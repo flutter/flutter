@@ -121,6 +121,43 @@ void main() {
       await pumpEventQueue();
     });
 
+    testWithoutContext(
+      'handles socket reset error on forwarded socket without uncaught zone errors',
+      () async {
+        final fakeServerSocket = FakeServerSocket(200);
+        final portForwarder = ProxiedPortForwarder(
+          FakeDaemonConnection(
+            handledRequests: <String, Object?>{
+              'proxy.connect': '1', // id
+            },
+          ),
+          logger: bufferLogger,
+          createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async => fakeServerSocket,
+        );
+        final int result = await portForwarder.forward(100);
+        expect(result, 200);
+
+        final fakeSocket = FakeSocket();
+        fakeServerSocket.controller.add(fakeSocket);
+
+        // Emit a socket reset error on the socket.
+        fakeSocket.controller.addError(
+          const SocketException(
+            'Error event raised in event handler : error condition has been reset',
+            port: 0,
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(
+          bufferLogger.traceText,
+          contains(
+            'Socket error: SocketException: Error event raised in event handler : error condition has been reset, port = 0',
+          ),
+        );
+      },
+    );
+
     testWithoutContext('forwards the port from the remote end with device id', () async {
       final fakeServerSocket = FakeServerSocket(400);
       final portForwarder = ProxiedPortForwarder(
@@ -894,6 +931,56 @@ void main() {
       expect(result, true);
       expect(launchedUrls, <String>['http://127.0.0.1:300/devtools']);
       expect(dds.calledLaunchDevToolsInBrowser, true);
+    });
+
+    testWithoutContext('launchDevToolsInBrowser handles startChrome failure', () async {
+      final portForwarder = FakeProxiedPortForwarder();
+      portForwarder.originalRemotePortReturnValue = 100;
+      portForwarder.forwardReturnValue = 200;
+      final devicePortForwarder = FakeProxiedPortForwarder();
+      final dds = ProxiedDartDevelopmentService(
+        clientDaemonConnection,
+        'test_id',
+        logger: bufferLogger,
+        proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
+      );
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
+
+      final Future<void> startFuture = dds.startDartDevelopmentService(
+        Uri.parse('http://127.0.0.1:100/fake'),
+        enableDevTools: true,
+      );
+
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, <String, Object?>{
+        'ddsUri': 'http://127.0.0.1:300/remote',
+        'devToolsUri': 'http://127.0.0.1:300/devtools',
+      });
+
+      await startFuture;
+      expect(dds.devToolsUri, Uri.parse('http://127.0.0.1:300/devtools'));
+
+      final flutterDevice = FakeFlutterDevice()..device = FakeDevice('test_device', 'device');
+
+      final bool result = dds.launchDevToolsInBrowser(
+        flutterDevice,
+        startChrome: (List<String> urls, {List<String>? args}) async {
+          throw ProcessException('chrome', urls, 'Chrome not installed');
+        },
+      );
+
+      expect(result, true);
+      expect(dds.calledLaunchDevToolsInBrowser, true);
+
+      await pumpEventQueue();
+
+      expect(
+        bufferLogger.errorText,
+        contains('Failed to launch DevTools in browser: ProcessException'),
+      );
     });
 
     testWithoutContext('launchDevToolsInBrowser returns false if devToolsUri is null', () async {

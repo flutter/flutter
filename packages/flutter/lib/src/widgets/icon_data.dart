@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart';
 /// In release builds, the Flutter tool will tree shake out of bundled fonts
 /// the code points (or instances of [IconData]) which are not referenced from
 /// Dart app code. See the [staticIconProvider] annotation for more details.
+@RecordUse()
 @immutable
 final class IconData {
   /// Creates icon data.

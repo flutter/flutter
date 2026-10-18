@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
@@ -17,7 +18,6 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 /// The port at which the local benchmark server is served.
-/// This is hard-coded and must be the same as the port used for DDC's benchmark at `flutter/dev/benchmarks/macrobenchmarks/lib/web_benchmarks_ddc.dart`.
 const int benchmarkServerPort = 9999;
 
 /// The port at which Chrome listens for a debug connection.
@@ -34,7 +34,50 @@ typedef WebBenchmarkOptions = ({
   String buildMode,
 });
 
-Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
+/// Deletes a directory with retry logic to handle file locks on various platforms.
+Future<void> deleteDirectoryWithRetry(
+  io.Directory dir, {
+  int maxAttempts = 10,
+  Duration delay = const Duration(milliseconds: 500),
+}) async {
+  for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      if (dir.existsSync()) {
+        await dir.delete(recursive: true);
+      }
+      return;
+    } on io.FileSystemException catch (e) {
+      if (attempt == maxAttempts) {
+        print('Warning: Failed to delete directory ${dir.path} after $maxAttempts attempts: $e');
+      } else {
+        await Future<void>.delayed(delay);
+      }
+    }
+  }
+}
+
+Future<TaskResult> runWebBenchmark(
+  WebBenchmarkOptions benchmarkOptions, {
+  List<String>? targetBenchmarks,
+  String? filterPattern,
+  bool? clean,
+  Map<String, String>? environment,
+}) async {
+  environment ??= io.Platform.environment;
+
+  final BenchmarkFilter benchmarkFilter;
+  try {
+    benchmarkFilter = BenchmarkFilter.parse(
+      targetBenchmarks: targetBenchmarks,
+      filterPattern: filterPattern,
+      environment: environment,
+    );
+  } on Exception catch (e) {
+    return TaskResult.failure(e.toString());
+  }
+
+  final bool effectiveClean = clean ?? environment['BENCHMARK_CLEAN']?.toLowerCase() != 'false';
+
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(
@@ -43,195 +86,346 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
     'benchmarks',
     'macrobenchmarks',
   );
-  return inDirectory(macrobenchmarksDirectory, () async {
-    await flutter('clean');
-    // DDC runs the benchmarks suite with 'flutter run', attaching to its
-    // Chrome instance instead of starting a new one.
-    io.Process? flutterRunProcess;
-    if (benchmarkOptions.useDdc) {
-      final ddcAppReady = Completer<void>();
-      flutterRunProcess = await startFlutter(
-        'run',
-        options: <String>[
-          '-d',
-          'chrome',
-          '--web-port',
-          '$benchmarksAppPort',
-          '--web-browser-debug-port',
-          '$chromeDebugPort',
-          '--web-launch-url',
-          'http://localhost:$benchmarksAppPort/index.html',
-          '--debug',
-          '--web-run-headless',
-          '--no-web-enable-expression-evaluation',
-          '--web-browser-flag=--disable-popup-blocking',
-          '--web-browser-flag=--bwsi',
-          '--web-browser-flag=--no-first-run',
-          '--web-browser-flag=--no-default-browser-check',
-          '--web-browser-flag=--disable-default-apps',
-          '--web-browser-flag=--disable-translate',
-          '--web-browser-flag=--disable-background-timer-throttling',
-          '--web-browser-flag=--disable-backgrounding-occluded-windows',
-          '--web-browser-flag=--disable-renderer-backgrounding',
-          '--web-browser-flag=--headless=new',
-          '--web-browser-flag=--no-sandbox',
-          '--web-browser-flag=--password-store=basic',
-          if (io.Platform.isMacOS) '--web-browser-flag=--use-mock-keychain',
-          '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          if (!benchmarkOptions.withHotReload) '--no-web-experimental-hot-reload',
-          '--no-web-resources-cdn',
-          'lib/web_benchmarks_ddc.dart',
-        ],
-      );
-      flutterRunProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
-        String line,
-      ) {
-        if (!ddcAppReady.isCompleted && line.startsWith('Debug service listening on')) {
-          ddcAppReady.complete();
-        }
-        print('[CHROME STDOUT]: $line');
-      });
-      flutterRunProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((
-        String line,
-      ) {
-        print('[CHROME STDERR]: $line');
-      });
-      // Wait for the app to load in DDC's Chrome instance before trying to
-      // connect the debugger.
-      await ddcAppReady.future;
-    } else {
-      await evalFlutter(
-        'build',
-        options: <String>[
-          'web',
-          '--no-tree-shake-icons', // local engine builds are frequently out of sync with the Dart Kernel version
-          if (benchmarkOptions.useWasm) ...<String>['--wasm', '--no-strip-wasm'],
-          '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          '--${benchmarkOptions.buildMode}',
-          '--no-web-resources-cdn',
-          '-t',
-          'lib/web_benchmarks.dart',
-        ],
-      );
+
+  io.HttpServer? server;
+  Chrome? chrome;
+  Future<Chrome>? whenChromeIsReady;
+  io.Process? flutterRunProcess;
+  String? userDataDir;
+
+  var isCleaningUp = false;
+  final cleanupCompleter = Completer<void>();
+
+  Future<void> performCleanup() async {
+    if (isCleaningUp) {
+      return cleanupCompleter.future;
     }
-    final profileData = Completer<List<Map<String, dynamic>>>();
-    final collectedProfiles = <Map<String, dynamic>>[];
-    List<String>? benchmarks;
-    late Iterator<String> benchmarkIterator;
-
-    // This future fixes a race condition between the web-page loading and
-    // asking to run a benchmark, and us connecting to Chrome's DevTools port.
-    // Sometime one wins. Other times, the other wins.
-    Future<Chrome>? whenChromeIsReady;
-    Chrome? chrome;
-    late io.HttpServer server;
-    var cascade = Cascade();
-    List<Map<String, dynamic>>? latestPerformanceTrace;
-    final requestHeaders = <String, List<String>>{
-      'Access-Control-Allow-Headers': <String>[
-        'Accept',
-        'Access-Control-Allow-Headers',
-        'Access-Control-Allow-Methods',
-        'Access-Control-Allow-Origin',
-        'Content-Type',
-        'Origin',
-      ],
-      'Access-Control-Allow-Methods': <String>['Post'],
-      'Access-Control-Allow-Origin': <String>['http://localhost:$benchmarksAppPort'],
-    };
-
-    cascade = cascade.add((Request request) async {
-      final String requestContents = await request.readAsString();
-      try {
-        chrome ??= await whenChromeIsReady;
-        if (request.method == 'OPTIONS') {
-          return Response.ok('', headers: requestHeaders);
-        }
-        if (request.requestedUri.path.endsWith('/profile-data')) {
-          final profile = json.decode(requestContents) as Map<String, dynamic>;
-          final benchmarkName = profile['name'] as String;
-          if (benchmarkName != benchmarkIterator.current) {
-            profileData.completeError(
-              Exception(
-                'Browser returned benchmark results from a wrong benchmark.\n'
-                'Requested to run benchmark ${benchmarkIterator.current}, but '
-                'got results for $benchmarkName.',
-              ),
-            );
-            unawaited(server.close());
-          }
-
-          // Trace data is null when the benchmark is not frame-based, such as RawRecorder.
-          if (latestPerformanceTrace != null) {
-            final BlinkTraceSummary traceSummary = BlinkTraceSummary.fromJson(
-              latestPerformanceTrace!,
-            )!;
-            profile['totalUiFrame.average'] = traceSummary.averageTotalUIFrameTime.inMicroseconds;
-            profile['scoreKeys'] ??= <dynamic>[]; // using dynamic for consistency with JSON
-            (profile['scoreKeys'] as List<dynamic>).add('totalUiFrame.average');
-            latestPerformanceTrace = null;
-          }
-          collectedProfiles.add(profile);
-          return Response.ok('Profile received', headers: requestHeaders);
-        } else if (request.requestedUri.path.endsWith('/start-performance-tracing')) {
-          latestPerformanceTrace = null;
-          await chrome!.beginRecordingPerformance(request.requestedUri.queryParameters['label']!);
-          return Response.ok('Started performance tracing', headers: requestHeaders);
-        } else if (request.requestedUri.path.endsWith('/stop-performance-tracing')) {
-          latestPerformanceTrace = await chrome!.endRecordingPerformance();
-          return Response.ok('Stopped performance tracing', headers: requestHeaders);
-        } else if (request.requestedUri.path.endsWith('/on-error')) {
-          final errorDetails = json.decode(requestContents) as Map<String, dynamic>;
-          unawaited(server.close());
-          // Keep the stack trace as a string. It's thrown in the browser, not this Dart VM.
-          profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');
-          return Response.ok('', headers: requestHeaders);
-        } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
-          if (benchmarks == null) {
-            benchmarks = (json.decode(requestContents) as List<dynamic>).cast<String>();
-            benchmarkIterator = benchmarks!.iterator;
-          }
-          if (benchmarkIterator.moveNext()) {
-            final String nextBenchmark = benchmarkIterator.current;
-            print('Launching benchmark "$nextBenchmark"');
-            return Response.ok(nextBenchmark, headers: requestHeaders);
-          } else {
-            profileData.complete(collectedProfiles);
-            return Response.notFound('Finished running benchmarks.', headers: requestHeaders);
-          }
-        } else if (request.requestedUri.path.endsWith('/print-to-console')) {
-          // A passthrough used by
-          // `dev/benchmarks/macrobenchmarks/lib/web_benchmarks.dart`
-          // to print information.
-          final message = requestContents;
-          print('[APP] $message');
-          return Response.ok('Reported.', headers: requestHeaders);
-        } else {
-          return Response.notFound(
-            'This request is not handled by the profile-data handler.',
-            headers: requestHeaders,
-          );
-        }
-      } catch (error, stackTrace) {
-        profileData.completeError(error, stackTrace);
-        return Response.internalServerError(body: '$error', headers: requestHeaders);
-      }
-    });
-    // Macrobenchmarks using 'flutter build' serve files from their local build directory alongside the orchestration logic.
-    if (!benchmarkOptions.useDdc) {
-      cascade = cascade.add(
-        createBuildDirectoryHandler(path.join(macrobenchmarksDirectory, 'build', 'web')),
-      );
-    }
-
-    server = await io.HttpServer.bind('localhost', benchmarkServerPort);
+    isCleaningUp = true;
     try {
-      shelf_io.serveRequests(server, cascade.handler);
+      // 1. Close Shelf server
+      try {
+        await server?.close(force: true);
+      } catch (e) {
+        print('Warning: Error closing server: $e');
+      }
 
-      final String dartToolDirectory = path.join('$macrobenchmarksDirectory/.dart_tool');
-      final String userDataDir = io.Directory(
-        dartToolDirectory,
-      ).createTempSync('flutter_chrome_user_data.').path;
+      // 2. Stop or disconnect Chrome (in DDC mode Chrome is managed by flutterRunProcess)
+      void cleanChrome(Chrome c) {
+        if (benchmarkOptions.useDdc) {
+          c.disconnect();
+        } else {
+          c.stop();
+        }
+      }
+
+      final currentChrome = chrome;
+      final readyFuture = whenChromeIsReady;
+      if (currentChrome != null) {
+        try {
+          cleanChrome(currentChrome);
+        } catch (e) {
+          final action = benchmarkOptions.useDdc ? 'disconnecting' : 'stopping';
+          print('Warning: Error $action Chrome: $e');
+        }
+      } else if (readyFuture != null) {
+        try {
+          var cleanedUp = false;
+          unawaited(
+            readyFuture.then((Chrome readyChrome) {
+              if (!cleanedUp) {
+                cleanedUp = true;
+                cleanChrome(readyChrome);
+              }
+            }, onError: (_) {}),
+          );
+
+          final Chrome readyChrome = await readyFuture.timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => throw TimeoutException('Chrome ready timeout during cleanup'),
+          );
+          if (!cleanedUp) {
+            cleanedUp = true;
+            cleanChrome(readyChrome);
+          }
+        } catch (e) {
+          final action = benchmarkOptions.useDdc ? 'disconnecting' : 'stopping';
+          print('Warning: Error $action Chrome: $e');
+        }
+      }
+
+      // 3. Stop flutter run process if present
+      final process = flutterRunProcess;
+      if (process != null) {
+        try {
+          process.stdin.write('q');
+          await process.stdin.flush();
+        } catch (_) {
+          // Stdin pipe may already be closed if Chrome process was killed
+        }
+        await process.exitCode.timeout(
+          const Duration(seconds: 2),
+          onTimeout: () {
+            process.kill();
+            return 0;
+          },
+        );
+      }
+
+      // 4. Clean up temporary directory
+      final dirPath = userDataDir;
+      if (dirPath != null) {
+        await deleteDirectoryWithRetry(io.Directory(dirPath));
+      }
+    } finally {
+      cleanupCompleter.complete();
+    }
+  }
+
+  StreamSubscription<io.ProcessSignal>? sigintSub;
+  StreamSubscription<io.ProcessSignal>? sigtermSub;
+
+  try {
+    sigintSub = io.ProcessSignal.sigint.watch().listen((io.ProcessSignal signal) async {
+      print('\nReceived SIGINT. Cleaning up benchmark processes and temporary directories...');
+      await performCleanup();
+      io.exit(130);
+    });
+  } catch (e) {
+    print('Warning: Unable to watch SIGINT signal: $e');
+  }
+
+  if (!io.Platform.isWindows) {
+    try {
+      sigtermSub = io.ProcessSignal.sigterm.watch().listen((io.ProcessSignal signal) async {
+        print('\nReceived SIGTERM. Cleaning up benchmark processes and temporary directories...');
+        await performCleanup();
+        io.exit(143);
+      });
+    } catch (e) {
+      print('Warning: Unable to watch SIGTERM signal: $e');
+    }
+  }
+
+  try {
+    return await inDirectory(macrobenchmarksDirectory, () async {
+      if (effectiveClean) {
+        await flutter('clean');
+      }
+
+      server = await io.HttpServer.bind('localhost', benchmarkServerPort);
+
+      // DDC runs the benchmarks suite with 'flutter run', attaching to its
+      // Chrome instance instead of starting a new one.
+      if (benchmarkOptions.useDdc) {
+        final ddcAppReady = Completer<void>();
+        flutterRunProcess = await startFlutter(
+          'run',
+          options: <String>[
+            '-d',
+            'chrome',
+            '--web-port',
+            '$benchmarksAppPort',
+            '--web-browser-debug-port',
+            '$chromeDebugPort',
+            '--web-launch-url',
+            'http://localhost:$benchmarksAppPort/index.html',
+            '--debug',
+            '--web-run-headless',
+            '--no-web-enable-expression-evaluation',
+            '--web-browser-flag=--disable-popup-blocking',
+            '--web-browser-flag=--bwsi',
+            '--web-browser-flag=--no-first-run',
+            '--web-browser-flag=--no-default-browser-check',
+            '--web-browser-flag=--disable-default-apps',
+            '--web-browser-flag=--disable-translate',
+            '--web-browser-flag=--disable-background-timer-throttling',
+            '--web-browser-flag=--disable-backgrounding-occluded-windows',
+            '--web-browser-flag=--disable-renderer-backgrounding',
+            '--web-browser-flag=--disable-background-networking',
+            '--web-browser-flag=--disable-sync',
+            '--web-browser-flag=--disable-client-side-phishing-detection',
+            '--web-browser-flag=--disable-notifications',
+            ...kGcmDisabledFlags.map((String flag) => '--web-browser-flag=$flag'),
+            '--web-browser-flag=--headless=new',
+            '--web-browser-flag=--no-sandbox',
+            '--web-browser-flag=--password-store=basic',
+            if (io.Platform.isMacOS) '--web-browser-flag=--use-mock-keychain',
+            '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
+            '--dart-define=BENCHMARK_SERVER_PORT=${server!.port}',
+            if (!benchmarkOptions.withHotReload) '--no-web-experimental-hot-reload',
+            '--no-web-resources-cdn',
+            '-t',
+            'lib/web_benchmarks.dart',
+          ],
+        );
+        flutterRunProcess!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
+          String line,
+        ) {
+          if (!ddcAppReady.isCompleted && line.startsWith('Debug service listening on')) {
+            ddcAppReady.complete();
+          }
+          print('[CHROME STDOUT]: $line');
+        });
+        flutterRunProcess!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((
+          String line,
+        ) {
+          print('[CHROME STDERR]: $line');
+        });
+        // Wait for the app to load in DDC's Chrome instance before trying to
+        // connect the debugger.
+        await ddcAppReady.future;
+      } else {
+        await evalFlutter(
+          'build',
+          options: <String>[
+            'web',
+            '--no-tree-shake-icons', // local engine builds are frequently out of sync with the Dart Kernel version
+            if (benchmarkOptions.useWasm) ...<String>['--wasm', '--no-strip-wasm'],
+            '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
+            '--${benchmarkOptions.buildMode}',
+            '--no-web-resources-cdn',
+            '-t',
+            'lib/web_benchmarks.dart',
+          ],
+        );
+      }
+      final profileData = Completer<List<Map<String, dynamic>>>();
+      final collectedProfiles = <Map<String, dynamic>>[];
+      List<String>? benchmarks;
+      late Iterator<String> benchmarkIterator;
+
+      var cascade = Cascade();
+      List<Map<String, dynamic>>? latestPerformanceTrace;
+      final requestHeaders = <String, List<String>>{
+        'Access-Control-Allow-Headers': <String>[
+          'Accept',
+          'Access-Control-Allow-Headers',
+          'Access-Control-Allow-Methods',
+          'Access-Control-Allow-Origin',
+          'Content-Type',
+          'Origin',
+        ],
+        'Access-Control-Allow-Methods': <String>['Post'],
+        'Access-Control-Allow-Origin': <String>['http://localhost:$benchmarksAppPort'],
+      };
+
+      cascade = cascade.add((Request request) async {
+        final String requestContents = await request.readAsString();
+        try {
+          chrome ??= await whenChromeIsReady;
+          if (request.method == 'OPTIONS') {
+            return Response.ok('', headers: requestHeaders);
+          }
+          if (request.requestedUri.path.endsWith('/profile-data')) {
+            final profile = json.decode(requestContents) as Map<String, dynamic>;
+            final benchmarkName = profile['name'] as String;
+            if (benchmarkName != benchmarkIterator.current) {
+              if (!profileData.isCompleted) {
+                profileData.completeError(
+                  Exception(
+                    'Browser returned benchmark results from a wrong benchmark.\n'
+                    'Requested to run benchmark ${benchmarkIterator.current}, but '
+                    'got results for $benchmarkName.',
+                  ),
+                );
+              }
+              unawaited(server!.close());
+            }
+
+            // Trace data is null when the benchmark is not frame-based, such as RawRecorder.
+            if (latestPerformanceTrace != null) {
+              final BlinkTraceSummary traceSummary = BlinkTraceSummary.fromJson(
+                latestPerformanceTrace!,
+              )!;
+              profile['totalUiFrame.average'] = traceSummary.averageTotalUIFrameTime.inMicroseconds;
+              profile['scoreKeys'] ??= <dynamic>[]; // using dynamic for consistency with JSON
+              (profile['scoreKeys'] as List<dynamic>).add('totalUiFrame.average');
+              latestPerformanceTrace = null;
+            }
+            collectedProfiles.add(profile);
+            return Response.ok('Profile received', headers: requestHeaders);
+          } else if (request.requestedUri.path.endsWith('/start-performance-tracing')) {
+            latestPerformanceTrace = null;
+            await chrome!.beginRecordingPerformance(request.requestedUri.queryParameters['label']!);
+            return Response.ok('Started performance tracing', headers: requestHeaders);
+          } else if (request.requestedUri.path.endsWith('/stop-performance-tracing')) {
+            latestPerformanceTrace = await chrome!.endRecordingPerformance();
+            return Response.ok('Stopped performance tracing', headers: requestHeaders);
+          } else if (request.requestedUri.path.endsWith('/on-error')) {
+            final errorDetails = json.decode(requestContents) as Map<String, dynamic>;
+            unawaited(server!.close());
+            // Keep the stack trace as a string. It's thrown in the browser, not this Dart VM.
+            if (!profileData.isCompleted) {
+              profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');
+            }
+            return Response.ok('', headers: requestHeaders);
+          } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
+            if (benchmarks == null) {
+              try {
+                final List<String> allBenchmarks = (json.decode(requestContents) as List<Object?>)
+                    .cast<String>();
+                benchmarks = benchmarkFilter.filter(allBenchmarks);
+                benchmarkIterator = benchmarks!.iterator;
+              } catch (e, stackTrace) {
+                final String errorMessage = e is FormatException ? e.message : e.toString();
+                print('[ERROR] $errorMessage');
+                if (!profileData.isCompleted) {
+                  profileData.completeError(e, stackTrace);
+                }
+                // Do NOT call server.close() here; let outer cleanup handle server shutdown.
+                return Response.internalServerError(body: errorMessage, headers: requestHeaders);
+              }
+            }
+            if (benchmarkIterator.moveNext()) {
+              final String nextBenchmark = benchmarkIterator.current;
+              // The page reloads as soon as it receives the next benchmark
+              // name. Collect the previous benchmarks' detached documents first
+              // so their /dev/shm segments do not accumulate across reloads
+              // (see Chrome.collectGarbage).
+              await chrome!.collectGarbage();
+              print('Launching benchmark "$nextBenchmark"');
+              return Response.ok(nextBenchmark, headers: requestHeaders);
+            } else {
+              if (!profileData.isCompleted) {
+                profileData.complete(collectedProfiles);
+              }
+              return Response.notFound('Finished running benchmarks.', headers: requestHeaders);
+            }
+          } else if (request.requestedUri.path.endsWith('/print-to-console')) {
+            // A passthrough used by
+            // `dev/benchmarks/macrobenchmarks/lib/web_benchmarks.dart`
+            // to print information.
+            final message = requestContents;
+            print('[APP] $message');
+            return Response.ok('Reported.', headers: requestHeaders);
+          } else {
+            return Response.notFound(
+              'This request is not handled by the profile-data handler.',
+              headers: requestHeaders,
+            );
+          }
+        } catch (error, stackTrace) {
+          if (!profileData.isCompleted) {
+            profileData.completeError(error, stackTrace);
+          }
+          return Response.internalServerError(body: '$error', headers: requestHeaders);
+        }
+      });
+      // Macrobenchmarks using 'flutter build' serve files from their local build directory alongside the orchestration logic.
+      if (!benchmarkOptions.useDdc) {
+        cascade = cascade.add(
+          createBuildDirectoryHandler(path.join(macrobenchmarksDirectory, 'build', 'web')),
+        );
+      }
+
+      shelf_io.serveRequests(server!, cascade.handler);
+
+      final String dartToolDirectory = path.join(macrobenchmarksDirectory, '.dart_tool');
+      final dartToolDir = io.Directory(dartToolDirectory);
+      if (!dartToolDir.existsSync()) {
+        dartToolDir.createSync(recursive: true);
+      }
+      userDataDir = dartToolDir.createTempSync('flutter_chrome_user_data.').path;
 
       // TODO(yjbanov): temporarily disables headful Chrome until we get
       //                devicelab hardware that is able to run it. Our current
@@ -259,7 +453,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           flutterRunProcess!,
           options,
           onError: (String error) {
-            profileData.completeError(Exception(error));
+            if (!profileData.isCompleted) {
+              profileData.completeError(Exception(error));
+            }
           },
           workingDirectory: cwd,
         );
@@ -267,72 +463,29 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         whenChromeIsReady = Chrome.launch(
           options,
           onError: (String error) {
-            profileData.completeError(Exception(error));
+            if (!profileData.isCompleted) {
+              profileData.completeError(Exception(error));
+            }
           },
           workingDirectory: cwd,
         );
       }
+      unawaited(whenChromeIsReady?.then((Chrome c) => chrome = c, onError: (_) {}));
 
       print('Waiting for the benchmark to report benchmark profile.');
-      final taskResult = <String, dynamic>{};
-      final benchmarkScoreKeys = <String>[];
-      final List<Map<String, dynamic>> profiles = await profileData.future;
-
-      print('Received profile data');
-      for (final profile in profiles) {
-        final benchmarkName = profile['name'] as String;
-        if (benchmarkName.isEmpty) {
-          throw 'Benchmark name is empty';
-        }
-
-        final String webRendererName;
-        if (benchmarkOptions.useWasm) {
-          webRendererName = benchmarkOptions.forceSingleThreadedSkwasm ? 'skwasm_st' : 'skwasm';
-        } else {
-          webRendererName = 'canvaskit';
-        }
-        final namespace = '$benchmarkName.$webRendererName';
-        final scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
-        if (scoreKeys.isEmpty) {
-          throw 'No score keys in benchmark "$benchmarkName"';
-        }
-        for (final scoreKey in scoreKeys) {
-          if (scoreKey.isEmpty) {
-            throw 'Score key is empty in benchmark "$benchmarkName". '
-                'Received [${scoreKeys.join(', ')}]';
-          }
-          benchmarkScoreKeys.add('$namespace.$scoreKey');
-        }
-
-        for (final String key in profile.keys) {
-          if (key == 'name' || key == 'scoreKeys') {
-            continue;
-          }
-          taskResult['$namespace.$key'] = profile[key];
-        }
+      final List<Map<String, Object?>> profiles;
+      try {
+        profiles = await profileData.future;
+      } catch (e) {
+        return TaskResult.failure(e.toString());
       }
-      return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
-    } finally {
-      unawaited(server.close());
-      chrome?.stop();
-      if (flutterRunProcess != null) {
-        // Sending a SIGINT/SIGTERM to the process here isn't reliable because [process] is
-        // the shell (flutter is a shell script) and doesn't pass the signal on.
-        // Sending a `q` is an instruction to quit using the console runner.
-        flutterRunProcess.stdin.write('q');
-        await flutterRunProcess.stdin.flush();
-        // Give the process a couple of seconds to exit and run shutdown hooks
-        // before sending kill signal.
-        await flutterRunProcess.exitCode.timeout(
-          const Duration(seconds: 2),
-          onTimeout: () {
-            flutterRunProcess!.kill(io.ProcessSignal.sigint);
-            return 0;
-          },
-        );
-      }
-    }
-  });
+      return processBenchmarkProfiles(profiles, benchmarkOptions);
+    });
+  } finally {
+    await sigintSub?.cancel();
+    await sigtermSub?.cancel();
+    await performCleanup();
+  }
 }
 
 Handler createBuildDirectoryHandler(String buildDirectoryPath) {
@@ -355,4 +508,215 @@ Handler createBuildDirectoryHandler(String buildDirectoryPath) {
       return response;
     }
   };
+}
+
+/// Filters benchmarks based on an exact list of targets or a regular expression pattern.
+///
+/// If [targetBenchmarks] is provided, only the exact benchmarks listed will be run. If
+/// [targetBenchmarks] is null, all benchmarks are considered candidates (unless further filtered).
+/// If a filter pattern is provided, it is parsed as a [RegExp] and only benchmarks matching
+/// the pattern will be run.
+///
+/// Target benchmarks and a filter pattern are mutually exclusive. Specifying both (whether
+/// through arguments, environment variables, or a mix of the two) throws an [Exception]
+/// instead of combining them.
+///
+/// Example target lists: `['scroll_perf', 'build_perf']`
+/// Example filter patterns: `skwasm` (matches any benchmark name containing 'skwasm'),
+/// `^scroll_` (matches names starting with 'scroll_').
+class BenchmarkFilter {
+  /// Creates a filter from already-parsed values.
+  ///
+  /// Throws an [Exception] if both [targetBenchmarks] (after trimming and dropping empty
+  /// entries) and [compiledFilter] are provided.
+  BenchmarkFilter({List<String>? targetBenchmarks, this.compiledFilter})
+    : targetBenchmarks = _parseTargetBenchmarks(targetBenchmarks) {
+    if (this.targetBenchmarks != null && compiledFilter != null) {
+      throw _targetsAndFilterConflict(this.targetBenchmarks!, compiledFilter!.pattern);
+    }
+  }
+
+  /// Creates a filter from raw arguments, falling back to the environment.
+  ///
+  /// [targetBenchmarks] falls back to the comma-separated `BENCHMARK_TARGETS` environment
+  /// variable, and [filterPattern] falls back to the `BENCHMARK_FILTER` environment variable.
+  /// Empty values are treated as unset.
+  ///
+  /// Throws an [Exception] if both target benchmarks and a filter pattern end up specified
+  /// (from arguments, environment variables, or one of each), or if the filter pattern is not
+  /// a valid regular expression.
+  factory BenchmarkFilter.parse({
+    List<String>? targetBenchmarks,
+    String? filterPattern,
+    Map<String, String>? environment,
+  }) {
+    environment ??= const <String, String>{};
+    final List<String>? effectiveTargets = _parseTargetBenchmarks(
+      targetBenchmarks ?? environment['BENCHMARK_TARGETS']?.split(','),
+    );
+    final String? rawFilterPattern = filterPattern ?? environment['BENCHMARK_FILTER'];
+    final String? effectiveFilterPattern = (rawFilterPattern?.isEmpty ?? true)
+        ? null
+        : rawFilterPattern;
+
+    if (effectiveTargets != null && effectiveFilterPattern != null) {
+      throw _targetsAndFilterConflict(effectiveTargets, effectiveFilterPattern);
+    }
+
+    RegExp? compiledFilter;
+    if (effectiveFilterPattern != null) {
+      try {
+        compiledFilter = RegExp(effectiveFilterPattern);
+      } on FormatException catch (e) {
+        throw Exception('Invalid filterPattern "$effectiveFilterPattern": ${e.message}');
+      }
+    }
+
+    return BenchmarkFilter(targetBenchmarks: effectiveTargets, compiledFilter: compiledFilter);
+  }
+
+  final List<String>? targetBenchmarks;
+  final RegExp? compiledFilter;
+
+  static Exception _targetsAndFilterConflict(List<String> targets, String pattern) {
+    return Exception(
+      'Cannot combine target benchmarks with a filter pattern; specify only one.\n'
+      '  Target benchmarks (--benchmark / BENCHMARK_TARGETS): [${targets.join(', ')}]\n'
+      '  Filter pattern (--filter / BENCHMARK_FILTER): "$pattern"',
+    );
+  }
+
+  List<String> filter(List<String> allBenchmarks) {
+    final Set<String> availableSet = allBenchmarks.toSet();
+
+    Iterable<String> filtered = allBenchmarks;
+    // Strict validation: fail fast if ANY target benchmark is missing/misspelled
+    if (targetBenchmarks != null && targetBenchmarks!.isNotEmpty) {
+      final Set<String> targetSet = targetBenchmarks!.toSet();
+      final Set<String> missing = targetSet.difference(availableSet);
+      if (missing.isNotEmpty) {
+        throw Exception(
+          'Unrecognized target benchmark(s): [${missing.join(', ')}].\n'
+          'Available benchmarks: [${allBenchmarks.join(', ')}]',
+        );
+      }
+      filtered = targetSet;
+    } else if (compiledFilter != null) {
+      filtered = filtered.where(compiledFilter!.hasMatch);
+    }
+
+    final List<String> result = filtered.toList();
+    if (result.isEmpty) {
+      throw Exception(
+        'No benchmarks matched the requested filter.\n'
+        '  Target benchmarks: $targetBenchmarks\n'
+        '  Filter pattern: ${compiledFilter?.pattern}\n'
+        '  Available benchmarks: [${allBenchmarks.join(', ')}]',
+      );
+    }
+    return result;
+  }
+}
+
+/// Parses a list of target benchmarks from an iterable of strings.
+/// Splits comma-separated values, trims whitespace, and removes empty strings.
+List<String>? _parseTargetBenchmarks(Iterable<String>? raw) {
+  if (raw == null || raw.isEmpty) {
+    return null;
+  }
+  final List<String> result = raw
+      .expand((String b) => b.split(','))
+      .map((String s) => s.trim())
+      .where((String s) => s.isNotEmpty)
+      .toList();
+  return result.isEmpty ? null : result;
+}
+
+TaskResult processBenchmarkProfiles(
+  List<Map<String, Object?>> profiles,
+  WebBenchmarkOptions benchmarkOptions,
+) {
+  if (profiles.isEmpty) {
+    return TaskResult.failure('No benchmark profiles were collected.');
+  }
+
+  final taskResult = <String, Object?>{};
+  final benchmarkScoreKeys = <String>[];
+
+  for (final profile in profiles) {
+    final Object? nameValue = profile['name'];
+    final String? benchmarkName = nameValue is String ? nameValue : null;
+    if (benchmarkName == null || benchmarkName.isEmpty) {
+      return TaskResult.failure('Benchmark name is empty');
+    }
+
+    final String webRendererName;
+    if (benchmarkOptions.useWasm) {
+      webRendererName = benchmarkOptions.forceSingleThreadedSkwasm ? 'skwasm_st' : 'skwasm';
+    } else {
+      webRendererName = 'canvaskit';
+    }
+    final namespace = '$benchmarkName.$webRendererName';
+    final Object? rawScoreKeys = profile['scoreKeys'];
+    final List<String> scoreKeys = rawScoreKeys is List<Object?>
+        ? rawScoreKeys.whereType<String>().toList()
+        : <String>[];
+    if (scoreKeys.isEmpty) {
+      return TaskResult.failure('No metrics in benchmark "$benchmarkName"');
+    }
+    for (final scoreKey in scoreKeys) {
+      if (scoreKey.isEmpty) {
+        return TaskResult.failure('Received an empty metric name in benchmark "$benchmarkName".');
+      }
+      benchmarkScoreKeys.add('$namespace.$scoreKey');
+    }
+
+    for (final String key in profile.keys) {
+      if (key == 'name' || key == 'scoreKeys') {
+        continue;
+      }
+      taskResult['$namespace.$key'] = profile[key];
+    }
+  }
+
+  return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
+}
+
+Future<TaskResult> runWebBenchmarkFromArgs(
+  WebBenchmarkOptions options,
+  List<String> rawArgs,
+) async {
+  final argParser = ArgParser()
+    ..addMultiOption(
+      'benchmark',
+      help:
+          'Target benchmark names to run (comma-separated or multiple flags). '
+          'Cannot be combined with --filter.',
+    )
+    ..addOption(
+      'filter',
+      help: 'Regex pattern to filter benchmark names. Cannot be combined with --benchmark.',
+    )
+    ..addFlag('clean', defaultsTo: true, help: 'Whether to run flutter clean before building');
+
+  // Report unknown flags as a task failure.
+  final ArgResults args;
+  try {
+    args = argParser.parse(rawArgs);
+  } on ArgParserException catch (e) {
+    return TaskResult.failure(e.message);
+  }
+
+  final rawBenchmarks = args['benchmark'] as List<String>?;
+  final List<String>? targetBenchmarks = _parseTargetBenchmarks(rawBenchmarks);
+
+  final filterPattern = args['filter'] as String?;
+  final bool? clean = args.wasParsed('clean') ? args['clean'] as bool : null;
+
+  return runWebBenchmark(
+    options,
+    targetBenchmarks: targetBenchmarks,
+    filterPattern: filterPattern,
+    clean: clean,
+  );
 }

@@ -1,6 +1,6 @@
 # Record Use Test App
 
-An integration test app for testing the "Record Use" asset tree-shaking feature.
+An integration test app for testing the "Record Use" asset tree-shaking feature and icon tree shaking.
 
 ## Overview
 
@@ -17,15 +17,16 @@ The feature relies on:
 3. This app (`record_use_test_app`) calls `translate('hello')` and `translate('friend')`.
 4. During the build, the `link.dart` hook in the package receives a recording of these calls.
 5. The hook filters `translations.json` to only include the entries for "hello" and "friend", tree-shaking the unused ones.
+6. The app instantiates `IconData(0x1234)`, which `IconTreeShaker` records during build.
 
 ## Testing
 
 The integration test for this feature is located at:
-`packages/flutter_tools/test/integration.shard/isolated/record_use_test.dart`
+`packages/flutter_tools/test/integration.shard/isolated/record_use_flutter_build_test.dart`
 
 To run the test:
 ```bash
-bin/cache/dart-sdk/bin/dart packages/flutter_tools/test/integration.shard/isolated/record_use_test.dart
+bin/flutter test packages/flutter_tools/test/integration.shard/isolated/record_use_flutter_build_test.dart
 ```
 
 Note: The test requires `--enable-record-use` and `--enable-dart-data-assets` to be enabled in the Flutter config.

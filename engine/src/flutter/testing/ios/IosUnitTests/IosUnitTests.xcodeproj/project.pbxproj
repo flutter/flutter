@@ -16,6 +16,7 @@
 		0D6AB6BE22BB05E200EEE540 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB6BD22BB05E200EEE540 /* Assets.xcassets */; };
 		0D6AB6C122BB05E200EEE540 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB6BF22BB05E200EEE540 /* LaunchScreen.storyboard */; };
 		0D6AB6C422BB05E200EEE540 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6C322BB05E200EEE540 /* main.m */; };
+		0D5CE1A22E4A000100AA0003 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D5CE1A12E4A000100AA0002 /* SceneDelegate.m */; };
 		F7521D7826BB68BC005F15C5 /* libios_test_flutter.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F7521D7926BB68BC005F15C5 /* libocmock_shared.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F77E081926FA9CE6003E6E4C /* Flutter.framework in Embed Libraries */ = {isa = PBXBuildFile; fileRef = F77E081726FA9CE6003E6E4C /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -61,6 +62,8 @@
 		0D6AB6B122BB05E100EEE540 /* IosUnitTests.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IosUnitTests.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D6AB6B422BB05E100EEE540 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0D6AB6B522BB05E100EEE540 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		0D5CE1A02E4A000100AA0001 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		0D5CE1A12E4A000100AA0002 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		0D6AB6B722BB05E100EEE540 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		0D6AB6B822BB05E100EEE540 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		0D6AB6BB22BB05E100EEE540 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -164,6 +167,8 @@
 			children = (
 				0D6AB6B422BB05E100EEE540 /* AppDelegate.h */,
 				0D6AB6B522BB05E100EEE540 /* AppDelegate.m */,
+				0D5CE1A02E4A000100AA0001 /* SceneDelegate.h */,
+				0D5CE1A12E4A000100AA0002 /* SceneDelegate.m */,
 				0D6AB6B722BB05E100EEE540 /* ViewController.h */,
 				0D6AB6B822BB05E100EEE540 /* ViewController.m */,
 				0D6AB6BA22BB05E100EEE540 /* Main.storyboard */,
@@ -302,6 +307,7 @@
 				0D6AB6B922BB05E100EEE540 /* ViewController.m in Sources */,
 				0D6AB6C422BB05E200EEE540 /* main.m in Sources */,
 				0D6AB6B622BB05E100EEE540 /* AppDelegate.m in Sources */,
+				0D5CE1A22E4A000100AA0003 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

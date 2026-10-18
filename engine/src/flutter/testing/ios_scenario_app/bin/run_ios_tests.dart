@@ -18,7 +18,9 @@ void main(List<String> args) async {
     return;
   }
 
-  final Engine? engine = Engine.tryFindWithin();
+  // Search from this script's own location rather than the current directory,
+  // so the script can be run from anywhere.
+  final Engine? engine = Engine.tryFindWithin(path.dirname(path.fromUri(io.Platform.script)));
   if (engine == null) {
     io.stderr.writeln('Must be run from within the engine repository.');
     io.exitCode = 1;
@@ -54,30 +56,32 @@ void main(List<String> args) async {
 
   // Run the actual script.
   final completer = Completer<void>();
-  runZonedGuarded(
-    () async {
-      await _run(
-        cleanup,
-        engine,
-        iosEngineVariant: iosEngineVariant,
-        deviceName: results.option('device-name')!,
-        deviceIdentifier: results.option('device-identifier')!,
-        osRuntime: results.option('os-runtime')!,
-        osVersion: results.option('os-version')!,
-        dumpXcresultOnFailure: dumpXcresultOnFailurePath,
-      );
-      completer.complete();
-    },
-    (e, s) {
-      if (e is _ToolFailure) {
-        io.stderr.writeln(e);
-        io.exitCode = 1;
-      } else {
-        io.stderr.writeln('Uncaught exception: $e\n$s');
-        io.exitCode = 255;
-      }
-      completer.complete();
-    },
+  unawaited(
+    runZonedGuarded(
+      () async {
+        await _run(
+          cleanup,
+          engine,
+          iosEngineVariant: iosEngineVariant,
+          deviceName: results.option('device-name')!,
+          deviceIdentifier: results.option('device-identifier')!,
+          osRuntime: results.option('os-runtime')!,
+          osVersion: results.option('os-version')!,
+          dumpXcresultOnFailure: dumpXcresultOnFailurePath,
+        );
+        completer.complete();
+      },
+      (e, s) {
+        if (e is _ToolFailure) {
+          io.stderr.writeln(e);
+          io.exitCode = 1;
+        } else {
+          io.stderr.writeln('Uncaught exception: $e\n$s');
+          io.exitCode = 255;
+        }
+        completer.complete();
+      },
+    ),
   );
 
   // We can't await the result of runZonedGuarded becauase async errors in futures never cross different errorZone boundaries.

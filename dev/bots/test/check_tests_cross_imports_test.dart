@@ -9,8 +9,8 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
 import '../check_tests_cross_imports.dart';
-import '../utils.dart';
 import 'common.dart';
+import 'cross_imports_checker_test_utils.dart';
 
 void main() {
   late TestsCrossImportChecker checker;
@@ -136,7 +136,7 @@ void main() {
         }, shouldHaveErrors: true);
         final String lines = <String>[
           '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-          '║ Huzzah! The following tests in $libraryName no longer contain cross imports!',
+          '║ Huzzah! The following files in $libraryName no longer contain cross imports!',
           '║   $excludedSample',
           '║ However, they now need to be removed from the',
           '║ $knownCrossImportsListName list in the script /dev/bots/check_tests_cross_imports.dart.',
@@ -329,81 +329,122 @@ void main() {
       },
       skip: isCupertino(libraryName), // [intended]: Cupertino can import itself
     );
+
+    test('unknown $libraryName cross import of material_ui', () async {
+      final testDartFile = '$libraryName/foo_test.dart';
+
+      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
+        libraryName,
+        flutterSlashTestDirectory: checker.flutterSlashTestDirectory,
+        flutterTestLibraryDirectory: checker.flutterTestLibraryDirectory,
+      );
+
+      buildKnownCrossImportTestFiles();
+      writeImportInFiles(
+        <String>{testDartFile},
+        inDirectory: testFilesDirectory,
+        importString: "import 'package:material_ui/material_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following test in $libraryName has a disallowed import of material_ui. Refactor it or move it to material_ui.',
+        '║   $testDartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of cupertino_ui', () async {
+      final testDartFile = '$libraryName/foo_test.dart';
+
+      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
+        libraryName,
+        flutterSlashTestDirectory: checker.flutterSlashTestDirectory,
+        flutterTestLibraryDirectory: checker.flutterTestLibraryDirectory,
+      );
+
+      buildKnownCrossImportTestFiles();
+      writeImportInFiles(
+        <String>{testDartFile},
+        inDirectory: testFilesDirectory,
+        importString: "import 'package:cupertino_ui/cupertino_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following test in $libraryName has a disallowed import of cupertino_ui. Refactor it or move it to cupertino_ui.',
+        '║   $testDartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
   }
-}
 
-typedef AsyncVoidCallback = Future<void> Function();
+  // Regression test: Material may import Material but not material_ui. This
+  // used to trip the assertion in getImportError, because the error was
+  // reported as an import of Material rather than material_ui.
+  test('Material test importing material_ui reports material_ui without asserting on deprecated Material itself', () async {
+    const testDartFile = 'packages/flutter/test/material/foo_test.dart';
 
-Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = false}) async {
-  final buffer = StringBuffer();
-  final PrintCallback oldPrint = print;
-  try {
-    print = (Object? line) {
-      buffer.writeln(line);
-    };
-    await callback();
-    expect(
-      hasError,
-      shouldHaveErrors,
-      reason: buffer.isEmpty
-          ? '(No output to report.)'
-          : hasError
-          ? 'Unexpected errors:\n$buffer'
-          : 'Unexpected success:\n$buffer',
+    buildKnownCrossImportTestFiles();
+    writeImportInFiles(
+      <String>{testDartFile},
+      inDirectory: checker.flutterSlashTestDirectory.childDirectory('material'),
+      importString: "import 'package:material_ui/material_ui.dart';",
     );
-  } finally {
-    print = oldPrint;
-    resetErrorStatus();
-  }
-  if (stdout.supportsAnsiEscapes) {
-    // Remove ANSI escapes when this test is running on a terminal.
-    return buffer.toString().replaceAll(RegExp(r'(\x9B|\x1B\[)[0-?]{1,3}[ -/]*[@-~]'), '');
-  } else {
-    return buffer.toString();
-  }
+
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ The following test in packages/flutter/test/material has a disallowed import of material_ui. Refactor it or move it to material_ui.',
+      '║   $testDartFile',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+
+  test('Cupertino test importing cupertino_ui reports cupertino_ui without asserting on deprecated Cupertino itself', () async {
+    const testDartFile = 'packages/flutter/test/cupertino/foo_test.dart';
+
+    buildKnownCrossImportTestFiles();
+    writeImportInFiles(
+      <String>{testDartFile},
+      inDirectory: checker.flutterSlashTestDirectory.childDirectory('cupertino'),
+      importString: "import 'package:cupertino_ui/cupertino_ui.dart';",
+    );
+
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ The following test in packages/flutter/test/cupertino has a disallowed import of cupertino_ui. Refactor it or move it to cupertino_ui.',
+      '║   $testDartFile',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
 }
 
 /// Returns whether the given [libraryName] matches the Cupertino library under `flutter/test`.
 bool isCupertino(String libraryName) => libraryName == 'packages/flutter/test/cupertino';
-
-File getFile(String filepath, Directory directory) {
-  final String platformFilepath = filepath.replaceAll('/', Platform.pathSeparator);
-  final String searchPattern = directory.basename + Platform.pathSeparator;
-  // Don't use `lastIndexOf`, as for files in test fixes
-  // i.e. `packages/flutter_test/test_fixes/flutter_test/matchers.dart`
-  // the overlap index could appear multiple times.
-  // Only take the first one.
-  final int overlapIndex = platformFilepath.indexOf(searchPattern);
-
-  if (overlapIndex < 0) {
-    throw ArgumentError('filepath $filepath must be located in directory ${directory.path}.');
-  }
-
-  final String filename = platformFilepath.substring(overlapIndex + searchPattern.length);
-  return directory.childFile(filename);
-}
-
-/// Writes [importString] into the given file.
-///
-/// The default [importString] is `import 'package:flutter/material.dart';`.
-void writeImport(File file, [String importString = "import 'package:flutter/material.dart';"]) {
-  file
-    ..createSync(recursive: true)
-    ..writeAsStringSync(importString);
-}
-
-/// Writes [importString] into the given [filePaths] in [inDirectory].
-///
-/// The default [importString] is `import 'package:flutter/material.dart';`.
-void writeImportInFiles(
-  Iterable<String> filePaths, {
-  required Directory inDirectory,
-  String importString = "import 'package:flutter/material.dart';",
-}) {
-  for (final filepath in filePaths) {
-    writeImport(getFile(filepath, inDirectory), importString);
-  }
-}
 
 // A utility that keeps track of the directories under test,
 // to avoid having to late initialize them individually in `setUp()`.

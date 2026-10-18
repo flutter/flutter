@@ -8,9 +8,7 @@ import '../base/logger.dart';
 
 /// A service for creating and parsing [Depfile]s.
 class DepfileService {
-  DepfileService({required Logger logger, required FileSystem fileSystem})
-    : _logger = logger,
-      _fileSystem = fileSystem;
+  DepfileService({required this._logger, required this._fileSystem});
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -104,6 +102,7 @@ class DepfileService {
   }
 
   List<File> _processList(String rawText, [Directory? baseDirectory]) {
+    final isWindows = _fileSystem.path.style.separator == r'\';
     return rawText
         // Put every file on right-hand side on the separate line
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
@@ -119,6 +118,9 @@ class DepfileService {
         .toSet()
         // Normalize the path before creating a file object.
         .map((String path) {
+          if (isWindows && path.length >= 5 && path.substring(0, 5).toLowerCase() == r'\unc\') {
+            path = r'\\' + path.substring(5);
+          }
           if (baseDirectory != null && _fileSystem.path.isRelative(path)) {
             return _fileSystem.file(
               _fileSystem.path.normalize(_fileSystem.path.join(baseDirectory.path, path)),

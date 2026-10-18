@@ -147,7 +147,8 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
 sk_sp<DisplayList> LayerTree::Flatten(
     const DlRect& bounds,
     const std::shared_ptr<TextureRegistry>& texture_registry,
-    GrDirectContext* gr_context) {
+    GrDirectContext* gr_context,
+    impeller::AiksContext* aiks_context) {
   TRACE_EVENT0("flutter", "LayerTree::Flatten");
 
   DisplayListBuilder builder(bounds);
@@ -188,6 +189,8 @@ sk_sp<DisplayList> LayerTree::Flatten(
 #if !SLIMPELLER
       .raster_cache                  = nullptr,
 #endif  //  !SLIMPELLER
+      .impeller_enabled              = !!aiks_context,
+      .aiks_context                  = aiks_context,
       // clang-format on
   };
 

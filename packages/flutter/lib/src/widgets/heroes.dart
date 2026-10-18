@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -42,14 +43,13 @@ typedef HeroPlaceholderBuilder = Widget Function(BuildContext context, Size hero
 /// A function that lets [Hero]es self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
-typedef HeroFlightShuttleBuilder =
-    Widget Function(
-      BuildContext flightContext,
-      Animation<double> animation,
-      HeroFlightDirection flightDirection,
-      BuildContext fromHeroContext,
-      BuildContext toHeroContext,
-    );
+typedef HeroFlightShuttleBuilder = Widget Function(
+  BuildContext flightContext,
+  Animation<double> animation,
+  HeroFlightDirection flightDirection,
+  BuildContext fromHeroContext,
+  BuildContext toHeroContext,
+);
 
 typedef _OnFlightEnded = void Function(_HeroFlight flight);
 
@@ -443,7 +443,6 @@ class _HeroFlightManifest {
   _HeroFlightManifest({
     required this.type,
     required this.overlay,
-    required this.navigatorSize,
     required this.fromRoute,
     required this.toRoute,
     required this.fromHero,
@@ -456,7 +455,6 @@ class _HeroFlightManifest {
 
   final HeroFlightDirection type;
   final OverlayState overlay;
-  final Size navigatorSize;
   final PageRoute<dynamic> fromRoute;
   final PageRoute<dynamic> toRoute;
   final _HeroState fromHero;
@@ -584,12 +582,8 @@ class _HeroFlight {
       child: shuttle,
       builder: (BuildContext context, Widget? child) {
         final Rect rect = heroRectTween.evaluate(_proxyAnimation)!;
-        final offsets = RelativeRect.fromSize(rect, manifest.navigatorSize);
-        return Positioned(
-          top: offsets.top,
-          right: offsets.right,
-          bottom: offsets.bottom,
-          left: offsets.left,
+        return Positioned.fromRect(
+          rect: rect,
           child: IgnorePointer(
             child: FadeTransition(opacity: _heroOpacity, child: child),
           ),
@@ -996,17 +990,6 @@ class HeroController extends NavigatorObserver {
       return;
     }
 
-    final RenderObject? navigatorRenderObject = navigator.context.findRenderObject();
-
-    if (navigatorRenderObject is! RenderBox) {
-      assert(
-        false,
-        'Navigator $navigator has an invalid RenderObject type ${navigatorRenderObject.runtimeType}.',
-      );
-      return;
-    }
-    assert(navigatorRenderObject.hasSize);
-
     // At this point, the toHeroes may have been built and laid out for the first time.
     //
     // If `fromSubtreeContext` is null, call endFlight on all toHeroes, for good measure.
@@ -1030,7 +1013,6 @@ class HeroController extends NavigatorObserver {
           : _HeroFlightManifest(
               type: flightType,
               overlay: overlay,
-              navigatorSize: navigatorRenderObject.size,
               fromRoute: from,
               toRoute: to,
               fromHero: fromHero,

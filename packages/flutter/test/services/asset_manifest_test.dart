@@ -81,4 +81,61 @@ void main() {
     final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(TestAssetBundle());
     expect(manifest.getAssetVariants('invalid asset key'), isNull);
   });
+
+  test('getAssetVariants marks primary 1.0x variant as main when content-hashed', () async {
+    final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(
+      _ContentHashedTestAssetBundle(),
+    );
+
+    final List<AssetMetadata> fooVariants = manifest.getAssetVariants('assets/foo.png')!;
+    expect(fooVariants, hasLength(2));
+    expect(fooVariants[0].key, 'assets/foo.9f64a747.png');
+    expect(fooVariants[0].targetDevicePixelRatio, isNull);
+    expect(fooVariants[0].main, isTrue);
+    expect(fooVariants[1].key, 'assets/2.0x/foo.74f81fe1.png');
+    expect(fooVariants[1].targetDevicePixelRatio, 2.0);
+    expect(fooVariants[1].main, isFalse);
+
+    final List<AssetMetadata> spacedVariants = manifest.getAssetVariants(
+      'assets/sub dir/space image.png',
+    )!;
+    expect(spacedVariants, hasLength(1));
+    expect(spacedVariants[0].key, 'assets/sub dir/space image.1a2b3c4d.png');
+    expect(spacedVariants[0].main, isTrue);
+  });
+}
+
+class _ContentHashedTestAssetBundle extends AssetBundle {
+  static const Map<String, List<Object>> _binManifestData = <String, List<Object>>{
+    'assets/foo.png': <Object>[
+      <String, Object>{'asset': 'assets/foo.9f64a747.png'},
+      <String, Object>{'asset': 'assets/2.0x/foo.74f81fe1.png', 'dpr': 2.0},
+    ],
+    'assets/sub dir/space image.png': <Object>[
+      <String, Object>{'asset': 'assets/sub dir/space image.1a2b3c4d.png'},
+    ],
+  };
+
+  @override
+  Future<ByteData> load(String key) async {
+    final ByteData data = const StandardMessageCodec().encodeMessage(_binManifestData)!;
+    if (key == 'AssetManifest.bin') {
+      return data;
+    }
+    if (key == 'AssetManifest.bin.json') {
+      return ByteData.sublistView(
+        utf8.encode(
+          json.encode(
+            base64.encode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)),
+          ),
+        ),
+      );
+    }
+    throw ArgumentError('Unexpected key: $key');
+  }
+
+  @override
+  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
+    return parser(await loadString(key));
+  }
 }

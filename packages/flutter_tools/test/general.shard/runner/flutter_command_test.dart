@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -30,6 +32,7 @@ import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/web/web_options.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
@@ -237,6 +240,100 @@ void main() {
     );
 
     testUsingContext(
+      'prints warning when enable-impeller flag is used with release build',
+      () async {
+        final flutterCommand = DummyFlutterCommand()
+          ..registerOptionBundle(const BuildModeOptionsBundle())
+          ..argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller);
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--release', '--enable-impeller']);
+
+        expect(
+          testLogger.warningText,
+          contains('The "--enable-impeller" flag is ignored in release builds'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'prints warning when no-enable-impeller flag is used with release build',
+      () async {
+        final flutterCommand = DummyFlutterCommand()
+          ..registerOptionBundle(const BuildModeOptionsBundle())
+          ..argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller);
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--release', '--no-enable-impeller']);
+
+        expect(
+          testLogger.warningText,
+          contains('The "--no-enable-impeller" flag is ignored in release builds'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not print warning when enable-impeller flag is used with debug build',
+      () async {
+        final flutterCommand = DummyFlutterCommand()
+          ..registerOptionBundle(const BuildModeOptionsBundle())
+          ..argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller);
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--debug', '--enable-impeller']);
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not print warning when no impeller flags are used with release build',
+      () async {
+        final flutterCommand = DummyFlutterCommand()
+          ..registerOptionBundle(const BuildModeOptionsBundle())
+          ..argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller);
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--release']);
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not fail or warn on command without build mode flags',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy']);
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'uses the error handling file system',
       () async {
         final flutterCommand = DummyFlutterCommand(
@@ -331,8 +428,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'success',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -355,8 +453,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'warning',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -378,8 +477,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'fail',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -396,7 +496,11 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns parsed uri',
       () async {
-        final command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+        final command = DummyFlutterCommand();
+        command.argParser.addDescriptors(<OptionDescriptor<Object?>>[
+          DebuggingOptionDescriptors.enableDevTools,
+          DebuggingOptionDescriptors.devToolsServerAddress(),
+        ]);
         await createTestCommandRunner(command).run(<String>[
           'dummy',
           '--${FlutterCommand.kDevToolsServerAddress}',
@@ -413,7 +517,11 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns null for bad input',
       () async {
-        final command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
+        final command = DummyFlutterCommand();
+        command.argParser.addDescriptors(<OptionDescriptor<Object?>>[
+          DebuggingOptionDescriptors.enableDevTools,
+          DebuggingOptionDescriptors.devToolsServerAddress(),
+        ]);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>[
           'dummy',
@@ -484,8 +592,9 @@ void main() {
               Event.flutterCommandResult(
                 commandPath: 'dummy',
                 result: 'killed',
-                maxRss: 10,
                 commandHasTerminal: false,
+                hostArch: globals.os.hostPlatform.cliName,
+                maxRss: 10,
               ),
             ),
           );
@@ -653,6 +762,212 @@ void main() {
     );
 
     testUsingContext(
+      'reports an explicit --[no-]enable-hcpp to gradle so it overrides the manifest',
+      () async {
+        final enabledCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(enabledCommand).run(<String>['dummy', '--enable-hcpp']);
+        final BuildInfo enabledBuildInfo = await enabledCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(enabledBuildInfo.androidGradleConfig.explicitEnableHcpp, isTrue);
+        expect(
+          AndroidBuildInfo(enabledBuildInfo).toGradleConfig(),
+          contains('-Pexplicit-enable-hcpp=true'),
+        );
+
+        // The negation has to be reported too, otherwise gradle cannot tell it apart from the
+        // flag being absent and would leave a manifest value of true in place.
+        final disabledCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(disabledCommand).run(<String>['dummy', '--no-enable-hcpp']);
+        final BuildInfo disabledBuildInfo = await disabledCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(disabledBuildInfo.androidGradleConfig.explicitEnableHcpp, isFalse);
+        expect(
+          AndroidBuildInfo(disabledBuildInfo).toGradleConfig(),
+          contains('-Pexplicit-enable-hcpp=false'),
+        );
+
+        // Without the flag nothing is reported, so the manifest decides.
+        final defaultCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(defaultCommand).run(<String>['dummy']);
+        final BuildInfo defaultBuildInfo = await defaultCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(defaultBuildInfo.androidGradleConfig.explicitEnableHcpp, isNull);
+        expect(
+          AndroidBuildInfo(defaultBuildInfo).toGradleConfig(),
+          isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'reports --[no-]deprecated-js-interop in BuildInfo only when passed',
+      () async {
+        Future<bool?> deprecatedJsInteropFor(List<String> args) async {
+          final command = DummyDeprecatedJsInteropFlutterCommand();
+          await createTestCommandRunner(command).run(<String>['dummy', ...args]);
+          final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+          return buildInfo.deprecatedJsInterop;
+        }
+
+        expect(await deprecatedJsInteropFor(<String>['--deprecated-js-interop']), isTrue);
+        expect(await deprecatedJsInteropFor(<String>['--no-deprecated-js-interop']), isFalse);
+        expect(await deprecatedJsInteropFor(<String>[]), isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'preserves hasOption and typed getters when subclass replaces argParser with a copy',
+      () async {
+        final command = _DummyOverriddenArgParserCommand();
+        await createTestCommandRunner(command)
+            .run(<String>['dummy', '--filesystem-scheme=org-dartlang-app', '--ipv6']);
+        expect(command.hasOption(BuildInfoOptions.fileSystemScheme), isTrue);
+        expect(command.hasOption(DebuggingOptionDescriptors.ipv6), isTrue);
+        expect(command.hasOption(CommonOptions.fatalWarnings), isFalse);
+        expect(command.fileSystemScheme, 'org-dartlang-app');
+        expect(command.ipv6, isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'reports the enable-hcpp feature flag to gradle as the injected default',
+      () async {
+        final command = DummyHcppFlutterCommand();
+        await createTestCommandRunner(command).run(<String>['dummy']);
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.androidGradleConfig.enableHcpp, isTrue);
+        expect(AndroidBuildInfo(buildInfo).toGradleConfig(), contains('-Penable-hcpp=true'));
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'an explicit --[no-]enable-hcpp overrides the enable-hcpp feature flag default',
+      () async {
+        final command = DummyHcppFlutterCommand();
+        await createTestCommandRunner(command).run(<String>['dummy', '--no-enable-hcpp']);
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.androidGradleConfig.enableHcpp, isFalse);
+        expect(AndroidBuildInfo(buildInfo).toGradleConfig(), contains('-Penable-hcpp=false'));
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo defaults when no build options are registered on command',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        await createTestCommandRunner(flutterCommand).run(<String>['dummy']);
+
+        final BuildInfo debugBuildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(debugBuildInfo.trackWidgetCreation, isFalse);
+        expect(debugBuildInfo.treeShakeIcons, isFalse);
+        expect(debugBuildInfo.androidGradleConfig.gradleDaemon, isTrue);
+        expect(debugBuildInfo.androidGradleConfig.skipBuildDependencyValidation, isTrue);
+
+        final BuildInfo releaseBuildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.release,
+        );
+        expect(releaseBuildInfo.trackWidgetCreation, isFalse);
+        expect(releaseBuildInfo.treeShakeIcons, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo default flag values with options registered',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(command).run(<String>['dummy']);
+
+        final BuildInfo debugBuildInfo = await command.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(debugBuildInfo.trackWidgetCreation, isTrue);
+        expect(debugBuildInfo.androidGradleConfig.skipBuildDependencyValidation, isFalse);
+
+        final BuildInfo releaseBuildInfo = await command.getBuildInfo(
+          forcedBuildMode: BuildMode.release,
+        );
+        expect(releaseBuildInfo.treeShakeIcons, isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo parses AndroidGradleConfig options and populates toGradleConfig',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(command).run(<String>[
+          'dummy',
+          '--android-project-arg=x=1',
+          '--android-project-cache-dir=/c',
+          '--no-android-gradle-daemon',
+        ]);
+
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.androidGradleConfig.gradleDaemon, isFalse);
+        expect(
+          AndroidBuildInfo(buildInfo).toGradleConfig(),
+          containsAll(<String>['-Px=1', '--project-cache-dir=/c']),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo respects historical ExtraFrontEndOptions and ExtraGenSnapshotOptions aliases',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['dummy', '--ExtraFrontEndOptions=--foo', '--ExtraGenSnapshotOptions=--bar']);
+
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.release);
+        expect(buildInfo.extraFrontEndOptions, contains('--foo'));
+        expect(buildInfo.extraGenSnapshotOptions, contains('--bar'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'use fileSystemScheme to generate BuildInfo',
       () async {
         final flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
@@ -685,7 +1000,11 @@ void main() {
     testUsingContext(
       'includes initializeFromDill in BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand();
+        flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+          BuildInfoOptions.initializeFromDill,
+          BuildInfoOptions.assumeInitializeFromDillUpToDate,
+        ], hideOverride: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -702,7 +1021,11 @@ void main() {
     testUsingContext(
       'includes assumeInitializeFromDillUpToDate in BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand();
+        flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+          BuildInfoOptions.initializeFromDill,
+          BuildInfoOptions.assumeInitializeFromDillUpToDate,
+        ], hideOverride: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -719,7 +1042,11 @@ void main() {
     testUsingContext(
       'unsets assumeInitializeFromDillUpToDate in BuildInfo when disabled',
       () async {
-        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand();
+        flutterCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+          BuildInfoOptions.initializeFromDill,
+          BuildInfoOptions.assumeInitializeFromDillUpToDate,
+        ], hideOverride: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -803,14 +1130,14 @@ void main() {
       final device2 = FakeDevice('device2', 'device2');
 
       testUsingContext('no device found', () async {
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
       });
 
       testUsingContext('finds single device', () async {
         testDeviceManager.addAttachedDevice(device1);
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, device1);
       });
@@ -819,7 +1146,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
         testDeviceManager.specifiedDeviceId = 'all';
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
         expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
@@ -839,7 +1166,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices();
 
         // Should prompt the user and print prompt options (so status contains "Connected devices")
@@ -885,7 +1212,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
 
         // Should NOT prompt the user even if machine mode is false.
@@ -902,7 +1229,11 @@ void main() {
       late CommandRunner<void> dummyCommandRunner;
 
       setUp(() {
-        dummyCommand = DummyFlutterCommand()..usesDartDefineOption();
+        dummyCommand = DummyFlutterCommand();
+        dummyCommand.argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+          CommonOptions.dartDefines,
+          CommonOptions.dartDefineFromFile,
+        ]);
         dummyCommandRunner = createTestCommandRunner(dummyCommand);
       });
 
@@ -1241,6 +1572,61 @@ void main() {
       );
 
       testUsingContext(
+        'parses values from JSON files encoded in UTF-16 LE with BOM',
+        () async {
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          final utf16Bytes = <int>[
+            0xFF, 0xFE, // UTF-16 LE BOM
+            ...'{ "kInt": 1 }'.codeUnits.expand(
+              (int codeUnit) => <int>[codeUnit & 0xFF, (codeUnit >> 8) & 0xFF],
+            ),
+          ];
+          fileSystem.file('config.json').writeAsBytesSync(utf16Bytes);
+
+          await dummyCommandRunner.run(<String>['dummy', '--dart-define-from-file=config.json']);
+
+          final BuildInfo buildInfo = await dummyCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+          );
+          expect(buildInfo.dartDefines, containsAll(const <String>['kInt=1']));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          FileSystemUtils: () => fileSystemUtils,
+          Platform: () => platform,
+          ProcessManager: () => processManager,
+        },
+      );
+
+      testUsingContext(
+        'throws a ToolExit when the given file cannot be decoded',
+        () async {
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('config.json').writeAsBytesSync(<int>[0xFF, 0xFF, 0xFF, 0xFF, 0x01]);
+
+          await dummyCommandRunner.run(<String>['dummy', '--dart-define-from-file=config.json']);
+          expect(
+            dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+            throwsToolExit(
+              message:
+                  'Unable to decode the file at path "config.json". '
+                  'Ensure that the file is encoded in UTF-8 or UTF-16.\n',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          FileSystemUtils: () => fileSystemUtils,
+          Platform: () => platform,
+          ProcessManager: () => processManager,
+        },
+      );
+
+      testUsingContext(
         'throws a ToolExit when the given JSON file is malformed',
         () async {
           fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
@@ -1346,7 +1732,7 @@ flutter:
               return FlutterCommandResult.success();
             },
           );
-          flutterCommand.usesFlavorOption();
+          flutterCommand.argParser.addDescriptor(BuildInfoOptions.flavor);
           final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
           await runner.run(<String>['dummy', '--flavor', 'bar']);
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -1848,6 +2234,7 @@ Use the "flutter config" command to enable feature flags.''',
         'FLUTTER_ENABLED_FEATURE_FLAGS is set in dartDefines',
         () async {
           final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          createTestCommandRunner(flutterCommand);
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -1886,7 +2273,7 @@ class FakeDeprecatedCommand extends FlutterCommand {
 
 class FakeTargetCommand extends FlutterCommand {
   FakeTargetCommand() {
-    usesTargetOption();
+    CommonOptions.target.addTo(argParser);
   }
 
   @override
@@ -1906,7 +2293,7 @@ class FakeTargetCommand extends FlutterCommand {
 
 class FakeDdsCommand extends FlutterCommand {
   FakeDdsCommand() {
-    addDdsOptions(verboseHelp: false);
+    registerOptionBundle(const DdsAndDevToolsOptionsBundle(includeDevTools: false));
   }
 
   @override
@@ -1978,6 +2365,23 @@ class FakeClock extends Fake implements SystemClock {
 }
 
 class _TestRunCommandThatOnlyValidates extends RunCommand {
+  _TestRunCommandThatOnlyValidates({ToolContext? toolContext})
+    : super(
+        appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext:
+            toolContext ??
+            FakeToolContext(
+              fs: globals.fs,
+              logger: globals.logger,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              artifacts: globals.artifacts,
+              cache: globals.cache,
+            ),
+      );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
@@ -1995,7 +2399,7 @@ class FakeFeature extends Feature {
 
 class DummyFlutterCommandWithPub extends FlutterCommand {
   DummyFlutterCommandWithPub() {
-    usesPubOption();
+    CommonOptions.pub.addTo(argParser);
   }
 
   @override
@@ -2066,6 +2470,10 @@ class FakeFeatureFlags implements FeatureFlags {
   @override
   bool isEnabled(Feature feature) => (feature as FakeFeature).enabled;
 
+  // Queried by getBuildInfo.
+  @override
+  bool get isHcppEnabled => false;
+
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -2105,6 +2513,91 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
 class DummyMachineFlutterCommand extends DummyFlutterCommand {
   DummyMachineFlutterCommand() : super(name: 'dummy') {
-    addMachineOutputFlag(verboseHelp: false);
+    CommonOptions.machine.addTo(argParser);
   }
+}
+
+class DummyHcppFlutterCommand extends DummyFlutterCommand {
+  DummyHcppFlutterCommand() : super(name: 'dummy') {
+    DebuggingOptionDescriptors.enableHcpp.addTo(argParser);
+  }
+}
+
+class DummyDeprecatedJsInteropFlutterCommand extends DummyFlutterCommand {
+  DummyDeprecatedJsInteropFlutterCommand() : super(name: 'dummy') {
+    WebOptions.deprecatedJsInterop.addTo(argParser);
+  }
+}
+
+class DummyAllBuildOptionsFlutterCommand extends DummyFlutterCommand {
+  DummyAllBuildOptionsFlutterCommand() : super(name: 'dummy') {
+    registerOptionBundle(const AndroidGradleOptionsBundle());
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.trackWidgetCreation,
+      CommonOptions.treeShakeIcons,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
+    ]);
+  }
+}
+
+class _DummyOverriddenArgParserCommand extends FlutterCommand {
+  _DummyOverriddenArgParserCommand() {
+    registerOptionBundle(const FilesystemOptionsBundle());
+    DebuggingOptionDescriptors.ipv6.addTo(argParser);
+    final copy = ArgParser(
+      allowTrailingOptions: argParser.allowTrailingOptions,
+      usageLineLength: argParser.usageLineLength,
+    );
+    for (final MapEntry<String, Option> entry in argParser.options.entries) {
+      final Option option = entry.value;
+      if (option.isFlag) {
+        copy.addFlag(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          defaultsTo: option.defaultsTo as bool?,
+          negatable: option.negatable!,
+          hide: option.hide,
+        );
+      } else if (option.isSingle) {
+        copy.addOption(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          valueHelp: option.valueHelp,
+          defaultsTo: option.defaultsTo as String?,
+          hide: option.hide,
+        );
+      } else if (option.isMultiple) {
+        copy.addMultiOption(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          valueHelp: option.valueHelp,
+          defaultsTo: option.defaultsTo as Iterable<String>?,
+          splitCommas: option.splitCommas,
+          hide: option.hide,
+        );
+      }
+    }
+    _overriddenArgParser = copy;
+  }
+
+  ArgParser? _overriddenArgParser;
+
+  @override
+  ArgParser get argParser => _overriddenArgParser ?? super.argParser;
+
+  @override
+  String get description => 'does nothing';
+
+  @override
+  String get name => 'dummy';
+
+  @override
+  bool get shouldUpdateCache => false;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.success();
 }

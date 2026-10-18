@@ -1469,11 +1469,12 @@ void main() {
           child: Center(
             child: SegmentedButton<int>(
               style: const ButtonStyle(
-                side:
-                    WidgetStateProperty<BorderSide?>.fromMap(<WidgetStatesConstraint, BorderSide?>{
-                      WidgetState.disabled: BorderSide(color: disabledColor),
-                      WidgetState.any: BorderSide(color: enabledColor),
-                    }),
+                side: WidgetStateProperty<BorderSide?>.fromMap(
+                  <WidgetStatesConstraint, BorderSide?>{
+                    WidgetState.disabled: BorderSide(color: disabledColor),
+                    WidgetState.any: BorderSide(color: enabledColor),
+                  },
+                ),
               ),
               // First segment is enabled, second is disabled.
               segments: const <ButtonSegment<int>>[

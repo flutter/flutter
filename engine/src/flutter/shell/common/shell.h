@@ -121,7 +121,6 @@ class Shell final : public PlatformView::Delegate,
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
   typedef std::function<std::unique_ptr<Engine>(
       Engine::Delegate& delegate,
-      const PointerDataDispatcherMaker& dispatcher_maker,
       DartVM& vm,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       TaskRunners task_runners,
@@ -306,6 +305,11 @@ class Shell final : public PlatformView::Delegate,
   void NotifyLowMemoryWarning() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Clears any cached render targets and textures on the
+  ///             rasterizer.
+  void ClearRenderTargetCache() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by embedders to flush the microtask queue. Required
   ///             when running with merged platform and UI threads, in which
   ///             case the embedder is responsible for flushing the microtask
@@ -339,18 +343,19 @@ class Shell final : public PlatformView::Delegate,
                                     bool base64_encode);
 
   //----------------------------------------------------------------------------
-  /// @brief      Pauses the calling thread until the first frame is presented.
+  /// @brief      Invokes a callback when the first frame has been presented.
   ///
-  /// @param[in]  timeout  The duration to wait before timing out. If this
-  ///                      duration would cause an overflow when added to
-  ///                      std::chrono::steady_clock::now(), this method will
-  ///                      wait indefinitely for the first frame.
+  /// @param[in]  callback  A callback that will be invoked on an arbitrary
+  ///                       thread when the first frame is presented.  The
+  ///                       callback may be run the raster thread, so it should
+  ///                       not do anything expensive.
   ///
-  /// @return     'kOk' when the first frame has been presented before the
-  ///             timeout successfully, 'kFailedPrecondition' if called from the
-  ///             GPU or UI thread, 'kDeadlineExceeded' if there is a timeout.
+  ///                       If the first frame has already been presented,
+  ///                       then the callback will be invoked immediately.
+  ///                       If the first frame is never drawn, then the
+  ///                       callback will not be invoked.
   ///
-  fml::Status WaitForFirstFrame(fml::TimeDelta timeout);
+  void AddFirstFrameCallback(std::function<void()> callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to reload the system fonts in
@@ -473,7 +478,7 @@ class Shell final : public PlatformView::Delegate,
   const fml::RefPtr<fml::RasterThreadMerger> parent_raster_thread_merger_;
   std::shared_ptr<ResourceCacheLimitCalculator>
       resource_cache_limit_calculator_;
-  size_t resource_cache_limit_;
+  size_t resource_cache_limit_ = 0;
   const Settings settings_;
   DartVMRef vm_;
   mutable std::mutex time_recorder_mutex_;
@@ -507,9 +512,16 @@ class Shell final : public PlatformView::Delegate,
   uint64_t next_pointer_flow_id_ = 0;
 
   bool first_frame_rasterized_ = false;
+
+  // True if a first frame has not yet been rendered.
+  //
+  // This is read and written lock-free on the raster thread, and read under
+  // waiting_for_first_frame_mutex_ in AddFirstFrameCallback.
   std::atomic<bool> waiting_for_first_frame_ = true;
+
   std::mutex waiting_for_first_frame_mutex_;
-  std::condition_variable waiting_for_first_frame_condition_;
+  // Guarded by waiting_for_first_frame_mutex_.
+  std::vector<std::function<void()>> waiting_for_first_frame_callbacks_;
 
   // Written in the UI thread and read from the raster thread. Hence make it
   // atomic.
@@ -743,6 +755,9 @@ class Shell final : public PlatformView::Delegate,
 
   // |Engine::Delegate|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
+
+  // |Engine::Delegate|
+  void OnEngineResetInternalState() override;
 
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;

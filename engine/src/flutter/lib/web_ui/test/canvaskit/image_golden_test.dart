@@ -22,7 +22,7 @@ Future<void> testMain() async {
     setUpCanvasKitTest(withImplicitView: true);
 
     test('ImageDecoder toByteData(PNG)', () async {
-      final image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
+      final image = EngineCodec.skia(CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test'));
       final ui.FrameInfo frame = await image.getNextFrame();
       final ByteData? png = await frame.image.toByteData(format: ui.ImageByteFormat.png);
       expect(png, isNotNull);
@@ -33,7 +33,7 @@ Future<void> testMain() async {
     });
 
     test('CkAnimatedImage toByteData(RGBA)', () async {
-      final image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
+      final image = EngineCodec.skia(CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test'));
       const expectedColors = <List<int>>[
         <int>[255, 0, 0, 255],
         <int>[0, 255, 0, 255],

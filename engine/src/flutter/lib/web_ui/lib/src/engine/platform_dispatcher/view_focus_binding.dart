@@ -8,6 +8,12 @@ import 'dart:js_interop';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+/// Overrides `domDocument.hasFocus()` in [ViewFocusBinding] for tests, so the
+/// iOS caret-drag deferral tests do not depend on the headless browser
+/// reporting the test document as focused. Mirrors
+/// `DefaultTextEditingStrategy.debugDocumentHasFocusOverride`.
+bool? debugViewFocusDocumentHasFocusOverride;
+
 /// Tracks the [FlutterView]s focus changes.
 final class ViewFocusBinding {
   ViewFocusBinding(this._viewManager, this._onViewFocusChange);
@@ -20,26 +26,23 @@ final class ViewFocusBinding {
 
   StreamSubscription<int>? _onViewCreatedListener;
 
-  /// How long a blur that landed on nothing is given to turn out to be a focus
-  /// change inside the view after all. See [_handleFocusout].
+  /// A deferred report of a `focusout` that named no element to gain focus.
   ///
-  /// This waits on a pair of browser events, not on anything a user does. The
-  /// browser dispatches the `focusout` and the `focusin` that follows it in
-  /// adjacent tasks, about a millisecond apart when something steps between two
-  /// fields of a form, and the wait only has to outlast that. The rest is
-  /// headroom for a busy main thread: any value between a few milliseconds and
-  /// a tenth of a second behaves identically, so the exact number is not
-  /// load-bearing. It is deliberately not derived from a frame budget, which
-  /// depends on the display and has nothing to do with the task scheduling this
-  /// waits on.
+  /// Two transient blurs look like a view losing focus and are not. A native
+  /// iOS caret or selection drag blurs the focused input to <body> and WebKit
+  /// refocuses it a frame later. A password manager filling an autofill form
+  /// blurs each field to <body> as it finishes with it and focuses the next a
+  /// moment later. Deferring the report lets the focus that follows cancel it,
+  /// so the view is never reported unfocused in between. See [_handleFocusout].
+  /// See also: https://github.com/flutter/flutter/issues/189744
+  Timer? _pendingFocusoutTimer;
+
+  /// Whether the document itself still has focus.
   ///
-  /// It cannot be zero: a zero timer is queued before the task carrying the
-  /// next focus, so it would fire first and defeat the point.
-  ///
-  /// Nothing waits on a password manager here. If focus never comes back, the
-  /// view is reported unfocused this much later than it once was.
-  static const Duration _unfocusGracePeriod = Duration(milliseconds: 32);
-  Timer? _pendingUnfocus;
+  /// Reads [debugViewFocusDocumentHasFocusOverride] when set, so tests do not
+  /// depend on the headless browser reporting the test document as focused.
+  /// Mirrors `DefaultTextEditingStrategy._documentHasFocus`.
+  bool get _documentHasFocus => debugViewFocusDocumentHasFocusOverride ?? domDocument.hasFocus();
 
   void init() {
     // We need a global listener here to know if the user was pressing "shift"
@@ -57,8 +60,8 @@ final class ViewFocusBinding {
     domDocument.body?.removeEventListener(_keyDown, _handleKeyDown);
     domDocument.body?.removeEventListener(_keyUp, _handleKeyUp);
     _onViewCreatedListener?.cancel();
-    _pendingUnfocus?.cancel();
-    _pendingUnfocus = null;
+    _pendingFocusoutTimer?.cancel();
+    _pendingFocusoutTimer = null;
   }
 
   void changeViewFocus(int viewId, ui.ViewFocusState state) {
@@ -76,11 +79,11 @@ final class ViewFocusBinding {
   }
 
   late final DomEventListener _handleFocusin = createDomEventListener((DomEvent event) {
-    // Focus returned before the pending report went out, so the view never lost
-    // it. See [_handleFocusout].
-    _pendingUnfocus?.cancel();
-    _pendingUnfocus = null;
     event as DomFocusEvent;
+    // Focus returned, so a deferred `focusout` was a transient blur; drop it.
+    // See [_handleFocusout].
+    _pendingFocusoutTimer?.cancel();
+    _pendingFocusoutTimer = null;
     _handleFocusChange(event.target as DomElement?);
   });
 
@@ -90,30 +93,49 @@ final class ViewFocusBinding {
     // We leverage this behavior to ignore focusout events where the document has focus but activeElement is not <body />.
     //
     // Refer to https://github.com/flutter/engine/pull/54965 for more info.
-    final bool wasFocusInvoked =
-        domDocument.hasFocus() && domDocument.activeElement != domDocument.body;
+    final bool wasFocusInvoked = _documentHasFocus && domDocument.activeElement != domDocument.body;
     if (wasFocusInvoked) {
       return;
     }
 
     event as DomFocusEvent;
-    final DomElement? willGainFocus = event.relatedTarget as DomElement?;
+    final willGainFocus = event.relatedTarget as DomElement?;
+    final target = event.target as DomElement?;
 
-    // A field of an autofill form blurring to nothing is not yet a view losing
-    // focus. A password manager fills a login form one field at a time, blurring
-    // each as it finishes before focusing the next, and reporting the view
-    // unfocused in between makes the framework drop its focus, which tears the
-    // text connection down and builds it back up between every field. Managers
-    // that give up when the form churns under them then fill only the first
-    // field. Wait a moment: a focus landing back in the view cancels the report.
+    // A blur to nothing is not always a view losing focus, and reporting it as
+    // one makes the framework drop its focus, which tears the text connection
+    // down and builds it back up when focus returns. Two cases wait instead,
+    // and a focus landing back in the view cancels the report:
     //
-    // Only these fields defer. Anything else losing focus is reported at once,
-    // as before.
-    if (_isAutofillFormField(event.target as DomElement?)) {
-      _pendingUnfocus?.cancel();
-      _pendingUnfocus = Timer(_unfocusGracePeriod, () {
-        _pendingUnfocus = null;
-        _handleFocusChange(willGainFocus);
+    // - A field of an autofill form. A password manager fills a login form one
+    //   field at a time, blurring each as it finishes before focusing the next.
+    //   Reporting the view unfocused in between churns the connection between
+    //   every field, and managers that give up when the form churns under them
+    //   then fill only the first field.
+    // - On iOS, Flutter's active text-editing element while the document keeps
+    //   focus. A native caret or selection drag blurs it to <body> and WebKit
+    //   refocuses it a frame later; reporting the view unfocused on that blink
+    //   tears the text connection down and drops the keyboard.
+    //   https://github.com/flutter/flutter/issues/189744
+    //
+    // The wait is [kTransientBlurSettleDelay], the same window the text editing
+    // strategy gives the matching `blur`. It only has to outlast the task gap
+    // between a `focusout` and the `focusin` that follows it; nothing here waits
+    // on a user or on a password manager. If focus never comes back, the view
+    // is reported unfocused this much later than it once was. Anything else
+    // losing focus, including a blur to a known element outside the view, is
+    // reported at once.
+    if (willGainFocus == null &&
+        (_isAutofillFormField(target) ||
+            (isIosSafari && _documentHasFocus && textEditing.isActiveTextEditingElement(target)))) {
+      _pendingFocusoutTimer?.cancel();
+      _pendingFocusoutTimer = Timer(kTransientBlurSettleDelay, () {
+        _pendingFocusoutTimer = null;
+        // Re-derive from the live focus so a refocus that fired no `focusin` is
+        // still a no-op. Once the document itself has lost focus (a window, tab
+        // or app switch, or browser chrome taking it) the active element is
+        // stale, it still names the blurred field, and the view is unfocused.
+        _handleFocusChange(_documentHasFocus ? domDocument.activeElement : null);
       });
       return;
     }
@@ -166,7 +188,9 @@ final class ViewFocusBinding {
       event = ui.ViewFocusEvent(
         viewId: viewId,
         state: ui.ViewFocusState.focused,
-        direction: _viewFocusDirection,
+        direction: _isViewRoot(viewId, focusedElement)
+            ? _viewFocusDirection
+            : ui.ViewFocusDirection.undefined,
       );
     }
     _updateViewKeyboardReachability(_lastViewId, reachable: true);
@@ -178,6 +202,11 @@ final class ViewFocusBinding {
   int? _viewId(DomElement? element) {
     final FlutterViewManager viewManager = EnginePlatformDispatcher.instance.viewManager;
     return viewManager.findViewForElement(element)?.viewId;
+  }
+
+  bool _isViewRoot(int viewId, DomElement? element) {
+    final DomElement? rootElement = _viewManager[viewId]?.dom.rootElement;
+    return element != null && element == rootElement;
   }
 
   void _handleViewCreated(int viewId) {

@@ -7,6 +7,8 @@ package io.flutter.embedding.engine.systemchannels;
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -113,5 +115,33 @@ public class TextInputChannelTest {
     arguments.put("autofill", autofill);
 
     return arguments;
+  }
+
+  @Test
+  public void inputTypeFromJsonParsesPassword() throws JSONException, NoSuchFieldException {
+    final JSONObject json = new JSONObject();
+    json.put("name", "TextInputType.number");
+    json.put("password", true);
+
+    final TextInputChannel.InputType inputType = TextInputChannel.InputType.fromJson(json);
+
+    assertEquals(TextInputChannel.TextInputType.NUMBER, inputType.type);
+    assertTrue(inputType.isPassword);
+    assertFalse(inputType.isSigned);
+    assertFalse(inputType.isDecimal);
+  }
+
+  @Test
+  public void inputTypeFromJsonDefaultsPasswordToFalseWhenMissing()
+      throws JSONException, NoSuchFieldException {
+    // Backward-compatibility guard: an older framework payload without the "password" key must
+    // deserialize to isPassword == false so plain numeric fields keep their existing IME behavior.
+    final JSONObject json = new JSONObject();
+    json.put("name", "TextInputType.number");
+
+    final TextInputChannel.InputType inputType = TextInputChannel.InputType.fromJson(json);
+
+    assertEquals(TextInputChannel.TextInputType.NUMBER, inputType.type);
+    assertFalse(inputType.isPassword);
   }
 }

@@ -5,13 +5,10 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:material_ui/material_ui.dart';
 
-void showWindowEditDialog({
-  required BuildContext context,
-  required WindowController controller,
-}) {
+void showWindowEditDialog({required BuildContext context, required WindowController controller}) {
   showDialog<void>(
     context: context,
     builder: (context) =>

@@ -8,12 +8,15 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show templateAndroidGradlePluginVersion;
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -21,7 +24,8 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart' show FakeFlutterVersion;
+import '../../src/fakes.dart'
+    show FakeAndroidContext, FakeFlutterVersion, FakeToolContext, TestFeatureFlags;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -71,11 +75,146 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics false when the manifest is silent and the feature flag is off',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildAppBundleCommand(projectPath);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from the enable-hcpp feature flag when the manifest is silent',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        // The manifest does not set EnableHcpp, so the build injects the feature flag value
+        // and the packaged app has HCPP on.
+        await runBuildAppBundleCommand(projectPath);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: true,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from an explicit --enable-hcpp flag when not in the manifest',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        // The manifest does not set EnableHcpp, so the build injects the flag value and the
+        // packaged app has HCPP on. Analytics has to report what was packaged, not what the
+        // source manifest happened to say.
+        await runBuildAppBundleCommand(projectPath, arguments: <String>['--enable-hcpp']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: true,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from an explicit --no-enable-hcpp flag',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildAppBundleCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
     testUsingContext('alias aab', () async {
-      final command = BuildAppBundleCommand(logger: BufferLogger.test());
+      final command = BuildAppBundleCommand(
+        androidBuilder: FakeAndroidBuilder(),
+        androidContext: FakeAndroidContext(),
+        buildSystem: globals.buildSystem,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: FakeToolContext(logger: BufferLogger.test()),
+      );
       expect(command.aliases, contains('aab'));
     });
 
@@ -150,6 +289,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -170,6 +310,7 @@ void main() {
               commandPath: 'create',
               result: 'success',
               commandHasTerminal: false,
+              hostArch: globals.os.hostPlatform.cliName,
               maxRss: processInfo.maxRss,
             ),
           ),
@@ -507,9 +648,24 @@ void main() {
 
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
+  AndroidBuilder? androidBuilder,
   List<String>? arguments,
 }) async {
-  final command = BuildAppBundleCommand(logger: BufferLogger.test());
+  final command = BuildAppBundleCommand(
+    androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
+    androidContext: FakeAndroidContext(
+      androidSdk: globals.androidSdk ?? FakeAndroidSdk(globals.fs.directory('android-sdk')),
+    ),
+    buildSystem: globals.buildSystem,
+    templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: FakeToolContext(
+      fs: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      projectFactory: globals.projectFactory,
+    ),
+  );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'appbundle',

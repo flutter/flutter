@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -9,36 +11,161 @@ import 'package:flutter_test/flutter_test.dart';
 
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
-  PageRoute<T> defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
-    return PageRouteBuilder<T>(
-      settings: settings,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => builder(context),
-      transitionsBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) => child,
-    );
-  }
-
-  Widget buildTestApp({required Widget child}) {
-    return WidgetsApp(
-      color: const Color(0xFFFFFFFF),
-      pageRouteBuilder: defaultPageRouteBuilder,
-      home: SizedBox.expand(child: Center(child: child)),
-    );
-  }
-
   final binding = LiveTestWidgetsFlutterBinding();
+  testWidgets('Widgets are built within the current test zone (test 1 of 2)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113885
+    Zone? buildZone;
+    final Zone bodyZone = Zone.current;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            buildZone = Zone.current;
+            return const Text('Test 1');
+          },
+        ),
+      ),
+    );
+    expect(buildZone, equals(bodyZone));
+  });
+
+  testWidgets('Widgets are built within the current test zone (test 2 of 2)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113885
+    Zone? buildZone;
+    final Zone bodyZone = Zone.current;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            buildZone = Zone.current;
+            return const Text('Test 2');
+          },
+        ),
+      ),
+    );
+    expect(buildZone, equals(bodyZone));
+  });
+
+  testWidgets('Frame callbacks and pointer events run in current test zone (test 1 of 2)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113885
+    Zone? frameCallbackZone;
+    Zone? postFrameCallbackZone;
+    Zone? gestureZone;
+    final Zone bodyZone = Zone.current;
+
+    tester.binding.scheduleFrameCallback((Duration timeStamp) {
+      frameCallbackZone = Zone.current;
+    });
+    tester.binding.addPostFrameCallback((Duration timeStamp) {
+      postFrameCallbackZone = Zone.current;
+    });
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          onTap: () {
+            gestureZone = Zone.current;
+          },
+          child: const Text('Tap target 1'),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Tap target 1'));
+    await tester.pump();
+
+    expect(frameCallbackZone, equals(bodyZone));
+    expect(postFrameCallbackZone, equals(bodyZone));
+    expect(gestureZone, equals(bodyZone));
+  });
+
+  testWidgets('Frame callbacks and pointer events run in current test zone (test 2 of 2)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113885
+    Zone? frameCallbackZone;
+    Zone? postFrameCallbackZone;
+    Zone? gestureZone;
+    final Zone bodyZone = Zone.current;
+
+    tester.binding.scheduleFrameCallback((Duration timeStamp) {
+      frameCallbackZone = Zone.current;
+    });
+    tester.binding.addPostFrameCallback((Duration timeStamp) {
+      postFrameCallbackZone = Zone.current;
+    });
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: GestureDetector(
+          onTap: () {
+            gestureZone = Zone.current;
+          },
+          child: const Text('Tap target 2'),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Tap target 2'));
+    await tester.pump();
+
+    expect(frameCallbackZone, equals(bodyZone));
+    expect(postFrameCallbackZone, equals(bodyZone));
+    expect(gestureZone, equals(bodyZone));
+  });
+
+  testWidgets(
+    'Teardown callbacks and frame callbacks in teardown run in current test zone (test 1 of 2)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113885
+      final Zone bodyZone = Zone.current;
+      addTearDown(() async {
+        Zone? teardownBuildZone;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Builder(
+              builder: (BuildContext context) {
+                teardownBuildZone = Zone.current;
+                return const Text('Teardown 1');
+              },
+            ),
+          ),
+        );
+        expect(teardownBuildZone, equals(bodyZone));
+      });
+    },
+  );
+
+  testWidgets(
+    'Teardown callbacks and frame callbacks in teardown run in current test zone (test 2 of 2)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113885
+      final Zone bodyZone = Zone.current;
+      addTearDown(() async {
+        Zone? teardownBuildZone;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Builder(
+              builder: (BuildContext context) {
+                teardownBuildZone = Zone.current;
+                return const Text('Teardown 2');
+              },
+            ),
+          ),
+        );
+        expect(teardownBuildZone, equals(bodyZone));
+      });
+    },
+  );
+
   testWidgets('Input PointerAddedEvent', (WidgetTester tester) async {
-    await tester.pumpWidget(buildTestApp(child: const Text('Test')));
+    await tester.pumpWidget(const TestWidgetsApp(home: Text('Test')));
     await tester.pump();
     final TestGesture gesture = await tester.createGesture();
     // This mimics the start of a gesture as seen on a device, where inputs
@@ -50,8 +177,8 @@ void main() {
   testWidgets('Input PointerHoverEvent', (WidgetTester tester) async {
     PointerHoverEvent? hoverEvent;
     await tester.pumpWidget(
-      buildTestApp(
-        child: MouseRegion(
+      TestWidgetsApp(
+        home: MouseRegion(
           child: const Text('Test'),
           onHover: (PointerHoverEvent event) {
             hoverEvent = event;
@@ -71,8 +198,8 @@ void main() {
   testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
     var invocations = 0;
     await tester.pumpWidget(
-      buildTestApp(
-        child: GestureDetector(
+      TestWidgetsApp(
+        home: GestureDetector(
           onTap: () {
             invocations++;
           },
@@ -100,7 +227,7 @@ void main() {
 
   testWidgets('setSurfaceSize works', (WidgetTester tester) async {
     addTearDown(binding.resetLayers);
-    await tester.pumpWidget(buildTestApp(child: const Text('Test')));
+    await tester.pumpWidget(const TestWidgetsApp(home: Center(child: Text('Test'))));
 
     final Size windowCenter = tester.view.physicalSize / tester.view.devicePixelRatio / 2;
     final double windowCenterX = windowCenter.width;

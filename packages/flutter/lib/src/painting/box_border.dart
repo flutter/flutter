@@ -90,8 +90,9 @@ abstract class BoxBorder extends ShapeBorder {
 
   /// Creates a [Border] with symmetrical vertical and horizontal sides.
   ///
-  /// The `vertical` argument applies to the [left] and [right] sides, and the
-  /// `horizontal` argument applies to the [top] and [bottom] sides.
+  /// The `vertical` argument refers to the vertical sides ([Border.left] and
+  /// [Border.right]), and the `horizontal` argument refers to the horizontal
+  /// sides ([Border.top] and [Border.bottom]).
   ///
   /// All arguments default to [BorderSide.none].
   const factory BoxBorder.symmetric({BorderSide vertical, BorderSide horizontal}) =
@@ -225,6 +226,11 @@ abstract class BoxBorder extends ShapeBorder {
       'The textDirection argument to $runtimeType.getOuterPath must not be null.',
     );
     return Path()..addRect(rect);
+  }
+
+  @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    return rect.contains(position);
   }
 
   @override
@@ -440,8 +446,8 @@ class Border extends BoxBorder {
 
   /// Creates a border with symmetrical vertical and horizontal sides.
   ///
-  /// The `vertical` argument applies to the [left] and [right] sides, and the
-  /// `horizontal` argument applies to the [top] and [bottom] sides.
+  /// The `vertical` argument refers to the vertical sides ([left] and [right]),
+  /// and the `horizontal` argument refers to the horizontal sides ([top] and [bottom]).
   ///
   /// All arguments default to [BorderSide.none].
   const Border.symmetric({

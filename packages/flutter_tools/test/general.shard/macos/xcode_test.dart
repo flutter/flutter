@@ -122,6 +122,7 @@ void main() {
           fakeProcessManager.addCommand(
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version']),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
             processManager: fakeProcessManager,
@@ -136,6 +137,7 @@ void main() {
           fakeProcessManager.addCommand(
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version'], exitCode: 1),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
             processManager: fakeProcessManager,
@@ -157,6 +159,7 @@ void main() {
               exception: ProcessException('xcrun', <String>['devicectl']),
             ),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
             processManager: fakeProcessManager,
@@ -169,17 +172,6 @@ void main() {
           expect(logger.statusText, isEmpty);
           expect(logger.errorText, isEmpty);
           expect(logger.traceText, contains('ProcessException'));
-        });
-
-        testWithoutContext('is false when Xcode is less than 15', () {
-          xcodeProjectInterpreter.version = Version(14, 0, 0);
-          final xcode = Xcode.test(
-            processManager: fakeProcessManager,
-            xcodeProjectInterpreter: xcodeProjectInterpreter,
-          );
-
-          expect(xcode.isDevicectlInstalled, isFalse);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
       });
 
@@ -413,16 +405,13 @@ void main() {
           },
         );
 
-        testWithoutContext(
-          'isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied',
-          () {
-            xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(15, null, null);
+        testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(15, null, null);
 
-            expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
-            expect(fakeProcessManager, hasNoRemainingExpectations);
-          },
-        );
+          expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
 
         testWithoutContext(
           'eulaSigned is false when clang output indicates EULA not yet accepted',
@@ -2022,6 +2011,66 @@ void main() {
           expect(errors, isNot(contains('Xcode will continue')));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{Platform: () => macPlatform});
+      });
+    });
+
+    group('environmentTypeFromSdkroot', () {
+      late MemoryFileSystem fileSystem;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+      });
+
+      testWithoutContext('returns EnvironmentType.physical for iPhoneOS sdk', () {
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneOS.sdk', fileSystem),
+          EnvironmentType.physical,
+        );
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneOS17.0.sdk', fileSystem),
+          EnvironmentType.physical,
+        );
+      });
+
+      testWithoutContext('returns EnvironmentType.simulator for iPhoneSimulator sdk', () {
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneSimulator.sdk', fileSystem),
+          EnvironmentType.simulator,
+        );
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneSimulator17.0.sdk', fileSystem),
+          EnvironmentType.simulator,
+        );
+      });
+
+      testWithoutContext('throws ToolExit for non-iOS sdk', () {
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/MacOSX.sdk', fileSystem),
+          throwsToolExit(
+            message:
+                'Unsupported iOS SDK root "/path/to/MacOSX.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
+          ),
+        );
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/XROS1.0.sdk', fileSystem),
+          throwsToolExit(
+            message:
+                'Unsupported iOS SDK root "/path/to/XROS1.0.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
+          ),
+        );
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/WatchOS.sdk', fileSystem),
+          throwsToolExit(
+            message:
+                'Unsupported iOS SDK root "/path/to/WatchOS.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
+          ),
+        );
       });
     });
   });

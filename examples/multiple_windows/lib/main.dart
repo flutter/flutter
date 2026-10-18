@@ -7,9 +7,9 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'app/main_window.dart';
 import 'app/models.dart';

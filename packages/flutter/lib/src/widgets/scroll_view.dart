@@ -344,7 +344,8 @@ abstract class ScrollView extends StatelessWidget {
   /// [ScrollView.center], or both, can configure a scroll view for
   /// [GrowthDirection.reverse].
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This sample shows a [CustomScrollView], with [Radio] buttons in the
   /// [AppBar.bottom] that change the [AxisDirection] to illustrate different
   /// configurations. The [CustomScrollView.anchor] and [CustomScrollView.center]
@@ -353,8 +354,17 @@ abstract class ScrollView extends StatelessWidget {
   /// illustrated on either side. The sliver that shares the
   /// [CustomScrollView.center] key is positioned at the [CustomScrollView.anchor].
   ///
-  /// ** See code in examples/api/lib/rendering/growth_direction/growth_direction.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/rendering/growth_direction/growth_direction.0.dart#body}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   final double anchor;
 
@@ -587,13 +597,15 @@ abstract class ScrollView extends StatelessWidget {
   }
 }
 
-/// A [ScrollView] that creates custom scroll effects using [slivers].
+/// A [ScrollView] that combines multiple [slivers] in one scrollable view.
 ///
-/// A [CustomScrollView] lets you supply [slivers] directly to create various
-/// scrolling effects, such as lists, grids, and expanding headers. For example,
-/// to create a scroll view that contains an expanding app bar followed by a
-/// list and a grid, use a list of three slivers: [SliverAppBar], [SliverList],
-/// and [SliverGrid].
+/// A [CustomScrollView] lets you combine lists, grids, and other widgets in a
+/// single scrollable view by supplying [slivers] directly. Slivers can
+/// represent lists, grids, and expanding headers. Widgets that use the box
+/// layout model can be included using a [SliverToBoxAdapter]. For example, to
+/// create a scroll view that contains an expanding app bar followed by a list
+/// and a grid, use a list of three slivers: [SliverAppBar], [SliverList], and
+/// [SliverGrid].
 ///
 /// [Widget]s in these [slivers] must produce [RenderSliver] objects.
 ///
@@ -716,7 +728,8 @@ abstract class ScrollView extends StatelessWidget {
 ///  * [IndexedSemantics], which allows annotating child lists with an index
 ///    for scroll announcements.
 class CustomScrollView extends ScrollView {
-  /// Creates a [ScrollView] that creates custom scroll effects using slivers.
+  /// Creates a [ScrollView] that combines multiple slivers in one scrollable
+  /// view.
   ///
   /// See the [ScrollView] constructor for more details on these arguments.
   const CustomScrollView({
@@ -1521,6 +1534,7 @@ class ListView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
+    this.itemExtentBuilder,
     required NullableIndexedWidgetBuilder itemBuilder,
     @Deprecated(
       'Use findItemIndexCallback instead. '
@@ -1555,7 +1569,6 @@ class ListView extends BoxScrollView {
          'Use findItemIndexCallback as findChildIndexCallback is deprecated.',
        ),
        itemExtent = null,
-       itemExtentBuilder = null,
        prototypeItem = null,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
@@ -1662,6 +1675,14 @@ class ListView extends BoxScrollView {
   ///
   /// Unlike [itemExtent] or [prototypeItem], this allows children to have
   /// different extents.
+  ///
+  /// For [ListView.separated], the `index` argument passed to the callback
+  /// represents the interleaved child index, which includes both items and separators.
+  /// Even indices correspond to the items, and odd indices correspond to the
+  /// separators.
+  ///
+  /// To map the interleaved child index to the semantic item index (for example,
+  /// to look up the extent in a data list), divide it by 2 (`index ~/ 2`).
   ///
   /// See also:
   ///

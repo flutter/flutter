@@ -5,14 +5,16 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'dialog_window_content.dart';
 import 'dialog_window_edit_dialog.dart';
 import 'models.dart';
 import 'popup_button.dart';
 import 'popup_window_edit_dialog.dart';
+import 'satellite_window_content.dart';
+import 'satellite_window_edit_dialog.dart';
 import 'tooltip_button.dart';
 import 'tooltip_window_edit_dialog.dart';
 import 'window_content.dart';
@@ -105,10 +107,7 @@ class _WindowsTable extends StatelessWidget {
 
   void _showWindowEditDialog(BaseWindowController controller, BuildContext context) {
     return switch (controller) {
-      final WindowController regular => showWindowEditDialog(
-        context: context,
-        controller: regular,
-      ),
+      final WindowController regular => showWindowEditDialog(context: context, controller: regular),
       final DialogWindowController dialog => showDialogWindowEditDialog(
         context: context,
         controller: dialog,
@@ -121,7 +120,10 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: popup,
       ),
-      SatelliteWindowController() => null,
+      final SatelliteWindowController satellite => showSatelliteWindowEditDialog(
+        context: context,
+        controller: satellite,
+      ),
     };
   }
 
@@ -285,6 +287,42 @@ class _WindowCreatorCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     PopupButton(parentController: windowController),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: () {
+                        late final WindowEntry entry;
+                        final SatelliteWindowController controller;
+                        if (windowSettings.satelliteShrinkWrap) {
+                          controller = SatelliteWindowController.shrinkWrap(
+                            resizable: windowSettings.satelliteResizable,
+                            delegate: CallbackSatelliteWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Satellite',
+                            parent: windowController,
+                            initialPositioner: windowSettings.positioner,
+                          );
+                        } else {
+                          controller = SatelliteWindowController(
+                            delegate: CallbackSatelliteWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Satellite',
+                            size: windowSettings.satelliteSize,
+                            parent: windowController,
+                            initialPositioner: windowSettings.positioner,
+                          );
+                        }
+
+                        entry = WindowEntry(
+                          controller: controller,
+                          builder: (BuildContext context) =>
+                              SatelliteWindowContent(controller: controller),
+                        );
+                        windowRegistry.register(entry);
+                      },
+                      child: const Text('Satellite'),
+                    ),
                     const SizedBox(height: 8),
                     Container(
                       alignment: Alignment.bottomRight,

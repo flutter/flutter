@@ -83,13 +83,6 @@ class TextFrame {
   ///             property.
   GlyphAtlas::Type GetAtlasType() const;
 
-  /// @brief If this text frame contains a single glyph (such as for an Icon),
-  ///        then return it, otherwise std::nullopt.
-  std::optional<Glyph> AsSingleGlyph() const;
-
-  /// @brief Return the font of the first glyph run.
-  const Font& GetFont() const;
-
   fml::StatusOr<flutter::DlPath> GetPath() const;
 
   /// @brief Toggle the platform-specific contrast and gamma correction in the
@@ -108,7 +101,7 @@ class TextFrame {
  private:
   std::vector<TextRun> runs_;
   Rect bounds_;
-  bool has_color_;
+  bool has_color_ = false;
   const PathCreator path_creator_;
   std::optional<bool> enable_gamma_correction_ = std::nullopt;
 };

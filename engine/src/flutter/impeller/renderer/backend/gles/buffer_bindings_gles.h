@@ -10,7 +10,10 @@
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/gles.h"
+#include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/renderer/backend/gles/sampler_gles.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
 #include "impeller/renderer/command.h"
 #include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
@@ -21,7 +24,36 @@ FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindArrayData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType);
+FML_TEST_CLASS(BufferBindingsGLESTest,
+               BindsTexturesAcrossThePerStageUnitBoundary);
+FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit);
+FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit);
+FML_TEST_CLASS(BufferBindingsGLESTest,
+               SkipsRedundantSamplerConfigurationOnSameTexture);
 }  // namespace testing
+
+//------------------------------------------------------------------------------
+/// @brief      Caches the sampler configuration state applied to GL texture
+///             objects during a render pass.
+///
+class SamplerStateCache {
+ public:
+  SamplerStateCache() = default;
+
+  ~SamplerStateCache() = default;
+
+  bool ConfigureBoundTexture(const SamplerGLES& sampler,
+                             const TextureGLES& texture,
+                             const ProcTableGLES& gl);
+
+ private:
+  absl::flat_hash_map<HandleGLES, uint64_t, HandleGLES::Hash, HandleGLES::Equal>
+      configured_samplers_;
+
+  SamplerStateCache(const SamplerStateCache&) = delete;
+
+  SamplerStateCache& operator=(const SamplerStateCache&) = delete;
+};
 
 //------------------------------------------------------------------------------
 /// @brief      Sets up stage bindings for single draw call in the OpenGLES
@@ -55,7 +87,8 @@ class BufferBindingsGLES {
                        const std::vector<TextureAndSampler>& bound_textures,
                        const std::vector<BufferResource>& bound_buffers,
                        Range texture_range,
-                       Range buffer_range);
+                       Range buffer_range,
+                       SamplerStateCache* sampler_cache = nullptr);
 
   bool UnbindVertexAttributes(const ProcTableGLES& gl);
 
@@ -66,6 +99,14 @@ class BufferBindingsGLES {
                   BindUniformDataVerticesAndMatrices);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   BindUniformFailsWithoutFloatType);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  BindsTexturesAcrossThePerStageUnitBoundary);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  RejectsTexturesBeyondThePerStageLimit);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  RejectsTexturesBeyondTheCombinedLimit);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  SkipsRedundantSamplerConfigurationOnSameTexture);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
@@ -121,7 +162,8 @@ class BufferBindingsGLES {
       const std::vector<TextureAndSampler>& bound_textures,
       Range texture_range,
       ShaderStage stage,
-      size_t unit_start_index = 0);
+      size_t unit_start_index = 0,
+      SamplerStateCache* sampler_cache = nullptr);
 
   BufferBindingsGLES(const BufferBindingsGLES&) = delete;
 

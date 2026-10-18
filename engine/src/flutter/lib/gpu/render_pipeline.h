@@ -28,8 +28,13 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
 
   ~RenderPipeline() override;
 
-  void BindToPipelineDescriptor(impeller::ShaderLibrary& library,
-                                impeller::PipelineDescriptor& desc);
+  /// Sets this pipeline's vertex descriptor and stage entrypoints on [desc].
+  /// Returns false (after a validation log naming the shader) when either
+  /// stage's function cannot be resolved from [library], in which case the
+  /// descriptor must not be used to build a backend pipeline.
+  [[nodiscard]] bool BindToPipelineDescriptor(
+      impeller::ShaderLibrary& library,
+      impeller::PipelineDescriptor& desc);
 
  private:
   fml::RefPtr<flutter::gpu::Shader> vertex_shader_;
@@ -48,6 +53,13 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPipeline);
 };
+
+/// Checks that [vertex_shader] and [fragment_shader] are actually a vertex
+/// and a fragment shader, returning an error message suitable for a Dart
+/// exception when they are not (pairing the wrong stages otherwise fails
+/// deep inside backend pipeline compilation with no useful signal).
+const char* ValidateRenderPipelineShaderStages(const Shader& vertex_shader,
+                                               const Shader& fragment_shader);
 
 }  // namespace gpu
 }  // namespace flutter

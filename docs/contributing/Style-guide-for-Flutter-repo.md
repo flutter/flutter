@@ -288,7 +288,7 @@ by real developers.
 
 ### Get early feedback when designing new APIs
 
-If you're designing a new API or a new feature, consider [writing a design doc](Design-Documents.md).
+If you're designing a new API or a new feature, consider [writing an RFC or design doc](Design-Documents.md).
 Then, get feedback from the relevant people, e.g. post it on the [relevant chat channel](Chat.md#existing-channels).
 
 
@@ -596,13 +596,13 @@ By definition, if they are looking at the documentation, they are not finding it
 
 Sample code helps developers learn your API quickly. Writing sample code also helps you think through how your API is going to be used by app developers.
 
-Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under [the API examples directory](https://github.com/flutter/flutter/blob/main/examples/api). This will then be checked by automated tools, and formatted for display on the API documentation web site [api.flutter.dev](https://api.flutter.dev). For details on how to write sample code, see [the API example documentation](https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring).
+Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under [the API examples directory](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api). This will then be checked by automated tools, and formatted for display on the API documentation web site [api.flutter.dev](https://api.flutter.dev). For details on how to write sample code, see [the API example documentation](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api/README.md#authoring).
 
 #### Provide full application samples.
 
 Our UX research has shown that developers prefer to see examples that are in the context of an entire app. So, whenever it makes sense, provide an example that can be presented as part of an entire application instead of just a snippet that uses the `{@tool snippet}` or &#96;&#96;&#96;dart ... &#96;&#96;&#96; indicators.
 
-An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See [here](https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring) for more details about writing these kinds of examples.
+An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See [here](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api/README.md#authoring) for more details about writing these kinds of examples.
 
 Dartpad examples (those using the dartdoc `{@tool dartpad}` indicator) will be presented on the [API documentation website](https://api.flutter.dev) as an in-page executable and editable example. This allows developers to interact with the example right there on the page, and is the preferred form of example. Here is [one such example](https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html#widgets.AnimatedSwitcher.1).
 
@@ -1339,6 +1339,82 @@ void foo() {
 
   // ✅ Good. Uses dot shorthands in a collection literal whose type is obvious.
   var objects = <BaseObject>[DifferentObject('Foo'), AwesomeObject('Bar')];
+}
+```
+
+
+### Use private named parameters as initializing formals
+
+Prefer using private named parameters as initializing formals when initializing private fields.
+
+```dart
+// GOOD
+class Point {
+  Point({required this._x});
+  final double _x;
+}
+
+// BAD
+class Point {
+  Point({required double x}) : _x = x;
+  final double _x;
+}
+```
+
+
+### Do not use primary constructors in framework widgets
+
+Do not use primary constructors to implement Flutter framework widgets.
+
+While primary constructors reduce boilerplate for simple classes, they scale poorly to complex
+framework widgets with many fields, assertions, and documentation comments.
+
+Primary constructors are permitted in non-widget framework helper classes (e.g., `_TableElementRow`),
+templates, code samples, and documentation. Even for non-widget classes, prefer standard constructors
+if parameters require extensive documentation or complex assertions. App developers are encouraged to
+use primary constructors for their own widgets.
+
+```dart
+// GOOD
+class BookingHeader extends StatelessWidget {
+  const BookingHeader({
+    super.key,
+    required this.booking,
+  });
+  final Booking booking;
+}
+
+// BAD (Framework widgets should not use primary header constructors)
+class const BookingHeader({
+  super.key,
+  required final Booking booking,
+}) extends StatelessWidget {}
+```
+
+
+### Do not use the new in-body constructor syntax
+
+Avoid using the new in-body constructor syntax (`new() {}`, `new name() {}`) introduced in
+Dart 3.13. This syntax is prohibited in the Flutter framework style guide until May 2027 to ensure
+backward compatibility and protect developers on older SDKs.
+
+```dart
+// GOOD
+class LongClassName {
+  LongClassName() {}
+  LongClassName.name() {}
+  const LongClassName();
+  const LongClassName.name();
+  factory LongClassName() = D;
+}
+
+// BAD (Prohibited until May 2027)
+class LongClassName {
+  new() {}
+  new name() {}
+  const new();
+  const new name();
+  factory() = D;
 }
 ```
 

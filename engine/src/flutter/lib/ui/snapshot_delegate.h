@@ -6,6 +6,7 @@
 #define FLUTTER_LIB_UI_SNAPSHOT_DELEGATE_H_
 
 #include <functional>
+#include <memory>
 #include <string>
 
 #include "flutter/common/graphics/texture.h"
@@ -19,6 +20,7 @@
 namespace impeller {
 class Texture;
 class RuntimeStage;
+class AiksContext;
 }  // namespace impeller
 
 namespace flutter {
@@ -83,6 +85,8 @@ class SnapshotDelegate {
 
   virtual GrDirectContext* GetGrContext() = 0;
 
+  virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const = 0;
+
   virtual void MakeSkiaSnapshot(sk_sp<DisplayList> display_list,
                                 DlISize picture_size,
                                 std::function<void(sk_sp<SkImage>)> callback,
@@ -93,14 +97,34 @@ class SnapshotDelegate {
       DlISize picture_size,
       SnapshotPixelFormat pixel_format) = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Produces the display list to snapshot.
+  ///
+  ///             Invoked on the raster thread after a rendering context has
+  ///             been made current, with the AiksContext that will render the
+  ///             result. Producing the display list may itself need that
+  ///             AiksContext, for example to flatten a layer tree containing
+  ///             external textures. May return nullptr to signal failure.
+  ///
+  using SnapshotDisplayListProvider =
+      std::function<sk_sp<DisplayList>(impeller::AiksContext* aiks_context)>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Renders the display list produced by |provider| into a
+  ///             texture. |provider| is invoked once a rendering context is
+  ///             current. Impeller only.
+  ///
   virtual void MakeImpellerSnapshot(
-      sk_sp<DisplayList> display_list,
+      SnapshotDisplayListProvider provider,
       DlISize picture_size,
       std::function<void(std::shared_ptr<impeller::Texture>)> callback,
       SnapshotPixelFormat pixel_format) = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Synchronous version of |MakeImpellerSnapshot|. Impeller only.
+  ///
   virtual std::shared_ptr<impeller::Texture> MakeImpellerSnapshotSync(
-      sk_sp<DisplayList> display_list,
+      SnapshotDisplayListProvider provider,
       DlISize picture_size,
       SnapshotPixelFormat pixel_format) = 0;
 

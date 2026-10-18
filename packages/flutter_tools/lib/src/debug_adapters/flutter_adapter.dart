@@ -5,14 +5,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:dds/dap.dart' hide PidTracker;
+import 'package:dap_adapters/dap_adapters.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/io.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals show fs;
 import 'error_formatter.dart';
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
@@ -81,12 +80,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Completers for reverse requests from Flutter that may need to be handled by the client.
   final _reverseRequestCompleters = <Object, Completer<Object?>>{};
 
-  /// Whether or not the user requested debugging be enabled.
+  /// Whether or not the user requested debugging be enabled and it's supported.
   ///
   /// For debugging to be enabled, the user must have chosen "Debug" (and not
   /// "Run") in the editor (which maps to the DAP `noDebug` field) _and_ must
-  /// not have requested to run in Profile or Release mode. Profile/Release
-  /// modes will always disable debugging.
+  /// not have requested to run in Profile, Release or WASM mode. These modes
+  /// will always disable debugging.
   ///
   /// This is always `true` for attach requests.
   ///
@@ -95,33 +94,25 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   /// Functionality provided via the daemon (hot reload/restart) will still be
   /// available.
   @override
-  bool get enableDebugger => super.enableDebugger && !profileMode && !releaseMode;
+  bool get enableDebugger => super.enableDebugger && !profileMode && !releaseMode && !wasmMode;
 
   /// Whether the launch configuration arguments specify `--profile`.
   ///
   /// Always `false` for attach requests.
-  bool get profileMode {
-    final DartCommonLaunchAttachRequestArguments args = this.args;
-    if (args is FlutterLaunchRequestArguments) {
-      return args.toolArgs?.contains('--profile') ?? false;
-    }
-
-    // Otherwise (attach), always false.
-    return false;
-  }
+  bool get profileMode => args.hasLaunchArg('--profile');
 
   /// Whether the launch configuration arguments specify `--release`.
   ///
   /// Always `false` for attach requests.
-  bool get releaseMode {
-    final DartCommonLaunchAttachRequestArguments args = this.args;
-    if (args is FlutterLaunchRequestArguments) {
-      return args.toolArgs?.contains('--release') ?? false;
-    }
+  bool get releaseMode => args.hasLaunchArg('--release');
 
-    // Otherwise (attach), always false.
-    return false;
-  }
+  /// Whether the launch configuration arguments specify `--wasm`.
+  ///
+  /// Debugging is not supported for WASM, even if `--release` was not
+  /// specified, see https://github.com/flutter/flutter/issues/190777.
+  ///
+  /// Always `false` for attach requests.
+  bool get wasmMode => args.hasLaunchArg('--wasm');
 
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
@@ -143,7 +134,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     if (vmServiceUri == null && vmServiceInfoFile != null) {
       final Uri uriFromFile = await waitForVmServiceInfoFile(
         logger,
-        globals.fs.file(vmServiceInfoFile),
+        fileSystem.file(vmServiceInfoFile),
       );
       vmServiceUri = uriFromFile.toString();
     }
@@ -228,9 +219,20 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       return;
     }
 
-    FlutterErrorFormatter()
+    final formatter = FlutterErrorFormatter()
       ..formatError(errorData)
       ..sendOutput(sendOutput);
+
+    // Forward any DevTools deep-links in a 'dart.flutter.devToolsDeepLink'
+    // event.
+    if (formatter case FlutterErrorFormatter(:final errorSummary?, :final devToolsDeepLinkUrl?)) {
+      // This event is interpreted by IDEs extensions like like Dart-Code and
+      // should not be changed in breaking ways without coordination.
+      sendEvent(
+        RawEventBody({'summary': errorSummary, 'deepLinkUrl': devToolsDeepLinkUrl}),
+        eventType: 'dart.flutter.devToolsDeepLink',
+      );
+    }
   }
 
   /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
@@ -452,7 +454,20 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // This may be useful when there's no VM Service (for example Profile mode)
     // but the editor still wants to know that startup has finished.
     if (enableDebugger) {
-      await debuggerInitialized; // Ensure we're fully initialized before sending.
+      waitingForDebugger = true;
+      try {
+        await Future.any<void>([debuggerInitialized, debuggerInitializationFailedCompleter.future]);
+      } on DebugAdapterException catch (e) {
+        sendConsoleOutput(e.message);
+        return;
+      } on Object catch (e) {
+        if (!isTerminating) {
+          sendConsoleOutput('Failed to initialize debugger: $e');
+        }
+        return;
+      } finally {
+        waitingForDebugger = false;
+      }
     }
     sendEvent(RawEventBody(<String, Object?>{}), eventType: 'flutter.appStarted');
   }
@@ -731,5 +746,31 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     if (data != null) {
       sendEvent(RawEventBody(data), eventType: 'flutter.serviceExtensionStateChanged');
     }
+  }
+}
+
+extension on DartCommonLaunchAttachRequestArguments {
+  /// Whether `this` is a set of launch arguments (not attach) and contains
+  /// [arg] in the `args` or `toolArgs`.
+  ///
+  /// For Flutter, `args` and `toolArgs` as essentially the same, whereas for
+  /// Dart, `toolArgs` are passed to `dart run` and `args` to the users
+  /// script.
+  bool hasLaunchArg(String arg) {
+    if (this case final FlutterLaunchRequestArguments args) {
+      return args.hasArg(arg);
+    }
+    return false;
+  }
+}
+
+extension on FlutterLaunchRequestArguments {
+  /// Whether these launch args contain [arg] in the `args` or `toolArgs`.
+  ///
+  /// For Flutter, `args` and `toolArgs` as essentially the same, whereas for
+  /// Dart, `toolArgs` are passed to `dart run` and `args` to the users
+  /// script.
+  bool hasArg(String arg) {
+    return (args?.contains(arg) ?? false) || (toolArgs?.contains(arg) ?? false);
   }
 }

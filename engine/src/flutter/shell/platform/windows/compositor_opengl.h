@@ -44,6 +44,9 @@ class CompositorOpenGL : public Compositor {
     uint32_t sized_format = 0;
     // The format used to create textures. Passed to `glTexImage2D`.
     uint32_t general_format = 0;
+    // The internal format passed to `glTexImage2D`. OpenGL ES 2.0 requires it
+    // to equal `general_format`, and only OpenGL ES 3.0 accepts `sized_format`.
+    uint32_t internal_format = 0;
   };
 
   // The compositor initializes itself lazily once |CreateBackingStore| is
@@ -65,6 +68,9 @@ class CompositorOpenGL : public Compositor {
 
   // Whether the OpenGL context supports implicit MSAA.
   bool supports_implicit_msaa_ = false;
+
+  // Whether the OpenGL context supports offscreen MSAA.
+  bool supports_offscreen_msaa_ = false;
 
   // Initialize the compositor. This must run on the raster thread.
   bool Initialize();

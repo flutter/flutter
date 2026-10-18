@@ -40,6 +40,11 @@ void WindowsTestContext::AddNativeFunction(std::string_view name,
   native_resolver_->AddNativeCallback(std::string{name}, function);
 }
 
+void WindowsTestContext::AddFfiNativeFunction(std::string_view name,
+                                              void* function) {
+  native_resolver_->AddFfiNativeCallback(std::string{name}, function);
+}
+
 fml::closure WindowsTestContext::GetRootIsolateCallback() {
   return [this]() {
     for (auto closure : this->isolate_create_callbacks_) {

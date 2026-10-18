@@ -215,6 +215,7 @@ class Plugin {
     bool isDirectDependency, {
     required bool isDevDependency,
   }) {
+    // SAFETY: This constructor is only invoked from .fromYaml, which validates.
     final platforms = <String, PluginPlatform>{};
     final pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
     if (pluginClass != null) {
@@ -308,6 +309,22 @@ class Plugin {
     }
   }
 
+  /// Whether [yaml] declares [key] with a value that is not a string.
+  ///
+  /// A key that is present with no value (`default_package:`) counts: the
+  /// entry is read with a non-nullable `as String` cast, so null crashes it.
+  static bool _hasNonStringValue(YamlMap yaml, String key) =>
+      yaml.containsKey(key) && yaml[key] is! String;
+
+  /// Whether [yaml] gives [key] a value that is neither absent nor a string.
+  ///
+  /// Unlike [_hasNonStringValue] this accepts null. `dartFileName` is read with
+  /// `as String?` and falls back to `<plugin>.dart` when it is null, so an
+  /// empty `dartFileName:` is valid and has always worked; only a value of the
+  /// wrong type (`dartFileName: 123`) reaches the cast and crashes the tool.
+  static bool _hasNonNullNonStringValue(YamlMap yaml, String key) =>
+      yaml[key] != null && yaml[key] is! String;
+
   static List<String> _validateMultiPlatformYaml({required YamlMap parentMap}) {
     final Object? platforms = parentMap['platforms'];
     if (platforms is! YamlMap?) {
@@ -328,7 +345,17 @@ class Plugin {
       if (yamlValue is! YamlMap) {
         return true;
       }
-      if (yamlValue.containsKey('default_package')) {
+      // These entries are cast to String while the plugin is constructed, so a
+      // value of the wrong type has to be rejected here. Otherwise a malformed
+      // pubspec crashes the tool with a type error instead of reporting the
+      // bad specification. `dartFileName` is the one whose cast is nullable,
+      // so null is left alone for it and only a wrong-typed value is rejected.
+      if (_hasNonStringValue(yamlValue, kDefaultPackage) ||
+          _hasNonStringValue(yamlValue, kDartPluginClass) ||
+          _hasNonNullNonStringValue(yamlValue, kDartFileName)) {
+        return true;
+      }
+      if (yamlValue.containsKey(kDefaultPackage)) {
         return false;
       }
       return !validate(yamlValue);
@@ -349,11 +376,31 @@ class Plugin {
   }
 
   static List<String> _validateLegacyYaml(YamlMap yaml) {
+    final Object? androidPackage = yaml['androidPackage'];
+    final Object? iosPrefix = yaml['iosPrefix'];
+    final Object? pluginClass = yaml['pluginClass'];
+
+    // As in the `platforms:` format, every identifier is checked here: they are
+    // interpolated verbatim into the generated GeneratedPluginRegistrant source
+    // files, so anything that is not a plain identifier would let a (possibly
+    // transitive) dependency inject native code into the consuming app's build.
+    const identifierRequirement =
+        'must be a valid identifier, optionally with dot-separated segments';
+
     return <String>[
-      if (yaml['androidPackage'] is! String?)
-        'The "androidPackage" must either be null or a string.',
-      if (yaml['iosPrefix'] is! String?) 'The "iosPrefix" must either be null or a string.',
-      if (yaml['pluginClass'] is! String?) 'The "pluginClass" must either be null or a string.',
+      if (androidPackage is! String?)
+        'The "androidPackage" must either be null or a string.'
+      else if (androidPackage != null && !isValidPluginIdentifier(androidPackage))
+        'The "androidPackage" $identifierRequirement.',
+      if (iosPrefix is! String?)
+        'The "iosPrefix" must either be null or a string.'
+      // An empty prefix is the default for a legacy plugin that does not set one.
+      else if (iosPrefix != null && iosPrefix.isNotEmpty && !isValidPluginIdentifier(iosPrefix))
+        'The "iosPrefix" $identifierRequirement.',
+      if (pluginClass is! String?)
+        'The "pluginClass" must either be null or a string.'
+      else if (pluginClass != null && !isValidPluginIdentifier(pluginClass))
+        'The "pluginClass" $identifierRequirement.',
     ];
   }
 
@@ -389,6 +436,12 @@ class Plugin {
       final dartClass = (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
       final String dartFileName =
           (platformsYaml[platformKey] as YamlMap)[kDartFileName] as String? ?? '$pluginName.dart';
+      if (!isValidPluginDartFileName(dartFileName)) {
+        throwToolExit(
+          'The plugin `$pluginName` has an invalid `dartFileName` for platform `$platformKey` '
+          'in pubspec.yaml.',
+        );
+      }
       return (dartClass: dartClass, dartFileName: dartFileName);
     }
     return null;

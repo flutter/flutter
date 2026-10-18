@@ -79,6 +79,15 @@ Future<void> testMain() async {
     editingDeltaState = null;
     lastInputAction = null;
     cleanTextEditingStrategy();
+    // Tests in this file drive the global `textEditing` singleton via
+    // `TextInputShow`, which is a no-op while `isEditing` is already true.
+    // Nothing else here resets it: `cleanTextEditingStrategy` only disables the
+    // test-local strategy, and `clearBackUpDomElementIfExists` removes the DOM
+    // element without touching singleton state. Leaving it set makes the next
+    // test's `TextInputShow` silently do nothing.
+    if (textEditing.isEditing) {
+      textEditing.stopEditing();
+    }
     cleanTestFlags();
     clearBackUpDomElementIfExists();
     await waitForTextStrategyStopPropagation();
@@ -760,74 +769,211 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
+    // On iOS WebKit, a native caret or selection drag transiently blurs the
+    // hidden input with `relatedTarget == null` and refocuses it a frame later.
+    // The connection close is deferred so that refocus cancels it; otherwise the
+    // keyboard dismisses mid-drag.
+    // Regression test for https://github.com/flutter/flutter/issues/189744
+    test('keeps the text connection open on iOS when the input refocuses after a '
+        'null-relatedTarget blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
 
-    test(
-      'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
-      () async {
-        final spy = PlatformMessagesSpy();
-        spy.setUp();
+      textEditing.configuration = singlelineConfig;
 
-        textEditing.configuration = singlelineConfig;
-        editingStrategy!.debugDocumentHasFocusOverride = true;
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
 
-        final showCompleter = Completer<void>();
-        textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
-        await showCompleter.future;
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      // Pinned so a browser reporting the page hidden cannot make this pass for
+      // the wrong reason: the refocus is what must skip the close, not the
+      // visibility bail-out.
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'visible';
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      // The immediate refocus, as WebKit does mid-drag, must skip the close.
+      input.focusWithoutScroll();
+      // Focus is the one condition the deferral reads live, with no debug
+      // override, so assert it took effect before relying on it below.
+      expect(domDocument.activeElement, input);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
 
-        // The "setSizeAndTransform" message has to be here before we call
-        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
-        // we don't put the input element into the DOM until we get its correct
-        // dimensions from the framework.
-        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      spy.tearDown();
+    });
+
+    // The Done button and tapping away also blur with `relatedTarget == null`,
+    // but do not refocus, so the deferred close must still fire.
+    test('closes the text connection on iOS when the input is not refocused '
+        'after a null-relatedTarget blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      // Pin visibility as well. The deferred close bails out when the page
+      // reports hidden, and headless browsers disagree about what an offscreen
+      // test page reports, so leaving it unpinned makes the result depend on
+      // the host browser.
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'visible';
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      // The deferral bails out if the input regained focus, so assert the blur
+      // took effect. A browser that refocuses fails here with a clear message
+      // instead of an empty message list below.
+      expect(domDocument.activeElement, isNot(input));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), hasLength(1));
+
+      spy.tearDown();
+    });
+
+    // The deferral is iOS-only: elsewhere a null-relatedTarget blur closes
+    // immediately.
+    test('closes the text connection immediately off iOS on a null-relatedTarget '
+        'blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      expect(connectionClosedMessages(spy), hasLength(1));
+
+      spy.tearDown();
+    });
+
+    // If the page is backgrounded (a tab switch) after the deferred close is
+    // scheduled, the connection must stay open, matching the issue 155265 policy.
+    test('keeps the text connection open on iOS when the page hides before the '
+        'deferred close fires', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      // Blur without refocusing schedules the deferred close, then the page
+      // is hidden before it fires.
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'hidden';
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      spy.tearDown();
+    });
+
+    test('keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+      editingStrategy!.debugDocumentHasFocusOverride = true;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      textEditing.channel.handleTextInput(
+        codec.encodeMethodCall(setSizeAndTransform),
+        (ByteData? data) {},
+      );
+
+      expect(textEditing.isEditing, isTrue);
+
+      if (isFirefox || isSafari) {
+        expect(domDocument.activeElement, anyOf(textEditing.strategy.domElement, domDocument.body));
+      } else {
+        expect(domDocument.activeElement, textEditing.strategy.domElement);
+      }
+
+      final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.implicitView!;
+
+      flutterView.dom.rootElement.focusWithoutScroll();
+      expect(spy.messages, isEmpty);
+
+      if (isSafari) {
+        // In Safari the web engine does not respond to blur, so there's no
+        // expectation that the input element keep focus.
+        expect(domDocument.activeElement, flutterView.dom.rootElement);
+      } else if (isFirefox) {
+        // This is a mysterious behavior in Firefox. Even though the engine does
+        // call <input>.focus() the browser doesn't move focus to the target
+        // element. This only happens in the test harness. When testing
+        // manually, Firefox happily moves focus to the input element.
+        //
+        // We've seen cases in LUCI where Firefox behaves like Chrome (sets focus on the input
+        // element). But when running locally, we are seeing the wrong behavior explained in the
+        // comment above. To work around this, the test will accept both behaviors for now.
+        expect(
+          domDocument.activeElement,
+          anyOf(textEditing.strategy.domElement, flutterView.dom.rootElement),
         );
-        textEditing.channel.handleTextInput(
-          codec.encodeMethodCall(setSizeAndTransform),
-          (ByteData? data) {},
-        );
+      } else {
+        expect(domDocument.activeElement, textEditing.strategy.domElement);
+      }
 
-        expect(textEditing.isEditing, isTrue);
-
-        if (isFirefox || isSafari) {
-          expect(
-            domDocument.activeElement,
-            anyOf(textEditing.strategy.domElement, domDocument.body),
-          );
-        } else {
-          expect(domDocument.activeElement, textEditing.strategy.domElement);
-        }
-
-        final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.implicitView!;
-
-        flutterView.dom.rootElement.focusWithoutScroll();
-        expect(spy.messages, isEmpty);
-
-        if (isSafari) {
-          // In Safari the web engine does not respond to blur, so there's no
-          // expectation that the input element keep focus.
-          expect(domDocument.activeElement, flutterView.dom.rootElement);
-        } else if (isFirefox) {
-          // This is a mysterious behavior in Firefox. Even though the engine does
-          // call <input>.focus() the browser doesn't move focus to the target
-          // element. This only happens in the test harness. When testing
-          // manually, Firefox happily moves focus to the input element.
-          //
-          // We've seen cases in LUCI where Firefox behaves like Chrome (sets focus on the input
-          // element). But when running locally, we are seeing the wrong behavior explained in the
-          // comment above. To work around this, the test will accept both behaviors for now.
-          expect(
-            domDocument.activeElement,
-            anyOf(textEditing.strategy.domElement, flutterView.dom.rootElement),
-          );
-        } else {
-          expect(domDocument.activeElement, textEditing.strategy.domElement);
-        }
-
-        spy.tearDown();
-      },
-    );
+      spy.tearDown();
+    });
   });
 
   group('IOSTextEditingStrategy scrollIntoView for embedded scenarios', () {
@@ -1208,50 +1354,40 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     });
 
-    test(
-      'setClient, setEditingState, setSizeAndTransform, show - input element is put into the DOM Safari Desktop',
-      () async {
-        editingStrategy = SafariDesktopTextEditingStrategy(textEditing!);
-        textEditing!.debugTextEditingStrategyOverride = editingStrategy;
-        final setClient = MethodCall('TextInput.setClient', <dynamic>[
-          123,
-          flutterSinglelineConfig,
-        ]);
-        sendFrameworkMessage(codec.encodeMethodCall(setClient));
+    test('setClient, setEditingState, setSizeAndTransform, show - input element is put into the DOM Safari Desktop', () async {
+      editingStrategy = SafariDesktopTextEditingStrategy(textEditing!);
+      textEditing!.debugTextEditingStrategyOverride = editingStrategy;
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
-        const show = MethodCall('TextInput.show');
-        sendFrameworkMessage(codec.encodeMethodCall(show));
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
 
-        // Editing shouldn't have started yet.
-        expect(domDocument.activeElement, domDocument.body);
+      // Editing shouldn't have started yet.
+      expect(domDocument.activeElement, domDocument.body);
 
-        // The "setSizeAndTransform" message has to be here before we call
-        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
-        // we don't put the input element into the DOM until we get its correct
-        // dimensions from the framework.
-        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        );
-        sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
-        const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
-          'text': 'abcd',
-          'selectionBase': 2,
-          'selectionExtent': 3,
-          'composingBase': -1,
-          'composingExtent': -1,
-        });
-        sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
-        expect(
-          defaultTextEditingRoot.ownerDocument?.activeElement,
-          textEditing!.strategy.domElement,
-        );
-      },
-      skip: !isSafari,
-    );
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement, textEditing!.strategy.domElement);
+    }, skip: !isSafari);
 
     test('setClient, setEditingState, show, updateConfig, clearClient', () {
       final setClient = MethodCall('TextInput.setClient', <dynamic>[
@@ -1758,8 +1894,7 @@ Future<void> testMain() async {
       expect(
         domDocument.activeElement,
         implicitViewRootElement,
-        reason:
-            'Receiving another client via setClient should stop editing, hence should remove the previous active element.',
+        reason: 'Receiving another client via setClient should stop editing, hence should remove the previous active element.',
       );
 
       // Confirm that [HybridTextEditing] didn't send any messages.
@@ -1816,7 +1951,7 @@ Future<void> testMain() async {
 
     test('singleTextField Autofill: setClient, setEditingState, show, '
         'setSizeAndTransform, setEditingState, clearClient', () async {
-      // Create a configuration with focused element has autofil hint.
+      // Create a configuration with focused element has autofill hint.
       final Map<String, dynamic> flutterSingleAutofillElementConfig = createFlutterConfig(
         'text',
         autofillHint: 'username',
@@ -1869,7 +2004,7 @@ Future<void> testMain() async {
 
     test('singleTextField Autofill setEditableSizeAndTransform preserves'
         'editing state', () async {
-      // Create a configuration with focused element has autofil hint.
+      // Create a configuration with focused element has autofill hint.
       final Map<String, dynamic> flutterSingleAutofillElementConfig = createFlutterConfig(
         'text',
         autofillHint: 'username',
@@ -1992,6 +2127,181 @@ Future<void> testMain() async {
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
       expect(dormantForms, hasLength(1));
+    });
+
+    test('TextInput.updateConfig preserves active autofill form', () async {
+      final Map<String, dynamic> initialConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+        autofillHintsForFields: <String>['username', 'password'],
+        obscureText: true,
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, initialConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'secret',
+        'selectionBase': 6,
+        'selectionExtent': 6,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.identity().storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+      expect(strategy.appendedToForm, isTrue);
+
+      final EngineAutofillForm originalAutofillGroup = strategy.inputConfiguration.autofillGroup!;
+      final DomHTMLFormElement originalForm = originalAutofillGroup.formElement!;
+      final DomHTMLElement activeElement = strategy.activeDomElement;
+
+      expect(originalForm.contains(activeElement), isTrue);
+
+      // Simulates toggling obscureText (TextInput.updateConfig only describes
+      // the focused field, omitting 'fields').
+      final Map<String, dynamic> updatedConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+      );
+      final updateConfig = MethodCall('TextInput.updateConfig', updatedConfig);
+      sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
+
+      final EngineAutofillForm updatedAutofillGroup = strategy.inputConfiguration.autofillGroup!;
+      expect(updatedAutofillGroup, same(originalAutofillGroup));
+      expect(updatedAutofillGroup.formElement, same(originalForm));
+      expect(originalForm.contains(activeElement), isTrue);
+
+      const clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+
+      // The form must go dormant rather than having the DOM element removed.
+      expect(dormantForms, hasLength(1));
+      expect(dormantForms.values.single.formElement, same(originalForm));
+      expect(originalForm.isConnected, isTrue);
+    });
+
+    test(
+      'singleTextField Autofill: TextInput.updateConfig preserves form and allows dormancy',
+      () async {
+        final Map<String, dynamic> initialConfig = createFlutterConfig(
+          'text',
+          autofillHint: 'password',
+          obscureText: true,
+        );
+        final setClient = MethodCall('TextInput.setClient', <dynamic>[123, initialConfig]);
+        sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+        const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+          'text': 'secret',
+          'selectionBase': 6,
+          'selectionExtent': 6,
+          'composingBase': -1,
+          'composingExtent': -1,
+        });
+        sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+        const show = MethodCall('TextInput.show');
+        sendFrameworkMessage(codec.encodeMethodCall(show));
+
+        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.identity().storage.toList(),
+        );
+        sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+        final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+        expect(strategy.appendedToForm, isTrue);
+
+        final DomHTMLFormElement originalForm = strategy.focusedFormElement!;
+        expect(originalForm.contains(strategy.activeDomElement), isTrue);
+
+        // Toggle obscureText
+        final Map<String, dynamic> updatedConfig = createFlutterConfig(
+          'text',
+          autofillHint: 'password',
+        );
+        final updateConfig = MethodCall('TextInput.updateConfig', updatedConfig);
+        sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
+
+        expect(strategy.focusedFormElement, same(originalForm));
+
+        const clearClient = MethodCall('TextInput.clearClient');
+        sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+
+        expect(dormantForms, hasLength(1));
+        expect(dormantForms.values.single.formElement, same(originalForm));
+        expect(originalForm.isConnected, isTrue);
+      },
+    );
+
+    test('autofill form remains reusable after TextInput.updateConfig', () async {
+      final Map<String, dynamic> initialConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+        autofillHintsForFields: <String>['username', 'password'],
+        obscureText: true,
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, initialConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.identity().storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+      final DomHTMLFormElement form = strategy.focusedFormElement!;
+
+      // Toggle obscureText
+      final Map<String, dynamic> updatedConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+      );
+      final updateConfig = MethodCall('TextInput.updateConfig', updatedConfig);
+      sendFrameworkMessage(codec.encodeMethodCall(updateConfig));
+
+      // Blur
+      const clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+      expect(dormantForms, hasLength(1));
+
+      // Refocus the same field with its full autofill configuration.
+      final Map<String, dynamic> reconnectConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'password',
+        autofillHintsForFields: <String>['username', 'password'],
+      );
+      final setClientAgain = MethodCall('TextInput.setClient', <dynamic>[124, reconnectConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClientAgain));
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      // The dormant form is revived and reused.
+      expect(dormantForms, hasLength(1));
+      expect(strategy.focusedFormElement, same(form));
+      expect(form.contains(strategy.activeDomElement), isTrue);
+      expect(form.isConnected, isTrue);
+
+      const finishAutofillContext = MethodCall('TextInput.finishAutofillContext', false);
+      sendFrameworkMessage(codec.encodeMethodCall(finishAutofillContext));
+      expect(dormantForms, isEmpty);
+      expect(form.isConnected, isFalse);
     });
 
     test('No capitalization: setClient, setEditingState, show', () {
@@ -3395,65 +3705,68 @@ Future<void> testMain() async {
       clearForms();
     });
 
-    test('keeps connection open across a transient autofill blur, closes on genuine unfocus', () async {
-      // Password managers and browser autofill popups blur the hidden input
-      // (with a null relatedTarget) while the page keeps focus, then hand focus
-      // back to fill the field. For an autofill field that re-focus must cancel
-      // the pending close, or the autofilled value is dropped.
+    test(
+      'keeps connection open across a transient autofill blur, closes on genuine unfocus',
+      () async {
+        // Password managers and browser autofill popups blur the hidden input
+        // (with a null relatedTarget) while the page keeps focus, then hand focus
+        // back to fill the field. For an autofill field that re-focus must cancel
+        // the pending close, or the autofilled value is dropped.
 
-      final config = createFlutterConfig(
-        'text',
-        autofillHint: 'email',
-        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
-      );
-      void send(MethodCall call) =>
-          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
+        final config = createFlutterConfig(
+          'text',
+          autofillHint: 'email',
+          autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+        );
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+        send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+        send(
+          configureSetSizeAndTransformMethodCall(
+            150,
+            50,
+            Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+          ),
+        );
+        send(const MethodCall('TextInput.show'));
 
-      expect(textEditing!.isEditing, isTrue);
+        expect(textEditing!.isEditing, isTrue);
 
-      final strategy = textEditing!.strategy;
-      strategy.debugDocumentHasFocusOverride = true;
-      strategy.debugDocumentVisibilityStateOverride = 'visible';
+        final strategy = textEditing!.strategy;
+        strategy.debugDocumentHasFocusOverride = true;
+        strategy.debugDocumentVisibilityStateOverride = 'visible';
 
-      // The popup takes focus: the field blurs while the page keeps focus.
-      strategy.handleBlur(createDomEvent('Event', 'blur'));
+        // The popup takes focus: the field blurs while the page keeps focus.
+        strategy.handleBlur(createDomEvent('Event', 'blur'));
 
-      // The close is deferred, never synchronous.
-      expect(connectionClosedMessages(spy), isEmpty);
+        // The close is deferred, never synchronous.
+        expect(connectionClosedMessages(spy), isEmpty);
 
-      // The browser hands focus back to the field to autofill it.
-      strategy.handleFocus(createDomEvent('Event', 'focus'));
+        // The browser hands focus back to the field to autofill it.
+        strategy.handleFocus(createDomEvent('Event', 'focus'));
 
-      await Future<void>.delayed(const Duration(milliseconds: 150));
+        await Future<void>.delayed(const Duration(milliseconds: 150));
 
-      // The re-focus cancelled the close, so the connection stays open.
-      expect(connectionClosedMessages(spy), isEmpty);
-      expect(textEditing!.isEditing, isTrue);
+        // The re-focus cancelled the close, so the connection stays open.
+        expect(connectionClosedMessages(spy), isEmpty);
+        expect(textEditing!.isEditing, isTrue);
 
-      strategy.debugDocumentHasFocusOverride = null;
-      strategy.debugDocumentVisibilityStateOverride = null;
+        strategy.debugDocumentHasFocusOverride = null;
+        strategy.debugDocumentVisibilityStateOverride = null;
 
-      // A genuine unfocus (the framework closes the connection) must actually
-      // tear the engine half down: the form goes dormant and the hidden input
-      // releases DOM focus, so the soft keyboard dismisses and physical
-      // keystrokes stop reaching the old field.
-      final DomHTMLElement? input = textEditing!.strategy.domElement;
-      send(const MethodCall('TextInput.clearClient'));
-      expect(textEditing!.isEditing, isFalse);
-      expect(dormantForms, hasLength(1));
-      // The DOM focus handoff (safeBlur) is asynchronous.
-      await Future<void>.delayed(Duration.zero);
-      expect(domDocument.activeElement, isNot(input));
-    });
+        // A genuine unfocus (the framework closes the connection) must actually
+        // tear the engine half down: the form goes dormant and the hidden input
+        // releases DOM focus, so the soft keyboard dismisses and physical
+        // keystrokes stop reaching the old field.
+        final DomHTMLElement? input = textEditing!.strategy.domElement;
+        send(const MethodCall('TextInput.clearClient'));
+        expect(textEditing!.isEditing, isFalse);
+        expect(dormantForms, hasLength(1));
+        // The DOM focus handoff (safeBlur) is asynchronous.
+        await Future<void>.delayed(Duration.zero);
+        expect(domDocument.activeElement, isNot(input));
+      },
+    );
 
     test('keeps connection open for an autofill field that blurs without refocus', () async {
       final config = createFlutterConfig(
@@ -4158,6 +4471,45 @@ Future<void> testMain() async {
       expect(inputElement.className, 'submitBtn');
     });
 
+    test('non-focused fields are hidden from assistive technology only in semantics mode', () {
+      // With semantics on, each field has a real semantics node and the proxy is
+      // a duplicate that a screen reader should skip. With semantics off the
+      // proxy is the only representation of the field, and a password manager
+      // rejects an aria-hidden input outright, so it must not be hidden there.
+      final List<Map<String, Object?>> fields = createFieldValues(
+        <String>['email', 'username', 'password'],
+        <String>['field1', 'field2', 'field3'],
+      );
+      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        emailAutofillMap,
+        fields,
+      )!;
+      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+
+      EngineSemantics.instance.semanticsEnabled = true;
+      addTearDown(() {
+        EngineSemantics.instance.semanticsEnabled = false;
+      });
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+
+      final formChildNodes =
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+      expect(formChildNodes[0], emailFocusedElement);
+      expect(formChildNodes[0].getAttribute('aria-hidden'), isNull);
+      expect(formChildNodes[1].getAttribute('aria-hidden'), 'true');
+      expect(formChildNodes[2].getAttribute('aria-hidden'), 'true');
+
+      // The proxies are reused for the life of the form, so waking it again
+      // with semantics off clears the attribute and they are candidates again.
+      EngineSemantics.instance.semanticsEnabled = false;
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+      expect(formChildNodes[1].getAttribute('aria-hidden'), isNull);
+      expect(formChildNodes[2].getAttribute('aria-hidden'), isNull);
+    });
+
     test('Return null if no focused element', () {
       final List<dynamic> fields = createFieldValues(<String>['username'], <String>['field1']);
       final EngineAutofillForm? autofillForm = EngineAutofillForm.fromFrameworkMessage(
@@ -4259,58 +4611,62 @@ Future<void> testMain() async {
       );
     });
 
-    test('non-focused autofill fields are discoverable but non-interactive on non-Safari browsers', () {
-      final List<Map<String, Object?>> fields = createFieldValues(
-        <String>['email', 'username', 'password'],
-        <String>['field1', 'field2', 'field3'],
-      );
-      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
-      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
-        kImplicitViewId,
-        emailAutofillMap,
-        fields,
-      )!;
+    test(
+      'non-focused autofill fields are discoverable but non-interactive on non-Safari browsers',
+      () {
+        final List<Map<String, Object?>> fields = createFieldValues(
+          <String>['email', 'username', 'password'],
+          <String>['field1', 'field2', 'field3'],
+        );
+        final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          emailAutofillMap,
+          fields,
+        )!;
 
-      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
-      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
-      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+        final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+        final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+        autofillForm.wakeUp(emailFocusedElement, emailAutofill);
 
-      final formChildNodes =
-          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
-      final DomHTMLInputElement email = formChildNodes[0];
-      final DomHTMLInputElement username = formChildNodes[1];
-      final DomHTMLInputElement password = formChildNodes[2];
+        final formChildNodes =
+            autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+        final DomHTMLInputElement email = formChildNodes[0];
+        final DomHTMLInputElement username = formChildNodes[1];
+        final DomHTMLInputElement password = formChildNodes[2];
 
-      expect(username.name, 'username');
-      expect(password.name, 'current-password');
-      // Non-focused autofill fields are kept discoverable: a non-zero size,
-      // positioned next to the focused field, and taking part in hit testing.
-      // A password manager only fills a field whose own centre point hit-tests
-      // back to it, so a field excluded from hit testing is one it will not
-      // fill, and a login form can never be filled as a pair. Pointer input on
-      // them is swallowed instead (see the pointerdown/mousedown listeners),
-      // which keeps taps meant for the app from landing on an invisible field.
-      expect(username.style.width, isNot('0px'));
-      expect(username.style.height, isNot('0px'));
-      expect(username.style.pointerEvents, isSafari ? 'none' : 'all');
-      expect(password.style.width, isNot('0px'));
-      expect(password.style.height, isNot('0px'));
-      expect(password.style.pointerEvents, isSafari ? 'none' : 'all');
-      expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
-      // They are also removed from the tab order, so keyboard Tab does not land
-      // on the invisible fields, while the focused field stays reachable.
-      expect(username.tabIndex, -1);
-      expect(password.tabIndex, -1);
-      // With semantics off there is no other representation of these fields, so
-      // they are not hidden from assistive technology either: a password
-      // manager rejects an aria-hidden input outright, and a field it never
-      // considers is a field it never fills. Semantics mode, where the field
-      // does have a real semantics node, hides them instead.
-      expect(EngineSemantics.instance.semanticsEnabled, isFalse);
-      expect(username.getAttribute('aria-hidden'), isNull);
-      expect(password.getAttribute('aria-hidden'), isNull);
-      expect(email.getAttribute('aria-hidden'), isNull);
-    }, skip: isSafari);
+        expect(username.name, 'username');
+        expect(password.name, 'current-password');
+        // Non-focused autofill fields are kept discoverable: a non-zero size,
+        // positioned next to the focused field, and taking part in hit testing.
+        // A password manager only fills a field whose own centre point hit-tests
+        // back to it, so a field excluded from hit testing is one it will not
+        // fill, and a login form can never be filled as a pair. Pointer input on
+        // them is swallowed instead (see the pointerdown/mousedown listeners),
+        // which keeps taps meant for the app from landing on an invisible field.
+        expect(username.style.width, isNot('0px'));
+        expect(username.style.height, isNot('0px'));
+        expect(username.style.pointerEvents, isSafari ? 'none' : 'all');
+        expect(password.style.width, isNot('0px'));
+        expect(password.style.height, isNot('0px'));
+        expect(password.style.pointerEvents, isSafari ? 'none' : 'all');
+        expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
+        // They are also removed from the tab order, so keyboard Tab does not land
+        // on the invisible fields, while the focused field stays reachable.
+        expect(username.tabIndex, -1);
+        expect(password.tabIndex, -1);
+        // With semantics off there is no other representation of these fields, so
+        // they are not hidden from assistive technology either: a password
+        // manager rejects an aria-hidden input outright, and a field it never
+        // considers is a field it never fills. Semantics mode, where the field
+        // does have a real semantics node, hides them instead.
+        expect(EngineSemantics.instance.semanticsEnabled, isFalse);
+        expect(username.getAttribute('aria-hidden'), isNull);
+        expect(password.getAttribute('aria-hidden'), isNull);
+        expect(email.getAttribute('aria-hidden'), isNull);
+      },
+      skip: isSafari,
+    );
 
     test('hidden autofill elements should not have a width and height of 0 on Safari', () {
       final List<Map<String, Object?>> fields = createFieldValues(
@@ -4937,9 +5293,12 @@ Future<void> testMain() async {
 
       expect(input.style.color, contains('transparent'));
       if (isSafari) {
-        // macOS 13 returns different values than macOS 12.
+        // macOS 13+ / 26 returns different values than macOS 12.
         expect(input.style.background, anyOf(contains('transparent'), contains('none')));
-        expect(input.style.outline, anyOf(contains('none'), contains('currentcolor')));
+        expect(
+          input.style.outline,
+          anyOf(contains('none'), contains('currentcolor'), contains('medium')),
+        );
         expect(input.style.border, anyOf(contains('none'), contains('medium')));
       } else {
         expect(input.style.background, contains('transparent'));
@@ -5023,6 +5382,9 @@ void cleanTextEditingStrategy() {
 void cleanTestFlags() {
   ui_web.browser.debugBrowserEngineOverride = null;
   ui_web.browser.debugOperatingSystemOverride = null;
+  debugEmulateIosSafari = false;
+  textEditing.strategy.debugDocumentHasFocusOverride = null;
+  textEditing.strategy.debugDocumentVisibilityStateOverride = null;
 }
 
 void checkInputEditingState(DomElement? element, String text, int start, int end) {

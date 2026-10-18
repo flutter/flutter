@@ -63,11 +63,11 @@ class FrameTiming {
 
  private:
   fml::TimePoint data_[kCount];
-  uint64_t frame_number_;
-  size_t layer_cache_count_;
-  size_t layer_cache_bytes_;
-  size_t picture_cache_count_;
-  size_t picture_cache_bytes_;
+  uint64_t frame_number_ = 0;
+  size_t layer_cache_count_ = 0;
+  size_t layer_cache_bytes_ = 0;
+  size_t picture_cache_count_ = 0;
+  size_t picture_cache_bytes_ = 0;
 };
 
 using TaskObserverAdd =
@@ -160,7 +160,6 @@ struct Settings {
   bool enable_dart_profiling = false;
   bool profile_startup = false;
   bool disable_dart_asserts = false;
-  bool enable_serial_gc = false;
   bool profile_microtasks = false;
 
   // Whether embedder only allows secure connections.
@@ -243,6 +242,14 @@ struct Settings {
 
   // Whether to use SDFs for rendering in Impeller.
   bool impeller_use_sdfs = false;
+
+  // Whether the origin of the default framebuffer (framebuffer 0) is the
+  // top-left of the window rather than OpenGL's usual bottom-left.
+  //
+  // Set by embedders whose window surface is created with an inverted Y axis,
+  // such as ANGLE's EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE. Only meaningful
+  // for OpenGL ES backends.
+  bool impeller_top_left_default_framebuffer_origin = false;
 
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;

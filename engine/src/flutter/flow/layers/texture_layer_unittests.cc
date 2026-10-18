@@ -144,6 +144,7 @@ TEST_F(TextureLayerTest, OpacityInheritance) {
             LayerStateStack::kCallerCanApplyOpacity);
 
   DlPaint texture_paint;
+  texture_paint.setAntiAlias(false);
   texture_paint.setAlpha(alpha);
 
   layer->Paint(display_list_paint_context());

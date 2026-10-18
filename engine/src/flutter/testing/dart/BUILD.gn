@@ -48,7 +48,6 @@ tests = [
   "plugin_utilities_test.dart",
   "process_test.dart",
   "semantics_test.dart",
-  "serial_gc_test.dart",
   "spawn_helper.dart",
   "spawn_test.dart",
   "stringification_test.dart",
@@ -61,6 +60,7 @@ foreach(test, tests) {
   flutter_build_dir = rebase_path("$root_gen_dir")
   flutter_src_dir = rebase_path("//flutter")
   skia_gold_work_dir = rebase_path("$root_gen_dir/skia_gold_$test")
+
   flutter_frontend_server("compile_$test") {
     main_dart = test
     kernel_output = "$root_gen_dir/$test.dill"

@@ -43,14 +43,12 @@ TEST(FlutterGpuCommandBufferTest,
   EXPECT_CALL(*context, GetBackendType)
       .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
-  EXPECT_CALL(*command_queue, Submit(_, _, _))
+  EXPECT_CALL(*command_queue, Submit(_, _))
       .WillOnce(DoAll(
           [](const std::vector<std::shared_ptr<impeller::CommandBuffer>>&
                  buffers,
-             const impeller::CommandQueue::CompletionCallback& callback,
-             bool block_on_schedule) {
+             const impeller::CommandQueue::CompletionCallback& callback) {
             EXPECT_EQ(buffers.size(), 1u);
-            EXPECT_FALSE(block_on_schedule);
             callback(impeller::CommandBuffer::Status::kCompleted);
           },
           Return(fml::Status())));
@@ -74,7 +72,7 @@ TEST(FlutterGpuCommandBufferTest, RejectsCompletionCallbacksAfterSubmit) {
   EXPECT_CALL(*context, GetBackendType)
       .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
-  EXPECT_CALL(*command_queue, Submit(_, _, _)).WillOnce(Return(fml::Status()));
+  EXPECT_CALL(*command_queue, Submit(_, _)).WillOnce(Return(fml::Status()));
 
   EXPECT_TRUE(command_buffer.Submit());
   EXPECT_FALSE(command_buffer.AddCompletionCallback(
@@ -99,7 +97,7 @@ TEST(FlutterGpuCommandBufferTest,
   EXPECT_CALL(*context, GetBackendType)
       .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
-  EXPECT_CALL(*command_queue, Submit(_, _, _))
+  EXPECT_CALL(*command_queue, Submit(_, _))
       .WillOnce(Return(fml::Status(fml::StatusCode::kInternal,
                                    "Command queue submit failed.")));
 
