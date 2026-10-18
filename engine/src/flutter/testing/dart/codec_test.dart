@@ -145,8 +145,10 @@ void main() {
         targetHeight: targetHeight,
       );
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      final size = <int>[frameInfo.image.width, frameInfo.image.height];
+      frameInfo.image.dispose();
       codec.dispose();
-      return <int>[frameInfo.image.width, frameInfo.image.height];
+      return size;
     }
 
     expect(await decode(4000, 1, targetWidth: 100), <int>[100, 1]);
