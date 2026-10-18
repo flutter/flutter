@@ -278,6 +278,13 @@ class MaterialApp extends StatefulWidget {
   /// Creates a [MaterialApp] that uses the [Router] instead of a [Navigator].
   ///
   /// {@macro flutter.widgets.WidgetsApp.router}
+  ///
+  /// {@tool dartpad}
+  /// This sample shows a [MaterialApp.router] whose [RouterDelegate] and
+  /// [RouteInformationParser] navigate between a home page and a details page.
+  ///
+  /// ** See code in examples/api/lib/material/app/material_app.router.0.dart **
+  /// {@end-tool}
   const MaterialApp.router({
     super.key,
     this.scaffoldMessengerKey,
