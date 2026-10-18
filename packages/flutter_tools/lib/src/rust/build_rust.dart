@@ -150,8 +150,8 @@ Future<File> buildRust(
 }
 
 /// Copies `flutter_assets` and `icudtl.dat` into `<runner dir>/data/`, and the
-/// engine and native plugin libraries into `<runner dir>/lib/`, so the runner
-/// finds them relative to its own executable (build.rs adds `$ORIGIN/lib` to
+/// engine and native plugin libraries into `<runner dir>/libs/`, so the runner
+/// finds them relative to its own executable (build.rs adds `$ORIGIN/libs` to
 /// its rpath) without being passed an assets path.
 void _bundleDataNextToRunner(
   File runnerBinary,
@@ -169,7 +169,13 @@ void _bundleDataNextToRunner(
   if (icu.existsSync()) {
     icu.copySync(dataDir.childFile('icudtl.dat').path);
   }
-  final Directory libDir = runnerBinary.parent.childDirectory('lib')..createSync(recursive: true);
+  // Earlier tool versions used `lib/`, which some plugins treat as a bundled
+  // third-party library directory; remove what we put there.
+  final Directory legacyLibDir = runnerBinary.parent.childDirectory('lib');
+  if (legacyLibDir.existsSync()) {
+    legacyLibDir.deleteSync(recursive: true);
+  }
+  final Directory libDir = runnerBinary.parent.childDirectory('libs')..createSync(recursive: true);
   final File engine = sdkLibDir.childFile('libflutter_rust_engine.so');
   if (engine.existsSync()) {
     engine.copySync(libDir.childFile(engine.basename).path);

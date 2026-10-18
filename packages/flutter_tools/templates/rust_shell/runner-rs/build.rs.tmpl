@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// flutter-rust-runner-version: 3
+// flutter-rust-runner-version: 4
 
 use std::{env, path::PathBuf};
 
@@ -22,13 +22,15 @@ fn main() {
     println!("cargo:rerun-if-changed={}", engine_library.display());
     println!("cargo:rustc-link-search=native={}", engine_dir.display());
     println!("cargo:rustc-link-lib=dylib=flutter_rust_engine");
-    // `$ORIGIN/lib` first so a bundle produced by `flutter build rust`
-    // (engine and native plugin libraries copied into `<exe dir>/lib`) is
+    // `$ORIGIN/libs` first so a bundle produced by `flutter build rust`
+    // (engine and native plugin libraries copied into `<exe dir>/libs`; not
+    // `lib/`, which plugins such as GStreamer wrappers treat as a bundled
+    // third-party library directory) is
     // relocatable; the absolute engine path remains as the in-tree fallback.
     // --disable-new-dtags emits DT_RPATH rather than DT_RUNPATH, so the path
     // also applies to libraries the engine/Dart FFI dlopens by bare name.
     println!("cargo:rustc-link-arg=-Wl,--disable-new-dtags");
-    println!("cargo:rustc-link-arg=-Wl,-rpath,$ORIGIN/lib");
+    println!("cargo:rustc-link-arg=-Wl,-rpath,$ORIGIN/libs");
     println!("cargo:rustc-link-arg=-Wl,-rpath,{}", engine_dir.display());
     println!("cargo:rustc-link-arg=-Wl,--export-dynamic");
     println!("cargo::rustc-env=FLUTTER_RS_PROFILE={profile}");

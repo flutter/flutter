@@ -22,7 +22,7 @@ const rustPluginDependenciesEnd = '# === END FLUTTER GENERATED RUST PLUGINS ==='
 
 /// Version of the tool-owned runner files generated from `templates/rust_shell`.
 /// Keep in sync with the `flutter-rust-runner-version` marker in the templates.
-const rustRunnerVersion = 3;
+const rustRunnerVersion = 4;
 const _rustRunnerVersionMarker = '// flutter-rust-runner-version: ';
 const _rustShellBundleUrl =
     'https://github.com/nrbnlulu/flutter/releases/download/BETA/flutter-rust-linux-x64.tar.gz';

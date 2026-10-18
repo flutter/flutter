@@ -2927,10 +2927,6 @@ impl TaskRunnerHost {
         self.queue.lock().take_due(now)
     }
 
-    pub fn is_destroyed(&self) -> bool {
-        self.destroyed.load(Ordering::Acquire)
-    }
-
     /// The opaque C++ task runner handle installed by
     /// `install_cpp_task_runner`. Used as the merged Flutter
     /// UI/platform task runner when creating the Rust shell.
