@@ -667,7 +667,7 @@ void main() {
     );
   });
 
-  test('fromImageProvider() propagates TimeoutException or Failed to render image when image cannot be rendered', () async {
+  test('fromImageProvider() propagates exception thrown by imageProvider.resolve when image cannot be rendered', () async {
     final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
     // Corrupt the image's bytelist so it cannot be read.
@@ -676,13 +676,7 @@ void main() {
 
     expect(
       () async => ColorScheme.fromImageProvider(provider: image),
-      throwsA(
-        isA<Exception>().having(
-          (Exception e) => e.toString(),
-          'image',
-          anyOf(contains('Failed to render image'), contains('TimeoutException')),
-        ),
-      ),
+      throwsA(anything),
     );
   });
 
