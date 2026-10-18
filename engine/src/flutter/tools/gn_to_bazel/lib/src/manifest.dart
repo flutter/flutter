@@ -111,29 +111,15 @@ exports_files([
   ConvertedFile('//flutter/benchmarking'),
   // font-subset, the SDK's font subsetting tool (run_tests.py --type
   // font-subset runs its test.py against the built binary and its
-  // archive). GN's zip_bundle is artifact packaging the converter does not
-  // read yet; the archive the test checks is written by hand below with
-  // the same template's Bazel side, and the entitlements list is the macOS
-  // bundle's.
+  // archive, GN's zip_bundle). The entitlements list is the macOS bundle's.
   ConvertedFile(
     '//flutter/tools/font_subset',
     skip: <String, String>{
       'font_entitlement_config':
           'generated_file over metadata: the entitlements list of the macOS bundle',
-      'font_subset': 'zip_bundle: artifact packaging (written by hand below)',
     },
     appendix: '''
 load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
-load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
-
-# GN's zip_bundle("font_subset") -- the binary in
-# `<full_target_platform_name>/font-subset.zip` -- for this host, until the
-# converter reads the template: the archive test.py checks.
-zip_bundle(
-    name = "font_subset",
-    files = {"font-subset": ":font-subset"},
-    output = "linux-x64/font-subset.zip",
-)
 
 # run_tests.py --type font-subset: `python3 test.py --variant <build
 # directory>` from this directory, against the binary and the archive at
@@ -231,11 +217,7 @@ filegroup(
   // (complete_static_lib) Bazel's cc_library does not stand for.
   ConvertedFile(
     '//flutter/impeller/toolkit/interop',
-    skip: <String, String>{
-      'sdk': 'zip_bundle: artifact packaging',
-      'static_library': 'complete_static_lib: an artifact of the GN build',
-      'example_mtl': 'Objective-C and Metal: macOS',
-    },
+    skip: <String, String>{'example_mtl': 'Objective-C and Metal: macOS'},
   ),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend'),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/gles'),
@@ -488,18 +470,10 @@ filegroup(
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
   ConvertedFile('//flutter/shell/common'),
-  // The embedder API: its libraries, its shared library and its three suites.
-  // What stays out is the artifact side -- the header copied into the build
-  // root, the group and the zip bundle CI archives -- which is a later
-  // phase's (the Linux artifacts).
-  ConvertedFile(
-    '//flutter/shell/platform/embedder',
-    skip: <String, String>{
-      'copy_headers': 'the artifact copy into the build root, a later phase',
-      'flutter_engine': 'the artifact group, a later phase',
-      'embedder-archive': 'zip_bundle: artifact packaging, a later phase',
-    },
-  ),
+  // The embedder API: its libraries, its shared library and its three suites,
+  // and its artifact side -- the header copied into the build root, the
+  // group over it and the library, the CI archive (linux-x64-embedder.zip).
+  ConvertedFile('//flutter/shell/platform/embedder'),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia

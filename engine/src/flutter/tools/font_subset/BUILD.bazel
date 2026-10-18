@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/tools/font_subset/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: font_entitlement_config, font_subset.
+# Not converted: font_entitlement_config.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
@@ -31,17 +31,14 @@ alias(
     actual = ":font-subset",
 )
 
-# What GN has no words for; maintained in the converter's manifest
-# (tools/gn_to_bazel/lib/src/manifest.dart).
-
-# GN's zip_bundle("font_subset") -- the binary in
-# `<full_target_platform_name>/font-subset.zip` -- for this host, until the
-# converter reads the template: the archive test.py checks.
 zip_bundle(
     name = "font_subset",
-    files = {"font-subset": ":font-subset"},
+    files = {"font-subset": ":_font-subset"},
     output = "linux-x64/font-subset.zip",
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
 
 # run_tests.py --type font-subset: `python3 test.py --variant <build
 # directory>` from this directory, against the binary and the archive at

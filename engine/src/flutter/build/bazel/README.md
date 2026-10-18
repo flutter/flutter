@@ -652,15 +652,8 @@ package's generated file holds three things. The binary, `cc_binary("font-subset
 with `alias("_font-subset")`: GN's target `_font-subset` produces
 `font-subset` through `output_name`, and a `cc_binary`'s file is its name, so
 the converter names the rule after the file and aliases the GN name, as it
-does for shared libraries. The archive, `zip_bundle("font_subset")`
-(`zip_bundle.bzl`): GN's `zip_bundle` template -- `build/zip.py` over
-`{ source, destination }` pairs, a generated `LICENSE.<target>.md` first in
-every archive, the result under `zip_archives/` -- under Bazel runs the same
-script under the synced Python (`@cpython3`) with the readme written from
-`@engine_version`'s version; the converter does not read the template yet
-(its `files` are scopes, its sources `$root_build_dir` paths), so the GN
-target is skipped and the rule written in the manifest's appendix for this
-host's `linux-x64`, which is the artifact phase's to replace. The test,
+does for shared libraries. The archive, `zip_bundle("font_subset")`, GN's
+`zip_bundle` converted (below). The test,
 `checkout_script_test("font_subset_test")` (`checkout_script_test.bzl`):
 `test.py` run under `@cpython3` from its own directory in a writable view of
 the checkout-shaped runfiles tree (`checkout_view.bzl`, shared with
@@ -668,6 +661,56 @@ the checkout-shaped runfiles tree (`checkout_view.bzl`, shared with
 archive at their places under `engine/src/out/<variant>` and the variant's
 name -- GN's build directory name for the mode -- substituted for
 `{variant}` in the script's arguments. 33 invocations, as in the checkout.
+
+## The archives CI uploads: `zip_bundle`
+
+Every artifact a Linux host builder uploads is a `zip_bundle`
+(`build/zip_bundle.gni`): `build/zip.py` over `{ source, destination }`
+scopes, a generated `LICENSE.<target>.md` first in every archive, the result
+at `$root_build_dir/zip_archives/<output>`. `ci/host_debug` uploads
+`dart-sdk-linux-x64.zip`, `flutter_patched_sdk.zip`, `linux-x64/artifacts.zip`,
+`linux-x64/font-subset.zip`, `linux-x64/impeller_sdk.zip` and
+`linux-x64/linux-x64-embedder.zip`; `ci/host_release`,
+`flutter_patched_sdk_product.zip`.
+
+`zip_bundle.bzl` is the template's Bazel side: the same script under the
+synced Python (`@cpython3`, through `zip_bundle.py`, which resolves the
+sandbox's input symlinks to the files they name -- `zip.py` keeps a symlink
+as a symlink entry), the readme written from `@engine_version`'s version
+byte for byte (its title is the nested `generated_file`'s name,
+`_<bundle>_license_md`, as GN evaluates `target_name` there), the archive at
+`zip_archives/<output>` under the package. The converter maps the template
+(`templateMappings['zip_bundle']`): `files` becomes a dictionary of
+destination to the label of the file placed there, each entry under its
+condition (`{...} | select({...})`, which Bazel merges); `output` is the
+string GN computes, with `full_target_platform_name` and its kin assumed as
+the Linux x64 host's (`linux-x64`), like every other platform variable in
+the generated files. A source that is a file of the tree is its label; one
+under the build directory (`$root_build_dir/impellerc`,
+`$root_out_dir/flutter_embedder.h`) is resolved to the target that produces
+it -- an executable by its `output_name` or name, a shared library by
+`lib<name>.so`, a complete static library by `lib<name>.a`, a `copy()` by its
+`outputs` (the copy itself when it is the one file: `copy_headers`, a copy of
+`embedder.h` into the build root, converts as a `gn_copy` whose file travels
+as it is) -- among the targets of the same file first, then of the files
+the bundle's `deps` name (evaluated on demand, `dependency_resolver.dart`),
+then `buildOutputLabels` for what the wrapped trees produce. The bundle's
+helpers (`exe`, `prefix`, `zip_out_dir`) are told from its arguments by
+being read in their own block (`GnTarget.readVariables`). GN's
+`complete_static_lib` -- the Impeller SDK's `libimpeller.a`, every object of
+the closure in one archive -- is `cc_static_library` (behind
+`--experimental_cc_static_library` in Bazel 8; `.bazelrc`), named after the
+`output_name` with an alias under the GN name.
+
+Converted so far: `font-subset.zip`, `linux-x64-embedder.zip` and
+`impeller_sdk.zip`, each with GN's entries in GN's order and the readme
+identical modulo the version hash. Not yet: `build/archives`
+(`artifacts.zip`, the patched SDK, the Dart SDK: `$root_out_dir` sources
+from the wrapped trees, a source directory, a conditional destination), and
+the GTK shell's bundle (a `foreach` over `get_target_outputs`: a tree of
+files at their build-directory paths), which are the artifact phase's next
+steps; `generated_file` over `metadata` (the macOS entitlements lists) is the
+Apple phase's.
 
 ## Impeller's shader pipeline
 
