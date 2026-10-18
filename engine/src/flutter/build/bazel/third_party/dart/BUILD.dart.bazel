@@ -16,15 +16,21 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
-# The C API an embedder compiles against: the headers of
-# //third_party/dart/runtime:dart_api (runtime/BUILD.gn) plus the bin/ ones
-# the engine's dart:io glue includes. The engine includes them as
-# "third_party/dart/runtime/include/<name>.h", which GN resolves through the
-# engine root include directory; include_prefix reproduces that path here so
-# no source has to change. Header-only: dart_api_dl.c belongs to the embedder
-# that uses the dynamic linking API, not here.
+# The C API an embedder compiles against: //third_party/dart/runtime:dart_api
+# (runtime/BUILD.gn), a source set of the headers and of dart_api_dl.c, the
+# dynamic-linking shim, which GN therefore puts on the link line of every
+# binary that reaches it (through //flutter/fml's public_deps: all of them)
+# and into a complete static library's archive (the Impeller SDK's
+# libimpeller.a); in a linked binary nothing refers to it and --gc-sections
+# drops it, as a cc_library's archive member goes unpulled here. The engine
+# includes the headers as "third_party/dart/runtime/include/<name>.h", which
+# GN resolves through the engine root include directory; include_prefix
+# reproduces that path here so no source has to change. (The headers are
+# exported, through the glob buildifier cannot see into.)
+# buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "dart_api_headers",
+    srcs = ["runtime/include/dart_api_dl.c"],
     hdrs = glob(["runtime/include/**/*.h"]),
     include_prefix = "third_party/dart",
     # dart_public_config's include_dirs (runtime/ and runtime/include/): a few
