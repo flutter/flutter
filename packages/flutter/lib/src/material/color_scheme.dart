@@ -1909,9 +1909,15 @@ class ColorScheme with Diagnosticable {
       height: maxDimension,
     );
     final listener = ImageStreamListener(
-      (ImageInfo info, bool sync) => completer.complete(info.image),
+      (ImageInfo info, bool sync) {
+        if (!completer.isCompleted) {
+          completer.complete(info.image);
+        }
+      },
       onError: (Object exception, StackTrace? stackTrace) {
-        completer.completeError(Exception('Failed to render image: $exception'), stackTrace);
+        if (!completer.isCompleted) {
+          completer.completeError(Exception('Failed to render image: $exception'), stackTrace);
+        }
       },
     );
 

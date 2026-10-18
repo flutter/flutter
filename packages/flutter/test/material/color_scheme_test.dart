@@ -676,7 +676,13 @@ void main() {
 
     expect(
       () async => ColorScheme.fromImageProvider(provider: image),
-      throwsA(anything),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('Failed to render image'),
+        ),
+      ),
     );
   });
 
