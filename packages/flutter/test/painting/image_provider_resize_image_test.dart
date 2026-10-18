@@ -379,9 +379,30 @@ void main() {
           );
           await _expectImageSize(resizedImage, const Size(50, 50));
         });
+
+        test('does not derive a side of 0 for a very thin image', () async {
+          final rawImage = MemoryImage(await _createPng(4000, 1));
+          await _expectImageSize(
+            ResizeImage(rawImage, width: 100, policy: ResizeImagePolicy.fit),
+            const Size(100, 1),
+          );
+          final tallImage = MemoryImage(await _createPng(1, 4000));
+          await _expectImageSize(
+            ResizeImage(tallImage, height: 100, policy: ResizeImagePolicy.fit),
+            const Size(1, 100),
+          );
+        });
       });
 
       group('with policy=fit and allowResize=true', () {
+        test('does not derive a side of 0 for a very thin image', () async {
+          final rawImage = MemoryImage(await _createPng(4000, 1));
+          await _expectImageSize(
+            ResizeImage(rawImage, width: 100, policy: ResizeImagePolicy.fit, allowUpscaling: true),
+            const Size(100, 1),
+          );
+        });
+
         test('constrains square image to bounded portrait rect', () async {
           final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
           await _expectImageSize(rawImage, const Size(50, 50));
@@ -689,6 +710,18 @@ void main() {
       expect(isAsync, true);
     });
   });
+}
+
+Future<Uint8List> _createPng(int width, int height) async {
+  final recorder = ui.PictureRecorder();
+  ui.Canvas(recorder).drawRect(
+    ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    ui.Paint()..color = const ui.Color(0xFF0000FF),
+  );
+  final ui.Image image = await recorder.endRecording().toImage(width, height);
+  final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return data!.buffer.asUint8List();
 }
 
 Future<void> _expectImageSize(ImageProvider<Object> imageProvider, Size size) async {

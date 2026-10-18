@@ -1444,7 +1444,11 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
                 }
               }
 
-              return ui.TargetImageSize(width: targetWidth, height: targetHeight);
+              // A very thin image can derive a side of 0, which cannot be decoded.
+              return ui.TargetImageSize(
+                width: math.max(1, targetWidth),
+                height: math.max(1, targetHeight),
+              );
           }
         },
       );

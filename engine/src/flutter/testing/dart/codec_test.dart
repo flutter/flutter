@@ -129,6 +129,30 @@ void main() {
     );
   });
 
+  test('does not derive a side of 0 for a very thin image', () async {
+    Future<List<int>> decode(int width, int height, {int? targetWidth, int? targetHeight}) async {
+      final recorder = ui.PictureRecorder();
+      ui.Canvas(recorder).drawRect(
+        ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+        ui.Paint()..color = const ui.Color(0xFF0000FF),
+      );
+      final ui.Image image = await recorder.endRecording().toImage(width, height);
+      final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data!.buffer.asUint8List(),
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+      );
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      codec.dispose();
+      return <int>[frameInfo.image.width, frameInfo.image.height];
+    }
+
+    expect(await decode(4000, 1, targetWidth: 100), <int>[100, 1]);
+    expect(await decode(1, 4000, targetHeight: 100), <int>[1, 100]);
+  });
+
   test('disposed decoded image', () async {
     final Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(data);
