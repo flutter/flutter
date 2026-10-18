@@ -371,8 +371,9 @@ TEST_F(EngineTest, SpawnSharesFontLibrary) {
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
-    auto spawn = engine->Spawn(delegate_, settings_, nullptr, std::string(),
-                               io_manager_, snapshot_delegate_, nullptr);
+    auto spawn =
+        engine->Spawn(delegate_, settings_, task_runners_, nullptr,
+                      std::string(), io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     EXPECT_EQ(&engine->GetFontCollection(), &spawn->GetFontCollection());
   });
@@ -397,8 +398,9 @@ TEST_F(EngineTest, SpawnWithCustomInitialRoute) {
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
-    auto spawn = engine->Spawn(delegate_, settings_, nullptr, "/foo",
-                               io_manager_, snapshot_delegate_, nullptr);
+    auto spawn =
+        engine->Spawn(delegate_, settings_, task_runners_, nullptr, "/foo",
+                      io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     ASSERT_EQ("/foo", spawn->InitialRoute());
   });
@@ -427,8 +429,8 @@ TEST_F(EngineTest, SpawnWithCustomSettings) {
     custom_settings.persistent_isolate_data =
         std::make_shared<fml::DataMapping>("foo");
     auto spawn =
-        engine->Spawn(delegate_, custom_settings, nullptr, std::string(),
-                      io_manager_, snapshot_delegate_, nullptr);
+        engine->Spawn(delegate_, custom_settings, task_runners_, nullptr,
+                      std::string(), io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     auto new_persistent_isolate_data =
         const_cast<RuntimeController*>(spawn->GetRuntimeController())
@@ -497,8 +499,9 @@ TEST_F(EngineTest, SpawnedEngineInheritsAssetManager) {
     engine->UpdateAssetManager(asset_manager);
     EXPECT_EQ(engine->GetAssetManager(), asset_manager);
 
-    auto spawn = engine->Spawn(delegate_, settings_, nullptr, std::string(),
-                               io_manager_, snapshot_delegate_, nullptr);
+    auto spawn =
+        engine->Spawn(delegate_, settings_, task_runners_, nullptr,
+                      std::string(), io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     EXPECT_EQ(engine->GetAssetManager(), spawn->GetAssetManager());
   });

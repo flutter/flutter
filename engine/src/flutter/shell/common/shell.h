@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_COMMON_SHELL_H_
 
 #include <functional>
+#include <future>
 #include <mutex>
 #include <string_view>
 #include <unordered_map>
@@ -194,6 +195,10 @@ class Shell final : public PlatformView::Delegate,
   ///             second Shell is mostly independent from the original Shell
   ///             and the original Shell doesn't need to keep running for the
   ///             spawned Shell to keep functioning.
+  ///             With mergeAfterLaunch, this waits for the parent's UI startup
+  ///             and creates the child with the platform runner as its UI
+  ///             runner. Startup callbacks must not synchronously wait for work
+  ///             on the platform thread while that startup is being joined.
   /// @param[in]  run_configuration  A RunConfiguration used to run the Isolate
   ///             associated with this new Shell. It doesn't have to be the same
   ///             configuration as the current Shell but it needs to be in the
@@ -491,6 +496,11 @@ class Shell final : public PlatformView::Delegate,
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   std::atomic<bool> route_messages_through_platform_thread_ = false;
 
+  // Set on the platform thread before the initial UI launch. The original
+  // invocation resolves this after its last Engine access. Retries before the
+  // queue is merged replace it with a new launch result.
+  std::shared_future<Engine::RunStatus> ui_thread_launch_result_;
+
   fml::TaskRunnerAffineWeakPtr<Engine>
       weak_engine_;  // to be shared across threads
   fml::TaskRunnerAffineWeakPtr<Rasterizer>
@@ -599,6 +609,10 @@ class Shell final : public PlatformView::Delegate,
              std::unique_ptr<Engine> engine,
              std::unique_ptr<Rasterizer> rasterizer,
              const std::shared_ptr<ShellIOManager>& io_manager);
+
+  // Waits for a separate UI startup to finish and checks that its running root
+  // isolate's queue has moved to the calling platform thread.
+  bool WaitForUIThreadMigration() const;
 
   void ReportTimings();
 

@@ -108,16 +108,18 @@ Engine::Engine(Delegate& delegate,
 std::unique_ptr<Engine> Engine::Spawn(
     Delegate& delegate,
     const Settings& settings,
+    const TaskRunners& task_runners,
     std::unique_ptr<Animator> animator,
     const std::string& initial_route,
     const fml::WeakPtr<IOManager>& io_manager,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) const {
+  CompleteRootIsolateOwnershipTransfer();
   auto result = std::make_unique<Engine>(
       /*delegate=*/delegate,
       /*image_decoder_task_runner=*/
       runtime_controller_->GetDartVM()->GetConcurrentWorkerTaskRunner(),
-      /*task_runners=*/task_runners_,
+      /*task_runners=*/task_runners,
       /*settings=*/settings,
       /*animator=*/std::move(animator),
       /*io_manager=*/io_manager,
@@ -126,6 +128,7 @@ std::unique_ptr<Engine> Engine::Spawn(
       /*gpu_disabled_switch=*/gpu_disabled_switch);
   result->runtime_controller_ = runtime_controller_->Spawn(
       /*p_client=*/*result,
+      /*task_runners=*/task_runners,
       /*advisory_script_uri=*/settings.advisory_script_uri,
       /*advisory_script_entrypoint=*/settings.advisory_script_entrypoint,
       /*idle_notification_callback=*/settings.idle_notification_callback,
@@ -145,6 +148,17 @@ Engine::~Engine() = default;
 
 fml::TaskRunnerAffineWeakPtr<Engine> Engine::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
+}
+
+void Engine::CompleteRootIsolateOwnershipTransfer() const {
+  // Spawn, restart, or shutdown can run in the current platform task before
+  // the queued owner transfer gets a chance to execute.
+  if (settings_.merged_platform_ui_thread ==
+          Settings::MergedPlatformUIThread::kMergeAfterLaunch &&
+      task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread() &&
+      task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread()) {
+    runtime_controller_->SetRootIsolateOwnerToCurrentThread();
+  }
 }
 
 void Engine::SetupDefaultFontManager() {
@@ -201,6 +215,7 @@ bool Engine::Restart(RunConfiguration configuration) {
     FML_LOG(ERROR) << "Engine run configuration was invalid.";
     return false;
   }
+  CompleteRootIsolateOwnershipTransfer();
   delegate_.OnPreEngineRestart();
   runtime_controller_ = runtime_controller_->Clone();
   UpdateAssetManager(nullptr);
@@ -671,6 +686,7 @@ void Engine::SetDisplays(const std::vector<DisplayData>& displays) {
 }
 
 void Engine::ShutdownPlatformIsolates() {
+  CompleteRootIsolateOwnershipTransfer();
   runtime_controller_->ShutdownPlatformIsolates();
 }
 

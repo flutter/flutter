@@ -49,6 +49,7 @@ RuntimeController::RuntimeController(
 
 std::unique_ptr<RuntimeController> RuntimeController::Spawn(
     RuntimeDelegate& p_client,
+    const TaskRunners& task_runners,
     const std::string& advisory_script_uri,
     const std::string& advisory_script_entrypoint,
     const std::function<void(int64_t)>& p_idle_notification_callback,
@@ -61,7 +62,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
         image_generator_registry,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const {
   UIDartState::Context spawned_context{
-      context_.task_runners,
+      task_runners,
       std::move(snapshot_delegate),
       std::move(io_manager),
       context_.unref_queue,
@@ -689,7 +690,8 @@ void RuntimeController::ShutdownPlatformIsolates() {
 
 void RuntimeController::SetRootIsolateOwnerToCurrentThread() {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
-  if (root_isolate) {
+  if (root_isolate &&
+      !Dart_GetCurrentThreadOwnsIsolate(root_isolate->main_port())) {
     root_isolate->SetOwnerToCurrentThread();
   }
 }

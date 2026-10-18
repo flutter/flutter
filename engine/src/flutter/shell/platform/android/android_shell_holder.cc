@@ -277,6 +277,9 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
   std::unique_ptr<flutter::Shell> shell =
       shell_->Spawn(std::move(config.value()), initial_route,
                     on_create_platform_view, on_create_rasterizer);
+  if (!shell) {
+    return nullptr;
+  }
 
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
       GetSettings(), jni_facade, thread_host_, std::move(shell),
