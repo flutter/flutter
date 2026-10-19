@@ -806,9 +806,10 @@ environment:
   sdk: '>=3.2.0 <4.0.0'
 ''');
 
-        final File packageConfigFile = projectDir.childFile('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion": 2, "packages": []}');
+        final File packageConfigFile =
+            projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+              ..createSync(recursive: true)
+              ..writeAsStringSync('{"configVersion": 2, "packages": []}');
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           packageConfigFile,
           logger: logger,
