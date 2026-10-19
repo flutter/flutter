@@ -331,7 +331,10 @@ class CopyAssets extends Target {
         try {
           resolvedTargetPlatform = TargetPlatform.fromName(targetPlatformDefine);
         } on Exception {
-          // Fall back to TargetPlatform.android for custom extension platforms.
+          // Custom extension platforms (such as 'ohos-arm64' or 'webos-arm64')
+          // are not in the built-in TargetPlatform enum. Fall back to
+          // TargetPlatform.android so ShaderCompiler and IconTreeShaker use the
+          // standard SkSL/Impeller mobile/embedded asset bundling pipeline.
         }
       }
     }

@@ -753,11 +753,13 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsForOS(
 ) {
   final Uri? absolutePath = flutterTester ? buildUri : null;
   return switch (targetOS) {
-    OS.windows || OS.linux => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
     OS.macOS => assetTargetLocationsMacOS(codeAssets, absolutePath),
     OS.iOS => assetTargetLocationsIOS(codeAssets),
     OS.android => assetTargetLocationsAndroid(codeAssets),
-    _ => throw UnimplementedError('This should be unreachable.'),
+    // Windows, Linux, Fuchsia, and custom extension operating systems (such as
+    // HarmonyOS 'ohos' or LG webOS 'webos') bundle dynamic libraries as
+    // standalone shared objects inside the target output directory.
+    _ => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
   };
 }
 
@@ -795,15 +797,6 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   globals.logger.printTrace('Copying native assets to ${targetUri.toFilePath()}.');
   final List<File> installedFiles;
   switch (targetOS) {
-    case OS.windows:
-    case OS.linux:
-      assert(codesignIdentity == null);
-      installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
-        targetUri,
-        assetTargetLocations,
-        buildMode,
-        fileSystem,
-      );
     case OS.macOS:
       if (flutterTester) {
         installedFiles = await copyNativeCodeAssetsMacOSFlutterTester(
@@ -838,7 +831,15 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
         fileSystem,
       );
     default:
-      throw StateError('This should be unreachable.');
+      // Windows, Linux, Fuchsia, and custom extension operating systems copy
+      // bundled dynamic libraries directly into the target bundle directory.
+      assert(codesignIdentity == null);
+      installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
+        targetUri,
+        assetTargetLocations,
+        buildMode,
+        fileSystem,
+      );
   }
   globals.logger.printTrace('Copying native assets done.');
   return installedFiles;
@@ -953,6 +954,15 @@ OS getNativeOSFromTargetPlatform(
     case .web:
       throw StateError('No dart builds for web yet.');
     case .unsupported:
+      if (environmentDefines != null) {
+        final (OS os, Architecture _)? customTarget = resolveCustomNativeTarget(
+          environmentDefines,
+          targetPlatform: platform,
+        );
+        if (customTarget != null) {
+          return customTarget.$1;
+        }
+      }
       TargetPlatform.throwUnsupportedTarget();
   }
 }

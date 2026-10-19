@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 /// C compiler toolchain configuration for running Dart build and link hooks
@@ -109,17 +110,12 @@ class ExtensionCCompilerConfig {
             other.cc == cc &&
             other.ld == ld &&
             other.envScript == envScript &&
-            _nullableListEquals(other.envScriptArgs, envScriptArgs));
+            const ListEquality<String>().equals(other.envScriptArgs, envScriptArgs));
   }
 
   @override
-  int get hashCode => Object.hash(
-    ar,
-    cc,
-    ld,
-    envScript,
-    envScriptArgs == null ? null : Object.hashAll(envScriptArgs!),
-  );
+  int get hashCode =>
+      Object.hash(ar, cc, ld, envScript, const ListEquality<String>().hash(envScriptArgs));
 }
 
 /// Configuration for running Dart build and link hooks (`native_assets`) for an
@@ -129,6 +125,11 @@ class ExtensionCCompilerConfig {
 /// Flutter `TargetPlatform` (or that use a custom cross-compiler toolchain) to
 /// specify the target OS, architecture, and C compiler configuration passed to
 /// `HookConfig` when building `CodeAsset`s and `DataAsset`s.
+///
+/// Both built-in operating systems (such as `'linux'` for Linux-based custom
+/// embedders like LG webOS or Raspberry Pi) and custom operating system
+/// identifiers (such as `'ohos'` for HarmonyOS or `'webos'`) are supported via
+/// `package:code_assets`'s `OS.fromString` and `Architecture.fromString`.
 @immutable
 class ExtensionNativeAssetsConfig {
   const ExtensionNativeAssetsConfig({
@@ -170,7 +171,8 @@ class ExtensionNativeAssetsConfig {
   static const String targetOsKey = 'targetOs';
 
   /// The target operating system for `CodeAsset` hooks (e.g. `'linux'`,
-  /// `'macos'`, `'windows'`, `'android'`, `'ios'`).
+  /// `'macos'`, `'windows'`, `'android'`, `'ios'`, or a custom OS identifier
+  /// such as `'ohos'` or `'webos'`).
   final String targetOs;
 
   /// The target CPU architecture for `CodeAsset` hooks (e.g. `'x64'`,
@@ -204,19 +206,4 @@ class ExtensionNativeAssetsConfig {
 
   @override
   int get hashCode => Object.hash(targetOs, targetArchitecture, cCompilerConfig);
-}
-
-bool _nullableListEquals<T>(List<T>? a, List<T>? b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a == null || b == null || a.length != b.length) {
-    return false;
-  }
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) {
-      return false;
-    }
-  }
-  return true;
 }

@@ -25,7 +25,8 @@ import '../../build_info.dart'
         kExtensionTargetArch,
         kExtensionTargetOs,
         kIosArchs,
-        kSdkRoot;
+        kSdkRoot,
+        kTargetPlatform;
 import '../../build_system/exceptions.dart' show MissingDefineException;
 import '../../convert.dart' show json;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
@@ -75,11 +76,12 @@ sealed class AssetBuildTarget {
     required List<SupportedAssetTypes> supportedAssetTypes,
     required Directory? buildDirectory,
   }) {
-    final String? extensionTargetOs = _emptyToNull(environmentDefines[kExtensionTargetOs]);
-    final String? extensionTargetArch = _emptyToNull(environmentDefines[kExtensionTargetArch]);
-    if (extensionTargetOs != null && extensionTargetArch != null) {
-      final OS os = parseNativeOS(extensionTargetOs);
-      final Architecture architecture = parseNativeArchitecture(extensionTargetArch);
+    final (OS os, Architecture architecture)? customTarget = resolveCustomNativeTarget(
+      environmentDefines,
+      targetPlatform: targetPlatform,
+    );
+    if (customTarget != null) {
+      final (OS os, Architecture architecture) = customTarget;
       return _extensionTarget(
         architecture: architecture,
         buildDirectory: buildDirectory,
@@ -188,6 +190,7 @@ sealed class AssetBuildTarget {
         CustomCodeAssetTarget(
           architecture: architecture,
           environmentDefines: environmentDefines,
+          fileSystem: fileSystem,
           os: os,
           supportedAssetTypes: supportedAssetTypes,
         ),
@@ -354,13 +357,20 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   String get targetString => '${os.name}_${architecture.name}';
 }
 
+/// [CodeAssetTarget] for custom extension operating systems (such as HarmonyOS
+/// `'ohos'` or LG webOS `'webos'`) or targets that do not use one of the
+/// built-in platform-specific `CodeConfig` extensions (such as `AndroidCodeConfig`
+/// or `IOSCodeConfig`).
 final class CustomCodeAssetTarget extends CodeAssetTarget {
   CustomCodeAssetTarget({
     required super.architecture,
     required super.os,
     required super.supportedAssetTypes,
     super.environmentDefines,
+    this.fileSystem,
   });
+
+  final FileSystem? fileSystem;
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -370,7 +380,12 @@ final class CustomCodeAssetTarget extends CodeAssetTarget {
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
-    cCompilerConfigSync = cCompilerConfigFromDefines(environmentDefines);
+    cCompilerConfigSync =
+        cCompilerConfigFromDefines(environmentDefines) ??
+        _cCompilerConfigLinuxFallback(
+          environmentDefines: environmentDefines,
+          fileSystem: fileSystem,
+        );
   }
 }
 
@@ -642,28 +657,92 @@ String? _emptyToNull(String? input) {
   return input;
 }
 
-/// Parses a native [OS] from a target OS string (such as `linux` or `android`).
-OS parseNativeOS(String rawOs) => switch (rawOs.toLowerCase()) {
-  'android' => OS.android,
-  'fuchsia' => OS.fuchsia,
-  'ios' => OS.iOS,
-  'linux' => OS.linux,
-  'macos' || 'darwin' => OS.macOS,
-  'windows' => OS.windows,
-  _ => throwToolExit('Unsupported native assets target OS "$rawOs".'),
-};
+/// Parses a native [OS] from a target OS string (such as `linux`, `android`,
+/// `ohos`, or `webos`).
+///
+/// Built-in operating systems map to the corresponding [OS] constants, while
+/// custom extension operating systems (such as HarmonyOS `ohos` or LG webOS
+/// `webos`) are constructed via [OS.fromString] so Dart build and link hooks
+/// receive the custom target OS identifier in `HookConfig.code.targetOS`.
+OS parseNativeOS(String rawOs) {
+  final String normalized = rawOs.trim().toLowerCase();
+  if (normalized.isEmpty) {
+    throwToolExit('Unsupported native assets target OS "$rawOs".');
+  }
+  return switch (normalized) {
+    'android' => OS.android,
+    'fuchsia' => OS.fuchsia,
+    'ios' => OS.iOS,
+    'linux' => OS.linux,
+    'macos' || 'darwin' => OS.macOS,
+    'windows' => OS.windows,
+    _ => OS.fromString(normalized),
+  };
+}
 
 /// Parses a native [Architecture] from a target architecture string (such as
 /// `x64` or `arm64`).
-Architecture parseNativeArchitecture(String rawArch) => switch (rawArch.toLowerCase()) {
-  'arm' || 'armv7' => Architecture.arm,
-  'arm64' || 'aarch64' => Architecture.arm64,
-  'ia32' || 'x86' => Architecture.ia32,
-  'riscv32' => Architecture.riscv32,
-  'riscv64' => Architecture.riscv64,
-  'x64' || 'x86_64' => Architecture.x64,
-  _ => throwToolExit('Unsupported native assets target architecture "$rawArch".'),
-};
+///
+/// Common architecture aliases (`armv7`, `aarch64`, `x86`, `x86_64`, `amd64`)
+/// are normalized to their canonical `package:code_assets` [Architecture]
+/// constants, while custom architecture identifiers are constructed via
+/// [Architecture.fromString].
+Architecture parseNativeArchitecture(String rawArch) {
+  final String normalized = rawArch.trim().toLowerCase();
+  if (normalized.isEmpty) {
+    throwToolExit('Unsupported native assets target architecture "$rawArch".');
+  }
+  return switch (normalized) {
+    'arm' || 'armv7' => Architecture.arm,
+    'arm64' || 'aarch64' => Architecture.arm64,
+    'arm64e' => Architecture.arm64e,
+    'ia32' || 'x86' => Architecture.ia32,
+    'riscv32' => Architecture.riscv32,
+    'riscv64' => Architecture.riscv64,
+    'x64' || 'x86_64' || 'amd64' => Architecture.x64,
+    _ => Architecture.fromString(normalized),
+  };
+}
+
+final _customTargetPlatformPattern = RegExp(r'^([a-zA-Z0-9]+)[-_]([a-zA-Z0-9_]+)$');
+
+/// Resolves the target [OS] and [Architecture] for an extension build target
+/// from [environmentDefines].
+///
+/// When [kExtensionTargetOs] and [kExtensionTargetArch] are explicitly defined,
+/// they take precedence (even when overriding a built-in [targetPlatform]).
+/// When [targetPlatform] is `null` or [TargetPlatform.unsupported] and either
+/// define is omitted, falls back to parsing `<os>-<arch>` or `<os>_<arch>` from
+/// [kTargetPlatform] (for example, `'ohos-arm64'` or `'webos-arm64'`).
+(OS, Architecture)? resolveCustomNativeTarget(
+  Map<String, String> environmentDefines, {
+  TargetPlatform? targetPlatform,
+}) {
+  final String? extensionTargetOs = _emptyToNull(environmentDefines[kExtensionTargetOs]);
+  final String? extensionTargetArch = _emptyToNull(environmentDefines[kExtensionTargetArch]);
+  if (extensionTargetOs != null && extensionTargetArch != null) {
+    return (parseNativeOS(extensionTargetOs), parseNativeArchitecture(extensionTargetArch));
+  }
+  if (targetPlatform != null && targetPlatform != TargetPlatform.unsupported) {
+    return null;
+  }
+  final String? rawTargetPlatform = _emptyToNull(environmentDefines[kTargetPlatform]);
+  String? fallbackOs;
+  String? fallbackArch;
+  if (rawTargetPlatform != null) {
+    final Match? match = _customTargetPlatformPattern.firstMatch(rawTargetPlatform.trim());
+    if (match != null) {
+      fallbackOs = match.group(1);
+      fallbackArch = match.group(2);
+    }
+  }
+  final String? resolvedOs = extensionTargetOs ?? fallbackOs;
+  final String? resolvedArch = extensionTargetArch ?? fallbackArch;
+  if (resolvedOs == null || resolvedArch == null) {
+    return null;
+  }
+  return (parseNativeOS(resolvedOs), parseNativeArchitecture(resolvedArch));
+}
 
 /// Resolves a [CCompilerConfig] from explicit `kExtensionCCompiler*` defines in
 /// [environmentDefines], or returns `null` if compiler defines are not all provided.

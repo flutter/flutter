@@ -903,6 +903,11 @@ import 'package:{{pluginName}}/{{dartFileName}}' as {{pluginName}};
 {{#windows}}
 import 'package:{{pluginName}}/{{dartFileName}}' as {{pluginName}};
 {{/windows}}
+{{#customPlatforms}}
+{{#plugins}}
+import 'package:{{pluginName}}/{{dartFileName}}' as {{pluginName}};
+{{/plugins}}
+{{/customPlatforms}}
 
 @pragma('vm:entry-point')
 class _PluginRegistrant {
@@ -929,7 +934,11 @@ $_dartPluginRegisterWith
       {{#windows}}
 $_dartPluginRegisterWith
       {{/windows}}
-    }
+    }{{#customPlatforms}} else if (Platform.operatingSystem == '{{platform}}') {
+      {{#plugins}}
+$_dartPluginRegisterWith
+      {{/plugins}}
+    }{{/customPlatforms}}
   }
 }
 ''';
@@ -1633,6 +1642,13 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
     MacOSPlugin.kConfigKey: <Plugin>[],
     WindowsPlugin.kConfigKey: <Plugin>[],
     WebPlugin.kConfigKey: <Plugin>[],
+    // Include any custom or extension-contributed platform keys (for example,
+    // 'ohos' or 'webos') declared by plugins in the dependency graph.
+    for (final Plugin plugin in plugins) ...<String, List<Plugin>>{
+      for (final String key in plugin.platforms.keys) key: <Plugin>[],
+      for (final String key in plugin.defaultPackagePlatforms.keys) key: <Plugin>[],
+      for (final String key in plugin.pluginDartClassPlatforms.keys) key: <Plugin>[],
+    },
     for (final String key in extraPlatformKeys) key: <Plugin>[],
   };
 
@@ -2047,10 +2063,18 @@ Future<void> generateMainDartWithPluginRegistrant(
     }
     return;
   }
+  final customPlatforms = <String, List<Object?>>{};
   for (final resolution in resolutions) {
-    assert(templateContext.containsKey(resolution.platform));
-    (templateContext[resolution.platform] as List<Object?>?)?.add(resolution.toMap());
+    if (templateContext.containsKey(resolution.platform)) {
+      (templateContext[resolution.platform] as List<Object?>?)?.add(resolution.toMap());
+    } else {
+      customPlatforms.putIfAbsent(resolution.platform, () => <Object?>[]).add(resolution.toMap());
+    }
   }
+  templateContext['customPlatforms'] = <Map<String, Object>>[
+    for (final MapEntry(:String key, :List<Object?> value) in customPlatforms.entries)
+      <String, Object>{'platform': key, 'plugins': value},
+  ];
   try {
     await _renderTemplateToFile(
       _dartPluginRegistryForNonWebTemplate,

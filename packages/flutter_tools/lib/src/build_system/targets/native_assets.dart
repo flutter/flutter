@@ -24,6 +24,7 @@ import '../../dart/package_map.dart';
 import '../../features.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
+import '../../isolated/native_assets/targets.dart' show resolveCustomNativeTarget;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart' show MissingDefineException;
@@ -321,8 +322,9 @@ class InstallCodeAssets extends Target {
       environmentDefines: environment.defines,
     );
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    if (targetOS case .linux || .windows) {
-      // Avoid needing migration for CMake files, keep old directory structure.
+    if (targetOS != OS.macOS && targetOS != OS.iOS && targetOS != OS.android) {
+      // Avoid needing migration for CMake files, keep old directory structure,
+      // and place custom extension OS assets under native_assets/<os>/.
       targetUri = targetUri.resolve('${targetOS.name}/');
     }
 
@@ -383,8 +385,11 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
   try {
     return TargetPlatform.fromName(targetPlatformEnvironment);
   } on Exception {
-    if (environment.defines.containsKey(kExtensionTargetOs) &&
-        environment.defines.containsKey(kExtensionTargetArch)) {
+    // Custom extension platforms (such as 'ohos-arm64' or 'webos-arm64') are
+    // not part of the built-in TargetPlatform enum. Map them to
+    // TargetPlatform.unsupported when a native OS and architecture can be
+    // resolved from extension defines or the target platform identifier.
+    if (resolveCustomNativeTarget(environment.defines) != null) {
       return TargetPlatform.unsupported;
     }
     rethrow;

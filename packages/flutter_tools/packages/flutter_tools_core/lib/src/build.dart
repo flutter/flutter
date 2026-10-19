@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'build_system/native_assets.dart';
@@ -174,11 +175,11 @@ class ExtensionPlugin {
         (other is ExtensionPlugin &&
             other.name == name &&
             other.path == path &&
-            _deepEquals(other.configuration, configuration));
+            const DeepCollectionEquality().equals(other.configuration, configuration));
   }
 
   @override
-  int get hashCode => Object.hash(name, path, _deepHash(configuration));
+  int get hashCode => Object.hash(name, path, const DeepCollectionEquality().hash(configuration));
 }
 
 /// Representation of a custom build target provided by a tool extension.
@@ -330,46 +331,4 @@ class ExtensionBuildResult {
 
   @override
   int get hashCode => Object.hash(success, errorMessage);
-}
-
-bool _deepEquals(Object? a, Object? b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a is Map<Object?, Object?> && b is Map<Object?, Object?>) {
-    if (a.length != b.length) {
-      return false;
-    }
-    for (final MapEntry(:Object? key, :Object? value) in a.entries) {
-      if (!b.containsKey(key) || !_deepEquals(value, b[key])) {
-        return false;
-      }
-    }
-    return true;
-  }
-  if (a is List<Object?> && b is List<Object?>) {
-    if (a.length != b.length) {
-      return false;
-    }
-    for (var i = 0; i < a.length; i++) {
-      if (!_deepEquals(a[i], b[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return a == b;
-}
-
-int _deepHash(Object? value) {
-  return switch (value) {
-    final Map<Object?, Object?> map => Object.hashAllUnordered(<int>[
-      for (final MapEntry(:Object? key, :Object? value) in map.entries)
-        Object.hash(_deepHash(key), _deepHash(value)),
-    ]),
-    final List<Object?> list => Object.hashAll(<int>[
-      for (final Object? item in list) _deepHash(item),
-    ]),
-    _ => value.hashCode,
-  };
 }

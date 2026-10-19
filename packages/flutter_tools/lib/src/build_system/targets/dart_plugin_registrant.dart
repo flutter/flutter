@@ -48,9 +48,16 @@ class DartPluginRegistrantTarget extends Target {
       return true;
     }
     final String? platformName = environment.defines[kTargetPlatform];
-    final TargetPlatform? targetPlatform = platformName == null
-        ? null
-        : TargetPlatform.fromName(platformName);
+    TargetPlatform? targetPlatform;
+    if (platformName != null) {
+      try {
+        targetPlatform = TargetPlatform.fromName(platformName);
+      } on Exception {
+        // Custom extension target platforms (such as 'ohos-arm64' or
+        // 'webos-arm64') are not part of the built-in TargetPlatform enum and
+        // should still generate a Dart plugin registrant.
+      }
+    }
     // TODO(stuartmorgan): Investigate removing this check entirely; ideally the
     // source generation step shouldn't be platform dependent, and the generated
     // code should just do the right thing on every platform.
