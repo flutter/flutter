@@ -11,13 +11,11 @@ import 'android/android_workflow.dart';
 import 'artifacts.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
-import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'experimental/extension_device_manager.dart';
 import 'experimental/extension_manager.dart';
@@ -55,12 +53,10 @@ class FlutterDeviceManager extends DeviceManager {
   }) : super(logger: toolContext.logger) {
     final ToolContext(
       :Artifacts artifacts,
-      :CustomDevicesConfig customDevicesConfig,
       :FlutterVersion flutterVersion,
       fs: FileSystem fileSystem,
       :Logger logger,
       :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-      os: OperatingSystemUtils operatingSystemUtils,
       :Platform platform,
       :ProcessManager processManager,
       :UserMessages userMessages,
@@ -93,27 +89,11 @@ class FlutterDeviceManager extends DeviceManager {
         macOSWorkflow: macOSWorkflow,
         toolContext: toolContext,
       ),
-      MacOSDesignedForIPadDevices(
-        processManager: processManager,
-        iosWorkflow: iosWorkflow,
-        logger: logger,
-        platform: platform,
-        fileSystem: fileSystem,
-        operatingSystemUtils: operatingSystemUtils,
-      ),
-      LinuxDevices(
-        platform: platform,
-        featureFlags: featureFlags,
-        processManager: processManager,
-        logger: logger,
-        fileSystem: fileSystem,
-        operatingSystemUtils: operatingSystemUtils,
-      ),
+      MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),
+      LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
       WindowsDevices(
-        processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-        logger: logger,
-        fileSystem: fileSystem,
+        analytics: analytics,
+        toolContext: toolContext,
         windowsWorkflow: windowsWorkflow,
       ),
       WebDevices(
@@ -123,12 +103,7 @@ class FlutterDeviceManager extends DeviceManager {
         processManager: processManager,
         logger: logger,
       ),
-      CustomDevices(
-        featureFlags: featureFlags,
-        processManager: processManager,
-        logger: logger,
-        config: customDevicesConfig,
-      ),
+      CustomDevices(featureFlags: featureFlags, toolContext: toolContext),
       if (extensionManager != null)
         ExtensionDevices(extensionManager: extensionManager, logger: logger),
     ];

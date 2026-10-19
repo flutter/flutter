@@ -550,7 +550,7 @@ InferMetalPlatformViewCreationCallback(
     frame_info.struct_size = sizeof(FlutterFrameInfo);
     frame_info.size = {static_cast<uint32_t>(frame_size.width),
                        static_cast<uint32_t>(frame_size.height)};
-    flutter::GPUMTLTextureInfo texture_info;
+    flutter::GPUMTLTextureInfo texture_info{};
 
     FlutterMetalTexture metal_texture = ptr(user_data, &frame_info);
     texture_info.texture_id = metal_texture.texture_id;
@@ -2890,7 +2890,7 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
   const FlutterPointerEvent* current = pointers;
 
   for (size_t i = 0; i < events_count; ++i) {
-    flutter::PointerData pointer_data;
+    flutter::PointerData pointer_data{};
     pointer_data.Clear();
     // this is currely in use only on android embedding.
     pointer_data.embedder_id = 0;
@@ -3043,7 +3043,7 @@ FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
 
   const char* character = SAFE_ACCESS(event, character, nullptr);
 
-  flutter::KeyData key_data;
+  flutter::KeyData key_data{};
   key_data.Clear();
   key_data.timestamp = static_cast<uint64_t>(SAFE_ACCESS(event, timestamp, 0));
   key_data.type = MapKeyEventType(
