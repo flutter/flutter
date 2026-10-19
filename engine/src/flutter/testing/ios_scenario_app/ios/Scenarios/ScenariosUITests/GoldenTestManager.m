@@ -48,6 +48,14 @@ const double kDefaultRmseThreshold = 0.5;
   }
 
   if (![_goldenImage compareGoldenToImage:screenshot.image rmesThreshold:rmesThreshold]) {
+    // If the golden does not match. Wait 30 seconds and try again with a new screenshot.
+    // Occasionally the first screenshot may include a system notification. See
+    // https://github.com/flutter/flutter/issues/194250#issuecomment-6222545727
+    [NSThread sleepForTimeInterval:30];
+    screenshot = [[XCUIScreen mainScreen] screenshot];
+  }
+
+  if (![_goldenImage compareGoldenToImage:screenshot.image rmesThreshold:rmesThreshold]) {
     XCTAttachment* screenshotAttachment = [XCTAttachment attachmentWithImage:screenshot.image];
     screenshotAttachment.name = [_goldenImage.goldenName stringByAppendingString:@"_actual.png"];
     screenshotAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
