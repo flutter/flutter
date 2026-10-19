@@ -100,7 +100,7 @@ class ExtensionConnection {
 
       logger.printTrace('ExtensionConnection querying extension.getCapabilities...');
       final Object? responseObj = await Future.any<Object?>([
-        peer.sendRequest('extension.getCapabilities'),
+        peer.sendRequest(ToolExtensionEntryPoint.getCapabilitiesMethod),
         errorCompleter.future,
       ]).timeout(timeout);
       if (responseObj is! Map<String, Object?>) {
