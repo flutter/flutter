@@ -3134,6 +3134,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
 
+  /// Pointer identifiers for active gestures created by the test.
+  ///
+  /// This preserves the source of synthetic cancel events, which are queued by
+  /// [GestureBinding.cancelPointer] and dispatched after the source scope ends.
+  final Set<int> _testPointers = <int>{};
+
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.test], then
@@ -3153,8 +3159,17 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   void _handlePointerEvent(PointerEvent event) {
+    if (pointerEventSource == TestBindingEventSource.device &&
+        event is PointerCancelEvent &&
+        _testPointers.contains(event.pointer)) {
+      withPointerEventSource(TestBindingEventSource.test, () => _handlePointerEvent(event));
+      return;
+    }
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
+        if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
+          _testPointers.add(event.pointer);
+        }
         RenderView? target;
         for (final RenderView renderView in renderViews) {
           if (renderView.flutterView.viewId == event.viewId) {
@@ -3180,7 +3195,15 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             _markViewsNeedPaint(event.viewId);
           }
         }
-        super.handlePointerEvent(event);
+        try {
+          super.handlePointerEvent(event);
+        } finally {
+          if (event is PointerUpEvent ||
+              event is PointerCancelEvent ||
+              event is PointerPanZoomEndEvent) {
+            _testPointers.remove(event.pointer);
+          }
+        }
       case TestBindingEventSource.device:
         if (shouldPropagateDevicePointerEvents) {
           super.handlePointerEvent(event);
