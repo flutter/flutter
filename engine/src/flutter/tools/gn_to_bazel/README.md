@@ -211,6 +211,25 @@ assembly intermediates left out), an archive compared entry by entry.
 Against `host_debug_unopt`: 16 of 16 paths agree, 1,098 files identical,
 the eight binaries expected different, nothing missing.
 
+### compile_commands.json
+
+```sh
+bazel build --config=host_debug_unopt //engine/src/flutter/...
+python3 tool/compile_commands.py --out=../../out/host_debug_unopt_bazel --config=host_debug_unopt
+```
+
+writes the build directory's `compile_commands.json` from `bazel aquery`,
+in the form clang's tools read: an entry per source with the command line
+as the action runs it, from the execution root, so that external
+repositories and generated headers under `bazel-out` resolve as they do for
+the build (a source compiled for both the target and the exec
+configuration gets the target's command). GN writes the file on request
+(`--export-compile-commands`, which `tools/gn` passes for the clang-tidy
+builder) and `tools/clang_tidy` and clangd read it; the checkout's
+`clang-tidy -p <dir>` runs over the Bazel file as over GN's. 4,281 entries
+for the engine's targets, against GN's 13,634 with the Dart runtime and the
+GPU test backends that Bazel compiles inside their wrapped GN builds.
+
 ## How it works
 
 GN build files are programs; Bazel wants data. The converter has three layers:

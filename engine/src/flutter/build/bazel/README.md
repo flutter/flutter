@@ -826,8 +826,10 @@ symbolic links, which a sandbox's inputs are; it does now (a one-line
 change, harmless to GN). Its 289 files come out byte-identical to GN's.
 
 Not installed yet: the web SDK, and GN's own bookkeeping (`args.gn`,
-`compile_commands.json`, depfiles). The builder-specific targets below
-install the archives alone.
+depfiles). `compile_commands.json`, which `tools/clang_tidy` and clangd
+read, comes from `tools/gn_to_bazel/tool/compile_commands.py` over
+`bazel aquery` after a build (a tool, since no action can query the
+graph). The builder-specific targets below install the archives alone.
 
 ## The builders: `--config=<build>` and their install targets
 
