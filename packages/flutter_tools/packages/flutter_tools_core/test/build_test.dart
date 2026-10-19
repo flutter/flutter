@@ -85,6 +85,39 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    test(
+      'ExtensionPatternSource.parse parses valid patterns and throws FormatException on invalid',
+      () {
+        expect(ExtensionPatternSource.parse('{PROJECT_DIR}'), '{PROJECT_DIR}');
+        expect(
+          ExtensionPatternSource.parse('{PROJECT_DIR}/lib/main.dart'),
+          '{PROJECT_DIR}/lib/main.dart',
+        );
+        expect(
+          () => ExtensionPatternSource.parse('{PROJECT_DIR}foo/bar.dart'),
+          throwsFormatException,
+        );
+        expect(() => ExtensionPatternSource.parse('relative/path/to/file'), throwsFormatException);
+      },
+    );
+
+    test('fromJson throws FormatException when pattern does not start with valid directory placeholder followed by slash', () {
+      expect(
+        () => ExtensionSource.fromJson(const <String, Object?>{
+          'type': 'pattern',
+          'value': 'relative/path/to/file',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionSource.fromJson(const <String, Object?>{
+          'type': 'pattern',
+          'value': '{PROJECT_DIR}foo/bar.dart',
+        }),
+        throwsFormatException,
+      );
+    });
   });
 
   group('ExtensionBuildTarget', () {
@@ -114,34 +147,56 @@ void main() {
     });
 
     test('deserializes with defaults when fields are missing', () {
-      final parsed = ExtensionBuildTarget.fromJson(const <String, Object?>{});
+      final parsed = ExtensionBuildTarget.fromJson(const <String, Object?>{
+        'targetPlatform': 'linux-x64',
+      });
       expect(parsed.name, isEmpty);
-      expect(parsed.targetPlatform, isEmpty);
+      expect(parsed.targetPlatform, 'linux-x64');
       expect(parsed.description, isEmpty);
       expect(parsed.artifacts, isEmpty);
       expect(parsed.hostArtifacts, isEmpty);
-      expect(parsed.outputDir, BuiltInPlaceholders.buildDir);
+      expect(parsed.outputDir, '${BuiltInPlaceholders.projectDir}/build');
     });
 
-    test('fromJson throws ArgumentError on malformed artifacts or hostArtifacts', () {
+    test('fromJson throws ArgumentError on missing targetPlatform or malformed fields', () {
+      expect(() => ExtensionBuildTarget.fromJson(const <String, Object?>{}), throwsArgumentError);
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{'targetPlatform': 123}),
+        throwsArgumentError,
+      );
       expect(
         () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'targetPlatform': 'linux-x64',
+          'outputDir': 123,
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'targetPlatform': 'linux-x64',
           'artifacts': <Object?>[123],
         }),
         throwsArgumentError,
       );
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{'artifacts': 'invalid'}),
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'targetPlatform': 'linux-x64',
+          'artifacts': 'invalid',
+        }),
         throwsArgumentError,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'targetPlatform': 'linux-x64',
           'hostArtifacts': <Object?>[123],
         }),
         throwsArgumentError,
       );
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{'hostArtifacts': 'invalid'}),
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'targetPlatform': 'linux-x64',
+          'hostArtifacts': 'invalid',
+        }),
         throwsArgumentError,
       );
     });

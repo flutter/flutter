@@ -88,15 +88,28 @@ base class ExtensionBuildManager {
     return targets;
   }
 
-  /// Triggers a custom build for the given [targetName] by routing to the active extension.
+  /// Triggers a custom `flutter build` target for the given [targetName] by routing to the active extension.
   Future<ExtensionBuildResult> build({
+    required Uri buildDir,
     required BuildMode buildMode,
+    required Uri flutterRoot,
     required String mainPath,
+    required Uri outputDir,
     required Uri projectRoot,
+    required Map<String, String> resolvedArtifacts,
     required String targetName,
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
+    }
+    if (!outputDir.hasAbsolutePath) {
+      throw ArgumentError.value(outputDir, 'outputDir', 'Must be an absolute path.');
+    }
+    if (!buildDir.hasAbsolutePath) {
+      throw ArgumentError.value(buildDir, 'buildDir', 'Must be an absolute path.');
+    }
+    if (!flutterRoot.hasAbsolutePath) {
+      throw ArgumentError.value(flutterRoot, 'flutterRoot', 'Must be an absolute path.');
     }
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const ExtensionBuildResult(
@@ -131,9 +144,13 @@ base class ExtensionBuildManager {
       final Object? result = await connection.sendRequest(
         BuildService.buildMethod,
         params: <String, Object?>{
+          BuildService.buildDirParam: buildDir.toString(),
           BuildService.buildModeParam: buildMode.cliName,
+          BuildService.flutterRootParam: flutterRoot.toString(),
           BuildService.mainPathParam: mainPath,
+          BuildService.outputDirParam: outputDir.toString(),
           BuildService.projectRootParam: projectRoot.toString(),
+          BuildService.resolvedArtifactsParam: resolvedArtifacts,
           BuildService.targetNameParam: targetName,
         },
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,

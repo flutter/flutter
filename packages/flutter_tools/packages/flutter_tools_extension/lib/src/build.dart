@@ -17,6 +17,7 @@ class ExtensionBuildContext {
   const ExtensionBuildContext({
     required this.buildDir,
     required this.buildMode,
+    required this.flutterRoot,
     required this.mainPath,
     required this.outputDir,
     required this.projectRoot,
@@ -28,6 +29,9 @@ class ExtensionBuildContext {
 
   /// The compilation mode for the build.
   final BuildMode buildMode;
+
+  /// The absolute directory URI (ending with `/`) to the Flutter SDK root directory.
+  final Uri flutterRoot;
 
   /// The path to the main entrypoint file (typically `lib/main.dart`).
   final String mainPath;
@@ -53,7 +57,7 @@ abstract class BuildTarget {
   const BuildTarget({
     required this.description,
     required this.targetPlatform,
-    this.outputDir = BuiltInPlaceholders.buildDir,
+    this.outputDir = '${BuiltInPlaceholders.projectDir}/build',
   });
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
@@ -68,11 +72,16 @@ abstract class BuildTarget {
   /// embedders can declare platform identifiers that are not built into Flutter.
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
+  // TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
   final String targetPlatform;
 
   /// The directory pattern used by `flutter build` to determine this target's
   /// output directory (`{OUTPUT_DIR}`), for example
   /// `'${BuiltInPlaceholders.projectDir}/build/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
+  ///
+  /// Defaults to `'${BuiltInPlaceholders.projectDir}/build'`. Note that `{BUILD_DIR}`
+  /// refers to the intermediate assemble scratch directory (`.dart_tool/flutter_build`),
+  /// whereas `{PROJECT_DIR}/build` is the project's top-level `build/` directory.
   ///
   /// Supports [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir],
   /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
@@ -157,6 +166,9 @@ abstract base class BuildService extends ToolExtensionService {
 
   /// RPC parameter key for the build mode.
   static const String buildModeParam = 'buildMode';
+
+  /// RPC parameter key for the Flutter SDK root directory.
+  static const String flutterRootParam = 'flutterRoot';
 
   /// RPC parameter key for the main entrypoint path.
   static const String mainPathParam = 'mainPath';
@@ -251,19 +263,11 @@ abstract base class BuildService extends ToolExtensionService {
     final Uri projectRootUri = _requireAbsoluteDirectoryUri(params, projectRootParam);
     final String mainPath = _requireString(params, mainPathParam);
     final String buildMode = _requireString(params, buildModeParam);
-    final Uri outputDirUri = switch (params[outputDirParam]) {
-      String() => _requireAbsoluteDirectoryUri(params, outputDirParam),
-      _ when !params.containsKey(outputDirParam) => projectRootUri,
-      _ => throw RpcException.invalidParams('Missing or invalid "$outputDirParam" parameter.'),
-    };
-    final Uri buildDirUri = switch (params[buildDirParam]) {
-      String() => _requireAbsoluteDirectoryUri(params, buildDirParam),
-      _ when !params.containsKey(buildDirParam) => projectRootUri,
-      _ => throw RpcException.invalidParams('Missing or invalid "$buildDirParam" parameter.'),
-    };
+    final Uri outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
+    final Uri buildDirUri = _requireAbsoluteDirectoryUri(params, buildDirParam);
+    final Uri flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
     final Map<String, Object?> rawResolvedArtifacts = switch (params[resolvedArtifactsParam]) {
       final Map<String, Object?> value => value,
-      _ when !params.containsKey(resolvedArtifactsParam) => const <String, Object?>{},
       _ => throw RpcException.invalidParams(
         'Missing or invalid "$resolvedArtifactsParam" parameter.',
       ),
@@ -287,6 +291,7 @@ abstract base class BuildService extends ToolExtensionService {
     final context = ExtensionBuildContext(
       buildDir: buildDirUri,
       buildMode: mode,
+      flutterRoot: flutterRootUri,
       mainPath: mainPath,
       outputDir: outputDirUri,
       projectRoot: projectRootUri,

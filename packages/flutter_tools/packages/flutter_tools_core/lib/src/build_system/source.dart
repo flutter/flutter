@@ -6,6 +6,15 @@ import 'package:meta/meta.dart';
 
 import '../build.dart';
 
+const _validLeadingDirectoryPlaceholders = <String>{
+  BuiltInPlaceholders.projectDir,
+  BuiltInPlaceholders.workspaceDir,
+  BuiltInPlaceholders.buildDir,
+  BuiltInPlaceholders.cacheDir,
+  BuiltInPlaceholders.flutterRootDir,
+  BuiltInPlaceholders.outputDir,
+};
+
 /// Represents an artifact downloaded from the Flutter cache (e.g. engine binaries, frameworks).
 ///
 /// Extensions can reference these artifacts in their target inputs/outputs,
@@ -70,7 +79,7 @@ sealed class ExtensionSource {
     return switch (json[typeKey]) {
       patternType => ExtensionSource.pattern(
         switch (json[valueKey]) {
-          final String value => value,
+          final String value => ExtensionPatternSource.parse(value),
           _ => throw ArgumentError(
             'Missing or invalid "$valueKey" for $patternType ExtensionSource.',
           ),
@@ -147,6 +156,25 @@ sealed class ExtensionSource {
 @immutable
 final class ExtensionPatternSource extends ExtensionSource {
   const ExtensionPatternSource(this.value, {this.optional = false});
+
+  /// Parses and validates a pattern string starting with a directory placeholder.
+  ///
+  /// A valid placeholder must either equal [value] or be followed immediately by
+  /// `/` (e.g. `'{PROJECT_DIR}/lib/main.dart'`).
+  ///
+  /// Throws a [FormatException] if [value] does not begin with a valid directory
+  /// placeholder.
+  static String parse(String value) {
+    for (final String placeholder in _validLeadingDirectoryPlaceholders) {
+      if (value == placeholder || value.startsWith('$placeholder/')) {
+        return value;
+      }
+    }
+    throw FormatException(
+      'Invalid pattern "$value": must start with a directory placeholder followed by "/".',
+      value,
+    );
+  }
 
   /// The file path pattern beginning with a directory placeholder.
   final String value;
