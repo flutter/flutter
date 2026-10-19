@@ -2141,7 +2141,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/181169.
     testWidgets(
-      'selection dragged across a nested two-dimensional scrollable selects its built cells without scrolling it',
+      'selection started above a nested two-dimensional scrollable and released below it selects its built cells without scrolling it',
       (WidgetTester tester) async {
         final outerController = ScrollController();
         addTearDown(outerController.dispose);
@@ -2168,7 +2168,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/181169.
     testWidgets(
-      'selection dragged across a vertical list whose first child is a horizontal list selects their built items without scrolling them',
+      'selection started above a vertical list whose first child is a horizontal list and released below it selects their built items without scrolling them',
       (WidgetTester tester) async {
         final outerController = ScrollController();
         addTearDown(outerController.dispose);
