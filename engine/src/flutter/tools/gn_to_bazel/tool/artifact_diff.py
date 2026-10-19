@@ -41,7 +41,11 @@ _VERSION_HASH = re.compile(rb"[0-9a-f]{40}")
 def _archives(root):
     """The zip files under `<root>/**/zip_archives/`, by their path under zip_archives/."""
     found = {}
-    for directory, _, files in os.walk(root, followlinks=True):
+    # The root may be a convenience symlink (bazel-bin); below it the
+    # archives sit in real directories, and the symlinks are the runfiles
+    # forests of every test and binary, which lead back into the checkout.
+    for directory, subdirectories, files in os.walk(os.path.realpath(root)):
+        subdirectories[:] = [d for d in subdirectories if not d.endswith(".runfiles")]
         if "zip_archives" not in directory.split(os.sep):
             continue
         parts = directory.split(os.sep)

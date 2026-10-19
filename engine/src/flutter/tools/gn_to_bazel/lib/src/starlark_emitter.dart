@@ -882,6 +882,40 @@ final class _Emitter {
           'an entry of ${variable.name} is $value, not a { source, destination } scope',
         );
       }
+      // Every output of a copy at its build-directory path (the GTK bundle:
+      // `foreach(source, get_target_outputs(":publish_headers_linux"))` with
+      // `destination = rebase_path(source, root_build_dir)`): a zip_tree of
+      // the copy's files, rooted so that each lands where the copy's output
+      // pattern puts it.
+      final GnValue? sourceValue = value.variables['source']?.unconditionalItems?.singleOrNull;
+      final GnValue? destinationValue =
+          value.variables['destination']?.unconditionalItems?.singleOrNull;
+      if (sourceValue is GnTargetOutputsValue || destinationValue is GnTargetOutputPathsValue) {
+        if (sourceValue is! GnTargetOutputsValue ||
+            destinationValue is! GnTargetOutputPathsValue ||
+            sourceValue.label != destinationValue.label) {
+          throw GnError(
+            location,
+            "an entry over a target's outputs must place each at its build-directory path "
+            '(destination = rebase_path(source, root_build_dir))',
+          );
+        }
+        _use(templateMappings['zip_bundle']!.bzl, 'zip_tree');
+        final String gnLabel = sourceValue.label;
+        final name = '${target.name}_${gnLabel.substring(gnLabel.indexOf(':') + 1)}';
+        final tree = _Rule('zip_tree', name, const <String>[])
+          ..scalars['root'] = _starlarkString(_copyTreeRoot(gnLabel, location))
+          ..scalars['destination'] = '""';
+        tree
+            .list('srcs')
+            .add(
+              Condition.always,
+              _Item(_localLabel(bazelLabel(gnLabel, package: gnPackage, location: location))),
+            );
+        rules.add(tree);
+        rule.list('trees').add(item.condition, _Item(':$name'));
+        continue;
+      }
       // A destination (or source) that varies with a condition -- GN's
       // `"${path_prefix}platform_strong.dill"` with the prefix set under the
       // release mode -- is an entry per case, each under its condition.
@@ -960,6 +994,71 @@ final class _Emitter {
       parts.add(out.toString());
     }
     return parts.join(' | ');
+  }
+
+  /// The zip_tree `root` for the outputs of the copy [gnLabel]: a copy whose
+  /// outputs are `$root_out_dir/<dir>/{{source_file_part}}` places each
+  /// source at `<dir>/<name>` in the build directory, and its Bazel files
+  /// are the sources themselves (gn_copy), so the root is the sources'
+  /// directory above `<dir>` -- the same for every source, or the shape is
+  /// not one a tree can say.
+  String _copyTreeRoot(String gnLabel, GnLocation location) {
+    final int colon = gnLabel.indexOf(':');
+    final String directory = gnLabel.substring(0, colon);
+    final String name = gnLabel.substring(colon + 1);
+    final GnTarget? copy = directory == gnPackage
+        ? localTargets[name]
+        : forwarded.targetOf(gnLabel);
+    if (copy == null || copy.rule != 'copy') {
+      throw GnError(location, '$gnLabel is not a copy() the converter can read');
+    }
+    final List<GnValue>? outputs = copy.variables['outputs']?.unconditionalItems;
+    final List<GnValue>? sources = copy.variables['sources']?.unconditionalItems;
+    const prefix = '$buildDirRoot/';
+    const suffix = '/{{source_file_part}}';
+    final GnValue? output = outputs?.singleOrNull;
+    // `<dir>` between the prefix and the suffix, which share no character:
+    // a copy into the build root itself has no directory a tree could stand
+    // for.
+    final String? under =
+        output is GnStringValue &&
+            output.value.startsWith(prefix) &&
+            output.value.endsWith(suffix) &&
+            output.value.length > prefix.length + suffix.length
+        ? output.value.substring(prefix.length, output.value.length - suffix.length)
+        : null;
+    if (under == null || sources == null) {
+      throw GnError(
+        location,
+        'the outputs of $gnLabel are not `\$root_out_dir/<dir>/{{source_file_part}}` over its sources',
+      );
+    }
+    String? root;
+    for (final GnValue source in sources) {
+      if (source is! GnStringValue) {
+        throw GnError(location, 'a source of $gnLabel is not a path');
+      }
+      final String absolute = source.value.startsWith('//')
+          ? source.value
+          : _normalized('$directory/${source.value}', location);
+      final String? relative = layout.relativePath(absolute);
+      final tail = '/$under/${p.basename(absolute)}';
+      if (relative == null || !relative.endsWith(tail)) {
+        throw GnError(
+          location,
+          '${source.value} of $gnLabel does not lie under a `$under` directory, as its output does',
+        );
+      }
+      final String candidate = relative.substring(0, relative.length - tail.length);
+      if (root != null && root != candidate) {
+        throw GnError(
+          location,
+          'the sources of $gnLabel lie under different roots: $root, $candidate',
+        );
+      }
+      root = candidate;
+    }
+    return root ?? '';
   }
 
   /// The string [member] of [scope] (`source`, `destination`): its one
