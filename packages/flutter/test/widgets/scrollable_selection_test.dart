@@ -2013,24 +2013,26 @@ void main() {
       required ScrollController horizontalController,
       int maxYIndex = 99,
     }) {
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 99,
+        maxYIndex: maxYIndex,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return Center(
+            child: Text(
+              'Cell r${vicinity.yIndex} c${vicinity.xIndex}',
+              style: nestedFixtureTextStyle,
+            ),
+          );
+        },
+      );
+      addTearDown(delegate.dispose);
       // The table lays its cells out at 200x200 only under loose constraints.
       return Align(
         alignment: Alignment.topLeft,
         child: SimpleBuilderTableView(
           verticalDetails: ScrollableDetails.vertical(controller: verticalController),
           horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
-          delegate: TwoDimensionalChildBuilderDelegate(
-            maxXIndex: 99,
-            maxYIndex: maxYIndex,
-            builder: (BuildContext context, ChildVicinity vicinity) {
-              return Center(
-                child: Text(
-                  'Cell r${vicinity.yIndex} c${vicinity.xIndex}',
-                  style: nestedFixtureTextStyle,
-                ),
-              );
-            },
-          ),
+          delegate: delegate,
         ),
       );
     }
