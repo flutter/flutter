@@ -16,6 +16,8 @@ import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
+import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart'
+    show copyNativeCodeAssetsMacOSFlutterTester;
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
     show cCompilerConfigMacOS;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -431,6 +433,99 @@ void main() {
       );
     }
   }
+
+  const dylibPathBarTester = '/build/native_assets/macos/libbar.dylib';
+  testUsingContext(
+    'flutter tester keeps the install name of a dylib without header room for its path',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'lipo',
+            '-create',
+            '-output',
+            dylibPathBarTester,
+            'arm64/libbar.dylib',
+          ],
+        ),
+        const FakeCommand(
+          command: <Pattern>['xcrun', 'otool', '-D', dylibPathBarTester],
+          stdout: '$dylibPathBarTester (architecture arm64):\n@rpath/libbar.dylib',
+        ),
+        const FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'install_name_tool',
+            '-id',
+            dylibPathBarTester,
+            '-change',
+            '@rpath/libbar.dylib',
+            dylibPathBarTester,
+            dylibPathBarTester,
+          ],
+          exitCode: 1,
+          stderr:
+              "error: install_name_tool: changing install names or rpaths can't be redone "
+              'for: $dylibPathBarTester (for architecture arm64) because larger updated '
+              'load commands do not fit (the program must be relinked, and you may need '
+              'to use -headerpad or -headerpad_max_install_names)',
+        ),
+        const FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'install_name_tool',
+            '-change',
+            '@rpath/libbar.dylib',
+            dylibPathBarTester,
+            dylibPathBarTester,
+          ],
+        ),
+        const FakeCommand(
+          command: <Pattern>[
+            'xcrun',
+            'codesign',
+            '--force',
+            '--sign',
+            '-',
+            '--timestamp=none',
+            dylibPathBarTester,
+          ],
+        ),
+      ]),
+    },
+    () async {
+      if (const LocalPlatform().isWindows) {
+        return; // Backslashes in commands, but we will never run these commands on Windows.
+      }
+      final List<File> installedFiles = await copyNativeCodeAssetsMacOSFlutterTester(
+        Uri.directory('/build/native_assets/macos/'),
+        <Uri, List<FlutterCodeAsset>>{
+          Uri.file('libbar.dylib'): <FlutterCodeAsset>[
+            FlutterCodeAsset(
+              codeAsset: CodeAsset(
+                package: 'bar',
+                name: 'bar.dart',
+                linkMode: DynamicLoadingBundled(),
+                file: Uri.file('arm64/libbar.dylib'),
+              ),
+              os: OS.macOS,
+              architecture: Architecture.arm64,
+            ),
+          ],
+        },
+        null,
+        BuildMode.debug,
+        fileSystem,
+      );
+
+      expect(installedFiles.single.path, dylibPathBarTester);
+      expect(
+        (globals.logger as BufferLogger).warningText,
+        allOf(contains('package:bar/bar.dart'), contains('-headerpad_max_install_names')),
+      );
+    },
+  );
 
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.

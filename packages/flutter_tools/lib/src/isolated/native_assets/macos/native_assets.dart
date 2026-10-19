@@ -6,6 +6,7 @@ import 'package:code_assets/code_assets.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
+import '../../../globals.dart' as globals;
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 import 'native_assets_host.dart';
@@ -157,6 +158,10 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
 /// referenced in dependent libraries are updated to match the new install name,
 /// so that the referenced library can be found the dynamic linker.
 ///
+/// A dylib whose header has no room for its absolute path keeps its own
+/// install name, and a warning is printed. Its dependents still reference it
+/// by the absolute path, and so does the native assets manifest.
+///
 /// Code signing is also done here.
 Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
   Uri targetUri,
@@ -168,7 +173,7 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
-  final dylibs = <(File, String)>[];
+  final dylibs = <(File, String, String)>[];
 
   for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
     final Uri target = assetMapping.key;
@@ -189,11 +194,24 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
-    dylibs.add((dylibFile, newInstallName));
+    dylibs.add((dylibFile, newInstallName, assetMapping.value.first.codeAsset.id));
   }
 
-  for (final (File dylibFile, String newInstallName) in dylibs) {
-    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
+  for (final (File dylibFile, String newInstallName, String assetId) in dylibs) {
+    final bool installNameSet = await setInstallNamesDylib(
+      dylibFile,
+      newInstallName,
+      oldToNewInstallNames,
+      keepInstallNameIfItDoesNotFit: true,
+    );
+    if (!installNameSet) {
+      globals.printWarning(
+        'The install name of code asset "$assetId" was not changed to its path, '
+        'because the new name does not fit in the header of ${dylibFile.path}. '
+        'The asset is loaded by its path instead. To avoid this, the package '
+        'that provides it should link it with -headerpad_max_install_names.',
+      );
+    }
     await codesignDylib(codesignIdentity, buildMode, dylibFile);
   }
   return installedFiles;
