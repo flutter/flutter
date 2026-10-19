@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:gn_to_bazel/gn_to_bazel.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -4685,6 +4686,195 @@ cc_library(
         expect(output, isNot(contains('_dir')));
       },
     );
+  });
+
+  group('builders', () {
+    // Builder files of the shapes ci/builders/linux_*.json has: a build
+    // whose flags all map, one with a flag the Bazel build cannot express,
+    // one of another platform, and ninja targets in each of GN's spellings.
+    Map<String, BuilderConfig> configs(Map<String, String> files) {
+      final Directory root = Directory.systemTemp.createTempSync('gn_to_bazel_builders');
+      addTearDown(() => root.deleteSync(recursive: true));
+      for (final MapEntry<String, String> file in files.entries) {
+        File(p.join(root.path, file.key)).writeAsStringSync(file.value);
+      }
+      final loader = BuildConfigLoader(buildConfigsDir: root);
+      final Map<String, BuilderConfig> loaded = loader.configs;
+      expect(loader.errors, isEmpty);
+      return loaded;
+    }
+
+    String build(
+      String name,
+      String gn,
+      List<String> ninja, {
+      List<String> archives = const <String>[],
+      String tests = '',
+    }) {
+      return '''
+{
+  "name": "$name",
+  "gn": [${gn.split(' ').where((String s) => s.isNotEmpty).map((String s) => '"$s"').join(', ')}],
+  "ninja": {"config": "$name", "targets": [${ninja.map((String s) => '"$s"').join(', ')}]},
+  "archives": [${archives.isEmpty ? '' : '{"name": "$name", "base_path": "out/$name/zip_archives/", "type": "gcs", "include_paths": [${archives.map((String s) => '"$s"').join(', ')}], "realm": "production"}'}],
+  "tests": [$tests],
+  "drone_dimensions": ["os=Linux"],
+  "gclient_variables": {}
+}''';
+    }
+
+    String runTests(String name, String types) {
+      return '{"name": "$name", "language": "python3", "script": "flutter/testing/run_tests.py", '
+          '"parameters": ["--variant", "x", "--type", "$types"], "contexts": []}';
+    }
+
+    test('maps flags to configurations and ninja targets to install targets', () {
+      final Map<String, BuilderConfig> loaded = configs(<String, String>{
+        'linux_host_engine.json':
+            '''
+{"builds": [
+  ${build('ci/host_debug', '--target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma', <String>['flutter/build/archives:artifacts', 'flutter/tools/font_subset', 'sky_engine', 'flutter', 'flutter:unittests'], archives: <String>['out/ci/host_debug/zip_archives/linux-x64/artifacts.zip'])},
+  ${build('ci/host_release', '--target-dir ci/host_release --runtime-mode=release --prebuilt-dart-sdk --no-lto', <String>['flutter/build/archives:flutter_patched_sdk'])},
+  ${build('ci/host_debug_test', '--target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --no-lto', <String>['flutter:unittests'], tests: '${runTests('Host Tests', 'dart,dart-host,engine,impeller-golden')}, {"name": "Lint", "language": "bash", "script": "flutter/ci/lint.sh", "parameters": [], "contexts": []}')},
+  ${build('ci/host_debug_unopt', '--runtime-mode debug --unoptimized --asan --dart-debug', <String>['flutter/tools/font_subset', 'flutter/fml:fml_unittests'])},
+  ${build('ci/host_profile_lto', '--runtime-mode profile --prebuilt-dart-sdk', <String>['flutter/tools/font_subset'])},
+  ${build('ci/android_debug', '--android --android-cpu=arm --no-lto', <String>['flutter'])}
+]}''',
+        'mac_host_engine.json':
+            '{"builds": [${build('ci/mac_host', '--runtime-mode debug --no-lto', <String>['flutter'])}]}',
+      });
+      final List<BuilderBuild> builds = linuxHostBuilds(loaded);
+      expect(builds.map((BuilderBuild b) => b.configName), <String>[
+        'host_debug',
+        'host_release',
+        'host_debug_test',
+        'host_debug_unopt',
+        'host_profile_lto',
+      ]);
+      expect(
+        configsBazelrc(builds),
+        contains('''
+# linux_host_engine.json: ci/host_debug
+#   --target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma
+build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+
+# linux_host_engine.json: ci/host_release
+#   --target-dir ci/host_release --runtime-mode=release --prebuilt-dart-sdk --no-lto
+build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+
+# linux_host_engine.json: ci/host_debug_test
+#   --target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --no-lto
+build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+
+# linux_host_engine.json: ci/host_debug_unopt
+#   --runtime-mode debug --unoptimized --asan --dart-debug
+# No configuration: the Bazel build cannot express
+#   --asan (the toolchain has no sanitizer feature yet)
+#   --dart-debug (the wrapped Dart SDK build is not parameterized by dart_debug)
+
+# linux_host_engine.json: ci/host_profile_lto
+#   --runtime-mode profile --prebuilt-dart-sdk
+# No configuration: the Bazel build cannot express
+#   LTO, which tools/gn enables without --no-lto (the Bazel toolchain has no LTO)
+'''),
+      );
+      final String buildFile = buildersBuildFile(
+        builds,
+        <String, Set<String>>{
+          '//flutter/build/archives': <String>{'artifacts', 'flutter_patched_sdk'},
+          '//flutter/tools/font_subset': <String>{'font_subset'},
+          '//flutter/sky/packages/sky_engine': <String>{'sky_engine'},
+          '//flutter/impeller/compiler/shader_lib/flutter': <String>{'flutter'},
+        },
+        convertedTests: <String, Set<String>>{
+          '//flutter/fml': <String>{'fml_unittests'},
+          '//flutter/txt': <String>{'txt_unittests'},
+        },
+      );
+      // `flutter` is the directory //flutter (not converted), not the
+      // shader_lib target of that name; `flutter:unittests` is not converted.
+      expect(
+        buildFile,
+        contains('''
+# linux_host_engine.json: ci/host_debug
+#   bazel run --config=host_debug :host_debug
+# Not built, no Bazel counterpart yet: flutter, flutter:unittests.
+install(
+    name = "host_debug",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/sky/packages/sky_engine:sky_engine",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+    directory = "ci/host_debug",
+)
+'''),
+      );
+      expect(
+        buildFile,
+        contains('''
+# linux_host_engine.json: ci/host_debug_unopt
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+# Tests, run by `bazel test` rather than installed: flutter/fml:fml_unittests.
+install(
+    name = "host_debug_unopt",
+    testonly = True,
+    contents = ["//engine/src/flutter/tools/font_subset:font_subset"],
+)
+'''),
+      );
+      expect(buildFile, isNot(contains('ci/android_debug')));
+      expect(buildFile, isNot(contains('mac_host')));
+      // The tests: the suites of the run_tests.py types, the `engine` type's
+      // executables among the converted tests, the rest on record.
+      expect(
+        buildFile,
+        contains(
+          '''
+# linux_host_engine.json: ci/host_debug_test
+#   bazel run --config=host_debug_test :host_debug_test
+# Not built, no Bazel counterpart yet: flutter:unittests.
+# Nothing to install.
+
+# ci/host_debug_test's tests: run_tests.py --type dart,dart-host,engine,impeller-golden.
+# Not run, no Bazel test yet: assets_unittests (engine), client_wrapper_glfw_unittests (engine), ''',
+        ),
+      );
+      expect(
+        buildFile,
+        contains('the impeller-golden type.\n# Other steps, scripts of the checkout: Lint.\n'),
+      );
+      expect(
+        buildFile,
+        contains('''
+test_suite(
+    name = "host_debug_test_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/testing/dart:dart",
+        "//engine/src/flutter/testing/dart/vm_service:vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure",
+        "//engine/src/flutter/txt:txt_unittests",
+    ],
+)
+'''),
+      );
+    });
+
+    test('the engine type names executables run_tests.py runs', () {
+      // One-directional: every name of the table is one the script runs
+      // (the script's platform branches keep the other direction manual).
+      final String script = File(
+        p.join(Directory.current.path, '..', '..', 'testing', 'run_tests.py'),
+      ).readAsStringSync();
+      for (final String name in runTestsEngineSuites) {
+        expect(script, contains("make_test('$name'"), reason: name);
+      }
+    });
   });
 
   group('mirrored lists', () {

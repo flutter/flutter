@@ -825,16 +825,58 @@ Not installed yet: the web SDK, and GN's own bookkeeping (`args.gn`,
 `compile_commands.json`, depfiles). The builder-specific targets below
 install the archives alone.
 
-The uploader reads `engine/src/out/<build>/zip_archives/`; the root package
-has an `install` of the archives alone per Linux host builder of
-`ci/builders/linux_host_engine.json`:
-`bazel run -c opt //engine/src/flutter:install_host_debug_archives` and
-`bazel run -c opt --//engine/src/flutter/common:runtime_mode=release
-//engine/src/flutter:install_host_release_archives`; and one for the three
-desktop builders of `linux_host_desktop_engine.json`, which differ only in
-the mode: `install_host_desktop_archives` under
-`--//engine/src/flutter/common:runtime_mode=<mode>`. `generated_file` over
-`metadata` (the macOS entitlements lists) is the Apple phase's.
+## The builders: `--config=<build>` and their install targets
+
+CI's builds are `ci/builders/*.json`: for each, the `tools/gn` flags of its
+GN configuration, the ninja targets it builds, the archives it uploads from
+`engine/src/out/<target dir>/zip_archives/`, the tests it runs. The
+converter reads the Linux builder files (`tools/gn_to_bazel`'s
+`builders.dart`, run with the rest) and generates two files beside them.
+`ci/builders/configs.bazelrc`, which the root `.bazelrc` imports, has a
+`build:<name>` configuration per Linux x64 host build whose flags the Bazel
+build can all express -- `--runtime-mode` is the runtime mode setting,
+`--unoptimized` the compilation mode (its absence `-c opt`), `--target-dir`
+the build directory, `--prebuilt-dart-sdk` and `--no-lto` what the generated
+files assume, `--rbe`/`--no-goma` where the build runs and
+`--build-embedder-examples` a target list, neither a flag -- and, for a
+build with a flag the Bazel build has no setting for yet, the reason and no
+configuration: `--enable-fontconfig` (the three `*_desktop` builds:
+`flutter_use_fontconfig` and `skia_use_fontconfig` are false in the
+generated files, so the Linux desktop artifact built here lacks what CI's
+has), `--asan` and `--dart-debug` (`host_debug_unopt`), `--use-glfw-swiftshader`,
+`--gn-args=dart_dynamic_modules=true`, LTO (which `tools/gn` enables
+without `--no-lto`). Of the fourteen Linux x64 host builds, seven have a
+configuration: `host_debug`, `host_release`, `host_debug_test`,
+`host_profile_test`, `host_release_test`, `host_release_licenses`,
+`host_debug_clang_tidy`. `ci/builders/BUILD.bazel` has an `install` per
+build over the Bazel counterparts of its ninja targets (a label, a
+directory for its target of the same name, a bare unique name, as GN's
+ninja files spell them), installing into GN's `--target-dir`, with the
+targets nothing converted answers to listed (`flutter:unittests`,
+`flutter/build/dart:dart_sdk`, the licenses tool):
+
+```sh
+bazel run --config=host_release //engine/src/flutter/ci/builders:host_release
+bazel run --config=host_debug //engine/src/flutter/ci/builders:host_debug
+```
+
+lay `out/ci/host_release/zip_archives/flutter_patched_sdk_product.zip` and
+`out/ci/host_debug/zip_archives/`'s six archives where the builders'
+recipes read them. The executables and shared libraries a build's targets
+produce (`flutter_tester`, `libpath_ops.so`) land in the build root, as GN
+puts them. A build with tests also gets a `<name>_tests` suite over the
+Bazel suites that stand for its `run_tests.py` types (`dart` is the Dart
+tests under flutter_tester with the VM service's and the smoke test,
+`dart-host` the Dart packages' own, `benchmarks`, `font-subset`, and
+`engine` the 27 executables `run_cc_tests` runs on Linux, each the
+converted test of that name -- `runTestsTypeSuites` and
+`runTestsEngineSuites` in `builders.dart`), with the build's other steps
+(the formatter, the linters, `generate_metrics.sh`) listed as what they
+are, scripts of the checkout:
+`bazel test --config=host_debug_test //engine/src/flutter/ci/builders:host_debug_test_tests`
+runs what `Linux linux_host_engine_test`'s `host_debug_test` runs.
+`generated_file` over `metadata` (the macOS entitlements lists) is the
+Apple phase's.
 
 ## Impeller's shader pipeline
 
