@@ -83,6 +83,18 @@ class WebTemplate {
         '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
+        'serviceWorkerUrl',
+        'Flutter\'s service worker loader has been removed and "serviceWorkerUrl" is ignored. '
+            'Register custom service workers directly using "navigator.serviceWorker.register(...)". '
+            'See https://github.com/flutter/flutter/issues/156910 for more details.',
+      ),
+      if (!_content.contains('{{flutter_service_worker_version}}') &&
+          !_content.contains('serviceWorkerUrl'))
+        ..._getWarningsForPattern(
+          'serviceWorkerSettings',
+          '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
+        ),
+      ..._getWarningsForPattern(
         '_flutter.loader.loadEntrypoint(',
         '"FlutterLoader.loadEntrypoint" is deprecated. Use "FlutterLoader.load" instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
       ),

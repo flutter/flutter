@@ -423,6 +423,47 @@ void main() {
     expect(warnings.single.lineNumber, 14);
   });
 
+  test('warns on custom serviceWorkerUrl and hardcoded serviceWorkerSettings', () {
+    const bootstrapWithCustomUrl = '''
+{{flutter_js}}
+{{flutter_build_config}}
+_flutter.loader.load({
+  serviceWorkerSettings: {
+    serviceWorkerUrl: 'my_custom_sw.js',
+  },
+});
+''';
+    final List<WebTemplateWarning> urlWarnings = const WebTemplate(bootstrapWithCustomUrl)
+        .getWarnings();
+    expect(urlWarnings, hasLength(1));
+    expect(urlWarnings.single.lineNumber, 5);
+    expect(
+      urlWarnings.single.warningText,
+      contains(
+        'Register custom service workers directly using "navigator.serviceWorker.register(...)"',
+      ),
+    );
+
+    const bootstrapWithHardcodedVersion = '''
+{{flutter_js}}
+{{flutter_build_config}}
+_flutter.loader.load({
+  serviceWorkerSettings: {
+    serviceWorkerVersion: 'v1',
+  },
+});
+''';
+    final List<WebTemplateWarning> settingsWarnings = const WebTemplate(
+      bootstrapWithHardcodedVersion,
+    ).getWarnings();
+    expect(settingsWarnings, hasLength(1));
+    expect(settingsWarnings.single.lineNumber, 4);
+    expect(
+      settingsWarnings.single.warningText,
+      contains("Flutter's service worker is deprecated and has been removed."),
+    );
+  });
+
   test('applies web-define variable substitutions', () {
     const htmlWithWebDefines = '''
 <!DOCTYPE html>

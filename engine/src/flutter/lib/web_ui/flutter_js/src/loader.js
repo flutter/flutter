@@ -26,7 +26,14 @@ export class FlutterLoader {
    *                     supplies an `onEntrypointLoaded` Function as an option.
    */
   async loadEntrypoint(options) {
-    const { ...entrypoint } = options || {};
+    const { serviceWorker, ...entrypoint } = options || {};
+    if (serviceWorker) {
+      console.warn(
+        'FlutterLoader.loadEntrypoint: The "serviceWorker" option is deprecated and ignored. ' +
+        'Register custom service workers directly with navigator.serviceWorker.register(). ' +
+        'See https://github.com/flutter/flutter/issues/156910 for more details.'
+      );
+    }
     // A Trusted Types policy that is going to be used by the loader.
     const flutterTT = new FlutterTrustedTypesPolicy();
     // The FlutterEntrypointLoader instance could be injected as a dependency
@@ -54,7 +61,15 @@ export class FlutterLoader {
     onEntrypointLoaded,
     nonce,
     config,
+    serviceWorkerSettings,
   } = {}) {
+    if (serviceWorkerSettings) {
+      console.warn(
+        'FlutterLoader.load: The "serviceWorkerSettings" option is deprecated and ignored. ' +
+        'Register custom service workers directly with navigator.serviceWorker.register(). ' +
+        'See https://github.com/flutter/flutter/issues/156910 for more details.'
+      );
+    }
     config ??= {};
 
     /** @type {import("./types").BuildConfig} */
