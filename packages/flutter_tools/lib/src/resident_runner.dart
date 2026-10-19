@@ -91,6 +91,7 @@ class FlutterDevice {
         logger: logger,
         processManager: processManager,
         fileSystem: fs,
+        platform: platform,
       ),
       fileSystem: fs,
       logger: logger,
@@ -610,107 +611,76 @@ abstract class ResidentHandlers {
   }
 
   /// Dump the application's current widget tree to the terminal.
-  Future<bool> debugDumpApp() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpApp(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpApp() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpApp(isolateId: isolateId),
+  );
 
   /// Dump the application's current render tree to the terminal.
-  Future<bool> debugDumpRenderTree() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpRenderTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpRenderTree() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpRenderTree(isolateId: isolateId),
+  );
 
   /// Dump the application's current layer tree to the terminal.
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
+    if (!isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpLayerTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
+    return _debugDumpTree(
+      (FlutterVmService vmService, String isolateId) =>
+          vmService.flutterDebugDumpLayerTree(isolateId: isolateId),
+    );
   }
 
+  /// Dump the application's current focus tree to the terminal.
   Future<bool> debugDumpFocusTree() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
+    if (!isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpFocusTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
+    return _debugDumpTree(
+      (FlutterVmService vmService, String isolateId) =>
+          vmService.flutterDebugDumpFocusTree(isolateId: isolateId),
+    );
   }
 
   /// Dump the application's current semantics tree to the terminal.
   ///
   /// If semantics are not enabled, nothing is returned.
-  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpSemanticsTreeInTraversalOrder(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpSemanticsTreeInTraversalOrder() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(isolateId: isolateId),
+  );
 
   /// Dump the application's current semantics tree to the terminal.
   ///
   /// If semantics are not enabled, nothing is returned.
-  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: isolateId),
+  );
+
+  /// Returns whether at least one Flutter view was dumped.
+  Future<bool> _debugDumpTree(
+    Future<String> Function(FlutterVmService vmService, String isolateId) dumpCall,
+  ) async {
     if (!supportsServiceProtocol) {
       return false;
     }
+    var dumped = false;
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!
-            .flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: view.uiIsolate!.id!);
-        logger.printStatus(data);
+      if (device?.vmService case final vmService?) {
+        final List<FlutterView> views = await vmService.getFlutterViews();
+        for (final view in views) {
+          if (view.uiIsolate?.id case final isolateId?) {
+            final String data = await dumpCall(vmService, isolateId);
+            logger.printStatus(data);
+            dumped = true;
+          }
+        }
       }
     }
-    return true;
+    return dumped;
   }
 
   /// Toggle the "paint size" debugging feature.
@@ -1105,10 +1075,12 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
   @override
-  bool get isRunningDebug => !debuggingOptions.webUseWasm && debuggingOptions.buildInfo.isDebug;
+  bool get isRunningDebug =>
+      !debuggingOptions.webConfig.useWasm && debuggingOptions.buildInfo.isDebug;
 
   @override
-  bool get isRunningProfile => !debuggingOptions.webUseWasm && debuggingOptions.buildInfo.isProfile;
+  bool get isRunningProfile =>
+      !debuggingOptions.webConfig.useWasm && debuggingOptions.buildInfo.isProfile;
 
   @override
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
@@ -1674,28 +1646,16 @@ Future<String?> getMissingPackageHintForPlatform(
   required FileSystem fileSystem,
   required FlutterProjectFactory projectFactory,
 }) async {
-  switch (platform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
+  switch (platform.os) {
+    case .android:
       final FlutterProject project = projectFactory.fromDirectory(fileSystem.currentDirectory);
       final String manifestPath = fileSystem.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
-    case TargetPlatform.ios:
+    case .ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
-    case TargetPlatform.android:
-    case TargetPlatform.darwin:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_riscv64:
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
+    case .macos || .fuchsia || .linux || .tester || .web || .windows:
       return null;
-    case TargetPlatform.unsupported:
+    case .unsupported:
       TargetPlatform.throwUnsupportedTarget();
   }
 }

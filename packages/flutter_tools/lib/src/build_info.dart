@@ -18,7 +18,6 @@ import 'base/os.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
-import 'runner/flutter_command.dart' show FlutterOptions;
 
 /// Whether icon font subsetting is enabled by default.
 const kIconTreeShakerEnabledDefault = true;
@@ -33,8 +32,6 @@ class BuildInfo {
     List<String>? extraFrontEndOptions,
     List<String>? extraGenSnapshotOptions,
     List<String>? fileSystemRoots,
-    this.androidProjectArgs = const <String>[],
-    this.androidGradleProjectCacheDir,
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
@@ -46,17 +43,13 @@ class BuildInfo {
     this.performanceMeasurementFile,
     required this.packageConfigPath,
     this.codeSizeDirectory,
-    this.androidGradleDaemon = true,
-    this.androidSkipBuildDependencyValidation = false,
-    this.androidEnableHcpp,
-    this.explicitAndroidEnableHcpp,
+    this.androidGradleConfig = const AndroidGradleConfig(),
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
     this.includeUnsupportedPlatformLibraryStubs = false,
-    this.webEnableHotReload = false,
     this.deprecatedJsInterop,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
@@ -82,8 +75,6 @@ class BuildInfo {
       extraFrontEndOptions: extraFrontEndOptions ?? this.extraFrontEndOptions,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       fileSystemRoots: fileSystemRoots ?? this.fileSystemRoots,
-      androidProjectArgs: androidProjectArgs,
-      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       fileSystemScheme: fileSystemScheme ?? this.fileSystemScheme,
       buildNumber: buildNumber,
       buildName: buildName,
@@ -94,10 +85,7 @@ class BuildInfo {
       performanceMeasurementFile: performanceMeasurementFile,
       packageConfigPath: packageConfigPath ?? this.packageConfigPath,
       codeSizeDirectory: codeSizeDirectory,
-      androidGradleDaemon: androidGradleDaemon,
-      androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
-      androidEnableHcpp: androidEnableHcpp,
-      explicitAndroidEnableHcpp: explicitAndroidEnableHcpp,
+      androidGradleConfig: androidGradleConfig,
       packageConfig: packageConfig ?? this.packageConfig,
       initializeFromDill: initializeFromDill ?? this.initializeFromDill,
       assumeInitializeFromDillUpToDate: assumeInitializeFromDillUpToDate,
@@ -105,7 +93,6 @@ class BuildInfo {
       useLocalCanvasKit: useLocalCanvasKit,
       includeUnsupportedPlatformLibraryStubs:
           includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
-      webEnableHotReload: webEnableHotReload,
       deprecatedJsInterop: deprecatedJsInterop,
       treeShakeIcons: treeShakeIcons,
     );
@@ -189,50 +176,8 @@ class BuildInfo {
   /// will be written for code size profiling.
   final String? codeSizeDirectory;
 
-  /// Whether to enable the Gradle daemon when performing an Android build.
-  ///
-  /// Starting the daemon is the default behavior of the gradle wrapper script created
-  /// in a Flutter project. Setting this value to false will cause the tool to pass
-  /// `--no-daemon` to the gradle wrapper script, preventing it from spawning a daemon
-  /// process.
-  ///
-  /// For one-off builds or CI systems, preventing the daemon from spawning will
-  /// reduce system resource usage, at the cost of any subsequent builds starting
-  /// up slightly slower.
-  ///
-  /// The Gradle daemon may also be disabled in the Android application's properties file.
-  final bool androidGradleDaemon;
-
-  /// Whether to skip checking of individual versions of our Android build time
-  /// dependencies.
-  final bool androidSkipBuildDependencyValidation;
-
-  /// The default `enable-hcpp` value (currently false unless the CLI flag was
-  /// passed), given to Gradle so the Flutter Gradle Plugin can inject the
-  /// corresponding manifest metadata if absent.
-  ///
-  /// The injection only happens for application projects, and only when the
-  /// merged manifest does not already contain the
-  /// `io.flutter.embedding.android.EnableHcpp` metadata, so a value in the
-  /// app's manifest takes priority over this one. Module (aar) manifests are
-  /// never injected; the add-to-app host's manifest is the source of truth.
-  /// When null, no property is passed and no injection happens.
-  final bool? androidEnableHcpp;
-
-  /// The explicit `--[no-]enable-hcpp` value passed by the user on the CLI, or
-  /// null if the user did not pass the flag explicitly.
-  ///
-  /// Passed to Gradle, which writes it into the merged manifest over any value
-  /// already there, so it takes priority over both [androidEnableHcpp] and the
-  /// app's manifest. When null, the manifest decides.
-  final bool? explicitAndroidEnableHcpp;
-
-  /// Additional key value pairs that are passed directly to the gradle project via the `-P`
-  /// flag.
-  final List<String> androidProjectArgs;
-
-  /// Specifies Gradle's project-specific cache directory.
-  final String? androidGradleProjectCacheDir;
+  /// Android and Gradle-specific configuration for the build.
+  final AndroidGradleConfig androidGradleConfig;
 
   /// The package configuration for the loaded application.
   ///
@@ -259,9 +204,6 @@ class BuildInfo {
 
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
-
-  /// If set, web builds with DDC will run with support for hot reload.
-  final bool webEnableHotReload;
 
   /// Whether the web compilers (dart2js and DDC) allow the deprecated JS
   /// interop libraries, such as `dart:html` and `dart:js`.
@@ -351,43 +293,6 @@ class BuildInfo {
   /// so the uncapitalized flavor name is used to compute the output file name
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
 
-  /// The module system DDC is targeting, or null if not using DDC or the
-  /// associated flag isn't present.
-  // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  DdcModuleFormat get ddcModuleFormat {
-    final DdcModuleFormat moduleFormat = webEnableHotReload
-        ? DdcModuleFormat.ddc
-        : DdcModuleFormat.amd;
-    final DdcModuleFormat? parsedFormat = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
-      extraFrontEndOptions,
-    ).ddcModuleFormat;
-    if (parsedFormat != null && moduleFormat != parsedFormat) {
-      throw Exception(
-        'Unsupported option combination:\n'
-        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
-        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-module-format=${parsedFormat.name}',
-      );
-    }
-    return moduleFormat;
-  }
-
-  /// Whether to enable canary features when using DDC, or null if not using
-  /// DDC or the associated flag isn't present.
-  bool get canaryFeatures {
-    final bool canaryEnabled = webEnableHotReload;
-    final bool? parsedCanary = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
-      extraFrontEndOptions,
-    ).canaryFeatures;
-    if (parsedCanary != null && canaryEnabled != parsedCanary) {
-      throw Exception(
-        'Unsupported option combination:\n'
-        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
-        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-canary=$parsedCanary',
-      );
-    }
-    return canaryEnabled;
-  }
-
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
   ///
@@ -439,32 +344,64 @@ class BuildInfo {
       'FLAVOR': ?flavor,
     };
   }
+}
 
-  /// Convert this config to a series of project level arguments to be passed
-  /// on the command line to gradle.
-  List<String> toGradleConfig() {
-    // PACKAGE_CONFIG not currently supported.
-    return <String>[
-      if (dartDefines.isNotEmpty) '-Pdart-defines=${encodeDartDefines(dartDefines)}',
-      '-Pdart-obfuscation=$dartObfuscation',
-      if (frontendServerStarterPath != null)
-        '-Pfrontend-server-starter-path=$frontendServerStarterPath',
-      if (extraFrontEndOptions.isNotEmpty)
-        '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
-      if (extraGenSnapshotOptions.isNotEmpty)
-        '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
-      if (splitDebugInfoPath != null) '-Psplit-debug-info=$splitDebugInfoPath',
-      '-Ptrack-widget-creation=$trackWidgetCreation',
-      '-Ptree-shake-icons=$treeShakeIcons',
-      if (performanceMeasurementFile != null)
-        '-Pperformance-measurement-file=$performanceMeasurementFile',
-      if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
-      if (androidEnableHcpp != null) '-Penable-hcpp=$androidEnableHcpp',
-      if (explicitAndroidEnableHcpp != null) '-Pexplicit-enable-hcpp=$explicitAndroidEnableHcpp',
-      for (final String projectArg in androidProjectArgs) '-P$projectArg',
-      if (androidGradleProjectCacheDir != null) '--project-cache-dir=$androidGradleProjectCacheDir',
-    ];
-  }
+/// Android and Gradle-specific configuration for a build.
+@immutable
+class AndroidGradleConfig {
+  const AndroidGradleConfig({
+    this.projectArgs = const <String>[],
+    this.projectCacheDir,
+    this.gradleDaemon = true,
+    this.skipBuildDependencyValidation = false,
+    this.enableHcpp,
+    this.explicitEnableHcpp,
+  });
+
+  /// Additional key value pairs that are passed directly to the gradle project via the `-P`
+  /// flag.
+  final List<String> projectArgs;
+
+  /// Specifies Gradle's project-specific cache directory.
+  final String? projectCacheDir;
+
+  /// Whether to enable the Gradle daemon when performing an Android build.
+  ///
+  /// Starting the daemon is the default behavior of the gradle wrapper script created
+  /// in a Flutter project. Setting this value to false will cause the tool to pass
+  /// `--no-daemon` to the gradle wrapper script, preventing it from spawning a daemon
+  /// process.
+  ///
+  /// For one-off builds or CI systems, preventing the daemon from spawning will
+  /// reduce system resource usage, at the cost of any subsequent builds starting
+  /// up slightly slower.
+  ///
+  /// The Gradle daemon may also be disabled in the Android application's properties file.
+  final bool gradleDaemon;
+
+  /// Whether to skip checking of individual versions of our Android build time
+  /// dependencies.
+  final bool skipBuildDependencyValidation;
+
+  /// The default `enable-hcpp` value (currently false unless the CLI flag was
+  /// passed), given to Gradle so the Flutter Gradle Plugin can inject the
+  /// corresponding manifest metadata if absent.
+  ///
+  /// The injection only happens for application projects, and only when the
+  /// merged manifest does not already contain the
+  /// `io.flutter.embedding.android.EnableHcpp` metadata, so a value in the
+  /// app's manifest takes priority over this one. Module (aar) manifests are
+  /// never injected; the add-to-app host's manifest is the source of truth.
+  /// When null, no property is passed and no injection happens.
+  final bool? enableHcpp;
+
+  /// The explicit `--[no-]enable-hcpp` value passed by the user on the CLI, or
+  /// null if the user did not pass the flag explicitly.
+  ///
+  /// Passed to Gradle, which writes it into the merged manifest over any value
+  /// already there, so it takes priority over both [enableHcpp] and the
+  /// app's manifest. When null, the manifest decides.
+  final bool? explicitEnableHcpp;
 }
 
 /// Information about an Android build to be performed or used.
@@ -495,6 +432,42 @@ class AndroidBuildInfo {
   /// options to the engine without relying on Intent extras. It is only relevant when building
   /// from source (i.e., not using a prebuilt application binary).
   final List<String>? releaseManifestEngineShellArgs;
+
+  /// Converts [buildInfo], [BuildInfo.androidGradleConfig], and [splitPerAbi]
+  /// into project-level arguments to be passed on the command line to Gradle.
+  ///
+  /// Note that [targetArchs] (`-Ptarget-platform`) is resolved by the Gradle
+  /// builder so `--local-engine` can override it from the local engine path.
+  List<String> toGradleConfig() {
+    final AndroidGradleConfig gradleConfig = buildInfo.androidGradleConfig;
+    // PACKAGE_CONFIG not currently supported.
+    return <String>[
+      if (buildInfo.dartDefines.isNotEmpty)
+        '-Pdart-defines=${encodeDartDefines(buildInfo.dartDefines)}',
+      '-Pdart-obfuscation=${buildInfo.dartObfuscation}',
+      if (buildInfo.frontendServerStarterPath != null)
+        '-Pfrontend-server-starter-path=${buildInfo.frontendServerStarterPath}',
+      if (buildInfo.extraFrontEndOptions.isNotEmpty)
+        '-Pextra-front-end-options=${buildInfo.extraFrontEndOptions.join(',')}',
+      if (buildInfo.extraGenSnapshotOptions.isNotEmpty)
+        '-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions.join(',')}',
+      if (buildInfo.splitDebugInfoPath != null)
+        '-Psplit-debug-info=${buildInfo.splitDebugInfoPath}',
+      '-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}',
+      '-Ptree-shake-icons=${buildInfo.treeShakeIcons}',
+      if (buildInfo.performanceMeasurementFile != null)
+        '-Pperformance-measurement-file=${buildInfo.performanceMeasurementFile}',
+      if (buildInfo.codeSizeDirectory != null)
+        '-Pcode-size-directory=${buildInfo.codeSizeDirectory}',
+      if (gradleConfig.enableHcpp != null) '-Penable-hcpp=${gradleConfig.enableHcpp}',
+      if (gradleConfig.explicitEnableHcpp != null)
+        '-Pexplicit-enable-hcpp=${gradleConfig.explicitEnableHcpp}',
+      for (final String projectArg in gradleConfig.projectArgs) '-P$projectArg',
+      if (gradleConfig.projectCacheDir != null)
+        '--project-cache-dir=${gradleConfig.projectCacheDir}',
+      if (splitPerAbi) '-Psplit-per-abi=true',
+    ];
+  }
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -511,7 +484,7 @@ String? validatedBuildNumberForPlatform(
   if (buildNumber == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform.os case .ios || .macos) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
@@ -534,9 +507,7 @@ String? validatedBuildNumberForPlatform(
     }
     return tmpBuildNumber;
   }
-  if (targetPlatform == TargetPlatform.android_arm ||
-      targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64) {
+  if (targetPlatform.os == .android) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
     final disallowed = RegExp(r'[^\d]');
     String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
@@ -564,7 +535,7 @@ String? validatedBuildNameForPlatform(
   if (buildName == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform.os case .ios || .macos) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
@@ -587,10 +558,7 @@ String? validatedBuildNameForPlatform(
     }
     return tmpBuildName;
   }
-  if (targetPlatform == TargetPlatform.android ||
-      targetPlatform == TargetPlatform.android_arm ||
-      targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64) {
+  if (targetPlatform.os == .android) {
     // See versionName at https://developer.android.com/studio/publish/versioning
     return buildName;
   }
@@ -686,6 +654,31 @@ enum CpuArch {
   };
 }
 
+/// The operating system (or runtime environment) that a [TargetPlatform]
+/// targets, independent of CPU architecture.
+///
+/// Use [TargetPlatform.os] to obtain the operating system of a target platform.
+/// This is preferable to switching over [TargetPlatform] directly when the
+/// decision being made only depends on the operating system, since it avoids
+/// having to enumerate every architecture-specific variant.
+enum TargetOperatingSystem {
+  android,
+  ios,
+  macos,
+  linux,
+  windows,
+  fuchsia,
+
+  /// The web platform.
+  web,
+
+  /// The `flutter_tester` desktop embedder used by `flutter test`.
+  tester,
+
+  /// An unsupported target. See [TargetPlatform.unsupported].
+  unsupported,
+}
+
 enum TargetPlatform {
   android('android'),
   ios('ios'),
@@ -761,16 +754,30 @@ enum TargetPlatform {
     unsupported => throw UnsupportedError('Unexpected Fuchsia platform $this'),
   };
 
-  String get osName => switch (this) {
-    linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
-    darwin => 'macos',
-    windows_x64 || windows_arm64 => 'windows',
-    android || android_arm || android_arm64 || android_x64 => 'android',
-    fuchsia_arm64 || fuchsia_x64 => 'fuchsia',
-    ios => 'ios',
-    tester => 'flutter-tester',
-    web_javascript => 'web',
-    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  /// The operating system this platform targets, independent of CPU
+  /// architecture.
+  TargetOperatingSystem get os => switch (this) {
+    android || android_arm || android_arm64 || android_x64 => .android,
+    ios => .ios,
+    darwin => .macos,
+    linux_x64 || linux_arm64 || linux_riscv64 => .linux,
+    windows_x64 || windows_arm64 => .windows,
+    fuchsia_arm64 || fuchsia_x64 => .fuchsia,
+    web_javascript => .web,
+    tester => .tester,
+    unsupported => .unsupported,
+  };
+
+  String get osName => switch (os) {
+    .linux => 'linux',
+    .macos => 'macos',
+    .windows => 'windows',
+    .android => 'android',
+    .fuchsia => 'fuchsia',
+    .ios => 'ios',
+    .tester => 'flutter-tester',
+    .web => 'web',
+    .unsupported => throw UnsupportedError('Unexpected target platform $this'),
   };
 
   String get simpleName => switch (this) {
@@ -1152,9 +1159,6 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
       .toList();
 }
 
-/// Indicates the module system DDC is targeting.
-enum DdcModuleFormat { amd, ddc }
-
 /// Returns the compiler flags that select whether the deprecated JS interop
 /// libraries (such as `dart:html` and `dart:js`) may be used.
 ///
@@ -1168,27 +1172,6 @@ List<String> deprecatedJsInteropCompilerFlags(bool? deprecatedJsInterop) =>
       true => const <String>['--deprecated-js-interop'],
       false => const <String>['--no-deprecated-js-interop'],
     };
-
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-({DdcModuleFormat? ddcModuleFormat, bool? canaryFeatures})
-_ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(List<String>? extraFrontEndArgs) {
-  DdcModuleFormat? ddcModuleFormat;
-  bool? canaryFeatures;
-  if (extraFrontEndArgs != null) {
-    const ddcModuleFormatArg = '--dartdevc-module-format=';
-    const canaryFeaturesArg = '--dartdevc-canary';
-    for (final String flag in extraFrontEndArgs) {
-      if (flag.startsWith(ddcModuleFormatArg)) {
-        final String moduleFormatString = flag.substring(ddcModuleFormatArg.length, flag.length);
-        assert(ddcModuleFormat == null);
-        ddcModuleFormat = DdcModuleFormat.values.byName(moduleFormatString);
-      } else if (flag == canaryFeaturesArg) {
-        canaryFeatures = true;
-      }
-    }
-  }
-  return (ddcModuleFormat: ddcModuleFormat, canaryFeatures: canaryFeatures);
-}
 
 String _getCurrentHostPlatformArchName() {
   final HostPlatform hostPlatform = getCurrentHostPlatform();

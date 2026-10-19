@@ -44,6 +44,14 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
 
+FlutterView _flutterViewForId(int viewId) {
+  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
+  if (view == null) {
+    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
+  }
+  return view;
+}
+
 /// [WindowingOwner] implementation for Linux.
 ///
 /// If [Platform.isLinux] is false, then the constructor will throw an
@@ -336,9 +344,7 @@ abstract mixin class BaseWindowControllerLinux {
     _view = _FlView(engine, isSizedToContent: isSizedToContent);
     _viewMonitor = _FlViewMonitor(_view, onFirstFrame: onFirstFrame);
     final int viewId = _view.getId();
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = _flutterViewForId(viewId);
     _view.show();
     _window.add(_view);
   }
