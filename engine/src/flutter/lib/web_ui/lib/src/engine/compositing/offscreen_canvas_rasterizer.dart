@@ -64,12 +64,11 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     createCanvas: () => RenderCanvas(),
   );
 
+  // Nothing to prepare. The shared offscreen surface is resized as part of
+  // each `rasterize` call. Resizing it here, as a separate step, would let
+  // another view resize it again before this view renders.
   @override
-  Future<void> prepareToDraw() async {
-    // Nothing to prepare. The shared offscreen surface is resized as part of
-    // each `rasterize` call. Resizing it here, as a separate step, would let
-    // another view resize it again before this view renders.
-  }
+  Future<void> prepareToDraw() => Future<void>.value();
 
   @override
   Future<void> rasterize(

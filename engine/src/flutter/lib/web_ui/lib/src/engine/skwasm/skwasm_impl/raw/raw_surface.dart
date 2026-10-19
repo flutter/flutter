@@ -67,7 +67,7 @@ external void surfaceSetResourceCacheLimitBytes(SurfaceHandle surface, int bytes
 )
 external CallbackId surfaceRenderPictures(
   SurfaceHandle surface,
-  Pointer<PictureHandle> picture,
+  Pointer<PictureHandle> pictures,
   int count,
   int width,
   int height,

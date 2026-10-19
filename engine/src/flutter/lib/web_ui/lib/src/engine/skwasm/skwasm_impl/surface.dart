@@ -284,7 +284,7 @@ class SkwasmSurface implements OffscreenSurface {
   // Skwasm.
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) {
-    throw StateError('rasterizeToCanvas is not supported for SkwasmSurface');
+    throw UnsupportedError('rasterizeToCanvas is not supported for SkwasmSurface');
   }
 
   @override
