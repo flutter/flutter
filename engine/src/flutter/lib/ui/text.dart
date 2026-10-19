@@ -1732,7 +1732,7 @@ Int32List _encodeTextStyle(
 ///
 ///  * [TextStyle](https://api.flutter.dev/flutter/painting/TextStyle-class.html), the class in the [painting] library.
 ///
-final class TextStyle {
+class TextStyle {
   /// Creates a new TextStyle object.
   ///
   /// * `color`: The color to use when painting the text. If this is specified, `foreground` must be null.
