@@ -53,6 +53,7 @@ class PreviewPubspecBuilder {
     'flutter_lints',
     'google_fonts',
     'json_rpc_2',
+    'material_ui',
     'path',
     'stack_trace',
     'url_launcher',
@@ -127,9 +128,9 @@ class PreviewPubspecBuilder {
         if (project.manifest.appName.isNotEmpty)
           // Use `json.encode` to handle escapes correctly.
           project.manifest.appName: json.encode(<String, Object?>{
-            'path': widgetPreviewScaffoldProject.directory.fileSystem.path.absolute(
-              project.directory.path,
-            ),
+            'path': widgetPreviewScaffoldProject.directory.fileSystem.path
+                .absolute(project.directory.path)
+                .replaceAll(r'\', '/'),
           }),
     };
 

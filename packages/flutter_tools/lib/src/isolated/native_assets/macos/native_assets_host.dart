@@ -5,7 +5,6 @@
 // Shared logic between iOS and macOS implementations of native assets.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -14,6 +13,7 @@ import '../../../build_info.dart';
 import '../../../build_system/targets/darwin.dart';
 import '../../../globals.dart' as globals;
 import '../native_assets.dart';
+import '../native_assets_manifest.dart';
 
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
 ///
@@ -267,10 +267,7 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   if (isDylib && fileName.startsWith('lib')) {
     fileName = fileName.replaceFirst('lib', '');
   }
-  fileName = fileName.replaceAll(
-    RegExp(r'[^A-Za-z0-9._-]'),
-    '',
-  ); // Allow period chars in framework names, as per Apple's syntax rules (fixes issue https://github.com/dart-lang/native/issues/3268#issue-4152803855)
+  fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), ''); // Allow period chars in framework names, as per Apple's syntax rules (fixes issue https://github.com/dart-lang/native/issues/3268#issue-4152803855)
   if (alreadyTakenNames.contains(fileName)) {
     final prefixName = fileName;
     for (var i = 1; i < 1000; i++) {
@@ -347,8 +344,8 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   return architectureSections;
 }
 
-/// Groups native assets by their target framework path for multi-architecture
-/// bundling.
+/// Computes the [FlutterCodeAssetTargetLocation] for each [FlutterCodeAsset] on
+/// Apple platforms (macOS and iOS).
 ///
 /// On macOS and iOS, architecture-specific binaries for the same Asset ID are
 /// combined into a single "fat" (universal) binary using `lipo`. This function
@@ -357,27 +354,45 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
 /// If different architectures for the same Asset ID have different framework
 /// names, a warning is issued, and the name of the first encountered
 /// architecture is used.
-Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
-  List<FlutterCodeAsset> nativeAssets,
-  KernelAsset Function(FlutterCodeAsset asset, Set<String> alreadyTakenNames)
-  targetLocationCallback,
-) {
-  final alreadyTakenNamesPerTarget = <Target, Set<String>>{};
-  final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
-  final idToPath = <String, KernelAssetPath>{};
+Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsApple(
+  List<FlutterCodeAsset> nativeAssets, {
+  Uri? absolutePath,
+}) {
+  final alreadyTakenNamesPerArch = <Architecture, Set<String>>{};
+  final idToLocation = <String, FlutterCodeAssetTargetLocation>{};
+  final result = <FlutterCodeAsset, FlutterCodeAssetTargetLocation>{};
+
   for (final asset in nativeAssets) {
-    // Use same target path for all assets with the same id.
     final String assetId = asset.codeAsset.id;
-    final KernelAssetPath? existingPath = idToPath[assetId];
-    final Set<String> alreadyTakenNames = alreadyTakenNamesPerTarget.putIfAbsent(
-      asset.target,
+    final FlutterCodeAssetTargetLocation? existingLocation = idToLocation[assetId];
+    final Set<String> alreadyTakenNames = alreadyTakenNamesPerArch.putIfAbsent(
+      asset.architecture,
       () => <String>{},
     );
-    final KernelAssetPath currentPath = targetLocationCallback(asset, alreadyTakenNames).path;
+    final FlutterCodeAssetTargetLocation currentLocation = targetLocationForCodeAsset(asset, (
+      FlutterCodeAsset asset,
+    ) {
+      final String fileName = asset.codeAsset.file!.pathSegments.last;
+      if (absolutePath != null) {
+        // Flutter tester needs full host paths.
+        return FlutterCodeAssetTargetLocation(
+          runtimePath: NativeAssetAbsolutePath.fromFileUri(absolutePath.resolve(fileName)),
+          bundlePath: Uri(path: fileName),
+        );
+      }
+      final Uri bundlePath = frameworkUri(fileName, alreadyTakenNames);
+      return FlutterCodeAssetTargetLocation(
+        runtimePath: NativeAssetAbsolutePath(frameworkInstallName(bundlePath)),
+        bundlePath: bundlePath,
+      );
+    });
 
-    if (existingPath != null && existingPath != currentPath) {
-      final String existingName = (existingPath as KernelAssetAbsolutePath).uri.pathSegments.first;
-      final String currentName = (currentPath as KernelAssetAbsolutePath).uri.pathSegments.first;
+    if (existingLocation != null &&
+        existingLocation.bundlePath != null &&
+        currentLocation.bundlePath != null &&
+        existingLocation.bundlePath != currentLocation.bundlePath) {
+      final String existingName = existingLocation.bundlePath!.pathSegments.first;
+      final String currentName = currentLocation.bundlePath!.pathSegments.first;
       printXcodeWarning(
         'Code asset "$assetId" has different framework names for '
         'different architectures. Picking "$existingName" and '
@@ -388,10 +403,24 @@ Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
       );
     }
 
-    final KernelAssetPath path = existingPath ?? currentPath;
-    idToPath[assetId] = path;
-    result[path] ??= <FlutterCodeAsset>[];
-    result[path]!.add(asset);
+    final FlutterCodeAssetTargetLocation location = existingLocation ?? currentLocation;
+    idToLocation[assetId] = location;
+    result[asset] = location;
+  }
+  return result;
+}
+
+/// Groups bundled native assets by their target bundle [Uri] for universal
+/// binary (`lipo`) creation on macOS and iOS.
+Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocations(
+  Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocations,
+) {
+  final result = <Uri, List<FlutterCodeAsset>>{};
+  for (final MapEntry<FlutterCodeAsset, FlutterCodeAssetTargetLocation>(key: asset, value: location)
+      in assetTargetLocations.entries) {
+    if (location.bundlePath case final Uri bundlePath) {
+      (result[bundlePath] ??= <FlutterCodeAsset>[]).add(asset);
+    }
   }
   return result;
 }

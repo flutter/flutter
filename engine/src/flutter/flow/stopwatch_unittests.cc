@@ -19,7 +19,7 @@ class FakeRefreshRateUpdater : public Stopwatch::RefreshRateUpdater {
   void SetFrameBudget(fml::Milliseconds budget) { budget_ = budget; }
 
  private:
-  fml::Milliseconds budget_;
+  fml::Milliseconds budget_{};
 };
 
 TEST(Instrumentation, GetDefaultFrameBudgetTest) {

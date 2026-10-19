@@ -542,8 +542,7 @@ void main() {
     final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
-      text:
-          'ABC\u05D0\u05D1\u05D2DEF', // A B C Alef Bet Gimel D E F -- but the Hebrew letters are RTL
+      text: 'ABC\u05D0\u05D1\u05D2DEF', // A B C Alef Bet Gimel D E F -- but the Hebrew letters are RTL
       style: TextStyle(fontSize: 10.0),
     );
     painter.layout();

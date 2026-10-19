@@ -22,6 +22,7 @@ FLUTTER_ASSERT_ARC
 
 @interface FlutterTextInputView ()
 @property(nonatomic, copy) NSString* autofillId;
+@property(nonatomic, assign) BOOL preventCursorDismissWhenResignFirstResponder;
 - (void)setEditableTransform:(NSArray*)matrix;
 - (void)setTextInputClient:(int)client;
 - (void)setTextInputState:(NSDictionary*)state;
@@ -33,6 +34,9 @@ FLUTTER_ASSERT_ARC
 - (void)handleSearchWebAction;
 - (void)handleLookUpAction;
 - (void)handleShareAction;
+- (BOOL)becomeFirstResponderFromFramework;
+- (BOOL)resignFirstResponderFromFramework;
+- (void)handleTranslateAction;
 @end
 
 @interface FlutterTextInputViewSpy : FlutterTextInputView
@@ -591,6 +595,22 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   range = [FlutterTextRange rangeWithNSRange:NSMakeRange(10, 20)];
   substring = [inputView textInRange:range];
   XCTAssertEqual(substring.length, 0ul);
+}
+
+- (void)testInsertTextReplacesEntireMarkedRangeForDeadKeySequence {
+  // Regression test for https://github.com/flutter/flutter/issues/59541#issuecomment-4617810595.
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [inputView setMarkedText:@"´" selectedRange:NSMakeRange(1, 0)];
+  [inputView insertText:@"Á"];
+
+  UITextRange* range = [inputView textRangeFromPosition:inputView.beginningOfDocument
+                                             toPosition:inputView.endOfDocument];
+  NSString* substring = [inputView textInRange:range];
+  XCTAssertEqualObjects(substring, @"Á");
 }
 
 - (void)testTextInRangeAcceptsNSNotFoundLocationGracefully {
@@ -1696,6 +1716,236 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                  return ([state[@"selectionBase"] intValue]) == 9 &&
                                         ([state[@"selectionExtent"] intValue] == 9);
                                }]]);
+}
+
+- (void)testRestoringPlatformFirstResponderNotifiesFrameworkOnce {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  XCTAssertTrue([inputView becomeFirstResponderFromFramework]);
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didRestoreFirstResponderWithTextInputClient:123
+                                                              result:[OCMArg any]]);
+
+  XCTAssertTrue([inputView resignFirstResponder]);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didResignFirstResponderWithTextInputClient:123]);
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didRestoreFirstResponderWithTextInputClient:123
+                                                              result:[OCMArg any]]);
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didRestoreFirstResponderWithTextInputClient:123
+                                                               result:[OCMArg any]]);
+
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didRestoreFirstResponderWithTextInputClient:123
+                                                               result:[OCMArg any]]);
+
+  XCTAssertTrue([inputView resignFirstResponder]);
+  OCMVerify(times(2), [engine flutterTextInputView:inputView
+                          didResignFirstResponderWithTextInputClient:123]);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didRestoreFirstResponderWithTextInputClient:123
+                                                               result:[OCMArg any]]);
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  OCMVerify(times(2), [engine flutterTextInputView:inputView
+                          didRestoreFirstResponderWithTextInputClient:123
+                                                               result:[OCMArg any]]);
+
+  [inputView resignFirstResponderFromFramework];
+  [inputView removeFromSuperview];
+}
+
+- (void)testFrameworkResponderChangesCancelPendingFocusRestore {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  XCTAssertTrue([inputView becomeFirstResponderFromFramework]);
+  XCTAssertTrue([inputView resignFirstResponderFromFramework]);
+  XCTAssertTrue([inputView becomeFirstResponder]);
+
+  XCTAssertTrue([inputView resignFirstResponder]);
+  XCTAssertTrue([inputView becomeFirstResponderFromFramework]);
+
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didRestoreFirstResponderWithTextInputClient:123
+                                                              result:[OCMArg any]]);
+
+  [inputView resignFirstResponderFromFramework];
+  [inputView removeFromSuperview];
+}
+
+- (void)testInteractiveKeyboardResignDoesNotArmFocusRestore {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  XCTAssertTrue([inputView becomeFirstResponderFromFramework]);
+  inputView.preventCursorDismissWhenResignFirstResponder = YES;
+  XCTAssertTrue([inputView resignFirstResponder]);
+  inputView.preventCursorDismissWhenResignFirstResponder = NO;
+  XCTAssertTrue([inputView becomeFirstResponder]);
+
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didResignFirstResponderWithTextInputClient:123]);
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didRestoreFirstResponderWithTextInputClient:123
+                                                              result:[OCMArg any]]);
+
+  [inputView resignFirstResponderFromFramework];
+  [inputView removeFromSuperview];
+}
+
+- (void)testChangingClientCancelsPendingFocusRestore {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  XCTAssertTrue([inputView becomeFirstResponderFromFramework]);
+  XCTAssertTrue([inputView resignFirstResponder]);
+  [inputView setTextInputClient:456];
+  XCTAssertTrue([inputView becomeFirstResponder]);
+
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didRestoreFirstResponderWithTextInputClient:123
+                                                              result:[OCMArg any]]);
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didRestoreFirstResponderWithTextInputClient:456
+                                                              result:[OCMArg any]]);
+
+  [inputView resignFirstResponderFromFramework];
+  [inputView removeFromSuperview];
+}
+
+- (void)testResettingSameClientCancelsPendingFocusRestore {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  XCTAssertTrue([inputView becomeFirstResponderFromFramework]);
+  XCTAssertTrue([inputView resignFirstResponder]);
+  [inputView setTextInputClient:123];
+  XCTAssertTrue([inputView becomeFirstResponder]);
+
+  OCMVerify(never(), [engine flutterTextInputView:inputView
+                         didRestoreFirstResponderWithTextInputClient:123
+                                                              result:[OCMArg any]]);
+
+  [inputView resignFirstResponderFromFramework];
+  [inputView removeFromSuperview];
+}
+
+// Resigns and restores the first responder of |inputView| (client 123) from the platform side, and
+// returns the callback that delivers the framework's reply to the resulting focus restore
+// notification.
+- (FlutterResult)restorePlatformFirstResponderOfInputView:(FlutterTextInputView*)inputView {
+  __block FlutterResult restoreResult;
+  OCMStub([engine flutterTextInputView:inputView
+              didRestoreFirstResponderWithTextInputClient:123
+                                                   result:[OCMArg any]])
+      .andDo(^(NSInvocation* invocation) {
+        __unsafe_unretained FlutterResult resultUnsafe;
+        [invocation getArgument:&resultUnsafe atIndex:4];
+        restoreResult = resultUnsafe;
+      });
+
+  XCTAssertTrue([inputView becomeFirstResponderFromFramework]);
+  XCTAssertTrue([inputView resignFirstResponder]);
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  XCTAssertNotNil(restoreResult);
+  return restoreResult;
+}
+
+- (void)testDeclinedFocusRestoreResignsFirstResponder {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  FlutterResult restoreResult = [self restorePlatformFirstResponderOfInputView:inputView];
+  restoreResult(@NO);
+
+  XCTAssertFalse(inputView.isFirstResponder);
+  OCMVerify(times(2), [engine flutterTextInputView:inputView
+                          didResignFirstResponderWithTextInputClient:123]);
+
+  // The resign goes through the framework path, so a later restore does not notify again.
+  XCTAssertTrue([inputView becomeFirstResponder]);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didRestoreFirstResponderWithTextInputClient:123
+                                                               result:[OCMArg any]]);
+
+  [inputView resignFirstResponderFromFramework];
+  [inputView removeFromSuperview];
+}
+
+- (void)testAcceptedFocusRestoreKeepsFirstResponder {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  FlutterResult restoreResult = [self restorePlatformFirstResponderOfInputView:inputView];
+  restoreResult(@YES);
+
+  XCTAssertTrue(inputView.isFirstResponder);
+  OCMVerify(times(1), [engine flutterTextInputView:inputView
+                          didResignFirstResponderWithTextInputClient:123]);
+
+  [inputView resignFirstResponderFromFramework];
+  [inputView removeFromSuperview];
+}
+
+- (void)testFailedFocusRestoreReplyResignsFirstResponder {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  FlutterResult restoreResult = [self restorePlatformFirstResponderOfInputView:inputView];
+  restoreResult([FlutterError errorWithCode:@"error" message:nil details:nil]);
+
+  XCTAssertFalse(inputView.isFirstResponder);
+
+  [inputView removeFromSuperview];
+}
+
+- (void)testChangingClientIgnoresPendingFocusRestoreReply {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  [inputView setTextInputClient:123];
+
+  FlutterResult restoreResult = [self restorePlatformFirstResponderOfInputView:inputView];
+  [inputView setTextInputClient:456];
+  restoreResult(@NO);
+
+  XCTAssertTrue(inputView.isFirstResponder);
+
+  [inputView resignFirstResponderFromFramework];
+  [inputView removeFromSuperview];
+}
+
+- (void)testPluginUsesFrameworkResponderChangesForExplicitTextInputMethods {
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  id mockInputView = OCMPartialMock(textInputPlugin.activeView);
+  OCMStub([mockInputView becomeFirstResponderFromFramework]).andReturn(YES);
+  OCMStub([mockInputView resignFirstResponderFromFramework]).andReturn(YES);
+
+  [self setTextInputShow];
+  OCMVerify(times(1), [mockInputView becomeFirstResponderFromFramework]);
+
+  [self setTextInputHide];
+  OCMVerify(times(1), [mockInputView resignFirstResponderFromFramework]);
+
+  FlutterMethodCall* finishAutofillContextCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.finishAutofillContext" arguments:@NO];
+  [textInputPlugin handleMethodCall:finishAutofillContextCall
+                             result:^(id _Nullable result){
+                             }];
+
+  OCMVerify(times(2), [mockInputView resignFirstResponderFromFramework]);
+  [mockInputView stopMocking];
 }
 
 - (void)testInputViewsHasNonNilInputDelegate {
@@ -3585,10 +3835,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     NSDictionary<NSString*, NSNumber*>* encodedTargetRect =
         @{@"x" : @(100), @"y" : @(200), @"width" : @(300), @"height" : @(400)};
 
-    NSArray<NSDictionary<NSString*, id>*>* encodedItems = @[
+    NSMutableArray<NSDictionary<NSString*, id>*>* encodedItems = [@[
       @{@"type" : @"searchWeb", @"title" : @"Search Web"},
       @{@"type" : @"lookUp", @"title" : @"Look Up"}, @{@"type" : @"share", @"title" : @"Share"}
-    ];
+    ] mutableCopy];
+    if (@available(iOS 17.4, *)) {
+      [encodedItems addObject:@{@"type" : @"translate", @"title" : @"Translate"}];
+    }
 
     BOOL shownEditMenu =
         [myInputPlugin showEditMenu:@{@"targetRect" : encodedTargetRect, @"items" : encodedItems}];
@@ -3602,7 +3855,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     UIMenu* menu = [myInputView editMenuInteraction:mockInteraction
                                menuForConfiguration:OCMClassMock([UIEditMenuConfiguration class])
                                    suggestedActions:suggestedActions];
-    XCTAssert(menu.children.count == 3, @"There must be 3 menu items");
+    if (@available(iOS 17.4, *)) {
+      XCTAssert(menu.children.count == 4, @"There must be 4 menu items");
+    } else {
+      XCTAssert(menu.children.count == 3, @"There must be 3 menu items");
+    }
 
     XCTAssert(((UICommand*)menu.children[0]).action == @selector(handleSearchWebAction),
               @"Must create search web item in the tree.");
@@ -3610,6 +3867,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               @"Must create look up item in the tree.");
     XCTAssert(((UICommand*)menu.children[2]).action == @selector(handleShareAction),
               @"Must create share item in the tree.");
+    if (@available(iOS 17.4, *)) {
+      XCTAssert(((UICommand*)menu.children[3]).action == @selector(handleTranslateAction),
+                @"Must create translate item in the tree.");
+    }
   }
 }
 

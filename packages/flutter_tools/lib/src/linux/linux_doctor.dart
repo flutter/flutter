@@ -18,9 +18,9 @@ class _VersionInfo {
   /// This should contain a version number. For example:
   ///     "clang version 9.0.1-6+build1"
   _VersionInfo(this.description) {
-    final String? versionString = RegExp(
-      r'[0-9]+\.[0-9]+(?:\.[0-9]+)?',
-    ).firstMatch(description)?.group(0);
+    final String? versionString = RegExp(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?')
+        .firstMatch(description)
+        ?.group(0);
     number = Version.parse(versionString);
   }
 
@@ -33,7 +33,7 @@ class _VersionInfo {
 
 /// Information about graphics drivers.
 class _DriverInformation {
-  _DriverInformation({required ProcessManager processManager}) : _processManager = processManager;
+  _DriverInformation({required this._processManager});
 
   final ProcessManager _processManager;
   var _sections = <List<String>>[];
@@ -118,10 +118,8 @@ class _DriverInformation {
 
 /// A validator that checks for Clang and Make build dependencies.
 class LinuxDoctorValidator extends DoctorValidator {
-  LinuxDoctorValidator({required ProcessManager processManager, required UserMessages userMessages})
-    : _processManager = processManager,
-      _userMessages = userMessages,
-      super('Linux toolchain - develop for Linux desktop');
+  LinuxDoctorValidator({required this._processManager, required this._userMessages})
+    : super('Linux toolchain - develop for Linux desktop');
 
   final ProcessManager _processManager;
   final UserMessages _userMessages;

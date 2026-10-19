@@ -182,6 +182,8 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.status => _noLiveRegion,
       SemanticsRole.list => _noCheckRequired,
       SemanticsRole.listItem => _semanticsListItem,
+      SemanticsRole.listBox => _semanticsListBox,
+      SemanticsRole.option => _semanticsOption,
       SemanticsRole.complementary => _semanticsComplementary,
       SemanticsRole.contentInfo => _semanticsContentInfo,
       SemanticsRole.main => _semanticsMain,
@@ -190,6 +192,7 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.form => _noCheckRequired,
       SemanticsRole.loadingSpinner => _noCheckRequired,
       SemanticsRole.progressBar => _semanticsProgressBar,
+      SemanticsRole.slider => _semanticsSlider,
       // TODO(chunhtai): add checks when the roles are used in framework.
       // https://github.com/flutter/flutter/issues/159741.
       SemanticsRole.dragHandle => _unimplemented,
@@ -260,6 +263,57 @@ sealed class _DebugSemanticsRoleChecks {
       );
     }
 
+    return null;
+  }
+
+  static FlutterError? _semanticsSlider(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+
+    // Check if value is present
+    if (data.value.isEmpty) {
+      return FlutterError('A slider must have a value');
+    }
+
+    // Check if minValue and maxValue are present
+    if (data.minValue?.isEmpty ?? true) {
+      return FlutterError('A slider must have a minValue');
+    }
+
+    if (data.maxValue?.isEmpty ?? true) {
+      return FlutterError('A slider must have a maxValue');
+    }
+
+    // Validate that value is within min and max range
+    try {
+      final double currentValue = double.parse(data.value.replaceAll('%', ''));
+      final double minVal = double.parse(data.minValue!);
+      final double maxVal = double.parse(data.maxValue!);
+
+      if (minVal >= maxVal) {
+        return FlutterError(
+          'Slider minValue (${data.minValue}) must be less than maxValue (${data.maxValue})',
+        );
+      }
+
+      if (data.value.contains('%')) {
+        if (currentValue < 0.0 || currentValue > 100.0) {
+          return FlutterError(
+            'Slider percentage value (${data.value}) must be between 0% and 100%',
+          );
+        }
+      } else {
+        if (currentValue < minVal || currentValue > maxVal) {
+          return FlutterError(
+            'Slider value (${data.value}) must be between minValue (${data.minValue}) and maxValue (${data.maxValue})',
+          );
+        }
+      }
+    } on FormatException {
+      return FlutterError(
+        'Slider value, minValue, and maxValue must be valid numbers. '
+        'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
+      );
+    }
     return null;
   }
 
@@ -457,6 +511,39 @@ sealed class _DebugSemanticsRoleChecks {
       );
     }
     return null;
+  }
+
+  static FlutterError? _semanticsListBox(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a listBox cannot be empty');
+    }
+    FlutterError? error;
+    bool validateListBoxChildren(SemanticsNode child) {
+      final SemanticsRole role = child.getSemanticsData().role;
+      if (role == SemanticsRole.option) {
+        return true;
+      }
+      if (role == SemanticsRole.none && child.childrenCount > 0) {
+        child.visitChildren(validateListBoxChildren);
+        return error == null;
+      }
+      error = FlutterError('Children of listBox must have the option role');
+      return false;
+    }
+
+    node.visitChildren(validateListBoxChildren);
+    return error;
+  }
+
+  static FlutterError? _semanticsOption(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (currentNode.role == SemanticsRole.listBox) {
+        return null;
+      }
+      currentNode = currentNode.parent;
+    }
+    return FlutterError('An option must be a descendant of a listBox');
   }
 
   static bool _isLandmarkRole(SemanticsData nodeData) =>
@@ -2808,16 +2895,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
-  SemanticsNode({this.key, VoidCallback? showOnScreen})
-    : _id = _generateNewId(),
-      _showOnScreen = showOnScreen;
+  SemanticsNode({this.key, this._showOnScreen}) : _id = _generateNewId();
 
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
   /// The root node is assigned an identifier of zero.
-  SemanticsNode.root({this.key, VoidCallback? showOnScreen, required SemanticsOwner owner})
-    : _id = 0,
-      _showOnScreen = showOnScreen {
+  SemanticsNode.root({this.key, this._showOnScreen, required SemanticsOwner owner}) : _id = 0 {
     attach(owner);
   }
 
@@ -6461,6 +6544,9 @@ class SemanticsConfiguration {
   /// is blocked in the a11y focus (different from input focus).
   AccessibilityFocusBlockType get accessibilityFocusBlockType => _accessibilityFocusBlockType;
   set accessibilityFocusBlockType(AccessibilityFocusBlockType value) {
+    if (_accessibilityFocusBlockType == value) {
+      return;
+    }
     _accessibilityFocusBlockType = value;
     _flags = _flags.copyWith(
       isAccessibilityFocusBlocked: value != AccessibilityFocusBlockType.none,

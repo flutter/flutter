@@ -12,14 +12,13 @@
 
 namespace impeller {
 
-// If texture_size is 0 then the gradient is invalid.
+// If colors is empty then the gradient is invalid.
 struct GradientData {
-  std::vector<uint8_t> color_bytes;
-  uint32_t texture_size;
+  std::vector<Color> colors;
 };
 
 /**
- * @brief Populate a vector with the interpolated color bytes for the linear
+ * @brief Populate GradientData with the interpolated colors for the linear
  * gradient described by colors and stops.
  *
  * @param colors

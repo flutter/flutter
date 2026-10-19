@@ -152,7 +152,7 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
 
   pass->SetPipeline(compute_pipeline);
 
-  CS::InputData<kCount> input_data;
+  CS::InputData<kCount> input_data{};
   input_data.count = kCount;
   for (size_t i = 0; i < kCount; i++) {
     input_data.data[i] = 1 + i;
@@ -333,7 +333,7 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
 
     pass->SetPipeline(compute_pipeline);
 
-    CS::InputData<kCount> input_data;
+    CS::InputData<kCount> input_data{};
     input_data.count = kCount;
     for (size_t i = 0; i < kCount; i++) {
       input_data.data[i] = 1 + i;
@@ -386,13 +386,13 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
   static constexpr size_t kCount1 = 5;
   static constexpr size_t kCount2 = kCount1 * 2;
 
-  CS1::Input<kCount1> input_1;
+  CS1::Input<kCount1> input_1{};
   input_1.count = kCount1;
   for (size_t i = 0; i < kCount1; i++) {
     input_1.elements[i] = i;
   }
 
-  CS2::Input<kCount2> input_2;
+  CS2::Input<kCount2> input_2{};
   input_2.count = kCount2;
   for (size_t i = 0; i < kCount2; i++) {
     input_2.elements[i] = i;
