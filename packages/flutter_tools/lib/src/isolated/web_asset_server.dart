@@ -640,9 +640,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   String get _flutterBootstrapJsContent {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final WebTemplate bootstrapTemplate = getWebTemplate(
-      fs,
+      _toolContext.fs,
       'flutter_bootstrap.js',
       generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
@@ -651,7 +650,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
-      logger: logger,
+      logger: _toolContext.logger,
       webDefines: _webDefines,
     );
   }
@@ -664,8 +663,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   shelf.Response _serveIndexHtml() {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
-    final WebTemplate indexHtml = getWebTemplate(fs, 'index.html', _kDefaultIndex);
+    final WebTemplate indexHtml = getWebTemplate(_toolContext.fs, 'index.html', _kDefaultIndex);
     return shelf.Response.ok(
       indexHtml.withSubstitutions(
         baseHref: _baseHref ?? '/',
@@ -675,7 +673,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
-        logger: logger,
+        logger: _toolContext.logger,
         webDefines: _webDefines,
       ),
       encoding: utf8,
@@ -755,15 +753,13 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     return fs.currentDirectory.childFile('.non_existent_file');
   }
 
-  File get _resolveDartSdkJsFile {
-    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
-    return fs.file(artifacts.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!));
-  }
+  File get _resolveDartSdkJsFile => _toolContext.fs.file(
+    _toolContext.artifacts.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!),
+  );
 
-  File get _resolveDartSdkJsMapFile {
-    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
-    return fs.file(artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!));
-  }
+  File get _resolveDartSdkJsMapFile => _toolContext.fs.file(
+    _toolContext.artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!),
+  );
 
   @override
   Future<String?> dartSourceContents(String serverPath) async {

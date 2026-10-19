@@ -257,15 +257,16 @@ class WebDevFS implements DevFS {
   final Directory rootDirectory;
 
   Future<void> _validateTemplateFile(String filename) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
-    final File file = fs.currentDirectory.childDirectory('web').childFile(filename);
+    final File file = _toolContext.fs.currentDirectory.childDirectory('web').childFile(filename);
     if (!file.existsSync()) {
       return;
     }
 
     final template = WebTemplate(await file.readAsString());
     for (final WebTemplateWarning warning in template.getWarnings()) {
-      logger.printWarning('Warning: In $filename:${warning.lineNumber}: ${warning.warningText}');
+      _toolContext.logger.printWarning(
+        'Warning: In $filename:${warning.lineNumber}: ${warning.warningText}',
+      );
     }
   }
 
