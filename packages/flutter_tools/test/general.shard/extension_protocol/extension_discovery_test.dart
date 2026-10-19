@@ -10,13 +10,14 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_kernel_compiler.dart';
 import 'package:flutter_tools/src/experimental/project_extension_finder.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
-import 'package:test/test.dart';
 
+import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
@@ -124,35 +125,74 @@ void main() {
     });
 
     test('ToolExtensionEntryPoint.runMain validates SendPort message and runs', () async {
+      await expectLater(
+        ToolExtensionEntryPoint.runMain(
+          const <String>[],
+          'not-a-send-port',
+          _dummyExtensionEntryPoint,
+        ),
+        throwsArgumentError,
+      );
+
+      SendPort? receivedPort;
       final receivePort = ReceivePort();
       addTearDown(receivePort.close);
 
-      expect(
-        () => ToolExtensionEntryPoint.runMain(
-          const <String>[],
-          'not-a-send-port',
-          const <ToolExtensionService>[],
+      await ToolExtensionEntryPoint.runMain(const <String>[], receivePort.sendPort, (
+        SendPort sendPort,
+      ) {
+        receivedPort = sendPort;
+      });
+      expect(receivedPort, equals(receivePort.sendPort));
+    });
+
+    test('ExtensionConnection.spawnUri spawns extension script and completes handshake', () async {
+      final logger = BufferLogger.test();
+      final Uri? libUri = await Isolate.resolvePackageUri(
+        Uri.parse(
+          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
         ),
-        throwsA(isA<ArgumentError>()),
+      );
+      expect(libUri, isNotNull);
+      final Uri entrypointUri = libUri!.resolve(
+        '../bin/flutter_tools_extension_linux_prototype.dart',
+      );
+      final Uri? packageConfigUri = await Isolate.packageConfig;
+      expect(packageConfigUri, isNotNull);
+
+      final ExtensionConnection connection = await ExtensionConnection.spawnUri(
+        entrypointUri,
+        logger: logger,
+        packageConfigUri: packageConfigUri!,
+        extensionName: 'flutter_tools_extension_linux_prototype',
+      );
+      addTearDown(connection.dispose);
+
+      expect(connection.extensionName, 'flutter_tools_extension_linux_prototype');
+      expect(
+        connection.capabilities.services,
+        containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
       );
     });
   });
 
   group('ProjectExtensionFinder', () {
-    test('returns empty list when .dart_tool/package_config.json is missing and succeeds after creation', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
-      projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+    testWithoutContext(
+      'returns empty list before package_config.json creation and succeeds after',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 dev_dependencies:
   my_ext:
     path: ../my_ext
 ''');
-      final Directory extDir = fs.directory('/workspace/my_ext')..createSync(recursive: true);
-      extDir.childFile('extension/flutter_tools/config.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        final Directory extDir = fs.directory('/workspace/my_ext')..createSync(recursive: true);
+        extDir.childFile('extension/flutter_tools/config.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: my_ext
 protocol_version: 1
 supported_platforms:
@@ -162,41 +202,46 @@ services:
 build_targets:
   - custom-linux
 ''');
-      extDir.childFile('bin/my_ext.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('void main(List<String> args, Object? message) {}');
+        extDir.childFile('bin/my_ext.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main(List<String> args, Object? message) {}');
 
-      final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
+        final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
 
-      // Before pub get (.dart_tool/package_config.json does not exist yet).
-      final List<DiscoveredProjectExtension> beforePubGet = await finder.findProjectExtensions(
-        startDirectory: projectDir,
-      );
-      expect(beforePubGet, isEmpty);
-
-      // Create .dart_tool/package_config.json (simulating pub get).
-      projectDir.childFile('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(
-          jsonEncode(<String, Object?>{
-            'configVersion': 2,
-            'packages': <Map<String, Object?>>[
-              <String, Object?>{'name': 'app', 'rootUri': '../', 'packageUri': 'lib/'},
-              <String, Object?>{'name': 'my_ext', 'rootUri': '../../my_ext', 'packageUri': 'lib/'},
-            ],
-          }),
+        // Before pub get (.dart_tool/package_config.json does not exist yet).
+        final List<DiscoveredProjectExtension> beforePubGet = await finder.findProjectExtensions(
+          startDirectory: projectDir,
         );
+        expect(beforePubGet, isEmpty);
 
-      final List<DiscoveredProjectExtension> afterPubGet = await finder.findProjectExtensions(
-        startDirectory: projectDir,
-      );
-      expect(afterPubGet, hasLength(1));
-      expect(afterPubGet.single.name, 'my_ext');
-      expect(afterPubGet.single.config.services, const <String>{'build'});
-      expect(afterPubGet.single.config.buildTargets, const <String>{'custom-linux'});
-    });
+        // Create .dart_tool/package_config.json (simulating pub get).
+        projectDir.childFile('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            jsonEncode(<String, Object?>{
+              'configVersion': 2,
+              'packages': <Map<String, Object?>>[
+                <String, Object?>{'name': 'app', 'rootUri': '../', 'packageUri': 'lib/'},
+                <String, Object?>{
+                  'name': 'my_ext',
+                  'rootUri': '../../my_ext',
+                  'packageUri': 'lib/',
+                },
+              ],
+            }),
+          );
 
-    test(
+        final List<DiscoveredProjectExtension> afterPubGet = await finder.findProjectExtensions(
+          startDirectory: projectDir,
+        );
+        expect(afterPubGet, hasLength(1));
+        expect(afterPubGet.single.name, 'my_ext');
+        expect(afterPubGet.single.config.services, const <String>{'build'});
+        expect(afterPubGet.single.config.buildTargets, const <String>{'custom-linux'});
+      },
+    );
+
+    testWithoutContext(
       'filters out transitive extensions not listed in direct dependencies or dev_dependencies',
       () async {
         final fs = MemoryFileSystem.test();
@@ -258,11 +303,13 @@ services:
       },
     );
 
-    test('includes direct dependencies from Pub workspace root pubspec.yaml', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final Directory workspaceRoot = fs.directory('/workspace')..createSync(recursive: true);
-      workspaceRoot.childFile('pubspec.yaml').writeAsStringSync('''
+    testWithoutContext(
+      'includes direct dependencies from Pub workspace root pubspec.yaml',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory workspaceRoot = fs.directory('/workspace')..createSync(recursive: true);
+        workspaceRoot.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_workspace
 workspace:
   - packages/app
@@ -270,56 +317,119 @@ dev_dependencies:
   workspace_ext:
     path: packages/workspace_ext
 ''');
-      final Directory appDir = workspaceRoot.childDirectory('packages/app')
-        ..createSync(recursive: true);
-      appDir.childFile('pubspec.yaml').writeAsStringSync('''
+        final Directory appDir = workspaceRoot.childDirectory('packages/app')
+          ..createSync(recursive: true);
+        appDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 resolution: workspace
 ''');
-      final Directory extDir = workspaceRoot.childDirectory('packages/workspace_ext')
-        ..createSync(recursive: true);
-      extDir.childFile('extension/flutter_tools/config.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        final Directory extDir = workspaceRoot.childDirectory('packages/workspace_ext')
+          ..createSync(recursive: true);
+        extDir.childFile('extension/flutter_tools/config.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
 name: workspace_ext
 platforms:
   - custom_linux
 services:
   - template
 ''');
-      extDir.childFile('bin/workspace_ext.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('void main(List<String> args, Object? message) {}');
+        extDir.childFile('bin/workspace_ext.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main(List<String> args, Object? message) {}');
 
-      workspaceRoot.childFile('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(
-          jsonEncode(<String, Object?>{
-            'configVersion': 2,
-            'packages': <Map<String, Object?>>[
-              <String, Object?>{'name': 'app', 'rootUri': '../packages/app', 'packageUri': 'lib/'},
-              <String, Object?>{
-                'name': 'workspace_ext',
-                'rootUri': '../packages/workspace_ext',
-                'packageUri': 'lib/',
-              },
-            ],
-          }),
+        workspaceRoot.childFile('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            jsonEncode(<String, Object?>{
+              'configVersion': 2,
+              'packages': <Map<String, Object?>>[
+                <String, Object?>{
+                  'name': 'app',
+                  'rootUri': '../packages/app',
+                  'packageUri': 'lib/',
+                },
+                <String, Object?>{
+                  'name': 'workspace_ext',
+                  'rootUri': '../packages/workspace_ext',
+                  'packageUri': 'lib/',
+                },
+              ],
+            }),
+          );
+
+        final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
+        final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
+          startDirectory: appDir,
         );
 
-      final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
-      final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
-        startDirectory: appDir,
-      );
+        expect(discovered, hasLength(1));
+        expect(discovered.single.name, 'workspace_ext');
+        expect(discovered.single.config.platforms, const <String>{'custom_linux'});
+      },
+    );
 
-      expect(discovered, hasLength(1));
-      expect(discovered.single.name, 'workspace_ext');
-      expect(discovered.single.config.platforms, const <String>{'custom_linux'});
-    });
+    testWithoutContext(
+      'discovers extensions via package:extension_discovery on LocalFileSystem',
+      () async {
+        final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
+        final Directory tempDir = localFs.systemTempDirectory.createTempSync('ext_finder_local.');
+        addTearDown(() {
+          if (tempDir.existsSync()) {
+            tempDir.deleteSync(recursive: true);
+          }
+        });
+
+        final logger = BufferLogger.test();
+        final Directory projectDir = tempDir.childDirectory('app')..createSync(recursive: true);
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: app
+dependencies:
+  local_ext:
+    path: ../local_ext
+''');
+        final Directory extDir = tempDir.childDirectory('local_ext')..createSync(recursive: true);
+        extDir.childFile('extension/flutter_tools/config.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: local_ext
+services:
+  - diagnostics
+''');
+        extDir.childFile('bin/local_ext.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main(List<String> args, Object? message) {}');
+
+        projectDir.childFile('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            jsonEncode(<String, Object?>{
+              'configVersion': 2,
+              'packages': <Map<String, Object?>>[
+                <String, Object?>{'name': 'app', 'rootUri': '../', 'packageUri': 'lib/'},
+                <String, Object?>{
+                  'name': 'local_ext',
+                  'rootUri': '../../local_ext',
+                  'packageUri': 'lib/',
+                },
+              ],
+            }),
+          );
+
+        final finder = ProjectExtensionFinder(fileSystem: localFs, logger: logger);
+        final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
+          startDirectory: projectDir,
+        );
+
+        expect(discovered, hasLength(1));
+        expect(discovered.single.name, 'local_ext');
+        expect(discovered.single.config.services, const <String>{'diagnostics'});
+      },
+    );
   });
 
   group('ExtensionKernelCompiler', () {
-    test('compiles local extension to .dart_tool/flutter_tools/extensions/<name>/extension.dill and invalidates via depfile', () async {
+    testWithoutContext('compiles local extension to .dill and invalidates via depfile', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final artifacts = Artifacts.test(fileSystem: fs);
@@ -398,10 +508,10 @@ services:
       final compiler = ExtensionKernelCompiler(
         artifacts: artifacts,
         fileSystem: fs,
+        flutterRoot: fs.directory('/flutter'),
         logger: logger,
         platform: FakePlatform(environment: const <String, String>{'HOME': '/home/test'}),
         processManager: processManager,
-        flutterRoot: '/flutter',
       );
 
       final extension = DiscoveredProjectExtension(
@@ -428,7 +538,7 @@ services:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    test(
+    testWithoutContext(
       'caches immutable PUB_CACHE extension under DART_DATA_HOME/flutter_tool_extensions/cache',
       () async {
         final fs = MemoryFileSystem.test();
@@ -463,6 +573,7 @@ services:
         final compiler = ExtensionKernelCompiler(
           artifacts: artifacts,
           fileSystem: fs,
+          flutterRoot: fs.directory('/flutter'),
           logger: logger,
           platform: FakePlatform(
             environment: const <String, String>{
@@ -472,7 +583,6 @@ services:
             },
           ),
           processManager: processManager,
-          flutterRoot: '/flutter',
         );
 
         final File targetDill = compiler.resolveDillFile(extension);
@@ -513,71 +623,94 @@ services:
       },
     );
 
-    test('cleans up temporary files and preserves existing .dill when compilation fails', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final artifacts = Artifacts.test(fileSystem: fs);
-      final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    testWithoutContext(
+      'cleans up temporary files and throws ExtensionCompileException on failure',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final artifacts = Artifacts.test(fileSystem: fs);
+        final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
 
-      final File packageConfigFile = fs.file('/workspace/app/.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
-      final Directory extDir = fs.directory('/workspace/my_ext')..createSync(recursive: true);
-      final File entrypointFile = extDir.childFile('bin/my_ext.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('void main() {}');
+        final File packageConfigFile = fs.file('/workspace/app/.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+        final Directory extDir = fs.directory('/workspace/my_ext')..createSync(recursive: true);
+        final File entrypointFile = extDir.childFile('bin/my_ext.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('void main() {}');
 
-      const expectedDillPath =
-          '/workspace/app/.dart_tool/flutter_tools/extensions/my_ext/extension.dill';
-      const expectedDepfilePath = '$expectedDillPath.d';
+        const expectedDillPath =
+            '/workspace/app/.dart_tool/flutter_tools/extensions/my_ext/extension.dill';
+        const expectedDepfilePath = '$expectedDillPath.d';
 
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            dartBinary,
-            'compile',
-            'kernel',
-            '--packages=${packageConfigFile.path}',
-            '--output=$expectedDillPath.tmp',
-            '--depfile=$expectedDepfilePath.tmp',
-            entrypointFile.path,
-          ],
-          exitCode: 254,
-          stderr: 'Compilation error',
-          onRun: (_) {
-            fs.file('$expectedDillPath.tmp')
-              ..createSync(recursive: true)
-              ..writeAsBytesSync(<int>[0]);
-            fs.file('$expectedDepfilePath.tmp')
-              ..createSync(recursive: true)
-              ..writeAsStringSync('partial');
-          },
-        ),
-      ]);
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              dartBinary,
+              'compile',
+              'kernel',
+              '--packages=${packageConfigFile.path}',
+              '--output=$expectedDillPath.tmp',
+              '--depfile=$expectedDepfilePath.tmp',
+              entrypointFile.path,
+            ],
+            exitCode: 254,
+            stderr: 'Compilation error',
+            onRun: (_) {
+              fs.file('$expectedDillPath.tmp')
+                ..createSync(recursive: true)
+                ..writeAsBytesSync(<int>[0]);
+              fs.file('$expectedDepfilePath.tmp')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('partial');
+            },
+          ),
+        ]);
 
-      final compiler = ExtensionKernelCompiler(
-        artifacts: artifacts,
-        fileSystem: fs,
-        logger: logger,
-        platform: FakePlatform(environment: const <String, String>{'HOME': '/home/test'}),
-        processManager: processManager,
-        flutterRoot: '/flutter',
-      );
+        final compiler = ExtensionKernelCompiler(
+          artifacts: artifacts,
+          fileSystem: fs,
+          flutterRoot: fs.directory('/flutter'),
+          logger: logger,
+          platform: FakePlatform(environment: const <String, String>{'HOME': '/home/test'}),
+          processManager: processManager,
+        );
 
-      final extension = DiscoveredProjectExtension(
-        name: 'my_ext',
-        rootUri: Uri.directory(extDir.path),
-        packageUri: Uri.directory(extDir.childDirectory('lib').path),
-        packageConfigUri: packageConfigFile.uri,
-        workspaceRootPath: '/workspace/app',
-        config: ExtensionPackageConfig(name: 'my_ext'),
-      );
+        final extension = DiscoveredProjectExtension(
+          name: 'my_ext',
+          rootUri: Uri.directory(extDir.path),
+          packageUri: Uri.directory(extDir.childDirectory('lib').path),
+          packageConfigUri: packageConfigFile.uri,
+          workspaceRootPath: '/workspace/app',
+          config: ExtensionPackageConfig(name: 'my_ext'),
+        );
 
-      await expectLater(compiler.compile(extension), throwsStateError);
-      expect(fs.file(expectedDillPath).existsSync(), isFalse);
-      expect(fs.file('$expectedDillPath.tmp').existsSync(), isFalse);
-      expect(fs.file('$expectedDepfilePath.tmp').existsSync(), isFalse);
-      expect(processManager, hasNoRemainingExpectations);
-    });
+        await expectLater(compiler.compile(extension), throwsA(isA<ExtensionCompileException>()));
+        expect(fs.file(expectedDillPath).existsSync(), isFalse);
+        expect(fs.file('$expectedDillPath.tmp').existsSync(), isFalse);
+        expect(fs.file('$expectedDepfilePath.tmp').existsSync(), isFalse);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'parseDepfileDependencies handles escaped spaces, line continuations, and Windows paths',
+      () {
+        const depfileContent =
+            r'C:\path\to\extension.dill.tmp: '
+            'C:\\path\\ with\\ spaces\\main.dart \\\r\n'
+            '  /workspace/lib/part\\ one.dart \\\n'
+            '  /workspace/lib/part_two.dart\n';
+
+        final List<String> parsed = ExtensionKernelCompiler.parseDepfileDependencies(
+          depfileContent,
+        );
+        expect(parsed, const <String>[
+          r'C:\path with spaces\main.dart',
+          '/workspace/lib/part one.dart',
+          '/workspace/lib/part_two.dart',
+        ]);
+      },
+    );
   });
 }

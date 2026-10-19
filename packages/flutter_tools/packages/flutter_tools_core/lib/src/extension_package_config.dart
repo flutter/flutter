@@ -24,40 +24,40 @@ final class ExtensionPackageConfig {
        services = Set<String>.unmodifiable(services),
        buildTargets = Set<String>.unmodifiable(buildTargets),
        templates = Set<String>.unmodifiable(templates),
-       platforms = Set<String>.unmodifiable(platforms);
+       platforms = _validatePlatforms(platforms);
 
   /// Parses an [ExtensionPackageConfig] from a decoded YAML or JSON [map].
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
   factory ExtensionPackageConfig.fromMap(Map<Object?, Object?> map, {String? packageName}) {
-    final Object? rawName = map[kNameKey] ?? packageName;
+    final Object? rawName = map[nameKey] ?? packageName;
     if (rawName is! String || rawName.trim().isEmpty) {
       throw const FormatException(
-        'Extension config.yaml must specify a non-empty string for "$kNameKey".',
+        'Extension config.yaml must specify a non-empty string for "$nameKey".',
       );
     }
     final String name = rawName.trim();
 
     if (packageName != null && name != packageName) {
       throw FormatException(
-        'Extension config.yaml "$kNameKey" ("$name") must match package name ("$packageName").',
+        'Extension config.yaml "$nameKey" ("$name") must match package name ("$packageName").',
       );
     }
 
-    final Object? rawProtocolVersion = map[kProtocolVersionKey];
+    final Object? rawProtocolVersion = map[protocolVersionKey];
     final int protocolVersion = switch (rawProtocolVersion) {
       final int v => v,
       null => currentProtocolVersion,
       final Object? other => throw FormatException(
-        'Extension config.yaml "$kProtocolVersionKey" must be an int, got: $other.',
+        'Extension config.yaml "$protocolVersionKey" must be an int, got: $other.',
       ),
     };
 
-    final String entrypoint = switch (map[kEntrypointKey]) {
+    final String entrypoint = switch (map[entrypointKey]) {
       final String e when e.trim().isNotEmpty => _validateEntrypoint(e),
       null => _validateEntrypoint('bin/$name.dart'),
       final Object? other => throw FormatException(
-        'Extension config.yaml "$kEntrypointKey" must be a non-empty string, got: $other.',
+        'Extension config.yaml "$entrypointKey" must be a non-empty string, got: $other.',
       ),
     };
 
@@ -65,11 +65,11 @@ final class ExtensionPackageConfig {
       name: name,
       protocolVersion: protocolVersion,
       entrypoint: entrypoint,
-      supportedPlatforms: _parseStringSet(map[kSupportedPlatformsKey], kSupportedPlatformsKey),
-      services: _parseStringSet(map[kServicesKey], kServicesKey),
-      buildTargets: _parseStringSet(map[kBuildTargetsKey], kBuildTargetsKey),
-      templates: _parseStringSet(map[kTemplatesKey], kTemplatesKey),
-      platforms: _parseStringSet(map[kPlatformsKey], kPlatformsKey),
+      supportedPlatforms: _parseStringSet(map[supportedPlatformsKey], supportedPlatformsKey),
+      services: _parseStringSet(map[servicesKey], servicesKey),
+      buildTargets: _parseStringSet(map[buildTargetsKey], buildTargetsKey),
+      templates: _parseStringSet(map[templatesKey], templatesKey),
+      platforms: _parseStringSet(map[platformsKey], platformsKey),
     );
   }
 
@@ -77,28 +77,30 @@ final class ExtensionPackageConfig {
   static const int currentProtocolVersion = 1;
 
   /// Map key for [name].
-  static const String kNameKey = 'name';
+  static const String nameKey = 'name';
 
   /// Map key for [protocolVersion].
-  static const String kProtocolVersionKey = 'protocol_version';
+  static const String protocolVersionKey = 'protocol_version';
 
   /// Map key for [entrypoint].
-  static const String kEntrypointKey = 'entrypoint';
+  static const String entrypointKey = 'entrypoint';
 
   /// Map key for [supportedPlatforms].
-  static const String kSupportedPlatformsKey = 'supported_platforms';
+  static const String supportedPlatformsKey = 'supported_platforms';
 
   /// Map key for [services].
-  static const String kServicesKey = 'services';
+  static const String servicesKey = 'services';
 
   /// Map key for [buildTargets].
-  static const String kBuildTargetsKey = 'build_targets';
+  static const String buildTargetsKey = 'build_targets';
 
   /// Map key for [templates].
-  static const String kTemplatesKey = 'templates';
+  static const String templatesKey = 'templates';
 
   /// Map key for [platforms].
-  static const String kPlatformsKey = 'platforms';
+  static const String platformsKey = 'platforms';
+
+  static final RegExp _platformIdentifierPattern = RegExp(r'^[a-z][a-z0-9_]*$');
 
   /// The Dart package name of the extension.
   final String name;
@@ -137,14 +139,14 @@ final class ExtensionPackageConfig {
   /// Serializes this [ExtensionPackageConfig] to a JSON-compatible map.
   Map<String, Object?> toMap() {
     return <String, Object?>{
-      kNameKey: name,
-      kProtocolVersionKey: protocolVersion,
-      kEntrypointKey: entrypoint,
-      kSupportedPlatformsKey: supportedPlatforms.toList(),
-      kServicesKey: services.toList(),
-      kBuildTargetsKey: buildTargets.toList(),
-      kTemplatesKey: templates.toList(),
-      kPlatformsKey: platforms.toList(),
+      nameKey: name,
+      protocolVersionKey: protocolVersion,
+      entrypointKey: entrypoint,
+      supportedPlatformsKey: supportedPlatforms.toList(),
+      servicesKey: services.toList(),
+      buildTargetsKey: buildTargets.toList(),
+      templatesKey: templates.toList(),
+      platformsKey: platforms.toList(),
     };
   }
 
@@ -158,11 +160,26 @@ final class ExtensionPackageConfig {
         parsedUri == null ||
         parsedUri.hasScheme) {
       throw FormatException(
-        'Extension config.yaml "$kEntrypointKey" must be a relative path within the package, '
+        'Extension config.yaml "$entrypointKey" must be a relative path within the package, '
         'got: "$entrypoint".',
       );
     }
     return trimmed;
+  }
+
+  static Set<String> _validatePlatforms(Iterable<String> platforms) {
+    final validated = <String>{};
+    for (final platform in platforms) {
+      final String trimmed = platform.trim();
+      if (!_platformIdentifierPattern.hasMatch(trimmed)) {
+        throw FormatException(
+          'Extension config.yaml "$platformsKey" entries must be valid lowercase identifiers, '
+          'got: "$platform".',
+        );
+      }
+      validated.add(trimmed);
+    }
+    return Set<String>.unmodifiable(validated);
   }
 
   static Set<String> _parseStringSet(Object? raw, String fieldName) {

@@ -21,10 +21,8 @@ class ToolExtensionEntryPoint {
   static Future<void> runMain(
     List<String> args,
     Object? message,
-    List<ToolExtensionService> services, {
-    void Function(String message)? logger,
-    Set<String>? supportedPlatforms,
-  }) async {
+    FutureOr<void> Function(SendPort sendPort) entryPoint,
+  ) async {
     if (message is! SendPort) {
       throw ArgumentError.value(
         message,
@@ -32,15 +30,15 @@ class ToolExtensionEntryPoint {
         'Expected a SendPort as the initial isolate message.',
       );
     }
-    await run(message, services, logger: logger, supportedPlatforms: supportedPlatforms);
+    await entryPoint(message);
   }
 
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   static Future<void> run(
     SendPort sendPort,
     List<ToolExtensionService> services, {
-    void Function(String message)? logger,
     Set<String>? supportedPlatforms,
+    void Function(String message)? logger,
   }) async {
     logger?.call('[ToolExtensionIsolate] Initializing isolate channel...');
     final channel = IsolateChannel<Object?>.connectSend(sendPort);
