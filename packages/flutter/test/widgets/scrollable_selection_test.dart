@@ -2426,7 +2426,8 @@ void main() {
         // Clear the selection by clicking on empty space to the right of the
         // last 'Below' row. This works around RenderTwoDimensionalViewport.detach
         // asserting '_owner != null' on teardown when a kept-alive selected cell
-        // has been scrolled away (see TODO: link issue).
+        // has been scrolled away, see
+        // https://github.com/flutter/flutter/issues/194718.
         await tester.tapAt(const Offset(790, 590), kind: ui.PointerDeviceKind.mouse);
         await tester.pump();
         expect(tester.takeException(), isNull);
