@@ -30,6 +30,7 @@ directory in the filesystem's order; here the files come in Bazel's, sorted.
 """
 
 load("@engine_version//:version.bzl", "ENGINE_VERSION")
+load(":build_directory.bzl", "BuildDirectoryInfo")
 
 ZipTreeInfo = provider(
     doc = "The entries a zip_tree contributes to an archive.",
@@ -137,7 +138,10 @@ def _zip_bundle_impl(ctx):
         mnemonic = "ZipBundle",
         progress_message = "Zipping %{output}",
     )
-    return [DefaultInfo(files = depset([output]))]
+    return [
+        DefaultInfo(files = depset([output])),
+        BuildDirectoryInfo(entries = depset([(output, "zip_archives/" + ctx.attr.output)])),
+    ]
 
 zip_bundle = rule(
     implementation = _zip_bundle_impl,

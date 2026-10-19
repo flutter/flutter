@@ -21,9 +21,15 @@ the paths in the arguments as tokens this rule expands:
 The script runs with the checkout's hermetic Python (`@cpython3`), from the
 execution root, in a sandbox that holds exactly the declared inputs: an
 undeclared input GN would have tolerated is a failure here, by design.
+
+Each rule here says where GN's build directory holds its files
+(BuildDirectoryInfo, ../build_directory.bzl): an action's outputs under
+gen/<package>/, a copy's at its `outputs`, a generated file's at its
+output; `install` (../install.bzl) lays them out there.
 """
 
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
+load("//engine/src/flutter/build/bazel:build_directory.bzl", "BuildDirectoryInfo", "build_directory_path", "copy_entries")
 
 def expand_gn_paths(ctx, arg, targets):
     """Expands the path tokens of one argument (see the module docstring).
@@ -126,7 +132,33 @@ def _gn_action_impl(ctx):
         mnemonic = "GnAction",
         progress_message = "GN action %{label}",
     )
-    return [DefaultInfo(files = depset(outputs))]
+    # The outputs are under GN's $target_gen_dir: gen/<GN package>/. An
+    # action of another repository (a synced tree's overlay) has its GN
+    # directory elsewhere, which install does not reconstruct.
+    package = gn_package(ctx)
+    return [
+        DefaultInfo(files = depset(outputs)),
+        BuildDirectoryInfo(entries = depset([
+            (output, "gen/" + package + "/" + path)
+            for output, path in zip(outputs, ctx.attr.outputs)
+        ] if package != None else [])),
+    ]
+
+def gn_package(ctx):
+    """The GN directory of the rule's package, for build directory paths.
+
+    Args:
+      ctx: the rule context.
+
+    Returns:
+      The package's path under engine/src (`flutter/fml` for
+      //engine/src/flutter/fml), or None for a package of another repository
+      or outside engine/src.
+    """
+    prefix = "engine/src/"
+    if ctx.label.workspace_root or not ctx.label.package.startswith(prefix):
+        return None
+    return ctx.label.package[len(prefix):]
 
 gn_action = rule(
     implementation = _gn_action_impl,
@@ -160,11 +192,12 @@ gn_action = rule(
 
 def _gn_copy_impl(ctx):
     # The copy's content is its sources. GN's destination (`outputs`, under
-    # the build directory) is the artifact layout, which packaging assembles;
-    # here the files travel as they are -- unless the copy renames (`outs`:
-    # a literal output name, which is the point of such a copy), when each
-    # source is linked under its new name. The empty CcInfo keeps the edges
-    # that GN has from libraries and binaries to copies, which order them.
+    # the build directory) is the artifact layout, which install assembles
+    # (BuildDirectoryInfo, from `outputs`); here the files travel as they
+    # are -- unless the copy renames (`outs`: a literal output name, which
+    # is the point of such a copy), when each source is linked under its new
+    # name. The empty CcInfo keeps the edges that GN has from libraries and
+    # binaries to copies, which order them.
     files = ctx.files.srcs
     if ctx.outputs.outs:
         if len(ctx.outputs.outs) != len(files):
@@ -175,6 +208,7 @@ def _gn_copy_impl(ctx):
     return [
         DefaultInfo(files = depset(files)),
         CcInfo(),
+        BuildDirectoryInfo(entries = depset(copy_entries(ctx.attr.outputs, files))),
     ]
 
 gn_copy = rule(
@@ -197,6 +231,37 @@ gn_copy = rule(
         ),
         "deps": attr.label_list(
             doc = "GN's `deps`: ordering only (the sources carry the file dependencies).",
+        ),
+    },
+)
+
+def _gn_generated_file_impl(ctx):
+    # GN's generated_file with `contents` and no output_conversion: a list
+    # is written one element per line, each line ended.
+    ctx.actions.write(ctx.outputs.out, "".join([line + "\n" for line in ctx.attr.content]))
+    entries = []
+    for output in ctx.attr.outputs:
+        path = build_directory_path(output)
+        if path:
+            entries.append((ctx.outputs.out, path))
+    return [
+        DefaultInfo(files = depset([ctx.outputs.out])),
+        BuildDirectoryInfo(entries = depset(entries)),
+    ]
+
+gn_generated_file = rule(
+    implementation = _gn_generated_file_impl,
+    doc = "A GN generated_file() with `contents`: the lines, written at build time.",
+    attrs = {
+        "out": attr.output(
+            mandatory = True,
+            doc = "The file, relative to the package: GN's output's path under the build directory.",
+        ),
+        "content": attr.string_list(
+            doc = "GN's `contents`: one element per line.",
+        ),
+        "outputs": attr.string_list(
+            doc = "GN's `outputs`, for the record: where the build directory holds the file.",
         ),
     },
 )

@@ -1529,6 +1529,290 @@ source_set("x") {
           throwsGnError(line: 3, message: 'only usable in the args of an action()'),
         );
       });
+
+      test('rebases paths to absolute ones and to the current directory', () async {
+        // sky_engine's way of naming the Dart SDK's sources: a base rebased
+        // to an absolute path, a directory under it, a list under that; and
+        // a script named relative to the current directory, which the
+        // source-absolute path serves as.
+        final GnFileEvaluation evaluation = await evaluate(r'''
+lib_root = rebase_path("//third_party/dart/sdk/lib")
+copy("async") {
+  lib_path = rebase_path("async", "", lib_root)
+  sources = rebase_path([ "async.dart", "sub/timer.dart" ], "", lib_path)
+  outputs = [ "$root_gen_dir/pkg/lib/async/{{source_file_part}}" ]
+}
+action("x") {
+  script = rebase_path("//flutter/build/tools/x.py", ".", "//")
+  sources = [ "//flutter/a.txt" ]
+  outputs = [ "$root_gen_dir/x.out" ]
+  args = rebase_path(sources, root_build_dir) + [ "--absolute" ] + rebase_path([ "//flutter/b.txt" ], "", "//")
+}
+''');
+        final GnTarget copy = evaluation.targets[0];
+        expect(strings(copy, 'sources'), <String>[
+          '\u0001//third_party/dart/sdk/lib/async/async.dart\u0001',
+          '\u0001//third_party/dart/sdk/lib/async/sub/timer.dart\u0001',
+        ]);
+        final GnTarget action = evaluation.targets[1];
+        expect(strings(action, 'script'), <String>['//flutter/build/tools/x.py']);
+        expect(strings(action, 'args'), <String>[
+          '\u0001//flutter/a.txt\u0001',
+          '--absolute',
+          '\u0001//flutter/b.txt\u0001',
+        ]);
+        await expectLater(
+          evaluate('''
+x = rebase_path("a", "", "relative/base")
+'''),
+          throwsGnError(line: 1, message: 'is not a path rebase_path() can rebase from'),
+        );
+      });
+    });
+  });
+
+  group('sky_engine', () {
+    // The shapes of sky/packages/sky_engine/BUILD.gn: copies of files of
+    // other packages and of the Dart tree into the gen directory, a
+    // generated_file with contents, an action converted by its script, the
+    // web SDK's rewriter template.
+    String convertSkyEngine() {
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/dart/sdk/lib/async/async_sources.gni': '''
+async_sdk_sources = [
+  "async.dart",
+  "timer.dart",
+]
+''',
+        'flutter/lib/ui/dart_ui.gni': '''
+dart_ui_files = [
+  "//flutter/lib/ui/ui.dart",
+]
+dart_ui_fix_data_file = "//flutter/lib/ui/fix_dart_ui.yaml"
+''',
+        'flutter/lib/ui/BUILD.gn': '',
+        'flutter/build/dart/rules.gni': '',
+        'flutter/web_sdk/web_sdk.gni': '',
+        'flutter/sky/packages/sky_engine/BUILD.gn': r'''
+import("//flutter/build/dart/rules.gni")
+import("//flutter/lib/ui/dart_ui.gni")
+import("//flutter/web_sdk/web_sdk.gni")
+import("$dart_src/sdk/lib/async/async_sources.gni")
+
+copy("copy_sky_engine_authors") {
+  sources = [ "//AUTHORS" ]
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/{{source_file_part}}" ]
+}
+
+dart_sdk_lib_path = rebase_path("$dart_src/sdk/lib")
+
+copy("async") {
+  lib_path = rebase_path("async", "", dart_sdk_lib_path)
+  sources = rebase_path(async_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/async/{{source_file_part}}" ]
+}
+
+copy("copy_dart_ui") {
+  sources = dart_ui_files
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/ui/{{source_file_part}}" ]
+}
+
+copy("copy_dart_ui_fix_data") {
+  sources = [ dart_ui_fix_data_file ]
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/fix_data/fix_dart_ui.yaml" ]
+}
+
+copy("renamed") {
+  sources = [ "//flutter/lib/ui/fix_dart_ui.yaml" ]
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/fix_data/renamed.yaml" ]
+}
+
+web_ui_ui_web_with_output("copy_dart_ui_web") {
+  output_dir = "$root_gen_dir/dart-pkg/sky_engine/lib/ui_web/"
+}
+
+group("copy_dart_sdk") {
+  deps = [ ":async" ]
+}
+
+generated_file("_embedder_yaml") {
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/_embedder.yaml" ]
+  contents = [
+    "# Generated.",
+    "",
+    "embedded_libs:",
+    "  \"dart:async\": \"async/async.dart\"",
+  ]
+}
+
+action("sky_engine") {
+  package_name = "sky_engine"
+  pkg_directory = rebase_path("$root_gen_dir/dart-pkg", root_build_dir)
+  stamp_file = "$root_gen_dir/dart-pkg/${package_name}.stamp"
+  sources = [
+    "LICENSE",
+    "pubspec.yaml",
+  ]
+  deps = [
+    ":_embedder_yaml",
+    ":copy_dart_sdk",
+    ":copy_dart_ui",
+    ":copy_dart_ui_web",
+  ]
+  if (!is_fuchsia) {
+    deps += [ ":copy_sky_engine_authors" ]
+  }
+  service_isolate_dir = "$dart_src/sdk/lib/_internal/vm/bin/"
+  sdk_ext_directory = [ "$root_gen_dir/sky/bindings" ]
+  sdk_ext_files = [ "$service_isolate_dir/vmservice_io.dart" ]
+  outputs = [ stamp_file ]
+  script = rebase_path("//flutter/build/dart/tools/dart_pkg.py", ".", "//")
+  inputs = [ script ] + sources
+  args = [
+    "--package-name",
+    package_name,
+    "--pkg-directory",
+    pkg_directory,
+    "--stamp-file",
+    rebase_path(stamp_file, root_build_dir),
+    "--package-sources",
+  ] + rebase_path(sources, root_build_dir) + [ "--sdk-ext-directories" ] +
+      rebase_path(sdk_ext_directory, root_build_dir) + [ "--sdk-ext-files" ] +
+      rebase_path(sdk_ext_files, root_build_dir)
+}
+''',
+      });
+      return emitBuildFile(
+        evaluateIn(
+          tree,
+          '//flutter/sky/packages/sky_engine/BUILD.gn',
+          templates: <String>{'web_ui_ui_web_with_output'},
+          importPolicy: engineImportPolicy,
+        ),
+        gnPackage: '//flutter/sky/packages/sky_engine',
+        tree: tree,
+        layout: mainRepositoryLayout,
+        forwardedFlags: DependencyResolver(tree: tree, assumptions: linuxHostAssumptions()),
+      );
+    }
+
+    test('copies files of the root, of another package and of the Dart tree', () {
+      final String output = convertSkyEngine();
+      expect(
+        output,
+        contains(r'''
+gn_copy(
+    name = "copy_sky_engine_authors",
+    srcs = ["//engine/src:AUTHORS"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/{{source_file_part}}"],
+)
+'''),
+      );
+      expect(
+        output,
+        contains(r'''
+gn_copy(
+    name = "async",
+    srcs = [
+        "@dart//:sdk/lib/async/async.dart",
+        "@dart//:sdk/lib/async/timer.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/async/{{source_file_part}}"],
+)
+'''),
+      );
+      expect(output, contains('srcs = ["//engine/src/flutter/lib/ui:ui.dart"],'));
+      // A copy into the gen directory keeping the name travels as it is; one
+      // renaming its file is produced under GN's path in the build directory.
+      expect(
+        output,
+        contains(r'''
+gn_copy(
+    name = "copy_dart_ui_fix_data",
+    srcs = ["//engine/src/flutter/lib/ui:fix_dart_ui.yaml"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/fix_data/fix_dart_ui.yaml"],
+)
+'''),
+      );
+      expect(
+        output,
+        contains(r'''
+gn_copy(
+    name = "renamed",
+    srcs = ["//engine/src/flutter/lib/ui:fix_dart_ui.yaml"],
+    outs = ["gen/dart-pkg/sky_engine/lib/fix_data/renamed.yaml"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/fix_data/renamed.yaml"],
+)
+'''),
+      );
+    });
+
+    test('generated_file with contents, the rewriter template, the action by its script', () {
+      final String output = convertSkyEngine();
+      expect(
+        output,
+        contains(r'''
+gn_generated_file(
+    name = "_embedder_yaml",
+    out = "gen/dart-pkg/sky_engine/lib/_embedder.yaml",
+    content = [
+        "# Generated.",
+        "",
+        "embedded_libs:",
+        "  \"dart:async\": \"async/async.dart\"",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_embedder.yaml"],
+)
+'''),
+      );
+      expect(
+        output,
+        contains(r'''
+web_ui_ui_web_with_output(
+    name = "copy_dart_ui_web",
+    output_dir = "$root_gen_dir/dart-pkg/sky_engine/lib/ui_web/",
+)
+'''),
+      );
+      expect(
+        output,
+        contains(r'''
+dart_pkg(
+    name = "sky_engine",
+    srcs = [
+        "LICENSE",
+        "pubspec.yaml",
+    ],
+    package = "sky_engine",
+    sdk_ext = ["@dart//:sdk/lib/_internal/vm/bin/vmservice_io.dart"],
+    deps = [
+        ":_embedder_yaml",
+        ":copy_dart_sdk",
+        ":copy_dart_ui",
+        ":copy_dart_ui_web",
+        ":copy_sky_engine_authors",  # !is_fuchsia
+    ],
+)
+'''),
+      );
+      expect(
+        output,
+        contains('load("//engine/src/flutter/build/bazel/dart:dart_pkg.bzl", "dart_pkg")'),
+      );
+      expect(output, isNot(contains('gn_action(')));
+    });
+
+    test('generated_file over metadata is refused', () async {
+      await expectLater(
+        convert(r'''
+generated_file("x") {
+  outputs = [ "$root_gen_dir/x.txt" ]
+  data_keys = [ "entitlements" ]
+  deps = []
+}
+'''),
+        throwsGnError(line: 3, message: 'generated_file variable data_keys is not converted yet'),
+      );
     });
   });
 

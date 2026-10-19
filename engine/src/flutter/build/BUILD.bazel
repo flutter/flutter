@@ -7,8 +7,12 @@
 # files for dependencies which ship none. Inputs of the rules that wrap a GN
 # build of part of the tree. The bazel/ subdirectory is its own package.
 
-# zip_bundle.gni's script, which bazel/zip_bundle.bzl runs the same way.
-exports_files(["zip.py"])
+# zip_bundle.gni's script, which bazel/zip_bundle.bzl runs the same way, and
+# the dart_pkg action's, which bazel/dart/dart_pkg.bzl runs.
+exports_files([
+    "dart/tools/dart_pkg.py",
+    "zip.py",
+])
 
 # What a wrapped GN build reads here. The build configuration (config/, dart/,
 # the .gni files) is in whole, with slack: it is small and changes rarely. The

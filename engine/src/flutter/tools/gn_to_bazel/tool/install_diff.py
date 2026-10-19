@@ -34,8 +34,8 @@ import artifact_diff  # pylint: disable=wrong-import-position
 # a local engine (flutter_tester, gen_snapshot, icudtl.dat, impellerc and
 # libtessellator.so, font-subset, the GTK library with its flutter_linux/
 # headers, dart-sdk/, flutter_patched_sdk/, gen/flutter/lib/snapshot/, the
-# frontend server), plus the embedder's library and header, path_ops, and
-# the archives.
+# frontend server, the sky_engine package), plus the embedder's library and
+# header, path_ops, and the archives.
 DEFAULT_PATHS = [
     "flutter_tester",
     "gen_snapshot",
@@ -52,6 +52,7 @@ DEFAULT_PATHS = [
     "flutter_patched_sdk",
     "gen/flutter/lib/snapshot",
     "gen/frontend_server_aot.dart.snapshot",
+    "gen/dart-pkg/sky_engine",
     "zip_archives",
 ]
 

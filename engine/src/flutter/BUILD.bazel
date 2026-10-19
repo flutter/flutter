@@ -102,6 +102,18 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+# dart:ui_web's sources and API file, which web_sdk.gni's
+# web_ui_ui_web_with_output (web_sdk/web_sdk.bzl) rewrites into the
+# sky_engine package for sky/packages/sky_engine; the web SDK's own build,
+# which rewrites them again for the web, is the web phase's.
+filegroup(
+    name = "ui_web_sources",
+    srcs = glob(["lib/web_ui/lib/ui_web/src/ui_web/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
+
+exports_files(["lib/web_ui/lib/ui_web/src/ui_web.dart"])
+
 # run_tests.py --type dart-host: `dart test` in each Dart package of
 # build_dart_host_test_list, as dart_package_test runs it
 # (build/bazel/dart/package_test.bzl). Thirteen packages there, eleven here:
@@ -171,9 +183,10 @@ filegroup(
 # tool reads from a `--local-engine` (flutter_tester, gen_snapshot,
 # icudtl.dat, impellerc and its libraries, font-subset, the GTK library and
 # headers, the Dart SDK, the patched SDK, the core snapshot under
-# gen/flutter/lib/snapshot/, the frontend server under gen/), the embedder
-# library with its header, and every archive the Linux host configurations
-# define (the ones below), under zip_archives/. `bazel run` copies them into
+# gen/flutter/lib/snapshot/, the frontend server under gen/, the sky_engine
+# package under gen/dart-pkg/), the embedder library with its header, and
+# every archive the Linux host configurations define (the ones below),
+# under zip_archives/. `bazel run` copies them into
 # engine/src/out/<variant>/ -- host_debug_unopt for a plain build, host_debug
 # for -c opt, host_release with the mode flag -- or into a directory named
 # after `--`:
@@ -181,9 +194,7 @@ filegroup(
 #   bazel run //engine/src/flutter:install
 #   bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
 #
-# Not here yet: gen/dart-pkg/sky_engine (sky/packages/sky_engine's copies of
-# the Dart SDK's libraries, which the tool lists as a build input and the
-# analyzer reads), the web SDK, and GN's own bookkeeping (args.gn,
+# Not here yet: the web SDK, and GN's own bookkeeping (args.gn,
 # compile_commands.json, the .d files).
 install(
     name = "install",
@@ -196,6 +207,9 @@ install(
         "//engine/src/flutter/shell/platform/linux:flutter_gtk",
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
+    # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
+    # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
+    contents = ["//engine/src/flutter/sky/packages/sky_engine"],
     files = {
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
         "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",

@@ -82,6 +82,23 @@ filegroup(
     srcs = glob(["sdk/lib/**"]),
 )
 
+# The same files by name, for the copies sky/packages/sky_engine makes of
+# each library's sources into the sky_engine package (the Dart tree's
+# <library>_sources.gni lists, which the converter reads).
+exports_files(glob(["sdk/lib/**"]))
+
+# What a Dart script of the engine's build runs under when GN gives it this
+# tree's package configuration (prebuilt_dart_action's `packages`): the
+# configuration and the packages such scripts import -- package:args and
+# package:path, for web_sdk/sdk_rewriter.dart.
+filegroup(
+    name = "script_packages",
+    srcs = [".dart_tool/package_config.json"] + glob([
+        "third_party/pkg/core/pkgs/args/lib/**",
+        "third_party/pkg/core/pkgs/path/lib/**",
+    ]),
+)
+
 # The script GN's bin_to_assembly template runs (//flutter/build/bin_to_obj.gni).
 exports_files(["runtime/tools/bin_to_assembly.py"])
 

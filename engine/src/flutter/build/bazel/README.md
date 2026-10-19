@@ -753,18 +753,32 @@ frontend server's snapshot under `bin/snapshots/`), `flutter_patched_sdk/`,
 `gen/flutter/lib/snapshot/` (the core snapshot's four files) and
 `gen/frontend_server_aot.dart.snapshot` from there (`artifacts.dart`); the
 embedder's consumers `libflutter_engine.so` and `flutter_embedder.h`; CI's
-uploader the archives under `zip_archives/`. Under Bazel each of these is an
-output under its own package in `bazel-bin`. `install` (`install.bzl`) is the
-`bazel run` target that copies a chosen set of them to where the consumers
-look: `files` maps a target to the directory under the build directory that
-holds its files by base name, `trees` are `zip_tree` targets whose files go
-at their paths under the tree's destination (the Dart SDK, the GTK headers),
-`archives` are `zip_bundle` targets whose archives go under `zip_archives/`.
-The destination is `engine/src/out/<variant>/` -- `<variant>` GN's name for
-the configuration's build directory (`host_debug_unopt`, `host_debug`,
+uploader the archives under `zip_archives/`; the analyzer, and the tool as
+a build input, the sky_engine package under `gen/dart-pkg/`. Under Bazel
+each of these is an output under its own package in `bazel-bin`. `install`
+(`install.bzl`) is the `bazel run` target that copies a chosen set of them
+to where the consumers look. A rule that knows where GN's build directory
+holds its files says so with `BuildDirectoryInfo` (`build_directory.bzl`):
+`gn_copy` from its `outputs` (`$root_gen_dir/dart-pkg/sky_engine/lib/async/
+{{source_file_part}}` places each source by name there; a literal output
+places the one file), `gn_action` under `gen/<package>/`,
+`gn_generated_file` at its output, `zip_bundle` under `zip_archives/`,
+`dart_pkg` and `sdk_rewriter` where their GN outputs go; `install`'s
+`contents` collects these over a target's dependency closure (an aspect
+over `deps`, `srcs` and `data`), so that one target -- the sky_engine
+package's -- brings its thirty copies, its generated file and its assembled
+directory along. For rules that do not say, `files` maps a target to the
+directory under the build directory that holds its files by base name,
+`trees` are `zip_tree` targets whose files go at their paths under the
+tree's destination (the Dart SDK, the GTK headers), and `archives` are
+`zip_bundle` targets whose archives go under `zip_archives/`. The
+destination is `engine/src/out/<variant>/` -- `<variant>` GN's name for the
+configuration's build directory (`host_debug_unopt`, `host_debug`,
 `host_release`; `checkout_view.bzl`) -- or a directory named after `--`,
 relative to the checkout; the copies land in the checkout
-(`BUILD_WORKSPACE_DIRECTORY`), outside Bazel's output tree, as GN's would.
+(`BUILD_WORKSPACE_DIRECTORY`), outside Bazel's output tree, as GN's would,
+and writable, as GN's are (Bazel's outputs are not; a second install
+replaces the first's).
 
 The root package has `//engine/src/flutter:install`, the Linux host's build
 directory as above with all seven archives of the Linux host configurations:
@@ -774,25 +788,40 @@ bazel run //engine/src/flutter:install
 bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
 ```
 
-installs 1,106 files; `tools/gn_to_bazel/tool/install_diff.py` compares such
+installs 1,390 files; `tools/gn_to_bazel/tool/install_diff.py` compares such
 a directory with GN's path by path (the consumer-visible paths above by
 default; a directory is every file under it, an archive is compared entry
-by entry as `artifact_diff.py` does): against `host_debug_unopt`, 16 of 16
-paths agree -- 1,098 files identical, the eight binaries differing as builds
+by entry as `artifact_diff.py` does): against `host_debug_unopt`, 17 of 17
+paths agree -- 1,387 files identical, the eight binaries differing as builds
 under different flags do, nothing missing on either side. Two things the
 comparison turned up. GN's build root holds the *full* ICU data file
 (`copy("copy_icudata")`, `common/icudtl.dat`, 10.8 MB), where `artifacts.zip`
 ships the trimmed `flutter/icudtl.dat` (865 KB): a `--local-engine` run
 loads different ICU data than a release does; `install` follows the build
-directory. And the converter now gives a copy into the build root that
-renames its file (`copy_headers`: `embedder.h` to `flutter_embedder.h`) an
-`outs` with the new name, so that the Bazel file bears the layout's name
-(`gn_copy` already renamed for literal outputs under the gen dir).
+directory. And the converter gives a copy elsewhere in the build directory
+that renames its file (`copy_headers`: `embedder.h` to `flutter_embedder.h`)
+an `outs` with GN's path for it, so that the Bazel file bears the layout's
+name (`gn_copy` already renamed for literal outputs under the gen dir).
 
-Not installed yet: `gen/dart-pkg/sky_engine` (`sky/packages/sky_engine`'s
-copies of the Dart SDK's libraries with `dart:ui`, which the tool lists as a
-build input -- a missing input only marks the build dirty -- and the analyzer
-reads), the web SDK, and GN's own bookkeeping (`args.gn`,
+The sky_engine package (`sky/packages/sky_engine`, GN's
+`gen/dart-pkg/sky_engine/`: the core libraries' sources copied out of the
+Dart tree, `dart:ui`'s, `dart:ui_web`'s rewritten by `web_sdk/
+sdk_rewriter.dart`, the embedder specification, and the package's own files
+laid in by `build/dart/tools/dart_pkg.py`) converts as any other file: the
+copies read the Dart SDK's `<library>_sources.gni` lists through
+three-argument `rebase_path()` and name files of the Dart tree
+(`@dart//:sdk/lib/async/async.dart`, which the overlay exports) and of other
+packages; `generated_file` with `contents` is `gn_generated_file`; the
+`dart_pkg.py` action is converted by its script (the converter's
+`scriptMappings`) into `dart_pkg` (`build/bazel/dart/dart_pkg.bzl`), which
+runs the script into a directory artifact; `web_ui_ui_web_with_output` is
+`web_sdk/web_sdk.bzl`'s `sdk_rewriter` rule, which runs the script under
+the prebuilt Dart SDK with the Dart tree's package configuration and
+declares an output per source. The script's directory walk did not follow
+symbolic links, which a sandbox's inputs are; it does now (a one-line
+change, harmless to GN). Its 289 files come out byte-identical to GN's.
+
+Not installed yet: the web SDK, and GN's own bookkeeping (`args.gn`,
 `compile_commands.json`, depfiles). The builder-specific targets below
 install the archives alone.
 

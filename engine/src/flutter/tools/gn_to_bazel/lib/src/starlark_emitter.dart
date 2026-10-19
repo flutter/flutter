@@ -498,9 +498,79 @@ final class _Emitter {
         _convertAction(target);
       case 'copy':
         _convertCopy(target);
+      case 'generated_file':
+        _convertGeneratedFile(target);
       default:
         throw GnError(target.location, '${target.rule}() is not converted yet');
     }
+  }
+
+  /// generated_file("x") with `contents`: a `gn_generated_file`
+  /// (build/bazel/gn_action) writing the lines, named after GN's output
+  /// path under the build directory (or under the package's own gen dir,
+  /// when it is there), with the output on record for install. The
+  /// `metadata`-walking form (`data_keys`) is not converted.
+  void _convertGeneratedFile(GnTarget target) {
+    _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_generated_file');
+    final rule = _Rule('gn_generated_file', target.name, target.comments);
+    for (final GnVariable variable in target.variables.values) {
+      switch (variable.name) {
+        case 'outputs':
+          final List<GnValue>? items = variable.unconditionalItems;
+          if (items == null || items.length != 1 || items.single is! GnStringValue) {
+            throw GnError(
+              variable.assignments.first.location,
+              'generated_file ${target.name} must name one unconditional output',
+            );
+          }
+          final String output = (items.single as GnStringValue).value;
+          final GnLocation location = variable.assignments.first.location;
+          final genDir = '$genDirRoot${gnPackage.substring(1)}/';
+          final String out = output.startsWith(genDir)
+              ? output.substring(genDir.length)
+              : _buildDirectoryPath(output, location);
+          rule.scalars['out'] = _starlarkString(out);
+          rule
+              .list('outputs')
+              .add(
+                Condition.always,
+                _Item(
+                  output
+                      .replaceFirst('$genDirRoot/', r'$root_gen_dir/')
+                      .replaceFirst('$buildDirRoot/', r'$root_out_dir/'),
+                ),
+              );
+        case 'contents':
+          // Lines of a file, as they are (not flags: no tokenizer escapes).
+          _forEachItem(variable, into: rule.list('content'), (_Element e) {
+            rule.list('content').add(e.condition, _item(_string(e), e));
+          });
+        case 'deps':
+        case 'public_deps':
+          _labelsInto(rule.list('deps'), variable, target);
+        case 'testonly':
+          _scalar(rule, 'testonly', variable);
+        case 'output_conversion' || 'data_keys' || 'walk_keys' || 'rebase':
+          throw GnError(
+            variable.assignments.first.location,
+            'generated_file variable ${variable.name} is not converted yet',
+          );
+        default:
+          if (_ignoredVariables.contains(variable.name) ||
+              variable.forwarded ||
+              _isHelperVariable(variable)) {
+            break;
+          }
+          throw GnError(
+            variable.assignments.first.location,
+            'variable ${variable.name} of generated_file ${target.name} is not converted yet',
+          );
+      }
+    }
+    if (!rule.scalars.containsKey('out')) {
+      throw GnError(target.location, 'generated_file ${target.name} has no outputs');
+    }
+    rules.add(rule);
   }
 
   static bool _isCompleteStaticLibrary(GnTarget target) {
@@ -625,6 +695,20 @@ final class _Emitter {
   /// arguments name that GN never declared as an input is declared here:
   /// the sandbox holds declared inputs only.
   void _convertAction(GnTarget target) {
+    // An action known by its script (dart_pkg.py) is a macro invocation,
+    // its variables the macro's arguments.
+    final List<GnValue>? scriptItems = target.variables['script']?.unconditionalItems;
+    if (scriptItems != null && scriptItems.length == 1 && scriptItems.single is GnStringValue) {
+      final String script = (scriptItems.single as GnStringValue).value;
+      final TemplateMapping? byScript =
+          scriptMappings[script.startsWith('//')
+              ? script
+              : _normalized('$gnPackage/$script', target.location)];
+      if (byScript != null) {
+        _convertTemplate(target, byScript);
+        return;
+      }
+    }
     _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_action');
     final rule = _Rule('gn_action', target.name, target.comments);
     final GnVariable? args = target.variables['args'];
@@ -851,6 +935,22 @@ final class _Emitter {
           }
           rule.scalars[argument.attribute] =
               '"${_packageLabel(directory, variable.assignments.first.location)}"';
+        case TemplateArgumentKind.buildPath:
+          final String? path = _singleString(variable);
+          if (path == null) {
+            throw GnError(variable.assignments.first.location, '${variable.name} has no value');
+          }
+          if (!path.startsWith('$buildDirRoot/') && !path.startsWith('$genDirRoot/')) {
+            throw GnError(
+              variable.assignments.first.location,
+              '${variable.name} is not a path under the build directory',
+            );
+          }
+          rule.scalars[argument.attribute] = _starlarkString(
+            path
+                .replaceFirst('$genDirRoot/', r'$root_gen_dir/')
+                .replaceFirst('$buildDirRoot/', r'$root_out_dir/'),
+          );
       }
     }
     // What GN discovers after the fact (templateAttributeOverrides).
@@ -1445,15 +1545,18 @@ final class _Emitter {
           if (items == null || !items.every((GnValue v) => v is GnStringValue)) {
             break;
           }
-          if (items.every((GnValue v) => (v as GnStringValue).value.startsWith('$buildDirRoot/'))) {
-            // Outputs under the build root (`$root_out_dir/flutter_embedder.h`)
-            // are the artifact layout's, which packaging and install assemble
-            // from the sources by name (a zip_bundle entry naming the output
-            // gets the source): the files travel as they are, the
-            // destinations are on record -- except that a copy which renames
-            // its file renames it here too, so that the file carries the name
-            // the layout has for it.
-            _buildRootRenamesInto(rule, items.cast<GnStringValue>(), variable, target);
+          final genDir = '$genDirRoot${gnPackage.substring(1)}/';
+          if (!items.every((GnValue v) => (v as GnStringValue).value.startsWith(genDir))) {
+            // Outputs elsewhere in the build directory
+            // (`$root_out_dir/flutter_embedder.h`,
+            // `$root_gen_dir/dart-pkg/sky_engine/lib/async/{{source_file_part}}`)
+            // are the layout's, which packaging and install assemble from
+            // the files by name (a zip_bundle entry naming the output gets
+            // the source; gn_copy places its files by `outputs`): the files
+            // travel as they are, the destinations are on record -- except
+            // that a copy which renames its file renames it here too, so
+            // that the file carries the name the layout has for it.
+            _buildDirectoryRenamesInto(rule, items.cast<GnStringValue>(), variable, target);
             break;
           }
           if (items.every((GnValue v) => !(v as GnStringValue).value.contains('{{'))) {
@@ -1481,12 +1584,13 @@ final class _Emitter {
     rules.add(rule);
   }
 
-  /// A copy into the build root whose literal outputs rename their sources
-  /// (`embedder.h` to `$root_out_dir/flutter_embedder.h`): the outputs'
-  /// paths under the build root as `outs`, so that the Bazel file bears the
-  /// layout's name. A copy keeping its files' names, or one with source
-  /// expansions in its outputs, adds nothing: its files travel as they are.
-  void _buildRootRenamesInto(
+  /// A copy elsewhere in the build directory whose literal outputs rename
+  /// their sources (`embedder.h` to `$root_out_dir/flutter_embedder.h`): the
+  /// outputs' paths under the build directory (`flutter_embedder.h`,
+  /// `gen/...`) as `outs`, so that the Bazel file bears the layout's name. A
+  /// copy keeping its files' names, or one with source expansions in its
+  /// outputs, adds nothing: its files travel as they are.
+  void _buildDirectoryRenamesInto(
     _Rule rule,
     List<GnStringValue> outputs,
     GnVariable variable,
@@ -1505,7 +1609,7 @@ final class _Emitter {
       );
     }
     final names = <String>[
-      for (final GnStringValue output in outputs) output.value.substring(buildDirRoot.length + 1),
+      for (final GnStringValue output in outputs) _buildDirectoryPath(output.value, location),
     ];
     var renames = false;
     for (var i = 0; i < names.length; i++) {
@@ -1513,7 +1617,7 @@ final class _Emitter {
       if (source is! GnStringValue) {
         throw GnError(location, 'a source of copy ${target.name} is not a path');
       }
-      if (p.basename(source.value) != p.basename(names[i])) {
+      if (p.basename(_unmarked(source.value)) != p.basename(names[i])) {
         renames = true;
       }
     }
@@ -1523,6 +1627,19 @@ final class _Emitter {
     for (final name in names) {
       rule.list('outs').addUnique(Condition.always, _Item(name));
     }
+  }
+
+  /// GN's path under the build directory for an output under the build
+  /// root (`$root_out_dir/x` is `x`) or the generated-file tree
+  /// (`$root_gen_dir/x` is `gen/x`).
+  static String _buildDirectoryPath(String output, GnLocation location) {
+    if (output.startsWith('$buildDirRoot/')) {
+      return output.substring(buildDirRoot.length + 1);
+    }
+    if (output.startsWith('$genDirRoot/')) {
+      return 'gen/${output.substring(genDirRoot.length + 1)}';
+    }
+    throw GnError(location, 'output $output is not under the build directory');
   }
 
   /// A copy's output pattern with source expansions: under the target's own
@@ -2571,13 +2688,18 @@ final class _Emitter {
   /// [gnPath] (`//dir/sub/../file`) with its `.` and `..` segments resolved,
   /// as GN resolves them; `..` above the root is an error.
   static String _normalized(String gnPath, GnLocation location) {
-    if (!gnPath.contains('/./') && !gnPath.contains('/../') && !gnPath.endsWith('/..')) {
+    if (!gnPath.contains('/./') &&
+        !gnPath.contains('/../') &&
+        !gnPath.endsWith('/..') &&
+        !gnPath.substring(2).contains('//')) {
       return gnPath;
     }
     final segments = <String>[];
     for (final String segment in gnPath.substring(2).split('/')) {
       switch (segment) {
-        case '.':
+        // An empty segment is a doubled slash (GN's "$dir/" + "/file"),
+        // which GN reads past.
+        case '.' || '':
           break;
         case '..':
           if (segments.isEmpty) {
@@ -2598,7 +2720,7 @@ final class _Emitter {
   /// then names something Bazel cannot see from here.
   String _filePath(String gnFilePath, GnLocation location) {
     String absolute = gnFilePath.startsWith('//')
-        ? gnFilePath
+        ? _normalized(gnFilePath, location)
         : gnFilePath == '.'
         ? gnPackage
         : _normalized('$gnPackage/$gnFilePath', location);
@@ -2623,6 +2745,13 @@ final class _Emitter {
             (absolute.startsWith(entry.key) || '$absolute/' == entry.key)) {
           final String rest = '$absolute/' == entry.key ? '' : absolute.substring(entry.key.length);
           return rest.isEmpty ? entry.value : '${entry.value}:$rest';
+        }
+      }
+      // A file of a repository whose targets are not converted, which
+      // exports its files (the Dart tree's core library sources).
+      for (final MapEntry<String, String> entry in fileRepositoryPrefixes.entries) {
+        if (absolute.startsWith(entry.key)) {
+          return '${entry.value}:${absolute.substring(entry.key.length)}';
         }
       }
     }
@@ -2654,8 +2783,28 @@ final class _Emitter {
 
   void _filesInto(_ListAttribute attribute, GnVariable variable) {
     _forEachItem(variable, into: attribute, (_Element e) {
-      attribute.addUnique(e.condition, _item(_filePath(_string(e), e.assignment.location), e));
+      // A source given as an absolute path (sky_engine's
+      // `rebase_path(sources, "", lib_path)`) is the file at that path.
+      final String raw = _rawString(e);
+      final String path = raw.contains(rebasedPathMarker) ? _unmarked(raw) : _string(e);
+      if (path.contains(rebasedPathMarker)) {
+        throw GnError(e.assignment.location, 'a rebased path inside a file name: $raw');
+      }
+      attribute.addUnique(e.condition, _item(_filePath(path, e.assignment.location), e));
     });
+  }
+
+  /// [path] without the marks of a `rebase_path()` result: a source given
+  /// as an absolute path (sky_engine's `rebase_path(sources, "", lib_path)`)
+  /// is the file at that path.
+  static String _unmarked(String path) {
+    if (path.length >= 2 &&
+        path.startsWith(rebasedPathMarker) &&
+        path.endsWith(rebasedPathMarker) &&
+        !path.substring(1, path.length - 1).contains(rebasedPathMarker)) {
+      return path.substring(1, path.length - 1);
+    }
+    return path;
   }
 
   /// `include_dirs`: `includes` entries, except that a generated directory
@@ -3101,6 +3250,7 @@ final class _Emitter {
     'size',
     'testonly',
     'srcs',
+    'out',
     'outs',
     'hdrs',
   ];
