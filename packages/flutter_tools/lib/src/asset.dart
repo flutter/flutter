@@ -725,6 +725,9 @@ class ManifestAssetBundle implements AssetBundle {
     String assetBasePath,
     String? flavor,
   ) {
+    if (flavor == null) {
+      return <String>{};
+    }
     final List<AssetsEntry> configurations = manifest.assets
         .where((AssetsEntry entry) => entry.bundleUri != null && entry.flavors.contains(flavor))
         .toList();

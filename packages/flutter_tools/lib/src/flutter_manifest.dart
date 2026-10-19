@@ -898,7 +898,7 @@ class AssetsEntry {
             value.isNotEmpty &&
             !value.contains(r'\') &&
             !value.contains(':') &&
-            !value.runes.any((int rune) => rune < 32 || rune == 127) &&
+            !value.codeUnits.any((int code) => code < 32 || code == 127) &&
             !value
                 .split('/')
                 .any((String segment) => segment.isEmpty || segment == '.' || segment == '..');
@@ -909,7 +909,10 @@ class AssetsEntry {
                 'with forward slashes and no empty, ".", or ".." segments.',
           );
         }
-        if (path.split('/').first == 'packages' || bundlePath.split('/').first == 'packages') {
+        if (path == 'packages' ||
+            path.startsWith('packages/') ||
+            bundlePath == 'packages' ||
+            bundlePath.startsWith('packages/')) {
           return (null, 'The bundle_path of asset "$path" cannot map package assets.');
         }
         if ((flavors ?? <String>[]).isEmpty ||
