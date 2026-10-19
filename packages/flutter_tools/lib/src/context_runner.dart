@@ -393,13 +393,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
-        visualStudio: VisualStudio(
-          fileSystem: globals.fs,
-          platform: globals.platform,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          osUtils: globals.os,
-        ),
+        visualStudio: VisualStudio(toolContext: const GlobalToolContext()),
       ),
       WebWorkflow: () => WebWorkflow(featureFlags: featureFlags, platform: globals.platform),
       WindowsWorkflow: () =>

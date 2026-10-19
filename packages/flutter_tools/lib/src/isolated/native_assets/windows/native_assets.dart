@@ -3,13 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:process/process.dart';
 
 import '../../../base/common.dart';
-import '../../../base/file_system.dart';
-import '../../../base/logger.dart';
-import '../../../base/os.dart';
-import '../../../base/platform.dart';
 import '../../../context/tool_context.dart';
 import '../../../windows/visual_studio.dart';
 
@@ -22,20 +17,7 @@ Future<CCompilerConfig?> cCompilerConfigWindows({
   required bool throwIfNotFound,
   required ToolContext toolContext,
 }) async {
-  final ToolContext(
-    :FileSystem fs,
-    :Logger logger,
-    :OperatingSystemUtils os,
-    :Platform platform,
-    :ProcessManager processManager,
-  ) = toolContext;
-  final visualStudio = VisualStudio(
-    fileSystem: fs,
-    platform: platform,
-    logger: logger,
-    processManager: processManager,
-    osUtils: os,
-  );
+  final visualStudio = VisualStudio(toolContext: toolContext);
 
   final Uri? compiler = _toOptionalFileUri(visualStudio.clPath);
   final Uri? archiver = _toOptionalFileUri(visualStudio.libPath);

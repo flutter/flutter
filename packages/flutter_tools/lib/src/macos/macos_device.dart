@@ -18,16 +18,8 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
-  MacOSDevice({required ToolContext super.toolContext})
-    : super(
-        'macos',
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        operatingSystemUtils: toolContext.os,
-        platformType: PlatformType.macos,
-        processManager: toolContext.processManager,
-        ephemeral: false,
-      );
+  MacOSDevice({required super.toolContext})
+    : super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   @override
   Future<bool> isSupported() async => true;

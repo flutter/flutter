@@ -78,7 +78,6 @@ class BuildSwiftPackage extends BuildSubCommand {
       _output,
       _platformOption,
       _buildMode,
-      _static,
     ], verboseHelp: verboseHelp);
   }
 
@@ -101,11 +100,6 @@ class BuildSwiftPackage extends BuildSubCommand {
     defaultsTo: <String>['debug', 'profile', 'release'],
     allowed: <String>['debug', 'profile', 'release'],
     help: 'Build modes to include.',
-  );
-
-  static const _static = FlagOptionDescriptor(
-    name: 'static',
-    help: 'Build CocoaPods plugins as static frameworks.',
   );
 
   @override
@@ -367,7 +361,7 @@ class BuildSwiftPackage extends BuildSubCommand {
 
     await cocoapodDependencies.generateArtifacts(
       buildInfo: buildInfo,
-      buildStatic: getValue(_static),
+      buildStatic: getValue(DarwinAddToAppOptionsBundle.staticFrameworks),
       cacheDirectory: cacheDirectory,
       xcframeworkOutput: xcframeworkOutput,
       codesignIdentity: codesignIdentity,

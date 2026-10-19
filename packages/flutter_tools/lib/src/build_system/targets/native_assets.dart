@@ -456,11 +456,7 @@ class _EnvironmentToolContext implements ToolContext {
   Artifacts get artifacts => _environment.artifacts;
 
   @override
-  late final botDetector = BotDetector(
-    httpClientFactory: () => HttpClient(),
-    platform: platform,
-    persistentToolState: persistentToolState,
-  );
+  late final botDetector = BotDetector(platform: platform);
 
   @override
   late final cache = FlutterCache(

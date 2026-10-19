@@ -29,10 +29,10 @@ void main() {
   testWithoutContext('default configuration', () async {
     final device = MacOSDevice(
       toolContext: FakeToolContext(
-        processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test(),
         fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.any(),
       ),
     );
     final package = FakeMacOSApp();
@@ -56,6 +56,8 @@ void main() {
     final device = MacOSDevice(
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>['release/executable'],
@@ -64,8 +66,6 @@ void main() {
             completer: completer,
           ),
         ]),
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
       ),
     );
     final package = FakeMacOSApp();
@@ -87,16 +87,16 @@ void main() {
   testWithoutContext('No devices listed if platform is unsupported', () async {
     expect(
       await MacOSDevices(
-        toolContext: FakeToolContext(
-          fs: MemoryFileSystem.test(),
-          processManager: FakeProcessManager.any(),
-          logger: BufferLogger.test(),
-          platform: linux,
-          os: FakeOperatingSystemUtils(),
-        ),
         macOSWorkflow: MacOSWorkflow(
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
           platform: linux,
+        ),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: linux,
+          processManager: FakeProcessManager.any(),
         ),
       ).devices(),
       isEmpty,
@@ -107,14 +107,14 @@ void main() {
     'No devices listed if platform is supported and feature is disabled',
     () async {
       final macOSDevices = MacOSDevices(
+        macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
-          processManager: FakeProcessManager.any(),
           logger: BufferLogger.test(),
-          platform: macOS,
           os: FakeOperatingSystemUtils(),
+          platform: macOS,
+          processManager: FakeProcessManager.any(),
         ),
-        macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
       );
 
       expect(await macOSDevices.devices(), isEmpty);
@@ -123,16 +123,16 @@ void main() {
 
   testWithoutContext('devices listed if platform is supported and feature is enabled', () async {
     final macOSDevices = MacOSDevices(
-      toolContext: FakeToolContext(
-        fs: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test(),
-        platform: macOS,
-        os: FakeOperatingSystemUtils(),
-      ),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
+      ),
+      toolContext: FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        platform: macOS,
+        processManager: FakeProcessManager.any(),
       ),
     );
 
@@ -141,16 +141,16 @@ void main() {
 
   testWithoutContext('has a well known device id macos', () async {
     final macOSDevices = MacOSDevices(
-      toolContext: FakeToolContext(
-        fs: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test(),
-        platform: macOS,
-        os: FakeOperatingSystemUtils(),
-      ),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
+      ),
+      toolContext: FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        platform: macOS,
+        processManager: FakeProcessManager.any(),
       ),
     );
 
@@ -159,16 +159,16 @@ void main() {
 
   testWithoutContext('can discover devices with a provided timeout', () async {
     final macOSDevices = MacOSDevices(
-      toolContext: FakeToolContext(
-        fs: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        logger: BufferLogger.test(),
-        platform: macOS,
-        os: FakeOperatingSystemUtils(),
-      ),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
+      ),
+      toolContext: FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        platform: macOS,
+        processManager: FakeProcessManager.any(),
       ),
     );
 
@@ -186,8 +186,8 @@ void main() {
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
         os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.any(),
       ),
     );
 
@@ -205,8 +205,8 @@ void main() {
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
         os: fakeOperatingSystemUtils,
+        processManager: FakeProcessManager.any(),
       ),
     );
 
@@ -220,8 +220,8 @@ void main() {
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
         os: fakeOperatingSystemUtils,
+        processManager: FakeProcessManager.any(),
       ),
     );
 
@@ -234,8 +234,8 @@ void main() {
       toolContext: FakeToolContext(
         fs: fileSystem,
         logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
         os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.any(),
       ),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -250,8 +250,8 @@ void main() {
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
         os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.any(),
       ),
     );
     const debugPath = 'debug/executable';
