@@ -10,7 +10,10 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-bool get isWebParagraphEnabled => configuration.preferWebParagraph && browserSupportsWebParagraph;
+bool get isWebParagraphEnabled =>
+    !FlutterConfiguration.flutterWebUseSkwasm &&
+    configuration.preferWebParagraph &&
+    browserSupportsWebParagraph;
 
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
