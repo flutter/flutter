@@ -276,13 +276,7 @@ class ToolDependencies {
         persistentToolState ??
         PersistentToolState(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final BotDetector finalBotDetector =
-        botDetector ??
-        BotDetector(
-          httpClientFactory: () => HttpClient(),
-          platform: finalPlatform,
-          persistentToolState: finalPersistentToolState,
-        );
+    final BotDetector finalBotDetector = botDetector ?? BotDetector(platform: finalPlatform);
 
     final bool isBot = await finalBotDetector.isRunningOnBot;
 

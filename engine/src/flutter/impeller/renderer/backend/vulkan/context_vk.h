@@ -76,11 +76,11 @@ class ContextVK final : public Context,
 
   /// Embedder Stuff
   struct EmbedderData {
-    VkInstance instance;
-    VkPhysicalDevice physical_device;
-    VkDevice device;
-    uint32_t queue_family_index;
-    VkQueue queue;
+    VkInstance instance = nullptr;
+    VkPhysicalDevice physical_device = nullptr;
+    VkDevice device = nullptr;
+    uint32_t queue_family_index = 0;
+    VkQueue queue = nullptr;
     std::vector<std::string> instance_extensions;
     std::vector<std::string> device_extensions;
   };

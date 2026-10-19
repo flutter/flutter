@@ -261,7 +261,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     super.toolContext,
   }) {
     requiresPubspecYaml();
-    usesFatalWarningsOption(verboseHelp: verboseHelp);
+    CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
   }
 
   @protected
@@ -283,9 +283,11 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
        ) {
-    usesTargetOption();
-    usesPubOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
+    registerOptionBundle(const BuildModeOptionsBundle());
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.target,
+      CommonOptions.pub,
+    ], verboseHelp: verboseHelp);
   }
 
   final ExtensionBuildManager _buildManager;
