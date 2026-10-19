@@ -1630,6 +1630,90 @@ void main() {
       expect(node2.traversalDescendants, equals(<FocusNode>[]));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/113005.
+    testWidgets('Rebuilding under a non-traversable ancestor does not set skipTraversal', (
+      WidgetTester tester,
+    ) async {
+      final node = FocusNode(debugLabel: 'node');
+      addTearDown(node.dispose);
+
+      Widget build({required bool traversable}) {
+        return Focus(
+          descendantsAreTraversable: traversable,
+          child: Focus(focusNode: node, child: Container()),
+        );
+      }
+
+      await tester.pumpWidget(build(traversable: true));
+      expect(node.skipTraversal, isFalse);
+
+      await tester.pumpWidget(build(traversable: false));
+      expect(node.skipTraversal, isTrue);
+
+      await tester.pumpWidget(build(traversable: true));
+      expect(node.skipTraversal, isFalse);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/113005.
+    testWidgets(
+      'EditableText is traversable after it loses focus under a non-traversable ancestor',
+      (WidgetTester tester) async {
+        final previousNode = FocusNode(debugLabel: 'previous');
+        addTearDown(previousNode.dispose);
+        final fieldNode = FocusNode(debugLabel: 'field');
+        addTearDown(fieldNode.dispose);
+        final controller = TextEditingController();
+        addTearDown(controller.dispose);
+
+        Widget build({required bool traversable}) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Focus(
+              descendantsAreTraversable: traversable,
+              child: Column(
+                children: <Widget>[
+                  Focus(focusNode: previousNode, child: const SizedBox(width: 10, height: 10)),
+                  EditableText(
+                    controller: controller,
+                    focusNode: fieldNode,
+                    style: const TextStyle(),
+                    cursorColor: const Color(0xff00ff00),
+                    backgroundCursorColor: const Color(0xff0000ff),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(build(traversable: true));
+        fieldNode.requestFocus();
+        await tester.pump();
+
+        await tester.pumpWidget(build(traversable: false));
+        fieldNode.unfocus();
+        await tester.pump();
+
+        await tester.pumpWidget(build(traversable: true));
+        previousNode.requestFocus();
+        await tester.pump();
+        previousNode.nextFocus();
+        await tester.pump();
+        expect(fieldNode.hasFocus, isTrue);
+      },
+    );
+
+    testWidgets('Removing skipTraversal resets the internal node to false', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(Focus(skipTraversal: true, child: Container(key: key)));
+      expect(Focus.of(key.currentContext!).skipTraversal, isTrue);
+
+      await tester.pumpWidget(Focus(child: Container(key: key)));
+      expect(Focus.of(key.currentContext!).skipTraversal, isFalse);
+    });
+
     testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (
       WidgetTester tester,
     ) async {
