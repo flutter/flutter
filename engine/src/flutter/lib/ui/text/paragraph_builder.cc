@@ -55,7 +55,7 @@ struct DartListElements {
 
   static constexpr intptr_t kInlineCapacity = 16;
   intptr_t length = 0;
-  Dart_Handle inline_storage[kInlineCapacity];
+  Dart_Handle inline_storage[kInlineCapacity]{};
   std::vector<Dart_Handle> heap_storage;
   Dart_Handle* data = inline_storage;
 
