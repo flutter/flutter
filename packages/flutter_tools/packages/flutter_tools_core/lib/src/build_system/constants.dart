@@ -19,7 +19,9 @@ abstract final class BuiltInPlaceholders {
   /// Valid as the leading segment of an [ExtensionSource.pattern].
   static const String workspaceDir = '{WORKSPACE_DIR}';
 
-  /// Placeholder substituted with the intermediate build directory.
+  /// Placeholder substituted with the intermediate build directory
+  /// (under `.dart_tool/flutter_build`, matching `Environment.buildDir` in
+  /// `flutter_tools`), not `{PROJECT_DIR}/build`.
   ///
   /// Valid as the leading segment of an [ExtensionSource.pattern] or within
   /// [ExtensionBuildTarget.outputDir].

@@ -69,6 +69,7 @@ void main() {
         final Object? missingCmakeResultObj = await handlers['build']!(<String, Object?>{
           BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
           BuildService.buildModeParam: 'debug',
+          BuildService.flutterRootParam: '/flutter',
           BuildService.mainPathParam: 'lib/main.dart',
           BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
           BuildService.projectRootParam: '/project',
@@ -84,6 +85,7 @@ void main() {
         final Object? unknownBuildTargetResultObj = await handlers['build']!(<String, Object?>{
           BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
           BuildService.buildModeParam: 'debug',
+          BuildService.flutterRootParam: '/flutter',
           BuildService.mainPathParam: 'lib/main.dart',
           BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
           BuildService.projectRootParam: '/project',
@@ -100,6 +102,7 @@ void main() {
           <String, Object?>{
             BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
             BuildService.buildModeParam: 'debug',
+            BuildService.flutterRootParam: '/flutter',
             BuildService.mainPathParam: 'lib/main.dart',
             BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
             BuildService.projectRootParam: '/project',
@@ -138,6 +141,7 @@ void main() {
         ExtensionBuildContext(
           buildDir: buildDir.uri,
           buildMode: .debug,
+          flutterRoot: tempDir.uri,
           mainPath: 'lib/main.dart',
           outputDir: outputDir.uri,
           projectRoot: tempDir.uri,
@@ -170,6 +174,7 @@ void main() {
         ExtensionBuildContext(
           buildDir: tempDir.uri,
           buildMode: .debug,
+          flutterRoot: tempDir.uri,
           mainPath: 'lib/main.dart',
           outputDir: tempDir.uri,
           projectRoot: tempDir.uri,
@@ -181,12 +186,53 @@ void main() {
       expect(result.errorMessage, contains('Missing linuxDesktopPath artifact.'));
     });
 
+    test('_copyDirectory preserves symbolic links', () async {
+      final Directory tempDir = Directory.systemTemp.createTempSync('linux_build_symlink_test.');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      final targetFile = File('${tempDir.path}/target.txt')..writeAsStringSync('target content');
+
+      final buildDir = Directory('${tempDir.path}/build_dir')..createSync(recursive: true);
+      final assetsDir = Directory('${buildDir.path}/flutter_assets')..createSync(recursive: true);
+      File('${assetsDir.path}/AssetManifest.bin').writeAsStringSync('manifest');
+      Link('${assetsDir.path}/symlink_asset.bin').createSync(targetFile.path);
+
+      final desktopDir = Directory('${tempDir.path}/desktop')..createSync(recursive: true);
+      File('${desktopDir.path}/libflutter_linux_gtk.so').writeAsStringSync('gtk');
+      final icuFile = File('${tempDir.path}/icudtl.dat')..writeAsStringSync('icu');
+      File('${buildDir.path}/app.dill').writeAsStringSync('dill');
+
+      final outputDir = Directory('${tempDir.path}/output_dir')..createSync(recursive: true);
+
+      const target = CustomLinuxAssembleOnlyDebug();
+      final ExtensionBuildResult result = await target.build(
+        ExtensionBuildContext(
+          buildDir: buildDir.uri,
+          buildMode: .debug,
+          flutterRoot: tempDir.uri,
+          mainPath: 'lib/main.dart',
+          outputDir: outputDir.uri,
+          projectRoot: tempDir.uri,
+          resolvedArtifacts: <String, String>{
+            LinuxArtifacts.linuxDesktopPath.name: desktopDir.path,
+            BuiltInArtifacts.icuData.name: icuFile.path,
+          },
+        ),
+      );
+
+      expect(result.success, isTrue);
+      final copiedLink = Link('${outputDir.path}/bundle/data/flutter_assets/symlink_asset.bin');
+      expect(copiedLink.existsSync(), isTrue);
+      expect(copiedLink.targetSync(), equals(targetFile.path));
+    });
+
     group('build RPC parameter validation', () {
       const validParams = <String, Object?>{
         BuildService.targetNameParam: 'custom-linux-build',
         BuildService.projectRootParam: '/project',
         BuildService.mainPathParam: 'lib/main.dart',
         BuildService.buildModeParam: 'debug',
+        BuildService.flutterRootParam: '/flutter',
         BuildService.outputDirParam: '/out',
         BuildService.buildDirParam: '/build',
         BuildService.resolvedArtifactsParam: <String, String>{},
@@ -208,6 +254,16 @@ void main() {
               'relative projectRoot',
               <String, Object?>{BuildService.projectRootParam: 'relative/path'},
               BuildService.projectRootParam,
+            ),
+            (
+              'missing flutterRoot',
+              <String, Object?>{BuildService.flutterRootParam: null},
+              BuildService.flutterRootParam,
+            ),
+            (
+              'relative flutterRoot',
+              <String, Object?>{BuildService.flutterRootParam: 'relative/flutter'},
+              BuildService.flutterRootParam,
             ),
             (
               'missing mainPath',

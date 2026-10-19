@@ -139,6 +139,7 @@ base class ExtensionBuildManager {
   Future<ExtensionBuildResult> build({
     required Uri buildDir,
     required BuildMode buildMode,
+    required Uri flutterRoot,
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
@@ -154,6 +155,7 @@ base class ExtensionBuildManager {
           await getBuildTargets();
         }
       },
+      flutterRoot: flutterRoot,
       mainPath: mainPath,
       outputDir: outputDir,
       projectRoot: projectRoot,
@@ -168,6 +170,7 @@ base class ExtensionBuildManager {
   Future<ExtensionBuildResult> assemble({
     required Uri buildDir,
     required BuildMode buildMode,
+    required Uri flutterRoot,
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
@@ -183,6 +186,7 @@ base class ExtensionBuildManager {
           await getAssembleTargets();
         }
       },
+      flutterRoot: flutterRoot,
       mainPath: mainPath,
       outputDir: outputDir,
       projectRoot: projectRoot,
@@ -198,6 +202,7 @@ base class ExtensionBuildManager {
     required BuildMode buildMode,
     required Map<String, ExtensionConnection> connectionMap,
     required Future<void> Function() ensureTargetsLoaded,
+    required Uri flutterRoot,
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
@@ -214,6 +219,9 @@ base class ExtensionBuildManager {
     }
     if (!buildDir.hasAbsolutePath) {
       throw ArgumentError.value(buildDir, 'buildDir', 'Must be an absolute path.');
+    }
+    if (!flutterRoot.hasAbsolutePath) {
+      throw ArgumentError.value(flutterRoot, 'flutterRoot', 'Must be an absolute path.');
     }
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const ExtensionBuildResult(
@@ -248,6 +256,7 @@ base class ExtensionBuildManager {
         params: <String, Object?>{
           BuildService.buildDirParam: buildDir.toString(),
           BuildService.buildModeParam: buildMode.cliName,
+          BuildService.flutterRootParam: flutterRoot.toString(),
           BuildService.mainPathParam: mainPath,
           BuildService.outputDirParam: outputDir.toString(),
           BuildService.projectRootParam: projectRoot.toString(),

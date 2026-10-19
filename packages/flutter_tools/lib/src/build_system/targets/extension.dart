@@ -77,6 +77,7 @@ class ExtensionTarget extends Target {
     final ExtensionBuildResult result = await _buildManager.assemble(
       buildDir: buildDir.uri,
       buildMode: mode,
+      flutterRoot: environment.flutterRootDir.uri,
       mainPath: mainPath,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,

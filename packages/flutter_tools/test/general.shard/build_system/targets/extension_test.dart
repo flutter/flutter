@@ -35,6 +35,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
 
   Uri? invokedBuildDir;
   BuildMode? invokedBuildMode;
+  Uri? invokedFlutterRoot;
   String? invokedMainPath;
   Uri? invokedOutputDir;
   Uri? invokedProjectRoot;
@@ -45,6 +46,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
   Future<ExtensionBuildResult> assemble({
     required Uri buildDir,
     required BuildMode buildMode,
+    required Uri flutterRoot,
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
@@ -53,6 +55,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
   }) async {
     invokedBuildDir = buildDir;
     invokedBuildMode = buildMode;
+    invokedFlutterRoot = flutterRoot;
     invokedMainPath = mainPath;
     invokedOutputDir = outputDir;
     invokedProjectRoot = projectRoot;
@@ -127,6 +130,7 @@ void main() {
     expect(buildManager.invokedBuildMode, equals(BuildMode.debug));
     expect(buildManager.invokedOutputDir, equals(environment.outputDir.uri));
     expect(buildManager.invokedBuildDir, equals(environment.buildDir.uri));
+    expect(buildManager.invokedFlutterRoot, equals(environment.flutterRootDir.uri));
     expect(buildManager.invokedResolvedArtifacts, isEmpty);
   });
 

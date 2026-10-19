@@ -88,10 +88,10 @@ class ExtensionBuildTarget {
   const ExtensionBuildTarget({
     required this.description,
     required this.name,
+    required this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-    this.outputDir = BuiltInPlaceholders.buildDir,
-    this.targetPlatform = '',
+    this.outputDir = '${BuiltInPlaceholders.projectDir}/build',
   });
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
@@ -107,7 +107,7 @@ class ExtensionBuildTarget {
       },
       targetPlatform: switch (json[targetPlatformKey]) {
         final String value => value,
-        _ => '',
+        final Object? invalid => throw ArgumentError('Invalid "$targetPlatformKey": $invalid'),
       },
       artifacts: switch (json[artifactsKey]) {
         final List<Object?> rawArtifacts => <ExtensionArtifact>{
@@ -133,7 +133,8 @@ class ExtensionBuildTarget {
       },
       outputDir: switch (json[outputDirKey]) {
         final String value => value,
-        _ => BuiltInPlaceholders.buildDir,
+        null => '${BuiltInPlaceholders.projectDir}/build',
+        final Object? invalid => throw ArgumentError('Invalid "$outputDirKey": $invalid'),
       },
     );
   }
@@ -179,6 +180,7 @@ class ExtensionBuildTarget {
   /// embedders can declare platform identifiers that are not built into Flutter.
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
+  // TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
   final String targetPlatform;
 
   /// Engine artifacts required by this build target, resolved for [targetPlatform]

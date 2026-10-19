@@ -334,6 +334,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     final ExtensionBuildResult result = await _buildManager.build(
       buildDir: buildDir.uri,
       buildMode: buildInfo.mode,
+      flutterRoot: fs.directory(Cache.flutterRoot).uri,
       mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,

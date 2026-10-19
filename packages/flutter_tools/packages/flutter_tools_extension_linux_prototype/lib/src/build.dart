@@ -27,6 +27,7 @@ const String _kAppDill = 'app.dill';
 const String _kGeneratedConfigCmake = 'generated_config.cmake';
 
 /// Top-level Linux build target contributed by the prototype extension.
+// TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
 class CustomLinuxBuildTarget extends BuildTarget {
   const CustomLinuxBuildTarget()
     : super(
@@ -58,13 +59,7 @@ class CustomLinuxBuildTarget extends BuildTarget {
       );
     }
 
-    final String? flutterRoot = Platform.environment['FLUTTER_ROOT'];
-    if (flutterRoot == null || flutterRoot.isEmpty) {
-      return const ExtensionBuildResult(
-        success: false,
-        errorMessage: 'FLUTTER_ROOT environment variable is not set.',
-      );
-    }
+    final String flutterRoot = Directory.fromUri(context.flutterRoot).path;
 
     final String? unpackError = _unpackArtifacts(
       projectRoot: projectDir.path,
@@ -179,6 +174,7 @@ class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
     final buildDir = Directory.fromUri(context.buildDir);
 
     // 1. Copy assets from buildDir if present
+    // TODO(bkonyi): Support depfiles on AssembleTarget so copied asset outputs are tracked.
     final srcAssets = Directory('${buildDir.path}/$_kFlutterAssets');
     final destAssets = Directory('${outputDir.path}/bundle/data/$_kFlutterAssets');
     if (srcAssets.existsSync()) {
@@ -186,6 +182,7 @@ class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
     }
 
     // 2. Copy libflutter_linux_gtk.so
+    // TODO(bkonyi): Move engine artifact bundling into a separate assemble target.
     final String? desktopPath = context.resolvedArtifacts[LinuxArtifacts.linuxDesktopPath.name];
     if (desktopPath == null) {
       return const ExtensionBuildResult(
@@ -268,12 +265,19 @@ void _copyDirectory(Directory source, Directory destination) {
   if (!destination.existsSync()) {
     destination.createSync(recursive: true);
   }
-  for (final FileSystemEntity entity in source.listSync()) {
+  for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = entity.uri.pathSegments.lastWhere((String e) => e.isNotEmpty);
     if (entity is Directory) {
       _copyDirectory(entity, Directory('${destination.path}/$name'));
     } else if (entity is File) {
       entity.copySync('${destination.path}/$name');
+    } else if (entity is Link) {
+      final destPath = '${destination.path}/$name';
+      if (FileSystemEntity.typeSync(destPath, followLinks: false) !=
+          FileSystemEntityType.notFound) {
+        Link(destPath).deleteSync();
+      }
+      Link(destPath).createSync(entity.targetSync());
     }
   }
 }
@@ -285,6 +289,7 @@ void _copyFile(File source, File destination) {
   source.copySync(destination.path);
 }
 
+// TODO(bkonyi): Move unpacking engine artifacts into linux/flutter/ephemeral to an assemble target.
 String? _unpackArtifacts({
   required String projectRoot,
   required Map<String, String> resolvedArtifacts,
