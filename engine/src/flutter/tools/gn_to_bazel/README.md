@@ -154,6 +154,29 @@ directories Bazel serves through `include_prefix`, and GN carrying a shader
 *tool*'s `all_dependent_configs` into `impeller/renderer`. Anything else is a
 converter gap or a GN oddity worth a look; `--full` lists every class.
 
+### Artifact parity
+
+```sh
+(cd ../.. && ninja -C out/host_debug_unopt flutter/build/archives:artifacts ...)
+bazel build //engine/src/flutter/build/archives:all //engine/src/flutter/tools/font_subset:font_subset ...
+python3 tool/artifact_diff.py --gn=../../out/host_debug_unopt \
+    --bazel=../../out/bazel-bin/engine/src/flutter \
+    --expect-different=gen_snapshot --expect-different=flutter_tester \
+    --expect-different=impellerc --expect-different='*.so' --expect-different='*.a' \
+    --expect-different=font-subset --expect-different=bin/impellerc
+```
+
+pairs the archives the two builds write under `zip_archives/` (GN's build
+directory; every converted package's under `bazel-bin`) and reports, per
+archive, the entries one side lacks, whether they come in the same order,
+and which common entries differ once the generated `LICENSE.<target>.md`'s
+version hash is normalized. `--expect-different` names the entries that are
+builds of the same sources under flags that agree only up to the
+compile-command classes above (the binaries); anything else that differs is
+a packaging difference. The Linux host's seven archives: the patched SDK's
+two byte-identical, the Dart SDK's 1,057 entries identical, the rest
+identical but for the binaries.
+
 ## How it works
 
 GN build files are programs; Bazel wants data. The converter has three layers:
