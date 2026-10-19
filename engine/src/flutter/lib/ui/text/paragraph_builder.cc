@@ -59,7 +59,10 @@ struct DartListElements {
   std::vector<Dart_Handle> heap_storage;
   Dart_Handle* data = inline_storage;
 
-  Dart_Handle operator[](intptr_t index) const { return data[index]; }
+  Dart_Handle operator[](intptr_t index) const {
+    FML_DCHECK(index >= 0 && index < length);
+    return data[index];
+  }
 };
 
 void DecodeTextShadows(Dart_Handle shadows_handle,
@@ -69,6 +72,7 @@ void DecodeTextShadows(Dart_Handle shadows_handle,
   if (handles.length <= 0) {
     return;
   }
+  FML_DCHECK(handles.length % 4 == 0);
   decoded_shadows.reserve(handles.length / 4);
   for (intptr_t i = 0; i < handles.length; i += 4) {
     decoded_shadows.emplace_back(
@@ -85,6 +89,7 @@ void DecodeTextShadows(Dart_Handle shadows_handle,
 void DecodeFontFeatures(Dart_Handle font_features_handle,
                         txt::FontFeatures& font_features) {
   DartListElements handles(font_features_handle);
+  FML_DCHECK(handles.length % 2 == 0);
   for (intptr_t i = 0; i < handles.length; i += 2) {
     font_features.SetFeature(
         tonic::DartConverter<std::string>::FromDart(handles[i]),
@@ -95,6 +100,7 @@ void DecodeFontFeatures(Dart_Handle font_features_handle,
 void DecodeFontVariations(Dart_Handle font_variations_handle,
                           txt::FontVariations& font_variations) {
   DartListElements handles(font_variations_handle);
+  FML_DCHECK(handles.length % 2 == 0);
   for (intptr_t i = 0; i < handles.length; i += 2) {
     font_variations.SetAxisValue(
         tonic::DartConverter<std::string>::FromDart(handles[i]),
