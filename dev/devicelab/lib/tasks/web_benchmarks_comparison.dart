@@ -63,8 +63,8 @@ class BenchmarkComparison {
 /// finite, and a [FormatException] if a compared value is not a finite,
 /// non-negative number.
 BenchmarkComparison compareResults({
-  required Map<String, dynamic> current,
-  required Map<String, dynamic> baseline,
+  required Map<String, Object?> current,
+  required Map<String, Object?> baseline,
   double? regressionThreshold,
 }) {
   if (regressionThreshold != null && (regressionThreshold < 0 || !regressionThreshold.isFinite)) {
@@ -75,7 +75,7 @@ BenchmarkComparison compareResults({
     );
   }
 
-  double read(Map<String, dynamic> values, String key) {
+  double read(Map<String, Object?> values, String key) {
     final Object? value = values[key];
     if (value is! num || !value.isFinite || value < 0) {
       throw FormatException('Expected a finite, non-negative number for $key, but got $value.');
@@ -123,7 +123,7 @@ MetricComparison _compareMetric(
 /// when the output is not a terminal.
 ///
 /// Returns an empty string if [comparison] has no metrics.
-String formatAnsiSummaryTable(BenchmarkComparison comparison, {bool enableAnsi = true}) {
+String formatAnsiSummaryTable(BenchmarkComparison comparison, {required bool enableAnsi}) {
   if (comparison.metrics.isEmpty) {
     return '';
   }

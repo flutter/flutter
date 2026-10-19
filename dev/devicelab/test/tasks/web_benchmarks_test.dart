@@ -467,7 +467,7 @@ zero.average                                                      0.0       2.2 
     });
 
     test('colors only the status when ANSI is enabled', () {
-      final String ansi = formatAnsiSummaryTable(comparison);
+      final String ansi = formatAnsiSummaryTable(comparison, enableAnsi: true);
       expect(ansi, contains('\x1B[31mFAIL\x1B[0m'));
       expect(ansi, contains('\x1B[32mPASS\x1B[0m'));
       expect(
@@ -477,7 +477,10 @@ zero.average                                                      0.0       2.2 
     });
 
     test('returns an empty string when there are no metrics', () {
-      expect(formatAnsiSummaryTable(const BenchmarkComparison(<MetricComparison>[])), isEmpty);
+      expect(
+        formatAnsiSummaryTable(const BenchmarkComparison(<MetricComparison>[]), enableAnsi: true),
+        isEmpty,
+      );
     });
   });
 }
