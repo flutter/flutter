@@ -47,15 +47,30 @@ const double kDefaultRmseThreshold = 0.5;
                       _goldenImage.goldenName);
   }
 
-  if (![_goldenImage compareGoldenToImage:screenshot.image rmesThreshold:rmesThreshold]) {
-    // If the golden does not match. Wait 30 seconds and try again with a new screenshot.
-    // Occasionally the first screenshot may include a system notification. See
-    // https://github.com/flutter/flutter/issues/194250#issuecomment-6222545727
-    [NSThread sleepForTimeInterval:30];
-    screenshot = [[XCUIScreen mainScreen] screenshot];
+  BOOL goldenMatches = [_goldenImage compareGoldenToImage:screenshot.image
+                                            rmesThreshold:rmesThreshold];
+  if (!goldenMatches) {
+    // If the golden does not match, check if there is a system notification. If there is a system
+    // notification, swipe it away, take a new screenshot, and compare the golden again.
+    // See: https://github.com/flutter/flutter/issues/194250#issuecomment-6222545727
+    XCUIApplication* springboard =
+        [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
+    if (springboard.buttons.count > 0) {
+      XCUIElement* firstButton = [springboard.buttons elementBoundByIndex:0];
+      if (firstButton.exists) {
+        [firstButton swipeUp];
+      }
+      [self expectationForPredicate:[NSPredicate predicateWithFormat:@"count == 0"]
+                evaluatedWithObject:springboard.buttons
+                            handler:nil];
+      [self waitForExpectationsWithTimeout:30.0 handler:nil];
+      screenshot = [[XCUIScreen mainScreen] screenshot];
+      goldenMatches = [_goldenImage compareGoldenToImage:screenshot.image
+                                           rmesThreshold:rmesThreshold];
+    }
   }
 
-  if (![_goldenImage compareGoldenToImage:screenshot.image rmesThreshold:rmesThreshold]) {
+  if (!goldenMatches) {
     XCTAttachment* screenshotAttachment = [XCTAttachment attachmentWithImage:screenshot.image];
     screenshotAttachment.name = [_goldenImage.goldenName stringByAppendingString:@"_actual.png"];
     screenshotAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
