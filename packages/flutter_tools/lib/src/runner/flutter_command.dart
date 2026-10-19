@@ -44,7 +44,6 @@ import '../web/web_options.dart';
 import 'flutter_command_runner.dart';
 import 'options/common_options.dart';
 import 'options/option_bundle.dart';
-import 'options/option_descriptor.dart';
 import 'options/safe_arg_results.dart';
 import 'target_devices.dart';
 
@@ -270,6 +269,11 @@ abstract class FlutterCommand extends Command<void> {
   ArgParser get argParser => _argParser ??= ArgParser(usageLineLength: _usageLineLength);
   ArgParser? _argParser;
 
+  /// The base [ArgParser] created by [FlutterCommand], before any subclass
+  /// overrides [argParser] (for example, to copy and hide options).
+  @internal
+  ArgParser? get baseArgParser => _argParser;
+
   int? get _usageLineLength {
     final OutputPreferences? prefs = _outputPreferences ?? toolContext?.outputPreferences;
     if (prefs != null) {
@@ -283,45 +287,9 @@ abstract class FlutterCommand extends Command<void> {
 
   var _requiresPubspecYaml = false;
 
-  /// Whether this command uses the 'target' option.
-  var _usesTargetOption = false;
-
-  /// Enables the target option flag behavior on this command.
-  void enableUsesTargetOption() {
-    _usesTargetOption = true;
-  }
-
-  var _usesPubOption = false;
-
-  /// Enables the pub option flag behavior on this command.
-  void enableUsesPubOption() {
-    _usesPubOption = true;
-  }
-
-  var _usesPortOption = false;
-
-  /// Enables the VM service port option behavior on this command.
-  void enableUsesPortOption() {
-    _usesPortOption = true;
-  }
-
-  var _usesIpv6Flag = false;
-
-  /// Enables the IPv6 flag behavior on this command.
-  void enableUsesIpv6Flag() {
-    _usesIpv6Flag = true;
-  }
-
-  var _usesFatalWarnings = false;
-
-  /// Enables the fatal warnings flag behavior on this command.
-  void enableUsesFatalWarnings() {
-    _usesFatalWarnings = true;
-  }
-
   DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
-  bool get shouldRunPub => _usesPubOption && getValue(CommonOptions.pub);
+  bool get shouldRunPub => hasOption(CommonOptions.pub) && getValue(CommonOptions.pub);
 
   bool get outputMachineFormat => getValue(CommonOptions.machine);
 
@@ -360,49 +328,23 @@ abstract class FlutterCommand extends Command<void> {
   /// Registers multiple [OptionBundle] instances with this command.
   void registerOptionBundles(List<OptionBundle> bundles) => bundles.forEach(registerOptionBundle);
 
+  // TODO(kevmoo): Remove after migrating Google3 G3DebugAdapterCommand.
+  void usesIpv6Flag({required bool verboseHelp}) {
+    DebuggingOptionDescriptors.ipv6.addTo(argParser, verboseHelp: verboseHelp);
+  }
+
+  // TODO(kevmoo): Remove after migrating Google3 G3DebugAdapterCommand.
+  void addDdsOptions({required bool verboseHelp}) {
+    DebuggingOptionDescriptors.dds.addTo(argParser);
+    DebuggingOptionDescriptors.ddsPort.addTo(argParser, verboseHelp: verboseHelp);
+    DebuggingOptionDescriptors.devToolsServerAddressOption.addTo(
+      argParser,
+      verboseHelp: verboseHelp,
+    );
+  }
+
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
-  }
-
-  void usesWebOptions({required bool verboseHelp}) {
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      WebOptions.webHeader,
-      WebOptions.webHostname,
-      WebOptions.webPort,
-      WebOptions.webTlsCertPath,
-      WebOptions.webTlsCertKeyPath,
-      WebOptions.webServerDebugProtocol,
-      WebOptions.webServerDebugBackendProtocol,
-      WebOptions.webServerDebugInjectedClientProtocol,
-      WebOptions.webAllowExposeUrl,
-      WebOptions.webRunHeadless,
-      WebOptions.webBrowserDebugPort,
-      WebOptions.webEnableExpressionEvaluation,
-      WebOptions.webLaunchUrl,
-      WebOptions.webBrowserFlags,
-      WebOptions.crossOriginIsolation,
-    ], verboseHelp: verboseHelp);
-    usesBaseHrefOption();
-  }
-
-  void usesBaseHrefOption() {
-    argParser.addDescriptor(WebOptions.baseHref);
-  }
-
-  /// Adds the `--[no-]deprecated-js-interop` flag, which is forwarded to the
-  /// web compilers through [BuildInfo.deprecatedJsInterop].
-  void usesDeprecatedJsInteropFlag({required bool verboseHelp}) {
-    argParser.addDescriptor(WebOptions.deprecatedJsInterop, verboseHelp: verboseHelp);
-  }
-
-  void usesTargetOption() {
-    CommonOptions.target.addTo(argParser);
-    _usesTargetOption = true;
-  }
-
-  void usesFatalWarningsOption({required bool verboseHelp}) {
-    CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
-    _usesFatalWarnings = true;
   }
 
   String get targetFile {
@@ -446,47 +388,6 @@ abstract class FlutterCommand extends Command<void> {
   /// This can be overridden by some of its subclasses.
   List<String>? get fileSystemRoots =>
       hasOption(BuildInfoOptions.fileSystemRoot) ? getValue(BuildInfoOptions.fileSystemRoot) : null;
-
-  void usesPubOption({bool hide = false}) {
-    CommonOptions.pub.addTo(argParser, hideOverride: hide);
-    _usesPubOption = true;
-  }
-
-  /// Adds flags for using a specific filesystem root and scheme.
-  ///
-  /// The `hide` argument indicates whether or not to hide these options when
-  /// the user asks for help.
-  void usesFilesystemOptions({required bool hide}) {
-    const FilesystemOptionsBundle().register(this, argParser, hideOverride: hide);
-  }
-
-  /// Adds options for connecting to the Dart VM Service port.
-  void usesPortOptions({required bool verboseHelp}) {
-    const VmServicePortOptionsBundle(includeIpv6: false)
-        .register(this, argParser, verboseHelp: verboseHelp);
-  }
-
-  /// Add option values for output directory of artifacts
-  void usesOutputDir() {
-    CommonOptions.outputDir.addTo(argParser);
-  }
-
-  void addDevToolsOptions({required bool verboseHelp, bool includeEnableDevTools = true}) {
-    if (includeEnableDevTools) {
-      argParser.addDescriptor(DebuggingOptionDescriptors.enableDevTools, verboseHelp: verboseHelp);
-    }
-    argParser.addDescriptor(
-      DebuggingOptionDescriptors.devToolsServerAddress(
-        includeEnableDevTools: includeEnableDevTools,
-      ),
-      verboseHelp: verboseHelp,
-    );
-  }
-
-  void addDdsOptions({required bool verboseHelp}) {
-    const DdsAndDevToolsOptionsBundle(includeDevTools: false)
-        .register(this, argParser, verboseHelp: verboseHelp);
-  }
 
   late final bool enableDds = getValue(DebuggingOptionDescriptors.dds);
 
@@ -535,7 +436,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int? get hostVmservicePort {
-    if (!_usesPortOption || !_hostVmServicePortProvided) {
+    if (!_hostVmServicePortProvided) {
       return null;
     }
     if (wasParsed(DebuggingOptionDescriptors.vmServicePort) &&
@@ -558,8 +459,11 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int? get deviceVmservicePort {
+    if (!hasOption(DebuggingOptionDescriptors.deviceVmservicePort)) {
+      return null;
+    }
     final String? devicePort = getValue(DebuggingOptionDescriptors.deviceVmservicePort);
-    if (!_usesPortOption || devicePort == null) {
+    if (devicePort == null) {
       return null;
     }
     try {
@@ -569,67 +473,11 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  void addPublishPort({bool enabledByDefault = true, bool verboseHelp = false}) {
-    argParser.addDescriptor(
-      DebuggingOptionDescriptors.publishPortOption(enabledByDefault: enabledByDefault),
-      verboseHelp: verboseHelp,
-    );
-  }
-
   Future<bool> get disablePortPublication async =>
       !getValue(DebuggingOptionDescriptors.publishPort);
 
-  void usesIpv6Flag({required bool verboseHelp}) {
-    argParser.addDescriptor(DebuggingOptionDescriptors.ipv6, verboseHelp: verboseHelp);
-    _usesIpv6Flag = true;
-  }
-
-  bool? get ipv6 => _usesIpv6Flag ? getValue(DebuggingOptionDescriptors.ipv6) : null;
-
-  void usesBuildNumberOption() {
-    CommonOptions.buildNumber.addTo(argParser);
-  }
-
-  void usesBuildNameOption() {
-    CommonOptions.buildName.addTo(argParser);
-  }
-
-  void usesDartDefineOption() {
-    CommonOptions.dartDefines.addTo(argParser);
-    _usesDartDefineFromFileOption();
-  }
-
-  void usesWebDefineOption() {
-    WebOptions.webDefines.addTo(argParser);
-  }
-
-  void _usesDartDefineFromFileOption() {
-    CommonOptions.dartDefineFromFile.addTo(argParser);
-  }
-
-  void usesWebResourcesCdnFlag() {
-    WebOptions.webResourcesCdn.addTo(argParser);
-  }
-
-  void usesDeviceUserOption() {
-    CommonOptions.deviceUser.addTo(argParser);
-  }
-
-  void usesDeviceTimeoutOption() {
-    CommonOptions.deviceTimeout.addTo(argParser);
-  }
-
-  void usesDeviceConnectionOption() {
-    CommonOptions.deviceConnection.addTo(argParser);
-  }
-
-  void usesAdbLogFilteringOption({required bool hide}) {
-    argParser.addDescriptor(DebuggingOptionDescriptors.adbLogFiltering, hideOverride: hide);
-  }
-
-  void usesApplicationBinaryOption() {
-    CommonOptions.useApplicationBinary.addTo(argParser);
-  }
+  bool? get ipv6 =>
+      hasOption(DebuggingOptionDescriptors.ipv6) ? getValue(DebuggingOptionDescriptors.ipv6) : null;
 
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
@@ -679,78 +527,6 @@ abstract class FlutterCommand extends Command<void> {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
   }
 
-  void addBuildModeFlags({
-    required bool verboseHelp,
-    bool defaultToRelease = true,
-    bool excludeDebug = false,
-    bool excludeRelease = false,
-  }) {
-    BuildModeOptionsBundle(
-      defaultToRelease: defaultToRelease,
-      excludeDebug: excludeDebug,
-      excludeRelease: excludeRelease,
-    ).register(this, argParser, verboseHelp: verboseHelp);
-  }
-
-  void addSplitDebugInfoOption() {
-    BuildInfoOptions.splitDebugInfo.addTo(argParser);
-  }
-
-  void addDartObfuscationOption() {
-    BuildInfoOptions.obfuscate.addTo(argParser);
-  }
-
-  void addTreeShakeIconsFlag({bool? enabledByDefault}) {
-    CommonOptions.treeShakeIcons.addTo(argParser, hideOverride: enabledByDefault == false);
-  }
-
-  void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
-    BuildInfoOptions.frontendServerStarterPath.addTo(argParser, verboseHelp: verboseHelp);
-  }
-
-  /// Enables support for the hidden options --extra-front-end-options and
-  /// --extra-gen-snapshot-options.
-  void usesExtraDartFlagOptions({required bool verboseHelp}) {
-    BuildInfoOptions.extraFrontEndOptions.addTo(argParser, verboseHelp: verboseHelp);
-    BuildInfoOptions.extraGenSnapshotOptions.addTo(argParser, verboseHelp: verboseHelp);
-  }
-
-  void usesFuchsiaOptions({bool hide = false}) {
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      DebuggingOptionDescriptors.fuchsiaTargetModel,
-      DebuggingOptionDescriptors.fuchsiaModule,
-    ], hideOverride: hide);
-  }
-
-  void addEnableExperimentation({required bool hide}) {
-    CommonOptions.enableExperiment.addTo(argParser, hideOverride: hide);
-  }
-
-  void addBuildPerformanceFile({bool hide = false}) {
-    BuildInfoOptions.performanceMeasurementFile.addTo(argParser, hideOverride: hide);
-  }
-
-  void addAndroidSpecificBuildOptions({bool hide = false}) {
-    const AndroidGradleOptionsBundle().register(this, argParser, hideOverride: hide);
-  }
-
-  void addNativeNullAssertions({bool hide = false}) {
-    CommonOptions.nativeNullAssertions.addTo(argParser, hideOverride: hide);
-  }
-
-  void usesInitializeFromDillOption({required bool hide}) {
-    BuildInfoOptions.initializeFromDill.addTo(argParser, hideOverride: hide);
-    BuildInfoOptions.assumeInitializeFromDillUpToDate.addTo(argParser, hideOverride: hide);
-  }
-
-  void usesNativeAssetsOption({required bool hide}) {
-    BuildInfoOptions.nativeAssetsYamlFile.addTo(argParser, hideOverride: hide);
-  }
-
-  void addIgnoreDeprecationOption({bool hide = false}) {
-    BuildInfoOptions.ignoreDeprecation.addTo(argParser, hideOverride: hide);
-  }
-
   /// The build mode that this command will use if no build mode is
   /// explicitly specified.
   ///
@@ -787,50 +563,6 @@ abstract class FlutterCommand extends Command<void> {
     return defaultBuildMode;
   }
 
-  void usesFlavorOption() {
-    BuildInfoOptions.flavor.addTo(argParser);
-  }
-
-  void usesTrackWidgetCreation({bool hasEffect = true, required bool verboseHelp}) {
-    BuildInfoOptions.trackWidgetCreation.addTo(
-      argParser,
-      verboseHelp: verboseHelp,
-      hideOverride: !hasEffect && !verboseHelp,
-    );
-  }
-
-  void usesAnalyzeSizeFlag() {
-    BuildInfoOptions.analyzeSize.addTo(argParser);
-    BuildInfoOptions.codeSizeDirectory.addTo(argParser);
-  }
-
-  void addEnableImpellerFlag({required bool verboseHelp}) {
-    argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller, verboseHelp: verboseHelp);
-  }
-
-  void addEnableFlutterGpuFlag({required bool verboseHelp}) {
-    argParser.addDescriptor(DebuggingOptionDescriptors.enableFlutterGpu, verboseHelp: verboseHelp);
-  }
-
-  void addEnableVulkanValidationFlag({required bool verboseHelp}) {
-    argParser.addDescriptor(
-      DebuggingOptionDescriptors.enableVulkanValidation,
-      verboseHelp: verboseHelp,
-    );
-  }
-
-  void addEnableEmbedderApiFlag({required bool verboseHelp}) {
-    argParser.addDescriptor(DebuggingOptionDescriptors.enableEmbedderApi, verboseHelp: verboseHelp);
-  }
-
-  void addMachineOutputFlag({required bool verboseHelp}) {
-    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
-  }
-
-  void addEnableHcppFlag({required bool verboseHelp}) {
-    argParser.addDescriptor(DebuggingOptionDescriptors.enableHcpp, verboseHelp: verboseHelp);
-  }
-
   /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
   /// passed (or the command does not define it).
   ///
@@ -854,10 +586,6 @@ abstract class FlutterCommand extends Command<void> {
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
   bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
-
-  void addTestFlag({required bool verboseHelp}) {
-    argParser.addDescriptor(DebuggingOptionDescriptors.testFlag, verboseHelp: verboseHelp);
-  }
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -1131,7 +859,7 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (_usesFatalWarnings) {
+        if (hasOption(CommonOptions.fatalWarnings)) {
           _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
         }
         _printDeprecationWarning();
@@ -1153,7 +881,7 @@ abstract class FlutterCommand extends Command<void> {
           if (commandPath != null) {
             _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
-          if (_usesFatalWarnings) {
+          if (hasOption(CommonOptions.fatalWarnings)) {
             _logger.checkForFatalLogs();
           }
         }
@@ -1641,7 +1369,7 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    if (_usesTargetOption) {
+    if (hasOption(CommonOptions.target)) {
       final String targetPath = targetFile;
       if (!_fs.isFileSync(targetPath)) {
         throwToolExit(_userMessages.flutterTargetFileMissing(targetPath));

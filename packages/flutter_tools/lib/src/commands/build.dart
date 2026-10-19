@@ -4,15 +4,11 @@
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
 import '../android/gradle.dart';
 import '../base/common.dart' show throwToolExit;
-import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -51,13 +47,6 @@ class BuildCommand extends FlutterCommand {
     bool verboseHelp = false,
   }) : _appleContext = appleContext,
        super(toolContext: toolContext, verboseHelp: verboseHelp) {
-    final ToolContext(
-      fs: FileSystem fileSystem,
-      :Logger logger,
-      os: OperatingSystemUtils osUtils,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
     final Xcode xcode = appleContext.xcode;
 
     final codesign = DarwinAddToAppCodesigning.fromContexts(
@@ -184,13 +173,7 @@ class BuildCommand extends FlutterCommand {
         featureFlags: featureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
-        visualStudio: VisualStudio(
-          fileSystem: fileSystem,
-          platform: platform,
-          logger: logger,
-          processManager: processManager,
-          osUtils: osUtils,
-        ),
+        visualStudio: VisualStudio(toolContext: toolContext),
       ),
     );
   }
@@ -256,7 +239,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     super.toolContext,
   }) {
     requiresPubspecYaml();
-    usesFatalWarningsOption(verboseHelp: verboseHelp);
+    CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
   }
 
   @protected
@@ -278,9 +261,11 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
        ) {
-    usesTargetOption();
-    usesPubOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
+    registerOptionBundle(const BuildModeOptionsBundle());
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.target,
+      CommonOptions.pub,
+    ], verboseHelp: verboseHelp);
   }
 
   final ExtensionBuildManager _buildManager;

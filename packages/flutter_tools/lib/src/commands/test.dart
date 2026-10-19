@@ -81,8 +81,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
            testRunner ??
            FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext!) {
     requiresPubspecYaml();
-    enableUsesPubOption();
-    enableUsesFatalWarnings();
     registerOptionBundles(const <OptionBundle>[
       DdsAndDevToolsOptionsBundle(includeDevTools: false),
     ]);

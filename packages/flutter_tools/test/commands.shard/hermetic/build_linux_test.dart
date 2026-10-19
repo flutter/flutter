@@ -5,7 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -45,7 +45,7 @@ void main() {
 
   late MemoryFileSystem fileSystem;
   late FakeProcessManager processManager;
-  late Logger logger;
+  late BufferLogger logger;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
@@ -114,30 +114,25 @@ void main() {
     Platform? platform,
     FeatureFlags? featureFlags,
     OperatingSystemUtils? osUtils,
+    Logger? commandLogger,
     bool verboseHelp = false,
   }) {
-    final Platform effectivePlatform = platform ?? (context.get<Platform>() ?? linuxPlatform);
-    final FeatureFlags effectiveFeatureFlags =
-        featureFlags ?? (context.get<FeatureFlags>() ?? TestFeatureFlags(isLinuxEnabled: true));
-    final OperatingSystemUtils effectiveOsUtils =
-        osUtils ?? (context.get<OperatingSystemUtils>() ?? FakeOperatingSystemUtils());
-    final BufferLogger effectiveLogger =
-        (context.get<Logger>() as BufferLogger?) ?? (logger as BufferLogger);
-    final ProcessManager effectiveProcessManager = context.get<ProcessManager>() ?? processManager;
+    final Logger resolvedLogger = commandLogger ?? logger;
     final toolContext = FakeToolContext(
+      artifacts: DeferredArtifacts(FakeArtifacts(fileSystem: fileSystem)),
       cache: Cache.test(
         rootOverride: fileSystem.directory(_kTestFlutterRoot),
-        logger: effectiveLogger,
-        processManager: effectiveProcessManager,
+        logger: resolvedLogger,
+        processManager: processManager,
       ),
       fs: fileSystem,
-      logger: effectiveLogger,
-      os: effectiveOsUtils,
-      platform: effectivePlatform,
-      processManager: effectiveProcessManager,
+      logger: resolvedLogger,
+      os: osUtils ?? FakeOperatingSystemUtils(),
+      platform: platform ?? linuxPlatform,
+      processManager: processManager,
       projectFactory: FlutterProjectFactory(
         fileSystem: fileSystem,
-        logger: effectiveLogger,
+        logger: resolvedLogger,
         config: FakeConfig(),
       ),
     );
@@ -145,7 +140,7 @@ void main() {
       androidContext: FakeAndroidContext(),
       appleContext: FakeAppleContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      featureFlags: effectiveFeatureFlags,
+      featureFlags: featureFlags ?? TestFeatureFlags(isLinuxEnabled: true),
       templateRenderer: FakeTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -156,36 +151,31 @@ void main() {
     Platform? platform,
     FeatureFlags? featureFlags,
     OperatingSystemUtils? osUtils,
+    Logger? commandLogger,
     bool verboseHelp = false,
   }) {
-    final Platform effectivePlatform = platform ?? (context.get<Platform>() ?? linuxPlatform);
-    final FeatureFlags effectiveFeatureFlags =
-        featureFlags ?? (context.get<FeatureFlags>() ?? TestFeatureFlags(isLinuxEnabled: true));
-    final OperatingSystemUtils effectiveOsUtils =
-        osUtils ?? (context.get<OperatingSystemUtils>() ?? FakeOperatingSystemUtils());
-    final BufferLogger effectiveLogger =
-        (context.get<Logger>() as BufferLogger?) ?? (logger as BufferLogger);
-    final ProcessManager effectiveProcessManager = context.get<ProcessManager>() ?? processManager;
+    final Logger resolvedLogger = commandLogger ?? logger;
     final toolContext = FakeToolContext(
+      artifacts: DeferredArtifacts(FakeArtifacts(fileSystem: fileSystem)),
       cache: Cache.test(
         rootOverride: fileSystem.directory(_kTestFlutterRoot),
-        logger: effectiveLogger,
-        processManager: effectiveProcessManager,
+        logger: resolvedLogger,
+        processManager: processManager,
       ),
       fs: fileSystem,
-      logger: effectiveLogger,
-      os: effectiveOsUtils,
-      platform: effectivePlatform,
-      processManager: effectiveProcessManager,
+      logger: resolvedLogger,
+      os: osUtils ?? FakeOperatingSystemUtils(),
+      platform: platform ?? linuxPlatform,
+      processManager: processManager,
       projectFactory: FlutterProjectFactory(
         fileSystem: fileSystem,
-        logger: effectiveLogger,
+        logger: resolvedLogger,
         config: FakeConfig(),
       ),
     );
     return BuildLinuxCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      featureFlags: effectiveFeatureFlags,
+      featureFlags: featureFlags ?? TestFeatureFlags(isLinuxEnabled: true),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
     );
@@ -208,17 +198,15 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Platform: () => linuxPlatform,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     },
   );
 
   testUsingContext(
     'Linux build fails on non-linux platform',
     () async {
-      final BuildCommand command = createBuildCommand();
+      final BuildCommand command = createBuildCommand(platform: notLinuxPlatform);
       setUpMockProjectFilesForBuild();
 
       expect(
@@ -227,17 +215,15 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Platform: () => notLinuxPlatform,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     },
   );
 
   testUsingContext(
     'Linux build fails when feature is disabled',
     () async {
-      final BuildCommand command = createBuildCommand();
+      final BuildCommand command = createBuildCommand(featureFlags: TestFeatureFlags());
       setUpMockProjectFilesForBuild();
 
       expect(
@@ -248,10 +234,8 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Platform: () => linuxPlatform,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: () => TestFeatureFlags(),
     },
   );
 
@@ -267,14 +251,11 @@ void main() {
 
       final BuildCommand command = createBuildCommand();
       await createTestCommandRunner(command).run(const <String>['build', 'linux', '--no-pub']);
-      expect(testLogger.statusText, contains('✓ Built build/linux/x64/release/bundle'));
+      expect(logger.statusText, contains('✓ Built build/linux/x64/release/bundle'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -309,9 +290,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
       Analytics: () => fakeAnalytics,
     },
   );
@@ -348,9 +326,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -370,9 +345,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -399,9 +371,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -417,17 +386,14 @@ void main() {
 
       await createTestCommandRunner(command)
           .run(const <String>['build', 'linux', '--debug', '--no-pub']);
-      expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.traceText, contains('STDOUT STUFF'));
+      expect(logger.statusText, isNot(contains('STDOUT STUFF')));
+      expect(logger.warningText, isNot(contains('STDOUT STUFF')));
+      expect(logger.errorText, isNot(contains('STDOUT STUFF')));
+      expect(logger.traceText, contains('STDOUT STUFF'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -465,7 +431,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
 
       await createTestCommandRunner(command).run(const <String>['build', 'linux', '--no-pub']);
       // Just the warnings and errors should be surfaced.
-      expect(testLogger.errorText, r'''
+      expect(logger.errorText, r'''
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:6:2: error: expected ';' after class
 /foo/linux/main.cc:9:7: warning: unused variable 'unused_variable' [-Wunused-variable]
@@ -479,16 +445,13 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
   testUsingContext(
     'Linux verbose build sets VERBOSE_SCRIPT_LOGGING',
     () async {
-      final BuildCommand command = createBuildCommand();
+      final BuildCommand command = createBuildCommand(commandLogger: VerboseLogger(logger));
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
         cmakeCommand('debug'),
@@ -501,18 +464,14 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
 
       await createTestCommandRunner(command)
           .run(const <String>['build', 'linux', '--debug', '-v', '--no-pub']);
-      expect(testLogger.statusText, contains('STDOUT STUFF'));
-      expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
+      expect(logger.statusText, contains('STDOUT STUFF'));
+      expect(logger.traceText, isNot(contains('STDOUT STUFF')));
+      expect(logger.warningText, isNot(contains('STDOUT STUFF')));
+      expect(logger.errorText, isNot(contains('STDOUT STUFF')));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      Logger: () => logger,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -528,11 +487,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      Logger: () => logger,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -554,8 +509,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     },
   );
 
@@ -577,8 +530,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     },
   );
 
@@ -595,9 +546,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -619,8 +567,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     },
   );
 
@@ -642,29 +588,20 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     },
   );
 
-  testUsingContext(
-    'Not support Linux cross-build for x64 on arm64',
-    () async {
-      final BuildCommand command = createBuildCommand(
-        osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-      );
+  testUsingContext('Not support Linux cross-build for x64 on arm64', () async {
+    final BuildCommand command = createBuildCommand(
+      osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
 
-      expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']),
-        throwsToolExit(),
-      );
-    },
-    overrides: <Type, Generator>{
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    },
-  );
+    expect(
+      createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']),
+      throwsToolExit(),
+    );
+  });
 
   testUsingContext(
     'Linux build configures CMake exports',
@@ -733,9 +670,6 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -761,37 +695,27 @@ set(BINARY_NAME "fizz_bar")
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     },
   );
 
   testUsingContext('Refuses to build for Linux when feature is disabled', () {
-    final CommandRunner<void> runner = createTestCommandRunner(createBuildCommand());
+    final CommandRunner<void> runner = createTestCommandRunner(
+      createBuildCommand(featureFlags: TestFeatureFlags()),
+    );
 
     expect(() => runner.run(<String>['build', 'linux', '--no-pub']), throwsToolExit());
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext(
-    'hidden when not enabled on Linux host',
-    () {
-      expect(createBuildLinuxCommand().hidden, true);
-    },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(),
-      Platform: () => notLinuxPlatform,
-    },
-  );
+  testWithoutContext('hidden when not enabled on Linux host', () {
+    expect(
+      createBuildLinuxCommand(featureFlags: TestFeatureFlags(), platform: notLinuxPlatform).hidden,
+      true,
+    );
+  });
 
-  testUsingContext(
-    'Not hidden when enabled and on Linux host',
-    () {
-      expect(createBuildLinuxCommand().hidden, false);
-    },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      Platform: () => linuxPlatform,
-    },
-  );
+  testWithoutContext('Not hidden when enabled and on Linux host', () {
+    expect(createBuildLinuxCommand().hidden, false);
+  });
 
   testUsingContext(
     'Performs code size analysis and sends analytics',
@@ -829,18 +753,15 @@ set(BINARY_NAME "fizz_bar")
           .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('A summary of your Linux bundle analysis can be found at'),
       );
-      expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
+      expect(logger.statusText, contains('dart devtools --appSizeBase='));
       expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'linux')));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
       Analytics: () => fakeAnalytics,
     },
   );
@@ -884,16 +805,12 @@ set(BINARY_NAME "fizz_bar")
           .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       // check if libapp.so of "build/linux/arm64/release" directory can be referenced.
-      expect(testLogger.statusText, contains('libapp.so (Dart AOT)'));
+      expect(logger.statusText, contains('libapp.so (Dart AOT)'));
       expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'linux')));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () =>
-          CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       Analytics: () => fakeAnalytics,
     },
   );
@@ -938,16 +855,12 @@ set(BINARY_NAME "fizz_bar")
           .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       // check if libapp.so of "build/linux/riscv64/release" directory can be referenced.
-      expect(testLogger.statusText, contains('libapp.so (Dart AOT)'));
+      expect(logger.statusText, contains('libapp.so (Dart AOT)'));
       expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'linux')));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => linuxPlatform,
-      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      OperatingSystemUtils: () =>
-          CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
       Analytics: () => fakeAnalytics,
     },
   );

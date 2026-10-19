@@ -49,9 +49,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     required super.verboseHelp,
     super.outputPreferences,
   }) {
-    enableUsesTargetOption();
-    enableUsesPubOption();
-    enableUsesFatalWarnings();
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false),
       VmServicePortOptionsBundle(),
@@ -59,8 +56,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DdsAndDevToolsOptionsBundle(),
       AndroidGradleOptionsBundle(),
       EngineRenderingFlagsBundle(includeTestFlag: true),
+      WebServerOptionsBundle(),
     ]);
-    usesWebOptions(verboseHelp: verboseHelp);
     CommonOptions.nativeNullAssertions.addTo(argParser, hideOverride: !verboseHelp);
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
       CommonOptions.dartDefines,

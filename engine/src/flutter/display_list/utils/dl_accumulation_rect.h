@@ -38,11 +38,11 @@ class AccumulationRect {
   void record_overlapping_bounds() { overlap_detected_ = true; }
 
  private:
-  DlScalar min_x_;
-  DlScalar min_y_;
-  DlScalar max_x_;
-  DlScalar max_y_;
-  bool overlap_detected_;
+  DlScalar min_x_ = 0.0f;
+  DlScalar min_y_ = 0.0f;
+  DlScalar max_x_ = 0.0f;
+  DlScalar max_y_ = 0.0f;
+  bool overlap_detected_ = false;
 };
 
 }  // namespace flutter

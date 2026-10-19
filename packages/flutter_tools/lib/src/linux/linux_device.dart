@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -17,8 +18,10 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
-  LinuxDevice({required super.toolContext})
+  LinuxDevice({required this._analytics, required super.toolContext})
     : super('linux', platformType: PlatformType.linux, ephemeral: false);
+
+  final Analytics _analytics;
 
   @override
   Future<bool> isSupported() async => true;
@@ -54,10 +57,11 @@ class LinuxDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     await buildLinux(
-      FlutterProject.current(fs, logger: logger).linux,
+      projectFactory.fromDirectory(fs.currentDirectory).linux,
       buildInfo,
+      analytics: _analytics,
       target: mainPath,
       targetPlatform: await targetPlatform,
       toolContext: toolContext,
@@ -71,10 +75,14 @@ class LinuxDevice extends DesktopDevice {
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {
-  LinuxDevices({required FeatureFlags featureFlags, required ToolContext super.toolContext})
-    : _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: featureFlags),
-      super('linux devices');
+  LinuxDevices({
+    required this._analytics,
+    required FeatureFlags featureFlags,
+    required ToolContext super.toolContext,
+  }) : _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: featureFlags),
+       super('linux devices');
 
+  final Analytics _analytics;
   final LinuxWorkflow _linuxWorkflow;
 
   @override
@@ -91,7 +99,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[LinuxDevice(toolContext: toolContext)];
+    return <Device>[LinuxDevice(analytics: _analytics, toolContext: toolContext)];
   }
 
   @override
