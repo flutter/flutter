@@ -190,12 +190,12 @@ final _args = ArgParser()
   ..addOption(
     'os-runtime',
     help: 'The OS runtime of the iOS simulator device to use.',
-    defaultsTo: 'com.apple.CoreSimulator.SimRuntime.iOS-27-0',
+    defaultsTo: 'com.apple.CoreSimulator.SimRuntime.iOS-27-1',
   )
   ..addOption(
     'os-version',
     help: 'The OS version of the iOS simulator device to use.',
-    defaultsTo: '27.0',
+    defaultsTo: '27.1',
   )
   ..addOption(
     'dump-xcresult-on-failure',
