@@ -62,7 +62,7 @@ class DlMatrixColorFilter final : public DlColorFilter {
  private:
   static std::shared_ptr<const DlColorFilter> Make(const float matrix[20]);
 
-  float matrix_[20];
+  float matrix_[20]{};
 
   friend class DlColorFilter;
 };

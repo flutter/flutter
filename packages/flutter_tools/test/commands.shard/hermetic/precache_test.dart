@@ -520,38 +520,48 @@ void main() {
       extensionArtifactManager: fakeArtifactManager,
       toolContext: toolContext,
     );
-    await createTestCommandRunner(command).run(const <String>['precache', '--linux']);
+    await createTestCommandRunner(command).run(const <String>['precache', '--linux', '--android']);
 
     expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
-    expect(fakeArtifactManager.requestedTargetPlatforms, contains('linux'));
-  });
-
-  testWithoutContext('precache passes null targetPlatforms to ExtensionArtifactManager when no platform flags are provided', () async {
-    final fakeArtifactManager = FakeExtensionArtifactManager();
-    final toolContext = FakeToolContext(cache: cache);
-    final command = PrecacheCommand(
-      cache: cache,
-      logger: BufferLogger.test(),
-      featureFlags: TestFeatureFlags(isLinuxEnabled: true, isToolExtensionsEnabled: true),
-      platform: FakePlatform(),
-      extensionArtifactManager: fakeArtifactManager,
-      toolContext: toolContext,
+    expect(
+      fakeArtifactManager.requestedTargetPlatforms,
+      equals(const <String>{'linux', 'android'}),
     );
-    await createTestCommandRunner(command).run(const <String>['precache']);
-
-    expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
-    expect(fakeArtifactManager.requestedTargetPlatforms, isNull);
+    expect(fakeArtifactManager.requestedForce, isFalse);
   });
+
+  testWithoutContext(
+    'precache passes null targetPlatforms and forwards --force to ExtensionArtifactManager',
+    () async {
+      final fakeArtifactManager = FakeExtensionArtifactManager();
+      final toolContext = FakeToolContext(cache: cache);
+      final command = PrecacheCommand(
+        cache: cache,
+        logger: BufferLogger.test(),
+        featureFlags: TestFeatureFlags(isLinuxEnabled: true, isToolExtensionsEnabled: true),
+        platform: FakePlatform(),
+        extensionArtifactManager: fakeArtifactManager,
+        toolContext: toolContext,
+      );
+      await createTestCommandRunner(command).run(const <String>['precache', '--force']);
+
+      expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+      expect(fakeArtifactManager.requestedTargetPlatforms, isNull);
+      expect(fakeArtifactManager.requestedForce, isTrue);
+    },
+  );
 }
 
 class FakeExtensionArtifactManager extends Fake implements ExtensionArtifactManager {
   bool ensureArtifactsDownloadedCalled = false;
+  bool requestedForce = false;
   Set<String>? requestedTargetPlatforms;
 
   @override
-  Future<void> ensureArtifactsDownloaded({Set<String>? targetPlatforms}) async {
+  Future<void> ensureArtifactsDownloaded({Set<String>? targetPlatforms, bool force = false}) async {
     ensureArtifactsDownloadedCalled = true;
     requestedTargetPlatforms = targetPlatforms;
+    requestedForce = force;
   }
 }
 

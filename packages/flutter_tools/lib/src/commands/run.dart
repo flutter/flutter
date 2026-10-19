@@ -50,9 +50,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     required super.verboseHelp,
     super.outputPreferences,
   }) {
-    enableUsesTargetOption();
-    enableUsesPubOption();
-    enableUsesFatalWarnings();
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false),
       VmServicePortOptionsBundle(),
@@ -60,8 +57,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DdsAndDevToolsOptionsBundle(),
       AndroidGradleOptionsBundle(),
       EngineRenderingFlagsBundle(includeTestFlag: true),
+      WebServerOptionsBundle(),
     ]);
-    usesWebOptions(verboseHelp: verboseHelp);
     CommonOptions.nativeNullAssertions.addTo(argParser, hideOverride: !verboseHelp);
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
       CommonOptions.dartDefines,
@@ -406,6 +403,8 @@ class RunCommand extends RunCommandBase {
   final AppleContext appleContext;
   final DeviceManager? deviceManager;
   final ExtensionArtifactManager? _extensionArtifactManager;
+
+  static const String _defaultCustomTargetPlatformDisplayName = 'custom';
 
   @override
   final name = 'run';
@@ -811,18 +810,19 @@ class RunCommand extends RunCommandBase {
     }
 
     if (_extensionArtifactManager case final ExtensionArtifactManager artifactManager) {
-      final runTargetPlatforms = <String>{};
-      for (final Device device in devices!) {
-        final TargetPlatform tp = await device.targetPlatform;
-        if (tp != TargetPlatform.unsupported) {
-          runTargetPlatforms.add(tp.getName());
-        } else {
-          final String displayName = await device.targetPlatformDisplayName;
-          if (displayName.isNotEmpty) {
-            runTargetPlatforms.add(displayName);
+      final List<String?> resolvedPlatforms = await Future.wait(
+        devices!.map((Device device) async {
+          final TargetPlatform tp = await device.targetPlatform;
+          if (tp != TargetPlatform.unsupported) {
+            return tp.getName();
           }
-        }
-      }
+          final String displayName = await device.targetPlatformDisplayName;
+          return displayName.isNotEmpty && displayName != _defaultCustomTargetPlatformDisplayName
+              ? displayName
+              : null;
+        }),
+      );
+      final Set<String> runTargetPlatforms = resolvedPlatforms.nonNulls.toSet();
       await artifactManager.ensureArtifactsDownloaded(
         targetPlatforms: runTargetPlatforms.isNotEmpty ? runTargetPlatforms : null,
       );

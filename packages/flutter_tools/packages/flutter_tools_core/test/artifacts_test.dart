@@ -6,6 +6,8 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/test.dart';
 
 void main() {
+  const validSha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
   group('HostPlatform', () {
     test('cliName and fromName round-trip', () {
       for (final HostPlatform platform in HostPlatform.values) {
@@ -17,7 +19,7 @@ void main() {
       expect(HostPlatform.darwin_arm64.platformName, 'arm64');
       expect(HostPlatform.linux_riscv64.platformName, 'riscv64');
       expect(HostPlatform.tryFromName('invalid-platform'), isNull);
-      expect(() => HostPlatform.fromName('invalid-platform'), throwsArgumentError);
+      expect(() => HostPlatform.fromName('invalid-platform'), throwsFormatException);
     });
   });
 
@@ -25,7 +27,7 @@ void main() {
     test('serializes and deserializes correctly with all fields', () {
       final dep = ArtifactDependency(
         name: 'custom-engine-bin',
-        sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        sha256: validSha256,
         url: Uri.parse('https://example.com/artifacts/engine.zip'),
         hostPlatform: HostPlatform.linux_x64,
         targetPlatform: 'linux-x64',
@@ -35,7 +37,7 @@ void main() {
       expect(json, <String, Object?>{
         'name': 'custom-engine-bin',
         'url': 'https://example.com/artifacts/engine.zip',
-        'sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        'sha256': validSha256,
         'hostPlatform': 'linux-x64',
         'targetPlatform': 'linux-x64',
       });
@@ -47,7 +49,7 @@ void main() {
         deserialized.toString(),
         'ArtifactDependency(name: custom-engine-bin, '
         'url: https://example.com/artifacts/engine.zip, '
-        'sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855, '
+        'sha256: $validSha256, '
         'hostPlatform: HostPlatform.linux_x64, targetPlatform: linux-x64)',
       );
     });
@@ -55,7 +57,7 @@ void main() {
     test('serializes and deserializes without optional platforms', () {
       final dep = ArtifactDependency(
         name: 'common-data',
-        sha256: 'abc123456',
+        sha256: validSha256,
         url: Uri.parse('https://example.com/data.bin'),
       );
 
@@ -71,72 +73,119 @@ void main() {
 
     test('listFromJson parses valid entries and returns empty list on non-list', () {
       final List<ArtifactDependency> list = ArtifactDependency.listFromJson(<Object?>[
-        <String, Object?>{'name': 'a', 'url': 'https://example.com/a.zip', 'sha256': '111'},
+        <String, Object?>{'name': 'a', 'url': 'https://example.com/a.zip', 'sha256': validSha256},
       ]);
       expect(list, hasLength(1));
       expect(list.first.name, 'a');
       expect(ArtifactDependency.listFromJson(null), isEmpty);
     });
 
-    test('throws ArgumentError on invalid JSON', () {
-      expect(() => ArtifactDependency.fromJson(const <String, Object?>{}), throwsArgumentError);
+    test('matchesPlatforms matches exact targetPlatform and OS prefix', () {
+      final dep = ArtifactDependency(
+        name: 'linux-bin',
+        sha256: validSha256,
+        url: Uri.parse('https://example.com/linux.zip'),
+        hostPlatform: HostPlatform.linux_x64,
+        targetPlatform: 'linux-x64',
+      );
+
+      expect(
+        dep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.linux_x64,
+          targetPlatforms: const <String>{'linux-x64'},
+        ),
+        isTrue,
+      );
+      expect(
+        dep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.linux_x64,
+          targetPlatforms: const <String>{'linux'},
+        ),
+        isTrue,
+      );
+      expect(
+        dep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.darwin_arm64,
+          targetPlatforms: const <String>{'linux-x64'},
+        ),
+        isFalse,
+      );
+      expect(
+        dep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.linux_x64,
+          targetPlatforms: const <String>{'android'},
+        ),
+        isFalse,
+      );
+    });
+
+    test('throws FormatException on invalid JSON', () {
+      expect(() => ArtifactDependency.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
           'name': 'test',
           'url': ':::not_a_valid_uri:::',
-          'sha256': '123',
+          'sha256': validSha256,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
           'name': 'test',
           'url': 'relative/path/without/scheme.zip',
-          'sha256': '123',
+          'sha256': validSha256,
         }),
-        throwsArgumentError,
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': 'test',
+          'url': 'file:///etc/passwd',
+          'sha256': validSha256,
+        }),
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
           'name': 'test',
           'url': 'https://example.com/a.zip',
-          'sha256': '123',
+          'sha256': validSha256,
           'hostPlatform': 'invalid-host',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
           'name': 'test',
           'url': 'https://example.com/a.zip',
-          'sha256': '123',
+          'sha256': validSha256,
           'targetPlatform': 42,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
           'name': '',
           'url': 'https://example.com/a.zip',
-          'sha256': '123',
+          'sha256': validSha256,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
           'name': '../evil',
           'url': 'https://example.com/a.zip',
-          'sha256': '123',
+          'sha256': validSha256,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
           'name': 'sub/bin',
           'url': 'https://example.com/a.zip',
-          'sha256': '123',
+          'sha256': validSha256,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ArtifactDependency.fromJson(const <String, Object?>{
@@ -144,7 +193,15 @@ void main() {
           'url': 'https://example.com/a.zip',
           'sha256': '../badsha',
         }),
-        throwsArgumentError,
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': 'test',
+          'url': 'https://example.com/a.zip',
+          'sha256': 'deadbeef',
+        }),
+        throwsFormatException,
       );
     });
   });

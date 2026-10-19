@@ -14,6 +14,8 @@ import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:test/test.dart';
 
+const String _testSha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
 final class _TestArtifactService extends ArtifactService {
   @override
   Future<List<ArtifactDependency>> downloadArtifacts({
@@ -24,7 +26,7 @@ final class _TestArtifactService extends ArtifactService {
       for (final String targetPlatform in targetPlatforms ?? const <String>{'default-target'})
         ArtifactDependency(
           name: 'test-artifact-${hostPlatform.cliName}-$targetPlatform',
-          sha256: 'deadbeef',
+          sha256: _testSha256,
           url: Uri.parse('https://example.com/${hostPlatform.cliName}/$targetPlatform.zip'),
           hostPlatform: hostPlatform,
           targetPlatform: targetPlatform,
@@ -69,7 +71,7 @@ void main() {
       expect(deps, hasLength(2));
       expect(deps.first.name, 'test-artifact-linux-x64-linux-x64');
       expect(deps.first.url, Uri.parse('https://example.com/linux-x64/linux-x64.zip'));
-      expect(deps.first.sha256, 'deadbeef');
+      expect(deps.first.sha256, _testSha256);
       expect(deps.first.hostPlatform, HostPlatform.linux_x64);
       expect(deps.first.targetPlatform, 'linux-x64');
       expect(deps.last.targetPlatform, 'linux-arm64');
@@ -129,11 +131,23 @@ void main() {
       );
     });
 
-    test('LinuxArtifactService returns expected default Linux artifact over RPC', () async {
+    test('LinuxArtifactService returns configured Linux artifacts over RPC', () async {
       void entryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
           sendPort,
-          <ToolExtensionService>[LinuxArtifactService()],
+          <ToolExtensionService>[
+            LinuxArtifactService(
+              artifacts: <ArtifactDependency>[
+                ArtifactDependency(
+                  name: 'linux-x64-custom-artifact',
+                  sha256: _testSha256,
+                  url: Uri.parse('https://example.com/linux-x64/artifacts.zip'),
+                  hostPlatform: HostPlatform.linux_x64,
+                  targetPlatform: 'linux-x64',
+                ),
+              ],
+            ),
+          ],
           extensionName: 'flutter_tools_extension_linux_prototype',
           supportedPlatforms: const <String>{'linux'},
         );

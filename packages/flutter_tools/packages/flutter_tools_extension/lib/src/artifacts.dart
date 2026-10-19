@@ -54,12 +54,9 @@ abstract base class ArtifactService extends ToolExtensionService {
 
   Future<List<Map<String, Object?>>> _downloadArtifactsRpc(Map<String, Object?> params) async {
     if (params case {hostPlatformParam: final String hp}) {
-      final HostPlatform hostPlatform;
-      try {
-        hostPlatform = HostPlatform.fromName(hp);
-      } on ArgumentError catch (e) {
-        throw RpcException.invalidParams(e.message.toString());
-      }
+      final HostPlatform hostPlatform =
+          HostPlatform.tryFromName(hp) ??
+          (throw RpcException.invalidParams('Invalid "$hostPlatformParam" parameter: "$hp"'));
       final Set<String>? targetPlatforms = switch (params[targetPlatformsParam]) {
         final List<Object?> list when list.every((Object? e) => e is String) =>
           list.cast<String>().toSet(),

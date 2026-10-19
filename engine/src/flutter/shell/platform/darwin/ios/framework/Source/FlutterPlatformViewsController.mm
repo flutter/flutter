@@ -33,8 +33,8 @@ static NSString* const kGestureBlockingPolicyFallbackToPluginDefault = @"fallbac
 
 struct LayerData {
   DlRect rect;
-  int64_t view_id;
-  int64_t overlay_id;
+  int64_t view_id = 0;
+  int64_t overlay_id = 0;
   std::shared_ptr<flutter::OverlayLayer> layer;
 };
 using LayersMap = std::unordered_map<int64_t, LayerData>;

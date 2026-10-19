@@ -674,7 +674,7 @@ bool Canvas::AttemptColorFilterOptimization(
     auto atlas_contents = std::make_shared<ColorFilterAtlasContents>();
     atlas_contents->SetGeometry(&geometry);
     atlas_contents->SetAlpha(paint.color.alpha);
-    impeller::ColorMatrix color_matrix;
+    impeller::ColorMatrix color_matrix{};
     matrix_filter->get_matrix(color_matrix.array);
     atlas_contents->SetMatrix(color_matrix);
 

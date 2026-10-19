@@ -216,12 +216,23 @@ class PrecacheCommand extends FlutterCommand {
       _logger.printStatus('Already up-to-date.');
     }
     if (_extensionArtifactManager != null) {
-      final Set<String> requiredStrings = requiredArtifacts
-          .map((DevelopmentArtifact a) => a.name)
-          .toSet();
-      await _extensionArtifactManager.ensureArtifactsDownloaded(
-        targetPlatforms: (includeAllPlatforms || downloadDefaultArtifacts) ? null : requiredStrings,
-      );
+      final Set<String>? targetPlatforms;
+      if (includeAllPlatforms || downloadDefaultArtifacts) {
+        targetPlatforms = null;
+      } else {
+        targetPlatforms = <String>{
+          for (final DevelopmentArtifact artifact in requiredArtifacts)
+            if (artifact != DevelopmentArtifact.universal &&
+                artifact != DevelopmentArtifact.informative)
+              umbrellaForArtifact[artifact.name] ?? artifact.name,
+        };
+      }
+      if (targetPlatforms == null || targetPlatforms.isNotEmpty) {
+        await _extensionArtifactManager.ensureArtifactsDownloaded(
+          targetPlatforms: targetPlatforms,
+          force: boolArg('force'),
+        );
+      }
     }
     return FlutterCommandResult.success();
   }

@@ -12,7 +12,6 @@ import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
@@ -62,7 +61,6 @@ class BuildCommand extends FlutterCommand {
       :FlutterVersion flutterVersion,
       fs: FileSystem fileSystem,
       :Logger logger,
-      os: OperatingSystemUtils osUtils,
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
@@ -198,13 +196,7 @@ class BuildCommand extends FlutterCommand {
         featureFlags: featureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
-        visualStudio: VisualStudio(
-          fileSystem: fileSystem,
-          platform: platform,
-          logger: logger,
-          processManager: processManager,
-          osUtils: osUtils,
-        ),
+        visualStudio: VisualStudio(toolContext: toolContext),
       ),
     );
   }
@@ -272,7 +264,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     super.toolContext,
   }) {
     requiresPubspecYaml();
-    usesFatalWarningsOption(verboseHelp: verboseHelp);
+    CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
   }
 
   @protected
@@ -291,9 +283,11 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     required super.verboseHelp,
     this._artifactManager,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
-    usesTargetOption();
-    usesPubOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
+    registerOptionBundle(const BuildModeOptionsBundle());
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.target,
+      CommonOptions.pub,
+    ], verboseHelp: verboseHelp);
   }
 
   final ExtensionArtifactManager? _artifactManager;

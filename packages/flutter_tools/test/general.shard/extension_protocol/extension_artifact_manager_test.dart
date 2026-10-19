@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide HostPlatform;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:flutter_tools_extension_linux_prototype/src/artifact.dart';
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
@@ -35,7 +36,14 @@ final class _FakeArtifactService extends ArtifactService {
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
   }) async {
-    return artifacts;
+    return <ArtifactDependency>[
+      for (final ArtifactDependency artifact in artifacts)
+        if (artifact.matchesPlatforms(
+          currentHostPlatform: hostPlatform,
+          targetPlatforms: targetPlatforms,
+        ))
+          artifact,
+    ];
   }
 }
 
@@ -154,6 +162,7 @@ void main() {
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
       );
+      addTearDown(manager.dispose);
       final artifactManager = ExtensionArtifactManager(
         extensionManager: manager,
         featureFlags: TestFeatureFlags(),
@@ -170,7 +179,6 @@ void main() {
       await artifactManager.ensureArtifactsDownloaded();
       expect(manager.isInitialized, isFalse);
       expect(fs.directory('/dart_data').existsSync(), isFalse);
-      await manager.dispose();
     });
 
     test('downloads and verifies artifact by SHA-256 into content-addressed cache and skips on cache hit', () async {
@@ -202,9 +210,10 @@ void main() {
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         entryPoints: <ExtensionEntryPoint>[entryPoint],
       );
+      addTearDown(manager.dispose);
 
       var downloadCount = 0;
-      final httpClient = _FakeHttpClient((Uri url) {
+      final httpClient = _FakeHttpClient((Uri url) async {
         downloadCount++;
         return _FakeHttpClientResponse(HttpStatus.ok, content);
       });
@@ -236,13 +245,18 @@ void main() {
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
       expect(downloadCount, 1);
 
+      // Passing force: true should re-download even when cached and verified.
+      await artifactManager.ensureArtifactsDownloaded(
+        targetPlatforms: const <String>{'linux-x64'},
+        force: true,
+      );
+      expect(downloadCount, 2);
+
       // Corrupt the cached file; next call should detect SHA-256 mismatch and re-download.
       artifactFile.writeAsStringSync('corrupted bytes');
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
-      expect(downloadCount, 2);
+      expect(downloadCount, 3);
       expect(artifactFile.readAsBytesSync(), equals(content));
-
-      await manager.dispose();
     });
 
     test('unzips .zip artifacts into content-addressed directory and writes stamp file', () async {
@@ -274,9 +288,10 @@ void main() {
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         entryPoints: <ExtensionEntryPoint>[entryPoint],
       );
+      addTearDown(manager.dispose);
 
       var downloadCount = 0;
-      final httpClient = _FakeHttpClient((Uri url) {
+      final httpClient = _FakeHttpClient((Uri url) async {
         downloadCount++;
         return _FakeHttpClientResponse(HttpStatus.ok, zipContent);
       });
@@ -302,12 +317,15 @@ void main() {
 
       expect(downloadCount, 1);
       expect(unzipOsUtils.unzipCount, 1);
-      final Directory extractedDir = customCacheDir
+      final Directory shaDir = customCacheDir
           .childDirectory('embedder_ext')
-          .childDirectory(zipSha256)
-          .childDirectory('engine_bundle');
+          .childDirectory(zipSha256);
+      final Directory extractedDir = shaDir.childDirectory('engine_bundle');
+      final File stampFile = shaDir.childFile('.engine_bundle.sha256');
       expect(extractedDir.existsSync(), isTrue);
       expect(extractedDir.childFile('extracted.txt').existsSync(), isTrue);
+      expect(stampFile.existsSync(), isTrue);
+      expect(stampFile.readAsStringSync(), zipSha256);
 
       // Subsequent call hits verified stamp and does not re-download.
       await artifactManager.ensureArtifactsDownloaded(
@@ -315,8 +333,6 @@ void main() {
       );
       expect(downloadCount, 1);
       expect(unzipOsUtils.unzipCount, 1);
-
-      await manager.dispose();
     });
 
     test(
@@ -349,10 +365,19 @@ void main() {
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
           entryPoints: <ExtensionEntryPoint>[entryPoint],
         );
+        addTearDown(manager.dispose);
+
+        await manager.ensureInitialized();
 
         var downloadCount = 0;
-        final httpClient = _FakeHttpClient((Uri url) {
+        final downloadStarted = Completer<void>();
+        final releaseDownload = Completer<void>();
+        final httpClient = _FakeHttpClient((Uri url) async {
           downloadCount++;
+          if (!downloadStarted.isCompleted) {
+            downloadStarted.complete();
+          }
+          await releaseDownload.future;
           return _FakeHttpClientResponse(HttpStatus.ok, content);
         });
 
@@ -370,11 +395,13 @@ void main() {
           ),
         );
 
-        await Future.wait(<Future<void>>[
-          artifactManager.ensureArtifactsDownloaded(),
-          artifactManager.ensureArtifactsDownloaded(),
-          artifactManager.ensureArtifactsDownloaded(),
-        ]);
+        final Future<void> call1 = artifactManager.ensureArtifactsDownloaded();
+        await downloadStarted.future;
+        final Future<void> call2 = artifactManager.ensureArtifactsDownloaded();
+        final Future<void> call3 = artifactManager.ensureArtifactsDownloaded();
+        releaseDownload.complete();
+
+        await Future.wait(<Future<void>>[call1, call2, call3]);
 
         expect(downloadCount, 1);
         final File cachedFile = cacheDir
@@ -383,12 +410,10 @@ void main() {
             .childFile('concurrent_bin');
         expect(cachedFile.existsSync(), isTrue);
         expect(cachedFile.readAsBytesSync(), equals(content));
-
-        await manager.dispose();
       },
     );
 
-    test('throws ToolExit when SHA-256 checksum mismatches', () async {
+    test('throws ToolExit when SHA-256 checksum mismatches or network fails', () async {
       final List<int> content = utf8.encode('corrupted payload');
 
       void entryPoint(SendPort sendPort) {
@@ -415,9 +440,10 @@ void main() {
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         entryPoints: <ExtensionEntryPoint>[entryPoint],
       );
+      addTearDown(manager.dispose);
 
       final httpClient = _FakeHttpClient(
-        (Uri url) => _FakeHttpClientResponse(HttpStatus.ok, content),
+        (Uri url) async => _FakeHttpClientResponse(HttpStatus.ok, content),
       );
 
       final artifactManager = ExtensionArtifactManager(
@@ -439,19 +465,61 @@ void main() {
         ),
       );
 
-      await manager.dispose();
+      final failingNetworkClient = _FakeHttpClient(
+        (Uri url) async => throw const SocketException('Connection refused'),
+      );
+      final networkErrorManager = ExtensionArtifactManager(
+        cacheDir: fs.directory('/bad_network_cache'),
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClient: failingNetworkClient,
+        toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
+      );
+
+      await expectLater(
+        networkErrorManager.ensureArtifactsDownloaded(),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            contains('Failed to download artifact "bad_bin"'),
+          ),
+        ),
+      );
     });
 
     test('works with LinuxArtifactService prototype extension', () async {
       const content = <int>[]; // Empty bytes match e3b0c44298fc...
       const expectedSha = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
+      void configuredLinuxEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            LinuxArtifactService(
+              artifacts: <ArtifactDependency>[
+                ArtifactDependency(
+                  name: 'linux-x64-custom-artifact',
+                  sha256: expectedSha,
+                  url: Uri.parse('https://example.com/linux-x64/artifacts'),
+                  hostPlatform: HostPlatform.linux_x64,
+                  targetPlatform: 'linux-x64',
+                ),
+              ],
+            ),
+          ],
+          extensionName: 'flutter_tools_extension_linux_prototype',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        entryPoints: <ExtensionEntryPoint>[configuredLinuxEntryPoint],
       );
+      addTearDown(manager.dispose);
 
       final Directory cacheDir = fs.directory('/shared_cache');
       final Directory shaDir = cacheDir
@@ -462,7 +530,7 @@ void main() {
         ..writeAsBytesSync(content);
 
       var downloadTriggered = false;
-      final httpClient = _FakeHttpClient((Uri url) {
+      final httpClient = _FakeHttpClient((Uri url) async {
         downloadTriggered = true;
         return _FakeHttpClientResponse(HttpStatus.ok, content);
       });
@@ -477,8 +545,6 @@ void main() {
 
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux'});
       expect(downloadTriggered, isFalse);
-
-      await manager.dispose();
     });
 
     test(
@@ -526,9 +592,10 @@ void main() {
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
           entryPoints: <ExtensionEntryPoint>[entryPoint],
         );
+        addTearDown(manager.dispose);
 
         final downloadedUrls = <Uri>[];
-        final httpClient = _FakeHttpClient((Uri url) {
+        final httpClient = _FakeHttpClient((Uri url) async {
           downloadedUrls.add(url);
           return _FakeHttpClientResponse(HttpStatus.ok, content);
         });
@@ -555,8 +622,6 @@ void main() {
           Uri.parse('https://example.com/linux_bin'),
           Uri.parse('https://example.com/embedder_bin'),
         ]);
-
-        await manager.dispose();
       },
     );
   });
@@ -577,7 +642,7 @@ class _UnzipTrackingOsUtils extends FakeOperatingSystemUtils {
 class _FakeHttpClient extends Fake implements HttpClient {
   _FakeHttpClient(this._handler);
 
-  final _FakeHttpClientResponse Function(Uri url) _handler;
+  final Future<_FakeHttpClientResponse> Function(Uri url) _handler;
 
   @override
   Future<HttpClientRequest> getUrl(Uri url) async => _FakeHttpClientRequest(url, _handler);
@@ -587,10 +652,10 @@ class _FakeHttpClientRequest extends Fake implements HttpClientRequest {
   _FakeHttpClientRequest(this._url, this._handler);
 
   final Uri _url;
-  final _FakeHttpClientResponse Function(Uri url) _handler;
+  final Future<_FakeHttpClientResponse> Function(Uri url) _handler;
 
   @override
-  Future<HttpClientResponse> close() async => _handler(_url);
+  Future<HttpClientResponse> close() => _handler(_url);
 }
 
 class _FakeHttpClientResponse extends Stream<List<int>> with Fake implements HttpClientResponse {

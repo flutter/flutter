@@ -15,12 +15,10 @@ enum HostPlatform {
   windows_arm64;
 
   /// Parses a [HostPlatform] from its [cliName] or enum [name].
+  ///
+  /// Throws a [FormatException] if [name] does not match a known host platform.
   factory HostPlatform.fromName(String name) {
-    final String normalized = name.replaceAll('-', '_');
-    return HostPlatform.values.firstWhere(
-      (HostPlatform platform) => platform.name == normalized,
-      orElse: () => throw ArgumentError('Unsupported host platform: "$name"'),
-    );
+    return tryFromName(name) ?? (throw FormatException('Unsupported host platform: "$name"'));
   }
 
   /// Architecture name of the host platform (e.g. `'x64'`, `'arm64'`, `'riscv64'`).
@@ -75,31 +73,35 @@ class ArtifactDependency {
   });
 
   /// Deserializes an [ArtifactDependency] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if any required field is missing or invalid.
   factory ArtifactDependency.fromJson(Map<String, Object?> json) {
     if (json case {
       nameKey: final String name,
       urlKey: final String urlStr,
       sha256Key: final String sha256,
     }) {
-      if (!_isValidSinglePathSegment(name)) {
-        throw ArgumentError('Invalid artifact dependency name: "$name"');
+      if (!isValidSinglePathSegment(name)) {
+        throw FormatException('Invalid artifact dependency name: "$name"');
       }
-      if (!_isValidSinglePathSegment(sha256)) {
-        throw ArgumentError('Invalid artifact dependency sha256: "$sha256"');
+      if (!_sha256RegExp.hasMatch(sha256)) {
+        throw FormatException(
+          'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
+        );
       }
       final Uri? uri = Uri.tryParse(urlStr);
-      if (uri == null || !uri.hasScheme) {
-        throw ArgumentError('Invalid artifact dependency URL: "$urlStr"');
+      if (uri == null || (!uri.isScheme(_httpScheme) && !uri.isScheme(_httpsScheme))) {
+        throw FormatException('Invalid artifact dependency URL (expected http/https): "$urlStr"');
       }
       final HostPlatform? hostPlatform = switch (json[hostPlatformKey]) {
         final String hp => HostPlatform.fromName(hp),
         null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$hostPlatformKey": $invalid'),
+        final Object? invalid => throw FormatException('Invalid "$hostPlatformKey": $invalid'),
       };
       final String? targetPlatform = switch (json[targetPlatformKey]) {
         final String tp => tp,
         null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$targetPlatformKey": $invalid'),
+        final Object? invalid => throw FormatException('Invalid "$targetPlatformKey": $invalid'),
       };
       return ArtifactDependency(
         name: name,
@@ -109,10 +111,16 @@ class ArtifactDependency {
         targetPlatform: targetPlatform,
       );
     }
-    throw ArgumentError('Invalid ArtifactDependency JSON: $json');
+    throw FormatException('Invalid ArtifactDependency JSON: $json');
   }
 
-  static bool _isValidSinglePathSegment(String value) {
+  static const String _httpScheme = 'http';
+  static const String _httpsScheme = 'https';
+  static final RegExp _sha256RegExp = RegExp(r'^[a-fA-F0-9]{64}$');
+
+  /// Returns whether [value] is a non-empty single path segment without
+  /// directory traversal or path separators.
+  static bool isValidSinglePathSegment(String value) {
     final String trimmed = value.trim();
     return trimmed.isNotEmpty &&
         trimmed == value &&
@@ -168,6 +176,24 @@ class ArtifactDependency {
   /// platform families (matching both exact identifiers and `<os>-<arch>`
   /// prefixes such as `'linux'` matching `'linux-x64'`).
   final String? targetPlatform;
+
+  /// Returns whether this artifact matches [currentHostPlatform] and optional
+  /// [targetPlatforms].
+  ///
+  /// When [targetPlatforms] is provided and [targetPlatform] is non-null, a
+  /// target platform matches if it equals [targetPlatform] or is an `<os>`
+  /// prefix of `<os>-<arch>` (e.g. `'linux'` matches `'linux-x64'`).
+  bool matchesPlatforms({required HostPlatform currentHostPlatform, Set<String>? targetPlatforms}) {
+    if (hostPlatform != null && hostPlatform != currentHostPlatform) {
+      return false;
+    }
+    if (targetPlatforms != null && targetPlatform != null) {
+      final String depTarget = targetPlatform!;
+      return targetPlatforms.contains(depTarget) ||
+          targetPlatforms.any((String p) => depTarget.startsWith('$p-'));
+    }
+    return true;
+  }
 
   /// Serializes the artifact dependency to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{

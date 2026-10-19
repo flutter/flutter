@@ -6,14 +6,11 @@ import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
 import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
@@ -505,65 +502,6 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
-
-    testWithoutContext(
-      'AssembleCommand invokes ExtensionArtifactManager only for non-built-in targets',
-      () async {
-        Cache.flutterRoot = '';
-        final logger = BufferLogger.test();
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final toolContext = FakeToolContext(
-          artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: FakeProcessManager.any()),
-          fs: fs,
-          logger: logger,
-          processManager: FakeProcessManager.any(),
-        );
-
-        final builtInArtifactManager = _FakeExtensionArtifactManager();
-        final builtInAssembleCommand = AssembleCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          extensionArtifactManager: builtInArtifactManager,
-          featureFlags: featureFlags,
-          toolContext: toolContext,
-        );
-        final CommandRunner<void> builtInRunner = createTestCommandRunner(
-          builtInAssembleCommand,
-          null,
-          toolContext,
-          featureFlags,
-        );
-        await builtInRunner.run(<String>[
-          'assemble',
-          '--output=/out',
-          '-dTargetPlatform=linux-x64',
-          'debug_macos_bundle_flutter_assets',
-        ]);
-        expect(builtInArtifactManager.ensureArtifactsDownloadedCalled, isFalse);
-
-        final customArtifactManager = _FakeExtensionArtifactManager();
-        final customAssembleCommand = _CustomTargetAssembleCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          extensionArtifactManager: customArtifactManager,
-          featureFlags: featureFlags,
-          toolContext: toolContext,
-        );
-        final CommandRunner<void> customRunner = createTestCommandRunner(
-          customAssembleCommand,
-          null,
-          toolContext,
-          featureFlags,
-        );
-        await customRunner.run(<String>[
-          'assemble',
-          '--output=/out',
-          '-dTargetPlatform=linux-x64',
-          'custom_extension_target',
-        ]);
-        expect(customArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
-        expect(customArtifactManager.requestedTargetPlatforms, const <String>{'linux-x64'});
-      },
-    );
   });
 }
 
@@ -572,39 +510,8 @@ class _FakeExtensionArtifactManager extends Fake implements ExtensionArtifactMan
   Set<String>? requestedTargetPlatforms;
 
   @override
-  Future<void> ensureArtifactsDownloaded({Set<String>? targetPlatforms}) async {
+  Future<void> ensureArtifactsDownloaded({Set<String>? targetPlatforms, bool force = false}) async {
     ensureArtifactsDownloadedCalled = true;
     requestedTargetPlatforms = targetPlatforms;
   }
-}
-
-class _CustomTargetAssembleCommand extends AssembleCommand {
-  _CustomTargetAssembleCommand({
-    required super.buildSystem,
-    required super.featureFlags,
-    required super.toolContext,
-    super.extensionArtifactManager,
-  });
-
-  @override
-  List<Target> createTargets() => const <Target>[_FakeExtensionAssembleTarget()];
-}
-
-class _FakeExtensionAssembleTarget extends Target {
-  const _FakeExtensionAssembleTarget();
-
-  @override
-  String get name => 'custom_extension_target';
-
-  @override
-  List<Source> get inputs => const <Source>[];
-
-  @override
-  List<Source> get outputs => const <Source>[];
-
-  @override
-  List<Target> get dependencies => const <Target>[];
-
-  @override
-  Future<void> build(Environment environment) async {}
 }

@@ -17,12 +17,16 @@ import 'service.dart';
 /// extension services.
 class ToolExtensionEntryPoint {
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
+  ///
+  /// If provided, [extensionName] should be the name of the extension package
+  /// and is surfaced by the host tool in error messages and artifact cache
+  /// directories.
   static Future<void> run(
     SendPort sendPort,
     List<ToolExtensionService> services, {
-    String? extensionName,
-    void Function(String message)? logger,
     Set<String>? supportedPlatforms,
+    void Function(String message)? logger,
+    String? extensionName,
   }) async {
     logger?.call('[ToolExtensionIsolate] Initializing isolate channel...');
     final channel = IsolateChannel<Object?>.connectSend(sendPort);
