@@ -611,7 +611,7 @@ class ToolDependencies {
     final extensionKernelCompiler = ExtensionKernelCompiler(
       artifacts: finalArtifacts,
       fileSystem: finalFS,
-      flutterRoot: flutterRoot,
+      flutterRoot: finalFS.directory(flutterRoot),
       logger: finalLogger,
       platform: finalPlatform,
       processManager: finalProcessManager,
@@ -620,12 +620,9 @@ class ToolDependencies {
       entryPoints: extensionEntryPoints,
       extensionFinder: projectExtensionFinder,
       featureFlags: finalFeatureFlags,
-      fileSystem: finalFS,
       hostPlatform: finalOS.hostPlatform,
-      isSafeMode: isToolExtensionsEnabledOverride == false,
       kernelCompiler: extensionKernelCompiler,
       logger: finalLogger,
-      platform: finalPlatform,
     );
 
     final extensionBuildManager = ExtensionBuildManager(

@@ -349,12 +349,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// Evaluates raw CLI [args] for `--extensions` or `--no-extensions` before
   /// full argument parsing (which depends on dynamic options from extensions).
   ///
-  /// Stops scanning at `--` so positional arguments after the separator are
+  /// Stops scanning at the first non-flag token (the subcommand name) or `--`
+  /// so flags after the subcommand or positional arguments after `--` are
   /// ignored. If both flags appear, the last one wins.
   static bool? evaluateToolExtensionsCliFlag(Iterable<String> args) {
     bool? result;
     for (final arg in args) {
-      if (arg == '--') {
+      if (!arg.startsWith('-') || arg == '--') {
         break;
       }
       if (arg == '--${FlutterGlobalOptions.kExtensionsFlag}') {
@@ -393,7 +394,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
         current = current.parent;
       }
-      _updateArgParser(wrapColumn: _argParser.usageLineLength);
     }
   }
 

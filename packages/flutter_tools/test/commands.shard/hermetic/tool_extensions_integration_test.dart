@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/experimental/project_extension_finder.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_features.dart';
@@ -173,29 +174,36 @@ void main() {
   });
 
   group('Tool Extensions Safe Mode & Custom Platforms', () {
-    testWithoutContext('evaluateToolExtensionsCliFlag parses --[no-]extensions before --', () {
-      expect(FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['doctor']), isNull);
-      expect(
-        FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['--no-extensions', 'doctor']),
-        isFalse,
-      );
-      expect(
-        FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>[
-          '--no-extensions',
-          '--extensions',
-          'doctor',
-        ]),
-        isTrue,
-      );
-      expect(
-        FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>[
-          'test',
-          '--',
-          '--no-extensions',
-        ]),
-        isNull,
-      );
-    });
+    testWithoutContext(
+      'evaluateToolExtensionsCliFlag parses --[no-]extensions before subcommand',
+      () {
+        expect(FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['doctor']), isNull);
+        expect(
+          FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['--no-extensions', 'doctor']),
+          isFalse,
+        );
+        expect(
+          FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>[
+            '--no-extensions',
+            '--extensions',
+            'doctor',
+          ]),
+          isTrue,
+        );
+        expect(
+          FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['run', '--no-extensions']),
+          isNull,
+        );
+        expect(
+          FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>[
+            'test',
+            '--',
+            '--no-extensions',
+          ]),
+          isNull,
+        );
+      },
+    );
 
     testWithoutContext('FLUTTER_NO_EXTENSIONS=1 overrides FLUTTER_TOOL_EXTENSIONS=true', () {
       final logger = BufferLogger.test();
@@ -238,8 +246,21 @@ void main() {
     testWithoutContext(
       'ConfigCommand skips extension settings when --no-extensions is passed',
       () async {
+        const args = <String>['--no-extensions', 'config', '--list'];
         final logger = BufferLogger.test();
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final platform = FakePlatform(
+          environment: const <String, String>{'FLUTTER_TOOL_EXTENSIONS': 'true'},
+        );
+        final featureFlags = FlutterFeatureFlags(
+          flutterVersion: FakeFlutterVersion(),
+          featuresConfig: FlutterFeaturesConfig(
+            globalConfig: Config.test(logger: logger),
+            platform: platform,
+            projectManifest: null,
+          ),
+          platform: platform,
+          isToolExtensionsEnabledOverride: FlutterCommandRunner.evaluateToolExtensionsCliFlag(args),
+        );
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: logger,
@@ -256,7 +277,7 @@ void main() {
         final runner = FlutterCommandRunner(toolContext: toolContext, featureFlags: featureFlags)
           ..addCommand(configCommand);
 
-        await runner.run(<String>['--no-extensions', 'config', '--list']);
+        await runner.run(args);
         expect(logger.statusText, isNot(contains('Extension Settings:')));
         expect(manager.connections, isEmpty);
 
@@ -323,7 +344,7 @@ platforms:
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: logger,
-          fileSystem: fs,
+          extensionFinder: ProjectExtensionFinder(fileSystem: fs, logger: logger),
           featureFlags: featureFlags,
         );
         final templateManager = ExtensionTemplateManager(
@@ -343,6 +364,13 @@ platforms:
         );
         expect(resolvedDir.path, templateSourceDir.path);
         expect(resolvedDir.existsSync(), isTrue);
+
+        expect(
+          () => templateManager.resolveTemplateDirectory(
+            'package:flutter_tools_extension_linux_prototype/../outside',
+          ),
+          throwsArgumentError,
+        );
 
         await manager.dispose();
       },

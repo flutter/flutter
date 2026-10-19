@@ -9,7 +9,6 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../features.dart';
 import 'config.dart';
 import 'diagnostics.dart';
@@ -18,50 +17,45 @@ import 'extension_discovery.dart';
 import 'extension_kernel_compiler.dart';
 import 'project_extension_finder.dart';
 
+/// Typedef for spawning an extension connection from a URI and package config.
+typedef ExtensionUriSpawner = Future<ExtensionConnection> Function(
+  Uri entrypointUri, {
+  required Logger logger,
+  required Uri packageConfigUri,
+  String? extensionName,
+  Duration timeout,
+});
+
 /// Manages active tool extension isolate connections and exposes capability proxies.
 class ExtensionManager {
+  /// Creates an [ExtensionManager] targeting the active [hostPlatform].
   ExtensionManager({
     required this._featureFlags,
     required this.hostPlatform,
     required Logger logger,
     ExtensionDiscovery? discovery,
     this._entryPoints = const <ExtensionEntryPoint>[],
-    ProjectExtensionFinder? extensionFinder,
-    FileSystem? fileSystem,
-    bool isSafeMode = false,
-    ExtensionKernelCompileFn? kernelCompileFn,
-    ExtensionKernelCompiler? kernelCompiler,
-    this._platform,
+    this._extensionFinder,
+    this._kernelCompiler,
     ExtensionUriSpawner? uriSpawner,
   }) : _logger = logger,
        _discovery = discovery ?? ExtensionDiscovery(logger: logger),
-       _extensionFinder =
-           extensionFinder ??
-           (fileSystem != null
-               ? ProjectExtensionFinder(fileSystem: fileSystem, logger: logger)
-               : null),
-       _kernelCompileFn = kernelCompileFn ?? kernelCompiler?.compile,
-       _uriSpawner = uriSpawner ?? ExtensionConnection.spawnUri,
-       _explicitSafeMode = isSafeMode;
+       _uriSpawner = uriSpawner ?? ExtensionConnection.spawnUri;
 
   /// The active [HostPlatform].
   final HostPlatform hostPlatform;
-
-  /// Whether tool extension loading is bypassed via safe mode (`--no-extensions` or `FLUTTER_NO_EXTENSIONS=1`).
-  bool get isSafeMode =>
-      _explicitSafeMode || (_platform != null && isSafeModeActive(_platform.environment));
-
   final Logger _logger;
   final ExtensionDiscovery _discovery;
   final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
   final ProjectExtensionFinder? _extensionFinder;
-  final ExtensionKernelCompileFn? _kernelCompileFn;
+  final ExtensionKernelCompiler? _kernelCompiler;
   final ExtensionUriSpawner _uriSpawner;
-  final Platform? _platform;
-  final bool _explicitSafeMode;
 
-  bool get _isToolExtensionsEnabled => _featureFlags.isToolExtensionsEnabled;
+  /// Monotonically increasing generation counter incremented whenever the set of
+  /// registered extension connections changes.
+  int get connectionGeneration => _connectionGeneration;
+  int _connectionGeneration = 0;
 
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
@@ -69,7 +63,9 @@ class ExtensionManager {
   Future<void>? _pendingInit;
 
   final _discoveredByPackageName = <String, DiscoveredProjectExtension>{};
+  final _discoveredDirs = <String>{};
   final _spawnedExtensionNames = <String>{};
+  final _failedExtensionNames = <String>{};
   final _registeredClientConnections = <ExtensionConnection>{};
 
   final _diagnosticsExtensions = <DiagnosticsExtension>[];
@@ -84,16 +80,23 @@ class ExtensionManager {
   /// Discovers project extensions starting from [startDir] using static
   /// `extension/flutter_tools/config.yaml` metadata without spawning isolates.
   Future<List<DiscoveredProjectExtension>> discoverExtensions({Directory? startDir}) async {
-    if (isSafeMode || !_isToolExtensionsEnabled) {
+    if (!_featureFlags.isToolExtensionsEnabled) {
       return const <DiscoveredProjectExtension>[];
     }
     final ProjectExtensionFinder? finder = _extensionFinder;
     if (finder == null) {
       return discoveredExtensions;
     }
+    final String cacheKey = startDir?.absolute.path ?? '';
+    if (_discoveredDirs.contains(cacheKey)) {
+      return discoveredExtensions;
+    }
     final List<DiscoveredProjectExtension> found = await finder.findProjectExtensions(
       startDirectory: startDir,
     );
+    if (found.isNotEmpty) {
+      _discoveredDirs.add(cacheKey);
+    }
     for (final ext in found) {
       if (ext.config.supportsHostPlatform(hostPlatformName) ||
           ext.config.supportsHostPlatform(hostPlatform.cliName)) {
@@ -124,7 +127,7 @@ class ExtensionManager {
   }
 
   Future<void> _doInitialize({Set<String>? requiredServices, Directory? startDir}) async {
-    if (isSafeMode || !_isToolExtensionsEnabled) {
+    if (!_featureFlags.isToolExtensionsEnabled) {
       _isInitialized = true;
       return;
     }
@@ -139,14 +142,15 @@ class ExtensionManager {
     final toSpawn = <DiscoveredProjectExtension>[
       for (final DiscoveredProjectExtension ext in _discoveredByPackageName.values)
         if (!_spawnedExtensionNames.contains(ext.name) &&
+            !_failedExtensionNames.contains(ext.name) &&
             (requiredServices == null || ext.config.services.any(requiredServices.contains)))
           ext,
     ];
 
     for (final ext in toSpawn) {
       try {
-        final Uri runnableUri = _kernelCompileFn != null
-            ? await _kernelCompileFn(ext)
+        final Uri runnableUri = _kernelCompiler != null
+            ? await _kernelCompiler.compile(ext)
             : ext.entrypointUri;
         final ExtensionConnection connection = await _uriSpawner(
           runnableUri,
@@ -157,6 +161,7 @@ class ExtensionManager {
         _spawnedExtensionNames.add(ext.name);
         await _registerOrDisposeConnection(connection);
       } on Object catch (error) {
+        _failedExtensionNames.add(ext.name);
         _logger.printWarning('Failed to initialize tool extension "${ext.name}": $error');
       }
     }
@@ -201,6 +206,7 @@ class ExtensionManager {
         'Extension connection supported on host platform "$hostPlatformName"; registering.',
       );
       _discovery.registerConnection(connection);
+      _connectionGeneration++;
     } else {
       _logger.printTrace(
         'Extension connection does not support host platform "$hostPlatformName" '
@@ -267,11 +273,14 @@ class ExtensionManager {
     _configurationExtensions.clear();
     _deviceExtensions.clear();
     _discoveredByPackageName.clear();
+    _discoveredDirs.clear();
     _spawnedExtensionNames.clear();
+    _failedExtensionNames.clear();
     _registeredClientConnections.clear();
     _entryPointsSpawned = false;
     _isInitialized = false;
     _pendingInit = null;
+    _connectionGeneration++;
     await _discovery.dispose();
   }
 }

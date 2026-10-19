@@ -9,13 +9,14 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
+import 'package:flutter_tools/src/experimental/extension_kernel_compiler.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/experimental/project_extension_finder.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
-import 'package:test/test.dart';
+import 'package:test/fake.dart';
 
+import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
@@ -30,9 +31,45 @@ void _linuxOnlyExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+class _FakeExtensionKernelCompiler extends Fake implements ExtensionKernelCompiler {
+  _FakeExtensionKernelCompiler(this._onCompile);
+
+  final Future<Uri> Function(DiscoveredProjectExtension extension) _onCompile;
+
+  @override
+  Future<Uri> compile(DiscoveredProjectExtension extension) => _onCompile(extension);
+}
+
+class _FakeExtensionConnection extends Fake implements ExtensionConnection {
+  _FakeExtensionConnection({required this.capabilities, this.extensionName});
+
+  @override
+  final ToolExtensionCapabilities capabilities;
+
+  @override
+  final String? extensionName;
+
+  bool _disposed = false;
+
+  @override
+  bool get isDisposed => _disposed;
+
+  @override
+  Future<Object?> sendRequest(
+    String method, {
+    Object? params,
+    Duration? timeout = const Duration(seconds: 5),
+  }) async => null;
+
+  @override
+  Future<void> dispose() async {
+    _disposed = true;
+  }
+}
+
 void main() {
   group('ExtensionManager Integration', () {
-    test('ExtensionManager loads extension compatible with hostPlatform', () async {
+    testWithoutContext('ExtensionManager loads extension compatible with hostPlatform', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
@@ -46,20 +83,23 @@ void main() {
       expect(manager.connections, isEmpty);
     });
 
-    test('ExtensionManager filters out extension incompatible with hostPlatform', () async {
-      final logger = BufferLogger.test();
-      final manager = ExtensionManager(
-        hostPlatform: HostPlatform.darwin_arm64,
-        logger: logger,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-      );
-      await manager.initialize(entryPoints: <ExtensionEntryPoint>[_linuxOnlyExtensionEntryPoint]);
+    testWithoutContext(
+      'ExtensionManager filters out extension incompatible with hostPlatform',
+      () async {
+        final logger = BufferLogger.test();
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.darwin_arm64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        await manager.initialize(entryPoints: <ExtensionEntryPoint>[_linuxOnlyExtensionEntryPoint]);
 
-      expect(manager.connections, isEmpty);
-      await manager.dispose();
-    });
+        expect(manager.connections, isEmpty);
+        await manager.dispose();
+      },
+    );
 
-    test(
+    testWithoutContext(
       'ensureInitialized(requiredServices: ...) only compiles and spawns matching extensions',
       () async {
         final fs = MemoryFileSystem.test();
@@ -135,12 +175,12 @@ build_targets:
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: logger,
-          fileSystem: fs,
+          extensionFinder: ProjectExtensionFinder(fileSystem: fs, logger: logger),
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          kernelCompileFn: (DiscoveredProjectExtension ext) async {
+          kernelCompiler: _FakeExtensionKernelCompiler((DiscoveredProjectExtension ext) async {
             compiledExtensions.add(ext.name);
             return Uri.file('/cache/${ext.name}.dill');
-          },
+          }),
           uriSpawner:
               (
                 Uri entrypointUri, {
@@ -150,15 +190,12 @@ build_targets:
                 Duration timeout = const Duration(seconds: 5),
               }) async {
                 spawnedExtensions.add(extensionName ?? entrypointUri.toString());
-                return ExtensionConnection.custom(
+                return _FakeExtensionConnection(
                   capabilities: ToolExtensionCapabilities(
                     services: <String>[if (extensionName == 'diag_ext') 'diagnostics' else 'build'],
                     supportedPlatforms: const <String>{'linux'},
                   ),
-                  logger: logger,
                   extensionName: extensionName,
-                  requestHandler: (String method, {Object? params, Duration? timeout}) async =>
-                      null,
                 );
               },
         );
@@ -185,30 +222,29 @@ build_targets:
       },
     );
 
-    test('isSafeMode and FLUTTER_NO_EXTENSIONS=1 bypass discovery and spawning', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      var spawned = false;
+    testWithoutContext(
+      'ensureInitialized skips spawning when tool extensions are disabled',
+      () async {
+        final logger = BufferLogger.test();
+        var spawned = false;
 
-      final safeModeManager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        fileSystem: fs,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        platform: FakePlatform(environment: const <String, String>{'FLUTTER_NO_EXTENSIONS': '1'}),
-        entryPoints: <ExtensionEntryPoint>[
-          (SendPort sendPort) {
-            spawned = true;
-            _dummyExtensionEntryPoint(sendPort);
-          },
-        ],
-      );
+        final disabledManager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(),
+          entryPoints: <ExtensionEntryPoint>[
+            (SendPort sendPort) {
+              spawned = true;
+              _dummyExtensionEntryPoint(sendPort);
+            },
+          ],
+        );
 
-      expect(safeModeManager.isSafeMode, isTrue);
-      await safeModeManager.ensureInitialized();
-      expect(spawned, isFalse);
-      expect(safeModeManager.connections, isEmpty);
-      await safeModeManager.dispose();
-    });
+        await disabledManager.ensureInitialized();
+        expect(spawned, isFalse);
+        expect(disabledManager.connections, isEmpty);
+        await disabledManager.dispose();
+      },
+    );
   });
 }

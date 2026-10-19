@@ -82,6 +82,9 @@ Future<int> run(
       doctor: globals.doctor,
       emulatorManager: emulatorManager,
       extensionEntryPoints: extensionEntryPoints,
+      // Only forward an explicit test-provided FeatureFlags override; in
+      // production, let ToolDependencies.bootstrap construct FlutterFeatureFlags
+      // with isToolExtensionsEnabledOverride applied.
       featureFlags: overrides?[FeatureFlags] != null ? featureFlags : null,
       isToolExtensionsEnabledOverride: isToolExtensionsEnabledOverride,
       flutterVersion: globals.flutterVersion,
@@ -116,6 +119,8 @@ Future<int> run(
     return context.run<int>(
       overrides: <Type, Generator>{
         DeviceManager: () => toolDeps.deviceManager,
+        // Mirror the bootstrapped FeatureFlags into the legacy Zone context so
+        // callers still reading Zone-scoped FeatureFlags observe safe mode.
         FeatureFlags: () => toolDeps.featureFlags,
       },
       body: () async {

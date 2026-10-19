@@ -264,24 +264,16 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           final Map<String, String>? allowedHelp = opt.allowedHelp != null
               ? Map<String, String>.of(opt.allowedHelp!)
               : null;
-          final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
           if (allowedHelp != null) {
             for (final platform in customPlatforms) {
               allowedHelp.putIfAbsent(platform, () => '');
-            }
-          }
-          if (allowed != null) {
-            for (final platform in customPlatforms) {
-              if (!allowed.contains(platform)) {
-                allowed.add(platform);
-              }
             }
           }
           newParser.addMultiOption(
             opt.name,
             abbr: opt.abbr,
             aliases: opt.aliases,
-            allowed: allowed,
+            allowed: opt.allowed,
             allowedHelp: allowedHelp,
             defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
             help: opt.help,
@@ -365,7 +357,8 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   /// Fetches the samples index file from the server and writes it to
   /// [outputFilePath].
   Future<void> _writeSamplesJson(String outputFilePath) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
     try {
       final File outputFile = fs.file(outputFilePath);
       if (outputFile.existsSync()) {
@@ -447,17 +440,15 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :Cache cache,
-      :Config config,
-      :FileSystem fs,
-      fileSystemUtils: FileSystemUtils fsUtils,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-      :FlutterProjectFactory projectFactory,
-      :AnsiTerminal terminal,
-    ) = toolContext;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
+    final Platform platform = toolContext.platform;
+    final ProcessManager processManager = toolContext.processManager;
+    final FileSystemUtils fsUtils = toolContext.fileSystemUtils;
+    final Config config = toolContext.config;
+    final AnsiTerminal terminal = toolContext.terminal;
+    final Cache cache = toolContext.cache;
+    final FlutterProjectFactory projectFactory = toolContext.projectFactory;
 
     final String? listSamples = stringArg('list-samples');
     if (listSamples != null) {
@@ -475,14 +466,14 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     final String? sampleArgument = stringArg('sample');
     final bool emptyArgument = boolArg('empty');
 
-    final ExtensionTemplateManager? manager = areToolExtensionsEnabled
+    final ExtensionTemplateManager? manager = featureFlags.isToolExtensionsEnabled
         ? extensionTemplateManager
         : null;
     if (manager != null) {
       try {
         await manager.getProjectTemplates(projectDir: projectDir);
       } on Object catch (e) {
-        logger.printTrace('Failed to retrieve project templates: $e');
+        toolContext.logger.printTrace('Failed to retrieve project templates: $e');
       }
     }
     final ParsedFlutterTemplateType template = _getProjectType(projectDir);
@@ -519,6 +510,13 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
     final List<String> platforms = stringsArg('platforms');
     final Set<String> customPlatforms = manager?.cachedCustomPlatforms ?? const <String>{};
+    for (final platform in customPlatforms) {
+      if (kAllCreatePlatforms.contains(platform)) {
+        logger.printWarning(
+          'Skipping custom platform "$platform" from extension because it collides with a built-in platform.',
+        );
+      }
+    }
     final allowedPlatforms = <String>{...kAllCreatePlatforms, ...customPlatforms};
     for (final platform in platforms) {
       if (!allowedPlatforms.contains(platform)) {
@@ -670,7 +668,9 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       gradleVersion: gradle.templateDefaultGradleVersion,
     );
     for (final customPlatform in requestedCustomPlatforms) {
-      templateContext[customPlatform] = true;
+      if (!templateContext.containsKey(customPlatform)) {
+        templateContext[customPlatform] = true;
+      }
     }
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
@@ -702,17 +702,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           printStatusWhenWriting: !creatingNewProject,
           projectType: template as FlutterTemplateType?,
         );
-        if (requestedCustomPlatforms.isNotEmpty && manager != null) {
-          generatedFileCount += await _renderExtensionPlatformTemplates(
-            manager: manager,
-            projectDir: relativeDir,
-            templateContext: templateContext,
-            requestedCustomPlatforms: requestedCustomPlatforms,
-            isPlugin: false,
-            overwrite: overwrite,
-            printStatusWhenWriting: !creatingNewProject,
-          );
-        }
         pubContext = PubContext.create;
       case FlutterTemplateType.module:
         generatedFileCount += await _generateModule(
@@ -738,17 +727,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           printStatusWhenWriting: !creatingNewProject,
           projectType: template as FlutterTemplateType,
         );
-        if (requestedCustomPlatforms.isNotEmpty && manager != null) {
-          generatedFileCount += await _renderExtensionPlatformTemplates(
-            manager: manager,
-            projectDir: relativeDir,
-            templateContext: templateContext,
-            requestedCustomPlatforms: requestedCustomPlatforms,
-            isPlugin: true,
-            overwrite: overwrite,
-            printStatusWhenWriting: !creatingNewProject,
-          );
-        }
         pubContext = PubContext.createPlugin;
       case FlutterTemplateType.pluginFfi:
         generatedFileCount += await _generateFfiPlugin(
@@ -758,17 +736,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           printStatusWhenWriting: !creatingNewProject,
           projectType: template as FlutterTemplateType,
         );
-        if (requestedCustomPlatforms.isNotEmpty && manager != null) {
-          generatedFileCount += await _renderExtensionPlatformTemplates(
-            manager: manager,
-            projectDir: relativeDir,
-            templateContext: templateContext,
-            requestedCustomPlatforms: requestedCustomPlatforms,
-            isPlugin: true,
-            overwrite: overwrite,
-            printStatusWhenWriting: !creatingNewProject,
-          );
-        }
         pubContext = PubContext.createPlugin;
       case FlutterTemplateType.packageFfi:
         generatedFileCount += await _generateFfiPackage(
@@ -867,6 +834,22 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         pubContext = PubContext.create;
       case RemovedFlutterTemplateType():
         throwToolExit('Unsupported template type: ${template.cliName}');
+    }
+
+    if (requestedCustomPlatforms.isNotEmpty &&
+        manager != null &&
+        (template == FlutterTemplateType.app ||
+            generateMethodChannelsPlugin ||
+            generateFfiPlugin)) {
+      generatedFileCount += await _renderExtensionPlatformTemplates(
+        manager: manager,
+        projectDir: relativeDir,
+        templateContext: templateContext,
+        requestedCustomPlatforms: requestedCustomPlatforms,
+        isPlugin: generateMethodChannelsPlugin || generateFfiPlugin,
+        overwrite: overwrite,
+        printStatusWhenWriting: !creatingNewProject,
+      );
     }
 
     _generatePubspecLock(relativeDir);
@@ -1044,14 +1027,6 @@ Your $application code is in $relativeAppMain.
         if (cached.templatePath == templatePath) {
           matchingTemplate = cached;
           break;
-        }
-      }
-      if (matchingTemplate == null) {
-        for (final ProjectTemplate cached in manager.cachedTemplates) {
-          if (requestedCustomPlatforms.contains(cached.name)) {
-            matchingTemplate = cached;
-            break;
-          }
         }
       }
       final Map<String, Object?> renderedParameters = matchingTemplate != null

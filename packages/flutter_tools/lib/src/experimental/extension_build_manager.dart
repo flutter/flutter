@@ -25,6 +25,7 @@ base class ExtensionBuildManager {
   final Logger _logger;
 
   List<ExtensionBuildTarget>? _cachedTargets;
+  int _cachedGeneration = -1;
   final _targetToConnection = <String, ExtensionConnection>{};
 
   /// Retrieve the cached build targets synchronously.
@@ -36,7 +37,6 @@ base class ExtensionBuildManager {
       return const <ExtensionBuildTarget>[];
     }
 
-    final int previousConnectionCount = _extensionManager.connections.length;
     try {
       await _extensionManager.ensureInitialized(
         requiredServices: const <String>{BuildService.serviceNamespace},
@@ -47,7 +47,7 @@ base class ExtensionBuildManager {
     }
 
     if (_cachedTargets case final cachedTargets?
-        when _extensionManager.connections.length == previousConnectionCount) {
+        when _extensionManager.connectionGeneration == _cachedGeneration) {
       return cachedTargets;
     }
 
@@ -90,6 +90,7 @@ base class ExtensionBuildManager {
     }
 
     _cachedTargets = targets;
+    _cachedGeneration = _extensionManager.connectionGeneration;
     return targets;
   }
 

@@ -23,6 +23,7 @@ const Duration _kRpcTimeout = Duration(seconds: 5);
 /// project templates, resolve their directories on the host, and generate
 /// template parameters over the extension protocol RPC.
 base class ExtensionTemplateManager extends TemplateService {
+  /// Creates an [ExtensionTemplateManager].
   ExtensionTemplateManager({
     required this._extensionManager,
     required this._featureFlags,
@@ -36,6 +37,7 @@ base class ExtensionTemplateManager extends TemplateService {
   final Logger _logger;
 
   List<ProjectTemplate>? _cachedTemplates;
+  int _cachedGeneration = -1;
   final _cachedCustomPlatforms = <String>{};
   final _cachedAppPlatformTemplates = <String>{};
   final _cachedPluginPlatformTemplates = <String>{};
@@ -73,13 +75,11 @@ base class ExtensionTemplateManager extends TemplateService {
       return const <ProjectTemplate>[];
     }
     await getCustomPlatforms(projectDir: projectDir);
-    final int previousConnectionCount = _extensionManager.connections.length;
     await _extensionManager.ensureInitialized(
       requiredServices: const <String>{TemplateService.serviceNamespace},
       startDir: projectDir,
     );
-    if (_cachedTemplates != null &&
-        _extensionManager.connections.length == previousConnectionCount) {
+    if (_cachedTemplates != null && _extensionManager.connectionGeneration == _cachedGeneration) {
       return _cachedTemplates!;
     }
 
@@ -112,11 +112,16 @@ base class ExtensionTemplateManager extends TemplateService {
       for (final template in templateList) {
         if (seenNames.add(template.name)) {
           templates.add(template);
+        } else {
+          _logger.printWarning(
+            'Skipping duplicate project template "${template.name}" from extension.',
+          );
         }
       }
     }
 
     _cachedTemplates = templates;
+    _cachedGeneration = _extensionManager.connectionGeneration;
     return templates;
   }
 
@@ -216,9 +221,21 @@ base class ExtensionTemplateManager extends TemplateService {
         for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions) {
           if (ext.name == packageName) {
             final Directory packageLibDir = _fileSystem.directory(ext.packageUri);
-            return _fileSystem.directory(
-              _fileSystem.path.joinAll(<String>[packageLibDir.path, ...relativePath.split('/')]),
+            final String normalizedLibPath = _fileSystem.path.normalize(
+              packageLibDir.absolute.path,
             );
+            final String resolvedPath = _fileSystem.path.normalize(
+              _fileSystem.path.joinAll(<String>[normalizedLibPath, ...relativePath.split('/')]),
+            );
+            if (!_fileSystem.path.isWithin(normalizedLibPath, resolvedPath) &&
+                !_fileSystem.path.equals(normalizedLibPath, resolvedPath)) {
+              throw ArgumentError.value(
+                templatePath,
+                'templatePath',
+                'Template path escapes package lib/ directory.',
+              );
+            }
+            return _fileSystem.directory(resolvedPath);
           }
         }
         if (packageName == 'flutter_tools_extension_linux_prototype') {

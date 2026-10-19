@@ -141,6 +141,22 @@ void main() {
     expect(doctorResult.stdout, isNot(contains('Linux Custom Extension Prototype')));
     expect(doctorResult.exitCode, 0);
 
+    final ProcessResult configResult = await processManager.run(
+      <String>[flutterBin, 'config', '--list'],
+      workingDirectory: workspaceProjectDir.path,
+      environment: baseEnv,
+    );
+    expect(configResult.stdout, isNot(contains('Extension Settings:')));
+    expect(configResult.exitCode, 0);
+
+    final ProcessResult devicesResult = await processManager.run(
+      <String>[flutterBin, 'devices'],
+      workingDirectory: workspaceProjectDir.path,
+      environment: baseEnv,
+    );
+    expect(devicesResult.stdout, isNot(contains('Linux Custom Extension Prototype Device')));
+    expect(devicesResult.exitCode, 0);
+
     final ProcessResult noExtFlagResult = await processManager.run(
       <String>[flutterBin, '--no-extensions', 'config', '--list'],
       workingDirectory: workspaceProjectDir.path,
