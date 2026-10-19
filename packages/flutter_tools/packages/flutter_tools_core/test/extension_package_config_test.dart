@@ -25,20 +25,20 @@ void main() {
       expect(config.supportsHostPlatform('windows'), isFalse);
 
       final Map<String, Object?> map = config.toMap();
-      expect(map[ExtensionPackageConfig.kNameKey], 'my_custom_ext');
-      expect(map[ExtensionPackageConfig.kProtocolVersionKey], 1);
-      expect(map[ExtensionPackageConfig.kEntrypointKey], 'bin/custom_entry.dart');
+      expect(map[ExtensionPackageConfig.nameKey], 'my_custom_ext');
+      expect(map[ExtensionPackageConfig.protocolVersionKey], 1);
+      expect(map[ExtensionPackageConfig.entrypointKey], 'bin/custom_entry.dart');
       expect(
-        map[ExtensionPackageConfig.kSupportedPlatformsKey],
+        map[ExtensionPackageConfig.supportedPlatformsKey],
         unorderedEquals(const <String>['linux', 'macos']),
       );
       expect(
-        map[ExtensionPackageConfig.kServicesKey],
+        map[ExtensionPackageConfig.servicesKey],
         unorderedEquals(const <String>['diagnostics', 'config', 'build', 'template']),
       );
-      expect(map[ExtensionPackageConfig.kBuildTargetsKey], const <String>['custom-build']);
-      expect(map[ExtensionPackageConfig.kTemplatesKey], const <String>['custom-app']);
-      expect(map[ExtensionPackageConfig.kPlatformsKey], const <String>['custom_linux']);
+      expect(map[ExtensionPackageConfig.buildTargetsKey], const <String>['custom-build']);
+      expect(map[ExtensionPackageConfig.templatesKey], const <String>['custom-app']);
+      expect(map[ExtensionPackageConfig.platformsKey], const <String>['custom_linux']);
 
       final String encoded = jsonEncode(map);
       final parsed = ExtensionPackageConfig.fromMap(
@@ -53,7 +53,7 @@ void main() {
 
     test('applies default protocolVersion and entrypoint when omitted', () {
       final config = ExtensionPackageConfig.fromMap(const <String, Object?>{
-        ExtensionPackageConfig.kNameKey: 'minimal_ext',
+        ExtensionPackageConfig.nameKey: 'minimal_ext',
       });
 
       expect(config.name, 'minimal_ext');
@@ -84,21 +84,21 @@ void main() {
       );
       expect(
         () => ExtensionPackageConfig.fromMap(const <String, Object?>{
-          ExtensionPackageConfig.kNameKey: 'wrong_name',
+          ExtensionPackageConfig.nameKey: 'wrong_name',
         }, packageName: 'expected_name'),
         throwsFormatException,
       );
       expect(
         () => ExtensionPackageConfig.fromMap(const <String, Object?>{
-          ExtensionPackageConfig.kNameKey: 'my_ext',
-          ExtensionPackageConfig.kProtocolVersionKey: '1',
+          ExtensionPackageConfig.nameKey: 'my_ext',
+          ExtensionPackageConfig.protocolVersionKey: '1',
         }),
         throwsFormatException,
       );
       expect(
         () => ExtensionPackageConfig.fromMap(const <String, Object?>{
-          ExtensionPackageConfig.kNameKey: 'my_ext',
-          ExtensionPackageConfig.kEntrypointKey: '',
+          ExtensionPackageConfig.nameKey: 'my_ext',
+          ExtensionPackageConfig.entrypointKey: '',
         }),
         throwsFormatException,
       );
@@ -111,23 +111,37 @@ void main() {
       ]) {
         expect(
           () => ExtensionPackageConfig.fromMap(<String, Object?>{
-            ExtensionPackageConfig.kNameKey: 'my_ext',
-            ExtensionPackageConfig.kEntrypointKey: invalidEntrypoint,
+            ExtensionPackageConfig.nameKey: 'my_ext',
+            ExtensionPackageConfig.entrypointKey: invalidEntrypoint,
+          }),
+          throwsFormatException,
+        );
+      }
+      for (final invalidPlatform in const <String>[
+        'Invalid-Name',
+        '123abc',
+        'projectName',
+        'custom-linux',
+      ]) {
+        expect(
+          () => ExtensionPackageConfig.fromMap(<String, Object?>{
+            ExtensionPackageConfig.nameKey: 'my_ext',
+            ExtensionPackageConfig.platformsKey: <Object?>[invalidPlatform],
           }),
           throwsFormatException,
         );
       }
       expect(
         () => ExtensionPackageConfig.fromMap(const <String, Object?>{
-          ExtensionPackageConfig.kNameKey: 'my_ext',
-          ExtensionPackageConfig.kServicesKey: 'not-a-list',
+          ExtensionPackageConfig.nameKey: 'my_ext',
+          ExtensionPackageConfig.servicesKey: 'not-a-list',
         }),
         throwsFormatException,
       );
       expect(
         () => ExtensionPackageConfig.fromMap(const <String, Object?>{
-          ExtensionPackageConfig.kNameKey: 'my_ext',
-          ExtensionPackageConfig.kServicesKey: <Object?>['diagnostics', 42],
+          ExtensionPackageConfig.nameKey: 'my_ext',
+          ExtensionPackageConfig.servicesKey: <Object?>['diagnostics', 42],
         }),
         throwsFormatException,
       );

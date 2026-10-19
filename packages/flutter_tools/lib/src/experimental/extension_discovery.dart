@@ -7,7 +7,6 @@ import 'dart:isolate';
 
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../base/logger.dart';
@@ -15,46 +14,19 @@ import '../base/logger.dart';
 /// Typedef for an extension isolate entrypoint function.
 typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 
-/// Typedef for spawning an extension connection from a URI and package config.
-typedef ExtensionUriSpawner = Future<ExtensionConnection> Function(
-  Uri entrypointUri, {
-  required Logger logger,
-  required Uri packageConfigUri,
-  String? extensionName,
-  Duration timeout,
-});
-
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
     required this.capabilities,
     required Isolate this._isolate,
     required this._logger,
-    required json_rpc.Peer this._peer,
+    required this._peer,
     this.extensionName,
-  }) : _customRequestHandler = null,
-       _customDisposeHandler = null;
-
-  /// Creates a custom [ExtensionConnection] for testing without spawning a real isolate.
-  @visibleForTesting
-  ExtensionConnection.custom({
-    required this.capabilities,
-    required this._logger,
-    required Future<Object?> Function(String method, {Object? params, Duration? timeout})
-    requestHandler,
-    Future<void> Function()? disposeHandler,
-    this.extensionName,
-  }) : _isolate = null,
-       _peer = null,
-       _customRequestHandler = requestHandler,
-       _customDisposeHandler = disposeHandler;
+  });
 
   Isolate? _isolate;
-  final json_rpc.Peer? _peer;
+  final json_rpc.Peer _peer;
   final Logger _logger;
-  final Future<Object?> Function(String method, {Object? params, Duration? timeout})?
-  _customRequestHandler;
-  final Future<void> Function()? _customDisposeHandler;
 
   /// Optional name of the extension package backing this connection.
   final String? extensionName;
@@ -76,12 +48,9 @@ class ExtensionConnection {
     if (_isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
-    if (_customRequestHandler case final handler?) {
-      return handler(method, params: params, timeout: timeout);
-    }
     _logger.printTrace('ExtensionConnection sending RPC request "$method"...');
     try {
-      final Future<Object?> request = _peer!.sendRequest(method, params);
+      final Future<Object?> request = _peer.sendRequest(method, params);
       final Object? result = await (timeout != null ? request.timeout(timeout) : request);
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
@@ -225,12 +194,8 @@ class ExtensionConnection {
     }
     _isDisposed = true;
     _logger.printTrace('ExtensionConnection disposing isolate connection.');
-    if (_customDisposeHandler case final handler?) {
-      await handler();
-      return;
-    }
     try {
-      await _peer?.close();
+      await _peer.close();
     } on Object catch (error) {
       _logger.printTrace('Error closing extension connection peer: $error');
     } finally {
@@ -245,7 +210,7 @@ class ExtensionDiscovery {
   /// Creates an [ExtensionDiscovery] instance with required [_logger].
   ExtensionDiscovery({required this._logger});
 
-  final _connections = <ExtensionConnection>[];
+  final List<ExtensionConnection> _connections = <ExtensionConnection>[];
   final Logger _logger;
 
   /// Active extension connections.

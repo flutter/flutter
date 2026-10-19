@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:isolate';
-
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
-void main(List<String> args, [Object? message]) {
-  if (message is SendPort) {
-    linuxExtensionEntryPoint(message);
-  }
+Future<void> main(List<String> args, [Object? message]) async {
+  await ToolExtensionEntryPoint.runMain(args, message, linuxExtensionEntryPoint);
 }
