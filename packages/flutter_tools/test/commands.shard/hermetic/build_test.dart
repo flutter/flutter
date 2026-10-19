@@ -273,9 +273,12 @@ dependencies:
 
 class FakeBuildInfoCommand extends FlutterCommand {
   FakeBuildInfoCommand({bool addLinuxGtkOption = false}) : super() {
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
-    usesDartDefineOption();
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.splitDebugInfo,
+      BuildInfoOptions.obfuscate,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
+    ]);
     if (addLinuxGtkOption) {
       argParser.addOption('linux-gtk', allowed: <String>['gtk3', 'gtk4']);
     }

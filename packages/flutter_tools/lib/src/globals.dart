@@ -82,13 +82,7 @@ LinuxProjectDirectory? get linuxProjectDirectory => context.get<LinuxProjectDire
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
-final _defaultBotDetector = BotDetector(
-  httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
-  platform: platform,
-  persistentToolState:
-      persistentToolState ??
-      PersistentToolState(fileSystem: fs, logger: logger, platform: platform),
-);
+final _defaultBotDetector = BotDetector(platform: platform);
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for analytics

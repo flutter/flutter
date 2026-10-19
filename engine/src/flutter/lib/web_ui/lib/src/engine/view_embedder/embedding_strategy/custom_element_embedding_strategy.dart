@@ -35,17 +35,15 @@ class CustomElementEmbeddingStrategy implements EmbeddingStrategy {
 
   @override
   void attachViewRoot(DomElement rootElement) {
+    // Setting touchAction lets the browser deliver all pointer events to Flutter
+    // without canceling them.
     rootElement
       ..style.width = '100%'
       ..style.height = '100%'
       ..style.display = 'block'
       ..style.overflow = 'hidden'
       ..style.position = 'relative'
-              // This is needed so the browser lets flutter handle all pointer events
-              // it receives, without canceling them.
-              ..style
-              .touchAction =
-          'none';
+      ..style.touchAction = 'none';
 
     hostElement.appendChild(rootElement);
 

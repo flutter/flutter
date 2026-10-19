@@ -103,10 +103,12 @@ class BuildLinuxCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = this.logger;
-    final OperatingSystemUtils os = toolContext.os;
-    final Platform platform = toolContext.platform;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+    ) = toolContext;
 
     final BuildInfo buildInfo = await getBuildInfo();
     final TargetPlatform targetPlatform = getValue(_targetPlatformOption);
@@ -141,12 +143,13 @@ class BuildLinuxCommand extends BuildSubCommand {
     await buildLinux(
       project.linux,
       buildInfo,
+      analytics: analytics,
       target: targetFile,
       sizeAnalyzer: SizeAnalyzer(fileSystem: fs, logger: logger, analytics: analytics),
       needCrossBuild: needCrossBuild,
       targetPlatform: targetPlatform,
       targetSysroot: getValue(_targetSysroot),
-      logger: logger,
+      toolContext: toolContext,
       configOnly: configOnly,
     );
     return FlutterCommandResult.success();
