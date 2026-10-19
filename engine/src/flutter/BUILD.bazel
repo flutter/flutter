@@ -190,3 +190,16 @@ install_archives(
     name = "install_host_release_archives",
     archives = ["//engine/src/flutter/build/archives:flutter_patched_sdk"],
 )
+
+# The archive the Linux desktop builders upload
+# (ci/builders/linux_host_desktop_engine.json: ci/host_debug_desktop,
+# ci/host_profile_desktop and ci/host_release_desktop, each the GTK shell's
+# bundle in its runtime mode, so one target under the mode flag serves the
+# three):
+#
+#   bazel run -c opt --//engine/src/flutter/common:runtime_mode=profile \
+#       //engine/src/flutter:install_host_desktop_archives
+install_archives(
+    name = "install_host_desktop_archives",
+    archives = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+)

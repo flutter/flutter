@@ -720,12 +720,27 @@ the group.
 All seven archives of the Linux host builders convert
 (`font-subset.zip`, `linux-x64-embedder.zip`, `impeller_sdk.zip`,
 `artifacts.zip`, `flutter_patched_sdk.zip`, `flutter_patched_sdk_product.zip`,
-`dart-sdk-linux-x64.zip`): each with GN's set of entries, the readme
-identical modulo the version hash, the data files, kernels and sources
-byte-identical, the binaries the files the build makes. Entry order follows
-GN's list where GN's does (a directory's files come sorted, after the list's
-files). `tools/gn_to_bazel/tool/artifact_diff.py` compares the two builds'
-archives entry by entry.
+`dart-sdk-linux-x64.zip`), and the Linux desktop builders' one
+(`linux-x64-<mode>/linux-x64-flutter-gtk.zip`): each with GN's set of
+entries, the readme identical modulo the version hash, the data files,
+kernels, headers and sources byte-identical, the binaries the files the
+build makes. Entry order follows GN's list where GN's does (a directory's
+files come sorted, after the list's files).
+`tools/gn_to_bazel/tool/artifact_diff.py` compares the two builds' archives
+entry by entry.
+
+The GTK bundle places every header the copy `publish_headers_linux` lays
+into `flutter_linux/` at its build-directory path -- GN's `foreach` over
+`get_target_outputs(":publish_headers_linux")` with `destination =
+rebase_path(source, root_build_dir)`. The converter runs the `foreach` (the
+body once per element, in the enclosing scope as GN does it; a list it
+cannot enumerate, a target's outputs, is one symbolic element) and reads the
+resulting entry as a `zip_tree` of the copy's files, rooted where the copy's
+output pattern says: outputs of `$root_out_dir/<dir>/{{source_file_part}}`
+over sources that all lie under a `<dir>` directory put the tree's root
+above it (`shell/platform/linux/public`), so each header lands at
+`flutter_linux/<name>` as in GN. A copy of another shape is an error, to be
+read when one appears.
 
 The uploader reads `engine/src/out/<build>/zip_archives/`; `install_archives`
 (`install_archives.bzl`) is the `bazel run` target that lays a builder's
@@ -736,11 +751,13 @@ build directory (`host_debug_unopt`, `host_release`; `checkout_view.bzl`) and
 package has one per Linux host builder of `ci/builders/linux_host_engine.json`:
 `bazel run -c opt //engine/src/flutter:install_host_debug_archives` and
 `bazel run -c opt --//engine/src/flutter/common:runtime_mode=release
-//engine/src/flutter:install_host_release_archives`. Not yet: the GTK shell's
-bundle (a `foreach` over `get_target_outputs`: the `zip_tree` of a copy's
-outputs) and the rest of GN's build directory beyond the archives (the
-compatibility tree of the phased plan); `generated_file` over `metadata` (the
-macOS entitlements lists) is the Apple phase's.
+//engine/src/flutter:install_host_release_archives`; and one for the three
+desktop builders of `linux_host_desktop_engine.json`, which differ only in
+the mode: `install_host_desktop_archives` under
+`--//engine/src/flutter/common:runtime_mode=<mode>`. Not yet: the rest of
+GN's build directory beyond the archives (the compatibility tree of the
+phased plan); `generated_file` over `metadata` (the macOS entitlements
+lists) is the Apple phase's.
 
 ## Impeller's shader pipeline
 

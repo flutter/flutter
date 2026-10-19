@@ -582,21 +582,66 @@ source_set("x") {
       expect(sources.commentsOf(1).before, <String>['# Why b.']);
     });
 
-    group('is strict about', () {
-      test('foreach', () async {
-        await expectLater(
-          evaluate('''
+    test('foreach runs its body per element, in the enclosing scope', () async {
+      // GN's foreach opens no scope: the body writes the enclosing
+      // variables, the loop variable shadows a variable of the same name
+      // only for the loop, and an element a condition adds to the list runs
+      // the body under that condition (never under this host: not at all).
+      final GnFileEvaluation evaluation = await evaluate('''
+source_set("x") {
+  f = "kept"
+  names = [ "a", "b" ]
+  if (is_mac) {
+    names += [ "mac" ]
+  }
+  if (flutter_runtime_mode == "release") {
+    names += [ "release" ]
+  }
+  sources = []
+  foreach(f, names) {
+    sources += [ f + ".cc" ]
+  }
+  output_name = f
+}
+''');
+      final GnTarget target = evaluation.targets.single;
+      expect(
+        target.variables['sources']!.liveItems.map((GnListItem i) => '[${i.condition}] ${i.value}'),
+        <String>[
+          '[true] "a.cc"',
+          '[true] "b.cc"',
+          '[flutter_runtime_mode == "release"] "release.cc"',
+        ],
+      );
+      expect(target.variables['output_name']!.unconditionalItems, <GnValue>[
+        const GnStringValue('kept'),
+      ]);
+      // The loop variable is gone afterwards when it was not there before.
+      await expectLater(
+        evaluate('''
 source_set("x") {
   sources = []
-  foreach(f, [ "a", "b" ]) {
+  foreach(f, [ "a" ]) {
     sources += [ f + ".cc" ]
+  }
+  output_name = f
+}
+'''),
+        throwsGnError(line: 6, message: 'unknown variable f'),
+      );
+      await expectLater(
+        evaluate('''
+source_set("x") {
+  foreach(f, "a") {
+    sources = [ f ]
   }
 }
 '''),
-          throwsGnError(line: 3, message: 'foreach() is not supported'),
-        );
-      });
+        throwsGnError(line: 2, message: 'foreach() over something other than a list'),
+      );
+    });
 
+    group('is strict about', () {
       test('exec_script and other calls in expressions', () async {
         // exec_script() as a statement does nothing the converter can use.
         await expectLater(
@@ -3305,6 +3350,154 @@ zip_bundle(
     }),
 )
 '''),
+      );
+    });
+
+    test('zip_bundle: every output of a copy at its build-directory path is a tree', () {
+      // The GTK bundle's idiom: foreach over get_target_outputs() of the
+      // headers' copy, each at rebase_path(source, root_build_dir), ahead of
+      // the library and gen_snapshot; the loop variable is a helper.
+      const gtk = r'''
+import("//flutter/build/zip_bundle.gni")
+
+_public_headers = [
+  "public/flutter_linux/fl_view.h",
+  "public/flutter_linux/flutter_linux.h",
+]
+
+shared_library("flutter_linux_gtk") {
+  sources = [ "fl_view.cc" ]
+}
+
+copy("publish_headers_linux") {
+  sources = _public_headers
+  outputs = [ "$root_out_dir/flutter_linux/{{source_file_part}}" ]
+}
+
+zip_bundle("flutter_gtk") {
+  prefix = "$full_target_platform_name-$flutter_runtime_mode/"
+  output = "${prefix}${full_target_platform_name}-flutter-gtk.zip"
+  deps = [
+    ":flutter_linux_gtk",
+    ":publish_headers_linux",
+    "$dart_src/runtime/bin:gen_snapshot",
+  ]
+  sources = get_target_outputs(":publish_headers_linux")
+  tmp_files = []
+  foreach(source, sources) {
+    tmp_files += [
+      {
+        source = source
+        destination = rebase_path(source, "$root_build_dir")
+      },
+    ]
+  }
+  tmp_files += [
+    {
+      source = "$root_build_dir/libflutter_${host_os}_gtk.so"
+      destination = "libflutter_${host_os}_gtk.so"
+    },
+    {
+      source = "$root_build_dir/gen_snapshot"
+      destination = "gen_snapshot"
+    },
+  ]
+  files = tmp_files
+}
+''';
+      // get_target_outputs() reads the copy through the source tree.
+      String convertGtk(String gn) {
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/build/zip_bundle.gni': '',
+          'flutter/shell/platform/linux/BUILD.gn': gn,
+        });
+        return emitBuildFile(
+          evaluateIn(
+            tree,
+            '//flutter/shell/platform/linux/BUILD.gn',
+            templates: <String>{'zip_bundle'},
+          ),
+          gnPackage: '//flutter/shell/platform/linux',
+          tree: tree,
+          forwardedFlags: DependencyResolver(tree: tree, assumptions: linuxHostAssumptions()),
+        );
+      }
+
+      final String output = convertGtk(gtk);
+      expect(
+        output,
+        contains('''
+zip_tree(
+    name = "flutter_gtk_publish_headers_linux",
+    srcs = [":publish_headers_linux"],
+    destination = "",
+    root = "engine/src/flutter/shell/platform/linux/public",
+)
+
+zip_bundle(
+    name = "flutter_gtk",
+    files = {
+        "libflutter_linux_gtk.so": ":flutter_linux_gtk",
+        "gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",
+    },
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_debug": "linux-x64-debug/linux-x64-flutter-gtk.zip",
+        "//engine/src/flutter/common:runtime_mode_profile": "linux-x64-profile/linux-x64-flutter-gtk.zip",
+        "//engine/src/flutter/common:runtime_mode_release": "linux-x64-release/linux-x64-flutter-gtk.zip",
+        "//engine/src/flutter/common:runtime_mode_jit_release": "linux-x64-jit_release/linux-x64-flutter-gtk.zip",
+        "//conditions:default": None,
+    }),
+    trees = [":flutter_gtk_publish_headers_linux"],
+)
+'''),
+      );
+      expect(output, isNot(contains('tmp_files')));
+      // The shapes a tree cannot say: a destination other than the
+      // build-directory path, a copy whose outputs are not
+      // `$root_out_dir/<dir>/{{source_file_part}}`, a source outside `<dir>`,
+      // sources under different roots.
+      void Function() variant(String from, String to) {
+        expect(gtk, contains(from));
+        return () => convertGtk(gtk.replaceFirst(from, to));
+      }
+
+      expect(
+        variant(r'destination = rebase_path(source, "$root_build_dir")', 'destination = "x.h"'),
+        throwsGnError(
+          line: 45,
+          message: "an entry over a target's outputs must place each at its build-directory path",
+        ),
+      );
+      expect(
+        variant(
+          r'outputs = [ "$root_out_dir/flutter_linux/{{source_file_part}}" ]',
+          r'outputs = [ "$root_out_dir/{{source_file_part}}" ]',
+        ),
+        throwsGnError(
+          line: 45,
+          message:
+              r'the outputs of //flutter/shell/platform/linux:publish_headers_linux are not '
+              r'`$root_out_dir/<dir>/{{source_file_part}}` over its sources',
+        ),
+      );
+      expect(
+        variant('"public/flutter_linux/fl_view.h"', '"fl_view.h"'),
+        throwsGnError(
+          line: 45,
+          message:
+              'fl_view.h of //flutter/shell/platform/linux:publish_headers_linux does not lie '
+              'under a `flutter_linux` directory, as its output does',
+        ),
+      );
+      expect(
+        variant('"public/flutter_linux/fl_view.h"', '"other/flutter_linux/fl_view.h"'),
+        throwsGnError(
+          line: 45,
+          message:
+              'the sources of //flutter/shell/platform/linux:publish_headers_linux lie under '
+              'different roots: engine/src/flutter/shell/platform/linux/other, '
+              'engine/src/flutter/shell/platform/linux/public',
+        ),
       );
     });
 

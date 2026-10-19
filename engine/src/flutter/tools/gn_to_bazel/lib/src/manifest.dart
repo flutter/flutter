@@ -365,10 +365,7 @@ exports_files(["README"] + glob(
   // The GTK shell (the Linux embedding) with its suite, which runs under a
   // display with GLib's criticals fatal as run_tests.py runs it; its
   // system libraries are //flutter/shell/platform/linux/config's.
-  ConvertedFile(
-    '//flutter/shell/platform/linux',
-    skip: <String, String>{'flutter_gtk': 'zip_bundle: artifact packaging'},
-  ),
+  ConvertedFile('//flutter/shell/platform/linux'),
   // The Android embedding's host-testable pieces (the JNI facade with its
   // mock, the native window, the context, the surfaces, the external view
   // embedder, the platform view delegate) with the three suites
