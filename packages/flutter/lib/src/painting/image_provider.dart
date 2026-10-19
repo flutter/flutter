@@ -1263,7 +1263,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// defined by `width` and `height`. The image will lose detail and
   /// use less memory if resized to a size smaller than the native size.
   ///
-  /// At least one of `width` and `height` must be non-null.
+  /// At least one of `width` and `height` must be non-null. If they are
+  /// non-null, they must be greater than zero.
   ///
   /// {@macro flutter.painting.ResizeImage.useLogicalSize}
   const ResizeImage(
@@ -1273,7 +1274,9 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     this.policy = ResizeImagePolicy.exact,
     this.allowUpscaling = false,
     this.useLogicalSize = false,
-  }) : assert(width != null || height != null);
+  }) : assert(width != null || height != null),
+       assert(width == null || width > 0),
+       assert(height == null || height > 0);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -1445,6 +1448,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
               }
 
               // A very thin image can derive a side of 0, which cannot be decoded.
+              // The given sides are greater than 0, so this changes only derived sides.
               return ui.TargetImageSize(
                 width: math.max(1, targetWidth),
                 height: math.max(1, targetHeight),

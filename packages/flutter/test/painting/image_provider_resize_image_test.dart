@@ -21,6 +21,20 @@ void main() {
   });
 
   group('ResizeImage', () {
+    test('asserts that width and height are greater than 0', () {
+      final image = MemoryImage(Uint8List.fromList(kTransparentImage));
+      for (final ResizeImagePolicy policy in ResizeImagePolicy.values) {
+        for (final value in <int>[0, -1]) {
+          expect(() => ResizeImage(image, width: value, policy: policy), throwsAssertionError);
+          expect(() => ResizeImage(image, height: value, policy: policy), throwsAssertionError);
+          expect(
+            () => ResizeImage(image, width: 100, height: value, policy: policy),
+            throwsAssertionError,
+          );
+        }
+      }
+    });
+
     group('equality and hashCode', () {
       test('Two identical instances should be equal and have same hashCode', () {
         final bytes = Uint8List.fromList(kTransparentImage);
