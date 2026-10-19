@@ -37,6 +37,18 @@ files that repeat a list of their GN file (`mirroredLists`: the Dart test
 packages' `tests`, GN's `foreach` over it being what keeps those files
 hand-written) against the GN assignment, and fails on a test the two do not
 both name -- the one way a test added to GN's list could go missing here.
+A run over the manifest also reads CI's builder files
+(`ci/builders/linux_*.json`, through `package:engine_build_configs`) and
+generates, beside them, `configs.bazelrc` -- a `--config=<build>` per Linux
+x64 host build whose `tools/gn` flags the Bazel build can express (`gnFlags`
+in `lib/src/builders.dart` says what each flag amounts to: a setting, an
+assumption, infrastructure, or nothing yet, in which case the build is
+listed with the reason and gets no configuration) -- and `BUILD.bazel`, an
+`install` per build over the Bazel counterparts of its ninja targets, into
+GN's `--target-dir`, and a `<build>_tests` suite over the Bazel suites that
+stand for its `run_tests.py` types (`runTestsTypeSuites`;
+`runTestsEngineSuites` is the `engine` type's executables by name, resolved
+among the converted tests); both files are covered by `--check`.
 
 By default the converter assumes the Linux x64 host build: GN conditions on
 `is_linux`, `is_win`, `enable_backtrace` and so on are decided the way GN

@@ -17,6 +17,7 @@ resolution: workspace
 
 dependencies:
   args: any
+  engine_build_configs: any
   meta: any
   path: any
 
