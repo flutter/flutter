@@ -17,6 +17,8 @@ impeller_component("playground") {
     "switches.h",
     "widgets.cc",
     "widgets.h",
+    "yuv_test_textures.cc",
+    "yuv_test_textures.h",
   ]
 
   deps = [
@@ -59,6 +61,7 @@ impeller_component("playground") {
     "//flutter/testing:testing_lib",
     "//flutter/third_party/glfw",
     "//flutter/third_party/imgui:imgui_glfw",
+    "//third_party/abseil-cpp/absl/status:statusor",
   ]
 
   if (impeller_supports_rendering) {
