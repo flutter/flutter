@@ -282,35 +282,27 @@ class Daemon {
         AndroidWorkflow(androidSdkBuilder: () => androidSdk, featureFlags: featureFlags);
 
     // Set up domains.
-    registerDomain(
-      daemonDomain = DaemonDomain(this, featureFlags: featureFlags, toolContext: _toolContext),
-    );
+    registerDomain(daemonDomain = DaemonDomain(this, featureFlags: featureFlags));
     registerDomain(
       appDomain = AppDomain(
         this,
         analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: _toolContext,
         xcode: xcode,
       ),
     );
-    registerDomain(
-      deviceDomain = DeviceDomain(this, deviceManager: deviceManager, toolContext: _toolContext),
-    );
+    registerDomain(deviceDomain = DeviceDomain(this, deviceManager: deviceManager));
     registerDomain(
       emulatorDomain = EmulatorDomain(
         this,
         androidWorkflow: workflow,
-        toolContext: _toolContext,
         androidSdk: androidSdk,
         java: java,
       ),
     );
     registerDomain(devToolsDomain = DevToolsDomain(this));
-    registerDomain(
-      proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer, toolContext: _toolContext),
-    );
+    registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -436,14 +428,13 @@ class Daemon {
 }
 
 abstract class Domain {
-  Domain(this.daemon, this.name, {this._toolContext});
+  Domain(this.daemon, this.name);
 
   final Daemon daemon;
   final String name;
-  final ToolContext? _toolContext;
 
   @protected
-  ToolContext get toolContext => _toolContext ?? daemon._toolContext;
+  ToolContext get toolContext => daemon._toolContext;
 
   final _handlers = <String, CommandHandler>{};
   final _handlersWithBinary = <String, CommandHandlerWithBinary>{};
@@ -532,8 +523,7 @@ abstract class Domain {
 ///
 /// This domain fires the `daemon.logMessage` event.
 class DaemonDomain extends Domain {
-  DaemonDomain(Daemon daemon, {required this._featureFlags, required super.toolContext})
-    : super(daemon, 'daemon') {
+  DaemonDomain(Daemon daemon, {required this._featureFlags}) : super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
@@ -809,7 +799,6 @@ class AppDomain extends Domain {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
-    required super.toolContext,
     required this._xcode,
   }) : super(daemon, 'app') {
     registerHandler('restart', restart);
@@ -1211,8 +1200,7 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon, {required super.toolContext, this._deviceManager})
-    : super(daemon, 'device') {
+  DeviceDomain(Daemon daemon, {this._deviceManager}) : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1844,7 +1832,6 @@ class EmulatorDomain extends Domain {
   EmulatorDomain(
     Daemon daemon, {
     required AndroidWorkflow androidWorkflow,
-    required super.toolContext,
     AndroidSdk? androidSdk,
     EmulatorManager? emulatorManager,
     Java? java,
@@ -1897,8 +1884,7 @@ class EmulatorDomain extends Domain {
 }
 
 class ProxyDomain extends Domain {
-  ProxyDomain(Daemon daemon, {required this._fileTransfer, required super.toolContext})
-    : super(daemon, 'proxy') {
+  ProxyDomain(Daemon daemon, {required this._fileTransfer}) : super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);
     registerHandlerWithBinary('updateFile', updateFile);

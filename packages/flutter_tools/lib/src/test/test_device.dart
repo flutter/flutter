@@ -16,12 +16,10 @@ import '../context/tool_context.dart';
 ///
 /// Methods may throw [TestDeviceException] if a problem is encountered.
 abstract class TestDevice {
-  TestDevice({this._toolContext});
-
-  final ToolContext? _toolContext;
+  TestDevice({required this.toolContext});
 
   @protected
-  ToolContext get toolContext => _toolContext!;
+  final ToolContext toolContext;
 
   /// Starts the test device with the provided entrypoint.
   ///

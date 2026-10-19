@@ -29,7 +29,7 @@ class IntegrationTestTestDevice extends TestDevice {
     required this.debuggingOptions,
     required this.userIdentifier,
     required this.compileExpression,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     this.ddsShutdownTimeout = const Duration(seconds: 5),
   });
 

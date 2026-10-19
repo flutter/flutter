@@ -28,7 +28,7 @@ import 'test_device.dart';
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
     required this.id,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required this.flutterTesterBinPath,
     required this.debuggingOptions,
     required this.enableVmService,
