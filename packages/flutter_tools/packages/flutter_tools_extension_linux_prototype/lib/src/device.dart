@@ -16,9 +16,6 @@ final class LinuxDeviceService extends DeviceService {
   /// Identifier of the prototype Linux target device.
   static const String customLinuxDeviceId = 'custom_linux_device';
 
-  static const Duration _launchWaitTimeout = Duration(seconds: 5);
-  static const Duration _vmServiceDiscoveryTimeout = Duration(seconds: 10);
-
   final _runningProcesses = <String, Process>{};
   final _vmServiceUriCompleters = <String, Completer<Uri?>>{};
   final _discoveredUris = <String, Uri?>{};
@@ -108,10 +105,7 @@ final class LinuxDeviceService extends DeviceService {
         }),
       );
 
-      // Wait briefly to see if the process crashes immediately or outputs the URI.
-      await uriCompleter.future.timeout(_launchWaitTimeout, onTimeout: () => null);
-
-      return _runningProcesses.containsKey(deviceId);
+      return true;
     } on ProcessException catch (e) {
       stderr.writeln('Failed to launch app: $e');
       if (!uriCompleter.isCompleted) {
@@ -128,10 +122,7 @@ final class LinuxDeviceService extends DeviceService {
     }
     final Completer<Uri?>? completer = _vmServiceUriCompleters[deviceId];
     if (completer != null) {
-      return completer.future.timeout(
-        _vmServiceDiscoveryTimeout,
-        onTimeout: () => _discoveredUris[deviceId],
-      );
+      return completer.future;
     }
     return null;
   }
@@ -139,7 +130,10 @@ final class LinuxDeviceService extends DeviceService {
   @override
   Future<bool> stopApp({required String deviceId}) async {
     final Process? process = _runningProcesses.remove(deviceId);
-    _vmServiceUriCompleters.remove(deviceId);
+    final Completer<Uri?>? completer = _vmServiceUriCompleters.remove(deviceId);
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
     _discoveredUris.remove(deviceId);
     if (process != null) {
       process.kill();

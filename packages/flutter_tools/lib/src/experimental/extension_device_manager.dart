@@ -22,10 +22,6 @@ import 'extension_manager.dart';
 final class ExtensionDeviceClient extends DeviceService {
   ExtensionDeviceClient(this.connection, {required this._logger});
 
-  static const Duration _defaultRpcTimeout = Duration(seconds: 5);
-  static const Duration _launchAppRpcTimeout = Duration(seconds: 30);
-  static const Duration _vmServiceUriRpcTimeout = Duration(seconds: 15);
-
   /// The active extension isolate connection.
   final ExtensionConnection connection;
   final Logger _logger;
@@ -36,9 +32,7 @@ final class ExtensionDeviceClient extends DeviceService {
       'ExtensionDeviceClient fetching devices via RPC ("${DeviceService.getDevicesMethod}")...',
     );
     try {
-      final Object? rawResult = await connection
-          .sendRequest(DeviceService.getDevicesMethod)
-          .timeout(_defaultRpcTimeout);
+      final Object? rawResult = await connection.sendRequest(DeviceService.getDevicesMethod);
       final List<TargetDevice> devices = TargetDevice.listFromJson(rawResult);
       _logger.printTrace('ExtensionDeviceClient received ${devices.length} device(s) via RPC.');
       return devices;
@@ -55,15 +49,13 @@ final class ExtensionDeviceClient extends DeviceService {
       '("${DeviceService.isSupportedForProjectMethod}")...',
     );
     try {
-      final Object? rawResult = await connection
-          .sendRequest(
-            DeviceService.isSupportedForProjectMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: deviceId,
-              DeviceService.projectRootParam: projectRoot.toString(),
-            },
-          )
-          .timeout(_defaultRpcTimeout);
+      final Object? rawResult = await connection.sendRequest(
+        DeviceService.isSupportedForProjectMethod,
+        params: <String, Object?>{
+          DeviceService.deviceIdParam: deviceId,
+          DeviceService.projectRootParam: projectRoot.toString(),
+        },
+      );
       if (rawResult case final bool supported) {
         return supported;
       }
@@ -94,11 +86,17 @@ final class ExtensionDeviceClient extends DeviceService {
           DeviceService.executablePathParam: executablePath,
           DeviceService.debuggingOptionsParam: ?optionsMap,
         },
-        timeout: _launchAppRpcTimeout,
+        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+        // https://github.com/flutter/flutter/issues/193955.
+        timeout: null,
       );
       if (rawResult case final bool launched) {
         return launched;
       }
+      _logger.printError(
+        'ExtensionDeviceClient received invalid response for "${DeviceService.launchAppMethod}": '
+        'expected bool, got ${rawResult.runtimeType}.',
+      );
     } on Object catch (err, stack) {
       _logger.printTrace('ExtensionDeviceClient failed to launch app: $err\n$stack');
     }
@@ -115,7 +113,9 @@ final class ExtensionDeviceClient extends DeviceService {
       final Object? rawResult = await connection.sendRequest(
         DeviceService.getVmServiceUriMethod,
         params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-        timeout: _vmServiceUriRpcTimeout,
+        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+        // https://github.com/flutter/flutter/issues/193955.
+        timeout: null,
       );
       if (rawResult case {DeviceService.vmServiceUriKey: final String uri}) {
         return Uri.tryParse(uri);
@@ -136,10 +136,17 @@ final class ExtensionDeviceClient extends DeviceService {
       final Object? rawResult = await connection.sendRequest(
         DeviceService.stopAppMethod,
         params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
+        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+        // https://github.com/flutter/flutter/issues/193955.
+        timeout: null,
       );
       if (rawResult case final bool stopped) {
         return stopped;
       }
+      _logger.printError(
+        'ExtensionDeviceClient received invalid response for "${DeviceService.stopAppMethod}": '
+        'expected bool, got ${rawResult.runtimeType}.',
+      );
     } on Object catch (err, stack) {
       _logger.printTrace('ExtensionDeviceClient failed to stop app: $err\n$stack');
     }
@@ -299,15 +306,15 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage? package, {
+    required DebuggingOptions debuggingOptions,
+    bool ipv6 = false,
     String? mainPath,
-    String? route,
-    DebuggingOptions? debuggingOptions,
     Map<String, Object?>? platformArgs,
     bool prebuiltApplication = false,
-    bool ipv6 = false,
+    String? route,
     String? userIdentifier,
   }) async {
-    final BuildMode buildMode = debuggingOptions?.buildInfo.mode ?? .debug;
+    final BuildMode buildMode = debuggingOptions.buildInfo.mode;
 
     String? executablePath;
     if (prebuiltApplication) {
@@ -359,7 +366,7 @@ class ExtensionBackedDevice extends Device {
       }
     }
 
-    final bool debuggingEnabled = debuggingOptions?.debuggingEnabled ?? false;
+    final bool debuggingEnabled = debuggingOptions.debuggingEnabled;
     final bool launched = await _deviceService.launchApp(
       deviceId: id,
       executablePath: executablePath,

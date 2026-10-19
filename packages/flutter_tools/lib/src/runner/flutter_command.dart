@@ -1508,6 +1508,10 @@ abstract class FlutterCommand extends Command<void> {
       }, offline: offline);
     }
 
+    // Run `pub get` early when `.dart_tool/package_config.json` is missing or
+    // stale so that project-scoped tool extensions declared in `pubspec.yaml`
+    // can be discovered before `requiredArtifacts` and `validateCommand` query
+    // `findAllTargetDevices()`.
     var ranEarlyPubGet = false;
     if (shouldRunPub) {
       final String? projectRootPath = findProjectRoot(_fs, _fs.currentDirectory.path);

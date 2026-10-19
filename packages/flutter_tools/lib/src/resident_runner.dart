@@ -549,7 +549,7 @@ class FlutterDevice {
 
 /// A subset of the [ResidentRunner] for delegating to attached flutter devices.
 abstract class ResidentHandlers {
-  List<FlutterDevice?> get flutterDevices;
+  List<FlutterDevice> get flutterDevices;
 
   /// Whether the resident runner has hot reload and restart enabled.
   bool get hotMode;
@@ -619,8 +619,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -639,8 +639,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -659,8 +659,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -678,8 +678,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -700,8 +700,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -722,8 +722,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -741,8 +741,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -760,8 +760,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.targetPlatform == TargetPlatform.web_javascript) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.targetPlatform == TargetPlatform.web_javascript) {
         continue;
       }
       if (device.vmService == null) {
@@ -782,8 +782,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -799,8 +799,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -816,8 +816,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -834,7 +834,7 @@ abstract class ResidentHandlers {
       return false;
     }
     final FlutterDevice? firstDeviceWithService = flutterDevices
-        .where((FlutterDevice? d) => d?.vmService != null)
+        .where((FlutterDevice d) => d.vmService != null)
         .firstOrNull;
     if (firstDeviceWithService == null) {
       return false;
@@ -847,8 +847,8 @@ abstract class ResidentHandlers {
       Brightness.light => Brightness.dark,
       Brightness.dark || null => Brightness.light,
     };
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -869,7 +869,7 @@ abstract class ResidentHandlers {
       return false;
     }
     final FlutterDevice? firstDeviceWithService = flutterDevices
-        .where((FlutterDevice? d) => d?.vmService != null)
+        .where((FlutterDevice d) => d.vmService != null)
         .firstOrNull;
     final FlutterVmService? vmService = firstDeviceWithService?.vmService;
     if (vmService == null) {
@@ -881,8 +881,8 @@ abstract class ResidentHandlers {
       isolateId: views.first.uiIsolate!.id!,
     );
     final String to = nextPlatform(from);
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      if (device.vmService == null) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -1381,10 +1381,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
     var activeConnections = 0;
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device == null) {
-        continue;
-      }
+    for (final FlutterDevice device in flutterDevices) {
       if (!device.isWaitingForVmService && device.vmService == null) {
         continue;
       }

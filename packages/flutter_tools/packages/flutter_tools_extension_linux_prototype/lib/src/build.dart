@@ -6,11 +6,14 @@ import 'dart:io';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:yaml/yaml.dart';
 
 /// Prototype Linux [BuildService] implementation.
 final class LinuxBuildService extends BuildService {
   /// Target name for the prototype Linux build target.
   static const String customLinuxBuildTargetName = 'custom-linux-build';
+  static const String _defaultAppName = 'app';
+  static const String _pubspecNameKey = 'name';
 
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
@@ -31,14 +34,16 @@ final class LinuxBuildService extends BuildService {
   }) async {
     if (targetName == customLinuxBuildTargetName) {
       final projectDir = Directory.fromUri(projectRoot);
-      var appName = 'app';
+      String appName = _defaultAppName;
       final pubspecFile = File('${projectDir.path}/pubspec.yaml');
       if (pubspecFile.existsSync()) {
-        for (final String line in pubspecFile.readAsLinesSync()) {
-          if (line.startsWith('name:')) {
-            appName = line.substring('name:'.length).trim();
-            break;
+        try {
+          final Object? parsed = loadYaml(pubspecFile.readAsStringSync());
+          if (parsed case {_pubspecNameKey: final String name} when name.trim().isNotEmpty) {
+            appName = name.trim();
           }
+        } on YamlException {
+          // Fall back to default app name if pubspec.yaml is malformed.
         }
       }
 

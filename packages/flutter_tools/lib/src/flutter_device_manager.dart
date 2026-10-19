@@ -55,8 +55,8 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    ExtensionBuildManager? extensionBuildManager,
-    ExtensionManager? extensionManager,
+    required ExtensionBuildManager extensionBuildManager,
+    required ExtensionManager extensionManager,
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
            logger: logger,
@@ -127,19 +127,12 @@ class FlutterDeviceManager extends DeviceManager {
            logger: logger,
            config: customDevicesConfig,
          ),
-         if (extensionManager != null)
-           ExtensionDevices(
-             extensionBuildManager:
-                 extensionBuildManager ??
-                 ExtensionBuildManager(
-                   extensionManager: extensionManager,
-                   featureFlags: featureFlags,
-                   logger: logger,
-                 ),
-             extensionManager: extensionManager,
-             fileSystem: fileSystem,
-             logger: logger,
-           ),
+         ExtensionDevices(
+           extensionBuildManager: extensionBuildManager,
+           extensionManager: extensionManager,
+           fileSystem: fileSystem,
+           logger: logger,
+         ),
        ];
 
   @override

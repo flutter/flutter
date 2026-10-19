@@ -7,6 +7,7 @@ environment:
 
 dependencies:
   meta: 1.19.0
+  yaml: 3.1.4
   flutter_tools_core:
     path: ../flutter_tools_core
   flutter_tools_extension:
@@ -15,4 +16,4 @@ dependencies:
 dev_dependencies:
   test: 1.33.0
 
-# PUBSPEC CHECKSUM: mo7vbt
+# PUBSPEC CHECKSUM: hm21lj
