@@ -464,8 +464,8 @@ void ContextVK::Setup(DeviceSelection selection) {
     return;
   }
 
-  auto descriptor_pool_recycler =
-      std::make_shared<DescriptorPoolRecyclerVK>(weak_from_this());
+  auto descriptor_pool_recycler = std::make_shared<DescriptorPoolRecyclerVK>(
+      weak_from_this(), device_holder);
   if (!descriptor_pool_recycler) {
     VALIDATION_LOG << "Could not create descriptor pool recycler.";
     return;

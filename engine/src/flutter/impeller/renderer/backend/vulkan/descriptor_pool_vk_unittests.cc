@@ -5,10 +5,65 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
 namespace impeller {
 namespace testing {
+
+TEST(DescriptorPoolVKTest, ReleasesPoolsIfDeviceIsGone) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+
+  std::vector<vk::UniqueDescriptorPool> pools;
+  pools.push_back(context->GetDescriptorPoolRecycler()->Get());
+  ASSERT_TRUE(pools.back());
+  vk::DescriptorPool raw_pool = pools.back().get();
+
+  {
+    // The context and the device are both gone, so destroying the holder must
+    // not call vkDestroyDescriptorPool on the device.
+    DescriptorPoolVK pool(std::weak_ptr<const ContextVK>(),
+                          std::weak_ptr<DeviceHolderVK>(), DescriptorCacheMap{},
+                          std::move(pools));
+  }
+
+  std::shared_ptr<std::vector<std::string>> called =
+      GetMockVulkanFunctions(context->GetDevice());
+  auto destroys =
+      std::count(called->begin(), called->end(), "vkDestroyDescriptorPool");
+  EXPECT_EQ(destroys, 0);
+  if (destroys == 0) {
+    // The handle was released, not destroyed. Destroy it here so that the mock
+    // does not leak it.
+    context->GetDevice().destroyDescriptorPool(raw_pool);
+  }
+
+  context->Shutdown();
+}
+
+TEST(DescriptorPoolVKTest, DestroysPoolsIfOnlyTheContextIsGone) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+
+  std::vector<vk::UniqueDescriptorPool> pools;
+  pools.push_back(context->GetDescriptorPoolRecycler()->Get());
+  ASSERT_TRUE(pools.back());
+
+  {
+    // Nothing is left to recycle the pool, but the device is alive, so the
+    // pool is destroyed rather than leaked.
+    DescriptorPoolVK pool(std::weak_ptr<const ContextVK>(),
+                          context->GetDeviceHolder(), DescriptorCacheMap{},
+                          std::move(pools));
+  }
+
+  std::shared_ptr<std::vector<std::string>> called =
+      GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(
+      std::count(called->begin(), called->end(), "vkDestroyDescriptorPool"),
+      1u);
+
+  context->Shutdown();
+}
 
 TEST(DescriptorPoolRecyclerVKTest, GetDescriptorPoolRecyclerCreatesNewPools) {
   std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
@@ -27,7 +82,8 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
 
   {
     // Fetch a pool (which will be created).
-    DescriptorPoolVK pool = DescriptorPoolVK(context);
+    DescriptorPoolVK pool =
+        DescriptorPoolVK(context, context->GetDeviceHolder());
     pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
   }
 
@@ -51,7 +107,8 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
     for (size_t i = 0u; i < 33; i++) {
       std::unique_ptr<DescriptorPoolVK> pool =
-          std::make_unique<DescriptorPoolVK>(context);
+          std::make_unique<DescriptorPoolVK>(context,
+                                             context->GetDeviceHolder());
       pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
       pools.push_back(std::move(pool));
     }
@@ -111,7 +168,8 @@ TEST(DescriptorPoolRecyclerVKTest, DescriptorsAreRecycled) {
   std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
 
   {
-    DescriptorPoolVK pool = DescriptorPoolVK(context);
+    DescriptorPoolVK pool =
+        DescriptorPoolVK(context, context->GetDeviceHolder());
     pool.AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
   }
 
