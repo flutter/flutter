@@ -936,6 +936,12 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
     Logger.root.level = Level.ALL;
     logSubscription = Logger.root.onRecord.listen((LogRecord record) {
       print('[${record.level.name}] ${record.loggerName}: ${record.message}');
+      if (record.error != null) {
+        print(record.error);
+      }
+      if (record.stackTrace != null) {
+        print(record.stackTrace);
+      }
     });
   }
 
@@ -962,8 +968,8 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
         filterPattern: filterPattern,
         verbose: verbose,
       );
-    } catch (e) {
-      printError('Benchmark run failed: $e');
+    } catch (e, s) {
+      printError('Benchmark run failed: $e\n$s');
       return 3;
     }
     if (!taskResult.succeeded) {

@@ -558,10 +558,11 @@ zero.average                                                      0.0       2.2 
     });
 
     test('identical --baseline and --results-file paths exit with code 2', () async {
+      final file = io.File(path.join(tempDir.path, 'file.json'))..writeAsStringSync('{}');
       expect(
         await runBenchmarkCli(<String>[
-          '--baseline=./path/to/file.json',
-          '--results-file=path/to/file.json',
+          '--baseline=${file.path}',
+          '--results-file=${path.join(tempDir.path, '.', 'file.json')}',
         ]),
         2,
       );
@@ -582,9 +583,14 @@ zero.average                                                      0.0       2.2 
     test(
       'negative, NaN, infinite, or non-numeric --regression-threshold exits with code 2',
       () async {
+        final baselineFile = io.File(path.join(tempDir.path, 'baseline.json'))
+          ..writeAsStringSync('{}');
         for (final value in <String>['-0.1', 'NaN', 'Infinity', 'abc']) {
           expect(
-            await runBenchmarkCli(<String>['--regression-threshold=$value', '--baseline=b.json']),
+            await runBenchmarkCli(<String>[
+              '--regression-threshold=$value',
+              '--baseline=${baselineFile.path}',
+            ]),
             2,
             reason: value,
           );
