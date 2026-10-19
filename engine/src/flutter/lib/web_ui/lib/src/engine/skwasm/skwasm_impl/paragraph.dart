@@ -38,15 +38,10 @@ class SkwasmParagraph implements BackendParagraph {
   SkwasmParagraph(this.handle);
 
   final ParagraphHandle handle;
-  bool _isDisposed = false;
 
   @override
   void dispose() {
-    assert(!_isDisposed, 'SkwasmParagraph has already been disposed.');
-    if (!_isDisposed) {
-      paragraphDispose(handle);
-      _isDisposed = true;
-    }
+    paragraphDispose(handle);
   }
 
   @override
@@ -385,7 +380,7 @@ StrutStyleHandle _createNativeStrutStyle(EngineStrutStyle style) {
   if (style.fontSize != null) {
     strutStyleSetFontSize(handle, style.fontSize!);
   }
-  if (style.height != null && style.height != ui.kTextHeightNone) {
+  if (style.height != null) {
     strutStyleSetHeight(handle, style.height!);
   }
   if (style.leadingDistribution != null) {
@@ -420,7 +415,7 @@ StrutStyleHandle _createNativeStrutStyle(EngineStrutStyle style) {
   if (style.maxLines != null) {
     paragraphStyleSetMaxLines(handle, style.maxLines!);
   }
-  if (style.height != null && style.height != ui.kTextHeightNone) {
+  if (style.height != null) {
     paragraphStyleSetHeight(handle, style.height!);
   }
   if (style.textHeightBehavior != null) {

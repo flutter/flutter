@@ -46,8 +46,8 @@ SkStrutStyleProperties _toSkStrutStyleProperties(
 ) {
   final skStrutStyle = SkStrutStyleProperties();
   skStrutStyle.fontFamilies = _computeCombinedFontFamilies(
-    style.fontFamily,
-    style.fontFamilyFallback,
+    style.effectiveFontFamily,
+    style.effectiveFontFamilyFallback,
   );
 
   if (style.fontSize != null) {

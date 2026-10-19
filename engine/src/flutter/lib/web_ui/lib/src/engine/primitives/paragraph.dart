@@ -130,8 +130,8 @@ class EngineLineMetrics implements ui.LineMetrics {
 @immutable
 class EngineStrutStyle implements ui.StrutStyle {
   EngineStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
+    this.fontFamily,
+    this.fontFamilyFallback,
     this.fontSize,
     double? height,
     this.leadingDistribution,
@@ -139,18 +139,16 @@ class EngineStrutStyle implements ui.StrutStyle {
     this.fontWeight,
     this.fontStyle,
     this.forceStrutHeight,
-  }) : _originalFontFamily = fontFamily,
-       _originalFontFamilyFallback = fontFamilyFallback,
-       fontFamily = _computeEffectiveFontFamily(fontFamily),
-       fontFamilyFallback = ui_web.TestEnvironment.instance.forceTestFonts
+  }) : effectiveFontFamily = _computeEffectiveFontFamily(fontFamily),
+       effectiveFontFamilyFallback = ui_web.TestEnvironment.instance.forceTestFonts
            ? null
            : fontFamilyFallback,
        height = height == ui.kTextHeightNone ? null : height;
 
-  final String? _originalFontFamily;
-  final List<String>? _originalFontFamilyFallback;
   final String? fontFamily;
   final List<String>? fontFamilyFallback;
+  final String? effectiveFontFamily;
+  final List<String>? effectiveFontFamilyFallback;
   final double? fontSize;
   final double? height;
   final ui.TextLeadingDistribution? leadingDistribution;
@@ -159,10 +157,8 @@ class EngineStrutStyle implements ui.StrutStyle {
   final ui.FontStyle? fontStyle;
   final bool? forceStrutHeight;
 
-  List<String> get effectiveFontFamilies => _computeEffectiveFontFamilies(<String>[
-    ?_originalFontFamily,
-    ...?_originalFontFamilyFallback,
-  ]);
+  List<String> get effectiveFontFamilies =>
+      _computeEffectiveFontFamilies(<String>[?fontFamily, ...?fontFamilyFallback]);
 
   @override
   bool operator ==(Object other) {
@@ -173,7 +169,7 @@ class EngineStrutStyle implements ui.StrutStyle {
       return false;
     }
     return other is EngineStrutStyle &&
-        other.fontFamily == fontFamily &&
+        other.effectiveFontFamily == effectiveFontFamily &&
         other.fontSize == fontSize &&
         other.height == height &&
         other.leading == leading &&
@@ -181,13 +177,13 @@ class EngineStrutStyle implements ui.StrutStyle {
         other.fontWeight == fontWeight &&
         other.fontStyle == fontStyle &&
         other.forceStrutHeight == forceStrutHeight &&
-        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback);
+        listEquals<String>(other.effectiveFontFamilyFallback, effectiveFontFamilyFallback);
   }
 
   @override
   int get hashCode => Object.hash(
-    fontFamily,
-    fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback!) : null,
+    effectiveFontFamily,
+    effectiveFontFamilyFallback != null ? Object.hashAll(effectiveFontFamilyFallback!) : null,
     fontSize,
     height,
     leading,
@@ -742,21 +738,20 @@ class EngineParagraph implements ui.Paragraph {
 }
 
 class EngineParagraphBuilder implements ui.ParagraphBuilder {
-  EngineParagraphBuilder(EngineParagraphStyle style) : _style = style {
+  EngineParagraphBuilder(EngineParagraphStyle style) {
     _ref = UniqueRef<BackendParagraphBuilder>(
       this,
       renderer.createParagraphBuilder(style),
       'ParagraphBuilder',
       onDispose: (BackendParagraphBuilder builder) => builder.dispose(),
     );
-    _styleStack.add(_style.getTextStyle());
+    _styleStack.add(style.getTextStyle());
   }
 
   late final UniqueRef<BackendParagraphBuilder> _ref;
 
   BackendParagraphBuilder get _backendBuilder => _ref.nativeObject;
 
-  final EngineParagraphStyle _style;
   final List<EngineTextStyle> _styleStack = <EngineTextStyle>[];
 
   @override
