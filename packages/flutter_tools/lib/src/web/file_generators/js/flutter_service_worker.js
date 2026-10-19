@@ -1,5 +1,21 @@
 'use strict';
 
+// This file is a vestigial self-unregistering cleanup stub.
+// Flutter no longer registers or uses a service worker by default.
+//
+// This stub is emitted only so returning browsers that previously visited a
+// deployment built with Flutter <= 3.38 (which registered an offline-first
+// caching service worker) can fetch an updated script at
+// `/flutter_service_worker.js`, unregister the legacy worker, and purge its
+// caches instead of getting stuck serving cached assets when
+// `/flutter_service_worker.js` returns 404.
+//
+// You can safely delete or exclude this file from your deployment unless you
+// have returning end-users upgrading from a Flutter <= 3.38 deployment.
+// To provide your own service worker, place a custom `flutter_service_worker.js`
+// in your project's `web/` directory.
+// See https://github.com/flutter/flutter/issues/156910 for more details.
+
 const CACHE_NAMES = [
   'flutter-app-manifest',
   'flutter-temp-cache',
