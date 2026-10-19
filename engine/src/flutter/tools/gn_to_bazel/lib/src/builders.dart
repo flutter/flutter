@@ -67,6 +67,13 @@ final class GnFlag {
 const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--runtime-mode': GnFlag(GnFlagEffect.runtimeMode, takesValue: true),
   '--unoptimized': GnFlag(GnFlagEffect.unoptimized),
+  // argparse takes a flag's unambiguous prefix; local_engine.json writes this one.
+  '--unopt': GnFlag(GnFlagEffect.unoptimized),
+  '--no-stripped': GnFlag(
+    GnFlagEffect.assumed,
+    note: "the Bazel build makes no stripped copies (GN's lib.stripped/) either way",
+  ),
+  '--xcode-symlinks': GnFlag(GnFlagEffect.ignored, note: 'a macOS build directory matter'),
   '--target-dir': GnFlag(GnFlagEffect.buildDirectory, takesValue: true),
   '--prebuilt-dart-sdk': GnFlag(
     GnFlagEffect.assumed,
@@ -313,21 +320,33 @@ final class BuilderBuild {
   /// Its other test steps, by name (scripts a Bazel test does not stand for).
   final List<String> otherTests;
 
-  /// The configuration's name: the build's, without CI's `ci/` prefix.
+  /// The configuration's name: the build's, without CI's `ci/` prefix or
+  /// local_engine.json's `linux/` (`host_debug` for both `ci/host_debug` and
+  /// `linux/host_debug`, which set the same flags).
   String get configName {
-    final String bare = name.startsWith('ci/') ? name.substring(3) : name;
+    final String bare = name.startsWith('ci/')
+        ? name.substring(3)
+        : name.startsWith('linux/')
+        ? name.substring(6)
+        : name;
     return bare.replaceAll('/', '_');
   }
 }
 
 /// The Linux x64 host builds of [configs] (a builder file's name to its
-/// configuration), by file and build order.
+/// configuration), by file and build order: the `linux_*.json` files' builds
+/// that target the host, and local_engine.json's `linux/` builds -- the
+/// developer's configurations, which `et build --config <name>` runs.
 List<BuilderBuild> linuxHostBuilds(Map<String, BuilderConfig> configs) {
   final builds = <BuilderBuild>[];
-  final List<String> files = configs.keys.where((String f) => f.startsWith('linux_')).toList()
-    ..sort();
+  final List<String> files =
+      configs.keys.where((String f) => f.startsWith('linux_') || f == 'local_engine').toList()
+        ..sort();
   for (final file in files) {
     for (final Build build in configs[file]!.builds) {
+      if (file == 'local_engine' && !build.name.startsWith('linux/')) {
+        continue;
+      }
       final read = BuilderBuild.of('$file.json', build);
       if (!read.otherPlatform && read.gn.isNotEmpty) {
         builds.add(read);
@@ -353,6 +372,9 @@ String configsBazelrc(List<BuilderBuild> builds) {
     ..writeln('# A build with a flag the Bazel build cannot express yet is listed with the')
     ..writeln('# reason and gets no configuration; the install target of each build is in')
     ..writeln('# BUILD.bazel beside this file.');
+  // A name may be two builds' (CI's ci/host_debug and the developer's
+  // linux/host_debug): one configuration, if they set the same flags.
+  final written = <String, BuilderBuild>{};
   for (final build in builds) {
     out
       ..writeln()
@@ -365,6 +387,19 @@ String configsBazelrc(List<BuilderBuild> builds) {
       }
       continue;
     }
+    final BuilderBuild? earlier = written[build.configName];
+    if (earlier != null) {
+      if (earlier.bazelFlags.join(' ') != build.bazelFlags.join(' ')) {
+        throw FormatException(
+          "${build.file}'s ${build.name} and ${earlier.file}'s ${earlier.name} would both be "
+          '--config=${build.configName} with different flags: ${build.bazelFlags.join(' ')} '
+          'against ${earlier.bazelFlags.join(' ')}',
+        );
+      }
+      out.writeln("# The same configuration as ${earlier.file}'s ${earlier.name}, above.");
+      continue;
+    }
+    written[build.configName] = build;
     out.writeln('build:${build.configName} ${build.bazelFlags.join(' ')}');
   }
   return out.toString();
@@ -439,6 +474,15 @@ String buildersBuildFile(
     out
       ..writeln()
       ..writeln('# ${build.file}: ${build.name}');
+    if (build.ninjaTargets.isEmpty) {
+      // GN's default target: the whole build, which the root package's
+      // install lays out.
+      out.writeln(
+        "#   ninja's default target, everything: "
+        'bazel run --config=${build.configName} //engine/src/flutter:install',
+      );
+      continue;
+    }
     if (build.unsupported.isEmpty) {
       out.writeln('#   bazel run --config=${build.configName} :${build.configName}');
     } else {

@@ -266,12 +266,19 @@ Future<int> _builderOutputs(
     return loader.errors.length;
   }
   final List<BuilderBuild> builds = linuxHostBuilds(configs);
+  final String bazelrc;
+  try {
+    bazelrc = configsBazelrc(builds);
+  } on FormatException catch (e) {
+    stderr.writeln('error: ${e.message}');
+    return 1;
+  }
   String buildFile = buildersBuildFile(builds, convertedTargets, convertedTests: convertedTests);
   if (buildifier != null) {
     buildFile = await _format(buildifier, buildFile);
   }
   final outputs = <String, String>{
-    p.join(buildersDir, 'configs.bazelrc'): configsBazelrc(builds),
+    p.join(buildersDir, 'configs.bazelrc'): bazelrc,
     p.join(buildersDir, 'BUILD.bazel'): buildFile,
   };
   var failures = 0;
