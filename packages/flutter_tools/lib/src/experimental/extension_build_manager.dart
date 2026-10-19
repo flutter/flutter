@@ -35,20 +35,15 @@ base class ExtensionBuildManager {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <ExtensionBuildTarget>[];
     }
+    if (_cachedTargets case final cachedTargets?) {
+      return cachedTargets;
+    }
 
-    final int previousConnectionCount = _extensionManager.connections.length;
     try {
-      await _extensionManager.ensureInitialized(
-        requiredServices: const <String>{BuildService.serviceNamespace},
-      );
+      await _extensionManager.ensureInitialized();
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
       return const <ExtensionBuildTarget>[];
-    }
-
-    if (_cachedTargets case final cachedTargets?
-        when _extensionManager.connections.length == previousConnectionCount) {
-      return cachedTargets;
     }
 
     final targets = <ExtensionBuildTarget>[];
@@ -111,9 +106,7 @@ base class ExtensionBuildManager {
     }
 
     try {
-      await _extensionManager.ensureInitialized(
-        requiredServices: const <String>{BuildService.serviceNamespace},
-      );
+      await _extensionManager.ensureInitialized();
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
       return ExtensionBuildResult(

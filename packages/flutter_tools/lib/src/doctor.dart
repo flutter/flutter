@@ -213,9 +213,7 @@ class Doctor {
   /// objects in [validators].
   Future<List<ValidatorTask>> startValidatorTasks({ExtensionManager? extensionManager}) async {
     if (extensionManager != null) {
-      await extensionManager.ensureInitialized(
-        requiredServices: const <String>{DiagnosticsExtension.serviceNamespace},
-      );
+      await extensionManager.ensureInitialized();
     }
     final List<DoctorValidator> validatorList = extensionManager != null
         ? DoctorValidatorsProvider.create(

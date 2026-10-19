@@ -95,9 +95,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     bool forWirelessDiscovery = false,
   }) async {
     _logger.printTrace('ExtensionDevices polling active tool extension devices...');
-    await _extensionManager.ensureInitialized(
-      requiredServices: const <String>{DeviceService.serviceNamespace},
-    );
+    await _extensionManager.ensureInitialized();
     final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;
     if (deviceServices.isEmpty) {
       _logger.printTrace('ExtensionDevices found 0 active device extensions.');

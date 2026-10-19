@@ -60,7 +60,6 @@ abstract final class FlutterGlobalOptions {
   static const kWrapColumnOption = 'wrap-column';
   static const kWrapFlag = 'wrap';
   static const kDebugLogsDirectoryFlag = 'debug-logs-dir';
-  static const kExtensionsFlag = 'extensions';
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
@@ -184,12 +183,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     );
     argParser.addDescriptor(CommonOptions.packages, verboseHelp: verboseHelp);
     argParser.addDescriptor(CommonOptions.printDtd, verboseHelp: verboseHelp);
-    argParser.addFlag(
-      FlutterGlobalOptions.kExtensionsFlag,
-      defaultsTo: true,
-      hide: !verboseHelp,
-      help: 'Whether to load Flutter tool extensions (pass "--no-extensions" for safe mode).',
-    );
 
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
@@ -346,33 +339,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
-  /// Evaluates raw CLI [args] for `--extensions` or `--no-extensions` before
-  /// full argument parsing (which depends on dynamic options from extensions).
-  ///
-  /// Stops scanning at `--` so positional arguments after the separator are
-  /// ignored. If both flags appear, the last one wins.
-  static bool? evaluateToolExtensionsCliFlag(Iterable<String> args) {
-    bool? result;
-    for (final arg in args) {
-      if (arg == '--') {
-        break;
-      }
-      if (arg == '--${FlutterGlobalOptions.kExtensionsFlag}') {
-        result = true;
-      } else if (arg == '--no-${FlutterGlobalOptions.kExtensionsFlag}') {
-        result = false;
-      }
-    }
-    return result;
-  }
-
   /// Traverses [args] to identify the target command being invoked and triggers
   /// dynamic option initialization (via [FlutterCommand.initializeDynamicOptions])
   /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
-    if (evaluateToolExtensionsCliFlag(args) == false) {
-      return;
-    }
     if (_featureFlags?.isToolExtensionsEnabled != true) {
       return;
     }
@@ -393,7 +363,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
         current = current.parent;
       }
-      _updateArgParser(wrapColumn: _argParser.usageLineLength);
     }
   }
 
