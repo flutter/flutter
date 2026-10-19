@@ -11,6 +11,7 @@
 library;
 
 export 'src/bazel_mapping.dart';
+export 'src/builders.dart';
 export 'src/dependency_resolver.dart';
 export 'src/gn_ast.dart';
 export 'src/gn_eval.dart';

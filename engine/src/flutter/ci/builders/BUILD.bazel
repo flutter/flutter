@@ -1,0 +1,320 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.
+#
+# An install target per Linux x64 host build of the builder files, over the
+# Bazel counterparts of its ninja targets: `bazel run --config=<name> :<name>`
+# builds what the build builds and lays it into GN's build directory for it
+# (--target-dir), as the builder's recipe expects to find it. A ninja target
+# with no Bazel counterpart yet is listed; a build whose configuration the
+# Bazel build cannot express yet (configs.bazelrc) is built with the flags
+# of the nearest one; a test executable among the targets is not installed,
+# since `bazel test` runs tests from their own place. A build with tests has
+# a <name>_tests suite over the Bazel suites that stand for its run_tests.py
+# types (runTestsTypeSuites, runTestsEngineSuites in builders.dart):
+# `bazel test --config=<name> :<name>_tests` runs what the build runs, with
+# its other test steps (scripts of the checkout) listed. The suites are
+# manual: each stands for one builder, named; a wildcard run of the tree
+# has the tests themselves.
+
+load("//engine/src/flutter/build/bazel:install.bzl", "install")
+
+package(default_visibility = ["//visibility:public"])
+
+# The builder files themselves, for the tests of the packages that read
+# them (//engine/src/flutter/ci:builder_configs).
+filegroup(
+    name = "json",
+    srcs = glob(["**/*.json"]),
+)
+
+# linux_clang_tidy.json: ci/host_debug_clang_tidy
+#   bazel run --config=host_debug_clang_tidy :host_debug_clang_tidy
+# Nothing to install.
+
+# linux_host_desktop_engine.json: ci/host_debug_desktop
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+install(
+    name = "host_debug_desktop",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+    directory = "ci/host_debug_desktop",
+)
+
+# linux_host_desktop_engine.json: ci/host_profile_desktop
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile
+install(
+    name = "host_profile_desktop",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+    directory = "ci/host_profile_desktop",
+)
+
+# linux_host_desktop_engine.json: ci/host_release_desktop
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+install(
+    name = "host_release_desktop",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+    directory = "ci/host_release_desktop",
+)
+
+# linux_host_engine.json: ci/host_debug
+#   bazel run --config=host_debug :host_debug
+install(
+    name = "host_debug",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/build/archives:dart_sdk_archive",
+        "//engine/src/flutter/build/archives:embedder",
+        "//engine/src/flutter/build/archives:flutter_patched_sdk",
+        "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+    directory = "ci/host_debug",
+)
+
+# linux_host_engine.json: ci/host_release
+#   bazel run --config=host_release :host_release
+install(
+    name = "host_release",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/archives:flutter_patched_sdk"],
+    directory = "ci/host_release",
+)
+
+# linux_host_engine_ddm.json: ci/host_debug_ddm
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+install(
+    name = "host_debug_ddm",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/archives:artifacts"],
+    directory = "ci/host_debug_ddm",
+)
+
+# linux_host_engine_test.json: ci/host_debug_test
+#   bazel run --config=host_debug_test :host_debug_test
+# Not built, no Bazel counterpart yet: flutter:unittests, flutter/build/dart:dart_sdk.
+install(
+    name = "host_debug_test",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/shell/testing:testing",
+        "//engine/src/flutter/tools/path_ops:path_ops",
+    ],
+    directory = "ci/host_debug_test",
+)
+
+# ci/host_debug_test's tests: run_tests.py --type dart,dart-host.
+test_suite(
+    name = "host_debug_test_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
+    ],
+)
+
+# linux_host_engine_test.json: ci/host_profile_test
+#   bazel run --config=host_profile_test :host_profile_test
+# Not built, no Bazel counterpart yet: flutter:unittests, flutter/build/dart:dart_sdk.
+install(
+    name = "host_profile_test",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/shell/testing:testing",
+        "//engine/src/flutter/tools/path_ops:path_ops",
+    ],
+    directory = "ci/host_profile_test",
+)
+
+# ci/host_profile_test's tests: run_tests.py --type dart,dart-host,engine.
+test_suite(
+    name = "host_profile_test_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter/assets:assets_unittests",
+        "//engine/src/flutter/display_list:display_list_rendertests",
+        "//engine/src/flutter/display_list:display_list_unittests",
+        "//engine/src/flutter/flow:flow_unittests",
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/lib/ui:ui_unittests",
+        "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:runtime_unittests",
+        "//engine/src/flutter/shell/common:shell_unittests",
+        "//engine/src/flutter/shell/geometry:geometry_unittests",
+        "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+        "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+        "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+        "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+        "//engine/src/flutter/shell/platform/glfw:flutter_glfw_unittests",
+        "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+        "//engine/src/flutter/shell/platform/linux:flutter_linux_unittests",
+        "//engine/src/flutter/testing:testing_unittests",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+        "//engine/src/flutter/txt:txt_unittests",
+    ],
+)
+
+# linux_host_engine_test.json: ci/host_release_test
+#   bazel run --config=host_release_test :host_release_test
+# Not built, no Bazel counterpart yet: flutter:unittests, flutter/build/dart:dart_sdk.
+# Tests, run by `bazel test` rather than installed: flutter/display_list:display_list_builder_benchmarks, flutter/fml:fml_benchmarks, flutter/impeller/geometry:geometry_benchmarks, flutter/lib/ui:ui_benchmarks, flutter/shell/common:shell_benchmarks, flutter/txt:txt_benchmarks.
+install(
+    name = "host_release_test",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/display_list:display_list_benchmarks",
+        "//engine/src/flutter/display_list:display_list_region_benchmarks",
+        "//engine/src/flutter/display_list:display_list_transform_benchmarks",
+        "//engine/src/flutter/display_list:primitive_rendering_benchmarks",
+        "//engine/src/flutter/shell/testing:testing",
+        "//engine/src/flutter/tools/path_ops:path_ops",
+    ],
+    directory = "ci/host_release_test",
+)
+
+# ci/host_release_test's tests: run_tests.py --type dart,dart-host,engine,benchmarks.
+# Other steps, scripts of the checkout: Generate metrics test; Upload metrics dry-run.
+test_suite(
+    name = "host_release_test_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:benchmarks",
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter/assets:assets_unittests",
+        "//engine/src/flutter/display_list:display_list_rendertests",
+        "//engine/src/flutter/display_list:display_list_unittests",
+        "//engine/src/flutter/flow:flow_unittests",
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/lib/ui:ui_unittests",
+        "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:runtime_unittests",
+        "//engine/src/flutter/shell/common:shell_unittests",
+        "//engine/src/flutter/shell/geometry:geometry_unittests",
+        "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+        "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+        "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+        "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+        "//engine/src/flutter/shell/platform/glfw:flutter_glfw_unittests",
+        "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+        "//engine/src/flutter/shell/platform/linux:flutter_linux_unittests",
+        "//engine/src/flutter/testing:testing_unittests",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+        "//engine/src/flutter/txt:txt_unittests",
+    ],
+)
+
+# linux_unopt.json: ci/host_debug_unopt
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+# Not built, no Bazel counterpart yet: flutter:unittests, flutter/build/dart:dart_sdk.
+# Tests, run by `bazel test` rather than installed: flutter/shell/platform/common/client_wrapper:client_wrapper_unittests, flutter/shell/platform/common:common_cpp_core_unittests, flutter/shell/platform/common:common_cpp_unittests, flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests.
+install(
+    name = "host_debug_unopt",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/shell/testing:testing",
+        "//engine/src/flutter/sky/packages/sky_engine:sky_engine",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+    directory = "ci/host_debug_unopt",
+)
+
+# ci/host_debug_unopt's tests: run_tests.py --type dart,dart-host,engine,font-subset.
+# Other steps, scripts of the checkout: test: Check formatting; ban GeneratedPluginRegistrant.java; ban_test GeneratedPluginRegistrant.java; analyze_dart_ui; pylint; test: service protocol; test: Lint android host; Check build configs; Tests of tools/gn.
+test_suite(
+    name = "host_debug_unopt_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter/assets:assets_unittests",
+        "//engine/src/flutter/display_list:display_list_rendertests",
+        "//engine/src/flutter/display_list:display_list_unittests",
+        "//engine/src/flutter/flow:flow_unittests",
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/lib/ui:ui_unittests",
+        "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:runtime_unittests",
+        "//engine/src/flutter/shell/common:shell_unittests",
+        "//engine/src/flutter/shell/geometry:geometry_unittests",
+        "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+        "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+        "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+        "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+        "//engine/src/flutter/shell/platform/glfw:flutter_glfw_unittests",
+        "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+        "//engine/src/flutter/shell/platform/linux:flutter_linux_unittests",
+        "//engine/src/flutter/testing:testing_unittests",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+        "//engine/src/flutter/tools/font_subset:font_subset_test",
+        "//engine/src/flutter/txt:txt_unittests",
+    ],
+)
+
+# linux_unopt.json: ci/host_debug_unopt_impeller_tests
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+# Not built, no Bazel counterpart yet: flutter, flutter/sky/packages.
+# Nothing to install.
+
+# ci/host_debug_unopt_impeller_tests's tests: run_tests.py --type impeller.
+test_suite(
+    name = "host_debug_unopt_impeller_tests_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/impeller:impeller_unittests"],
+)
+
+# linux_unopt.json: ci/host_release_licenses
+#   bazel run --config=host_release_licenses :host_release_licenses
+# Not built, no Bazel counterpart yet: flutter/tools/licenses_cpp, flutter/tools/licenses_cpp:licenses_cpp_testrunner.
+# Nothing to install.
+
+# Other steps, scripts of the checkout: Run license_cpp unittests.
+# Nothing to run.
+
+# linux_unopt.json: ci/host_debug_no_prebuilt_dart_sdk
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+# Not built, no Bazel counterpart yet: default.
+# Nothing to install.

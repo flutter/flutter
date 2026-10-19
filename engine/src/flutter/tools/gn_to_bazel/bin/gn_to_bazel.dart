@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:gn_to_bazel/gn_to_bazel.dart';
 import 'package:path/path.dart' as p;
 
@@ -114,6 +115,10 @@ Future<int> run(List<String> arguments) async {
       : options.rest;
   final files = <String>[];
   var failures = 0;
+  // The targets each converted file defines (less the skipped), for the
+  // builder files' ninja targets.
+  final convertedTargets = <String, Set<String>>{};
+  final convertedTests = <String, Set<String>>{};
   for (final input in inputs) {
     final String file = p.canonicalize(input);
     if (!p.isWithin(root, file)) {
@@ -154,6 +159,14 @@ Future<int> run(List<String> arguments) async {
         tree: tree,
         importPolicy: engineImportPolicy,
       );
+      convertedTargets[gnPackage] = <String>{
+        for (final GnTarget target in evaluation.targets)
+          if (!skip.contains(target.name)) target.name,
+      };
+      convertedTests[gnPackage] = <String>{
+        for (final GnTarget target in evaluation.targets)
+          if (!skip.contains(target.name) && isBazelTest(target, gnPackage)) target.name,
+      };
       String output = emitBuildFile(
         evaluation,
         gnPackage: gnPackage,
@@ -207,6 +220,15 @@ Future<int> run(List<String> arguments) async {
       stderr.writeln('error: $message');
       failures++;
     }
+    // The builder files' Linux x64 host builds as configurations and
+    // install targets (lib/src/builders.dart).
+    failures += await _builderOutputs(
+      root,
+      convertedTargets,
+      convertedTests,
+      buildifier: buildifier,
+      check: check,
+    );
   }
   final String? depfile = options.option('depfile');
   if (depfile != null) {
@@ -217,10 +239,61 @@ Future<int> run(List<String> arguments) async {
   if (check && failures == 0) {
     stdout.writeln(
       '${inputs.length} generated BUILD.bazel file(s) up to date; '
-      '${mirroredLists.length} hand-written list(s) match their GN files',
+      '${mirroredLists.length} hand-written list(s) match their GN files'
+      '${options.rest.isEmpty && outDir == null ? "; the builders' configurations and install targets are current" : ''}',
     );
   }
   return failures == 0 ? 0 : 1;
+}
+
+/// Writes (or, with [check], compares) ci/builders/configs.bazelrc and
+/// ci/builders/BUILD.bazel from the builder files; returns the number of
+/// failures.
+Future<int> _builderOutputs(
+  String root,
+  Map<String, Set<String>> convertedTargets,
+  Map<String, Set<String>> convertedTests, {
+  required String? buildifier,
+  required bool check,
+}) async {
+  final String buildersDir = p.join(root, 'flutter/ci/builders');
+  final loader = BuildConfigLoader(buildConfigsDir: Directory(buildersDir));
+  final Map<String, BuilderConfig> configs = loader.configs;
+  if (loader.errors.isNotEmpty) {
+    for (final String error in loader.errors) {
+      stderr.writeln('error: $error');
+    }
+    return loader.errors.length;
+  }
+  final List<BuilderBuild> builds = linuxHostBuilds(configs);
+  String buildFile = buildersBuildFile(builds, convertedTargets, convertedTests: convertedTests);
+  if (buildifier != null) {
+    buildFile = await _format(buildifier, buildFile);
+  }
+  final outputs = <String, String>{
+    p.join(buildersDir, 'configs.bazelrc'): configsBazelrc(builds),
+    p.join(buildersDir, 'BUILD.bazel'): buildFile,
+  };
+  var failures = 0;
+  for (final MapEntry<String, String> output in outputs.entries) {
+    final file = File(output.key);
+    if (check) {
+      if (!file.existsSync() || file.readAsStringSync() != output.value) {
+        stderr.writeln(
+          '${output.key} is out of date with respect to flutter/ci/builders/linux_*.json; '
+          'rerun tools/gn_to_bazel',
+        );
+        failures++;
+      }
+    } else {
+      file.writeAsStringSync(output.value);
+      stdout.writeln(
+        'flutter/ci/builders/linux_*.json -> ${output.key} (${builds.length} Linux x64 host builds, '
+        '${builds.where((BuilderBuild b) => b.unsupported.isEmpty).length} with a configuration)',
+      );
+    }
+  }
+  return failures;
 }
 
 /// `--repository=@skia=//flutter/third_party/skia`, with the packages of

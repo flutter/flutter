@@ -17,8 +17,10 @@
 
 package(default_visibility = ["//visibility:public"])
 
-# The builder configurations, for the tests of the packages that read them.
+# The builder configurations, for the tests of the packages that read them
+# (builders/ is a package of its own: the generated install targets and
+# configurations of the builds, see builders/BUILD.bazel).
 filegroup(
     name = "builder_configs",
-    srcs = glob(["builders/**/*.json"]),
+    srcs = ["//engine/src/flutter/ci/builders:json"],
 )
