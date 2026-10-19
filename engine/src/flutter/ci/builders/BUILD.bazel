@@ -292,8 +292,7 @@ test_suite(
 )
 
 # linux_unopt.json: ci/host_debug_unopt_impeller_tests
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+#   bazel run --config=host_debug_unopt_impeller_tests :host_debug_unopt_impeller_tests
 # Not built, no Bazel counterpart yet: flutter, flutter/sky/packages.
 # Nothing to install.
 
