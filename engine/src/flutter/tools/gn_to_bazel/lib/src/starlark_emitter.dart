@@ -149,6 +149,45 @@ final class _Rule {
   _ListAttribute list(String attribute) => lists.putIfAbsent(attribute, _ListAttribute.new);
 }
 
+/// buildifier's order of two strings of a sorted list (labels): compared
+/// piecewise after splitting on `.` and `:`, a prefix first.
+int compareBuildifierStrings(String a, String b) {
+  final List<String> sa = a.replaceAll(':', '.').split('.');
+  final List<String> sb = b.replaceAll(':', '.').split('.');
+  for (var i = 0; i < sa.length && i < sb.length; i++) {
+    final int c = sa[i].compareTo(sb[i]);
+    if (c != 0) {
+      return c;
+    }
+  }
+  if (sa.length != sb.length) {
+    return sa.length.compareTo(sb.length);
+  }
+  return a.compareTo(b);
+}
+
+/// Whether a GN executable is a test: `testonly`, named `*tests`, which is
+/// how run_tests.py's executables are declared. The emitter makes such an
+/// executable a `cc_test` (or a `flutter_cc_test`); the builder files'
+/// generator resolves run_tests.py's names among them.
+bool isTestTarget(GnTarget target) {
+  if (target.rule != 'executable') {
+    return false;
+  }
+  final List<GnValue>? testonly = target.variables['testonly']?.unconditionalItems;
+  final bool isTestonly =
+      testonly != null && testonly.length == 1 && testonly.single == const GnBoolValue(true);
+  return isTestonly && target.name.endsWith('tests');
+}
+
+/// Whether the emitter makes a `cc_test` of the executable [target] of
+/// [gnPackage]: a test ([isTestTarget]), or a benchmark run_tests.py runs
+/// (`benchmarkRuns`).
+bool isBazelTest(GnTarget target, String gnPackage) {
+  return target.rule == 'executable' &&
+      (isTestTarget(target) || benchmarkRuns.containsKey('$gnPackage:${target.name}'));
+}
+
 /// Converts the targets of one GN file into the text of a `BUILD.bazel`.
 ///
 /// [gnPackage] is the GN directory of the file (`//flutter/fml`). Targets
@@ -845,12 +884,7 @@ final class _Emitter {
   /// (`fml_unittests`, `display_list_rendertests`); testonly benchmarks and
   /// tools stay binaries -- but for the benchmarks run_tests.py runs
   /// ([benchmarkRuns]), which are tests tagged `benchmark` and `manual`.
-  static bool _isTest(GnTarget target) {
-    final List<GnValue>? testonly = target.variables['testonly']?.unconditionalItems;
-    final bool isTestonly =
-        testonly != null && testonly.length == 1 && testonly.single == const GnBoolValue(true);
-    return isTestonly && target.name.endsWith('tests');
-  }
+  static bool _isTest(GnTarget target) => isTestTarget(target);
 
   /// A known template becomes a call of its Bazel macro, with the arguments
   /// the mapping names translated by kind (see [TemplateMapping.arguments]).
@@ -3371,25 +3405,12 @@ final class _Emitter {
       return 0;
     }
 
-    List<String> split(_Item item) => item.text.replaceAll(':', '.').split('.');
-
     return List<_Item>.of(items)..sort((_Item a, _Item b) {
       final int byPhase = phase(a).compareTo(phase(b));
       if (byPhase != 0) {
         return byPhase;
       }
-      final List<String> sa = split(a);
-      final List<String> sb = split(b);
-      for (var i = 0; i < sa.length && i < sb.length; i++) {
-        final int c = sa[i].compareTo(sb[i]);
-        if (c != 0) {
-          return c;
-        }
-      }
-      if (sa.length != sb.length) {
-        return sa.length.compareTo(sb.length);
-      }
-      return a.text.compareTo(b.text);
+      return compareBuildifierStrings(a.text, b.text);
     });
   }
 

@@ -103,7 +103,13 @@ def _build_directory_aspect_impl(target, ctx):
         for dep in _targets_of(getattr(ctx.rule.attr, attribute, None)):
             if _CollectedInfo in dep:
                 transitive.append(dep[_CollectedInfo].entries)
-    direct = target[BuildDirectoryInfo].entries if BuildDirectoryInfo in target else depset()
+    if BuildDirectoryInfo in target:
+        direct = target[BuildDirectoryInfo].entries
+    elif ctx.rule.kind in ("cc_binary", "cc_shared_library"):
+        # GN writes an executable or a shared library into the build root.
+        direct = depset([(f, f.basename) for f in target[DefaultInfo].files.to_list()])
+    else:
+        direct = depset()
     return [_CollectedInfo(entries = depset(transitive = [direct] + transitive))]
 
 _CollectedInfo = provider(
@@ -113,7 +119,7 @@ _CollectedInfo = provider(
 
 build_directory_aspect = aspect(
     implementation = _build_directory_aspect_impl,
-    doc = "Collects BuildDirectoryInfo over deps, srcs and data.",
+    doc = "Collects BuildDirectoryInfo over deps, srcs and data, with executables and shared libraries at the build root.",
     attr_aspects = ["deps", "srcs", "data"],
 )
 

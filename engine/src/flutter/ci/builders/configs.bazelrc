@@ -1,0 +1,77 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.
+#
+# Each Linux x64 host build of the builder files as a Bazel configuration:
+# `bazel build --config=<name> ...` sets what the build's tools/gn flags
+# set, as far as the Bazel build has settings for them (gnFlags in
+# tools/gn_to_bazel/lib/src/builders.dart says what each flag amounts to).
+# A build with a flag the Bazel build cannot express yet is listed with the
+# reason and gets no configuration; the install target of each build is in
+# BUILD.bazel beside this file.
+
+# linux_clang_tidy.json: ci/host_debug_clang_tidy
+#   --runtime-mode debug --prebuilt-dart-sdk --no-lto --target-dir ci/host_debug_clang_tidy --rbe --no-goma
+build:host_debug_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+
+# linux_host_desktop_engine.json: ci/host_debug_desktop
+#   --runtime-mode debug --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/host_debug_desktop
+# No configuration: the Bazel build cannot express
+#   --enable-fontconfig (flutter_use_fontconfig and skia_use_fontconfig are false in the generated files)
+
+# linux_host_desktop_engine.json: ci/host_profile_desktop
+#   --runtime-mode profile --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/host_profile_desktop
+# No configuration: the Bazel build cannot express
+#   --enable-fontconfig (flutter_use_fontconfig and skia_use_fontconfig are false in the generated files)
+
+# linux_host_desktop_engine.json: ci/host_release_desktop
+#   --runtime-mode release --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/host_release_desktop
+# No configuration: the Bazel build cannot express
+#   --enable-fontconfig (flutter_use_fontconfig and skia_use_fontconfig are false in the generated files)
+
+# linux_host_engine.json: ci/host_debug
+#   --target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma
+build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+
+# linux_host_engine.json: ci/host_release
+#   --target-dir ci/host_release --runtime-mode release --prebuilt-dart-sdk --no-lto --rbe --no-goma
+build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+
+# linux_host_engine_ddm.json: ci/host_debug_ddm
+#   --target-dir ci/host_debug_ddm --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma --gn-args=dart_dynamic_modules=true
+# No configuration: the Bazel build cannot express
+#   --gn-args=dart_dynamic_modules=true (an arbitrary GN argument)
+
+# linux_host_engine_test.json: ci/host_debug_test
+#   --target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --build-embedder-examples --no-lto --rbe --no-goma
+build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+
+# linux_host_engine_test.json: ci/host_profile_test
+#   --target-dir ci/host_profile_test --runtime-mode profile --prebuilt-dart-sdk --build-embedder-examples --no-lto --rbe --no-goma
+build:host_profile_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile
+
+# linux_host_engine_test.json: ci/host_release_test
+#   --target-dir ci/host_release_test --runtime-mode release --prebuilt-dart-sdk --build-embedder-examples --no-lto --rbe --no-goma
+build:host_release_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+
+# linux_unopt.json: ci/host_debug_unopt
+#   --target-dir ci/host_debug_unopt --runtime-mode debug --unoptimized --prebuilt-dart-sdk --asan --dart-debug --rbe --no-goma
+# No configuration: the Bazel build cannot express
+#   --asan (the toolchain has no sanitizer feature yet)
+#   --dart-debug (the wrapped Dart SDK build is not parameterized by dart_debug)
+
+# linux_unopt.json: ci/host_debug_unopt_impeller_tests
+#   --runtime-mode debug --unoptimized --prebuilt-dart-sdk --target-dir ci/host_debug_unopt_impeller_tests --rbe --no-goma --use-glfw-swiftshader
+# No configuration: the Bazel build cannot express
+#   --use-glfw-swiftshader (the Impeller test backends are not parameterized by it)
+
+# linux_unopt.json: ci/host_release_licenses
+#   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
+build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+
+# linux_unopt.json: ci/host_debug_no_prebuilt_dart_sdk
+#   --target-dir ci/host_debug --runtime-mode debug --no-prebuilt-dart-sdk --build-embedder-examples --no-lto --rbe --no-goma
+# No configuration: the Bazel build cannot express
+#   --no-prebuilt-dart-sdk (the generated files assume the prebuilt Dart SDK)

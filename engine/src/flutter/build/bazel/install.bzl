@@ -20,12 +20,12 @@ the rule's own output is the script that copies.
 
     bazel run //engine/src/flutter:install
     bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
-    bazel run -c opt --//engine/src/flutter/common:runtime_mode=release \\
-        //engine/src/flutter:install_host_release_archives
+    bazel run --config=host_release //engine/src/flutter/ci/builders:host_release
 
 `contents` are targets whose dependency closure says where GN's build
 directory holds its files (BuildDirectoryInfo, build_directory.bzl: copies,
-actions, generated files, archives); `files` maps a target to the directory
+actions, generated files, archives; a cc_binary's executable or shared
+library at the build root, as GN puts them); `files` maps a target to the directory
 under the build directory that holds its files by base name (`` for the
 build directory itself, `gen`, `flutter_patched_sdk`), for rules that do not
 say; `trees` are zip_tree targets, whose files go at their paths under the
@@ -68,7 +68,7 @@ def _install_impl(ctx):
         "#!/bin/sh",
         "set -e",
         'root="${BUILD_WORKSPACE_DIRECTORY:?%s runs under bazel run}"' % ctx.label.name,
-        'dest="${1:-%s/out/%s}"' % (ENGINE_SRC, build_directory_variant(ctx)),
+        'dest="${1:-%s/out/%s}"' % (ENGINE_SRC, ctx.attr.directory or build_directory_variant(ctx)),
         'case "$dest" in /*) ;; *) dest="$root/$dest" ;; esac',
     ]
     directories = {paths.dirname(path) if not file.is_directory else path: None for file, path in unique}
@@ -116,6 +116,10 @@ _install = rule(
             allow_files = [".zip"],
             doc = "zip_bundle targets whose archives go under zip_archives/.",
         ),
+        "directory": attr.string(
+            doc = "The build directory under engine/src/out to install into (GN's --target-dir, " +
+                  "`ci/host_debug`), instead of the configuration's variant name.",
+        ),
         "build_directory_name": attr.string(
             mandatory = True,
             doc = "GN's name for the build directory in this mode (host_debug, host_release, ...).",
@@ -126,7 +130,7 @@ _install = rule(
     },
 )
 
-def install(name, contents = [], files = {}, trees = [], archives = [], **kwargs):
+def install(name, contents = [], files = {}, trees = [], archives = [], directory = None, **kwargs):
     """A `bazel run` target copying a build's files into engine/src/out/<variant>/ (or a named directory).
 
     Args:
@@ -135,6 +139,8 @@ def install(name, contents = [], files = {}, trees = [], archives = [], **kwargs
       files: targets mapped to the directory under the build directory that holds their files.
       trees: zip_tree targets.
       archives: zip_bundle targets.
+      directory: the build directory under engine/src/out (GN's --target-dir), when not the
+        configuration's variant name.
       **kwargs: the rule's other arguments (visibility, tags).
     """
     _install(
@@ -143,5 +149,6 @@ def install(name, contents = [], files = {}, trees = [], archives = [], **kwargs
         files = files,
         trees = trees,
         archives = archives,
+        directory = directory,
         **(build_directory_attrs() | kwargs)
     )
