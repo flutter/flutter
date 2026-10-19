@@ -159,7 +159,7 @@ Future<int> run(
                 } else {
                   if (globals.analytics.telemetryEnabled) {
                     globals.analytics.send(Event.analyticsCollectionEnabled(status: false));
-                    // Before disablig analytics, we need to close the client to make
+                    // Before disabling analytics, we need to close the client to make
                     // sure the above collection event is sent.
                     await globals.analytics.close();
                   }
