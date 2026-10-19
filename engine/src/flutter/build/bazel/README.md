@@ -742,22 +742,70 @@ above it (`shell/platform/linux/public`), so each header lands at
 `flutter_linux/<name>` as in GN. A copy of another shape is an error, to be
 read when one appears.
 
-The uploader reads `engine/src/out/<build>/zip_archives/`; `install_archives`
-(`install_archives.bzl`) is the `bazel run` target that lays a builder's
-archives there for the configuration they are built in --
-`engine/src/out/<variant>/zip_archives/<path>`, `<variant>` GN's name for the
-build directory (`host_debug_unopt`, `host_release`; `checkout_view.bzl`) and
-`<path>` the archive's path under its package's `zip_archives/`. The root
-package has one per Linux host builder of `ci/builders/linux_host_engine.json`:
+## The build directory: `install`
+
+What consumes an engine build reads a directory laid out as GN's
+`engine/src/out/<build>/` is. The flutter tool's `--local-engine` reads
+`flutter_tester`, `gen_snapshot`, `icudtl.dat`, `impellerc` and
+`libtessellator.so`, `font-subset`, `libflutter_linux_gtk.so` with the
+`flutter_linux/` headers, `dart-sdk/` (with `bin/dartaotruntime` and the
+frontend server's snapshot under `bin/snapshots/`), `flutter_patched_sdk/`,
+`gen/flutter/lib/snapshot/` (the core snapshot's four files) and
+`gen/frontend_server_aot.dart.snapshot` from there (`artifacts.dart`); the
+embedder's consumers `libflutter_engine.so` and `flutter_embedder.h`; CI's
+uploader the archives under `zip_archives/`. Under Bazel each of these is an
+output under its own package in `bazel-bin`. `install` (`install.bzl`) is the
+`bazel run` target that copies a chosen set of them to where the consumers
+look: `files` maps a target to the directory under the build directory that
+holds its files by base name, `trees` are `zip_tree` targets whose files go
+at their paths under the tree's destination (the Dart SDK, the GTK headers),
+`archives` are `zip_bundle` targets whose archives go under `zip_archives/`.
+The destination is `engine/src/out/<variant>/` -- `<variant>` GN's name for
+the configuration's build directory (`host_debug_unopt`, `host_debug`,
+`host_release`; `checkout_view.bzl`) -- or a directory named after `--`,
+relative to the checkout; the copies land in the checkout
+(`BUILD_WORKSPACE_DIRECTORY`), outside Bazel's output tree, as GN's would.
+
+The root package has `//engine/src/flutter:install`, the Linux host's build
+directory as above with all seven archives of the Linux host configurations:
+
+```sh
+bazel run //engine/src/flutter:install
+bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
+```
+
+installs 1,106 files; `tools/gn_to_bazel/tool/install_diff.py` compares such
+a directory with GN's path by path (the consumer-visible paths above by
+default; a directory is every file under it, an archive is compared entry
+by entry as `artifact_diff.py` does): against `host_debug_unopt`, 16 of 16
+paths agree -- 1,098 files identical, the eight binaries differing as builds
+under different flags do, nothing missing on either side. Two things the
+comparison turned up. GN's build root holds the *full* ICU data file
+(`copy("copy_icudata")`, `common/icudtl.dat`, 10.8 MB), where `artifacts.zip`
+ships the trimmed `flutter/icudtl.dat` (865 KB): a `--local-engine` run
+loads different ICU data than a release does; `install` follows the build
+directory. And the converter now gives a copy into the build root that
+renames its file (`copy_headers`: `embedder.h` to `flutter_embedder.h`) an
+`outs` with the new name, so that the Bazel file bears the layout's name
+(`gn_copy` already renamed for literal outputs under the gen dir).
+
+Not installed yet: `gen/dart-pkg/sky_engine` (`sky/packages/sky_engine`'s
+copies of the Dart SDK's libraries with `dart:ui`, which the tool lists as a
+build input -- a missing input only marks the build dirty -- and the analyzer
+reads), the web SDK, and GN's own bookkeeping (`args.gn`,
+`compile_commands.json`, depfiles). The builder-specific targets below
+install the archives alone.
+
+The uploader reads `engine/src/out/<build>/zip_archives/`; the root package
+has an `install` of the archives alone per Linux host builder of
+`ci/builders/linux_host_engine.json`:
 `bazel run -c opt //engine/src/flutter:install_host_debug_archives` and
 `bazel run -c opt --//engine/src/flutter/common:runtime_mode=release
 //engine/src/flutter:install_host_release_archives`; and one for the three
 desktop builders of `linux_host_desktop_engine.json`, which differ only in
 the mode: `install_host_desktop_archives` under
-`--//engine/src/flutter/common:runtime_mode=<mode>`. Not yet: the rest of
-GN's build directory beyond the archives (the compatibility tree of the
-phased plan); `generated_file` over `metadata` (the macOS entitlements
-lists) is the Apple phase's.
+`--//engine/src/flutter/common:runtime_mode=<mode>`. `generated_file` over
+`metadata` (the macOS entitlements lists) is the Apple phase's.
 
 ## Impeller's shader pipeline
 

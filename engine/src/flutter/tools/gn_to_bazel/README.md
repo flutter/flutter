@@ -180,6 +180,24 @@ identical but for the binaries; the desktop builders' GTK bundle: the 26
 headers and the license identical, the library and `gen_snapshot` the
 binaries.
 
+```sh
+bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
+python3 tool/install_diff.py --gn=../../out/host_debug_unopt \
+    --bazel=../../out/host_debug_unopt_bazel \
+    --expect-different=flutter_tester --expect-different=gen_snapshot \
+    --expect-different=impellerc --expect-different=font-subset \
+    --expect-different='*.so' --expect-different='*.a'
+```
+
+compares a build directory `install` laid out (`build/bazel/install.bzl`)
+with GN's, path by path: the consumer-visible paths of a Linux host build by
+default (what the flutter tool reads from a `--local-engine`, the embedder's
+library and header, `zip_archives/`), each a file compared as above, a
+directory compared file by file (GN's depfiles, stamps and the snapshot's
+assembly intermediates left out), an archive compared entry by entry.
+Against `host_debug_unopt`: 16 of 16 paths agree, 1,098 files identical,
+the eight binaries expected different, nothing missing.
+
 ## How it works
 
 GN build files are programs; Bazel wants data. The converter has three layers:
@@ -325,9 +343,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    through `{{source_file_part}}`/`{{source_name_part}}` with more than the
    bare name around them (`assets/{{source_name_part}}/gschemas.compiled`),
    when the copies are produced under those names (`outs`), expanded per
-   source as GN expands them; a copy into the build root
-   (`$root_out_dir/flutter_embedder.h`, the artifact layout's) lets its file
-   travel as it is. A `static_library` with `complete_static_lib` -- an
+   source as GN expands them; a copy into the build root (the artifact
+   layout's, which `install` assembles by the files' names) lets its file
+   travel as it is, unless it renames the file
+   (`embedder.h` to `$root_out_dir/flutter_embedder.h`), when the copy is
+   produced under the new name. A `static_library` with `complete_static_lib` -- an
    archive of every object in its closure, the Impeller SDK's
    `libimpeller.a` -- becomes `cc_static_library`, named after its
    `output_name` with an alias under the GN name. A known template's

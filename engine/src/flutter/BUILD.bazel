@@ -5,7 +5,7 @@
 # The engine (GN's `//flutter`).
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:install_archives.bzl", "install_archives")
+load("//engine/src/flutter/build/bazel:install.bzl", "install")
 
 # config("config") in BUILD.gn: the two include roots engine code is written
 # against -- engine/src ("flutter/fml/...") and this directory
@@ -166,6 +166,63 @@ filegroup(
     ],
 )
 
+# The build directory as GN lays it out for a Linux host build
+# (engine/src/out/<variant>/), from this build's outputs: what the flutter
+# tool reads from a `--local-engine` (flutter_tester, gen_snapshot,
+# icudtl.dat, impellerc and its libraries, font-subset, the GTK library and
+# headers, the Dart SDK, the patched SDK, the core snapshot under
+# gen/flutter/lib/snapshot/, the frontend server under gen/), the embedder
+# library with its header, and every archive the Linux host configurations
+# define (the ones below), under zip_archives/. `bazel run` copies them into
+# engine/src/out/<variant>/ -- host_debug_unopt for a plain build, host_debug
+# for -c opt, host_release with the mode flag -- or into a directory named
+# after `--`:
+#
+#   bazel run //engine/src/flutter:install
+#   bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
+#
+# Not here yet: gen/dart-pkg/sky_engine (sky/packages/sky_engine's copies of
+# the Dart SDK's libraries, which the tool lists as a build input and the
+# analyzer reads), the web SDK, and GN's own bookkeeping (args.gn,
+# compile_commands.json, the .d files).
+install(
+    name = "install",
+    archives = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/build/archives:dart_sdk_archive",
+        "//engine/src/flutter/build/archives:flutter_patched_sdk",
+        "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/shell/platform/embedder:embedder-archive",
+        "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+    files = {
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
+        "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
+        "//engine/src/flutter/impeller/compiler:impellerc": "",
+        "//engine/src/flutter/impeller/tessellator:libtessellator.so": "",
+        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
+        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
+        "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+        "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+        "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+        "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
+        "//engine/src/flutter/shell/platform/embedder:libflutter_engine.so": "",
+        "//engine/src/flutter/shell/platform/linux:flutter_linux_gtk": "",
+        "//engine/src/flutter/shell/testing:flutter_tester": "",
+        "//engine/src/flutter/tools/font_subset:font-subset": "",
+        "//engine/src/flutter/tools/path_ops:libpath_ops.so": "",
+        # copy("copy_icudata"): the full data file, where artifacts.zip
+        # carries the trimmed flutter/icudtl.dat.
+        "@icu//:icudata": "",
+    },
+    trees = [
+        "//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk",
+        "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
+    ],
+)
+
 # The archives the Linux host builders upload (ci/builders/linux_host_engine.json:
 # ci/host_debug's six, ci/host_release's one), laid by `bazel run` into
 # engine/src/out/<variant>/zip_archives/ -- the directory the uploader reads
@@ -174,7 +231,7 @@ filegroup(
 #   bazel run -c opt //engine/src/flutter:install_host_debug_archives
 #   bazel run -c opt --//engine/src/flutter/common:runtime_mode=release \
 #       //engine/src/flutter:install_host_release_archives
-install_archives(
+install(
     name = "install_host_debug_archives",
     archives = [
         "//engine/src/flutter/build/archives:artifacts",
@@ -186,7 +243,7 @@ install_archives(
     ],
 )
 
-install_archives(
+install(
     name = "install_host_release_archives",
     archives = ["//engine/src/flutter/build/archives:flutter_patched_sdk"],
 )
@@ -199,7 +256,7 @@ install_archives(
 #
 #   bazel run -c opt --//engine/src/flutter/common:runtime_mode=profile \
 #       //engine/src/flutter:install_host_desktop_archives
-install_archives(
+install(
     name = "install_host_desktop_archives",
     archives = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
 )

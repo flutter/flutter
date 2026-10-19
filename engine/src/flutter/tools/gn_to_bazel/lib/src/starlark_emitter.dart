@@ -1447,9 +1447,13 @@ final class _Emitter {
           }
           if (items.every((GnValue v) => (v as GnStringValue).value.startsWith('$buildDirRoot/'))) {
             // Outputs under the build root (`$root_out_dir/flutter_embedder.h`)
-            // are the artifact layout's, which packaging assembles from the
-            // sources (a zip_bundle entry naming the output gets the source):
-            // the files travel as they are, the destinations are on record.
+            // are the artifact layout's, which packaging and install assemble
+            // from the sources by name (a zip_bundle entry naming the output
+            // gets the source): the files travel as they are, the
+            // destinations are on record -- except that a copy which renames
+            // its file renames it here too, so that the file carries the name
+            // the layout has for it.
+            _buildRootRenamesInto(rule, items.cast<GnStringValue>(), variable, target);
             break;
           }
           if (items.every((GnValue v) => !(v as GnStringValue).value.contains('{{'))) {
@@ -1475,6 +1479,50 @@ final class _Emitter {
       }
     }
     rules.add(rule);
+  }
+
+  /// A copy into the build root whose literal outputs rename their sources
+  /// (`embedder.h` to `$root_out_dir/flutter_embedder.h`): the outputs'
+  /// paths under the build root as `outs`, so that the Bazel file bears the
+  /// layout's name. A copy keeping its files' names, or one with source
+  /// expansions in its outputs, adds nothing: its files travel as they are.
+  void _buildRootRenamesInto(
+    _Rule rule,
+    List<GnStringValue> outputs,
+    GnVariable variable,
+    GnTarget target,
+  ) {
+    if (outputs.any((GnStringValue output) => output.value.contains('{{'))) {
+      return;
+    }
+    final GnLocation location = variable.assignments.first.location;
+    final List<GnValue>? sources = target.variables['sources']?.unconditionalItems;
+    if (sources == null || sources.length != outputs.length) {
+      throw GnError(
+        location,
+        'copy ${target.name} names ${outputs.length} literal output(s) for its sources, '
+        'which must be as many and unconditional',
+      );
+    }
+    final names = <String>[
+      for (final GnStringValue output in outputs) output.value.substring(buildDirRoot.length + 1),
+    ];
+    var renames = false;
+    for (var i = 0; i < names.length; i++) {
+      final GnValue source = sources[i];
+      if (source is! GnStringValue) {
+        throw GnError(location, 'a source of copy ${target.name} is not a path');
+      }
+      if (p.basename(source.value) != p.basename(names[i])) {
+        renames = true;
+      }
+    }
+    if (!renames) {
+      return;
+    }
+    for (final name in names) {
+      rule.list('outs').addUnique(Condition.always, _Item(name));
+    }
   }
 
   /// A copy's output pattern with source expansions: under the target's own
