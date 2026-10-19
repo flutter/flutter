@@ -1478,7 +1478,7 @@ enum TextLeadingDistribution {
 /// [TextHeightBehavior.applyHeightToLastDescent].
 ///
 /// {@endtemplate}
-final class TextHeightBehavior {
+class TextHeightBehavior {
   /// Creates a new TextHeightBehavior object.
   ///
   ///  * applyHeightToFirstAscent: When true, the [TextStyle.height] modifier
@@ -1548,6 +1548,9 @@ final class TextHeightBehavior {
 
   @override
   bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     return other is TextHeightBehavior &&
         other.applyHeightToFirstAscent == applyHeightToFirstAscent &&
         other.applyHeightToLastDescent == applyHeightToLastDescent &&
