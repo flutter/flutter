@@ -458,6 +458,15 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/icu/': '@icu//',
 };
 
+/// Repositories whose files the generated rules name but whose targets are
+/// not converted (their labels go through [labelOverrides], one by one):
+/// a source file under one of these prefixes is the file of that
+/// repository, which exports it. The Dart tree's core library sources,
+/// which sky/packages/sky_engine copies into the sky_engine package.
+const Map<String, String> fileRepositoryPrefixes = <String, String>{
+  '//flutter/third_party/dart/': '@dart//',
+};
+
 /// Generated include directories (`$root_gen_dir/flutter`) that are an
 /// ancestor package's: Bazel's `includes` is package-relative, and the
 /// target whose `includes` names that package's directory already covers
@@ -1112,6 +1121,11 @@ enum TemplateArgumentKind {
   /// label of the file placed there, each source resolved to the target
   /// that produces it (see `_archiveEntriesText` in starlark_emitter.dart).
   archiveEntries,
+
+  /// A path under the build directory as GN wrote it (`output_dir =
+  /// "$root_gen_dir/dart-pkg/sky_engine/lib/ui_web/"`), passed on as such
+  /// for the rule to place its outputs by (BuildDirectoryInfo).
+  buildPath,
 }
 
 /// One argument of a known template: the macro attribute it becomes and how.
@@ -1341,6 +1355,48 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     },
     files: true,
   ),
+  // web_sdk.gni's wrapper of sdk_rewriter for dart:ui_web: the macro spells
+  // out the template's fixed arguments (the library, its API file, the input
+  // directory) and takes the invoker's output directory. GN expands it to a
+  // prebuilt_dart_action, which is an action under the invocation's name.
+  'web_ui_ui_web_with_output': TemplateMapping(
+    '//engine/src/flutter/web_sdk:web_sdk.bzl',
+    'web_ui_ui_web_with_output',
+    <String, TemplateArgument>{
+      'output_dir': TemplateArgument('output_dir', TemplateArgumentKind.buildPath),
+    },
+    files: true,
+  ),
+};
+
+/// GN actions known by the script they run, converted as a template
+/// invocation would be: the action's variables are the macro's arguments.
+/// dart_pkg.py (sky/packages/sky_engine's `action("sky_engine")`) assembles
+/// a Dart package directory in the build directory from the package's own
+/// files and the SDK extension sources; its `args` are the same variables
+/// rebased, and its outputs a stamp.
+const Map<String, TemplateMapping> scriptMappings = <String, TemplateMapping>{
+  '//flutter/build/dart/tools/dart_pkg.py': TemplateMapping(
+    '//engine/src/flutter/build/bazel/dart:dart_pkg.bzl',
+    'dart_pkg',
+    <String, TemplateArgument>{
+      'package_name': TemplateArgument('package', TemplateArgumentKind.scalar),
+      'sources': TemplateArgument('srcs', TemplateArgumentKind.files),
+      'sdk_ext_files': TemplateArgument('sdk_ext', TemplateArgumentKind.files),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      // The script's own arguments and bookkeeping, which the rule supplies.
+      'script': TemplateArgument('script', TemplateArgumentKind.ignored),
+      'args': TemplateArgument('args', TemplateArgumentKind.ignored),
+      'inputs': TemplateArgument('inputs', TemplateArgumentKind.ignored),
+      'outputs': TemplateArgument('outputs', TemplateArgumentKind.ignored),
+      'pkg_directory': TemplateArgument('pkg_directory', TemplateArgumentKind.ignored),
+      'stamp_file': TemplateArgument('stamp_file', TemplateArgumentKind.ignored),
+      // GN's sdk_ext_directories: a generated directory nothing writes
+      // ($root_gen_dir/sky/bindings), which the script walks as empty.
+      'sdk_ext_directory': TemplateArgument('sdk_ext_directory', TemplateArgumentKind.ignored),
+    },
+    files: true,
+  ),
 };
 
 /// Which imported `.gni` files the converter evaluates (Skia's lists,
@@ -1383,8 +1439,18 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//build_overrides/glslang.gni',
     '//build_overrides/vulkan_headers.gni',
     '//flutter/third_party/vulkan-deps/',
+    // The Dart SDK's library source lists (<library>_sources.gni) and
+    // dart:ui's (dart_ui.gni), which sky/packages/sky_engine copies into the
+    // sky_engine package.
+    '//flutter/third_party/dart/sdk/lib/',
+    '//flutter/lib/ui/dart_ui.gni',
   },
   known: <String>{
+    // The Dart package templates (dart_pkg); sky_engine writes its action
+    // out by hand and the converter maps it by its script (scriptMappings).
+    '//flutter/build/dart/rules.gni',
+    // The web SDK's templates; web_ui_ui_web_with_output is in templateMappings.
+    '//flutter/web_sdk/web_sdk.gni',
     '//flutter/build/dart/dart.gni',
     '//flutter/common/config.gni',
     '//flutter/impeller/tools/shaders.gni',

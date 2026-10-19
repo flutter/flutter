@@ -911,6 +911,7 @@ const Set<String> gnTargetRules = <String>{
   'config',
   'copy',
   'executable',
+  'generated_file',
   'group',
   'shared_library',
   'source_set',
@@ -1787,8 +1788,65 @@ final class _Evaluator {
             // The outputs of a target, as their build-directory paths.
             return _Expression.scalar(GnTargetOutputPathsValue(single.label));
           }
-          final String path = _absolutePath(_stringExpression(args[0], scope), node);
+          if (what.isList) {
+            // A list of paths (an action's sources as arguments): each one.
+            return _Expression(<_Value>[
+              for (final _Value item in what.items)
+                if (item.value case GnStringValue(:final String value))
+                  _Value(
+                    GnStringValue(
+                      '$rebasedPathMarker${_absolutePath(_unmarkedPath(value), node)}$rebasedPathMarker',
+                    ),
+                    item.comments,
+                    condition: item.condition,
+                    sourceConditions: item.sourceConditions,
+                  )
+                else
+                  throw GnError(node.location, 'rebase_path() of a list of ${item.value}'),
+            ], isList: true);
+          }
+          final String path = _absolutePath(_unmarkedPath(_stringExpression(args[0], scope)), node);
           return _Expression.scalar(GnStringValue('$rebasedPathMarker$path$rebasedPathMarker'));
+        }
+        // rebase_path(x, "", base): x, relative to base, as an absolute
+        // path -- sky_engine's way of naming the Dart SDK's library sources
+        // (`rebase_path(async_sdk_sources, "", lib_path)`, lib_path itself
+        // `rebase_path("async", "", rebase_path("$dart_src/sdk/lib"))`).
+        // Each result is the marked absolute path again, for a file list to
+        // read; the base must be one such, or a source-absolute path.
+        // rebase_path(x, ".", base): the same path relative to the current
+        // directory, which a source-absolute path serves as wherever GN
+        // takes a relative one (`script = rebase_path(script, ".", "//")`),
+        // so the result is that path, unmarked.
+        if (args.length == 3 &&
+            args[1] is GnLiteral &&
+            ((args[1] as GnLiteral).stringValue == '' ||
+                (args[1] as GnLiteral).stringValue == '.')) {
+          final marked = (args[1] as GnLiteral).stringValue == '';
+          final String base = _rebasedPath(_stringExpression(args[2], scope), node);
+          String rebased(String path) {
+            final String absolute = path.startsWith('//') || path.startsWith(rebasedPathMarker)
+                ? _rebasedPath(path, node)
+                : _normalizedPath(base == '//' ? '//$path' : '$base/$path', node);
+            return marked ? '$rebasedPathMarker$absolute$rebasedPathMarker' : absolute;
+          }
+
+          final _Expression input = _expression(args[0], scope);
+          if (input.isList) {
+            return _Expression(<_Value>[
+              for (final _Value item in input.items)
+                if (item.value case GnStringValue(:final String value))
+                  _Value(
+                    GnStringValue(rebased(value)),
+                    item.comments,
+                    condition: item.condition,
+                    sourceConditions: item.sourceConditions,
+                  )
+                else
+                  throw GnError(node.location, 'rebase_path() of a list of ${item.value}'),
+            ], isList: true);
+          }
+          return _Expression.scalar(GnStringValue(rebased(_stringExpression(args[0], scope))));
         }
         return _Expression.scalar(GnOpaqueValue(_gnText(node)));
       case GnFunctionCall(name: 'get_label_info', :final List<GnNode> args):
@@ -1880,6 +1938,37 @@ final class _Evaluator {
       throw GnError(node.location, 'get_path_info() needs the source tree');
     }
     return tree.gnPath(p.normalize(p.join(p.dirname(node.location.file), path)));
+  }
+
+  /// The source-absolute path a `rebase_path()` result holds (the marked
+  /// path), or [path] itself when it is already one (`//flutter/...`).
+  String _rebasedPath(String path, GnNode node) {
+    final String unmarked = _unmarkedPath(path);
+    if (unmarked.startsWith('//')) {
+      return unmarked;
+    }
+    throw GnError(node.location, '$path is not a path rebase_path() can rebase from');
+  }
+
+  /// [path] without the marks of a `rebase_path()` result, if it is one.
+  static String _unmarkedPath(String path) {
+    if (path.length >= 2 &&
+        path.startsWith(rebasedPathMarker) &&
+        path.endsWith(rebasedPathMarker) &&
+        !path.substring(1, path.length - 1).contains(rebasedPathMarker)) {
+      return path.substring(1, path.length - 1);
+    }
+    return path;
+  }
+
+  /// A source-absolute path with `.` and `..` resolved (`//a/b/../c` is
+  /// `//a/c`).
+  String _normalizedPath(String path, GnNode node) {
+    if (!path.startsWith('//')) {
+      throw GnError(node.location, '$path is not source-absolute');
+    }
+    final String normalized = p.posix.normalize(path.substring(2));
+    return normalized == '.' ? '//' : '//$normalized';
   }
 
   /// The GN directory of the file containing [node] (`//flutter/fml`).
