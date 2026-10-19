@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [DropdownMenuFormField] demonstrating leading icon support and validation.
 
-const List<String> roles = <String>['Admin', 'Editor', 'Viewer'];
+const List<String> _roles = <String>['Admin', 'Editor', 'Viewer'];
 
 void main() => runApp(const DropdownMenuFormFieldApp());
 
+/// An application widget that displays the [DropdownMenuFormFieldExample].
 class DropdownMenuFormFieldApp extends StatelessWidget {
   const DropdownMenuFormFieldApp({super.key});
 
@@ -30,6 +30,7 @@ class DropdownMenuFormFieldApp extends StatelessWidget {
   }
 }
 
+/// A widget that demonstrates the usage of [DropdownMenuFormField] with a leading icon and validation.
 class DropdownMenuFormFieldExample extends StatefulWidget {
   const DropdownMenuFormFieldExample({super.key});
 
@@ -38,13 +39,15 @@ class DropdownMenuFormFieldExample extends StatefulWidget {
       _DropdownMenuFormFieldExampleState();
 }
 
-typedef RoleEntry = DropdownMenuEntry<String>;
+typedef _RoleEntry = DropdownMenuEntry<String>;
 
 class _DropdownMenuFormFieldExampleState
     extends State<DropdownMenuFormFieldExample> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  static final List<RoleEntry> _roleEntries = UnmodifiableListView<RoleEntry>(
-    roles.map<RoleEntry>((String role) => RoleEntry(value: role, label: role)),
+  static final List<_RoleEntry> _roleEntries = List<_RoleEntry>.unmodifiable(
+    _roles.map<_RoleEntry>(
+      (String role) => _RoleEntry(value: role, label: role),
+    ),
   );
   String? _selectedRole;
 
