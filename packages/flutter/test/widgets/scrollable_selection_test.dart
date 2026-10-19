@@ -2423,11 +2423,13 @@ void main() {
         );
         expect(samples.map((_ScrollOffsets s) => s.horizontal), everyElement(0.0));
 
-        // Clear the selection by clicking on empty space to the right of the
-        // last 'Below' row. This works around RenderTwoDimensionalViewport.detach
-        // asserting '_owner != null' on teardown when a kept-alive selected cell
-        // has been scrolled away, see
+        // TODO(Renzo-Olivares): Remove this workaround once a two-dimensional
+        // viewport can be unmounted while it holds a kept-alive selected cell,
         // https://github.com/flutter/flutter/issues/194718.
+        // Clear the selection by clicking on empty space to the right of the
+        // last 'Below' row; otherwise RenderTwoDimensionalViewport.detach
+        // asserts '_owner != null' on teardown because the kept-alive selected
+        // cell has been scrolled away.
         await tester.tapAt(const Offset(790, 590), kind: ui.PointerDeviceKind.mouse);
         await tester.pump();
         expect(tester.takeException(), isNull);
