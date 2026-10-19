@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
@@ -16,6 +15,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
@@ -782,6 +782,85 @@ _flutter.loader.load();
       );
 
       await Dart2JSTarget(const JsCompilerConfig(minify: false)).build(environment);
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
+
+  List<String> dart2jsCfeCommand(List<String> common) => <String>[
+    ...common,
+    environment.buildDir.childFile('app.dill').absolute.path,
+    '--packages=/.dart_tool/package_config.json',
+    '--cfe-only',
+    environment.buildDir.childFile('main.dart').absolute.path,
+  ];
+
+  List<String> dart2jsCompileCommand(List<String> common) => <String>[
+    ...common,
+    environment.buildDir.childFile('main.dart.js').absolute.path,
+    environment.buildDir.childFile('app.dill').absolute.path,
+  ];
+
+  const releaseDeprecatedJsInteropDisabledArgs = <String>[
+    ..._kDart2jsLinuxArgs,
+    '-Ddart.vm.product=true',
+    ..._kStandardFlutterWebDefines,
+    '-O4',
+    '--minify',
+    '--no-deprecated-js-interop',
+    '-o',
+  ];
+
+  test(
+    'Dart2JSTarget passes --no-deprecated-js-interop to both dart2js phases',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(command: dart2jsCfeCommand(releaseDeprecatedJsInteropDisabledArgs)),
+        FakeCommand(command: dart2jsCompileCommand(releaseDeprecatedJsInteropDisabledArgs)),
+      ]);
+
+      await Dart2JSTarget(const JsCompilerConfig(deprecatedJsInterop: false)).build(environment);
+
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
+
+  test(
+    'Dart2JSTarget prints dart2js output to stderr when compilation fails',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      const diagnostics =
+          'web/main.dart:1:8:\n'
+          "Error: Import of deprecated JS interop library 'dart:html' is not "
+          'allowed.\n'
+          "import 'dart:html';\n"
+          '       ^\n'
+          'Deprecated JS interop libraries are imported through:\n'
+          '  main library\n'
+          '  └── package:foo/main.dart\n'
+          '      └── dart:html\n'
+          'Error: Compilation failed.\n';
+      processManager.addCommand(
+        FakeCommand(
+          command: dart2jsCfeCommand(releaseDeprecatedJsInteropDisabledArgs),
+          // The import tree uses non-ASCII characters, so the output must be
+          // decoded as UTF-8 rather than the system encoding.
+          encoding: utf8,
+          exitCode: 1,
+          stdout: diagnostics,
+          stderr: 'Unhandled dart2js issue\n',
+        ),
+      );
+
+      await expectLater(
+        Dart2JSTarget(const JsCompilerConfig(deprecatedJsInterop: false)).build(environment),
+        throwsToolExit(message: 'Failed to compile application for the Web.'),
+      );
+
+      final logger = globals.logger as BufferLogger;
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, '${diagnostics}Unhandled dart2js issue\n');
+      // The second dart2js phase must not run after the first one fails.
+      expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1596,6 +1675,8 @@ _flutter.loader.load();
       JsCompilerConfig(sourceMaps: false),
       JsCompilerConfig(minify: false),
       JsCompilerConfig(webContentHash: true),
+      JsCompilerConfig(deprecatedJsInterop: true),
+      JsCompilerConfig(deprecatedJsInterop: false),
 
       // All properties non-default
       JsCompilerConfig(
