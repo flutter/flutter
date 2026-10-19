@@ -434,7 +434,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           TextureFillVertexShader::FrameInfo frame_info;
           frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
 
-          TextureFillFragmentShader::FragInfo frag_info;
+          TextureFillFragmentShader::FragInfo frag_info{};
           frag_info.alpha = 1.0;
 
           const Quad& uvs = pass_args.uvs;
@@ -583,7 +583,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         KernelSamples kernel_info = GenerateBlurInfo(blur_info);
         LerpHackResult lerped_kernel = LerpHackKernelSamples(kernel_info);
 
-        GaussianBlurFragmentShader::FragInfo frag_info;
+        GaussianBlurFragmentShader::FragInfo frag_info{};
         frag_info.unpremultiply = blur_info.apply_unpremultiply;
         frag_info.sample_count = lerped_kernel.sample_count;
         GaussianBlurFragmentShader::BindFragInfo(
@@ -828,7 +828,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
     expanded_coverage_hint = coverage_hint->Expand(blur_info.local_padding);
   }
 
-  Entity snapshot_entity = entity.Clone();
+  Entity snapshot_entity;
   snapshot_entity.SetTransform(
       Matrix::MakeTranslation(blur_info.source_space_offset) *
       Matrix::MakeScale(blur_info.source_space_scalar));
@@ -847,7 +847,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
-    Matrix transform = snapshot_entity.GetTransform() * effect_transform;
+    Matrix transform =
+        snapshot_entity.GetTransform() * GetLocalToPassTransform();
     source_bounds = bounds_->GetTransformedPoints(transform);
   }
 

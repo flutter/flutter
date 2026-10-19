@@ -370,6 +370,33 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   return nil;
 }
 
+// Verifies that a create call whose viewType is not a string returns an error rather than raising.
+// An omitted argument arrives as nil and an explicit Dart null as NSNull, and neither can be
+// converted to the view type the factory lookup needs.
+- (void)testCreateWithInvalidViewTypeReturnsError {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+
+  NSArray<NSDictionary*>* invalidArguments = @[
+    @{@"id" : @2},                               // 'viewType' omitted.
+    @{@"id" : @2, @"viewType" : [NSNull null]},  // 'viewType' explicitly null in Dart.
+    @{@"id" : @2, @"viewType" : @7},             // 'viewType' not a string.
+  ];
+
+  for (NSDictionary* arguments in invalidArguments) {
+    __block BOOL errored = NO;
+    FlutterResult result = ^(id result) {
+      if ([result isKindOfClass:[FlutterError class]]) {
+        errored = YES;
+      }
+    };
+    [flutterPlatformViewsController
+        onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create" arguments:arguments]
+              result:result];
+    XCTAssertTrue(errored, @"arguments: %@", arguments);
+  }
+}
+
 - (void)testFlutterViewOnlyCreateOnceInOneFrame {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 

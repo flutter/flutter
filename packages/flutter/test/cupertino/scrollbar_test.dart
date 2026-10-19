@@ -723,66 +723,63 @@ void main() {
     },
   );
 
-  testWidgets(
-    'With thumbVisibility: false, fling a scroll. While it is still scrolling, set thumbVisibility: true. '
-    'The thumb should not fade even after the scrolling stops',
-    (WidgetTester tester) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-      var thumbVisibility = false;
-      Widget viewWithScroll() {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Directionality(
-              textDirection: TextDirection.ltr,
-              child: MediaQuery(
-                data: const MediaQueryData(),
-                child: Stack(
-                  children: <Widget>[
-                    CupertinoScrollbar(
-                      thumbVisibility: thumbVisibility,
+  testWidgets('With thumbVisibility: false, fling a scroll. While it is still scrolling, set thumbVisibility: true. '
+      'The thumb should not fade even after the scrolling stops', (WidgetTester tester) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    var thumbVisibility = false;
+    Widget viewWithScroll() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Stack(
+                children: <Widget>[
+                  CupertinoScrollbar(
+                    thumbVisibility: thumbVisibility,
+                    controller: controller,
+                    child: SingleChildScrollView(
                       controller: controller,
-                      child: SingleChildScrollView(
-                        controller: controller,
-                        child: const SizedBox(width: 4000.0, height: 4000.0),
-                      ),
+                      child: const SizedBox(width: 4000.0, height: 4000.0),
                     ),
-                    Positioned(
-                      bottom: 10,
-                      child: CupertinoButton(
-                        onPressed: () {
-                          setState(() {
-                            thumbVisibility = !thumbVisibility;
-                          });
-                        },
-                        child: const Text('change thumbVisibility'),
-                      ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    child: CupertinoButton(
+                      onPressed: () {
+                        setState(() {
+                          thumbVisibility = !thumbVisibility;
+                        });
+                      },
+                      child: const Text('change thumbVisibility'),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-        );
-      }
+            ),
+          );
+        },
+      );
+    }
 
-      await tester.pumpWidget(viewWithScroll());
-      await tester.pumpAndSettle();
-      expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
-      await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10);
-      expect(find.byType(CupertinoScrollbar), paints..rrect());
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
+    await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10);
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
 
-      await tester.tap(find.byType(CupertinoButton));
-      await tester.pump();
-      expect(find.byType(CupertinoScrollbar), paints..rrect());
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pump();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
 
-      // Wait for the timer delay to expire.
-      await tester.pump(const Duration(milliseconds: 600)); // kScrollbarTimeToFade
-      await tester.pumpAndSettle();
-      // Scrollbar thumb is showing after scroll finishes and timer ends.
-      expect(find.byType(CupertinoScrollbar), paints..rrect());
-    },
-  );
+    // Wait for the timer delay to expire.
+    await tester.pump(const Duration(milliseconds: 600)); // kScrollbarTimeToFade
+    await tester.pumpAndSettle();
+    // Scrollbar thumb is showing after scroll finishes and timer ends.
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+  });
 
   testWidgets('Toggling thumbVisibility while not scrolling fades the thumb in/out. '
       'This works even when you have never scrolled at all yet', (WidgetTester tester) async {
@@ -989,130 +986,126 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgets(
-    'Tapping the track area pages the Scroll View except on iOS',
-    (WidgetTester tester) async {
-      final scrollController = ScrollController();
-      addTearDown(scrollController.dispose);
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: CupertinoScrollbar(
-              thumbVisibility: true,
+  testWidgets('Tapping the track area pages the Scroll View except on iOS', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            thumbVisibility: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
               controller: scrollController,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: const SizedBox(width: 1000.0, height: 1000.0),
-              ),
+              child: const SizedBox(width: 1000.0, height: 1000.0),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      await tester.pumpAndSettle();
-      expect(scrollController.offset, 0.0);
-      expect(
-        find.byType(CupertinoScrollbar),
-        paints..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
+      ),
+    );
+
+    // Tap on the track area below the thumb.
+    await tester.tapAt(const Offset(796.0, 550.0));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 400.0);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(794.0, 240.6, 797.0, 597.0),
+          const Radius.circular(1.5),
         ),
-      );
+      ),
+    );
 
-      // Tap on the track area below the thumb.
-      await tester.tapAt(const Offset(796.0, 550.0));
-      await tester.pumpAndSettle();
+    // Tap on the track area above the thumb.
+    await tester.tapAt(const Offset(796.0, 50.0));
+    await tester.pumpAndSettle();
 
-      expect(scrollController.offset, 400.0);
-      expect(
-        find.byType(CupertinoScrollbar),
-        paints..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromRectAndRadius(
-            const Rect.fromLTRB(794.0, 240.6, 797.0, 597.0),
-            const Radius.circular(1.5),
-          ),
-        ),
-      );
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
+      ),
+    );
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-      // Tap on the track area above the thumb.
-      await tester.tapAt(const Offset(796.0, 50.0));
-      await tester.pumpAndSettle();
-
-      expect(scrollController.offset, 0.0);
-      expect(
-        find.byType(CupertinoScrollbar),
-        paints..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
-        ),
-      );
-    },
-    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-  );
-
-  testWidgets(
-    'Tapping the track area does not page the Scroll View on iOS',
-    (WidgetTester tester) async {
-      final scrollController = ScrollController();
-      addTearDown(scrollController.dispose);
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: CupertinoScrollbar(
-              thumbVisibility: true,
+  testWidgets('Tapping the track area does not page the Scroll View on iOS', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoScrollbar(
+            thumbVisibility: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
               controller: scrollController,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: const SizedBox(width: 1000.0, height: 1000.0),
-              ),
+              child: const SizedBox(width: 1000.0, height: 1000.0),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      await tester.pumpAndSettle();
-      expect(scrollController.offset, 0.0);
-      expect(
-        find.byType(CupertinoScrollbar),
-        paints..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
-        ),
-      );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
+      ),
+    );
 
-      // Tap on the track area below the thumb.
-      await tester.tapAt(const Offset(796.0, 550.0));
-      await tester.pumpAndSettle();
+    // Tap on the track area below the thumb.
+    await tester.tapAt(const Offset(796.0, 550.0));
+    await tester.pumpAndSettle();
 
-      expect(scrollController.offset, 0.0);
-      expect(
-        find.byType(CupertinoScrollbar),
-        paints..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
-        ),
-      );
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
+      ),
+    );
 
-      // Tap on the track area above the thumb.
-      await tester.tapAt(const Offset(796.0, 50.0));
-      await tester.pumpAndSettle();
+    // Tap on the track area above the thumb.
+    await tester.tapAt(const Offset(796.0, 50.0));
+    await tester.pumpAndSettle();
 
-      expect(scrollController.offset, 0.0);
-      expect(
-        find.byType(CupertinoScrollbar),
-        paints..rrect(
-          color: _kScrollbarColor.color,
-          rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
-        ),
-      );
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(CupertinoScrollbar),
+      paints..rrect(
+        color: _kScrollbarColor.color,
+        rrect: RRect.fromLTRBR(794.0, 3.0, 797.0, 359.4, const Radius.circular(1.5)),
+      ),
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Throw if interactive with the bar when no position attached', (
     WidgetTester tester,

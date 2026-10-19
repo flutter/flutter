@@ -805,6 +805,54 @@ void main() {
   );
 
   testUsingContext(
+    'iOS targets throw ToolExit if sdk root is unrecognized iOS SDK',
+    () async {
+      const unsupportedSdkRoot = 'path/to/XROS1.0.sdk';
+      const expectedErrorMessage =
+          'Unsupported iOS SDK root "$unsupportedSdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK. '
+          "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+          '(SDKROOT) and Supported Destinations in Xcode.';
+      final fileSystem = MemoryFileSystem.test();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{
+          kTargetPlatform: 'ios',
+          kSdkRoot: unsupportedSdkRoot,
+          kBuildMode: 'release',
+          kIosArchs: 'arm64',
+        },
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+
+      await expectLater(
+        const AotAssemblyRelease().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugUniversalFramework().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugUnpackIOS().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugIosLLDBInit().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
     'AotAssemblyRelease throws exception if sdk root is missing',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -874,7 +922,11 @@ void main() {
           'chmod',
           '-R',
           'u+w',
-          outputDir.childDirectory('Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical').path,
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+              )
+              .path,
         ],
       );
 
@@ -890,7 +942,6 @@ void main() {
           outputDir.path,
         ],
       );
-
 
       copyPhysicalFrameworkDsymCommandFailure = FakeCommand(
         command: <String>[
@@ -928,7 +979,11 @@ void main() {
           'chmod',
           '-R',
           'u+w',
-          outputDir.childDirectory('Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator').path,
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+              )
+              .path,
         ],
       );
     });

@@ -30,12 +30,12 @@ jobs:
       - name: Fetch upstream
         run: |
           git remote add upstream https://github.com/flutter/flutter.git
-          git fetch upstream $REF_NAME
+          git fetch upstream "$REF_NAME"
 
           BRANCH_NAME="update-engine-$(date +%s)"
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> "$GITHUB_ENV"
 
-          git checkout -b "$BRANCH_NAME" upstream/$REF_NAME
+          git checkout -b "$BRANCH_NAME" "upstream/$REF_NAME"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           REF_NAME: ${{ github.ref_name }}
@@ -49,13 +49,13 @@ jobs:
           else
             OLD_HASH="None (New File)"
           fi
-          echo "OLD_HASH=$OLD_HASH" >> $GITHUB_ENV
+          echo "OLD_HASH=$OLD_HASH" >> "$GITHUB_ENV"
 
           chmod +x bin/internal/last_engine_commit.sh
           NEW_HASH=$(./bin/internal/last_engine_commit.sh)
 
           echo "$NEW_HASH" > bin/internal/engine.version
-          echo "ENGINE_HASH=$NEW_HASH" >> $GITHUB_ENV
+          echo "ENGINE_HASH=$NEW_HASH" >> "$GITHUB_ENV"
 
       - name: Check for Changes
         id: git-check
@@ -64,13 +64,13 @@ jobs:
           git add -f bin/internal/engine.version
 
           if git diff --cached --exit-code bin/internal/engine.version; then
-            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "changed=false" >> "$GITHUB_OUTPUT"
 
             # Nice big No-Op Summary
-            echo "## ✅ Engine version already up to date" >> $GITHUB_STEP_SUMMARY
-            echo "The engine is already at hash \`$ENGINE_HASH\`. No PR was created." >> $GITHUB_STEP_SUMMARY
+            echo "## ✅ Engine version already up to date" >> "$GITHUB_STEP_SUMMARY"
+            echo "The engine is already at hash \`$ENGINE_HASH\`. No PR was created." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create PR if Changed
@@ -85,14 +85,16 @@ jobs:
             --title "[$REF_NAME] Sync engine.version to $ENGINE_HASH" \
             --body "Updates the engine.version file from \`$OLD_HASH\` to \`$ENGINE_HASH\`." \
             --repo flutter/flutter \
-            --base $REF_NAME \
-            --head flutteractionsbot:$BRANCH_NAME)
+            --base "$REF_NAME" \
+            --head "flutteractionsbot:$BRANCH_NAME")
 
           # Nice big PR Success Summary
-          echo "## 🚀 PR Created Successfully" >> $GITHUB_STEP_SUMMARY
-          echo "Updated engine version from \`$OLD_HASH\` to \`$ENGINE_HASH\`." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 **View Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 🚀 PR Created Successfully"
+            echo "Updated engine version from \`$OLD_HASH\` to \`$ENGINE_HASH\`."
+            echo ""
+            echo "🔗 **View Pull Request:** $PR_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           REF_NAME: ${{ github.ref_name }}
