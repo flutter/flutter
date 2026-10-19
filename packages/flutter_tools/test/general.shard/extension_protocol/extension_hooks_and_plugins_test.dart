@@ -42,7 +42,9 @@ import '../../src/throwing_pub.dart';
 import '../isolated/fake_native_assets_build_runner.dart';
 
 final class _PluginCapturingBuildService extends BuildService {
-  static List<ExtensionPlugin> lastPlugins = const <ExtensionPlugin>[];
+  _PluginCapturingBuildService(this._pluginsPort);
+
+  final SendPort _pluginsPort;
 
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
@@ -72,17 +74,21 @@ final class _PluginCapturingBuildService extends BuildService {
     required String targetName,
     List<ExtensionPlugin> plugins = const <ExtensionPlugin>[],
   }) async {
-    lastPlugins = plugins;
+    _pluginsPort.send(plugins);
     return const ExtensionBuildResult(success: true);
   }
 }
 
-void _pluginCapturingExtensionEntryPoint(SendPort sendPort) {
+void _pluginCapturingExtensionEntryPoint(SendPort sendPort, SendPort pluginsPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
-    <ToolExtensionService>[_PluginCapturingBuildService()],
+    <ToolExtensionService>[_PluginCapturingBuildService(pluginsPort)],
     supportedPlatforms: const <String>{'linux'},
   );
+}
+
+ExtensionEntryPoint _createPluginCapturingEntryPoint(SendPort pluginsPort) {
+  return (SendPort sendPort) => _pluginCapturingExtensionEntryPoint(sendPort, pluginsPort);
 }
 
 void main() {
@@ -380,7 +386,10 @@ environment:
       writePackageConfigFiles(
         directory: projectDir,
         mainLibName: 'my_app',
-        packages: <String, String>{'camera_ohos': '/camera_ohos'},
+        packages: <String, String>{
+          'camera_ohos': '/camera_ohos',
+          'url_launcher_linux': '/url_launcher_linux',
+        },
       );
       projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_app
@@ -388,6 +397,7 @@ dependencies:
   flutter:
     sdk: flutter
   camera_ohos: 1.0.0
+  url_launcher_linux: 1.0.0
 ''');
       fileSystem.directory('/camera_ohos').childFile('pubspec.yaml')
         ..createSync(recursive: true)
@@ -403,14 +413,30 @@ environment:
   sdk: ^3.7.0-0
   flutter: ">=1.20.0"
 ''');
+      fileSystem.directory('/url_launcher_linux').childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: url_launcher_linux
+flutter:
+  plugin:
+    platforms:
+      linux:
+        pluginClass: UrlLauncherPlugin
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=1.20.0"
+''');
 
+      final pluginsPort = ReceivePort();
+      addTearDown(pluginsPort.close);
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final extensionManager = ExtensionManager(
-        entryPoints: <ExtensionEntryPoint>[_pluginCapturingExtensionEntryPoint],
+        entryPoints: <ExtensionEntryPoint>[_createPluginCapturingEntryPoint(pluginsPort.sendPort)],
         featureFlags: featureFlags,
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
       );
+      addTearDown(extensionManager.dispose);
       final buildManager = ExtensionBuildManager(
         extensionManager: extensionManager,
         featureFlags: featureFlags,
@@ -432,7 +458,6 @@ environment:
         }),
       );
 
-      _PluginCapturingBuildService.lastPlugins = const <ExtensionPlugin>[];
       final ExtensionBuildResult result = await buildManager.build(
         buildMode: BuildMode.release,
         mainPath: 'lib/main.dart',
@@ -441,7 +466,7 @@ environment:
       );
       expect(result.success, isTrue);
       expect(
-        _PluginCapturingBuildService.lastPlugins,
+        await pluginsPort.first,
         equals(<ExtensionPlugin>[
           ExtensionPlugin(
             name: 'camera_ohos',
@@ -453,8 +478,6 @@ environment:
           ),
         ]),
       );
-
-      await extensionManager.dispose();
     });
   });
 
