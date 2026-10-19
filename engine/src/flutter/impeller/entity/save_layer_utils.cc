@@ -22,7 +22,8 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     const Rect& coverage_limit,
     const std::shared_ptr<FilterContents>& image_filter,
     bool flood_output_coverage,
-    bool flood_input_coverage) {
+    bool flood_input_coverage,
+    std::optional<ISize> max_subpass_size) {
   Rect coverage = content_coverage;
   // There are three conditions that should cause input coverage to flood, the
   // first is the presence of a backdrop filter on the saveLayer. The second is
@@ -62,13 +63,15 @@ std::optional<Rect> ComputeSaveLayerCoverage(
       // No intersection with parent coverage limit.
       return std::nullopt;
     }
+    bool source_is_unbounded = source_coverage_limit->IsMaximum() ||
+                               !source_coverage_limit->IsFinite();
     // The image filter may change the coverage limit required to flood
     // the parent layer. Returning the source coverage limit so that we
     // can guarantee the render target is larger enough.
     //
     // See note below on flood_output_coverage.
     if (flood_output_coverage || coverage.IsMaximum()) {
-      if (source_coverage_limit->IsMaximum()) {
+      if (source_is_unbounded) {
         return coverage_limit;
       }
       return source_coverage_limit;
@@ -85,9 +88,17 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     // intersected coverage, then just use the transformed coverage. In other
     // cases, use the intersection.
     auto transformed_coverage = coverage.TransformBounds(effect_transform);
-    if (source_coverage_limit->IsMaximum() &&
-        !transformed_coverage.IntersectsWithRect(coverage_limit)) {
-      return std::nullopt;
+    if (source_is_unbounded) {
+      if (!transformed_coverage.IntersectsWithRect(coverage_limit)) {
+        return std::nullopt;
+      }
+      ISize full_size(transformed_coverage.GetSize());
+      if (!max_subpass_size.has_value() ||
+          (full_size.width <= max_subpass_size->width &&
+           full_size.height <= max_subpass_size->height)) {
+        return transformed_coverage;
+      }
+      return transformed_coverage.Intersection(coverage_limit);
     }
     auto intersected_coverage =
         transformed_coverage.Intersection(source_coverage_limit.value());

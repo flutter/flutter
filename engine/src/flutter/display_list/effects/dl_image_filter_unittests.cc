@@ -1107,5 +1107,67 @@ TEST(
   EXPECT_EQ(display_list->rtree()->bounds(), outer_clip);
 }
 
+TEST(DisplayListImageFilter,
+     RuntimeEffectComposedInsideOuterFilterMatchesRTreeAndGlobalBounds) {
+  auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>());
+
+  DlRect layer_bounds = DlRect::MakeLTRB(0, 0, 400, 800);
+  DlRect child_bounds = DlRect::MakeLTRB(50, 600, 150, 700);
+
+  // Case 1: compose(outer: Matrix(translate 100, 0), inner: RuntimeEffect)
+  {
+    auto matrix_filter = DlImageFilter::MakeMatrix(
+        DlMatrix::MakeTranslation({100.0f, 0.0f}), DlImageSampling::kLinear);
+    auto composed = DlImageFilter::MakeCompose(matrix_filter, runtime_filter);
+    DlPaint save_paint;
+    save_paint.setImageFilter(composed);
+
+    DisplayListBuilder builder_no_rtree(/*prepare_rtree=*/false);
+    builder_no_rtree.SaveLayer(layer_bounds, &save_paint);
+    builder_no_rtree.DrawRect(child_bounds, DlPaint());
+    builder_no_rtree.Restore();
+    auto dl_no_rtree = builder_no_rtree.Build();
+
+    DisplayListBuilder builder_rtree(/*prepare_rtree=*/true);
+    builder_rtree.SaveLayer(layer_bounds, &save_paint);
+    builder_rtree.DrawRect(child_bounds, DlPaint());
+    builder_rtree.Restore();
+    auto dl_rtree = builder_rtree.Build();
+
+    DlRect expected_bounds = DlRect::MakeLTRB(100, 0, 500, 800);
+    EXPECT_EQ(dl_no_rtree->GetBounds(), expected_bounds);
+    EXPECT_EQ(dl_rtree->GetBounds(), expected_bounds);
+    ASSERT_TRUE(dl_rtree->has_rtree());
+    EXPECT_EQ(dl_rtree->rtree()->bounds(), expected_bounds);
+  }
+
+  // Case 2: compose(outer: Blur(5, 5), inner: RuntimeEffect)
+  {
+    auto blur_filter = DlImageFilter::MakeBlur(5.0f, 5.0f, DlTileMode::kClamp);
+    auto composed = DlImageFilter::MakeCompose(blur_filter, runtime_filter);
+    DlPaint save_paint;
+    save_paint.setImageFilter(composed);
+
+    DisplayListBuilder builder_no_rtree(/*prepare_rtree=*/false);
+    builder_no_rtree.SaveLayer(layer_bounds, &save_paint);
+    builder_no_rtree.DrawRect(child_bounds, DlPaint());
+    builder_no_rtree.Restore();
+    auto dl_no_rtree = builder_no_rtree.Build();
+
+    DisplayListBuilder builder_rtree(/*prepare_rtree=*/true);
+    builder_rtree.SaveLayer(layer_bounds, &save_paint);
+    builder_rtree.DrawRect(child_bounds, DlPaint());
+    builder_rtree.Restore();
+    auto dl_rtree = builder_rtree.Build();
+
+    DlRect expected_bounds = layer_bounds.Expand(15.0f, 15.0f);
+    EXPECT_EQ(dl_no_rtree->GetBounds(), expected_bounds);
+    EXPECT_EQ(dl_rtree->GetBounds(), expected_bounds);
+    ASSERT_TRUE(dl_rtree->has_rtree());
+    EXPECT_EQ(dl_rtree->rtree()->bounds(), expected_bounds);
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter

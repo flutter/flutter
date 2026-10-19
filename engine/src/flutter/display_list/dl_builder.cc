@@ -900,13 +900,30 @@ bool DisplayListBuilder::AdjustRTreeRects(
   auto& indices = data.indices;
   FML_DCHECK(rects.size() == indices.size());
   int ret = false;
+  std::optional<DlRect> full_layer_output;
+  bool full_layer_floods = false;
+  if (unbounded_input_device_bounds.has_value()) {
+    DlIRect ibounds = DlIRect::RoundOut(*unbounded_input_device_bounds);
+    if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
+      full_layer_output = DlRect::Make(ibounds);
+    } else {
+      full_layer_floods = true;
+    }
+  }
   auto rect_keep = rect_start_index;
   for (size_t i = rect_start_index; i < rects.size(); i++) {
-    DlRect bounds = rects[i];
-    DlIRect ibounds = DlIRect::RoundOut(bounds);
-    if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
-      bounds = unbounded_input_device_bounds.value_or(DlRect::Make(ibounds));
-    } else {
+    DlRect bounds;
+    if (full_layer_output.has_value()) {
+      bounds = *full_layer_output;
+    } else if (!full_layer_floods) {
+      DlIRect ibounds = DlIRect::RoundOut(rects[i]);
+      if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
+        bounds = DlRect::Make(ibounds);
+      } else {
+        full_layer_floods = true;
+      }
+    }
+    if (full_layer_floods) {
       bounds = clip;
       ret = true;
     }

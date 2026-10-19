@@ -30,6 +30,10 @@ namespace impeller {
 /// @param flood_input_coverage  Whther the content coverage should be flooded.
 /// This should be set to true if the paint has a backdrop filter or if there is
 /// a transparent black effecting color filter.
+/// @param max_subpass_size      Optional maximum render pass attachment size.
+///                              When provided, filters with unbounded source
+///                              coverage only preserve the full layer coverage
+///                              if it fits within a single render target.
 ///
 /// The coverage computation expects `content_coverage` to be in the child
 /// coordinate space. `effect_transform` is used to transform this back into the
@@ -42,7 +46,8 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     const Rect& coverage_limit,
     const std::shared_ptr<FilterContents>& image_filter,
     bool flood_output_coverage = false,
-    bool flood_input_coverage = false);
+    bool flood_input_coverage = false,
+    std::optional<ISize> max_subpass_size = std::nullopt);
 
 }  // namespace impeller
 

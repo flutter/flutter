@@ -390,6 +390,45 @@ TEST(SaveLayerUtilsTest,
   EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 400, 800));
 }
 
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectFilterExceedingMaxSubpassSizeFallsBackToCoverageLimit) {
+  auto image_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 400, 20000),    //
+      /*effect_transform=*/{},                                  //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 15000, 400, 16000),  //
+      /*image_filter=*/image_filter,                            //
+      /*flood_output_coverage=*/false,                          //
+      /*flood_input_coverage=*/false,                           //
+      /*max_subpass_size=*/ISize(4096, 4096)                    //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 15000, 400, 16000));
+}
+
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectOuterComposedWithMatrixInnerAndFloodUsesCoverageLimit) {
+  auto inner_matrix = FilterContents::MakeMatrixFilter(
+      FilterInput::Make(Rect()), Matrix::MakeScale({0.5f, 0.5f, 1.0f}), {});
+  auto composed_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(inner_matrix), nullptr, nullptr, {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*effect_transform=*/{},                              //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 400, 800),    //
+      /*image_filter=*/composed_filter,                     //
+      /*flood_output_coverage=*/true,                       //
+      /*flood_input_coverage=*/false                        //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 400, 800));
+}
+
 }  // namespace testing
 }  // namespace impeller
 
