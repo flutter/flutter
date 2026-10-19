@@ -627,6 +627,134 @@ void main() {
       skip: !kIsWeb,
     );
 
+    group('focus moving to a descendant', () {
+      const text = 'Hello world';
+
+      Future<RenderParagraph> pumpAndSelect(WidgetTester tester, Widget descendant) async {
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: _selectableRegion(
+              child: Column(children: <Widget>[const Text(text), descendant]),
+            ),
+          ),
+        );
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(
+          tester.getTopLeft(find.text(text)),
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await gesture.moveTo(tester.getBottomRight(find.text(text)));
+        await gesture.up();
+        await tester.pump();
+        expect(paragraph.selections, isNotEmpty);
+        return paragraph;
+      }
+
+      testWidgets(
+        'clicking into an editable descendant dismisses the selection',
+        (WidgetTester tester) async {
+          final fieldFocusNode = FocusNode();
+          addTearDown(fieldFocusNode.dispose);
+          final RenderParagraph paragraph = await pumpAndSelect(
+            tester,
+            TestTextField(focusNode: fieldFocusNode),
+          );
+
+          await tester.tap(find.byType(TestTextField), kind: PointerDeviceKind.mouse);
+          await tester.pump();
+
+          expect(fieldFocusNode.hasFocus, isTrue);
+          expect(paragraph.selections, isEmpty);
+        },
+        // [intended] Dismissing the selection when an editable descendant takes the focus is web-only.
+        skip: !kIsWeb,
+      );
+
+      testWidgets(
+        'moving the focus to an editable descendant with the keyboard dismisses the selection',
+        (WidgetTester tester) async {
+          final fieldFocusNode = FocusNode();
+          addTearDown(fieldFocusNode.dispose);
+          final RenderParagraph paragraph = await pumpAndSelect(
+            tester,
+            TestTextField(focusNode: fieldFocusNode),
+          );
+
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.pump();
+
+          expect(fieldFocusNode.hasFocus, isTrue);
+          expect(paragraph.selections, isEmpty);
+        },
+        // [intended] Dismissing the selection when an editable descendant takes the focus is web-only.
+        skip: !kIsWeb,
+      );
+
+      testWidgets(
+        'focusing a read-only editable descendant dismisses the selection',
+        (WidgetTester tester) async {
+          final fieldFocusNode = FocusNode();
+          addTearDown(fieldFocusNode.dispose);
+          final RenderParagraph paragraph = await pumpAndSelect(
+            tester,
+            TestTextField(focusNode: fieldFocusNode, readOnly: true),
+          );
+
+          fieldFocusNode.requestFocus();
+          await tester.pump();
+
+          expect(fieldFocusNode.hasFocus, isTrue);
+          expect(paragraph.selections, isEmpty);
+        },
+        // [intended] Dismissing the selection when an editable descendant takes the focus is web-only.
+        skip: !kIsWeb,
+      );
+
+      testWidgets(
+        'focusing a non-editable descendant keeps the selection',
+        (WidgetTester tester) async {
+          final buttonFocusNode = FocusNode();
+          addTearDown(buttonFocusNode.dispose);
+          final RenderParagraph paragraph = await pumpAndSelect(
+            tester,
+            Focus(focusNode: buttonFocusNode, child: const SizedBox(width: 100.0, height: 40.0)),
+          );
+
+          buttonFocusNode.requestFocus();
+          await tester.pump();
+
+          expect(buttonFocusNode.hasFocus, isTrue);
+          expect(paragraph.selections, isNotEmpty);
+        },
+        // [intended] Only web dismisses the selection on focus changes.
+        skip: !kIsWeb,
+      );
+
+      testWidgets(
+        'focusing an editable descendant keeps the selection on non-web platforms',
+        (WidgetTester tester) async {
+          final fieldFocusNode = FocusNode();
+          addTearDown(fieldFocusNode.dispose);
+          final RenderParagraph paragraph = await pumpAndSelect(
+            tester,
+            TestTextField(focusNode: fieldFocusNode),
+          );
+
+          await tester.tap(find.byType(TestTextField), kind: PointerDeviceKind.mouse);
+          await tester.pump();
+
+          expect(fieldFocusNode.hasFocus, isTrue);
+          expect(paragraph.selections, isNotEmpty);
+        },
+        variant: TargetPlatformVariant.all(),
+        // [intended] Dismissing the selection when an editable descendant takes the focus is web-only.
+        skip: kIsWeb,
+      );
+    });
+
     testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
 

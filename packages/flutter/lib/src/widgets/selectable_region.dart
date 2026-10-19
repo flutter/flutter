@@ -24,6 +24,7 @@ import 'actions.dart';
 import 'basic.dart';
 import 'context_menu_button_item.dart';
 import 'debug.dart';
+import 'editable_text.dart' show EditableTextState;
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -549,9 +550,30 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
-    } else if (_webContextMenuEnabled) {
-      PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
+    } else {
+      if (kIsWeb &&
+          !_focusNode.hasPrimaryFocus &&
+          _selectionDelegate.value.hasSelection &&
+          _primaryFocusIsEditable) {
+        // To match the native web behavior, the selection is dismissed when an
+        // editable descendant takes the focus: a browser collapses the page
+        // selection when the focus enters an editable element, and keeps it
+        // when the focus moves to a non-editable one such as a button.
+        clearSelection();
+        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+        _finalizeSelectableRegionStatus();
+      }
+      if (_webContextMenuEnabled) {
+        PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
+      }
     }
+  }
+
+  /// Whether the node that currently holds the primary focus belongs to an
+  /// [EditableText].
+  static bool get _primaryFocusIsEditable {
+    final BuildContext? context = FocusManager.instance.primaryFocus?.context;
+    return context != null && context.findAncestorStateOfType<EditableTextState>() != null;
   }
 
   void _updateSelectionStatus() {
