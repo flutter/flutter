@@ -18,6 +18,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/base32.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/log_settings.h"
@@ -819,7 +820,8 @@ void Shell::RunEngine(
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  std::unique_ptr<std::promise<Engine::RunStatus>> launch_completion;
+  std::shared_ptr<std::promise<Engine::RunStatus>> launch_completion;
+  fml::ScopedCleanupClosure launch_cancellation;
   if (settings_.merged_platform_ui_thread ==
       Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
     if (ui_thread_launch_result_.valid()) {
@@ -827,8 +829,12 @@ void Shell::RunEngine(
     }
     if (!ui_thread_launch_result_.valid() ||
         !task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread()) {
-      launch_completion = std::make_unique<std::promise<Engine::RunStatus>>();
+      launch_completion = std::make_shared<std::promise<Engine::RunStatus>>();
       ui_thread_launch_result_ = launch_completion->get_future().share();
+      // Resolve discarded startup tasks without creating a broken promise.
+      launch_cancellation.SetClosure([launch_completion] {
+        launch_completion->set_value(Engine::RunStatus::Failure);
+      });
     }
   }
   fml::TaskRunner::RunNowOrPostTask(
@@ -836,13 +842,15 @@ void Shell::RunEngine(
       fml::MakeCopyable(
           [run_configuration = std::move(run_configuration),
            weak_engine = weak_engine_, result,
-           launch_completion = std::move(launch_completion)]() mutable {
+           launch_completion = std::move(launch_completion),
+           launch_cancellation = std::move(launch_cancellation)]() mutable {
             if (!weak_engine) {
               FML_LOG(ERROR)
                   << "Could not launch engine with configuration - no engine.";
               result(Engine::RunStatus::Failure);
               if (launch_completion) {
                 launch_completion->set_value(Engine::RunStatus::Failure);
+                launch_cancellation.Release();
               }
               return;
             }
@@ -854,6 +862,7 @@ void Shell::RunEngine(
             result(run_result);
             if (launch_completion) {
               launch_completion->set_value(run_result);
+              launch_cancellation.Release();
             }
           }));
 }

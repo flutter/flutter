@@ -5403,6 +5403,32 @@ TEST_F(MergeAfterLaunchShellTest, SpawnBeforeRunFails) {
   EXPECT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
+TEST_F(MergeAfterLaunchShellTest, DiscardedStartupTaskReportsFailure) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  fml::AutoResetWaitableEvent ui_blocked;
+  fml::AutoResetWaitableEvent discard_startup;
+  task_runners_.GetUITaskRunner()->PostTask([&] {
+    ui_blocked.Signal();
+    discard_startup.Wait();
+    // Keep the runner alive so Shell can still shut down normally.
+    auto launch_task =
+        fml::MessageLoopTaskQueues::GetInstance()->GetNextTaskToRun(
+            task_runners_.GetUITaskRunner()->GetTaskQueueId(),
+            fml::TimePoint::Now());
+    EXPECT_TRUE(launch_task);
+    launch_task = nullptr;
+  });
+  ui_blocked.Wait();
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    shell->RunEngine(Configuration(settings));
+    discard_startup.Signal();
+    EXPECT_EQ(WaitForUIThreadLaunch(shell.get()), Engine::RunStatus::Failure);
+  });
+  DestroyShell(std::move(shell), task_runners_);
+}
+
 TEST_F(MergeAfterLaunchShellTest, FailedStartupCanRetryAndSpawn) {
   auto settings = CreateSettingsForFixture();
   size_t isolate_create_count = 0;
