@@ -4890,6 +4890,31 @@ void main() {
       },
     );
 
+    testWidgets(
+      'leadingIcon is used when decorationBuilder does not set InputDecoration.prefixIcon',
+      (WidgetTester tester) async {
+        final menuController = MenuController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                leadingIcon: const Icon(Icons.search),
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byIcon(Icons.search), findsNWidgets(2));
+        expect(
+          find.descendant(of: find.byType(TextField), matching: find.byIcon(Icons.search)),
+          findsOneWidget,
+        );
+      },
+    );
+
     testWidgets('Passing label and decorationBuilder throws', (WidgetTester tester) async {
       final menuController = MenuController();
       await expectLater(() async {

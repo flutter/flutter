@@ -90,6 +90,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
              final InputDecoration decoration =
                  decorationBuilder?.call(context, menuController) ?? const InputDecoration();
              final InputDecoration decorationWithLabels = decoration.copyWith(
+               prefixIcon: decoration.prefixIcon ?? leadingIcon,
                label: label,
                hintText: hintText,
                helperText: helperText,

@@ -173,6 +173,11 @@ void main() {
 
     dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.leadingIcon, leadingIcon);
+    expect(find.byIcon(Icons.abc), findsNWidgets(2));
+    expect(
+      find.descendant(of: find.byType(TextField), matching: find.byIcon(Icons.abc)),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Passes trailingIcon to underlying DropdownMenu', (WidgetTester tester) async {
