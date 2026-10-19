@@ -34,7 +34,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "27a266a"
+                    "sdk_version": "27a9275"
                 }
             },
             "tests": [
@@ -85,7 +85,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "27a266a"
+                    "sdk_version": "27a9275"
                 }
             },
             "tests": [
@@ -137,7 +137,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "27a266a"
+                    "sdk_version": "27a9275"
                 }
             },
             "tests": [
@@ -188,7 +188,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "27a266a"
+                    "sdk_version": "27a9275"
                 }
             },
             "tests": [
@@ -245,7 +245,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "27a266a"
+                    "sdk_version": "27a9275"
                 }
             },
             "tests": [
@@ -297,7 +297,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "27a266a"
+                    "sdk_version": "27a9275"
                 }
             },
             "tests": [
@@ -327,9 +327,9 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-27-0_27a266a"
+                        "ios-27-0_27a9275"
                     ],
-                    "sdk_version": "27a266a"
+                    "sdk_version": "27a9275"
                 }
             },
             "drone_dimensions": [
@@ -395,9 +395,9 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-27-0_27a266a"
+                        "ios-27-0_27a9275"
                     ],
-                    "sdk_version": "27a266a"
+                    "sdk_version": "27a9275"
                 }
             },
             "drone_dimensions": [
