@@ -1,11 +1,13 @@
 'use strict';
 
 // This file is a vestigial self-unregistering cleanup stub.
-// Flutter no longer registers or uses a service worker by default.
+// Flutter stopped generating an offline caching service worker in
+// Flutter 3.41.0 (2026-02-10) and no longer registers or uses a service worker
+// by default.
 //
 // This stub is emitted only so returning browsers that previously visited a
-// deployment built with Flutter <= 3.38 (which registered an offline-first
-// caching service worker) can fetch an updated script at
+// deployment built with Flutter <= 3.38 (2025-11-11, which registered an
+// offline-first caching service worker) can fetch an updated script at
 // `/flutter_service_worker.js`, unregister the legacy worker, and purge its
 // caches instead of getting stuck serving cached assets when
 // `/flutter_service_worker.js` returns 404.
