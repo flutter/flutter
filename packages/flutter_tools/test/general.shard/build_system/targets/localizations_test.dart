@@ -46,6 +46,7 @@ use-deferred-loading: true
 preferred-supported-locales: en_US
 required-resource-attributes: false
 nullable-getter: false
+use-explicit-plural-values: true
 ''');
 
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
@@ -66,6 +67,7 @@ nullable-getter: false
     expect(options.preferredSupportedLocales, <String>['en_US']);
     expect(options.requiredResourceAttributes, false);
     expect(options.nullableGetter, false);
+    expect(options.useExplicitPluralValues, true);
   });
 
   testWithoutContext('parseLocalizationsOptions refuses synthetic-package: true', () async {

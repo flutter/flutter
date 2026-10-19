@@ -74,6 +74,7 @@ Future<LocalizationsGenerator> generateLocalizations({
             suppressWarnings: options.suppressWarnings,
             useRelaxedSyntax: options.relaxSyntax,
             useNamedParameters: options.useNamedParameters,
+            useExplicitPluralValues: options.useExplicitPluralValues,
           )
           ..loadResources()
           ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
@@ -528,6 +529,7 @@ class LocalizationsGenerator {
     bool suppressWarnings = false,
     bool useRelaxedSyntax = false,
     bool useNamedParameters = false,
+    bool useExplicitPluralValues = false,
   }) {
     final Directory projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(
@@ -567,6 +569,7 @@ class LocalizationsGenerator {
       suppressWarnings: suppressWarnings,
       useRelaxedSyntax: useRelaxedSyntax,
       useNamedParameters: useNamedParameters,
+      useExplicitPluralValues: useExplicitPluralValues,
     );
   }
 
@@ -593,6 +596,7 @@ class LocalizationsGenerator {
     this.suppressWarnings = false,
     this.useRelaxedSyntax = false,
     this.useNamedParameters = false,
+    this.useExplicitPluralValues = false,
   });
 
   final FileSystem _fs;
@@ -740,6 +744,14 @@ class LocalizationsGenerator {
   /// String helloWorld({required String name});
   /// ```
   final bool useNamedParameters;
+
+  /// Whether explicit plural values such as `=1` match only that exact value.
+  ///
+  /// If this is true, an explicit `=N` plural case is compared against the
+  /// count before the plural category (`zero`, `one`, `two`, `few`, `many`,
+  /// `other`) is resolved, and any non-negative integer is allowed for `N`.
+  /// Otherwise `=0`, `=1` and `=2` are treated as `zero`, `one` and `two`.
+  final bool useExplicitPluralValues;
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -1297,6 +1309,8 @@ class LocalizationsGenerator {
 
           case ST.pluralExpr:
             final pluralLogicArgs = <String, String>{};
+            // Explicit values in reverse source order, keyed by their integer value.
+            final explicitPluralArgs = <int, String>{};
             // Recall that pluralExpr are of the form
             // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
             assert(node.children[1].type == ST.identifier);
@@ -1308,7 +1322,8 @@ class LocalizationsGenerator {
             for (final Node pluralPart in pluralParts.children.reversed) {
               String pluralCase;
               Node pluralMessage;
-              if (pluralPart.children[0].value == '=') {
+              final isExplicitValue = pluralPart.children[0].value == '=';
+              if (isExplicitValue) {
                 assert(pluralPart.children[1].type == ST.number);
                 assert(pluralPart.children[3].type == ST.message);
                 pluralCase = pluralPart.children[1].value!;
@@ -1322,7 +1337,23 @@ class LocalizationsGenerator {
                 pluralCase = pluralPart.children[0].value!;
                 pluralMessage = pluralPart.children[2];
               }
-              if (!pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
+              final int? explicitValue = useExplicitPluralValues && isExplicitValue
+                  ? int.tryParse(pluralCase)
+                  : null;
+              if (useExplicitPluralValues && isExplicitValue && explicitValue == null) {
+                throw L10nParserException(
+                  '''
+The plural case "=$pluralCase" is too large to be represented as an integer.''',
+                  _inputFileNames[locale]!,
+                  message.resourceId,
+                  translationForMessage,
+                  pluralPart.positionInMessage,
+                );
+              }
+              if (explicitValue != null && !explicitPluralArgs.containsKey(explicitValue)) {
+                explicitPluralArgs[explicitValue] = generateVariables(pluralMessage);
+              } else if (explicitValue == null &&
+                  !pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
                 final String pluralPartExpression = generateVariables(pluralMessage);
                 final String? transformedPluralCase = pluralCases[pluralCase];
                 // A valid plural case is one of "=0", "=1", "=2", "zero", "one", "two", "few", "many", or "other".
@@ -1350,6 +1381,17 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             tempVariables.add(
               pluralVariableTemplate
                   .replaceAll('@(varName)', tempVarName)
+                  .replaceAll(
+                    '@(explicitPluralCases)',
+                    explicitPluralArgs.entries
+                        .toList()
+                        .reversed
+                        .map(
+                          (MapEntry<int, String> entry) =>
+                              '${identifier.value!} == ${entry.key}\n        ? ${entry.value}\n        : ',
+                        )
+                        .join(),
+                  )
                   .replaceAll('@(count)', identifier.value!)
                   .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.values.join('\n')),
             );
