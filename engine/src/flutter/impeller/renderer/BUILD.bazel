@@ -195,6 +195,7 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
         "-Wno-redundant-parens",  # from //flutter/runtime
     ],
+    data = ["//engine/src/flutter/impeller/fixtures:flutter_gpu_shaders"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":renderer",
@@ -202,7 +203,6 @@ cc_library(
         "//engine/src/flutter:export_dynamic_symbols",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/fixtures:flutter_gpu_fixtures",
-        "//engine/src/flutter/impeller/fixtures:flutter_gpu_shaders",
         "//engine/src/flutter/impeller/playground:playground_test",
         "//engine/src/flutter/lib/gpu",
         "//engine/src/flutter/lib/snapshot",

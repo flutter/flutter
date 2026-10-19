@@ -1,0 +1,97 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/build/archives/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: artifacts_entitlement_config, artifacts_without_entitlement_config, dart_sdk_entitlement_config, dart_sdk_without_entitlement_config.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle", "zip_tree")
+
+package(default_visibility = ["//visibility:public"])
+
+zip_tree(
+    name = "artifacts_shader_lib",
+    srcs = ["//engine/src/flutter/impeller/compiler/shader_lib:all_files"],
+    destination = "shader_lib",
+    root = "engine/src/flutter/impeller/compiler/shader_lib",
+)
+
+zip_bundle(
+    name = "artifacts",
+    files = {"gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot"} | select({
+        "//engine/src/flutter/common:runtime_mode_debug": {
+            "icudtl.dat": "@icu//:flutter/icudtl.dat",
+            "flutter_tester": "//engine/src/flutter/shell/testing:flutter_tester",
+            "impellerc": "//engine/src/flutter/impeller/compiler:impellerc",
+            "libpath_ops.so": "//engine/src/flutter/tools/path_ops",
+            "libtessellator.so": "//engine/src/flutter/impeller/tessellator:tessellator_shared",
+            "isolate_snapshot.bin": "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin",
+            "vm_isolate_snapshot.bin": "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin",
+            "frontend_server_aot.dart.snapshot": "//engine/src/flutter/flutter_frontend_server:frontend_server",
+        },
+        "//conditions:default": {},
+    }),
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_profile": "linux-x64-profile/artifacts.zip",
+        "//engine/src/flutter/common:runtime_mode_release": "linux-x64-release/artifacts.zip",
+        "//engine/src/flutter/common:runtime_mode_jit_release": "linux-x64-jit_release/artifacts.zip",
+        "//engine/src/flutter/common:runtime_mode_debug": "linux-x64/artifacts.zip",
+        "//conditions:default": None,
+    }),
+    trees = select({
+        "//engine/src/flutter/common:runtime_mode_debug": [":artifacts_shader_lib"],
+        "//conditions:default": [],
+    }),
+)
+
+cc_library(
+    name = "embedder",
+    data = ["//engine/src/flutter/shell/platform/embedder:embedder-archive"],
+)
+
+# Generates flutter_patched_sdk.zip for debug and profile runtime modes
+# and saves it in the zips_archive folder. For release runtime mode it
+# generates flutter_patched_sdk_product.zip and saves it to
+# zips_archive/flutter_patched_sdk_product/ folder.
+zip_bundle(
+    name = "flutter_patched_sdk",
+    files = select({
+        "//engine/src/flutter/common:runtime_mode_release": {
+            "flutter_patched_sdk_product/vm_outline_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill",
+            "flutter_patched_sdk_product/platform_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill",
+        },
+        "//conditions:default": {
+            "flutter_patched_sdk/vm_outline_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill",
+            "flutter_patched_sdk/platform_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill",
+        },
+    }),
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_release": "flutter_patched_sdk_product.zip",
+        "//conditions:default": "flutter_patched_sdk.zip",
+    }),
+)
+
+zip_tree(
+    name = "dart_sdk_archive_dart-sdk",
+    srcs = ["@dart_sdk_linux_x64//:all_files"],
+    destination = "dart-sdk",
+    root = "",
+)
+
+zip_bundle(
+    name = "dart_sdk_archive",
+    output = "dart-sdk-linux-x64.zip",
+    trees = [":dart_sdk_archive_dart-sdk"],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The GN file, for the wrapped GN builds that read //flutter/build
+# (//engine/src/flutter/build:gn_files; a glob does not enter a package).
+filegroup(
+    name = "gn_files",
+    srcs = ["BUILD.gn"],
+    visibility = ["//engine/src/flutter/build:__pkg__"],
+)

@@ -13,18 +13,66 @@ license and the bundle's source directory at the engine's version.
 zip_bundle does the same under Bazel: the same script, under the synced
 Python (@cpython3; GN runs it under depot_tools' vpython3) through
 zip_bundle.py, which hands it the files the sandbox's input symlinks name,
-over the files of `files`, the readme written by the rule from the version
-@engine_version//:version.bzl carries, and the archive at
-`zip_archives/<output>` under the package. Every value of `files` is one
-file for now (a directory source is the artifact phase's: zip.py walks it
-and keeps symlinks, which a tree artifact would stand for).
+over the files of `files` (destination to the one file placed there) and
+the trees of `trees` (zip_tree below: files at their paths under a
+destination, GN's directory sources), the readme written by the rule from
+the version @engine_version//:version.bzl carries, and the archive at
+`zip_archives/<output>` under the package. The converter writes the calls
+from GN's zip_bundle invocations (tools/gn_to_bazel: templateMappings).
 
-The converter does not read the template yet: a GN zip_bundle is skipped in
-its file's manifest entry and written here by hand where something needs the
-archive -- run_tests.py --type font-subset checks font-subset.zip.
+A zip_tree is a directory entry of a GN zip_bundle -- `source` a directory,
+which zip.py walks -- or the GTK shell's idiom of one entry per output of a
+target at its build-directory path: the files of `srcs`, each at
+`<destination>/<its path relative to root>`, `root` being a directory of the
+files' repository (`engine/src/flutter/impeller/compiler/shader_lib`; empty
+for the repository itself, as for the prebuilt Dart SDK). zip.py walks a
+directory in the filesystem's order; here the files come in Bazel's, sorted.
 """
 
 load("@engine_version//:version.bzl", "ENGINE_VERSION")
+
+ZipTreeInfo = provider(
+    doc = "The entries a zip_tree contributes to an archive.",
+    fields = {"entries": "A list of (file, path in the archive) pairs."},
+)
+
+def _zip_tree_impl(ctx):
+    root = ctx.attr.root
+    entries = []
+    for file in ctx.files.srcs:
+        # short_path is relative to the main repository's root, with another
+        # repository's files under `../<repository>/`.
+        path = file.short_path
+        if path.startswith("../"):
+            path = path.split("/", 2)[2]
+        if root:
+            if not path.startswith(root + "/"):
+                fail("%s: %s is not under %s" % (ctx.label, file.short_path, root))
+            path = path[len(root) + 1:]
+        entries.append((file, ctx.attr.destination + "/" + path if ctx.attr.destination else path))
+    return [
+        ZipTreeInfo(entries = entries),
+        DefaultInfo(files = depset(ctx.files.srcs)),
+    ]
+
+zip_tree = rule(
+    implementation = _zip_tree_impl,
+    doc = "Files at their paths under a destination directory of an archive: a zip_bundle's `trees`.",
+    attrs = {
+        "srcs": attr.label_list(
+            allow_files = True,
+            mandatory = True,
+            doc = "The files (a filegroup over a directory, a copy's outputs).",
+        ),
+        "root": attr.string(
+            doc = "The directory the paths are relative to, relative to the files' repository root; " +
+                  "empty for the repository root itself.",
+        ),
+        "destination": attr.string(
+            doc = "The directory in the archive the files go under; empty for the archive's root.",
+        ),
+    },
+)
 
 def _zip_bundle_impl(ctx):
     output = ctx.actions.declare_file("zip_archives/" + ctx.attr.output)
@@ -72,6 +120,10 @@ def _zip_bundle_impl(ctx):
             fail("%s: %s should be one file for %s, is %s" % (ctx.label, target.label, destination, files))
         args.add_all(["-i", files[0], destination])
         inputs.append(files[0])
+    for tree in ctx.attr.trees:
+        for file, destination in tree[ZipTreeInfo].entries:
+            args.add_all(["-i", file, destination])
+            inputs.append(file)
 
     ctx.actions.run(
         executable = ctx.executable._python,
@@ -97,8 +149,11 @@ zip_bundle = rule(
         ),
         "files": attr.string_keyed_label_dict(
             allow_files = True,
-            mandatory = True,
             doc = "The archive's entries: each destination path mapped to the target of the one file placed there.",
+        ),
+        "trees": attr.label_list(
+            providers = [ZipTreeInfo],
+            doc = "zip_tree targets: files at their paths under a destination (GN's directory sources).",
         ),
         "_script": attr.label(
             default = "//engine/src/flutter/build:zip.py",

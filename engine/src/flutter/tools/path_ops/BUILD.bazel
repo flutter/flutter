@@ -1,0 +1,32 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/tools/path_ops/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "libpath_ops.so",
+    srcs = [
+        "path_ops.cc",
+        "path_ops.h",
+    ],
+    copts = FLUTTER_COPTS,
+    linkshared = True,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+        "@skia",
+    ],
+)
+
+alias(
+    name = "path_ops",
+    actual = ":libpath_ops.so",
+)

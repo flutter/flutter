@@ -109,6 +109,33 @@ exports_files([
   // engine's wrapper of it, for the benchmark executables run_tests.py
   // --type benchmarks runs (benchmarkRuns).
   ConvertedFile('//flutter/benchmarking'),
+  // path_ops, the SDK's path operations library (a shared library over
+  // Skia that artifacts.zip ships).
+  ConvertedFile('//flutter/tools/path_ops'),
+  // The archives a host build uploads (research/09): artifacts.zip, the
+  // patched SDK's, the prebuilt Dart SDK's, the embedder's. The
+  // entitlement lists are the macOS signing step's.
+  ConvertedFile(
+    '//flutter/build/archives',
+    skip: <String, String>{
+      'artifacts_entitlement_config':
+          'generated_file over metadata: the entitlements list of the macOS bundle',
+      'artifacts_without_entitlement_config':
+          'generated_file over metadata: the entitlements list of the macOS bundle',
+      'dart_sdk_entitlement_config': 'generated_file: the entitlements list of the macOS bundle',
+      'dart_sdk_without_entitlement_config':
+          'generated_file: the entitlements list of the macOS bundle',
+    },
+    appendix: '''
+# The GN file, for the wrapped GN builds that read //flutter/build
+# (//engine/src/flutter/build:gn_files; a glob does not enter a package).
+filegroup(
+    name = "gn_files",
+    srcs = ["BUILD.gn"],
+    visibility = ["//engine/src/flutter/build:__pkg__"],
+)
+''',
+  ),
   // font-subset, the SDK's font subsetting tool (run_tests.py --type
   // font-subset runs its test.py against the built binary and its
   // archive, GN's zip_bundle). The entitlements list is the macOS bundle's.
@@ -194,9 +221,43 @@ filegroup(
   ConvertedFile('//flutter/impeller/runtime_stage'),
   ConvertedFile('//flutter/impeller/shader_bundle'),
   ConvertedFile('//flutter/impeller/compiler'),
-  ConvertedFile('//flutter/impeller/compiler/shader_lib'),
-  ConvertedFile('//flutter/impeller/compiler/shader_lib/flutter'),
-  ConvertedFile('//flutter/impeller/compiler/shader_lib/impeller'),
+  // impellerc's shader library: GN copies the GLSL files beside the
+  // compiler in the build directory, and artifacts.zip ships the source
+  // directory whole (zip.py walks it, BUILD files and all), which is the
+  // `all_files` filegroups: each package's files, the parent's gathering
+  // its subpackages' (a glob stops at a package boundary).
+  ConvertedFile(
+    '//flutter/impeller/compiler/shader_lib',
+    appendix: '''
+# The directory as artifacts.zip ships it (directorySources in the
+# converter's bazel_mapping.dart).
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]) + [
+        "//engine/src/flutter/impeller/compiler/shader_lib/flutter:all_files",
+        "//engine/src/flutter/impeller/compiler/shader_lib/impeller:all_files",
+    ],
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/impeller/compiler/shader_lib/flutter',
+    appendix: '''
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/impeller/compiler/shader_lib/impeller',
+    appendix: '''
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]),
+)
+''',
+  ),
   // The shader pipeline's users (research/08, step 4): impeller_shaders()
   // invocations become the macro in build/bazel/impeller.
   ConvertedFile('//flutter/impeller/shader_archive'),

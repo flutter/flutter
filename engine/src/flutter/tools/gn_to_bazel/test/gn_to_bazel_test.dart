@@ -3125,8 +3125,8 @@ zip_bundle("bundle") {
   output = "x.zip"
   files = [
     {
-      source = "$root_build_dir/gen_snapshot"
-      destination = "gen_snapshot"
+      source = "$root_build_dir/nothing"
+      destination = "nothing"
     },
   ]
 }
@@ -3135,7 +3135,8 @@ zip_bundle("bundle") {
         ),
         throwsGnError(
           line: 5,
-          message: r'no target of this file or of the deps of bundle produces $root_out_dir/gen_snapshot',
+          message:
+              r'no target of this file or of the deps of bundle produces $root_out_dir/nothing',
         ),
       );
       // An argument the mapping lacks, as opposed to a helper the block reads.
@@ -3195,6 +3196,155 @@ zip_bundle("sdk") {
       expect(resolver.targetOf('//flutter/compiler:impellerc')?.rule, 'executable');
       expect(resolver.targetOf('//flutter/compiler:nothing'), isNull);
       expect(resolver.targetOf('//flutter/nowhere:nothing'), isNull);
+    });
+
+    test('zip_bundle: conditional destinations and names, a directory, a group', () {
+      // build/archives' shapes: the patched SDK's layout by mode, the
+      // artifacts' prefix with the mode's name, a directory source, a
+      // source produced behind a group, an output of a hand-written tree.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/build/zip_bundle.gni': '',
+        'flutter/shell/testing/BUILD.gn': '''
+group("testing") {
+  public_deps = [ ":flutter_tester" ]
+}
+
+executable("flutter_tester") {
+  sources = [ "t.cc" ]
+}
+''',
+        'flutter/build/archives/BUILD.gn': r'''
+import("//flutter/build/zip_bundle.gni")
+
+zip_bundle("flutter_patched_sdk") {
+  file_suffix = ""
+  path_prefix = "flutter_patched_sdk/"
+  if (flutter_runtime_mode == "release") {
+    file_suffix = "_product"
+    path_prefix = "flutter_patched_sdk_product/"
+  }
+  output = "flutter_patched_sdk${file_suffix}.zip"
+  files = [
+    {
+      source = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
+      destination = "${path_prefix}platform_strong.dill"
+    },
+  ]
+}
+
+zip_bundle("artifacts") {
+  deps = [ "//flutter/shell/testing" ]
+  if (flutter_runtime_mode != "debug") {
+    prefix = "$full_target_platform_name-$flutter_runtime_mode"
+  } else {
+    prefix = "$full_target_platform_name"
+  }
+  output = "$prefix/artifacts.zip"
+  files = [
+    {
+      source = "$root_out_dir/flutter_tester"
+      destination = "flutter_tester"
+    },
+  ]
+  if (flutter_runtime_mode == "debug") {
+    files += [
+      {
+        source = "//flutter/impeller/compiler/shader_lib"
+        destination = "shader_lib"
+      },
+    ]
+  }
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/build/archives/BUILD.gn', templates: <String>{'zip_bundle'}),
+        gnPackage: '//flutter/build/archives',
+        tree: tree,
+        forwardedFlags: DependencyResolver(tree: tree, assumptions: linuxHostAssumptions()),
+      );
+      expect(
+        output,
+        contains('''
+zip_bundle(
+    name = "flutter_patched_sdk",
+    files = select({
+        "//engine/src/flutter/common:runtime_mode_release": {"flutter_patched_sdk_product/platform_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill"},
+        "//conditions:default": {"flutter_patched_sdk/platform_strong.dill": "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill"},
+    }),
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_release": "flutter_patched_sdk_product.zip",
+        "//conditions:default": "flutter_patched_sdk.zip",
+    }),
+)
+'''),
+      );
+      expect(
+        output,
+        contains('''
+zip_tree(
+    name = "artifacts_shader_lib",
+    srcs = ["//engine/src/flutter/impeller/compiler/shader_lib:all_files"],
+    destination = "shader_lib",
+    root = "engine/src/flutter/impeller/compiler/shader_lib",
+)
+
+zip_bundle(
+    name = "artifacts",
+    files = {"flutter_tester": "//engine/src/flutter/shell/testing:flutter_tester"},
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_profile": "linux-x64-profile/artifacts.zip",
+        "//engine/src/flutter/common:runtime_mode_release": "linux-x64-release/artifacts.zip",
+        "//engine/src/flutter/common:runtime_mode_jit_release": "linux-x64-jit_release/artifacts.zip",
+        "//engine/src/flutter/common:runtime_mode_debug": "linux-x64/artifacts.zip",
+        "//conditions:default": None,
+    }),
+    trees = select({
+        "//engine/src/flutter/common:runtime_mode_debug": [":artifacts_shader_lib"],
+        "//conditions:default": [],
+    }),
+)
+'''),
+      );
+    });
+
+    test('a string expanding a conditional variable has a value per case', () async {
+      final GnFileEvaluation evaluation = await evaluate(r'''
+executable("tool") {
+  suffix = ""
+  if (flutter_runtime_mode == "release") {
+    suffix = "_product"
+  }
+  output_name = "tool${suffix}"
+  sources = [ "a.cc" ]
+}
+''');
+      final GnTarget target = evaluation.targets.single;
+      expect(
+        target.variables['output_name']!.cases(target.location).map((GnScalarCase c) => '$c'),
+        <String>[
+          '[flutter_runtime_mode != "release"] "tool"',
+          '[flutter_runtime_mode == "release"] "tool_product"',
+        ],
+      );
+      await expectLater(
+        evaluate(r'''
+executable("tool") {
+  a = ""
+  b = ""
+  if (flutter_runtime_mode == "release") {
+    a = "x"
+    b = "y"
+  }
+  output_name = "tool$a$b"
+  sources = [ "a.cc" ]
+}
+'''),
+        throwsGnError(
+          line: 8,
+          message: 'more than one variable with conditional values in one string',
+        ),
+      );
     });
 
     test('a helper variable of a target block is ignored', () async {

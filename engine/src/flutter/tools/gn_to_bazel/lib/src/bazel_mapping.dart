@@ -1015,7 +1015,52 @@ const String _versionBzl = '@engine_version//:version.bzl';
 /// (`//@out/...` for `$root_out_dir`, `//@gen/...` for `$root_gen_dir`) to
 /// the label. An entry whose producer is a converted file needs no row: the
 /// emitter reads the producer's outputs (`_buildOutputs`).
-const Map<String, String> buildOutputLabels = <String, String>{};
+const Map<String, String> buildOutputLabels = <String, String>{
+  // The Dart SDK's gen_snapshot, out of the wrapped GN build of the Dart
+  // tree (build/bazel/dart_wrap).
+  '//@out/gen_snapshot': '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot',
+  // //flutter/lib/snapshot (hand-written): the core snapshot and the
+  // platform kernels.
+  '//@gen/flutter/lib/snapshot/isolate_snapshot.bin':
+      '//engine/src/flutter/lib/snapshot:isolate_snapshot.bin',
+  '//@gen/flutter/lib/snapshot/vm_isolate_snapshot.bin':
+      '//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin',
+  '//@out/flutter_patched_sdk/platform_strong.dill':
+      '//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill',
+  '//@out/flutter_patched_sdk/vm_outline_strong.dill':
+      '//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill',
+};
+
+/// A directory a zip_bundle entry names as its source (zip.py walks it):
+/// the target of its files and the directory's path relative to its
+/// repository's root, which are zip_tree's `srcs` and `root`
+/// (build/bazel/zip_bundle.bzl).
+final class DirectorySource {
+  const DirectorySource(this.label, {required this.root});
+
+  /// A filegroup over the directory's files.
+  final String label;
+
+  /// The directory, relative to the root of the repository its files are
+  /// in; empty for the repository root itself.
+  final String root;
+}
+
+/// The directories zip_bundle entries name, by GN path.
+const Map<String, DirectorySource> directorySources = <String, DirectorySource>{
+  // impellerc's shader library (GLSL sources), which artifacts.zip ships
+  // beside the compiler; the packages' files, BUILD files included, as
+  // zip.py's walk takes them.
+  '//flutter/impeller/compiler/shader_lib': DirectorySource(
+    '//engine/src/flutter/impeller/compiler/shader_lib:all_files',
+    root: 'engine/src/flutter/impeller/compiler/shader_lib',
+  ),
+  // The prebuilt Dart SDK, which dart-sdk-<platform>.zip is.
+  '//flutter/prebuilts/linux-x64/dart-sdk': DirectorySource(
+    '@dart_sdk_linux_x64//:all_files',
+    root: '',
+  ),
+};
 
 /// Starlark constants for GN references that have a Bazel-side value.
 const Map<String, ReferenceConstant> referenceConstants = <String, ReferenceConstant>{
