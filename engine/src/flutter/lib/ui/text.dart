@@ -200,7 +200,7 @@ class FontWeight {
 ///
 ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>,
 ///    Microsoft's registry of these features.
-class FontFeature {
+final class FontFeature {
   /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
   /// change how the engine selects glyphs when rendering text.
   ///
@@ -991,9 +991,6 @@ class FontFeature {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is FontFeature && other.feature == feature && other.value == value;
   }
 
@@ -1026,7 +1023,7 @@ class FontFeature {
 ///
 ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/otvaroverview>,
 ///    an overview of the font variations technology.
-class FontVariation {
+final class FontVariation {
   /// Creates a [FontVariation] object, which can be added to a [TextStyle] to
   /// change the variable attributes of a font.
   ///
@@ -1186,9 +1183,6 @@ class FontVariation {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is FontVariation && other.axis == axis && other.value == value;
   }
 
@@ -1484,7 +1478,7 @@ enum TextLeadingDistribution {
 /// [TextHeightBehavior.applyHeightToLastDescent].
 ///
 /// {@endtemplate}
-class TextHeightBehavior {
+final class TextHeightBehavior {
   /// Creates a new TextHeightBehavior object.
   ///
   ///  * applyHeightToFirstAscent: When true, the [TextStyle.height] modifier
@@ -1554,9 +1548,6 @@ class TextHeightBehavior {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is TextHeightBehavior &&
         other.applyHeightToFirstAscent == applyHeightToFirstAscent &&
         other.applyHeightToLastDescent == applyHeightToLastDescent &&
@@ -1738,7 +1729,7 @@ Int32List _encodeTextStyle(
 ///
 ///  * [TextStyle](https://api.flutter.dev/flutter/painting/TextStyle-class.html), the class in the [painting] library.
 ///
-class TextStyle {
+final class TextStyle {
   /// Creates a new TextStyle object.
   ///
   /// * `color`: The color to use when painting the text. If this is specified, `foreground` must be null.
@@ -2028,7 +2019,7 @@ Int32List _encodeParagraphStyle(
 
 /// An opaque object that determines the configuration used by
 /// [ParagraphBuilder] to position lines within a [Paragraph] of text.
-class ParagraphStyle {
+final class ParagraphStyle {
   /// Creates a new ParagraphStyle object.
   ///
   /// * `textAlign`: The alignment of the text within the lines of the
@@ -2143,9 +2134,6 @@ class ParagraphStyle {
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
     }
     return other is ParagraphStyle &&
         other._fontFamily == _fontFamily &&
@@ -2273,7 +2261,7 @@ ByteData _encodeStrut(
 ///
 ///  * [StrutStyle](https://api.flutter.dev/flutter/painting/StrutStyle-class.html), the class in the [painting] library.
 ///
-class StrutStyle {
+final class StrutStyle {
   /// Creates a new StrutStyle object.
   ///
   /// * `fontFamily`: The name of the font to use when painting the text (e.g.,
@@ -2356,9 +2344,6 @@ class StrutStyle {
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
     }
     return other is StrutStyle &&
         other._fontFamily == _fontFamily &&
@@ -2721,7 +2706,7 @@ class TextRange {
 ///
 /// The only constraint that can be specified is the [width]. See the discussion
 /// at [width] for more details.
-class ParagraphConstraints {
+final class ParagraphConstraints {
   /// Creates constraints for laying out a paragraph.
   ///
   /// The [width] argument must not be null.
@@ -2748,9 +2733,6 @@ class ParagraphConstraints {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is ParagraphConstraints && other.width == width;
   }
 

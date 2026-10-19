@@ -15,7 +15,7 @@ import 'system_channels.dart';
 /// context menus are hidden.
 ///
 /// On all non-web platforms, this does nothing.
-class BrowserContextMenu {
+final class BrowserContextMenu {
   BrowserContextMenu._();
 
   static final BrowserContextMenu _instance = BrowserContextMenu._();

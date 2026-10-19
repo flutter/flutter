@@ -7396,7 +7396,7 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
 ///
 /// Setting a [DebugCreator] as [RenderObject.debugCreator] will lead to better
 /// error messages.
-class DebugCreator {
+final class DebugCreator {
   /// Create a [DebugCreator] instance with input [Element].
   DebugCreator(this.element);
 
@@ -7438,7 +7438,7 @@ FlutterErrorDetails _reportException(
 ///  * [RenderObjectElement.updateChildren], which discusses why this class is
 ///    used as slot values for the children of a [MultiChildRenderObjectElement].
 @immutable
-class IndexedSlot<T extends Element?> {
+final class IndexedSlot<T extends Element?> {
   /// Creates an [IndexedSlot] with the provided [index] and slot [value].
   const IndexedSlot(this.index, this.value);
 
@@ -7451,9 +7451,6 @@ class IndexedSlot<T extends Element?> {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is IndexedSlot && index == other.index && value == other.value;
   }
 

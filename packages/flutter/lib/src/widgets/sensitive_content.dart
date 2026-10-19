@@ -123,7 +123,7 @@ class _ContentSensitivitySetting {
 // for use. See https://github.com/flutter/flutter/issues/160050 and
 // https://github.com/flutter/flutter/issues/164820.
 @visibleForTesting
-class SensitiveContentHost {
+final class SensitiveContentHost {
   SensitiveContentHost._();
 
   bool? _contentSensitivityIsSupported;

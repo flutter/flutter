@@ -5,7 +5,7 @@
 import 'print.dart';
 
 /// Dumps error messages to the console.
-class ErrorToConsoleDumper {
+abstract final class ErrorToConsoleDumper {
   /// Dumps the given error [message] to the console.
   static void dump(String message) => debugPrint(message);
 
