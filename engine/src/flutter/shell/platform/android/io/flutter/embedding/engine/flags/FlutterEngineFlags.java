@@ -190,10 +190,13 @@ public final class FlutterEngineFlags {
   /**
    * Sets whether the UI thread and platform thread should be merged.
    *
+   * <p>Accepts {@code enabled} (the default) or {@code mergeAfterLaunch}. {@code disabled} is not
+   * supported on Android.
+   *
    * <p>Allowed in release mode for performance purposes. Only settable via the manifest.
    */
   private static final Flag MERGED_PLATFORM_UI_THREAD =
-      new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
+      new Flag("--merged-platform-ui-thread=", "MergedPlatformUIThread", true);
 
   /**
    * Specifies the path to the VM snapshot data file.
@@ -214,13 +217,15 @@ public final class FlutterEngineFlags {
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   /**
-   * Enables Hybrid Composition++.
+   * Enables or disables Hybrid Composition++.
+   *
+   * <p>Accepts {@code true} or {@code false}.
    *
    * <p>Allowed in release to opt-in to this platform views implementation in production. Settable
-   * via the manifest and the command line (via --enable-hcpp).
+   * via the manifest and the command line (via --[no-]enable-hcpp).
    */
   private static final Flag ENABLE_HCPP =
-      new Flag("--enable-hcpp-and-surface-control", "EnableHcpp", true);
+      new Flag("--enable-hcpp-and-surface-control=", "EnableHcpp", true);
 
   /**
    * Enables the Flutter GPU backend.

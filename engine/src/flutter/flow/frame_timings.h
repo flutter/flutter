@@ -153,10 +153,10 @@ class FrameTimingsRecorder {
   fml::TimePoint raster_end_;
   fml::TimePoint raster_end_wall_time_;
 
-  size_t layer_cache_count_;
-  size_t layer_cache_bytes_;
-  size_t picture_cache_count_;
-  size_t picture_cache_bytes_;
+  size_t layer_cache_count_ = 0;
+  size_t layer_cache_bytes_ = 0;
+  size_t picture_cache_count_ = 0;
+  size_t picture_cache_bytes_ = 0;
 
   // Set when `RecordRasterEnd` is called. Cannot be reset once set.
   FrameTiming timing_;

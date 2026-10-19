@@ -121,7 +121,7 @@ void main() {
           flutterTesterBinPath: '/',
           enableVmService: false,
           integrationTestDevice: testDevice,
-          flutterProject: _FakeFlutterProject(),
+          flutterProject: _FakeFlutterProject(directory: fileSystem.directory('/project')),
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
@@ -168,7 +168,7 @@ void main() {
           flutterTesterBinPath: '/',
           enableVmService: false,
           integrationTestDevice: testDevice,
-          flutterProject: _FakeFlutterProject(),
+          flutterProject: _FakeFlutterProject(directory: fileSystem.directory('/project')),
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
@@ -578,6 +578,229 @@ void main() {
       },
     );
   });
+
+  group('listener.dart generation', () {
+    late SuitePlatform fakeSuitePlatform;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
+    late FileSystem windowsFs;
+
+    setUp(() {
+      fakeSuitePlatform = SuitePlatform(Runtime.vm);
+      processManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+      windowsFs = MemoryFileSystem.test(style: .windows);
+      windowsFs.file(r'C:\.dart_tool\package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+    });
+
+    FlutterPlatform createPlatform({
+      required FlutterProject flutterProject,
+      required FileSystem fs,
+      Device? integrationTestDevice,
+      Platform? platform,
+    }) {
+      return FlutterPlatform(
+        debuggingOptions: DebuggingOptions.disabled(.debug),
+        flutterTesterBinPath: 'flutter_tester',
+        enableVmService: false,
+        flutterProject: flutterProject,
+        integrationTestDevice: integrationTestDevice,
+        host: InternetAddress.anyIPv4,
+        updateGoldens: false,
+        buildInfo: .debug,
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          artifacts: Artifacts.test(fileSystem: fs),
+          config: Config.test(),
+          platform: platform ?? FakePlatform(),
+          processManager: processManager,
+          shutdownHooks: ShutdownHooks(),
+        ),
+      );
+    }
+
+    Map<Type, Generator> integrationOverrides({bool windows = false}) {
+      return <Type, Generator>{
+        FileSystem: () => windows ? windowsFs : fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => _FakeFlutterVmService(),
+        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
+        Artifacts: () => Artifacts.test(fileSystem: windows ? windowsFs : fileSystem),
+      };
+    }
+
+    testUsingContext('creates listener file in project build directory for integration tests with stable path across runs and cleans up on completion', () async {
+      final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+
+      final device1 = _WorkingDevice();
+      final FlutterPlatform platform1 = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+        integrationTestDevice: device1,
+      );
+
+      final StreamChannel<Object?> channel1 = platform1.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel1.stream.drain<void>());
+      await pumpEventQueue();
+
+      final String expectedPath = fileSystem.path.join(
+        projectDir.path,
+        'build',
+        'test',
+        'listener_0.dart',
+      );
+      expect(device1.lastMainPath, equals(expectedPath));
+      expect(fileSystem.file(expectedPath).existsSync(), isTrue);
+
+      // Simulate expression compiler output alongside listener file.
+      final File dillFile = fileSystem.file('$expectedPath.dill')..createSync(recursive: true);
+
+      await channel1.sink.close();
+      await pumpEventQueue();
+
+      expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+      expect(dillFile.existsSync(), isFalse);
+      expect(logger.traceText, contains('test 0: deleting test listener file'));
+
+      final device2 = _WorkingDevice();
+      final FlutterPlatform platform2 = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+        integrationTestDevice: device2,
+      );
+
+      final StreamChannel<Object?> channel2 = platform2.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel2.stream.drain<void>());
+      await pumpEventQueue();
+
+      expect(device2.lastMainPath, equals(expectedPath));
+      expect(fileSystem.file(expectedPath).existsSync(), isTrue);
+
+      await channel2.sink.close();
+      await pumpEventQueue();
+
+      expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+    }, overrides: integrationOverrides());
+
+    testUsingContext(
+      'uses systemTempDirectory for non-integration tests',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+        final testCompleter = Completer<void>();
+        final testCompiler = _FakeTestCompiler();
+
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>[
+              'flutter_tester',
+              '--disable-vm-service',
+              '--enable-checked-mode',
+              '--verify-entry-points',
+              '--enable-software-rendering',
+              '--skia-deterministic-rendering',
+              '--enable-dart-profiling',
+              '--non-interactive',
+              '--use-test-fonts',
+              '--disable-asset-fonts',
+              '--packages=.dart_tool/package_config.json',
+              'path_to_output.dill',
+            ],
+            exitCode: -9,
+            completer: testCompleter,
+          ),
+        );
+
+        final FlutterPlatform platform = createPlatform(
+          flutterProject: flutterProject,
+          fs: fileSystem,
+        )..compiler = testCompiler;
+
+        final StreamChannel<Object?> channel = platform.loadChannel(
+          'test1.dart',
+          fakeSuitePlatform,
+        );
+        unawaited(channel.stream.drain<void>());
+        await pumpEventQueue();
+
+        expect(testCompiler.lastMainUri, isNotNull);
+        final String listenerPath = fileSystem.path.fromUri(testCompiler.lastMainUri);
+        expect(listenerPath, startsWith(fileSystem.systemTempDirectory.path));
+        expect(fileSystem.path.basename(listenerPath), equals('listener.dart'));
+        expect(fileSystem.file(listenerPath).existsSync(), isTrue);
+        expect(projectDir.childDirectory('build').childDirectory('test').existsSync(), isFalse);
+
+        testCompleter.complete();
+        await expectLater(channel.sink.done, completes);
+
+        expect(fileSystem.file(listenerPath).existsSync(), isFalse);
+        expect(logger.traceText, contains('test 0: deleting temporary directory'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        Artifacts: () => Artifacts.test(fileSystem: fileSystem),
+      },
+    );
+
+    testUsingContext('creates listener file in project build directory on Windows', () async {
+      final Directory projectDir = windowsFs.directory(r'C:\custom_project')
+        ..createSync(recursive: true);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+
+      final device = _WorkingDevice();
+      final FlutterPlatform platform = createPlatform(
+        flutterProject: flutterProject,
+        fs: windowsFs,
+        integrationTestDevice: device,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
+
+      final StreamChannel<Object?> channel = platform.loadChannel(
+        r'C:\custom_project\test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel.stream.drain<void>());
+      await pumpEventQueue();
+
+      final String expectedPath = windowsFs.path.join(
+        projectDir.path,
+        'build',
+        'test',
+        'listener_0.dart',
+      );
+      expect(device.lastMainPath, equals(expectedPath));
+      expect(windowsFs.file(expectedPath).existsSync(), isTrue);
+
+      await channel.sink.close();
+      await pumpEventQueue();
+
+      expect(windowsFs.file(expectedPath).existsSync(), isFalse);
+    }, overrides: integrationOverrides(windows: true));
+  });
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
@@ -627,8 +850,11 @@ class _FakeVmService extends Fake implements VmService {
 }
 
 class _FakeTestCompiler extends Fake implements TestCompiler {
+  Uri? lastMainUri;
+
   @override
   Future<TestCompilerResult> compile(Uri mainUri) async {
+    lastMainUri = mainUri;
     return TestCompilerComplete(outputPath: 'path_to_output.dill', mainUri: mainUri);
   }
 }
@@ -663,6 +889,8 @@ class _UnstartableDevice extends Fake implements Device {
 }
 
 class _WorkingDevice extends Fake implements Device {
+  String? lastMainPath;
+
   @override
   Future<void> dispose() async {}
 
@@ -685,11 +913,20 @@ class _WorkingDevice extends Fake implements Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    lastMainPath = mainPath;
     return LaunchResult.succeeded(vmServiceUri: Uri.parse('http://127.0.0.1:12345/vmService'));
   }
 }
 
 class _FakeFlutterProject extends Fake implements FlutterProject {
+  _FakeFlutterProject({required this.directory});
+
+  @override
+  final Directory directory;
+
+  @override
+  Directory get buildDirectory => directory.childDirectory('build');
+
   @override
   FlutterManifest get manifest => FlutterManifest.empty(logger: BufferLogger.test());
 }
