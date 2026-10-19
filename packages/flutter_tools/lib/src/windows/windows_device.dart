@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:unified_analytics/unified_analytics.dart';
+
+import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -16,8 +19,10 @@ import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
-  WindowsDevice({required super.toolContext})
+  WindowsDevice({required this._analytics, required super.toolContext})
     : super('windows', platformType: PlatformType.windows, ephemeral: false);
+
+  final Analytics _analytics;
 
   @override
   Future<bool> isSupported() async => true;
@@ -50,11 +55,14 @@ class WindowsDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     await buildWindows(
-      FlutterProject.current().windows,
+      projectFactory.fromDirectory(fs.currentDirectory).windows,
       buildInfo,
       _targetPlatform,
+      analytics: _analytics,
       target: mainPath,
+      toolContext: toolContext,
     );
   }
 
@@ -65,9 +73,13 @@ class WindowsDevice extends DesktopDevice {
 }
 
 class WindowsDevices extends PollingDeviceDiscovery {
-  WindowsDevices({required this._windowsWorkflow, required ToolContext super.toolContext})
-    : super('windows devices');
+  WindowsDevices({
+    required this._analytics,
+    required ToolContext super.toolContext,
+    required this._windowsWorkflow,
+  }) : super('windows devices');
 
+  final Analytics _analytics;
   final WindowsWorkflow _windowsWorkflow;
 
   @override
@@ -84,7 +96,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[WindowsDevice(toolContext: toolContext)];
+    return <Device>[WindowsDevice(analytics: _analytics, toolContext: toolContext)];
   }
 
   @override
