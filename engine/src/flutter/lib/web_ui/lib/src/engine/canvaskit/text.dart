@@ -133,6 +133,8 @@ SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style) {
     style.fontStyle,
   );
   properties.applyRoundingHack = false;
+  // Like the native engine, render soft hyphens unless they are hidden.
+  properties.renderSoftHyphens = style.hyphens != ui.Hyphens.hidden;
 
   return canvasKit.ParagraphStyle(properties);
 }

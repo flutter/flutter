@@ -5,6 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/test_initialization.dart';
 
@@ -13,7 +14,11 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests(
+    withImplicitView: true,
+    setUpTestViewDimensions: false,
+    testEnvironment: const ui_web.TestEnvironment(forceTestFonts: true),
+  );
 
   test('Should be able to build and layout a paragraph', () {
     final builder = ParagraphBuilder(ParagraphStyle());
@@ -139,5 +144,37 @@ Future<void> testMain() async {
     builder.addText('Hello');
     final Paragraph paragraph = builder.build();
     paragraph.dispose();
+  });
+
+  group('hyphens', () {
+    const text = 'abcd\u00ADe';
+
+    Paragraph layoutParagraph(Hyphens? hyphens, double width) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(fontSize: 10, fontFamily: 'FlutterTest', hyphens: hyphens),
+      );
+      builder.addText(text);
+      return builder.build()..layout(ParagraphConstraints(width: width));
+    }
+
+    // Just narrower than the unbroken text, so the line breaks at the soft hyphen.
+    double breakingWidth() => layoutParagraph(null, double.infinity).longestLine - 1;
+
+    test('manual renders a hyphen at a soft hyphen line break', () {
+      final Paragraph manual = layoutParagraph(Hyphens.manual, breakingWidth());
+      final Paragraph hidden = layoutParagraph(Hyphens.hidden, breakingWidth());
+
+      expect(manual.numberOfLines, 2);
+      expect(hidden.numberOfLines, 2);
+      expect(manual.longestLine, 50);
+      expect(hidden.longestLine, 40);
+    });
+
+    test('unspecified behaves like manual', () {
+      final Paragraph unspecified = layoutParagraph(null, breakingWidth());
+      final Paragraph manual = layoutParagraph(Hyphens.manual, breakingWidth());
+
+      expect(unspecified.longestLine, manual.longestLine);
+    });
   });
 }

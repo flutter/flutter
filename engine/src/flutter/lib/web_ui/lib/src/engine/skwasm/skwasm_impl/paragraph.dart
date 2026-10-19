@@ -482,6 +482,8 @@ StrutStyleHandle _createNativeStrutStyle(EngineStrutStyle style) {
   }
   paragraphStyleSetTextStyle(handle, textStyleHandle);
   paragraphStyleSetApplyRoundingHack(handle, false);
+  // Like the native engine, render soft hyphens unless they are hidden.
+  paragraphStyleSetRenderSoftHyphens(handle, style.hyphens != ui.Hyphens.hidden);
   return (handle, textStyle);
 }
 
