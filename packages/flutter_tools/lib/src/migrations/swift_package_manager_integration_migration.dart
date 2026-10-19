@@ -251,6 +251,15 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           ),
         );
       } on Exception catch (e, stackTrace) {
+        final message = e.toString();
+        if (message.contains('Could not resolve package dependencies') ||
+            message.contains('Xcode failed to resolve Swift Package Manager dependencies')) {
+          throw SwiftPackageManagerMigrationException(
+            message,
+            analyticsMessage: 'Xcode could not resolve package dependencies.',
+          );
+        }
+
         // Send error to crash reporter.
         if (_reportCrashes) {
           try {
@@ -269,23 +278,15 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
                 typeId: 'XcodeBuildError',
               );
             });
-          } on Exception catch (_) {
+          } on Exception {
             // Fail silently if it fails to send crash report
           }
         }
 
-        final message = e.toString();
-        if (message.contains('Could not resolve package dependencies')) {
-          throw SwiftPackageManagerMigrationException(
-            message,
-            analyticsMessage: 'Xcode could not resolve package dependencies.',
-          );
-        } else {
-          throw SwiftPackageManagerMigrationException(
-            message,
-            analyticsMessage: 'Xcode failed for unknown reason.',
-          );
-        }
+        throw SwiftPackageManagerMigrationException(
+          message,
+          analyticsMessage: 'Xcode failed for unknown reason.',
+        );
       }
       _analytics.send(
         Event.appleUsageEvent(

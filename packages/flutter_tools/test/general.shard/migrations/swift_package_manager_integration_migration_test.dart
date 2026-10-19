@@ -4583,8 +4583,69 @@ void main() {
             ),
           ),
         );
-        expect(testLogger.traceText, contains('Sending crash report to Google.'));
+        expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
       });
+
+      testWithoutContext(
+        'throw if settings fail to compile due to prefetching Swift packages failing',
+        () async {
+          final memoryFileSystem = MemoryFileSystem();
+          final testLogger = BufferLogger.test();
+          final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            fs: memoryFileSystem,
+            fakeFlutterVersion: FakeFlutterVersion(),
+          );
+          const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
+          final project = FakeXcodeProject(
+            platform: platform.name,
+            fileSystem: memoryFileSystem,
+            logger: testLogger,
+          );
+          _createProjectFiles(project, platform);
+          project.xcodeProjectInfoFile.writeAsStringSync(
+            _projectSettings(_allSectionsUnmigrated(platform)),
+          );
+
+          final plistParser = FakePlistParser.multiple(<String>[
+            _plutilOutput(_allSectionsUnmigratedAsJson(platform)),
+            _plutilOutput(_allSectionsMigratedAsJson(platform)),
+          ]);
+
+          final projectMigration = SwiftPackageManagerIntegrationMigration(
+            project,
+            platform,
+            BuildInfo.debug,
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+              errorMessageOnGetInfo:
+                  'Xcode failed to resolve Swift Package Manager dependencies:\n',
+            ),
+            logger: testLogger,
+            fileSystem: memoryFileSystem,
+            plistParser: plistParser,
+            config: FakeConfig(),
+            analytics: fakeAnalytics,
+            hostPlatform: FakePlatform(),
+            operatingSystemUtils: FakeOperatingSystemUtils(),
+            flutterVersion: FakeFlutterVersion(),
+            reportCrashes: true,
+          );
+          await expectLater(
+            () => projectMigration.migrate(),
+            throwsToolExit(message: 'Xcode failed to resolve Swift Package Manager dependencies:'),
+          );
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.appleUsageEvent(
+                workflow: 'swiftpm-migration-failure',
+                parameter: 'full',
+                result: 'Xcode could not resolve package dependencies.',
+              ),
+            ),
+          );
+          expect(testLogger.traceText, isNot(contains('Sending crash report to Google.')));
+        },
+      );
 
       testWithoutContext('does not send crash report if reportCrashes is false', () async {
         final memoryFileSystem = MemoryFileSystem();
