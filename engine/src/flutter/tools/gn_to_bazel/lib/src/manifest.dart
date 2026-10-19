@@ -112,6 +112,12 @@ exports_files([
   // path_ops, the SDK's path operations library (a shared library over
   // Skia that artifacts.zip ships).
   ConvertedFile('//flutter/tools/path_ops'),
+  // The sky_engine package (the local engine's gen/dart-pkg/sky_engine,
+  // which the flutter tool lists as a build input and the analyzer reads
+  // dart:ui and the core libraries from): copies of the Dart SDK's library
+  // sources and dart:ui's, dart:ui_web rewritten by web_sdk's sdk_rewriter,
+  // the embedder specification, and the package assembled by dart_pkg.py.
+  ConvertedFile('//flutter/sky/packages/sky_engine'),
   // The archives a host build uploads (research/09): artifacts.zip, the
   // patched SDK's, the prebuilt Dart SDK's, the embedder's. The
   // entitlement lists are the macOS signing step's.
@@ -464,6 +470,10 @@ filegroup(
     name = "fixture_sources",
     srcs = glob(["fixtures/*"]),
 )
+
+# The same sources and the fix data by name, for the copies
+# sky/packages/sky_engine makes into the sky_engine package.
+exports_files(glob(["*.dart"]) + ["fix_dart_ui.yaml"])
 ''',
   ),
   // The shader fixtures of lib/ui: impellerc() invoked directly, with each
@@ -1069,6 +1079,9 @@ const Set<String> handWrittenPackages = <String>{
   // sub-packages include.
   'engine/src/flutter/shell/platform/android',
   'engine/src/flutter/third_party',
+  // The web SDK, until the web phase converts it: web_sdk.gni's
+  // sdk_rewriter template as a rule, and the script it runs.
+  'engine/src/flutter/web_sdk',
 };
 
 /// The main repository's layout: its packages are the generated ones and

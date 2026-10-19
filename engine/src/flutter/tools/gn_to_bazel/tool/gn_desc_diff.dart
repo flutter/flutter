@@ -512,8 +512,14 @@ String _stripToolchain(String label) {
 }
 
 /// A GN path as `//dir/file`, without a trailing slash (gn desc lists
-/// include directories with one).
+/// include directories with one). A `rebase_path()` result the evaluator
+/// kept (the marked absolute path a source list may hold) is its path.
 String _absolutePath(String value, String gnPackage) {
+  if (value.length >= 2 &&
+      value.startsWith(rebasedPathMarker) &&
+      value.endsWith(rebasedPathMarker)) {
+    value = value.substring(1, value.length - 1);
+  }
   final absolute = value.startsWith('//') ? value : '$gnPackage/$value';
   return p.posix.normalize(absolute);
 }

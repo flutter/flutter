@@ -225,8 +225,14 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `target_name` takes the invocation's comments). `forward_variables_from`,
    `target(type, name)`, scope values (`x.member`, `defined(x.member)`),
    `get_path_info(p, "abspath")` (of a path or a list of them), short-circuit `&&`/`||` and integer
-   comparisons are understood; `rebase_path()` and `exec_script()` yield
-   opaque values that are an error only if they reach the output. `+=` and
+   comparisons are understood; `rebase_path(x, root_build_dir)` is a marked
+   absolute path (of each element, for a list), `rebase_path(x, "", base)`
+   the same for `x` under an absolute `base` (sky_engine's way of naming
+   the Dart SDK's library sources through its `<library>_sources.gni`
+   lists), `rebase_path(x, ".", base)` that path unmarked (a script named
+   relative to the current directory); any other `rebase_path()` and
+   `exec_script()` yield opaque values that are an error only if they reach
+   the output. `+=` and
    `-=` on a variable of an enclosing scope (a template body appending to a
    forwarded `public_configs`) modify a copy in the current scope and leave
    the enclosing variable alone, as GN does; a `config`'s `_`-prefixed
@@ -288,7 +294,10 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    compiles alone, which is GN's private semantics. A file of another
    package of the main repository (a font under `//flutter/txt` as a
    fixture) is labelled through that package, which the manifest-derived
-   `mainRepositoryLayout` knows; an unknown owner is an error.
+   `mainRepositoryLayout` knows; a file of a repository whose targets are
+   not converted (the Dart tree's core library sources,
+   `fileRepositoryPrefixes`) is that repository's, which exports it; an
+   unknown owner is an error.
    `cflags_c` and `cflags_cc` go to `conlyopts` and `cxxopts`; a `-std=` in a
    target's flags is dropped, because GN's compiler config sets the standard
    after every target's flags and the target's never takes effect. Bazel
@@ -316,7 +325,15 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    emitter writes it as the rule's token -- `$(execpath label)` for a source
    file (declared as an input if GN did not), `$(src dir)` for a source
    directory, `$(gen path)` for anything generated; outputs must be under
-   `$target_gen_dir`. A dependency on an action of the same file becomes a
+   `$target_gen_dir`. An action known by its script (`scriptMappings`:
+   `build/dart/tools/dart_pkg.py`, which assembles sky_engine's package
+   directory) is converted as a template invocation would be, its
+   variables the macro's arguments (`dart_pkg` in `build/bazel/dart`).
+   `generated_file()` with `contents` becomes a `gn_generated_file` writing
+   the lines, named after GN's output path under the build directory; the
+   `metadata`-walking form is not converted. Each of these rules, and
+   `copy()`'s, says where GN's build directory holds its files
+   (`BuildDirectoryInfo`), which `install` reads. A dependency on an action of the same file becomes a
    source of the dependent, since the outputs are inputs of its compile in
    Bazel where GN only ordered the two; one on a `copy()` of the same file,
    or on a target of a template whose macro produces files rather than a
