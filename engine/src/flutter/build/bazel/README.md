@@ -17,7 +17,11 @@ Nothing in this directory is used by the GN build.
 | `impeller/` | The engine's `impeller_shaders()` GN template as a macro over three rules (`impellerc_compile`, `shader_archive`, `embed_blob`), and `impellerc()` itself (the template the test fixtures invoke directly) over `impellerc_run`; see below. |
 | `dart_wrap/` | The Dart SDK, built with `gn_build`: `BUILD.gn` lists the GN targets, `BUILD.bazel` the args, the inputs and the `cc_library` facades; `tests/` starts the VM from the archive. |
 | `gl_wrap/` | The GPU test backends -- ANGLE, SwiftShader, the Vulkan loader -- built with `gn_build` the same way; `stubs/` holds the stand-in GN files for the engine directories ANGLE's GN reaches; `tests/` renders through both. See below. |
-| `dart/` | The engine's own Dart pipeline on the wrapped SDK's tools and the prebuilt SDK: `snapshot.bzl` (`compile_platform`, `core_snapshot`, `aot_snapshot`, `bin_to_assembly` -- `lib/snapshot/BUILD.gn`'s steps) and `kernel.bzl` (`dart_kernel`, GN's `flutter_frontend_server`); see below. |
+| `dart/` | The engine's own Dart pipeline on the wrapped SDK's tools and the prebuilt SDK: `snapshot.bzl` (`compile_platform`, `core_snapshot`, `aot_snapshot`, `bin_to_assembly` -- `lib/snapshot/BUILD.gn`'s steps), `kernel.bzl` (`dart_kernel`, GN's `flutter_frontend_server`), `package_test.bzl` (`dart_package_test`, a Dart package's own `dart test` run) and `dart_pkg.bzl` (GN's `dart_pkg.py` action, which assembles the sky_engine package); see below. |
+| `checkout_view.bzl`, `checkout_script_test.bzl` | The checkout-shaped runfiles tree the Dart tests and the checkout's scripts run in, and GN's name for the build directory of a configuration (`host_debug_unopt`), which the tests' launchers and `install` use; see below. |
+| `zip_bundle.bzl` | GN's `zip_bundle` template (the archives CI uploads) as a rule running `build/zip.py`, with `zip_tree` for a directory's files; see below. |
+| `build_directory.bzl` | `BuildDirectoryInfo`: where GN's build directory holds a rule's files, which `gn_copy`, `gn_action`, `gn_generated_file`, `zip_bundle`, `dart_pkg` and `sdk_rewriter` provide and `install` collects over a closure; see below. |
+| `install.bzl` | `install`: a `bazel run` target laying a build's files into GN's build directory (`engine/src/out/<variant>/`, or a named directory) for the consumers that read it; the root package's `install` and the generated per-builder targets in `ci/builders`; see below. |
 
 ## How dependencies reach Bazel during the transition
 
