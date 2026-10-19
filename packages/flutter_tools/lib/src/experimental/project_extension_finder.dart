@@ -116,7 +116,7 @@ class ProjectExtensionFinder {
           packageConfigUri: packageConfigUri,
           workspaceRootPath: workspaceRoot.path,
         );
-      } on Object catch (error) {
+      } on Exception catch (error) {
         _logger.printTrace(
           'ProjectExtensionFinder: findExtensions failed for "$packageConfigUri" ($error); '
           'falling back to FileSystem scan.',
@@ -199,7 +199,7 @@ class ProjectExtensionFinder {
           }
         }
       }
-    } on Object catch (error) {
+    } on Exception catch (error) {
       _logger.printTrace('ProjectExtensionFinder: failed to parse "${pubspecFile.path}": $error');
     }
   }
@@ -232,7 +232,7 @@ class ProjectExtensionFinder {
           packageUri: _fileSystem.directory(pkg.packageUriRoot).absolute.uri,
           config: rawYaml,
         ));
-      } on Object catch (error) {
+      } on Exception catch (error) {
         _logger.printWarning(
           'Skipping extension "${pkg.name}": malformed extension/flutter_tools/config.yaml ($error).',
         );

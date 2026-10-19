@@ -10,11 +10,21 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../cache.dart';
 import 'project_extension_finder.dart';
 
 /// Signature for compiling a [DiscoveredProjectExtension] to a runnable Kernel (`.dill`) URI.
 typedef ExtensionKernelCompileFn = Future<Uri> Function(DiscoveredProjectExtension extension);
+
+/// Exception thrown when compiling a tool extension entrypoint to a `.dill` Kernel fails.
+class ExtensionCompileException implements Exception {
+  const ExtensionCompileException(this.message);
+
+  /// Description of the compilation failure.
+  final String message;
+
+  @override
+  String toString() => 'ExtensionCompileException: $message';
+}
 
 /// Compiles discovered tool extension entrypoints to `.dill` Kernel files and
 /// manages caching across `$PUB_CACHE` and local workspace packages.
@@ -22,10 +32,10 @@ class ExtensionKernelCompiler {
   ExtensionKernelCompiler({
     required this._artifacts,
     required this._fileSystem,
+    required this._flutterRoot,
     required this._logger,
     required this._platform,
     required this._processManager,
-    this._flutterRoot,
   });
 
   /// Environment variable overriding the shared Dart data directory.
@@ -36,24 +46,24 @@ class ExtensionKernelCompiler {
 
   final Artifacts _artifacts;
   final FileSystem _fileSystem;
+  final Directory _flutterRoot;
   final Logger _logger;
   final Platform _platform;
   final ProcessManager _processManager;
-  final String? _flutterRoot;
 
   /// Compiles [extension] to a `.dill` file (or returns the cached `.dill` URI
   /// if up to date).
   Future<Uri> compile(DiscoveredProjectExtension extension) async {
     final File entrypointFile = _fileSystem.file(extension.entrypointUri);
     if (!entrypointFile.existsSync()) {
-      throw StateError(
+      throw ExtensionCompileException(
         'Extension "${extension.name}" entrypoint not found at "${entrypointFile.path}".',
       );
     }
 
     final File packageConfigFile = _fileSystem.file(extension.packageConfigUri);
     if (!packageConfigFile.existsSync()) {
-      throw StateError(
+      throw ExtensionCompileException(
         'Cannot compile extension "${extension.name}" without a resolved '
         '.dart_tool/package_config.json at "${packageConfigFile.path}".',
       );
@@ -63,22 +73,13 @@ class ExtensionKernelCompiler {
     final File depFile = _fileSystem.file('${dillFile.path}.d');
     final bool isImmutableCache = isPubCacheExtension(extension);
 
-    if (isImmutableCache) {
-      if (dillFile.existsSync() && dillFile.lengthSync() > 0) {
-        _logger.printTrace(
-          'ExtensionKernelCompiler: reusing cached pub-cache kernel "${dillFile.path}".',
-        );
-        return dillFile.absolute.uri;
-      }
-    } else if (!_needsRecompilation(
-      dillFile: dillFile,
+    if (_isCachedDillValid(
       depFile: depFile,
-      packageConfigFile: packageConfigFile,
+      dillFile: dillFile,
       entrypointFile: entrypointFile,
+      isImmutableCache: isImmutableCache,
+      packageConfigFile: packageConfigFile,
     )) {
-      _logger.printTrace(
-        'ExtensionKernelCompiler: reusing up-to-date local kernel "${dillFile.path}".',
-      );
       return dillFile.absolute.uri;
     }
 
@@ -87,22 +88,13 @@ class ExtensionKernelCompiler {
       lockPath: '${dillFile.path}.lock',
       logger: _logger,
       scope: () async {
-        if (isImmutableCache) {
-          if (dillFile.existsSync() && dillFile.lengthSync() > 0) {
-            _logger.printTrace(
-              'ExtensionKernelCompiler: reusing cached pub-cache kernel "${dillFile.path}".',
-            );
-            return dillFile.absolute.uri;
-          }
-        } else if (!_needsRecompilation(
-          dillFile: dillFile,
+        if (_isCachedDillValid(
           depFile: depFile,
-          packageConfigFile: packageConfigFile,
+          dillFile: dillFile,
           entrypointFile: entrypointFile,
+          isImmutableCache: isImmutableCache,
+          packageConfigFile: packageConfigFile,
         )) {
-          _logger.printTrace(
-            'ExtensionKernelCompiler: reusing up-to-date local kernel "${dillFile.path}".',
-          );
           return dillFile.absolute.uri;
         }
 
@@ -126,21 +118,57 @@ class ExtensionKernelCompiler {
         if (result.exitCode != 0) {
           _tryDeleteFile(tempDillFile);
           _tryDeleteFile(tempDepFile);
-          throw StateError(
+          throw ExtensionCompileException(
             'Failed to compile extension "${extension.name}" to kernel '
             '(exit code ${result.exitCode}):\n${result.stderr}',
+          );
+        }
+
+        if (!tempDillFile.existsSync()) {
+          _tryDeleteFile(tempDepFile);
+          throw ExtensionCompileException(
+            'Failed to compile extension "${extension.name}" to kernel: '
+            'compiler exited 0 but did not produce "${tempDillFile.path}".',
           );
         }
 
         if (tempDepFile.existsSync()) {
           tempDepFile.renameSync(depFile.path);
         }
-        if (tempDillFile.existsSync()) {
-          tempDillFile.renameSync(dillFile.path);
-        }
+        tempDillFile.renameSync(dillFile.path);
         return dillFile.absolute.uri;
       },
     );
+  }
+
+  bool _isCachedDillValid({
+    required File depFile,
+    required File dillFile,
+    required File entrypointFile,
+    required bool isImmutableCache,
+    required File packageConfigFile,
+  }) {
+    if (isImmutableCache) {
+      if (dillFile.existsSync() && dillFile.lengthSync() > 0) {
+        _logger.printTrace(
+          'ExtensionKernelCompiler: reusing cached pub-cache kernel "${dillFile.path}".',
+        );
+        return true;
+      }
+      return false;
+    }
+    if (!_needsRecompilation(
+      dillFile: dillFile,
+      depFile: depFile,
+      packageConfigFile: packageConfigFile,
+      entrypointFile: entrypointFile,
+    )) {
+      _logger.printTrace(
+        'ExtensionKernelCompiler: reusing up-to-date local kernel "${dillFile.path}".',
+      );
+      return true;
+    }
+    return false;
   }
 
   static void _tryDeleteFile(File file) {
@@ -154,14 +182,16 @@ class ExtensionKernelCompiler {
     }
   }
 
-  /// Determines whether [extension]'s package root resides inside `$PUB_CACHE`.
+  /// Determines whether [extension]'s package root resides inside `$PUB_CACHE`
+  /// (checking [kPubCacheEnv] first, then standard `.pub-cache` and Windows
+  /// `Pub/Cache` directory segments).
   @visibleForTesting
   bool isPubCacheExtension(DiscoveredProjectExtension extension) {
     final String rootPath = _fileSystem.path.normalize(
       _fileSystem.directory(extension.rootUri).absolute.path,
     );
-    final String? pubCacheEnv = _platform.environment[kPubCacheEnv]?.trim();
-    if (pubCacheEnv != null && pubCacheEnv.isNotEmpty) {
+    final String? pubCacheEnv = _nonEmptyEnv(kPubCacheEnv);
+    if (pubCacheEnv != null) {
       final String normalizedPubCache = _fileSystem.path.normalize(
         _fileSystem.directory(pubCacheEnv).absolute.path,
       );
@@ -186,9 +216,10 @@ class ExtensionKernelCompiler {
   @visibleForTesting
   File resolveDillFile(DiscoveredProjectExtension extension) {
     if (isPubCacheExtension(extension)) {
-      final Directory cacheDir = _resolveSharedCacheDirectory();
-      final String sdkKey = _computeSdkAndPackageKey(extension);
-      return cacheDir.childFile('${extension.name}-$sdkKey.dill');
+      if (_resolveSharedCacheDirectory() case final Directory cacheDir) {
+        final String sdkKey = _computeSdkAndPackageKey(extension);
+        return cacheDir.childFile('${extension.name}-$sdkKey.dill');
+      }
     }
     return _fileSystem
         .directory(extension.workspaceRootPath)
@@ -199,40 +230,40 @@ class ExtensionKernelCompiler {
         .childFile('extension.dill');
   }
 
-  Directory _resolveSharedCacheDirectory() {
-    final String? dartDataHome = _platform.environment[kDartDataHomeEnv]?.trim();
-    if (dartDataHome != null && dartDataHome.isNotEmpty) {
+  Directory? _resolveSharedCacheDirectory() {
+    if (_nonEmptyEnv(kDartDataHomeEnv) case final String dartDataHome) {
       return _fileSystem
           .directory(dartDataHome)
           .childDirectory('flutter_tool_extensions')
           .childDirectory('cache');
     }
     if (_platform.isWindows) {
-      final String? localAppData =
-          _platform.environment['LOCALAPPDATA']?.trim() ?? _platform.environment['APPDATA']?.trim();
-      if (localAppData != null && localAppData.isNotEmpty) {
+      final String? localAppData = _nonEmptyEnv('LOCALAPPDATA') ?? _nonEmptyEnv('APPDATA');
+      if (localAppData != null) {
         return _fileSystem
             .directory(localAppData)
             .childDirectory('flutter_tool_extensions')
             .childDirectory('cache');
       }
     }
-    final String? home =
-        _platform.environment['HOME']?.trim() ?? _platform.environment['USERPROFILE']?.trim();
-    if (home != null && home.isNotEmpty) {
+    final String? home = _nonEmptyEnv('HOME') ?? _nonEmptyEnv('USERPROFILE');
+    if (home != null) {
       return _fileSystem
           .directory(home)
           .childDirectory('.flutter_tool_extensions')
           .childDirectory('cache');
     }
-    return _fileSystem.systemTempDirectory
-        .childDirectory('flutter_tool_extensions')
-        .childDirectory('cache');
+    return null;
+  }
+
+  String? _nonEmptyEnv(String key) {
+    final String? value = _platform.environment[key]?.trim();
+    return (value != null && value.isNotEmpty) ? value : null;
   }
 
   String _computeSdkAndPackageKey(DiscoveredProjectExtension extension) {
-    final File? versionFile = _resolveDartSdkVersionFile();
-    final String sdkVersion = versionFile != null && versionFile.existsSync()
+    final File versionFile = _resolveDartSdkVersionFile();
+    final String sdkVersion = versionFile.existsSync()
         ? versionFile.readAsStringSync().trim()
         : 'unknown';
     final String rootPath = _fileSystem.directory(extension.rootUri).absolute.path;
@@ -271,10 +302,8 @@ class ExtensionKernelCompiler {
       return true;
     }
 
-    final File? sdkVersionFile = _resolveDartSdkVersionFile();
-    if (sdkVersionFile != null &&
-        sdkVersionFile.existsSync() &&
-        sdkVersionFile.lastModifiedSync().isAfter(dillModified)) {
+    final File sdkVersionFile = _resolveDartSdkVersionFile();
+    if (sdkVersionFile.existsSync() && sdkVersionFile.lastModifiedSync().isAfter(dillModified)) {
       return true;
     }
 
@@ -347,14 +376,12 @@ class ExtensionKernelCompiler {
     return results;
   }
 
-  File? _resolveDartSdkVersionFile() {
-    final String? flutterRoot = _flutterRoot ?? Cache.flutterRoot;
-    if (flutterRoot == null || flutterRoot.isEmpty) {
-      return null;
-    }
-    return _fileSystem.file(
-      _fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'version'),
-    );
+  File _resolveDartSdkVersionFile() {
+    return _flutterRoot
+        .childDirectory('bin')
+        .childDirectory('cache')
+        .childDirectory('dart-sdk')
+        .childFile('version');
   }
 
   String _resolveDartExecutable() => _artifacts.getArtifactPath(Artifact.engineDartBinary);
