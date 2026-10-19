@@ -402,3 +402,28 @@ class WebOptionsBundle extends OptionBundle {
     WebWasmOptionsBundle(),
   ];
 }
+
+/// A bundle encapsulating web development server and browser debugging options.
+class WebServerOptionsBundle extends OptionBundle {
+  const WebServerOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
+    WebOptions.webHeader,
+    WebOptions.webHostname,
+    WebOptions.webPort,
+    WebOptions.webTlsCertPath,
+    WebOptions.webTlsCertKeyPath,
+    WebOptions.webServerDebugProtocol,
+    WebOptions.webServerDebugBackendProtocol,
+    WebOptions.webServerDebugInjectedClientProtocol,
+    WebOptions.webAllowExposeUrl,
+    WebOptions.webRunHeadless,
+    WebOptions.webBrowserDebugPort,
+    WebOptions.webEnableExpressionEvaluation,
+    WebOptions.webLaunchUrl,
+    WebOptions.webBrowserFlags,
+    WebOptions.crossOriginIsolation,
+    WebOptions.baseHref,
+  ];
+}
