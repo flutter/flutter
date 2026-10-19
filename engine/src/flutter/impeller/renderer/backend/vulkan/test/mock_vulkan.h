@@ -143,6 +143,27 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  /// Decide the result of vkCreateDescriptorPool. On VK_SUCCESS the mock
+  /// creates the pool as usual; any other result is returned to the caller
+  /// without creating one.
+  MockVulkanContextBuilder& SetCreateDescriptorPoolCallback(
+      std::function<std::remove_pointer_t<PFN_vkCreateDescriptorPool>>
+          create_descriptor_pool_callback) {
+    create_descriptor_pool_callback_ =
+        std::move(create_descriptor_pool_callback);
+    return *this;
+  }
+
+  /// Decide the result of vkAllocateDescriptorSets. The mock never writes
+  /// descriptor set handles, so the callback only controls the result.
+  MockVulkanContextBuilder& SetAllocateDescriptorSetsCallback(
+      std::function<std::remove_pointer_t<PFN_vkAllocateDescriptorSets>>
+          allocate_descriptor_sets_callback) {
+    allocate_descriptor_sets_callback_ =
+        std::move(allocate_descriptor_sets_callback);
+    return *this;
+  }
+
   /// Make the next `count` calls to vkCreateImage for a fixed-rate-compressed
   /// image (one carrying a VkImageCompressionControlEXT in its pNext chain)
   /// fail with VK_ERROR_COMPRESSION_EXHAUSTED_EXT. Also advertises the
@@ -173,6 +194,10 @@ class MockVulkanContextBuilder {
       acquire_next_image_callback_;
   std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
       wait_for_fences_callback_;
+  std::function<std::remove_pointer_t<PFN_vkCreateDescriptorPool>>
+      create_descriptor_pool_callback_;
+  std::function<std::remove_pointer_t<PFN_vkAllocateDescriptorSets>>
+      allocate_descriptor_sets_callback_;
   int compression_exhausted_create_image_failures_ = 0;
 };
 

@@ -197,6 +197,10 @@ struct MockVulkanState {
       wait_for_fences_callback;
   std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
       acquire_next_image_callback;
+  std::function<std::remove_pointer_t<PFN_vkCreateDescriptorPool>>
+      create_descriptor_pool_callback;
+  std::function<std::remove_pointer_t<PFN_vkAllocateDescriptorSets>>
+      allocate_descriptor_sets_callback;
   // When > 0, the next vkCreateImage for a fixed-rate-compressed image returns
   // VK_ERROR_COMPRESSION_EXHAUSTED_EXT and decrements (models PowerVR).
   int compression_exhausted_create_image_failures = 0;
@@ -896,9 +900,17 @@ VkResult vkCreateDescriptorPool(VkDevice device,
                                 const VkAllocationCallbacks* pAllocator,
                                 VkDescriptorPool* pDescriptorPool) {
   MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkCreateDescriptorPool");
+  if (g_mock_vulkan_state &&
+      GetMockVulkanState().create_descriptor_pool_callback) {
+    VkResult result = GetMockVulkanState().create_descriptor_pool_callback(
+        device, pCreateInfo, pAllocator, pDescriptorPool);
+    if (result != VK_SUCCESS) {
+      return result;
+    }
+  }
   *pDescriptorPool =
       reinterpret_cast<VkDescriptorPool>(new MockDescriptorPool());
-  mock_device->AddCalledFunction("vkCreateDescriptorPool");
   return VK_SUCCESS;
 }
 
@@ -924,6 +936,11 @@ VkResult vkAllocateDescriptorSets(
     VkDescriptorSet* pDescriptorSets) {
   MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkAllocateDescriptorSets");
+  if (g_mock_vulkan_state &&
+      GetMockVulkanState().allocate_descriptor_sets_callback) {
+    return GetMockVulkanState().allocate_descriptor_sets_callback(
+        device, pAllocateInfo, pDescriptorSets);
+  }
   return VK_SUCCESS;
 }
 
@@ -1330,6 +1347,10 @@ ContextVK::Settings MockVulkanContextBuilder::PrepareSettings() {
   g_mock_vulkan_state->acquire_next_image_callback =
       acquire_next_image_callback_;
   g_mock_vulkan_state->wait_for_fences_callback = wait_for_fences_callback_;
+  g_mock_vulkan_state->create_descriptor_pool_callback =
+      create_descriptor_pool_callback_;
+  g_mock_vulkan_state->allocate_descriptor_sets_callback =
+      allocate_descriptor_sets_callback_;
   g_mock_vulkan_state->compression_exhausted_create_image_failures =
       compression_exhausted_create_image_failures_;
   settings.embedder_data = embedder_data_;
