@@ -5,8 +5,8 @@
 import 'package:code_assets/code_assets.dart';
 
 import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
 import '../../../build_info.dart';
-import '../../../globals.dart' as globals;
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
 import 'native_assets_host.dart';
@@ -158,9 +158,17 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
 /// referenced in dependent libraries are updated to match the new install name,
 /// so that the referenced library can be found the dynamic linker.
 ///
-/// A dylib whose header has no room for its absolute path keeps its own
-/// install name, and a warning is printed. Its dependents still reference it
-/// by the absolute path, and so does the native assets manifest.
+/// A dylib whose header has no room for its absolute path, such as a prebuilt
+/// one linked without `-headerpad_max_install_names`, keeps its own install
+/// name, and [logger] prints a warning. Its dependents and the native assets
+/// manifest still use the absolute path. dyld matches a load against the path
+/// an image was loaded from, so every load of that path gets the same image,
+/// also after a later run replaced the file. App builds must not do this:
+/// there the manifest entry is the install name, which has to match
+/// (https://github.com/flutter/flutter/issues/190799).
+///
+/// A dylib without room whose own dependencies are code assets still fails,
+/// because their absolute paths do not fit in its header either.
 ///
 /// Code signing is also done here.
 Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
@@ -168,12 +176,14 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
   Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
+  FileSystem fileSystem, {
+  required Logger logger,
+}) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
-  final dylibs = <(File, String, String)>[];
+  final dylibs =
+      <({File dylibFile, String newInstallName, String assetId, String oldInstallName})>[];
 
   for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
     final Uri target = assetMapping.key;
@@ -194,10 +204,16 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
-    dylibs.add((dylibFile, newInstallName, assetMapping.value.first.codeAsset.id));
+    dylibs.add((
+      dylibFile: dylibFile,
+      newInstallName: newInstallName,
+      assetId: assetMapping.value.first.codeAsset.id,
+      oldInstallName: oldInstallNames.join(', '),
+    ));
   }
 
-  for (final (File dylibFile, String newInstallName, String assetId) in dylibs) {
+  for (final (:File dylibFile, :String newInstallName, :String assetId, :String oldInstallName)
+      in dylibs) {
     final bool installNameSet = await setInstallNamesDylib(
       dylibFile,
       newInstallName,
@@ -205,11 +221,14 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
       keepInstallNameIfItDoesNotFit: true,
     );
     if (!installNameSet) {
-      globals.printWarning(
-        'The install name of code asset "$assetId" was not changed to its path, '
-        'because the new name does not fit in the header of ${dylibFile.path}. '
-        'The asset is loaded by its path instead. To avoid this, the package '
-        'that provides it should link it with -headerpad_max_install_names.',
+      // Not fatal: the asset loads correctly, so `--fatal-warnings` should not
+      // fail the run of a package that cannot relink a vendor's dylib.
+      logger.printWarning(
+        'Code asset "$assetId" keeps its install name "$oldInstallName", because '
+        'the header of ${dylibFile.basename} has no room for its path. The asset '
+        'still loads. Linking the dylib with -headerpad_max_install_names avoids '
+        'this.',
+        fatal: false,
       );
     }
     await codesignDylib(codesignIdentity, buildMode, dylibFile);

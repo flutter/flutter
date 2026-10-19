@@ -809,6 +809,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
           codesignIdentity,
           buildMode,
           fileSystem,
+          logger: globals.logger,
         );
       } else {
         installedFiles = await copyNativeCodeAssetsMacOS(

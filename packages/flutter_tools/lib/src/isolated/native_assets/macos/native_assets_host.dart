@@ -91,10 +91,13 @@ Future<void> lipoDylibs(File target, List<File> sources) async {
 /// name of a dependencies needs to be updated if the location of the dependency
 /// has changed.
 ///
-/// If [keepInstallNameIfItDoesNotFit] is true and [newInstallName] does not fit
-/// in the header of [dylibFile], the install name of [dylibFile] is left as it
-/// is and only its dependencies are updated. This happens for a dylib that was
-/// linked without `-headerpad_max_install_names`, such as a prebuilt one.
+/// If [keepInstallNameIfItDoesNotFit] is true and `install_name_tool` reports
+/// that the header of [dylibFile] has no room for the updated load commands,
+/// the install name of [dylibFile] is left as it is and only its dependencies
+/// are updated. This happens for a dylib that was linked without
+/// `-headerpad_max_install_names`, such as a prebuilt one. If the dependencies
+/// do not fit either, or `install_name_tool` fails for any other reason, the
+/// tool exits.
 ///
 /// Returns whether the install name of [dylibFile] was set to
 /// [newInstallName].
@@ -134,7 +137,9 @@ Future<bool> setInstallNamesDylib(
       return false;
     }
     throwToolExit(
-      'Failed to change the dependencies of $dylibFile:\n'
+      'Failed to change install names in $dylibFile, also after keeping its '
+      'install name because $newInstallName did not fit:\n'
+      '${setInstallNamesResult.stderr}\n'
       '${changeDependenciesResult.stderr}',
     );
   }
@@ -148,6 +153,9 @@ Future<bool> setInstallNamesDylib(
 
 /// What `install_name_tool` prints when a dylib's header has no room for the
 /// larger load commands.
+///
+/// If a later version words this differently, the fallback in
+/// [setInstallNamesDylib] no longer applies and the tool exits as before.
 const _loadCommandsDoNotFit = 'larger updated load commands do not fit';
 
 Future<Set<String>> getInstallNamesDylib(File dylibFile) async {

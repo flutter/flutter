@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets.dart'
-    show copyNativeCodeAssetsMacOSFlutterTester;
+    show copyNativeCodeAssetsMacOS, copyNativeCodeAssetsMacOSFlutterTester;
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
     show cCompilerConfigMacOS;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -25,6 +25,7 @@ import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -415,6 +416,8 @@ void main() {
           // Multi arch.
           expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
           expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
+          // Every install name fit, so there is nothing to warn about.
+          expect((globals.logger as BufferLogger).warningText, isEmpty);
 
           if (!flutterTester) {
             // Not running on the host system, so the code asset has been turned into a framework.
@@ -434,98 +437,183 @@ void main() {
     }
   }
 
-  const dylibPathBarTester = '/build/native_assets/macos/libbar.dylib';
-  testUsingContext(
-    'flutter tester keeps the install name of a dylib without header room for its path',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <Pattern>[
-            'xcrun',
-            'lipo',
-            '-create',
-            '-output',
-            dylibPathBarTester,
-            'arm64/libbar.dylib',
-          ],
-        ),
-        const FakeCommand(
-          command: <Pattern>['xcrun', 'otool', '-D', dylibPathBarTester],
-          stdout: '$dylibPathBarTester (architecture arm64):\n@rpath/libbar.dylib',
-        ),
-        const FakeCommand(
-          command: <Pattern>[
-            'xcrun',
-            'install_name_tool',
-            '-id',
-            dylibPathBarTester,
-            '-change',
-            '@rpath/libbar.dylib',
-            dylibPathBarTester,
-            dylibPathBarTester,
-          ],
-          exitCode: 1,
-          stderr:
-              "error: install_name_tool: changing install names or rpaths can't be redone "
-              'for: $dylibPathBarTester (for architecture arm64) because larger updated '
-              'load commands do not fit (the program must be relinked, and you may need '
-              'to use -headerpad or -headerpad_max_install_names)',
-        ),
-        const FakeCommand(
-          command: <Pattern>[
-            'xcrun',
-            'install_name_tool',
-            '-change',
-            '@rpath/libbar.dylib',
-            dylibPathBarTester,
-            dylibPathBarTester,
-          ],
-        ),
-        const FakeCommand(
-          command: <Pattern>[
-            'xcrun',
-            'codesign',
-            '--force',
-            '--sign',
-            '-',
-            '--timestamp=none',
-            dylibPathBarTester,
-          ],
-        ),
-      ]),
-    },
-    () async {
+  group('install name that does not fit', () {
+    const doesNotFit =
+        "error: install_name_tool: changing install names or rpaths can't be redone for: "
+        '/build/native_assets/macos/libbar.dylib (for architecture arm64) because larger '
+        'updated load commands do not fit (the program must be relinked, and you may need '
+        'to use -headerpad or -headerpad_max_install_names)';
+
+    FlutterCodeAsset codeAsset(String name) => FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: name,
+        name: '$name.dart',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('arm64/lib$name.dylib'),
+      ),
+      os: OS.macOS,
+      architecture: Architecture.arm64,
+    );
+
+    testUsingContext(
+      'flutter tester keeps the install name of a dylib without header room for its path',
+      () async {
+        if (const LocalPlatform().isWindows) {
+          return; // Backslashes in commands, but we will never run these commands on Windows.
+        }
+        const barPath = '/build/native_assets/macos/libbar.dylib';
+        const buzPath = '/build/native_assets/macos/libbuz.dylib';
+        const changeDependencies = <String>[
+          '-change',
+          '@rpath/libbuz.dylib',
+          buzPath,
+          '-change',
+          '@rpath/libbar.dylib',
+          barPath,
+        ];
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['xcrun', 'lipo', '-create', '-output', buzPath, 'arm64/libbuz.dylib'],
+          ),
+          const FakeCommand(
+            command: <String>['xcrun', 'otool', '-D', buzPath],
+            stdout: '$buzPath (architecture arm64):\n@rpath/libbuz.dylib',
+          ),
+          const FakeCommand(
+            command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+          ),
+          const FakeCommand(
+            command: <String>['xcrun', 'otool', '-D', barPath],
+            stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+          ),
+          // libbuz has room, and references libbar by its path.
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'install_name_tool',
+              '-id',
+              buzPath,
+              ...changeDependencies,
+              buzPath,
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              '--timestamp=none',
+              buzPath,
+            ],
+          ),
+          // libbar has no room for its path, so it keeps its install name and
+          // only its dependencies are changed.
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'install_name_tool',
+              '-id',
+              barPath,
+              ...changeDependencies,
+              barPath,
+            ],
+            exitCode: 1,
+            stderr: doesNotFit,
+          ),
+          const FakeCommand(
+            command: <String>['xcrun', 'install_name_tool', ...changeDependencies, barPath],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              '--timestamp=none',
+              barPath,
+            ],
+          ),
+        ]);
+
+        final List<File> installedFiles = await copyNativeCodeAssetsMacOSFlutterTester(
+          Uri.directory('/build/native_assets/macos/'),
+          <Uri, List<FlutterCodeAsset>>{
+            Uri.file('libbuz.dylib'): <FlutterCodeAsset>[codeAsset('buz')],
+            Uri.file('libbar.dylib'): <FlutterCodeAsset>[codeAsset('bar')],
+          },
+          null,
+          BuildMode.debug,
+          fileSystem,
+          logger: logger,
+        );
+
+        expect(installedFiles.map((File file) => file.path), <String>[buzPath, barPath]);
+        expect(processManager, hasNoRemainingExpectations);
+        expect(
+          logger.warningText,
+          allOf(
+            contains(
+              'Code asset "package:bar/bar.dart" keeps its install name "@rpath/libbar.dylib"',
+            ),
+            contains('-headerpad_max_install_names'),
+            isNot(contains('package:buz/buz.dart')),
+          ),
+        );
+        expect('package:bar/bar.dart'.allMatches(logger.warningText), hasLength(1));
+        // The asset loads, so `--fatal-warnings` must not fail the run.
+        expect(logger.hadWarningOutput, isFalse);
+      },
+      overrides: <Type, Generator>{ProcessManager: () => processManager},
+    );
+
+    testUsingContext('app builds still fail when the install name does not fit', () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.
       }
-      final List<File> installedFiles = await copyNativeCodeAssetsMacOSFlutterTester(
-        Uri.directory('/build/native_assets/macos/'),
-        <Uri, List<FlutterCodeAsset>>{
-          Uri.file('libbar.dylib'): <FlutterCodeAsset>[
-            FlutterCodeAsset(
-              codeAsset: CodeAsset(
-                package: 'bar',
-                name: 'bar.dart',
-                linkMode: DynamicLoadingBundled(),
-                file: Uri.file('arm64/libbar.dylib'),
-              ),
-              os: OS.macOS,
-              architecture: Architecture.arm64,
-            ),
+      const barPath = '/build/native_assets/macos/bar.framework/Versions/A/bar';
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', 'otool', '-D', barPath],
+          stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'install_name_tool',
+            '-id',
+            '@rpath/bar.framework/bar',
+            '-change',
+            '@rpath/libbar.dylib',
+            '@rpath/bar.framework/bar',
+            barPath,
           ],
-        },
-        null,
-        BuildMode.debug,
-        fileSystem,
-      );
+          exitCode: 1,
+          stderr: doesNotFit,
+        ),
+      ]);
 
-      expect(installedFiles.single.path, dylibPathBarTester);
-      expect(
-        (globals.logger as BufferLogger).warningText,
-        allOf(contains('package:bar/bar.dart'), contains('-headerpad_max_install_names')),
+      await expectLater(
+        copyNativeCodeAssetsMacOS(
+          Uri.directory('/build/native_assets/macos/'),
+          <Uri, List<FlutterCodeAsset>>{
+            Uri.file('bar.framework/bar'): <FlutterCodeAsset>[codeAsset('bar')],
+          },
+          null,
+          BuildMode.debug,
+          fileSystem,
+        ),
+        throwsToolExit(message: 'larger updated load commands do not fit'),
       );
-    },
-  );
+      expect(processManager, hasNoRemainingExpectations);
+      expect(logger.warningText, isEmpty);
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager});
+  });
 
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.

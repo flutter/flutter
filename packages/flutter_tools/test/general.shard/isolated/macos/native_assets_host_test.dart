@@ -301,6 +301,9 @@ void main() {
   });
 
   group('setInstallNamesDylib', () {
+    // The file is not at its new install name, so the commands show which one
+    // they are given.
+    const dylibPath = '/staging/libfoo.dylib';
     const newInstallName = '/project/build/native_assets/macos/libfoo.dylib';
     const oldToNewInstallNames = <String, String>{
       '@rpath/libfoo.dylib': newInstallName,
@@ -316,7 +319,7 @@ void main() {
     ];
     const doesNotFit =
         "error: install_name_tool: changing install names or rpaths can't be redone for: "
-        '$newInstallName (for architecture arm64) because larger updated load commands do '
+        '$dylibPath (for architecture arm64) because larger updated load commands do '
         'not fit (the program must be relinked, and you may need to use -headerpad or '
         '-headerpad_max_install_names)';
 
@@ -325,7 +328,7 @@ void main() {
 
     setUp(() {
       processManager = FakeProcessManager.empty();
-      dylibFile = MemoryFileSystem.test().file(newInstallName);
+      dylibFile = MemoryFileSystem.test().file(dylibPath);
     });
 
     FakeCommand setId({int exitCode = 0, String stderr = ''}) => FakeCommand(
@@ -335,14 +338,14 @@ void main() {
         '-id',
         newInstallName,
         ...changeDependencies,
-        newInstallName,
+        dylibPath,
       ],
       exitCode: exitCode,
       stderr: stderr,
     );
 
     FakeCommand changeOnlyDependencies({int exitCode = 0, String stderr = ''}) => FakeCommand(
-      command: const <String>['xcrun', 'install_name_tool', ...changeDependencies, newInstallName],
+      command: const <String>['xcrun', 'install_name_tool', ...changeDependencies, dylibPath],
       exitCode: exitCode,
       stderr: stderr,
     );
@@ -416,7 +419,7 @@ void main() {
           oldToNewInstallNames,
           keepInstallNameIfItDoesNotFit: true,
         ),
-        throwsToolExit(message: 'Failed to change the dependencies'),
+        throwsToolExit(message: 'also after keeping its install name'),
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager});
