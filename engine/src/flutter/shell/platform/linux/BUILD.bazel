@@ -14,11 +14,13 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "linux",
-    data = [":publish_headers_linux"],
+    data = [
+        ":publish_headers_linux",
+        "//engine/src/flutter/shell/platform/glfw:publish_headers_glfw",  # build_glfw_shell
+    ],
     deps = [
         ":flutter_linux_glfw",  # build_glfw_shell
         ":flutter_linux_gtk",
-        "//engine/src/flutter/shell/platform/glfw:publish_headers_glfw",  # build_glfw_shell
         "//engine/src/flutter/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",  # build_glfw_shell
     ],
 )

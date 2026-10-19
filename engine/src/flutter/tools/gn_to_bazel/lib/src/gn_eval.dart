@@ -1677,6 +1677,9 @@ final class _Evaluator {
         _evaluateBlock(node, blockScope, Condition.always, const <String>[], target: null);
         return _Expression.scalar(GnScopeValue(blockScope.variables));
       case GnLiteral():
+        if (node.hasExpansion) {
+          return _expandExpression(node, scope);
+        }
         return _Expression(<_Value>[
           _Value(_literal(node, scope: scope), _comments(node)),
         ], isList: false);
@@ -1999,15 +2002,41 @@ final class _Evaluator {
   /// (assumptions and local scalar variables). An external variable with no
   /// assumed value stays a reference inside a [GnExpandedString]; anything
   /// else is an error.
-  GnValue _expand(GnLiteral node, _Scope? scope) {
+  GnValue _expand(
+    GnLiteral node,
+    _Scope? scope, {
+    Map<String, GnValue> bound = const <String, GnValue>{},
+  }) {
     final String text = node.stringValue;
     var last = 0;
     final parts = <GnValue>[];
     final literal = StringBuffer();
     for (final Match match in _expansion.allMatches(text)) {
       final String name = match.group(1) ?? match.group(2)!;
-      final String? value = _knownString(name, scope, node);
       literal.write(text.substring(last, match.start));
+      last = match.end;
+      // A variable bound to one of its cases ([_expandExpression]): its
+      // string, or the parts of a string around a reference.
+      final GnValue? boundValue = bound[name];
+      if (boundValue is GnStringValue) {
+        literal.write(boundValue.value);
+        continue;
+      }
+      if (boundValue is GnExpandedString) {
+        for (final GnValue part in boundValue.parts) {
+          if (part is GnStringValue) {
+            literal.write(part.value);
+          } else {
+            if (literal.isNotEmpty) {
+              parts.add(GnStringValue(literal.toString()));
+              literal.clear();
+            }
+            parts.add(part);
+          }
+        }
+        continue;
+      }
+      final String? value = _knownString(name, scope, node);
       if (value != null) {
         literal.write(value);
       } else if (settings.externalVariables.contains(name)) {
@@ -2019,7 +2048,6 @@ final class _Evaluator {
       } else {
         throw GnError(node.location, 'string expansion of \$$name is not supported: ${node.raw}');
       }
-      last = match.end;
     }
     if (last < text.length) {
       final String rest = text.substring(last);
@@ -2035,6 +2063,53 @@ final class _Evaluator {
       parts.add(GnStringValue(literal.toString()));
     }
     return GnExpandedString(List<GnValue>.unmodifiable(parts));
+  }
+
+  /// A string with expansions as an expression: one value per case when a
+  /// variable it expands takes different values under different conditions
+  /// (`path_prefix` set under `flutter_runtime_mode == "release"`, then
+  /// `"${path_prefix}platform_strong.dill"`), each under the conjunction of
+  /// its variables' conditions; the single value otherwise ([_expand]).
+  _Expression _expandExpression(GnLiteral node, _Scope? scope) {
+    final String text = node.stringValue;
+    // Each variable with more than one case, by its place in the text.
+    final conditional = <String, List<_Value>>{};
+    for (final Match match in _expansion.allMatches(text)) {
+      final String name = match.group(1) ?? match.group(2)!;
+      final GnVariable? variable = scope?.lookup(name);
+      if (variable == null || variable.isList || conditional.containsKey(name)) {
+        continue;
+      }
+      final _Expression items = _scalarItems(variable, node.location);
+      if (items.items.length > 1) {
+        conditional[name] = items.items;
+      }
+    }
+    if (conditional.isEmpty) {
+      return _Expression(<_Value>[_Value(_expand(node, scope), _comments(node))], isList: false);
+    }
+    if (conditional.length > 1) {
+      throw GnError(
+        node.location,
+        'more than one variable with conditional values in one string: ${node.raw}',
+      );
+    }
+    final MapEntry<String, List<_Value>> only = conditional.entries.single;
+    final values = <_Value>[];
+    for (final _Value item in only.value) {
+      if (item.value is! GnStringValue && item.value is! GnExpandedString) {
+        throw GnError(node.location, 'expansion of ${only.key}, which is ${item.value}');
+      }
+      values.add(
+        _Value(
+          _expand(node, scope, bound: <String, GnValue>{only.key: item.value}),
+          _comments(node),
+          condition: item.condition,
+          sourceConditions: item.sourceConditions,
+        ),
+      );
+    }
+    return _Expression(values, isList: false);
   }
 
   /// The value of [name] when it is a string the converter knows: an
