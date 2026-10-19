@@ -440,12 +440,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   // ignore: avoid_setters_without_getters
   set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
     _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
+    onPlatformConfigurationChanged?.call();
   }
 
   /// Deletes any existing test clock format and returns to using the real clock
   /// format.
   void clearAlwaysUse24HourTestValue() {
     _alwaysUse24HourFormatTestValue = null;
+    onPlatformConfigurationChanged?.call();
   }
 
   @override

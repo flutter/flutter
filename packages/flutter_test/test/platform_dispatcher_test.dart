@@ -213,6 +213,24 @@ void main() {
     },
   );
 
+  testWidgets(
+    'TestPlatformDispatcher sends platform configuration change when alwaysUse24HourFormatTestValue is updated',
+    (WidgetTester tester) async {
+      addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
+      final observer = TestObserver();
+      retrieveTestBinding(tester).addObserver(observer);
+      addTearDown(() => retrieveTestBinding(tester).removeObserver(observer));
+
+      expect(observer.platformConfigurationChanged, isFalse);
+      retrieveTestBinding(tester).platformDispatcher.alwaysUse24HourFormatTestValue = true;
+      expect(observer.platformConfigurationChanged, isTrue);
+
+      observer.platformConfigurationChanged = false;
+      retrieveTestBinding(tester).platformDispatcher.clearAlwaysUse24HourTestValue();
+      expect(observer.platformConfigurationChanged, isTrue);
+    },
+  );
+
   testWidgets('TestPlatformDispatcher.view getter returns the implicit view', (
     WidgetTester tester,
   ) async {
@@ -644,10 +662,16 @@ void main() {
 
 class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
+  bool platformConfigurationChanged = false;
 
   @override
   void didChangeLocales(List<Locale>? locales) {
     this.locales = locales;
+  }
+
+  @override
+  void didChangePlatformConfiguration() {
+    platformConfigurationChanged = true;
   }
 }
 

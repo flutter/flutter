@@ -2089,4 +2089,27 @@ void main() {
     expect(widthBuildCount, 2);
     expect(heightBuildCount, 2);
   });
+
+  testWidgets('MediaQuery.fromView updates when alwaysUse24HourFormat changes at runtime', (WidgetTester tester) async {
+    addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
+    await tester.pumpWidget(
+      MediaQuery.fromView(
+        view: tester.view,
+        child: Builder(
+          builder: (BuildContext context) {
+            return Text(
+              MediaQuery.alwaysUse24HourFormatOf(context) ? '24-hour' : '12-hour',
+              textDirection: TextDirection.ltr,
+            );
+          },
+        ),
+      ),
+    );
+    expect(find.text('12-hour'), findsOneWidget);
+
+    tester.platformDispatcher.alwaysUse24HourFormatTestValue = true;
+    await tester.pump();
+
+    expect(find.text('24-hour'), findsOneWidget);
+  });
 }
