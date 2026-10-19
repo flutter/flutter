@@ -559,11 +559,9 @@ zero.average                                                      0.0       2.2 
 
     test('identical --baseline and --results-file paths exit with code 2', () async {
       final file = io.File(path.join(tempDir.path, 'file.json'))..writeAsStringSync('{}');
+      addTearDown(file.deleteSync);
       expect(
-        await runBenchmarkCli(<String>[
-          '--baseline=${file.path}',
-          '--results-file=${path.join(tempDir.path, '.', 'file.json')}',
-        ]),
+        await runBenchmarkCli(<String>['--baseline=${file.path}', '--results-file=${file.path}']),
         2,
       );
     });
@@ -585,6 +583,7 @@ zero.average                                                      0.0       2.2 
       () async {
         final baselineFile = io.File(path.join(tempDir.path, 'baseline.json'))
           ..writeAsStringSync('{}');
+        addTearDown(baselineFile.deleteSync);
         for (final value in <String>['-0.1', 'NaN', 'Infinity', 'abc']) {
           expect(
             await runBenchmarkCli(<String>[
@@ -604,9 +603,10 @@ zero.average                                                      0.0       2.2 
     });
 
     test('--baseline file that is not a JSON object exits with code 2', () async {
+      final baselineFile = io.File(path.join(tempDir.path, 'baseline.json'));
+      addTearDown(baselineFile.deleteSync);
       for (final contents in <String>['not json', '[1, 2]']) {
-        final baselineFile = io.File(path.join(tempDir.path, 'baseline.json'))
-          ..writeAsStringSync(contents);
+        baselineFile.writeAsStringSync(contents);
         expect(
           await runBenchmarkCli(<String>['--baseline=${baselineFile.path}']),
           2,
