@@ -517,7 +517,7 @@ static const int kMainThreadPriority = 47;
 static void SetThreadPriority(FlutterThreadPriority priority) {
   if (priority == kDisplay || priority == kRaster) {
     pthread_t thread = pthread_self();
-    sched_param param;
+    sched_param param{};
     int policy;
     if (!pthread_getschedparam(thread, &policy, &param)) {
       param.sched_priority = kMainThreadPriority;

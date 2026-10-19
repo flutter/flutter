@@ -476,7 +476,7 @@ class TextLayout {
       if (block is! PlaceholderBlock) {
         continue;
       }
-      block.calculatePlaceholderTop(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
+      block.calculatePlaceholderMetrics(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
       line.updateBoundingBox(block);
     }
 
@@ -507,11 +507,12 @@ class TextLayout {
       isFirstLine: lines.isEmpty,
       isLastLine: isLastLine,
     );
-    // Position placeholders after TextHeightBehavior potentially reverts the
+    // Position each placeholder only after all placeholders have folded their
+    // ascent into the line and TextHeightBehavior has potentially reverted the
     // first line's ascent.
     for (final LineBlock block in line.visualBlocks) {
       if (block is PlaceholderBlock) {
-        block.positionInLine(line.fontBoundingBoxAscent);
+        block.calculatePlaceholderTop(line.fontBoundingBoxAscent);
       }
     }
     line.advance = ui.Rect.fromLTWH(0, top, width, line.height);
@@ -627,21 +628,25 @@ class TextLayout {
         ui.Rect firstRect = block.advance;
         if (block is! PlaceholderBlock) {
           // We need to calculate the intersect rectangle
-          firstRect = (block.span as TextSpan)
-              .getTextRangeSelectionInBlock(block, intersect)
-              .translate(0, block.multipliedFontBoundingBoxAscent);
+          firstRect = (block.span as TextSpan).getTextRangeSelectionInBlock(block, intersect);
         }
         // Now we need to recalculate the rects
         double left, right, top, bottom;
         switch (boxHeightStyle) {
           case ui.BoxHeightStyle.tight:
-            top =
-                firstRect.top +
-                line.advance.top +
-                line.fontBoundingBoxAscent -
-                block.multipliedFontBoundingBoxAscent;
-            bottom = top + block.multipliedHeight;
-            assert((block.multipliedHeight - (bottom - top).abs() < epsilon));
+            if (block is PlaceholderBlock) {
+              // For PlaceholderBlock, `firstRect` is `block.advance`, which already has
+              // `top = line.fontBoundingBoxAscent - block.ascent` relative to the line
+              top = firstRect.top + line.advance.top;
+              bottom = top + block.span.height;
+            } else {
+              // For TextBlock, BoxHeightStyle.tight returns the unscaled glyph bounds
+              // positioned relative to the line's baseline
+              // (`line.advance.top + line.fontBoundingBoxAscent`), matching SkParagraph's
+              // TextLine::getRectsForRange
+              top = line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent;
+              bottom = top + block.rawFontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
+            }
           case ui.BoxHeightStyle.max:
             top = line.advance.top;
             bottom = line.advance.bottom;
@@ -1371,7 +1376,7 @@ class PlaceholderBlock extends LineBlock {
   @override
   final double spanShiftFromLineStart;
 
-  void calculatePlaceholderTop(double lineAscent, double lineDescent) {
+  void calculatePlaceholderMetrics(double lineAscent, double lineDescent) {
     double baselineAdjustment = 0;
     if (span.baseline == ui.TextBaseline.ideographic) {
       baselineAdjustment = lineDescent / 2;
@@ -1416,15 +1421,11 @@ class PlaceholderBlock extends LineBlock {
 
   /// Positions the placeholder vertically within the line once the final
   /// [lineAscent] is known.
-  void positionInLine(double lineAscent) {
+  void calculatePlaceholderTop(double lineAscent) {
+    final double top = lineAscent - ascent;
     // The advance needs to be calculated relative to the line. In order to do that, we need to start
     // from the span's own advance within the line.
-    advance = ui.Rect.fromLTWH(
-      spanShiftFromLineStart,
-      lineAscent - ascent,
-      span.width,
-      span.height,
-    );
+    advance = ui.Rect.fromLTWH(spanShiftFromLineStart, top, span.width, span.height);
   }
 
   // TODO(jlavrova): Why are we using separate properties instead of `rawFontBoundingBoxAscent` and `rawFontBoundingBoxDescent`?

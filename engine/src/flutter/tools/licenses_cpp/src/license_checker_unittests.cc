@@ -51,7 +51,7 @@ class LicenseCheckerTest : public testing::Test {
  private:
   fs::path temp_dir_base_;
   fs::path temp_dir_;
-  bool should_delete_temp_dir_;
+  bool should_delete_temp_dir_ = false;
 };
 
 namespace {
