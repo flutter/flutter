@@ -267,25 +267,25 @@ void main() {
     test('toEnvironmentDefines maps targetOs, targetArchitecture, and compiler paths', () {
       final config = ExtensionNativeAssetsConfig(
         targetArchitecture: 'arm64',
-        targetOs: 'ohos',
+        targetOs: 'custom_os',
         cCompilerConfig: ExtensionCCompilerConfig(
-          ar: Uri.file('/opt/ohos-sdk/llvm/bin/llvm-ar'),
-          cc: Uri.file('/opt/ohos-sdk/llvm/bin/clang'),
-          envScript: Uri.file('/opt/ohos-sdk/env.sh'),
+          ar: Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
+          cc: Uri.file('/opt/custom-sdk/llvm/bin/clang'),
+          envScript: Uri.file('/opt/custom-sdk/env.sh'),
           envScriptArgs: const <String>['--arch', 'arm64 with spaces'],
-          ld: Uri.file('/opt/ohos-sdk/llvm/bin/ld.lld'),
+          ld: Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'),
         ),
       );
 
       expect(
         config.toEnvironmentDefines(),
         equals(<String, String>{
-          ExtensionNativeAssetsConfig.targetOsDefine: 'ohos',
+          ExtensionNativeAssetsConfig.targetOsDefine: 'custom_os',
           ExtensionNativeAssetsConfig.targetArchDefine: 'arm64',
-          ExtensionNativeAssetsConfig.cCompilerCcDefine: '/opt/ohos-sdk/llvm/bin/clang',
-          ExtensionNativeAssetsConfig.cCompilerArDefine: '/opt/ohos-sdk/llvm/bin/llvm-ar',
-          ExtensionNativeAssetsConfig.cCompilerLdDefine: '/opt/ohos-sdk/llvm/bin/ld.lld',
-          ExtensionNativeAssetsConfig.cCompilerEnvScriptDefine: '/opt/ohos-sdk/env.sh',
+          ExtensionNativeAssetsConfig.cCompilerCcDefine: '/opt/custom-sdk/llvm/bin/clang',
+          ExtensionNativeAssetsConfig.cCompilerArDefine: '/opt/custom-sdk/llvm/bin/llvm-ar',
+          ExtensionNativeAssetsConfig.cCompilerLdDefine: '/opt/custom-sdk/llvm/bin/ld.lld',
+          ExtensionNativeAssetsConfig.cCompilerEnvScriptDefine: '/opt/custom-sdk/env.sh',
           ExtensionNativeAssetsConfig.cCompilerEnvScriptArgsDefine:
               '["--arch","arm64 with spaces"]',
         }),

@@ -385,10 +385,9 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
   try {
     return TargetPlatform.fromName(targetPlatformEnvironment);
   } on Exception {
-    // Custom extension platforms (such as 'ohos-arm64' or 'webos-arm64') are
-    // not part of the built-in TargetPlatform enum. Map them to
-    // TargetPlatform.unsupported when a native OS and architecture can be
-    // resolved from extension defines or the target platform identifier.
+    // Custom extension platforms are not part of the built-in TargetPlatform
+    // enum. Map them to TargetPlatform.unsupported when a native OS and
+    // architecture can be resolved from extension defines.
     if (resolveCustomNativeTarget(environment.defines) != null) {
       return TargetPlatform.unsupported;
     }

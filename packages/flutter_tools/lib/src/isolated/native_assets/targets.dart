@@ -270,8 +270,7 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 }
 
 /// [CodeAssetTarget] for extension build targets configured via
-/// [kExtensionTargetOs] and [kExtensionTargetArch] (such as HarmonyOS `'ohos'`,
-/// LG webOS `'webos'`, or custom Linux cross-compilation toolchains).
+/// [kExtensionTargetOs] and [kExtensionTargetArch].
 final class CustomCodeAssetTarget extends CodeAssetTarget {
   CustomCodeAssetTarget({
     required super.architecture,
@@ -511,12 +510,12 @@ String? _emptyToNull(String? input) {
 }
 
 /// Parses a native [OS] from a target OS string (such as `linux`, `android`,
-/// `ohos`, or `webos`).
+/// or a custom extension OS identifier).
 ///
 /// Built-in operating systems map to the corresponding [OS] constants, while
-/// custom extension operating systems (such as HarmonyOS `ohos` or LG webOS
-/// `webos`) are constructed via [OS.fromString] so Dart build and link hooks
-/// receive the custom target OS identifier in `HookConfig.code.targetOS`.
+/// custom extension operating systems are constructed via [OS.fromString] so
+/// Dart build and link hooks receive the custom target OS identifier in
+/// `HookConfig.code.targetOS`.
 OS parseNativeOS(String rawOs) {
   final String normalized = rawOs.trim().toLowerCase();
   if (normalized.isEmpty) {

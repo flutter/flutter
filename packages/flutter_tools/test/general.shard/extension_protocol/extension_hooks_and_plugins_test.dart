@@ -50,18 +50,18 @@ final class _PluginCapturingBuildService extends BuildService {
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
     return <ExtensionBuildTarget>[
       ExtensionBuildTarget(
-        description: 'HarmonyOS HAP build target.',
-        name: 'ohos-hap',
+        description: 'Custom package build target.',
+        name: 'custom-pkg',
         nativeAssetsConfig: ExtensionNativeAssetsConfig(
           targetArchitecture: 'arm64',
-          targetOs: 'ohos',
+          targetOs: 'custom_os',
           cCompilerConfig: ExtensionCCompilerConfig(
-            ar: Uri.file('/opt/ohos-sdk/llvm/bin/llvm-ar'),
-            cc: Uri.file('/opt/ohos-sdk/llvm/bin/clang'),
-            ld: Uri.file('/opt/ohos-sdk/llvm/bin/ld.lld'),
+            ar: Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
+            cc: Uri.file('/opt/custom-sdk/llvm/bin/clang'),
+            ld: Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'),
           ),
         ),
-        pluginPlatformKey: 'ohos',
+        pluginPlatformKey: 'custom_os',
       ),
     ];
   }
@@ -117,7 +117,7 @@ platforms:
         - b
   custom_federated:
     default_package: my_plugin_custom_federated
-  tizen:
+  custom_platform_b:
 ''') as YamlMap;
 
       final plugin = Plugin.fromYaml(
@@ -130,7 +130,7 @@ platforms:
         isDevDependency: false,
       );
 
-      expect(plugin.platforms.containsKey('tizen'), isFalse);
+      expect(plugin.platforms.containsKey('custom_platform_b'), isFalse);
       final PluginPlatform? platformPlugin = plugin.platforms['custom_embedder'];
       expect(platformPlugin, isA<CustomPlatformPlugin>());
       final customPlugin = platformPlugin! as CustomPlatformPlugin;
@@ -306,9 +306,9 @@ platforms:
           logger: logger,
           processManager: FakeProcessManager.any(),
           defines: <String, String>{
-            kTargetPlatform: 'ohos-arm64',
-            kExtensionTargetOs: 'ohos',
-            kExtensionPluginPlatformKey: 'ohos,webos',
+            kTargetPlatform: 'custom-arm64',
+            kExtensionTargetOs: 'custom_os',
+            kExtensionPluginPlatformKey: 'custom_os',
             kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
           },
           generateDartPluginRegistry: true,
@@ -320,8 +320,8 @@ platforms:
           directory: projectDir,
           mainLibName: 'my_app',
           packages: <String, String>{
-            'path_provider_ohos': '/path_provider_ohos',
-            'path_provider_webos': '/path_provider_webos',
+            'path_provider_custom_a': '/path_provider_custom_a',
+            'path_provider_custom_b': '/path_provider_custom_b',
           },
           languageVersions: <String, String>{'my_app': '3.7'},
         );
@@ -331,35 +331,35 @@ name: my_app
 dependencies:
   flutter:
     sdk: flutter
-  path_provider_ohos: 1.0.0
-  path_provider_webos: 1.0.0
+  path_provider_custom_a: 1.0.0
+  path_provider_custom_b: 1.0.0
 ''');
         projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
-        fileSystem.directory('/path_provider_ohos').childFile('pubspec.yaml')
+        fileSystem.directory('/path_provider_custom_a').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
-name: path_provider_ohos
+name: path_provider_custom_a
 flutter:
   plugin:
     implements: path_provider
     platforms:
-      ohos:
-        dartPluginClass: PathProviderOhos
+      custom_os:
+        dartPluginClass: PathProviderCustomA
 environment:
   sdk: ^3.7.0-0
   flutter: ">=1.20.0"
 ''');
-        fileSystem.directory('/path_provider_webos').childFile('pubspec.yaml')
+        fileSystem.directory('/path_provider_custom_b').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
-name: path_provider_webos
+name: path_provider_custom_b
 flutter:
   plugin:
     implements: path_provider
     platforms:
-      webos:
-        dartPluginClass: PathProviderWebos
+      custom_platform_b:
+        dartPluginClass: PathProviderCustomB
 environment:
   sdk: ^3.7.0-0
   flutter: ">=1.20.0"
@@ -374,10 +374,19 @@ environment:
             .childFile('dart_plugin_registrant.dart');
         expect(generatedMain, exists);
         final String registrantContent = generatedMain.readAsStringSync();
-        expect(registrantContent, contains("Platform.operatingSystem == 'ohos'"));
-        expect(registrantContent, contains('path_provider_ohos.PathProviderOhos.registerWith()'));
-        expect(registrantContent, contains("Platform.operatingSystem == 'webos'"));
-        expect(registrantContent, contains('path_provider_webos.PathProviderWebos.registerWith()'));
+        const customPlatformCheck =
+            "const String.fromEnvironment('$kFlutterCustomPlatformDartDefine') == 'custom_os'";
+        expect(registrantContent, contains(customPlatformCheck));
+        expect(
+          registrantContent,
+          contains('path_provider_custom_a.PathProviderCustomA.registerWith()'),
+        );
+        expect(registrantContent, contains('return;'));
+        expect(registrantContent, isNot(contains('PathProviderCustomB')));
+        expect(
+          registrantContent.indexOf(customPlatformCheck),
+          lessThan(registrantContent.indexOf('if (Platform.isAndroid)')),
+        );
       },
     );
 
@@ -387,7 +396,7 @@ environment:
         directory: projectDir,
         mainLibName: 'my_app',
         packages: <String, String>{
-          'camera_ohos': '/camera_ohos',
+          'camera_custom': '/camera_custom',
           'url_launcher_linux': '/url_launcher_linux',
         },
       );
@@ -396,19 +405,19 @@ name: my_app
 dependencies:
   flutter:
     sdk: flutter
-  camera_ohos: 1.0.0
+  camera_custom: 1.0.0
   url_launcher_linux: 1.0.0
 ''');
-      fileSystem.directory('/camera_ohos').childFile('pubspec.yaml')
+      fileSystem.directory('/camera_custom').childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
-name: camera_ohos
+name: camera_custom
 flutter:
   plugin:
     platforms:
-      ohos:
-        pluginClass: CameraOhosPlugin
-        harPath: har/camera.har
+      custom_os:
+        pluginClass: CameraCustomPlugin
+        archivePath: pkg/camera.pkg
 environment:
   sdk: ^3.7.0-0
   flutter: ">=1.20.0"
@@ -447,14 +456,14 @@ environment:
       final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
       expect(targets, hasLength(1));
       expect(
-        buildManager.environmentDefinesForTarget('ohos-hap'),
+        buildManager.environmentDefinesForTarget('custom-pkg'),
         equals(<String, String>{
-          kExtensionTargetOs: 'ohos',
+          kExtensionTargetOs: 'custom_os',
           kExtensionTargetArch: 'arm64',
-          kExtensionCCompilerCc: '/opt/ohos-sdk/llvm/bin/clang',
-          kExtensionCCompilerAr: '/opt/ohos-sdk/llvm/bin/llvm-ar',
-          kExtensionCCompilerLd: '/opt/ohos-sdk/llvm/bin/ld.lld',
-          kExtensionPluginPlatformKey: 'ohos',
+          kExtensionCCompilerCc: '/opt/custom-sdk/llvm/bin/clang',
+          kExtensionCCompilerAr: '/opt/custom-sdk/llvm/bin/llvm-ar',
+          kExtensionCCompilerLd: '/opt/custom-sdk/llvm/bin/ld.lld',
+          kExtensionPluginPlatformKey: 'custom_os',
         }),
       );
 
@@ -462,18 +471,18 @@ environment:
         buildMode: BuildMode.release,
         mainPath: 'lib/main.dart',
         projectRoot: projectDir.uri,
-        targetName: 'ohos-hap',
+        targetName: 'custom-pkg',
       );
       expect(result.success, isTrue);
       expect(
         await pluginsPort.first,
         equals(<ExtensionPlugin>[
           ExtensionPlugin(
-            name: 'camera_ohos',
-            path: Uri.directory('/camera_ohos'),
+            name: 'camera_custom',
+            path: Uri.directory('/camera_custom'),
             configuration: const <String, Object?>{
-              'pluginClass': 'CameraOhosPlugin',
-              'harPath': 'har/camera.har',
+              'pluginClass': 'CameraCustomPlugin',
+              'archivePath': 'pkg/camera.pkg',
             },
           ),
         ]),
@@ -646,6 +655,7 @@ environment:
             kBuildMode: BuildMode.profile.cliName,
             kTargetPlatform: 'custom-embedder-arm64',
             kExtensionTargetOs: 'windows',
+            kExtensionPluginPlatformKey: 'custom_embedder',
           },
           fileSystem: fileSystem,
           inputs: <String, String>{},
@@ -668,6 +678,7 @@ environment:
               '$flutterPatchedSdkPath/',
               '--target=flutter',
               '--no-print-incremental-dependencies',
+              '-DFLUTTER_CUSTOM_PLATFORM=custom_embedder',
               ...buildModeOptions(BuildMode.profile, <String>[]),
               '--track-creation-locations',
               '--aot',
@@ -697,51 +708,48 @@ environment:
       },
     );
 
-    testWithoutContext(
-      'AssetBuildTarget.targetsFor supports custom OS identifiers (such as ohos and webos)',
-      () async {
-        fileSystem.directory('/opt/ohos-sdk/llvm/bin').createSync(recursive: true);
-        fileSystem.file('/opt/ohos-sdk/llvm/bin/clang').createSync();
-        fileSystem.file('/opt/ohos-sdk/llvm/bin/llvm-ar').createSync();
-        fileSystem.file('/opt/ohos-sdk/llvm/bin/ld.lld').createSync();
+    testWithoutContext('AssetBuildTarget.targetsFor supports custom OS identifiers', () async {
+      fileSystem.directory('/opt/custom-sdk/llvm/bin').createSync(recursive: true);
+      fileSystem.file('/opt/custom-sdk/llvm/bin/clang').createSync();
+      fileSystem.file('/opt/custom-sdk/llvm/bin/llvm-ar').createSync();
+      fileSystem.file('/opt/custom-sdk/llvm/bin/ld.lld').createSync();
 
-        final List<AssetBuildTarget> ohosTargets = AssetBuildTarget.targetsFor(
-          buildDirectory: fileSystem.directory('/project/build'),
-          buildMode: BuildMode.debug,
-          environmentDefines: <String, String>{
-            kBuildMode: BuildMode.debug.cliName,
-            kTargetPlatform: 'ohos-arm64',
-            kExtensionTargetOs: 'ohos',
-            kExtensionTargetArch: 'arm64',
-            kExtensionCCompilerCc: '/opt/ohos-sdk/llvm/bin/clang',
-          },
-          fileSystem: fileSystem,
-          supportedAssetTypes: <SupportedAssetTypes>[
-            SupportedAssetTypes.codeAssets,
-            SupportedAssetTypes.dataAssets,
-          ],
-          targetPlatform: TargetPlatform.unsupported,
-        );
+      final List<AssetBuildTarget> customTargets = AssetBuildTarget.targetsFor(
+        buildDirectory: fileSystem.directory('/project/build'),
+        buildMode: BuildMode.debug,
+        environmentDefines: <String, String>{
+          kBuildMode: BuildMode.debug.cliName,
+          kTargetPlatform: 'custom-arm64',
+          kExtensionTargetOs: 'custom_os',
+          kExtensionTargetArch: 'arm64',
+          kExtensionCCompilerCc: '/opt/custom-sdk/llvm/bin/clang',
+        },
+        fileSystem: fileSystem,
+        supportedAssetTypes: <SupportedAssetTypes>[
+          SupportedAssetTypes.codeAssets,
+          SupportedAssetTypes.dataAssets,
+        ],
+        targetPlatform: TargetPlatform.unsupported,
+      );
 
-        expect(ohosTargets, hasLength(1));
-        final AssetBuildTarget ohosTarget = ohosTargets.single;
-        expect(ohosTarget, isA<CustomCodeAssetTarget>());
-        final customTarget = ohosTarget as CustomCodeAssetTarget;
-        expect(customTarget.os, OS.fromString('ohos'));
-        expect(customTarget.os.name, 'ohos');
-        expect(customTarget.architecture, Architecture.arm64);
-        await customTarget.setCCompilerConfig();
-        expect(
-          customTarget.cCompilerConfigSync?.compiler,
-          Uri.file('/opt/ohos-sdk/llvm/bin/clang'),
-        );
-        expect(
-          customTarget.cCompilerConfigSync?.archiver,
-          Uri.file('/opt/ohos-sdk/llvm/bin/llvm-ar'),
-        );
-        expect(customTarget.cCompilerConfigSync?.linker, Uri.file('/opt/ohos-sdk/llvm/bin/ld.lld'));
-      },
-    );
+      expect(customTargets, hasLength(1));
+      final AssetBuildTarget target = customTargets.single;
+      expect(target, isA<CustomCodeAssetTarget>());
+      final customTarget = target as CustomCodeAssetTarget;
+      expect(customTarget.os, OS.fromString('custom_os'));
+      expect(customTarget.os.name, 'custom_os');
+      expect(customTarget.architecture, Architecture.arm64);
+      await customTarget.setCCompilerConfig();
+      expect(
+        customTarget.cCompilerConfigSync?.compiler,
+        Uri.file('/opt/custom-sdk/llvm/bin/clang'),
+      );
+      expect(
+        customTarget.cCompilerConfigSync?.archiver,
+        Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
+      );
+      expect(customTarget.cCompilerConfigSync?.linker, Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'));
+    });
 
     testWithoutContext('unknown kTargetPlatform without kExtensionTargetOs throws in KernelSnapshot, DartPluginRegistrantTarget, and BuildHooks', () async {
       final environment = Environment.test(
@@ -767,7 +775,7 @@ environment:
     });
 
     testUsingContext(
-      'BuildHooks, LinkHooks, and InstallCodeAssets bundle code assets for custom OS (ohos)',
+      'BuildHooks, LinkHooks, and InstallCodeAssets bundle code assets for custom OS',
       overrides: <Type, Generator>{
         FeatureFlags: () =>
             TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
@@ -781,12 +789,12 @@ environment:
           artifacts: artifacts,
           defines: <String, String>{
             kBuildMode: BuildMode.release.cliName,
-            kTargetPlatform: 'ohos-arm64',
-            kExtensionTargetOs: 'ohos',
+            kTargetPlatform: 'custom-arm64',
+            kExtensionTargetOs: 'custom_os',
             kExtensionTargetArch: 'arm64',
-            kExtensionCCompilerCc: '/opt/ohos-sdk/llvm/bin/clang',
-            kExtensionCCompilerAr: '/opt/ohos-sdk/llvm/bin/llvm-ar',
-            kExtensionCCompilerLd: '/opt/ohos-sdk/llvm/bin/ld.lld',
+            kExtensionCCompilerCc: '/opt/custom-sdk/llvm/bin/clang',
+            kExtensionCCompilerAr: '/opt/custom-sdk/llvm/bin/llvm-ar',
+            kExtensionCCompilerLd: '/opt/custom-sdk/llvm/bin/ld.lld',
           },
           fileSystem: fileSystem,
           inputs: <String, String>{},
@@ -801,15 +809,15 @@ environment:
             codeAssets: <CodeAsset>[
               CodeAsset(
                 package: 'my_app',
-                name: 'ohos_ffi.dart',
+                name: 'custom_ffi.dart',
                 linkMode: DynamicLoadingBundled(),
-                file: environment.buildDir.childFile('libohos_ffi.so').uri,
+                file: environment.buildDir.childFile('libcustom_ffi.so').uri,
               ),
             ],
           ),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
         );
-        environment.buildDir.childFile('libohos_ffi.so').writeAsStringSync('elf');
+        environment.buildDir.childFile('libcustom_ffi.so').writeAsStringSync('elf');
 
         await BuildHooks(buildRunner: buildRunner).build(environment);
         await LinkHooks(buildRunner: buildRunner).build(environment);
@@ -818,80 +826,78 @@ environment:
         expect(
           environment.outputDir
               .childDirectory('native_assets')
-              .childDirectory('ohos')
-              .childFile('libohos_ffi.so'),
+              .childDirectory('custom_os')
+              .childFile('libcustom_ffi.so'),
           exists,
         );
         final File manifestFile = environment.buildDir.childFile(
           InstallCodeAssets.nativeAssetsFilename,
         );
         expect(manifestFile, exists);
-        expect(manifestFile.readAsStringSync(), contains('ohos_ffi.dart'));
+        expect(manifestFile.readAsStringSync(), contains('custom_ffi.dart'));
       },
     );
 
-    testWithoutContext(
-      'KernelSnapshot omits --target-os for custom OS platforms (such as ohos)',
-      () async {
-        const boundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
-        fileSystem.file('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-        final processManager = FakeProcessManager.empty();
-        final environment = Environment.test(
-          fileSystem.currentDirectory,
-          artifacts: artifacts,
-          defines: <String, String>{
-            kBuildMode: BuildMode.profile.cliName,
-            kTargetPlatform: 'ohos-arm64',
-            kExtensionTargetOs: 'ohos',
+    testWithoutContext('KernelSnapshot omits --target-os for custom OS platforms', () async {
+      const boundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+      final processManager = FakeProcessManager.empty();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: artifacts,
+        defines: <String, String>{
+          kBuildMode: BuildMode.profile.cliName,
+          kTargetPlatform: 'custom-arm64',
+          kExtensionTargetOs: 'custom_os',
+        },
+        fileSystem: fileSystem,
+        inputs: <String, String>{},
+        logger: logger,
+        processManager: processManager,
+      );
+      environment.buildDir.createSync(recursive: true);
+      final String build = environment.buildDir.path;
+      final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: TargetPlatform.linux_x64,
+        mode: BuildMode.profile,
+      );
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+            artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+            '--sdk-root',
+            '$flutterPatchedSdkPath/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-DFLUTTER_CUSTOM_PLATFORM=custom_os',
+            ...buildModeOptions(BuildMode.profile, <String>[]),
+            '--track-creation-locations',
+            '--aot',
+            '--tfa',
+            '--packages',
+            '/.dart_tool/package_config.json',
+            '--output-dill',
+            '$build/app.dill',
+            '--depfile',
+            '$build/kernel_snapshot_program.d',
+            '--verbosity=error',
+            '--recorded-uses=$build/recorded_uses.json',
+            'file:///lib/main.dart',
+          ],
+          stdout: 'result $boundaryKey\n$boundaryKey\n$boundaryKey $build/app.dill 0\n',
+          onRun: (_) {
+            fileSystem.file('$build/recorded_uses.json').createSync();
           },
-          fileSystem: fileSystem,
-          inputs: <String, String>{},
-          logger: logger,
-          processManager: processManager,
-        );
-        environment.buildDir.createSync(recursive: true);
-        final String build = environment.buildDir.path;
-        final String flutterPatchedSdkPath = artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: TargetPlatform.linux_x64,
-          mode: BuildMode.profile,
-        );
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-              artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
-              '--sdk-root',
-              '$flutterPatchedSdkPath/',
-              '--target=flutter',
-              '--no-print-incremental-dependencies',
-              ...buildModeOptions(BuildMode.profile, <String>[]),
-              '--track-creation-locations',
-              '--aot',
-              '--tfa',
-              '--packages',
-              '/.dart_tool/package_config.json',
-              '--output-dill',
-              '$build/app.dill',
-              '--depfile',
-              '$build/kernel_snapshot_program.d',
-              '--verbosity=error',
-              '--recorded-uses=$build/recorded_uses.json',
-              'file:///lib/main.dart',
-            ],
-            stdout: 'result $boundaryKey\n$boundaryKey\n$boundaryKey $build/app.dill 0\n',
-            onRun: (_) {
-              fileSystem.file('$build/recorded_uses.json').createSync();
-            },
-          ),
-        );
+        ),
+      );
 
-        await const KernelSnapshot().build(environment);
+      await const KernelSnapshot().build(environment);
 
-        expect(processManager, hasNoRemainingExpectations);
-      },
-    );
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 }

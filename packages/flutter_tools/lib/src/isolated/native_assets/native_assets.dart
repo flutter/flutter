@@ -757,9 +757,8 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsForOS(
     OS.macOS => assetTargetLocationsMacOS(codeAssets, absolutePath),
     OS.iOS => assetTargetLocationsIOS(codeAssets),
     OS.android => assetTargetLocationsAndroid(codeAssets),
-    // Custom extension operating systems (such as HarmonyOS 'ohos' or LG webOS
-    // 'webos') bundle dynamic libraries as standalone shared objects inside
-    // the target output directory.
+    // Custom extension operating systems bundle dynamic libraries as
+    // standalone shared objects inside the target output directory.
     final OS customOs when !OS.values.contains(customOs) => _assetTargetLocationsWindowsLinux(
       codeAssets,
       absolutePath,
@@ -941,9 +940,8 @@ OS getNativeOSFromTargetPlatform(
   Map<String, String>? environmentDefines,
 }) {
   if (environmentDefines != null) {
-    final (OS os, Architecture _)? customTarget = resolveCustomNativeTarget(environmentDefines);
-    if (customTarget != null) {
-      return customTarget.$1;
+    if (resolveCustomNativeTarget(environmentDefines) case (final OS os, _)) {
+      return os;
     }
   }
   switch (platform.os) {

@@ -20,6 +20,7 @@ import 'base/platform.dart';
 import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
+import 'build_info.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
@@ -915,6 +916,14 @@ class _PluginRegistrant {
 
   @pragma('vm:entry-point')
   static void register() {
+    {{#customPlatforms}}
+    if (const String.fromEnvironment('$kFlutterCustomPlatformDartDefine') == '{{platform}}') {
+      {{#plugins}}
+$_dartPluginRegisterWith
+      {{/plugins}}
+      return;
+    }
+    {{/customPlatforms}}
     if (Platform.isAndroid) {
       {{#android}}
 $_dartPluginRegisterWith
@@ -935,11 +944,7 @@ $_dartPluginRegisterWith
       {{#windows}}
 $_dartPluginRegisterWith
       {{/windows}}
-    }{{#customPlatforms}} else if (Platform.operatingSystem == '{{platform}}') {
-      {{#plugins}}
-$_dartPluginRegisterWith
-      {{/plugins}}
-    }{{/customPlatforms}}
+    }
   }
 }
 ''';

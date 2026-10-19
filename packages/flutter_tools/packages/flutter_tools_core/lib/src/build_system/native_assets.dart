@@ -130,8 +130,7 @@ class ExtensionCCompilerConfig {
 /// `HookConfig` when building `CodeAsset`s and `DataAsset`s.
 ///
 /// Both built-in operating systems (such as `'linux'` for Linux-based custom
-/// embedders like LG webOS or Raspberry Pi) and custom operating system
-/// identifiers (such as `'ohos'` for HarmonyOS or `'webos'`) are supported via
+/// embedders) and custom operating system identifiers are supported via
 /// `package:code_assets`'s `OS.fromString` and `Architecture.fromString`.
 @immutable
 class ExtensionNativeAssetsConfig {
@@ -195,8 +194,7 @@ class ExtensionNativeAssetsConfig {
   static const String cCompilerEnvScriptArgsDefine = 'ExtensionCCompilerEnvScriptArgs';
 
   /// The target operating system for `CodeAsset` hooks (e.g. `'linux'`,
-  /// `'macos'`, `'windows'`, `'android'`, `'ios'`, or a custom OS identifier
-  /// such as `'ohos'` or `'webos'`).
+  /// `'macos'`, `'windows'`, `'android'`, `'ios'`, or a custom OS identifier).
   final String targetOs;
 
   /// The target CPU architecture for `CodeAsset` hooks (e.g. `'x64'`,

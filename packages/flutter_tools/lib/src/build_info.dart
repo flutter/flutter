@@ -1145,9 +1145,14 @@ const String kExtensionCCompilerEnvScript =
 const String kExtensionCCompilerEnvScriptArgs =
     tools_core.ExtensionNativeAssetsConfig.cCompilerEnvScriptArgsDefine;
 
-/// Optional comma-separated or single platform key under `flutter.plugin.platforms.<key>`
-/// used to resolve Dart plugins on an extension target.
+/// Optional platform key under `flutter.plugin.platforms.<key>` used to resolve
+/// Dart plugins on an extension target.
 const kExtensionPluginPlatformKey = 'ExtensionPluginPlatformKey';
+
+/// Compile-time Dart environment define (`-DFLUTTER_CUSTOM_PLATFORM=<platform>`)
+/// used by `dart_plugin_registrant.dart` to select Dart plugin implementations
+/// for a custom extension target platform.
+const kFlutterCustomPlatformDartDefine = 'FLUTTER_CUSTOM_PLATFORM';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

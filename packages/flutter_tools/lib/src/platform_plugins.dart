@@ -802,7 +802,7 @@ class WebPlugin extends PluginPlatform {
 }
 
 /// Represents a plugin declaration for a custom or extension-contributed
-/// platform (for example, `'ohos'` for HarmonyOS or `'webos'` for LG webOS).
+/// platform.
 ///
 /// Preserves the full platform configuration map from
 /// `flutter.plugin.platforms.<platformKey>` in `pubspec.yaml` while validating

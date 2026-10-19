@@ -24,6 +24,15 @@ class DartPluginRegistrantTarget extends Target {
   @visibleForTesting
   const DartPluginRegistrantTarget.test(FlutterProject project) : _project = project;
 
+  static const _builtInPlatformKeys = <String>{
+    'android',
+    'ios',
+    'linux',
+    'macos',
+    'web',
+    'windows',
+  };
+
   final FlutterProject? _project;
 
   @override
@@ -38,14 +47,16 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFilePath =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFilePath);
+    final String? rawPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey]?.trim();
+    final String? customPlatformKey =
+        (rawPluginPlatformKey != null && rawPluginPlatformKey.isNotEmpty)
+        ? rawPluginPlatformKey
+        : environment.defines[kExtensionTargetOs]?.trim().toLowerCase();
     final extraPlatformKeys = <String>{
-      if (environment.defines[kExtensionPluginPlatformKey] case final String rawKeys
-          when rawKeys.isNotEmpty)
-        for (final String key in rawKeys.split(','))
-          if (key.trim().isNotEmpty) key.trim(),
-      if (environment.defines[kExtensionTargetOs] case final String targetOs
-          when targetOs.trim().isNotEmpty)
-        targetOs.trim().toLowerCase(),
+      if (customPlatformKey != null &&
+          customPlatformKey.isNotEmpty &&
+          !_builtInPlatformKeys.contains(customPlatformKey))
+        customPlatformKey,
     };
 
     await generateMainDartWithPluginRegistrant(
@@ -75,10 +86,9 @@ class DartPluginRegistrantTarget extends Target {
         if (!hasExtensionPlatform) {
           rethrow;
         }
-        // Custom extension target platforms (such as 'ohos-arm64' or
-        // 'webos-arm64') are not part of the built-in TargetPlatform enum and
-        // should still generate a Dart plugin registrant when extension
-        // platform defines are present.
+        // Custom extension target platforms are not part of the built-in
+        // TargetPlatform enum and should still generate a Dart plugin
+        // registrant when extension platform defines are present.
       }
     }
     // TODO(stuartmorgan): Investigate removing this check entirely; ideally the

@@ -176,6 +176,15 @@ class KernelSnapshot extends Target {
   static const dillName = 'app.dill';
   static const recordedUsesFileName = 'recorded_uses.json';
 
+  static const _builtInPlatformKeys = <String>{
+    'android',
+    'ios',
+    'linux',
+    'macos',
+    'web',
+    'windows',
+  };
+
   /// The content of an empty recorded uses file.
   ///
   /// We always write this file even if no resources are recorded to prevent
@@ -206,8 +215,7 @@ class KernelSnapshot extends Target {
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
-    // Custom extension platforms (such as 'ohos-arm64' for HarmonyOS or
-    // 'webos-arm64' for LG webOS) are not part of the built-in TargetPlatform
+    // Custom extension platforms are not part of the built-in TargetPlatform
     // enum. When TargetPlatform.fromName fails and kExtensionTargetOs is
     // explicitly provided, fall back to a representative TargetPlatform so
     // KernelCompiler can resolve the host engine's Artifact.platformKernelDill
@@ -290,9 +298,9 @@ class KernelSnapshot extends Target {
     // For custom extension platforms, only pass --target-os when
     // customTargetOs is one of those six operating systems (for example, a
     // Linux-based embedded target that sets ExtensionTargetOs=linux). For
-    // custom operating systems (such as HarmonyOS 'ohos' or LG webOS 'webos'),
-    // omit --target-os (null) so Platform.operatingSystem is evaluated at
-    // runtime by the embedder instead of being constant-folded to 'linux'.
+    // custom operating systems not in OS.values, omit --target-os (null) so
+    // Platform.operatingSystem is evaluated at runtime by the embedder instead
+    // of being constant-folded to 'linux'.
     final String? targetOS = customTargetOs != null
         ? (OS.values.contains(customTargetOs) ? customTargetOs.name : null)
         : switch (targetPlatform.os) {
@@ -315,6 +323,19 @@ class KernelSnapshot extends Target {
 
     final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
     await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
+    final String? rawPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey]?.trim();
+    final String? customPlatformKey =
+        (rawPluginPlatformKey != null && rawPluginPlatformKey.isNotEmpty)
+        ? rawPluginPlatformKey
+        : environment.defines[kExtensionTargetOs]?.trim().toLowerCase();
+    if (customPlatformKey != null &&
+        customPlatformKey.isNotEmpty &&
+        !_builtInPlatformKeys.contains(customPlatformKey)) {
+      dartDefines.removeWhere(
+        (String define) => define.startsWith('$kFlutterCustomPlatformDartDefine='),
+      );
+      dartDefines.add('$kFlutterCustomPlatformDartDefine=$customPlatformKey');
+    }
 
     final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(
