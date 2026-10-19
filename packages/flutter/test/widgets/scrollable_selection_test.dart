@@ -2140,11 +2140,8 @@ void main() {
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/181169.
-    // A scrollable only auto scrolls a selection that started inside it, so
-    // neither axis of a two-dimensional scrollable may scroll a selection that
-    // started above it.
     testWidgets(
-      'selection dragged across a nested two-dimensional scrollable selects its built cells without scrolling it (issue 181169)',
+      'selection dragged across a nested two-dimensional scrollable selects its built cells without scrolling it',
       (WidgetTester tester) async {
         final outerController = ScrollController();
         addTearDown(outerController.dispose);
@@ -2170,11 +2167,8 @@ void main() {
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/181169.
-    // A scrollable only auto scrolls a selection that started inside it, so a
-    // horizontal list at the start of a vertical list may not scroll a
-    // selection that started above both.
     testWidgets(
-      'selection dragged across a vertical list whose first child is a horizontal list selects their built items without scrolling them (issue 181169)',
+      'selection dragged across a vertical list whose first child is a horizontal list selects their built items without scrolling them',
       (WidgetTester tester) async {
         final outerController = ScrollController();
         addTearDown(outerController.dispose);
@@ -2200,11 +2194,8 @@ void main() {
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/181169.
-    // A scrollable only auto scrolls a selection that started inside it: when
-    // a selection that started above a nested two-dimensional scrollable is
-    // held past the bottom of the outer scrollable, only the outer one scrolls.
     testWidgets(
-      'selection started above a nested two-dimensional scrollable auto scrolls only the outer scrollable (issue 181169)',
+      'selection started above a nested two-dimensional scrollable auto scrolls only the outer scrollable',
       (WidgetTester tester) async {
         final outerController = ScrollController();
         addTearDown(outerController.dispose);
@@ -2254,14 +2245,8 @@ void main() {
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/181169.
-    // A scrollable only auto scrolls a selection that started inside it, so a
-    // horizontal list at the start of a vertical list may not scroll sideways
-    // when a selection that started above both is held beside it. Unlike the
-    // tests above this one never reaches the assertion in
-    // EdgeDraggingAutoScroller: the wrong auto scroll is the only symptom, in
-    // release builds too.
     testWidgets(
-      'selection started above a vertical list does not auto scroll the horizontal list at its start (issue 181169)',
+      'selection started above a vertical list does not auto scroll the horizontal list at its start',
       (WidgetTester tester) async {
         final outerController = ScrollController();
         addTearDown(outerController.dispose);
@@ -2317,8 +2302,6 @@ void main() {
       },
     );
 
-    // Control: a selection that started inside a nested list still auto scrolls
-    // that list to its end before the outer scrollable takes over.
     testWidgets(
       'selection started inside a nested vertical list auto scrolls it to its end before the outer scrollable',
       (WidgetTester tester) async {
@@ -2371,9 +2354,6 @@ void main() {
       },
     );
 
-    // Control: a selection that started inside a nested two-dimensional
-    // scrollable still auto scrolls it to its vertical end before the outer
-    // scrollable takes over.
     testWidgets(
       'selection started inside a nested two-dimensional scrollable auto scrolls it to its end before the outer scrollable',
       (WidgetTester tester) async {
