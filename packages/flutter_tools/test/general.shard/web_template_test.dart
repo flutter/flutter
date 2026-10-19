@@ -198,7 +198,7 @@ String htmlSample2Replaced({required String baseHref}) =>
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    const serviceWorkerVersion = null /* Flutter's service worker is deprecated and has been removed. */;
+    const serviceWorkerVersion = null;
   </script>
   <script>
     navigator.serviceWorker.register('flutter_service_worker.js');
@@ -315,14 +315,6 @@ void main() {
   test('applies substitutions', () {
     const indexHtml = WebTemplate(htmlSample2);
 
-    expect(
-      indexHtml.withSubstitutions(baseHref: '/foo/333/', flutterJsFile: flutterJs, logger: logger),
-      htmlSample2Replaced(baseHref: '/foo/333/'),
-    );
-  });
-
-  test('applies substitutions with legacy var version syntax', () {
-    const indexHtml = WebTemplate(htmlSampleLegacyVar);
     expect(
       indexHtml.withSubstitutions(baseHref: '/foo/333/', flutterJsFile: flutterJs, logger: logger),
       htmlSample2Replaced(baseHref: '/foo/333/'),

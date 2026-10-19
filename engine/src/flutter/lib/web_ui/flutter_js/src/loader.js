@@ -7,7 +7,29 @@ import { FlutterEntrypointLoader } from './entrypoint_loader.js';
 import { FlutterTrustedTypesPolicy } from './trusted_types.js';
 import { loadCanvasKit } from './canvaskit_loader.js';
 import { loadSkwasm } from './skwasm_loader.js';
-import { getCanvaskitBaseUrl } from './utils.js';
+import { getCanvaskitBaseUrl, resolveUrlWithSegments } from './utils.js';
+
+/**
+ * Fire-and-forget cleanup for legacy `flutter_service_worker.js?v=` registrations
+ * whose script URL may be cached indefinitely by a CDN.
+ *
+ * TODO(kevmoo): Remove in 2027 H2 (https://github.com/flutter/flutter/issues/156910).
+ * @param {TrustedTypePolicy?} ttPolicy
+ */
+function cleanupLegacyServiceWorker(ttPolicy) {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then((registration) => {
+      const scriptURL = registration?.active?.scriptURL ?? '';
+      if (scriptURL.includes('flutter_service_worker.js?v=')) {
+        let url = resolveUrlWithSegments(`flutter_service_worker.js?v=${Date.now()}`);
+        if (ttPolicy != null) {
+          url = ttPolicy.createScriptURL(url);
+        }
+        navigator.serviceWorker.register(url);
+      }
+    });
+  }
+}
 
 /**
  * The public interface of _flutter.loader. Exposes two methods:
@@ -27,7 +49,7 @@ export class FlutterLoader {
    */
   async loadEntrypoint(options) {
     const { serviceWorker, ...entrypoint } = options || {};
-    if (serviceWorker) {
+    if (serviceWorker?.serviceWorkerUrl) {
       console.warn(
         'FlutterLoader.loadEntrypoint: The "serviceWorker" option is deprecated and ignored. ' +
         'Register custom service workers directly with navigator.serviceWorker.register(). ' +
@@ -36,6 +58,7 @@ export class FlutterLoader {
     }
     // A Trusted Types policy that is going to be used by the loader.
     const flutterTT = new FlutterTrustedTypesPolicy();
+    cleanupLegacyServiceWorker(flutterTT.policy);
     // The FlutterEntrypointLoader instance could be injected as a dependency
     // (and dynamically imported from a module if not present).
     const entrypointLoader = new FlutterEntrypointLoader();
@@ -63,7 +86,7 @@ export class FlutterLoader {
     config,
     serviceWorkerSettings,
   } = {}) {
-    if (serviceWorkerSettings) {
+    if (serviceWorkerSettings?.serviceWorkerUrl) {
       console.warn(
         'FlutterLoader.load: The "serviceWorkerSettings" option is deprecated and ignored. ' +
         'Register custom service workers directly with navigator.serviceWorker.register(). ' +
@@ -160,6 +183,7 @@ export class FlutterLoader {
 
     const deps = {};
     deps.flutterTT = new FlutterTrustedTypesPolicy();
+    cleanupLegacyServiceWorker(deps.flutterTT.policy);
 
     const canvasKitBaseUrl = getCanvaskitBaseUrl(config, buildConfig);
     if (build.renderer === "canvaskit") {

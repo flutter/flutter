@@ -136,11 +136,6 @@ class WebTemplate {
       newContent = newContent.replaceAll(kStaticAssetsUrlPlaceholder, staticAssetsUrl);
     }
 
-    newContent = newContent.replaceFirst(
-      // Support older `var` syntax as well as new `const` syntax
-      RegExp('(const|var) serviceWorkerVersion = null'),
-      'const serviceWorkerVersion = null /* $_kServiceWorkerDeprecationNotice */',
-    );
     newContent = _applyVariableSubstitutions(newContent, logger, <String, String>{
       ...webDefines,
       'flutter_build_config': ?buildConfig,
