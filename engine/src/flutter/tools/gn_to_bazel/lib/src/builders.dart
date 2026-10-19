@@ -105,9 +105,12 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
     GnFlagEffect.unsupported,
     note: 'the wrapped Dart SDK build is not parameterized by dart_debug',
   ),
+  // GN: glfw_vulkan_library, which puts SwiftShader, the Vulkan loader and
+  // the validation layers beside impeller_unittests; the Bazel suites always
+  // carry the wrapped backends (gpuBackendTests).
   '--use-glfw-swiftshader': GnFlag(
-    GnFlagEffect.unsupported,
-    note: 'the Impeller test backends are not parameterized by it',
+    GnFlagEffect.assumed,
+    note: 'the Impeller suites always run on the wrapped SwiftShader and loader here',
   ),
   '--gn-args': GnFlag(GnFlagEffect.unsupported, takesValue: true, note: 'an arbitrary GN argument'),
   '--android': GnFlag(GnFlagEffect.otherPlatform),
