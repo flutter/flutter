@@ -10,7 +10,6 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
@@ -47,7 +46,6 @@ class FlutterDeviceManager extends DeviceManager {
     required IOSSimulatorUtils iosSimulatorUtils,
     required IOSWorkflow iosWorkflow,
     required MacOSWorkflow macOSWorkflow,
-    required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     required ToolContext toolContext,
     required WindowsWorkflow windowsWorkflow,
     required XCDevice xcDevice,
@@ -56,7 +54,7 @@ class FlutterDeviceManager extends DeviceManager {
     final ToolContext(
       fs: FileSystem fileSystem,
       :Logger logger,
-      os: OperatingSystemUtils operatingSystemUtils,
+      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
       :Platform platform,
       :ProcessManager processManager,
       :UserMessages userMessages,
@@ -80,35 +78,12 @@ class FlutterDeviceManager extends DeviceManager {
         buildTargets: buildTargets,
         nativeAssetsBuilder: nativeAssetsBuilder,
       ),
-      MacOSDevices(
-        processManager: processManager,
-        macOSWorkflow: macOSWorkflow,
-        logger: logger,
-        platform: platform,
-        fileSystem: fileSystem,
-        operatingSystemUtils: operatingSystemUtils,
-      ),
-      MacOSDesignedForIPadDevices(
-        processManager: processManager,
-        iosWorkflow: iosWorkflow,
-        logger: logger,
-        platform: platform,
-        fileSystem: fileSystem,
-        operatingSystemUtils: operatingSystemUtils,
-      ),
-      LinuxDevices(
-        platform: platform,
-        featureFlags: featureFlags,
-        processManager: processManager,
-        logger: logger,
-        fileSystem: fileSystem,
-        operatingSystemUtils: operatingSystemUtils,
-      ),
+      MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
+      MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),
+      LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
       WindowsDevices(
-        processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-        logger: logger,
-        fileSystem: fileSystem,
+        analytics: analytics,
+        toolContext: toolContext,
         windowsWorkflow: windowsWorkflow,
       ),
       WebDevices(

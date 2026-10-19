@@ -277,7 +277,6 @@ struct ContentContext::Pipelines {
   Variants<PorterDuffBlendPipeline> destination_over_blend;
   Variants<PorterDuffBlendPipeline> modulate_blend;
   Variants<PorterDuffBlendPipeline> plus_blend;
-  Variants<PorterDuffBlendPipeline> screen_blend;
   Variants<PorterDuffBlendPipeline> source_a_top_blend;
   Variants<PorterDuffBlendPipeline> source_blend;
   Variants<PorterDuffBlendPipeline> source_in_blend;
@@ -509,7 +508,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   desc.SetPolygonMode(PolygonMode::kFill);
 }
 
-std::array<std::vector<Scalar>, 15> GetPorterDuffSpecConstants(
+std::array<std::vector<Scalar>, 14> GetPorterDuffSpecConstants(
     bool supports_decal) {
   Scalar x = supports_decal ? 1 : 0;
   return {{
@@ -527,7 +526,6 @@ std::array<std::vector<Scalar>, 15> GetPorterDuffSpecConstants(
       {x, 1, -1, 1, -1, 0},  // Xor
       {x, 1, 0, 1, 0, 0},    // Plus
       {x, 0, 0, 0, 0, 1},    // Modulate
-      {x, 0, 0, 1, 0, -1},   // Screen
   }};
 }
 
@@ -728,7 +726,7 @@ ContentContext::ContentContext(
     pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
                                                {supports_decal});
 
-    const std::array<std::vector<Scalar>, 15> porter_duff_constants =
+    const std::array<std::vector<Scalar>, 14> porter_duff_constants =
         GetPorterDuffSpecConstants(supports_decal);
     pipelines_->clear_blend.CreateDefault(*context_, options_trianglestrip,
                                           porter_duff_constants[0]);
@@ -758,8 +756,6 @@ ContentContext::ContentContext(
                                          porter_duff_constants[12]);
     pipelines_->modulate_blend.CreateDefault(*context_, options_trianglestrip,
                                              porter_duff_constants[13]);
-    pipelines_->screen_blend.CreateDefault(*context_, options_trianglestrip,
-                                           porter_duff_constants[14]);
   }
 
   if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
@@ -1253,7 +1249,6 @@ PipelineRef ContentContext::GetPorterDuffPipeline(
     case BlendMode::kModulate:
       return GetModulateBlendPipeline(opts);
     case BlendMode::kScreen:
-      return GetScreenBlendPipeline(opts);
     case BlendMode::kOverlay:
     case BlendMode::kDarken:
     case BlendMode::kLighten:
@@ -1343,11 +1338,6 @@ PipelineRef ContentContext::GetPlusBlendPipeline(
 PipelineRef ContentContext::GetModulateBlendPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->modulate_blend, opts);
-}
-
-PipelineRef ContentContext::GetScreenBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->screen_blend, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorPipeline(

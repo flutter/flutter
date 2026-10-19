@@ -266,11 +266,8 @@ class ResidentWebRunner extends ResidentRunner {
           :bool crossOriginIsolation,
         ) = debuggingOptions.webConfig;
 
-        final WebDevServerConfig originalConfig = devServerConfig ?? const WebDevServerConfig();
-
-        final int resolvedPort = await resolvePort(originalConfig.port, osUtils);
-
-        final WebDevServerConfig updatedConfig = originalConfig.copyWith(port: resolvedPort);
+        final WebDevServerConfig serverConfig = devServerConfig ?? const WebDevServerConfig();
+        validatePort(serverConfig.port);
         final ExpressionCompiler? expressionCompiler = enableExpressionEvaluation
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: fileSystem)
             : null;
@@ -278,7 +275,7 @@ class ResidentWebRunner extends ResidentRunner {
         flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
 
         flutterDevice!.devFS = WebDevFS(
-          webDevServerConfig: updatedConfig,
+          webDevServerConfig: serverConfig,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: useSseForDebugProxy,
@@ -306,7 +303,7 @@ class ResidentWebRunner extends ResidentRunner {
           webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();
-        if (updatedConfig.https?.certKeyPath != null && updatedConfig.https?.certPath != null) {
+        if (serverConfig.https?.certKeyPath != null && serverConfig.https?.certPath != null) {
           url = url.replace(scheme: 'https');
         }
         if (debuggingOptions.buildInfo.isDebug && !useWasm) {

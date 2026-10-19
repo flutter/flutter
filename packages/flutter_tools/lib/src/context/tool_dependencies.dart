@@ -276,13 +276,7 @@ class ToolDependencies {
         persistentToolState ??
         PersistentToolState(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final BotDetector finalBotDetector =
-        botDetector ??
-        BotDetector(
-          httpClientFactory: () => HttpClient(),
-          platform: finalPlatform,
-          persistentToolState: finalPersistentToolState,
-        );
+    final BotDetector finalBotDetector = botDetector ?? BotDetector(platform: finalPlatform);
 
     final bool isBot = await finalBotDetector.isRunningOnBot;
 
@@ -630,15 +624,14 @@ class ToolDependencies {
           androidWorkflow: finalAndroidWorkflow,
           buildSystem: finalBuildSystem,
           buildTargets: finalBuildTargets,
+          extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
           iosWorkflow: finalIOSWorkflow,
           macOSWorkflow: finalMacOSWorkflow,
-          nativeAssetsBuilder: finalNativeAssetsBuilder,
           toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
           xcDevice: finalXCDevice,
-          extensionManager: extensionManager,
         );
 
     return ToolDependencies(

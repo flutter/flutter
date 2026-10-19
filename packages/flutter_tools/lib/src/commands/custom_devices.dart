@@ -269,15 +269,14 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(CustomDeviceConfig config) async {
-    final ToolContext(
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
     final device = CustomDevice(
       config: config,
       analytics: analytics,
-      buildSystem: FlutterBuildSystem(fileSystem: fileSystem, logger: logger, platform: platform),
+      buildSystem: FlutterBuildSystem(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: toolContext.platform,
+      ),
       buildTargets: const NoOpBuildTargets(),
       toolContext: toolContext,
     );
@@ -322,6 +321,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
 
     if (config.usesPortForwarding) {
+      final ToolContext(:Logger logger, :OperatingSystemUtils os, :ProcessManager processManager) =
+          toolContext;
       final portForwarder = CustomDevicePortForwarder(
         deviceName: device.displayName,
         forwardPortCommand: config.forwardPortCommand!,

@@ -26,12 +26,20 @@ class BuildBundleCommand extends BuildSubCommand {
     this._bundleBuilder,
   }) : super(logger: toolContext.logger) {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
-    usesTargetOption();
-    usesFilesystemOptions(hide: !verboseHelp);
-    usesBuildNumberOption();
-    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
-    usesDartDefineOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
+    registerOptionBundles(const <OptionBundle>[
+      FilesystemOptionsBundle(),
+      BuildModeOptionsBundle(defaultToRelease: false),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.target,
+      CommonOptions.buildNumber,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
+      CommonOptions.pub,
+      BuildInfoOptions.trackWidgetCreation,
+    ], verboseHelp: verboseHelp);
     argParser
       ..addOption(
         'depfile',
@@ -69,8 +77,6 @@ class BuildBundleCommand extends BuildSubCommand {
         hide: !verboseHelp,
         help: '(deprecated) Icon font tree shaking is not supported by this command.',
       );
-    usesPubOption();
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
   final BuildSystem buildSystem;
