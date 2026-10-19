@@ -75,3 +75,19 @@ build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common
 #   --target-dir ci/host_debug --runtime-mode debug --no-prebuilt-dart-sdk --build-embedder-examples --no-lto --rbe --no-goma
 # No configuration: the Bazel build cannot express
 #   --no-prebuilt-dart-sdk (the generated files assume the prebuilt Dart SDK)
+
+# local_engine.json: linux/host_debug
+#   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
+# The same configuration as linux_host_engine.json's ci/host_debug, above.
+
+# local_engine.json: linux/host_debug_unopt
+#   --runtime-mode debug --unoptimized --no-stripped --no-lto --rbe --no-goma
+build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+
+# local_engine.json: linux/host_profile
+#   --runtime-mode profile --no-stripped --no-lto --rbe --no-goma
+build:host_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile
+
+# local_engine.json: linux/host_release
+#   --runtime-mode release --no-stripped --no-lto --rbe --no-goma --xcode-symlinks
+# The same configuration as linux_host_engine.json's ci/host_release, above.

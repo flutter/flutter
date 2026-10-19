@@ -31,8 +31,7 @@ filegroup(
 )
 
 # linux_clang_tidy.json: ci/host_debug_clang_tidy
-#   bazel run --config=host_debug_clang_tidy :host_debug_clang_tidy
-# Nothing to install.
+#   ninja's default target, everything: bazel run --config=host_debug_clang_tidy //engine/src/flutter:install
 
 # linux_host_desktop_engine.json: ci/host_debug_desktop
 #   no configuration (configs.bazelrc); the flags would be:
@@ -318,3 +317,15 @@ test_suite(
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
 # Not built, no Bazel counterpart yet: default.
 # Nothing to install.
+
+# local_engine.json: linux/host_debug
+#   ninja's default target, everything: bazel run --config=host_debug //engine/src/flutter:install
+
+# local_engine.json: linux/host_debug_unopt
+#   ninja's default target, everything: bazel run --config=host_debug_unopt //engine/src/flutter:install
+
+# local_engine.json: linux/host_profile
+#   ninja's default target, everything: bazel run --config=host_profile //engine/src/flutter:install
+
+# local_engine.json: linux/host_release
+#   ninja's default target, everything: bazel run --config=host_release //engine/src/flutter:install
