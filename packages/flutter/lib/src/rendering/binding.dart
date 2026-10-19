@@ -446,7 +446,7 @@ mixin RendererBinding
   @protected
   void handlePlatformBrightnessChanged() {}
 
-  /// Called when the platform configuration changes (such as [alwaysUse24HourFormat]).
+  /// Called when the platform configuration changes (such as [PlatformDispatcher.alwaysUse24HourFormat]).
   ///
   /// See [dart:ui.PlatformDispatcher.onPlatformConfigurationChanged].
   @protected
