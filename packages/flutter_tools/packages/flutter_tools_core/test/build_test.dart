@@ -247,12 +247,48 @@ void main() {
       );
       expect(
         () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
+          'ar': 'https://example.com/ar',
+          'cc': 'file:///usr/bin/clang',
+          'ld': 'file:///usr/bin/ld.lld',
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
           'ar': 'file:///usr/bin/llvm-ar',
           'cc': 'file:///usr/bin/clang',
           'ld': 'file:///usr/bin/ld.lld',
           'envScriptArgs': <Object?>[123],
         }),
         throwsArgumentError,
+      );
+    });
+
+    test('toEnvironmentDefines maps targetOs, targetArchitecture, and compiler paths', () {
+      final config = ExtensionNativeAssetsConfig(
+        targetArchitecture: 'arm64',
+        targetOs: 'ohos',
+        cCompilerConfig: ExtensionCCompilerConfig(
+          ar: Uri.file('/opt/ohos-sdk/llvm/bin/llvm-ar'),
+          cc: Uri.file('/opt/ohos-sdk/llvm/bin/clang'),
+          envScript: Uri.file('/opt/ohos-sdk/env.sh'),
+          envScriptArgs: const <String>['--arch', 'arm64 with spaces'],
+          ld: Uri.file('/opt/ohos-sdk/llvm/bin/ld.lld'),
+        ),
+      );
+
+      expect(
+        config.toEnvironmentDefines(),
+        equals(<String, String>{
+          ExtensionNativeAssetsConfig.targetOsDefine: 'ohos',
+          ExtensionNativeAssetsConfig.targetArchDefine: 'arm64',
+          ExtensionNativeAssetsConfig.cCompilerCcDefine: '/opt/ohos-sdk/llvm/bin/clang',
+          ExtensionNativeAssetsConfig.cCompilerArDefine: '/opt/ohos-sdk/llvm/bin/llvm-ar',
+          ExtensionNativeAssetsConfig.cCompilerLdDefine: '/opt/ohos-sdk/llvm/bin/ld.lld',
+          ExtensionNativeAssetsConfig.cCompilerEnvScriptDefine: '/opt/ohos-sdk/env.sh',
+          ExtensionNativeAssetsConfig.cCompilerEnvScriptArgsDefine:
+              '["--arch","arm64 with spaces"]',
+        }),
       );
     });
   });

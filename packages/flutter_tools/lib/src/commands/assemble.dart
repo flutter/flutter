@@ -218,7 +218,11 @@ class AssembleCommand extends FlutterCommand {
     try {
       targetPlatform = TargetPlatform.fromName(platform);
     } on Exception {
-      return super.requiredArtifacts;
+      final String? extensionTargetOs = _environment.defines[kExtensionTargetOs];
+      if (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) {
+        return super.requiredArtifacts;
+      }
+      rethrow;
     }
     final DevelopmentArtifact? artifact = artifactFromTargetPlatform(targetPlatform, _featureFlags);
     if (artifact != null) {

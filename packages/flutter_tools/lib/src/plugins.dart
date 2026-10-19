@@ -166,7 +166,11 @@ class Plugin {
 
     final customPlatformKeys = <String>[
       for (final Object? key in platformsYaml.keys)
-        if (key is String && !_builtInPlatformKeys.contains(key)) key,
+        if (key is String &&
+            !_builtInPlatformKeys.contains(key) &&
+            _customPlatformKeyPattern.hasMatch(key) &&
+            platformsYaml[key] is YamlMap)
+          key,
     ];
     for (final key in customPlatformKeys) {
       if (_providesImplementationForPlatform(platformsYaml, key)) {
@@ -345,6 +349,8 @@ class Plugin {
     WindowsPlugin.kConfigKey,
   };
 
+  static final _customPlatformKeyPattern = RegExp(r'^[a-z][a-z0-9_]*$');
+
   static List<String> _validateMultiPlatformYaml({required YamlMap parentMap}) {
     final Object? platforms = parentMap['platforms'];
     if (platforms is! YamlMap?) {
@@ -395,7 +401,9 @@ class Plugin {
       for (final Object? key in yaml.keys)
         if (key is String &&
             !_builtInPlatformKeys.contains(key) &&
-            isInvalid(key, CustomPlatformPlugin.validate))
+            yaml[key] is YamlMap &&
+            (!_customPlatformKeyPattern.hasMatch(key) ||
+                isInvalid(key, CustomPlatformPlugin.validate)))
           'Invalid "$key" plugin specification.',
     ];
   }

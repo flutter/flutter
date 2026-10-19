@@ -25,8 +25,7 @@ import '../../build_info.dart'
         kExtensionTargetArch,
         kExtensionTargetOs,
         kIosArchs,
-        kSdkRoot,
-        kTargetPlatform;
+        kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
 import '../../convert.dart' show json;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
@@ -78,53 +77,31 @@ sealed class AssetBuildTarget {
   }) {
     final (OS os, Architecture architecture)? customTarget = resolveCustomNativeTarget(
       environmentDefines,
-      targetPlatform: targetPlatform,
     );
     if (customTarget != null) {
       final (OS os, Architecture architecture) = customTarget;
-      return _extensionTarget(
-        architecture: architecture,
-        buildDirectory: buildDirectory,
-        buildMode: buildMode,
-        environmentDefines: environmentDefines,
-        fileSystem: fileSystem,
-        os: os,
-        supportedAssetTypes: supportedAssetTypes,
-      );
+      return <AssetBuildTarget>[
+        CustomCodeAssetTarget(
+          architecture: architecture,
+          environmentDefines: environmentDefines,
+          fileSystem: fileSystem,
+          os: os,
+          supportedAssetTypes: supportedAssetTypes,
+        ),
+      ];
     }
 
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
-        return _windowsTarget(supportedAssetTypes, Architecture.x64, environmentDefines);
+        return _windowsTarget(supportedAssetTypes, Architecture.x64);
       case TargetPlatform.linux_x64:
-        return _linuxTarget(
-          supportedAssetTypes,
-          Architecture.x64,
-          buildMode,
-          buildDirectory,
-          environmentDefines: environmentDefines,
-          fileSystem: fileSystem,
-        );
+        return _linuxTarget(supportedAssetTypes, Architecture.x64, buildMode, buildDirectory);
       case TargetPlatform.linux_arm64:
-        return _linuxTarget(
-          supportedAssetTypes,
-          Architecture.arm64,
-          buildMode,
-          buildDirectory,
-          environmentDefines: environmentDefines,
-          fileSystem: fileSystem,
-        );
+        return _linuxTarget(supportedAssetTypes, Architecture.arm64, buildMode, buildDirectory);
       case TargetPlatform.linux_riscv64:
-        return _linuxTarget(
-          supportedAssetTypes,
-          Architecture.riscv64,
-          buildMode,
-          buildDirectory,
-          environmentDefines: environmentDefines,
-          fileSystem: fileSystem,
-        );
+        return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
       case TargetPlatform.windows_arm64:
-        return _windowsTarget(supportedAssetTypes, Architecture.arm64, environmentDefines);
+        return _windowsTarget(supportedAssetTypes, Architecture.arm64);
       case TargetPlatform.darwin:
         return _macTargets(environmentDefines, supportedAssetTypes);
       case TargetPlatform.android:
@@ -145,67 +122,12 @@ sealed class AssetBuildTarget {
     }
   }
 
-  static List<AssetBuildTarget> _extensionTarget({
-    required Architecture architecture,
-    required Directory? buildDirectory,
-    required BuildMode buildMode,
-    required Map<String, String> environmentDefines,
-    required FileSystem fileSystem,
-    required OS os,
-    required List<SupportedAssetTypes> supportedAssetTypes,
-  }) {
-    return switch (os) {
-      OS.linux => _linuxTarget(
-        supportedAssetTypes,
-        architecture,
-        buildMode,
-        buildDirectory,
-        environmentDefines: environmentDefines,
-        fileSystem: fileSystem,
-      ),
-      OS.windows => _windowsTarget(supportedAssetTypes, architecture, environmentDefines),
-      OS.macOS => <AssetBuildTarget>[
-        MacOSAssetTarget(
-          architecture: architecture,
-          environmentDefines: environmentDefines,
-          supportedAssetTypes: supportedAssetTypes,
-        ),
-      ],
-      OS.android => <AssetBuildTarget>[
-        AndroidAssetTarget(
-          architecture: architecture,
-          environmentDefines: environmentDefines,
-          supportedAssetTypes: supportedAssetTypes,
-        ),
-      ],
-      OS.iOS when environmentDefines.containsKey(kSdkRoot) => <AssetBuildTarget>[
-        IOSAssetTarget(
-          architecture: architecture,
-          environmentDefines: environmentDefines,
-          fileSystem: fileSystem,
-          supportedAssetTypes: supportedAssetTypes,
-        ),
-      ],
-      _ => <AssetBuildTarget>[
-        CustomCodeAssetTarget(
-          architecture: architecture,
-          environmentDefines: environmentDefines,
-          fileSystem: fileSystem,
-          os: os,
-          supportedAssetTypes: supportedAssetTypes,
-        ),
-      ],
-    };
-  }
-
   static List<AssetBuildTarget> _linuxTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
     Architecture architecture,
     BuildMode buildMode,
-    Directory? buildDirectory, {
-    Map<String, String> environmentDefines = const <String, String>{},
-    FileSystem? fileSystem,
-  }) {
+    Directory? buildDirectory,
+  ) {
     Directory? cmakeBuildDirectory;
     if (buildDirectory != null) {
       cmakeBuildDirectory = buildDirectory
@@ -218,8 +140,6 @@ sealed class AssetBuildTarget {
       LinuxAssetTarget(
         architecture: architecture,
         cmakeBuildDirectory: cmakeBuildDirectory,
-        environmentDefines: environmentDefines,
-        fileSystem: fileSystem,
         supportedAssetTypes: supportedAssetTypes,
       ),
     ];
@@ -227,15 +147,10 @@ sealed class AssetBuildTarget {
 
   static List<AssetBuildTarget> _windowsTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
-    Architecture architecture, [
-    Map<String, String> environmentDefines = const <String, String>{},
-  ]) {
+    Architecture architecture,
+  ) {
     return <AssetBuildTarget>[
-      WindowsAssetTarget(
-        architecture: architecture,
-        environmentDefines: environmentDefines,
-        supportedAssetTypes: supportedAssetTypes,
-      ),
+      WindowsAssetTarget(architecture: architecture, supportedAssetTypes: supportedAssetTypes),
     ];
   }
 
@@ -248,7 +163,6 @@ sealed class AssetBuildTarget {
         .map(
           (Architecture architecture) => MacOSAssetTarget(
             architecture: architecture,
-            environmentDefines: environmentDefines,
             supportedAssetTypes: supportedAssetTypes,
           ),
         )
@@ -318,14 +232,12 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
     required this.architecture,
     required this.os,
     required super.supportedAssetTypes,
-    this.environmentDefines = const <String, String>{},
   });
 
   final Architecture architecture;
   final OS os;
-  final Map<String, String> environmentDefines;
 
-  CCompilerConfig? cCompilerConfigSync;
+  late final CCompilerConfig? cCompilerConfigSync;
 
   /// On platforms where the Flutter app is compiled with a native toolchain, configures this target
   /// to contain a [CCompilerConfig] matching that toolchain.
@@ -357,20 +269,20 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   String get targetString => '${os.name}_${architecture.name}';
 }
 
-/// [CodeAssetTarget] for custom extension operating systems (such as HarmonyOS
-/// `'ohos'` or LG webOS `'webos'`) or targets that do not use one of the
-/// built-in platform-specific `CodeConfig` extensions (such as `AndroidCodeConfig`
-/// or `IOSCodeConfig`).
+/// [CodeAssetTarget] for extension build targets configured via
+/// [kExtensionTargetOs] and [kExtensionTargetArch] (such as HarmonyOS `'ohos'`,
+/// LG webOS `'webos'`, or custom Linux cross-compilation toolchains).
 final class CustomCodeAssetTarget extends CodeAssetTarget {
   CustomCodeAssetTarget({
     required super.architecture,
+    required this.environmentDefines,
+    required this.fileSystem,
     required super.os,
     required super.supportedAssetTypes,
-    super.environmentDefines,
-    this.fileSystem,
   });
 
-  final FileSystem? fileSystem;
+  final Map<String, String> environmentDefines;
+  final FileSystem fileSystem;
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -382,7 +294,7 @@ final class CustomCodeAssetTarget extends CodeAssetTarget {
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
     cCompilerConfigSync =
         cCompilerConfigFromDefines(environmentDefines) ??
-        _cCompilerConfigLinuxFallback(
+        _cCompilerConfigForCustomTarget(
           environmentDefines: environmentDefines,
           fileSystem: fileSystem,
         );
@@ -390,11 +302,8 @@ final class CustomCodeAssetTarget extends CodeAssetTarget {
 }
 
 class WindowsAssetTarget extends CodeAssetTarget {
-  WindowsAssetTarget({
-    required super.architecture,
-    required super.supportedAssetTypes,
-    super.environmentDefines,
-  }) : super(os: OS.windows);
+  WindowsAssetTarget({required super.supportedAssetTypes, required super.architecture})
+    : super(os: OS.windows);
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -403,66 +312,27 @@ class WindowsAssetTarget extends CodeAssetTarget {
   ];
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
-    if (cCompilerConfigFromDefines(environmentDefines) case final CCompilerConfig config) {
-      cCompilerConfigSync = config;
-      return;
-    }
-    cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
-  }
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
   LinuxAssetTarget({
+    required super.supportedAssetTypes,
     required super.architecture,
     required this.cmakeBuildDirectory,
-    required super.supportedAssetTypes,
-    super.environmentDefines,
-    this.fileSystem,
   }) : super(os: OS.linux);
 
   /// Null if this target is used for widget tests where we run code assets
   /// without an app to build.
   final Directory? cmakeBuildDirectory;
-  final FileSystem? fileSystem;
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
-    if (cCompilerConfigFromDefines(environmentDefines) case final CCompilerConfig config) {
-      cCompilerConfigSync = config;
-      return;
-    }
-
-    final bool hasCmakeCache =
-        cmakeBuildDirectory != null &&
-        cmakeBuildDirectory!.childFile('CMakeCache.txt').existsSync();
-    if (hasCmakeCache) {
-      cCompilerConfigSync = await cCompilerConfigLinux(
-        cmakeDirectory: cmakeBuildDirectory,
-        throwIfNotFound: mustMatchAppBuild,
-      );
-      return;
-    }
-
-    if (cmakeBuildDirectory == null &&
-        !environmentDefines.containsKey(kExtensionCCompilerCc) &&
-        !environmentDefines.containsKey(kExtensionCCompilerAr) &&
-        !environmentDefines.containsKey(kExtensionCCompilerLd)) {
-      cCompilerConfigSync = null;
-      return;
-    }
-
-    final CCompilerConfig? fallbackConfig = _cCompilerConfigLinuxFallback(
-      environmentDefines: environmentDefines,
-      fileSystem: fileSystem ?? cmakeBuildDirectory?.fileSystem,
-    );
-    if (fallbackConfig != null || environmentDefines.containsKey(kExtensionTargetOs)) {
-      cCompilerConfigSync = fallbackConfig;
-      return;
-    }
+    final bool isNativeAppBuild = cmakeBuildDirectory != null && cmakeBuildDirectory!.existsSync();
 
     cCompilerConfigSync = await cCompilerConfigLinux(
-      cmakeDirectory: cmakeBuildDirectory,
+      cmakeDirectory: isNativeAppBuild ? cmakeBuildDirectory : null,
       throwIfNotFound: mustMatchAppBuild,
     );
   }
@@ -476,22 +346,18 @@ final class LinuxAssetTarget extends CodeAssetTarget {
 
 final class IOSAssetTarget extends CodeAssetTarget {
   IOSAssetTarget({
-    required super.architecture,
-    required super.environmentDefines,
-    required this.fileSystem,
     required super.supportedAssetTypes,
+    required super.architecture,
+    required this.environmentDefines,
+    required this.fileSystem,
   }) : super(os: OS.iOS);
 
+  final Map<String, String> environmentDefines;
   final FileSystem fileSystem;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
-    if (cCompilerConfigFromDefines(environmentDefines) case final CCompilerConfig config) {
-      cCompilerConfigSync = config;
-      return;
-    }
-    cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
-  }
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
 
   IOSCodeConfig _getIOSConfig(Map<String, String> environmentDefines, FileSystem fileSystem) {
     final String? sdkRoot = environmentDefines[kSdkRoot];
@@ -519,11 +385,8 @@ final class IOSAssetTarget extends CodeAssetTarget {
 }
 
 final class MacOSAssetTarget extends CodeAssetTarget {
-  MacOSAssetTarget({
-    required super.architecture,
-    required super.supportedAssetTypes,
-    super.environmentDefines,
-  }) : super(os: OS.macOS);
+  MacOSAssetTarget({required super.supportedAssetTypes, required super.architecture})
+    : super(os: OS.macOS);
 
   @override
   List<ProtocolExtension> get extensions {
@@ -541,19 +404,14 @@ final class MacOSAssetTarget extends CodeAssetTarget {
   }
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
-    if (cCompilerConfigFromDefines(environmentDefines) case final CCompilerConfig config) {
-      cCompilerConfigSync = config;
-      return;
-    }
-    cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
-  }
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
 }
 
 final class AndroidAssetTarget extends CodeAssetTarget {
   AndroidAssetTarget({
     required super.architecture,
-    required super.environmentDefines,
+    required Map<String, String> environmentDefines,
     required super.supportedAssetTypes,
   }) : _androidCodeConfig = AndroidCodeConfig(
          targetNdkApi: targetAndroidNdkApi(environmentDefines),
@@ -563,13 +421,8 @@ final class AndroidAssetTarget extends CodeAssetTarget {
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
-    if (cCompilerConfigFromDefines(environmentDefines) case final CCompilerConfig config) {
-      cCompilerConfigSync = config;
-      return;
-    }
-    cCompilerConfigSync = await cCompilerConfigAndroid();
-  }
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      cCompilerConfigSync = await cCompilerConfigAndroid();
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -669,15 +522,15 @@ OS parseNativeOS(String rawOs) {
   if (normalized.isEmpty) {
     throwToolExit('Unsupported native assets target OS "$rawOs".');
   }
-  return switch (normalized) {
-    'android' => OS.android,
-    'fuchsia' => OS.fuchsia,
-    'ios' => OS.iOS,
-    'linux' => OS.linux,
-    'macos' || 'darwin' => OS.macOS,
-    'windows' => OS.windows,
-    _ => OS.fromString(normalized),
-  };
+  if (normalized == 'darwin') {
+    return OS.macOS;
+  }
+  for (final OS builtinOs in OS.values) {
+    if (builtinOs.name == normalized) {
+      return builtinOs;
+    }
+  }
+  return OS.fromString(normalized);
 }
 
 /// Parses a native [Architecture] from a target architecture string (such as
@@ -704,44 +557,18 @@ Architecture parseNativeArchitecture(String rawArch) {
   };
 }
 
-final _customTargetPlatformPattern = RegExp(r'^([a-zA-Z0-9]+)[-_]([a-zA-Z0-9_]+)$');
-
 /// Resolves the target [OS] and [Architecture] for an extension build target
 /// from [environmentDefines].
 ///
-/// When [kExtensionTargetOs] and [kExtensionTargetArch] are explicitly defined,
-/// they take precedence (even when overriding a built-in [targetPlatform]).
-/// When [targetPlatform] is `null` or [TargetPlatform.unsupported] and either
-/// define is omitted, falls back to parsing `<os>-<arch>` or `<os>_<arch>` from
-/// [kTargetPlatform] (for example, `'ohos-arm64'` or `'webos-arm64'`).
-(OS, Architecture)? resolveCustomNativeTarget(
-  Map<String, String> environmentDefines, {
-  TargetPlatform? targetPlatform,
-}) {
+/// Returns `null` unless both [kExtensionTargetOs] and [kExtensionTargetArch]
+/// are explicitly defined.
+(OS, Architecture)? resolveCustomNativeTarget(Map<String, String> environmentDefines) {
   final String? extensionTargetOs = _emptyToNull(environmentDefines[kExtensionTargetOs]);
   final String? extensionTargetArch = _emptyToNull(environmentDefines[kExtensionTargetArch]);
-  if (extensionTargetOs != null && extensionTargetArch != null) {
-    return (parseNativeOS(extensionTargetOs), parseNativeArchitecture(extensionTargetArch));
-  }
-  if (targetPlatform != null && targetPlatform != TargetPlatform.unsupported) {
+  if (extensionTargetOs == null || extensionTargetArch == null) {
     return null;
   }
-  final String? rawTargetPlatform = _emptyToNull(environmentDefines[kTargetPlatform]);
-  String? fallbackOs;
-  String? fallbackArch;
-  if (rawTargetPlatform != null) {
-    final Match? match = _customTargetPlatformPattern.firstMatch(rawTargetPlatform.trim());
-    if (match != null) {
-      fallbackOs = match.group(1);
-      fallbackArch = match.group(2);
-    }
-  }
-  final String? resolvedOs = extensionTargetOs ?? fallbackOs;
-  final String? resolvedArch = extensionTargetArch ?? fallbackArch;
-  if (resolvedOs == null || resolvedArch == null) {
-    return null;
-  }
-  return (parseNativeOS(resolvedOs), parseNativeArchitecture(resolvedArch));
+  return (parseNativeOS(extensionTargetOs), parseNativeArchitecture(extensionTargetArch));
 }
 
 /// Resolves a [CCompilerConfig] from explicit `kExtensionCCompiler*` defines in
@@ -776,42 +603,44 @@ List<String> _parseEnvScriptArgs(String? rawArgs) {
   if (rawArgs == null || rawArgs.isEmpty) {
     return const <String>[];
   }
-  if (rawArgs.startsWith('[')) {
-    try {
-      final Object? decoded = json.decode(rawArgs);
-      if (decoded case final List<Object?> list) {
-        return <String>[
-          for (final Object? item in list)
-            if (item is String) item,
-        ];
-      }
-    } on FormatException {
-      // Fall back to space-delimited splitting below.
+  try {
+    final Object? decoded = json.decode(rawArgs);
+    if (decoded case final List<Object?> list) {
+      return <String>[
+        for (final Object? item in list)
+          if (item is String)
+            item
+          else
+            throwToolExit(
+              'Invalid "$kExtensionCCompilerEnvScriptArgs" define: expected a JSON-encoded list of strings.',
+            ),
+      ];
     }
+  } on FormatException {
+    // Handled by throwToolExit below.
   }
-  return rawArgs.split(' ').where((String s) => s.isNotEmpty).toList();
+  throwToolExit(
+    'Invalid "$kExtensionCCompilerEnvScriptArgs" define: expected a JSON-encoded list of strings.',
+  );
 }
 
-CCompilerConfig? _cCompilerConfigLinuxFallback({
+CCompilerConfig? _cCompilerConfigForCustomTarget({
   required Map<String, String> environmentDefines,
-  required FileSystem? fileSystem,
+  required FileSystem fileSystem,
 }) {
-  final Uri? compiler = _resolveLinuxExecutable(
-    const <String>['clang', 'gcc'],
-    explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerCc]),
-    fileSystem: fileSystem,
-  );
-  if (compiler == null) {
+  final String? explicitCc = _emptyToNull(environmentDefines[kExtensionCCompilerCc]);
+  if (explicitCc == null) {
     return null;
   }
-  final String? compilerParentDir = fileSystem?.file(compiler).parent.path;
-  final Uri? archiver = _resolveLinuxExecutable(
+  final compiler = Uri.file(explicitCc);
+  final String compilerParentDir = fileSystem.file(compiler).parent.path;
+  final Uri? archiver = _resolveSiblingExecutable(
     const <String>['llvm-ar', 'ar'],
     explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerAr]),
     fileSystem: fileSystem,
     siblingDir: compilerParentDir,
   );
-  final Uri? linker = _resolveLinuxExecutable(
+  final Uri? linker = _resolveSiblingExecutable(
     const <String>['ld.lld', 'ld'],
     explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerLd]),
     fileSystem: fileSystem,
@@ -839,24 +668,19 @@ CCompilerConfig? _cCompilerConfigLinuxFallback({
   );
 }
 
-Uri? _resolveLinuxExecutable(
+Uri? _resolveSiblingExecutable(
   List<String> candidates, {
   required String? explicitPath,
-  required FileSystem? fileSystem,
-  String? siblingDir,
+  required FileSystem fileSystem,
+  required String siblingDir,
 }) {
   if (explicitPath != null) {
     return Uri.file(explicitPath);
   }
-  if (fileSystem != null) {
-    final searchDirs = <String>[?siblingDir, '/usr/bin', '/bin', '/usr/local/bin'];
-    for (final candidate in candidates) {
-      for (final searchDir in searchDirs) {
-        final File candidateFile = fileSystem.file(fileSystem.path.join(searchDir, candidate));
-        if (candidateFile.existsSync()) {
-          return candidateFile.uri;
-        }
-      }
+  for (final candidate in candidates) {
+    final File candidateFile = fileSystem.file(fileSystem.path.join(siblingDir, candidate));
+    if (candidateFile.existsSync()) {
+      return candidateFile.uri;
     }
   }
   return null;

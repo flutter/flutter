@@ -867,9 +867,9 @@ class CustomPlatformPlugin extends PluginPlatform implements NativeOrDartPlugin 
 
   @override
   Map<String, Object?> toMap() => <String, Object?>{
+    ...configuration,
     'name': name,
     'platformKey': platformKey,
-    ...configuration,
   };
 
   static Map<String, Object?> _yamlToMap(YamlMap yaml) {

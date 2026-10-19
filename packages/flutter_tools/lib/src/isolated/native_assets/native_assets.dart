@@ -753,13 +753,18 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsForOS(
 ) {
   final Uri? absolutePath = flutterTester ? buildUri : null;
   return switch (targetOS) {
+    OS.windows || OS.linux => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
     OS.macOS => assetTargetLocationsMacOS(codeAssets, absolutePath),
     OS.iOS => assetTargetLocationsIOS(codeAssets),
     OS.android => assetTargetLocationsAndroid(codeAssets),
-    // Windows, Linux, Fuchsia, and custom extension operating systems (such as
-    // HarmonyOS 'ohos' or LG webOS 'webos') bundle dynamic libraries as
-    // standalone shared objects inside the target output directory.
-    _ => _assetTargetLocationsWindowsLinux(codeAssets, absolutePath),
+    // Custom extension operating systems (such as HarmonyOS 'ohos' or LG webOS
+    // 'webos') bundle dynamic libraries as standalone shared objects inside
+    // the target output directory.
+    final OS customOs when !OS.values.contains(customOs) => _assetTargetLocationsWindowsLinux(
+      codeAssets,
+      absolutePath,
+    ),
+    _ => throw UnimplementedError('This should be unreachable.'),
   };
 }
 
@@ -797,6 +802,15 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   globals.logger.printTrace('Copying native assets to ${targetUri.toFilePath()}.');
   final List<File> installedFiles;
   switch (targetOS) {
+    case OS.windows:
+    case OS.linux:
+      assert(codesignIdentity == null);
+      installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
+        targetUri,
+        assetTargetLocations,
+        buildMode,
+        fileSystem,
+      );
     case OS.macOS:
       if (flutterTester) {
         installedFiles = await copyNativeCodeAssetsMacOSFlutterTester(
@@ -830,9 +844,9 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
         assetTargetLocations,
         fileSystem,
       );
-    default:
-      // Windows, Linux, Fuchsia, and custom extension operating systems copy
-      // bundled dynamic libraries directly into the target bundle directory.
+    case final OS customOs when !OS.values.contains(customOs):
+      // Custom extension operating systems copy bundled dynamic libraries
+      // directly into the target bundle directory.
       assert(codesignIdentity == null);
       installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
         targetUri,
@@ -840,6 +854,8 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
         buildMode,
         fileSystem,
       );
+    default:
+      throw StateError('This should be unreachable.');
   }
   globals.logger.printTrace('Copying native assets done.');
   return installedFiles;
@@ -924,9 +940,11 @@ OS getNativeOSFromTargetPlatform(
   TargetPlatform platform, {
   Map<String, String>? environmentDefines,
 }) {
-  if (environmentDefines?[kExtensionTargetOs] case final String extensionOs
-      when extensionOs.isNotEmpty) {
-    return parseNativeOS(extensionOs);
+  if (environmentDefines != null) {
+    final (OS os, Architecture _)? customTarget = resolveCustomNativeTarget(environmentDefines);
+    if (customTarget != null) {
+      return customTarget.$1;
+    }
   }
   switch (platform.os) {
     case .ios:
@@ -954,15 +972,6 @@ OS getNativeOSFromTargetPlatform(
     case .web:
       throw StateError('No dart builds for web yet.');
     case .unsupported:
-      if (environmentDefines != null) {
-        final (OS os, Architecture _)? customTarget = resolveCustomNativeTarget(
-          environmentDefines,
-          targetPlatform: platform,
-        );
-        if (customTarget != null) {
-          return customTarget.$1;
-        }
-      }
       TargetPlatform.throwUnsupportedTarget();
   }
 }

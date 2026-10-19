@@ -38,8 +38,22 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFilePath =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFilePath);
+    final extraPlatformKeys = <String>{
+      if (environment.defines[kExtensionPluginPlatformKey] case final String rawKeys
+          when rawKeys.isNotEmpty)
+        for (final String key in rawKeys.split(','))
+          if (key.trim().isNotEmpty) key.trim(),
+      if (environment.defines[kExtensionTargetOs] case final String targetOs
+          when targetOs.trim().isNotEmpty)
+        targetOs.trim().toLowerCase(),
+    };
 
-    await generateMainDartWithPluginRegistrant(project, packageConfig, mainFile);
+    await generateMainDartWithPluginRegistrant(
+      project,
+      packageConfig,
+      mainFile,
+      extraPlatformKeys: extraPlatformKeys,
+    );
   }
 
   @override
@@ -53,9 +67,18 @@ class DartPluginRegistrantTarget extends Target {
       try {
         targetPlatform = TargetPlatform.fromName(platformName);
       } on Exception {
+        final String? extensionTargetOs = environment.defines[kExtensionTargetOs];
+        final String? extensionPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey];
+        final bool hasExtensionPlatform =
+            (extensionTargetOs != null && extensionTargetOs.trim().isNotEmpty) ||
+            (extensionPluginPlatformKey != null && extensionPluginPlatformKey.trim().isNotEmpty);
+        if (!hasExtensionPlatform) {
+          rethrow;
+        }
         // Custom extension target platforms (such as 'ohos-arm64' or
         // 'webos-arm64') are not part of the built-in TargetPlatform enum and
-        // should still generate a Dart plugin registrant.
+        // should still generate a Dart plugin registrant when extension
+        // platform defines are present.
       }
     }
     // TODO(stuartmorgan): Investigate removing this check entirely; ideally the

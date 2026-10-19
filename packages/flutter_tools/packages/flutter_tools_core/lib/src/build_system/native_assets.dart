@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonEncode;
+
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
@@ -69,10 +71,11 @@ class ExtensionCCompilerConfig {
   /// Absolute URI to the linker (`ld`) executable.
   final Uri ld;
 
-  /// Optional absolute URI to an environment setup script for the compiler toolchain.
+  /// Optional absolute `file:` URI to a Windows developer command prompt
+  /// environment setup script for the compiler toolchain.
   final Uri? envScript;
 
-  /// Optional arguments passed to [envScript].
+  /// Optional arguments passed to [envScript] on Windows.
   final List<String>? envScriptArgs;
 
   static Uri _parseAbsoluteUri(Object? rawValue, String fieldName) {
@@ -82,8 +85,8 @@ class ExtensionCCompilerConfig {
       );
     }
     final Uri? uri = Uri.tryParse(rawValue);
-    if (uri == null || !uri.hasAbsolutePath) {
-      throw ArgumentError('"$fieldName" must be an absolute URI: $rawValue');
+    if (uri == null || !uri.isScheme('file') || !uri.hasAbsolutePath) {
+      throw ArgumentError('"$fieldName" must be an absolute file:// URI: $rawValue');
     }
     return uri;
   }
@@ -170,6 +173,27 @@ class ExtensionNativeAssetsConfig {
   /// Map key for [targetOs].
   static const String targetOsKey = 'targetOs';
 
+  /// Environment define key (`-dExtensionTargetOs=...`) for [targetOs].
+  static const String targetOsDefine = 'ExtensionTargetOs';
+
+  /// Environment define key (`-dExtensionTargetArch=...`) for [targetArchitecture].
+  static const String targetArchDefine = 'ExtensionTargetArch';
+
+  /// Environment define key (`-dExtensionCCompilerCc=...`) for [ExtensionCCompilerConfig.cc].
+  static const String cCompilerCcDefine = 'ExtensionCCompilerCc';
+
+  /// Environment define key (`-dExtensionCCompilerAr=...`) for [ExtensionCCompilerConfig.ar].
+  static const String cCompilerArDefine = 'ExtensionCCompilerAr';
+
+  /// Environment define key (`-dExtensionCCompilerLd=...`) for [ExtensionCCompilerConfig.ld].
+  static const String cCompilerLdDefine = 'ExtensionCCompilerLd';
+
+  /// Environment define key (`-dExtensionCCompilerEnvScript=...`) for [ExtensionCCompilerConfig.envScript].
+  static const String cCompilerEnvScriptDefine = 'ExtensionCCompilerEnvScript';
+
+  /// Environment define key (`-dExtensionCCompilerEnvScriptArgs=...`) for [ExtensionCCompilerConfig.envScriptArgs].
+  static const String cCompilerEnvScriptArgsDefine = 'ExtensionCCompilerEnvScriptArgs';
+
   /// The target operating system for `CodeAsset` hooks (e.g. `'linux'`,
   /// `'macos'`, `'windows'`, `'android'`, `'ios'`, or a custom OS identifier
   /// such as `'ohos'` or `'webos'`).
@@ -181,6 +205,26 @@ class ExtensionNativeAssetsConfig {
 
   /// Optional C compiler toolchain configuration for `CodeAsset` hooks.
   final ExtensionCCompilerConfig? cCompilerConfig;
+
+  /// Converts this configuration into `flutter assemble` environment defines
+  /// (`-d<Key>=<Value>`) consumed by `BuildHooks`, `LinkHooks`,
+  /// `InstallCodeAssets`, and `KernelSnapshot`.
+  Map<String, String> toEnvironmentDefines() {
+    final ExtensionCCompilerConfig? compiler = cCompilerConfig;
+    return <String, String>{
+      targetOsDefine: targetOs,
+      targetArchDefine: targetArchitecture,
+      if (compiler != null) ...<String, String>{
+        cCompilerCcDefine: compiler.cc.toFilePath(),
+        cCompilerArDefine: compiler.ar.toFilePath(),
+        cCompilerLdDefine: compiler.ld.toFilePath(),
+        if (compiler.envScript case final Uri envScript)
+          cCompilerEnvScriptDefine: envScript.toFilePath(),
+        if (compiler.envScriptArgs case final List<String> args when args.isNotEmpty)
+          cCompilerEnvScriptArgsDefine: jsonEncode(args),
+      },
+    };
+  }
 
   /// Serializes the configuration to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{

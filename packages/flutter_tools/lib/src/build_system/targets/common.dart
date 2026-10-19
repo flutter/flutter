@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart' show OS;
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -15,6 +16,7 @@ import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show os;
 import '../../isolated/native_assets/dart_hook_result.dart';
+import '../../isolated/native_assets/targets.dart' show parseNativeOS;
 import '../../project.dart';
 import '../../windows/visual_studio.dart';
 import '../build_system.dart';
@@ -206,22 +208,26 @@ class KernelSnapshot extends Target {
     final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     // Custom extension platforms (such as 'ohos-arm64' for HarmonyOS or
     // 'webos-arm64' for LG webOS) are not part of the built-in TargetPlatform
-    // enum. When TargetPlatform.fromName fails, fall back to a representative
-    // TargetPlatform so KernelCompiler can resolve the host engine's
-    // Artifact.platformKernelDill and link the platform kernel into the output
-    // dill for custom embedders.
+    // enum. When TargetPlatform.fromName fails and kExtensionTargetOs is
+    // explicitly provided, fall back to a representative TargetPlatform so
+    // KernelCompiler can resolve the host engine's Artifact.platformKernelDill
+    // and link the platform kernel into the output dill for custom embedders.
     TargetPlatform targetPlatform;
-    var isCustomTargetPlatform = false;
+    OS? customTargetOs;
     try {
       targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     } on Exception {
-      isCustomTargetPlatform = true;
-      targetPlatform = switch (environment.defines[kExtensionTargetOs]?.toLowerCase()) {
-        'android' => TargetPlatform.android,
-        'fuchsia' => TargetPlatform.fuchsia_arm64,
-        'ios' => TargetPlatform.ios,
-        'macos' || 'darwin' => TargetPlatform.darwin,
-        'windows' => TargetPlatform.windows_x64,
+      final String? extensionTargetOs = environment.defines[kExtensionTargetOs];
+      if (extensionTargetOs == null || extensionTargetOs.trim().isEmpty) {
+        rethrow;
+      }
+      customTargetOs = parseNativeOS(extensionTargetOs);
+      targetPlatform = switch (customTargetOs) {
+        OS.android => TargetPlatform.android,
+        OS.fuchsia => TargetPlatform.fuchsia_arm64,
+        OS.iOS => TargetPlatform.ios,
+        OS.macOS => TargetPlatform.darwin,
+        OS.windows => TargetPlatform.windows_x64,
         _ => TargetPlatform.linux_x64,
       };
     }
@@ -278,26 +284,17 @@ class KernelSnapshot extends Target {
     }
 
     // frontend_server's --target-os flag only accepts the six built-in VM
-    // operating systems ('android', 'fuchsia', 'ios', 'linux', 'macos',
-    // 'windows') and is used by AOT global type-flow analysis (TFA) to
-    // constant-fold Platform.operatingSystem and Platform.is<OS> checks.
+    // operating systems (OS.values: 'android', 'fuchsia', 'ios', 'linux',
+    // 'macos', 'windows') and is used by AOT global type-flow analysis (TFA)
+    // to constant-fold Platform.operatingSystem and Platform.is<OS> checks.
     // For custom extension platforms, only pass --target-os when
-    // kExtensionTargetOs explicitly names one of those six operating systems
-    // (for example, a Linux-based embedded target that sets
-    // ExtensionTargetOs=linux). For custom operating systems (such as
-    // HarmonyOS 'ohos' or LG webOS 'webos'), omit --target-os (null) so
-    // Platform.operatingSystem is evaluated at runtime by the embedder instead
-    // of being constant-folded to 'linux'.
-    final String? targetOS = isCustomTargetPlatform
-        ? switch (environment.defines[kExtensionTargetOs]?.toLowerCase()) {
-            'android' => 'android',
-            'fuchsia' => 'fuchsia',
-            'ios' => 'ios',
-            'linux' => 'linux',
-            'macos' || 'darwin' => 'macos',
-            'windows' => 'windows',
-            _ => null,
-          }
+    // customTargetOs is one of those six operating systems (for example, a
+    // Linux-based embedded target that sets ExtensionTargetOs=linux). For
+    // custom operating systems (such as HarmonyOS 'ohos' or LG webOS 'webos'),
+    // omit --target-os (null) so Platform.operatingSystem is evaluated at
+    // runtime by the embedder instead of being constant-folded to 'linux'.
+    final String? targetOS = customTargetOs != null
+        ? (OS.values.contains(customTargetOs) ? customTargetOs.name : null)
         : switch (targetPlatform.os) {
             .fuchsia => 'fuchsia',
             .android => 'android',

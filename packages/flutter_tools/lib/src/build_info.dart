@@ -1123,25 +1123,31 @@ const kXcodeBuildScriptValuePrepare = 'prepare';
 const kBuildSwiftPackage = 'BuildSwiftPackage';
 
 /// The target operating system for Dart build/link hooks on a custom extension target.
-const kExtensionTargetOs = 'ExtensionTargetOs';
+const String kExtensionTargetOs = tools_core.ExtensionNativeAssetsConfig.targetOsDefine;
 
 /// The target CPU architecture for Dart build/link hooks on a custom extension target.
-const kExtensionTargetArch = 'ExtensionTargetArch';
+const String kExtensionTargetArch = tools_core.ExtensionNativeAssetsConfig.targetArchDefine;
 
 /// Optional C compiler (`cc`) path for Dart build/link hooks on an extension target.
-const kExtensionCCompilerCc = 'ExtensionCCompilerCc';
+const String kExtensionCCompilerCc = tools_core.ExtensionNativeAssetsConfig.cCompilerCcDefine;
 
 /// Optional archiver (`ar`) path for Dart build/link hooks on an extension target.
-const kExtensionCCompilerAr = 'ExtensionCCompilerAr';
+const String kExtensionCCompilerAr = tools_core.ExtensionNativeAssetsConfig.cCompilerArDefine;
 
 /// Optional linker (`ld`) path for Dart build/link hooks on an extension target.
-const kExtensionCCompilerLd = 'ExtensionCCompilerLd';
+const String kExtensionCCompilerLd = tools_core.ExtensionNativeAssetsConfig.cCompilerLdDefine;
 
 /// Optional compiler environment setup script path for Dart build/link hooks on an extension target.
-const kExtensionCCompilerEnvScript = 'ExtensionCCompilerEnvScript';
+const String kExtensionCCompilerEnvScript =
+    tools_core.ExtensionNativeAssetsConfig.cCompilerEnvScriptDefine;
 
-/// Optional space-separated or JSON-encoded arguments for [kExtensionCCompilerEnvScript].
-const kExtensionCCompilerEnvScriptArgs = 'ExtensionCCompilerEnvScriptArgs';
+/// Optional JSON-encoded arguments for [kExtensionCCompilerEnvScript].
+const String kExtensionCCompilerEnvScriptArgs =
+    tools_core.ExtensionNativeAssetsConfig.cCompilerEnvScriptArgsDefine;
+
+/// Optional comma-separated or single platform key under `flutter.plugin.platforms.<key>`
+/// used to resolve Dart plugins on an extension target.
+const kExtensionPluginPlatformKey = 'ExtensionPluginPlatformKey';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

@@ -153,6 +153,23 @@ void main() {
           ),
         ),
       );
+
+      await expectLater(
+        () => buildHandler(<String, Object?>{
+          BuildService.targetNameParam: 'custom-linux-build',
+          BuildService.projectRootParam: '/project',
+          BuildService.mainPathParam: 'lib/main.dart',
+          BuildService.buildModeParam: 'debug',
+          BuildService.pluginsParam: 'invalid_plugins',
+        }),
+        throwsA(
+          isA<Object>().having(
+            (Object e) => e.toString(),
+            'toString',
+            contains('Missing or invalid "${BuildService.pluginsParam}" parameter'),
+          ),
+        ),
+      );
     });
   });
 }

@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:isolate';
+
 import 'package:code_assets/code_assets.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/build_info.dart' hide BuildMode;
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
@@ -16,6 +19,9 @@ import 'package:flutter_tools/src/build_system/targets/dart_plugin_registrant.da
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
+import 'package:flutter_tools/src/experimental/extension_discovery.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -23,6 +29,8 @@ import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
@@ -32,6 +40,50 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 import '../isolated/fake_native_assets_build_runner.dart';
+
+final class _PluginCapturingBuildService extends BuildService {
+  static List<ExtensionPlugin> lastPlugins = const <ExtensionPlugin>[];
+
+  @override
+  Future<List<ExtensionBuildTarget>> getBuildTargets() async {
+    return <ExtensionBuildTarget>[
+      ExtensionBuildTarget(
+        description: 'HarmonyOS HAP build target.',
+        name: 'ohos-hap',
+        nativeAssetsConfig: ExtensionNativeAssetsConfig(
+          targetArchitecture: 'arm64',
+          targetOs: 'ohos',
+          cCompilerConfig: ExtensionCCompilerConfig(
+            ar: Uri.file('/opt/ohos-sdk/llvm/bin/llvm-ar'),
+            cc: Uri.file('/opt/ohos-sdk/llvm/bin/clang'),
+            ld: Uri.file('/opt/ohos-sdk/llvm/bin/ld.lld'),
+          ),
+        ),
+        pluginPlatformKey: 'ohos',
+      ),
+    ];
+  }
+
+  @override
+  Future<ExtensionBuildResult> build({
+    required BuildMode buildMode,
+    required String mainPath,
+    required Uri projectRoot,
+    required String targetName,
+    List<ExtensionPlugin> plugins = const <ExtensionPlugin>[],
+  }) async {
+    lastPlugins = plugins;
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+void _pluginCapturingExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_PluginCapturingBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -59,6 +111,7 @@ platforms:
         - b
   custom_federated:
     default_package: my_plugin_custom_federated
+  tizen:
 ''') as YamlMap;
 
       final plugin = Plugin.fromYaml(
@@ -71,6 +124,7 @@ platforms:
         isDevDependency: false,
       );
 
+      expect(plugin.platforms.containsKey('tizen'), isFalse);
       final PluginPlatform? platformPlugin = plugin.platforms['custom_embedder'];
       expect(platformPlugin, isA<CustomPlatformPlugin>());
       final customPlugin = platformPlugin! as CustomPlatformPlugin;
@@ -94,107 +148,144 @@ platforms:
       );
     });
 
-    testWithoutContext(
-      'resolvePluginImplementationsForPlatform resolves federated and custom platform plugins',
-      () {
-        final appFacingPlugin = Plugin.fromYaml(
-          'url_launcher',
-          '/pub/url_launcher',
-          loadYaml('''
+    testWithoutContext('resolvePluginImplementationsForPlatform and resolveExtensionPluginsForPlatform resolve custom platform plugins without affecting built-in resolution', () {
+      final appFacingPlugin = Plugin.fromYaml(
+        'url_launcher',
+        '/pub/url_launcher',
+        loadYaml('''
 platforms:
   custom_embedder:
     default_package: url_launcher_custom
 ''') as YamlMap,
-          null,
-          const <String>['url_launcher_custom'],
-          appDependencies: const <String>{'url_launcher'},
-          fileSystem: fileSystem,
-          isDevDependency: false,
-        );
+        null,
+        const <String>['url_launcher_custom'],
+        appDependencies: const <String>{'url_launcher'},
+        fileSystem: fileSystem,
+        isDevDependency: false,
+      );
 
-        final customImplPlugin = Plugin.fromYaml(
-          'url_launcher_custom',
-          '/pub/url_launcher_custom',
-          loadYaml('''
+      final customImplPlugin = Plugin.fromYaml(
+        'url_launcher_custom',
+        '/pub/url_launcher_custom',
+        loadYaml('''
 implements: url_launcher
 platforms:
   custom_embedder:
     pluginClass: UrlLauncherCustomPlugin
 ''') as YamlMap,
-          null,
-          const <String>[],
-          appDependencies: const <String>{'url_launcher'},
-          fileSystem: fileSystem,
-          isDevDependency: false,
-        );
+        null,
+        const <String>[],
+        appDependencies: const <String>{'url_launcher'},
+        fileSystem: fileSystem,
+        isDevDependency: false,
+      );
 
-        final unrelatedAndroidPlugin = Plugin.fromYaml(
-          'android_only',
-          '/pub/android_only',
-          loadYaml('''
+      final unrelatedAndroidPlugin = Plugin.fromYaml(
+        'android_only',
+        '/pub/android_only',
+        loadYaml('''
 platforms:
   android:
     package: com.example.android
     pluginClass: AndroidOnlyPlugin
 ''') as YamlMap,
-          null,
-          const <String>[],
-          appDependencies: const <String>{'android_only'},
-          fileSystem: fileSystem,
-          isDevDependency: false,
-        );
+        null,
+        const <String>[],
+        appDependencies: const <String>{'android_only'},
+        fileSystem: fileSystem,
+        isDevDependency: false,
+      );
 
-        final List<Plugin> resolved = resolvePluginImplementationsForPlatform(
-          <Plugin>[appFacingPlugin, customImplPlugin, unrelatedAndroidPlugin],
-          'custom_embedder',
-          quiet: true,
-        );
+      final allPlugins = <Plugin>[appFacingPlugin, customImplPlugin, unrelatedAndroidPlugin];
 
-        expect(resolved.map((Plugin p) => p.name), equals(<String>['url_launcher_custom']));
-      },
-    );
-
-    testWithoutContext('Plugin.fromYaml rejects invalid custom platform specifications', () {
+      // Standard built-in resolution ignores custom_embedder unless requested.
+      final List<PluginInterfaceResolution> builtInResolutions = resolvePlatformImplementation(
+        allPlugins,
+        selectDartPluginsOnly: false,
+      );
       expect(
-        () => Plugin.fromYaml(
-          'my_plugin',
-          '/packages/my_plugin',
-          loadYaml('''
+        builtInResolutions.map((PluginInterfaceResolution r) => r.platform),
+        equals(<String>['android']),
+      );
+
+      final List<ExtensionPlugin> resolvedExtensionPlugins = resolveExtensionPluginsForPlatform(
+        allPlugins,
+        'custom_embedder',
+        quiet: true,
+      );
+      expect(
+        resolvedExtensionPlugins,
+        equals(<ExtensionPlugin>[
+          ExtensionPlugin(
+            name: 'url_launcher_custom',
+            path: Uri.directory('/pub/url_launcher_custom'),
+            configuration: const <String, Object?>{'pluginClass': 'UrlLauncherCustomPlugin'},
+          ),
+        ]),
+      );
+    });
+
+    testWithoutContext(
+      'Plugin.fromYaml rejects invalid custom platform keys and specifications',
+      () {
+        expect(
+          () => Plugin.fromYaml(
+            'my_plugin',
+            '/packages/my_plugin',
+            loadYaml('''
+platforms:
+  bad-key:
+    pluginClass: GoodClass
+''') as YamlMap,
+            null,
+            const <String>[],
+            fileSystem: fileSystem,
+            isDevDependency: false,
+          ),
+          throwsToolExit(message: 'Invalid "bad-key" plugin specification.'),
+        );
+
+        expect(
+          () => Plugin.fromYaml(
+            'my_plugin',
+            '/packages/my_plugin',
+            loadYaml('''
 platforms:
   custom_embedder:
     pluginClass: Bad;Class
 ''') as YamlMap,
-          null,
-          const <String>[],
-          fileSystem: fileSystem,
-          isDevDependency: false,
-        ),
-        throwsToolExit(message: 'Invalid "custom_embedder" plugin specification.'),
-      );
+            null,
+            const <String>[],
+            fileSystem: fileSystem,
+            isDevDependency: false,
+          ),
+          throwsToolExit(message: 'Invalid "custom_embedder" plugin specification.'),
+        );
 
-      expect(
-        () => Plugin.fromYaml(
-          'my_plugin',
-          '/packages/my_plugin',
-          loadYaml('''
+        expect(
+          () => Plugin.fromYaml(
+            'my_plugin',
+            '/packages/my_plugin',
+            loadYaml('''
 platforms:
   custom_embedder:
     pluginClass: GoodClass
     dartFileName: src/custom.dart
 ''') as YamlMap,
-          null,
-          const <String>[],
-          fileSystem: fileSystem,
-          isDevDependency: false,
-        ),
-        throwsToolExit(
-          message: '"dartFileName" cannot be specified without "dartPluginClass" in custom_embedder platform of plugin "my_plugin"',
-        ),
-      );
-    });
+            null,
+            const <String>[],
+            fileSystem: fileSystem,
+            isDevDependency: false,
+          ),
+          throwsToolExit(
+            message: '"dartFileName" cannot be specified without "dartPluginClass" in custom_embedder platform of plugin "my_plugin"',
+          ),
+        );
+      },
+    );
 
     testUsingContext(
-      'DartPluginRegistrantTarget supports custom platform plugins (such as ohos and webos)',
+      'DartPluginRegistrantTarget supports custom platform plugins when extension defines are set',
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
         Pub: ThrowingPub.new,
@@ -210,6 +301,8 @@ platforms:
           processManager: FakeProcessManager.any(),
           defines: <String, String>{
             kTargetPlatform: 'ohos-arm64',
+            kExtensionTargetOs: 'ohos',
+            kExtensionPluginPlatformKey: 'ohos,webos',
             kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
           },
           generateDartPluginRegistry: true,
@@ -281,6 +374,88 @@ environment:
         expect(registrantContent, contains('path_provider_webos.PathProviderWebos.registerWith()'));
       },
     );
+
+    testWithoutContext('ExtensionBuildManager resolves plugins for pluginPlatformKey and maps nativeAssetsConfig to defines', () async {
+      final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+      writePackageConfigFiles(
+        directory: projectDir,
+        mainLibName: 'my_app',
+        packages: <String, String>{'camera_ohos': '/camera_ohos'},
+      );
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+dependencies:
+  flutter:
+    sdk: flutter
+  camera_ohos: 1.0.0
+''');
+      fileSystem.directory('/camera_ohos').childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: camera_ohos
+flutter:
+  plugin:
+    platforms:
+      ohos:
+        pluginClass: CameraOhosPlugin
+        harPath: har/camera.har
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=1.20.0"
+''');
+
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final extensionManager = ExtensionManager(
+        entryPoints: <ExtensionEntryPoint>[_pluginCapturingExtensionEntryPoint],
+        featureFlags: featureFlags,
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: extensionManager,
+        featureFlags: featureFlags,
+        fileSystem: fileSystem,
+        logger: logger,
+      );
+
+      final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+      expect(targets, hasLength(1));
+      expect(
+        buildManager.environmentDefinesForTarget('ohos-hap'),
+        equals(<String, String>{
+          kExtensionTargetOs: 'ohos',
+          kExtensionTargetArch: 'arm64',
+          kExtensionCCompilerCc: '/opt/ohos-sdk/llvm/bin/clang',
+          kExtensionCCompilerAr: '/opt/ohos-sdk/llvm/bin/llvm-ar',
+          kExtensionCCompilerLd: '/opt/ohos-sdk/llvm/bin/ld.lld',
+          kExtensionPluginPlatformKey: 'ohos',
+        }),
+      );
+
+      _PluginCapturingBuildService.lastPlugins = const <ExtensionPlugin>[];
+      final ExtensionBuildResult result = await buildManager.build(
+        buildMode: BuildMode.release,
+        mainPath: 'lib/main.dart',
+        projectRoot: projectDir.uri,
+        targetName: 'ohos-hap',
+      );
+      expect(result.success, isTrue);
+      expect(
+        _PluginCapturingBuildService.lastPlugins,
+        equals(<ExtensionPlugin>[
+          ExtensionPlugin(
+            name: 'camera_ohos',
+            path: Uri.directory('/camera_ohos'),
+            configuration: const <String, Object?>{
+              'pluginClass': 'CameraOhosPlugin',
+              'harPath': 'har/camera.har',
+            },
+          ),
+        ]),
+      );
+
+      await extensionManager.dispose();
+    });
   });
 
   group('ExtensionNativeAssetsConfig and custom-target Dart hooks interop', () {
@@ -309,21 +484,21 @@ environment:
 
       expect(targets, hasLength(1));
       final AssetBuildTarget assetTarget = targets.single;
-      expect(assetTarget, isA<LinuxAssetTarget>());
-      final linuxTarget = assetTarget as LinuxAssetTarget;
-      expect(linuxTarget.os, OS.linux);
-      expect(linuxTarget.architecture, Architecture.riscv64);
-      await linuxTarget.setCCompilerConfig();
+      expect(assetTarget, isA<CustomCodeAssetTarget>());
+      final customTarget = assetTarget as CustomCodeAssetTarget;
+      expect(customTarget.os, OS.linux);
+      expect(customTarget.architecture, Architecture.riscv64);
+      await customTarget.setCCompilerConfig();
       expect(
-        linuxTarget.cCompilerConfigSync?.compiler,
+        customTarget.cCompilerConfigSync?.compiler,
         Uri.file('/toolchain/bin/riscv64-linux-gnu-gcc'),
       );
       expect(
-        linuxTarget.cCompilerConfigSync?.archiver,
+        customTarget.cCompilerConfigSync?.archiver,
         Uri.file('/toolchain/bin/riscv64-linux-gnu-ar'),
       );
       expect(
-        linuxTarget.cCompilerConfigSync?.linker,
+        customTarget.cCompilerConfigSync?.linker,
         Uri.file('/toolchain/bin/riscv64-linux-gnu-ld'),
       );
     });
@@ -390,40 +565,20 @@ environment:
       },
     );
 
-    testWithoutContext('LinuxAssetTarget.setCCompilerConfig falls back to clang on PATH when CMakeCache.txt is missing', () async {
-      fileSystem.directory('/usr/bin').createSync(recursive: true);
-      fileSystem.file('/usr/bin/clang++').createSync();
-      fileSystem.file('/usr/bin/clang').createSync();
-      fileSystem.file('/usr/bin/llvm-ar').createSync();
-      fileSystem.file('/usr/bin/ld.lld').createSync();
-
-      final Directory missingCmakeDir = fileSystem.directory('/project/build/linux/x64/debug');
-      final target = LinuxAssetTarget(
-        architecture: Architecture.x64,
-        cmakeBuildDirectory: missingCmakeDir,
-        fileSystem: fileSystem,
-        supportedAssetTypes: <SupportedAssetTypes>[SupportedAssetTypes.codeAssets],
-      );
-
-      await target.setCCompilerConfig();
-
-      expect(target.cCompilerConfigSync, isNotNull);
-      expect(target.cCompilerConfigSync!.compiler, Uri.file('/usr/bin/clang'));
-      expect(target.cCompilerConfigSync!.archiver, Uri.file('/usr/bin/llvm-ar'));
-      expect(target.cCompilerConfigSync!.linker, Uri.file('/usr/bin/ld.lld'));
-    });
-
-    testWithoutContext(
-      'CopyAssets includes NativeAssetsManifest.json and tolerates custom kTargetPlatform',
+    testUsingContext(
+      'CopyAssets includes NativeAssetsManifest.json when present',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
       () async {
-        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+        final Directory projectDir = fileSystem.currentDirectory;
         projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: test_app
 environment:
   sdk: ^3.7.0
 ''');
         writePackageConfigFiles(directory: projectDir, mainLibName: 'test_app');
-        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir, logger);
 
         final environment = Environment.test(
           projectDir,
@@ -431,6 +586,7 @@ environment:
           defines: <String, String>{
             kBuildMode: BuildMode.debug.cliName,
             kTargetPlatform: 'custom-embedder-arm64',
+            kExtensionTargetOs: 'linux',
           },
           fileSystem: fileSystem,
           inputs: <String, String>{},
@@ -442,7 +598,7 @@ environment:
             .childFile(InstallCodeAssets.nativeAssetsFilename)
             .writeAsStringSync('{"format-version":[1,0,0],"native-assets":{}}');
 
-        await CopyAssets(flutterProject: flutterProject).build(environment);
+        await const CopyAssets().build(environment);
 
         final File bundledManifest = environment.buildDir
             .childDirectory('flutter_assets')
@@ -561,26 +717,31 @@ environment:
           Uri.file('/opt/ohos-sdk/llvm/bin/llvm-ar'),
         );
         expect(customTarget.cCompilerConfigSync?.linker, Uri.file('/opt/ohos-sdk/llvm/bin/ld.lld'));
-
-        // Also resolves custom OS and architecture directly from kTargetPlatform
-        // when kExtensionTargetOs and kExtensionTargetArch are omitted.
-        final List<AssetBuildTarget> inferredWebosTargets = AssetBuildTarget.targetsFor(
-          buildDirectory: fileSystem.directory('/project/build'),
-          buildMode: BuildMode.release,
-          environmentDefines: <String, String>{
-            kBuildMode: BuildMode.release.cliName,
-            kTargetPlatform: 'webos-arm64',
-          },
-          fileSystem: fileSystem,
-          supportedAssetTypes: <SupportedAssetTypes>[SupportedAssetTypes.codeAssets],
-          targetPlatform: TargetPlatform.unsupported,
-        );
-        expect(inferredWebosTargets, hasLength(1));
-        final inferredTarget = inferredWebosTargets.single as CustomCodeAssetTarget;
-        expect(inferredTarget.os.name, 'webos');
-        expect(inferredTarget.architecture, Architecture.arm64);
       },
     );
+
+    testWithoutContext('unknown kTargetPlatform without kExtensionTargetOs throws in KernelSnapshot, DartPluginRegistrantTarget, and BuildHooks', () async {
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: artifacts,
+        defines: <String, String>{
+          kBuildMode: BuildMode.debug.cliName,
+          kTargetPlatform: 'linux-x46',
+        },
+        fileSystem: fileSystem,
+        inputs: <String, String>{},
+        logger: logger,
+        processManager: FakeProcessManager.empty(),
+        generateDartPluginRegistry: true,
+      );
+
+      await expectLater(() => const KernelSnapshot().build(environment), throwsA(isA<Exception>()));
+      await expectLater(
+        () => const DartPluginRegistrantTarget().canSkip(environment),
+        throwsA(isA<Exception>()),
+      );
+      await expectLater(() => const BuildHooks().build(environment), throwsA(isA<Exception>()));
+    });
 
     testUsingContext(
       'BuildHooks, LinkHooks, and InstallCodeAssets bundle code assets for custom OS (ohos)',

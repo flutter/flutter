@@ -322,7 +322,7 @@ class InstallCodeAssets extends Target {
       environmentDefines: environment.defines,
     );
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    if (targetOS != OS.macOS && targetOS != OS.iOS && targetOS != OS.android) {
+    if (targetOS == OS.linux || targetOS == OS.windows || !OS.values.contains(targetOS)) {
       // Avoid needing migration for CMake files, keep old directory structure,
       // and place custom extension OS assets under native_assets/<os>/.
       targetUri = targetUri.resolve('${targetOS.name}/');

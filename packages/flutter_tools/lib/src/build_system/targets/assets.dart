@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
@@ -42,7 +41,6 @@ Future<Depfile> copyAssets(
   required BuildMode buildMode,
   List<File> additionalInputs = const <File>[],
   String? flavor,
-  @visibleForTesting FlutterProject? flutterProject,
 }) async {
   final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
   // Only the default asset bundle style is supported in assemble.
@@ -52,25 +50,14 @@ Future<Depfile> copyAssets(
     platform: environment.platform,
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
-  final int resultCode = switch (assetBundle) {
-    final ManifestAssetBundle manifestBundle => await manifestBundle.build(
-      flutterHookResult: dartHookResult.asFlutterResult,
-      flutterProject: flutterProject,
-      manifestPath: pubspecFile.path,
-      packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
-      deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
-      targetPlatform: targetPlatform,
-      flavor: flavor,
-    ),
-    _ => await assetBundle.build(
-      flutterHookResult: dartHookResult.asFlutterResult,
-      manifestPath: pubspecFile.path,
-      packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
-      deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
-      targetPlatform: targetPlatform,
-      flavor: flavor,
-    ),
-  };
+  final int resultCode = await assetBundle.build(
+    flutterHookResult: dartHookResult.asFlutterResult,
+    manifestPath: pubspecFile.path,
+    packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
+    deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
+    targetPlatform: targetPlatform,
+    flavor: flavor,
+  );
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
   }
@@ -283,10 +270,7 @@ Future<Depfile> copyAssets(
 
 /// Copy the assets defined in the flutter manifest into a build directory.
 class CopyAssets extends Target {
-  const CopyAssets({@visibleForTesting this.flutterProject});
-
-  @visibleForTesting
-  final FlutterProject? flutterProject;
+  const CopyAssets();
 
   @override
   String get name => 'copy_assets';
@@ -315,7 +299,10 @@ class CopyAssets extends Target {
   List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
-  Future<void> build(Environment environment, {TargetPlatform? targetPlatform}) async {
+  Future<void> build(
+    Environment environment, {
+    TargetPlatform targetPlatform = TargetPlatform.android,
+  }) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -324,20 +311,6 @@ class CopyAssets extends Target {
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
-    TargetPlatform resolvedTargetPlatform = targetPlatform ?? TargetPlatform.android;
-    if (targetPlatform == null) {
-      final String? targetPlatformDefine = environment.defines[kTargetPlatform];
-      if (targetPlatformDefine != null) {
-        try {
-          resolvedTargetPlatform = TargetPlatform.fromName(targetPlatformDefine);
-        } on Exception {
-          // Custom extension platforms (such as 'ohos-arm64' or 'webos-arm64')
-          // are not in the built-in TargetPlatform enum. Fall back to
-          // TargetPlatform.android so ShaderCompiler and IconTreeShaker use the
-          // standard SkSL/Impeller mobile/embedded asset bundling pipeline.
-        }
-      }
-    }
     final File nativeAssetsFile = environment.buildDir.childFile(
       InstallCodeAssets.nativeAssetsFilename,
     );
@@ -349,10 +322,9 @@ class CopyAssets extends Target {
           'NativeAssetsManifest.json': DevFSFileContent(nativeAssetsFile),
       },
       dartHookResult: dartHookResult,
-      targetPlatform: resolvedTargetPlatform,
+      targetPlatform: targetPlatform,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
-      flutterProject: flutterProject,
     );
     environment.depFileService.writeToFile(
       depfile,

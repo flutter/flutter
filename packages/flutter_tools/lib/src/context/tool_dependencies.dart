@@ -619,7 +619,9 @@ class ToolDependencies {
     final extensionBuildManager = ExtensionBuildManager(
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
+      fileSystem: finalFS,
       logger: finalLogger,
+      projectFactory: finalProjectFactory,
     );
 
     final DeviceManager finalDeviceManager =

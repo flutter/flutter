@@ -7,8 +7,6 @@ import 'package:meta/meta.dart';
 
 import 'build_system/native_assets.dart';
 
-export 'build_system/native_assets.dart';
-
 final _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
@@ -125,9 +123,9 @@ class ExtensionPlugin {
 
   static Uri _parseDirectoryUri(String rawUri, String fieldName) {
     final Uri? uri = Uri.tryParse(rawUri);
-    if (uri == null || !uri.hasAbsolutePath || !uri.path.endsWith('/')) {
+    if (uri == null || !uri.isScheme('file') || !uri.hasAbsolutePath || !uri.path.endsWith('/')) {
       throw ArgumentError(
-        '"$fieldName" must be an absolute directory URI ending with "/": $rawUri',
+        '"$fieldName" must be an absolute file:// directory URI ending with "/": $rawUri',
       );
     }
     return uri;

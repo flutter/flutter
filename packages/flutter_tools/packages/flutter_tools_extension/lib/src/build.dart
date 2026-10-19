@@ -26,6 +26,9 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC parameter key for the main entrypoint path.
   static const String mainPathParam = 'mainPath';
 
+  /// RPC parameter key for the resolved platform plugins list.
+  static const String pluginsParam = 'plugins';
+
   /// RPC parameter key for the project root path.
   static const String projectRootParam = 'projectRoot';
 
@@ -42,11 +45,15 @@ abstract base class BuildService extends ToolExtensionService {
   Future<List<ExtensionBuildTarget>> getBuildTargets();
 
   /// Triggers a custom build for the given [targetName].
+  ///
+  /// When the target specifies [ExtensionBuildTarget.pluginPlatformKey], the
+  /// host tool resolves plugins for that platform and passes them in [plugins].
   Future<ExtensionBuildResult> build({
     required BuildMode buildMode,
     required String mainPath,
     required Uri projectRoot,
     required String targetName,
+    List<ExtensionPlugin> plugins = const <ExtensionPlugin>[],
   });
 
   @override
@@ -96,9 +103,21 @@ abstract base class BuildService extends ToolExtensionService {
       throw RpcException.invalidParams('Missing or invalid "$buildModeParam" parameter.');
     }
 
+    final List<ExtensionPlugin> plugins;
+    if (params[pluginsParam] case final Object? rawPlugins?) {
+      try {
+        plugins = ExtensionPlugin.listFromJson(rawPlugins);
+      } on ArgumentError catch (e) {
+        throw RpcException.invalidParams('Missing or invalid "$pluginsParam" parameter: $e');
+      }
+    } else {
+      plugins = const <ExtensionPlugin>[];
+    }
+
     final ExtensionBuildResult result = await build(
       buildMode: mode,
       mainPath: mainPath,
+      plugins: plugins,
       projectRoot: projectRootUri,
       targetName: targetName,
     );

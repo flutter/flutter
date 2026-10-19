@@ -43,6 +43,7 @@ final class _FailingAndConflictingBuildService extends BuildService {
     required String mainPath,
     required Uri projectRoot,
     required String targetName,
+    List<ExtensionPlugin> plugins = const <ExtensionPlugin>[],
   }) async {
     return const ExtensionBuildResult(
       success: false,
@@ -73,6 +74,7 @@ final class _FirstDuplicateBuildService extends BuildService {
     required String mainPath,
     required Uri projectRoot,
     required String targetName,
+    List<ExtensionPlugin> plugins = const <ExtensionPlugin>[],
   }) async {
     return const ExtensionBuildResult(success: true);
   }
@@ -100,6 +102,7 @@ final class _SecondDuplicateBuildService extends BuildService {
     required String mainPath,
     required Uri projectRoot,
     required String targetName,
+    List<ExtensionPlugin> plugins = const <ExtensionPlugin>[],
   }) async {
     return const ExtensionBuildResult(
       success: false,

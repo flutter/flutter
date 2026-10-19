@@ -26,6 +26,7 @@ final class LinuxBuildService extends BuildService {
     required String mainPath,
     required Uri projectRoot,
     required String targetName,
+    List<ExtensionPlugin> plugins = const <ExtensionPlugin>[],
   }) async {
     if (targetName == customLinuxBuildTargetName) {
       return const ExtensionBuildResult(success: true);

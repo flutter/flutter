@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionPlugin;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
@@ -1590,6 +1591,34 @@ List<Plugin> resolvePluginImplementationsForPlatform(
   return pluginsByPlatform[platformKey] ?? const <Plugin>[];
 }
 
+/// Resolves and serializes [ExtensionPlugin]s for [platformKey] from [plugins].
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
+List<ExtensionPlugin> resolveExtensionPluginsForPlatform(
+  List<Plugin> plugins,
+  String platformKey, {
+  bool quiet = false,
+}) {
+  final List<Plugin> resolved = resolvePluginImplementationsForPlatform(
+    plugins,
+    platformKey,
+    quiet: quiet,
+  );
+  return <ExtensionPlugin>[
+    for (final Plugin plugin in resolved)
+      ExtensionPlugin(
+        name: plugin.name,
+        path: Uri.directory(plugin.path),
+        configuration: switch (plugin.platforms[platformKey]) {
+          final CustomPlatformPlugin custom => custom.configuration,
+          final PluginPlatform platform => platform.toMap(),
+          null => const <String, Object?>{},
+        },
+      ),
+  ];
+}
+
 /// Resolves the plugin implementations for all platforms.
 ///
 ///   * If there is only one dependency on a package that implements the
@@ -1608,12 +1637,14 @@ List<Plugin> resolvePluginImplementationsForPlatform(
 List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   required bool selectDartPluginsOnly,
+  Iterable<String> extraPlatformKeys = const <String>[],
 }) {
   final Map<String, List<Plugin>> resolution = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: selectDartPluginsOnly
         ? _PluginResolutionType.dart
         : _PluginResolutionType.nativeOrDart,
+    extraPlatformKeys: extraPlatformKeys,
   );
   return resolution.entries.expand((MapEntry<String, List<Plugin>> entry) {
     return entry.value.map((Plugin plugin) {
@@ -1642,13 +1673,6 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
     MacOSPlugin.kConfigKey: <Plugin>[],
     WindowsPlugin.kConfigKey: <Plugin>[],
     WebPlugin.kConfigKey: <Plugin>[],
-    // Include any custom or extension-contributed platform keys (for example,
-    // 'ohos' or 'webos') declared by plugins in the dependency graph.
-    for (final Plugin plugin in plugins) ...<String, List<Plugin>>{
-      for (final String key in plugin.platforms.keys) key: <Plugin>[],
-      for (final String key in plugin.defaultPackagePlatforms.keys) key: <Plugin>[],
-      for (final String key in plugin.pluginDartClassPlatforms.keys) key: <Plugin>[],
-    },
     for (final String key in extraPlatformKeys) key: <Plugin>[],
   };
 
@@ -2028,12 +2052,14 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
-  File mainFile,
-) async {
+  File mainFile, {
+  Iterable<String> extraPlatformKeys = const <String>[],
+}) async {
   final List<Plugin> plugins = await findPlugins(rootProject, logger: globals.logger);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     selectDartPluginsOnly: true,
+    extraPlatformKeys: extraPlatformKeys,
   );
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
