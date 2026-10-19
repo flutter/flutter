@@ -5,6 +5,7 @@
 # The engine (GN's `//flutter`).
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:install_archives.bzl", "install_archives")
 
 # config("config") in BUILD.gn: the two include roots engine code is written
 # against -- engine/src ("flutter/fml/...") and this directory
@@ -163,4 +164,29 @@ filegroup(
         "//engine/src/flutter/shell/common:shell_benchmarks",
         "//engine/src/flutter/txt:txt_benchmarks",
     ],
+)
+
+# The archives the Linux host builders upload (ci/builders/linux_host_engine.json:
+# ci/host_debug's six, ci/host_release's one), laid by `bazel run` into
+# engine/src/out/<variant>/zip_archives/ -- the directory the uploader reads
+# -- for the configuration they are built in:
+#
+#   bazel run -c opt //engine/src/flutter:install_host_debug_archives
+#   bazel run -c opt --//engine/src/flutter/common:runtime_mode=release \
+#       //engine/src/flutter:install_host_release_archives
+install_archives(
+    name = "install_host_debug_archives",
+    archives = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/build/archives:dart_sdk_archive",
+        "//engine/src/flutter/build/archives:flutter_patched_sdk",
+        "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/shell/platform/embedder:embedder-archive",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+)
+
+install_archives(
+    name = "install_host_release_archives",
+    archives = ["//engine/src/flutter/build/archives:flutter_patched_sdk"],
 )
