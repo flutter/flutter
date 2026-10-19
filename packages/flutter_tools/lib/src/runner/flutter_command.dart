@@ -851,6 +851,22 @@ abstract class FlutterCommand extends Command<void> {
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
   bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
 
+  /// Whether tool extensions are enabled for this command invocation, taking
+  /// into account the global `--[no-]extensions` CLI flag, the
+  /// `FLUTTER_NO_EXTENSIONS` environment variable, and `enable-tool-extensions`.
+  bool get areToolExtensionsEnabled {
+    final FeatureFlags? featureFlags = runner?.featureFlags;
+    if (featureFlags != null && !featureFlags.isToolExtensionsEnabled) {
+      return false;
+    }
+    if (globalResults != null &&
+        globalResults!.options.contains(FlutterGlobalOptions.kExtensionsFlag) &&
+        globalResults!.wasParsed(FlutterGlobalOptions.kExtensionsFlag)) {
+      return globalResults![FlutterGlobalOptions.kExtensionsFlag] as bool;
+    }
+    return true;
+  }
+
   void addTestFlag({required bool verboseHelp}) {
     argParser.addDescriptor(DebuggingOptionDescriptors.testFlag, verboseHelp: verboseHelp);
   }

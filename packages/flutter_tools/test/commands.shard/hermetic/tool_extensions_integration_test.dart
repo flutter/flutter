@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
@@ -11,8 +14,12 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_features.dart';
+import 'package:flutter_tools/src/flutter_features_config.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -156,6 +163,99 @@ void main() {
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+      },
+    );
+  });
+
+  group('Tool Extensions Safe Mode', () {
+    testWithoutContext('evaluateToolExtensionsCliFlag parses --[no-]extensions before --', () {
+      expect(FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['doctor']), isNull);
+      expect(
+        FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['--no-extensions', 'doctor']),
+        isFalse,
+      );
+      expect(
+        FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>[
+          '--no-extensions',
+          '--extensions',
+          'doctor',
+        ]),
+        isTrue,
+      );
+      expect(
+        FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>[
+          'test',
+          '--',
+          '--no-extensions',
+        ]),
+        isNull,
+      );
+    });
+
+    testWithoutContext('FLUTTER_NO_EXTENSIONS=1 overrides FLUTTER_TOOL_EXTENSIONS=true', () {
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(
+        environment: const <String, String>{
+          'FLUTTER_TOOL_EXTENSIONS': 'true',
+          'FLUTTER_NO_EXTENSIONS': '1',
+        },
+      );
+      final config = Config.test(logger: logger);
+      config.setValue('enable-tool-extensions', true);
+
+      final flags = FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(),
+        featuresConfig: FlutterFeaturesConfig(
+          globalConfig: config,
+          platform: platform,
+          projectManifest: null,
+        ),
+        platform: platform,
+        isToolExtensionsEnabledOverride: true,
+      );
+
+      expect(flags.isToolExtensionsEnabled, isFalse);
+
+      final disabledFlagsWithOverride = FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(),
+        featuresConfig: FlutterFeaturesConfig(
+          globalConfig: Config.test(logger: logger),
+          platform: FakePlatform(),
+          projectManifest: null,
+        ),
+        platform: FakePlatform(),
+        isToolExtensionsEnabledOverride: true,
+      );
+
+      expect(disabledFlagsWithOverride.isToolExtensionsEnabled, isFalse);
+    });
+
+    testWithoutContext(
+      'ConfigCommand skips extension settings when --no-extensions is passed',
+      () async {
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+          featureFlags: featureFlags,
+        );
+        final toolContext = FakeToolContext(logger: logger);
+        final configCommand = ConfigCommand(
+          androidContext: FakeAndroidContext(),
+          toolContext: toolContext,
+          featureFlags: featureFlags,
+          extensionManager: manager,
+        );
+        final runner = FlutterCommandRunner(toolContext: toolContext, featureFlags: featureFlags)
+          ..addCommand(configCommand);
+
+        await runner.run(<String>['--no-extensions', 'config', '--list']);
+        expect(logger.statusText, isNot(contains('Extension Settings:')));
+        expect(manager.connections, isEmpty);
+
+        await manager.dispose();
       },
     );
   });

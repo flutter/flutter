@@ -59,7 +59,8 @@ Future<int> run(
   final bool usingLocalEngine = args.any((a) => a.startsWith('--local-engine'));
 
   return runInContext<int>(() async {
-    globals.terminal.applyFeatureFlags(featureFlags);
+    final bool? isToolExtensionsEnabledOverride =
+        FlutterCommandRunner.evaluateToolExtensionsCliFlag(args);
 
     reportCrashes ??= !await globals.isRunningOnBot;
     final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
@@ -81,7 +82,8 @@ Future<int> run(
       doctor: globals.doctor,
       emulatorManager: emulatorManager,
       extensionEntryPoints: extensionEntryPoints,
-      featureFlags: featureFlags,
+      featureFlags: overrides?[FeatureFlags] != null ? featureFlags : null,
+      isToolExtensionsEnabledOverride: isToolExtensionsEnabledOverride,
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
       git: globals.git,
@@ -110,12 +112,16 @@ Future<int> run(
       xcode: globals.xcode,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
     );
+    toolDeps.toolContext.terminal.applyFeatureFlags(toolDeps.featureFlags);
     return context.run<int>(
-      overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
+      overrides: <Type, Generator>{
+        DeviceManager: () => toolDeps.deviceManager,
+        FeatureFlags: () => toolDeps.featureFlags,
+      },
       body: () async {
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
-          featureFlags: featureFlags,
+          featureFlags: toolDeps.featureFlags,
           toolContext: toolDeps.toolContext,
           verboseHelp: verboseHelp,
         );

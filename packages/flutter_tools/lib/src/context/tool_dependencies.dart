@@ -178,6 +178,7 @@ class ToolDependencies {
     GradleUtils Function()? gradleUtilsBuilder,
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSWorkflow? iosWorkflow,
+    bool? isToolExtensionsEnabledOverride,
     Java? java,
     Java? Function()? javaBuilder,
     LocalEngineLocator? localEngineLocator,
@@ -483,6 +484,7 @@ class ToolDependencies {
             projectManifest: projectManifest,
           ),
           platform: finalPlatform,
+          isToolExtensionsEnabledOverride: isToolExtensionsEnabledOverride,
         );
 
     final IOSWorkflow finalIOSWorkflow =
@@ -613,7 +615,9 @@ class ToolDependencies {
       entryPoints: extensionEntryPoints,
       featureFlags: finalFeatureFlags,
       hostPlatform: finalOS.hostPlatform,
+      isSafeMode: isToolExtensionsEnabledOverride == false,
       logger: finalLogger,
+      platform: finalPlatform,
     );
 
     final extensionBuildManager = ExtensionBuildManager(
