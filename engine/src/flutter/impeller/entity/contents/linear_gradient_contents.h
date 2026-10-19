@@ -70,7 +70,7 @@ class LinearGradientContents final : public ColorSourceContents {
   Point end_point_;
   std::vector<Color> colors_;
   std::vector<Scalar> stops_;
-  Entity::TileMode tile_mode_;
+  Entity::TileMode tile_mode_ = Entity::TileMode::kClamp;
   Color decal_border_color_ = Color::BlackTransparent();
 
   LinearGradientContents(const LinearGradientContents&) = delete;
