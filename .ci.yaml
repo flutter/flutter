@@ -179,7 +179,7 @@ platform_properties:
       device_type: none
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "27a266a"
+          "sdk_version": "27a9275"
         }
 
   mac_arm64:
@@ -197,7 +197,7 @@ platform_properties:
       cpu: arm64
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "27a266a"
+          "sdk_version": "27a9275"
         }
 
   mac_benchmark:
@@ -222,7 +222,7 @@ platform_properties:
         ["devicelab", "hostonly", "mac", "arm64"]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "27a266a"
+          "sdk_version": "27a9275"
         }
 
   mac_x64:
@@ -240,7 +240,7 @@ platform_properties:
       cpu: x86
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "27a266a"
+          "sdk_version": "27a9275"
         }
 
   mac_build_test:
@@ -259,7 +259,7 @@ platform_properties:
       device_type: none
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "27a266a"
+          "sdk_version": "27a9275"
         }
 
   mac_mokey:
@@ -302,7 +302,7 @@ platform_properties:
       device_os: iOS-18|iOS-26
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "27a266a"
+          "sdk_version": "27a9275"
         }
 
   mac_x64_ios:
@@ -321,7 +321,7 @@ platform_properties:
       device_os: iOS-18|iOS-26
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "27a266a"
+          "sdk_version": "27a9275"
         }
 
   mac_arm64_ios:
@@ -340,7 +340,7 @@ platform_properties:
       device_os: iOS-18|iOS-26
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "27a266a"
+          "sdk_version": "27a9275"
         }
 
   windows:
