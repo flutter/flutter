@@ -113,6 +113,8 @@ mergeInto(LibraryManager.library, {
               data.surface,
               data.pictures,
               data.pictureCount,
+              data.width,
+              data.height,
               data.callbackId,
               skwasm_getCurrentTimestamp());
             return;
@@ -250,12 +252,14 @@ mergeInto(LibraryManager.library, {
     };
 
     // Rendering
-    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, pictureCount, callbackId) {
+    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, pictureCount, width, height, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'renderPictures',
         surface: surfaceHandle,
         pictures,
         pictureCount,
+        width,
+        height,
         callbackId,
       }, [], threadId);
     };
