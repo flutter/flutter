@@ -2481,6 +2481,17 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   }
 
   @override
+  void didChangePlatformConfiguration() {
+    // If we have a parent, it dictates our platform configuration. If we don't
+    // have a parent, we get our configuration (e.g. 24-hour format) from the
+    // PlatformDispatcher and need to update our data in response to the
+    // PlatformDispatcher changing its configuration settings.
+    if (_parentData == null) {
+      _updateData();
+    }
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

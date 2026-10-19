@@ -409,6 +409,15 @@ abstract mixin class WidgetsBindingObserver {
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   void didChangeAccessibilityFeatures() {}
+
+  /// Called when the platform configuration changes.
+  ///
+  /// This typically happens when system-wide user preferences like 24-hour time
+  /// format change.
+  ///
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onPlatformConfigurationChanged].
+  void didChangePlatformConfiguration() {}
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -986,6 +995,27 @@ mixin WidgetsBinding
             library: 'widgets library',
             context: ErrorDescription(
               'while dispatching notifications for WidgetsBindingObserver.didChangePlatformBrightness',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void handlePlatformConfigurationChanged() {
+    super.handlePlatformConfigurationChanged();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangePlatformConfiguration();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangePlatformConfiguration',
             ),
           ),
         );
