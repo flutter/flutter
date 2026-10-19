@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
+import 'image_test_utils.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
@@ -688,6 +689,13 @@ void main() {
       await completer.future;
       expect(isAsync, true);
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/107000
+  test('ResizeImage delegates createStream to the wrapped provider', () {
+    final resizeImage = ResizeImage(CustomStreamImageProvider(), width: 10);
+
+    expect(resizeImage.resolve(ImageConfiguration.empty), isA<CustomImageStream>());
   });
 }
 

@@ -53,3 +53,17 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   String toString() => '${describeIdentity(this)}()';
 }
+
+/// An [ImageStream] subclass returned by [CustomStreamImageProvider.createStream].
+class CustomImageStream extends ImageStream {}
+
+/// An image provider that returns a [CustomImageStream] from [createStream].
+///
+/// Its key never resolves, so it never loads.
+class CustomStreamImageProvider extends ImageProvider<Object> {
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) => Completer<Object>().future;
+
+  @override
+  ImageStream createStream(ImageConfiguration configuration) => CustomImageStream();
+}
