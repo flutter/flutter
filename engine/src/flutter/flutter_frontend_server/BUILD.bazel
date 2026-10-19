@@ -14,6 +14,14 @@ load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_tes
 
 package(default_visibility = ["//visibility:public"])
 
+# copy("frontend_server"): the prebuilt SDK's frontend_server_aot.dart.snapshot
+# as $root_gen_dir/frontend_server_aot.dart.snapshot, which artifacts.zip
+# ships (build/archives); the file as it is, under the GN target's name.
+filegroup(
+    name = "frontend_server",
+    srcs = ["@dart_sdk_linux_x64//:frontend_server"],
+)
+
 # The test compiles its fixture with the frontend server out of
 # FLUTTER_BUILD_DIRECTORY -- gen/frontend_server_aot.dart.snapshot against
 # flutter_patched_sdk/, as GN's build directory lays them out -- and runs

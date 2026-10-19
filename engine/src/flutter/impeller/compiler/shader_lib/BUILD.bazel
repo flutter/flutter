@@ -10,8 +10,21 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "shader_lib",
-    deps = [
+    data = [
         "//engine/src/flutter/impeller/compiler/shader_lib/flutter",
         "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The directory as artifacts.zip ships it (directorySources in the
+# converter's bazel_mapping.dart).
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]) + [
+        "//engine/src/flutter/impeller/compiler/shader_lib/flutter:all_files",
+        "//engine/src/flutter/impeller/compiler/shader_lib/impeller:all_files",
     ],
 )
