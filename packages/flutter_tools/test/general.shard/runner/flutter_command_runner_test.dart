@@ -811,7 +811,7 @@ class FakeStdio extends Stdio {
 
 final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
   _FlutterCommandWithItsOwnMachineFlag({required bool verboseHelp}) {
-    addMachineOutputFlag(verboseHelp: verboseHelp);
+    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
   }
 
   @override

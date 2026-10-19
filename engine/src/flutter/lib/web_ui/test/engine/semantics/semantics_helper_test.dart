@@ -116,6 +116,16 @@ void testMain() {
       expect(placeholder!.isConnected, isFalse);
     });
 
+    test('retiring removes the placeholder right away', () {
+      // The desktop placeholder is offscreen, so no gesture can target it.
+      domDocument.body!.append(placeholder!);
+      desktopSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerdown'));
+
+      desktopSemanticsEnabler.retirePlaceholders();
+      expect(placeholder!.isConnected, isFalse);
+      expect(desktopSemanticsEnabler.placeholders, isEmpty);
+    });
+
     test('shares one page-level placeholder across views', () {
       // The desktop placeholder must stay out of the <flutter-view> and be at
       // the front of the body. Once browser focus enters a view, Flutter's
@@ -336,6 +346,40 @@ void testMain() {
         });
       }
 
+      test('retiring keeps the placeholder until the gesture in progress ends', () {
+        // The app can enable semantics in the middle of a drag that started on
+        // the placeholder. Removing the drag's target right away could lose
+        // its pointerup.
+        // See https://github.com/flutter/flutter/issues/194104
+        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerdown'));
+        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove'));
+
+        mobileSemanticsEnabler.retirePlaceholders();
+        expect(placeholder!.isConnected, isTrue);
+
+        expect(
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove')),
+          isTrue,
+        );
+        expect(placeholder!.isConnected, isTrue);
+
+        expect(
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerup')),
+          isTrue,
+        );
+        expect(placeholder!.isConnected, isFalse);
+        expect(mobileSemanticsEnabler.placeholders, isEmpty);
+      });
+
+      test('retiring removes the placeholder right away when no gesture is in progress', () {
+        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerdown'));
+        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerup'));
+
+        mobileSemanticsEnabler.retirePlaceholders();
+        expect(placeholder!.isConnected, isFalse);
+        expect(mobileSemanticsEnabler.placeholders, isEmpty);
+      });
+
       test('Can update placeholder label', () {
         const testLabel = 'Test label for placeholder';
         mobileSemanticsEnabler.updatePlaceholderLabel(testLabel);
@@ -425,6 +469,9 @@ class FakeSemanticsEnabler extends SemanticsEnabler {
 
   @override
   DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
+
+  @override
+  void retirePlaceholders() => throw UnimplementedError();
 
   int tryEnableSemanticsCallCount = 0;
 
