@@ -724,11 +724,23 @@ All seven archives of the Linux host builders convert
 identical modulo the version hash, the data files, kernels and sources
 byte-identical, the binaries the files the build makes. Entry order follows
 GN's list where GN's does (a directory's files come sorted, after the list's
-files). Not yet: the GTK shell's bundle (a `foreach` over
-`get_target_outputs`: the `zip_tree` of a copy's outputs) and the
-`install` step that lays `zip_archives/` into `engine/src/out/<config>` for
-the uploader; `generated_file` over `metadata` (the macOS entitlements
-lists) is the Apple phase's.
+files). `tools/gn_to_bazel/tool/artifact_diff.py` compares the two builds'
+archives entry by entry.
+
+The uploader reads `engine/src/out/<build>/zip_archives/`; `install_archives`
+(`install_archives.bzl`) is the `bazel run` target that lays a builder's
+archives there for the configuration they are built in --
+`engine/src/out/<variant>/zip_archives/<path>`, `<variant>` GN's name for the
+build directory (`host_debug_unopt`, `host_release`; `checkout_view.bzl`) and
+`<path>` the archive's path under its package's `zip_archives/`. The root
+package has one per Linux host builder of `ci/builders/linux_host_engine.json`:
+`bazel run -c opt //engine/src/flutter:install_host_debug_archives` and
+`bazel run -c opt --//engine/src/flutter/common:runtime_mode=release
+//engine/src/flutter:install_host_release_archives`. Not yet: the GTK shell's
+bundle (a `foreach` over `get_target_outputs`: the `zip_tree` of a copy's
+outputs) and the rest of GN's build directory beyond the archives (the
+compatibility tree of the phased plan); `generated_file` over `metadata` (the
+macOS entitlements lists) is the Apple phase's.
 
 ## Impeller's shader pipeline
 
