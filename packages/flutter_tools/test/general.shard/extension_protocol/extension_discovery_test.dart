@@ -88,8 +88,34 @@ void main() {
         expect(capabilities.supportedPlatforms, const <String>{'linux', 'macos'});
         expect(capabilities.supportsHostPlatform('LINUX'), isTrue);
         expect(capabilities.supportsHostPlatform('windows'), isFalse);
+
+        final defaultPlatformsCapabilities = ToolExtensionCapabilities.fromJson(
+          const <String, Object?>{
+            'services': <Object?>['diagnostics'],
+          },
+        );
+        expect(defaultPlatformsCapabilities.supportedPlatforms, const <String>{
+          'linux',
+          'macos',
+          'windows',
+        });
       },
     );
+
+    test('ToolExtensionCapabilities.fromJson throws FormatException on invalid field types', () {
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.servicesKey: 'not-a-list',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.supportedPlatformsKey: <Object?>[123],
+        }),
+        throwsFormatException,
+      );
+    });
 
     test('ToolExtensionEntryPoint.run rejects duplicate RPC method registration', () async {
       final service1 = _DummyService('test', 'ping');

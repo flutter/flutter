@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 /// Represents the overall status category of a diagnostic validation check.
 enum ValidationType {
   /// An unhandled exception or crash occurred during check execution.
@@ -56,10 +58,13 @@ class ValidationMessage {
 
   /// Deserializes a [ValidationMessage] from a JSON-serializable map.
   factory ValidationMessage.fromJson(Map<String, Object?> json) {
-    final String message = json['message'] as String? ?? '';
-    final piiStrippedMessage = json['piiStrippedMessage'] as String?;
-    final contextUrl = json['contextUrl'] as String?;
-    final String typeName = json['type'] as String? ?? 'information';
+    final String message = json.optionalField<String>(messageKey, defaultValue: '');
+    final String? piiStrippedMessage = json.nullableField<String>(piiStrippedMessageKey);
+    final String? contextUrl = json.nullableField<String>(contextUrlKey);
+    final String typeName = json.optionalField<String>(
+      typeKey,
+      defaultValue: ValidationMessageType.information.name,
+    );
     final ValidationMessageType type = ValidationMessageType.values.firstWhere(
       (ValidationMessageType t) => t.name == typeName,
       orElse: () => ValidationMessageType.information,
@@ -81,6 +86,18 @@ class ValidationMessage {
       ),
     };
   }
+
+  /// Map key for [contextUrl].
+  static const String contextUrlKey = 'contextUrl';
+
+  /// Map key for [message].
+  static const String messageKey = 'message';
+
+  /// Map key for [piiStrippedMessage].
+  static const String piiStrippedMessageKey = 'piiStrippedMessage';
+
+  /// Map key for [type].
+  static const String typeKey = 'type';
 
   /// Severity level of the validation message.
   final ValidationMessageType type;
@@ -105,10 +122,10 @@ class ValidationMessage {
 
   /// Serializes the validation message to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
-    'type': type.name,
-    'message': message,
-    'contextUrl': ?contextUrl,
-    'piiStrippedMessage': piiStrippedMessage,
+    typeKey: type.name,
+    messageKey: message,
+    contextUrlKey: ?contextUrl,
+    piiStrippedMessageKey: piiStrippedMessage,
   };
 
   @override
@@ -146,22 +163,43 @@ class ValidationResult {
 
   /// Deserializes a [ValidationResult] from a JSON-serializable map.
   factory ValidationResult.fromJson(Map<String, Object?> json) {
-    final String typeName = json['type'] as String? ?? 'success';
+    final String typeName = json.optionalField<String>(
+      typeKey,
+      defaultValue: ValidationType.success.name,
+    );
     final ValidationType type = ValidationType.values.firstWhere(
       (ValidationType t) => t.name == typeName,
       orElse: () => ValidationType.success,
     );
-    final statusInfo = json['statusInfo'] as String?;
+    final String? statusInfo = json.nullableField<String>(statusInfoKey);
 
-    final Object? messagesJson = json['messages'];
-    final messages = <ValidationMessage>[
-      if (messagesJson is List)
-        for (final Object? item in messagesJson)
-          if (item is Map) ValidationMessage.fromJson(item.cast<String, Object?>()),
-    ];
+    final List<ValidationMessage> messages = switch (json[messagesKey]) {
+      final Iterable<Object?> items => <ValidationMessage>[
+        for (final Object? item in items)
+          switch (item) {
+            final Map<String, Object?> map => ValidationMessage.fromJson(map),
+            _ => throw FormatException(
+              'Invalid "$messagesKey" element: expected Map<String, Object?>, got ${item.runtimeType}.',
+            ),
+          },
+      ],
+      null => <ValidationMessage>[],
+      final Object invalid => throw FormatException(
+        'Invalid "$messagesKey": expected Iterable<Object?>, got ${invalid.runtimeType}.',
+      ),
+    };
 
     return ValidationResult(type, messages, statusInfo: statusInfo);
   }
+
+  /// Map key for [messages].
+  static const String messagesKey = 'messages';
+
+  /// Map key for [statusInfo].
+  static const String statusInfoKey = 'statusInfo';
+
+  /// Map key for [type].
+  static const String typeKey = 'type';
 
   /// Status category of the diagnostic check.
   final ValidationType type;
@@ -177,9 +215,9 @@ class ValidationResult {
 
   /// Serializes the validation result to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
-    'type': type.name,
-    'statusInfo': ?statusInfo,
-    'messages': messages.map((ValidationMessage m) => m.toMap()).toList(),
+    typeKey: type.name,
+    statusInfoKey: ?statusInfo,
+    messagesKey: messages.map((ValidationMessage m) => m.toMap()).toList(),
   };
 
   @override

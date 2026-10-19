@@ -53,5 +53,31 @@ void main() {
       });
       expect(parsed.type, ValidationType.success);
     });
+
+    test('ValidationMessage.fromJson and ValidationResult.fromJson throw FormatException on invalid types', () {
+      expect(
+        () =>
+            ValidationMessage.fromJson(const <String, Object?>{ValidationMessage.messageKey: 123}),
+        throwsFormatException,
+      );
+      expect(
+        () => ValidationResult.fromJson(const <String, Object?>{
+          ValidationResult.statusInfoKey: false,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ValidationResult.fromJson(const <String, Object?>{
+          ValidationResult.messagesKey: 'not-a-list',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ValidationResult.fromJson(const <String, Object?>{
+          ValidationResult.messagesKey: <Object?>['not-a-map'],
+        }),
+        throwsFormatException,
+      );
+    });
   });
 }

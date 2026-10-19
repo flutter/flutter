@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 
 /// Typedef for an extension RPC handler function.
@@ -37,14 +38,23 @@ class ToolExtensionCapabilities {
 
   /// Deserializes [ToolExtensionCapabilities] from a JSON map payload.
   factory ToolExtensionCapabilities.fromJson(Map<String, Object?> json) {
-    final Object? servicesList = json['services'];
-    final services = servicesList is Iterable ? List<String>.from(servicesList) : <String>[];
-    final Object? platformsList = json['supportedPlatforms'];
-    final Set<String> supportedPlatforms = platformsList is Iterable
-        ? platformsList.map((Object? p) => p.toString().toLowerCase()).toSet()
-        : const <String>{'linux', 'macos', 'windows'};
-    return ToolExtensionCapabilities(services: services, supportedPlatforms: supportedPlatforms);
+    return ToolExtensionCapabilities(
+      services: json.stringIterable(servicesKey).toList(),
+      supportedPlatforms: json
+          .stringIterable(
+            supportedPlatformsKey,
+            defaultValue: const <String>{'linux', 'macos', 'windows'},
+          )
+          .map((String p) => p.toLowerCase())
+          .toSet(),
+    );
   }
+
+  /// Map key for [services].
+  static const String servicesKey = 'services';
+
+  /// Map key for [supportedPlatforms].
+  static const String supportedPlatformsKey = 'supportedPlatforms';
 
   /// The list of service namespace identifiers supported by the extension.
   final List<String> services;
@@ -59,7 +69,7 @@ class ToolExtensionCapabilities {
 
   /// Serializes capabilities to a map payload.
   Map<String, Object?> toMap() => <String, Object?>{
-    'services': services,
-    'supportedPlatforms': supportedPlatforms.toList(),
+    servicesKey: services,
+    supportedPlatformsKey: supportedPlatforms.toList(),
   };
 }
