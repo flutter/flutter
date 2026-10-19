@@ -81,7 +81,8 @@ def main(argv):
         action="append",
         default=[],
         metavar="GLOB",
-        help="Entry paths whose content is expected to differ (binaries); may repeat.",
+        help="Entries (by path in the archive, or base name) whose content is expected to differ "
+        "(binaries); may repeat.",
     )
     parser.add_argument(
         "--only",
@@ -107,39 +108,51 @@ def main(argv):
             print(f"{name}: only in {'GN' if name in gn else 'Bazel'}")
             failures += 1
             continue
-        gn_entries = _entries(gn[name])
-        bazel_entries = _entries(bazel[name])
-        gn_names = [n for n, _ in gn_entries]
-        bazel_names = [n for n, _ in bazel_entries]
-        gn_set, bazel_set = set(gn_names), set(bazel_names)
-        gn_by_name = dict(gn_entries)
-        identical, expected, different = [], [], []
-        for entry, content in bazel_entries:
-            if entry not in gn_by_name:
-                continue
-            if _normalized(entry, content) == _normalized(entry, gn_by_name[entry]):
-                identical.append(entry)
-            elif any(fnmatch.fnmatch(entry, g) for g in args.expect_different):
-                expected.append(entry)
-            else:
-                different.append(entry)
-        order = "same order" if gn_names == bazel_names else "different order"
-        status = "ok" if not different and gn_set == bazel_set else "DIFFERS"
-        print(
-            f"{name}: {status}; {len(bazel_names)} entries"
-            f"{'' if gn_set == bazel_set else f' (GN {len(gn_names)})'}, "
-            f"{len(identical)} identical, {len(expected)} expected different, "
-            f"{len(different)} different; {order}"
-        )
-        for entry in sorted(bazel_set - gn_set):
-            print(f"  only in Bazel: {entry}")
-        for entry in sorted(gn_set - bazel_set):
-            print(f"  only in GN: {entry}")
-        for entry in different:
-            print(f"  different: {entry}")
-        if different or gn_set != bazel_set:
+        ok, lines = compare_archive(name, gn[name], bazel[name], args.expect_different)
+        print("\n".join(lines))
+        if not ok:
             failures += 1
     return 1 if failures else 0
+
+
+def compare_archive(name, gn_path, bazel_path, expect_different):
+    """Compares two archives entry by entry.
+
+    Returns whether they agree (the same entries, every common entry
+    identical or expected to differ) and the lines of the report, the first a
+    summary under `name` and the rest the entries that disagree.
+    """
+    gn_entries = _entries(gn_path)
+    bazel_entries = _entries(bazel_path)
+    gn_names = [n for n, _ in gn_entries]
+    bazel_names = [n for n, _ in bazel_entries]
+    gn_set, bazel_set = set(gn_names), set(bazel_names)
+    gn_by_name = dict(gn_entries)
+    identical, expected, different = [], [], []
+    for entry, content in bazel_entries:
+        if entry not in gn_by_name:
+            continue
+        if _normalized(entry, content) == _normalized(entry, gn_by_name[entry]):
+            identical.append(entry)
+        elif any(
+            fnmatch.fnmatch(entry, g) or fnmatch.fnmatch(os.path.basename(entry), g)
+            for g in expect_different
+        ):
+            expected.append(entry)
+        else:
+            different.append(entry)
+    order = "same order" if gn_names == bazel_names else "different order"
+    ok = not different and gn_set == bazel_set
+    lines = [
+        f"{name}: {'ok' if ok else 'DIFFERS'}; {len(bazel_names)} entries"
+        f"{'' if gn_set == bazel_set else f' (GN {len(gn_names)})'}, "
+        f"{len(identical)} identical, {len(expected)} expected different, "
+        f"{len(different)} different; {order}"
+    ]
+    lines.extend(f"  only in Bazel: {entry}" for entry in sorted(bazel_set - gn_set))
+    lines.extend(f"  only in GN: {entry}" for entry in sorted(gn_set - bazel_set))
+    lines.extend(f"  different: {entry}" for entry in different)
+    return ok, lines
 
 
 if __name__ == "__main__":
