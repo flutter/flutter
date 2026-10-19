@@ -70,14 +70,16 @@ void main() {
       expect(map[ExtensionFlutterProject.workspaceKey], isEmpty);
     });
 
-    test('constructor asserts valid file:// directory URIs ending with slash', () {
+    test('constructor validates file:// directory URIs ending with slash', () {
+      expect((null as Uri?).isValidDirectoryUri, isFalse);
+      expect(Uri.directory('/path/to/my_app').isValidDirectoryUri, isTrue);
       expect(
         () => ExtensionFlutterProject(
           appName: 'my_app',
           buildDirectory: Uri.parse('https://example.com/my_app/build/'),
           directory: Uri.directory('/path/to/my_app'),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
       expect(
         () => ExtensionFlutterProject(
@@ -85,7 +87,7 @@ void main() {
           buildDirectory: Uri.directory('/path/to/my_app/build'),
           directory: Uri.parse('https://example.com/my_app/'),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
       expect(
         () => ExtensionFlutterProject(
@@ -93,7 +95,7 @@ void main() {
           buildDirectory: Uri.parse('file:///path/to/my_app/build'),
           directory: Uri.directory('/path/to/my_app'),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
       expect(
         () => ExtensionFlutterProject(
@@ -101,7 +103,7 @@ void main() {
           buildDirectory: Uri.directory('/path/to/my_app/build'),
           directory: Uri.parse('file:///path/to/my_app'),
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
     });
 
