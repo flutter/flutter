@@ -3,10 +3,10 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/linux/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: flutter_gtk.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle", "zip_tree")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_display_test", "flutter_test_fixtures")
 
@@ -447,4 +447,27 @@ gn_copy(
         "public/flutter_linux/flutter_linux.h",
     ],
     outputs = ["$root_out_dir/flutter_linux/{{source_file_part}}"],
+)
+
+zip_tree(
+    name = "flutter_gtk_publish_headers_linux",
+    srcs = [":publish_headers_linux"],
+    destination = "",
+    root = "engine/src/flutter/shell/platform/linux/public",
+)
+
+zip_bundle(
+    name = "flutter_gtk",
+    files = {
+        "libflutter_linux_gtk.so": ":flutter_linux_gtk",
+        "gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",
+    },
+    output = select({
+        "//engine/src/flutter/common:runtime_mode_debug": "linux-x64-debug/linux-x64-flutter-gtk.zip",
+        "//engine/src/flutter/common:runtime_mode_profile": "linux-x64-profile/linux-x64-flutter-gtk.zip",
+        "//engine/src/flutter/common:runtime_mode_release": "linux-x64-release/linux-x64-flutter-gtk.zip",
+        "//engine/src/flutter/common:runtime_mode_jit_release": "linux-x64-jit_release/linux-x64-flutter-gtk.zip",
+        "//conditions:default": None,
+    }),
+    trees = [":flutter_gtk_publish_headers_linux"],
 )

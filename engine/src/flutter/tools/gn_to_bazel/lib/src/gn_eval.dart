@@ -473,6 +473,26 @@ final class GnTargetOutputsValue extends GnValue {
       : 'filter_include(get_target_outputs("$label"), $patterns)';
 }
 
+/// The outputs of a target as paths relative to the build directory:
+/// `rebase_path(get_target_outputs(":copy"), root_build_dir)` -- the GTK
+/// bundle's idiom for "every output of the copy at its build-directory
+/// path", which the emitter reads together with the outputs themselves.
+final class GnTargetOutputPathsValue extends GnValue {
+  const GnTargetOutputPathsValue(this.label);
+
+  /// The target, as `//dir:name`.
+  final String label;
+
+  @override
+  bool operator ==(Object other) => other is GnTargetOutputPathsValue && other.label == label;
+
+  @override
+  int get hashCode => label.hashCode;
+
+  @override
+  String toString() => 'rebase_path(get_target_outputs("$label"), root_build_dir)';
+}
+
 /// A boolean whose value the assumptions did not decide: the result of
 /// `use_x = enable_unittests && shell_enable_gl`, kept as a formula so that
 /// `if (use_x)` can be followed.
@@ -1228,6 +1248,8 @@ final class _Evaluator {
         _forwardVariablesFrom(call, scope);
         return;
       case 'foreach':
+        _foreach(call, scope, condition, source, target: target);
+        return;
       case 'exec_script':
         throw GnError(call.location, '${call.name}() is not supported by the converter');
     }
@@ -1279,6 +1301,48 @@ final class _Evaluator {
     newTarget.variables.addAll(targetScope.variables);
     newTarget.readVariables.addAll(targetScope.readNames);
     result.targets.add(newTarget);
+  }
+
+  /// `foreach(x, list) { ... }`: the body once per element of the list,
+  /// with `x` bound to the element in the enclosing scope (GN's foreach
+  /// opens no scope; the variable is restored afterwards). A list the
+  /// converter cannot enumerate (`get_target_outputs()` of a target) is
+  /// one symbolic element, the outputs themselves, which the body's
+  /// expressions carry along (`rebase_path(x, root_build_dir)` becomes
+  /// [GnTargetOutputPathsValue]) for the emitter to read as a tree.
+  void _foreach(
+    GnFunctionCall call,
+    _Scope scope,
+    Condition condition,
+    List<String> source, {
+    required GnTarget? target,
+  }) {
+    final GnBlock? body = call.block;
+    if (call.args.length != 2 || call.args[0] is! GnIdentifier || body == null) {
+      throw GnError(call.location, 'foreach() takes a variable, a list and a block');
+    }
+    final String name = (call.args[0] as GnIdentifier).name;
+    final _Expression list = _expression(call.args[1], scope);
+    if (!list.isList) {
+      throw GnError(call.location, 'foreach() over something other than a list');
+    }
+    final GnVariable? previous = scope.variables[name];
+    for (final _Value item in list.items) {
+      final Condition when = condition.and(item.condition);
+      if (when == Condition.never) {
+        continue;
+      }
+      scope.variables[name] = GnVariable(
+        name,
+        isList: false,
+      )..assignments.add(GnAssignment(call.location, Condition.always, '=', <GnValue>[item.value]));
+      _evaluateBlock(body, scope, when, source, target: target);
+    }
+    if (previous == null) {
+      scope.variables.remove(name);
+    } else {
+      scope.variables[name] = previous;
+    }
   }
 
   String _stringArgument(GnFunctionCall call, _Scope scope) {
@@ -1714,7 +1778,15 @@ final class _Evaluator {
         if (args.isNotEmpty &&
             args.length <= 2 &&
             (args.length == 1 ||
-                (args[1] is GnIdentifier && (args[1] as GnIdentifier).name == 'root_build_dir'))) {
+                (args[1] is GnIdentifier && (args[1] as GnIdentifier).name == 'root_build_dir') ||
+                (args[1] is GnLiteral &&
+                    (args[1] as GnLiteral).stringValue == r'$root_build_dir'))) {
+          final _Expression what = _expression(args[0], scope);
+          final GnValue? single = what.isList ? null : what.scalar;
+          if (single is GnTargetOutputsValue) {
+            // The outputs of a target, as their build-directory paths.
+            return _Expression.scalar(GnTargetOutputPathsValue(single.label));
+          }
           final String path = _absolutePath(_stringExpression(args[0], scope), node);
           return _Expression.scalar(GnStringValue('$rebasedPathMarker$path$rebasedPathMarker'));
         }
@@ -2037,8 +2109,23 @@ final class _Evaluator {
         continue;
       }
       final String? value = _knownString(name, scope, node);
+      // A local variable holding a string around a reference (`prefix =
+      // "linux-x64-$flutter_runtime_mode/"`): its parts, spliced in.
+      final GnValue? held = value == null ? _heldExpandedString(name, scope, node) : null;
       if (value != null) {
         literal.write(value);
+      } else if (held is GnExpandedString) {
+        for (final GnValue part in held.parts) {
+          if (part is GnStringValue) {
+            literal.write(part.value);
+          } else {
+            if (literal.isNotEmpty) {
+              parts.add(GnStringValue(literal.toString()));
+              literal.clear();
+            }
+            parts.add(part);
+          }
+        }
       } else if (settings.externalVariables.contains(name)) {
         if (literal.isNotEmpty) {
           parts.add(GnStringValue(literal.toString()));
@@ -2110,6 +2197,18 @@ final class _Evaluator {
       );
     }
     return _Expression(values, isList: false);
+  }
+
+  /// The [GnExpandedString] a local scalar [name] holds unconditionally,
+  /// or null.
+  GnValue? _heldExpandedString(String name, _Scope? scope, GnNode node) {
+    final GnVariable? variable = scope?.lookup(name);
+    if (variable == null || variable.isList) {
+      return null;
+    }
+    final _Expression items = _scalarItems(variable, node.location);
+    final GnValue? single = items.scalar;
+    return single is GnExpandedString ? single : null;
   }
 
   /// The value of [name] when it is a string the converter knows: an

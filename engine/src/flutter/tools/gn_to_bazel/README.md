@@ -167,7 +167,8 @@ python3 tool/artifact_diff.py --gn=../../out/host_debug_unopt \
 ```
 
 pairs the archives the two builds write under `zip_archives/` (GN's build
-directory; every converted package's under `bazel-bin`) and reports, per
+directory; every converted package's under `bazel-bin`, whose runfiles
+forests the walk skips) and reports, per
 archive, the entries one side lacks, whether they come in the same order,
 and which common entries differ once the generated `LICENSE.<target>.md`'s
 version hash is normalized. `--expect-different` names the entries that are
@@ -175,7 +176,9 @@ builds of the same sources under flags that agree only up to the
 compile-command classes above (the binaries); anything else that differs is
 a packaging difference. The Linux host's seven archives: the patched SDK's
 two byte-identical, the Dart SDK's 1,057 entries identical, the rest
-identical but for the binaries.
+identical but for the binaries; the desktop builders' GTK bundle: the 26
+headers and the license identical, the library and `gen_snapshot` the
+binaries.
 
 ## How it works
 
@@ -338,7 +341,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    them, read through `dependency_resolver.dart`, or of a wrapped tree,
    `buildOutputLabels`; a directory, `directorySources`, is a `zip_tree`
    of its files; an entry whose destination varies with a condition is an
-   entry per case);
+   entry per case; an entry over every output of a copy at its
+   build-directory path -- `foreach(source, get_target_outputs(":copy"))`
+   with `destination = rebase_path(source, root_build_dir)`, the GTK
+   bundle's -- is a `zip_tree` of the copy's files, rooted where the copy's
+   `$root_out_dir/<dir>/{{source_file_part}}` outputs say);
    the template's body is the macro's (`flatbuffers()` in
    `build/bazel/flatbuffers`), and the targets it expands to in GN are the
    mapping's `innerTargets`, which the oracle expects. A variable of a
@@ -354,6 +361,15 @@ under the release mode) is one value per case, each under its condition,
 so that the attribute becomes a `select()`; a reference to a variable whose
 values the mapping enumerates (`$flutter_runtime_mode`) is spelled out as
 those values, one case each, since a `select()` cannot nest one.
+
+`foreach(x, list) { ... }` runs its body once per element with `x` bound to
+it in the enclosing scope, as GN does (the loop opens no scope; `x` is
+restored afterwards), an element a condition added to the list running the
+body under that condition. A list the converter cannot enumerate -- the
+outputs of a target, `get_target_outputs()` -- is one symbolic element, the
+outputs themselves, which the body's expressions carry along
+(`rebase_path(x, root_build_dir)` on it is the outputs at their
+build-directory paths) for the emitter to read, as above.
 
 `bazel_mapping.dart` holds the converter's knowledge of the engine: label
 translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,
@@ -384,8 +400,8 @@ Extending the converter's coverage means adding to these tables.
 ### Strict mode
 
 The converter never guesses. Anything outside the subset it understands --
-`foreach`, string expansions of unknown variables, an unknown import, a label
-with no Bazel home, a config with no mapping, a condition with no
+`exec_script`, string expansions of unknown variables, an unknown import, a
+label with no Bazel home, a config with no mapping, a condition with no
 `config_setting`, a file outside the output repository -- is an error that
 names the GN file and line. The fix is either to teach the converter the
 construct or to simplify the GN file; GN build files that are plain data
