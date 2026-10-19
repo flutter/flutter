@@ -37,8 +37,9 @@ files that repeat a list of their GN file (`mirroredLists`: the Dart test
 packages' `tests`, GN's `foreach` over it being what keeps those files
 hand-written) against the GN assignment, and fails on a test the two do not
 both name -- the one way a test added to GN's list could go missing here.
-A run over the manifest also reads CI's builder files
-(`ci/builders/linux_*.json`, through `package:engine_build_configs`) and
+A run over the manifest also reads the builder files
+(`ci/builders/linux_*.json` and `local_engine.json`'s `linux/` builds, the
+developer's, through `package:engine_build_configs`) and
 generates, beside them, `configs.bazelrc` -- a `--config=<build>` per Linux
 x64 host build whose `tools/gn` flags the Bazel build can express (`gnFlags`
 in `lib/src/builders.dart` says what each flag amounts to: a setting, an
