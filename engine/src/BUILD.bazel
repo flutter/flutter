@@ -26,6 +26,10 @@ cc_library(
     deps = ["@skia//:engine_root_headers"],
 )
 
+# The engine's AUTHORS, which sky/packages/sky_engine copies into the
+# sky_engine package (copy("copy_sky_engine_authors"): `//AUTHORS`).
+exports_files(["AUTHORS"])
+
 # GN's root files: the dotfile and the build_overrides it names. Inputs of
 # the rules that wrap a GN build of part of this tree.
 filegroup(

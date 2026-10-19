@@ -372,3 +372,7 @@ filegroup(
     name = "fixture_sources",
     srcs = glob(["fixtures/*"]),
 )
+
+# The same sources and the fix data by name, for the copies
+# sky/packages/sky_engine makes into the sky_engine package.
+exports_files(glob(["*.dart"]) + ["fix_dart_ui.yaml"])

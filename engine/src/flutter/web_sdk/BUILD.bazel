@@ -1,0 +1,9 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The web SDK (GN's //flutter/web_sdk), whose own build is the web phase's.
+# This package exists for web_sdk.bzl -- the sdk_rewriter template of
+# web_sdk.gni as a rule, which sky/packages/sky_engine invokes -- and the
+# script it runs.
+exports_files(["sdk_rewriter.dart"])
