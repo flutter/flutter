@@ -8,7 +8,6 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../features.dart';
 import 'config.dart';
 import 'diagnostics.dart';
@@ -24,31 +23,21 @@ class ExtensionManager {
     required Logger logger,
     this._entryPoints = const <ExtensionEntryPoint>[],
     ExtensionDiscovery? discovery,
-    bool isSafeMode = false,
-    this._platform,
   }) : _logger = logger,
-       _discovery = discovery ?? ExtensionDiscovery(logger: logger),
-       _explicitSafeMode = isSafeMode;
+       _discovery = discovery ?? ExtensionDiscovery(logger: logger);
 
   /// The active [HostPlatform].
   final HostPlatform hostPlatform;
-
-  /// Whether tool extension loading is bypassed via safe mode (`--no-extensions` or `FLUTTER_NO_EXTENSIONS=1`).
-  bool get isSafeMode =>
-      _explicitSafeMode || (_platform != null && isSafeModeActive(_platform.environment));
-
   final Logger _logger;
   final ExtensionDiscovery _discovery;
   final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
-  final Platform? _platform;
-  final bool _explicitSafeMode;
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
   Future<void>? _initFuture;
-  final _diagnosticsExtensions = <DiagnosticsExtension>[];
-  final _configurationExtensions = <ConfigurationExtension>[];
-  final _deviceExtensions = <DeviceService>[];
+  final List<DiagnosticsExtension> _diagnosticsExtensions = <DiagnosticsExtension>[];
+  final List<ConfigurationExtension> _configurationExtensions = <ConfigurationExtension>[];
+  final List<DeviceService> _deviceExtensions = <DeviceService>[];
 
   /// Ensures entrypoints are initialized; idempotent.
   Future<void> ensureInitialized() {
@@ -56,7 +45,7 @@ class ExtensionManager {
   }
 
   Future<void> _doInitialize() async {
-    if (isSafeMode || !_featureFlags.isToolExtensionsEnabled) {
+    if (!_featureFlags.isToolExtensionsEnabled) {
       _isInitialized = true;
       return;
     }

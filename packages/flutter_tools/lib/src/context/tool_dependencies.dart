@@ -615,9 +615,7 @@ class ToolDependencies {
       entryPoints: extensionEntryPoints,
       featureFlags: finalFeatureFlags,
       hostPlatform: finalOS.hostPlatform,
-      isSafeMode: isToolExtensionsEnabledOverride == false,
       logger: finalLogger,
-      platform: finalPlatform,
     );
 
     final extensionBuildManager = ExtensionBuildManager(
