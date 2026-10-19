@@ -35,11 +35,6 @@ void main() {
         buildDirectory: tempDir.uri.resolve('build/'),
         directory: Uri.directory(tempDir.path),
       );
-      final projectWithoutTrailingSlash = ExtensionFlutterProject(
-        appName: 'test_app',
-        buildDirectory: tempDir.uri.resolve('build/'),
-        directory: Uri.file(tempDir.path, windows: false),
-      );
       final service = LinuxDeviceService();
 
       expect(
@@ -49,26 +44,12 @@ void main() {
         ),
         isFalse,
       );
-      expect(
-        await service.isSupportedForProject(
-          deviceId: LinuxDeviceService.customLinuxDeviceId,
-          project: projectWithoutTrailingSlash,
-        ),
-        isFalse,
-      );
 
       Directory.fromUri(tempDir.uri.resolve('linux')).createSync();
       expect(
         await service.isSupportedForProject(
           deviceId: LinuxDeviceService.customLinuxDeviceId,
           project: project,
-        ),
-        isTrue,
-      );
-      expect(
-        await service.isSupportedForProject(
-          deviceId: LinuxDeviceService.customLinuxDeviceId,
-          project: projectWithoutTrailingSlash,
         ),
         isTrue,
       );
@@ -113,6 +94,23 @@ void main() {
             ExtensionFlutterProject.appNameKey: 'test_app',
             ExtensionFlutterProject.buildDirectoryKey: 'relative/build/',
             ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+          },
+        },
+        <String, Object?>{
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.projectParam: <String, Object?>{
+            ExtensionFlutterProject.appNameKey: 'test_app',
+            ExtensionFlutterProject.buildDirectoryKey: 'https://example.com/build/',
+            ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+          },
+        },
+        <String, Object?>{
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.projectParam: <String, Object?>{
+            ExtensionFlutterProject.appNameKey: 'test_app',
+            ExtensionFlutterProject.buildDirectoryKey: tempDir.uri.resolve('build/').toString(),
+            ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+            ExtensionFlutterProject.isModuleKey: 'not_a_bool',
           },
         },
       ]) {

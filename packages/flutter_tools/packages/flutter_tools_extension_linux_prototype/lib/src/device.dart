@@ -34,7 +34,6 @@ final class LinuxDeviceService extends DeviceService {
     if (deviceId != customLinuxDeviceId) {
       return false;
     }
-    final Uri projectDirectoryUri = Directory.fromUri(project.directory).uri;
-    return Directory.fromUri(projectDirectoryUri.resolve('linux')).existsSync();
+    return Directory.fromUri(project.directory.resolve('linux')).existsSync();
   }
 }

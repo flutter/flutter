@@ -70,76 +70,102 @@ void main() {
       expect(map[ExtensionFlutterProject.workspaceKey], isEmpty);
     });
 
-    test('handles malformed optional JSON fields gracefully', () {
-      final malformedOptionalJson = <String, Object?>{
-        ExtensionFlutterProject.appNameKey: 'my_app',
-        ExtensionFlutterProject.appVersionKey: 456,
-        ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
-        ExtensionFlutterProject.dependenciesKey: <Object?>['valid_dep', 99, null],
-        ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
-        ExtensionFlutterProject.isEmptyKey: 'true',
-        ExtensionFlutterProject.isModuleKey: 1,
-        ExtensionFlutterProject.isPluginKey: null,
-        ExtensionFlutterProject.workspaceKey: <Object?>['packages/a', false, null],
-      };
-
-      final project = ExtensionFlutterProject.fromJson(malformedOptionalJson);
-      expect(project.appName, 'my_app');
-      expect(project.appVersion, isNull);
-      expect(project.buildDirectory, Uri.parse('file:///tmp/my_app/build/'));
-      expect(project.dependencies, <String>{'valid_dep'});
-      expect(project.directory, Uri.parse('file:///tmp/my_app/'));
-      expect(project.isEmpty, isFalse);
-      expect(project.isModule, isFalse);
-      expect(project.isPlugin, isFalse);
-      expect(project.workspace, <String>['packages/a']);
-    });
-
-    test('throws FormatException on missing or invalid required fields and non-directory URIs', () {
+    test('constructor asserts valid file:// directory URIs ending with slash', () {
       expect(
-        () => ExtensionFlutterProject.fromJson(const <String, Object?>{}),
-        throwsFormatException,
+        () => ExtensionFlutterProject(
+          appName: 'my_app',
+          buildDirectory: Uri.parse('https://example.com/my_app/build/'),
+          directory: Uri.directory('/path/to/my_app'),
+        ),
+        throwsA(isA<AssertionError>()),
       );
       expect(
-        () => ExtensionFlutterProject.fromJson(const <String, Object?>{
+        () => ExtensionFlutterProject(
+          appName: 'my_app',
+          buildDirectory: Uri.directory('/path/to/my_app/build'),
+          directory: Uri.parse('https://example.com/my_app/'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionFlutterProject(
+          appName: 'my_app',
+          buildDirectory: Uri.parse('file:///path/to/my_app/build'),
+          directory: Uri.directory('/path/to/my_app'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ExtensionFlutterProject(
+          appName: 'my_app',
+          buildDirectory: Uri.directory('/path/to/my_app/build'),
+          directory: Uri.parse('file:///path/to/my_app'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws FormatException on missing or invalid fields and non-directory URIs', () {
+      const validBase = <String, Object?>{
+        ExtensionFlutterProject.appNameKey: 'my_app',
+        ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
+        ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
+      };
+
+      for (final invalidJson in const <Map<String, Object?>>[
+        <String, Object?>{},
+        <String, Object?>{
           ExtensionFlutterProject.appNameKey: 123,
           ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
           ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionFlutterProject.fromJson(const <String, Object?>{
+        },
+        <String, Object?>{
           ExtensionFlutterProject.appNameKey: 'my_app',
           ExtensionFlutterProject.buildDirectoryKey: 'relative/build/',
           ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionFlutterProject.fromJson(const <String, Object?>{
+        },
+        <String, Object?>{
           ExtensionFlutterProject.appNameKey: 'my_app',
           ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build',
           ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionFlutterProject.fromJson(const <String, Object?>{
+        },
+        <String, Object?>{
+          ExtensionFlutterProject.appNameKey: 'my_app',
+          ExtensionFlutterProject.buildDirectoryKey: 'https://example.com/my_app/build/',
+          ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app/',
+        },
+        <String, Object?>{
           ExtensionFlutterProject.appNameKey: 'my_app',
           ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
           ExtensionFlutterProject.directoryKey: 'relative/project/',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionFlutterProject.fromJson(const <String, Object?>{
+        },
+        <String, Object?>{
           ExtensionFlutterProject.appNameKey: 'my_app',
           ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
           ExtensionFlutterProject.directoryKey: 'file:///tmp/my_app',
-        }),
-        throwsFormatException,
-      );
+        },
+        <String, Object?>{
+          ExtensionFlutterProject.appNameKey: 'my_app',
+          ExtensionFlutterProject.buildDirectoryKey: 'file:///tmp/my_app/build/',
+          ExtensionFlutterProject.directoryKey: 'https://example.com/my_app/',
+        },
+        <String, Object?>{...validBase, ExtensionFlutterProject.appVersionKey: 456},
+        <String, Object?>{...validBase, ExtensionFlutterProject.dependenciesKey: 'not_a_list'},
+        <String, Object?>{
+          ...validBase,
+          ExtensionFlutterProject.dependenciesKey: <Object?>['valid_dep', 99],
+        },
+        <String, Object?>{...validBase, ExtensionFlutterProject.isEmptyKey: 'true'},
+        <String, Object?>{...validBase, ExtensionFlutterProject.isModuleKey: 1},
+        <String, Object?>{...validBase, ExtensionFlutterProject.isPluginKey: 0},
+        <String, Object?>{...validBase, ExtensionFlutterProject.workspaceKey: 'not_a_list'},
+        <String, Object?>{
+          ...validBase,
+          ExtensionFlutterProject.workspaceKey: <Object?>['packages/a', false],
+        },
+      ]) {
+        expect(() => ExtensionFlutterProject.fromJson(invalidJson), throwsFormatException);
+      }
     });
 
     test('equality and hashCode compare Set and List contents properly', () {

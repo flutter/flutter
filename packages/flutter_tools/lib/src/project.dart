@@ -491,23 +491,16 @@ class FlutterProject {
   /// Converts this project into a serializable [ExtensionFlutterProject] representation
   /// for tool extensions.
   ExtensionFlutterProject toExtensionProject() {
-    final FlutterManifest(
-      :String appName,
-      :String? appVersion,
-      :Set<String> dependencies,
-      :bool isEmpty,
-      :List<String> workspace,
-    ) = manifest;
     return ExtensionFlutterProject(
-      appName: appName,
+      appName: manifest.appName,
       buildDirectory: buildDirectory.uri,
       directory: directory.uri,
-      appVersion: appVersion,
-      dependencies: <String>{...dependencies},
-      isEmpty: isEmpty,
+      appVersion: manifest.appVersion,
+      dependencies: <String>{...manifest.dependencies},
+      isEmpty: manifest.isEmpty,
       isModule: isModule,
       isPlugin: isPlugin,
-      workspace: <String>[...workspace],
+      workspace: <String>[...manifest.workspace],
     );
   }
 

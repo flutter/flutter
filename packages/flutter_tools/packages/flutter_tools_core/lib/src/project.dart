@@ -4,11 +4,17 @@
 
 import 'package:meta/meta.dart';
 
+/// Returns whether [uri] is a valid absolute `file:` directory URI ending with
+/// a trailing slash (`/`).
+@internal
+bool isValidDirectoryUri(Uri uri) =>
+    uri.isScheme('file') && uri.hasAbsolutePath && uri.path.endsWith('/');
+
 /// Serializable representation of a Flutter project and its manifest metadata
 /// for tool extensions.
 @immutable
 class ExtensionFlutterProject {
-  const ExtensionFlutterProject({
+  ExtensionFlutterProject({
     required this.appName,
     required this.buildDirectory,
     required this.directory,
@@ -18,13 +24,20 @@ class ExtensionFlutterProject {
     this.isModule = false,
     this.isPlugin = false,
     this.workspace = const <String>[],
-  });
+  }) : assert(
+         isValidDirectoryUri(buildDirectory),
+         'buildDirectory must be an absolute file:// directory URI ending with "/": $buildDirectory',
+       ),
+       assert(
+         isValidDirectoryUri(directory),
+         'directory must be an absolute file:// directory URI ending with "/": $directory',
+       );
 
   /// Deserializes an [ExtensionFlutterProject] from a JSON-serializable map.
   ///
-  /// Throws a [FormatException] if required fields are missing or if
-  /// [buildDirectory] or [directory] are not valid trailing-slash-terminated
-  /// absolute directory URIs.
+  /// Throws a [FormatException] if required fields are missing, if any field
+  /// has an invalid type, or if [buildDirectory] or [directory] are not valid
+  /// trailing-slash-terminated absolute `file:` directory URIs.
   factory ExtensionFlutterProject.fromJson(Map<String, Object?> json) {
     if (json case {
       appNameKey: final String appName,
@@ -34,36 +47,61 @@ class ExtensionFlutterProject {
       final Uri? buildDirectoryUri = Uri.tryParse(buildDirectoryStr);
       final Uri? directoryUri = Uri.tryParse(directoryStr);
       if (buildDirectoryUri != null &&
-          buildDirectoryUri.hasAbsolutePath &&
-          buildDirectoryUri.path.endsWith('/') &&
+          isValidDirectoryUri(buildDirectoryUri) &&
           directoryUri != null &&
-          directoryUri.hasAbsolutePath &&
-          directoryUri.path.endsWith('/')) {
+          isValidDirectoryUri(directoryUri)) {
+        final String? appVersion = switch (json[appVersionKey]) {
+          final String value => value,
+          null => null,
+          _ => throw FormatException('Invalid ExtensionFlutterProject JSON: $json'),
+        };
+        final bool isEmpty = switch (json[isEmptyKey]) {
+          final bool value => value,
+          null => false,
+          _ => throw FormatException('Invalid ExtensionFlutterProject JSON: $json'),
+        };
+        final bool isModule = switch (json[isModuleKey]) {
+          final bool value => value,
+          null => false,
+          _ => throw FormatException('Invalid ExtensionFlutterProject JSON: $json'),
+        };
+        final bool isPlugin = switch (json[isPluginKey]) {
+          final bool value => value,
+          null => false,
+          _ => throw FormatException('Invalid ExtensionFlutterProject JSON: $json'),
+        };
+        final Set<String> dependencies = switch (json[dependenciesKey]) {
+          final Iterable<Object?> items => <String>{
+            for (final Object? item in items)
+              switch (item) {
+                final String value => value,
+                _ => throw FormatException('Invalid ExtensionFlutterProject JSON: $json'),
+              },
+          },
+          null => const <String>{},
+          _ => throw FormatException('Invalid ExtensionFlutterProject JSON: $json'),
+        };
+        final List<String> workspace = switch (json[workspaceKey]) {
+          final Iterable<Object?> items => <String>[
+            for (final Object? item in items)
+              switch (item) {
+                final String value => value,
+                _ => throw FormatException('Invalid ExtensionFlutterProject JSON: $json'),
+              },
+          ],
+          null => const <String>[],
+          _ => throw FormatException('Invalid ExtensionFlutterProject JSON: $json'),
+        };
         return ExtensionFlutterProject(
           appName: appName,
           buildDirectory: buildDirectoryUri,
           directory: directoryUri,
-          appVersion: switch (json[appVersionKey]) {
-            final String value => value,
-            _ => null,
-          },
-          dependencies: switch (json[dependenciesKey]) {
-            final Iterable<Object?> items => <String>{
-              for (final Object? item in items)
-                if (item case final String value) value,
-            },
-            _ => const <String>{},
-          },
-          isEmpty: json[isEmptyKey] == true,
-          isModule: json[isModuleKey] == true,
-          isPlugin: json[isPluginKey] == true,
-          workspace: switch (json[workspaceKey]) {
-            final Iterable<Object?> items => <String>[
-              for (final Object? item in items)
-                if (item case final String value) value,
-            ],
-            _ => const <String>[],
-          },
+          appVersion: appVersion,
+          dependencies: dependencies,
+          isEmpty: isEmpty,
+          isModule: isModule,
+          isPlugin: isPlugin,
+          workspace: workspace,
         );
       }
     }
