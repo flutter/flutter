@@ -10,7 +10,8 @@ import 'package:package_config/package_config.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
+import '../base/platform.dart';
+import '../context/tool_context.dart';
 
 /// Whether to ignore [Isolate.packageConfigSync] and force the fallback
 /// path in [currentPackageConfig].
@@ -20,20 +21,20 @@ bool debugIgnorePackageConfigSync = false;
 const String _fileScheme = 'file';
 
 /// Loads the package configuration of the current isolate.
-Future<PackageConfig> currentPackageConfig() async {
+Future<PackageConfig> currentPackageConfig({required ToolContext toolContext}) async {
   final Uri? packageConfigUri = debugIgnorePackageConfigSync ? null : Isolate.packageConfigSync;
   if (packageConfigUri != null) {
     return loadPackageConfigUri(packageConfigUri);
   }
 
-  final FileSystem fileSystem = globals.fs;
-  final Directory cwd = fileSystem.currentDirectory;
+  final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
+  final Directory cwd = fs.currentDirectory;
   File? packageConfigFile = findPackageConfigFile(cwd);
 
   if (packageConfigFile == null) {
-    final Uri scriptUri = globals.platform.script;
+    final Uri scriptUri = platform.script;
     if (scriptUri.scheme == _fileScheme) {
-      final File scriptFile = fileSystem.file(scriptUri);
+      final File scriptFile = fs.file(scriptUri);
       packageConfigFile = findPackageConfigFile(scriptFile.parent);
     }
   }
@@ -43,12 +44,12 @@ Future<PackageConfig> currentPackageConfig() async {
       'Failed to resolve package configuration.\n'
       'Isolate.packageConfigSync was null, and no .dart_tool/package_config.json '
       'could be found in the current working directory (${cwd.path}) or '
-      'relative to the script (${globals.platform.script}).\n'
+      'relative to the script (${platform.script}).\n'
       'Did you run "flutter pub get"?',
     );
   }
 
-  return loadPackageConfigWithLogging(packageConfigFile, logger: globals.logger);
+  return loadPackageConfigWithLogging(packageConfigFile, logger: logger);
 }
 
 /// Locates the `.dart_tool/package_config.json` relevant to [dir].
