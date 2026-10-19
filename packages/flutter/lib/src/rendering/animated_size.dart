@@ -89,7 +89,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
           ..addListener(() {
             // A zero-length animation can complete synchronously inside
             // performLayout, which already uses the new value.
-            if (_controller.value != _lastValue && !debugDoingThisLayout) {
+            if (_controller.value != _lastValue && !_isForwardingDuringLayout) {
               markNeedsLayout();
             }
           });
@@ -136,6 +136,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   final SizeTween _sizeTween = SizeTween();
   late bool _hasVisualOverflow;
   double? _lastValue;
+  bool _isForwardingDuringLayout = false;
 
   /// The state this size animation is in.
   ///
@@ -309,7 +310,16 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   void _restartAnimation() {
     _lastValue = 0.0;
-    _controller.forward(from: 0.0);
+    _forwardDuringLayout(from: 0.0);
+  }
+
+  void _forwardDuringLayout({double? from}) {
+    _isForwardingDuringLayout = true;
+    try {
+      _controller.forward(from: from);
+    } finally {
+      _isForwardingDuringLayout = false;
+    }
   }
 
   /// Laying out the child for the first time.
@@ -336,7 +346,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       // Animation finished. Reset target sizes.
       _sizeTween.begin = _sizeTween.end = debugAdoptSize(child!.size);
     } else if (!_controller.isAnimating) {
-      _controller.forward(); // resume the animation after being detached
+      _forwardDuringLayout(); // resume the animation after being detached
     }
   }
 
@@ -357,7 +367,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       _state = RenderAnimatedSizeState.stable;
       if (!_controller.isAnimating) {
         // Resume the animation after being detached.
-        _controller.forward();
+        _forwardDuringLayout();
       }
     }
   }
