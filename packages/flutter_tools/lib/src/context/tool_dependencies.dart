@@ -276,13 +276,7 @@ class ToolDependencies {
         persistentToolState ??
         PersistentToolState(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final BotDetector finalBotDetector =
-        botDetector ??
-        BotDetector(
-          httpClientFactory: () => HttpClient(),
-          platform: finalPlatform,
-          persistentToolState: finalPersistentToolState,
-        );
+    final BotDetector finalBotDetector = botDetector ?? BotDetector(platform: finalPlatform);
 
     final bool isBot = await finalBotDetector.isRunningOnBot;
 
@@ -625,25 +619,17 @@ class ToolDependencies {
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
-          logger: finalLogger,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          fileSystem: finalFS,
+          analytics: finalAnalytics,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          androidWorkflow: finalAndroidWorkflow,
+          extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
-          xcDevice: finalXCDevice,
-          androidWorkflow: finalAndroidWorkflow,
           iosWorkflow: finalIOSWorkflow,
-          flutterVersion: finalFlutterVersion,
-          artifacts: finalArtifacts,
           macOSWorkflow: finalMacOSWorkflow,
-          userMessages: finalUserMessages,
-          operatingSystemUtils: finalOS,
+          toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
-          customDevicesConfig: finalCustomDevicesConfig,
-          nativeAssetsBuilder: finalNativeAssetsBuilder,
-          extensionManager: extensionManager,
+          xcDevice: finalXCDevice,
         );
 
     return ToolDependencies(
