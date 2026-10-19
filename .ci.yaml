@@ -4224,6 +4224,10 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      # Pin to macOS 26 due to benchmark differing while fleet is split between macOS 15 and 26.
+      # See https://github.com/flutter/flutter/issues/194809.
+      # TODO(vashworth): Remove `os` pin once https://github.com/flutter/flutter/issues/192579 is complete.
+      os: Mac-26.6
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
