@@ -160,23 +160,15 @@ class GlobalToolContext implements ToolContext {
 }
 
 Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? overrides}) async {
-  // Wrap runner with any asynchronous initialization that should run with the
-  // overrides and callbacks.
-  late bool runningOnBot;
-  FutureOr<T> runnerWrapper() async {
-    runningOnBot = await globals.isRunningOnBot;
-    return runner();
-  }
-
   // TODO(ianh): We should split this into two, one for tests (which should be
   // in test/), and one for production (which should be in executable.dart).
   return context.run<T>(
     name: 'global fallbacks',
-    body: runnerWrapper,
+    body: runner,
     overrides: overrides,
     fallbacks: <Type, Generator>{
       Analytics: () => getAnalytics(
-        runningOnBot: runningOnBot,
+        runningOnBot: globals.isRunningOnBot,
         flutterVersion: globals.flutterVersion,
         environment: globals.platform.environment,
         clientIde: globals.platform.environment['FLUTTER_HOST'],

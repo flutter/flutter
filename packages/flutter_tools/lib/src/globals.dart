@@ -82,7 +82,7 @@ PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
 final _defaultBotDetector = BotDetector(platform: platform);
-Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+bool get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling
