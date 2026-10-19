@@ -87,7 +87,9 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     _controller =
         AnimationController(vsync: vsync, duration: duration, reverseDuration: reverseDuration)
           ..addListener(() {
-            if (_controller.value != _lastValue) {
+            // A zero-length animation can complete synchronously inside
+            // performLayout, which already uses the new value.
+            if (_controller.value != _lastValue && !debugDoingThisLayout) {
               markNeedsLayout();
             }
           });
