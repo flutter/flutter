@@ -18,6 +18,7 @@ import 'button_tester.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_tester.dart';
 import 'keyboard_utils.dart';
+import 'list_tile_tester.dart';
 import 'process_text_utils.dart';
 import 'semantics_tester.dart';
 import 'test_page_tester.dart';
@@ -442,6 +443,185 @@ void main() {
         await tester.tapAt(selectableRegionRect.topLeft - const Offset(10.0, 10.0));
         await tester.pump();
         expect(paragraph.selections, isEmpty);
+      },
+      // [intended] Tap outside to dismiss the selection is only supported on web.
+      skip: !kIsWeb,
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/185614.
+    testWidgets('tapping a RawAutocomplete option inside a SelectableRegion selects it', (
+      WidgetTester tester,
+    ) async {
+      const options = <String>['aardvark', 'bobcat', 'chameleon'];
+      String? selected;
+      late TextEditingController controller;
+      late FocusNode focusNode;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: _selectableRegion(
+            child: Column(
+              children: <Widget>[
+                const Text('Selectable text above the field.'),
+                RawAutocomplete<String>(
+                  optionsBuilder: (TextEditingValue value) {
+                    return options.where((String option) {
+                      return option.contains(value.text.toLowerCase());
+                    });
+                  },
+                  onSelected: (String option) {
+                    selected = option;
+                  },
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController fieldController,
+                        FocusNode fieldFocusNode,
+                        VoidCallback onFieldSubmitted,
+                      ) {
+                        controller = fieldController;
+                        focusNode = fieldFocusNode;
+                        return TestTextField(
+                          controller: fieldController,
+                          focusNode: fieldFocusNode,
+                        );
+                      },
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return ListView(
+                          children: <Widget>[
+                            for (final String option in options)
+                              TestListTile(title: Text(option), onTap: () => onSelected(option)),
+                          ],
+                        );
+                      },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Focus the field and type a prefix so that one option is shown.
+      focusNode.requestFocus();
+      await tester.pump();
+      controller.value = const TextEditingValue(
+        text: 'b',
+        selection: TextSelection.collapsed(offset: 1),
+      );
+      await tester.pump();
+      expect(find.widgetWithText(TestListTile, 'bobcat'), findsOneWidget);
+
+      // Click the option. A real click spans at least one frame between the
+      // pointer going down and coming back up, so pump in between.
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.widgetWithText(TestListTile, 'bobcat')),
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      // The options view closes, the field shows the option, and the
+      // selection callback ran.
+      expect(find.byType(TestListTile), findsNothing);
+      expect(controller.text, 'bobcat');
+      expect(selected, 'bobcat');
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets(
+      'tapping the popup of a focused non-editable descendant keeps the selection and the tap',
+      (WidgetTester tester) async {
+        const text = 'Hello world';
+        final anchorFocusNode = FocusNode(debugLabel: 'anchor');
+        addTearDown(anchorFocusNode.dispose);
+        final popupController = OverlayPortalController();
+        var tapped = false;
+
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: _selectableRegion(
+              child: Column(
+                children: <Widget>[
+                  const Text(text),
+                  // A button-like descendant whose popup lives in the app
+                  // Overlay and hides when the descendant loses focus.
+                  Focus(
+                    focusNode: anchorFocusNode,
+                    child: OverlayPortal(
+                      controller: popupController,
+                      overlayChildBuilder: (BuildContext context) {
+                        return Positioned(
+                          left: 20.0,
+                          top: 300.0,
+                          child: TestListTile(
+                            title: const Text('Item'),
+                            onTap: () {
+                              tapped = true;
+                            },
+                          ),
+                        );
+                      },
+                      child: const SizedBox(width: 100.0, height: 40.0),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        anchorFocusNode.addListener(() {
+          if (!anchorFocusNode.hasFocus && popupController.isShowing) {
+            popupController.hide();
+          }
+        });
+        // The selection only dismisses when unfocused if the app
+        // was currently active.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+
+        // Drag to select.
+        final TestGesture gesture = await tester.startGesture(
+          tester.getTopLeft(find.text(text)),
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await gesture.moveTo(tester.getBottomRight(find.text(text)));
+        await gesture.up();
+        await tester.pump();
+        expect(paragraph.selections, isNotEmpty);
+
+        // Move the focus to the non-editable descendant, as keyboard traversal
+        // would, and open its popup.
+        anchorFocusNode.requestFocus();
+        await tester.pump();
+        popupController.show();
+        await tester.pump();
+        expect(find.widgetWithText(TestListTile, 'Item'), findsOneWidget);
+        expect(paragraph.selections, isNotEmpty);
+
+        // Click the popup item across a frame.
+        final TestGesture click = await tester.startGesture(
+          tester.getCenter(find.widgetWithText(TestListTile, 'Item')),
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(click.removePointer);
+        await tester.pump();
+        await click.up();
+        await tester.pump();
+
+        expect(tapped, isTrue);
+        expect(anchorFocusNode.hasFocus, isTrue);
+        expect(paragraph.selections, isNotEmpty);
       },
       // [intended] Tap outside to dismiss the selection is only supported on web.
       skip: !kIsWeb,

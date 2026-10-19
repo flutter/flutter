@@ -1978,9 +1978,16 @@ class SelectableRegionState extends State<SelectableRegion>
         // unfocused when tapping outside of it causing the selection to
         // be dismissed.
         //
+        // Only do so when the region itself holds the primary focus. When a
+        // descendant holds it, for example a text field or a menu anchor whose
+        // popup lives in the app [Overlay], unfocusing the region would take
+        // the focus away from that descendant on pointer down, before its own
+        // tap handling runs. Whether a descendant keeps its focus on a tap
+        // outside is decided by the descendant.
+        //
         // Tapping outside the selectable region does not unfocus
         // the region on non-web platforms.
-        if (kIsWeb) {
+        if (kIsWeb && _focusNode.hasPrimaryFocus) {
           _focusNode.unfocus();
         }
       },
