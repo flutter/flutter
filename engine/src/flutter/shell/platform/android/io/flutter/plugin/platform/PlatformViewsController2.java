@@ -770,7 +770,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         if (queuedFrame.platformTransaction == null) {
           queuedFrame.platformTransaction = activePlatformTransaction;
         } else {
-          queuedFrame.platformTransaction.merge(activePlatformTransaction);
+          queuedFrame.platformTransaction =
+              queuedFrame.platformTransaction.merge(activePlatformTransaction);
           activePlatformTransaction.close();
         }
         activePlatformTransaction = null;

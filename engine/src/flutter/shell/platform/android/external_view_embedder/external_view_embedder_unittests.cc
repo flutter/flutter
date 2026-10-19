@@ -1588,7 +1588,8 @@ TEST(AndroidExternalViewEmbedder2,
   EXPECT_CALL(*jni_mock,
               onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50, mutators))
       .WillOnce([&](int32_t, int32_t, int32_t, int32_t, int32_t, int32_t,
-                    int32_t, MutatorsStack) { events.push_back("display_1"); });
+                    int32_t,
+                    const MutatorsStack&) { events.push_back("display_1"); });
   EXPECT_CALL(*jni_mock, hidePlatformView2(view_id)).WillOnce([&](int32_t) {
     events.push_back("hide_2");
   });
