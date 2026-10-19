@@ -90,7 +90,7 @@ const htmlSampleInlineFlutterJsBootstrapOutput = '''
     (build config)
     _flutter.loader.load({
       serviceWorker: {
-        serviceWorkerVersion: "(service worker version)" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
+        serviceWorkerVersion: null /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
       },
     });
   </script>
@@ -184,7 +184,7 @@ const htmlSampleLegacyLoadEntrypoint =
 </html>
 ''';
 
-String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) =>
+String htmlSample2Replaced({required String baseHref}) =>
     '''
 <!DOCTYPE html>
 <html>
@@ -198,10 +198,10 @@ String htmlSample2Replaced({required String baseHref, required String serviceWor
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    const serviceWorkerVersion = "$serviceWorkerVersion" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
+    const serviceWorkerVersion = null /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
   <script>
-    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
+    navigator.serviceWorker.register('flutter_service_worker.js');
   </script>
 </body>
 </html>
@@ -316,26 +316,16 @@ void main() {
     const indexHtml = WebTemplate(htmlSample2);
 
     expect(
-      indexHtml.withSubstitutions(
-        baseHref: '/foo/333/',
-        serviceWorkerVersion: 'v123xyz',
-        flutterJsFile: flutterJs,
-        logger: logger,
-      ),
-      htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
+      indexHtml.withSubstitutions(baseHref: '/foo/333/', flutterJsFile: flutterJs, logger: logger),
+      htmlSample2Replaced(baseHref: '/foo/333/'),
     );
   });
 
   test('applies substitutions with legacy var version syntax', () {
     const indexHtml = WebTemplate(htmlSampleLegacyVar);
     expect(
-      indexHtml.withSubstitutions(
-        baseHref: '/foo/333/',
-        serviceWorkerVersion: 'v123xyz',
-        flutterJsFile: flutterJs,
-        logger: logger,
-      ),
-      htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
+      indexHtml.withSubstitutions(baseHref: '/foo/333/', flutterJsFile: flutterJs, logger: logger),
+      htmlSample2Replaced(baseHref: '/foo/333/'),
     );
   });
 
@@ -346,7 +336,6 @@ void main() {
     expect(
       indexHtml.withSubstitutions(
         baseHref: '/',
-        serviceWorkerVersion: '(service worker version)',
         flutterJsFile: flutterJs,
         buildConfig: '(build config)',
         logger: logger,
@@ -362,7 +351,6 @@ void main() {
     expect(
       indexHtml.withSubstitutions(
         baseHref: '/',
-        serviceWorkerVersion: '(service worker version)',
         flutterJsFile: flutterJs,
         buildConfig: '(build config)',
         flutterBootstrapJs: '(flutter bootstrap script)',
@@ -379,7 +367,6 @@ void main() {
     expect(
       indexHtml.withSubstitutions(
         baseHref: '/',
-        serviceWorkerVersion: 'v123xyz',
         flutterJsFile: flutterJs,
         staticAssetsUrl: expectedStaticAssetsUrl,
         logger: logger,
@@ -394,7 +381,6 @@ void main() {
 
     final String substituted = indexHtml.withSubstitutions(
       baseHref: '/foo/333/',
-      serviceWorkerVersion: 'v123xyz',
       flutterJsFile: flutterJs,
       logger: logger,
     );
@@ -455,7 +441,6 @@ void main() {
     const indexHtml = WebTemplate(htmlWithWebDefines);
     final String result = indexHtml.withSubstitutions(
       baseHref: '/',
-      serviceWorkerVersion: null,
       flutterJsFile: flutterJs,
       webDefines: <String, String>{
         'API_URL': 'https://api.example.com',
@@ -488,7 +473,6 @@ void main() {
     const indexHtml = WebTemplate(htmlWithMissingVar);
     final String result = indexHtml.withSubstitutions(
       baseHref: '/',
-      serviceWorkerVersion: null,
       flutterJsFile: flutterJs,
       webDefines: <String, String>{}, // Missing API_URL
       logger: testLogger,
@@ -521,7 +505,6 @@ void main() {
     const indexHtml = WebTemplate(htmlWithMultipleMissingVars);
     final String result = indexHtml.withSubstitutions(
       baseHref: '/',
-      serviceWorkerVersion: null,
       flutterJsFile: flutterJs,
       webDefines: <String, String>{'API_URL': 'test'}, // Missing ENV, VERSION
       logger: testLogger,
@@ -554,7 +537,6 @@ void main() {
       const indexHtml = WebTemplate(htmlWithBuiltInVars);
       final String result = indexHtml.withSubstitutions(
         baseHref: '/',
-        serviceWorkerVersion: null,
         flutterJsFile: flutterJs,
         buildConfig: 'test config',
         webDefines: <String, String>{}, // Missing CUSTOM_VAR but built-in vars should be ignored
@@ -584,7 +566,6 @@ void main() {
     const indexHtml = WebTemplate(htmlWithEmptyVar);
     final String result = indexHtml.withSubstitutions(
       baseHref: '/',
-      serviceWorkerVersion: null,
       flutterJsFile: flutterJs,
       webDefines: <String, String>{'EMPTY_VAR': ''},
       logger: logger,

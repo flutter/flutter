@@ -4,7 +4,6 @@
 
 import { browserEnvironment, defaultWasmSupport } from './browser_environment.js';
 import { FlutterEntrypointLoader } from './entrypoint_loader.js';
-import { FlutterServiceWorkerLoader } from './service_worker_loader.js';
 import { FlutterTrustedTypesPolicy } from './trusted_types.js';
 import { loadCanvasKit } from './canvaskit_loader.js';
 import { loadSkwasm } from './skwasm_loader.js';
@@ -27,17 +26,9 @@ export class FlutterLoader {
    *                     supplies an `onEntrypointLoaded` Function as an option.
    */
   async loadEntrypoint(options) {
-    const { serviceWorker, ...entrypoint } = options || {};
+    const { ...entrypoint } = options || {};
     // A Trusted Types policy that is going to be used by the loader.
     const flutterTT = new FlutterTrustedTypesPolicy();
-    // The FlutterServiceWorkerLoader instance could be injected as a dependency
-    // (and dynamically imported from a module if not present).
-    const serviceWorkerLoader = new FlutterServiceWorkerLoader();
-    serviceWorkerLoader.setTrustedTypesPolicy(flutterTT.policy);
-    await serviceWorkerLoader.loadServiceWorker(serviceWorker).catch(e => {
-      // Regardless of what happens with the injection of the SW, the show must go on
-      console.warn("Exception while loading service worker:", e);
-    });
     // The FlutterEntrypointLoader instance could be injected as a dependency
     // (and dynamically imported from a module if not present).
     const entrypointLoader = new FlutterEntrypointLoader();
@@ -51,9 +42,6 @@ export class FlutterLoader {
   /**
    * Loads and initializes a flutter application.
    * @param {Object} options
-   * @param {import("/.types".ServiceWorkerSettings?)} options.serviceWorkerSettings
-   *   DEPRECATED: Settings for the service worker to be loaded. Can pass `undefined` or
-   *   `null` to not launch a service worker at all.
    * @param {import("/.types".OnEntryPointLoadedCallback)} options.onEntrypointLoaded
    *   An optional callback to invoke
    * @param {string} options.nonce
@@ -63,7 +51,6 @@ export class FlutterLoader {
    * @param {import("./types".FlutterConfiguration)} arg.config
    */
   async load({
-    serviceWorkerSettings,
     onEntrypointLoaded,
     nonce,
     config,
@@ -158,14 +145,6 @@ export class FlutterLoader {
 
     const deps = {};
     deps.flutterTT = new FlutterTrustedTypesPolicy();
-    if (serviceWorkerSettings) {
-      deps.serviceWorkerLoader = new FlutterServiceWorkerLoader();
-      deps.serviceWorkerLoader.setTrustedTypesPolicy(deps.flutterTT.policy);
-      await deps.serviceWorkerLoader.loadServiceWorker(serviceWorkerSettings).catch(e => {
-        // Regardless of what happens with the injection of the SW, the show must go on
-        console.warn("Exception while loading service worker:", e);
-      });
-    }
 
     const canvasKitBaseUrl = getCanvaskitBaseUrl(config, buildConfig);
     if (build.renderer === "canvaskit") {

@@ -114,7 +114,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/main.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -359,7 +358,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/a.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -396,7 +394,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/a.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -453,7 +450,6 @@ void main() {
         expect(environment.defines, <String, String>{
           'TargetFile': 'lib/main.dart',
           'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
           'BuildMode': 'release',
           'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           'DartObfuscation': 'false',
@@ -991,9 +987,6 @@ void main() {
       expect(command.usage, isNot(contains(option)));
     }
 
-    // Deprecated options are always hidden.
-    expectHidden('pwa-strategy');
-
     // Verbose-only options are hidden in standard help output.
     expectHidden('dump-info');
     expectHidden('minify-js');
@@ -1034,15 +1027,6 @@ void main() {
       );
       expect(command.usage, contains(option));
     }
-
-    void expectHidden(String option) {
-      expect(command.argParser.options.keys, contains(option));
-      expect(command.argParser.options[option]!.hide, isTrue);
-      expect(command.usage, isNot(contains(option)));
-    }
-
-    // Deprecated options remain hidden.
-    expectHidden('pwa-strategy');
 
     // Verbose-only options become visible when verboseHelp is true.
     expectVisible('dump-info');

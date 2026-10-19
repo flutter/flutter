@@ -653,11 +653,10 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     final WebTemplate bootstrapTemplate = getWebTemplate(
       fileSystem,
       'flutter_bootstrap.js',
-      generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
+      generateDefaultFlutterBootstrapScript(),
     );
     return bootstrapTemplate.withSubstitutions(
       baseHref: _baseHref ?? '/',
-      serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
       logger: logger,
@@ -679,7 +678,6 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         baseHref: _baseHref ?? '/',
         // Currently, we don't support --static-assets-url for the "run" command.
         staticAssetsUrl: '/',
-        serviceWorkerVersion: null,
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,

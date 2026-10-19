@@ -27,7 +27,6 @@ import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
 import '../../web/content_hash.dart';
-import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../../web/web_constants.dart';
 import '../../web_template.dart';
@@ -1467,16 +1466,12 @@ $supportsDart2WasmLine''';
   @override
   Future<void> build(Environment environment) async {
     final Directory webResources = environment.projectDir.childDirectory('web');
-    final includeServiceWorkerSettings =
-        environment.serviceWorkerStrategy == ServiceWorkerStrategy.offlineFirst;
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
     final String inputBootstrapContent;
     if (inputFlutterBootstrapJs.existsSync()) {
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
-      inputBootstrapContent = generateDefaultFlutterBootstrapScript(
-        includeServiceWorkerSettings: includeServiceWorkerSettings,
-      );
+      inputBootstrapContent = generateDefaultFlutterBootstrapScript();
     }
     final bootstrapTemplate = WebTemplate(inputBootstrapContent);
     for (final WebTemplateWarning warning in bootstrapTemplate.getWarnings()) {
@@ -1500,15 +1495,8 @@ $supportsDart2WasmLine''';
         if (key.startsWith(kWebDefinePrefix)) key.substring(kWebDefinePrefix.length): value,
     };
 
-    // Insert a random hash into the requests for service_worker.js. This is not a content hash,
-    // because it would need to be the hash for the entire bundle and not just the resource
-    // in question.
-    final String? serviceWorkerVersion = includeServiceWorkerSettings
-        ? Random().nextInt(1 << 32).toString()
-        : null;
     final String bootstrapContent = bootstrapTemplate.withSubstitutions(
       baseHref: '',
-      serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
       buildConfig: buildConfig,
       logger: environment.logger,
@@ -1532,7 +1520,6 @@ $supportsDart2WasmLine''';
         final String indexHtmlContent = indexHtmlTemplate.withSubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
           staticAssetsUrl: environment.defines[kStaticAssetsUrl] ?? '/',
-          serviceWorkerVersion: serviceWorkerVersion,
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
           flutterBootstrapJs: bootstrapContent,
@@ -1644,7 +1631,8 @@ class WebBuiltInAssets extends Target {
   }
 }
 
-/// Generate a service worker for a web target.
+/// Finalizes the web output directory and generates `precache_manifest.json`
+/// when `--web-content-hash` is enabled.
 class WebServiceWorker extends Target {
   const WebServiceWorker(this.fileSystem, this.compileConfigs, this.analytics);
 
@@ -1677,7 +1665,6 @@ class WebServiceWorker extends Target {
         .whereType<File>()
         .where(
           (File file) =>
-              !file.path.endsWith('flutter_service_worker.js') &&
               !file.path.endsWith(kPrecacheManifestFile) &&
               !environment.fileSystem.path.basename(file.path).startsWith('.'),
         )
@@ -1691,25 +1678,11 @@ class WebServiceWorker extends Target {
       enabled: webContentHash,
       useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
     );
-    final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
-    final depfile = Depfile(contents, <File>[serviceWorkerFile, ?precacheManifestFile]);
-    final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-      Artifact.flutterToolsFileGenerators,
-    );
-    final String serviceWorker = generateServiceWorker(
-      fileGeneratorsPath,
-      serviceWorkerStrategy: environment.serviceWorkerStrategy,
-    );
-    serviceWorkerFile.writeAsStringSync(serviceWorker);
+    final depfile = Depfile(contents, <File>[?precacheManifestFile]);
     environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('service_worker.d'),
+      writeEmpty: true,
     );
   }
-}
-
-extension on Environment {
-  ServiceWorkerStrategy get serviceWorkerStrategy =>
-      ServiceWorkerStrategy.fromCliName(defines[kServiceWorkerStrategy]) ??
-      ServiceWorkerStrategy.offlineFirst;
 }

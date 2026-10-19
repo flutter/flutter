@@ -336,7 +336,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
     );
 
     // Fully hidden options and flags should still have help text.
-    const hiddenOptions = <String>['pwa-strategy'];
+    const hiddenOptions = <String>[];
     final bool isHiddenOption = hiddenOptions.contains(option.name);
     if (!isHiddenOption) {
       expect(

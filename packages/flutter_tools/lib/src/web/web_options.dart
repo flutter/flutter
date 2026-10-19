@@ -6,7 +6,6 @@ import '../runner/options/common_options.dart';
 import '../runner/options/option_bundle.dart';
 import '../runner/options/option_descriptor.dart';
 import '../web_template.dart';
-import 'file_generators/flutter_service_worker_js.dart';
 import 'web_constants.dart';
 
 /// Typed option descriptors specific to Flutter Web compilation.
@@ -46,15 +45,6 @@ abstract final class WebOptions {
         'Used when serving the static assets from a different domain the application is hosted on. '
         'The value has to end with a slash "/". '
         'When this is set, it will replace all $kStaticAssetsUrlPlaceholder in web/index.html for the given value.',
-  );
-
-  static const pwaStrategy = EnumOptionDescriptor<ServiceWorkerStrategy>(
-    name: 'pwa-strategy',
-    hide: true,
-    help:
-        'This option is deprecated and will be removed in a future Flutter release.\n'
-        'The caching strategy to be used by the PWA service worker.',
-    values: ServiceWorkerStrategy.values,
   );
 
   static const webResourcesCdn = FlagOptionDescriptor(
@@ -344,7 +334,6 @@ class WebCoreOptionsBundle extends OptionBundle {
   List<OptionDescriptor<Object?>> get descriptors => [
     WebOptions.baseHref,
     WebOptions.staticAssetsUrl,
-    WebOptions.pwaStrategy,
     WebOptions.webResourcesCdn,
     WebOptions.webDefines,
     WebOptions.webDefineFromFile,

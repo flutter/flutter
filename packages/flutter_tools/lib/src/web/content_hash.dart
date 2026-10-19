@@ -476,9 +476,7 @@ bool _shouldExcludeFromPrecacheManifest({
   required List<String> segments,
   required bool useLocalCanvasKit,
 }) {
-  if (basename.startsWith('.') ||
-      posixUrl == kPrecacheManifestFile ||
-      posixUrl == 'flutter_service_worker.js') {
+  if (basename.startsWith('.') || posixUrl == kPrecacheManifestFile) {
     return true;
   }
   if (basename.endsWith('.map') ||

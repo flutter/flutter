@@ -237,7 +237,6 @@ class BuildWebCommand extends BuildSubCommand {
       project,
       targetFile,
       buildInfo,
-      getValue(WebOptions.pwaStrategy),
       compilerConfigs: compilerConfigs,
       baseHref: baseHref,
       staticAssetsUrl: staticAssetsUrl,

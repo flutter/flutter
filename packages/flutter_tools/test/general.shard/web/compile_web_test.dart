@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/compile.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -60,7 +59,6 @@ environement:
         expect(environment.defines, <String, String>{
           'TargetFile': 'target',
           'HasWebPlugins': 'false',
-          'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
           'BuildMode': 'debug',
           'DartObfuscation': 'false',
           'TrackWidgetCreation': 'true',
@@ -89,7 +87,6 @@ environement:
         flutterProject,
         'target',
         BuildInfo.debug,
-        ServiceWorkerStrategy.offlineFirst,
         compilerConfigs: <WebCompilerConfig>[
           const WasmCompilerConfig(optimizationLevel: 0, stripWasm: false),
           const JsCompilerConfig.run(
@@ -123,103 +120,6 @@ environement:
         ),
         true,
       );
-    },
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.any(),
-      Pub: ThrowingPub.new,
-    },
-  );
-
-  testUsingContext(
-    'WebBuilder prints deprecation warning for --pwa-strategy',
-    () async {
-      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(target, isA<WebServiceWorker>());
-        expect(
-          environment.defines,
-          containsPair('ServiceWorkerStrategy', ServiceWorkerStrategy.offlineFirst.cliName),
-        );
-      });
-
-      final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
-        analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
-        buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
-      );
-      await webBuilder.buildWeb(
-        flutterProject,
-        'target',
-        BuildInfo.debug,
-        ServiceWorkerStrategy.offlineFirst,
-        compilerConfigs: const <WebCompilerConfig>[],
-      );
-
-      expect(logger.statusText, contains('Compiling target for the Web...'));
-      expect(
-        logger.warningText,
-        contains(
-          'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.',
-        ),
-      );
-      expect(logger.errorText, isEmpty);
-    },
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.any(),
-      Pub: ThrowingPub.new,
-    },
-  );
-
-  testUsingContext(
-    'WebBuilder skips deprecation warning when --pwa-strategy is omitted',
-    () async {
-      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(target, isA<WebServiceWorker>());
-        expect(
-          environment.defines,
-          containsPair('ServiceWorkerStrategy', ServiceWorkerStrategy.offlineFirst.cliName),
-        );
-      });
-
-      final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
-        analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
-        buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
-      );
-      await webBuilder.buildWeb(
-        flutterProject,
-        'target',
-        BuildInfo.debug,
-        null,
-        compilerConfigs: const <WebCompilerConfig>[],
-      );
-
-      expect(logger.statusText, contains('Compiling target for the Web...'));
-      expect(logger.warningText, isNot(contains('--pwa-strategy')));
-      expect(logger.errorText, isEmpty);
     },
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
@@ -262,7 +162,6 @@ environement:
           flutterProject,
           'target',
           BuildInfo.debug,
-          ServiceWorkerStrategy.offlineFirst,
           compilerConfigs: <WebCompilerConfig>[
             const JsCompilerConfig.run(
               nativeNullAssertions: true,

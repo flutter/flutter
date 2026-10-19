@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/content_hash.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -240,10 +239,9 @@ name: foo
   );
 
   test(
-    'WebTemplatedFiles includes serviceWorkerSettings in flutter_bootstrap.js by default',
+    'WebTemplatedFiles omits serviceWorkerSettings in flutter_bootstrap.js by default',
     () => testbed.run(() async {
       final Directory webResources = environment.projectDir.childDirectory('web');
-      environment.defines[kServiceWorkerStrategy] = 'none';
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
       await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
@@ -251,25 +249,6 @@ name: foo
       expect(
         environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
         contains('_flutter.loader.load();'),
-      );
-    }),
-  );
-
-  test(
-    'WebTemplatedFiles omits serviceWorkerSettings in flutter_bootstrap.js when environment specifies',
-    () => testbed.run(() async {
-      final Directory webResources = environment.projectDir.childDirectory('web');
-      webResources.childFile('index.html').createSync(recursive: true);
-      environment.buildDir.childFile('main.dart.js').createSync();
-      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
-
-      expect(
-        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
-        stringContainsInOrder(<String>[
-          '_flutter.loader.load({',
-          'serviceWorkerSettings',
-          'serviceWorkerVersion',
-        ]),
       );
     }),
   );
@@ -1800,21 +1779,6 @@ _flutter.loader.load();
   });
 
   test(
-    'Generated service worker is empty with none-strategy',
-    () => testbed.run(() {
-      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-        Artifact.flutterToolsFileGenerators,
-      );
-      final String result = generateServiceWorker(
-        fileGeneratorsPath,
-        serviceWorkerStrategy: ServiceWorkerStrategy.none,
-      );
-
-      expect(result, '');
-    }),
-  );
-
-  test(
     'WebBuiltInAssets declares and copies the Flutter loader source map',
     () => testbed.run(() async {
       final File flutterJsMapInput = globals.fs.file(
@@ -2973,20 +2937,6 @@ flutter:
   test(
     'WebServiceWorker emits precache_manifest.json and excludes non-runtime bloat when webContentHash is true',
     () => testbed.run(() async {
-      final File fileGenerators =
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators).isEmpty
-          ? environment.fileSystem.file('flutter_service_worker.js')
-          : environment.fileSystem.file(
-              environment.fileSystem.path.join(
-                environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-                'js',
-                'flutter_service_worker.js',
-              ),
-            );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
-
       const indexBytes = <int>[1, 2, 3, 4];
       const bootstrapBytes = <int>[5, 6, 7, 8, 9];
       const mainJsBytes = <int>[10, 20, 30, 40, 50, 60];
@@ -3104,16 +3054,6 @@ flutter:
     'WebServiceWorker includes canvaskit in precache_manifest.json when kUseLocalCanvasKitFlag is true',
     () => testbed.run(() async {
       environment.defines[kUseLocalCanvasKitFlag] = 'true';
-      final File fileGenerators = environment.fileSystem.file(
-        environment.fileSystem.path.join(
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-          'js',
-          'flutter_service_worker.js',
-        ),
-      );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
 
       const wasmBytes = <int>[0, 97, 115, 109];
       final String wasmHash = crypto.sha256.convert(wasmBytes).toString().substring(0, 8);
@@ -3142,17 +3082,6 @@ flutter:
   test(
     'WebServiceWorker deletes stale precache_manifest.json when webContentHash is false',
     () => testbed.run(() async {
-      final File fileGenerators = environment.fileSystem.file(
-        environment.fileSystem.path.join(
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-          'js',
-          'flutter_service_worker.js',
-        ),
-      );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
-
       final File staleManifest = environment.outputDir.childFile('precache_manifest.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('{"version":1,"entries":[]}');
@@ -3163,6 +3092,7 @@ flutter:
       await target.build(environment);
 
       expect(staleManifest, isNot(exists));
+      expect(environment.buildDir.childFile('service_worker.d'), exists);
     }),
   );
 
