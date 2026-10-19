@@ -177,7 +177,9 @@ class ValidationResult {
       final Iterable<Object?> items => <ValidationMessage>[
         for (final Object? item in items)
           switch (item) {
-            final Map<String, Object?> map => ValidationMessage.fromJson(map),
+            final Map<Object?, Object?> map => ValidationMessage.fromJson(
+              map.cast<String, Object?>(),
+            ),
             _ => throw FormatException(
               'Invalid "$messagesKey" element: expected Map<String, Object?>, got ${item.runtimeType}.',
             ),

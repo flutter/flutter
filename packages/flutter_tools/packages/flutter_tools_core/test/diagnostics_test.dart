@@ -54,6 +54,16 @@ void main() {
       expect(parsed.type, ValidationType.success);
     });
 
+    test('ValidationResult.fromJson deserializes Map<Object?, Object?> message elements', () {
+      final parsed = ValidationResult.fromJson(<String, Object?>{
+        ValidationResult.messagesKey: <Object?>[
+          <Object?, Object?>{ValidationMessage.messageKey: 'ok'},
+        ],
+      });
+      expect(parsed.messages, hasLength(1));
+      expect(parsed.messages.single.message, 'ok');
+    });
+
     test('ValidationMessage.fromJson and ValidationResult.fromJson throw FormatException on invalid types', () {
       expect(
         () =>
