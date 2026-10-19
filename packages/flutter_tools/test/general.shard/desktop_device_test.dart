@@ -394,15 +394,18 @@ void main() {
     );
   });
 
-  testUsingContext(
+  testWithoutContext(
     'macOS devices print warning if Dart VM not found within timeframe in CI',
     () async {
       final logger = BufferLogger.test();
       final device = FakeMacOSDevice(
-        fileSystem: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        logger: logger,
+        toolContext: FakeToolContext(
+          botDetector: const FakeBotDetector(true),
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       );
 
       final package = FakeApplicationPackage();
@@ -586,23 +589,20 @@ FakeDesktopDevice setUpDesktopDevice({
   bool nullExecutablePathForDevice = false,
 }) {
   return FakeDesktopDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
-    logger: logger ?? BufferLogger.test(),
-    processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+    toolContext: FakeToolContext(
+      fs: fileSystem ?? MemoryFileSystem.test(),
+      logger: logger ?? BufferLogger.test(),
+      os: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+      processManager: processManager ?? FakeProcessManager.any(),
+    ),
     nullExecutablePathForDevice: nullExecutablePathForDevice,
   );
 }
 
 /// A trivial subclass of DesktopDevice for testing the shared functionality.
 class FakeDesktopDevice extends DesktopDevice {
-  FakeDesktopDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-    this.nullExecutablePathForDevice = false,
-  }) : super('dummy', platformType: PlatformType.linux, ephemeral: false);
+  FakeDesktopDevice({required super.toolContext, this.nullExecutablePathForDevice = false})
+    : super('dummy', platformType: PlatformType.linux, ephemeral: false);
 
   /// The `mainPath` last passed to [buildForDevice].
   String? lastBuiltMainPath;
@@ -655,12 +655,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 }
 
 class FakeMacOSDevice extends MacOSDevice {
-  FakeMacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  });
+  FakeMacOSDevice({required super.toolContext});
 
   @override
   String get name => 'dummy';

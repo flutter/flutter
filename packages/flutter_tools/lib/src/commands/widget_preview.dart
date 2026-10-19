@@ -161,8 +161,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     _analysisServerFactoryOverride = analysisServerFactoryOverride;
     addPubOptions();
-    addMachineOutputFlag(verboseHelp: verbose);
-    addDevToolsOptions(verboseHelp: verbose);
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      CommonOptions.machine,
+      DebuggingOptionDescriptors.enableDevTools,
+      DebuggingOptionDescriptors.devToolsServerAddress(),
+    ], verboseHelp: verbose);
     argParser
       ..addFlag(
         kWebServer,
