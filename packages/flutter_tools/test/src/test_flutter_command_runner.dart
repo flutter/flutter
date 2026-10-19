@@ -71,7 +71,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
   }) : super(
          analytics: analytics ?? _defaultAnalytics(),
          featureFlags: featureFlags ?? _defaultFeatureFlags(),
-         toolContext: toolContext ?? DelegatingToolContext(),
+         toolContext: toolContext ?? const DelegatingToolContext(),
        );
 
   static Analytics _defaultAnalytics() {
