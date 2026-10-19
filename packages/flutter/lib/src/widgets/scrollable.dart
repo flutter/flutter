@@ -1184,17 +1184,17 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   // An eye-balled value for a smooth scrolling speed.
   static const double _kDefaultSelectToScrollVelocityScalar = 30;
 
-  // The position synthesized for a selection edge that lies before this
-  // scrollable's content, in this scrollable's local coordinates.
-  //
-  // This is one pixel outside the content origin rather than the origin itself
-  // so that it never lands inside a nested scrollable positioned at the origin
-  // (for example the inner scrollable of a [TwoDimensionalScrollable], or a
-  // horizontal list that is the first child of a vertical list). A nested
-  // scrollable decides whether the selection started inside it from the first
-  // position it receives; a synthesized position at its own top-left would make
-  // it believe it owns the drag and auto scroll a selection that started
-  // outside it. See https://github.com/flutter/flutter/issues/181169.
+  /// The position synthesized for a selection edge that lies before this
+  /// scrollable's content, in this scrollable's local coordinates.
+  ///
+  /// This is one pixel outside the content origin rather than the origin itself
+  /// so that it never lands inside a nested scrollable positioned at the origin
+  /// (for example the inner scrollable of a [TwoDimensionalScrollable], or a
+  /// horizontal list that is the first child of a vertical list). A nested
+  /// scrollable decides whether the selection started inside it from the first
+  /// position it receives; a synthesized position at its own top-left would make
+  /// it believe it owns the drag and auto scroll a selection that started
+  /// outside it. See https://github.com/flutter/flutter/issues/181169.
   static const Offset _kBeforeContentOrigin = Offset(-1, -1);
 
   final ScrollableState state;
