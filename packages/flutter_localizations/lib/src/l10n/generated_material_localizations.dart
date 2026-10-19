@@ -5642,7 +5642,7 @@ class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'بڕین';
 
   @override
-  String get dateHelpText => 'ڕڕ/م/س';
+  String get dateHelpText => 'ڕڕ/مم/سسسس';
 
   @override
   String get dateInputLabel => 'بەروار بنووسە';
