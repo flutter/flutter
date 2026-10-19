@@ -196,23 +196,26 @@ class FlutterTesterTestDevice extends TestDevice {
         }
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
-        await connectToVmServiceImpl(
+        final FlutterVmService vmService = await connectToVmServiceImpl(
           forwardingUri!,
           compileExpression: compileExpression,
           logger: logger,
         );
         logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
-        if (debuggingOptions.startPaused && !machine!) {
-          logger.printStatus('The Dart VM service is listening on $forwardingUri');
-          if (devToolsUri != null) {
+        if (debuggingOptions.startPaused) {
+          await vmService.waitForUIIsolatePaused();
+          if (!machine!) {
+            logger.printStatus('The Dart VM service is listening on $forwardingUri');
+            if (devToolsUri != null) {
+              logger.printStatus(
+                'The Flutter DevTools debugger and profiler is available at: $devToolsUri',
+              );
+            }
+            logger.printStatus('');
             logger.printStatus(
-              'The Flutter DevTools debugger and profiler is available at: $devToolsUri',
+              'The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.',
             );
           }
-          logger.printStatus('');
-          logger.printStatus(
-            'The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.',
-          );
         }
         _gotProcessVmServiceUri.complete(forwardingUri);
       },
