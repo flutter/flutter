@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:code_assets/code_assets.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,14 +14,18 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
+import 'package:hooks/hooks.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import 'fake_native_assets_build_runner.dart';
 
 void main() {
@@ -512,6 +517,108 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(staleFile, isNot(exists));
     },
   );
+
+  testWithoutContext('FlutterNativeAssetsBuildRunnerImpl.build throws ToolExit on lock TimeoutException '
+      '(regression test for https://github.com/flutter/flutter/issues/194568)', () async {
+    final logger = BufferLogger.test();
+    final lockTimeoutFileSystem = MemoryFileSystem.test(
+      opHandle: (String context, FileSystemOp operation) {
+        if (operation == FileSystemOp.exists && context.endsWith('build.dart')) {
+          throw TimeoutException(
+            'Could not acquire the lock to /project/.dart_tool/hooks_runner/shared/my_app/.lock.',
+            const Duration(minutes: 5),
+          );
+        }
+      },
+    );
+    final Directory projectDir = lockTimeoutFileSystem.directory('/project')
+      ..createSync(recursive: true);
+    final File pubspecFile = projectDir.childFile('pubspec.yaml')
+      ..writeAsStringSync('name: my_app\n');
+    final File packageConfigFile = writePackageConfigFiles(
+      directory: projectDir,
+      mainLibName: 'my_app',
+    );
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packageConfigFile,
+      logger: logger,
+    );
+    final runner = FlutterNativeAssetsBuildRunnerImpl(
+      packageConfigFile.path,
+      packageConfig,
+      lockTimeoutFileSystem,
+      logger,
+      FakePlatform(),
+      'my_app',
+      pubspecFile.path,
+      includeDevDependencies: false,
+    );
+
+    await expectLater(
+      runner.build(extensions: <ProtocolExtension>[], linkingEnabled: false),
+      throwsToolExit(
+        message:
+            'Building native assets timed out waiting for a file lock: '
+            'TimeoutException after 0:05:00.000000: '
+            'Could not acquire the lock to /project/.dart_tool/hooks_runner/shared/my_app/.lock.\n'
+            'Ensure no other Flutter or Dart processes are stuck building native assets, '
+            'or delete stale `.lock` files under `.dart_tool/hooks_runner/` and try again.',
+      ),
+    );
+  });
+
+  testWithoutContext('FlutterNativeAssetsBuildRunnerImpl.link throws ToolExit on lock TimeoutException '
+      '(regression test for https://github.com/flutter/flutter/issues/194568)', () async {
+    final logger = BufferLogger.test();
+    final lockTimeoutFileSystem = MemoryFileSystem.test(
+      opHandle: (String context, FileSystemOp operation) {
+        if (operation == FileSystemOp.exists && context.endsWith('link.dart')) {
+          throw TimeoutException(
+            'Could not acquire the lock to /project/.dart_tool/hooks_runner/shared/my_app/.lock.',
+            const Duration(minutes: 5),
+          );
+        }
+      },
+    );
+    final Directory projectDir = lockTimeoutFileSystem.directory('/project')
+      ..createSync(recursive: true);
+    final File pubspecFile = projectDir.childFile('pubspec.yaml')
+      ..writeAsStringSync('name: my_app\n');
+    final File packageConfigFile = writePackageConfigFiles(
+      directory: projectDir,
+      mainLibName: 'my_app',
+    );
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packageConfigFile,
+      logger: logger,
+    );
+    final runner = FlutterNativeAssetsBuildRunnerImpl(
+      packageConfigFile.path,
+      packageConfig,
+      lockTimeoutFileSystem,
+      logger,
+      FakePlatform(),
+      'my_app',
+      pubspecFile.path,
+      includeDevDependencies: false,
+    );
+
+    await expectLater(
+      runner.link(
+        extensions: <ProtocolExtension>[],
+        buildResult: const FakeFlutterNativeAssetsBuilderResult(),
+        recordedUsesFile: null,
+      ),
+      throwsToolExit(
+        message:
+            'Linking native assets timed out waiting for a file lock: '
+            'TimeoutException after 0:05:00.000000: '
+            'Could not acquire the lock to /project/.dart_tool/hooks_runner/shared/my_app/.lock.\n'
+            'Ensure no other Flutter or Dart processes are stuck building native assets, '
+            'or delete stale `.lock` files under `.dart_tool/hooks_runner/` and try again.',
+      ),
+    );
+  });
 }
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {

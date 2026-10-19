@@ -4,6 +4,8 @@
 
 // Logic for native assets shared between all host OSes.
 
+import 'dart:async';
+
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
@@ -614,10 +616,12 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required List<ProtocolExtension> extensions,
     required bool linkingEnabled,
   }) async {
-    final Result<BuildResult, HooksRunnerFailure> result = await _buildRunner.build(
-      linkingEnabled: linkingEnabled,
-      extensions: extensions,
-    );
+    final Result<BuildResult, HooksRunnerFailure> result;
+    try {
+      result = await _buildRunner.build(linkingEnabled: linkingEnabled, extensions: extensions);
+    } on TimeoutException catch (e) {
+      _throwNativeAssetsLockTimeout('Building', e);
+    }
     if (result.isSuccess) {
       return result.success;
     } else {
@@ -631,11 +635,16 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required BuildResult buildResult,
     required File? recordedUsesFile,
   }) async {
-    final Result<LinkResult, HooksRunnerFailure> result = await _buildRunner.link(
-      extensions: extensions,
-      buildResult: buildResult,
-      resourceIdentifiers: recordedUsesFile?.uri,
-    );
+    final Result<LinkResult, HooksRunnerFailure> result;
+    try {
+      result = await _buildRunner.link(
+        extensions: extensions,
+        buildResult: buildResult,
+        resourceIdentifiers: recordedUsesFile?.uri,
+      );
+    } on TimeoutException catch (e) {
+      _throwNativeAssetsLockTimeout('Linking', e);
+    }
     if (result.isSuccess) {
       return result.success;
     } else {
@@ -914,6 +923,14 @@ Never _throwNativeAssetsBuildFailed() {
 
 Never _throwNativeAssetsLinkFailed() {
   throwToolExit('Linking native assets failed. See the logs for more details.');
+}
+
+Never _throwNativeAssetsLockTimeout(String stage, TimeoutException error) {
+  throwToolExit(
+    '''
+$stage native assets timed out waiting for a file lock: $error
+Ensure no other Flutter or Dart processes are stuck building native assets, or delete stale `.lock` files under `.dart_tool/hooks_runner/` and try again.''',
+  );
 }
 
 OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
