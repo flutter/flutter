@@ -20,6 +20,20 @@ filegroup(
     srcs = ["bin/snapshots/frontend_server_aot.dart.snapshot"],
 )
 
+# The whole SDK, as dart-sdk-<platform>.zip ships it (build/archives'
+# dart_sdk_archive; directorySources in the converter's bazel_mapping.dart):
+# every file of the checkout's directory, not the repository's own markers.
+filegroup(
+    name = "all_files",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+        ],
+    ),
+)
+
 # The command-line SDK: `dart` and the libraries and snapshots it loads.
 filegroup(
     name = "dart",

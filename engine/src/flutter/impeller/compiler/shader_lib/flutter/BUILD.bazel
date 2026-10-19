@@ -13,3 +13,11 @@ gn_copy(
     srcs = ["runtime_effect.glsl"],
     outputs = ["$root_out_dir/shader_lib/flutter/{{source_file_part}}"],
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["*"]),
+)

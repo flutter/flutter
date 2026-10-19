@@ -311,8 +311,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    scalar, or a `zip_bundle`'s `{ source, destination }` scopes (a
    dictionary of destination to the label of the file: a source under the
    build directory is resolved to the target that produces it -- of the
-   same file, or of a file the bundle's `deps` name, read through
-   `dependency_resolver.dart`, or of a wrapped tree, `buildOutputLabels`);
+   same file, or of a file the bundle's `deps` name, through a group among
+   them, read through `dependency_resolver.dart`, or of a wrapped tree,
+   `buildOutputLabels`; a directory, `directorySources`, is a `zip_tree`
+   of its files; an entry whose destination varies with a condition is an
+   entry per case);
    the template's body is the macro's (`flatbuffers()` in
    `build/bazel/flatbuffers`), and the targets it expands to in GN are the
    mapping's `innerTargets`, which the oracle expects. A variable of a
@@ -321,6 +324,13 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `"gen_snapshot$exe"`; `GnTarget.readVariables`), is the block's helper
    and is not written: GN rejects an assignment nothing reads, so its
    effect is already in the values it fed.
+
+A string that expands a variable with different values under different
+conditions (`"${path_prefix}platform_strong.dill"` with the prefix set
+under the release mode) is one value per case, each under its condition,
+so that the attribute becomes a `select()`; a reference to a variable whose
+values the mapping enumerates (`$flutter_runtime_mode`) is spelled out as
+those values, one case each, since a `select()` cannot nest one.
 
 `bazel_mapping.dart` holds the converter's knowledge of the engine: label
 translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,

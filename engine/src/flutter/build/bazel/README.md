@@ -702,15 +702,33 @@ the closure in one archive -- is `cc_static_library` (behind
 `--experimental_cc_static_library` in Bazel 8; `.bazelrc`), named after the
 `output_name` with an alias under the GN name.
 
-Converted so far: `font-subset.zip`, `linux-x64-embedder.zip` and
-`impeller_sdk.zip`, each with GN's entries in GN's order and the readme
-identical modulo the version hash. Not yet: `build/archives`
-(`artifacts.zip`, the patched SDK, the Dart SDK: `$root_out_dir` sources
-from the wrapped trees, a source directory, a conditional destination), and
-the GTK shell's bundle (a `foreach` over `get_target_outputs`: a tree of
-files at their build-directory paths), which are the artifact phase's next
-steps; `generated_file` over `metadata` (the macOS entitlements lists) is the
-Apple phase's.
+A directory source (`artifacts.zip`'s `shader_lib`, the prebuilt Dart SDK
+that `dart-sdk-linux-x64.zip` is) is a `zip_tree`: the files of a filegroup
+over the directory (`directorySources` in the converter names it and the
+directory's path), each at its path under the destination, in Bazel's
+sorted order where `zip.py` walks the filesystem's. A destination or a name
+that varies with the runtime mode (`flutter_patched_sdk_product/` and
+`flutter_patched_sdk_product.zip` in release builds; the artifacts'
+`linux-x64-<mode>/` prefix) is a `select()` over the mode's settings: the
+converter gives a string with a conditional variable one value per case and
+spells out `$flutter_runtime_mode` as the mode's values. A source produced
+by a target of a wrapped or hand-written tree (`gen_snapshot`, the core
+snapshot, the platform kernels) is named in `buildOutputLabels`; one behind
+a group (`//flutter/shell/testing` over `flutter_tester`) is found through
+the group.
+
+All seven archives of the Linux host builders convert
+(`font-subset.zip`, `linux-x64-embedder.zip`, `impeller_sdk.zip`,
+`artifacts.zip`, `flutter_patched_sdk.zip`, `flutter_patched_sdk_product.zip`,
+`dart-sdk-linux-x64.zip`): each with GN's set of entries, the readme
+identical modulo the version hash, the data files, kernels and sources
+byte-identical, the binaries the files the build makes. Entry order follows
+GN's list where GN's does (a directory's files come sorted, after the list's
+files). Not yet: the GTK shell's bundle (a `foreach` over
+`get_target_outputs`: the `zip_tree` of a copy's outputs) and the
+`install` step that lays `zip_archives/` into `engine/src/out/<config>` for
+the uploader; `generated_file` over `metadata` (the macOS entitlements
+lists) is the Apple phase's.
 
 ## Impeller's shader pipeline
 

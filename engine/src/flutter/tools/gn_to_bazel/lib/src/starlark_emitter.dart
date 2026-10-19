@@ -87,6 +87,16 @@ final class _SelectKeys {
   final bool negated;
 }
 
+/// The archive entries a zip_bundle holds under some settings (`held`) and
+/// under none of them (`otherwise`): one `select()` of its `files`.
+final class _EntrySelect {
+  _EntrySelect(this.settings);
+
+  final List<String> settings;
+  final Map<String, String> held = <String, String>{};
+  final Map<String, String> otherwise = <String, String>{};
+}
+
 /// A list attribute: unconditional items, plus items per condition in the
 /// order the conditions first appeared.
 final class _ListAttribute {
@@ -830,7 +840,10 @@ final class _Emitter {
         case TemplateArgumentKind.ignored:
           break;
         case TemplateArgumentKind.archiveEntries:
-          rule.scalars[argument.attribute] = _archiveEntriesText(variable, target, rule);
+          final String entries = _archiveEntriesText(variable, target, rule);
+          if (entries.isNotEmpty) {
+            rule.scalars[argument.attribute] = entries;
+          }
         case TemplateArgumentKind.package:
           final String? directory = _singleString(variable);
           if (directory == null) {
@@ -869,20 +882,56 @@ final class _Emitter {
           'an entry of ${variable.name} is $value, not a { source, destination } scope',
         );
       }
-      final String source = _scopeMember(value, 'source', location);
-      final String destination = _scopeMember(value, 'destination', location);
-      final String label = source.startsWith('$buildDirRoot/') || source.startsWith('$genDirRoot/')
-          ? _buildOutputLabel(source, target, location)
-          : _filePath(source, location);
-      final Map<String, String> entries = item.condition == Condition.always
-          ? always
-          : conditional.putIfAbsent(item.condition, () => <String, String>{});
-      if (entries.containsKey(destination)) {
-        throw GnError(location, 'two entries of ${variable.name} go to $destination');
+      // A destination (or source) that varies with a condition -- GN's
+      // `"${path_prefix}platform_strong.dill"` with the prefix set under the
+      // release mode -- is an entry per case, each under its condition.
+      for (final GnScalarCase source in _scopeMember(value, 'source', location)) {
+        for (final GnScalarCase destination in _scopeMember(value, 'destination', location)) {
+          final Condition condition = item.condition
+              .and(source.condition)
+              .and(destination.condition);
+          if (condition == Condition.never) {
+            continue;
+          }
+          final String path = (source.value as GnStringValue).value;
+          final String at = (destination.value as GnStringValue).value;
+          // A directory: a zip_tree of its files, named after the bundle
+          // and the destination, in the bundle's `trees`.
+          final DirectorySource? directory =
+              directorySources[path.startsWith('//')
+                  ? path
+                  : _normalized('$gnPackage/$path', location)];
+          if (directory != null) {
+            _use(templateMappings['zip_bundle']!.bzl, 'zip_tree');
+            final name = '${target.name}_${at.isEmpty ? 'tree' : at.replaceAll('/', '_')}';
+            final tree = _Rule('zip_tree', name, const <String>[])
+              ..scalars['root'] = _starlarkString(directory.root)
+              ..scalars['destination'] = _starlarkString(at);
+            tree.list('srcs').add(Condition.always, _Item(_localLabel(directory.label)));
+            rules.add(tree);
+            rule.list('trees').add(condition, _Item(':$name'));
+            continue;
+          }
+          final String label = path.startsWith('$buildDirRoot/') || path.startsWith('$genDirRoot/')
+              ? _buildOutputLabel(path, target, location)
+              : _filePath(path, location);
+          final Map<String, String> entries = condition == Condition.always
+              ? always
+              : conditional.putIfAbsent(condition, () => <String, String>{});
+          if (entries.containsKey(at)) {
+            throw GnError(location, 'two entries of ${variable.name} go to $at');
+          }
+          entries[at] = label;
+        }
       }
-      entries[destination] = label;
     }
-    final out = StringBuffer(_stringDictText(always));
+    if (always.isEmpty && conditional.isEmpty) {
+      return '';
+    }
+    // One select() per set of settings: entries under a setting and entries
+    // under its negation (the patched SDK's two layouts, by the release
+    // mode) are the two branches of one.
+    final selects = <String, _EntrySelect>{};
     for (final MapEntry<Condition, Map<String, String>> group in conditional.entries) {
       final _SelectKeys keys = _selectKeys(
         group.key,
@@ -890,24 +939,95 @@ final class _Emitter {
         variable.assignments.first.location,
         () => 'of an entry of ${variable.name}',
       );
-      final String held = _stringDictText(group.value);
-      out.write(' | select({\n');
-      for (final String setting in keys.settings) {
-        out.write('        ${_starlarkString(setting)}: ${keys.negated ? '{}' : held},\n');
-      }
-      out.write('        "//conditions:default": ${keys.negated ? held : '{}'},\n');
-      out.write('    })');
+      final _EntrySelect entry = selects.putIfAbsent(
+        keys.settings.join(' '),
+        () => _EntrySelect(keys.settings),
+      );
+      (keys.negated ? entry.otherwise : entry.held).addAll(group.value);
     }
-    return out.toString();
+    final parts = <String>[if (always.isNotEmpty || selects.isEmpty) _stringDictText(always)];
+    for (final _EntrySelect select in selects.values) {
+      final out = StringBuffer('select({\n');
+      for (final String setting in select.settings) {
+        out.write(
+          '        ${_starlarkString(setting)}: ${_stringDictText(select.held, indent: 8)},\n',
+        );
+      }
+      out.write(
+        '        "//conditions:default": ${_stringDictText(select.otherwise, indent: 8)},\n',
+      );
+      out.write('    })');
+      parts.add(out.toString());
+    }
+    return parts.join(' | ');
   }
 
-  /// The one string [member] of [scope] (`source`, `destination`).
-  static String _scopeMember(GnScopeValue scope, String member, GnLocation location) {
-    final List<GnValue>? items = scope.variables[member]?.unconditionalItems;
-    if (items == null || items.length != 1 || items.single is! GnStringValue) {
-      throw GnError(location, 'the scope has no single $member string');
+  /// The string [member] of [scope] (`source`, `destination`): its one
+  /// value, or one per condition it takes a value under.
+  static List<GnScalarCase> _scopeMember(GnScopeValue scope, String member, GnLocation location) {
+    final GnVariable? variable = scope.variables[member];
+    if (variable == null || variable.isList) {
+      throw GnError(location, 'the scope has no $member string');
     }
-    return (items.single as GnStringValue).value;
+    final List<GnScalarCase> cases = _enumerated(variable.cases(location), location);
+    if (cases.isEmpty || cases.any((GnScalarCase c) => c.value is! GnStringValue)) {
+      throw GnError(location, "the scope's $member is not a string");
+    }
+    return cases;
+  }
+
+  /// [cases] with every string around a reference to a variable whose
+  /// values the mapping enumerates (`flutter_runtime_mode`:
+  /// [comparisonSettings]) spelled out, one case per value under the
+  /// case's condition and that value's -- `"linux-x64-$flutter_runtime_mode"`
+  /// under `flutter_runtime_mode != "debug"` is three cases, one per other
+  /// mode -- since a `select()` cannot nest one. Other strings stay as they
+  /// are.
+  static List<GnScalarCase> _enumerated(List<GnScalarCase> cases, GnLocation location) {
+    final out = <GnScalarCase>[];
+    for (final scalarCase in cases) {
+      final GnValue value = scalarCase.value;
+      if (value is! GnExpandedString) {
+        out.add(scalarCase);
+        continue;
+      }
+      final names = <String>{
+        for (final GnValue part in value.parts)
+          if (part is GnReference) part.name,
+      };
+      if (!names.every(comparisonSettings.containsKey)) {
+        out.add(scalarCase);
+        continue;
+      }
+      // One case per combination of the variables' values.
+      var combinations = <Map<String, String>>[<String, String>{}];
+      for (final name in names) {
+        combinations = <Map<String, String>>[
+          for (final partial in combinations)
+            for (final String option in comparisonSettings[name]!.keys)
+              <String, String>{...partial, name: option},
+        ];
+      }
+      for (final bound in combinations) {
+        Condition condition = scalarCase.condition;
+        for (final MapEntry<String, String> b in bound.entries) {
+          condition = condition.and(ConditionComparison(b.key, true, b.value));
+        }
+        if (condition == Condition.never) {
+          continue;
+        }
+        final String text = value.parts
+            .map(
+              (GnValue part) => switch (part) {
+                GnReference(:final String name) => bound[name]!,
+                _ => (part as GnStringValue).value,
+              },
+            )
+            .join();
+        out.add(GnScalarCase(condition, GnStringValue(text), scalarCase.assignment));
+      }
+    }
+    return out;
   }
 
   /// The label of the target that produces the build output [path]
@@ -919,23 +1039,42 @@ final class _Emitter {
   String _buildOutputLabel(String path, GnTarget bundle, GnLocation location) {
     String? label = _buildOutputs(localTargets.values.toList(), gnPackage)[path];
     if (label == null) {
-      for (final GnListItem dep in bundle.variables['deps']?.liveItems ?? const <GnListItem>[]) {
-        if (dep.value is! GnStringValue) {
-          continue;
-        }
-        final String gnLabel = _gnLabel((dep.value as GnStringValue).value);
+      // The bundle's deps in other files, and what a group among them
+      // forwards (`//flutter/shell/testing` is a group over flutter_tester).
+      final pending = <String>[
+        for (final GnListItem dep in bundle.variables['deps']?.liveItems ?? const <GnListItem>[])
+          if (dep.value is GnStringValue) _gnLabel((dep.value as GnStringValue).value),
+      ];
+      final seen = <String>{};
+      while (pending.isNotEmpty && label == null) {
+        final String gnLabel = pending.removeAt(0);
         final int colon = gnLabel.indexOf(':');
-        if (colon < 0 || gnLabel.substring(0, colon) == gnPackage) {
+        if (colon < 0 || gnLabel.substring(0, colon) == gnPackage || !seen.add(gnLabel)) {
           continue;
         }
+        final String directory = gnLabel.substring(0, colon);
         final GnTarget? target = forwarded.targetOf(gnLabel);
         if (target == null) {
           continue;
         }
-        label = _buildOutputs(<GnTarget>[target], gnLabel.substring(0, colon))[path];
-        if (label != null) {
-          break;
+        if (target.rule == 'group') {
+          for (final name in <String>['deps', 'public_deps']) {
+            for (final GnListItem dep
+                in target.variables[name]?.liveItems ?? const <GnListItem>[]) {
+              if (dep.value is GnStringValue) {
+                pending.add(
+                  absoluteGnLabel(
+                    (dep.value as GnStringValue).value,
+                    package: directory,
+                    implicitName: true,
+                  ),
+                );
+              }
+            }
+          }
+          continue;
         }
+        label = _buildOutputs(<GnTarget>[target], directory)[path];
       }
     }
     if (label != null) {
@@ -1140,16 +1279,22 @@ final class _Emitter {
   }
 
   /// A dictionary of strings (a test's `env`) in the same layout.
-  static String _stringDictText(Map<String, String> entries) {
+  /// A dictionary of strings as Starlark text, its lines indented for an
+  /// attribute value ([indent] 4) or a `select()` branch (8), as buildifier
+  /// lays them out.
+  static String _stringDictText(Map<String, String> entries, {int indent = 4}) {
+    if (entries.isEmpty) {
+      return '{}';
+    }
     if (entries.length == 1) {
       final MapEntry<String, String> e = entries.entries.single;
       return '{${_starlarkString(e.key)}: ${_starlarkString(e.value)}}';
     }
     final out = StringBuffer('{\n');
     for (final MapEntry<String, String> e in entries.entries) {
-      out.writeln('        ${_starlarkString(e.key)}: ${_starlarkString(e.value)},');
+      out.writeln('${' ' * (indent + 4)}${_starlarkString(e.key)}: ${_starlarkString(e.value)},');
     }
-    return '$out    }';
+    return '$out${' ' * indent}}';
   }
 
   /// [text] as a Starlark string literal.
@@ -2217,8 +2362,23 @@ final class _Emitter {
   /// file in the build directory; in Bazel the files must be the binary's
   /// runfiles.
   bool _isLocalData(String gnLabel) {
-    final String? rule = _localRule(gnLabel);
-    return rule == 'copy' || (templateMappings[rule]?.files ?? false);
+    return _isFilesRule(_localRule(gnLabel) ?? _ruleElsewhere(gnLabel));
+  }
+
+  /// Whether a target of GN rule [rule] is files rather than a library: a
+  /// `copy()`, or a template whose macro's target is files (an archive, a
+  /// snapshot).
+  static bool _isFilesRule(String? rule) =>
+      rule == 'copy' || (templateMappings[rule]?.files ?? false);
+
+  /// The GN rule of a target of another file (`//flutter/shell/platform/
+  /// embedder:embedder-archive`), through the resolver; null when it cannot
+  /// say.
+  String? _ruleElsewhere(String gnLabel) {
+    if (gnLabel.startsWith(':')) {
+      return null;
+    }
+    return forwarded.targetOf(_gnLabel(gnLabel))?.rule;
   }
 
   /// The GN rule of a target of this file named by a `:name` label, or null
@@ -2602,7 +2762,10 @@ final class _Emitter {
   }
 
   void _scalar(_Rule rule, String attribute, GnVariable variable) {
-    final List<GnScalarCase> cases = variable.cases(variable.assignments.first.location);
+    final List<GnScalarCase> cases = _enumerated(
+      variable.cases(variable.assignments.first.location),
+      variable.assignments.first.location,
+    );
     if (cases.isEmpty) {
       throw GnError(variable.assignments.first.location, '${variable.name} has no value');
     }

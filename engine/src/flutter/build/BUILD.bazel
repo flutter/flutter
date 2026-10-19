@@ -27,7 +27,6 @@ filegroup(
             "*.gni",
             "*.py",
             "*.sh",
-            "archives/**",
             "config/**",
             "dart/**",
             "esbuild/**",
@@ -52,6 +51,7 @@ filegroup(
         ],
     ) + [
         # Subpackages the glob does not enter.
+        "//engine/src/flutter/build/archives:gn_files",
         "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:gn_files",
     ],
     visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
