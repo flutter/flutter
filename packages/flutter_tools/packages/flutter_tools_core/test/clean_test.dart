@@ -87,6 +87,20 @@ void main() {
         }),
         throwsFormatException,
       );
+      expect(
+        () => CleanEnvironment.fromJson(const <String, Object?>{
+          'projectRoot': 'http://example.com/dir/',
+          'buildDir': 'file:///path/to/project/build/',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => CleanEnvironment.fromJson(const <String, Object?>{
+          'projectRoot': 'file:///path/to/project/',
+          'buildDir': 'http://example.com/dir/',
+        }),
+        throwsFormatException,
+      );
     });
   });
 }

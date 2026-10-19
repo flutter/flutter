@@ -66,7 +66,9 @@ class ExtensionCleanManager {
               timeout: null,
             );
           } on Object catch (e) {
-            _logger.printError('Failed to clean extension artifacts: $e');
+            _logger.printError(
+              'Failed to clean extension artifacts for "${connection.extensionName}": $e',
+            );
           }
         }),
       );

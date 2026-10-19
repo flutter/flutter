@@ -17,10 +17,11 @@ typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
-    required Isolate this._isolate,
-    required this._peer,
     required this.capabilities,
+    required this.extensionName,
+    required Isolate this._isolate,
     required this._logger,
+    required this._peer,
   });
 
   Isolate? _isolate;
@@ -29,6 +30,9 @@ class ExtensionConnection {
 
   /// The capabilities and supported service namespaces of the extension.
   final ToolExtensionCapabilities capabilities;
+
+  /// The resolved package or extension name of the connected extension.
+  final String extensionName;
 
   bool _isDisposed = false;
 
@@ -57,6 +61,7 @@ class ExtensionConnection {
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
     required Logger logger,
+    String? packageName,
     Duration timeout = const Duration(seconds: 5),
   }) async {
     logger.printTrace('ExtensionConnection spawning extension isolate...');
@@ -114,10 +119,11 @@ class ExtensionConnection {
       );
 
       return ExtensionConnection._(
-        isolate: isolate,
-        peer: peer,
         capabilities: capabilities,
+        extensionName: capabilities.extensionName ?? packageName ?? 'unknown_extension',
+        isolate: isolate,
         logger: logger,
+        peer: peer,
       );
     } on TimeoutException {
       logger.printTrace('ExtensionConnection handshake timed out.');

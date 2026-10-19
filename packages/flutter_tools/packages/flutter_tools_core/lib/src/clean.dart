@@ -20,24 +20,27 @@ class CleanEnvironment {
   /// Deserializes a [CleanEnvironment] from a JSON-serializable map.
   ///
   /// Throws a [FormatException] if required fields are missing or are not
-  /// valid trailing-slash-terminated absolute directory URIs.
+  /// valid trailing-slash-terminated absolute `file:` directory URIs.
   factory CleanEnvironment.fromJson(Map<String, Object?> json) {
     if (json case {
       projectRootKey: final String projectRootStr,
       buildDirKey: final String buildDirStr,
     }) {
-      final Uri? projectRootUri = Uri.tryParse(projectRootStr);
-      final Uri? buildDirUri = Uri.tryParse(buildDirStr);
-      if (projectRootUri != null &&
-          projectRootUri.hasAbsolutePath &&
-          projectRootUri.path.endsWith('/') &&
-          buildDirUri != null &&
-          buildDirUri.hasAbsolutePath &&
-          buildDirUri.path.endsWith('/')) {
+      final Uri? projectRootUri = _parseDirectoryUri(projectRootStr);
+      final Uri? buildDirUri = _parseDirectoryUri(buildDirStr);
+      if (projectRootUri != null && buildDirUri != null) {
         return CleanEnvironment(buildDir: buildDirUri, projectRoot: projectRootUri);
       }
     }
     throw FormatException('Invalid CleanEnvironment JSON: $json');
+  }
+
+  static Uri? _parseDirectoryUri(String rawUri) {
+    final Uri? uri = Uri.tryParse(rawUri);
+    if (uri != null && uri.isScheme('file') && uri.hasAbsolutePath && uri.path.endsWith('/')) {
+      return uri;
+    }
+    return null;
   }
 
   /// Map key for [buildDir].

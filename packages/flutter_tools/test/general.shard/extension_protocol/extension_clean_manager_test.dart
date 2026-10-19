@@ -159,6 +159,7 @@ void main() {
                 throw StateError('Simulated extension clean failure');
               }),
             ],
+            extensionName: 'failing_clean_extension',
             supportedPlatforms: const <String>{'linux'},
           );
         }
@@ -171,6 +172,7 @@ void main() {
                 verifySendPort.send(env.toMap());
               }),
             ],
+            extensionName: 'succeeding_clean_extension',
             supportedPlatforms: const <String>{'linux'},
           );
         }
@@ -195,7 +197,10 @@ void main() {
         final Directory buildDir = projectDir.childDirectory('build');
 
         await cleanManager.cleanProject(project, buildDirectory: buildDir);
-        expect(logger.errorText, contains('Failed to clean extension artifacts'));
+        expect(
+          logger.errorText,
+          contains('Failed to clean extension artifacts for "failing_clean_extension"'),
+        );
 
         final Object? rawReceived = await verifyPort.first;
         final receivedEnv = CleanEnvironment.fromJson(rawReceived! as Map<String, Object?>);
