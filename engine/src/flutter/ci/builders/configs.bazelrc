@@ -64,8 +64,7 @@ build:host_release_test --compilation_mode=opt --//engine/src/flutter/common:run
 
 # linux_unopt.json: ci/host_debug_unopt_impeller_tests
 #   --runtime-mode debug --unoptimized --prebuilt-dart-sdk --target-dir ci/host_debug_unopt_impeller_tests --rbe --no-goma --use-glfw-swiftshader
-# No configuration: the Bazel build cannot express
-#   --use-glfw-swiftshader (the Impeller test backends are not parameterized by it)
+build:host_debug_unopt_impeller_tests --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
 
 # linux_unopt.json: ci/host_release_licenses
 #   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
