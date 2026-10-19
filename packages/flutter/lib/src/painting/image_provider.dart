@@ -1263,8 +1263,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// defined by `width` and `height`. The image will lose detail and
   /// use less memory if resized to a size smaller than the native size.
   ///
-  /// At least one of `width` and `height` must be non-null. If they are
-  /// non-null, they must be greater than zero.
+  /// At least one of `width` and `height` must be non-null.
   ///
   /// {@macro flutter.painting.ResizeImage.useLogicalSize}
   const ResizeImage(
@@ -1274,9 +1273,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     this.policy = ResizeImagePolicy.exact,
     this.allowUpscaling = false,
     this.useLogicalSize = false,
-  }) : assert(width != null || height != null),
-       assert(width == null || width > 0),
-       assert(height == null || height > 0);
+  }) : assert(width != null || height != null);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -1415,6 +1412,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
               return ui.TargetImageSize(width: targetWidth, height: targetHeight);
             case ResizeImagePolicy.fit:
+              // A very thin image can derive a side of 0, which cannot be decoded.
+              // Clamp only the derived sides, so that a given side of 0 still fails.
               final double aspectRatio = intrinsicWidth / intrinsicHeight;
               final int maxWidth = effectiveWidth ?? intrinsicWidth;
               final int maxHeight = effectiveHeight ?? intrinsicHeight;
@@ -1423,36 +1422,31 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
               if (targetWidth > maxWidth) {
                 targetWidth = maxWidth;
-                targetHeight = targetWidth ~/ aspectRatio;
+                targetHeight = math.max(1, targetWidth ~/ aspectRatio);
               }
 
               if (targetHeight > maxHeight) {
                 targetHeight = maxHeight;
-                targetWidth = (targetHeight * aspectRatio).floor();
+                targetWidth = math.max(1, (targetHeight * aspectRatio).floor());
               }
 
               if (allowUpscaling) {
                 if (effectiveWidth == null) {
                   assert(effectiveHeight != null);
                   targetHeight = effectiveHeight!;
-                  targetWidth = (targetHeight * aspectRatio).floor();
+                  targetWidth = math.max(1, (targetHeight * aspectRatio).floor());
                 } else if (effectiveHeight == null) {
                   targetWidth = effectiveWidth;
-                  targetHeight = targetWidth ~/ aspectRatio;
+                  targetHeight = math.max(1, targetWidth ~/ aspectRatio);
                 } else {
-                  final int derivedMaxWidth = (maxHeight * aspectRatio).floor();
-                  final int derivedMaxHeight = maxWidth ~/ aspectRatio;
+                  final int derivedMaxWidth = math.max(1, (maxHeight * aspectRatio).floor());
+                  final int derivedMaxHeight = math.max(1, maxWidth ~/ aspectRatio);
                   targetWidth = math.min(maxWidth, derivedMaxWidth);
                   targetHeight = math.min(maxHeight, derivedMaxHeight);
                 }
               }
 
-              // A very thin image can derive a side of 0, which cannot be decoded.
-              // The given sides are greater than 0, so this changes only derived sides.
-              return ui.TargetImageSize(
-                width: math.max(1, targetWidth),
-                height: math.max(1, targetHeight),
-              );
+              return ui.TargetImageSize(width: targetWidth, height: targetHeight);
           }
         },
       );

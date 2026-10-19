@@ -21,16 +21,16 @@ void main() {
   });
 
   group('ResizeImage', () {
-    test('asserts that width and height are greater than 0', () {
-      final image = MemoryImage(Uint8List.fromList(kTransparentImage));
-      for (final ResizeImagePolicy policy in ResizeImagePolicy.values) {
-        for (final value in <int>[0, -1]) {
-          expect(() => ResizeImage(image, width: value, policy: policy), throwsAssertionError);
-          expect(() => ResizeImage(image, height: value, policy: policy), throwsAssertionError);
-          expect(
-            () => ResizeImage(image, width: 100, height: value, policy: policy),
-            throwsAssertionError,
-          );
+    test('fails to decode when a given width or height is 0', () async {
+      final image = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+      for (final policy in <ResizeImagePolicy>[ResizeImagePolicy.exact, ResizeImagePolicy.fit]) {
+        // The constructor accepts 0. The failure occurs at decode time.
+        for (final resizedImage in <ResizeImage>[
+          ResizeImage(image, width: 0, policy: policy),
+          ResizeImage(image, height: 0, policy: policy),
+        ]) {
+          expect(await _resolveAndGetError(resizedImage), isAssertionError);
+          PaintingBinding.instance.imageCache.clear();
         }
       }
     });
@@ -755,6 +755,19 @@ Future<Size> _resolveAndGetSize(
     completer.complete(Size(width.toDouble(), height.toDouble()));
   });
   stream.addListener(listener);
+  return completer.future;
+}
+
+Future<Object> _resolveAndGetError(ImageProvider imageProvider) {
+  final completer = Completer<Object>();
+  imageProvider
+      .resolve(ImageConfiguration.empty)
+      .addListener(
+        ImageStreamListener(
+          (ImageInfo image, bool synchronousCall) => completer.complete(image),
+          onError: (Object error, StackTrace? stackTrace) => completer.complete(error),
+        ),
+      );
   return completer.future;
 }
 
