@@ -55,6 +55,14 @@ abstract final class WebOptions {
         'Set to "--no-web-resources-cdn" to embed all web resources locally in the built app.',
   );
 
+  static const pwaStrategy = StringOptionDescriptor(
+    name: 'pwa-strategy',
+    help:
+        'Removed. Flutter no longer generates or registers an offline caching service worker by default. '
+        'Remove "--pwa-strategy" from your build command.',
+    hide: true,
+  );
+
   static const optimizationLevel = StringOptionDescriptor(
     name: 'optimization-level',
     abbr: 'O',
@@ -334,6 +342,7 @@ class WebCoreOptionsBundle extends OptionBundle {
   List<OptionDescriptor<Object?>> get descriptors => [
     WebOptions.baseHref,
     WebOptions.staticAssetsUrl,
+    WebOptions.pwaStrategy,
     WebOptions.webResourcesCdn,
     WebOptions.webDefines,
     WebOptions.webDefineFromFile,

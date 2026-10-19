@@ -239,7 +239,7 @@ name: foo
   );
 
   test(
-    'WebTemplatedFiles omits serviceWorkerSettings in flutter_bootstrap.js by default',
+    'WebTemplatedFiles generates default _flutter.loader.load() in flutter_bootstrap.js',
     () => testbed.run(() async {
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
@@ -3044,9 +3044,37 @@ flutter:
         },
       ]);
 
+      final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
+      expect(serviceWorkerFile, exists);
+      expect(serviceWorkerFile.readAsStringSync(), contains('self.registration.unregister()'));
+      expect(serviceWorkerFile.readAsStringSync(), contains("'flutter-app-cache'"));
+
       final File serviceWorkerDepfile = environment.buildDir.childFile('service_worker.d');
       expect(serviceWorkerDepfile, exists);
+      expect(serviceWorkerDepfile.readAsStringSync(), contains('flutter_service_worker.js'));
       expect(serviceWorkerDepfile.readAsStringSync(), contains('precache_manifest.json:'));
+    }),
+  );
+
+  test(
+    'WebServiceWorker preserves custom web/flutter_service_worker.js when present in project',
+    () => testbed.run(() async {
+      environment.projectDir.childDirectory('web').childFile('flutter_service_worker.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// custom user service worker');
+      final File outputServiceWorker = environment.outputDir.childFile('flutter_service_worker.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// custom user service worker');
+
+      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
+        JsCompilerConfig(),
+      ], const NoOpAnalytics());
+      await target.build(environment);
+
+      expect(outputServiceWorker.readAsStringSync(), '// custom user service worker');
+      final File serviceWorkerDepfile = environment.buildDir.childFile('service_worker.d');
+      expect(serviceWorkerDepfile, exists);
+      expect(serviceWorkerDepfile.readAsStringSync(), isNot(contains('flutter_service_worker.js')));
     }),
   );
 

@@ -913,6 +913,27 @@ void main() {
     expect(buildInfo.dartDefines, contains('FLUTTER_WEB_CANVASKIT_URL=abcdefg'));
   });
 
+  testWithoutContext('Rejects --pwa-strategy with migration message', () async {
+    final buildCommand = TestWebBuildCommand(
+      fileSystem: fileSystem,
+      platform: fakePlatform,
+      processManager: processManager,
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+
+    await expectLater(
+      runner.run(<String>['build', 'web', '--no-pub', '--pwa-strategy=none']),
+      throwsToolExit(
+        message:
+            'The "--pwa-strategy" option has been removed because Flutter no longer '
+            'generates or registers an offline caching service worker.\n'
+            'Remove "--pwa-strategy" from your build command. '
+            'See https://github.com/flutter/flutter/issues/156910 for more details.',
+      ),
+    );
+  });
+
   testWithoutContext('Rejects --base-href value that does not start with /', () async {
     final buildCommand = TestWebBuildCommand(
       fileSystem: fileSystem,
@@ -987,6 +1008,9 @@ void main() {
       expect(command.usage, isNot(contains(option)));
     }
 
+    // Removed options remain hidden so passing them produces a targeted ToolExit.
+    expectHidden('pwa-strategy');
+
     // Verbose-only options are hidden in standard help output.
     expectHidden('dump-info');
     expectHidden('minify-js');
@@ -1027,6 +1051,15 @@ void main() {
       );
       expect(command.usage, contains(option));
     }
+
+    void expectHidden(String option) {
+      expect(command.argParser.options.keys, contains(option));
+      expect(command.argParser.options[option]!.hide, isTrue);
+      expect(command.usage, isNot(contains(option)));
+    }
+
+    // Removed options remain hidden.
+    expectHidden('pwa-strategy');
 
     // Verbose-only options become visible when verboseHelp is true.
     expectVisible('dump-info');

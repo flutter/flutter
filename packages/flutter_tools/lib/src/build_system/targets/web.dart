@@ -27,6 +27,7 @@ import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
 import '../../web/content_hash.dart';
+import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../../web/web_constants.dart';
 import '../../web_template.dart';
@@ -1631,8 +1632,13 @@ class WebBuiltInAssets extends Target {
   }
 }
 
-/// Finalizes the web output directory and generates `precache_manifest.json`
-/// when `--web-content-hash` is enabled.
+/// Finalizes the web output directory, emits the self-unregistering
+/// `flutter_service_worker.js` cleanup stub when the project does not provide
+/// a custom `web/flutter_service_worker.js`, and generates
+/// `precache_manifest.json` when `--web-content-hash` is enabled.
+///
+/// The [WebServiceWorker] class and `web_service_worker` target name are
+/// preserved for `BuildTargets.webServiceWorker` compatibility.
 class WebServiceWorker extends Target {
   const WebServiceWorker(this.fileSystem, this.compileConfigs, this.analytics);
 
@@ -1665,6 +1671,7 @@ class WebServiceWorker extends Target {
         .whereType<File>()
         .where(
           (File file) =>
+              !file.path.endsWith('flutter_service_worker.js') &&
               !file.path.endsWith(kPrecacheManifestFile) &&
               !environment.fileSystem.path.basename(file.path).startsWith('.'),
         )
@@ -1678,7 +1685,19 @@ class WebServiceWorker extends Target {
       enabled: webContentHash,
       useLocalCanvasKit: environment.defines[kUseLocalCanvasKitFlag] == 'true',
     );
-    final depfile = Depfile(contents, <File>[?precacheManifestFile]);
+    final File userServiceWorker = environment.projectDir
+        .childDirectory('web')
+        .childFile('flutter_service_worker.js');
+    File? serviceWorkerFile;
+    if (!userServiceWorker.existsSync()) {
+      serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
+      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
+        Artifact.flutterToolsFileGenerators,
+      );
+      final String serviceWorker = generateServiceWorker(fileGeneratorsPath);
+      serviceWorkerFile.writeAsStringSync(serviceWorker);
+    }
+    final depfile = Depfile(contents, <File>[?serviceWorkerFile, ?precacheManifestFile]);
     environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('service_worker.d'),
