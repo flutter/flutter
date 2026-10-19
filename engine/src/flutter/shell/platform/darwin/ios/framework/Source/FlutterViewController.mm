@@ -1382,7 +1382,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     // This read has to happen during layout. Reserved regions lag the hinge and
     // UIKit has no notification for them; it tracks a read made here and runs
     // layout again when a region changes, which is the only signal there is
-    // while folding, since the view's bounds stay the same.
+    // while folding, since the view's bounds stay the same. A change of hinge
+    // posture requests a pass too, so this is the only place regions are read.
     [_displayFeaturesMonitor refresh];
   }
   [self updateViewportMetricsIfNeeded];

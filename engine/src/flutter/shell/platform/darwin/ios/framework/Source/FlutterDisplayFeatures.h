@@ -87,6 +87,12 @@ typedef void (^FlutterDisplayFeaturesUpdateBlock)(const FlutterDisplayFeatureLis
 /// Observes the hinge and the reserved regions of a view and reports them as
 /// display features whenever either changes.
 ///
+/// The regions are only ever read during layout, from `refresh`. The hinge
+/// handler contributes the posture alone: when it changes, the monitor
+/// requests a layout pass on the view rather than reading the regions itself,
+/// since the handler runs on every change of the angle while the regions
+/// change only with the posture.
+///
 /// The hinge APIs ship in the iOS 27.1 SDK. When the engine is built against an
 /// older SDK this class still exists but `init` returns nil, so callers need
 /// only an `@available(iOS 27.1, *)` check.

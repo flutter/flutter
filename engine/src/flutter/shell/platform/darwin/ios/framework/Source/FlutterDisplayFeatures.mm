@@ -91,9 +91,17 @@ FlutterDisplayFeatureList FlutterDisplayFeaturesFromRegions(
           // A nil hinge means this device has none, or the interaction left a
           // hierarchy that provides hinge updates.
           UIHinge* hinge = update.hinge;
-          strongSelf.status =
+          FlutterHingeStatus status =
               hinge ? static_cast<FlutterHingeStatus>(hinge.status) : FlutterHingeStatusUnknown;
-          [strongSelf refresh];
+          // This handler runs on every change of the angle, many times a second
+          // while the device is folding. Only the posture matters here, and the
+          // regions are read during layout, so a change of posture requests a
+          // layout pass rather than reading anything itself.
+          if (status == strongSelf.status) {
+            return;
+          }
+          strongSelf.status = status;
+          [strongSelf.view setNeedsLayout];
         }];
     [view addInteraction:_interaction];
   }
