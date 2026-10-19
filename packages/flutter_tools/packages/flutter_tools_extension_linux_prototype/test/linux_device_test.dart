@@ -64,8 +64,12 @@ void main() {
       final ExtensionRpcHandler launchAppHandler = handlers['launchApp']!;
       expect(
         await launchAppHandler(<String, Object?>{
+          DeviceService.debuggingOptionsParam: <String, Object?>{
+            'buildMode': 'debug',
+            'debuggingEnabled': true,
+          },
           DeviceService.deviceIdParam: 'unknown_device',
-          DeviceService.executablePathParam: '/nonexistent/app',
+          DeviceService.executableUriParam: 'file:///nonexistent/app',
         }),
         isFalse,
       );
@@ -84,9 +88,28 @@ void main() {
       );
       await expectLater(
         launchAppHandler(<String, Object?>{
+          DeviceService.debuggingOptionsParam: <String, Object?>{'buildMode': 'debug'},
           DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
-          DeviceService.executablePathParam: '/nonexistent/app',
+          DeviceService.executableUriParam: 'relative/path/app',
+        }),
+        throwsA(
+          isA<Object>().having(
+            (Object e) => e.toString(),
+            'toString',
+            allOf(
+              contains('-32602'),
+              contains(
+                'Invalid "${DeviceService.executableUriParam}" parameter for ${DeviceService.launchAppMethod}',
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(
+        launchAppHandler(<String, Object?>{
           DeviceService.debuggingOptionsParam: <String, Object?>{'buildMode': 'invalid_mode'},
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.executableUriParam: 'file:///nonexistent/app',
         }),
         throwsA(
           isA<Object>().having(
@@ -145,50 +168,42 @@ void main() {
       );
     });
 
-    test(
-      'launchApp, getVmServiceUri, and stopApp manage process lifecycle and parse VM Service URI',
-      () async {
-        if (!Platform.isLinux && !Platform.isMacOS) {
-          return;
-        }
-        final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_launch_test.');
-        addTearDown(() => tempDir.deleteSync(recursive: true));
+    test('launchApp, getVmServiceUri, and stopApp manage process lifecycle and parse VM Service URI with base64url padding', () async {
+      final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_launch_test.');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
 
-        final scriptFile = File('${tempDir.path}/fake_app.sh');
-        scriptFile.writeAsStringSync('''
+      final scriptFile = File('${tempDir.path}/fake_app.sh');
+      scriptFile.writeAsStringSync('''
 #!/bin/sh
-echo "The Dart VM service is listening on http://127.0.0.1:45678/abc123def456/"
+echo "The Dart VM service is listening on http://127.0.0.1:41187/wXxrm1n2GUI=/"
 sleep 30
 ''');
-        await Process.run('chmod', <String>['+x', scriptFile.path]);
+      await Process.run('chmod', <String>['+x', scriptFile.path]);
 
-        final service = LinuxDeviceService();
-        addTearDown(service.shutdown);
+      final service = LinuxDeviceService();
+      addTearDown(service.shutdown);
 
-        final bool launched = await service.launchApp(
-          deviceId: LinuxDeviceService.customLinuxDeviceId,
-          executablePath: scriptFile.path,
-          debuggingOptions: const ExtensionDebuggingOptions(
-            buildMode: .debug,
-            debuggingEnabled: true,
-          ),
-        );
-        expect(launched, isTrue);
+      final bool launched = await service.launchApp(
+        debuggingOptions: const ExtensionDebuggingOptions(
+          buildMode: .debug,
+          debuggingEnabled: true,
+        ),
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+        executableUri: scriptFile.absolute.uri,
+      );
+      expect(launched, isTrue);
 
-        final Uri? vmServiceUri = await service.getVmServiceUri(
-          deviceId: LinuxDeviceService.customLinuxDeviceId,
-        );
-        expect(vmServiceUri, Uri.parse('http://127.0.0.1:45678/abc123def456/'));
+      final Uri? vmServiceUri = await service.getVmServiceUri(
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+      );
+      expect(vmServiceUri, Uri.parse('http://127.0.0.1:41187/wXxrm1n2GUI=/'));
 
-        final bool stopped = await service.stopApp(
-          deviceId: LinuxDeviceService.customLinuxDeviceId,
-        );
-        expect(stopped, isTrue);
-        expect(
-          await service.getVmServiceUri(deviceId: LinuxDeviceService.customLinuxDeviceId),
-          isNull,
-        );
-      },
-    );
+      final bool stopped = await service.stopApp(deviceId: LinuxDeviceService.customLinuxDeviceId);
+      expect(stopped, isTrue);
+      expect(
+        await service.getVmServiceUri(deviceId: LinuxDeviceService.customLinuxDeviceId),
+        isNull,
+      );
+    }, skip: !Platform.isLinux && !Platform.isMacOS); // [intended] Uses POSIX shell script.
   });
 }

@@ -41,10 +41,10 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for the project root URI.
   static const String projectRootParam = 'projectRoot';
 
-  /// RPC parameter key for the executable path to launch.
-  static const String executablePathParam = 'executablePath';
+  /// RPC parameter key for the executable URI to launch.
+  static const String executableUriParam = 'executableUri';
 
-  /// RPC parameter key for optional debugging options.
+  /// RPC parameter key for debugging options.
   static const String debuggingOptionsParam = 'debuggingOptions';
 
   /// RPC response key for the VM service URI.
@@ -60,17 +60,30 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Flutter project at [projectRoot].
   Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot});
 
-  /// Launches the application at [executablePath] on the device with [deviceId].
+  /// Launches the application at [executableUri] on the device with [deviceId]
+  /// using the given [debuggingOptions].
+  ///
+  /// [executableUri] is guaranteed to be an absolute `file:` URI pointing to
+  /// the built application binary or bundle. Returns `true` once the
+  /// application process has been started, or `false` if launching failed.
   Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
-    required String executablePath,
-    ExtensionDebuggingOptions? debuggingOptions,
+    required Uri executableUri,
   });
 
-  /// Returns the VM Service URI for a running application on [deviceId], if available.
+  /// Returns the VM Service URI for a running application on [deviceId].
+  ///
+  /// Called by the host tool after [launchApp] succeeds when
+  /// [ExtensionDebuggingOptions.debuggingEnabled] is `true`. Implementations
+  /// may await VM Service discovery from the running process before returning,
+  /// or return `null` if the process exits or VM Service discovery fails.
   Future<Uri?> getVmServiceUri({required String deviceId});
 
   /// Stops a running application on [deviceId].
+  ///
+  /// Returns `true` if a running application was stopped, or `false` if no
+  /// application was running on [deviceId].
   Future<bool> stopApp({required String deviceId});
 
   @override
@@ -100,31 +113,39 @@ abstract base class DeviceService extends ToolExtensionService {
 
   Future<bool> _launchAppRpc(Map<String, Object?> params) async {
     if (params case {
+      debuggingOptionsParam: final Map<String, Object?> optionsMap,
       deviceIdParam: final String deviceId,
-      executablePathParam: final String executablePath,
+      executableUriParam: final String executableUriStr,
     }) {
-      final ExtensionDebuggingOptions? debuggingOptions = switch (params[debuggingOptionsParam]) {
-        final Map<String, Object?> options => () {
-          try {
-            return ExtensionDebuggingOptions.fromJson(options);
-          } on FormatException catch (e) {
-            throw RpcException.invalidParams(
-              'Invalid "$debuggingOptionsParam" parameter for $launchAppMethod: ${e.message}',
-            );
-          }
-        }(),
-        null => null,
-        _ => throw RpcException.invalidParams(
-          'Invalid "$debuggingOptionsParam" parameter for $launchAppMethod.',
-        ),
-      };
+      final Uri executableUri = _parseExecutableUri(executableUriStr);
+      final ExtensionDebuggingOptions debuggingOptions = _parseDebuggingOptions(optionsMap);
       return launchApp(
-        deviceId: deviceId,
-        executablePath: executablePath,
         debuggingOptions: debuggingOptions,
+        deviceId: deviceId,
+        executableUri: executableUri,
       );
     }
     throw RpcException.invalidParams('Invalid or missing parameters for $launchAppMethod.');
+  }
+
+  static Uri _parseExecutableUri(String executableUriStr) {
+    final Uri? uri = Uri.tryParse(executableUriStr);
+    if (uri == null || !uri.isScheme('file') || !uri.hasAbsolutePath) {
+      throw RpcException.invalidParams(
+        'Invalid "$executableUriParam" parameter for $launchAppMethod: must be an absolute "file:" URI.',
+      );
+    }
+    return uri;
+  }
+
+  static ExtensionDebuggingOptions _parseDebuggingOptions(Map<String, Object?> options) {
+    try {
+      return ExtensionDebuggingOptions.fromJson(options);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(
+        'Invalid "$debuggingOptionsParam" parameter for $launchAppMethod: ${e.message}',
+      );
+    }
   }
 
   Future<Map<String, Object?>> _getVmServiceUriRpc(Map<String, Object?> params) async {

@@ -33,9 +33,9 @@ final class LinuxBuildService extends BuildService {
     required String targetName,
   }) async {
     if (targetName == customLinuxBuildTargetName) {
-      final projectDir = Directory.fromUri(projectRoot);
+      final Uri projectDirUri = Directory.fromUri(projectRoot).uri;
       String appName = _defaultAppName;
-      final pubspecFile = File('${projectDir.path}/pubspec.yaml');
+      final pubspecFile = File.fromUri(projectDirUri.resolve('pubspec.yaml'));
       if (pubspecFile.existsSync()) {
         try {
           final Object? parsed = loadYaml(pubspecFile.readAsStringSync());
@@ -47,10 +47,11 @@ final class LinuxBuildService extends BuildService {
         }
       }
 
-      final executableFile = File(
-        '${projectDir.path}/build/linux/x64/${buildMode.cliName}/bundle/$appName',
+      // TODO(bkonyi): Invoke the Linux build pipeline instead of resolving the expected bundle path.
+      final executableFile = File.fromUri(
+        projectDirUri.resolve('build/linux/x64/${buildMode.cliName}/bundle/$appName'),
       );
-      return ExtensionBuildResult(success: true, executablePath: executableFile.absolute.path);
+      return ExtensionBuildResult(success: true, executableUri: executableFile.absolute.uri);
     }
     return ExtensionBuildResult(success: false, errorMessage: 'Unknown build target: $targetName');
   }

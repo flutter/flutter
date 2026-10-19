@@ -115,8 +115,8 @@ class TargetDevice {
   /// Display name of the device.
   final String name;
 
-  /// The name of the extension build target used to build an application for
-  /// this device during `flutter run`.
+  /// The [ExtensionBuildTarget.name] of the extension build target used to
+  /// build an application for this device during `flutter run`.
   final String? buildTarget;
 
   /// Whether the device is ephemeral.
@@ -194,19 +194,7 @@ class ExtensionDebuggingOptions {
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
   factory ExtensionDebuggingOptions.fromJson(Map<String, Object?> json) {
-    final BuildMode buildMode = switch (json[buildModeKey]) {
-      final String modeName => () {
-        try {
-          return BuildMode.fromCliName(modeName);
-        } on ArgumentError catch (e) {
-          throw FormatException('Invalid "$buildModeKey": ${e.message}', json);
-        }
-      }(),
-      _ => throw FormatException(
-        'Missing or invalid "$buildModeKey" in ExtensionDebuggingOptions.',
-        json,
-      ),
-    };
+    final BuildMode buildMode = _parseBuildMode(json[buildModeKey], json);
     final bool debuggingEnabled = switch (json[debuggingEnabledKey]) {
       final bool enabled => enabled,
       null => false,
@@ -216,6 +204,17 @@ class ExtensionDebuggingOptions {
       ),
     };
     return ExtensionDebuggingOptions(buildMode: buildMode, debuggingEnabled: debuggingEnabled);
+  }
+
+  static BuildMode _parseBuildMode(Object? raw, Map<String, Object?> json) {
+    if (raw case final String modeName) {
+      try {
+        return BuildMode.fromCliName(modeName);
+      } on ArgumentError catch (e) {
+        throw FormatException('Invalid "$buildModeKey": ${e.message}', json);
+      }
+    }
+    throw FormatException('Missing or invalid "$buildModeKey" in ExtensionDebuggingOptions.', json);
   }
 
   /// Map key for [buildMode].

@@ -170,7 +170,7 @@ TEST(PointerDataPacketConverterTest, CanConvertPointerDataPacket) {
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(6);
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
   CreateSimulatedPointerData(data, PointerData::Change::kHover, 0, 3.0, 0.0, 0);
@@ -221,7 +221,7 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeDownAndUp) {
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(4);
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
   CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 3.0, 0.0, 1);
@@ -274,7 +274,7 @@ TEST(PointerDataPacketConverterTest, CanUpdatePointerIdentifier) {
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(7);
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
   CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
@@ -331,7 +331,7 @@ TEST(PointerDataPacketConverterTest, AlwaysForwardMoveEvent) {
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(4);
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
   CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
@@ -370,7 +370,7 @@ TEST(PointerDataPacketConverterTest, CanWorkWithDifferentDevices) {
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(12);
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   packet->SetPointerData(0, data);
   CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0, 1);
@@ -469,7 +469,7 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeAdd) {
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(2);
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 330.0, 450.0,
                              1);
   packet->SetPointerData(0, data);
@@ -517,7 +517,7 @@ TEST(PointerDataPacketConverterTest, CanSynthesizeRemove) {
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(3);
 
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   data.view_id = 100;
   packet->SetPointerData(0, data);
@@ -574,7 +574,7 @@ TEST(PointerDataPacketConverterTest,
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(2);
 
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   data.view_id = 100;
   packet->SetPointerData(0, data);
@@ -617,7 +617,7 @@ TEST(PointerDataPacketConverterTest, CanHandleThreeFingerGesture) {
   TestDelegate delegate;
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
-  PointerData data;
+  PointerData data{};
   std::vector<PointerData> result;
   // First finger down.
   auto packet = std::make_unique<PointerDataPacket>(1);
@@ -700,7 +700,7 @@ TEST(PointerDataPacketConverterTest, CanConvertPointerSignals) {
     delegate.AddView(kImplicitViewId);
     PointerDataPacketConverter converter(delegate);
     auto packet = std::make_unique<PointerDataPacket>(6);
-    PointerData data;
+    PointerData data{};
     CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
                                     PointerData::SignalKind::kNone, 0, 0.0, 0.0,
                                     0.0, 0.0, 0);
@@ -810,7 +810,7 @@ TEST(PointerDataPacketConverterTest, CanConvertTrackpadGesture) {
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(3);
-  PointerData data;
+  PointerData data{};
   CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
                                      0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
   packet->SetPointerData(0, data);
@@ -864,7 +864,7 @@ TEST(PointerDataPacketConverterTest, CanConvertViewId) {
   delegate.AddView(200);
   PointerDataPacketConverter converter(delegate);
   auto packet = std::make_unique<PointerDataPacket>(2);
-  PointerData data;
+  PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0, 0);
   data.view_id = 100;
   packet->SetPointerData(0, data);

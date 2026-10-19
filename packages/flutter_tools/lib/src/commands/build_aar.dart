@@ -27,7 +27,6 @@ class BuildAarCommand extends BuildSubCommand {
     required ToolContext toolContext,
     super.verboseHelp = false,
   }) : super(logger: toolContext.logger, toolContext: toolContext) {
-    enableUsesPubOption();
     registerOptionBundles(const <OptionBundle>[
       DartCompileOptionsBundle(),
       AndroidGradleOptionsBundle(),

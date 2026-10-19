@@ -56,7 +56,7 @@ final class _FakeTestBuildService extends BuildService {
     required String targetName,
   }) async {
     if (targetName == 'fake-test-build') {
-      return const ExtensionBuildResult(success: true, executablePath: '/tmp/fake_bundle/app');
+      return ExtensionBuildResult(success: true, executableUri: Uri.file('/tmp/fake_bundle/app'));
     }
     if (targetName == 'fake-failing-build') {
       return const ExtensionBuildResult(success: false, errorMessage: 'Simulated build error');
@@ -98,6 +98,13 @@ final class _FakeTestDeviceService extends DeviceService {
         buildTarget: 'fake-test-build',
         ephemeral: false,
       ),
+      TargetDevice(
+        category: Category.desktop,
+        id: 'missing_vm_service_device',
+        name: 'Missing VM Service Device',
+        buildTarget: 'fake-test-build',
+        ephemeral: false,
+      ),
     ];
   }
 
@@ -107,19 +114,30 @@ final class _FakeTestDeviceService extends DeviceService {
 
   @override
   Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
-    required String executablePath,
-    ExtensionDebuggingOptions? debuggingOptions,
-  }) async =>
-      deviceId == 'fake_test_device' &&
-      (executablePath == '/tmp/fake_bundle/app' || executablePath == '/prebuilt/app');
+    required Uri executableUri,
+  }) async {
+    if (deviceId == 'fake_test_device') {
+      return (executableUri == Uri.file('/tmp/fake_bundle/app') &&
+              debuggingOptions ==
+                  const ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true)) ||
+          (executableUri == Uri.file('/prebuilt/app') &&
+              debuggingOptions == const ExtensionDebuggingOptions(buildMode: .release));
+    }
+    if (deviceId == 'missing_vm_service_device') {
+      return executableUri == Uri.file('/tmp/fake_bundle/app');
+    }
+    return false;
+  }
 
   @override
   Future<Uri?> getVmServiceUri({required String deviceId}) async =>
-      deviceId == 'fake_test_device' ? Uri.parse('http://127.0.0.1:8181/abcd/') : null;
+      deviceId == 'fake_test_device' ? Uri.parse('http://127.0.0.1:8181/abcd=/') : null;
 
   @override
-  Future<bool> stopApp({required String deviceId}) async => deviceId == 'fake_test_device';
+  Future<bool> stopApp({required String deviceId}) async =>
+      deviceId == 'fake_test_device' || deviceId == 'missing_vm_service_device';
 }
 
 void _fakeLaunchExtensionEntryPoint(SendPort sendPort) {
@@ -303,9 +321,9 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'ExtensionBackedDevice startApp and stopApp delegate build and launch via RPC',
-      () async {
+    group('ExtensionBackedDevice startApp and stopApp', () {
+      Future<(ExtensionManager, BufferLogger, MemoryFileSystem, List<Device>)>
+      setUpTestDevices() async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
         fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
@@ -316,6 +334,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[_fakeLaunchExtensionEntryPoint],
           featureFlags: featureFlags,
         );
+        addTearDown(manager.dispose);
         final discovery = ExtensionDevices(
           extensionBuildManager: ExtensionBuildManager(
             extensionManager: manager,
@@ -326,23 +345,32 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
         );
-
         final List<Device> devices = await discovery.devices();
-        expect(devices, hasLength(4));
+        return (manager, logger, fileSystem, devices);
+      }
+
+      testWithoutContext(
+        'delegates build, launch, VM service discovery, and stop via RPC',
+        () async {
+          final (_, _, _, List<Device> devices) = await setUpTestDevices();
+          final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
+
+          final LaunchResult launchResult = await device.startApp(
+            null,
+            mainPath: 'lib/main.dart',
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          expect(launchResult.started, isTrue);
+          expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
+          expect(await device.stopApp(null), isTrue);
+        },
+      );
+
+      testWithoutContext('launches prebuilt application without invoking build service', () async {
+        final (_, _, MemoryFileSystem fileSystem, List<Device> devices) = await setUpTestDevices();
         final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
-
-        final LaunchResult launchResult = await device.startApp(
-          null,
-          mainPath: 'lib/main.dart',
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        );
-        expect(launchResult.started, isTrue);
-        expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd/'));
-
-        expect(await device.stopApp(null), isTrue);
-
-        // Prebuilt application launch succeeds when PrebuiltApplicationPackage is supplied.
         final prebuiltPackage = _FakePrebuiltApplicationPackage(fileSystem.file('/prebuilt/app'));
+
         final LaunchResult prebuiltResult = await device.startApp(
           prebuiltPackage,
           prebuiltApplication: true,
@@ -350,22 +378,31 @@ void main() {
         );
         expect(prebuiltResult.started, isTrue);
         expect(prebuiltResult.vmServiceUri, isNull);
+      });
 
-        // Prebuilt application launch fails when no PrebuiltApplicationPackage is supplied.
-        final LaunchResult missingPrebuiltResult = await device.startApp(
-          null,
-          prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        );
-        expect(missingPrebuiltResult.started, isFalse);
-        expect(
-          logger.errorText,
-          contains('No prebuilt application binary provided for launching on'),
-        );
-        logger.clear();
+      testWithoutContext(
+        'fails when prebuiltApplication is true without PrebuiltApplicationPackage',
+        () async {
+          final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+          final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
 
-        // Missing buildTarget fails gracefully.
+          final LaunchResult missingPrebuiltResult = await device.startApp(
+            null,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          expect(missingPrebuiltResult.started, isFalse);
+          expect(
+            logger.errorText,
+            contains('No prebuilt application binary provided for launching on'),
+          );
+        },
+      );
+
+      testWithoutContext('fails when device does not specify a buildTarget', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device noTargetDevice = devices.firstWhere((Device d) => d.id == 'no_target_device');
+
         final LaunchResult noTargetResult = await noTargetDevice.startApp(
           null,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -375,24 +412,28 @@ void main() {
           logger.errorText,
           contains('does not specify a buildTarget for launching applications.'),
         );
-        logger.clear();
+      });
 
-        // Build failure fails gracefully.
+      testWithoutContext('fails when extension build target returns failure', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device failingBuildDevice = devices.firstWhere(
           (Device d) => d.id == 'failing_build_device',
         );
+
         final LaunchResult failingBuildResult = await failingBuildDevice.startApp(
           null,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(failingBuildResult.started, isFalse);
         expect(logger.errorText, contains('Build failed: Simulated build error'));
-        logger.clear();
+      });
 
-        // Launch failure fails gracefully.
+      testWithoutContext('fails when DeviceService.launchApp returns false', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device failingLaunchDevice = devices.firstWhere(
           (Device d) => d.id == 'failing_launch_device',
         );
+
         final LaunchResult failingLaunchResult = await failingLaunchDevice.startApp(
           null,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -402,10 +443,28 @@ void main() {
           logger.errorText,
           contains('Failed to launch application on Failing Launch Device.'),
         );
+      });
 
-        await manager.dispose();
-      },
-    );
+      testWithoutContext(
+        'fails and stops app when debugging is enabled and getVmServiceUri returns null',
+        () async {
+          final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+          final Device missingVmServiceDevice = devices.firstWhere(
+            (Device d) => d.id == 'missing_vm_service_device',
+          );
+
+          final LaunchResult result = await missingVmServiceDevice.startApp(
+            null,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          expect(result.started, isFalse);
+          expect(
+            logger.errorText,
+            contains('Failed to discover VM Service URI for Missing VM Service Device.'),
+          );
+        },
+      );
+    });
   });
 }
 

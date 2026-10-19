@@ -69,22 +69,21 @@ final class ExtensionDeviceClient extends DeviceService {
 
   @override
   Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
-    required String executablePath,
-    ExtensionDebuggingOptions? debuggingOptions,
+    required Uri executableUri,
   }) async {
     _logger.printTrace(
-      'ExtensionDeviceClient launching app "$executablePath" on "$deviceId" via RPC '
+      'ExtensionDeviceClient launching app "$executableUri" on "$deviceId" via RPC '
       '("${DeviceService.launchAppMethod}")...',
     );
     try {
-      final Map<String, Object?>? optionsMap = debuggingOptions?.toMap();
       final Object? rawResult = await connection.sendRequest(
         DeviceService.launchAppMethod,
         params: <String, Object?>{
+          DeviceService.debuggingOptionsParam: debuggingOptions.toMap(),
           DeviceService.deviceIdParam: deviceId,
-          DeviceService.executablePathParam: executablePath,
-          DeviceService.debuggingOptionsParam: ?optionsMap,
+          DeviceService.executableUriParam: executableUri.toString(),
         },
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
         // https://github.com/flutter/flutter/issues/193955.
@@ -98,7 +97,8 @@ final class ExtensionDeviceClient extends DeviceService {
         'expected bool, got ${rawResult.runtimeType}.',
       );
     } on Object catch (err, stack) {
-      _logger.printTrace('ExtensionDeviceClient failed to launch app: $err\n$stack');
+      _logger.printError('ExtensionDeviceClient failed to launch app on "$deviceId": $err');
+      _logger.printTrace('$stack');
     }
     return false;
   }
@@ -121,7 +121,10 @@ final class ExtensionDeviceClient extends DeviceService {
         return Uri.tryParse(uri);
       }
     } on Object catch (err, stack) {
-      _logger.printTrace('ExtensionDeviceClient failed to get VM Service URI: $err\n$stack');
+      _logger.printError(
+        'ExtensionDeviceClient failed to get VM Service URI for "$deviceId": $err',
+      );
+      _logger.printTrace('$stack');
     }
     return null;
   }
@@ -136,9 +139,6 @@ final class ExtensionDeviceClient extends DeviceService {
       final Object? rawResult = await connection.sendRequest(
         DeviceService.stopAppMethod,
         params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
-        timeout: null,
       );
       if (rawResult case final bool stopped) {
         return stopped;
@@ -148,7 +148,8 @@ final class ExtensionDeviceClient extends DeviceService {
         'expected bool, got ${rawResult.runtimeType}.',
       );
     } on Object catch (err, stack) {
-      _logger.printTrace('ExtensionDeviceClient failed to stop app: $err\n$stack');
+      _logger.printError('ExtensionDeviceClient failed to stop app on "$deviceId": $err');
+      _logger.printTrace('$stack');
     }
     return false;
   }
@@ -314,14 +315,21 @@ class ExtensionBackedDevice extends Device {
     String? route,
     String? userIdentifier,
   }) async {
+    // TODO(bkonyi): Forward additional BuildInfo and DebuggingOptions fields
+    // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/193955.
     final BuildMode buildMode = debuggingOptions.buildInfo.mode;
 
-    String? executablePath;
+    Uri? executableUri;
     if (prebuiltApplication) {
       if (package is PrebuiltApplicationPackage) {
-        executablePath = package.applicationPackage.path;
+        final String path = package.applicationPackage.path;
+        if (path.isNotEmpty) {
+          executableUri = package.applicationPackage.absolute.uri;
+        }
       }
-      if (executablePath == null || executablePath.isEmpty) {
+      if (executableUri == null ||
+          !executableUri.isScheme('file') ||
+          !executableUri.hasAbsolutePath) {
         _logger.printError('No prebuilt application binary provided for launching on $name.');
         return LaunchResult.failed();
       }
@@ -336,31 +344,27 @@ class ExtensionBackedDevice extends Device {
 
       final String targetMainPath = mainPath ?? 'lib/main.dart';
       _logger.printTrace('Building application using extension target "$buildTargetName"...');
-      try {
-        final ExtensionBuildResult result = await _buildManager.build(
-          buildMode: buildMode,
-          mainPath: targetMainPath,
-          projectRoot: _fileSystem.currentDirectory.uri,
-          targetName: buildTargetName,
+      final ExtensionBuildResult result = await _buildManager.build(
+        buildMode: buildMode,
+        mainPath: targetMainPath,
+        projectRoot: _fileSystem.currentDirectory.uri,
+        targetName: buildTargetName,
+      );
+      if (!result.success) {
+        final String? errorMessage = result.errorMessage;
+        _logger.printError(
+          errorMessage != null && errorMessage.isNotEmpty
+              ? 'Build failed: $errorMessage'
+              : 'Build failed.',
         );
-        if (!result.success) {
-          final String? errorMessage = result.errorMessage;
-          _logger.printError(
-            errorMessage != null && errorMessage.isNotEmpty
-                ? 'Build failed: $errorMessage'
-                : 'Build failed.',
-          );
-          return LaunchResult.failed();
-        }
-        executablePath = result.executablePath;
-      } on Object catch (err, stack) {
-        _logger.printError('Failed to build application for $name: $err\n$stack');
         return LaunchResult.failed();
       }
-
-      if (executablePath == null || executablePath.isEmpty) {
+      executableUri = result.executableUri;
+      if (executableUri == null ||
+          !executableUri.isScheme('file') ||
+          !executableUri.hasAbsolutePath) {
         _logger.printError(
-          'Extension build target "$buildTargetName" did not return an executablePath.',
+          'Extension build target "$buildTargetName" did not return a valid executableUri.',
         );
         return LaunchResult.failed();
       }
@@ -368,12 +372,12 @@ class ExtensionBackedDevice extends Device {
 
     final bool debuggingEnabled = debuggingOptions.debuggingEnabled;
     final bool launched = await _deviceService.launchApp(
-      deviceId: id,
-      executablePath: executablePath,
       debuggingOptions: ExtensionDebuggingOptions(
         buildMode: buildMode,
         debuggingEnabled: debuggingEnabled,
       ),
+      deviceId: id,
+      executableUri: executableUri,
     );
     if (!launched) {
       _logger.printError('Failed to launch application on $name.');
@@ -382,9 +386,12 @@ class ExtensionBackedDevice extends Device {
 
     if (debuggingEnabled) {
       final Uri? vmServiceUri = await _deviceService.getVmServiceUri(deviceId: id);
-      if (vmServiceUri != null) {
-        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+      if (vmServiceUri == null) {
+        _logger.printError('Failed to discover VM Service URI for $name.');
+        await stopApp(package, userIdentifier: userIdentifier);
+        return LaunchResult.failed();
       }
+      return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
     }
 
     return LaunchResult.succeeded();

@@ -312,13 +312,9 @@ class FlutterDevice {
   }
 
   Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) {
-    final FlutterVmService? service = vmService;
-    if (service == null) {
-      return Future<Uri?>.value();
-    }
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
-      service,
+      vmService!,
       fsName,
       rootDirectory,
       buildMode: buildInfo.mode,
@@ -549,7 +545,7 @@ class FlutterDevice {
 
 /// A subset of the [ResidentRunner] for delegating to attached flutter devices.
 abstract class ResidentHandlers {
-  List<FlutterDevice> get flutterDevices;
+  List<FlutterDevice?> get flutterDevices;
 
   /// Whether the resident runner has hot reload and restart enabled.
   bool get hotMode;
@@ -615,125 +611,76 @@ abstract class ResidentHandlers {
   }
 
   /// Dump the application's current widget tree to the terminal.
-  Future<bool> debugDumpApp() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpApp(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpApp() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpApp(isolateId: isolateId),
+  );
 
   /// Dump the application's current render tree to the terminal.
-  Future<bool> debugDumpRenderTree() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpRenderTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpRenderTree() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpRenderTree(isolateId: isolateId),
+  );
 
   /// Dump the application's current layer tree to the terminal.
   Future<bool> debugDumpLayerTree() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
+    if (!isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpLayerTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
+    return _debugDumpTree(
+      (FlutterVmService vmService, String isolateId) =>
+          vmService.flutterDebugDumpLayerTree(isolateId: isolateId),
+    );
   }
 
+  /// Dump the application's current focus tree to the terminal.
   Future<bool> debugDumpFocusTree() async {
-    if (!supportsServiceProtocol || !isRunningDebug) {
+    if (!isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpFocusTree(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
+    return _debugDumpTree(
+      (FlutterVmService vmService, String isolateId) =>
+          vmService.flutterDebugDumpFocusTree(isolateId: isolateId),
+    );
   }
 
   /// Dump the application's current semantics tree to the terminal.
   ///
   /// If semantics are not enabled, nothing is returned.
-  Future<bool> debugDumpSemanticsTreeInTraversalOrder() async {
-    if (!supportsServiceProtocol) {
-      return false;
-    }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!.flutterDebugDumpSemanticsTreeInTraversalOrder(
-          isolateId: view.uiIsolate!.id!,
-        );
-        logger.printStatus(data);
-      }
-    }
-    return true;
-  }
+  Future<bool> debugDumpSemanticsTreeInTraversalOrder() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpSemanticsTreeInTraversalOrder(isolateId: isolateId),
+  );
 
   /// Dump the application's current semantics tree to the terminal.
   ///
   /// If semantics are not enabled, nothing is returned.
-  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<bool> debugDumpSemanticsTreeInInverseHitTestOrder() => _debugDumpTree(
+    (FlutterVmService vmService, String isolateId) =>
+        vmService.flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: isolateId),
+  );
+
+  /// Returns whether at least one Flutter view was dumped.
+  Future<bool> _debugDumpTree(
+    Future<String> Function(FlutterVmService vmService, String isolateId) dumpCall,
+  ) async {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-      for (final view in views) {
-        final String data = await device.vmService!
-            .flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: view.uiIsolate!.id!);
-        logger.printStatus(data);
+    var dumped = false;
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device?.vmService case final vmService?) {
+        final List<FlutterView> views = await vmService.getFlutterViews();
+        for (final view in views) {
+          if (view.uiIsolate?.id case final isolateId?) {
+            final String data = await dumpCall(vmService, isolateId);
+            logger.printStatus(data);
+            dumped = true;
+          }
+        }
       }
     }
-    return true;
+    return dumped;
   }
 
   /// Toggle the "paint size" debugging feature.
@@ -741,11 +688,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+    for (final FlutterDevice? device in flutterDevices) {
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterToggleDebugPaintSizeEnabled(isolateId: view.uiIsolate!.id!);
       }
@@ -760,11 +704,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.targetPlatform == TargetPlatform.web_javascript) {
-        continue;
-      }
-      if (device.vmService == null) {
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device!.targetPlatform == TargetPlatform.web_javascript) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -782,11 +723,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+    for (final FlutterDevice? device in flutterDevices) {
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterToggleWidgetInspector(isolateId: view.uiIsolate!.id!);
       }
@@ -799,11 +737,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+    for (final FlutterDevice? device in flutterDevices) {
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterToggleInvertOversizedImages(isolateId: view.uiIsolate!.id!);
       }
@@ -816,11 +751,8 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+    for (final FlutterDevice? device in flutterDevices) {
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterToggleProfileWidgetBuilds(isolateId: view.uiIsolate!.id!);
       }
@@ -833,25 +765,16 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    final FlutterDevice? firstDeviceWithService = flutterDevices
-        .where((FlutterDevice d) => d.vmService != null)
-        .firstOrNull;
-    if (firstDeviceWithService == null) {
-      return false;
-    }
-    final List<FlutterView> views = await firstDeviceWithService.vmService!.getFlutterViews();
-    final Brightness? current = await firstDeviceWithService.vmService!.flutterBrightnessOverride(
+    final List<FlutterView> views = await flutterDevices.first!.vmService!.getFlutterViews();
+    final Brightness? current = await flutterDevices.first!.vmService!.flutterBrightnessOverride(
       isolateId: views.first.uiIsolate!.id!,
     );
     final Brightness next = switch (current) {
       Brightness.light => Brightness.dark,
       Brightness.dark || null => Brightness.light,
     };
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+    for (final FlutterDevice? device in flutterDevices) {
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterBrightnessOverride(
           isolateId: view.uiIsolate!.id!,
@@ -868,10 +791,7 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    final FlutterDevice? firstDeviceWithService = flutterDevices
-        .where((FlutterDevice d) => d.vmService != null)
-        .firstOrNull;
-    final FlutterVmService? vmService = firstDeviceWithService?.vmService;
+    final FlutterVmService? vmService = flutterDevices.firstOrNull?.vmService;
     if (vmService == null) {
       logger.printStatus('Platform toggle is not supported for this device.', emphasis: true);
       return false;
@@ -881,11 +801,8 @@ abstract class ResidentHandlers {
       isolateId: views.first.uiIsolate!.id!,
     );
     final String to = nextPlatform(from);
-    for (final FlutterDevice device in flutterDevices) {
-      if (device.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+    for (final FlutterDevice? device in flutterDevices) {
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterPlatformOverride(
           platform: to,
@@ -1245,17 +1162,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final FlutterVmService? vmService = flutterDevices
-            .map((FlutterDevice d) => d.vmService)
-            .whereType<FlutterVmService>()
-            .firstOrNull;
-        final Uri? wsAddress = vmService?.wsAddress;
-        if (wsAddress == null) {
-          return;
-        }
+        final address = flutterDevices.first.vmService!.wsAddress.toString();
         final File vmserviceOutFile = fileSystem.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
-        vmserviceOutFile.writeAsStringSync(wsAddress.toString());
+        vmserviceOutFile.writeAsStringSync(address);
       } on FileSystemException {
         logger.printError(
           'Failed to write vmservice-out-file at ${debuggingOptions.vmserviceOutFile}',
@@ -1380,12 +1290,10 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
-    var activeConnections = 0;
-    for (final FlutterDevice device in flutterDevices) {
-      if (!device.isWaitingForVmService && device.vmService == null) {
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device == null) {
         continue;
       }
-      activeConnections++;
       try {
         if (device.vmServiceUri == null) {
           throw Exception('VM Service URI info not available.');
@@ -1412,12 +1320,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       unawaited(
         device.vmService!.service.onDone
             .then<void>(_serviceProtocolDone, onError: _serviceProtocolError)
-            .whenComplete(() {
-              activeConnections--;
-              if (activeConnections == 0) {
-                _serviceDisconnected();
-              }
-            }),
+            .whenComplete(_serviceDisconnected),
       );
     }
   }

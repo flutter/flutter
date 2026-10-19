@@ -11,14 +11,24 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import 'build.dart';
 
+class _RunningApp {
+  _RunningApp({required this.process, required this.vmServiceCompleter});
+
+  final Process process;
+  final Completer<Uri?> vmServiceCompleter;
+  Uri? vmServiceUri;
+}
+
 /// Prototype Linux [DeviceService] implementation.
 final class LinuxDeviceService extends DeviceService {
   /// Identifier of the prototype Linux target device.
   static const String customLinuxDeviceId = 'custom_linux_device';
 
-  final _runningProcesses = <String, Process>{};
-  final _vmServiceUriCompleters = <String, Completer<Uri?>>{};
-  final _discoveredUris = <String, Uri?>{};
+  static final _vmServicePattern = RegExp(
+    r'The Dart VM service is listening on (http://127\.0\.0\.1:\d+/[a-zA-Z0-9_=-]+/?)',
+  );
+
+  final _runningApps = <String, _RunningApp>{};
 
   @override
   Future<List<TargetDevice>> getDevices() async {
@@ -45,16 +55,15 @@ final class LinuxDeviceService extends DeviceService {
 
   @override
   Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
-    required String executablePath,
-    ExtensionDebuggingOptions? debuggingOptions,
+    required Uri executableUri,
   }) async {
     if (deviceId != customLinuxDeviceId) {
       return false;
     }
-    final executable = File(executablePath);
+    final executable = File.fromUri(executableUri);
     if (!executable.existsSync()) {
-      stderr.writeln('Executable not found at $executablePath');
       return false;
     }
 
@@ -62,43 +71,41 @@ final class LinuxDeviceService extends DeviceService {
     await stopApp(deviceId: deviceId);
 
     final uriCompleter = Completer<Uri?>();
-    _vmServiceUriCompleters[deviceId] = uriCompleter;
-    _discoveredUris[deviceId] = null;
 
     try {
       final Process process = await Process.start(
-        executablePath,
+        executable.path,
         const <String>[],
         workingDirectory: executable.parent.path,
       );
-      _runningProcesses[deviceId] = process;
-
-      final vmServiceRegExp = RegExp(
-        r'The Dart VM service is listening on (http://127\.0\.0\.1:\d+/[a-zA-Z0-9_-]+/?)',
-      );
+      final runningApp = _RunningApp(process: process, vmServiceCompleter: uriCompleter);
+      _runningApps[deviceId] = runningApp;
 
       void checkVmServiceUri(String line) {
-        final Match? match = vmServiceRegExp.firstMatch(line);
+        final Match? match = _vmServicePattern.firstMatch(line);
         if (match != null && !uriCompleter.isCompleted) {
           final String? uriStr = match.group(1);
           final Uri? uri = uriStr != null ? Uri.tryParse(uriStr) : null;
-          _discoveredUris[deviceId] = uri;
+          runningApp.vmServiceUri = uri;
           uriCompleter.complete(uri);
         }
       }
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-        stdout.writeln('[App] $line');
-        checkVmServiceUri(line);
-      });
-      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-        stderr.writeln('[App Error] $line');
-        checkVmServiceUri(line);
-      });
+      // TODO(bkonyi): Route application logs over a DeviceService log stream.
+      process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(checkVmServiceUri);
+      process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen(checkVmServiceUri);
 
       unawaited(
-        process.exitCode.then((int code) {
-          _runningProcesses.remove(deviceId);
+        process.exitCode.then((int _) {
+          if (identical(_runningApps[deviceId], runningApp)) {
+            _runningApps.remove(deviceId);
+          }
           if (!uriCompleter.isCompleted) {
             uriCompleter.complete();
           }
@@ -106,8 +113,7 @@ final class LinuxDeviceService extends DeviceService {
       );
 
       return true;
-    } on ProcessException catch (e) {
-      stderr.writeln('Failed to launch app: $e');
+    } on ProcessException {
       if (!uriCompleter.isCompleted) {
         uriCompleter.complete();
       }
@@ -117,36 +123,31 @@ final class LinuxDeviceService extends DeviceService {
 
   @override
   Future<Uri?> getVmServiceUri({required String deviceId}) async {
-    if (_discoveredUris[deviceId] != null) {
-      return _discoveredUris[deviceId];
+    final _RunningApp? runningApp = _runningApps[deviceId];
+    if (runningApp == null) {
+      return null;
     }
-    final Completer<Uri?>? completer = _vmServiceUriCompleters[deviceId];
-    if (completer != null) {
-      return completer.future;
-    }
-    return null;
+    return runningApp.vmServiceUri ?? runningApp.vmServiceCompleter.future;
   }
 
   @override
   Future<bool> stopApp({required String deviceId}) async {
-    final Process? process = _runningProcesses.remove(deviceId);
-    final Completer<Uri?>? completer = _vmServiceUriCompleters.remove(deviceId);
-    if (completer != null && !completer.isCompleted) {
-      completer.complete();
+    final _RunningApp? runningApp = _runningApps.remove(deviceId);
+    if (runningApp == null) {
+      return false;
     }
-    _discoveredUris.remove(deviceId);
-    if (process != null) {
-      process.kill();
-      await process.exitCode;
-      return true;
+    if (!runningApp.vmServiceCompleter.isCompleted) {
+      runningApp.vmServiceCompleter.complete();
     }
-    return false;
+    runningApp.process.kill();
+    await runningApp.process.exitCode;
+    return true;
   }
 
   @override
   Future<void> shutdown() async {
-    for (final String deviceId in _runningProcesses.keys.toList()) {
-      await stopApp(deviceId: deviceId);
-    }
+    await Future.wait(
+      _runningApps.keys.toList().map((String deviceId) => stopApp(deviceId: deviceId)),
+    );
   }
 }

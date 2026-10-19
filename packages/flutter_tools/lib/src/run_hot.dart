@@ -279,24 +279,18 @@ class HotRunner extends ResidentRunner {
     try {
       final List<Uri?> baseUris = await _initDevFS();
       if (connectionInfoCompleter != null) {
-        final FlutterDevice? deviceWithService = flutterDevices
-            .where((FlutterDevice? d) => d?.vmService != null)
-            .firstOrNull;
-        if (deviceWithService != null) {
-          final FlutterVmService vmService = deviceWithService.vmService!;
-          final DartDevelopmentService dds = deviceWithService.device!.dds;
-          final int index = flutterDevices.indexOf(deviceWithService);
-          // Only handle one debugger connection.
-          connectionInfoCompleter.complete(
-            DebugConnectionInfo(
-              httpUri: vmService.httpAddress,
-              wsUri: vmService.wsAddress,
-              baseUri: baseUris[index]?.toString(),
-              devToolsUri: dds.devToolsUri,
-              dtdUri: dds.dtdUri,
-            ),
-          );
-        }
+        final FlutterVmService vmService = flutterDevices.first.vmService!;
+        final DartDevelopmentService dds = flutterDevices.first.device!.dds;
+        // Only handle one debugger connection.
+        connectionInfoCompleter.complete(
+          DebugConnectionInfo(
+            httpUri: vmService.httpAddress,
+            wsUri: vmService.wsAddress,
+            baseUri: baseUris.first.toString(),
+            devToolsUri: dds.devToolsUri,
+            dtdUri: dds.dtdUri,
+          ),
+        );
       }
     } on DevFSException catch (error) {
       logger.printError('Error initializing DevFS: $error');
@@ -324,9 +318,6 @@ class HotRunner extends ResidentRunner {
       // report, so we let incremental compiler know that source code was accepted.
       if (device!.generator != null) {
         device.generator!.accept();
-      }
-      if (device.vmService == null) {
-        continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
@@ -510,14 +501,7 @@ class HotRunner extends ResidentRunner {
 
     final Stopwatch findInvalidationTimer = _stopwatchFactory.createStopwatch('updateDevFS')
       ..start();
-    final DevFS? devFS = flutterDevices
-        .map((FlutterDevice? d) => d?.devFS)
-        .whereType<DevFS>()
-        .firstOrNull;
-    if (devFS == null) {
-      findInvalidationTimer.stop();
-      return UpdateFSReport(success: true);
-    }
+    final DevFS devFS = flutterDevices[0].devFS!;
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: devFS.lastCompiled,
       urisToMonitor: devFS.sources,
@@ -541,11 +525,8 @@ class HotRunner extends ResidentRunner {
       findInvalidatedDuration: findInvalidationTimer.elapsed,
     );
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS == null) {
-        continue;
-      }
       results.incorporateResults(
-        await device.updateDevFS(
+        await device!.updateDevFS(
           mainUri: entrypointFile.absolute.uri,
           target: target,
           bundle: assetBundle,
@@ -609,10 +590,7 @@ class HotRunner extends ResidentRunner {
   Future<void> _launchFromDevFS() async {
     final futures = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS == null) {
-        continue;
-      }
-      final Uri deviceEntryUri = device.devFS!.baseUri!.resolve(
+      final Uri deviceEntryUri = device!.devFS!.baseUri!.resolve(
         _swap ? 'main.dart.swap.dill' : 'main.dart.dill',
       );
       final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
@@ -650,11 +628,8 @@ class HotRunner extends ResidentRunner {
     // Check if the isolate is paused and resume it.
     final operations = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
-        continue;
-      }
       final uiIsolatesIds = <String?>{};
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
         if (view.uiIsolate == null) {
           continue;
@@ -798,10 +773,7 @@ class HotRunner extends ResidentRunner {
     bool silent = false,
     bool pause = false,
   }) async {
-    if (flutterDevices.any(
-      (FlutterDevice? device) =>
-          device!.devFS == null && (device.isWaitingForVmService || device.vmService != null),
-    )) {
+    if (flutterDevices.any((FlutterDevice? device) => device!.devFS == null)) {
       return OperationResult(1, 'Device initialization has not completed.');
     }
     await _calculateTargetPlatform();
@@ -990,10 +962,7 @@ class HotRunner extends ResidentRunner {
   }) async {
     final viewCache = <FlutterDevice?, List<FlutterView>>{};
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.vmService == null) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       viewCache[device] = views;
       for (final view in views) {
         if (view.uiIsolate == null) {
@@ -1213,11 +1182,8 @@ Future<OperationResult> defaultReloadSourcesHelper(
   final allReportsFutures = <Future<DeviceReloadReport?>>[];
 
   for (final device in flutterDevices) {
-    if (device!.vmService == null || device.devFS == null) {
-      continue;
-    }
     final List<Future<vm_service.ReloadReport>> reportFutures = await _reloadDeviceSources(
-      device,
+      device!,
       entryPath,
       pause: pause,
     );
@@ -1299,7 +1265,7 @@ Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
 
 void _resetDevFSCompileTime(List<FlutterDevice?> flutterDevices) {
   for (final device in flutterDevices) {
-    device!.devFS?.resetLastCompiled();
+    device!.devFS!.resetLastCompiled();
   }
 }
 
@@ -1334,11 +1300,8 @@ Future<ReassembleResult> _defaultReassembleHelper(
   var failedReassemble = false;
   var shouldReportReloadTime = true;
   for (final device in flutterDevices) {
-    final List<FlutterView>? views = viewCache[device];
-    if (views == null) {
-      continue;
-    }
-    for (final FlutterView view in views) {
+    final List<FlutterView> views = viewCache[device]!;
+    for (final view in views) {
       // Check if the isolate is paused, and if so, don't reassemble. Ignore the
       // PostPauseEvent event - the client requesting the pause will resume the app.
       final vm_service.Event? pauseEvent = await device!.vmService!.getIsolatePauseEventOrNull(
@@ -1385,10 +1348,6 @@ Future<ReassembleResult> _defaultReassembleHelper(
       logger.printTrace('Skipping reassemble because all isolates are paused.');
       return ReassembleResult(reassembleViews, failedReassemble, shouldReportReloadTime);
     }
-  }
-  if (reassembleViews.isEmpty) {
-    logger.printTrace('Skipping reassemble because no views are available.');
-    return ReassembleResult(reassembleViews, failedReassemble, shouldReportReloadTime);
   }
   assert(reassembleViews.isNotEmpty);
 

@@ -35,25 +35,14 @@ class ExtensionManager {
   final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
   bool get isInitialized => _isInitialized;
-  var _isInitialized = false;
-  var _entryPointsSpawned = false;
-  var _initializedConnectionCount = 0;
+  bool _isInitialized = false;
   Future<void>? _initFuture;
-  final _diagnosticsExtensions = <DiagnosticsExtension>[];
-  final _configurationExtensions = <ConfigurationExtension>[];
-  final _deviceExtensions = <DeviceService>[];
+  final List<DiagnosticsExtension> _diagnosticsExtensions = <DiagnosticsExtension>[];
+  final List<ConfigurationExtension> _configurationExtensions = <ConfigurationExtension>[];
+  final List<DeviceService> _deviceExtensions = <DeviceService>[];
 
-  /// Ensures entrypoints are initialized; idempotent once connections are active.
-  ///
-  /// If new connections have been registered in [_discovery] since the previous
-  /// initialization (for example, after `pub.get()` generated
-  /// `.dart_tool/package_config.json`), subsequent calls re-run initialization
-  /// so newly resolved project extensions are discovered.
+  /// Ensures entrypoints are initialized; idempotent.
   Future<void> ensureInitialized() {
-    if (_isInitialized && _discovery.connections.length != _initializedConnectionCount) {
-      _isInitialized = false;
-      _initFuture = null;
-    }
     return _initFuture ??= _doInitialize();
   }
 
@@ -62,11 +51,10 @@ class ExtensionManager {
       _isInitialized = true;
       return;
     }
-    if (_entryPoints.isNotEmpty && !_entryPointsSpawned) {
-      _entryPointsSpawned = true;
+    if (_entryPoints.isNotEmpty) {
       await initialize(entryPoints: _entryPoints);
     } else {
-      await initialize();
+      _isInitialized = true;
     }
   }
 
@@ -126,7 +114,6 @@ class ExtensionManager {
         _deviceExtensions.add(client);
       }
     }
-    _initializedConnectionCount = _discovery.connections.length;
     _isInitialized = true;
   }
 
@@ -164,8 +151,6 @@ class ExtensionManager {
     _configurationExtensions.clear();
     _deviceExtensions.clear();
     _isInitialized = false;
-    _entryPointsSpawned = false;
-    _initializedConnectionCount = 0;
     _initFuture = null;
     await _discovery.dispose();
   }
