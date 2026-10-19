@@ -510,6 +510,39 @@ void main() {
     );
   });
 
+  testWidgets('Material 3 primary tab indicator has a minimum width of 24dp', (
+    WidgetTester tester,
+  ) async {
+    const tabs = <String>['A', 'Medium', 'Longer Tab'];
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'A', useMaterial3: true));
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final RenderBox labelBox = tester.renderObject<RenderBox>(find.text('A'));
+    expect(labelBox.size.width, lessThan(24.0));
+
+    final Offset labelCenter = tabBarBox.globalToLocal(
+      labelBox.localToGlobal(labelBox.size.center(Offset.zero)),
+    );
+    final Rect expectedIndicator = Rect.fromLTRB(
+      labelCenter.dx - 12.0,
+      tabBarBox.size.height - 3.0,
+      labelCenter.dx + 12.0,
+      tabBarBox.size.height,
+    );
+
+    expect(
+      tabBarBox,
+      paints..rrect(
+        color: Theme.of(tester.element(find.byType(TabBar))).colorScheme.primary,
+        rrect: RRect.fromRectAndCorners(
+          expectedIndicator,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+  });
+
   testWidgets('TabBar default tab indicator (secondary)', (WidgetTester tester) async {
     final theme = ThemeData();
     final tabs = List<Widget>.generate(4, (int index) {
