@@ -825,6 +825,27 @@ declares an output per source. The script's directory walk did not follow
 symbolic links, which a sandbox's inputs are; it does now (a one-line
 change, harmless to GN). Its 289 files come out byte-identical to GN's.
 
+To use such a tree as a local engine with the flutter tool:
+
+```sh
+bazel run --config=host_debug_unopt //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
+cd packages/flutter
+../../bin/flutter test test/widgets/text_test.dart \
+    --local-engine=host_debug_unopt_bazel --local-engine-host=host_debug_unopt_bazel
+```
+
+(any name under `engine/src/out/` will do; `host_debug_unopt`, the
+default, is where GN's own build of that configuration lands, which
+`install` overwrites). The tool reads `flutter_tester`, the patched SDK,
+`dart-sdk/bin/dartaotruntime` and the frontend server from the tree, as the
+verbose log shows. One thing to know on a fresh checkout: under a local
+engine the tool downloads no engine artifacts, and pub resolves
+`sky_engine` from `bin/cache/pkg/`, which only a run *without*
+`--local-engine` populates -- run one plain `flutter test` first, or the
+first local-engine run fails in pub with "could not find package
+sky_engine". `packages/flutter/test/widgets` passes on the Bazel tree with
+GN's exact numbers (7,349 tests, 128 skipped).
+
 Not installed yet: the web SDK, and GN's own bookkeeping (`args.gn`,
 depfiles). `compile_commands.json`, which `tools/clang_tidy` and clangd
 read, comes from `tools/gn_to_bazel/tool/compile_commands.py` over
