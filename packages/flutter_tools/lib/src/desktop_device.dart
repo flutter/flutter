@@ -190,11 +190,12 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+    final ProcessManager processManager = toolContext.processManager;
     var succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
     for (final process in Set<Process>.of(_runningProcesses)) {
-      succeeded &= toolContext.processManager.killPid(process.pid);
+      succeeded &= processManager.killPid(process.pid);
     }
     return succeeded;
   }

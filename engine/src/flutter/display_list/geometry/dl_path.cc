@@ -131,7 +131,7 @@ void DlPath::Dispatch(DlPathReceiver& receiver) const {
     };
   };
 
-  PathData data;
+  PathData data{};
 
   auto verb = SkPath::Verb::kDone_Verb;
   do {
