@@ -30,6 +30,9 @@ to the Flutter SDK controlled `flutter` and `dart` binaries.
 
 Markdown documentation can be found for some commands in [flutter/packages/flutter_tools/doc/](https://github.com/flutter/flutter/tree/main/packages/flutter_tools/doc).
 
+See [Flavor-specific configuration assets](Flavor-configuration-assets.md) for
+selecting configuration files while preserving a fixed runtime asset key.
+
 ## Analysis
 
 To run dart analysis on the Flutter tool codebase, run:
