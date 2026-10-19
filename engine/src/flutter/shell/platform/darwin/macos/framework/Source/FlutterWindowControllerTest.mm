@@ -55,7 +55,7 @@ class FlutterWindowControllerTest : public FlutterEngineTest {
   }
 
   std::optional<flutter::Isolate> isolate_;
-  bool signalled_;
+  bool signalled_ = false;
 };
 
 class FlutterWindowControllerRetainTest : public ::testing::Test {};
