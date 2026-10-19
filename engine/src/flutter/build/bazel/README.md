@@ -845,8 +845,15 @@ configuration: `--enable-fontconfig` (the three `*_desktop` builds:
 generated files, so the Linux desktop artifact built here lacks what CI's
 has), `--asan` and `--dart-debug` (`host_debug_unopt`), `--use-glfw-swiftshader`,
 `--gn-args=dart_dynamic_modules=true`, LTO (which `tools/gn` enables
-without `--no-lto`). Of the fourteen Linux x64 host builds, seven have a
-configuration: `host_debug`, `host_release`, `host_debug_test`,
+without `--no-lto`). The developer's own configurations, `local_engine.json`'s
+`linux/` builds (what `et build --config <name>` runs: `host_debug`,
+`host_debug_unopt`, `host_profile`, `host_release`, with `--no-stripped`,
+which the Bazel build has no stripped copies to answer anyway), are read
+with the rest, and a name two builds share with the same flags -- CI's
+`ci/host_debug` and the developer's `linux/host_debug` -- is one
+configuration (different flags under one name would be an error). Of the
+eighteen builds, eleven have a configuration, nine distinct: `host_debug`,
+`host_debug_unopt`, `host_profile`, `host_release`, `host_debug_test`,
 `host_profile_test`, `host_release_test`, `host_release_licenses`,
 `host_debug_clang_tidy`. `ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a
@@ -858,6 +865,7 @@ targets nothing converted answers to listed (`flutter:unittests`,
 ```sh
 bazel run --config=host_release //engine/src/flutter/ci/builders:host_release
 bazel run --config=host_debug //engine/src/flutter/ci/builders:host_debug
+bazel run --config=host_profile //engine/src/flutter:install   # the developer's: everything
 ```
 
 lay `out/ci/host_release/zip_archives/flutter_patched_sdk_product.zip` and

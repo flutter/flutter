@@ -4742,6 +4742,15 @@ cc_library(
 ]}''',
         'mac_host_engine.json':
             '{"builds": [${build('ci/mac_host', '--runtime-mode debug --no-lto', <String>['flutter'])}]}',
+        // The developer's configurations: linux/host_debug sets what
+        // ci/host_debug sets (one configuration); macos/ is not the host.
+        'local_engine.json':
+            '''
+{"builds": [
+  ${build('linux/host_debug', '--runtime-mode debug --no-stripped --no-lto --rbe --no-goma', <String>[])},
+  ${build('linux/host_debug_unopt', '--runtime-mode debug --unopt --no-stripped --no-lto', <String>[])},
+  ${build('macos/host_debug', '--runtime-mode debug --no-stripped --no-lto --xcode-symlinks', <String>[])}
+]}''',
       });
       final List<BuilderBuild> builds = linuxHostBuilds(loaded);
       expect(builds.map((BuilderBuild b) => b.configName), <String>[
@@ -4750,6 +4759,8 @@ cc_library(
         'host_debug_test',
         'host_debug_unopt',
         'host_profile_lto',
+        'host_debug',
+        'host_debug_unopt',
       ]);
       expect(
         configsBazelrc(builds),
@@ -4776,7 +4787,35 @@ build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runti
 #   --runtime-mode profile --prebuilt-dart-sdk
 # No configuration: the Bazel build cannot express
 #   LTO, which tools/gn enables without --no-lto (the Bazel toolchain has no LTO)
+
+# local_engine.json: linux/host_debug
+#   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
+# The same configuration as linux_host_engine.json's ci/host_debug, above.
+
+# local_engine.json: linux/host_debug_unopt
+#   --runtime-mode debug --unopt --no-stripped --no-lto
+build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
 '''),
+      );
+      // Two builds of one name with different flags cannot share it.
+      expect(
+        () => configsBazelrc(
+          linuxHostBuilds(
+            configs(<String, String>{
+              'linux_a.json':
+                  '{"builds": [${build('ci/host_x', '--runtime-mode debug --no-lto', <String>[])}]}',
+              'linux_b.json':
+                  '{"builds": [${build('ci/host_x', '--runtime-mode release --no-lto', <String>[])}]}',
+            }),
+          ),
+        ),
+        throwsA(
+          isA<FormatException>().having(
+            (FormatException e) => e.message,
+            'message',
+            contains('would both be --config=host_x with different flags'),
+          ),
+        ),
       );
       final String buildFile = buildersBuildFile(
         builds,
@@ -4827,6 +4866,14 @@ install(
       );
       expect(buildFile, isNot(contains('ci/android_debug')));
       expect(buildFile, isNot(contains('mac_host')));
+      expect(
+        buildFile,
+        contains(
+          '# local_engine.json: linux/host_debug\n'
+          "#   ninja's default target, everything: "
+          'bazel run --config=host_debug //engine/src/flutter:install\n',
+        ),
+      );
       // The tests: the suites of the run_tests.py types, the `engine` type's
       // executables among the converted tests, the rest on record.
       expect(
