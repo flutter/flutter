@@ -13,6 +13,46 @@ import 'semantics_tester.dart';
 
 void main() {
   group('FocusScope', () {
+    // Regression test for https://github.com/flutter/flutter/issues/147256.
+    testWidgets(
+      'Rebuilding a FocusScope while its node cannot request focus does not disable descendants',
+      (WidgetTester tester) async {
+        final focusScopeNode = FocusScopeNode();
+        addTearDown(focusScopeNode.dispose);
+        Widget build() => FocusScope(node: focusScopeNode, child: const SizedBox.shrink());
+
+        await tester.pumpWidget(build());
+        expect(focusScopeNode.descendantsAreFocusable, isTrue);
+
+        focusScopeNode.canRequestFocus = false;
+        expect(focusScopeNode.descendantsAreFocusable, isFalse);
+        await tester.pumpWidget(build());
+        focusScopeNode.canRequestFocus = true;
+        expect(focusScopeNode.descendantsAreFocusable, isTrue);
+
+        // Same for a FocusScope that is created while the node cannot request focus.
+        await tester.pumpWidget(const SizedBox.shrink());
+        focusScopeNode.canRequestFocus = false;
+        await tester.pumpWidget(build());
+        focusScopeNode.canRequestFocus = true;
+        expect(focusScopeNode.descendantsAreFocusable, isTrue);
+      },
+    );
+
+    testWidgets('Rebuilding a FocusScope without descendantsAreFocusable resets its own node', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        FocusScope(descendantsAreFocusable: false, child: SizedBox(key: key)),
+      );
+      final FocusScopeNode node = FocusScope.of(key.currentContext!);
+      expect(node.descendantsAreFocusable, isFalse);
+
+      await tester.pumpWidget(FocusScope(child: SizedBox(key: key)));
+      expect(node.descendantsAreFocusable, isTrue);
+    });
+
     testWidgets('Can focus', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
