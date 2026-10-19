@@ -90,7 +90,7 @@ const htmlSampleInlineFlutterJsBootstrapOutput = '''
     (build config)
     _flutter.loader.load({
       serviceWorker: {
-        serviceWorkerVersion: null /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
+        serviceWorkerVersion: null /* Flutter's service worker is deprecated and has been removed. */,
       },
     });
   </script>
@@ -198,7 +198,7 @@ String htmlSample2Replaced({required String baseHref}) =>
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    const serviceWorkerVersion = null /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
+    const serviceWorkerVersion = null /* Flutter's service worker is deprecated and has been removed. */;
   </script>
   <script>
     navigator.serviceWorker.register('flutter_service_worker.js');
@@ -331,7 +331,13 @@ void main() {
 
   test('applies substitutions to inline flutter.js bootstrap script', () {
     const indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
-    expect(indexHtml.getWarnings(), isEmpty);
+    final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
+    expect(warnings, hasLength(1));
+    expect(warnings.single.lineNumber, 16);
+    expect(
+      warnings.single.warningText,
+      contains("Flutter's service worker is deprecated and has been removed."),
+    );
 
     expect(
       indexHtml.withSubstitutions(
@@ -403,9 +409,7 @@ void main() {
         isA<WebTemplateWarning>().having(
           (WebTemplateWarning warning) => warning.warningText,
           'service worker warning message',
-          contains(
-            "Flutter's service worker is deprecated and will be removed in a future Flutter release.",
-          ),
+          contains("Flutter's service worker is deprecated and has been removed."),
         ),
       ),
     );

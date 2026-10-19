@@ -16,7 +16,7 @@ const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 const kStaticAssetsUrlPlaceholder = r'$FLUTTER_STATIC_ASSETS_URL';
 
 const _kServiceWorkerDeprecationNotice =
-    "Flutter's service worker is deprecated and will be removed in a future Flutter release.";
+    "Flutter's service worker is deprecated and has been removed.";
 
 class WebTemplateWarning {
   WebTemplateWarning(this.warningText, this.lineNumber);
@@ -76,6 +76,10 @@ class WebTemplate {
       ),
       ..._getWarningsForPattern(
         "navigator.serviceWorker.register('flutter_service_worker.js')",
+        '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
+      ),
+      ..._getWarningsForPattern(
+        '{{flutter_service_worker_version}}',
         '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
