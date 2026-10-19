@@ -3154,12 +3154,30 @@ zip_bundle(
 )
 '''),
       );
-      // The copy into the build root converts (the file travels as it is).
+      // The copy into the build root converts; as it renames its file, the
+      // Bazel file bears the layout's name.
       expect(
         output,
-        contains('gn_copy(\n    name = "copy_headers",\n    srcs = ["embedder.h"],\n'),
+        contains(
+          'gn_copy(\n    name = "copy_headers",\n    srcs = ["embedder.h"],\n'
+          '    outs = ["flutter_embedder.h"],\n    outputs = ["\$root_out_dir/flutter_embedder.h"],\n)\n',
+        ),
       );
       expect(output, isNot(contains('tool_bin')));
+      // A copy into the build root that keeps its file's name lets the file
+      // travel as it is.
+      expect(
+        await convert(r'''
+copy("copy_icu") {
+  sources = [ "data/icudtl.dat" ]
+  outputs = [ "$root_out_dir/icudtl.dat" ]
+}
+'''),
+        contains(
+          'gn_copy(\n    name = "copy_icu",\n    srcs = ["data/icudtl.dat"],\n'
+          '    outputs = ["\$root_out_dir/icudtl.dat"],\n)\n',
+        ),
+      );
       // An entry nothing produces.
       await expectLater(
         convert(

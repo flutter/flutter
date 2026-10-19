@@ -548,6 +548,7 @@ alias(
 gn_copy(
     name = "copy_headers",
     srcs = ["embedder.h"],
+    outs = ["flutter_embedder.h"],
     outputs = ["$root_out_dir/flutter_embedder.h"],
 )
 
