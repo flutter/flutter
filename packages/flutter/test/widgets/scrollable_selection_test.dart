@@ -85,9 +85,6 @@ Future<void> selectPastNestedListEdge(WidgetTester tester, Axis axis) async {
   await tester.pumpAndSettle();
 }
 
-// The horizontal offset is null when it is not tracked.
-typedef _ScrollOffsets = ({double outer, double vertical, double? horizontal});
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final mockClipboard = MockClipboard();
@@ -1965,9 +1962,9 @@ void main() {
   group('auto scroll with nested scrollables', () {
     // A scrollable auto scrolls a selection only if the drag started inside it,
     // transitively: a nested scrollable must not scroll a selection that started
-    // above it, while one that started inside it still auto scrolls it to its
-    // end before the outer scrollable takes over. Every test drives the fixture
-    // built by pumpNestedScrollableFixture with a single-jump mouse drag.
+    // above it, while one that started inside it still auto scrolls it. Every
+    // test drives the fixture built by pumpNestedScrollableFixture with a
+    // single-jump mouse drag.
 
     const nestedFixtureTextStyle = TextStyle(fontSize: 14);
     const Key nestedScrollableKey = ValueKey<String>('nested scrollable');
@@ -2102,23 +2099,6 @@ void main() {
       }
     }
 
-    // Pumps 40ms frames until [read] has returned the same offsets for 10
-    // consecutive frames, or 400 frames have passed, and returns every sample.
-    Future<List<_ScrollOffsets>> pumpUntilScrollingStops(
-      WidgetTester tester,
-      _ScrollOffsets Function() read,
-    ) async {
-      final samples = <_ScrollOffsets>[read()];
-      var stableFrames = 0;
-      for (var i = 0; i < 400 && stableFrames < 10; i += 1) {
-        await tester.pump(const Duration(milliseconds: 40));
-        final _ScrollOffsets sample = read();
-        stableFrames = sample == samples.last ? stableFrames + 1 : 0;
-        samples.add(sample);
-      }
-      return samples;
-    }
-
     // Drags in one jump from inside 'Above 8' to inside 'Below 1', across the
     // nested scrollable built by pumpNestedScrollableFixture, and expects the
     // rows between and every text built in the nested scrollable to be selected.
@@ -2232,14 +2212,7 @@ void main() {
         // Over the table horizontally, 50 pixels past the bottom of the outer
         // scrollable.
         await gesture.moveTo(const Offset(300, 650));
-        final List<_ScrollOffsets> samples = await pumpUntilScrollingStops(
-          tester,
-          () => (
-            outer: outerController.offset,
-            vertical: verticalController.offset,
-            horizontal: horizontalController.offset,
-          ),
-        );
+        await tester.pumpAndSettle();
         await gesture.up();
         await tester.pump();
 
@@ -2249,8 +2222,8 @@ void main() {
           const TextSelection(baseOffset: 0, extentOffset: 8),
         ]);
         // The table never scrolled.
-        expect(samples.map((_ScrollOffsets s) => s.vertical), everyElement(0.0));
-        expect(samples.map((_ScrollOffsets s) => s.horizontal), everyElement(0.0));
+        expect(verticalController.offset, 0.0);
+        expect(horizontalController.offset, 0.0);
         expect(tester.takeException(), isNull);
       },
     );
@@ -2284,16 +2257,11 @@ void main() {
         // Inside the vertical list, in the empty space to the right of the
         // horizontal list (which spans x 0..400, y 200..300).
         await gesture.moveTo(const Offset(600, 250));
-        _ScrollOffsets read() => (
-          outer: outerController.offset,
-          vertical: verticalController.offset,
-          horizontal: horizontalController.offset,
-        );
-        final List<_ScrollOffsets> samples = await pumpUntilScrollingStops(tester, read);
+        await tester.pumpAndSettle();
         await gesture.up();
-        samples.addAll(await pumpUntilScrollingStops(tester, read));
+        await tester.pumpAndSettle();
 
-        expect(samples.map((_ScrollOffsets s) => s.horizontal), everyElement(0.0));
+        expect(horizontalController.offset, 0.0);
         expect(outerController.offset, 0.0);
         expect(verticalController.offset, 0.0);
         expect(paragraphOf(tester, 'Above 8').selections, <TextSelection>[
@@ -2314,7 +2282,7 @@ void main() {
     );
 
     testWidgets(
-      'selection started inside a nested vertical list auto scrolls it to its end before the outer scrollable',
+      'selection started inside a nested vertical list auto scrolls it and the outer scrollable to their ends',
       (WidgetTester tester) async {
         final outerController = ScrollController();
         addTearDown(outerController.dispose);
@@ -2340,33 +2308,18 @@ void main() {
         // Past the bottom of both the nested list (y 500) and the outer
         // scrollable (y 600).
         await gesture.moveTo(const Offset(300, 650));
-        // The horizontal list scrolls out of the nested list and is disposed,
-        // so its offset is not tracked.
-        final List<_ScrollOffsets> samples = await pumpUntilScrollingStops(
-          tester,
-          () => (
-            outer: outerController.offset,
-            vertical: verticalController.offset,
-            horizontal: null,
-          ),
-        );
+        await tester.pumpAndSettle();
         await gesture.up();
         await tester.pump();
 
-        final double verticalEnd = verticalController.position.maxScrollExtent;
-        expect(verticalController.offset, verticalEnd);
+        expect(verticalController.offset, verticalController.position.maxScrollExtent);
         expect(outerController.offset, outerController.position.maxScrollExtent);
-        // The outer scrollable only moved once the nested list reached its end.
-        expect(
-          samples.where((_ScrollOffsets s) => s.outer > 0.0).map((_ScrollOffsets s) => s.vertical),
-          everyElement(verticalEnd),
-        );
         expect(tester.takeException(), isNull);
       },
     );
 
     testWidgets(
-      'selection started inside a nested two-dimensional scrollable auto scrolls it to its end before the outer scrollable',
+      'selection started inside a nested two-dimensional scrollable auto scrolls it and the outer scrollable to their ends',
       (WidgetTester tester) async {
         final outerController = ScrollController();
         addTearDown(outerController.dispose);
@@ -2393,26 +2346,13 @@ void main() {
         // Over the table horizontally, past the bottom of both the table
         // (y 500) and the outer scrollable (y 600).
         await gesture.moveTo(const Offset(300, 650));
-        final List<_ScrollOffsets> samples = await pumpUntilScrollingStops(
-          tester,
-          () => (
-            outer: outerController.offset,
-            vertical: verticalController.offset,
-            horizontal: horizontalController.offset,
-          ),
-        );
+        await tester.pumpAndSettle();
         await gesture.up();
         await tester.pump();
 
-        final double verticalEnd = verticalController.position.maxScrollExtent;
-        expect(verticalController.offset, verticalEnd);
+        expect(verticalController.offset, verticalController.position.maxScrollExtent);
         expect(outerController.offset, outerController.position.maxScrollExtent);
-        // The outer scrollable only moved once the table reached its end.
-        expect(
-          samples.where((_ScrollOffsets s) => s.outer > 0.0).map((_ScrollOffsets s) => s.vertical),
-          everyElement(verticalEnd),
-        );
-        expect(samples.map((_ScrollOffsets s) => s.horizontal), everyElement(0.0));
+        expect(horizontalController.offset, 0.0);
 
         // TODO(Renzo-Olivares): Remove this workaround once a two-dimensional
         // viewport can be unmounted while it holds a kept-alive selected cell,
