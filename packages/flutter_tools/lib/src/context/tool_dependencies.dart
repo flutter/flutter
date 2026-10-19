@@ -624,10 +624,7 @@ class ToolDependencies {
     final extensionArtifactManager = ExtensionArtifactManager(
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
-      fileSystem: finalFS,
-      logger: finalLogger,
-      osUtils: finalOS,
-      platform: finalPlatform,
+      toolContext: finalToolContext,
     );
 
     final extensionBuildManager = ExtensionBuildManager(

@@ -33,7 +33,7 @@ final class _FakeArtifactService extends ArtifactService {
   @override
   Future<List<ArtifactDependency>> downloadArtifacts({
     required HostPlatform hostPlatform,
-    String? targetPlatform,
+    Set<String>? targetPlatforms,
   }) async {
     return artifacts;
   }
@@ -63,21 +63,30 @@ void main() {
         cacheDir: explicitDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(),
-        fileSystem: fs,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(environment: const <String, String>{'DART_DATA_HOME': '/dart_data'}),
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          os: osUtils,
+          platform: FakePlatform(
+            environment: const <String, String>{'DART_DATA_HOME': '/dart_data'},
+          ),
+        ),
       );
       expect(withOverride.artifactsCacheDirectory.path, '/explicit/cache');
 
       final withDartDataHome = ExtensionArtifactManager(
         extensionManager: manager,
         featureFlags: TestFeatureFlags(),
-        fileSystem: fs,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(
-          environment: const <String, String>{'DART_DATA_HOME': '/dart_data', 'HOME': '/home/user'},
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          os: osUtils,
+          platform: FakePlatform(
+            environment: const <String, String>{
+              'DART_DATA_HOME': '/dart_data',
+              'HOME': '/home/user',
+            },
+          ),
         ),
       );
       expect(
@@ -88,10 +97,12 @@ void main() {
       final withHomeFallback = ExtensionArtifactManager(
         extensionManager: manager,
         featureFlags: TestFeatureFlags(),
-        fileSystem: fs,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(environment: const <String, String>{'HOME': '/home/user'}),
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          os: osUtils,
+          platform: FakePlatform(environment: const <String, String>{'HOME': '/home/user'}),
+        ),
       );
       expect(
         withHomeFallback.artifactsCacheDirectory.path,
@@ -102,12 +113,14 @@ void main() {
       final withWindowsLocalAppData = ExtensionArtifactManager(
         extensionManager: manager,
         featureFlags: TestFeatureFlags(),
-        fileSystem: windowsFs,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(
-          operatingSystem: 'windows',
-          environment: const <String, String>{'LOCALAPPDATA': r'C:\Users\user\AppData\Local'},
+        toolContext: FakeToolContext(
+          fs: windowsFs,
+          logger: logger,
+          os: osUtils,
+          platform: FakePlatform(
+            operatingSystem: 'windows',
+            environment: const <String, String>{'LOCALAPPDATA': r'C:\Users\user\AppData\Local'},
+          ),
         ),
       );
       expect(
@@ -118,12 +131,14 @@ void main() {
       final withWindowsUserProfile = ExtensionArtifactManager(
         extensionManager: manager,
         featureFlags: TestFeatureFlags(),
-        fileSystem: windowsFs,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(
-          operatingSystem: 'windows',
-          environment: const <String, String>{'USERPROFILE': r'C:\Users\user'},
+        toolContext: FakeToolContext(
+          fs: windowsFs,
+          logger: logger,
+          os: osUtils,
+          platform: FakePlatform(
+            operatingSystem: 'windows',
+            environment: const <String, String>{'USERPROFILE': r'C:\Users\user'},
+          ),
         ),
       );
       expect(
@@ -142,10 +157,14 @@ void main() {
       final artifactManager = ExtensionArtifactManager(
         extensionManager: manager,
         featureFlags: TestFeatureFlags(),
-        fileSystem: fs,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(environment: const <String, String>{'DART_DATA_HOME': '/dart_data'}),
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          os: osUtils,
+          platform: FakePlatform(
+            environment: const <String, String>{'DART_DATA_HOME': '/dart_data'},
+          ),
+        ),
       );
 
       await artifactManager.ensureArtifactsDownloaded();
@@ -193,11 +212,15 @@ void main() {
       final artifactManager = ExtensionArtifactManager(
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        fileSystem: fs,
         httpClient: httpClient,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(environment: const <String, String>{'DART_DATA_HOME': '/dart_data'}),
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          os: osUtils,
+          platform: FakePlatform(
+            environment: const <String, String>{'DART_DATA_HOME': '/dart_data'},
+          ),
+        ),
       );
 
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
@@ -264,11 +287,13 @@ void main() {
         cacheDir: customCacheDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        fileSystem: fs,
         httpClient: httpClient,
-        logger: logger,
-        osUtils: unzipOsUtils,
-        platform: FakePlatform(),
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          os: unzipOsUtils,
+          platform: FakePlatform(),
+        ),
       );
 
       await artifactManager.ensureArtifactsDownloaded(
@@ -336,11 +361,13 @@ void main() {
           cacheDir: cacheDir,
           extensionManager: manager,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          fileSystem: fs,
           httpClient: httpClient,
-          logger: logger,
-          osUtils: osUtils,
-          platform: FakePlatform(),
+          toolContext: FakeToolContext(
+            fs: fs,
+            logger: logger,
+            os: osUtils,
+            platform: FakePlatform(),
+          ),
         );
 
         await Future.wait(<Future<void>>[
@@ -397,11 +424,8 @@ void main() {
         cacheDir: fs.directory('/bad_cache'),
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        fileSystem: fs,
         httpClient: httpClient,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(),
+        toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
       await expectLater(
@@ -447,11 +471,8 @@ void main() {
         cacheDir: cacheDir,
         extensionManager: manager,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        fileSystem: fs,
         httpClient: httpClient,
-        logger: logger,
-        osUtils: osUtils,
-        platform: FakePlatform(),
+        toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
       );
 
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux'});
@@ -459,6 +480,85 @@ void main() {
 
       await manager.dispose();
     });
+
+    test(
+      'forwards multiple targetPlatforms to ArtifactService and filters matching artifacts',
+      () async {
+        final List<int> content = utf8.encode('multi-target payload');
+        final contentSha256 = sha256.convert(content).toString();
+
+        void entryPoint(SendPort sendPort) {
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _FakeArtifactService(<ArtifactDependency>[
+                ArtifactDependency(
+                  name: 'linux_bin',
+                  sha256: contentSha256,
+                  url: Uri.parse('https://example.com/linux_bin'),
+                  hostPlatform: HostPlatform.linux_x64,
+                  targetPlatform: 'linux-x64',
+                ),
+                ArtifactDependency(
+                  name: 'embedder_bin',
+                  sha256: contentSha256,
+                  url: Uri.parse('https://example.com/embedder_bin'),
+                  hostPlatform: HostPlatform.linux_x64,
+                  targetPlatform: 'custom-embedder-arm64',
+                ),
+                ArtifactDependency(
+                  name: 'unselected_bin',
+                  sha256: contentSha256,
+                  url: Uri.parse('https://example.com/unselected_bin'),
+                  hostPlatform: HostPlatform.linux_x64,
+                  targetPlatform: 'other-platform',
+                ),
+              ]),
+            ],
+            extensionName: 'multi_ext',
+            supportedPlatforms: const <String>{'linux'},
+          );
+        }
+
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          entryPoints: <ExtensionEntryPoint>[entryPoint],
+        );
+
+        final downloadedUrls = <Uri>[];
+        final httpClient = _FakeHttpClient((Uri url) {
+          downloadedUrls.add(url);
+          return _FakeHttpClientResponse(HttpStatus.ok, content);
+        });
+
+        final Directory cacheDir = fs.directory('/multi_cache');
+        final artifactManager = ExtensionArtifactManager(
+          cacheDir: cacheDir,
+          extensionManager: manager,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          httpClient: httpClient,
+          toolContext: FakeToolContext(
+            fs: fs,
+            logger: logger,
+            os: osUtils,
+            platform: FakePlatform(),
+          ),
+        );
+
+        await artifactManager.ensureArtifactsDownloaded(
+          targetPlatforms: const <String>{'linux', 'custom-embedder-arm64'},
+        );
+
+        expect(downloadedUrls, <Uri>[
+          Uri.parse('https://example.com/linux_bin'),
+          Uri.parse('https://example.com/embedder_bin'),
+        ]);
+
+        await manager.dispose();
+      },
+    );
   });
 }
 

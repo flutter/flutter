@@ -23,21 +23,23 @@ abstract base class ArtifactService extends ToolExtensionService {
   /// RPC parameter key for the host platform.
   static const String hostPlatformParam = 'hostPlatform';
 
-  /// RPC parameter key for the optional target platform filter.
-  static const String targetPlatformParam = 'targetPlatform';
+  /// RPC parameter key for the optional target platforms filter.
+  static const String targetPlatformsParam = 'targetPlatforms';
 
   @override
   String get namespace => serviceNamespace;
 
   /// Returns the list of [ArtifactDependency] objects required by this
-  /// extension for the given [hostPlatform] and optional [targetPlatform].
+  /// extension for the given [hostPlatform] and optional [targetPlatforms].
   ///
-  /// [targetPlatform] is a [String] rather than `TargetPlatform` so extensions
-  /// can match custom out-of-tree embedder identifiers (e.g. `'tizen-arm64'`)
-  /// as well as built-in platform names or OS prefixes (e.g. `'linux'`).
+  /// [targetPlatforms] contains [String] identifiers rather than `TargetPlatform`
+  /// values so extensions can match custom out-of-tree embedder identifiers
+  /// (e.g. `'tizen-arm64'`) as well as built-in platform names or OS prefixes
+  /// (e.g. `'linux'`). When `null`, artifacts for all target platforms supported
+  /// on [hostPlatform] should be returned.
   Future<List<ArtifactDependency>> downloadArtifacts({
     required HostPlatform hostPlatform,
-    String? targetPlatform,
+    Set<String>? targetPlatforms,
   });
 
   /// Initializes the service by registering RPC methods with the extension provider.
@@ -58,16 +60,17 @@ abstract base class ArtifactService extends ToolExtensionService {
       } on ArgumentError catch (e) {
         throw RpcException.invalidParams(e.message.toString());
       }
-      final String? targetPlatform = switch (params[targetPlatformParam]) {
-        final String tp => tp,
+      final Set<String>? targetPlatforms = switch (params[targetPlatformsParam]) {
+        final List<Object?> list when list.every((Object? e) => e is String) =>
+          list.cast<String>().toSet(),
         null => null,
         final Object? invalid => throw RpcException.invalidParams(
-          'Invalid "$targetPlatformParam" parameter: $invalid',
+          'Invalid "$targetPlatformsParam" parameter: $invalid',
         ),
       };
       final List<ArtifactDependency> deps = await downloadArtifacts(
         hostPlatform: hostPlatform,
-        targetPlatform: targetPlatform,
+        targetPlatforms: targetPlatforms,
       );
       return deps.map((ArtifactDependency d) => d.toMap()).toList();
     }

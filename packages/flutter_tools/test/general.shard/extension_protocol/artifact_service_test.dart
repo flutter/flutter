@@ -18,16 +18,17 @@ final class _TestArtifactService extends ArtifactService {
   @override
   Future<List<ArtifactDependency>> downloadArtifacts({
     required HostPlatform hostPlatform,
-    String? targetPlatform,
+    Set<String>? targetPlatforms,
   }) async {
     return <ArtifactDependency>[
-      ArtifactDependency(
-        name: 'test-artifact-${hostPlatform.cliName}',
-        sha256: 'deadbeef',
-        url: Uri.parse('https://example.com/${hostPlatform.cliName}/artifact.zip'),
-        hostPlatform: hostPlatform,
-        targetPlatform: targetPlatform,
-      ),
+      for (final String targetPlatform in targetPlatforms ?? const <String>{'default-target'})
+        ArtifactDependency(
+          name: 'test-artifact-${hostPlatform.cliName}-$targetPlatform',
+          sha256: 'deadbeef',
+          url: Uri.parse('https://example.com/${hostPlatform.cliName}/$targetPlatform.zip'),
+          hostPlatform: hostPlatform,
+          targetPlatform: targetPlatform,
+        ),
     ];
   }
 }
@@ -60,17 +61,18 @@ void main() {
         ArtifactService.downloadArtifactsMethod,
         params: <String, Object?>{
           ArtifactService.hostPlatformParam: HostPlatform.linux_x64.cliName,
-          ArtifactService.targetPlatformParam: 'linux-x64',
+          ArtifactService.targetPlatformsParam: const <String>['linux-x64', 'linux-arm64'],
         },
       );
       final List<ArtifactDependency> deps = ArtifactDependency.listFromJson(response);
 
-      expect(deps, hasLength(1));
-      expect(deps.first.name, 'test-artifact-linux-x64');
-      expect(deps.first.url, Uri.parse('https://example.com/linux-x64/artifact.zip'));
+      expect(deps, hasLength(2));
+      expect(deps.first.name, 'test-artifact-linux-x64-linux-x64');
+      expect(deps.first.url, Uri.parse('https://example.com/linux-x64/linux-x64.zip'));
       expect(deps.first.sha256, 'deadbeef');
       expect(deps.first.hostPlatform, HostPlatform.linux_x64);
       expect(deps.first.targetPlatform, 'linux-x64');
+      expect(deps.last.targetPlatform, 'linux-arm64');
     });
 
     test('throws RpcException on missing or invalid hostPlatform', () async {
@@ -114,7 +116,7 @@ void main() {
           ArtifactService.downloadArtifactsMethod,
           params: const <String, Object?>{
             ArtifactService.hostPlatformParam: 'linux-x64',
-            ArtifactService.targetPlatformParam: 123,
+            ArtifactService.targetPlatformsParam: 123,
           },
         ),
         throwsA(
@@ -144,7 +146,7 @@ void main() {
         ArtifactService.downloadArtifactsMethod,
         params: <String, Object?>{
           ArtifactService.hostPlatformParam: HostPlatform.linux_x64.cliName,
-          ArtifactService.targetPlatformParam: 'linux-x64',
+          ArtifactService.targetPlatformsParam: const <String>['linux-x64'],
         },
       );
       final List<ArtifactDependency> linuxDeps = ArtifactDependency.listFromJson(linuxResponse);
