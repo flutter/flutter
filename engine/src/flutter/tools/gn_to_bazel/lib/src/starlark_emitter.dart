@@ -3483,7 +3483,7 @@ final class _Emitter {
     for (final term in terms) {
       switch (term) {
         case ConditionVariable():
-        case ConditionComparison(equals: true):
+        case ConditionComparison():
           settings.add(_setting(term, rule));
         case ConditionNot(operand: ConditionVariable(:final String name))
             when negatedSettings.containsKey(name):
@@ -3510,13 +3510,17 @@ final class _Emitter {
     return ':$name';
   }
 
-  /// The config_setting that is true exactly when [condition] (a variable or
-  /// an equality) holds.
+  /// The config_setting that is true exactly when [condition] (a variable,
+  /// an equality, or a denied variable with a complement setting -- a term
+  /// of a disjunction, `!enable_backtrace || is_wasm`) holds.
   String _setting(Condition condition, _Rule rule) {
     final String? setting = switch (condition) {
       ConditionVariable(:final String name) => conditionSettings[name],
       ConditionComparison(:final String name, equals: true, :final String value) =>
         comparisonSettings[name]?[value],
+      ConditionComparison(:final String name, equals: false, :final String value) =>
+        comparisonNegatedSettings[name]?[value],
+      ConditionNot(operand: ConditionVariable(:final String name)) => negatedSettings[name],
       _ => null,
     };
     if (setting == null) {

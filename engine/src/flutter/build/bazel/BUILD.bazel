@@ -100,6 +100,30 @@ selects.config_setting_group(
     ],
 )
 
+# BUILDCONFIG.gn's use_flutter_cxx, `is_clang && (is_linux || is_android ||
+# is_mac || is_ios)`: where the engine builds and links its own libc++
+# (toolchains:cxx_runtime selects on it); elsewhere the toolchain's serves.
+_FLUTTER_CXX_OSES = [
+    "android",
+    "ios",
+    "linux",
+    "mac",
+]
+
+selects.config_setting_group(
+    name = "flutter_cxx",
+    match_any = [_OS_CONSTRAINTS[os] for os in _FLUTTER_CXX_OSES],
+)
+
+selects.config_setting_group(
+    name = "not_flutter_cxx",
+    match_any = [
+        constraint
+        for os, constraint in _OS_CONSTRAINTS.items()
+        if os not in _FLUTTER_CXX_OSES
+    ],
+)
+
 # GN's is_asan (build/config/sanitizers/sanitizers.gni; tools/gn --asan,
 # which Linux's host_debug_unopt test builder passes): AddressSanitizer on
 # every compile and link. The toolchain's `asan` feature selects on it

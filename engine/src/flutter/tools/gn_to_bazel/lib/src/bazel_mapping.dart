@@ -917,6 +917,13 @@ const Map<String, String> conditionSettings = <String, String>{
   // --gn-args=dart_dynamic_modules=true, the `_ddm` builders): the Dart
   // wrap's flag, which the archives' names also read.
   'dart_dynamic_modules': '//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled',
+  // common/config.gni's enable_backtrace and build_engine_artifacts, as
+  // tools/gn and the formula set them by platform: //flutter/common's
+  // appendix. BUILDCONFIG.gn's use_flutter_cxx: build/bazel's group, the
+  // same one the toolchains' cxx_runtime selects on.
+  'enable_backtrace': '//engine/src/flutter/common:backtrace_enabled',
+  'build_engine_artifacts': '//engine/src/flutter/common:engine_artifacts',
+  'use_flutter_cxx': '//engine/src/flutter/build/bazel:flutter_cxx',
   // shell/config.gni's backend arguments, as its defaults and tools/gn set
   // them by platform: the groups in //flutter/shell's appendix.
   'shell_enable_gl': '//engine/src/flutter/shell:enable_gl',
@@ -946,6 +953,8 @@ const Map<String, String> negatedSettings = <String, String>{
   'is_win': '//engine/src/flutter/build/bazel:not_win',
   // The host's own build, denied: the OSes only a target runs.
   'is_host_toolchain': '//engine/src/flutter/build/bazel:not_host_toolchain',
+  'use_flutter_cxx': '//engine/src/flutter/build/bazel:not_flutter_cxx',
+  'enable_backtrace': '//engine/src/flutter/common:backtrace_disabled',
   // The shell's backends, denied (software is everywhere: no complement).
   'shell_enable_gl': '//engine/src/flutter/shell:not_enable_gl',
   'shell_enable_metal': '//engine/src/flutter/shell:not_enable_metal',
@@ -961,6 +970,7 @@ const Map<String, String> negatedSettings = <String, String>{
 };
 
 /// The Bazel config_setting for `variable == "value"`, by variable and value.
+/// `target_os == "wasm"` (fml) is the OS predicate's constraint.
 const Map<String, Map<String, String>> comparisonSettings = <String, Map<String, String>>{
   'flutter_runtime_mode': <String, String>{
     'debug': '//engine/src/flutter/common:runtime_mode_debug',
@@ -968,6 +978,37 @@ const Map<String, Map<String, String>> comparisonSettings = <String, Map<String,
     'release': '//engine/src/flutter/common:runtime_mode_release',
     'jit_release': '//engine/src/flutter/common:runtime_mode_jit_release',
   },
+  'target_os': _osNameSettings,
+  'current_os': _osNameSettings,
+};
+
+/// The config_setting that holds exactly when `variable != "value"` does,
+/// for the denied comparisons of a conjunction: the OS names' complements.
+const Map<String, Map<String, String>> comparisonNegatedSettings = <String, Map<String, String>>{
+  'target_os': _osNameNegatedSettings,
+  'current_os': _osNameNegatedSettings,
+};
+
+const Map<String, String> _osNameSettings = <String, String>{
+  'android': '@platforms//os:android',
+  'fuchsia': '@platforms//os:fuchsia',
+  'ios': '@platforms//os:ios',
+  'linux': '@platforms//os:linux',
+  'mac': '@platforms//os:macos',
+  'qnx': '@platforms//os:qnx',
+  'wasm': '@platforms//os:emscripten',
+  'win': '@platforms//os:windows',
+};
+
+const Map<String, String> _osNameNegatedSettings = <String, String>{
+  'android': '//engine/src/flutter/build/bazel:not_android',
+  'fuchsia': '//engine/src/flutter/build/bazel:not_fuchsia',
+  'ios': '//engine/src/flutter/build/bazel:not_ios',
+  'linux': '//engine/src/flutter/build/bazel:not_linux',
+  'mac': '//engine/src/flutter/build/bazel:not_mac',
+  'qnx': '//engine/src/flutter/build/bazel:not_qnx',
+  'wasm': '//engine/src/flutter/build/bazel:not_wasm',
+  'win': '//engine/src/flutter/build/bazel:not_win',
 };
 
 /// GN variables an imported `.gni` defines and that build files may read or
@@ -998,9 +1039,11 @@ const Set<String> knownExternalVariables = <String>{
   'is_win',
   'target_cpu',
   'target_os',
+  'use_flutter_cxx',
   // //flutter/build/dart/dart.gni
   'dart_src',
   // //flutter/common/config.gni
+  'build_engine_artifacts',
   'enable_backtrace',
   'enable_unittests',
   'feature_defines_list',
