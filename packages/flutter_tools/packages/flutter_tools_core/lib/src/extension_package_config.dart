@@ -15,9 +15,10 @@ import 'package:meta/meta.dart';
 ///
 /// ### Schema
 ///
-/// - `name` (`String`, optional when inferred from the package directory/config,
-///   otherwise required): The Dart package name of the extension. When both
-///   `name` and `packageName` are provided, they must match.
+/// - `name` (`String`, optional when the hosting package name is supplied to
+///   [ExtensionPackageConfig.fromMap], otherwise required): The Dart package
+///   name of the extension. If both `name` in `config.yaml` and `packageName`
+///   are provided, they must match.
 /// - `protocol_version` (`int`, optional): The extension RPC protocol version
 ///   targeted by the package. Defaults to [currentProtocolVersion] (`1`).
 /// - `entrypoint` (`String`, optional): Relative POSIX path within the package
@@ -26,11 +27,11 @@ import 'package:meta/meta.dart';
 ///   `'bin/<name>.dart'`.
 /// - `supported_platforms` (`List<String>`, optional): Host operating systems on
 ///   which the extension can run (normalized to lowercase, e.g., `'linux'`,
-///   `'macos'`, `'windows'`). An empty list indicates support for all host
-///   platforms.
+///   `'macos'`, `'windows'`). When omitted or empty, [supportsHostPlatform]
+///   imposes no static host platform filter before spawning.
 /// - `services` (`List<String>`, optional): RPC service namespaces implemented
 ///   by the extension (e.g., `'diagnostics'`, `'config'`, `'template'`,
-///   `'device'`, `'build'`, `'artifact'`, `'clean'`).
+///   `'device'`, `'build'`).
 /// - `build_targets` (`List<String>`, optional): Static top-level `flutter build`
 ///   subcommand target names contributed by the extension.
 /// - `templates` (`List<String>`, optional): Custom project template names
