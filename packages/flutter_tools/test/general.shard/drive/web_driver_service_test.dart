@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -423,7 +424,7 @@ void main() {
     },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'WebDriverService exits the tool when the WebDriver server cannot create a session',
     () async {
       // A fake WebDriver server that rejects every session request, the way
@@ -449,15 +450,22 @@ void main() {
         unawaited(request.response.close());
       });
 
-      final WebDriverService service = setUpDriverService();
+      final service = WebDriverService(
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        dartSdkPath: 'dart',
+        toolContext: FakeToolContext(),
+      );
       await expectLater(
         service.startTest(
           'test_driver/app_test.dart',
-          <String>[],
-          PackageConfig.empty,
-          browserName: 'chrome',
-          headless: true,
-          driverPort: driverServer.port,
+          DriveTestSpecification(
+            packageConfig: PackageConfig.empty,
+            browserName: 'chrome',
+            headless: true,
+            driverPort: driverServer.port,
+          ),
         ),
         throwsToolExit(message: "DevToolsActivePort file doesn't exist"),
       );
