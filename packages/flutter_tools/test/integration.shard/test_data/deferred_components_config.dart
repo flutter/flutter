@@ -148,16 +148,32 @@ class DeferredComponentModule {
           r'''
     }
 
+    // Directories that the Flutter tool fills with this component's deferred files
+    // while the app's compileFlutterBuild<Variant> task runs. The task has no actions;
+    // it declares the directories so that this module's merge tasks run after the
+    // app's Flutter task.
+    abstract class FlutterDeferredComponentFiles extends DefaultTask {
+        @OutputDirectory
+        abstract DirectoryProperty getAssetsDir()
+
+        @OutputDirectory
+        abstract DirectoryProperty getLibsDir()
+    }
+
     androidComponents {
         onVariants(selector().all()) { variant ->
             // The Flutter tool writes deferred component files per Flutter build mode. This
             // picks the mode the way the Flutter Gradle Plugin's internal
             // FlutterPluginUtils.buildModeFor does, which build scripts can't call.
             def flutterBuildMode = variant.buildType == "profile" ? "profile" : (variant.debuggable ? "debug" : "release")
-            // addStaticSourceDirectory takes a path, so the build directory is resolved here.
-            def flutterIntermediates = project.layout.buildDirectory.dir("intermediates/flutter/${flutterBuildMode}").get().asFile
-            variant.sources.assets?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_assets").path)
-            variant.sources.jniLibs?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_libs").path)
+            def variantName = variant.name.capitalize()
+            def deferredFiles = tasks.register("flutterDeferredComponentFiles${variantName}", FlutterDeferredComponentFiles) {
+                assetsDir.set(layout.buildDirectory.dir("intermediates/flutter/${flutterBuildMode}/deferred_assets"))
+                libsDir.set(layout.buildDirectory.dir("intermediates/flutter/${flutterBuildMode}/deferred_libs"))
+                dependsOn(":app:compileFlutterBuild${variantName}")
+            }
+            variant.sources.assets?.addGeneratedSourceDirectory(deferredFiles) { it.assetsDir }
+            variant.sources.jniLibs?.addGeneratedSourceDirectory(deferredFiles) { it.libsDir }
         }
     }
 
