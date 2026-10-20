@@ -350,7 +350,7 @@ class WebTestsSuite {
     final String javaScript = mainDartJs.readAsStringSync();
 
     // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
-    expect(javaScript.contains('RootElement'), true);
+    _expect(javaScript.contains('RootElement'), true);
 
     const word = 'debugFillProperties';
     var count = 0;
@@ -367,11 +367,11 @@ class WebTestsSuite {
 
     // The following are classes from `timeline.dart` that should be treeshaken
     // off unless the app (typically a benchmark) uses methods that need them.
-    expect(javaScript.contains('AggregatedTimedBlock'), false);
-    expect(javaScript.contains('AggregatedTimings'), false);
-    expect(javaScript.contains('_BlockBuffer'), false);
-    expect(javaScript.contains('_StringListChain'), false);
-    expect(javaScript.contains('_Float64ListChain'), false);
+    _expect(javaScript.contains('AggregatedTimedBlock'), false);
+    _expect(javaScript.contains('AggregatedTimings'), false);
+    _expect(javaScript.contains('_BlockBuffer'), false);
+    _expect(javaScript.contains('_StringListChain'), false);
+    _expect(javaScript.contains('_Float64ListChain'), false);
 
     const kMaxExpectedDebugFillProperties = 11;
     if (count > kMaxExpectedDebugFillProperties) {
@@ -670,5 +670,11 @@ class WebTestsSuite {
     if (!webDriverReady) {
       throw Exception('WebDriver not available.');
     }
+  }
+}
+
+void _expect(Object? actual, Object? expected) {
+  if (actual != expected) {
+    foundError(<String>['Expected: $expected', '  Actual: $actual', StackTrace.current.toString()]);
   }
 }
