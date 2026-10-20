@@ -111,10 +111,10 @@ struct RenderPassRecording {
   /// Keep the binding pointers above valid until replay is done.
   std::vector<std::shared_ptr<const Shader::Reflection>> reflections;
 
-  template <typename T>
-  void Push(RecordedOp op, std::vector<T>& payloads, T&& payload) {
+  template <typename T, typename U>
+  void Push(RecordedOp op, std::vector<T>& payloads, U&& payload) {
     ops.emplace_back(op, static_cast<uint32_t>(payloads.size()));
-    payloads.push_back(std::forward<T>(payload));
+    payloads.push_back(std::forward<U>(payload));
   }
 
   void Push(RecordedOp op) { ops.emplace_back(op, 0u); }

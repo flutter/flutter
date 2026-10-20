@@ -260,21 +260,19 @@ void RenderPass::BindIndexBuffer(impeller::BufferView view,
 void RenderPass::SetStencilReference(uint32_t reference) {
   if (auto* recording = OpenRecording()) {
     recording->Push(RecordedOp::kSetStencilReference,
-                    recording->stencil_references, std::move(reference));
+                    recording->stencil_references, reference);
   }
 }
 
 void RenderPass::SetScissor(impeller::IRect32 scissor) {
   if (auto* recording = OpenRecording()) {
-    recording->Push(RecordedOp::kSetScissor, recording->scissors,
-                    std::move(scissor));
+    recording->Push(RecordedOp::kSetScissor, recording->scissors, scissor);
   }
 }
 
 void RenderPass::SetViewport(impeller::Viewport viewport) {
   if (auto* recording = OpenRecording()) {
-    recording->Push(RecordedOp::kSetViewport, recording->viewports,
-                    std::move(viewport));
+    recording->Push(RecordedOp::kSetViewport, recording->viewports, viewport);
   }
 }
 
@@ -331,7 +329,7 @@ void RenderPass::RecordPipelineState() {
       static_cast<uint32_t>(recording_->pipeline_states.size());
   recording_->pipeline_states.push_back(RenderPassRecording::PipelineState{
       .pipeline = core,
-      .descriptor = std::move(pipeline_desc),
+      .descriptor = pipeline_desc,
       .key = key,
   });
 }

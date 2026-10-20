@@ -403,7 +403,7 @@ bool ReplayAndSubmit(const std::shared_ptr<impeller::Context>& context,
   // deferred reactor operation), so both live until the work completes.
   auto status = context->GetCommandQueue()->Submit(
       {command_buffer},
-      [recording, pipelines = std::move(pipelines),
+      [recording = std::move(recording), pipelines = std::move(pipelines),
        complete](impeller::CommandBuffer::Status status) { complete(status); });
   if (!status.ok()) {
     complete(impeller::CommandBuffer::Status::kError);
