@@ -95,9 +95,12 @@ abstract class DeferredComponentsConfig {
 }
 
 class DeferredComponentModule {
-  DeferredComponentModule(this.name);
+  DeferredComponentModule(this.name, {this.androidBlockExtras = ''});
 
   String name;
+
+  /// Gradle DSL added inside the module's `android {}` block.
+  final String androidBlockExtras;
 
   void setUpIn(Directory dir) {
     writeFile(
@@ -140,6 +143,9 @@ class DeferredComponentModule {
             sourceCompatibility 1.8
             targetCompatibility 1.8
         }
+''' +
+          androidBlockExtras +
+          r'''
     }
 
     androidComponents {

@@ -4002,3 +4002,25 @@ loading-units:
       - package:test/invalid_lib_name.dart
 ''';
 }
+
+/// The app and the dynamic feature module declare a `free` product flavor, so
+/// variant names (`freeRelease`) differ from Flutter build modes (`release`).
+class FlavoredDeferredComponentsConfig extends BasicDeferredComponentsConfig {
+  static const _flavors = '''
+    flavorDimensions += "tier"
+    productFlavors {
+        free {
+            dimension = "tier"
+        }
+    }
+''';
+
+  @override
+  String get appBuild =>
+      super.appBuild.replaceFirst('    buildTypes {', '$_flavors    buildTypes {');
+
+  @override
+  List<DeferredComponentModule> get deferredComponents => <DeferredComponentModule>[
+    DeferredComponentModule('component1', androidBlockExtras: _flavors),
+  ];
+}
