@@ -28,6 +28,7 @@ load(
     "build_directory_variant",
     "checkout_view_prologue",
 )
+load("//engine/src/flutter/build/bazel:sanitizers.bzl", "SANITIZER_ATTRS", "sanitizer_launcher_lines")
 
 def _checkout_script_test_impl(ctx):
     script = ctx.file.script
@@ -41,9 +42,13 @@ def _checkout_script_test_impl(ctx):
     words = [script.basename] + [arg.replace("{variant}", variant) for arg in ctx.attr.script_args]
 
     launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
+
+    # The sanitizer environment of a sanitized build (the script runs the
+    # instrumented font-subset), after the prologue's cd: by $root.
+    sanitizers, sanitizer_runfiles = sanitizer_launcher_lines(ctx, runfiles_root = "$root")
     ctx.actions.write(
         output = launcher,
-        content = checkout_view_prologue(package, build_directory) + """
+        content = checkout_view_prologue(package, build_directory) + "".join([line + "\n" for line in sanitizers]) + """
 export PYTHONDONTWRITEBYTECODE=1
 exec "$root/{python}" {words} "$@"
 """.format(
@@ -58,6 +63,7 @@ exec "$root/{python}" {words} "$@"
         transitive_files = ctx.attr._python_runtime[DefaultInfo].files,
         symlinks = symlinks,
     )
+    runfiles = runfiles.merge(sanitizer_runfiles)
     for target in ctx.attr.data + ctx.attr.build_directory.keys():
         runfiles = runfiles.merge(target[DefaultInfo].default_runfiles)
     return [
@@ -97,7 +103,7 @@ _checkout_script_test = rule(
             cfg = "exec",
         ),
         "_python_runtime": attr.label(default = "@cpython3//:runtime"),
-    } | BUILD_DIRECTORY_ATTRS,
+    } | BUILD_DIRECTORY_ATTRS | SANITIZER_ATTRS,
 )
 
 def checkout_script_test(name, script, srcs = None, size = "small", **kwargs):
