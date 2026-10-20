@@ -346,32 +346,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
-  /// Evaluates raw CLI [args] for `--extensions` or `--no-extensions` before
-  /// full argument parsing (which depends on dynamic options from extensions).
-  ///
-  /// Stops scanning at the first non-flag token (the subcommand name) or `--`
-  /// so flags after the subcommand or positional arguments after `--` are
-  /// ignored. If both flags appear, the last one wins.
-  static bool? evaluateToolExtensionsCliFlag(Iterable<String> args) {
-    bool? result;
-    for (final arg in args) {
-      if (!arg.startsWith('-') || arg == '--') {
-        break;
-      }
-      if (arg == '--${FlutterGlobalOptions.kExtensionsFlag}') {
-        result = true;
-      } else if (arg == '--no-${FlutterGlobalOptions.kExtensionsFlag}') {
-        result = false;
-      }
-    }
-    return result;
-  }
-
   /// Traverses [args] to identify the target command being invoked and triggers
   /// dynamic option initialization (via [FlutterCommand.initializeDynamicOptions])
   /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
-    if (evaluateToolExtensionsCliFlag(args) == false) {
+    final Map<String, bool> topLevelFlags = _collectTopLevelFlags(args);
+    if (topLevelFlags[FlutterGlobalOptions.kExtensionsFlag] == false) {
       return;
     }
     if (_featureFlags?.isToolExtensionsEnabled != true) {
@@ -397,6 +377,30 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
+  /// Collects top-level boolean flags appearing in [args] before the first
+  /// command or `--` separator.
+  ///
+  /// Skips non-flag top-level options and their value arguments (e.g.,
+  /// `-d linux` or `--device-id=linux`). If a flag is specified multiple times
+  /// (e.g., `--no-extensions --extensions`), the last value wins.
+  Map<String, bool> _collectTopLevelFlags(Iterable<String> args) {
+    final flags = <String, bool>{};
+    final List<String> argsList = args.toList();
+    var i = 0;
+    while (i < argsList.length) {
+      final String arg = argsList[i];
+      if (!arg.startsWith('-') || arg == '--') {
+        break;
+      }
+      final (:int consumed, :(String, bool)? flag) = _parseOptionToken(argParser, arg);
+      if (flag case (final String name, final bool value)) {
+        flags[name] = value;
+      }
+      i += consumed;
+    }
+    return flags;
+  }
+
   /// Helper to find the target command from the list of arguments, traversing subcommands and skipping options.
   ///
   /// Skips global and command-level options (e.g., `--verbose`, `-v`, `--device-id <id>`, `--device-id=id`)
@@ -409,31 +413,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     var i = 0;
     while (i < argsList.length) {
       final String arg = argsList[i];
+      if (arg == '--') {
+        break;
+      }
       // Options and flags start with '-'.
       if (arg.startsWith('-')) {
-        var name = arg;
-        while (name.startsWith('-')) {
-          name = name.substring(1);
-        }
-        // Option with inline value (e.g., '--device-id=foo' or '-d=foo'): consumes 1 argument token.
-        if (name.contains('=')) {
-          i++;
-          continue;
-        }
-        // Look up option in the current command or runner parser to check if it expects a separate value token.
-        Option? option;
-        for (final Option opt in currentParser.options.values) {
-          if (opt.name == name || opt.abbr == name) {
-            option = opt;
-            break;
-          }
-        }
-        // Non-flag options (single/multi options) consume the subsequent argument as their value (e.g., '-d' 'linux').
-        if (option != null && !option.isFlag) {
-          i += 2;
-        } else {
-          i++;
-        }
+        i += _parseOptionToken(currentParser, arg).consumed;
       } else {
         if (commandsMap[arg] case final matchedCommand?) {
           lastFoundCommand = matchedCommand;
@@ -444,6 +429,42 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
     }
     return lastFoundCommand;
+  }
+
+  /// Parses a single option token [arg] against [parser].
+  ///
+  /// Returns the number of argument tokens consumed (`2` for non-flag options
+  /// with a separate value argument like `-d linux`, `1` otherwise), along with
+  /// the resolved `(flagName, value)` if [arg] is a registered boolean flag.
+  ({int consumed, (String name, bool value)? flag}) _parseOptionToken(
+    ArgParser parser,
+    String arg,
+  ) {
+    var name = arg;
+    while (name.startsWith('-')) {
+      name = name.substring(1);
+    }
+    // Option with inline value (e.g., '--device-id=foo' or '-d=foo'): consumes 1 argument token.
+    if (name.contains('=')) {
+      return (consumed: 1, flag: null);
+    }
+    if (arg.startsWith('--no-')) {
+      final String unnegatedName = name.substring('no-'.length);
+      if (parser.options[unnegatedName] case final Option opt
+          when opt.isFlag && (opt.negatable ?? false)) {
+        return (consumed: 1, flag: (opt.name, false));
+      }
+    }
+    for (final Option opt in parser.options.values) {
+      if (opt.name == name || opt.abbr == name) {
+        if (opt.isFlag) {
+          return (consumed: 1, flag: (opt.name, true));
+        }
+        // Non-flag options (single/multi options) consume the subsequent argument as their value (e.g., '-d' 'linux').
+        return (consumed: 2, flag: null);
+      }
+    }
+    return (consumed: 1, flag: null);
   }
 
   /// Whether to perform a flutter version check, which prints a warning if old.

@@ -88,12 +88,10 @@ interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlag
     required this._flutterVersion,
     required this._featuresConfig,
     required this.platform,
-    this._isToolExtensionsEnabledOverride,
   });
 
   final FlutterVersion _flutterVersion;
   final FlutterFeaturesConfig _featuresConfig;
-  final bool? _isToolExtensionsEnabledOverride;
 
   @override
   @protected
@@ -109,10 +107,8 @@ interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlag
       return false;
     }
 
-    if (feature == toolExtensionsFeature) {
-      if (_isToolExtensionsEnabledOverride == false || isSafeModeActive(platform.environment)) {
-        return false;
-      }
+    if (feature == toolExtensionsFeature && isSafeModeActive(platform.environment)) {
+      return false;
     }
 
     // Otherwise, read it from environment variable > project manifest > global config

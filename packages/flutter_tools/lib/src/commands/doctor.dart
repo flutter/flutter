@@ -8,6 +8,7 @@ import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 
 /// The `flutter doctor` command, which displays diagnostic information about the
 /// installed developer environment and tooling.
@@ -85,11 +86,14 @@ class DoctorCommand extends FlutterCommand {
         // Catches UnsupportedError in testWithoutContext and StateError if AppContext is missing.
       }
     }
+    final bool extensionsEnabled =
+        !(globalResults?.wasParsed(FlutterGlobalOptions.kExtensionsFlag) ?? false) ||
+        boolArg(FlutterGlobalOptions.kExtensionsFlag, global: true);
     final bool success = await _doctor.diagnose(
       androidLicenses: boolArg('android-licenses'),
       verbose: verbose,
       androidLicenseValidator: androidLicenseValidator,
-      extensionManager: extensionManager,
+      extensionManager: extensionsEnabled ? extensionManager : null,
     );
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
