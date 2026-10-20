@@ -7,6 +7,7 @@ import 'dart:io' as io;
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:gn_to_bazel/gn_to_bazel.dart' as gn_to_bazel;
 import 'package:path/path.dart' as p;
+import 'package:process_runner/process_runner.dart';
 
 import 'environment.dart';
 import 'label.dart';
@@ -171,11 +172,7 @@ final class Bazel {
   Future<int> run(List<String> arguments) async {
     final String? executable = _executable();
     if (executable == null) {
-      _environment.logger.error(
-        'Neither bazelisk nor bazel is on PATH. Install bazelisk '
-        '(https://github.com/bazelbuild/bazelisk); the engine pins its Bazel version in '
-        '.bazelversion.',
-      );
+      _environment.logger.error(_noBazel);
       return 1;
     }
     final command = <String>[executable, ...arguments];
@@ -187,6 +184,47 @@ final class Bazel {
     );
     return process.exitCode;
   }
+
+  /// Runs `bazel query <expression>` from `engine/src` and returns the
+  /// labels it prints, or null (the error logged) when the query fails.
+  Future<List<String>?> query(String expression) async {
+    final String? executable = _executable();
+    if (executable == null) {
+      _environment.logger.error(_noBazel);
+      return null;
+    }
+    final command = <String>[executable, 'query', '--output=label', expression];
+    _environment.logger.info('Running: ${command.join(' ')}');
+    final ProcessRunnerResult result = await _environment.processRunner.runProcess(
+      command,
+      workingDirectory: _environment.engine.srcDir,
+      failOk: true,
+    );
+    if (result.exitCode != 0) {
+      _environment.logger.error('bazel query failed:\n${result.stderr}');
+      return null;
+    }
+    return <String>[
+      for (final String line in result.stdout.split('\n'))
+        if (line.trim().isNotEmpty) line.trim(),
+    ];
+  }
+
+  /// The GN spelling of a Bazel label of the main repository
+  /// (`//engine/src/flutter/fml:fml` is `//flutter/fml:fml`), or null for a
+  /// label of another repository or outside the GN root.
+  static String? gnLabelFor(String bazelLabel) {
+    const root = '$rootPackage/';
+    if (!bazelLabel.startsWith(root)) {
+      return null;
+    }
+    return '//${bazelLabel.substring(root.length)}';
+  }
+
+  static const String _noBazel =
+      'Neither bazelisk nor bazel is on PATH. Install bazelisk '
+      '(https://github.com/bazelbuild/bazelisk); the engine pins its Bazel version in '
+      '.bazelversion.';
 
   String? _executable() {
     for (final name in <String>['bazelisk', 'bazel']) {

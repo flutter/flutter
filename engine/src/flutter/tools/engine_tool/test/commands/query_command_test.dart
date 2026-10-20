@@ -295,4 +295,65 @@ void main() {
 
     expect(expected.isEmpty, isTrue, reason: 'All expected targets were found');
   });
+
+  test('query targets --backend bazel asks bazel query and prints GN labels', () async {
+    final testEnvironment = TestEnvironment.withTestEngine(
+      cannedProcesses: [
+        CannedProcess(
+          (command) => command.contains('query'),
+          stdout:
+              '//engine/src/flutter/fml:fml\n'
+              '//engine/src/flutter/fml:fml_unittests\n'
+              '@skia//:skia\n',
+        ),
+      ],
+    );
+    addTearDown(testEnvironment.cleanup);
+
+    final builders = TestBuilderConfig();
+    builders.addBuild(name: 'linux/host_debug', dimension: TestDroneDimension.linux);
+    final runner = ToolCommandRunner(
+      environment: testEnvironment.environment,
+      configs: {'local_engine': builders.buildConfig(path: 'ci/builders/local_engine.json')},
+    );
+    final int result = await runner.run(<String>[
+      'query',
+      'targets',
+      '--backend',
+      'bazel',
+      '//flutter/fml/...',
+      '//flutter/txt:all',
+    ]);
+
+    printOnFailure(testEnvironment.testLogs.map((r) => r.message).join('\n'));
+    expect(result, equals(0));
+    // No configuration for a query, and no gn run.
+    expect(testEnvironment.processHistory.single.command, <String>[
+      'bazelisk',
+      'query',
+      '--output=label',
+      'kind(rule, //engine/src/flutter/fml/... + //engine/src/flutter/txt:all)',
+    ]);
+    final List<String> testLogs = stringsFromLogs(testEnvironment.testLogs)
+        .map((s) => s.trim())
+        .toList();
+    expect(testLogs, containsAll(<String>['//flutter/fml:fml', '//flutter/fml:fml_unittests']));
+    expect(testLogs, isNot(contains(contains('skia'))));
+
+    final testOnly = TestEnvironment.withTestEngine(
+      cannedProcesses: [
+        CannedProcess(
+          (command) => command.contains('query'),
+          stdout: '//engine/src/flutter/fml:fml_unittests\n',
+        ),
+      ],
+    );
+    addTearDown(testOnly.cleanup);
+    final int tests = await ToolCommandRunner(
+      environment: testOnly.environment,
+      configs: {'local_engine': builders.buildConfig(path: 'ci/builders/local_engine.json')},
+    ).run(<String>['query', 'targets', '--backend', 'bazel', '--testonly']);
+    expect(tests, equals(0));
+    expect(testOnly.processHistory.single.command.last, 'tests(//engine/src/...)');
+  });
 }
