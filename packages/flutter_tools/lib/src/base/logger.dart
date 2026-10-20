@@ -1101,8 +1101,14 @@ class VerboseLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, dynamic>? args]) {}
 }
 
+/// Prefixes every line of an error with [prefix], so that a parent process
+/// filtering the build output line by line can surface it.
 class PrefixedErrorLogger extends DelegatingLogger {
   PrefixedErrorLogger(super.parent);
+
+  /// Not in the `error:` form, which MSBuild reports as a build error even
+  /// when the command succeeds.
+  static const prefix = '[ERROR] ';
 
   @override
   void printError(
@@ -1116,7 +1122,10 @@ class PrefixedErrorLogger extends DelegatingLogger {
   }) {
     hadErrorOutput = true;
     if (message.trim().isNotEmpty) {
-      message = 'ERROR: $message';
+      message = message
+          .split('\n')
+          .map((String line) => line.trim().isEmpty ? line : '$prefix$line')
+          .join('\n');
     }
     super.printError(
       message,

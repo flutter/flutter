@@ -281,6 +281,18 @@ void main() {
     expect(() => asLogger<MachineOutputLogger>(notifyingLogger), throwsStateError);
   });
 
+  testWithoutContext('PrefixedErrorLogger prefixes every non-empty line of an error', () {
+    final bufferLogger = BufferLogger.test();
+    final logger = PrefixedErrorLogger(bufferLogger);
+
+    logger.printError('Building assets for package:foo failed.\n\nException: bar');
+
+    expect(
+      bufferLogger.errorText,
+      '[ERROR] Building assets for package:foo failed.\n\n[ERROR] Exception: bar\n',
+    );
+  });
+
   group('AppContext', () {
     late FakeStopwatch fakeStopWatch;
 

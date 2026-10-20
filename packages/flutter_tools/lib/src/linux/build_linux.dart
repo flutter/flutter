@@ -30,7 +30,9 @@ import '../migrations/cmake_native_assets_migration.dart';
 // - <file path>:<line>:<column>: warning: <warning...>
 // - clang: error: <link error...>
 // - Error: <tool error...>
+// - [ERROR] <Flutter tool backend error...>
 final errorMatcher = RegExp(
+  '${RegExp.escape(PrefixedErrorLogger.prefix)}|'
   r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:error|warning):\s.*',
   caseSensitive: false,
 );
