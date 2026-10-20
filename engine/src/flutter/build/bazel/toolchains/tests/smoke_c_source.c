@@ -4,15 +4,16 @@
 
 // A C translation unit, so the smoke test also exercises the C compiler
 // configuration (the engine has C dependencies such as zlib and ICU's C
-// sources).
+// sources): the sysroot's C headers and a call into its libc.
 
 #include <inttypes.h>
-#include <stdio.h>
+#include <string.h>
 
 int FlutterBazelSmokeAddFromC(int a, int b);
 
 int FlutterBazelSmokeAddFromC(int a, int b) {
-  char buffer[32];
-  int written = snprintf(buffer, sizeof(buffer), "%" PRId32, (int32_t)(a + b));
-  return written > 0 ? a + b : 0;
+  // The string depends on the arguments, so the call is not folded away.
+  const char* word = a > b ? "sysroot" : "libc";
+  const int32_t sum = (int32_t)a + (int32_t)b;
+  return strlen(word) > 0 ? (int)sum : 0;
 }
