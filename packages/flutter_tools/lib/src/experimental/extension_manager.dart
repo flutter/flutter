@@ -34,10 +34,18 @@ class ExtensionManager {
   final FeatureFlags _featureFlags;
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
+  bool get isDisabled => _isDisabled;
+  bool _isDisabled = false;
   Future<void>? _initFuture;
-  final List<DiagnosticsExtension> _diagnosticsExtensions = <DiagnosticsExtension>[];
-  final List<ConfigurationExtension> _configurationExtensions = <ConfigurationExtension>[];
-  final List<DeviceService> _deviceExtensions = <DeviceService>[];
+  final _diagnosticsExtensions = <DiagnosticsExtension>[];
+  final _configurationExtensions = <ConfigurationExtension>[];
+  final _deviceExtensions = <DeviceService>[];
+
+  /// Disables tool extension initialization for the current CLI invocation
+  /// (for example, when `--no-extensions` is passed).
+  void disable() {
+    _isDisabled = true;
+  }
 
   /// Ensures entrypoints are initialized; idempotent.
   Future<void> ensureInitialized() {
@@ -45,7 +53,7 @@ class ExtensionManager {
   }
 
   Future<void> _doInitialize() async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
+    if (_isDisabled || !_featureFlags.isToolExtensionsEnabled) {
       _isInitialized = true;
       return;
     }
@@ -148,6 +156,7 @@ class ExtensionManager {
     _diagnosticsExtensions.clear();
     _configurationExtensions.clear();
     _deviceExtensions.clear();
+    _isDisabled = false;
     _isInitialized = false;
     _initFuture = null;
     await _discovery.dispose();
