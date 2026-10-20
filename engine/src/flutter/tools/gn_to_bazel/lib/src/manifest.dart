@@ -186,7 +186,6 @@ checkout_script_test(
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
 exports_files([
-    "fixtures_location.cc",
     # The display wrapper of flutter_display_test (testing.bzl).
     "xvfb_run.sh",
     # The gtest-parallel wrapper of flutter_cc_test (testing.bzl).

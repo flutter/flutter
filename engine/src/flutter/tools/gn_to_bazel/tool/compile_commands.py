@@ -21,15 +21,18 @@ resolve as they do for the build.
         --out=engine/src/out/host_debug_unopt_bazel --config=host_debug_unopt
 
 Each entry carries the command both as `arguments` (what clangd prefers)
-and as a `command` string (what tools/clang_tidy reads). Two paths are
-written as the checkout spells them rather than as the execution root does:
-the source (`file`), so that tools/clang_tidy's own file selection -- the
-files changed in git, or every file under flutter/, with anything under a
-`third_party` directory skipped -- matches the entries, as it does for
-GN's file; and the compiler, so that the toolchain's `clang-tidy` is found
-beside it (`.../buildtools/linux-x64/clang/bin/clang++`; the repository
-symlink resolved, the name kept, since the binary is a multicall that reads
-its name).
+and as a `command` string (what tools/clang_tidy reads). Paths are written
+to last: a path under `external/` -- a repository's headers, the sysroot,
+the compiler -- is spelled through the output base rather than the
+execution root, whose `external/` symlinks Bazel replants per command for
+that command's repositories alone; and two are written as the checkout
+spells them: the source (`file`), so that tools/clang_tidy's own file
+selection -- the files changed in git, or every file under flutter/, with
+anything under a `third_party` directory skipped -- matches the entries,
+as it does for GN's file; and the compiler, so that the toolchain's
+`clang-tidy` is found beside it (`.../buildtools/linux-x64/clang/bin/
+clang++`; the repository symlink resolved, the name kept, since the binary
+is a multicall that reads its name).
 
 A source compiled in both the target configuration and the exec
 configuration (a host tool's, built -c opt) gets the target's command;
@@ -69,14 +72,44 @@ def _aquery(bazel, workspace, config, targets):
     return json.loads(result.stdout)
 
 
-def _execution_root(bazel, workspace):
-    result = subprocess.run(
-        [bazel, "info", "execution_root"], cwd=workspace, check=True, capture_output=True, text=True
-    )
-    return result.stdout.strip()
+def _info(bazel, workspace):
+    """`bazel info`'s execution_root and output_base."""
+    result = subprocess.run([bazel, "info"], cwd=workspace, check=True, capture_output=True, text=True)
+    info = dict(line.split(": ", 1) for line in result.stdout.splitlines() if ": " in line)
+    return info["execution_root"], info["output_base"]
 
 
-def _checkout_path(execution_root, relative):
+_EXTERNAL = "external/"
+
+# Flags that take a path in the same argument; `-isystem external/...` and
+# `-iquote external/...` come as two arguments, the second a bare path.
+_PATH_FLAGS = ("-I", "-isystem", "-iquote", "-idirafter", "--sysroot=", "-include", "-imacros")
+
+
+def _lasting_path(execution_root, output_base, relative):
+    """`relative`, a path the action spells from the execution root, as a path that outlives the command.
+
+    Bazel plants `<execution root>/external/<repository>` symlinks per
+    command, for the repositories that command uses (48 of 210 after a test
+    run here), so a path through them is good only until the next command;
+    the repositories themselves live under `<output base>/external/`, which
+    lasts. Everything else under the execution root (the main repository's
+    directories, bazel-out) stays put.
+    """
+    if relative.startswith(_EXTERNAL):
+        return os.path.join(output_base, relative)
+    return os.path.join(execution_root, relative)
+
+
+def _lasting_argument(argument, execution_root, output_base):
+    """`argument` with a path under external/ spelled through the output base (see _lasting_path)."""
+    for prefix in ("",) + _PATH_FLAGS:
+        if argument.startswith(prefix + _EXTERNAL):
+            return prefix + _lasting_path(execution_root, output_base, argument[len(prefix):])
+    return argument
+
+
+def _checkout_path(execution_root, output_base, relative):
     """`relative` (a path from the execution root) as the checkout spells it.
 
     Sources of the main repository and of the synced repositories are
@@ -84,10 +117,10 @@ def _checkout_path(execution_root, relative):
     the checkout; generated files under bazel-out have no other spelling and
     come back absolute under the execution root.
     """
-    return os.path.realpath(os.path.join(execution_root, relative))
+    return os.path.realpath(_lasting_path(execution_root, output_base, relative))
 
 
-def _compiler_path(execution_root, compiler):
+def _compiler_path(execution_root, output_base, compiler):
     """The compiler's path with its repository symlink resolved and its name kept.
 
     `external/<clang repository>/bin` is a symlink to the prebuilt's `bin`;
@@ -95,10 +128,10 @@ def _compiler_path(execution_root, compiler):
     reads its name, so only the directory is resolved.
     """
     directory, name = os.path.split(compiler)
-    return os.path.join(os.path.realpath(os.path.join(execution_root, directory)), name)
+    return os.path.join(os.path.realpath(_lasting_path(execution_root, output_base, directory)), name)
 
 
-def compile_commands(aquery, execution_root):
+def compile_commands(aquery, execution_root, output_base):
     """The compile_commands.json entries of an aquery result: source -> entry, target configuration first."""
     exec_configurations = {
         c["id"] for c in aquery.get("configuration", []) if "exec" in c.get("mnemonic", "")
@@ -115,10 +148,11 @@ def compile_commands(aquery, execution_root):
         ]
         if not sources:
             continue
-        arguments[0] = _compiler_path(execution_root, arguments[0])
+        arguments[0] = _compiler_path(execution_root, output_base, arguments[0])
+        arguments[1:] = [_lasting_argument(a, execution_root, output_base) for a in arguments[1:]]
         entry = {
             "directory": execution_root,
-            "file": _checkout_path(execution_root, sources[-1]),
+            "file": _checkout_path(execution_root, output_base, sources[-1]),
             "arguments": arguments,
             "command": shlex.join(arguments),
         }
@@ -147,7 +181,8 @@ def main(argv):
     args = parser.parse_args(argv)
     bazel = _bazel(args.bazel)
     aquery = _aquery(bazel, args.workspace, args.config, args.targets)
-    entries = compile_commands(aquery, _execution_root(bazel, args.workspace))
+    execution_root, output_base = _info(bazel, args.workspace)
+    entries = compile_commands(aquery, execution_root, output_base)
     os.makedirs(args.out, exist_ok=True)
     path = os.path.join(args.out, "compile_commands.json")
     with open(path, "w", encoding="utf-8") as f:
