@@ -8,7 +8,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -400,18 +399,21 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
 
   // The framework receives the state through dart:ui, so the message is not
   // forwarded to it.
-  static const std::unordered_map<std::string, LifecycleState> kStates = {
-      {"AppLifecycleState.detached", LifecycleState::kDetached},
-      {"AppLifecycleState.resumed", LifecycleState::kResumed},
-      {"AppLifecycleState.inactive", LifecycleState::kInactive},
-      {"AppLifecycleState.hidden", LifecycleState::kHidden},
-      {"AppLifecycleState.paused", LifecycleState::kPaused},
-  };
-  auto it = kStates.find(state);
-  if (it == kStates.end()) {
+  LifecycleState lifecycle_state;
+  if (state == "AppLifecycleState.detached") {
+    lifecycle_state = LifecycleState::kDetached;
+  } else if (state == "AppLifecycleState.resumed") {
+    lifecycle_state = LifecycleState::kResumed;
+  } else if (state == "AppLifecycleState.inactive") {
+    lifecycle_state = LifecycleState::kInactive;
+  } else if (state == "AppLifecycleState.hidden") {
+    lifecycle_state = LifecycleState::kHidden;
+  } else if (state == "AppLifecycleState.paused") {
+    lifecycle_state = LifecycleState::kPaused;
+  } else {
     return false;
   }
-  runtime_controller_->SetAppLifecycleState(it->second);
+  runtime_controller_->SetAppLifecycleState(lifecycle_state);
   if (message->response()) {
     message->response()->CompleteEmpty();
   }
