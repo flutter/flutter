@@ -167,9 +167,11 @@ int compareBuildifierStrings(String a, String b) {
 }
 
 /// Whether a GN executable is a test: `testonly`, named `*tests`, which is
-/// how run_tests.py's executables are declared. The emitter makes such an
-/// executable a `cc_test` (or a `flutter_cc_test`); the builder files'
-/// generator resolves run_tests.py's names among them.
+/// how run_tests.py's executables are declared -- or `*testrunner`, the one
+/// gtest executable a builder runs directly (`licenses_cpp_testrunner`,
+/// host_release_licenses' test step). The emitter makes such an executable
+/// a `cc_test` (or a `flutter_cc_test`); the builder files' generator
+/// resolves run_tests.py's names among them.
 bool isTestTarget(GnTarget target) {
   if (target.rule != 'executable') {
     return false;
@@ -177,7 +179,7 @@ bool isTestTarget(GnTarget target) {
   final List<GnValue>? testonly = target.variables['testonly']?.unconditionalItems;
   final bool isTestonly =
       testonly != null && testonly.length == 1 && testonly.single == const GnBoolValue(true);
-  return isTestonly && target.name.endsWith('tests');
+  return isTestonly && (target.name.endsWith('tests') || target.name.endsWith('testrunner'));
 }
 
 /// Whether the emitter makes a `cc_test` of the executable [target] of

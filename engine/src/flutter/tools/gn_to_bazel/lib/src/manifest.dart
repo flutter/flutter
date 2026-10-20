@@ -171,6 +171,10 @@ checkout_script_test(
 )
 ''',
   ),
+  // licenses_cpp, the license checker ci/licenses.sh runs over the
+  // checkout (the host_release_licenses builder builds it and runs its
+  // test runner from the build directory).
+  ConvertedFile('//flutter/tools/licenses_cpp'),
   ConvertedFile(
     '//flutter/testing',
     // The fixtures macro in testing.bzl compiles this file into every
