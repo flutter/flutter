@@ -232,12 +232,11 @@ test_suite(
 )
 
 # linux_unopt.json: ci/host_debug_unopt
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
+#   bazel run --config=ci_host_debug_unopt :ci_host_debug_unopt
 # Not built, no Bazel counterpart yet: flutter:unittests, flutter/build/dart:dart_sdk.
 # Tests, run by `bazel test` rather than installed: flutter/shell/platform/common/client_wrapper:client_wrapper_unittests, flutter/shell/platform/common:common_cpp_core_unittests, flutter/shell/platform/common:common_cpp_unittests, flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests.
 install(
-    name = "host_debug_unopt",
+    name = "ci_host_debug_unopt",
     testonly = True,
     contents = [
         "//engine/src/flutter/shell/testing:testing",
@@ -250,7 +249,7 @@ install(
 # ci/host_debug_unopt's tests: run_tests.py --type dart,dart-host,engine,font-subset.
 # Other steps, scripts of the checkout: test: Check formatting; ban GeneratedPluginRegistrant.java; ban_test GeneratedPluginRegistrant.java; analyze_dart_ui; pylint; test: service protocol; test: Lint android host; Check build configs; Tests of tools/gn.
 test_suite(
-    name = "host_debug_unopt_tests",
+    name = "ci_host_debug_unopt_tests",
     tags = ["manual"],
     tests = [
         "//engine/src/flutter:dart_host_tests",

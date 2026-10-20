@@ -78,6 +78,10 @@ _GN_ARGS = {
     # tools/gn does for --dart-debug with --runtime-mode release.
     ":dart_debug_enabled": {"dart_debug": "true"},
     "//conditions:default": {},
+}) | select({
+    # GN's is_asan (the build-wide flag): the VM instrumented like the engine.
+    "//engine/src/flutter/build/bazel:asan_enabled": {"is_asan": "true"},
+    "//conditions:default": {},
 })
 
 gn_build(

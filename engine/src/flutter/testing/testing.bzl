@@ -8,6 +8,7 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
+load("//engine/src/flutter/build/bazel:sanitizers.bzl", "SANITIZER_ATTRS", "sanitizer_launcher_lines")
 load("//engine/src/flutter/build/bazel/dart:kernel.bzl", "SOURCE_URI_SCHEME", _dart_kernel = "dart_kernel")
 load("//engine/src/flutter/build/bazel/dart:snapshot.bzl", "aot_snapshot")
 
@@ -497,18 +498,22 @@ def _gtest_parallel_words(ctx):
     )
     return words, runfiles
 
-def _launcher_line(words):
-    # One `exec` line: the words quoted, then the test's own arguments.
-    return "#!/bin/bash\nexec " + " ".join(["'" + w.replace("'", "'\\''") + "'" for w in words]) + " \"$@\"\n"
+def _launcher_line(words, prologue = []):
+    # The prologue's lines (the sanitizer environment of a sanitized build,
+    # build/bazel/sanitizers.bzl), then one `exec` line: the words quoted,
+    # then the test's own arguments.
+    return "#!/bin/bash\n" + "".join([line + "\n" for line in prologue]) + "exec " + " ".join(["'" + w.replace("'", "'\\''") + "'" for w in words]) + " \"$@\"\n"
 
 def _gtest_parallel_test_impl(ctx):
     launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
     words, runfiles = _gtest_parallel_words(ctx)
+    prologue, sanitizer_runfiles = sanitizer_launcher_lines(ctx)
     ctx.actions.write(
         output = launcher,
-        content = _launcher_line(words + [ctx.executable.binary.short_path, "--"]),
+        content = _launcher_line(words + [ctx.executable.binary.short_path, "--"], prologue),
         is_executable = True,
     )
+    runfiles = runfiles.merge(sanitizer_runfiles)
     runfiles = runfiles.merge(ctx.runfiles(files = [ctx.executable.binary] + ctx.files.data))
     runfiles = runfiles.merge(ctx.attr.binary[DefaultInfo].default_runfiles)
     for target in ctx.attr.data:
@@ -537,7 +542,7 @@ _gtest_parallel_test = rule(
         "env": attr.string_dict(
             doc = "Environment of the test (run_tests.py's extra_env).",
         ),
-    } | _GTEST_PARALLEL_ATTRS,
+    } | _GTEST_PARALLEL_ATTRS | SANITIZER_ATTRS,
 )
 
 def flutter_cc_test(name, size = None, timeout = None, shard_count = None, flaky = None, args = [], runner_args = [], data = [], env = {}, tags = [], visibility = None, **kwargs):
@@ -612,11 +617,13 @@ def _display_test_impl(ctx):
         runfiles = runfiles.merge(gtest_parallel_runfiles)
     else:
         words.append(ctx.executable.binary.short_path)
+    prologue, sanitizer_runfiles = sanitizer_launcher_lines(ctx)
     ctx.actions.write(
         output = launcher,
-        content = _launcher_line(words),
+        content = _launcher_line(words, prologue),
         is_executable = True,
     )
+    runfiles = runfiles.merge(sanitizer_runfiles)
     runfiles = runfiles.merge(ctx.attr.binary[DefaultInfo].default_runfiles)
     for target in ctx.attr.data:
         runfiles = runfiles.merge(target[DefaultInfo].default_runfiles)
@@ -674,7 +681,7 @@ _display_test = rule(
             default = "//engine/src/flutter/testing:xvfb_run.sh",
             allow_single_file = True,
         ),
-    } | _GTEST_PARALLEL_ATTRS,
+    } | _GTEST_PARALLEL_ATTRS | SANITIZER_ATTRS,
 )
 
 def flutter_display_test(name, size = None, timeout = None, shard_count = None, flaky = None, args = [], runner_args = [], data = [], env = {}, vulkan_validation = True, session_bus = False, gtest_parallel = False, tags = [], visibility = None, **kwargs):
@@ -757,7 +764,7 @@ _TESTER_LAUNCHER = """#!/bin/bash
 # {tester} as testing/run_tests.py does.
 set -eu
 runfiles="$PWD"
-build_dir="${{TEST_TMPDIR:-${{TMPDIR:-/tmp}}}}/flutter_build_directory"
+{sanitizers}build_dir="${{TEST_TMPDIR:-${{TMPDIR:-/tmp}}}}/flutter_build_directory"
 mkdir -p "$build_dir"
 ln -sfn "$runfiles/engine/src" "$build_dir/gen"
 export FLUTTER_BUILD_DIRECTORY="$build_dir"
@@ -819,6 +826,7 @@ def _shell_quoted(strings):
 def _flutter_tester_test_impl(ctx):
     launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
     assets_dir = paths.join(ctx.attr.assets.label.package, "assets")
+    prologue, sanitizer_runfiles = sanitizer_launcher_lines(ctx)
     ctx.actions.write(
         output = launcher,
         content = _TESTER_LAUNCHER.format(
@@ -830,12 +838,14 @@ def _flutter_tester_test_impl(ctx):
             assets_dir = assets_dir,
             must_fail = "1" if ctx.attr.must_fail else "0",
             forbidden = _shell_quoted(ctx.attr.forbidden_output),
+            sanitizers = "".join([line + "\n" for line in prologue]),
         ),
         is_executable = True,
     )
     runfiles = ctx.runfiles(
         files = [ctx.file.kernel, ctx.file.source, ctx.file.icu_data, ctx.executable.tester] + ctx.files.data,
     )
+    runfiles = runfiles.merge(sanitizer_runfiles)
     runfiles = runfiles.merge(ctx.attr.tester[DefaultInfo].default_runfiles)
     runfiles = runfiles.merge(ctx.attr.assets[DefaultInfo].default_runfiles)
     for target in ctx.attr.data:
@@ -890,7 +900,7 @@ flutter_tester_test = rule(
             doc = "Strings the run's output must not contain (run_tests.py's forbidden_output: `[ERROR` in an " +
                   "optimized build directory), checked once the run has passed.",
         ),
-    },
+    } | SANITIZER_ATTRS,
 )
 
 # run_tests.py's variants of every Dart test (gather_dart_tests): the

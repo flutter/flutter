@@ -181,6 +181,15 @@ _OPT_COMPILE_FLAGS = ["-O2", "-g0", "-fno-ident", "-fdata-sections", "-ffunction
 _OPT_DEFINES = ["NDEBUG", "NVALGRIND", "DYNAMIC_ANNOTATIONS_ENABLED=0"]
 _OPT_LINK_FLAGS = ["-Wl,-O2", "-Wl,--gc-sections"]
 
+# GN's is_asan (//build/config/compiler:compiler under `using_sanitizer` and
+# `is_asan`, //build/config:feature_flags' define): AddressSanitizer on every
+# compile and link. In GN's command line these come before the mode's -O0
+# -g2, so -gline-tables-only is overridden by -g2 there, and the feature sits
+# before the mode features here for the same reason.
+_ASAN_COMPILE_FLAGS = ["-fno-omit-frame-pointer", "-gline-tables-only", "-fsanitize=address"]
+_ASAN_DEFINES = ["ADDRESS_SANITIZER"]
+_ASAN_LINK_FLAGS = ["-fsanitize=address"]
+
 def _defines(names):
     return ["-D" + name for name in names]
 
@@ -211,6 +220,22 @@ def _impl(ctx):
         ),
         _flag_feature("flutter_c_flags", [ACTION_NAMES.c_compile], _LINUX_C_FLAGS),
         _flag_feature("flutter_cxx_flags", ALL_CPP_COMPILE_ACTION_NAMES, _LINUX_CXX_FLAGS + cxx_include_flags),
+        # AddressSanitizer, when the build asks for it (the `asan` attribute,
+        # which BUILD.bazel selects on //engine/src/flutter/build/bazel:asan).
+        feature(
+            name = "asan",
+            enabled = ctx.attr.asan,
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = _ASAN_COMPILE_FLAGS + _defines(_ASAN_DEFINES))],
+                ),
+                flag_set(
+                    actions = ALL_CC_LINK_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = _ASAN_LINK_FLAGS)],
+                ),
+            ],
+        ),
         # Compilation modes; Bazel enables exactly one of dbg/opt/fastbuild.
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
@@ -430,6 +455,10 @@ flutter_cc_toolchain_config = rule(
             mandatory = True,
             allow_single_file = True,
             doc = "A file in clang's builtin include directory (lib/clang/<version>/include); the directory is a builtin include directory.",
+        ),
+        "asan": attr.bool(
+            default = False,
+            doc = "Whether every compile and link is instrumented with AddressSanitizer (GN's is_asan).",
         ),
     },
     provides = [CcToolchainConfigInfo],
