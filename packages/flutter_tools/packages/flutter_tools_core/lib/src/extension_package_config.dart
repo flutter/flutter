@@ -2,10 +2,65 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 /// Static metadata parsed from an extension package's
 /// `extension/flutter_tools/config.yaml` file.
+///
+/// Tool extension packages publish this manifest at
+/// `<package_root>/extension/flutter_tools/config.yaml` so `flutter_tools` can
+/// discover extension capabilities via `package:extension_discovery` without
+/// compiling or spawning extension isolates up front.
+///
+/// ### Schema
+///
+/// - `name` (`String`, optional when inferred from the package directory/config,
+///   otherwise required): The Dart package name of the extension. When both
+///   `name` and `packageName` are provided, they must match.
+/// - `protocol_version` (`int`, optional): The extension RPC protocol version
+///   targeted by the package. Defaults to [currentProtocolVersion] (`1`).
+/// - `entrypoint` (`String`, optional): Relative POSIX path within the package
+///   to the isolate entrypoint script (must not be absolute, contain `\`,
+///   include `..` segments, or specify a URI scheme). Defaults to
+///   `'bin/<name>.dart'`.
+/// - `supported_platforms` (`List<String>`, optional): Host operating systems on
+///   which the extension can run (normalized to lowercase, e.g., `'linux'`,
+///   `'macos'`, `'windows'`). An empty list indicates support for all host
+///   platforms.
+/// - `services` (`List<String>`, optional): RPC service namespaces implemented
+///   by the extension (e.g., `'diagnostics'`, `'config'`, `'template'`,
+///   `'device'`, `'build'`, `'artifact'`, `'clean'`).
+/// - `build_targets` (`List<String>`, optional): Static top-level `flutter build`
+///   subcommand target names contributed by the extension.
+/// - `templates` (`List<String>`, optional): Custom project template names
+///   contributed by the extension.
+/// - `platforms` (`List<String>`, optional): Custom target platform identifiers
+///   supported for `flutter create --platforms=<platform>`. Each entry must
+///   match `^[a-z][a-z0-9_]*$`.
+///
+/// ### Example `extension/flutter_tools/config.yaml`
+///
+/// ```yaml
+/// name: my_custom_extension
+/// protocol_version: 1
+/// entrypoint: bin/my_custom_extension.dart
+/// supported_platforms:
+///   - linux
+///   - macos
+/// services:
+///   - diagnostics
+///   - config
+///   - template
+///   - device
+///   - build
+/// build_targets:
+///   - custom-target
+/// templates:
+///   - custom-app
+/// platforms:
+///   - custom_os
+/// ```
 @immutable
 final class ExtensionPackageConfig {
   ExtensionPackageConfig({
@@ -200,12 +255,7 @@ final class ExtensionPackageConfig {
     };
   }
 
-  static bool _setEquals(Set<String> a, Set<String> b) {
-    if (identical(a, b)) {
-      return true;
-    }
-    return a.length == b.length && a.containsAll(b);
-  }
+  static const SetEquality<String> _stringSetEquality = SetEquality<String>();
 
   @override
   bool operator ==(Object other) {
@@ -216,11 +266,11 @@ final class ExtensionPackageConfig {
         other.name == name &&
         other.protocolVersion == protocolVersion &&
         other.entrypoint == entrypoint &&
-        _setEquals(other.supportedPlatforms, supportedPlatforms) &&
-        _setEquals(other.services, services) &&
-        _setEquals(other.buildTargets, buildTargets) &&
-        _setEquals(other.templates, templates) &&
-        _setEquals(other.platforms, platforms);
+        _stringSetEquality.equals(other.supportedPlatforms, supportedPlatforms) &&
+        _stringSetEquality.equals(other.services, services) &&
+        _stringSetEquality.equals(other.buildTargets, buildTargets) &&
+        _stringSetEquality.equals(other.templates, templates) &&
+        _stringSetEquality.equals(other.platforms, platforms);
   }
 
   @override
@@ -228,11 +278,11 @@ final class ExtensionPackageConfig {
     name,
     protocolVersion,
     entrypoint,
-    Object.hashAllUnordered(supportedPlatforms),
-    Object.hashAllUnordered(services),
-    Object.hashAllUnordered(buildTargets),
-    Object.hashAllUnordered(templates),
-    Object.hashAllUnordered(platforms),
+    _stringSetEquality.hash(supportedPlatforms),
+    _stringSetEquality.hash(services),
+    _stringSetEquality.hash(buildTargets),
+    _stringSetEquality.hash(templates),
+    _stringSetEquality.hash(platforms),
   );
 
   @override
