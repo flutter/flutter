@@ -197,7 +197,8 @@ class TestSwapchainVK : public impeller::SwapchainVK {
     desc.usage = impeller::TextureUsage::kRenderTarget;
 
     impeller::vk::Image vk_image(test_surface_->GetImage());
-    auto wrapped = impeller::WrapTextureSourceVK(context_, desc, vk_image);
+    std::shared_ptr<impeller::TextureSourceVK> wrapped =
+        impeller::WrapTextureSourceVK(context_, desc, vk_image);
     if (!transients_) {
       transients_ = std::make_shared<impeller::SwapchainTransientsVK>(
           context_, desc, /*enable_msaa=*/true);
@@ -235,8 +236,12 @@ TEST(GPUSurfaceVulkanImpeller,
   impeller::ContextVK::Settings context_settings;
   context_settings.proc_address_callback = vkGetInstanceProcAddr;
   context_settings.shader_libraries_data = ShaderLibraryMappings();
-  auto context = impeller::ContextVK::Create(std::move(context_settings));
-  auto surface_context = context->CreateSurfaceContext();
+  std::shared_ptr<impeller::ContextVK> context =
+      impeller::ContextVK::Create(std::move(context_settings));
+  ASSERT_NE(context, nullptr);
+  std::shared_ptr<impeller::SurfaceContextVK> surface_context =
+      context->CreateSurfaceContext();
+  ASSERT_NE(surface_context, nullptr);
   ASSERT_TRUE(surface_context->SetSwapchain(
       std::make_shared<TestSwapchainVK>(context)));
 
@@ -244,11 +249,12 @@ TEST(GPUSurfaceVulkanImpeller,
       /*delegate=*/nullptr, surface_context);
   ASSERT_TRUE(surface->IsValid());
 
-  auto& data_host_buffer =
+  impeller::HostBuffer& data_host_buffer =
       surface->GetAiksContext()->GetContentContext().GetTransientsDataBuffer();
   EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 0u);
 
-  auto frame = surface->AcquireFrame(DlISize(100, 100));
+  std::unique_ptr<SurfaceFrame> frame =
+      surface->AcquireFrame(DlISize(100, 100));
   ASSERT_NE(frame, nullptr);
   frame->set_submit_info({.frame_boundary = false});
   ASSERT_TRUE(frame->Submit());
