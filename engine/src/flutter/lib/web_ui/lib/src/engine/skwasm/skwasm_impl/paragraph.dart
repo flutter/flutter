@@ -11,8 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-const String _kWeightAxisTag = 'wght';
-
 int getFourByteTag(String s) {
   assert(s.length == 4);
   return s.codeUnitAt(0) << 24 | s.codeUnitAt(1) << 16 | s.codeUnitAt(2) << 8 | s.codeUnitAt(3);
@@ -337,31 +335,15 @@ void _applyTextStyleToNative(EngineTextStyle style, SkwasmNativeTextStyle native
     }
   }
 
-  final List<ui.FontVariation>? fontVariations = style.fontVariations;
-  Iterable<ui.FontVariation> allFontVariations;
-  if (fontVariations != null &&
-      fontVariations.any((ui.FontVariation v) => v.axis == _kWeightAxisTag)) {
-    allFontVariations = fontVariations;
-  } else {
-    final int weightValue = style.fontWeight?.value ?? ui.FontWeight.normal.value;
-    final weightVariation = <ui.FontVariation>[
-      ui.FontVariation(_kWeightAxisTag, weightValue.toDouble()),
-    ];
-    if (fontVariations == null) {
-      allFontVariations = weightVariation;
-    } else {
-      allFontVariations = fontVariations.followedBy(weightVariation);
-    }
-  }
-  final int variationCount = allFontVariations.length;
+  final List<ui.FontVariation> effectiveFontVariations = style.effectiveFontVariations;
+  final int variationCount = effectiveFontVariations.length;
   withStackScope((StackScope scope) {
     final Pointer<Uint32> axisBuffer = scope.allocUint32Array(variationCount);
     final Pointer<Float> valueBuffer = scope.allocFloatArray(variationCount);
-    var i = 0;
-    for (final variation in allFontVariations) {
+    for (var i = 0; i < variationCount; i++) {
+      final ui.FontVariation variation = effectiveFontVariations[i];
       axisBuffer[i] = getFourByteTag(variation.axis);
       valueBuffer[i] = variation.value;
-      i++;
     }
     textStyleSetFontVariations(handle, axisBuffer, valueBuffer, variationCount);
   });
@@ -402,8 +384,9 @@ StrutStyleHandle _createNativeStrutStyle(EngineStrutStyle style) {
   return handle;
 }
 
-(ParagraphStyleHandle, SkwasmNativeTextStyle) _createNativeParagraphStyle(
+ParagraphStyleHandle _createNativeParagraphStyle(
   EngineParagraphStyle style,
+  SkwasmFontCollection collection,
 ) {
   final ParagraphStyleHandle handle = paragraphStyleCreate();
   if (style.textAlign != null) {
@@ -435,83 +418,37 @@ StrutStyleHandle _createNativeStrutStyle(EngineStrutStyle style) {
     paragraphStyleSetStrutStyle(handle, strutStyleHandle);
     strutStyleDispose(strutStyleHandle);
   }
-  final SkwasmNativeTextStyle textStyle = (renderer.fontCollection as SkwasmFontCollection)
-      .defaultTextStyle
-      .copy();
-  final TextStyleHandle textStyleHandle = textStyle.handle;
-
-  final List<String> effectiveFontFamilies = style.effectiveFontFamilies;
-  if (effectiveFontFamilies.isNotEmpty) {
-    withScopedFontList(
-      effectiveFontFamilies,
-      (Pointer<SkStringHandle> families, int count) =>
-          textStyleAddFontFamilies(textStyleHandle, families, count),
-    );
-  }
-  if (style.fontSize != null) {
-    textStyleSetFontSize(textStyleHandle, style.fontSize!);
-  }
-  if (style.height != null) {
-    textStyleSetHeight(textStyleHandle, style.height!);
-  }
-  if (style.fontWeight != null || style.fontStyle != null) {
-    textStyleSetFontStyle(
-      textStyleHandle,
-      (style.fontWeight ?? ui.FontWeight.normal).value,
-      (style.fontStyle ?? ui.FontStyle.normal).index,
-    );
-  }
-  withStackScope((StackScope scope) {
-    final Pointer<Uint32> axisBuffer = scope.allocUint32Array(1);
-    final Pointer<Float> valueBuffer = scope.allocFloatArray(1);
-    axisBuffer[0] = getFourByteTag(_kWeightAxisTag);
-    final int weightValue = style.fontWeight?.value ?? ui.FontWeight.normal.value;
-    valueBuffer[0] = weightValue.toDouble();
-    textStyleSetFontVariations(textStyleHandle, axisBuffer, valueBuffer, 1);
-  });
-  if (style.textHeightBehavior != null) {
-    textStyleSetHalfLeading(
-      textStyleHandle,
-      style.textHeightBehavior!.leadingDistribution == ui.TextLeadingDistribution.even,
-    );
-  }
-  if (style.locale != null) {
-    final SkStringHandle localeHandle = skStringFromDartString(style.locale!.toLanguageTag());
-    textStyleSetLocale(textStyleHandle, localeHandle);
-    skStringFree(localeHandle);
-  }
-  paragraphStyleSetTextStyle(handle, textStyleHandle);
+  final SkwasmNativeTextStyle textStyle = collection.defaultTextStyle.copy();
+  _applyTextStyleToNative(style.getTextStyle(), textStyle);
+  paragraphStyleSetTextStyle(handle, textStyle.handle);
+  textStyle.dispose();
   paragraphStyleSetApplyRoundingHack(handle, false);
   // Like the native engine, render soft hyphens unless they are hidden.
   paragraphStyleSetRenderSoftHyphens(handle, style.hyphens != ui.Hyphens.hidden);
-  return (handle, textStyle);
+  return handle;
 }
 
 class SkwasmParagraphBuilder implements BackendParagraphBuilder {
   factory SkwasmParagraphBuilder(EngineParagraphStyle style, SkwasmFontCollection collection) {
-    final (ParagraphStyleHandle paragraphStyleHandle, SkwasmNativeTextStyle nativeTextStyle) =
-        _createNativeParagraphStyle(style);
+    final ParagraphStyleHandle paragraphStyleHandle = _createNativeParagraphStyle(
+      style,
+      collection,
+    );
     final builder = SkwasmParagraphBuilder._(
       paragraphBuilderCreate(paragraphStyleHandle, collection.handle),
-      nativeTextStyle,
+      collection,
     );
     paragraphStyleDispose(paragraphStyleHandle);
     return builder;
   }
 
-  SkwasmParagraphBuilder._(this.handle, SkwasmNativeTextStyle baseTextStyle) {
-    textStyleStack.add(baseTextStyle);
-  }
+  SkwasmParagraphBuilder._(this.handle, this.fontCollection);
 
   final ParagraphBuilderHandle handle;
-  final List<SkwasmNativeTextStyle> textStyleStack = <SkwasmNativeTextStyle>[];
+  final SkwasmFontCollection fontCollection;
 
   @override
   void dispose() {
-    while (textStyleStack.isNotEmpty) {
-      final SkwasmNativeTextStyle style = textStyleStack.removeLast();
-      style.dispose();
-    }
     paragraphBuilderDispose(handle);
   }
 
@@ -648,17 +585,15 @@ class SkwasmParagraphBuilder implements BackendParagraphBuilder {
 
   @override
   void pop() {
-    final SkwasmNativeTextStyle style = textStyleStack.removeLast();
-    style.dispose();
     paragraphBuilderPop(handle);
   }
 
   @override
-  void pushStyle(EngineTextStyle style, {required EngineTextStyle mergedStyle}) {
-    final SkwasmNativeTextStyle nativeStyle = textStyleStack.last.copy();
-    _applyTextStyleToNative(style, nativeStyle);
-    textStyleStack.add(nativeStyle);
+  void pushStyle(EngineTextStyle mergedStyle) {
+    final SkwasmNativeTextStyle nativeStyle = fontCollection.defaultTextStyle.copy();
+    _applyTextStyleToNative(mergedStyle, nativeStyle);
     paragraphBuilderPushStyle(handle, nativeStyle.handle);
+    nativeStyle.dispose();
   }
 }
 

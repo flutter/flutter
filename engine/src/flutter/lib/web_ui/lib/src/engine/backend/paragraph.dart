@@ -56,7 +56,7 @@ abstract class BackendParagraph {
 abstract class BackendParagraphBuilder {
   void dispose();
 
-  void pushStyle(EngineTextStyle style, {required EngineTextStyle mergedStyle});
+  void pushStyle(EngineTextStyle mergedStyle);
 
   void pop();
 

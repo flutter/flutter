@@ -7,39 +7,6 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-const String _kWeightAxisTag = 'wght';
-
-SkTextStyleProperties _toParagraphSkTextStyleProperties(
-  String? fontFamily,
-  double? fontSize,
-  double? height,
-  ui.FontWeight? fontWeight,
-  ui.FontStyle? fontStyle,
-) {
-  final skTextStyle = SkTextStyleProperties();
-  if (fontWeight != null || fontStyle != null) {
-    skTextStyle.fontStyle = toSkFontStyle(fontWeight, fontStyle);
-  }
-
-  final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
-  final skFontVariation = SkFontVariation();
-  skFontVariation.axis = _kWeightAxisTag;
-  skFontVariation.value = weightValue.toDouble();
-  skTextStyle.fontVariations = <SkFontVariation>[skFontVariation];
-
-  if (fontSize != null) {
-    skTextStyle.fontSize = fontSize;
-  }
-
-  if (height != null) {
-    skTextStyle.heightMultiplier = height;
-  }
-
-  skTextStyle.fontFamilies = _computeCombinedFontFamilies(fontFamily);
-
-  return skTextStyle;
-}
-
 SkStrutStyleProperties _toSkStrutStyleProperties(
   EngineStrutStyle style,
   ui.TextHeightBehavior? paragraphHeightBehavior,
@@ -125,13 +92,7 @@ SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style) {
   }
 
   properties.replaceTabCharacters = true;
-  properties.textStyle = _toParagraphSkTextStyleProperties(
-    style.effectiveFontFamily,
-    style.fontSize,
-    style.height,
-    style.fontWeight,
-    style.fontStyle,
-  );
+  properties.textStyle = _toSkTextStyleProperties(style.getTextStyle());
   properties.applyRoundingHack = false;
   // Like the native engine, render soft hyphens unless they are hidden.
   properties.renderSoftHyphens = style.hyphens != ui.Hyphens.hidden;
@@ -139,7 +100,7 @@ SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style) {
   return canvasKit.ParagraphStyle(properties);
 }
 
-SkTextStyle _toSkTextStyle(EngineTextStyle style) {
+SkTextStyleProperties _toSkTextStyleProperties(EngineTextStyle style) {
   final ui.Color? color = style.color;
   final ui.TextDecoration? decoration = style.decoration;
   final ui.Color? decorationColor = style.decorationColor;
@@ -157,7 +118,6 @@ SkTextStyle _toSkTextStyle(EngineTextStyle style) {
   final foreground = style.foreground as CkPaint?;
   final List<ui.Shadow>? shadows = style.shadows;
   final List<ui.FontFeature>? fontFeatures = style.fontFeatures;
-  final List<ui.FontVariation>? fontVariations = style.fontVariations;
 
   final properties = SkTextStyleProperties();
 
@@ -265,28 +225,19 @@ SkTextStyle _toSkTextStyle(EngineTextStyle style) {
   }
 
   final skFontVariations = <SkFontVariation>[];
-  var weightAxisSet = false;
-  if (fontVariations != null) {
-    for (final ui.FontVariation fontVariation in fontVariations) {
-      final skFontVariation = SkFontVariation();
-      skFontVariation.axis = fontVariation.axis;
-      skFontVariation.value = fontVariation.value;
-      skFontVariations.add(skFontVariation);
-      if (fontVariation.axis == _kWeightAxisTag) {
-        weightAxisSet = true;
-      }
-    }
-  }
-  if (!weightAxisSet) {
-    final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+  for (final ui.FontVariation fontVariation in style.effectiveFontVariations) {
     final skFontVariation = SkFontVariation();
-    skFontVariation.axis = _kWeightAxisTag;
-    skFontVariation.value = weightValue.toDouble();
+    skFontVariation.axis = fontVariation.axis;
+    skFontVariation.value = fontVariation.value;
     skFontVariations.add(skFontVariation);
   }
   properties.fontVariations = skFontVariations;
 
-  return canvasKit.TextStyle(properties);
+  return properties;
+}
+
+SkTextStyle _toSkTextStyle(EngineTextStyle style) {
+  return canvasKit.TextStyle(_toSkTextStyleProperties(style));
 }
 
 SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
@@ -556,7 +507,7 @@ class CkParagraphBuilder implements BackendParagraphBuilder {
   }
 
   @override
-  void pushStyle(EngineTextStyle style, {required EngineTextStyle mergedStyle}) {
+  void pushStyle(EngineTextStyle mergedStyle) {
     final SkTextStyle skTextStyle = _toSkTextStyle(mergedStyle);
     if (mergedStyle.foreground != null || mergedStyle.background != null) {
       final SkPaint foreground = _createForegroundPaint(mergedStyle);

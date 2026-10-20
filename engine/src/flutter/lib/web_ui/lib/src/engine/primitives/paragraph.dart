@@ -12,6 +12,7 @@ import '../native_memory.dart';
 import '../renderer.dart';
 import '../util.dart';
 
+const String _kWeightAxisTag = 'wght';
 const List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 
 String? _computeEffectiveFontFamily(String? fontFamily) {
@@ -258,6 +259,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
       fontSize: fontSize,
       height: height,
       leadingDistribution: textHeightBehavior?.leadingDistribution,
+      locale: locale,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
     );
@@ -445,6 +447,17 @@ class EngineTextStyle implements ui.TextStyle {
 
   List<String> get effectiveFontFamilies =>
       _computeEffectiveFontFamilies(<String>[?fontFamily, ...?fontFamilyFallback]);
+
+  List<ui.FontVariation> get effectiveFontVariations {
+    final List<ui.FontVariation>? fontVariations = this.fontVariations;
+    if (fontVariations != null &&
+        fontVariations.any((ui.FontVariation v) => v.axis == _kWeightAxisTag)) {
+      return fontVariations;
+    }
+    final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+    final weightVariation = ui.FontVariation(_kWeightAxisTag, weightValue.toDouble());
+    return <ui.FontVariation>[...?fontVariations, weightVariation];
+  }
 
   EngineTextStyle mergeWith(EngineTextStyle other) {
     final double? textHeight = other.height == ui.kTextHeightNone ? null : (other.height ?? height);
@@ -795,7 +808,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     final EngineTextStyle baseStyle = _styleStack.last;
     final EngineTextStyle mergedStyle = baseStyle.mergeWith(style);
     _styleStack.add(mergedStyle);
-    _backendBuilder.pushStyle(style, mergedStyle: mergedStyle);
+    _backendBuilder.pushStyle(mergedStyle);
   }
 
   @override
