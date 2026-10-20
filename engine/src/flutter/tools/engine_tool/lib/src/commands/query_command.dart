@@ -4,6 +4,7 @@
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 
+import '../bazel.dart';
 import '../build_plan.dart';
 import '../build_utils.dart';
 import '../gn.dart';
@@ -152,6 +153,17 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
   Future<int> run() async {
     final plan = BuildPlan.fromArgResults(argResults!, environment, builds: builds);
 
+    // TODO(matanlurey): Discuss if we want to just require '//...'.
+    // For now this retains the existing behavior.
+    List<String> patterns = argResults!.rest;
+    if (patterns.isEmpty) {
+      patterns = ['//...'];
+    }
+
+    if (plan.backend == BuildBackend.bazel) {
+      return _runBazel(patterns, testOnly: argResults!.flag(testOnlyFlag));
+    }
+
     if (!await ensureBuildDir(environment, plan.build, enableRbe: plan.useRbe)) {
       return 1;
     }
@@ -159,13 +171,6 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
     // Builds only accept labels as arguments, so convert patterns to labels.
     // TODO(matanlurey): Can be optimized in cases where wildcards are not used.
     final gn = Gn.fromEnvironment(environment);
-
-    // TODO(matanlurey): Discuss if we want to just require '//...'.
-    // For now this retains the existing behavior.
-    List<String> patterns = argResults!.rest;
-    if (patterns.isEmpty) {
-      patterns = ['//...'];
-    }
 
     final allTargets = <BuildTarget>{};
     for (final pattern in patterns) {
@@ -185,6 +190,36 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
         continue;
       }
       environment.logger.status(target.label);
+    }
+    return 0;
+  }
+
+  /// `bazel query` over the patterns' Bazel counterparts (the rules, or the
+  /// tests with --testonly), printed as GN labels; targets of other
+  /// repositories, which have no GN spelling, are left out. A query needs no
+  /// configuration: the targets are the same under every one.
+  Future<int> _runBazel(List<String> patterns, {required bool testOnly}) async {
+    final bazel = Bazel(environment, configs);
+    final String union = patterns
+        .map((String pattern) => Bazel.labelFor(TargetPattern.parse(pattern)))
+        .join(' + ');
+    final List<String>? labels = await bazel.query(
+      testOnly ? 'tests($union)' : 'kind(rule, $union)',
+    );
+    if (labels == null) {
+      return 1;
+    }
+    var found = 0;
+    for (final String label in labels) {
+      final String? gnLabel = Bazel.gnLabelFor(label);
+      if (gnLabel != null) {
+        environment.logger.status(gnLabel);
+        found++;
+      }
+    }
+    if (found == 0) {
+      environment.logger.error('No targets found, nothing to query.');
+      return 1;
     }
     return 0;
   }
