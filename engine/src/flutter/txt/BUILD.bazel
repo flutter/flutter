@@ -4,6 +4,7 @@
 
 # Generated from //flutter/txt/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
@@ -62,6 +63,12 @@ cc_library(
         "src/txt/typeface_font_asset_provider.h",
     ],
     copts = FLUTTER_COPTS,
+    linkopts = select({
+        "//engine/src/flutter/txt:fontconfig": [
+            "-lfontconfig",  # flutter_use_fontconfig
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":txt_config",
@@ -150,3 +157,18 @@ flutter_cc_test(
 # (tools/gn_to_bazel/lib/src/manifest.dart).
 
 exports_files(glob(["third_party/fonts/*"]))
+
+# tools/gn's --enable-fontconfig: flutter_use_fontconfig (this file's
+# argument) and skia_use_fontconfig at once. Off, as in every host build; the
+# Linux desktop builders turn it on (ci/builders/configs.bazelrc), and with
+# it txt's Linux font manager is Skia's fontconfig one (SkFontMgr_fontconfig,
+# SK_FONTMGR_FONTCONFIG_AVAILABLE) over the sysroot's libfontconfig.
+bool_flag(
+    name = "use_fontconfig",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "fontconfig",
+    flag_values = {":use_fontconfig": "True"},
+)
