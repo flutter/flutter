@@ -4,6 +4,7 @@
 
 # Generated from //flutter/common/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_FEATURE_DEFINES", "FLUTTER_LOCAL_DEFINES")
@@ -77,6 +78,73 @@ bool_flag(
 config_setting(
     name = "slimpeller_enabled",
     flag_values = {":slimpeller": "True"},
+)
+
+# GN's enable_backtrace, as tools/gn sets it (--backtrace, which every
+# builder leaves on): the host's own build or a desktop target -- Linux,
+# macOS, Windows -- and iOS in debug mode; off elsewhere, which is where
+# fml compiles backtrace_stub.cc.
+selects.config_setting_group(
+    name = "backtrace_enabled",
+    match_any = [
+        "@platforms//os:linux",
+        "@platforms//os:macos",
+        "@platforms//os:windows",
+        ":ios_debug",
+    ],
+)
+
+selects.config_setting_group(
+    name = "ios_debug",
+    match_all = [
+        "@platforms//os:ios",
+        ":runtime_mode_debug",
+    ],
+)
+
+# Its complement, for the denied term of a disjunction (fml's
+# `!enable_backtrace || is_wasm`, the stub's branch).
+selects.config_setting_group(
+    name = "backtrace_disabled",
+    match_any = [
+        "@platforms//os:android",
+        "@platforms//os:emscripten",
+        "@platforms//os:fuchsia",
+        "@platforms//os:qnx",
+        ":ios_not_debug",
+    ],
+)
+
+selects.config_setting_group(
+    name = "ios_not_debug",
+    match_all = [
+        "@platforms//os:ios",
+        ":runtime_mode_not_debug",
+    ],
+)
+
+selects.config_setting_group(
+    name = "runtime_mode_not_debug",
+    match_any = [
+        ":runtime_mode_jit_release",
+        ":runtime_mode_profile",
+        ":runtime_mode_release",
+    ],
+)
+
+# GN's build_engine_artifacts (config.gni's formula over
+# flutter_build_engine_artifacts, which tools/gn leaves true: the host's own
+# build or a Linux, macOS or Windows target, never Android): where the
+# host-side development artifacts -- the archives, font-subset -- are
+# built. The formula's 32-bit Linux arm exclusion has no CPU constraint
+# here yet.
+selects.config_setting_group(
+    name = "engine_artifacts",
+    match_any = [
+        "@platforms//os:linux",
+        "@platforms//os:macos",
+        "@platforms//os:windows",
+    ],
 )
 
 # config("export_dynamic_symbols") and config("export_dynamic_test_symbols")
