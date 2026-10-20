@@ -5,12 +5,16 @@
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 
 #include <charconv>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <filesystem>
+#include <memory>
+#include <optional>
 #include <string_view>
 
-#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/common/engine_switches.h"  // nogncheck
 #include "flutter/shell/platform/common/path_utils.h"
@@ -66,6 +70,32 @@ std::optional<egl::D3DFeatureLevel> GetMaxD3DFeatureLevelFromEnvironment() {
 #else
   return std::nullopt;
 #endif  // !FLUTTER_RELEASE
+}
+
+// Returns the AOT data source type of the file at the given path, based on the
+// magic number at the start of the file.
+absl::StatusOr<FlutterEngineAOTDataSourceType> GetAotDataSourceType(
+    const std::string& path) {
+  constexpr uint8_t kElfMagic[] = {0x7f, 'E', 'L', 'F'};
+  constexpr uint8_t kPeMagic[] = {'M', 'Z'};
+
+  std::unique_ptr<fml::FileMapping> mapping =
+      fml::FileMapping::CreateReadOnly(path);
+  if (!mapping) {
+    return absl::NotFoundError("could not open the file");
+  }
+  if (mapping->GetSize() < sizeof(kElfMagic)) {
+    return absl::InvalidArgumentError("the file is too small");
+  }
+
+  const uint8_t* header = mapping->GetMapping();
+  if (std::memcmp(header, kElfMagic, sizeof(kElfMagic)) == 0) {
+    return kFlutterEngineAOTDataSourceTypeElfPath;
+  }
+  if (std::memcmp(header, kPeMagic, sizeof(kPeMagic)) == 0) {
+    return kFlutterEngineAOTDataSourceTypeDllPath;
+  }
+  return absl::InvalidArgumentError("not an ELF or PE file");
 }
 
 }  // namespace
@@ -142,14 +172,21 @@ UniqueAotDataPtr FlutterProjectBundle::LoadAotData(
     return UniqueAotDataPtr(nullptr, nullptr);
   }
   std::string path_string = fml::PathToUtf8(aot_library_path_);
+  absl::StatusOr<FlutterEngineAOTDataSourceType> type =
+      GetAotDataSourceType(path_string);
+  if (!type.ok()) {
+    FML_LOG(ERROR) << "Can't load AOT data from " << aot_library_path_ << "; "
+                   << type.status().message() << ".";
+    return UniqueAotDataPtr(nullptr, nullptr);
+  }
+
   FlutterEngineAOTDataSource source = {};
-#if FML_ARCH_CPU_X86_64
-  source.type = kFlutterEngineAOTDataSourceTypeDllPath;
-  source.dll_path = path_string.c_str();
-#else
-  source.type = kFlutterEngineAOTDataSourceTypeElfPath;
-  source.elf_path = path_string.c_str();
-#endif
+  source.type = type.value();
+  if (source.type == kFlutterEngineAOTDataSourceTypeDllPath) {
+    source.dll_path = path_string.c_str();
+  } else {
+    source.elf_path = path_string.c_str();
+  }
   FlutterEngineAOTData data = nullptr;
   auto result = engine_procs.CreateAOTData(&source, &data);
   if (result != kSuccess) {

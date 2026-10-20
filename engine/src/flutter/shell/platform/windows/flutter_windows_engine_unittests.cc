@@ -382,15 +382,15 @@ TEST_F(FlutterWindowsEngineTest, RunSkiaWithoutANGLEUsesSoftware) {
   modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
 }
 
-// Verify that Run creates the AOT data using the source type expected for
-// the current architecture.
+// Verify that Run creates the AOT data using the source type that matches the
+// file format of the AOT library.
 TEST_F(FlutterWindowsEngineTest, RunLoadsAotDataWithExpectedSourceType) {
   // Loading AOT data requires that the AOT library exist on disk. Use a
-  // fixture source file as a stand-in; its contents are irrelevant since
+  // fixture with a PE header as a stand-in; only its header is read since
   // CreateAOTData is mocked below.
   std::filesystem::path aot_library_path =
       std::filesystem::path{GetSourcePath()} /
-      "flutter/shell/platform/windows/fixtures/main.dart";
+      "flutter/shell/platform/windows/fixtures/pe_header.bin";
   ASSERT_TRUE(std::filesystem::exists(aot_library_path));
 
   FlutterWindowsEngineBuilder builder{GetContext()};
@@ -459,12 +459,69 @@ TEST_F(FlutterWindowsEngineTest, RunLoadsAotDataWithExpectedSourceType) {
 
   EXPECT_TRUE(run_called);
   EXPECT_TRUE(create_aot_data_called);
-#if FML_ARCH_CPU_X86_64
   EXPECT_EQ(source_type, kFlutterEngineAOTDataSourceTypeDllPath);
-#else
-  EXPECT_EQ(source_type, kFlutterEngineAOTDataSourceTypeElfPath);
-#endif
   EXPECT_EQ(source_path, fml::PathToUtf8(aot_library_path));
+}
+
+TEST_F(FlutterWindowsEngineTest, RunLoadsElfAotDataAsElfPath) {
+  std::filesystem::path aot_library_path =
+      std::filesystem::path{GetSourcePath()} /
+      "flutter/shell/platform/windows/fixtures/elf_header.bin";
+  ASSERT_TRUE(std::filesystem::exists(aot_library_path));
+
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(DisabledImpeller);
+  builder.SetAotLibraryPath(aot_library_path.wstring());
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return true; };
+
+  FlutterEngineAOTDataSourceType source_type =
+      kFlutterEngineAOTDataSourceTypeDllPath;
+  std::string source_path;
+  modifier.embedder_api().CreateAOTData = MOCK_ENGINE_PROC(
+      CreateAOTData, ([&](const FlutterEngineAOTDataSource* source,
+                          FlutterEngineAOTData* data_out) {
+        source_type = source->type;
+        source_path = source->elf_path;
+        // Fail here so that Run returns before it starts the engine.
+        return kInvalidArguments;
+      }));
+
+  modifier.SetEGLManager(nullptr);
+
+  EXPECT_FALSE(engine->Run());
+  EXPECT_EQ(source_type, kFlutterEngineAOTDataSourceTypeElfPath);
+  EXPECT_EQ(source_path, fml::PathToUtf8(aot_library_path));
+}
+
+TEST_F(FlutterWindowsEngineTest, RunFailsForAotDataInUnknownFormat) {
+  std::filesystem::path aot_library_path =
+      std::filesystem::path{GetSourcePath()} /
+      "flutter/shell/platform/windows/fixtures/main.dart";
+  ASSERT_TRUE(std::filesystem::exists(aot_library_path));
+
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(DisabledImpeller);
+  builder.SetAotLibraryPath(aot_library_path.wstring());
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return true; };
+
+  bool create_aot_data_called = false;
+  modifier.embedder_api().CreateAOTData = MOCK_ENGINE_PROC(
+      CreateAOTData, ([&](const FlutterEngineAOTDataSource* source,
+                          FlutterEngineAOTData* data_out) {
+        create_aot_data_called = true;
+        return kSuccess;
+      }));
+
+  modifier.SetEGLManager(nullptr);
+
+  EXPECT_FALSE(engine->Run());
+  EXPECT_FALSE(create_aot_data_called);
 }
 
 TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEOnImpellerFailsToStart) {

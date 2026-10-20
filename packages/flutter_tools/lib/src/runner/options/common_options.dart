@@ -328,6 +328,23 @@ abstract final class BuildInfoOptions {
     help: 'Output individual target performance to a JSON file.',
   );
 
+  static const windowsAotFormat = StringOptionDescriptor(
+    name: 'windows-aot-format',
+    help:
+        'The file format of the AOT snapshot on Windows x64. '
+        'Defaults to "pecoff". Ignored on other platforms.',
+    allowed: <String>['pecoff', 'elf'],
+    allowedHelp: <String, String>{
+      'pecoff':
+          'A DLL loaded by the Windows loader. With "--split-debug-info", '
+          'the debug information is written to a PDB file.',
+      'elf':
+          'An ELF file loaded by the Dart VM. With "--split-debug-info", '
+          'the debug information is written to a ".symbols" file that '
+          '"flutter symbolize" reads.',
+    },
+  );
+
   static const configOnly = FlagOptionDescriptor(
     name: 'config-only',
     help:
@@ -792,6 +809,20 @@ class DesktopBuildOptionsBundle extends OptionBundle {
     BuildInfoOptions.codeSizeDirectory,
     BuildInfoOptions.trackWidgetCreation,
     configOnly,
+  ];
+}
+
+/// A bundle encapsulating options for `flutter build windows`
+/// (`--windows-aot-format` and the desktop build options).
+class WindowsBuildOptionsBundle extends OptionBundle {
+  const WindowsBuildOptionsBundle();
+
+  @override
+  List<OptionBundle> get subBundles => const <OptionBundle>[DesktopBuildOptionsBundle()];
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
+    BuildInfoOptions.windowsAotFormat,
   ];
 }
 

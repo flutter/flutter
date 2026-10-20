@@ -335,6 +335,30 @@ void main() {
     expect(buildInfo.toEnvironmentConfig()['BUILD_NUMBER'], '7');
   });
 
+  testWithoutContext('toBuildSystemEnvironment includes Windows AOT format', () {
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      windowsAotFormat: 'elf',
+      treeShakeIcons: false,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+
+    expect(buildInfo.toBuildSystemEnvironment()['WindowsAotFormat'], 'elf');
+  });
+
+  testWithoutContext('toEnvironmentConfig includes Windows AOT format', () {
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      windowsAotFormat: 'elf',
+      treeShakeIcons: false,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+
+    expect(buildInfo.toEnvironmentConfig()['WINDOWS_AOT_FORMAT'], 'elf');
+  });
+
   testWithoutContext('AndroidGradleConfig defaults and overrides', () {
     const defaultConfig = AndroidGradleConfig();
     expect(defaultConfig.projectArgs, isEmpty);
