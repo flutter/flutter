@@ -37,8 +37,12 @@ android {
 
 androidComponents {
     onVariants(selector().all()) { variant ->
+        // The Flutter tool writes deferred component files per Flutter build mode. This
+        // picks the mode the way the Flutter Gradle Plugin's internal
+        // FlutterPluginUtils.buildModeFor does, which build scripts can't call.
+        def flutterBuildMode = variant.buildType == "profile" ? "profile" : (variant.debuggable ? "debug" : "release")
         // addStaticSourceDirectory takes a path, so the build directory is resolved here.
-        def flutterIntermediates = project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}").get().asFile
+        def flutterIntermediates = project.layout.buildDirectory.dir("intermediates/flutter/${flutterBuildMode}").get().asFile
         variant.sources.assets?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_assets").path)
         variant.sources.jniLibs?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_libs").path)
     }
