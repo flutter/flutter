@@ -25,4 +25,9 @@ const kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '5.0.0', // Must always exactly match flutter_tools template.
   'material_color_utilities': '0.13.0', // Keep pinned to latest until 1.0.0.
   'data_assets': '0.20.0', //  Keep pinned to latest until 1.0.0. Rolled by @dcharkes.
+  // 3.27.1 requires iOS 15, but google_mobile_ads' Package.swift still declares
+  // iOS 13, so SwiftPM refuses to resolve the dependency and
+  // dev/benchmarks/platform_views_layout fails to build. Unpin once
+  // google_mobile_ads raises its minimum iOS version to 15.
+  'webview_flutter_wkwebview': '3.27.0',
 };
