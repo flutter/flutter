@@ -58,38 +58,38 @@ struct RenderPassRecording {
   };
 
   struct UniformBind {
-    const Shader::UniformBinding* binding;
-    impeller::ShaderStage stage;
+    const Shader::UniformBinding* binding = nullptr;
+    impeller::ShaderStage stage = impeller::ShaderStage::kUnknown;
     impeller::BufferView view;
   };
 
   struct TextureBind {
-    const Shader::TextureBinding* binding;
-    impeller::ShaderStage stage;
+    const Shader::TextureBinding* binding = nullptr;
+    impeller::ShaderStage stage = impeller::ShaderStage::kUnknown;
     std::shared_ptr<const impeller::Texture> texture;
     impeller::SamplerDescriptor sampler;
   };
 
   struct SetBind {
-    uint32_t slot;
+    uint32_t slot = 0;
     std::shared_ptr<const BindingSet::Contents> contents;
   };
 
   struct VertexBufferBind {
-    uint32_t slot;
+    uint32_t slot = 0;
     impeller::BufferView view;
   };
 
   struct IndexBufferBind {
     impeller::BufferView view;
-    impeller::IndexType type;
+    impeller::IndexType type = impeller::IndexType::kNone;
   };
 
   struct Draw {
-    uint32_t pipeline_state;
-    uint32_t element_count;
-    uint32_t instance_count;
-    bool indexed;
+    uint32_t pipeline_state = 0;
+    uint32_t element_count = 0;
+    uint32_t instance_count = 0;
+    bool indexed = false;
   };
 
   impeller::RenderTarget render_target;
@@ -130,13 +130,13 @@ struct RecordedBlit {
     kTextureToTexture,
   };
 
-  Kind kind;
+  Kind kind = Kind::kBufferToTexture;
   impeller::BufferView source_buffer;
   std::shared_ptr<impeller::Texture> source_texture;
   std::shared_ptr<impeller::DeviceBuffer> destination_buffer;
   std::shared_ptr<impeller::Texture> destination_texture;
-  impeller::IRect region;
-  impeller::IPoint destination_origin;
+  impeller::IRect region{};
+  impeller::IPoint destination_origin{};
   size_t destination_offset = 0;
   uint32_t mip_level = 0;
   uint32_t slice = 0;

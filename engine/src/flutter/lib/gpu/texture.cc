@@ -26,7 +26,6 @@
 
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/display_list/image/dl_image.h"      // nogncheck
-#include "impeller/display_list/aiks_context.h"       // nogncheck
 #include "impeller/display_list/dl_image_impeller.h"  // nogncheck
 #endif
 #include "third_party/tonic/converter/dart_converter.h"
@@ -174,8 +173,9 @@ static std::shared_ptr<impeller::Texture> GetTextureFromImage(
   if (!impeller_image) {
     return nullptr;
   }
-  impeller::AiksContext aiks_context(gpu_context->GetContextShared(), nullptr);
-  return impeller_image->GetImpellerTexture(aiks_context.GetContentContext());
+  // Resolved without a renderer. Building one here would create the whole
+  // content context, pipelines included, on the calling thread.
+  return impeller_image->GetResolvedTexture();
 }
 #endif
 

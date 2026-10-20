@@ -45,7 +45,8 @@ RenderPipeline::RenderPipeline(
       fragment_shader_->GetDescriptorSetLayouts().size());
   core_ = std::make_shared<Core>(
       vertex_shader_->GetScopedName(), vertex_shader_->GetEntrypoint(),
-      fragment_shader_->GetScopedName(), fragment_shader_->GetEntrypoint(),
+      vertex_shader_->GetRegistration(), fragment_shader_->GetScopedName(),
+      fragment_shader_->GetEntrypoint(), fragment_shader_->GetRegistration(),
       vertex_descriptor_);
 }
 
@@ -57,18 +58,32 @@ const std::shared_ptr<const RenderPipeline::Core>& RenderPipeline::GetCore()
 RenderPipeline::Core::Core(
     std::string vertex_name,
     std::string vertex_entrypoint,
+    std::shared_ptr<const Shader::Registration> vertex_registration,
     std::string fragment_name,
     std::string fragment_entrypoint,
+    std::shared_ptr<const Shader::Registration> fragment_registration,
     std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor)
     : vertex_name_(std::move(vertex_name)),
       vertex_entrypoint_(std::move(vertex_entrypoint)),
+      vertex_registration_(std::move(vertex_registration)),
       fragment_name_(std::move(fragment_name)),
       fragment_entrypoint_(std::move(fragment_entrypoint)),
+      fragment_registration_(std::move(fragment_registration)),
       vertex_descriptor_(std::move(vertex_descriptor)) {}
 
 bool RenderPipeline::Core::BindToPipelineDescriptor(
     impeller::ShaderLibrary& library,
     impeller::PipelineDescriptor& desc) const {
+  if (!vertex_registration_->Wait()) {
+    VALIDATION_LOG << "Unable to register the vertex shader function '"
+                   << vertex_entrypoint_ << "'.";
+    return false;
+  }
+  if (!fragment_registration_->Wait()) {
+    VALIDATION_LOG << "Unable to register the fragment shader function '"
+                   << fragment_entrypoint_ << "'.";
+    return false;
+  }
   auto vertex_function =
       library.GetFunction(vertex_name_, impeller::ShaderStage::kVertex);
   if (!vertex_function) {
@@ -370,9 +385,9 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
     return tonic::ToDart(stage_error);
   }
 
-  // Lazily register the shaders synchronously if they haven't been already.
-  vertex_shader->RegisterSync(*gpu_context);
-  fragment_shader->RegisterSync(*gpu_context);
+  // Registration runs where pipelines are resolved; resolving waits on it.
+  vertex_shader->ScheduleRegistration(*gpu_context);
+  fragment_shader->ScheduleRegistration(*gpu_context);
 
   std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor;
 

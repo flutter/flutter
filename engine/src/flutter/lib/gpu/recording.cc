@@ -243,7 +243,7 @@ class PassReplayer {
 
  private:
   struct BoundTexture {
-    const RenderPassRecording::TextureBind* bind;
+    const RenderPassRecording::TextureBind* bind = nullptr;
     impeller::raw_ptr<const impeller::Sampler> sampler;
   };
 

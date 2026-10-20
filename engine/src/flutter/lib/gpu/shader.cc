@@ -4,11 +4,14 @@
 
 #include "flutter/lib/gpu/shader.h"
 
+#include <chrono>
 #include <cstring>
 #include <utility>
 
 #include "flutter/lib/gpu/formats.h"
+#include "flutter/lib/gpu/recording.h"
 #include "fml/make_copyable.h"
+#include "impeller/base/promise.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_function.h"
@@ -88,16 +91,6 @@ std::string Shader::GetScopedName() const {
       impeller::ShaderKey::kScopeFlutterGPU, library_id_, entrypoint_);
 }
 
-std::shared_ptr<const impeller::ShaderFunction> Shader::GetFunctionFromLibrary(
-    impeller::ShaderLibrary& library) {
-  return library.GetFunction(GetScopedName(), stage_);
-}
-
-bool Shader::IsRegistered(Context& context) {
-  auto& lib = *context.GetContext().GetShaderLibrary();
-  return GetFunctionFromLibrary(lib) != nullptr;
-}
-
 bool Shader::IsDirty() const {
   return is_dirty_;
 }
@@ -123,7 +116,7 @@ void Shader::ResetFrom(Shader& other) {
 
   // library_id_ is intentionally preserved: the scoped registry key
   // (library_id + entrypoint) must remain stable across reloads so the
-  // eviction triple-call in `RegisterSync` lands at the same slot.
+  // eviction in `ScheduleRegistration` lands at the same slot.
   entrypoint_ = std::move(other.entrypoint_);
   stage_ = other.stage_;
   code_mapping_ = std::move(other.code_mapping_);
@@ -138,37 +131,59 @@ void Shader::ResetFrom(Shader& other) {
   }
 }
 
-bool Shader::RegisterSync(Context& context) {
-  auto& lib = *context.GetContext().GetShaderLibrary();
-  const std::string scoped_name = GetScopedName();
+void Shader::Registration::Set(std::shared_future<bool> latest) {
+  std::scoped_lock lock(mutex_);
+  latest_ = std::move(latest);
+}
 
-  std::shared_ptr<const impeller::ShaderFunction> existing =
-      lib.GetFunction(scoped_name, stage_);
-  if (existing && !is_dirty_) {
-    return true;  // Already registered and current.
+bool Shader::Registration::Wait() const {
+  std::shared_future<bool> latest;
+  {
+    std::scoped_lock lock(mutex_);
+    latest = latest_;
   }
+  return !latest.valid() || latest.get();
+}
 
-  // Dirty path: an earlier asset version still occupies the scoped slot.
-  // Evict it (and any pipelines that referenced it) before registering the
-  // new code mapping. Mirrors `RuntimeEffectContents::RegisterShader`.
-  if (existing && is_dirty_) {
-    context.GetContext().GetPipelineLibrary()->RemovePipelinesWithEntryPoint(
-        existing);
-    lib.UnregisterFunction(scoped_name, stage_);
-  }
+bool Shader::Registration::HasFailed() const {
+  std::scoped_lock lock(mutex_);
+  return latest_.valid() &&
+         latest_.wait_for(std::chrono::seconds(0)) ==
+             std::future_status::ready &&
+         !latest_.get();
+}
 
-  std::promise<bool> promise;
-  auto future = promise.get_future();
-  lib.RegisterFunction(
-      scoped_name, stage_, code_mapping_,
-      fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
-        promise.set_value(result);
-      }));
-  if (!future.get()) {
-    return false;  // Registration failed.
+const std::shared_ptr<Shader::Registration>& Shader::GetRegistration() const {
+  return registration_;
+}
+
+void Shader::ScheduleRegistration(Context& context) {
+  if (!is_dirty_ && !registration_->HasFailed()) {
+    return;
   }
   is_dirty_ = false;
-  return true;
+
+  auto promise = std::make_shared<impeller::NoExceptionPromise<bool>>();
+  registration_->Set(promise->get_future().share());
+  auto task = [context = context.GetContextShared(), name = GetScopedName(),
+               stage = stage_, code = code_mapping_, promise]() {
+    auto& library = *context->GetShaderLibrary();
+    // After a reload an earlier version still occupies the scoped slot.
+    // Evict it, and the pipelines built from it, before registering the new
+    // code. Mirrors `RuntimeEffectContents::RegisterShader`.
+    if (auto existing = library.GetFunction(name, stage)) {
+      context->GetPipelineLibrary()->RemovePipelinesWithEntryPoint(existing);
+      library.UnregisterFunction(name, stage);
+    }
+    library.RegisterFunction(name, stage, code, [promise](bool result) {
+      promise->set_value(result);
+    });
+  };
+  if (auto runner = GetReplayTaskRunner()) {
+    runner->PostTask(std::move(task));
+  } else {
+    task();
+  }
 }
 
 std::shared_ptr<impeller::VertexDescriptor> Shader::CreateVertexDescriptor()

@@ -6,7 +6,9 @@
 #define FLUTTER_LIB_GPU_SHADER_H_
 
 #include <algorithm>
+#include <future>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -66,17 +68,39 @@ class Shader : public RefCountedDartWrappable<Shader> {
       std::unordered_map<std::string, TextureBinding> uniform_textures,
       std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts);
 
-  std::shared_ptr<const impeller::ShaderFunction> GetFunctionFromLibrary(
-      impeller::ShaderLibrary& library);
+  /// The outcome of the latest registration of this shader's code with the
+  /// impeller shader library. Registration runs where pipelines are resolved,
+  /// so resolving waits on this rather than racing a registration in flight.
+  /// Safe to use from any thread.
+  class Registration {
+   public:
+    void Set(std::shared_future<bool> latest);
 
-  bool IsRegistered(Context& context);
+    /// Waits for the latest registration and returns whether it succeeded.
+    /// True when nothing was ever scheduled.
+    bool Wait() const;
 
-  bool RegisterSync(Context& context);
+    /// Whether the latest registration finished and failed.
+    bool HasFailed() const;
+
+   private:
+    mutable std::mutex mutex_;
+    std::shared_future<bool> latest_;
+  };
+
+  /// Schedules registration of this shader's code when it changed since it
+  /// was last scheduled, or when the last registration failed. Registration
+  /// runs on the thread that encodes Flutter GPU work, after evicting
+  /// pipelines built from an earlier version, so the calling thread never
+  /// touches the shader or pipeline library.
+  void ScheduleRegistration(Context& context);
+
+  const std::shared_ptr<Registration>& GetRegistration() const;
 
   /// Whether this shader needs to be re-registered with the impeller shader
-  /// library on next use. Fresh shaders start dirty. Set back to false by
-  /// `RegisterSync` after registration completes, and back to true by
-  /// `ResetFrom` when the underlying asset is reloaded.
+  /// library on next use. Fresh shaders start dirty. Cleared by
+  /// `ScheduleRegistration`, and set again by `ResetFrom` when the underlying
+  /// asset is reloaded.
   bool IsDirty() const;
 
   void SetClean();
@@ -146,6 +170,8 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::vector<impeller::ShaderStageBufferLayout> layouts_;
   // Replaced, never mutated, so recordings may hold the old one.
   std::shared_ptr<const Reflection> reflection_;
+  std::shared_ptr<Registration> registration_ =
+      std::make_shared<Registration>();
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
   bool is_dirty_ = true;
 
