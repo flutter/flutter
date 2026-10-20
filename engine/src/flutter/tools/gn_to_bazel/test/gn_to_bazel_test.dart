@@ -1117,8 +1117,9 @@ if (is_debug) {
           '//flutter/a/BUILD.gn',
           assumptions: Assumptions(const <String, GnValue>{}),
         );
+        // The placeholder group is resolved away in the evaluation: one
+        // target per name, the real one under its condition.
         expect(open.targets.map((GnTarget t) => '${t.rule} ${t.name} [${t.condition}]'), <String>[
-          'group x_unittests [!enable_unittests]',
           'source_set x_unittests [enable_unittests]',
           'source_set x [true]',
         ]);
@@ -1150,6 +1151,164 @@ cc_library(
           ),
           throwsGnError(line: 7, message: 'target twice is defined more than once'),
         );
+      });
+
+      test('two definitions of a name in branches that cannot both run become one target', () {
+        // Skia's optional() shape: the feature's sources and public config
+        // when it is enabled, an empty source set otherwise, under an
+        // argument the host assumptions leave open (skia_use_fontconfig is
+        // the fontconfig flag). One cc_library, each branch's variables
+        // under its condition, the public config inherited by dependents
+        // under the same condition; what both branches set the same way
+        // stays unconditional.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/optional.gni': '''
+declare_args() {
+  skia_use_fontconfig = is_linux
+}
+declare_args() {
+  skia_enable_fontmgr_fontconfig = skia_use_fontconfig
+}
+template("optional") {
+  if (invoker.enabled) {
+    config(target_name + "_public") {
+      defines = invoker.public_defines
+    }
+    source_set(target_name) {
+      visibility = [ ":*" ]
+      configs = [ ":lib_config" ]
+      forward_variables_from(invoker, "*", [ "configs", "public_defines" ])
+      all_dependent_configs = [ ":" + target_name + "_public" ]
+    }
+  } else {
+    source_set(target_name) {
+      visibility = [ ":*" ]
+      configs = [ ":lib_config" ]
+      forward_variables_from(invoker, "*", [ "configs", "public_defines", "public_deps", "deps", "sources", "public" ])
+    }
+  }
+}
+''',
+          'flutter/a/BUILD.gn': '''
+import("//lib/optional.gni")
+config("lib_config") {
+  defines = [ "LIB" ]
+}
+optional("fontmgr_fontconfig") {
+  enabled = skia_enable_fontmgr_fontconfig
+  public_defines = [ "SK_FONTMGR_FONTCONFIG_AVAILABLE" ]
+  public = [ "fontmgr_fontconfig.h" ]
+  sources = [ "fontmgr_fontconfig.cc" ]
+  deps = [ ":typeface" ]
+}
+source_set("typeface") {
+  sources = [ "typeface.cc" ]
+}
+source_set("skia") {
+  sources = [ "skia.cc" ]
+  deps = [ ":fontmgr_fontconfig" ]
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(tree, '//flutter/a/BUILD.gn');
+        expect(
+          evaluation.targets.map((GnTarget t) => '${t.rule} ${t.name} [${t.condition}]'),
+          <String>[
+            'config lib_config [true]',
+            'config fontmgr_fontconfig_public [skia_use_fontconfig]',
+            'source_set fontmgr_fontconfig [true]',
+            'source_set typeface [true]',
+            'source_set skia [true]',
+          ],
+        );
+        final GnTarget merged = evaluation.targets[2];
+        expect(strings(merged, 'configs'), <String>[':lib_config']);
+        expect(merged.variables['sources']!.unconditionalItems, isNull);
+        expect(
+          merged.variables['sources']!.assignments.map((GnAssignment a) => a.toString()),
+          <String>['[skia_use_fontconfig] += ["fontmgr_fontconfig.cc"]'],
+        );
+        expect(
+          evaluation.inheritedConfigs['skia']!.map(
+            (String config, Condition when) => MapEntry<String, String>(config, '$when'),
+          ),
+          <String, String>{':fontmgr_fontconfig_public': 'skia_use_fontconfig'},
+        );
+        final String output = emitBuildFile(evaluation, gnPackage: '//flutter/a', tree: tree);
+        expect(
+          output,
+          contains('''
+cc_library(
+    name = "fontmgr_fontconfig_public",
+    defines = ["SK_FONTMGR_FONTCONFIG_AVAILABLE"],
+    target_compatible_with = select({
+        "//engine/src/flutter/txt:fontconfig": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "fontmgr_fontconfig",
+    srcs = select({
+        "//engine/src/flutter/txt:fontconfig": [
+            "fontmgr_fontconfig.cc",  # skia_use_fontconfig
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = select({
+        "//engine/src/flutter/txt:fontconfig": [
+            "fontmgr_fontconfig.h",  # skia_use_fontconfig
+        ],
+        "//conditions:default": [],
+    }),
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["LIB"],
+    deps = ["//engine/src:include_root"] + select({
+        "//engine/src/flutter/txt:fontconfig": [
+            ":fontmgr_fontconfig_public",  # skia_use_fontconfig
+            ":typeface",  # skia_use_fontconfig
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+'''),
+        );
+        expect(
+          output,
+          contains('''
+cc_library(
+    name = "skia",
+    srcs = ["skia.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":fontmgr_fontconfig",
+        "//engine/src:include_root",
+    ] + select({
+        "//engine/src/flutter/txt:fontconfig": [":fontmgr_fontconfig_public"],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+'''),
+        );
+        // Decided either way, the file is the one branch, as before.
+        final GnFileEvaluation off = evaluateIn(
+          tree,
+          '//flutter/a/BUILD.gn',
+          assumptions: linuxHostAssumptions().withValues(const <String, GnValue>{
+            'skia_use_fontconfig': GnBoolValue(false),
+          }),
+        );
+        expect(off.targets.map((GnTarget t) => t.name), <String>[
+          'lib_config',
+          'fontmgr_fontconfig',
+          'typeface',
+          'skia',
+        ]);
+        expect(off.targets[1].variables.containsKey('sources'), isFalse);
+        expect(off.inheritedConfigs['skia'], isEmpty);
       });
 
       test('runs templates as closures with invoker and target_name', () {

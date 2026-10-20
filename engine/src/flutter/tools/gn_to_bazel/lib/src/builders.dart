@@ -37,6 +37,9 @@ enum GnFlagEffect {
   /// `--target-dir <dir>`: the build directory under engine/src/out.
   buildDirectory,
 
+  /// A flag the Bazel build has a setting for ([GnFlag.bazelFlag]).
+  setting,
+
   /// What the generated files assume already (the prebuilt Dart SDK, no LTO).
   assumed,
 
@@ -52,7 +55,7 @@ enum GnFlagEffect {
 
 /// One `tools/gn` flag.
 final class GnFlag {
-  const GnFlag(this.effect, {this.takesValue = false, this.note});
+  const GnFlag(this.effect, {this.takesValue = false, this.note, this.bazelFlag});
 
   final GnFlagEffect effect;
 
@@ -61,6 +64,9 @@ final class GnFlag {
 
   /// Why it is assumed, ignored or unsupported.
   final String? note;
+
+  /// The Bazel flag a [GnFlagEffect.setting] flag amounts to.
+  final String? bazelFlag;
 }
 
 /// The `tools/gn` flags of the Linux builder files, as far as they appear.
@@ -96,9 +102,11 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
     GnFlagEffect.ignored,
     note: 'adds targets to the build, which a configuration cannot name',
   ),
+  // flutter_use_fontconfig and skia_use_fontconfig at once: the flag in
+  // //flutter/txt's appendix (conditionSettings).
   '--enable-fontconfig': GnFlag(
-    GnFlagEffect.unsupported,
-    note: 'flutter_use_fontconfig and skia_use_fontconfig are false in the generated files',
+    GnFlagEffect.setting,
+    bazelFlag: '--//engine/src/flutter/txt:use_fontconfig',
   ),
   '--asan': GnFlag(GnFlagEffect.unsupported, note: 'the toolchain has no sanitizer feature yet'),
   '--dart-debug': GnFlag(
@@ -202,6 +210,7 @@ final class BuilderBuild {
   /// Reads [build] of the builder file [file] (`linux_host_engine.json`).
   factory BuilderBuild.of(String file, Build build) {
     final flags = <String>[];
+    final settings = <String>[];
     final unsupported = <String>[];
     var otherPlatform = false;
     var unoptimized = false;
@@ -236,6 +245,11 @@ final class BuilderBuild {
           unoptimized = true;
         case GnFlagEffect.buildDirectory:
           buildDirectory = value;
+        case GnFlagEffect.setting:
+          final String setting = known.bazelFlag! + (value == null ? '' : '=$value');
+          if (!settings.contains(setting)) {
+            settings.add(setting);
+          }
         case GnFlagEffect.assumed:
           if (flag == '--no-lto') {
             lto = false;
@@ -254,6 +268,7 @@ final class BuilderBuild {
     }
     flags.add(unoptimized ? '--compilation_mode=fastbuild' : '--compilation_mode=opt');
     flags.add('--$runtimeModeSetting=${runtimeMode ?? 'debug'}');
+    flags.addAll(settings);
     // The tests: run_tests.py's types, and every other step by name.
     final testTypes = <String>[];
     final otherTests = <String>[];

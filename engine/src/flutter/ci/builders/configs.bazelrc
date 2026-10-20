@@ -18,18 +18,15 @@ build:host_debug_clang_tidy --compilation_mode=opt --//engine/src/flutter/common
 
 # linux_host_desktop_engine.json: ci/host_debug_desktop
 #   --runtime-mode debug --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/host_debug_desktop
-# No configuration: the Bazel build cannot express
-#   --enable-fontconfig (flutter_use_fontconfig and skia_use_fontconfig are false in the generated files)
+build:host_debug_desktop --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/txt:use_fontconfig
 
 # linux_host_desktop_engine.json: ci/host_profile_desktop
 #   --runtime-mode profile --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/host_profile_desktop
-# No configuration: the Bazel build cannot express
-#   --enable-fontconfig (flutter_use_fontconfig and skia_use_fontconfig are false in the generated files)
+build:host_profile_desktop --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/txt:use_fontconfig
 
 # linux_host_desktop_engine.json: ci/host_release_desktop
 #   --runtime-mode release --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/host_release_desktop
-# No configuration: the Bazel build cannot express
-#   --enable-fontconfig (flutter_use_fontconfig and skia_use_fontconfig are false in the generated files)
+build:host_release_desktop --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/txt:use_fontconfig
 
 # linux_host_engine.json: ci/host_debug
 #   --target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma

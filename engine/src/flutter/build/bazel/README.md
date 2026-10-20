@@ -863,25 +863,28 @@ converter reads the Linux builder files (`tools/gn_to_bazel`'s
 `build:<name>` configuration per Linux x64 host build whose flags the Bazel
 build can all express -- `--runtime-mode` is the runtime mode setting,
 `--unoptimized` the compilation mode (its absence `-c opt`), `--target-dir`
-the build directory, `--prebuilt-dart-sdk` and `--no-lto` what the generated
-files assume, `--rbe`/`--no-goma` where the build runs and
+the build directory, `--enable-fontconfig` the fontconfig flag
+(`//engine/src/flutter/txt:use_fontconfig`, which the three `*_desktop`
+builds set: txt links the sysroot's libfontconfig and Skia's fontconfig font
+manager is built and chosen, as in CI's Linux desktop artifact),
+`--prebuilt-dart-sdk`, `--no-lto` and `--use-glfw-swiftshader` what the
+generated files assume, `--rbe`/`--no-goma` where the build runs and
 `--build-embedder-examples` a target list, neither a flag -- and, for a
 build with a flag the Bazel build has no setting for yet, the reason and no
-configuration: `--enable-fontconfig` (the three `*_desktop` builds:
-`flutter_use_fontconfig` and `skia_use_fontconfig` are false in the
-generated files, so the Linux desktop artifact built here lacks what CI's
-has), `--asan` and `--dart-debug` (`host_debug_unopt`), `--use-glfw-swiftshader`,
-`--gn-args=dart_dynamic_modules=true`, LTO (which `tools/gn` enables
-without `--no-lto`). The developer's own configurations, `local_engine.json`'s
-`linux/` builds (what `et build --config <name>` runs: `host_debug`,
-`host_debug_unopt`, `host_profile`, `host_release`, with `--no-stripped`,
-which the Bazel build has no stripped copies to answer anyway), are read
-with the rest, and a name two builds share with the same flags -- CI's
-`ci/host_debug` and the developer's `linux/host_debug` -- is one
-configuration (different flags under one name would be an error). Of the
-eighteen builds, eleven have a configuration, nine distinct: `host_debug`,
-`host_debug_unopt`, `host_profile`, `host_release`, `host_debug_test`,
-`host_profile_test`, `host_release_test`, `host_release_licenses`,
+configuration: `--asan` and `--dart-debug` (`host_debug_unopt`),
+`--gn-args=dart_dynamic_modules=true`, `--no-prebuilt-dart-sdk`, LTO (which
+`tools/gn` enables without `--no-lto`). The developer's own configurations,
+`local_engine.json`'s `linux/` builds (what `et build --config <name>` runs:
+`host_debug`, `host_debug_unopt`, `host_profile`, `host_release`, with
+`--no-stripped`, which the Bazel build has no stripped copies to answer
+anyway), are read with the rest, and a name two builds share with the same
+flags -- CI's `ci/host_debug` and the developer's `linux/host_debug` -- is
+one configuration (different flags under one name would be an error). Of
+the eighteen builds, fifteen have a configuration, thirteen distinct:
+`host_debug`, `host_debug_unopt`, `host_profile`, `host_release`,
+`host_debug_desktop`, `host_profile_desktop`, `host_release_desktop`,
+`host_debug_test`, `host_profile_test`, `host_release_test`,
+`host_debug_unopt_impeller_tests`, `host_release_licenses`,
 `host_debug_clang_tidy`. `ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a
 directory for its target of the same name, a bare unique name, as GN's

@@ -104,14 +104,28 @@ appendix), named in `conditionSettings` and `knownExternalVariables`. In a
 default's formula (Bazel sets the per-platform value in configuration);
 arguments derived from it (`impeller_enable_compute = vulkan || metal`)
 stay formulas over the settings. The host assumptions fix them as `tools/gn`
-would.
+would. An argument `tools/gn` sets from a flag of its own that the builders
+differ on -- `--enable-fontconfig`, which sets `flutter_use_fontconfig` and
+`skia_use_fontconfig` together -- is a flag the host assumptions leave open
+(`//flutter/txt:use_fontconfig`, in txt's appendix), so that the generated
+files hold both shapes and a configuration picks one
+(`ci/builders/configs.bazelrc`).
 
 A target GN defines only under a condition exists in Bazel with
 `target_compatible_with` incompatible wherever the condition fails, on every
 rule the target produced (the `impeller_shaders` macro forwards it to each
-target it creates). GN's placeholder idiom -- `if (c) { real(name) } else {
-group(name) {} }`, an empty group so that dependents can name the target
-unconditionally -- drops the group; any other duplicate name is an error.
+target it creates). A name GN defines in two branches that cannot both run
+(`if (c) { source_set("x") { … } } else { source_set("x") { … } }`; Skia's
+`optional()`, which is the feature's sources with its public config when it
+is enabled and an empty source set otherwise) is one target under an open
+`c`: each branch's variables under its condition, so that the rule's
+attributes `select()` between the two shapes, and a variable both branches
+set the same way unconditional; a public config such a target names under
+its condition reaches its dependents under the same condition. GN's
+placeholder idiom -- `if (c) { real(name) } else { group(name) {} }`, an
+empty group so that dependents can name the target unconditionally -- drops
+the group and keeps the real target under its condition; any other
+duplicate name (branches that could both run, or two rules) is an error.
 
 ### Fetch-time conversion
 
