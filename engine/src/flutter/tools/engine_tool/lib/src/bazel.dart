@@ -221,6 +221,54 @@ final class Bazel {
     return '//${bazelLabel.substring(root.length)}';
   }
 
+  /// Writes [buildDirectory]'s `compile_commands.json` for the Bazel build
+  /// under configuration [config], through
+  /// `tools/gn_to_bazel/tool/compile_commands.py` (`bazel aquery` over the
+  /// engine's compiles); false, the error logged, when it fails.
+  ///
+  /// GN writes the file at `gn gen`; Bazel has no such step, so the tool
+  /// runs when something is about to read the file (`et lint`'s clang-tidy).
+  /// It is Python, as `tools/gn` is, and runs under the `python3` on PATH.
+  Future<bool> writeCompileCommands({
+    required String config,
+    required String buildDirectory,
+  }) async {
+    final String? executable = _executable();
+    if (executable == null) {
+      _environment.logger.error(_noBazel);
+      return false;
+    }
+    if (!_environment.processRunner.processManager.canRun('python3')) {
+      _environment.logger.error('No python3 on PATH; compile_commands.py needs it.');
+      return false;
+    }
+    final command = <String>[
+      'python3',
+      p.join(
+        _environment.engine.flutterDir.path,
+        'tools',
+        'gn_to_bazel',
+        'tool',
+        'compile_commands.py',
+      ),
+      '--out=$buildDirectory',
+      '--config=$config',
+      '--bazel=$executable',
+    ];
+    _environment.logger.info('Running: ${command.join(' ')}');
+    final ProcessRunnerResult result = await _environment.processRunner.runProcess(
+      command,
+      workingDirectory: _environment.engine.srcDir,
+      failOk: true,
+    );
+    if (result.exitCode != 0) {
+      _environment.logger.error('compile_commands.py failed:\n${result.stdout}\n${result.stderr}');
+      return false;
+    }
+    _environment.logger.status(result.stdout.trim());
+    return true;
+  }
+
   static const String _noBazel =
       'Neither bazelisk nor bazel is on PATH. Install bazelisk '
       '(https://github.com/bazelbuild/bazelisk); the engine pins its Bazel version in '

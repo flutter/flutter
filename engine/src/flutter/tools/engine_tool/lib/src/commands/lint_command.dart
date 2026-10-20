@@ -4,8 +4,11 @@
 
 import 'dart:io' show Directory;
 
+import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:path/path.dart' as p;
 
+import '../bazel.dart';
+import '../build_plan.dart';
 import '../dart_utils.dart';
 
 import '../proc_utils.dart';
@@ -39,7 +42,12 @@ class _LinterDescription {
 /// The root 'lint' command.
 final class LintCommand extends CommandBase {
   /// Constructs the 'lint' command.
-  LintCommand({required super.environment, super.usageLineLength}) {
+  LintCommand({
+    required super.environment,
+    required Map<String, BuilderConfig> configs,
+    super.help = false,
+    super.usageLineLength,
+  }) : _configs = configs {
     final String engineFlutterPath = environment.engine.flutterDir.path;
     _linters[Linter.dart] = _LinterDescription(Linter.dart, environment.engine.flutterDir, <String>[
       p.join(engineFlutterPath, 'ci', 'analyze.sh'),
@@ -58,9 +66,16 @@ final class LintCommand extends CommandBase {
       <String>[p.join(engineFlutterPath, 'ci', 'pylint.sh')],
     );
     argParser.addFlag(quietFlag, abbr: 'q', help: 'Prints minimal output');
+    // The C linter reads a build directory's compile_commands.json:
+    // ci/clang_tidy.sh's default (out/host_debug) under GN, the --config's
+    // build directory, written first, under the Bazel backend.
+    _builds = BuildPlan.addConfigOption(argParser, environment, help: help, configs: configs);
+    BuildPlan.addBackendOption(argParser, environment);
   }
 
   final Map<Linter, _LinterDescription> _linters = <Linter, _LinterDescription>{};
+  final Map<String, BuilderConfig> _configs;
+  late final List<Build> _builds;
 
   @override
   String get name => 'lint';
@@ -73,6 +88,11 @@ final class LintCommand extends CommandBase {
     // TODO(loic-sharma): Relax this restriction.
     if (environment.platform.isWindows) {
       environment.logger.fatal('lint command is not supported on Windows (for now).');
+    }
+    if (BuildPlan.backendFromArgResults(argResults!, environment) == BuildBackend.bazel) {
+      if (!await _prepareBazelCompileCommands()) {
+        return 1;
+      }
     }
     final wp = WorkerPool(environment, ProcessTaskProgressReporter(environment));
 
@@ -96,5 +116,32 @@ final class LintCommand extends CommandBase {
       }
     }
     return r ? 0 : 1;
+  }
+
+  /// Under the Bazel backend: writes the `--config` build's
+  /// `compile_commands.json` into its build directory and points the C
+  /// linter at it (`ci/clang_tidy.sh --variant <build directory>`); the
+  /// other linters read no build. False, the error logged, when the build
+  /// has no Bazel configuration or the file cannot be written.
+  Future<bool> _prepareBazelCompileCommands() async {
+    final Build build = BuildPlan.buildFromArgResults(argResults!, environment, builds: _builds);
+    final bazel = Bazel(environment, _configs);
+    final String? config = bazel.configFor(build);
+    if (config == null) {
+      return false;
+    }
+    if (!await bazel.writeCompileCommands(
+      config: config,
+      buildDirectory: bazel.buildDirectoryFor(build),
+    )) {
+      return false;
+    }
+    final _LinterDescription c = _linters[Linter.c]!;
+    _linters[Linter.c] = _LinterDescription(Linter.c, c.cwd, <String>[
+      ...c.command,
+      '--variant',
+      build.ninja.config,
+    ]);
+    return true;
   }
 }
