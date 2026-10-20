@@ -28,10 +28,10 @@ static size_t GetMaxActiveCompileJobsForReactor(
 PipelineLibraryGLES::PipelineLibraryGLES(
     std::shared_ptr<ReactorGLES> reactor,
     std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
-    : reactor_(std::move(reactor)),
-      compile_queue_(PipelineCompileQueueGLES::Create(
-          std::move(io_task_runner),
-          GetMaxActiveCompileJobsForReactor(reactor_))) {}
+    : reactor_(std::move(reactor)) {
+  compile_queue_ = PipelineCompileQueueGLES::Create(
+      std::move(io_task_runner), GetMaxActiveCompileJobsForReactor(reactor_));
+}
 
 size_t PipelineLibraryGLES::GetMaxActiveCompileJobs(
     const CapabilitiesGLES& capabilities) {
@@ -40,7 +40,7 @@ size_t PipelineLibraryGLES::GetMaxActiveCompileJobs(
     // -1 means the implementation-dependent maximum.
     return PipelineCompileQueueGLES::kDefaultMaxActiveJobs;
   }
-  return std::clamp<size_t>(threads, 1,
+  return std::clamp<size_t>(static_cast<size_t>(threads), 1,
                             PipelineCompileQueueGLES::kDefaultMaxActiveJobs);
 }
 
