@@ -567,6 +567,98 @@ filegroup(
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
+  // The shell's directory: its one group gathers the platform shells (not
+  // converted); the file is here for shell/config.gni's arguments, which
+  // the appendix defines as the settings their formulas and tools/gn give.
+  ConvertedFile(
+    '//flutter/shell',
+    skip: <String, String>{
+      'shell': 'a group over //flutter/shell/platform, which has no Bazel build yet',
+    },
+    appendix: '''
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# GN's shell_enable_gl, shell_enable_metal, shell_enable_vulkan,
+# shell_enable_software and the test_enable_* beside them
+# (shell/config.gni): which rendering backends the shell and its tests are
+# built with, by platform, as config.gni's defaults and tools/gn decide
+# them. OpenGL: config.gni's `!is_fuchsia && !is_mac`, and tools/gn turns it
+# off on iOS. Metal: tools/gn, on iOS and for macOS targets (built on a
+# macOS host). Vulkan: tools/gn, everywhere but iOS and macOS. Software:
+# everywhere. The tests follow the shell's (test_enable_vulkan: on Fuchsia
+# or wherever the GL ones run, the same set as the shell's Vulkan). The
+# complements serve conjunctions (`shell_enable_vulkan && !is_wasm`).
+_ALL_PLATFORMS = [
+    "@platforms//os:android",
+    "@platforms//os:emscripten",
+    "@platforms//os:fuchsia",
+    "@platforms//os:ios",
+    "@platforms//os:linux",
+    "@platforms//os:macos",
+    "@platforms//os:qnx",
+    "@platforms//os:windows",
+]
+
+_BACKEND_PLATFORMS = {
+    "gl": [
+        "@platforms//os:android",
+        "@platforms//os:emscripten",
+        "@platforms//os:linux",
+        "@platforms//os:qnx",
+        "@platforms//os:windows",
+    ],
+    "metal": [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+    "software": _ALL_PLATFORMS,
+    "vulkan": [
+        "@platforms//os:android",
+        "@platforms//os:emscripten",
+        "@platforms//os:fuchsia",
+        "@platforms//os:linux",
+        "@platforms//os:qnx",
+        "@platforms//os:windows",
+    ],
+}
+
+[
+    selects.config_setting_group(
+        name = "enable_" + backend,
+        match_any = platforms,
+    )
+    for backend, platforms in _BACKEND_PLATFORMS.items()
+]
+
+[
+    selects.config_setting_group(
+        name = "not_enable_" + backend,
+        match_any = [
+            os
+            for os in _ALL_PLATFORMS
+            if os not in platforms
+        ],
+    )
+    for backend, platforms in _BACKEND_PLATFORMS.items()
+    if len(platforms) < len(_ALL_PLATFORMS)
+]
+
+# The tests' arguments are the shell's (test_enable_vulkan's formula,
+# `is_fuchsia || shell_enable_gl`, names the Vulkan set).
+[
+    alias(
+        name = "test_enable_" + backend,
+        actual = ":enable_" + backend,
+    )
+    for backend in _BACKEND_PLATFORMS.keys()
+]
+
+# The iOS embedding's AccessibilityFeatures, which api_check's tests read
+# (the enum mirrors dart:ui's): a file of this package until
+# shell/platform/darwin has a build file of its own.
+exports_files(["platform/darwin/ios/framework/Source/AccessibilityFeatures.swift"])
+''',
+  ),
   ConvertedFile('//flutter/shell/common'),
   // The embedder API: its libraries, its shared library and its three suites,
   // and its artifact side -- the header copied into the build root, the
