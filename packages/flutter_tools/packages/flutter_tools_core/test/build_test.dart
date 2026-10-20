@@ -128,7 +128,7 @@ void main() {
         targetPlatform: 'linux-x64',
         artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
         hostArtifacts: <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
-        outputDir: '{PROJECT_DIR}/build/linux',
+        outputDir: '{OUTPUT_DIR}/linux',
       );
 
       final Map<String, Object?> map = target.toMap();
@@ -137,64 +137,86 @@ void main() {
       expect(map[ExtensionBuildTarget.descriptionKey], 'A custom Linux build target.');
       expect(map[ExtensionBuildTarget.artifactsKey], equals(<String>['icuData', 'genSnapshot']));
       expect(map[ExtensionBuildTarget.hostArtifactsKey], equals(<String>['impellerc']));
-      expect(map[ExtensionBuildTarget.outputDirKey], '{PROJECT_DIR}/build/linux');
+      expect(map[ExtensionBuildTarget.outputDirKey], '{OUTPUT_DIR}/linux');
 
       final parsed = ExtensionBuildTarget.fromJson(map);
       expect(parsed, equals(target));
       expect(parsed.hashCode, equals(target.hashCode));
       expect(parsed.toString(), contains('custom-linux-build'));
-      expect(parsed.toString(), contains('outputDir: {PROJECT_DIR}/build/linux'));
+      expect(parsed.toString(), contains('outputDir: {OUTPUT_DIR}/linux'));
     });
 
-    test('deserializes with defaults when fields are missing', () {
+    test('deserializes with defaults when optional fields are missing', () {
       final parsed = ExtensionBuildTarget.fromJson(const <String, Object?>{
+        'description': 'A custom Linux build target.',
+        'name': 'custom-linux-build',
+        'outputDir': '{OUTPUT_DIR}/linux',
         'targetPlatform': 'linux-x64',
       });
-      expect(parsed.name, isEmpty);
+      expect(parsed.name, 'custom-linux-build');
       expect(parsed.targetPlatform, 'linux-x64');
-      expect(parsed.description, isEmpty);
+      expect(parsed.description, 'A custom Linux build target.');
       expect(parsed.artifacts, isEmpty);
       expect(parsed.hostArtifacts, isEmpty);
-      expect(parsed.outputDir, '${BuiltInPlaceholders.projectDir}/build');
+      expect(parsed.outputDir, '{OUTPUT_DIR}/linux');
     });
 
-    test('fromJson throws ArgumentError on missing targetPlatform or malformed fields', () {
+    test('fromJson throws ArgumentError on missing required fields or malformed fields', () {
+      final validRequired = <String, Object?>{
+        'description': 'A custom Linux build target.',
+        'name': 'custom-linux-build',
+        'outputDir': '{OUTPUT_DIR}/linux',
+        'targetPlatform': 'linux-x64',
+      };
       expect(() => ExtensionBuildTarget.fromJson(const <String, Object?>{}), throwsArgumentError);
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{'targetPlatform': 123}),
+        () =>
+            ExtensionBuildTarget.fromJson(<String, Object?>{...validRequired, 'description': null}),
         throwsArgumentError,
       );
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          'targetPlatform': 'linux-x64',
-          'outputDir': 123,
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{...validRequired, 'name': null}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'targetPlatform': 123,
         }),
         throwsArgumentError,
       );
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          'targetPlatform': 'linux-x64',
-          'artifacts': <Object?>[123],
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{...validRequired, 'outputDir': null}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{...validRequired, 'outputDir': 123}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'artifacts': const <Object?>[123],
         }),
         throwsArgumentError,
       );
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          'targetPlatform': 'linux-x64',
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
           'artifacts': 'invalid',
         }),
         throwsArgumentError,
       );
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          'targetPlatform': 'linux-x64',
-          'hostArtifacts': <Object?>[123],
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'hostArtifacts': const <Object?>[123],
         }),
         throwsArgumentError,
       );
       expect(
-        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          'targetPlatform': 'linux-x64',
+        () => ExtensionBuildTarget.fromJson(<String, Object?>{
+          ...validRequired,
           'hostArtifacts': 'invalid',
         }),
         throwsArgumentError,
@@ -204,6 +226,7 @@ void main() {
     test('listFromJson handles valid and invalid lists', () {
       final validJson = <String, Object?>{
         'name': 'custom-linux-build',
+        'outputDir': '{OUTPUT_DIR}/linux',
         'targetPlatform': 'linux-x64',
         'description': 'A custom Linux build target.',
       };
@@ -213,6 +236,7 @@ void main() {
       ]);
       expect(targets, hasLength(1));
       expect(targets.first.name, 'custom-linux-build');
+      expect(targets.first.outputDir, '{OUTPUT_DIR}/linux');
       expect(targets.first.targetPlatform, 'linux-x64');
       expect(targets.first.description, 'A custom Linux build target.');
 
@@ -224,18 +248,21 @@ void main() {
       const target1 = ExtensionBuildTarget(
         description: 'Target 1',
         name: 'target-1',
+        outputDir: '{OUTPUT_DIR}/target-1',
         targetPlatform: 'linux-x64',
         artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
       );
       const target1Reordered = ExtensionBuildTarget(
         description: 'Target 1',
         name: 'target-1',
+        outputDir: '{OUTPUT_DIR}/target-1',
         targetPlatform: 'linux-x64',
         artifacts: <ExtensionArtifact>{BuiltInArtifacts.genSnapshot, BuiltInArtifacts.icuData},
       );
       const target2 = ExtensionBuildTarget(
         description: 'Target 2',
         name: 'target-2',
+        outputDir: '{OUTPUT_DIR}/target-2',
         targetPlatform: 'linux-x64',
       );
 

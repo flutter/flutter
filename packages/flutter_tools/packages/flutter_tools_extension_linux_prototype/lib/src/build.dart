@@ -32,9 +32,9 @@ class CustomLinuxBuildTarget extends BuildTarget {
   const CustomLinuxBuildTarget()
     : super(
         description: 'A custom Linux build target from prototype extension.',
-        targetPlatform: _kLinuxX64Platform,
         outputDir:
-            '${BuiltInPlaceholders.projectDir}/build/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
+            '${BuiltInPlaceholders.outputDir}/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
+        targetPlatform: _kLinuxX64Platform,
       );
 
   @override

@@ -56,8 +56,8 @@ class ExtensionBuildContext {
 abstract class BuildTarget {
   const BuildTarget({
     required this.description,
+    required this.outputDir,
     required this.targetPlatform,
-    this.outputDir = '${BuiltInPlaceholders.projectDir}/build',
   });
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
@@ -76,14 +76,12 @@ abstract class BuildTarget {
   final String targetPlatform;
 
   /// The directory pattern used by `flutter build` to determine this target's
-  /// output directory (`{OUTPUT_DIR}`), for example
-  /// `'${BuiltInPlaceholders.projectDir}/build/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
+  /// output directory, for example
+  /// `'${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
   ///
-  /// Defaults to `'${BuiltInPlaceholders.projectDir}/build'`. Note that `{BUILD_DIR}`
-  /// refers to the intermediate assemble scratch directory (`.dart_tool/flutter_build`),
-  /// whereas `{PROJECT_DIR}/build` is the project's top-level `build/` directory.
-  ///
-  /// Supports [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir],
+  /// Supports [BuiltInPlaceholders.outputDir] (the project's configured build
+  /// output root from `flutter config --build-dir`, defaulting to
+  /// `<project>/build`), [BuiltInPlaceholders.projectDir],
   /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
   final String outputDir;
 

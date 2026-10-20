@@ -23,8 +23,8 @@ abstract final class BuiltInPlaceholders {
   /// (under `.dart_tool/flutter_build`, matching `Environment.buildDir` in
   /// `flutter_tools`), not `{PROJECT_DIR}/build`.
   ///
-  /// Valid as the leading segment of an [ExtensionSource.pattern] or within
-  /// [ExtensionBuildTarget.outputDir].
+  /// Valid as the leading segment of an [ExtensionSource.pattern]; not
+  /// supported in [ExtensionBuildTarget.outputDir].
   static const String buildDir = '{BUILD_DIR}';
 
   /// Placeholder substituted with the Flutter artifact cache directory.
@@ -37,9 +37,13 @@ abstract final class BuiltInPlaceholders {
   /// Valid as the leading segment of an [ExtensionSource.pattern].
   static const String flutterRootDir = '{FLUTTER_ROOT}';
 
-  /// Placeholder substituted with the target's output directory.
+  /// Placeholder substituted with the target's output directory in
+  /// [ExtensionSource.pattern], or with the project's configured build output
+  /// directory (`flutter config --build-dir`, defaulting to `<project>/build`)
+  /// within [ExtensionBuildTarget.outputDir].
   ///
-  /// Valid as the leading segment of an [ExtensionSource.pattern].
+  /// Valid as the leading segment of an [ExtensionSource.pattern] or within
+  /// [ExtensionBuildTarget.outputDir].
   static const String outputDir = '{OUTPUT_DIR}';
 
   /// Placeholder substituted with the CLI name of the active [BuildMode]
