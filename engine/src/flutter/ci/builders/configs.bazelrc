@@ -55,8 +55,7 @@ build:host_release_test --compilation_mode=opt --//engine/src/flutter/common:run
 
 # linux_unopt.json: ci/host_debug_unopt
 #   --target-dir ci/host_debug_unopt --runtime-mode debug --unoptimized --prebuilt-dart-sdk --asan --dart-debug --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --asan (the toolchain has no sanitizer feature yet)
+build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:asan --test_timeout=240,1200,3600,14400 --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
 
 # linux_unopt.json: ci/host_debug_unopt_impeller_tests
 #   --runtime-mode debug --unoptimized --prebuilt-dart-sdk --target-dir ci/host_debug_unopt_impeller_tests --rbe --no-goma --use-glfw-swiftshader

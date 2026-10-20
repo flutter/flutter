@@ -55,7 +55,13 @@ enum GnFlagEffect {
 
 /// One `tools/gn` flag.
 final class GnFlag {
-  const GnFlag(this.effect, {this.takesValue = false, this.note, this.bazelFlag});
+  const GnFlag(
+    this.effect, {
+    this.takesValue = false,
+    this.note,
+    this.bazelFlag,
+    this.alongside = const <String>[],
+  });
 
   final GnFlagEffect effect;
 
@@ -67,6 +73,10 @@ final class GnFlag {
 
   /// The Bazel flag a [GnFlagEffect.setting] flag amounts to.
   final String? bazelFlag;
+
+  /// Bazel options the configuration carries besides [bazelFlag]: what the
+  /// setting implies for the run that `tools/gn` has no flag for.
+  final List<String> alongside;
 }
 
 /// The `tools/gn` flags of the Linux builder files, as far as they appear.
@@ -108,7 +118,19 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
     GnFlagEffect.setting,
     bazelFlag: '--//engine/src/flutter/txt:use_fontconfig',
   ),
-  '--asan': GnFlag(GnFlagEffect.unsupported, note: 'the toolchain has no sanitizer feature yet'),
+  // build/config/sanitizers' is_asan: the build-wide flag, which the
+  // toolchain's asan feature and the wrapped GN builds select() on, and
+  // under which the test launchers export CI's sanitizer environment. An
+  // instrumented build's tests, on a Debug VM, run several times slower
+  // than the sizes the test targets declare allow for; run_tests.py has no
+  // per-test timeout, so the configuration gives each size four times
+  // Bazel's default (measured: the suites that overran their 60 s and 300 s
+  // in a loaded run pass in 59 s, 180 s and 254 s alone).
+  '--asan': GnFlag(
+    GnFlagEffect.setting,
+    bazelFlag: '--//engine/src/flutter/build/bazel:asan',
+    alongside: <String>['--test_timeout=240,1200,3600,14400'],
+  ),
   // runtime_args.gni's dart_debug: the wrap's flag (build/bazel/dart_wrap),
   // which @dart//:dart_config follows for the engine's own file under it.
   '--dart-debug': GnFlag(
@@ -207,7 +229,7 @@ final class BuilderBuild {
     required this.otherPlatform,
     required this.testTypes,
     required this.otherTests,
-  });
+  }) : configName = bareName(name);
 
   /// Reads [build] of the builder file [file] (`linux_host_engine.json`).
   factory BuilderBuild.of(String file, Build build) {
@@ -249,8 +271,10 @@ final class BuilderBuild {
           buildDirectory = value;
         case GnFlagEffect.setting:
           final String setting = known.bazelFlag! + (value == null ? '' : '=$value');
-          if (!settings.contains(setting)) {
-            settings.add(setting);
+          for (final option in <String>[setting, ...known.alongside]) {
+            if (!settings.contains(option)) {
+              settings.add(option);
+            }
           }
         case GnFlagEffect.assumed:
           if (flag == '--no-lto') {
@@ -340,10 +364,20 @@ final class BuilderBuild {
   /// Its other test steps, by name (scripts a Bazel test does not stand for).
   final List<String> otherTests;
 
-  /// The configuration's name: the build's, without CI's `ci/` prefix or
-  /// local_engine.json's `linux/` (`host_debug` for both `ci/host_debug` and
-  /// `linux/host_debug`, which set the same flags).
-  String get configName {
+  /// The configuration's name, and the install target's and the test
+  /// suite's: the build's without CI's `ci/` prefix or local_engine.json's
+  /// `linux/` (`host_debug` for both `ci/host_debug` and `linux/host_debug`,
+  /// which set the same flags) -- unless a CI build's flags differ from the
+  /// developer's build of the same bare name, in which case the developer's
+  /// keeps the name `et build --config <name>` knows and CI's keeps its
+  /// prefix as GN's build directory does: `ci_host_debug_unopt`
+  /// (`out/ci/host_debug_unopt`: asan and a Debug VM) beside
+  /// `host_debug_unopt` (`out/host_debug_unopt`). [linuxHostBuilds] decides
+  /// that once every build is read.
+  String configName;
+
+  /// [name] without its `ci/` or `linux/` prefix, `/` as `_`.
+  static String bareName(String name) {
     final String bare = name.startsWith('ci/')
         ? name.substring(3)
         : name.startsWith('linux/')
@@ -371,6 +405,19 @@ List<BuilderBuild> linuxHostBuilds(Map<String, BuilderConfig> configs) {
       if (!read.otherPlatform && read.gn.isNotEmpty) {
         builds.add(read);
       }
+    }
+  }
+  // A CI build with the developer's name and other flags keeps its `ci/`.
+  final developers = <String, BuilderBuild>{
+    for (final build in builds)
+      if (build.file == 'local_engine.json') build.configName: build,
+  };
+  for (final build in builds) {
+    final BuilderBuild? developer = developers[build.configName];
+    if (build.name.startsWith('ci/') &&
+        developer != null &&
+        developer.bazelFlags.join(' ') != build.bazelFlags.join(' ')) {
+      build.configName = 'ci_${build.configName}';
     }
   }
   return builds;

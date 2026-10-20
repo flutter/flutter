@@ -7,6 +7,7 @@
 # extensions and tooling, and holds the build-wide config_settings.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -71,3 +72,22 @@ _OS_CONSTRAINTS = {
     )
     for os in _OS_CONSTRAINTS
 ]
+
+# GN's is_asan (build/config/sanitizers/sanitizers.gni; tools/gn --asan,
+# which Linux's host_debug_unopt test builder passes): AddressSanitizer on
+# every compile and link. The toolchain's `asan` feature selects on it
+# (toolchains/BUILD.bazel), the wrapped GN builds pass it on as is_asan, and
+# the test launchers export CI's sanitizer environment under it
+# (sanitizers.bzl). Nothing else: the engine's GN links no sanitizer options
+# of its own (//build/config/sanitizers:deps comes only with BUILDCONFIG.gn's
+# component() template, which no engine target uses), so the runtime's
+# defaults stand there as here, qualified by that environment.
+bool_flag(
+    name = "asan",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "asan_enabled",
+    flag_values = {":asan": "True"},
+)

@@ -867,11 +867,20 @@ the build directory, `--enable-fontconfig` the fontconfig flag
 (`//engine/src/flutter/txt:use_fontconfig`, which the three `*_desktop`
 builds set: txt links the sysroot's libfontconfig and Skia's fontconfig font
 manager is built and chosen, as in CI's Linux desktop artifact),
-`--prebuilt-dart-sdk`, `--no-lto` and `--use-glfw-swiftshader` what the
-generated files assume, `--rbe`/`--no-goma` where the build runs and
-`--build-embedder-examples` a target list, neither a flag -- and, for a
-build with a flag the Bazel build has no setting for yet, the reason and no
-configuration: `--asan` and `--dart-debug` (`host_debug_unopt`),
+`--asan` the asan flag (`//engine/src/flutter/build/bazel:asan`: the
+toolchain's `asan` feature on every compile and link, `is_asan` in the
+wrapped GN builds, and CI's sanitizer environment --
+`testing/sanitizer_suppressions.sh`, leak detection on with its suppression
+lists, the toolchain's `llvm-symbolizer` -- exported by every test launcher,
+as `run_tests.py --use-sanitizer-suppressions` exports it; and, since an
+instrumented build on a Debug VM runs its tests several times slower than
+their sizes allow for and `run_tests.py` has no per-test timeout, four times
+Bazel's default timeouts), `--dart-debug`
+the Dart wrap's `dart_debug` flag (a Debug VM), `--prebuilt-dart-sdk`,
+`--no-lto` and `--use-glfw-swiftshader` what the generated files assume,
+`--rbe`/`--no-goma` where the build runs and `--build-embedder-examples` a
+target list, neither a flag -- and, for a build with a flag the Bazel build
+has no setting for yet, the reason and no configuration:
 `--gn-args=dart_dynamic_modules=true`, `--no-prebuilt-dart-sdk`, LTO (which
 `tools/gn` enables without `--no-lto`). The developer's own configurations,
 `local_engine.json`'s `linux/` builds (what `et build --config <name>` runs:
@@ -879,11 +888,14 @@ configuration: `--asan` and `--dart-debug` (`host_debug_unopt`),
 `--no-stripped`, which the Bazel build has no stripped copies to answer
 anyway), are read with the rest, and a name two builds share with the same
 flags -- CI's `ci/host_debug` and the developer's `linux/host_debug` -- is
-one configuration (different flags under one name would be an error). Of
-the eighteen builds, fifteen have a configuration, thirteen distinct:
-`host_debug`, `host_debug_unopt`, `host_profile`, `host_release`,
-`host_debug_desktop`, `host_profile_desktop`, `host_release_desktop`,
-`host_debug_test`, `host_profile_test`, `host_release_test`,
+one configuration; where CI's flags differ from the developer's under one
+bare name, the developer keeps the name `et` knows and CI's keeps its prefix
+as its build directory does: `ci_host_debug_unopt` (`out/ci/host_debug_unopt`,
+asan and a Debug VM) beside `host_debug_unopt`. Of the eighteen builds,
+sixteen have a configuration, fourteen distinct: `host_debug`,
+`host_debug_unopt`, `host_profile`, `host_release`, `host_debug_desktop`,
+`host_profile_desktop`, `host_release_desktop`, `host_debug_test`,
+`host_profile_test`, `host_release_test`, `ci_host_debug_unopt`,
 `host_debug_unopt_impeller_tests`, `host_release_licenses`,
 `host_debug_clang_tidy`. `ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a

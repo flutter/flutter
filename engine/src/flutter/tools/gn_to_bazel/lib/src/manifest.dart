@@ -191,6 +191,12 @@ exports_files([
     "xvfb_run.sh",
     # The gtest-parallel wrapper of flutter_cc_test (testing.bzl).
     "gtest_parallel_run.sh",
+    # CI's sanitizer environment, which the test launchers source under the
+    # asan flag (build/bazel/sanitizers.bzl).
+    "sanitizer_suppressions.sh",
+    "lsan_suppressions.txt",
+    "tsan_suppressions.txt",
+    "ubsan_suppressions.txt",
 ])
 
 selects.config_setting_group(

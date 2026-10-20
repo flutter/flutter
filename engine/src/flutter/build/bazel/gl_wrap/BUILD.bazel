@@ -71,6 +71,11 @@ _GN_ARGS = {
     # As in dart_wrap: -c opt is tools/gn without --unoptimized.
     "//engine/src/flutter/build/bazel:optimized": {"is_debug": "false"},
     "//conditions:default": {"is_debug": "true"},
+}) | select({
+    # GN's is_asan (the build-wide flag): the backends instrumented like the
+    # suites that load them, as in a GN --asan build.
+    "//engine/src/flutter/build/bazel:asan_enabled": {"is_asan": "true"},
+    "//conditions:default": {},
 })
 
 gn_build(

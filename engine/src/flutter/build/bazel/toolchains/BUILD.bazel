@@ -64,6 +64,11 @@ filegroup(
 flutter_cc_toolchain_config(
     name = "linux_x64_clang_config",
     ar = "@clang_linux_x64//:bin/llvm-ar",
+    # GN's is_asan, as the build-wide flag says.
+    asan = select({
+        "//engine/src/flutter/build/bazel:asan_enabled": True,
+        "//conditions:default": False,
+    }),
     clang = "@clang_linux_x64//:bin/clang",
     clangxx = "@clang_linux_x64//:bin/clang++",
     # Search order matches GN: libc++, libc++abi, then the engine's
