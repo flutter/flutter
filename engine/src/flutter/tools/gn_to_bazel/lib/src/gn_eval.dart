@@ -1043,7 +1043,8 @@ final class ImportPolicy {
 ///
 /// [templates] are the names of the `.gni` templates that may be invoked like
 /// rules; [externalVariables] the names that imported files define and that
-/// may be read (they become [GnReference]s) or tested (they stay symbolic).
+/// may be read (they become [GnReference]s -- or, for the [booleanVariables]
+/// among them, the predicate itself) or tested (they stay symbolic).
 /// Targets named in [skipTargets] are not evaluated at all (so that what is
 /// inside them need not be understood); they are listed in the result.
 /// Imports are resolved and loaded through [tree] according to
@@ -1053,6 +1054,7 @@ GnFileEvaluation evaluateGnFile(
   required Assumptions assumptions,
   Set<String> templates = const <String>{},
   Set<String> externalVariables = const <String>{},
+  Set<String> booleanVariables = const <String>{},
   Set<String> skipTargets = const <String>{},
   GnSourceTree? tree,
   ImportPolicy importPolicy = const ImportPolicy(),
@@ -1061,6 +1063,7 @@ GnFileEvaluation evaluateGnFile(
     assumptions: assumptions,
     templates: templates,
     externalVariables: externalVariables,
+    booleanVariables: booleanVariables,
     skipTargets: skipTargets,
     tree: tree,
     importPolicy: importPolicy,
@@ -1370,6 +1373,7 @@ final class _Settings {
     required this.assumptions,
     required this.templates,
     required this.externalVariables,
+    required this.booleanVariables,
     required this.skipTargets,
     required this.tree,
     required this.importPolicy,
@@ -1379,6 +1383,11 @@ final class _Settings {
   final Assumptions assumptions;
   final Set<String> templates;
   final Set<String> externalVariables;
+
+  /// The external variables that are predicates (the OS predicates, the
+  /// arguments with a config_setting): read as values they are the
+  /// predicate, where the other external variables are lists of flags.
+  final Set<String> booleanVariables;
   final Set<String> skipTargets;
   final GnSourceTree? tree;
   final ImportPolicy importPolicy;
@@ -2305,9 +2314,15 @@ final class _Evaluator {
     if (assumed != null) {
       return _Expression.scalar(assumed);
     }
+    if (settings.booleanVariables.contains(name)) {
+      // A predicate read as a value (gpu.gni's invocations: `enable_software
+      // = test_enable_software`, tested in the template as
+      // `invoker.enable_software`).
+      return _Expression.scalar(GnConditionValue(ConditionVariable(name)));
+    }
     if (settings.externalVariables.contains(name)) {
-      // The engine's `.gni` variables that build files read are all lists of
-      // flags.
+      // The engine's other `.gni` variables that build files read are lists
+      // of flags.
       return _Expression(<_Value>[_Value(GnReference(name), _comments(node))], isList: true);
     }
     final String? buildDir = _buildDirVariable(name, node);
@@ -2319,7 +2334,7 @@ final class _Evaluator {
 
   /// The elements of a variable, each under the condition of the append
   /// that produced it; for a scalar, its [GnVariable.cases].
-  static _Expression _variableItems(GnVariable variable, GnNode node) {
+  _Expression _variableItems(GnVariable variable, GnNode node) {
     if (!variable.isList) {
       return _scalarItems(variable, node.location);
     }
@@ -2360,7 +2375,7 @@ final class _Evaluator {
   /// fold into one formula — "some case holds and its value is true" — which
   /// is exact wherever GN would let the variable be read (where no case
   /// holds, GN has no value to give either).
-  static _Expression _scalarItems(GnVariable variable, GnLocation use) {
+  _Expression _scalarItems(GnVariable variable, GnLocation use) {
     final List<GnScalarCase> cases = variable.cases(use);
     if (cases.isEmpty) {
       throw GnError(use, 'use of ${variable.name}, which has no value');

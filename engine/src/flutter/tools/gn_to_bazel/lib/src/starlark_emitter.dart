@@ -3522,6 +3522,11 @@ final class _Emitter {
         case ConditionNot(operand: ConditionVariable(:final String name))
             when negatedSettings.containsKey(name):
           settings.add(_absoluteLabel(negatedSettings[name]!));
+        case ConditionOr(terms: final List<Condition> alternatives):
+          // A disjunction among the terms (`impeller_supports_rendering &&
+          // enable_unittests`, the former being the three backends): its
+          // own match_any group, one member of this one.
+          settings.add(_disjunctionSetting(term, alternatives, rule, location, where));
         default:
           throw GnError(
             location,
@@ -3530,14 +3535,54 @@ final class _Emitter {
           );
       }
     }
+    return _group(condition, 'match_all', settings);
+  }
+
+  /// A `config_setting_group(match_any = ...)` for a disjunction that is a
+  /// term of a conjunction (a select() key can hold a disjunction's terms
+  /// side by side, but a match_all member cannot).
+  String _disjunctionSetting(
+    Condition condition,
+    List<Condition> terms,
+    _Rule rule,
+    GnLocation location,
+    String Function() where,
+  ) {
+    final String? existing = _conjunctionGroups[condition];
+    if (existing != null) {
+      return existing;
+    }
+    final settings = <String>[];
+    for (final term in terms) {
+      switch (term) {
+        case ConditionVariable():
+        case ConditionComparison():
+          settings.add(_setting(term, rule));
+        case ConditionNot(operand: ConditionVariable(:final String name))
+            when negatedSettings.containsKey(name):
+          settings.add(_absoluteLabel(negatedSettings[name]!));
+        default:
+          throw GnError(
+            location,
+            'condition `$condition` ${where()} cannot be expressed as a select(): '
+            'no config_setting holds exactly when `$term` does',
+          );
+      }
+    }
+    return _group(condition, 'match_any', settings);
+  }
+
+  /// The group for [condition] over [settings], added to the file's rules
+  /// once and named after the condition.
+  String _group(Condition condition, String kind, List<String> settings) {
     final name =
-        'when_${condition.gnSource.replaceAll('&&', 'and').replaceAll('!', 'not_').replaceAll(RegExp('[^A-Za-z0-9_]+'), '_').replaceAll(RegExp('_+'), '_').replaceAll(RegExp(r'_$'), '')}';
+        'when_${condition.gnSource.replaceAll('&&', 'and').replaceAll('||', 'or').replaceAll('!', 'not_').replaceAll(RegExp('[^A-Za-z0-9_]+'), '_').replaceAll(RegExp('_+'), '_').replaceAll(RegExp(r'^_|_$'), '')}';
     _use('@bazel_skylib//lib:selects.bzl', 'selects');
     final group = _Rule('selects.config_setting_group', name, <String>[
       '# `$condition`, for the select()s of this file.',
     ]);
     for (final setting in settings) {
-      group.list('match_all').always.add(_Item(setting));
+      group.list(kind).always.add(_Item(setting));
     }
     rules.add(group);
     _conjunctionGroups[condition] = ':$name';
