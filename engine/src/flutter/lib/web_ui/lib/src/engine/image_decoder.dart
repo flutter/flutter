@@ -522,12 +522,12 @@ BitmapSize? scaledImageSize(int width, int height, int? targetWidth, int? target
     if (targetHeight == null || targetHeight == height) {
       return null;
     }
-    targetWidth = (width * targetHeight / height).round();
+    targetWidth = math.max(1, (width * targetHeight / height).round());
   } else if (targetHeight == null) {
     if (targetWidth == width) {
       return null;
     }
-    targetHeight = (height * targetWidth / width).round();
+    targetHeight = math.max(1, (height * targetWidth / width).round());
   }
   return BitmapSize(targetWidth, targetHeight);
 }
