@@ -335,7 +335,6 @@ flutter_cc_test(
 # (tools/gn_to_bazel/lib/src/manifest.dart).
 
 exports_files([
-    "fixtures_location.cc",
     # The display wrapper of flutter_display_test (testing.bzl).
     "xvfb_run.sh",
     # The gtest-parallel wrapper of flutter_cc_test (testing.bzl).

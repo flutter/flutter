@@ -69,6 +69,7 @@ TEST(CcToolchain, CompilesC) {
 
 TEST(CcToolchain, LibcxxRuntimeWorks) {
   std::vector<std::string> parts;
+  parts.reserve(3);
   for (int i = 0; i < 3; ++i) {
     parts.push_back(std::to_string(i));
   }

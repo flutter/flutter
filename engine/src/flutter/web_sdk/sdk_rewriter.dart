@@ -146,8 +146,9 @@ void main(List<String> arguments) {
   }
 
   final inputFiles = <String>[];
-  final List<FileSystemEntity> entries = Directory(inputDirectoryPath)
-      .listSync(recursive: true, followLinks: true);
+  // Links are followed (the default): a Bazel sandbox hands every input as
+  // a symbolic link, and the rewriter must see them as the files they are.
+  final List<FileSystemEntity> entries = Directory(inputDirectoryPath).listSync(recursive: true);
   for (final File inputFile in entries.whereType<File>()) {
     if (excludePattern != null && inputFile.path.startsWith(excludePattern)) {
       continue;
