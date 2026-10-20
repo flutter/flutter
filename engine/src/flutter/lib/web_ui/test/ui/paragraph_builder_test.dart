@@ -8,7 +8,6 @@ import 'package:ui/ui.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -116,7 +115,6 @@ Future<void> testMain() async {
     expect(paragraph.height, lessThan(2 * fontSize));
   });
 
-  // TODO(dbebawy): Enable on CanvasKit, https://github.com/flutter/flutter/issues/193506.
   group('hyphens', () {
     const text = 'abcd\u00ADe';
 
@@ -147,5 +145,5 @@ Future<void> testMain() async {
 
       expect(unspecified.longestLine, manual.longestLine);
     });
-  }, skip: isCanvasKit);
+  });
 }

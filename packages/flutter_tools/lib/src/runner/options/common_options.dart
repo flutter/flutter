@@ -551,14 +551,6 @@ class VmServicePortOptionsBundle extends OptionBundle {
   final bool includeIpv6;
 
   @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesPortOption();
-    if (includeIpv6) {
-      command.enableUsesIpv6Flag();
-    }
-  }
-
-  @override
   List<OptionDescriptor<Object?>> get descriptors => <OptionDescriptor<Object?>>[
     DebuggingOptionDescriptors.vmServicePort,
     DebuggingOptionDescriptors.deviceVmservicePort,
@@ -652,12 +644,6 @@ class DartCompileOptionsBundle extends OptionBundle {
 /// A bundle encapsulating basic build parameters (target, pub, build-number/name).
 class CommonBuildOptionsBundle extends OptionBundle {
   const CommonBuildOptionsBundle();
-
-  @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesTargetOption();
-    command.enableUsesPubOption();
-  }
 
   @override
   List<OptionDescriptor<Object?>> get descriptors => const [
@@ -761,12 +747,6 @@ class DarwinAddToAppOptionsBundle extends OptionBundle {
         'Build plugins as static frameworks. Link on, but do not embed these '
         'frameworks in the existing Xcode project.',
   );
-
-  @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesTargetOption();
-    command.enableUsesPubOption();
-  }
 
   @override
   List<OptionBundle> get subBundles => const [
@@ -1282,17 +1262,4 @@ abstract final class DebuggingOptionDescriptors {
         '(deprecated) If necessary, build the app before running. To use an existing app, '
         'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
   );
-
-  static FlagOptionDescriptor buildOption({bool verboseOnly = true}) {
-    if (verboseOnly) {
-      return build;
-    }
-    return const FlagOptionDescriptor(
-      name: 'build',
-      defaultsTo: true,
-      help:
-          '(deprecated) If necessary, build the app before running. To use an existing app, '
-          'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
-    );
-  }
 }
