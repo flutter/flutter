@@ -231,7 +231,7 @@ static bool Bind(PassBindingsCacheMTL& pass,
 // |RenderPass|
 void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
   const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
-  context_->GetPipelineLibrary()->LogPipelineUsage(pipeline_desc);
+  CountPipelineUse(pipeline);
   primitive_type_ = pipeline_desc.GetPrimitiveType();
   pass_bindings_.SetRenderPipelineState(
       PipelineMTL::Cast(*pipeline).GetMTLRenderPipelineState());
