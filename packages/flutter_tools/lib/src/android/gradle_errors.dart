@@ -962,22 +962,25 @@ For instructions on how to opt out, see: $kOptOutOfNewDslDocsUrl
 const String kAgpVariantApiDocsUrl = 'https://developer.android.com/build/extend-agp';
 
 /// Gradle errors for build scripts that use an Android Gradle Plugin variant
-/// API that `android.newDsl=true` removes. Each pattern matches the error that
-/// AGP 9.3.1 reports for that API; with `android.newDsl=false` the same
+/// API that `android.newDsl=true` removes. With `android.newDsl=false` the same
 /// scripts build.
 final _legacyVariantApiPatterns = <RegExp>[
-  // Groovy, for example `android.applicationVariants.all { ... }`.
+  // Groovy, for example `android.applicationVariants.all { ... }`. Wording of
+  // Gradle 9.5.0 with AGP 9.3.1.
   RegExp(
     r"Could not get unknown property '(applicationVariants|libraryVariants|testVariants|unitTestVariants)' for object of type com\.android\.build\.",
   ),
-  // Groovy, `android { variantFilter { ... } }`.
+  // Groovy, `android { variantFilter { ... } }`. Wording of Gradle 9.5.0 with
+  // AGP 9.3.1.
   RegExp(
     r'Could not find method variantFilter\(\) for arguments \[.*\] on object of type com\.android\.build\.',
   ),
   // Groovy, `android { sourceSets { applicationVariants.all { ... } } }`. Inside
   // `sourceSets`, Gradle resolves `applicationVariants` as a new source set.
+  // Wording of Gradle 9.5.0 with AGP 9.3.1.
   RegExp(r'on source set application variants of type com\.android\.build\.'),
-  // Kotlin DSL, for example `android.applicationVariants.all { ... }`.
+  // Kotlin DSL, for example `android.applicationVariants.all { ... }`. Wording
+  // of the Kotlin script compiler in Gradle 9.5.0, with AGP 9.3.1.
   RegExp(
     r"Unresolved reference '(applicationVariants|libraryVariants|testVariants|unitTestVariants|variantFilter)'\.",
   ),
@@ -999,9 +1002,10 @@ final legacyVariantApiErrorHandler = GradleHandledError(
       }) async {
         final Logger logger = toolContext.logger;
         logger.printBox('''
-${logger.terminal.warningMark} A Gradle build script uses an Android Gradle Plugin API that
-does not exist when `android.newDsl` is enabled:
+${logger.terminal.warningMark} A Gradle build script, in the app or in one of its plugins, uses an
+Android Gradle Plugin API that does not exist when `android.newDsl` is enabled:
 ${line.trim()}
+Gradle names the build script under "* Where:" above.
 
 To fix this, migrate the build script to the variant API (`androidComponents.onVariants`).
 For instructions, see: $kAgpVariantApiDocsUrl

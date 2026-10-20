@@ -1671,6 +1671,11 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
       );
 
       expect(testLogger.statusText, contains('does not exist when `android.newDsl` is enabled'));
+      expect(testLogger.statusText, contains('in the app or in one of its plugins'));
+      expect(
+        testLogger.statusText,
+        contains('Gradle names the build script under "* Where:" above.'),
+      );
       expect(testLogger.statusText, contains("unknown property 'applicationVariants'"));
       expect(testLogger.statusText, contains('androidComponents.onVariants'));
       expect(testLogger.statusText, contains(kAgpVariantApiDocsUrl));

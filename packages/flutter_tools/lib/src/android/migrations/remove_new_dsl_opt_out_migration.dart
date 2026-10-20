@@ -68,10 +68,12 @@ class RemoveNewDslOptOutMigration extends ProjectMigrator {
     if (kept.length == lines.length) {
       return fileContents;
     }
-    logger.printStatus(
+    logger.printWarning(
       'Removed the android.newDsl=false opt-out that Flutter added to '
       '${_gradlePropertiesFile.path}, because the project uses built-in Kotlin. '
       'The Android Gradle Plugin builds this project with android.newDsl enabled. '
+      'To keep the opt-out, add android.newDsl=false without the Flutter comment '
+      'above it; Flutter removes the pair with the comment on every build. '
       'For details, see $kOptOutOfNewDslDocsUrl',
     );
     return kept.join('\n');

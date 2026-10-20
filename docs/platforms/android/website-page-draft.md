@@ -35,8 +35,16 @@ built-in Kotlin migration (tracked in
 [flutter/flutter#184836](https://github.com/flutter/flutter/issues/184836))
 removes both.
 
-If a build script uses an API that does not exist under the new DSL,
-`flutter build` names the failing API and links to the AGP Variant API guide.
+This also applies to the build scripts of the plugins your app uses. A plugin
+whose `android/build.gradle` uses `android.libraryVariants` or `variantFilter`
+builds with `android.newDsl=false` and fails once the opt-out is removed.
+
+If a build script, in the app or in one of its plugins, uses an API that does
+not exist under the new DSL, `flutter build` names the failing API and links to
+the AGP Variant API guide. To keep opting out until the script is migrated,
+add `android.newDsl=false` to `android/gradle.properties` without Flutter's
+marker comment above it; Flutter removes the line pair that carries its marker
+comment on every build.
 
 ## Migration guide
 

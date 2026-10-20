@@ -14,9 +14,10 @@ android.newDsl=false''';
 final RegExp _newDslRegex = RegExp(r'^\s*android\.newDsl(?=[ \t=:])', multiLine: true);
 
 /// Captures the value of each `android.builtInKotlin` entry. A properties file
-/// separates a key from its value with `=`, `:` or whitespace.
+/// separates a key from its value with `=`, `:` or whitespace. Like
+/// `java.util.Properties`, the value keeps its trailing whitespace.
 final RegExp _builtInKotlinValueRegex = RegExp(
-  r'^[ \t]*android\.builtInKotlin(?:[ \t]*[=:][ \t]*|[ \t]+)(.*?)[ \t]*$',
+  r'^[ \t]*android\.builtInKotlin(?:[ \t]*[=:][ \t]*|[ \t]+)(.*)$',
   multiLine: true,
 );
 
@@ -27,9 +28,11 @@ final RegExp _builtInKotlinValueRegex = RegExp(
 /// The `kotlin-android` plugin fails to apply when `android.newDsl` is enabled,
 /// so only these projects can build without the `android.newDsl=false` opt-out.
 ///
-/// The last `android.builtInKotlin` entry decides, read the way the Flutter
-/// Gradle Plugin's `FlutterPluginUtils.isBuiltInKotlinEnabled` reads it: Kotlin's
-/// `String.toBoolean()`, which is `true` only for `true`, ignoring case.
+/// The last `android.builtInKotlin` entry decides. Its value, as
+/// `java.util.Properties` reads it, must be `true`, ignoring case: the test that
+/// the Flutter Gradle Plugin's `FlutterPluginUtils.isBuiltInKotlinEnabled`
+/// applies through Kotlin's `String.toBoolean()`. A value with trailing
+/// whitespace, such as `true `, is not `true`.
 /// Without an entry this returns false: `DisableBuiltInKotlinMigration` adds
 /// `android.builtInKotlin=false` to such projects.
 bool usesBuiltInKotlinWithoutKotlinAndroidPlugin(AndroidProject project, String gradleProperties) {

@@ -741,8 +741,9 @@ android.builtInKotlin=true
 android.useAndroidX=true
 android.builtInKotlin=true
 ''');
-          expect(bufferLogger.statusText, contains('Removed the android.newDsl=false opt-out'));
-          expect(bufferLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
+          expect(bufferLogger.warningText, contains('Removed the android.newDsl=false opt-out'));
+          expect(bufferLogger.warningText, contains('without the Flutter comment'));
+          expect(bufferLogger.warningText, contains(kOptOutOfNewDslDocsUrl));
         });
 
         testUsingContext('removes the migrator-written opt-out', () async {
@@ -778,7 +779,7 @@ android.builtInKotlin=true
           await runMigrators();
 
           expect(topLevelGradlePropertiesFile.readAsStringSync(), contents);
-          expect(bufferLogger.statusText, isEmpty);
+          expect(bufferLogger.warningText, isEmpty);
         });
 
         testUsingContext('the last builtInKotlin entry decides', () async {
@@ -799,6 +800,36 @@ android.builtInKotlin=true
           await runMigrators();
 
           expect(topLevelGradlePropertiesFile.readAsStringSync(), 'android.builtInKotlin : TRUE\n');
+        });
+
+        testUsingContext('a builtInKotlin value with trailing whitespace is not true', () async {
+          // java.util.Properties keeps the trailing space, and the Flutter
+          // Gradle Plugin's String.toBoolean() reads `true ` as false.
+          const contents = 'android.builtInKotlin=true \n$templatePair\n';
+          topLevelGradlePropertiesFile.writeAsStringSync(contents);
+
+          await runMigrators();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), contents);
+        });
+
+        testUsingContext('removes a re-added marker pair and keeps a bare opt-out', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync(
+            'android.builtInKotlin=true\n$templatePair\n',
+          );
+          await runMigrators();
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), 'android.builtInKotlin=true\n');
+
+          topLevelGradlePropertiesFile.writeAsStringSync(
+            'android.builtInKotlin=true\n$templatePair\n',
+          );
+          await runMigrators();
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), 'android.builtInKotlin=true\n');
+
+          const bare = 'android.builtInKotlin=true\nandroid.newDsl=false\n';
+          topLevelGradlePropertiesFile.writeAsStringSync(bare);
+          await runMigrators();
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), bare);
         });
 
         testUsingContext('keeps the opt-out when the app applies kotlin-android', () async {
@@ -844,10 +875,7 @@ android.newDsl=true
 
           // ProjectMigrator.processFileLines reads lines with
           // File.readAsLinesSync, which keeps the `\r` in MemoryFileSystem.
-          expect(
-            topLevelGradlePropertiesFile.readAsStringSync(),
-            anyOf('android.builtInKotlin=true\n', 'android.builtInKotlin=true\r\n'),
-          );
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), 'android.builtInKotlin=true\r\n');
         });
 
         testUsingContext('a file with only the migrator-written pair is not changed', () async {
@@ -876,12 +904,12 @@ android.newDsl=true
 
           await runMigrators();
           final String once = topLevelGradlePropertiesFile.readAsStringSync();
-          bufferLogger.clear();
+          final String warningsAfterOnce = bufferLogger.warningText;
           await runMigrators();
 
           expect(once, 'android.builtInKotlin=true\n');
           expect(topLevelGradlePropertiesFile.readAsStringSync(), once);
-          expect(bufferLogger.statusText, isEmpty);
+          expect(bufferLogger.warningText, warningsAfterOnce);
         });
 
         testUsingContext(

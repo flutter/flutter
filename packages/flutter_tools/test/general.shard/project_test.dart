@@ -1010,6 +1010,114 @@ plugins {
       );
 
       testUsingContext(
+        'kotlin host app language with id("org.jetbrains.kotlin.android") version',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android") version "2.4.20"
+}
+''';
+            },
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin host app language with kotlin("android") version',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    kotlin("android") version "2.4.20"
+}
+''';
+            },
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin host app language with alias(libs.plugins.jetbrains.kotlin.android)',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    alias(libs.plugins.jetbrains.kotlin.android)
+}
+''';
+            },
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin-android declared with apply false is not applied',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android") version "2.4.20" apply false
+}
+''';
+            },
+          );
+          expect(project.android.appliesKotlinAndroidPlugin, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
         'kotlin host app language with kotlin("android")',
         () async {
           final FlutterProject project = await someProject();
