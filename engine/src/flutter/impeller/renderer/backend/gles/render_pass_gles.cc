@@ -600,8 +600,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     }
 #endif  // IMPELLER_DEBUG
     const auto& pipeline = PipelineGLES::Cast(*command.pipeline);
-    impeller_context->GetPipelineLibrary()->LogPipelineUsage(
-        pipeline.GetDescriptor());
     const auto* color_attachment =
         pipeline.GetDescriptor().GetLegacyCompatibleColorAttachment();
     if (!color_attachment) {
