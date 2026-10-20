@@ -57,6 +57,14 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/dart",
         build_file = _OVERLAYS + ":dart/BUILD.dart.bazel",
     ),
+    # The Emscripten SDK (GN's wasm toolchain, build/toolchain/wasm.gni),
+    # a git dependency whose compiler and Node.js tools/activate_emsdk.py
+    # installs into it under `download_emsdk`; consumed in place by
+    # build/bazel/toolchains/emscripten (see the overlay).
+    "emsdk": struct(
+        path = "engine/src/flutter/prebuilts/emsdk",
+        build_file = _OVERLAYS + ":emsdk/BUILD.emsdk.bazel",
+    ),
     # Skia's codec and font dependencies, each converted at fetch time from
     # its GN file: in the synced tree (libpng, freetype2), in the engine's
     # secondary source tree (expat, libwebp, wuffs; files beside the BUILD.gn

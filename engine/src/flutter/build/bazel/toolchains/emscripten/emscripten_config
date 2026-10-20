@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# emcc's configuration (Python, read through EM_CONFIG) for the Bazel
+# toolchain: the same roles as the SDK's own .emscripten (LLVM_ROOT,
+# BINARYEN_ROOT, EMSCRIPTEN_ROOT, NODE_JS), resolved against the execution
+# root the wrapper scripts record in EM_ROOT_DIR, so that the file holds
+# for every sandbox and machine. The cache is the SDK's prebuilt one and is
+# frozen: a system library variant that is not in it is an error rather
+# than a build into the shared tree.
+
+import os
+
+_root = os.environ["EM_ROOT_DIR"]
+_bin = os.path.join(_root, os.environ["EM_BIN_PATH"])
+
+EMSCRIPTEN_ROOT = os.path.join(_bin, "emscripten")
+LLVM_ROOT = os.path.join(_bin, "bin")
+BINARYEN_ROOT = _bin
+NODE_JS = os.path.join(_root, os.environ["EM_NODE"])
+CACHE = os.path.join(EMSCRIPTEN_ROOT, "cache")
+FROZEN_CACHE = True
