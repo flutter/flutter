@@ -47,7 +47,10 @@ template("wasm_toolchain") {
     # dummy file. If the target does use pthreads, this dummy file will be
     # overwritten. If the target does not, the dummy file will satisfy the
     # toolchain's requirement that it has this as an output.
-    ld = "$emsdk_dir/upstream/emscripten/em++ --em-config $em_config_path"
+    # Disable Binaryen's internal thread pool (`BINARYEN_CORES=1`) when linking
+    # so `wasm-opt` runs single-threaded inside Ninja's parallel build jobs and
+    # avoids a spurious-wakeup race in Binaryen's `ThreadPool` (threads.cpp).
+    ld = "BINARYEN_CORES=1 $emsdk_dir/upstream/emscripten/em++ --em-config $em_config_path"
     readelf = "readelf"
     nm = "nm"
 
