@@ -407,6 +407,11 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext
 
   @override
   int get itemIndex {
+    // The viewport can build children, and so query this, before it applies
+    // the content dimensions.
+    if (!hasContentDimensions) {
+      return (pixels / itemExtent).round();
+    }
     return _getItemFromOffset(
       offset: pixels,
       itemExtent: itemExtent,
