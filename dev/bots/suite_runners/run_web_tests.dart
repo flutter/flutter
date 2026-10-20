@@ -54,6 +54,11 @@ class WebTestsSuite {
     // VM-specific functionality.
     'test/services/message_codecs_vm_test.dart',
     'test/examples/sector_layout_test.dart',
+
+    // This test has a few failing cases on the web that need `skip`s, but the
+    // file is under the Material code freeze and can't be modified here.
+    // TODO(mdebbar): https://github.com/flutter/flutter/issues/188444
+    'test/material/text_field_test.dart',
   ];
 
   static const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
