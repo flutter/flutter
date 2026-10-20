@@ -25,6 +25,19 @@ class MockGtk {
   MOCK_METHOD(GdkWindowState, gdk_window_get_state, (GdkWindow * window));
   MOCK_METHOD(int, gdk_window_get_width, (GdkWindow * window));
   MOCK_METHOD(int, gdk_window_get_height, (GdkWindow * window));
+  MOCK_METHOD(GdkGLContext*, gdk_gl_context_get_current, ());
+  MOCK_METHOD(void, gdk_gl_context_make_current, (GdkGLContext * context));
+  MOCK_METHOD(void,
+              gdk_cairo_draw_from_gl,
+              (cairo_t * cr,
+               GdkWindow* window,
+               int source,
+               int source_type,
+               int buffer_scale,
+               int x,
+               int y,
+               int width,
+               int height));
   MOCK_METHOD(void, gtk_window_new, (GtkWindow * window, GtkWindowType type));
   MOCK_METHOD(void,
               gtk_window_set_default_size,
