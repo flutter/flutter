@@ -1166,6 +1166,9 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateAppLifecycleState(int state) {
+    if (state < 0 || state >= AppLifecycleState.values.length) {
+      return;
+    }
     final AppLifecycleState newState = AppLifecycleState.values[state];
     if (newState == _appLifecycleState) {
       return;
