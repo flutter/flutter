@@ -148,4 +148,81 @@ void main() {
     expect(profile.isRunning, isFalse);
     expect(profile.toJson().keys.toSet(), _legacyKeys);
   });
+
+  test('toJson(reportSamples: true) splits each series at its own warm-up and keeps outliers', () {
+    final profile = Profile(name: 'custom_warm_up', useCustomWarmUp: true);
+    for (var i = 0; i < 3; i += 1) {
+      profile.addDataPoint('layout', _warmUpDuration(i), reported: true);
+    }
+    profile.addDataPoint('paint', _warmUpDuration(7), reported: false);
+    profile.stopWarmingUp();
+    final layoutMeasured = <double>[
+      for (var i = 0; i < 10; i += 1)
+        if (i == 4) 100000.0 else 1000.0,
+    ];
+    for (final value in layoutMeasured) {
+      profile.addDataPoint('layout', Duration(microseconds: value.toInt()), reported: true);
+    }
+    profile.addDataPoint('paint', _measuredDuration(9000, 0), reported: false);
+    profile.addDataPoint('paint', _measuredDuration(9000, 1), reported: false);
+    profile.stopBenchmark();
+
+    final Map<String, dynamic> json = profile.toJson(reportSamples: true);
+
+    // The 100000 µs sample is classified as an outlier, yet it is still a
+    // measured sample and is reported in place.
+    expect(json['layout.outlierAverage'], 100000.0);
+    expect(json['layout.average'], 1000.0);
+    expect(json['layout.samples'], layoutMeasured);
+    expect(json['paint.samples'], <double>[9000.0, 9001.0]);
+  });
+
+  test('extraData is merged after samples and may override them', () {
+    final Profile profile = _autoProfile();
+    profile.extraData['drawFrameDuration.samples'] = 'overridden';
+    profile.extraData['totalUploadedBytes'] = 42;
+
+    final Map<String, dynamic> json = profile.toJson(reportSamples: true);
+
+    expect(json['drawFrameDuration.samples'], 'overridden');
+    expect(json['totalUploadedBytes'], 42);
+    expect(json['sceneBuildDuration.samples'], <double>[
+      for (var i = 0; i < _measuredCount; i += 1) 9000.0 + i,
+    ]);
+  });
+
+  test('toJson(reportSamples: true) returns fresh lists and does not change the profile', () {
+    final Profile profile = _autoProfile();
+    final expectedSamples = <double>[for (var i = 0; i < _measuredCount; i += 1) 5000.0 + i];
+
+    final Map<String, dynamic> first = profile.toJson(reportSamples: true);
+    (first['drawFrameDuration.samples'] as List<double>).clear();
+
+    expect(profile.extraData, isEmpty);
+    expect(profile.toJson().keys.toSet(), _legacyKeys);
+    final Map<String, dynamic> second = profile.toJson(reportSamples: true);
+    expect(second['drawFrameDuration.samples'], expectedSamples);
+    expect(second['drawFrameDuration.average'], 5049.5);
+  });
+
+  test('phaseListener is read at each warm-up switch, not when the profile is created', () {
+    final replaced = <(String, String)>[];
+    final current = <(String, String)>[];
+    Profile.phaseListener = (String benchmarkName, String phase) {
+      replaced.add((benchmarkName, phase));
+    };
+    final early = Profile(name: 'created_before_swap', useCustomWarmUp: true);
+    Profile.phaseListener = (String benchmarkName, String phase) {
+      current.add((benchmarkName, phase));
+    };
+
+    early.stopWarmingUp();
+    _autoProfile();
+
+    expect(replaced, isEmpty);
+    expect(current, <(String, String)>[
+      ('created_before_swap', 'measure'),
+      ('bench_test', 'measure'),
+    ]);
+  });
 }
