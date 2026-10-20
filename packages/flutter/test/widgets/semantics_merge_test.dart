@@ -257,7 +257,7 @@ class TestConfigDelegate extends SingleChildRenderObjectWidget {
 }
 
 class RenderTestConfigDelegate extends RenderProxyBox {
-  RenderTestConfigDelegate({ChildSemanticsConfigurationsDelegate? delegate}) : _delegate = delegate;
+  RenderTestConfigDelegate({this._delegate});
 
   ChildSemanticsConfigurationsDelegate? get delegate => _delegate;
   ChildSemanticsConfigurationsDelegate? _delegate;

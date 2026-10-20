@@ -18,6 +18,7 @@ import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -42,6 +43,14 @@ To try experimental windowing APIs:
 
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
+
+FlutterView _flutterViewForId(int viewId) {
+  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
+  if (view == null) {
+    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
+  }
+  return view;
+}
 
 /// [WindowingOwner] implementation for Linux.
 ///
@@ -335,9 +344,7 @@ abstract mixin class BaseWindowControllerLinux {
     _view = _FlView(engine, isSizedToContent: isSizedToContent);
     _viewMonitor = _FlViewMonitor(_view, onFirstFrame: onFirstFrame);
     final int viewId = _view.getId();
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = _flutterViewForId(viewId);
     _view.show();
     _window.add(_view);
   }
@@ -690,13 +697,12 @@ class WindowControllerLinux extends WindowController
   @internal
   WindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required WindowControllerDelegate delegate,
+    required this._delegate,
     Size? size,
     BoxConstraints? constraints,
     String? title,
     bool decorated = true,
-  }) : _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     _createWindow(owner, _GtkWindowType.toplevel);
 
     _createWindowMonitor(
@@ -771,14 +777,13 @@ class DialogWindowControllerLinux extends DialogWindowController
   @internal
   DialogWindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     Size? size,
     BoxConstraints? constraints,
     BaseWindowController? parent,
     String? title,
     bool decorated = true,
-  }) : _delegate = delegate,
-       _parent = parent,
+  }) : _parent = parent,
        super.empty() {
     _createWindow(owner, _GtkWindowType.toplevel);
 
@@ -839,13 +844,12 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   @internal
   TooltipWindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required TooltipWindowControllerDelegate delegate,
+    required this._delegate,
     required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     _createWindow(owner, _GtkWindowType.popup);
 
     _window.setTypeHint(_GdkWindowTypeHint.tooltip);
@@ -898,13 +902,12 @@ class PopupWindowControllerLinux extends PopupWindowController
   @internal
   PopupWindowControllerLinux({
     required WindowingOwnerLinux owner,
-    required PopupWindowControllerDelegate delegate,
+    required this._delegate,
     required BoxConstraints constraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     _createWindow(owner, _GtkWindowType.popup);
 
     _window.setDecorated(false);
@@ -1065,10 +1068,10 @@ String? _nativeToString(ffi.Pointer<ffi.Uint8> value) {
 
 /// Wraps GObject.
 class _GObject {
-  /// Creates a wrapper to an existing [GObject] in [instance].
+  /// Creates a wrapper to an existing GObject in [instance].
   const _GObject(this.instance);
 
-  /// The pointer to the underlying [GObject].
+  /// The pointer to the underlying GObject.
   final ffi.Pointer<ffi.NativeType> instance;
 
   /// Drop reference to this object.
@@ -1082,7 +1085,7 @@ class _GObject {
 
 /// Wraps GtkContainer.
 class _GtkContainer extends _GtkWidget {
-  /// Creates a wrapper to an existing [GtkContainer] in [instance].
+  /// Creates a wrapper to an existing GtkContainer in [instance].
   const _GtkContainer(super.instance);
 
   /// Adds [child] widget to this container.
@@ -1101,7 +1104,7 @@ class _GtkContainer extends _GtkWidget {
 
 /// Wraps GtkWidget.
 class _GtkWidget extends _GObject {
-  /// Creates a wrapper to an existing [GtkWidget] in [instance].
+  /// Creates a wrapper to an existing GtkWidget in [instance].
   const _GtkWidget(super.instance);
 
   /// Creates the GDK resources associated with a widget.
@@ -1227,13 +1230,13 @@ class _GtkWidget extends _GObject {
 
 /// Wraps GdkVisual.
 class _GdkVisual extends _GObject {
-  /// Creates a wrapper to an existing [GdkVisual] in [instance].
+  /// Creates a wrapper to an existing GdkVisual in [instance].
   const _GdkVisual(super.instance);
 }
 
 /// Wraps GdkScreen.
 class _GdkScreen extends _GObject {
-  /// Creates a wrapper to an existing [GdkScreen] in [instance].
+  /// Creates a wrapper to an existing GdkScreen in [instance].
   const _GdkScreen(super.instance);
 
   /// Gets the visual that supports translucent windows, or null if this screen
@@ -1264,7 +1267,7 @@ class _GdkScreen extends _GObject {
 
 /// Wraps GdkWindow.
 class _GdkWindow extends _GObject {
-  /// Creates a wrapper to an existing [GdkWindow] in [instance].
+  /// Creates a wrapper to an existing GdkWindow in [instance].
   const _GdkWindow(super.instance);
 
   /// Gets the window state.
@@ -1292,9 +1295,8 @@ class _GdkWindow extends _GObject {
     int rectAnchorDx = 0,
     int rectAnchorDy = 0,
   }) {
-    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(
-      ffi.sizeOf<_GdkRectangle>(),
-    ).cast<_GdkRectangle>();
+    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(ffi.sizeOf<_GdkRectangle>())
+        .cast<_GdkRectangle>();
     final _GdkRectangle r = rect.ref;
     r.x = x;
     r.y = y;
@@ -1465,9 +1467,8 @@ class _GtkWindow extends _GtkContainer {
 
   /// Set minimum and maximum size of the window.
   void setGeometryHints({int? minWidth, int? minHeight, int? maxWidth, int? maxHeight}) {
-    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(
-      ffi.sizeOf<_GdkGeometry>(),
-    ).cast<_GdkGeometry>();
+    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(ffi.sizeOf<_GdkGeometry>())
+        .cast<_GdkGeometry>();
     final _GdkGeometry g = geometry.ref;
     var geometryMask = 0;
     if (minWidth != null || minHeight != null) {

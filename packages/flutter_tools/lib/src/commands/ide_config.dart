@@ -15,8 +15,8 @@ import '../template.dart';
 class IdeConfigCommand extends FlutterCommand {
   IdeConfigCommand({
     required super.toolContext,
-    TemplateRenderer templateRenderer = const MustacheTemplateRenderer(),
-  }) : _templateRenderer = templateRenderer {
+    this._templateRenderer = const MustacheTemplateRenderer(),
+  }) {
     argParser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
     argParser.addFlag(
       'update-templates',

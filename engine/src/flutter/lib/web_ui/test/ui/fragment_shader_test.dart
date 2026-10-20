@@ -968,9 +968,8 @@ Future<void> testMain() async {
     late Map<Type, ui.FragmentShader> shaderMap;
     setUpAll(() async {
       shaderMap = {
-        ui.UniformFloatSlot: (await renderer.createFragmentProgram(
-          'float_uniform',
-        )).fragmentShader(),
+        ui.UniformFloatSlot: (await renderer.createFragmentProgram('float_uniform'))
+            .fragmentShader(),
         ui.UniformVec2Slot: (await renderer.createFragmentProgram('vec2_uniform')).fragmentShader(),
         ui.UniformVec3Slot: (await renderer.createFragmentProgram('vec3_uniform')).fragmentShader(),
         ui.UniformVec4Slot: (await renderer.createFragmentProgram('vec4_uniform')).fragmentShader(),

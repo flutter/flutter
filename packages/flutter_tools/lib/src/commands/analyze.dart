@@ -24,13 +24,12 @@ import 'validate_project.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({
-    required List<ProjectValidator> allProjectValidators,
-    required bool suppressAnalytics,
+    required this._allProjectValidators,
+    required this._suppressAnalytics,
     required super.toolContext,
     bool verboseHelp = false,
     this.workingDirectory,
-  }) : _allProjectValidators = allProjectValidators,
-       _suppressAnalytics = suppressAnalytics {
+  }) {
     argParser.addFlag(
       'flutter-repo',
       negatable: false,
@@ -77,7 +76,7 @@ class AnalyzeCommand extends FlutterCommand {
       hide: !verboseHelp,
     );
     argParser.addFlag('suggestions', help: 'Show suggestions about the current flutter project.');
-    addMachineOutputFlag(verboseHelp: verboseHelp);
+    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag(
@@ -88,7 +87,7 @@ class AnalyzeCommand extends FlutterCommand {
     );
     argParser.addFlag('plugins', defaultsTo: true, help: 'Whether to enable analyzer plugins.');
 
-    usesPubOption();
+    CommonOptions.pub.addTo(argParser);
 
     // Not used by analyze --watch
     argParser.addFlag(

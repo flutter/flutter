@@ -17,13 +17,11 @@ import '../runner/flutter_command.dart';
 /// The `flutter emulators` command, which lists, launches, and creates emulators.
 class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand({
-    required Doctor doctor,
-    required EmulatorManager emulatorManager,
-    required ToolContext toolContext,
+    required this._doctor,
+    required this._emulatorManager,
+    required ToolContext super.toolContext,
     super.verboseHelp,
-  }) : _doctor = doctor,
-       _emulatorManager = emulatorManager,
-       super(toolContext: toolContext) {
+  }) {
     argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag(
       'cold',

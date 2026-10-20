@@ -38,14 +38,11 @@ class Java {
     required this.binaryPath,
     required this.javaSource,
     required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils os,
-    required Platform platform,
+    required this._fileSystem,
+    required this._os,
+    required this._platform,
     required ProcessManager processManager,
   }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _os = os,
-       _platform = platform,
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
@@ -69,10 +66,10 @@ class Java {
   ///
   /// Returns null if no java binary could be found.
   static Java? find({
+    required AndroidStudio? Function() androidStudioBuilder,
     required Config config,
-    required AndroidStudio? androidStudio,
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
   }) {
@@ -83,9 +80,9 @@ class Java {
       processManager: processManager,
     );
     final _JavaHomePathWithSource? home = _findJavaHome(
+      androidStudioBuilder: androidStudioBuilder,
       config: config,
       logger: logger,
-      androidStudio: androidStudio,
       platform: platform,
     );
     final String? binary = _findJavaBinary(
@@ -159,6 +156,29 @@ class Java {
         _platform.environment['PATH']!,
   };
 
+  /// JVM flag that grants native access to code on the class path.
+  static const enableNativeAccessFlag = '--enable-native-access=ALL-UNNAMED';
+
+  /// Returns an environment variable map for invoking Gradle.
+  ///
+  /// This is [environment], plus [enableNativeAccessFlag] appended to
+  /// `GRADLE_OPTS`. The Gradle client loads a native library via
+  /// `System::load`, which on JDK 24+ prints a warning to stderr unless native
+  /// access is enabled. On earlier JDKs, the flag has no effect.
+  ///
+  /// See: https://openjdk.org/jeps/472.
+  Map<String, String> get gradleEnvironment {
+    final Map<String, String> env = environment;
+    final String existingOpts = _platform.environment['GRADLE_OPTS']?.trim() ?? '';
+    if (existingOpts.contains('--enable-native-access')) {
+      return env;
+    }
+    env['GRADLE_OPTS'] = existingOpts.isEmpty
+        ? enableNativeAccessFlag
+        : '$existingOpts $enableNativeAccessFlag';
+    return env;
+  }
+
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.
   late final Version? version = (() {
@@ -224,9 +244,9 @@ class Java {
 }
 
 _JavaHomePathWithSource? _findJavaHome({
+  required AndroidStudio? Function() androidStudioBuilder,
   required Config config,
   required Logger logger,
-  required AndroidStudio? androidStudio,
   required Platform platform,
 }) {
   final Object? configured = config.getValue('jdk-dir');
@@ -234,7 +254,7 @@ _JavaHomePathWithSource? _findJavaHome({
     return (path: configured as String, source: JavaSource.flutterConfig);
   }
 
-  final String? androidStudioJavaPath = androidStudio?.javaPath;
+  final String? androidStudioJavaPath = androidStudioBuilder()?.javaPath;
   if (androidStudioJavaPath != null) {
     return (path: androidStudioJavaPath, source: JavaSource.androidStudio);
   }

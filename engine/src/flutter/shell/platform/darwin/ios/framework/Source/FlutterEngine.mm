@@ -67,7 +67,7 @@ static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& confi
     case fml::Thread::ThreadPriority::kDisplay: {
       pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
       [[NSThread currentThread] setThreadPriority:1.0];
-      sched_param param;
+      sched_param param{};
       int policy;
       pthread_t thread = pthread_self();
       if (!pthread_getschedparam(thread, &policy, &param)) {
@@ -288,6 +288,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   self.sceneLifeCycleDelegate = [[FlutterEnginePluginSceneLifeCycleDelegate alloc] init];
 
+  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
+    [FlutterPluginSceneLifeCycleDelegate registerEngineForSingleScene:self];
+  }
+
   return self;
 }
 
@@ -332,11 +336,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
-  // If the application is not available, use the scene for lifecycle notifications if available.
-  [center addObserver:self
-             selector:@selector(sceneWillConnect:)
-                 name:UISceneWillConnectNotification
-               object:nil];
   if (!FlutterSharedApplication.isAvailable) {
     [center addObserver:self
                selector:@selector(sceneWillEnterForeground:)
@@ -356,26 +355,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
              selector:@selector(applicationDidEnterBackground:)
                  name:UIApplicationDidEnterBackgroundNotification
                object:nil];
-}
-
-- (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
-  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
-    return;
-  }
-  UIScene* scene = notification.object;
-  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
-    // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
-    // register it to the scene.
-    // The FlutterEngine needs to be registered with the scene when the scene connects in order for
-    // plugins to receive the `scene:willConnectToSession:options` event.
-    // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
-    // register their FlutterEngine to the scene manually during this event.
-    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
-        [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
-    if (sceneLifeCycleDelegate != nil) {
-      return [sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
-    }
-  }
 }
 
 - (void)recreatePlatformViewsController {
@@ -428,7 +407,15 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if (!self.platformView) {
     return;
   }
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(true);
+  }
   self.platformView->DispatchPointerDataPacket(std::move(packet));
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(false);
+  }
 }
 
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
@@ -514,7 +501,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   }
   const char* character = event.character;
 
-  flutter::KeyData key_data;
+  flutter::KeyData key_data{};
   key_data.Clear();
   key_data.timestamp = (uint64_t)event.timestamp;
   switch (event.type) {
@@ -840,22 +827,34 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.shell.RunEngine(std::move(configuration));
 }
 
-- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
-    withVMServicePublication:(BOOL)doesVMServicePublication {
+/// Takes ownership of `shell` and initializes engine-owned objects whose lifetime is tied to shell
+/// lifetime.
+- (void)adoptShell:(std::unique_ptr<flutter::Shell>)shell {
+  FML_DCHECK(shell);
   _shell = std::move(shell);
   _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
   _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
+}
 
+/// Configures the engine.
+///
+/// Wires up platform channels, pushes initial state to the framework and starts the VM service
+/// publisher.
+- (void)configureForRunningShellWithVMServicePublication:(BOOL)doesVMServicePublication {
   [self setUpChannels];
   [self onLocaleUpdated:nil];
   [self updateDisplays];
   self.publisher = [[FlutterDartVMServicePublisher alloc]
       initWithEnableVMServicePublication:doesVMServicePublication];
   [self maybeSetupPlatformViewChannels];
-  _shell->SetGpuAvailability(_isGpuDisabled ? flutter::GpuAvailability::kUnavailable
-                                            : flutter::GpuAvailability::kAvailable);
+}
+
+- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
+    withVMServicePublication:(BOOL)doesVMServicePublication {
+  [self adoptShell:std::move(shell)];
+  [self configureForRunningShellWithVMServicePublication:doesVMServicePublication];
 }
 
 + (BOOL)isProfilerEnabled {
@@ -1204,6 +1203,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       translateSelectedText:(NSString*)selectedText {
+  [self.platformPlugin showTranslateViewControllerForTerm:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     performContextMenuCustomActionWithActionID:(NSString*)actionID
                                textInputClient:(int)client {
   [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
@@ -1312,6 +1316,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
     [self.platformViewsChannel invokeMethod:@"viewFocused" arguments:@(platform_view_id)];
   });
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client
+                                         result:(FlutterResult)callback {
+  [self.textInputChannel invokeMethod:@"TextInputClient.onFocusReceived"
+                            arguments:@[ @(client) ]
+                               result:callback];
 }
 
 #pragma mark - Undo Manager Delegate
@@ -1765,14 +1777,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
     NSObject<FlutterPlugin>* delegate) {
   SEL selectors[] = {
-    @selector(applicationDidBecomeActive:),
-    @selector(applicationWillResignActive:),
-    @selector(applicationWillEnterForeground:),
-    @selector(applicationDidEnterBackground:),
-    @selector(application:continueUserActivity:restorationHandler:),
-    @selector(application:performActionForShortcutItem:completionHandler:),
-    @selector(application:openURL:options:),
-    @selector(application:performFetchWithCompletionHandler:),
+      @selector(applicationDidBecomeActive:),
+      @selector(applicationWillResignActive:),
+      @selector(applicationWillEnterForeground:),
+      @selector(applicationDidEnterBackground:),
+      @selector(application:continueUserActivity:restorationHandler:),
+      @selector(application:performActionForShortcutItem:completionHandler:),
+      @selector(application:openURL:options:),
+      @selector(application:performFetchWithCompletionHandler:),
   };
   for (SEL sel : selectors) {
     if ([delegate respondsToSelector:sel]) {

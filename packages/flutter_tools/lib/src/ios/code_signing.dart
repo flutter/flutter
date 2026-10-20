@@ -297,22 +297,15 @@ class XcodeCodeSigningSettings {
   }) : this(plistParser: appleContext.plistParser, toolContext: toolContext);
 
   XcodeCodeSigningSettings.fromParameters({
-    required Config config,
-    required FileSystem fileSystem,
-    required FileSystemUtils fileSystemUtils,
-    required Logger logger,
-    required Platform platform,
-    required PlistParser plistParser,
-    required ProcessUtils processUtils,
-    required Terminal terminal,
-  }) : _config = config,
-       _fileSystem = fileSystem,
-       _fileSystemUtils = fileSystemUtils,
-       _logger = logger,
-       _platform = platform,
-       _plistParser = plistParser,
-       _processUtils = processUtils,
-       _terminal = terminal;
+    required this._config,
+    required this._fileSystem,
+    required this._fileSystemUtils,
+    required this._logger,
+    required this._platform,
+    required this._plistParser,
+    required this._processUtils,
+    required this._terminal,
+  });
 
   @visibleForTesting
   factory XcodeCodeSigningSettings.test({

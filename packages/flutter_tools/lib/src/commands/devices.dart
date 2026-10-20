@@ -16,21 +16,19 @@ import '../runner/flutter_command.dart';
 /// The `flutter devices` command, which lists all connected devices.
 class DevicesCommand extends FlutterCommand {
   DevicesCommand({
-    required DeviceManager deviceManager,
-    required Doctor doctor,
+    required this._deviceManager,
+    required this._doctor,
     required super.toolContext,
     super.verboseHelp,
-  }) : _deviceManager = deviceManager,
-       _doctor = doctor {
-    addMachineOutputFlag(verboseHelp: verboseHelp);
+  }) {
+    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
       abbr: 't',
       help: '(deprecated) This option has been replaced by "--${FlutterOptions.kDeviceTimeout}".',
       hide: !verboseHelp,
     );
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
+    registerOptionBundle(const DeviceDiscoveryOptionsBundle());
   }
 
   final DeviceManager _deviceManager;
@@ -122,12 +120,11 @@ class DevicesCommandOutput {
   }
 
   DevicesCommandOutput._private({
-    required DeviceManager deviceManager,
-    required Logger logger,
+    required this._deviceManager,
+    required this._logger,
     this.deviceConnectionInterface,
     this.deviceDiscoveryTimeout,
-  }) : _deviceManager = deviceManager,
-       _logger = logger;
+  });
 
   final DeviceManager _deviceManager;
   final Logger _logger;

@@ -86,27 +86,11 @@ Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       std::optional<HWND> const& owner_window,
                                       bool sized_to_content,
                                       bool resizable) {
-  auto const window_style = GetWindowStyleForDialog(owner_window, resizable);
-  auto const extended_window_style =
-      GetExtendedWindowStyleForDialog(owner_window);
-
-  double client_width;
-  double client_height;
-  if (sized_to_content) {
-    // Use the minimum constraint as the initial window size. The window will
-    // be resized to match the rendered content after the first frame.
-    client_width = std::max(1.0, constraints.smallest().width());
-    client_height = std::max(1.0, constraints.smallest().height());
-  } else {
-    client_width = preferred_size.preferred_view_width;
-    client_height = preferred_size.preferred_view_height;
-  }
-
   std::optional<Size> const window_size =
-      HostWindow::GetWindowSizeForClientSize(
-          *engine->windows_proc_table(), Size(client_width, client_height),
-          constraints.smallest(), constraints.biggest(), window_style,
-          extended_window_style, owner_window);
+      GetInitialWindowSize(engine, preferred_size, constraints,
+                           GetWindowStyleForDialog(owner_window, resizable),
+                           GetExtendedWindowStyleForDialog(owner_window),
+                           owner_window, sized_to_content);
 
   Point window_origin = {CW_USEDEFAULT, CW_USEDEFAULT};
   if (!sized_to_content && owner_window && window_size.has_value()) {

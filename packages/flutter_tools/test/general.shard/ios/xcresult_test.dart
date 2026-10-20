@@ -319,22 +319,19 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext(
-    'error: `xcresulttool get` process fail should return an `XCResult` with stderr as `parsingErrorMessage`.',
-    () async {
-      const fakeStderr = 'Fake: fail to parse result json.';
-      final XCResultGenerator generator = setupGenerator(
-        resultJson: '',
-        exitCode: 1,
-        stderr: fakeStderr,
-      );
+  testWithoutContext('error: `xcresulttool get` process fail should return an `XCResult` with stderr as `parsingErrorMessage`.', () async {
+    const fakeStderr = 'Fake: fail to parse result json.';
+    final XCResultGenerator generator = setupGenerator(
+      resultJson: '',
+      exitCode: 1,
+      stderr: fakeStderr,
+    );
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage, fakeStderr);
-    },
-  );
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, fakeStderr);
+  });
 
   testWithoutContext('error: `xcresulttool get` no stdout', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: '');

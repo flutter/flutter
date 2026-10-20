@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -297,9 +298,8 @@ void main() {
       createCoreMockProjectFiles();
 
       expect(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'ios', '--no-pub', '--debug', '--analyze-size']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'ios', '--no-pub', '--debug', '--analyze-size']),
         throwsToolExit(message: '--analyze-size" can only be used on release builds'),
       );
     },
@@ -441,9 +441,8 @@ void main() {
       final BuildCommand command = createBuildCommand();
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -472,9 +471,8 @@ void main() {
       final BuildCommand command = createBuildCommand();
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--no-pub', '--no-publish-port']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub', '--no-publish-port']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -585,9 +583,8 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--no-pub', '--device-id', '1234']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub', '--device-id', '1234']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -617,9 +614,8 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--simulator', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--simulator', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -628,6 +624,54 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'ios build config-only writes Generated.xcconfig with local engine options',
+    () async {
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('ios_debug')
+          .childDirectory('Flutter.xcframework')
+          .childDirectory('ios-arm64')
+          .childDirectory('Flutter.framework')
+          .createSync(recursive: true);
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('host_debug')
+          .createSync(recursive: true);
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+
+      await createTestCommandRunner(command).run(const <String>[
+        '--local-engine=ios_debug',
+        '--local-engine-host=host_debug',
+        '--local-engine-src-path=engine/src',
+        'build',
+        'ios',
+        '--config-only',
+        '--no-pub',
+      ]);
+
+      final File configFile = fileSystem.file('ios/Flutter/Generated.xcconfig');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains('LOCAL_ENGINE=ios_debug'));
+      expect(configContent, contains('LOCAL_ENGINE_HOST=host_debug'));
+      expect(configContent, contains('FLUTTER_ENGINE=engine/src'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     },
   );
 
@@ -696,9 +740,8 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ios', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--no-pub', '--analyze-size']);
 
       expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
       expect(logger.statusText, contains('dart devtools --appSizeBase='));
@@ -1406,9 +1449,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -1444,9 +1486,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -1487,9 +1528,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -1531,9 +1571,8 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 

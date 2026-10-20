@@ -185,7 +185,7 @@ static const constexpr RenderTarget::AttachmentConfig kDefaultStencilConfig =
         .storage_mode = StorageMode::kDeviceTransient,
         .load_action = LoadAction::kDontCare,
         .store_action = StoreAction::kDontCare,
-    };
+};
 
 static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
     ContentContext& renderer,
@@ -333,14 +333,19 @@ CreateUberSDFGradientParameters(const ContentContext& renderer,
     return std::nullopt;
   }
 
-  GradientData gradient_data = CreateGradientBuffer(colors, stops);
-  std::shared_ptr<Texture> texture =
-      CreateGradientTexture(gradient_data, renderer.GetContext());
-  if (!texture) {
-    return std::nullopt;
+  if (renderer.GetDeviceCapabilities().SupportsSSBO()) {
+    gradient.colors = std::move(colors);
+    gradient.stops = std::move(stops);
+  } else {
+    GradientData gradient_data = CreateGradientBuffer(colors, stops);
+    std::shared_ptr<Texture> texture =
+        CreateGradientTexture(gradient_data, renderer.GetContext());
+    if (!texture) {
+      return std::nullopt;
+    }
+    gradient.texture = std::move(texture);
   }
 
-  gradient.texture = std::move(texture);
   return gradient;
 }
 
@@ -669,7 +674,7 @@ bool Canvas::AttemptColorFilterOptimization(
     auto atlas_contents = std::make_shared<ColorFilterAtlasContents>();
     atlas_contents->SetGeometry(&geometry);
     atlas_contents->SetAlpha(paint.color.alpha);
-    impeller::ColorMatrix color_matrix;
+    impeller::ColorMatrix color_matrix{};
     matrix_filter->get_matrix(color_matrix.array);
     atlas_contents->SetMatrix(color_matrix);
 
@@ -2006,7 +2011,7 @@ void Canvas::SaveLayer(const Paint& paint,
         backdrop_entity.SetBlendMode(paint.blend_mode);
 
         backdrop_entity.Render(renderer_, GetCurrentRenderPass());
-        Save(0);
+        Save(total_content_depth);
         return;
       }
     }
@@ -2219,8 +2224,7 @@ bool Canvas::AttemptBlurredTextOptimization(
   //              https://github.com/flutter/flutter/issues/133297
   std::shared_ptr<FilterContents> filter =
       paint.mask_blur_descriptor->CreateMaskBlur(
-          FilterInput::Make(text_contents),
-          /*is_solid_color=*/true, GetCurrentTransform());
+          FilterInput::Make(text_contents), GetCurrentTransform());
 
   TextFrameFingerprint fingerprint = ComputeTextFrameFingerprint(*text_frame);
   TextShadowCache::TextShadowCacheKey cache_key(
@@ -2605,6 +2609,17 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   RenderPass& current_render_pass =
       *render_passes_.back().GetInlinePassContext()->GetRenderPass();
 
+  // If the current pass already contains the backdrop, which only happens when
+  // MSAA is not available, the eager restore below is unnecessary and would
+  // draw the texture into itself, which is undefined behavior.
+  const ColorAttachment color0 =
+      current_render_pass.GetRenderTarget().GetColorAttachment(0);
+  const bool contents_already_present = color0.texture == input_texture;
+  FML_DCHECK(!contents_already_present ||
+             color0.load_action == LoadAction::kLoad)
+      << "A pass writing to the backdrop texture must load it, otherwise the "
+         "backdrop is dropped from the frame.";
+
   // Eagerly restore the BDF contents.
 
   // If the pass context returns a backdrop texture, we need to draw it to the
@@ -2612,20 +2627,22 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   // memory than storing/loading large MSAA textures. Also, it's not possible
   // to blit the non-MSAA resolve texture of the previous pass to MSAA
   // textures (let alone a transient one).
-  Rect size_rect = Rect::MakeSize(input_texture->GetSize());
-  auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
-  msaa_backdrop_contents->SetStencilEnabled(false);
-  msaa_backdrop_contents->SetLabel("MSAA backdrop");
-  msaa_backdrop_contents->SetSourceRect(size_rect);
-  msaa_backdrop_contents->SetTexture(input_texture);
+  if (!contents_already_present) {
+    Rect size_rect = Rect::MakeSize(input_texture->GetSize());
+    auto msaa_backdrop_contents = TextureContents::MakeRect(size_rect);
+    msaa_backdrop_contents->SetStencilEnabled(false);
+    msaa_backdrop_contents->SetLabel("MSAA backdrop");
+    msaa_backdrop_contents->SetSourceRect(size_rect);
+    msaa_backdrop_contents->SetTexture(input_texture);
 
-  Entity msaa_backdrop_entity;
-  msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
-  msaa_backdrop_entity.SetBlendMode(BlendMode::kSrc);
-  msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
-  if (!msaa_backdrop_entity.Render(renderer_, current_render_pass)) {
-    VALIDATION_LOG << "Failed to render MSAA backdrop entity.";
-    return nullptr;
+    Entity msaa_backdrop_entity;
+    msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
+    msaa_backdrop_entity.SetBlendMode(BlendMode::kSrc);
+    msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
+    if (!msaa_backdrop_entity.Render(renderer_, current_render_pass)) {
+      VALIDATION_LOG << "Failed to render MSAA backdrop entity.";
+      return nullptr;
+    }
   }
 
   // Restore any clips that were recorded before the backdrop filter was
