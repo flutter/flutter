@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -23,7 +24,6 @@ typedef ExtensionUriSpawner = Future<ExtensionConnection> Function(
   required Logger logger,
   required Uri packageConfigUri,
   String? extensionName,
-  Duration timeout,
 });
 
 /// Manages active tool extension isolate connections and exposes capability proxies.
@@ -182,6 +182,7 @@ class ExtensionManager {
 
   /// Spawns entrypoints without host OS checks; disposes any extension that reports
   /// it does not support [hostPlatform].
+  @visibleForTesting
   Future<void> initialize({
     List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[],
   }) async {
@@ -189,6 +190,7 @@ class ExtensionManager {
       'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
     for (final entryPoint in entryPoints) {
+      // ignore: invalid_use_of_visible_for_testing_member
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         entryPoint,
         logger: _logger,

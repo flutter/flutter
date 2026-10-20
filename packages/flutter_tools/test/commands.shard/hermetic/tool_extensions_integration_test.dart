@@ -174,37 +174,6 @@ void main() {
   });
 
   group('Tool Extensions Safe Mode & Custom Platforms', () {
-    testWithoutContext(
-      'evaluateToolExtensionsCliFlag parses --[no-]extensions before subcommand',
-      () {
-        expect(FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['doctor']), isNull);
-        expect(
-          FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['--no-extensions', 'doctor']),
-          isFalse,
-        );
-        expect(
-          FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>[
-            '--no-extensions',
-            '--extensions',
-            'doctor',
-          ]),
-          isTrue,
-        );
-        expect(
-          FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>['run', '--no-extensions']),
-          isNull,
-        );
-        expect(
-          FlutterCommandRunner.evaluateToolExtensionsCliFlag(<String>[
-            'test',
-            '--',
-            '--no-extensions',
-          ]),
-          isNull,
-        );
-      },
-    );
-
     testWithoutContext('FLUTTER_NO_EXTENSIONS=1 overrides FLUTTER_TOOL_EXTENSIONS=true', () {
       final logger = BufferLogger.test();
       final platform = FakePlatform(
@@ -224,23 +193,9 @@ void main() {
           projectManifest: null,
         ),
         platform: platform,
-        isToolExtensionsEnabledOverride: true,
       );
 
       expect(flags.isToolExtensionsEnabled, isFalse);
-
-      final disabledFlagsWithOverride = FlutterFeatureFlags(
-        flutterVersion: FakeFlutterVersion(),
-        featuresConfig: FlutterFeaturesConfig(
-          globalConfig: Config.test(logger: logger),
-          platform: FakePlatform(),
-          projectManifest: null,
-        ),
-        platform: FakePlatform(),
-        isToolExtensionsEnabledOverride: true,
-      );
-
-      expect(disabledFlagsWithOverride.isToolExtensionsEnabled, isFalse);
     });
 
     testWithoutContext(
@@ -259,7 +214,6 @@ void main() {
             projectManifest: null,
           ),
           platform: platform,
-          isToolExtensionsEnabledOverride: FlutterCommandRunner.evaluateToolExtensionsCliFlag(args),
         );
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,

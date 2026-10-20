@@ -718,6 +718,42 @@ void main() {
         );
 
         testUsingContext(
+          'does not initialize dynamic options when --no-extensions precedes command',
+          () async {
+            final dynamicCommand = _FakeDynamicFlutterCommand();
+            final runner = createTestCommandRunner(dynamicCommand) as FlutterCommandRunner;
+
+            await runner.run(<String>['-d', 'test', '--no-extensions', 'dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isFalse);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+          },
+        );
+
+        testUsingContext(
+          'initializes dynamic options when --extensions overrides preceding --no-extensions',
+          () async {
+            final dynamicCommand = _FakeDynamicFlutterCommand();
+            final runner = createTestCommandRunner(dynamicCommand) as FlutterCommandRunner;
+
+            await runner.run(<String>['--no-extensions', '--extensions', 'dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isTrue);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+          },
+        );
+
+        testUsingContext(
           'propagates local engine options to DeferredArtifacts and context Artifacts',
           () async {
             fileSystem

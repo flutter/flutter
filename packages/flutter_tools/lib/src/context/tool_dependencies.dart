@@ -37,7 +37,6 @@ import '../device.dart';
 import '../doctor.dart';
 import '../emulator.dart';
 import '../experimental/extension_build_manager.dart';
-import '../experimental/extension_discovery.dart';
 import '../experimental/extension_kernel_compiler.dart';
 import '../experimental/extension_manager.dart';
 import '../experimental/project_extension_finder.dart';
@@ -171,7 +170,6 @@ class ToolDependencies {
     DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
-    List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
@@ -180,7 +178,6 @@ class ToolDependencies {
     GradleUtils Function()? gradleUtilsBuilder,
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSWorkflow? iosWorkflow,
-    bool? isToolExtensionsEnabledOverride,
     Java? java,
     Java? Function()? javaBuilder,
     LocalEngineLocator? localEngineLocator,
@@ -480,7 +477,6 @@ class ToolDependencies {
             projectManifest: projectManifest,
           ),
           platform: finalPlatform,
-          isToolExtensionsEnabledOverride: isToolExtensionsEnabledOverride,
         );
 
     final IOSWorkflow finalIOSWorkflow =
@@ -617,7 +613,6 @@ class ToolDependencies {
       processManager: finalProcessManager,
     );
     final extensionManager = ExtensionManager(
-      entryPoints: extensionEntryPoints,
       extensionFinder: projectExtensionFinder,
       featureFlags: finalFeatureFlags,
       hostPlatform: finalOS.hostPlatform,

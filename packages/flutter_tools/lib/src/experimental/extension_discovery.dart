@@ -7,6 +7,7 @@ import 'dart:isolate';
 
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../base/logger.dart';
@@ -14,9 +15,7 @@ import '../base/logger.dart';
 /// Typedef for an in-process extension isolate entrypoint function.
 ///
 /// Used by unit tests to spawn lightweight in-process extension isolates via
-/// [ExtensionConnection.spawn] without compiling a `.dill` kernel file, and
-/// during transitional bootstrap before dynamic project discovery is wired via
-/// [ExtensionConnection.spawnUri].
+/// [ExtensionConnection.spawn] without compiling a `.dill` kernel file.
 typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 
 /// Represents an active host-side connection to a running tool extension isolate.
@@ -69,8 +68,8 @@ class ExtensionConnection {
   /// capability handshake.
   ///
   /// Used by unit tests to exercise extension protocol behavior in-process
-  /// without compiling a `.dill` kernel file, and during transitional bootstrap
-  /// before dynamic project discovery is wired via [spawnUri].
+  /// without compiling a `.dill` kernel file.
+  @visibleForTesting
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
     required Logger logger,

@@ -187,7 +187,6 @@ build_targets:
                 required Logger logger,
                 required Uri packageConfigUri,
                 String? extensionName,
-                Duration timeout = const Duration(seconds: 5),
               }) async {
                 spawnedExtensions.add(extensionName ?? entrypointUri.toString());
                 return _FakeExtensionConnection(

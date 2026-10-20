@@ -25,7 +25,6 @@ import 'src/context_runner.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
-import 'src/experimental/extension_discovery.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
@@ -38,7 +37,6 @@ Future<int> run(
   List<String> args,
   List<FlutterCommand> Function(ToolDependencies toolDependencies) commands, {
   required ShutdownHooks shutdownHooks,
-  List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
   String? flutterVersion,
   bool muteCommandLogging = false,
   Map<Type, Generator>? overrides,
@@ -59,8 +57,7 @@ Future<int> run(
   final bool usingLocalEngine = args.any((a) => a.startsWith('--local-engine'));
 
   return runInContext<int>(() async {
-    final bool? isToolExtensionsEnabledOverride =
-        FlutterCommandRunner.evaluateToolExtensionsCliFlag(args);
+    globals.terminal.applyFeatureFlags(featureFlags);
 
     reportCrashes ??= !await globals.isRunningOnBot;
     final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
@@ -81,12 +78,7 @@ Future<int> run(
       deviceManager: globals.deviceManager,
       doctor: globals.doctor,
       emulatorManager: emulatorManager,
-      extensionEntryPoints: extensionEntryPoints,
-      // Only forward an explicit test-provided FeatureFlags override; in
-      // production, let ToolDependencies.bootstrap construct FlutterFeatureFlags
-      // with isToolExtensionsEnabledOverride applied.
-      featureFlags: overrides?[FeatureFlags] != null ? featureFlags : null,
-      isToolExtensionsEnabledOverride: isToolExtensionsEnabledOverride,
+      featureFlags: featureFlags,
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
       git: globals.git,
@@ -115,18 +107,12 @@ Future<int> run(
       xcode: globals.xcode,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
     );
-    toolDeps.toolContext.terminal.applyFeatureFlags(toolDeps.featureFlags);
     return context.run<int>(
-      overrides: <Type, Generator>{
-        DeviceManager: () => toolDeps.deviceManager,
-        // Mirror the bootstrapped FeatureFlags into the legacy Zone context so
-        // callers still reading Zone-scoped FeatureFlags observe safe mode.
-        FeatureFlags: () => toolDeps.featureFlags,
-      },
+      overrides: <Type, Generator>{DeviceManager: () => toolDeps.deviceManager},
       body: () async {
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
-          featureFlags: toolDeps.featureFlags,
+          featureFlags: featureFlags,
           toolContext: toolDeps.toolContext,
           verboseHelp: verboseHelp,
         );
