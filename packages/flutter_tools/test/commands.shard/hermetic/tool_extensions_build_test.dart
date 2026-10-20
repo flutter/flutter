@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -77,7 +78,7 @@ final class _TestBuildTarget extends BuildTarget {
     required this.name,
     this.artifacts = const <ExtensionArtifact>{},
     this.errorMessage,
-    super.outputDir,
+    super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
   });
@@ -818,6 +819,8 @@ void main() {
         const target = ExtensionBuildTarget(
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
+          outputDir:
+              '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
           targetPlatform: 'linux-x64',
         );
 
@@ -841,13 +844,67 @@ void main() {
           fakeBuildManager.lastBuildArgs!['buildDir'],
           equals(fs.directory('/.dart_tool/flutter_build').uri),
         );
-        expect(fakeBuildManager.lastBuildArgs!['outputDir'], equals(fs.directory('/build').uri));
+        expect(
+          fakeBuildManager.lastBuildArgs!['outputDir'],
+          equals(fs.directory('/build/custom/linux-x64/release').uri),
+        );
         expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testWithoutContext('ExtensionBuildSubCommand resolves {OUTPUT_DIR} using custom build-dir from Config', () async {
+      final buildManager = _RecordingExtensionBuildManager();
+      const target = ExtensionBuildTarget(
+        description: 'Custom hermetic build target.',
+        name: 'custom-hermetic-build',
+        outputDir:
+            '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
+        targetPlatform: 'linux-x64',
+      );
+      final config = Config.test()..setValue('build-dir', 'custom_build_root');
+      final subCommand = ExtensionBuildSubCommand(
+        buildManager: buildManager,
+        target: target,
+        toolContext: FakeToolContext(config: config, fs: fs, logger: BufferLogger.test()),
+        verboseHelp: false,
+      );
+
+      final FlutterCommandResult result = await subCommand.runCommand();
+      expect(result.exitStatus, ExitStatus.success);
+      expect(
+        buildManager.lastBuildArgs!['outputDir'],
+        equals(fs.directory('/custom_build_root/custom/linux-x64/release').uri),
+      );
+    });
+
+    testWithoutContext(
+      'ExtensionBuildSubCommand throws ToolExit when outputDir contains unsupported placeholder',
+      () async {
+        final buildManager = _RecordingExtensionBuildManager();
+        const target = ExtensionBuildTarget(
+          description: 'Custom hermetic build target.',
+          name: 'custom-hermetic-build',
+          outputDir: '${BuiltInPlaceholders.buildDir}/custom',
+          targetPlatform: 'linux-x64',
+        );
+        final subCommand = ExtensionBuildSubCommand(
+          buildManager: buildManager,
+          target: target,
+          toolContext: FakeToolContext(fs: fs, logger: BufferLogger.test()),
+          verboseHelp: false,
+        );
+
+        await expectLater(
+          subCommand.runCommand(),
+          throwsToolExit(
+            message: 'Unsupported placeholder "{BUILD_DIR}" in outputDir "{BUILD_DIR}/custom" for build target "custom-hermetic-build".',
+          ),
+        );
       },
     );
 

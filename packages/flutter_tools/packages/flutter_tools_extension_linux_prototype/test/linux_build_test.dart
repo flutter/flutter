@@ -49,6 +49,10 @@ void main() {
         expect(buildTargets, hasLength(1));
         expect(buildTargets.single.name, LinuxBuildService.customLinuxBuildTargetName);
         expect(
+          buildTargets.single.outputDir,
+          '${BuiltInPlaceholders.outputDir}/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
+        );
+        expect(
           buildTargets.single.artifacts,
           equals(const <ExtensionArtifact>{
             LinuxArtifacts.linuxHeaders,

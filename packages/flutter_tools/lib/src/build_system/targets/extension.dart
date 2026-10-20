@@ -96,20 +96,39 @@ class ExtensionTarget extends Target {
   }
 }
 
+final _placeholderRegex = RegExp(r'\{[^}]+\}');
+
+const _supportedOutputDirPlaceholders = <String>{
+  BuiltInPlaceholders.outputDir,
+  BuiltInPlaceholders.projectDir,
+  BuiltInPlaceholders.buildMode,
+  BuiltInPlaceholders.targetPlatform,
+};
+
 /// Resolves the output directory for [target] by substituting placeholders
-/// (`{PROJECT_DIR}`, `{BUILD_DIR}`, `{BUILD_MODE}`, and `{TARGET_PLATFORM}`).
+/// (`{OUTPUT_DIR}`, `{PROJECT_DIR}`, `{BUILD_MODE}`, and `{TARGET_PLATFORM}`).
 ///
 /// Relative paths are resolved relative to [projectDir].
+/// Throws a [ToolExit] if [ExtensionBuildTarget.outputDir] contains an
+/// unsupported `{...}` placeholder.
 Directory resolveExtensionOutputDir({
-  required Directory buildDir,
   required BuildMode buildMode,
+  required Directory buildOutputDir,
   required FileSystem fileSystem,
   required Directory projectDir,
   required ExtensionBuildTarget target,
 }) {
+  for (final RegExpMatch match in _placeholderRegex.allMatches(target.outputDir)) {
+    final String? placeholder = match[0];
+    if (!_supportedOutputDirPlaceholders.contains(placeholder)) {
+      throwToolExit(
+        'Unsupported placeholder "$placeholder" in outputDir "${target.outputDir}" for build target "${target.name}".',
+      );
+    }
+  }
   String outputPath = target.outputDir
+      .replaceAll(BuiltInPlaceholders.outputDir, buildOutputDir.path)
       .replaceAll(BuiltInPlaceholders.projectDir, projectDir.path)
-      .replaceAll(BuiltInPlaceholders.buildDir, buildDir.path)
       .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName)
       .replaceAll(BuiltInPlaceholders.targetPlatform, target.targetPlatform);
   if (fileSystem.path.isRelative(outputPath)) {

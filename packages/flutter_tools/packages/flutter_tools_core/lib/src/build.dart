@@ -88,10 +88,10 @@ class ExtensionBuildTarget {
   const ExtensionBuildTarget({
     required this.description,
     required this.name,
+    required this.outputDir,
     required this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-    this.outputDir = '${BuiltInPlaceholders.projectDir}/build',
   });
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
@@ -99,11 +99,11 @@ class ExtensionBuildTarget {
     return ExtensionBuildTarget(
       description: switch (json[descriptionKey]) {
         final String value => value,
-        _ => '',
+        final Object? invalid => throw ArgumentError('Invalid "$descriptionKey": $invalid'),
       },
       name: switch (json[nameKey]) {
         final String value => value,
-        _ => '',
+        final Object? invalid => throw ArgumentError('Invalid "$nameKey": $invalid'),
       },
       targetPlatform: switch (json[targetPlatformKey]) {
         final String value => value,
@@ -133,7 +133,6 @@ class ExtensionBuildTarget {
       },
       outputDir: switch (json[outputDirKey]) {
         final String value => value,
-        null => '${BuiltInPlaceholders.projectDir}/build',
         final Object? invalid => throw ArgumentError('Invalid "$outputDirKey": $invalid'),
       },
     );
@@ -191,10 +190,12 @@ class ExtensionBuildTarget {
   final Set<ExtensionHostArtifact> hostArtifacts;
 
   /// The directory pattern used by `flutter build` to determine this target's
-  /// output directory (`{OUTPUT_DIR}`), for example
-  /// `'${BuiltInPlaceholders.projectDir}/build/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
+  /// output directory, for example
+  /// `'${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
   ///
-  /// Supports [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir],
+  /// Supports [BuiltInPlaceholders.outputDir] (the project's configured build
+  /// output root from `flutter config --build-dir`, defaulting to
+  /// `<project>/build`), [BuiltInPlaceholders.projectDir],
   /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
   final String outputDir;
 

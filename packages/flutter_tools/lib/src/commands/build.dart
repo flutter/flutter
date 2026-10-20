@@ -10,6 +10,7 @@ import '../android/android_builder.dart';
 import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -312,15 +313,15 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Artifacts artifacts, :FileSystem fs) = toolContext;
+    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
     final Directory buildDir = projectDir
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build');
     final Directory outputDir = resolveExtensionOutputDir(
-      buildDir: buildDir,
       buildMode: buildInfo.mode,
+      buildOutputDir: projectDir.childDirectory(getBuildDirectory(config, fs)),
       fileSystem: fs,
       projectDir: projectDir,
       target: target,
