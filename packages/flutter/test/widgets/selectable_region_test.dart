@@ -653,25 +653,22 @@ void main() {
         return paragraph;
       }
 
-      testWidgets(
-        'clicking into an editable descendant dismisses the selection',
-        (WidgetTester tester) async {
-          final fieldFocusNode = FocusNode();
-          addTearDown(fieldFocusNode.dispose);
-          final RenderParagraph paragraph = await pumpAndSelect(
-            tester,
-            TestTextField(focusNode: fieldFocusNode),
-          );
+      testWidgets('clicking into an editable descendant dismisses the selection', (
+        WidgetTester tester,
+      ) async {
+        final fieldFocusNode = FocusNode();
+        addTearDown(fieldFocusNode.dispose);
+        final RenderParagraph paragraph = await pumpAndSelect(
+          tester,
+          TestTextField(focusNode: fieldFocusNode),
+        );
 
-          await tester.tap(find.byType(TestTextField), kind: PointerDeviceKind.mouse);
-          await tester.pump();
+        await tester.tap(find.byType(TestTextField), kind: PointerDeviceKind.mouse);
+        await tester.pump();
 
-          expect(fieldFocusNode.hasFocus, isTrue);
-          expect(paragraph.selections, isEmpty);
-        },
-        // [intended] Dismissing the selection when an editable descendant takes the focus is web-only.
-        skip: !kIsWeb,
-      );
+        expect(fieldFocusNode.hasFocus, isTrue);
+        expect(paragraph.selections, isEmpty);
+      }, variant: TargetPlatformVariant.all());
 
       testWidgets(
         'moving the focus to an editable descendant with the keyboard dismisses the selection',
@@ -689,50 +686,25 @@ void main() {
           expect(fieldFocusNode.hasFocus, isTrue);
           expect(paragraph.selections, isEmpty);
         },
-        // [intended] Dismissing the selection when an editable descendant takes the focus is web-only.
-        skip: !kIsWeb,
-      );
-
-      testWidgets(
-        'focusing a non-editable descendant keeps the selection',
-        (WidgetTester tester) async {
-          final buttonFocusNode = FocusNode();
-          addTearDown(buttonFocusNode.dispose);
-          final RenderParagraph paragraph = await pumpAndSelect(
-            tester,
-            Focus(focusNode: buttonFocusNode, child: const SizedBox(width: 100.0, height: 40.0)),
-          );
-
-          buttonFocusNode.requestFocus();
-          await tester.pump();
-
-          expect(buttonFocusNode.hasFocus, isTrue);
-          expect(paragraph.selections, isNotEmpty);
-        },
-        // [intended] Only web dismisses the selection on focus changes.
-        skip: !kIsWeb,
-      );
-
-      testWidgets(
-        'focusing an editable descendant keeps the selection on non-web platforms',
-        (WidgetTester tester) async {
-          final fieldFocusNode = FocusNode();
-          addTearDown(fieldFocusNode.dispose);
-          final RenderParagraph paragraph = await pumpAndSelect(
-            tester,
-            TestTextField(focusNode: fieldFocusNode),
-          );
-
-          await tester.tap(find.byType(TestTextField), kind: PointerDeviceKind.mouse);
-          await tester.pump();
-
-          expect(fieldFocusNode.hasFocus, isTrue);
-          expect(paragraph.selections, isNotEmpty);
-        },
         variant: TargetPlatformVariant.all(),
-        // [intended] Dismissing the selection when an editable descendant takes the focus is web-only.
-        skip: kIsWeb,
       );
+
+      testWidgets('focusing a non-editable descendant keeps the selection', (
+        WidgetTester tester,
+      ) async {
+        final buttonFocusNode = FocusNode();
+        addTearDown(buttonFocusNode.dispose);
+        final RenderParagraph paragraph = await pumpAndSelect(
+          tester,
+          Focus(focusNode: buttonFocusNode, child: const SizedBox(width: 100.0, height: 40.0)),
+        );
+
+        buttonFocusNode.requestFocus();
+        await tester.pump();
+
+        expect(buttonFocusNode.hasFocus, isTrue);
+        expect(paragraph.selections, isNotEmpty);
+      }, variant: TargetPlatformVariant.all());
     });
 
     testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {

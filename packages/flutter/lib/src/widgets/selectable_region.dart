@@ -551,14 +551,14 @@ class SelectableRegionState extends State<SelectableRegion>
         _finalizeSelectableRegionStatus();
       }
     } else {
-      if (kIsWeb &&
-          !_focusNode.hasPrimaryFocus &&
+      if (!_focusNode.hasPrimaryFocus &&
           _selectionDelegate.value.hasSelection &&
           _primaryFocusIsEditable) {
-        // To match the native web behavior, the selection is dismissed when an
-        // editable descendant takes the focus: a browser collapses the page
-        // selection when the focus enters an editable element, and keeps it
-        // when the focus moves to a non-editable one such as a button.
+        // The selection is dismissed when an editable descendant takes the
+        // focus, and kept when the focus moves to a non-editable descendant
+        // such as a button. This is what a browser does with the page
+        // selection, and what the native text selection does on Android and
+        // iOS.
         clearSelection();
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
