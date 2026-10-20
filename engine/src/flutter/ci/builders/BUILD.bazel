@@ -233,7 +233,7 @@ test_suite(
 
 # linux_unopt.json: ci/host_debug_unopt
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
 # Not built, no Bazel counterpart yet: flutter:unittests, flutter/build/dart:dart_sdk.
 # Tests, run by `bazel test` rather than installed: flutter/shell/platform/common/client_wrapper:client_wrapper_unittests, flutter/shell/platform/common:common_cpp_core_unittests, flutter/shell/platform/common:common_cpp_unittests, flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests.
 install(
