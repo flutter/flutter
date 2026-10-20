@@ -14,10 +14,20 @@ package(default_visibility = ["//visibility:public"])
 # The C++ standard library GN links into every executable, shared library and
 # loadable module (BUILDCONFIG.gn's default deps). The root .bazelrc attaches
 # it to every cc_binary and cc_test through --@bazel_tools//tools/cpp:link_extra_libs;
-# cc_shared_library targets must list it in their deps.
+# cc_shared_library targets must list it in their deps. GN builds it from
+# source only where use_flutter_cxx holds (BUILDCONFIG.gn: clang on Linux,
+# Android, macOS and iOS); Fuchsia's binaries take their toolchain's libc++
+# (the Fuchsia clang's runtimes, through rules_fuchsia), as the web's take
+# Emscripten's.
 cc_library(
     name = "cxx_runtime",
-    deps = ["@libcxx"],
+    deps = select({
+        "@platforms//os:android": ["@libcxx"],
+        "@platforms//os:ios": ["@libcxx"],
+        "@platforms//os:linux": ["@libcxx"],
+        "@platforms//os:macos": ["@libcxx"],
+        "//conditions:default": [],
+    }),
 )
 
 # ---------------------------------------------------------------------------

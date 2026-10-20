@@ -98,8 +98,44 @@ use_repo(engine_version, "engine_version")
 
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
 # found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
+# The Python toolchain comes first so that it is the one resolved ahead of
+# rules_python's own (which download an interpreter).
 register_toolchains(
+    "//engine/src/flutter/build/bazel/toolchains/python:cpython3_toolchain",
     "//engine/src/flutter/build/bazel/toolchains:linux_x64_clang_toolchain",
     # Emscripten (wasm32), selected through its platform by wasm_module.
     "//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_toolchain",
 )
+
+# rules_python, as rules_fuchsia's tools are py_binaries: declared here for
+# the toolchain above (the version is the one the module graph resolves to
+# through rules_fuchsia).
+bazel_dep(name = "rules_python", version = "0.40.0")
+
+# The Fuchsia Bazel SDK rules, for the rules_fuchsia spike (metric 0.7; see
+# engine/src/flutter/build/bazel/toolchains/fuchsia/README.md). The rules are
+# pinned to the IDK's own revision: DEPS syncs fuchsia/sdk/core/linux-amd64 at
+# an instance tagged git_revision:1463df67e630ab75428ad5731ab1c24dd5dce1a9, and
+# fuchsia/development/rules_fuchsia carries the same tag; the two move
+# together. The URL is CIPD's download of that instance and the integrity hash
+# is the instance id's (base64url(sha256 + 0x02)), as for the other CIPD
+# downloads in extensions.bzl.
+bazel_dep(name = "rules_fuchsia", version = "0.0.1")
+archive_override(
+    module_name = "rules_fuchsia",
+    integrity = "sha256-jTRrmiGmw8DU5v/EDp7w+B6VRd11BAsGjU+gnXT1SEU=",
+    type = "zip",
+    urls = ["https://chrome-infra-packages.appspot.com/dl/fuchsia/development/rules_fuchsia/+/jTRrmiGmw8DU5v_EDp7w-B6VRd11BAsGjU-gnXT1SEUC"],
+)
+
+# @fuchsia_sdk is generated over the IDK gclient syncs (the same tree GN's
+# Fuchsia build reads, 13 GB, consumed in place); @fuchsia_clang is the
+# engine's own clang, which is Fuchsia's toolchain build and carries the
+# Fuchsia target runtimes.
+fuchsia_sdk_ext = use_extension("@rules_fuchsia//fuchsia/workspace:fuchsia_sdk_repository.bzl", "fuchsia_sdk_ext")
+fuchsia_sdk_ext.local(path = "engine/src/third_party/fuchsia-sdk/sdk")
+use_repo(fuchsia_sdk_ext, "fuchsia_sdk", "fuchsia_sdk_toolchain_decl")
+
+fuchsia_clang_ext = use_extension("@rules_fuchsia//fuchsia/workspace:fuchsia_clang_repository.bzl", "fuchsia_clang_ext")
+fuchsia_clang_ext.local(local_path = "engine/src/flutter/buildtools/linux-x64/clang")
+use_repo(fuchsia_clang_ext, "fuchsia_clang")
