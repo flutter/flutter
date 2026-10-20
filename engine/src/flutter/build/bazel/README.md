@@ -891,7 +891,12 @@ cd packages/flutter
 
 (any name under `engine/src/out/` will do; `host_debug_unopt`, the
 default, is where GN's own build of that configuration lands, which
-`install` overwrites). The tool reads `flutter_tester`, the patched SDK,
+`install` overwrites -- each installed path is removed first and copied
+afresh, since GN's copies are hard links of their sources and a copy
+onto a hard link of its own source is refused as "the same file". GN's
+files come back by deleting the installed paths -- the install script in
+bazel-bin lists them -- and running `ninja` there; ninja takes the newer
+Bazel copies for up to date otherwise). The tool reads `flutter_tester`, the patched SDK,
 `dart-sdk/bin/dartaotruntime` and the frontend server from the tree, as the
 verbose log shows. One thing to know on a fresh checkout: under a local
 engine the tool downloads no engine artifacts, and pub resolves
@@ -991,8 +996,8 @@ Apple phase's.
 
 ## `et` with `--backend bazel`
 
-`et build`, `et test`, `et query targets` and `et lint` take `--backend
-bazel` (or `ET_BACKEND=bazel` in the environment; `gn` otherwise, and
+`et build`, `et test`, `et run`, `et query targets` and `et lint` take
+`--backend bazel` (or `ET_BACKEND=bazel` in the environment; `gn` otherwise, and
 nothing changes for anyone who does not ask), which drives the Bazel build
 of the same configuration instead of GN and ninja. `et` asks the converter's code (`tools/gn_to_bazel`'s
 `builders.dart`, the same that generates `configs.bazelrc`) which
@@ -1014,6 +1019,7 @@ et test --backend bazel --config ci/host_debug_test       # the builder's own su
 et query targets --backend bazel //flutter/fml/...        # the rules under fml, as GN labels
 et query targets --backend bazel --testonly //flutter/... # the tests
 et lint --backend bazel --config host_debug_unopt         # clang-tidy over the build's compile_commands.json
+et run --backend bazel --config host_debug_unopt -- -d linux  # install, then flutter run --local-engine
 ```
 
 `et build` with no targets is GN's default target, everything, which under
@@ -1034,10 +1040,13 @@ writes the `--config` build's `compile_commands.json` into its build
 directory through `compile_commands.py` (the build must have been built:
 clang-tidy reads the generated headers) and runs `ci/clang_tidy.sh
 --variant <build directory>` against it; the Dart, Java and Python linters
-read no build and run as before. `--gn-args`
+read no build and run as before. `et run` installs the host build (and
+the target build, when it is another one the Bazel build has a
+configuration for) into its build directory and hands over to `flutter
+run --local-engine` exactly as the GN path does. `--gn-args`
 has no Bazel counterpart (the configuration is the whole of it) and is
 refused; `--rbe`, `--lto` and `--build-strategy` are GN's concerns and are
-ignored. `et run` and the rest stay on GN for now. bazelisk must
+ignored. `et stamp` and the rest stay on GN for now. bazelisk must
 be on PATH (`.bazelversion` pins the version); `bazel` is accepted when it
 is not.
 

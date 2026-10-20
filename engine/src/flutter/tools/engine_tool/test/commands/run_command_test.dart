@@ -148,6 +148,8 @@ void main() {
         dimension: TestDroneDimension.linux,
         targetDir: 'host_debug',
         enableRbe: true,
+        // As the developer's build is: the Bazel backend has no LTO.
+        enableLto: false,
       );
 
       // Be very permissive on process execution, and check usage below instead.
@@ -383,6 +385,57 @@ void main() {
         containsAllInOrder([
           containsAllInOrder(['flutter', 'run', '--foo', '--bar=baz,foobar', '--flag1', '--flag2']),
         ]),
+      );
+    });
+
+    test('--backend bazel installs the host build with Bazel, then runs `flutter run`', () async {
+      final int? result = await et.run(['run', '--config=host_debug', '--backend', 'bazel']);
+
+      expect(result, equals(0));
+      expect(
+        commandsRun.where((c) => c.first.endsWith('ninja') || c.first.endsWith('/gn')),
+        isEmpty,
+      );
+      expect(
+        commandsRun,
+        containsAllInOrder([
+          [
+            'bazelisk',
+            'run',
+            '--config=host_debug',
+            // The builder's own install target: the test's build names
+            // ninja targets (a developer's would use the root install).
+            '//engine/src/flutter/ci/builders:host_debug',
+            '--',
+            p.join(testEngine.outDir.path, 'host_debug'),
+          ],
+          containsAllInOrder([
+            endsWith('flutter'),
+            contains('run'),
+            '--local-engine',
+            'host_debug',
+            '--local-engine-host',
+            'host_debug',
+          ]),
+        ]),
+      );
+    });
+
+    test('--backend bazel refuses a target build the Bazel build has none for', () async {
+      final int? result = await et.run([
+        'run',
+        '--config=android_debug_arm64',
+        '--backend',
+        'bazel',
+      ]);
+
+      expect(result, equals(1));
+      // The host was installed; the Android build stopped it before flutter run.
+      expect(commandsRun, contains(containsAllInOrder(['bazelisk', 'run', '--config=host_debug'])));
+      expect(commandsRun.where((c) => c.first.endsWith('flutter') && c.contains('run')), isEmpty);
+      expect(
+        testLogs.map((l) => l.message).join(),
+        contains('cannot express linux/android_debug_arm64'),
       );
     });
 

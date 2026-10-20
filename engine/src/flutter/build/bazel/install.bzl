@@ -71,6 +71,18 @@ def _install_impl(ctx):
         'dest="${1:-%s/out/%s}"' % (ENGINE_SRC, ctx.attr.directory or build_directory_variant(ctx)),
         'case "$dest" in /*) ;; *) dest="$root/$dest" ;; esac',
     ]
+
+    # What was there goes first, before any directory is made: an earlier
+    # install's files, or GN's -- GN's copies are hard links of their
+    # sources, and a copy onto a hard link of its own source is refused as
+    # "the same file". A directory artifact replaces its whole destination
+    # directory, which may also hold other entries' files (sky_engine's
+    # `gen/dart-pkg`), so the removals precede every mkdir and copy.
+    for file, path in unique:
+        if file.is_directory:
+            lines.append('rm -rf "$dest/%s"' % path)
+        else:
+            lines.append('rm -f "$dest/%s"' % path)
     directories = {paths.dirname(path) if not file.is_directory else path: None for file, path in unique}
     for directory in sorted(directories.keys()):
         lines.append('mkdir -p "$dest/%s"' % directory if directory else 'mkdir -p "$dest"')
@@ -80,12 +92,11 @@ def _install_impl(ctx):
             # output directories are read-only, and a copy keeps the mode;
             # the next install must be able to replace what is inside, as
             # it can in GN's build directory.
-            lines.append('chmod -R u+w "$dest/%s"' % path)
-            lines.append('cp -rf "%s/." "$dest/%s"' % (file.short_path, path))
+            lines.append('cp -r "%s/." "$dest/%s"' % (file.short_path, path))
             lines.append('chmod -R u+w "$dest/%s"' % path)
         else:
-            # -f: a copy of a read-only output (Bazel's are) is read-only, and
-            # the next install replaces it.
+            # -f besides the removal above, for a destination the shell
+            # cannot remove but can replace.
             lines.append('cp -f "%s" "$dest/%s"' % (file.short_path, path))
     lines.append('echo "%d files into $dest"' % len(unique))
     script = ctx.actions.declare_file(ctx.label.name + ".sh")
