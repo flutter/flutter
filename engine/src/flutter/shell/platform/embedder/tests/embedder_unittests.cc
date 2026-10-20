@@ -2466,6 +2466,113 @@ TEST_F(EmbedderTest, CanUpdateLocales) {
   check_latch.Wait();
 }
 
+TEST_F(EmbedderTest, CanSetAppLifecycleState) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("can_receive_app_lifecycle_state");
+  fml::AutoResetWaitableEvent ready;
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+
+  fml::AutoResetWaitableEvent message_latch;
+  std::string message;
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        message = tonic::DartConverter<std::string>::FromDart(message_handle);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Wait for the application to attach the callback.
+  ready.Wait();
+
+  ASSERT_EQ(FlutterEngineSetAppLifecycleState(
+                engine.get(), kFlutterAppLifecycleStateInactive),
+            kSuccess);
+  message_latch.Wait();
+  EXPECT_EQ(message, "AppLifecycleState.inactive");
+
+  ASSERT_EQ(FlutterEngineSetAppLifecycleState(engine.get(),
+                                              kFlutterAppLifecycleStateHidden),
+            kSuccess);
+  message_latch.Wait();
+  EXPECT_EQ(message, "AppLifecycleState.hidden");
+
+  ASSERT_EQ(FlutterEngineSetAppLifecycleState(
+                engine.get(), static_cast<FlutterAppLifecycleState>(-1)),
+            kInvalidArguments);
+  ASSERT_EQ(FlutterEngineSetAppLifecycleState(nullptr,
+                                              kFlutterAppLifecycleStateResumed),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, DeprecatedLifecycleChannelWarnsOnce) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("can_receive_app_lifecycle_state");
+  fml::AutoResetWaitableEvent ready;
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+
+  fml::AutoResetWaitableEvent message_latch;
+  std::string message;
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        message = tonic::DartConverter<std::string>::FromDart(message_handle);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  ready.Wait();
+
+  // The deprecation warning is logged on the UI thread, so capture logs there.
+  auto ui_task_runner = ToEmbedderEngine(engine.get())
+                            ->GetShell()
+                            .GetTaskRunners()
+                            .GetUITaskRunner();
+  std::unique_ptr<fml::testing::LogCapture> log_capture;
+  fml::AutoResetWaitableEvent capture_latch;
+
+  // The deprecation warning is only logged for the first message.
+  const std::string warning = "FlutterEngineSetAppLifecycleState";
+  bool first = true;
+  for (const std::string state :
+       {"AppLifecycleState.hidden", "AppLifecycleState.resumed"}) {
+    ui_task_runner->PostTask([&]() {
+      log_capture = std::make_unique<fml::testing::LogCapture>();
+      capture_latch.Signal();
+    });
+    capture_latch.Wait();
+
+    FlutterPlatformMessage platform_message = {};
+    platform_message.struct_size = sizeof(FlutterPlatformMessage);
+    platform_message.channel = "flutter/lifecycle";
+    platform_message.message = reinterpret_cast<const uint8_t*>(state.data());
+    platform_message.message_size = state.size();
+    ASSERT_EQ(FlutterEngineSendPlatformMessage(engine.get(), &platform_message),
+              kSuccess);
+
+    // The state is delivered through dart:ui rather than the channel.
+    message_latch.Wait();
+    EXPECT_EQ(message, state);
+
+    std::string log;
+    ui_task_runner->PostTask([&]() {
+      log = log_capture->str();
+      log_capture.reset();
+      capture_latch.Signal();
+    });
+    capture_latch.Wait();
+    EXPECT_EQ(log.find(warning) != std::string::npos, first);
+    first = false;
+  }
+}
+
 TEST_F(EmbedderTest, LocalizationCallbacksCalled) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   fml::AutoResetWaitableEvent latch;

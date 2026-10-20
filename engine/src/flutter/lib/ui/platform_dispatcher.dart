@@ -1118,6 +1118,9 @@ class PlatformDispatcher {
   ///
   /// It is used to initialize [SchedulerBinding.lifecycleState] at startup with
   /// any buffered lifecycle state events.
+  ///
+  /// This is only set by embedders using the deprecated `flutter/lifecycle`
+  /// platform channel. Use [appLifecycleState] instead.
   String get initialLifecycleState {
     _initialLifecycleStateAccessed = true;
     return _initialLifecycleState;
@@ -1137,6 +1140,38 @@ class PlatformDispatcher {
     if (!_initialLifecycleStateAccessed) {
       _initialLifecycleState = state;
     }
+  }
+
+  /// The current lifecycle state of the application, as reported by the
+  /// embedder.
+  ///
+  /// This is null until the embedder reports a lifecycle state.
+  ///
+  /// The [onAppLifecycleStateChanged] callback is called whenever this value
+  /// changes.
+  AppLifecycleState? get appLifecycleState => _appLifecycleState;
+  AppLifecycleState? _appLifecycleState;
+
+  /// A callback that is invoked whenever [appLifecycleState] changes.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  VoidCallback? get onAppLifecycleStateChanged => _onAppLifecycleStateChanged;
+  VoidCallback? _onAppLifecycleStateChanged;
+  Zone _onAppLifecycleStateChangedZone = Zone.root;
+  set onAppLifecycleStateChanged(VoidCallback? callback) {
+    _onAppLifecycleStateChanged = callback;
+    _onAppLifecycleStateChangedZone = Zone.current;
+  }
+
+  // Called from the engine, via hooks.dart
+  void _updateAppLifecycleState(int state) {
+    final AppLifecycleState newState = AppLifecycleState.values[state];
+    if (newState == _appLifecycleState) {
+      return;
+    }
+    _appLifecycleState = newState;
+    _invoke(onAppLifecycleStateChanged, _onAppLifecycleStateChangedZone);
   }
 
   /// The setting indicating whether time should always be shown in the 24-hour

@@ -157,6 +157,8 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
              platform_data_.accessibility_feature_flags_) &&
          SetUserSettingsData(platform_data_.user_settings_data) &&
          SetInitialLifecycleState(platform_data_.lifecycle_state) &&
+         (!platform_data_.app_lifecycle_state.has_value() ||
+          SetAppLifecycleState(platform_data_.app_lifecycle_state.value())) &&
          SetDisplays(platform_data_.displays);
 }
 
@@ -267,6 +269,17 @@ bool RuntimeController::SetInitialLifecycleState(const std::string& data) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
     platform_configuration->UpdateInitialLifecycleState(
         platform_data_.lifecycle_state);
+    return true;
+  }
+
+  return false;
+}
+
+bool RuntimeController::SetAppLifecycleState(LifecycleState state) {
+  platform_data_.app_lifecycle_state = state;
+
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    platform_configuration->UpdateAppLifecycleState(state);
     return true;
   }
 

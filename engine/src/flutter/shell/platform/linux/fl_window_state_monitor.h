@@ -25,15 +25,15 @@ G_DECLARE_FINAL_TYPE(FlWindowStateMonitor,
 
 /**
  * fl_window_state_monitor_new:
- * @messenger: an #FlBinaryMessenger.
+ * @engine: an #FlEngine.
  * @window: a #GtkWindow.
  *
  * Creates a new window state manager to monitor @window and report events to
- * @messenger.
+ * @engine.
  *
  * Returns: a new #FlWindowStateMonitor.
  */
-FlWindowStateMonitor* fl_window_state_monitor_new(FlBinaryMessenger* messenger,
+FlWindowStateMonitor* fl_window_state_monitor_new(FlEngine* engine,
                                                   GtkWindow* window);
 
 G_END_DECLS

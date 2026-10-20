@@ -6,9 +6,11 @@
 #define FLUTTER_RUNTIME_PLATFORM_DATA_H_
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
+#include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/display.h"
 
@@ -42,6 +44,7 @@ struct PlatformData {
   std::vector<std::string> locale_data;
   std::string user_settings_data = "{}";
   std::string lifecycle_state;
+  std::optional<LifecycleState> app_lifecycle_state;
   bool semantics_enabled = false;
   bool assistive_technology_enabled = false;
   int32_t accessibility_feature_flags_ = 0;

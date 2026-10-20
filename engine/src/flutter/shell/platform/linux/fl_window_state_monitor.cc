@@ -6,22 +6,13 @@
 
 #include <gtk/gtk.h>
 
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
-
-static constexpr const char* kFlutterLifecycleChannel = "flutter/lifecycle";
-
-static constexpr const char* kAppLifecycleStateResumed =
-    "AppLifecycleState.resumed";
-static constexpr const char* kAppLifecycleStateInactive =
-    "AppLifecycleState.inactive";
-static constexpr const char* kAppLifecycleStateHidden =
-    "AppLifecycleState.hidden";
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 
 struct _FlWindowStateMonitor {
   GObject parent_instance;
 
-  // Messenger to communicate with engine.
-  FlBinaryMessenger* messenger;
+  // Engine to report state changes to.
+  FlEngine* engine;
 
   // Window being monitored.
   GtkWindow* window;
@@ -31,22 +22,6 @@ struct _FlWindowStateMonitor {
 };
 
 G_DEFINE_TYPE(FlWindowStateMonitor, fl_window_state_monitor, G_TYPE_OBJECT);
-
-static void send_lifecycle_state(FlWindowStateMonitor* self,
-                                 const gchar* lifecycle_state) {
-  g_autoptr(FlValue) value = fl_value_new_string(lifecycle_state);
-  g_autoptr(FlStringCodec) codec = fl_string_codec_new();
-  g_autoptr(GError) error = nullptr;
-  g_autoptr(GBytes) message =
-      fl_message_codec_encode_message(FL_MESSAGE_CODEC(codec), value, &error);
-  if (message == nullptr) {
-    g_warning("Failed to encoding lifecycle state message: %s", error->message);
-    return;
-  }
-
-  fl_binary_messenger_send_on_channel(self->messenger, kFlutterLifecycleChannel,
-                                      message, nullptr, nullptr, nullptr);
-}
 
 static gboolean is_hidden(GdkWindowState state) {
   return (state & GDK_WINDOW_STATE_WITHDRAWN) ||
@@ -65,15 +40,15 @@ static gboolean window_state_event_cb(FlWindowStateMonitor* self,
   bool is_focused = (state & GDK_WINDOW_STATE_FOCUSED);
 
   if (was_visible != is_visible || was_focused != is_focused) {
-    const gchar* lifecycle_state;
+    FlutterAppLifecycleState lifecycle_state;
     if (is_visible) {
-      lifecycle_state =
-          is_focused ? kAppLifecycleStateResumed : kAppLifecycleStateInactive;
+      lifecycle_state = is_focused ? kFlutterAppLifecycleStateResumed
+                                   : kFlutterAppLifecycleStateInactive;
     } else {
-      lifecycle_state = kAppLifecycleStateHidden;
+      lifecycle_state = kFlutterAppLifecycleStateHidden;
     }
 
-    send_lifecycle_state(self, lifecycle_state);
+    fl_engine_set_app_lifecycle_state(self->engine, lifecycle_state);
   }
 
   return FALSE;
@@ -82,7 +57,7 @@ static gboolean window_state_event_cb(FlWindowStateMonitor* self,
 static void fl_window_state_monitor_dispose(GObject* object) {
   FlWindowStateMonitor* self = FL_WINDOW_STATE_MONITOR(object);
 
-  g_clear_object(&self->messenger);
+  g_clear_object(&self->engine);
 
   G_OBJECT_CLASS(fl_window_state_monitor_parent_class)->dispose(object);
 }
@@ -94,11 +69,11 @@ static void fl_window_state_monitor_class_init(
 
 static void fl_window_state_monitor_init(FlWindowStateMonitor* self) {}
 
-FlWindowStateMonitor* fl_window_state_monitor_new(FlBinaryMessenger* messenger,
+FlWindowStateMonitor* fl_window_state_monitor_new(FlEngine* engine,
                                                   GtkWindow* window) {
   FlWindowStateMonitor* self = FL_WINDOW_STATE_MONITOR(
       g_object_new(fl_window_state_monitor_get_type(), nullptr));
-  self->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
+  self->engine = FL_ENGINE(g_object_ref(engine));
   self->window = window;
 
   // Listen to window state changes.

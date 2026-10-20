@@ -184,10 +184,6 @@ bool WindowsLifecycleManager::IsLastWindowOfProcess() {
   return num_windows <= 1;
 }
 
-void WindowsLifecycleManager::BeginProcessingLifecycle() {
-  process_lifecycle_ = true;
-}
-
 void WindowsLifecycleManager::BeginProcessingExit() {
   process_exit_ = true;
 }
@@ -197,11 +193,8 @@ void WindowsLifecycleManager::SetLifecycleState(AppLifecycleState state) {
     return;
   }
   state_ = state;
-  if (engine_ && process_lifecycle_) {
-    const char* state_name = AppLifecycleStateToString(state);
-    engine_->SendPlatformMessage("flutter/lifecycle",
-                                 reinterpret_cast<const uint8_t*>(state_name),
-                                 strlen(state_name), nullptr, nullptr);
+  if (engine_) {
+    engine_->SetAppLifecycleState(state);
   }
 }
 

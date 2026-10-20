@@ -38,6 +38,18 @@ FML_TEST_CLASS(PlatformConfigurationTest, BeginFrameMonotonic);
 }
 
 //--------------------------------------------------------------------------
+/// @brief The lifecycle state of the application.
+///
+///        Must match the `AppLifecycleState` enum in dart:ui.
+enum class LifecycleState : int32_t {
+  kDetached,
+  kResumed,
+  kInactive,
+  kHidden,
+  kPaused,
+};
+
+//--------------------------------------------------------------------------
 /// @brief An enum for defining the different kinds of accessibility features
 ///        that can be enabled by the platform.
 ///
@@ -439,6 +451,14 @@ class PlatformConfiguration final {
   void UpdateInitialLifecycleState(const std::string& data);
 
   //----------------------------------------------------------------------------
+  /// @brief      Updates the lifecycle state of the application in the
+  ///             framework.
+  ///
+  /// @param[in]  state  The lifecycle state.
+  ///
+  void UpdateAppLifecycleState(LifecycleState state);
+
+  //----------------------------------------------------------------------------
   /// @brief      Notifies the PlatformConfiguration that the embedder has
   ///             expressed an opinion about whether the accessibility tree
   ///             should be generated or not. This call originates in the
@@ -608,6 +628,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue update_locales_;
   tonic::DartPersistentValue update_user_settings_data_;
   tonic::DartPersistentValue update_initial_lifecycle_state_;
+  tonic::DartPersistentValue update_app_lifecycle_state_;
   tonic::DartPersistentValue update_semantics_enabled_;
   tonic::DartPersistentValue update_accessibility_features_;
   tonic::DartPersistentValue dispatch_platform_message_;

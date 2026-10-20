@@ -41,7 +41,6 @@
 
 NSString* const kFlutterPlatformChannel = @"flutter/platform";
 NSString* const kFlutterSettingsChannel = @"flutter/settings";
-NSString* const kFlutterLifecycleChannel = @"flutter/lifecycle";
 
 using flutter::kFlutterImplicitViewId;
 
@@ -1646,10 +1645,25 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 #pragma mark - FlutterAppLifecycleDelegate
 
 - (void)setApplicationState:(flutter::AppLifecycleState)state {
-  NSString* nextState =
-      [[NSString alloc] initWithCString:flutter::AppLifecycleStateToString(state)];
-  [self sendOnChannel:kFlutterLifecycleChannel
-              message:[nextState dataUsingEncoding:NSUTF8StringEncoding]];
+  FlutterAppLifecycleState embedderState = kFlutterAppLifecycleStateDetached;
+  switch (state) {
+    case flutter::AppLifecycleState::kDetached:
+      embedderState = kFlutterAppLifecycleStateDetached;
+      break;
+    case flutter::AppLifecycleState::kResumed:
+      embedderState = kFlutterAppLifecycleStateResumed;
+      break;
+    case flutter::AppLifecycleState::kInactive:
+      embedderState = kFlutterAppLifecycleStateInactive;
+      break;
+    case flutter::AppLifecycleState::kHidden:
+      embedderState = kFlutterAppLifecycleStateHidden;
+      break;
+    case flutter::AppLifecycleState::kPaused:
+      embedderState = kFlutterAppLifecycleStatePaused;
+      break;
+  }
+  _embedderAPI.SetAppLifecycleState(_engine, embedderState);
 }
 
 /**

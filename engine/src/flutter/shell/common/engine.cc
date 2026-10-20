@@ -6,7 +6,9 @@
 
 #include <cstring>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -370,7 +372,20 @@ void Engine::DispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) {
   FML_DLOG(WARNING) << "Dropping platform message on channel: " << channel;
 }
 
+// Deprecated: Embedders should set the lifecycle state directly using
+// |PlatformView::SetAppLifecycleState| (|FlutterEngineSetAppLifecycleState| in
+// the embedder API) instead of sending messages on the lifecycle channel.
+// TODO(robert-ancell): Remove once embedders have migrated.
 bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
+  static std::once_flag deprecation_warning;
+  std::call_once(deprecation_warning, []() {
+    // Logged as an error as warnings are hidden once the engine is running.
+    FML_LOG(ERROR) << "Sending messages on the " << kLifecycleChannel
+                   << " channel is deprecated, set the lifecycle state "
+                      "directly (FlutterEngineSetAppLifecycleState in the "
+                      "embedder API) instead.";
+  });
+
   const auto& data = message->data();
   std::string state(reinterpret_cast<const char*>(data.GetMapping()),
                     data.GetSize());
@@ -383,8 +398,25 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
     ScheduleFrame();
   }
   runtime_controller_->SetInitialLifecycleState(state);
-  // Always forward these messages to the framework by returning false.
-  return false;
+
+  // The framework receives the state through dart:ui, so the message is not
+  // forwarded to it.
+  static const std::unordered_map<std::string, LifecycleState> kStates = {
+      {"AppLifecycleState.detached", LifecycleState::kDetached},
+      {"AppLifecycleState.resumed", LifecycleState::kResumed},
+      {"AppLifecycleState.inactive", LifecycleState::kInactive},
+      {"AppLifecycleState.hidden", LifecycleState::kHidden},
+      {"AppLifecycleState.paused", LifecycleState::kPaused},
+  };
+  auto it = kStates.find(state);
+  if (it == kStates.end()) {
+    return false;
+  }
+  runtime_controller_->SetAppLifecycleState(it->second);
+  if (message->response()) {
+    message->response()->CompleteEmpty();
+  }
+  return true;
 }
 
 bool Engine::HandleNavigationPlatformMessage(
@@ -496,6 +528,10 @@ void Engine::SetSemanticsEnabled(bool enabled) {
 
 void Engine::SetAccessibilityFeatures(int32_t flags) {
   runtime_controller_->SetAccessibilityFeatures(flags);
+}
+
+void Engine::SetAppLifecycleState(LifecycleState state) {
+  runtime_controller_->SetAppLifecycleState(state);
 }
 
 std::string Engine::DefaultRouteName() {

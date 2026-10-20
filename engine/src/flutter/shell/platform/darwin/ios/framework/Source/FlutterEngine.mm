@@ -586,7 +586,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)notifyViewControllerDeallocated {
-  [self.lifecycleChannel sendMessage:@"AppLifecycleState.detached"];
+  [self setAppLifecycleState:flutter::LifecycleState::kDetached];
   self.textInputPlugin.viewController = nil;
   if (!self.allowHeadlessExecution) {
     [self destroyContext];
@@ -717,6 +717,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
                                  binaryMessenger:self.binaryMessenger
                                            codec:[FlutterStandardMethodCodec sharedInstance]];
 
+  // Deprecated: The engine sends lifecycle state directly using
+  // setAppLifecycleState:, this channel remains for API compatibility.
   self.lifecycleChannel =
       [[FlutterBasicMessageChannel alloc] initWithName:@"flutter/lifecycle"
                                        binaryMessenger:self.binaryMessenger
@@ -1073,6 +1075,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }
   [self launchEngine:entrypoint libraryURI:libraryURI entrypointArgs:entrypointArgs];
   return YES;
+}
+
+- (void)setAppLifecycleState:(flutter::LifecycleState)state {
+  if (self.platformView) {
+    self.platformView->SetAppLifecycleState(state);
+  }
 }
 
 - (void)notifyLowMemory {
