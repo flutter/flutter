@@ -1307,6 +1307,46 @@ void main() {
     painter.dispose();
   });
 
+  test('Selecting a soft hyphen at a line break covers the hyphen drawn for it', () {
+    final TextPainter painter = softHyphenPainter(Hyphens.manual)..layout(maxWidth: 49);
+
+    final List<TextBox> boxes = painter.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
+
+    expect(boxes, const <TextBox>[TextBox.fromLTRBD(0, 0, 40, 10, TextDirection.ltr)]);
+    painter.dispose();
+  });
+
+  test('A selection that ends before a soft hyphen leaves out the hyphen drawn for it', () {
+    final TextPainter painter = softHyphenPainter(Hyphens.manual)..layout(maxWidth: 49);
+
+    final List<TextBox> boxes = painter.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 3),
+    );
+
+    expect(boxes, const <TextBox>[TextBox.fromLTRBD(0, 0, 30, 10, TextDirection.ltr)]);
+    painter.dispose();
+  });
+
+  test('TextPainter breaks earlier when the hyphen at a soft hyphen would not fit', () {
+    // "ab cd" + hyphen would be 60 wide, more than the max width of 55, so the
+    // line breaks at the space instead and "cdef" moves to the second line.
+    // Without the hyphen, "ab cd" fits and the line breaks at the soft hyphen.
+    TextPainter layOut(Hyphens hyphens) => TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..hyphens = hyphens
+      ..text = const TextSpan(text: 'ab cd\u00ADef', style: TextStyle(fontSize: 10.0))
+      ..layout(maxWidth: 55);
+    final TextPainter manual = layOut(Hyphens.manual);
+    final TextPainter hidden = layOut(Hyphens.hidden);
+
+    expect(manual.computeLineMetrics().map((LineMetrics line) => line.width), <double>[20, 40]);
+    expect(hidden.computeLineMetrics().map((LineMetrics line) => line.width), <double>[50, 20]);
+    manual.dispose();
+    hidden.dispose();
+  });
+
   test('TextPainter line metrics', () {
     final painter = TextPainter()..textDirection = TextDirection.ltr;
 
