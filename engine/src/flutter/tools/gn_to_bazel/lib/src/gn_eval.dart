@@ -98,6 +98,38 @@ sealed class Condition {
           asserted[alternative.family] != null &&
           asserted[alternative.family] != alternative.member;
     });
+    // A disjunction beside the negation of one of its own terms loses that
+    // term (`a && (!a || b)` is `a && b`), and beside one of its terms goes
+    // altogether (`a && (a || b)` is `a`): the shape a scalar's cases take
+    // when a later conditional write overrides an earlier one.
+    for (var i = 0; i < terms.length; i++) {
+      final Condition term = terms[i];
+      if (term is! ConditionOr) {
+        continue;
+      }
+      final others = <Condition>[...terms.sublist(0, i), ...terms.sublist(i + 1)];
+      if (term.terms.any(others.contains)) {
+        terms.removeAt(i--);
+        continue;
+      }
+      final List<Condition> remaining = term.terms
+          .where((Condition t) => !others.contains(t.negated))
+          .toList();
+      if (remaining.length != term.terms.length) {
+        if (remaining.isEmpty) {
+          return never;
+        }
+        final Condition reduced = disjunction(remaining);
+        if (others.contains(reduced.negated)) {
+          return never;
+        }
+        if (others.contains(reduced)) {
+          terms.removeAt(i--);
+          continue;
+        }
+        terms[i] = reduced;
+      }
+    }
     return switch (terms.length) {
       0 => always,
       1 => terms.single,

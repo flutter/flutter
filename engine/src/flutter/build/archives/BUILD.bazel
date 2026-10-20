@@ -5,10 +5,83 @@
 # Generated from //flutter/build/archives/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: artifacts_entitlement_config, artifacts_without_entitlement_config, dart_sdk_entitlement_config, dart_sdk_without_entitlement_config.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle", "zip_tree")
 
 package(default_visibility = ["//visibility:public"])
+
+# `!dart_dynamic_modules && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_flutter_runtime_mode_debug",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
 
 zip_tree(
     name = "artifacts_shader_lib",
@@ -33,10 +106,14 @@ zip_bundle(
         "//conditions:default": {},
     }),
     output = select({
-        "//engine/src/flutter/common:runtime_mode_profile": "linux-x64-profile/artifacts.zip",
-        "//engine/src/flutter/common:runtime_mode_release": "linux-x64-release/artifacts.zip",
-        "//engine/src/flutter/common:runtime_mode_jit_release": "linux-x64-jit_release/artifacts.zip",
-        "//engine/src/flutter/common:runtime_mode_debug": "linux-x64/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_flutter_runtime_mode_profile": "linux-x64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_flutter_runtime_mode_release": "linux-x64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_flutter_runtime_mode_jit_release": "linux-x64-jit_release/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules": "linux-x64/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_profile": "linux-x64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_release": "linux-x64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_jit_release": "linux-x64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug": "linux-x64-ddm/artifacts.zip",
         "//conditions:default": None,
     }),
     trees = select({
@@ -81,7 +158,10 @@ zip_tree(
 
 zip_bundle(
     name = "dart_sdk_archive",
-    output = "dart-sdk-linux-x64.zip",
+    output = select({
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled": "dart-sdk-linux-x64-ddm.zip",
+        "//conditions:default": "dart-sdk-linux-x64.zip",
+    }),
     trees = [":dart_sdk_archive_dart-sdk"],
 )
 
