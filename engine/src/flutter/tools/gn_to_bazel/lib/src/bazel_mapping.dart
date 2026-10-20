@@ -1054,6 +1054,27 @@ const Map<String, String> _osNameNegatedSettings = <String, String>{
   'win': '//engine/src/flutter/build/bazel:not_win',
 };
 
+/// The external variables that are predicates: the OS predicates and every
+/// argument with a config_setting ([conditionSettings]). Read as a value
+/// (`enable_software = test_enable_software` in gpu.gni's invocations) one
+/// is the predicate itself, not a list of flags.
+final Set<String> knownBooleanVariables = Set<String>.unmodifiable(<String>{
+  'is_android',
+  'is_apple',
+  'is_clang',
+  'is_component_build',
+  'is_fuchsia',
+  'is_ios',
+  'is_linux',
+  'is_mac',
+  'is_minimal_linux',
+  'is_official_build',
+  'is_qnx',
+  'is_wasm',
+  'is_win',
+  ...conditionSettings.keys,
+});
+
 /// GN variables an imported `.gni` defines and that build files may read or
 /// test. Reads become references that [referenceConstants] resolve.
 const Set<String> knownExternalVariables = <String>{
