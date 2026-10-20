@@ -13,6 +13,10 @@
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"
 #include "impeller/entity/vk/modern_shaders_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
+#include "impeller/renderer/backend/vulkan/swapchain/swapchain_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_wrapper_vk.h"
 
 namespace flutter {
 namespace testing {
@@ -167,6 +171,94 @@ TEST(GPUSurfaceVulkanImpeller, RecreatesTransientsWhenFrameSizeChanges) {
   ASSERT_NE(frame, nullptr);
   EXPECT_NE(surface->transients_, transients);
   EXPECT_EQ(surface->transients_size_, impeller::ISize(200, 100));
+}
+
+class TestSwapchainVK : public impeller::SwapchainVK {
+ public:
+  explicit TestSwapchainVK(const std::shared_ptr<impeller::Context>& context)
+      : context_(context),
+        test_context_(fml::MakeRefCounted<TestVulkanContext>()) {}
+
+  // |SwapchainVK|
+  bool IsValid() const override { return true; }
+
+  // |SwapchainVK|
+  std::unique_ptr<impeller::Surface> AcquireNextDrawable() override {
+    const DlISize size(100, 100);
+    if (!test_surface_) {
+      test_surface_ = TestVulkanSurface::Create(*test_context_, size);
+    }
+    impeller::TextureDescriptor desc;
+    desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+    desc.size = impeller::ISize{size.width, size.height};
+    desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+    desc.mip_count = 1;
+    desc.compression_type = impeller::CompressionType::kLossless;
+    desc.usage = impeller::TextureUsage::kRenderTarget;
+
+    impeller::vk::Image vk_image(test_surface_->GetImage());
+    auto wrapped = impeller::WrapTextureSourceVK(context_, desc, vk_image);
+    if (!transients_) {
+      transients_ = std::make_shared<impeller::SwapchainTransientsVK>(
+          context_, desc, /*enable_msaa=*/true);
+    }
+    return impeller::SurfaceVK::WrapSwapchainImage(transients_, wrapped,
+                                                   []() { return true; });
+  }
+
+  // |SwapchainVK|
+  impeller::vk::Format GetSurfaceFormat() const override {
+    return impeller::vk::Format::eR8G8B8A8Unorm;
+  }
+
+  // |SwapchainVK|
+  void AddFinalCommandBuffer(
+      std::shared_ptr<impeller::CommandBuffer> cmd_buffer) const override {}
+
+  // |SwapchainVK|
+  void UpdateSurfaceSize(const impeller::ISize& size) override {}
+
+ private:
+  std::shared_ptr<impeller::Context> context_;
+  fml::RefPtr<TestVulkanContext> test_context_;
+  std::unique_ptr<TestVulkanSurface> test_surface_;
+  std::shared_ptr<impeller::SwapchainTransientsVK> transients_;
+};
+
+// Regression test for https://github.com/flutter/flutter/issues/194406.
+//
+// Each GPUSurfaceVulkanImpeller owns a private AiksContext, so submitting a
+// frame with frame_boundary = false (such as an HCPP overlay surface frame)
+// must still reset its transient host buffers.
+TEST(GPUSurfaceVulkanImpeller,
+     AlwaysResetsHostBufferRegardlessOfFrameBoundary) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  auto context = impeller::ContextVK::Create(std::move(context_settings));
+  auto surface_context = context->CreateSurfaceContext();
+  ASSERT_TRUE(surface_context->SetSwapchain(
+      std::make_shared<TestSwapchainVK>(context)));
+
+  std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceVulkanImpeller>(
+      /*delegate=*/nullptr, surface_context);
+  ASSERT_TRUE(surface->IsValid());
+
+  auto& data_host_buffer =
+      surface->GetAiksContext()->GetContentContext().GetTransientsDataBuffer();
+  EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 0u);
+
+  auto frame = surface->AcquireFrame(DlISize(100, 100));
+  ASSERT_NE(frame, nullptr);
+  frame->set_submit_info({.frame_boundary = false});
+  ASSERT_TRUE(frame->Submit());
+  EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 1u);
+
+  frame = surface->AcquireFrame(DlISize(100, 100));
+  ASSERT_NE(frame, nullptr);
+  frame->set_submit_info({.frame_boundary = true});
+  ASSERT_TRUE(frame->Submit());
+  EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 2u);
 }
 
 }  // namespace testing
