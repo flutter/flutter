@@ -75,6 +75,7 @@ Future<int> run(List<String> arguments) async {
         assumptions: assumptions,
         templates: templateMappings.keys.toSet(),
         externalVariables: knownExternalVariables,
+        booleanVariables: knownBooleanVariables,
         skipTargets: skip,
         tree: tree,
         importPolicy: engineImportPolicy,

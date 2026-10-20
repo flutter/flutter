@@ -151,6 +151,7 @@ final class DependencyResolver {
           assumptions: assumptions,
           templates: templateMappings.keys.toSet(),
           externalVariables: knownExternalVariables,
+          booleanVariables: knownBooleanVariables,
           skipTargets: manifestEntry(directory)?.skip.keys.toSet() ?? const <String>{},
           tree: tree,
           importPolicy: engineImportPolicy,

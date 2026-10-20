@@ -39,6 +39,7 @@ Future<GnFileEvaluation> evaluate(
     assumptions: assumptions ?? linuxHostAssumptions(),
     templates: templates,
     externalVariables: externalVariables,
+    booleanVariables: knownBooleanVariables,
     skipTargets: skip,
   );
 }
@@ -99,6 +100,7 @@ GnFileEvaluation evaluateIn(
     assumptions: assumptions ?? linuxHostAssumptions(),
     templates: templates,
     externalVariables: knownExternalVariables,
+    booleanVariables: knownBooleanVariables,
     tree: tree,
     importPolicy: importPolicy,
   );
@@ -2563,6 +2565,73 @@ executable("font_subset_bin") {
       expect(
         await convert(gn, templates: <String>{'zip_bundle'}),
         contains('    output = "linux-x64/font-subset.zip",\n'),
+      );
+    });
+
+    test('a disjunction inside a conjunction is a match_any group inside the match_all', () async {
+      // impeller/tools/component.gni: `impeller_supports_rendering &&
+      // enable_unittests`, the former the disjunction of the three backends.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if ((impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && enable_unittests) {
+    sources += [ "rendering_tests.cc" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains(
+          'selects.config_setting_group(\n'
+          '    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_enable_unittests",\n'
+          '    match_all = [\n'
+          '        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",\n'
+          '        "//engine/src/flutter/testing:unittests_enabled",\n'
+          '    ],\n'
+          ')\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          'selects.config_setting_group(\n'
+          '    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",\n'
+          '    match_any = [\n'
+          '        "//engine/src/flutter/impeller/tools:metal",\n'
+          '        "//engine/src/flutter/impeller/tools:opengles",\n'
+          '        "//engine/src/flutter/impeller/tools:vulkan",\n'
+          '    ],\n'
+          ')\n',
+        ),
+      );
+    });
+
+    test('a predicate read as a value is the predicate', () async {
+      // gpu.gni's invocations: the test_enable_* arguments assigned to the
+      // invoker's members, tested in the template.
+      final String output = await convert('''
+template("configuration") {
+  group(target_name) {
+    public_deps = []
+    if (invoker.enable_software) {
+      public_deps += [ "//flutter/shell/gpu:gpu_surface_software" ]
+    }
+  }
+}
+configuration("gpu") {
+  enable_software = test_enable_software
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains(
+          '    deps = select({\n'
+          '        "//engine/src/flutter/shell:test_enable_software": [\n'
+          '            "//engine/src/flutter/shell/gpu:gpu_surface_software",  # invoker.enable_software\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
       );
     });
 
@@ -5476,6 +5545,7 @@ flutter_dart_tests(
           assumptions: linuxHostAssumptions(),
           templates: templateMappings.keys.toSet(),
           externalVariables: knownExternalVariables,
+          booleanVariables: knownBooleanVariables,
           skipTargets: file.skip.keys.toSet(),
           tree: tree,
           importPolicy: engineImportPolicy,
