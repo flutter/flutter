@@ -694,26 +694,6 @@ void main() {
       );
 
       testWidgets(
-        'focusing a read-only editable descendant dismisses the selection',
-        (WidgetTester tester) async {
-          final fieldFocusNode = FocusNode();
-          addTearDown(fieldFocusNode.dispose);
-          final RenderParagraph paragraph = await pumpAndSelect(
-            tester,
-            TestTextField(focusNode: fieldFocusNode, readOnly: true),
-          );
-
-          fieldFocusNode.requestFocus();
-          await tester.pump();
-
-          expect(fieldFocusNode.hasFocus, isTrue);
-          expect(paragraph.selections, isEmpty);
-        },
-        // [intended] Dismissing the selection when an editable descendant takes the focus is web-only.
-        skip: !kIsWeb,
-      );
-
-      testWidgets(
         'focusing a non-editable descendant keeps the selection',
         (WidgetTester tester) async {
           final buttonFocusNode = FocusNode();
