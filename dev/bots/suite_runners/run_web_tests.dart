@@ -460,6 +460,7 @@ class WebTestsSuite {
         '-d',
         'chrome',
         '--web-run-headless',
+        '--no-web-resources-cdn',
         '--dart-define=FLUTTER_WEB_USE_SKIA=false',
         ...additionalArguments,
         '-t',

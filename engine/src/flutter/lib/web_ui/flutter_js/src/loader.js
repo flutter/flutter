@@ -25,8 +25,10 @@ function cleanupLegacyServiceWorker(ttPolicy) {
         if (ttPolicy != null) {
           url = ttPolicy.createScriptURL(url);
         }
-        navigator.serviceWorker.register(url);
+        return navigator.serviceWorker.register(url);
       }
+    }).catch(() => {
+      // Best-effort cleanup; ignore failures.
     });
   }
 }
