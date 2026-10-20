@@ -4912,11 +4912,13 @@ cc_library(
 ]}''',
       });
       final List<BuilderBuild> builds = linuxHostBuilds(loaded);
+      // CI's host_debug_unopt sets flags the developer's does not (asan, a
+      // Debug VM): the developer's keeps the bare name, CI's its prefix.
       expect(builds.map((BuilderBuild b) => b.configName), <String>[
         'host_debug',
         'host_release',
         'host_debug_test',
-        'host_debug_unopt',
+        'ci_host_debug_unopt',
         'host_profile_lto',
         'host_debug',
         'host_debug_unopt',
@@ -4938,8 +4940,7 @@ build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runti
 
 # linux_host_engine.json: ci/host_debug_unopt
 #   --runtime-mode debug --unoptimized --asan --dart-debug
-# No configuration: the Bazel build cannot express
-#   --asan (the toolchain has no sanitizer feature yet)
+build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:asan --test_timeout=240,1200,3600,14400 --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
 
 # linux_host_engine.json: ci/host_profile_lto
 #   --runtime-mode profile --prebuilt-dart-sdk
@@ -5012,11 +5013,10 @@ install(
         buildFile,
         contains('''
 # linux_host_engine.json: ci/host_debug_unopt
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
+#   bazel run --config=ci_host_debug_unopt :ci_host_debug_unopt
 # Tests, run by `bazel test` rather than installed: flutter/fml:fml_unittests.
 install(
-    name = "host_debug_unopt",
+    name = "ci_host_debug_unopt",
     testonly = True,
     contents = ["//engine/src/flutter/tools/font_subset:font_subset"],
 )
