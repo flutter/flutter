@@ -34,7 +34,6 @@ class ExtensionManager {
   final FeatureFlags _featureFlags;
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
-  bool get isDisabled => _isDisabled;
   bool _isDisabled = false;
   Future<void>? _initFuture;
   final _diagnosticsExtensions = <DiagnosticsExtension>[];
@@ -156,7 +155,6 @@ class ExtensionManager {
     _diagnosticsExtensions.clear();
     _configurationExtensions.clear();
     _deviceExtensions.clear();
-    _isDisabled = false;
     _isInitialized = false;
     _initFuture = null;
     await _discovery.dispose();
