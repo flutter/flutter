@@ -11,8 +11,10 @@
 namespace flutter {
 
 AndroidSurfaceDynamicImpeller::AndroidSurfaceDynamicImpeller(
-    std::shared_ptr<AndroidContextDynamicImpeller>& android_context)
-    : android_context_(android_context) {}
+    std::shared_ptr<AndroidContextDynamicImpeller>& android_context,
+    std::shared_ptr<SurfaceTransactionRouter> transaction_router)
+    : android_context_(android_context),
+      transaction_router_(std::move(transaction_router)) {}
 
 AndroidSurfaceDynamicImpeller::~AndroidSurfaceDynamicImpeller() = default;
 
@@ -50,7 +52,8 @@ void AndroidSurfaceDynamicImpeller::SetupImpellerSurface() {
   // contexts are read directly instead of going through |RenderingApi|, which
   // blocks until that very setup completes.
   if (auto vk_context = android_context_->GetVKContext()) {
-    vulkan_surface_ = std::make_unique<AndroidSurfaceVKImpeller>(vk_context);
+    vulkan_surface_ = std::make_unique<AndroidSurfaceVKImpeller>(
+        vk_context, transaction_router_);
   } else if (auto gl_context = android_context_->GetGLContext()) {
     gl_surface_ = std::make_unique<AndroidSurfaceGLImpeller>(gl_context);
   } else {

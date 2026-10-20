@@ -25,8 +25,9 @@ namespace flutter {
 /// The backing surface is created the first time [CreateGPUSurface] is called.
 class AndroidSurfaceDynamicImpeller : public AndroidSurface {
  public:
-  explicit AndroidSurfaceDynamicImpeller(
-      std::shared_ptr<AndroidContextDynamicImpeller>& android_context);
+  AndroidSurfaceDynamicImpeller(
+      std::shared_ptr<AndroidContextDynamicImpeller>& android_context,
+      std::shared_ptr<SurfaceTransactionRouter> transaction_router);
 
   ~AndroidSurfaceDynamicImpeller() override;
 
@@ -65,6 +66,7 @@ class AndroidSurfaceDynamicImpeller : public AndroidSurface {
 
  private:
   std::shared_ptr<AndroidContextDynamicImpeller> android_context_;
+  const std::shared_ptr<SurfaceTransactionRouter> transaction_router_;
   std::unique_ptr<AndroidSurfaceVKImpeller> vulkan_surface_;
   std::unique_ptr<AndroidSurfaceGLImpeller> gl_surface_;
   fml::RefPtr<AndroidNativeWindow> window_;
