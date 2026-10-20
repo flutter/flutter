@@ -60,10 +60,10 @@ const double kDefaultRmseThreshold = 0.5;
       if (firstButton.exists) {
         [firstButton swipeUp];
       }
-      [self expectationForPredicate:[NSPredicate predicateWithFormat:@"count == 0"]
+      [test expectationForPredicate:[NSPredicate predicateWithFormat:@"count == 0"]
                 evaluatedWithObject:springboard.buttons
                             handler:nil];
-      [self waitForExpectationsWithTimeout:30.0 handler:nil];
+      [test waitForExpectationsWithTimeout:30.0 handler:nil];
       screenshot = [[XCUIScreen mainScreen] screenshot];
       goldenMatches = [_goldenImage compareGoldenToImage:screenshot.image
                                            rmesThreshold:rmesThreshold];
