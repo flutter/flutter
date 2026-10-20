@@ -10,6 +10,14 @@ import 'package:flutter_tools_extension_linux_prototype/src/build.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/device.dart';
 import 'package:test/test.dart';
 
+const int _invalidParamsErrorCode = -32602;
+
+Matcher _throwsInvalidParams(String message) => throwsA(
+  isA<RpcException>()
+      .having((RpcException e) => e.code, 'code', _invalidParamsErrorCode)
+      .having((RpcException e) => e.message, 'message', contains(message)),
+);
+
 void main() {
   group('LinuxDeviceService', () {
     test('getDevices returns prototype custom linux device', () async {
@@ -75,16 +83,7 @@ void main() {
       );
       await expectLater(
         launchAppHandler(<String, Object?>{}),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            allOf(
-              contains('-32602'),
-              contains('Invalid or missing parameters for ${DeviceService.launchAppMethod}.'),
-            ),
-          ),
-        ),
+        _throwsInvalidParams('Invalid or missing parameters for ${DeviceService.launchAppMethod}.'),
       );
       await expectLater(
         launchAppHandler(<String, Object?>{
@@ -92,17 +91,8 @@ void main() {
           DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
           DeviceService.executableUriParam: 'relative/path/app',
         }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            allOf(
-              contains('-32602'),
-              contains(
-                'Invalid "${DeviceService.executableUriParam}" parameter for ${DeviceService.launchAppMethod}',
-              ),
-            ),
-          ),
+        _throwsInvalidParams(
+          'Invalid "${DeviceService.executableUriParam}" parameter for ${DeviceService.launchAppMethod}',
         ),
       );
       await expectLater(
@@ -111,17 +101,8 @@ void main() {
           DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
           DeviceService.executableUriParam: 'file:///nonexistent/app',
         }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            allOf(
-              contains('-32602'),
-              contains(
-                'Invalid "${DeviceService.debuggingOptionsParam}" parameter for ${DeviceService.launchAppMethod}',
-              ),
-            ),
-          ),
+        _throwsInvalidParams(
+          'Invalid "${DeviceService.debuggingOptionsParam}" parameter for ${DeviceService.launchAppMethod}',
         ),
       );
 
@@ -134,15 +115,8 @@ void main() {
       );
       await expectLater(
         getVmServiceUriHandler(<String, Object?>{}),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            allOf(
-              contains('-32602'),
-              contains('Invalid or missing parameters for ${DeviceService.getVmServiceUriMethod}.'),
-            ),
-          ),
+        _throwsInvalidParams(
+          'Invalid or missing parameters for ${DeviceService.getVmServiceUriMethod}.',
         ),
       );
 
@@ -155,16 +129,7 @@ void main() {
       );
       await expectLater(
         stopAppHandler(<String, Object?>{}),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            allOf(
-              contains('-32602'),
-              contains('Invalid or missing parameters for ${DeviceService.stopAppMethod}.'),
-            ),
-          ),
-        ),
+        _throwsInvalidParams('Invalid or missing parameters for ${DeviceService.stopAppMethod}.'),
       );
     });
 

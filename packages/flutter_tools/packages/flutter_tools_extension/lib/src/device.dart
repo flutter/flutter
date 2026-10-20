@@ -130,7 +130,7 @@ abstract base class DeviceService extends ToolExtensionService {
 
   static Uri _parseExecutableUri(String executableUriStr) {
     final Uri? uri = Uri.tryParse(executableUriStr);
-    if (uri == null || !uri.isScheme('file') || !uri.hasAbsolutePath) {
+    if (uri == null || !uri.isValidFileUri) {
       throw RpcException.invalidParams(
         'Invalid "$executableUriParam" parameter for $launchAppMethod: must be an absolute "file:" URI.',
       );

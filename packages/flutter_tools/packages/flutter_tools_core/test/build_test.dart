@@ -162,4 +162,17 @@ void main() {
       expect(result1.hashCode, isNot(equals(result2.hashCode)));
     });
   });
+
+  group('ExtensionFileUriValidation', () {
+    test('isValidFileUri returns true only for non-directory absolute file URIs', () {
+      expect(Uri.parse('file:///path/to/app').isValidFileUri, isTrue);
+      expect(Uri(scheme: 'file').isValidFileUri, isFalse);
+      expect(Uri.parse('file:').isValidFileUri, isFalse);
+      expect(Uri.parse('file:///').isValidFileUri, isFalse);
+      expect(Uri.parse('file:///path/to/dir/').isValidFileUri, isFalse);
+      expect(Uri.parse('relative/app').isValidFileUri, isFalse);
+      expect(Uri.parse('/absolute/without/scheme').isValidFileUri, isFalse);
+      expect(Uri.parse('https://example.com/app').isValidFileUri, isFalse);
+    });
+  });
 }

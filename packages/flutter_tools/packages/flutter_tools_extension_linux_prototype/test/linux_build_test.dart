@@ -7,6 +7,14 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/build.dart';
 import 'package:test/test.dart';
 
+const int _invalidParamsErrorCode = -32602;
+
+Matcher _throwsInvalidParams(String message) => throwsA(
+  isA<RpcException>()
+      .having((RpcException e) => e.code, 'code', _invalidParamsErrorCode)
+      .having((RpcException e) => e.message, 'message', contains(message)),
+);
+
 void main() {
   group('LinuxBuildService', () {
     test('getBuildTargets returns prototype custom-linux-build target', () async {
@@ -73,24 +81,12 @@ void main() {
 
       await expectLater(
         () => buildHandler(const <String, Object?>{}),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.targetNameParam}" parameter.'),
-          ),
-        ),
+        _throwsInvalidParams('Missing or invalid "${BuildService.targetNameParam}" parameter.'),
       );
 
       await expectLater(
         () => buildHandler(<String, Object?>{BuildService.targetNameParam: 'custom-linux-build'}),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
-          ),
-        ),
+        _throwsInvalidParams('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
       );
 
       await expectLater(
@@ -98,13 +94,7 @@ void main() {
           BuildService.targetNameParam: 'custom-linux-build',
           BuildService.projectRootParam: '/project',
         }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.mainPathParam}" parameter.'),
-          ),
-        ),
+        _throwsInvalidParams('Missing or invalid "${BuildService.mainPathParam}" parameter.'),
       );
 
       await expectLater(
@@ -113,13 +103,7 @@ void main() {
           BuildService.projectRootParam: '/project',
           BuildService.mainPathParam: 'lib/main.dart',
         }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
-          ),
-        ),
+        _throwsInvalidParams('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
       );
 
       await expectLater(
@@ -129,13 +113,7 @@ void main() {
           BuildService.mainPathParam: 'lib/main.dart',
           BuildService.buildModeParam: 'debug',
         }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
-          ),
-        ),
+        _throwsInvalidParams('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
       );
 
       await expectLater(
@@ -145,13 +123,7 @@ void main() {
           BuildService.mainPathParam: 'lib/main.dart',
           BuildService.buildModeParam: 'invalid_mode',
         }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
-          ),
-        ),
+        _throwsInvalidParams('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
       );
     });
   });

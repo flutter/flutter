@@ -134,6 +134,12 @@ class ExtensionBuildTarget {
   int get hashCode => Object.hash(description, name);
 }
 
+/// Validation helpers for file [Uri]s exchanged over the tool extension protocol.
+extension ExtensionFileUriValidation on Uri {
+  /// Whether this [Uri] uses the `file` scheme and has a non-directory absolute path.
+  bool get isValidFileUri => isScheme('file') && hasAbsolutePath && !path.endsWith('/');
+}
+
 /// Representation of a build result returned by a tool extension.
 @immutable
 class ExtensionBuildResult {
@@ -153,22 +159,27 @@ class ExtensionBuildResult {
         final String value => value,
         _ => null,
       },
-      executableUri: _parseExecutableUri(json[executableUriKey], json),
+      executableUri: _parseExecutableUri(json),
     );
   }
 
-  static Uri? _parseExecutableUri(Object? raw, Map<String, Object?> json) {
-    return switch (raw) {
-      final String value => switch (Uri.tryParse(value)) {
-        final Uri uri when uri.isScheme('file') && uri.hasAbsolutePath => uri,
-        _ => throw FormatException(
-          'Invalid "$executableUriKey" in ExtensionBuildResult: must be an absolute "file:" URI.',
-          json,
-        ),
-      },
-      null => null,
-      _ => throw FormatException('Invalid "$executableUriKey" in ExtensionBuildResult.', json),
-    };
+  static Uri? _parseExecutableUri(Map<String, Object?> json) {
+    final Object? raw = json[executableUriKey];
+    if (raw == null) {
+      return null;
+    }
+    if (raw is String) {
+      final Uri? uri = Uri.tryParse(raw);
+      if (uri != null && uri.isValidFileUri) {
+        return uri;
+      }
+      throw const FormatException(
+        'Invalid "$executableUriKey" in ExtensionBuildResult: must be an absolute file:// URI.',
+      );
+    }
+    throw const FormatException(
+      'Invalid "$executableUriKey" in ExtensionBuildResult: expected a String.',
+    );
   }
 
   /// Map key for [errorMessage].
