@@ -11,7 +11,12 @@ import 'package:stream_channel/isolate_channel.dart';
 
 import '../base/logger.dart';
 
-/// Typedef for an extension isolate entrypoint function.
+/// Typedef for an in-process extension isolate entrypoint function.
+///
+/// Used by unit tests to spawn lightweight in-process extension isolates via
+/// [ExtensionConnection.spawn] without compiling a `.dill` kernel file, and
+/// during transitional bootstrap before dynamic project discovery is wired via
+/// [ExtensionConnection.spawnUri].
 typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 
 /// Represents an active host-side connection to a running tool extension isolate.
@@ -60,18 +65,21 @@ class ExtensionConnection {
     }
   }
 
-  /// Spawns an extension isolate from [entryPoint] and completes handshake.
+  /// Spawns an in-process extension isolate from [entryPoint] and completes the
+  /// capability handshake.
+  ///
+  /// Used by unit tests to exercise extension protocol behavior in-process
+  /// without compiling a `.dill` kernel file, and during transitional bootstrap
+  /// before dynamic project discovery is wired via [spawnUri].
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
     required Logger logger,
     String? extensionName,
-    Duration timeout = const Duration(seconds: 5),
   }) {
     logger.printTrace('ExtensionConnection spawning extension isolate...');
     return _spawnAndHandshake(
       logger: logger,
       extensionName: extensionName,
-      timeout: timeout,
       isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
         return Isolate.spawn(entryPoint, sendPort, onError: onError, onExit: onExit);
       },
@@ -87,7 +95,6 @@ class ExtensionConnection {
     required Uri packageConfigUri,
     List<String> args = const <String>[],
     String? extensionName,
-    Duration timeout = const Duration(seconds: 5),
   }) {
     logger.printTrace(
       'ExtensionConnection spawning extension isolate from URI "$entrypointUri"...',
@@ -95,7 +102,6 @@ class ExtensionConnection {
     return _spawnAndHandshake(
       logger: logger,
       extensionName: extensionName,
-      timeout: timeout,
       isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
         return Isolate.spawnUri(
           entrypointUri,
@@ -113,7 +119,6 @@ class ExtensionConnection {
     required Future<Isolate> Function(SendPort sendPort, SendPort onError, SendPort onExit)
     isolateLauncher,
     required Logger logger,
-    required Duration timeout,
     String? extensionName,
   }) async {
     final receivePort = ReceivePort();
@@ -153,7 +158,7 @@ class ExtensionConnection {
       final Object? responseObj = await Future.any<Object?>([
         peer.sendRequest('extension.getCapabilities'),
         errorCompleter.future,
-      ]).timeout(timeout);
+      ]);
       if (responseObj is! Map<String, Object?>) {
         throw StateError(
           'Extension handshake failed: extension.getCapabilities did not return a Map.',
@@ -171,11 +176,6 @@ class ExtensionConnection {
         logger: logger,
         extensionName: extensionName,
       );
-    } on TimeoutException {
-      logger.printTrace('ExtensionConnection handshake timed out.');
-      receivePort.close();
-      isolate?.kill(priority: Isolate.immediate);
-      throw TimeoutException('Handshake with tool extension isolate timed out.');
     } on Object catch (error) {
       logger.printTrace('ExtensionConnection spawn failed with error: $error');
       receivePort.close();
