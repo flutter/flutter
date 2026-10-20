@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'view.dart';
 
 /// A widget that describes this app in the operating system.
 class Title extends StatefulWidget {
@@ -37,8 +38,8 @@ class Title extends StatefulWidget {
 
 class _TitleState extends State<Title> {
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _updateChrome();
   }
 
@@ -53,6 +54,7 @@ class _TitleState extends State<Title> {
   void _updateChrome() {
     SystemChrome.setApplicationSwitcherDescription(
       ApplicationSwitcherDescription(label: widget.title, primaryColor: widget.color.value),
+      viewId: View.maybeOf(context)?.viewId,
     );
   }
 
