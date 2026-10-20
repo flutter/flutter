@@ -164,9 +164,9 @@ dependencies:
   rally_assets: 3.0.1
   retry: 3.1.2
   scoped_model: 2.0.0
-  shelf: 1.4.3
+  shelf: 1.4.2
   shelf_packages_handler: 3.0.2
-  shelf_static: 1.2.0
+  shelf_static: 1.1.3
   shelf_web_socket: 3.0.0
   shrine_images: 2.0.2
   source_map_stack_trace: 2.1.2
@@ -207,7 +207,7 @@ dependencies:
   webview_flutter: 4.14.1
   webview_flutter_android: 4.14.1
   webview_flutter_platform_interface: 2.15.1
-  webview_flutter_wkwebview: 3.27.1
+  webview_flutter_wkwebview: 3.27.0
   xdg_directories: 1.1.0
   xml: 6.6.1
   yaml: 3.1.4
@@ -222,4 +222,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: k0283t
+# PUBSPEC CHECKSUM: ps2ats
