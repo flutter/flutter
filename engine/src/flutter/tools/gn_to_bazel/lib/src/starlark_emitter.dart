@@ -216,13 +216,8 @@ String emitBuildFile(
           ? DependencyResolver.none()
           : DependencyResolver(tree: tree, assumptions: evaluation.assumptions));
   final emitter = _Emitter(gnPackage, layout, implicitDeps, tree, evaluation.assumptions, forwarded)
-    ..inheritedConfigs.addAll(evaluation.allDependentConfigs)
-    ..conditionalInheritance.addAll(evaluation.conditionalAllDependentConfigs);
-  final Set<GnTarget> placeholders = _placeholders(evaluation.targets);
+    ..inheritedConfigs.addAll(evaluation.inheritedConfigs);
   for (final GnTarget target in evaluation.targets) {
-    if (placeholders.contains(target)) {
-      continue;
-    }
     emitter.localTargets[target.name] = target;
     if (target.rule == 'config') {
       emitter.localConfigs[target.name] = target;
@@ -244,52 +239,9 @@ String emitBuildFile(
       skipped.add(target.name);
       continue;
     }
-    if (placeholders.contains(target)) {
-      continue;
-    }
     emitter.convert(target);
   }
   return emitter.render(evaluation.file, skipped, appendix: appendix);
-}
-
-/// GN's placeholder idiom: `if (c) { real(name) { … } } else { group(name) {
-/// } }` -- an empty group stands in for a target the configuration lacks, so
-/// that dependents can name it unconditionally (impeller_component does this
-/// for testonly components when unit tests are off). Bazel says the same
-/// thing with the real target's `target_compatible_with`, and two rules
-/// cannot share a name, so the placeholder goes. Any other duplicate name is
-/// an error.
-Set<GnTarget> _placeholders(List<GnTarget> targets) {
-  final byName = <String, List<GnTarget>>{};
-  for (final target in targets) {
-    byName.putIfAbsent(target.name, () => <GnTarget>[]).add(target);
-  }
-  final placeholders = <GnTarget>{};
-  for (final MapEntry<String, List<GnTarget>> entry in byName.entries) {
-    if (entry.value.length == 1) {
-      continue;
-    }
-    final List<GnTarget> group = entry.value;
-    final Iterable<GnTarget> empties = group.where(
-      (GnTarget t) =>
-          t.rule == 'group' &&
-          t.variables.keys.every(
-            (String v) => v == 'testonly' || v == 'visibility' || t.variables[v]!.forwarded,
-          ),
-    );
-    final Iterable<GnTarget> real = group.where((GnTarget t) => !empties.contains(t));
-    if (group.length != 2 ||
-        empties.length != 1 ||
-        real.single.condition != empties.single.condition.negated) {
-      throw GnError(
-        group[1].location,
-        'target ${entry.key} is defined more than once (under `${group[0].condition}` and '
-        '`${group[1].condition}`)',
-      );
-    }
-    placeholders.add(empties.single);
-  }
-  return placeholders;
 }
 
 /// Target variables that say nothing Bazel needs.
@@ -407,10 +359,9 @@ final class _Emitter {
 
   /// Per target, the configs it inherits through `all_dependent_configs`
   /// (its own and its dependencies', see
-  /// [GnFileEvaluation.allDependentConfigs]), and the targets whose
-  /// inheritance is conditional, which the emitter refuses.
-  final Map<String, Set<String>> inheritedConfigs = <String, Set<String>>{};
-  final Set<String> conditionalInheritance = <String>{};
+  /// [GnFileEvaluation.inheritedConfigs]), each under the condition it
+  /// reaches the target.
+  final Map<String, Map<String, Condition>> inheritedConfigs = <String, Map<String, Condition>>{};
 
   /// `load()` statements: file label to the symbols used from it.
   final Map<String, Set<String>> loads = <String, Set<String>>{};
@@ -719,10 +670,18 @@ final class _Emitter {
       }
     }
     _checkPropagatedFlags(target, propagated);
-    for (final String config in inheritedConfigs[target.name] ?? const <String>{}) {
-      rule.list('deps').addUnique(Condition.always, _Item(_localLabel(config)));
-    }
+    _inheritedConfigsInto(rule, target);
     rules.add(rule);
+  }
+
+  /// The configs [target] inherits through `all_dependent_configs` as
+  /// dependencies on their libraries, each under the condition it reaches
+  /// the target.
+  void _inheritedConfigsInto(_Rule rule, GnTarget target) {
+    for (final MapEntry<String, Condition> inherited
+        in (inheritedConfigs[target.name] ?? const <String, Condition>{}).entries) {
+      rule.list('deps').addUnique(inherited.value, _Item(_localLabel(inherited.key)));
+    }
   }
 
   /// action("x") becomes a `gn_action` (build/bazel/gn_action): the script
@@ -1952,16 +1911,10 @@ final class _Emitter {
     // GN applies a dependency's all_dependent_configs to this target and to
     // everything that depends on it, through private dependencies too;
     // Bazel's implementation_deps would stop them, so the configs become
-    // public deps of their own.
-    if (conditionalInheritance.contains(target.name)) {
-      throw GnError(
-        target.location,
-        '${target.name} inherits all_dependent_configs under a condition, which is not supported',
-      );
-    }
-    for (final String config in inheritedConfigs[target.name] ?? const <String>{}) {
-      rule.list('deps').addUnique(Condition.always, _Item(_localLabel(config)));
-    }
+    // public deps of their own (under the condition each reaches this
+    // target: a merged optional() target names its public config only
+    // when the feature is on).
+    _inheritedConfigsInto(rule, target);
 
     // A header-only library compiles nothing: GN ignores its flags and
     // defines (they apply to no compile and propagate to no one), and so
@@ -2150,8 +2103,14 @@ final class _Emitter {
             }
             continue;
           }
+          // A target of another file: the engine's own (GN's //flutter/...,
+          // converted into the main repository) carry //flutter:config as a
+          // public config by convention; synced trees do not, nor does the
+          // secondary tree's //third_party:fontconfig, whose facade lives in
+          // the main repository too.
           final String label = bazelLabel(v.value, package: gnPackage, location: a.location);
-          if (label.startsWith('$bazelRootPackage/flutter')) {
+          if (label.startsWith('$bazelRootPackage/flutter') &&
+              absoluteGnLabel(v.value, package: gnPackage).startsWith('//flutter/')) {
             return true;
           }
         }

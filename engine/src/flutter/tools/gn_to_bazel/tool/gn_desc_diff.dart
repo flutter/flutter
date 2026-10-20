@@ -145,6 +145,15 @@ Future<int> run(List<String> arguments) async {
         gnTarget = config[label] as Map<String, Object?>?;
       }
       if (gnTarget == null) {
+        if (target.condition != Condition.always) {
+          // Defined under a condition the assumptions left open, which this
+          // out directory may well decide against.
+          stdout.writeln(
+            '  $label: defined under ${target.condition}, which the GN build lacks '
+            '(undecided; not compared)',
+          );
+          continue;
+        }
         _report(label, 'is not in the GN build (gn desc knows nothing of it)');
         differences++;
         continue;
@@ -155,7 +164,7 @@ Future<int> run(List<String> arguments) async {
         target,
         gnTarget,
         gnPackage,
-        evaluation.allDependentConfigs,
+        evaluation.inheritedConfigs,
         namedAllDependentConfigs: named,
         localTargets: <String, GnTarget>{for (final GnTarget t in evaluation.targets) t.name: t},
         nestedElsewhere: nestedElsewhere,
@@ -255,7 +264,7 @@ int _compare(
   GnTarget target,
   Map<String, Object?> gnTarget,
   String gnPackage,
-  Map<String, Set<String>> inherited, {
+  Map<String, Map<String, Condition>> inherited, {
   required Set<String> namedAllDependentConfigs,
   required Map<String, GnTarget> localTargets,
   required Map<String, Map<String, Object?>> nestedElsewhere,
@@ -367,9 +376,15 @@ int _compare(
   final Object? public = gnTarget['public'];
   if (public is List<Object?>) {
     check('public', items('public', path), _strings(public).map(path).toSet());
-  } else if (target.variables.containsKey('public')) {
-    _report(label, 'has a public list to the converter, all headers public to GN');
-    differences++;
+  } else if (target.variables['public'] case final GnVariable publicList) {
+    // A public list under an undecided condition alone (a merged optional()
+    // target's) is as undecided as its items.
+    if (publicList.assignments.every((GnAssignment a) => !a.isUnconditional)) {
+      items('public', path);
+    } else {
+      _report(label, 'has a public list to the converter, all headers public to GN');
+      differences++;
+    }
   }
   // gn desc's deps are deps and public_deps together, plus what
   // BUILDCONFIG.gn's executable and shared_library templates add (the C++
@@ -404,12 +419,20 @@ int _compare(
   final Set<String> fromElsewhere = gnAllDependent
       .where((String c) => !c.startsWith('$gnPackage:') && !namedAllDependentConfigs.contains(c))
       .toSet();
-  check(
-    'all_dependent_configs',
-    (inherited[target.name] ?? const <String>{}).map(labelOf).toSet(),
-    gnAllDependent,
-    notOurs: fromElsewhere,
-  );
+  // A config inherited under a condition the assumptions left open (a merged
+  // optional() target's, or through a conditional dep) is as undecided as a
+  // conditional item.
+  final inheritedHere = <String>{};
+  for (final MapEntry<String, Condition> config
+      in (inherited[target.name] ?? const <String, Condition>{}).entries) {
+    if (config.value == Condition.always) {
+      inheritedHere.add(labelOf(config.key));
+    } else {
+      undecided.add('all_dependent_configs ${config.key} under ${config.value}');
+      undecidedValues.add(labelOf(config.key));
+    }
+  }
+  check('all_dependent_configs', inheritedHere, gnAllDependent, notOurs: fromElsewhere);
   if (fromElsewhere.isNotEmpty) {
     notes.add(
       'all_dependent_configs from other files, which reach the Bazel target through its deps (not compared): ${(fromElsewhere.toList()..sort()).join(', ')}',

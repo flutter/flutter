@@ -350,6 +350,9 @@ const Map<String, String> labelOverrides = <String, String>{
   '//third_party/boringssl': '//engine/src/flutter/third_party/boringssl',
   '//third_party/googletest:gtest': '@googletest//:gtest',
   '//third_party/googletest:gmock': '@googletest//:gtest',
+  // The secondary tree's fontconfig (build/secondary/third_party/BUILD.gn):
+  // the sysroot's system library, as a hand-written facade.
+  '//third_party:fontconfig': '//engine/src/flutter/third_party:fontconfig',
   // The Dart SDK, built by gn_build.
   '//flutter/third_party/dart/runtime:dart_api': '@dart//:dart_api_headers',
   '//flutter/third_party/dart/runtime:libdart_jit':
@@ -901,6 +904,12 @@ const Map<String, String> conditionSettings = <String, String>{
   // flutter_vma/config.gni's argument, which tools/gn derives from the host
   // (iOS and Windows): the group in //flutter/flutter_vma's appendix.
   'disable_vma_stl_shared_mutex': '//engine/src/flutter/flutter_vma:without_stl_shared_mutex',
+  // tools/gn's --enable-fontconfig, which sets //flutter/txt's
+  // flutter_use_fontconfig and Skia's skia_use_fontconfig together (the
+  // Linux desktop builders pass it; the host builders do not): one flag, in
+  // //flutter/txt's appendix, where GN declares the engine's argument.
+  'flutter_use_fontconfig': '//engine/src/flutter/txt:fontconfig',
+  'skia_use_fontconfig': '//engine/src/flutter/txt:fontconfig',
 };
 
 /// The config_setting that holds exactly when a GN predicate is *false*, for
@@ -996,6 +1005,11 @@ const Set<String> knownExternalVariables = <String>{
   'impeller_enable_metal',
   'impeller_enable_opengles',
   'impeller_enable_vulkan',
+  // //flutter/txt/BUILD.gn's own declare_args() and Skia's skia.gni
+  // (evaluated): tools/gn's --enable-fontconfig, one Bazel flag
+  // (conditionSettings).
+  'flutter_use_fontconfig',
+  'skia_use_fontconfig',
 };
 
 /// A Starlark constant the Bazel side keeps for a GN variable the converter
@@ -1552,11 +1566,12 @@ Assumptions linuxHostAssumptions() {
     'impeller_enable_vulkan': GnBoolValue(true),
     // Skia's arguments as tools/gn sets them for a Linux host; the rest take
     // the defaults of //flutter/third_party/skia/gn/skia.gni.
+    // skia_use_fontconfig is not here: tools/gn sets it from
+    // --enable-fontconfig, which is a Bazel flag (conditionSettings).
     'skia_enable_pdf': GnBoolValue(false),
     'skia_gl_standard': GnStringValue(''),
     'skia_use_dng_sdk': GnBoolValue(false),
     'skia_use_expat': GnBoolValue(true),
-    'skia_use_fontconfig': GnBoolValue(false),
     'skia_use_gl': GnBoolValue(true),
     'skia_use_icu': GnBoolValue(true),
     'skia_use_libpng_decode': GnBoolValue(true),

@@ -756,57 +756,56 @@ final class GnFileEvaluation {
   /// `all_dependent_configs`: a target's own, and those of every target it
   /// depends on, directly or indirectly, through `deps` or `public_deps` —
   /// private dependencies do not stop them, unlike `public_configs`. Only
-  /// dependencies within this file are followed (`:name`), and only
-  /// unconditional ones (see [conditionalAllDependentConfigs]); the result
-  /// maps target names to config labels as written (`:name_public`).
-  Map<String, Set<String>> get allDependentConfigs => _propagation().$1;
-
-  /// The targets whose propagated configs depend on a condition the
-  /// assumptions did not decide (a conditional dep or a conditional
-  /// `all_dependent_configs`), which [allDependentConfigs] leaves out.
-  Set<String> get conditionalAllDependentConfigs => _propagation().$2;
-
-  (Map<String, Set<String>>, Set<String>) _propagation() {
+  /// dependencies within this file are followed (`:name`). The result maps
+  /// target names to config labels as written (`:name_public`), each under
+  /// the condition it reaches the target: [Condition.always] for one named
+  /// and depended on unconditionally, else the disjunction over the paths
+  /// of each path's conditions (a conditional `all_dependent_configs`, as
+  /// of a merged optional() target, or a conditional dep).
+  Map<String, Map<String, Condition>> get inheritedConfigs {
     final byName = <String, GnTarget>{for (final GnTarget t in targets) t.name: t};
-    final result = <String, Set<String>>{};
-    final conditional = <String>{};
-    Set<String> visit(GnTarget target, Set<String> visiting) {
-      final Set<String>? done = result[target.name];
+    final result = <String, Map<String, Condition>>{};
+    Map<String, Condition> visit(GnTarget target, Set<String> visiting) {
+      final Map<String, Condition>? done = result[target.name];
       if (done != null) {
         return done;
       }
-      final configs = <String>{};
+      final configs = <String, Condition>{};
+      void add(String config, Condition when) {
+        if (when == Condition.never) {
+          return;
+        }
+        final Condition? already = configs[config];
+        configs[config] = already == null ? when : already.or(when);
+      }
+
       if (visiting.add(target.name)) {
         for (final GnAssignment a
             in target.variables['all_dependent_configs']?.assignments ?? const <GnAssignment>[]) {
-          if (!a.isUnconditional) {
-            conditional.add(target.name);
+          if (a.op == '-=') {
             continue;
           }
           for (final GnValue v in a.items) {
-            if (v is GnStringValue && a.op != '-=') {
-              configs.add(v.value);
+            if (v is GnStringValue) {
+              add(v.value, a.condition);
             }
           }
         }
         for (final name in <String>['deps', 'public_deps']) {
           for (final GnAssignment a
               in target.variables[name]?.assignments ?? const <GnAssignment>[]) {
+            if (a.op == '-=') {
+              continue;
+            }
             for (final GnValue v in a.items) {
               final GnTarget? dep = v is GnStringValue && v.value.startsWith(':')
                   ? byName[v.value.substring(1)]
                   : null;
-              if (dep == null || a.op == '-=') {
+              if (dep == null) {
                 continue;
               }
-              final Set<String> theirs = visit(dep, visiting);
-              if (a.isUnconditional) {
-                configs.addAll(theirs);
-                if (conditional.contains(dep.name)) {
-                  conditional.add(target.name);
-                }
-              } else if (theirs.isNotEmpty || conditional.contains(dep.name)) {
-                conditional.add(target.name);
+              for (final MapEntry<String, Condition> theirs in visit(dep, visiting).entries) {
+                add(theirs.key, a.condition.and(theirs.value));
               }
             }
           }
@@ -820,7 +819,7 @@ final class GnFileEvaluation {
     for (final GnTarget target in targets) {
       visit(target, <String>{});
     }
-    return (result, conditional);
+    return result;
   }
 }
 
@@ -970,7 +969,201 @@ GnFileEvaluation evaluateGnFile(
   );
   final evaluator = _Evaluator(settings, file.location.file);
   evaluator.evaluateFile(file);
-  return evaluator.result;
+  final GnFileEvaluation result = evaluator.result;
+  final List<GnTarget> resolved = _resolveDefinitions(List<GnTarget>.of(result.targets));
+  result.targets
+    ..clear()
+    ..addAll(resolved);
+  return result;
+}
+
+/// One name, one target. GN lets a file define a name in branches that
+/// cannot both run (`if (c) { source_set("x") { … } } else { source_set("x")
+/// { … } }`; Skia's optional() template, which is the feature's sources when
+/// it is enabled and an empty source set otherwise), since only one branch
+/// runs. Under a condition the assumptions leave open both branches are
+/// evaluated, and Bazel has one rule per name, so the two definitions become
+/// one target: defined wherever either was, with each branch's variables
+/// under that branch's condition (the emitter's select()s), and a variable
+/// both branches set the same way unconditional. GN's placeholder idiom --
+/// an empty group standing in for a real target of another rule
+/// (impeller_component's testonly components when unit tests are off), so
+/// that dependents can name it unconditionally -- keeps the real target
+/// alone, under its own condition: Bazel says what the group said with
+/// `target_compatible_with`. Two definitions that could both run, or of
+/// different rules otherwise, are an error, as the first is in GN.
+List<GnTarget> _resolveDefinitions(List<GnTarget> targets) {
+  final byName = <String, List<GnTarget>>{};
+  for (final target in targets) {
+    byName.putIfAbsent(target.name, () => <GnTarget>[]).add(target);
+  }
+  if (byName.length == targets.length) {
+    return targets;
+  }
+  // Each target of a duplicated name, and what stands for it: a merged
+  // target, or null for one that another stands for.
+  final replacements = <GnTarget, GnTarget?>{};
+  for (final List<GnTarget> group in byName.values) {
+    if (group.length == 1) {
+      continue;
+    }
+    final GnTarget first = group[0];
+    final GnTarget second = group[1];
+    GnError duplicate() => GnError(
+      second.location,
+      'target ${first.name} is defined more than once (under `${first.condition}` and '
+      '`${second.condition}`)',
+    );
+    if (group.length != 2) {
+      throw duplicate();
+    }
+    final (Condition common, Condition a, Condition b) = _branches(
+      first.condition,
+      second.condition,
+    );
+    final complementary = a.negated == b;
+    if (!complementary && a.and(b) != Condition.never) {
+      throw duplicate();
+    }
+    final List<GnTarget> placeholders = group.where(_isPlaceholder).toList();
+    if (placeholders.length == 1 && complementary) {
+      replacements[placeholders.single] = null;
+      continue;
+    }
+    if (first.rule != second.rule) {
+      throw duplicate();
+    }
+    replacements[first] = _merged(first, second, common.and(a.or(b)), a, b);
+    replacements[second] = null;
+  }
+  return <GnTarget>[
+    for (final GnTarget target in targets)
+      if (!replacements.containsKey(target))
+        target
+      else if (replacements[target] case final GnTarget merged)
+        merged,
+  ];
+}
+
+/// An empty group: the placeholder of GN's idiom (`group(name) {
+/// not_needed(invoker, "*") }`), with nothing but a template's forwarded
+/// bookkeeping, `testonly` or `visibility` in it.
+bool _isPlaceholder(GnTarget target) =>
+    target.rule == 'group' &&
+    target.variables.keys.every(
+      (String v) => v == 'testonly' || v == 'visibility' || target.variables[v]!.forwarded,
+    );
+
+/// The conditions of two definitions of one name taken apart: the terms
+/// they share (the enclosing conditions, `P` of `P && c` and `P && !c`) and
+/// what each adds to them.
+(Condition, Condition, Condition) _branches(Condition first, Condition second) {
+  List<Condition> terms(Condition c) => c is ConditionAnd ? c.terms : <Condition>[c];
+  final List<Condition> x = terms(first);
+  final List<Condition> y = terms(second);
+  final List<Condition> common = x.where(y.contains).toList();
+  return (
+    Condition.conjunction(common),
+    Condition.conjunction(x.where((Condition t) => !common.contains(t)).toList()),
+    Condition.conjunction(y.where((Condition t) => !common.contains(t)).toList()),
+  );
+}
+
+/// The one target two definitions of a name amount to (see
+/// [_resolveDefinitions]): [first]'s variables under [a], [second]'s under
+/// [b], a variable both set the same way as it was.
+GnTarget _merged(GnTarget first, GnTarget second, Condition condition, Condition a, Condition b) {
+  final merged = GnTarget(first.location, first.rule, first.name, condition)
+    ..comments = first.comments
+    ..readVariables.addAll(first.readVariables)
+    ..readVariables.addAll(second.readVariables);
+  for (final name in <String>{...first.variables.keys, ...second.variables.keys}) {
+    final GnVariable? x = first.variables[name];
+    final GnVariable? y = second.variables[name];
+    if (x != null && y != null && x.isList != y.isList) {
+      throw GnError(
+        y.assignments.first.location,
+        '$name is a ${y.isList ? 'list' : 'scalar'} in one definition of ${first.name} '
+        'and a ${x.isList ? 'list' : 'scalar'} in the other',
+      );
+    }
+    if (x != null && y != null && _sameValue(x, y)) {
+      merged.variables[name] = x;
+      continue;
+    }
+    final GnVariable either = (x ?? y)!;
+    final variable = GnVariable(
+      name,
+      isList: either.isList,
+      forwarded: (x?.forwarded ?? true) && (y?.forwarded ?? true),
+    );
+    if (x != null) {
+      variable.assignments.addAll(_under(x, a));
+    }
+    if (y != null) {
+      variable.assignments.addAll(_under(y, b));
+    }
+    merged.variables[name] = variable;
+  }
+  return merged;
+}
+
+/// Whether two variables hold the same unconditional value.
+bool _sameValue(GnVariable a, GnVariable b) {
+  final List<GnValue>? x = a.unconditionalItems;
+  final List<GnValue>? y = b.unconditionalItems;
+  if (x == null || y == null || x.length != y.length) {
+    return false;
+  }
+  for (var i = 0; i < x.length; i++) {
+    if (x[i] != y[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// [variable]'s effective assignments, each under its own condition and
+/// [branch]: a list's live items (an unconditional `=` having started it
+/// over), grouped as they were assigned, as `+=`; a scalar's cases as `=`.
+List<GnAssignment> _under(GnVariable variable, Condition branch) {
+  final result = <GnAssignment>[];
+  if (variable.isList) {
+    final groups = <GnAssignment, List<int>>{};
+    for (final GnListItem item in variable.liveItems) {
+      groups.putIfAbsent(item.assignment, () => <int>[]).add(item.index);
+    }
+    for (final MapEntry<GnAssignment, List<int>> entry in groups.entries) {
+      final GnAssignment a = entry.key;
+      result.add(
+        GnAssignment(
+          a.location,
+          branch.and(a.condition),
+          '+=',
+          <GnValue>[for (final int i in entry.value) a.items[i]],
+          sourceConditions: <String>[branch.gnSource, ...a.sourceConditions],
+          comments: a.comments,
+          itemComments: a.itemComments.isEmpty
+              ? const <GnItemComments>[]
+              : <GnItemComments>[for (final int i in entry.value) a.commentsOf(i)],
+        ),
+      );
+    }
+    return result;
+  }
+  for (final GnScalarCase c in variable.cases(variable.assignments.first.location)) {
+    result.add(
+      GnAssignment(
+        c.assignment.location,
+        branch.and(c.condition),
+        '=',
+        <GnValue>[c.value],
+        sourceConditions: <String>[branch.gnSource, ...c.assignment.sourceConditions],
+        comments: c.assignment.comments,
+      ),
+    );
+  }
+  return result;
 }
 
 /// Target variables that BUILDCONFIG.gn's set_defaults() initializes, so
@@ -1425,20 +1618,6 @@ final class _Evaluator {
       }
       scope.templates[e.key] = e.value;
     }
-  }
-
-  static bool _sameValue(GnVariable a, GnVariable b) {
-    final List<GnValue>? x = a.unconditionalItems;
-    final List<GnValue>? y = b.unconditionalItems;
-    if (x == null || y == null || x.length != y.length) {
-      return false;
-    }
-    for (var i = 0; i < x.length; i++) {
-      if (x[i] != y[i]) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /// The GN path (`//a/b.gni`) of an import, resolved against the importing
