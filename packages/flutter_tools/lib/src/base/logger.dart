@@ -1101,8 +1101,6 @@ class VerboseLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, dynamic>? args]) {}
 }
 
-/// Prefixes every line of an error with [prefix], so that a parent process
-/// filtering the build output line by line can surface it.
 class PrefixedErrorLogger extends DelegatingLogger {
   PrefixedErrorLogger(super.parent);
 
