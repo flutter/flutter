@@ -3028,10 +3028,11 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
             thumbVisibility: true,
             thickness: 24.0,
             controller: scrollController,
-            child: CustomScrollView(
+            child: ListView.builder(
               controller: scrollController,
               scrollDirection: Axis.horizontal,
-              slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(width: 1200.0))],
+              itemCount: 200,
+              itemBuilder: (_, _) => const SizedBox(width: 120.0),
             ),
           ),
         ),
