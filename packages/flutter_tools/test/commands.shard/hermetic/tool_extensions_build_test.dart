@@ -133,8 +133,7 @@ final class _SucceedingBuildService extends BuildService {
     _TestBuildTarget(
       description: 'Hermetic custom build target.',
       name: 'custom-hermetic-build',
-      outputDir:
-          '${BuiltInPlaceholders.projectDir}/build/hermetic/${BuiltInPlaceholders.buildMode}',
+      outputDir: '${BuiltInPlaceholders.outputDir}/hermetic/${BuiltInPlaceholders.buildMode}',
     ),
   ];
 

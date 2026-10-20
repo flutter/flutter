@@ -335,30 +335,28 @@ void main() {
     final cases = <({String description, String pattern, String expectedPath})>[
       (
         description: 'substitutes {PROJECT_DIR}, {BUILD_MODE}, and {TARGET_PLATFORM}',
-        pattern: '{PROJECT_DIR}/build/custom/{TARGET_PLATFORM}/{BUILD_MODE}',
-        expectedPath: '/project/build/custom/linux-x64/profile',
+        pattern: '{PROJECT_DIR}/custom/{TARGET_PLATFORM}/{BUILD_MODE}',
+        expectedPath: '/project/custom/linux-x64/profile',
       ),
       (
-        description: 'substitutes {BUILD_DIR}',
-        pattern: '{BUILD_DIR}/custom-out',
-        expectedPath: '/project/.dart_tool/flutter_build/custom-out',
+        description: 'substitutes {OUTPUT_DIR}',
+        pattern: '{OUTPUT_DIR}/custom-out',
+        expectedPath: '/project/build/custom-out',
       ),
       (
         description: 'resolves relative outputDir against projectDir',
-        pattern: 'build/custom_out/{BUILD_MODE}',
-        expectedPath: '/project/build/custom_out/profile',
+        pattern: 'custom_out/{BUILD_MODE}',
+        expectedPath: '/project/custom_out/profile',
       ),
     ];
 
     for (final (:String description, :String pattern, :String expectedPath) in cases) {
       testWithoutContext(description, () {
         final Directory projectDir = fileSystem.directory('/project');
-        final Directory buildDir = projectDir
-            .childDirectory('.dart_tool')
-            .childDirectory('flutter_build');
+        final Directory buildOutputDir = projectDir.childDirectory('build');
         final Directory resolved = resolveExtensionOutputDir(
-          buildDir: buildDir,
           buildMode: .profile,
+          buildOutputDir: buildOutputDir,
           fileSystem: fileSystem,
           projectDir: projectDir,
           target: ExtensionBuildTarget(
@@ -371,12 +369,56 @@ void main() {
         expect(resolved.path, equals(expectedPath));
       });
     }
+
+    testWithoutContext('allows projectDir and buildOutputDir paths containing braces', () {
+      final Directory projectDir = fileSystem.directory('/home/user/{client}/project');
+      final Directory buildOutputDir = projectDir.childDirectory('build');
+      final Directory resolved = resolveExtensionOutputDir(
+        buildMode: .profile,
+        buildOutputDir: buildOutputDir,
+        fileSystem: fileSystem,
+        projectDir: projectDir,
+        target: const ExtensionBuildTarget(
+          description: 'description',
+          name: 'custom-target',
+          outputDir: '{OUTPUT_DIR}/custom/{BUILD_MODE}',
+          targetPlatform: 'linux-x64',
+        ),
+      );
+      expect(resolved.path, equals('/home/user/{client}/project/build/custom/profile'));
+    });
+
+    testWithoutContext(
+      'throws ToolExit when outputDir contains unsupported placeholder like {BUILD_DIR}',
+      () {
+        final Directory projectDir = fileSystem.directory('/project');
+        final Directory buildOutputDir = projectDir.childDirectory('build');
+        expect(
+          () => resolveExtensionOutputDir(
+            buildMode: .profile,
+            buildOutputDir: buildOutputDir,
+            fileSystem: fileSystem,
+            projectDir: projectDir,
+            target: const ExtensionBuildTarget(
+              description: 'description',
+              name: 'custom-target',
+              outputDir: '{BUILD_DIR}/custom-out',
+              targetPlatform: 'linux-x64',
+            ),
+          ),
+          throwsToolExit(
+            message: 'Unsupported placeholder "{BUILD_DIR}" in outputDir "{BUILD_DIR}/custom-out" for build target "custom-target".',
+          ),
+        );
+      },
+    );
   });
 
   testWithoutContext('BuiltInArtifacts, BuiltInHostArtifacts, Linux artifacts, and BuiltInTargets match host definitions', () {
     const buildTarget = ExtensionBuildTarget(
       description: 'Contract check build target',
       name: 'contract-build-target',
+      outputDir: '{OUTPUT_DIR}/contract-build',
       targetPlatform: 'linux-x64',
       artifacts: <ExtensionArtifact>{
         BuiltInArtifacts.flutterPatchedSdkPath,
