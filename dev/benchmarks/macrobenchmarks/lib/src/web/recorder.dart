@@ -29,11 +29,17 @@ const int _kDefaultWarmUpSampleCount = 200;
 /// This value is used when [Profile.useCustomWarmUp] is set to false.
 ///
 /// Defaults to 100 and can be overridden at compile time with
-/// `--dart-define=BENCHMARK_MEASURED_SAMPLES=<n>`.
+/// `--dart-define=BENCHMARK_MEASURED_SAMPLES=<n>`, where `<n>` must be a
+/// positive integer.
 const int _kDefaultMeasuredSampleCount = int.fromEnvironment(
   'BENCHMARK_MEASURED_SAMPLES',
   defaultValue: 100,
 );
+
+/// The default total number of samples collected by a benchmark.
+///
+/// This value is used when [Profile.useCustomWarmUp] is set to false.
+const int kDefaultTotalSampleCount = _kDefaultWarmUpSampleCount + _kDefaultMeasuredSampleCount;
 
 /// Whether [Profile.toJson] includes the raw measured samples of each series.
 ///
@@ -46,11 +52,6 @@ const bool _kReportSamples = bool.fromEnvironment('BENCHMARK_REPORT_SAMPLES');
 /// Currently the only reported phase is `'measure'`, which is reported when
 /// warm-up ends and measured samples start being recorded.
 typedef BenchmarkPhaseListener = void Function(String benchmarkName, String phase);
-
-/// The default total number of samples collected by a benchmark.
-///
-/// This value is used when [Profile.useCustomWarmUp] is set to false.
-const int kDefaultTotalSampleCount = _kDefaultWarmUpSampleCount + _kDefaultMeasuredSampleCount;
 
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as

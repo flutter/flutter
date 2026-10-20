@@ -8,6 +8,8 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:macrobenchmarks/src/web/recorder.dart';
 
+// These mirror the recorder's defaults, so the tests assume no
+// `BENCHMARK_MEASURED_SAMPLES` define is set.
 const int _warmUpCount = 200;
 const int _measuredCount = 100;
 
@@ -63,7 +65,10 @@ void main() {
   });
 
   test('toJson without options emits exactly the legacy key set', () {
+    // No phaseListener is set, so this also covers the warm-up switch
+    // completing without one.
     final Profile profile = _autoProfile();
+    expect(profile.isWarmingUp, isFalse);
     expect(profile.isRunning, isFalse);
 
     final Map<String, dynamic> json = profile.toJson();
@@ -139,14 +144,6 @@ void main() {
 
     expect(profile.stopWarmingUp, throwsStateError);
     expect(calls, <(String, String)>[('custom_warm_up', 'measure')]);
-  });
-
-  test('no phaseListener means the warm-up switch completes without error', () {
-    final Profile profile = _autoProfile();
-
-    expect(profile.isWarmingUp, isFalse);
-    expect(profile.isRunning, isFalse);
-    expect(profile.toJson().keys.toSet(), _legacyKeys);
   });
 
   test('toJson(reportSamples: true) splits each series at its own warm-up and keeps outliers', () {

@@ -95,7 +95,8 @@ late final LocalBenchmarkServerClient _client;
 /// warm-up to measurement.
 ///
 /// Opt-in via `--dart-define=BENCHMARK_REPORT_PHASES=true`. When enabled, a
-/// fire-and-forget `POST /benchmark-phase` is sent at the switch.
+/// fire-and-forget `POST benchmark-phase` request (resolved against the
+/// benchmark server origin) is sent at the switch.
 const bool _kReportPhases = bool.fromEnvironment('BENCHMARK_REPORT_PHASES');
 
 Future<void> main(List<String> args) async {
@@ -125,8 +126,11 @@ Future<void> main(List<String> args) async {
   }
 
   if (_kReportPhases) {
+    // The listener is called synchronously from `Profile.stopWarmingUp`, which
+    // may run in the middle of a timed frame. Defer the request to a new task
+    // so that its setup cost is not attributed to the first measured frame.
     Profile.phaseListener = (String name, String phase) =>
-        unawaited(_client.reportPhase(name, phase));
+        Timer.run(() => unawaited(_client.reportPhase(name, phase)));
   }
   await _runBenchmark(nextBenchmark);
   web.window.location.reload();
@@ -423,7 +427,10 @@ class LocalBenchmarkServerClient {
   /// [phase] (currently only `'measure'`, sent when warm-up ends).
   ///
   /// Only used when `--dart-define=BENCHMARK_REPORT_PHASES=true` is set. The
-  /// server's response is ignored.
+  /// server's response (including a 404 from servers that do not handle this
+  /// request) is ignored. Unlike the other requests this does not check for
+  /// manual mode: the phase listener is only installed when a benchmark server
+  /// is driving the run.
   Future<void> reportPhase(String name, String phase) async {
     await _requestXhr(
       serverOrigin.resolve('benchmark-phase'),
