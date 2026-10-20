@@ -910,6 +910,10 @@ const Map<String, String> conditionSettings = <String, String>{
   // //flutter/txt's appendix, where GN declares the engine's argument.
   'flutter_use_fontconfig': '//engine/src/flutter/txt:fontconfig',
   'skia_use_fontconfig': '//engine/src/flutter/txt:fontconfig',
+  // runtime_args.gni's dart_dynamic_modules (tools/gn
+  // --gn-args=dart_dynamic_modules=true, the `_ddm` builders): the Dart
+  // wrap's flag, which the archives' names also read.
+  'dart_dynamic_modules': '//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled',
 };
 
 /// The config_setting that holds exactly when a GN predicate is *false*, for
@@ -927,6 +931,11 @@ const Map<String, String> negatedSettings = <String, String>{
   'is_qnx': '//engine/src/flutter/build/bazel:not_qnx',
   'is_wasm': '//engine/src/flutter/build/bazel:not_wasm',
   'is_win': '//engine/src/flutter/build/bazel:not_win',
+  // A flag's denial has a setting of its own where a conjunction needs one
+  // (`!dart_dynamic_modules && flutter_runtime_mode == "debug"`: the
+  // archives' names).
+  'dart_dynamic_modules':
+      '//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled',
 };
 
 /// The Bazel config_setting for `variable == "value"`, by variable and value.
@@ -1010,6 +1019,9 @@ const Set<String> knownExternalVariables = <String>{
   // (conditionSettings).
   'flutter_use_fontconfig',
   'skia_use_fontconfig',
+  // $dart_src/runtime/runtime_args.gni (known through zip_bundle.gni): the
+  // Dart wrap's flag (conditionSettings).
+  'dart_dynamic_modules',
 };
 
 /// A Starlark constant the Bazel side keeps for a GN variable the converter
@@ -1546,9 +1558,6 @@ Assumptions linuxHostAssumptions() {
     'prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
     'host_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
     'target_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
-    // $dart_src/runtime/runtime_args.gni (zip_bundle.gni imports it): the
-    // dynamic-modules build is its own configuration (`_ddm`), not this.
-    'dart_dynamic_modules': GnBoolValue(false),
     // //flutter/shell/config.gni
     'shell_enable_gl': GnBoolValue(true),
     'shell_enable_metal': GnBoolValue(false),

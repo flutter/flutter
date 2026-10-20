@@ -86,8 +86,7 @@ install(
 )
 
 # linux_host_engine_ddm.json: ci/host_debug_ddm
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+#   bazel run --config=host_debug_ddm :host_debug_ddm
 install(
     name = "host_debug_ddm",
     testonly = True,
