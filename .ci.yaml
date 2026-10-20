@@ -4224,6 +4224,9 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      # Pin to macOS 26 due to benchmark differing while fleet is split between macOS 15 and 26.
+      # See https://github.com/flutter/flutter/issues/194809.
+      os: Mac-26.6 # TODO(flutter/flutter#192579): Delete this after all bots are upgraded to macOS 26.
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4446,6 +4449,9 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      # Pin to macOS 26 due to benchmark differing while fleet is split between macOS 15 and 26.
+      # See https://github.com/flutter/flutter/issues/194809.
+      os: Mac-26.6 # TODO(flutter/flutter#192579): Delete this after all bots are upgraded to macOS 26.
       task_name: hello_world_macos__compile
 
   - name: Mac hello_world_impeller_macos_sdfs
@@ -7459,6 +7465,20 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
         ]
       task_name: windows_engine_integration_golden_test
+
+  - name: Windows windows_engine_integration_golden_test_feature_level_10_0
+    recipe: devicelab/devicelab_drone
+    presubmit: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+      task_name: windows_engine_integration_golden_test_feature_level_10_0
 
   - name: Windows texture_impeller_windows
     recipe: devicelab/devicelab_drone
