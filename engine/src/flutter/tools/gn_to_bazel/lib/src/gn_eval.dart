@@ -2640,8 +2640,17 @@ final class _Evaluator {
     }
     final String? leftValue = _knownString(left.name, scope);
     if (right is GnIdentifier) {
-      // `current_toolchain == host_toolchain`: both sides must be known.
+      // `current_toolchain == host_toolchain`: both sides must be known -- or
+      // neither, when the comparison is GN's "is this the host's own build"
+      // (testing.gni's enable_unittests, the shell's tester, glfw's shell),
+      // which the converter keeps as the predicate hostToolchainPredicate:
+      // in Bazel's terms the target OS is one a host runs
+      // (build/bazel/BUILD.bazel's host_toolchain group).
       final String? rightValue = _knownString(right.name, scope);
+      if (leftValue == null && rightValue == null && _isHostToolchainTest(left.name, right.name)) {
+        const condition = ConditionVariable(hostToolchainPredicate);
+        return equals ? condition : condition.negated;
+      }
       if (leftValue == null || rightValue == null) {
         throw GnError(
           node.location,
@@ -2665,4 +2674,16 @@ final class _Evaluator {
     }
     return ConditionComparison(left.name, equals, value);
   }
+
+  static bool _isHostToolchainTest(String a, String b) {
+    return (a == 'current_toolchain' && b == 'host_toolchain') ||
+        (a == 'host_toolchain' && b == 'current_toolchain');
+  }
 }
+
+/// The converter's name for GN's `current_toolchain == host_toolchain` when
+/// neither toolchain is assumed: the build is the host's own. Its
+/// config_setting (bazel_mapping's conditionSettings) is the group of the
+/// OSes a host runs, which is how //flutter/testing's unittests_enabled
+/// already reads testing.gni's default.
+const String hostToolchainPredicate = 'is_host_toolchain';

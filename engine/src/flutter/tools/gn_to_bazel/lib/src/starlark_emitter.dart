@@ -3179,6 +3179,15 @@ final class _Emitter {
         rule.scalars['linkstatic'] = 'True';
       }
     }
+    // The rules first, into their own buffer: rendering a select() under a
+    // conjunction may add that conjunction's config_setting_group to the
+    // rules (rendered in its turn, by index) and a load() to the file's,
+    // which the header below must then carry.
+    final body = StringBuffer();
+    for (var i = 0; i < rules.length; i++) {
+      body.writeln();
+      _renderRule(body, rules[i]);
+    }
     final out = StringBuffer()
       ..write(_licenseHeader)
       ..writeln()
@@ -3194,11 +3203,8 @@ final class _Emitter {
     }
     out
       ..writeln()
-      ..writeln('package(default_visibility = ["//visibility:public"])');
-    for (final _Rule rule in rules) {
-      out.writeln();
-      _renderRule(out, rule);
-    }
+      ..writeln('package(default_visibility = ["//visibility:public"])')
+      ..write(body);
     if (appendix != null) {
       out
         ..writeln()

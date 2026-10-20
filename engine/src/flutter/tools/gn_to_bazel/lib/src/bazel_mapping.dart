@@ -892,6 +892,9 @@ const Map<String, String> conditionSettings = <String, String>{
   'is_win': '@platforms//os:windows',
   'is_debug': '//engine/src/flutter/build/bazel:unoptimized',
   'slimpeller': '//engine/src/flutter/common:slimpeller_enabled',
+  // GN's `current_toolchain == host_toolchain` with neither toolchain
+  // assumed (gn_eval's hostToolchainPredicate): the OSes a host runs.
+  'is_host_toolchain': '//engine/src/flutter/build/bazel:host_toolchain',
   // testing.gni's default, `current_toolchain == host_toolchain || is_fuchsia
   // || is_mac`, read in Bazel terms (the group in //flutter/testing's
   // appendix).
@@ -931,6 +934,8 @@ const Map<String, String> negatedSettings = <String, String>{
   'is_qnx': '//engine/src/flutter/build/bazel:not_qnx',
   'is_wasm': '//engine/src/flutter/build/bazel:not_wasm',
   'is_win': '//engine/src/flutter/build/bazel:not_win',
+  // The host's own build, denied: the OSes only a target runs.
+  'is_host_toolchain': '//engine/src/flutter/build/bazel:not_host_toolchain',
   // A flag's denial has a setting of its own where a conjunction needs one
   // (`!dart_dynamic_modules && flutter_runtime_mode == "debug"`: the
   // archives' names).
