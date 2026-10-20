@@ -290,6 +290,11 @@ bool RenderPass::Draw(size_t element_count,
     return false;
   }
 
+  if (!render_pipeline_) {
+    // draw was called before bindPipeline.
+    return false;
+  }
+
   auto pipeline = GetOrCreatePipeline();
   if (!pipeline) {
     // The failure was already validation-logged with the specifics; failing
