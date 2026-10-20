@@ -194,6 +194,29 @@ TEST_F(FlTaskRunnerTest, StopWaitWithoutWaitIsNoOp) {
   EXPECT_EQ(executed[0], 123u);
 }
 
+// A task that is already due runs on the next main loop iteration, without
+// waiting for a timeout.
+// https://github.com/flutter/flutter/issues/190620
+TEST_F(FlTaskRunnerTest, DueTaskRunsWithoutDelay) {
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+
+  std::vector<uint64_t> executed;
+  fl_engine_get_embedder_api(engine)->RunTask = MOCK_ENGINE_PROC(
+      RunTask, ([&executed](auto engine, const FlutterTask* task) {
+        executed.push_back(task->task);
+        return kSuccess;
+      }));
+
+  uint64_t target_time_nanos = g_get_monotonic_time() * 1000;
+  fl_task_runner_post_flutter_task(task_runner, make_task(1),
+                                   target_time_nanos);
+
+  g_main_context_iteration(nullptr, FALSE);
+
+  ASSERT_EQ(executed.size(), 1u);
+  EXPECT_EQ(executed[0], 1u);
+}
+
 // Disposing the runner removes its main loop source, so nothing can fire on
 // the freed runner.
 // https://github.com/flutter/flutter/issues/193742
