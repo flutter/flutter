@@ -40,6 +40,10 @@ enum GnFlagEffect {
   /// A flag the Bazel build has a setting for ([GnFlag.bazelFlag]).
   setting,
 
+  /// `--gn-args=<name>=<value>`: a setting when [gnArguments] has the
+  /// argument, unsupported otherwise.
+  gnArgument,
+
   /// What the generated files assume already (the prebuilt Dart SDK, no LTO).
   assumed,
 
@@ -144,7 +148,8 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
     GnFlagEffect.assumed,
     note: 'the Impeller suites always run on the wrapped SwiftShader and loader here',
   ),
-  '--gn-args': GnFlag(GnFlagEffect.unsupported, takesValue: true, note: 'an arbitrary GN argument'),
+  // An arbitrary GN argument; the ones the builders pass are in gnArguments.
+  '--gn-args': GnFlag(GnFlagEffect.gnArgument, takesValue: true, note: 'an arbitrary GN argument'),
   '--android': GnFlag(GnFlagEffect.otherPlatform),
   '--android-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
   '--fuchsia': GnFlag(GnFlagEffect.otherPlatform),
@@ -156,6 +161,14 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--target-os': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
   '--linux-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
   '--embedder-for-target': GnFlag(GnFlagEffect.otherPlatform),
+};
+
+/// The `--gn-args=<name>=<value>` arguments the builder files pass, as the
+/// Bazel flags they amount to; any other is unsupported.
+const Map<String, String> gnArguments = <String, String>{
+  // runtime_args.gni's dart_dynamic_modules: the Dart wrap's flag, which the
+  // archives' names read too (the `_ddm` builders).
+  'dart_dynamic_modules=true': '--//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules',
 };
 
 /// The runtime mode setting of the Bazel build.
@@ -275,6 +288,13 @@ final class BuilderBuild {
             if (!settings.contains(option)) {
               settings.add(option);
             }
+          }
+        case GnFlagEffect.gnArgument:
+          final String? argument = gnArguments[value];
+          if (argument == null) {
+            unsupported.add('$flag=$value (${known.note})');
+          } else if (!settings.contains(argument)) {
+            settings.add(argument);
           }
         case GnFlagEffect.assumed:
           if (flag == '--no-lto') {

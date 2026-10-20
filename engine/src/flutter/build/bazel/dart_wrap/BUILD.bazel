@@ -36,6 +36,27 @@ config_setting(
     flag_values = {":dart_debug": "True"},
 )
 
+# tools/gn's --gn-args=dart_dynamic_modules=true: runtime_args.gni's
+# dart_dynamic_modules, a VM with dynamic modules (DART_DYNAMIC_MODULES in
+# runtime:dart_config), which the `_ddm` builders build and the archives
+# name with a -ddm suffix (build/archives). Off everywhere else. Both
+# settings exist because the archives' select()s conjoin the denial with a
+# runtime mode.
+bool_flag(
+    name = "dart_dynamic_modules",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "dart_dynamic_modules_enabled",
+    flag_values = {":dart_dynamic_modules": "True"},
+)
+
+config_setting(
+    name = "dart_dynamic_modules_disabled",
+    flag_values = {":dart_dynamic_modules": "False"},
+)
+
 # What tools/gn would write to args.gn for this build, restricted to the
 # arguments the pruned GN graph declares (gn gen runs with
 # --fail-on-unused-args; dart_version, for one, belongs to
@@ -81,6 +102,9 @@ _GN_ARGS = {
 }) | select({
     # GN's is_asan (the build-wide flag): the VM instrumented like the engine.
     "//engine/src/flutter/build/bazel:asan_enabled": {"is_asan": "true"},
+    "//conditions:default": {},
+}) | select({
+    ":dart_dynamic_modules_enabled": {"dart_dynamic_modules": "true"},
     "//conditions:default": {},
 })
 
