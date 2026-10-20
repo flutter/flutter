@@ -20,6 +20,17 @@ resolve as they do for the build.
     python3 engine/src/flutter/tools/gn_to_bazel/tool/compile_commands.py \\
         --out=engine/src/out/host_debug_unopt_bazel --config=host_debug_unopt
 
+Each entry carries the command both as `arguments` (what clangd prefers)
+and as a `command` string (what tools/clang_tidy reads). Two paths are
+written as the checkout spells them rather than as the execution root does:
+the source (`file`), so that tools/clang_tidy's own file selection -- the
+files changed in git, or every file under flutter/, with anything under a
+`third_party` directory skipped -- matches the entries, as it does for
+GN's file; and the compiler, so that the toolchain's `clang-tidy` is found
+beside it (`.../buildtools/linux-x64/clang/bin/clang++`; the repository
+symlink resolved, the name kept, since the binary is a multicall that reads
+its name).
+
 A source compiled in both the target configuration and the exec
 configuration (a host tool's, built -c opt) gets the target's command;
 one compiled for the exec configuration alone (impellerc, the shader
@@ -29,6 +40,7 @@ compiler, built only as a tool) gets that.
 import argparse
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -64,6 +76,28 @@ def _execution_root(bazel, workspace):
     return result.stdout.strip()
 
 
+def _checkout_path(execution_root, relative):
+    """`relative` (a path from the execution root) as the checkout spells it.
+
+    Sources of the main repository and of the synced repositories are
+    symlinks (the execution root's, or a repository's directory of them) to
+    the checkout; generated files under bazel-out have no other spelling and
+    come back absolute under the execution root.
+    """
+    return os.path.realpath(os.path.join(execution_root, relative))
+
+
+def _compiler_path(execution_root, compiler):
+    """The compiler's path with its repository symlink resolved and its name kept.
+
+    `external/<clang repository>/bin` is a symlink to the prebuilt's `bin`;
+    inside it, `clang++` is a symlink to the `llvm` multicall binary, which
+    reads its name, so only the directory is resolved.
+    """
+    directory, name = os.path.split(compiler)
+    return os.path.join(os.path.realpath(os.path.join(execution_root, directory)), name)
+
+
 def compile_commands(aquery, execution_root):
     """The compile_commands.json entries of an aquery result: source -> entry, target configuration first."""
     exec_configurations = {
@@ -74,14 +108,20 @@ def compile_commands(aquery, execution_root):
     for action in aquery.get("actions", []):
         if action.get("mnemonic") != "CppCompile":
             continue
-        arguments = action.get("arguments", [])
+        arguments = list(action.get("arguments", []))
         sources = [
             a for a in arguments
             if a.endswith(compile_command_diff.SOURCE_SUFFIXES) and not a.startswith("-")
         ]
         if not sources:
             continue
-        entry = {"directory": execution_root, "file": sources[-1], "arguments": arguments}
+        arguments[0] = _compiler_path(execution_root, arguments[0])
+        entry = {
+            "directory": execution_root,
+            "file": _checkout_path(execution_root, sources[-1]),
+            "arguments": arguments,
+            "command": shlex.join(arguments),
+        }
         if action.get("configurationId") in exec_configurations:
             exec_entries.setdefault(sources[-1], entry)
         else:
