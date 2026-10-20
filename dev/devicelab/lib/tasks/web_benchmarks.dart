@@ -789,12 +789,7 @@ ArgParser buildBenchmarkArgParser() {
       'local-web-sdk',
       help: 'Local engine web SDK build to compile against (e.g. wasm_release).',
     )
-    ..addFlag(
-      'verbose',
-      abbr: 'v',
-      negatable: false,
-      help: 'Enable verbose logging and Chrome stdout.',
-    );
+    ..addFlag('verbose', abbr: 'v', negatable: false, help: 'Enable verbose logging.');
 }
 
 /// Runs the standalone local web benchmark CLI with [rawArgs] and returns the
@@ -870,6 +865,10 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
     printError('--local-engine-src-path requires --local-web-sdk.');
     return 2;
   }
+  if (noBuild && localWebSdk != null) {
+    printError('Cannot use --local-web-sdk and --no-build together.');
+    return 2;
+  }
 
   final regressionThresholdArg = args['regression-threshold'] as String?;
   double? regressionThreshold;
@@ -899,10 +898,10 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
     }
   }
 
-  final String? flutterRootEnv = io.Platform.environment['FLUTTER_ROOT'];
   final String flutterRoot;
-  if (flutterRootEnv != null && flutterRootEnv.isNotEmpty) {
-    flutterRoot = flutterRootEnv;
+  final String? scriptFlutterRoot = _findFlutterRootFromScript();
+  if (scriptFlutterRoot != null) {
+    flutterRoot = scriptFlutterRoot;
   } else if (io.Directory(path.join(initialCwd, 'dev', 'devicelab')).existsSync()) {
     flutterRoot = initialCwd;
   } else {
@@ -912,19 +911,26 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
   final renderer = args['renderer'] as String;
   final bool useWasm = renderer == 'skwasm' || renderer == 'skwasm_st';
   if (noBuild) {
-    final String artifactPath = path.join(
-      flutterRoot,
-      'dev',
-      'benchmarks',
-      'macrobenchmarks',
-      'build',
-      'web',
-      useWasm ? 'main.dart.wasm' : 'main.dart.js',
+    // A wasm build also emits main.dart.js, so check the compile target
+    // recorded in the build config rather than which artifacts exist.
+    final bootstrapFile = io.File(
+      path.join(
+        flutterRoot,
+        'dev',
+        'benchmarks',
+        'macrobenchmarks',
+        'build',
+        'web',
+        'flutter_bootstrap.js',
+      ),
     );
-    if (!io.File(artifactPath).existsSync()) {
+    final bool hasBuild = bootstrapFile.existsSync();
+    final bool isWasmBuild =
+        hasBuild && bootstrapFile.readAsStringSync().contains('"compileTarget":"dart2wasm"');
+    if (!hasBuild || isWasmBuild != useWasm) {
       printError(
-        'Build artifacts for renderer "$renderer" were not found (expected $artifactPath). '
-        'Run without --no-build to build them.',
+        'No build for renderer "$renderer" was found in ${bootstrapFile.parent.path}. '
+        'Run without --no-build to build it.',
       );
       return 2;
     }
@@ -947,8 +953,10 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
 
   try {
     // runWebBenchmark locates the macrobenchmarks app relative to
-    // dev/devicelab (see flutterDirectory).
-    cd(path.join(flutterRoot, 'dev', 'devicelab'));
+    // dev/devicelab (see flutterDirectory, which reads io.Directory.current).
+    final String devicelabDirectory = path.join(flutterRoot, 'dev', 'devicelab');
+    io.Directory.current = devicelabDirectory;
+    cd(devicelabDirectory);
 
     final TaskResult taskResult;
     try {
@@ -967,6 +975,9 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
         targetBenchmarks: targetBenchmarks,
         filterPattern: filterPattern,
         verbose: verbose,
+        // The selectors were validated above without the environment, so
+        // ignore BENCHMARK_TARGETS and BENCHMARK_FILTER here too.
+        environment: const <String, String>{},
       );
     } catch (e, s) {
       printError('Benchmark run failed: $e\n$s');
@@ -1031,10 +1042,31 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
     }
     return 0;
   } finally {
+    io.Directory.current = initialCwd;
     cd(initialCwd);
     await logSubscription?.cancel();
     if (verbose) {
       Logger.root.level = Level.INFO;
     }
+  }
+}
+
+/// Returns the root of the Flutter checkout that contains the running script,
+/// or null if the script is not a file inside a Flutter checkout.
+String? _findFlutterRootFromScript() {
+  final Uri script = io.Platform.script;
+  if (!script.isScheme('file')) {
+    return null;
+  }
+  String candidate = path.dirname(script.toFilePath());
+  while (true) {
+    if (io.Directory(path.join(candidate, 'dev', 'devicelab')).existsSync()) {
+      return candidate;
+    }
+    final String parent = path.dirname(candidate);
+    if (parent == candidate) {
+      return null;
+    }
+    candidate = parent;
   }
 }
