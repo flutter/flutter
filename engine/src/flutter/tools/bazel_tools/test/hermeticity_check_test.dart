@@ -202,25 +202,31 @@ void main() {
       );
     });
 
-    test('accepts every tool of a clang repository for any platform', () {
-      for (final executable in <String>[
-        'external/+synced_deps+clang_linux_x64/bin/clang',
-        'external/+synced_deps+clang_linux_x64/bin/llvm-ar',
-        'external/+synced_deps+clang_linux_x64/bin/llvm-strip',
-        'external/+synced_deps+clang_mac_arm64/bin/clang++',
-        'external/+synced_deps+clang_win_x64/bin/clang-cl.exe',
-      ]) {
-        expect(defaultToolchainExecutable.hasMatch(executable), isTrue, reason: executable);
-      }
-      for (final executable in <String>[
-        '/usr/bin/clang',
-        'external/local_config_cc/cc_wrapper.sh',
-        'external/+synced_deps+emsdk/upstream/emscripten/em++',
-        'external/+synced_deps+clang_linux_x64/lib/clang',
-      ]) {
-        expect(defaultToolchainExecutable.hasMatch(executable), isFalse, reason: executable);
-      }
-    });
+    test(
+      'accepts every tool of a clang repository for any platform, and the Emscripten wrappers',
+      () {
+        for (final executable in <String>[
+          'external/+synced_deps+clang_linux_x64/bin/clang',
+          'external/+synced_deps+clang_linux_x64/bin/llvm-ar',
+          'external/+synced_deps+clang_linux_x64/bin/llvm-strip',
+          'external/+synced_deps+clang_mac_arm64/bin/clang++',
+          'external/+synced_deps+clang_win_x64/bin/clang-cl.exe',
+          'engine/src/flutter/build/bazel/toolchains/emscripten/emcc.sh',
+          'engine/src/flutter/build/bazel/toolchains/emscripten/em++.sh',
+          'engine/src/flutter/build/bazel/toolchains/emscripten/emar.sh',
+        ]) {
+          expect(defaultToolchainExecutable.hasMatch(executable), isTrue, reason: executable);
+        }
+        for (final executable in <String>[
+          '/usr/bin/clang',
+          'external/local_config_cc/cc_wrapper.sh',
+          'external/+synced_deps+emsdk/upstream/emscripten/em++',
+          'external/+synced_deps+clang_linux_x64/lib/clang',
+        ]) {
+          expect(defaultToolchainExecutable.hasMatch(executable), isFalse, reason: executable);
+        }
+      },
+    );
 
     test('checks environment variables', () {
       final HermeticityReport report = scanActionGraph(

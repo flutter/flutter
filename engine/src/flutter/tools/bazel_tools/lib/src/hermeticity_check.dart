@@ -46,15 +46,25 @@ const Set<String> defaultToolchainMnemonics = <String>{
   'CcLtoBackendCompile',
   'CcStrip',
   'ObjcCompile',
+  // The Emscripten toolchain's module link (build/bazel/toolchains/emscripten/wasm.bzl).
+  'WasmLink',
 };
 
 /// What the executable of such an action must look like: a binary inside one
 /// of the `clang_<platform>` repositories that `extensions.bzl` defines
-/// (`external/<canonical repository name>/bin/<tool>`).
+/// (`external/<canonical repository name>/bin/<tool>`), or one of the
+/// Emscripten toolchain's wrapper scripts
+/// (`build/bazel/toolchains/emscripten/{emcc,em++,emar}.sh`), which run the
+/// synced SDK's drivers under the engine's Python with the SDK's paths from
+/// the action's environment.
 ///
 /// Bazel's auto-detected toolchain would show up as `/usr/bin/gcc` or as a
-/// wrapper script under `local_config_cc`, and neither matches.
-final RegExp defaultToolchainExecutable = RegExp(r'^external/[^/]*\bclang_[^/]+/bin/[^/]+$');
+/// wrapper script under `local_config_cc`, and neither matches; nor does
+/// the SDK's own `em++` launcher, which finds things through the host.
+final RegExp defaultToolchainExecutable = RegExp(
+  r'^(external/[^/]*\bclang_[^/]+/bin/[^/]+'
+  r'|engine/src/flutter/build/bazel/toolchains/emscripten/(emcc|em\+\+|emar)\.sh)$',
+);
 
 /// What a hermetic action graph may reference outside the execution root.
 final class HermeticityPolicy {

@@ -1,0 +1,87 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Emscripten (wasm32) toolchain over the synced SDK (@emsdk): GN's
+# build/toolchain/wasm:wasm, which builds the web engine's modules. The
+# toolchain is registered in the root MODULE.bazel; wasm_module (wasm.bzl)
+# selects it through the platform below.
+
+load("@rules_cc//cc:defs.bzl", "cc_toolchain")
+load(":emscripten_cc_toolchain_config.bzl", "emscripten_cc_toolchain_config")
+
+package(default_visibility = ["//visibility:public"])
+
+# The wasm target platform; the OS constraint is the one the converter's
+# config_settings map GN's is_wasm to (build/bazel/BUILD.bazel).
+platform(
+    name = "wasm32_emscripten",
+    constraint_values = [
+        "@platforms//os:emscripten",
+        "@platforms//cpu:wasm32",
+    ],
+)
+
+exports_files([
+    "emcc.sh",
+    "em++.sh",
+    "emar.sh",
+    "emscripten_config",
+])
+
+# The wrappers, the configuration they point emcc at, the SDK and the
+# Python: what every compile and link reads.
+filegroup(
+    name = "wasm32_all_files",
+    srcs = [
+        "em++.sh",
+        "emar.sh",
+        "emcc.sh",
+        "emscripten_config",
+        "@cpython3//:runtime",
+        "@emsdk//:all_files",
+    ],
+)
+
+emscripten_cc_toolchain_config(
+    name = "wasm32_emscripten_config",
+    em_config = "emscripten_config",
+    emar = "emar.sh",
+    emcc = "emcc.sh",
+    emscripten_marker = "@emsdk//:emscripten_marker",
+    emxx = "em++.sh",
+    node = "@emsdk//:node",
+    python3 = "@cpython3//:bin/python3",
+    resource_include_marker = "@emsdk//:resource_include_marker",
+    toolchain_identifier = "wasm32_emscripten",
+)
+
+cc_toolchain(
+    name = "wasm32_emscripten_cc_toolchain",
+    all_files = ":wasm32_all_files",
+    ar_files = ":wasm32_all_files",
+    compiler_files = ":wasm32_all_files",
+    dwp_files = ":empty",
+    linker_files = ":wasm32_all_files",
+    objcopy_files = ":empty",
+    strip_files = ":empty",
+    supports_param_files = True,
+    toolchain_config = ":wasm32_emscripten_config",
+    toolchain_identifier = "wasm32_emscripten",
+)
+
+filegroup(name = "empty")
+
+toolchain(
+    name = "wasm32_emscripten_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:emscripten",
+        "@platforms//cpu:wasm32",
+    ],
+    toolchain = ":wasm32_emscripten_cc_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
