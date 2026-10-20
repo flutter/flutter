@@ -456,7 +456,7 @@ class Cache {
       _devToolsVersion = _parseDevToolsVersion(
         versionFile,
         onError: (String message, [Object? error, StackTrace? stackTrace]) {
-          throw Exception(error != null ? '$message: $error' : message);
+          throwToolExit(error != null ? '$message: $error' : message);
         },
       );
     }

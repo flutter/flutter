@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi' show Abi;
+
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -2083,6 +2084,135 @@ void main() {
         false,
       );
     });
+
+    testWithoutContext('returns version when engine-dart-sdk.stamp is absent', () {
+      fileSystem.file(
+          fileSystem.path.join(
+            cache.getRoot().path,
+            'dart-sdk',
+            'bin',
+            'resources',
+            'devtools',
+            'version.json',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version": "2.40.0"}');
+
+      expect(cache.devToolsVersion, '2.40.0');
+    });
+
+    testWithoutContext(
+      'throws ToolExit when engine-dart-sdk.stamp is absent and devtools version.json is missing',
+      () {
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(message: 'DevTools version file does not exist'),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'throws ToolExit when engine-dart-sdk.stamp is absent and devtools version.json cannot be read',
+      () {
+        final handler = FileExceptionHandler();
+        final fs = MemoryFileSystem.test(opHandle: handler.opHandle);
+        final testCache = Cache.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: FakeProcessManager.empty(),
+        );
+        final File versionFile = fs.file(
+          fs.path.join(
+            testCache.getRoot().path,
+            'dart-sdk',
+            'bin',
+            'resources',
+            'devtools',
+            'version.json',
+          ),
+        )..createSync(recursive: true);
+        handler.addError(
+          versionFile,
+          FileSystemOp.read,
+          const FileSystemException('Permission denied'),
+        );
+
+        expect(
+          () => testCache.devToolsVersion,
+          throwsToolExit(message: 'Failed to read DevTools version file'),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'throws ToolExit when engine-dart-sdk.stamp is absent and devtools version.json is malformed JSON',
+      () {
+        fileSystem.file(
+            fileSystem.path.join(
+              cache.getRoot().path,
+              'dart-sdk',
+              'bin',
+              'resources',
+              'devtools',
+              'version.json',
+            ),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{not valid json');
+
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(message: 'Failed to parse JSON from DevTools version file'),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'throws ToolExit when engine-dart-sdk.stamp is absent and devtools version.json is missing version key',
+      () {
+        fileSystem.file(
+            fileSystem.path.join(
+              cache.getRoot().path,
+              'dart-sdk',
+              'bin',
+              'resources',
+              'devtools',
+              'version.json',
+            ),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
+
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(message: 'DevTools version key is null or missing'),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'throws ToolExit when engine-dart-sdk.stamp is absent and devtools version key is not a String',
+      () {
+        fileSystem.file(
+            fileSystem.path.join(
+              cache.getRoot().path,
+              'dart-sdk',
+              'bin',
+              'resources',
+              'devtools',
+              'version.json',
+            ),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"version": 123}');
+
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(message: 'Expected DevTools version to be a String'),
+        );
+      },
+    );
   });
 
   group('AndroidMavenArtifacts', () {
