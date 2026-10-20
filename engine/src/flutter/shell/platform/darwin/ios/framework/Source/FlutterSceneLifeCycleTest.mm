@@ -634,28 +634,42 @@ FLUTTER_ASSERT_ARC
   FlutterPluginSceneLifeCycleDelegate* delegate =
       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
 
-  id mocks = [self mocksForEvents];
+  id sharedMocks = [self sharedApplicationMocksForEvents];
+  id mockScene = sharedMocks[@"mockScene"];
+
+  id mocks = [self engineMocksForEvents];
   id mockEngine = mocks[@"mockEngine"];
-  id mockScene = mocks[@"mockScene"];
   FlutterEnginePluginSceneLifeCycleDelegate* mockLifecycleDelegate =
       (FlutterEnginePluginSceneLifeCycleDelegate*)mocks[@"mockLifecycleDelegate"];
+  __block id capturedOptions1 = nil;
   OCMStub([mockLifecycleDelegate scene:[OCMArg any]
                   willConnectToSession:[OCMArg any]
                                options:[OCMArg any]])
+      .andDo(^(NSInvocation* invocation) {
+        __unsafe_unretained id opts = nil;
+        [invocation getArgument:&opts atIndex:4];
+        capturedOptions1 = opts;
+      })
       .andReturn(NO);
 
-  id mocks2 = [self mocksForEvents];
+  id mocks2 = [self engineMocksForEvents];
   id mockEngine2 = mocks2[@"mockEngine"];
   FlutterEnginePluginSceneLifeCycleDelegate* mockLifecycleDelegate2 =
       (FlutterEnginePluginSceneLifeCycleDelegate*)mocks2[@"mockLifecycleDelegate"];
+  __block id capturedOptions2 = nil;
   OCMStub([mockLifecycleDelegate2 scene:[OCMArg any]
                    willConnectToSession:[OCMArg any]
                                 options:[OCMArg any]])
+      .andDo(^(NSInvocation* invocation) {
+        __unsafe_unretained id opts = nil;
+        [invocation getArgument:&opts atIndex:4];
+        capturedOptions2 = opts;
+      })
       .andReturn(NO);
 
-  id mockAppLifecycleDelegate = mocks2[@"mockAppLifecycleDelegate"];
+  id mockAppLifecycleDelegate = sharedMocks[@"mockAppLifecycleDelegate"];
   OCMStub([mockAppLifecycleDelegate sceneWillConnectFallback:[OCMArg any]]).andReturn(YES);
-  id session = mocks[@"mockSession"];
+  id session = sharedMocks[@"mockSession"];
   id options = OCMClassMock([UISceneConnectionOptions class]);
 
   [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
@@ -665,10 +679,18 @@ FLUTTER_ASSERT_ARC
   [delegate scene:mockScene willConnectToSession:session options:options];
   OCMVerify(times(1), [mockLifecycleDelegate scene:mockScene
                               willConnectToSession:session
-                                           options:options]);
+                                           options:[OCMArg any]]);
   OCMVerify(times(1), [mockLifecycleDelegate2 scene:mockScene
                                willConnectToSession:session
-                                            options:nil]);
+                                            options:[OCMArg any]]);
+  // Exactly one of the two engines is treated as "first" and receives the real options object;
+  // the other receives nil. Which engine is first depends on NSSet iteration order
+  // (searchFlutterEnginesWithinScene: returns engines via NSMutableSet.allObjects, which makes no
+  // ordering guarantee), so don't assume which specific engine gets which.
+  BOOL engine1First = (capturedOptions1 == options && capturedOptions2 == nil);
+  BOOL engine2First = (capturedOptions2 == options && capturedOptions1 == nil);
+  XCTAssertTrue(engine1First || engine2First,
+                @"Exactly one engine should receive the real options object; the other nil.");
   OCMVerify(times(1), [mockAppLifecycleDelegate sceneWillConnectFallback:options]);
   OCMVerify(times(0), [mockEngine sendDeepLinkToFramework:[OCMArg any]
                                         completionHandler:[OCMArg any]]);
@@ -1478,11 +1500,12 @@ FLUTTER_ASSERT_ARC
                                                               completionHandler:handler]);
 }
 
-- (NSDictionary*)mocksForEvents {
-  id mockEngine = OCMClassMock([FlutterEngine class]);
-  id mockLifecycleDelegate = OCMClassMock([FlutterEnginePluginSceneLifeCycleDelegate class]);
-  OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
-
+// +[UIApplication sharedApplication] is a process-wide singleton, so only one set of these
+// mocks may be active at a time: a second, overlapping class mock of the same class is
+// order-dependent and non-deterministic. Split out so a test that needs to simulate multiple
+// FlutterEngines registered to the same scene (see -engineMocksForEvents) can reuse a single
+// shared application mock instead of creating a second, conflicting one.
+- (NSDictionary*)sharedApplicationMocksForEvents {
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
   OCMStub([mockApplication supportsMultipleScenes]).andReturn(YES);
@@ -1497,13 +1520,41 @@ FLUTTER_ASSERT_ARC
   id mockSession = OCMClassMock([UISceneSession class]);
   OCMStub([mockScene session]).andReturn(mockSession);
 
+  [self addTeardownBlock:^{
+    [mockApplication stopMocking];
+    [mockAppDelegate stopMocking];
+    [mockAppLifecycleDelegate stopMocking];
+    [mockScene stopMocking];
+    [mockSession stopMocking];
+  }];
+
   return @{
-    @"mockEngine" : mockEngine,
     @"mockScene" : mockScene,
     @"mockSession" : mockSession,
-    @"mockLifecycleDelegate" : mockLifecycleDelegate,
     @"mockAppLifecycleDelegate" : mockAppLifecycleDelegate,
   };
+}
+
+- (NSDictionary*)engineMocksForEvents {
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  id mockLifecycleDelegate = OCMClassMock([FlutterEnginePluginSceneLifeCycleDelegate class]);
+  OCMStub([mockEngine sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  [self addTeardownBlock:^{
+    [mockEngine stopMocking];
+    [mockLifecycleDelegate stopMocking];
+  }];
+
+  return @{
+    @"mockEngine" : mockEngine,
+    @"mockLifecycleDelegate" : mockLifecycleDelegate,
+  };
+}
+
+- (NSDictionary*)mocksForEvents {
+  NSMutableDictionary* mocks = [[self sharedApplicationMocksForEvents] mutableCopy];
+  [mocks addEntriesFromDictionary:[self engineMocksForEvents]];
+  return mocks;
 }
 
 #pragma mark - FlutterEnginePluginSceneLifeCycleDelegate
