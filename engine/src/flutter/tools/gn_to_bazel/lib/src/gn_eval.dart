@@ -41,6 +41,40 @@ const Set<String> exclusiveOsPredicates = <String>{
   'is_win',
 };
 
+/// BUILDCONFIG.gn's OS names, as `target_os` and `current_os` spell them, to
+/// the OS predicate each one sets: comparing the name asserts the predicate.
+const Map<String, String> osNamePredicates = <String, String>{
+  'android': 'is_android',
+  'fuchsia': 'is_fuchsia',
+  'ios': 'is_ios',
+  'linux': 'is_linux',
+  'mac': 'is_mac',
+  'qnx': 'is_qnx',
+  'wasm': 'is_wasm',
+  'win': 'is_win',
+};
+
+/// What a value of config.gni's `full_target_platform_name`
+/// (`<target_platform_name>-<target_cpu>`, with mac spelled `darwin` and win
+/// `windows`) asserts: its OS predicate and its CPU. Null for a string that
+/// is not one.
+({String osPredicate, String cpu})? targetPlatformParts(String value) {
+  final int dash = value.lastIndexOf('-');
+  if (dash <= 0 || dash == value.length - 1) {
+    return null;
+  }
+  final String name = value.substring(0, dash);
+  final String? predicate = switch (name) {
+    'darwin' => 'is_mac',
+    'windows' => 'is_win',
+    _ => osNamePredicates[name],
+  };
+  if (predicate == null) {
+    return null;
+  }
+  return (osPredicate: predicate, cpu: value.substring(dash + 1));
+}
+
 /// A boolean formula over GN variables.
 ///
 /// [and] and [or] simplify as they combine: constants, repeated terms, a term
@@ -78,18 +112,22 @@ sealed class Condition {
       }
     }
     // Asserting one alternative of a family denies the others: `is_mac`
-    // beside `is_ios` never holds, beside `!is_ios` it says it all.
+    // beside `is_ios` never holds, beside `!is_ios` it says it all. A
+    // comparison may assert in several families at once (`target_os ==
+    // "wasm"` is `is_wasm`; `full_target_platform_name == "linux-x64"` is
+    // `is_linux` and `target_cpu == "x64"`).
     final asserted = <String, String>{};
     for (final term in terms) {
-      final _Alternative? alternative = term._alternative;
-      if (alternative == null || !alternative.asserted) {
-        continue;
+      for (final _Alternative alternative in term._alternatives) {
+        if (!alternative.asserted) {
+          continue;
+        }
+        final String? other = asserted[alternative.family];
+        if (other != null && other != alternative.member) {
+          return never;
+        }
+        asserted[alternative.family] = alternative.member;
       }
-      final String? other = asserted[alternative.family];
-      if (other != null && other != alternative.member) {
-        return never;
-      }
-      asserted[alternative.family] = alternative.member;
     }
     terms.removeWhere((Condition term) {
       final _Alternative? alternative = term._alternative;
@@ -180,6 +218,35 @@ sealed class Condition {
       1 => terms.single,
       _ => ConditionOr(terms),
     };
+  }
+
+  /// Every alternative this formula asserts or denies ([_alternative] first):
+  /// an asserted comparison of an OS name or a platform name asserts the OS
+  /// predicate (and the CPU) it names too.
+  List<_Alternative> get _alternatives {
+    final _Alternative? primary = _alternative;
+    if (primary == null) {
+      return const <_Alternative>[];
+    }
+    if (this case ConditionComparison(:final String name, equals: true, :final String value)) {
+      if (name == 'target_os' || name == 'current_os') {
+        final String? predicate = osNamePredicates[value];
+        if (predicate != null) {
+          return <_Alternative>[primary, _Alternative('current_os', predicate, asserted: true)];
+        }
+      }
+      if (name == 'full_target_platform_name') {
+        final ({String osPredicate, String cpu})? parts = targetPlatformParts(value);
+        if (parts != null) {
+          return <_Alternative>[
+            primary,
+            _Alternative('current_os', parts.osPredicate, asserted: true),
+            _Alternative('target_cpu', parts.cpu, asserted: true),
+          ];
+        }
+      }
+    }
+    return <_Alternative>[primary];
   }
 
   /// This formula as the assertion or denial of one alternative of a family
