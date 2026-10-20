@@ -210,8 +210,9 @@ class WebDriverService extends DriverService {
         'Unable to start a WebDriver session for web testing.\n'
         'The WebDriver server running at ${spec.driverPort} could not create a browser session:\n'
         '$error\n'
-        'Make sure the browser is installed and that its version is compatible with '
-        'the WebDriver server (e.g. chromedriver must match the installed Chrome version).\n'
+        'Make sure the WebDriver server matches --browser-name=${spec.browserName}, '
+        'the browser is installed, and its version is compatible with the WebDriver server '
+        '(e.g. chromedriver must match the installed Chrome version).\n'
         'For instructions on how to obtain and run a WebDriver server, see:\n'
         'https://flutter.dev/to/integration-test-on-web\n',
       );
