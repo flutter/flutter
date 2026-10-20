@@ -9,6 +9,7 @@ import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.*;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,7 +40,7 @@ public class FlutterMutatorViewTest {
     assertTrue(view.onInterceptTouchEvent(mock(MotionEvent.class)));
 
     {
-      view.readyToDisplay(mutatorStack, /*left=*/ 1, /*top=*/ 2, /*width=*/ 0, /*height=*/ 0);
+      view.readyToDisplay(mutatorStack, /*left=*/ 1, /*top=*/ 2, /*width=*/ 0, /*height=*/ 0, 1.0f);
       view.layout(1, 2, 1, 2);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
@@ -53,7 +54,7 @@ public class FlutterMutatorViewTest {
     reset(touchProcessor);
 
     {
-      view.readyToDisplay(mutatorStack, /*left=*/ 3, /*top=*/ 4, /*width=*/ 0, /*height=*/ 0);
+      view.readyToDisplay(mutatorStack, /*left=*/ 3, /*top=*/ 4, /*width=*/ 0, /*height=*/ 0, 1.0f);
       view.layout(3, 4, 3, 4);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
@@ -67,7 +68,7 @@ public class FlutterMutatorViewTest {
     reset(touchProcessor);
 
     {
-      view.readyToDisplay(mutatorStack, /*left=*/ 5, /*top=*/ 6, /*width=*/ 0, /*height=*/ 0);
+      view.readyToDisplay(mutatorStack, /*left=*/ 5, /*top=*/ 6, /*width=*/ 0, /*height=*/ 0, 1.0f);
       view.layout(5, 6, 5, 6);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
@@ -81,7 +82,7 @@ public class FlutterMutatorViewTest {
     reset(touchProcessor);
 
     {
-      view.readyToDisplay(mutatorStack, /*left=*/ 7, /*top=*/ 8, /*width=*/ 0, /*height=*/ 0);
+      view.readyToDisplay(mutatorStack, /*left=*/ 7, /*top=*/ 8, /*width=*/ 0, /*height=*/ 0, 1.0f);
       view.layout(7, 8, 7, 8);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
@@ -91,6 +92,36 @@ public class FlutterMutatorViewTest {
       screenMatrix.postTranslate(7, 8);
       assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
+  }
+
+  @Test
+  public void readyToDisplay_usesTheRatioFromEachFrame() {
+    final FlutterMutatorsStack mutatorStack = mock(FlutterMutatorsStack.class);
+    when(mutatorStack.getFinalMatrix()).thenReturn(new Matrix());
+
+    // Built at 1.0 deliberately. If the view still divided by the value it was
+    // constructed with, both matrices below would come back unscaled.
+    final FlutterMutatorView view = new FlutterMutatorView(ctx, 1.0f, null);
+
+    view.readyToDisplay(mutatorStack, /*left=*/ 0, /*top=*/ 0, /*width=*/ 0, /*height=*/ 0, 2.0f);
+    final Matrix half = new Matrix();
+    half.preScale(1 / 2.0f, 1 / 2.0f);
+    assertEquals(half, drawAndCaptureMatrix(view));
+
+    // A later frame is rendered at a different ratio. The view has to follow it.
+    view.readyToDisplay(mutatorStack, /*left=*/ 0, /*top=*/ 0, /*width=*/ 0, /*height=*/ 0, 4.0f);
+    final Matrix quarter = new Matrix();
+    quarter.preScale(1 / 4.0f, 1 / 4.0f);
+    assertEquals(quarter, drawAndCaptureMatrix(view));
+  }
+
+  /** Draws the view onto a mock canvas and returns the matrix it concatenated. */
+  private static Matrix drawAndCaptureMatrix(FlutterMutatorView view) {
+    final Canvas canvas = mock(Canvas.class);
+    view.dispatchDraw(canvas);
+    final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
+    verify(canvas).concat(matrixCaptor.capture());
+    return matrixCaptor.getValue();
   }
 
   @Test

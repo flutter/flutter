@@ -13,6 +13,8 @@ import android.app.Presentation;
 import android.content.Context;
 import android.content.MutableContextWrapper;
 import android.content.res.AssetManager;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.util.SparseArray;
@@ -1497,6 +1499,7 @@ public class PlatformViewsControllerTest {
         /* height=*/ 10,
         /* viewWidth=*/ 10,
         /* viewHeight=*/ 10,
+        /* devicePixelRatio=*/ 1.0f,
         /* mutatorsStack=*/ new FlutterMutatorsStack());
 
     final PlatformOverlayView overlayImageView = mock(PlatformOverlayView.class);
@@ -1643,6 +1646,7 @@ public class PlatformViewsControllerTest {
         /* height=*/ 10,
         /* viewWidth=*/ 10,
         /* viewHeight=*/ 10,
+        /* devicePixelRatio=*/ 1.0f,
         /* mutatorsStack=*/ new FlutterMutatorsStack());
 
     final PlatformOverlayView overlayImageView = mock(PlatformOverlayView.class);
@@ -1817,6 +1821,7 @@ public class PlatformViewsControllerTest {
         /* height=*/ 10,
         /* viewWidth=*/ 10,
         /* viewHeight=*/ 10,
+        /* devicePixelRatio=*/ 1.0f,
         /* mutatorsStack=*/ new FlutterMutatorsStack());
 
     assertEquals(3, flutterView.getChildCount());
@@ -1867,6 +1872,7 @@ public class PlatformViewsControllerTest {
         /* height=*/ 10,
         /* viewWidth=*/ 10,
         /* viewHeight=*/ 10,
+        /* devicePixelRatio=*/ 1.0f,
         /* mutatorsStack=*/ new FlutterMutatorsStack());
 
     assertEquals(2, flutterView.getChildCount());
@@ -1977,6 +1983,59 @@ public class PlatformViewsControllerTest {
 
     // Make sure the overlay ImageVIew is not in the FlutterView
     assertEquals(-1, flutterView.indexOfChild(overlayView));
+  }
+
+  @Test
+  @Config(
+      qualifiers = "420dpi",
+      shadows = {
+        ShadowFlutterSurfaceView.class,
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class
+      })
+  public void onDisplayPlatformView_handsTheFramesRatioToTheMutatorView() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final int platformViewId = 0;
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mock(View.class));
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
+
+    platformViewsController.onBeginFrame();
+    // 420dpi seeds the mutator view with a density of 2.625, so a matrix scaled by 1/2.5 can
+    // only have come from the ratio this call passes.
+    platformViewsController.onDisplayPlatformView(
+        platformViewId,
+        /* x=*/ 0,
+        /* y=*/ 0,
+        /* width=*/ 100,
+        /* height=*/ 100,
+        /* viewWidth=*/ 100,
+        /* viewHeight=*/ 100,
+        /* devicePixelRatio=*/ 2.5f,
+        /* mutatorsStack=*/ new FlutterMutatorsStack());
+
+    final FlutterMutatorView parent = platformViewsController.getPlatformViewParent(platformViewId);
+    // The embedded view is a mock, and drawing it would exercise Mockito rather than the matrix.
+    parent.removeAllViews();
+
+    final Canvas canvas = mock(Canvas.class);
+    parent.dispatchDraw(canvas);
+    final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
+    verify(canvas).concat(matrixCaptor.capture());
+
+    final Matrix expected = new Matrix();
+    expected.preScale(1 / 2.5f, 1 / 2.5f);
+    assertEquals(expected, matrixCaptor.getValue());
   }
 
   @Test

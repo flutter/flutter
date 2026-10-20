@@ -525,6 +525,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    * @param height The height of the platform view.
    * @param viewWidth The original width of the platform view before applying the mutator stack.
    * @param viewHeight The original height of the platform view before applying the mutator stack.
+   * @param devicePixelRatio The ratio the frame being displayed was rendered at.
    * @param mutatorsStack The mutator stack. This member is not intended for public use, and is only
    *     visible for testing.
    */
@@ -537,13 +538,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       int height,
       int viewWidth,
       int viewHeight,
+      float devicePixelRatio,
       @NonNull FlutterMutatorsStack mutatorsStack) {
     if (!initializePlatformViewIfNeeded(viewId)) {
       return;
     }
 
     final FlutterMutatorView parentView = platformViewParent.get(viewId);
-    parentView.readyToDisplay(mutatorsStack, x, y, width, height);
+    parentView.readyToDisplay(mutatorsStack, x, y, width, height, devicePixelRatio);
     parentView.setVisibility(View.VISIBLE);
     parentView.bringToFront();
 

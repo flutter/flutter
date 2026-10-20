@@ -137,6 +137,7 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
         view_rect.GetHeight(),  //
         ToPhysicalPixels(params.sizePoints().width, device_pixel_ratio_),
         ToPhysicalPixels(params.sizePoints().height, device_pixel_ratio_),
+        device_pixel_ratio_,    //
         params.mutatorsStack()  //
     );
     std::unordered_map<int64_t, DlRect>::const_iterator overlay =
