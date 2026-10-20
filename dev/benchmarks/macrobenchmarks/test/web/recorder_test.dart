@@ -20,8 +20,12 @@ Duration _measuredDuration(int seriesOffset, int i) => Duration(microseconds: se
 
 /// Feeds a [Profile] that uses automatic warm-up through `addDataPoint`,
 /// interleaving a reported series and an unreported series.
-Profile _autoProfile({void Function(int sampleIndex)? afterSample}) {
+Profile _autoProfile({
+  void Function(Profile profile)? onCreate,
+  void Function(int sampleIndex)? afterSample,
+}) {
   final profile = Profile(name: 'bench_test');
+  onCreate?.call(profile);
   for (var i = 0; i < _warmUpCount + _measuredCount; i += 1) {
     final bool warmUp = i < _warmUpCount;
     final int j = i - _warmUpCount;
@@ -107,7 +111,10 @@ void main() {
       calls.add((benchmarkName, phase, profile.isWarmingUp));
     };
     final callsAfterSample = <int, int>{};
-    profile = _autoProfile(afterSample: (int i) => callsAfterSample[i] = calls.length);
+    _autoProfile(
+      onCreate: (Profile created) => profile = created,
+      afterSample: (int i) => callsAfterSample[i] = calls.length,
+    );
 
     // Silent through warm-up, fires on the sample that ends warm-up, then
     // stays silent for every measured sample.
