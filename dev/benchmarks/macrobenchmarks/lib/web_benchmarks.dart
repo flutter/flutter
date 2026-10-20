@@ -91,6 +91,13 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
 
 late final LocalBenchmarkServerClient _client;
 
+/// Whether to notify the benchmark server when a benchmark switches from
+/// warm-up to measurement.
+///
+/// Opt-in via `--dart-define=BENCHMARK_REPORT_PHASES=true`. When enabled, a
+/// fire-and-forget `POST /benchmark-phase` is sent at the switch.
+const bool _kReportPhases = bool.fromEnvironment('BENCHMARK_REPORT_PHASES');
+
 Future<void> main(List<String> args) async {
   final parser = ArgParser()
     ..addOption(
@@ -117,6 +124,10 @@ Future<void> main(List<String> args) async {
     return;
   }
 
+  if (_kReportPhases) {
+    Profile.phaseListener = (String name, String phase) =>
+        unawaited(_client.reportPhase(name, phase));
+  }
   await _runBenchmark(nextBenchmark);
   web.window.location.reload();
 }
@@ -405,6 +416,21 @@ class LocalBenchmarkServerClient {
       requestHeaders: headers,
       method: 'POST',
       mimeType: 'application/json',
+    );
+  }
+
+  /// Tells the local benchmark server that the benchmark [name] entered
+  /// [phase] (currently only `'measure'`, sent when warm-up ends).
+  ///
+  /// Only used when `--dart-define=BENCHMARK_REPORT_PHASES=true` is set. The
+  /// server's response is ignored.
+  Future<void> reportPhase(String name, String phase) async {
+    await _requestXhr(
+      serverOrigin.resolve('benchmark-phase'),
+      requestHeaders: headers,
+      method: 'POST',
+      mimeType: 'application/json',
+      sendData: json.encode(<String, String>{'name': name, 'phase': phase}),
     );
   }
 

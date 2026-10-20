@@ -27,7 +27,25 @@ const int _kDefaultWarmUpSampleCount = 200;
 /// The default number of samples collected to compute benchmark statistics.
 ///
 /// This value is used when [Profile.useCustomWarmUp] is set to false.
-const int _kDefaultMeasuredSampleCount = 100;
+///
+/// Defaults to 100 and can be overridden at compile time with
+/// `--dart-define=BENCHMARK_MEASURED_SAMPLES=<n>`.
+const int _kDefaultMeasuredSampleCount = int.fromEnvironment(
+  'BENCHMARK_MEASURED_SAMPLES',
+  defaultValue: 100,
+);
+
+/// Whether [Profile.toJson] includes the raw measured samples of each series.
+///
+/// Opt-in via `--dart-define=BENCHMARK_REPORT_SAMPLES=true`. When unset, the
+/// reported JSON is unchanged.
+const bool _kReportSamples = bool.fromEnvironment('BENCHMARK_REPORT_SAMPLES');
+
+/// Called when a benchmark named [benchmarkName] enters a new [phase].
+///
+/// Currently the only reported phase is `'measure'`, which is reported when
+/// warm-up ends and measured samples start being recorded.
+typedef BenchmarkPhaseListener = void Function(String benchmarkName, String phase);
 
 /// The default total number of samples collected by a benchmark.
 ///
@@ -868,6 +886,13 @@ class Profile {
   /// [kDefaultTotalSampleCount] samples and stops automatically.
   Profile({required this.name, this.useCustomWarmUp = false});
 
+  /// An optional listener notified when any profile changes phase.
+  ///
+  /// Null by default, in which case no notifications are sent. It is invoked
+  /// synchronously from [stopWarmingUp] with the phase `'measure'`, so it
+  /// must not block.
+  static BenchmarkPhaseListener? phaseListener;
+
   /// The name of the benchmark that produced this profile.
   final String name;
 
@@ -894,6 +919,7 @@ class Profile {
       throw StateError('Warm-up already stopped.');
     } else {
       _isWarmingUp = false;
+      Profile.phaseListener?.call(name, 'measure');
     }
   }
 
@@ -1024,7 +1050,12 @@ class Profile {
 
   /// Returns a JSON representation of the profile that will be sent to the
   /// server.
-  Map<String, dynamic> toJson() {
+  ///
+  /// If [reportSamples] is true, each series also reports its measured
+  /// (non-warm-up) sample magnitudes, in recording order, under
+  /// `<series>.samples`. It defaults to the opt-in
+  /// `--dart-define=BENCHMARK_REPORT_SAMPLES=true` setting, which is off.
+  Map<String, dynamic> toJson({bool reportSamples = _kReportSamples}) {
     final scoreKeys = <String>[];
     final json = <String, dynamic>{'name': name, 'scoreKeys': scoreKeys};
 
@@ -1044,6 +1075,12 @@ class Profile {
       json['$key.outlierAverage'] = stats.outlierAverage;
       json['$key.outlierRatio'] = stats.outlierRatio;
       json['$key.noise'] = stats.noise;
+      if (reportSamples) {
+        json['$key.samples'] = <double>[
+          for (final AnnotatedSample sample in stats.samples)
+            if (!sample.isWarmUpValue) sample.magnitude,
+        ];
+      }
     }
 
     json.addAll(extraData);
