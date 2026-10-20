@@ -588,4 +588,135 @@ void main() {
     expect(childUpdates, hasLength(2));
     expect(childUpdates.last, isEmpty);
   });
+
+  test('drops overlays clipped to empty intersection and does not overlap against completely clipped platform view', () {
+    debugEnableHitTestRegionsOnAllPlatforms = true;
+    binding.automaticPointerInterceptorsEnabled = true;
+
+    // PV 1 is inside a 50x50 ClipRect at (0, 0), but translated to (200, 200) -> clipped to empty.
+    final RenderBox clippedOutPv = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 50.0, height: 50.0),
+      child: RenderClipRect(
+        child: RenderTransform(
+          transform: Matrix4.translationValues(200.0, 200.0, 0.0),
+          child: RenderConstrainedBox(
+            additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0),
+            child: _createPlatformView(1),
+          ),
+        ),
+      ),
+    );
+    // Overlay at (210, 210) would overlap PV 1's unclipped bounds, but PV 1 is clipped out.
+    final RenderBox overlayOverUnclippedPv1 = _createHitTarget(width: 50, height: 50);
+
+    // PV 2 is unclipped at (0, 0) to (300, 300).
+    final PlatformViewRenderBox pv2 = _createPlatformView(2);
+    // Overlay inside a 50x50 ClipRect at (10, 10), translated to (100, 100) -> disjoint from clip.
+    final RenderBox clippedOutOverlay = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 50.0, height: 50.0),
+      child: RenderClipRect(
+        child: RenderTransform(
+          transform: Matrix4.translationValues(100.0, 100.0, 0.0),
+          child: _createHitTarget(width: 80, height: 40),
+        ),
+      ),
+    );
+
+    final stack = RenderStack(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[
+        _positioned(left: 0, top: 0, width: 50, height: 50, child: clippedOutPv),
+        _positioned(left: 210, top: 210, width: 50, height: 50, child: overlayOverUnclippedPv1),
+        _positioned(left: 0, top: 0, width: 300, height: 300, child: pv2),
+        _positioned(left: 10, top: 10, width: 50, height: 50, child: clippedOutOverlay),
+      ],
+    );
+
+    layout(stack, phase: EnginePhase.composite);
+    binding.pumpCompleteFrame();
+
+    expect(
+      binding.rootPipelineOwner.debugLastHitTestRegions,
+      equals(Float64List.fromList(<double>[1.0, 0.0, 2.0, 0.0])),
+    );
+  });
+
+  test('RenderAbsorbPointer(absorbing: false) descends into child hit target and toggling to true claims own bounds', () {
+    debugEnableHitTestRegionsOnAllPlatforms = true;
+    binding.automaticPointerInterceptorsEnabled = true;
+
+    final PlatformViewRenderBox pv = _createPlatformView(1);
+    final absorbPointer = RenderAbsorbPointer(
+      absorbing: false,
+      child: RenderStack(
+        textDirection: TextDirection.ltr,
+        children: <RenderBox>[
+          _positioned(left: 10, top: 15, width: 60, height: 40, child: _createHitTarget()),
+        ],
+      ),
+    );
+
+    final stack = RenderStack(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[
+        _positioned(left: 0, top: 0, width: 400, height: 400, child: pv),
+        _positioned(left: 20, top: 30, width: 200, height: 150, child: absorbPointer),
+      ],
+    );
+
+    layout(stack, phase: EnginePhase.composite);
+    binding.pumpCompleteFrame();
+
+    // When absorbing is false, only the inner child rect [30, 45, 90, 85] is claimed.
+    expect(
+      binding.rootPipelineOwner.debugLastHitTestRegions,
+      equals(Float64List.fromList(<double>[1.0, 1.0, 30.0, 45.0, 90.0, 85.0])),
+    );
+
+    // Toggling absorbing to true claims the RenderAbsorbPointer bounds [20, 30, 220, 180]
+    // and stops descending into children.
+    absorbPointer.absorbing = true;
+    binding.pumpCompleteFrame();
+    expect(
+      binding.rootPipelineOwner.debugLastHitTestRegions,
+      equals(Float64List.fromList(<double>[1.0, 1.0, 20.0, 30.0, 220.0, 180.0])),
+    );
+  });
+
+  test('zero-sized PlatformViewRenderBox does not emit a group and zero-sized overlay over valid platform view is dropped', () {
+    debugEnableHitTestRegionsOnAllPlatforms = true;
+    binding.automaticPointerInterceptorsEnabled = true;
+
+    final PlatformViewRenderBox zeroPv = _createPlatformView(1);
+    final RenderBox validOverlay = _createHitTarget(width: 100, height: 50);
+
+    final stack = RenderStack(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[
+        _positioned(left: 0, top: 0, width: 0, height: 0, child: zeroPv),
+        _positioned(left: 0, top: 0, width: 100, height: 50, child: validOverlay),
+      ],
+    );
+
+    layout(stack, phase: EnginePhase.composite);
+    binding.pumpCompleteFrame();
+
+    // Only a zero-sized platform view is present -> returns null.
+    expect(binding.rootPipelineOwner.debugLastHitTestRegions, isNull);
+
+    // Add a valid platform view (id 2) and a zero-sized overlay on top of it.
+    final PlatformViewRenderBox validPv = _createPlatformView(2);
+    final RenderBox zeroOverlay = _createHitTarget(width: 0, height: 0);
+    stack.add(_positioned(left: 0, top: 0, width: 300, height: 300, child: validPv));
+    stack.add(_positioned(left: 50, top: 50, width: 0, height: 0, child: zeroOverlay));
+
+    pumpFrame(phase: EnginePhase.composite);
+    binding.pumpCompleteFrame();
+
+    // Zero-sized PV 1 is omitted and zero-sized overlay over PV 2 is dropped.
+    expect(
+      binding.rootPipelineOwner.debugLastHitTestRegions,
+      equals(Float64List.fromList(<double>[2.0, 0.0])),
+    );
+  });
 }

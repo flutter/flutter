@@ -683,4 +683,62 @@ void main() {
       expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
     },
   );
+
+  testWidgets('overlay painted after PV2 that overlaps disjoint PV1 is appended to PV2 group', (
+    WidgetTester tester,
+  ) async {
+    configureTestView(tester);
+    debugEnableHitTestRegionsOnAllPlatforms = true;
+    RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            // PV1 at (0, 0) to (100, 100).
+            Positioned(left: 0, top: 0, width: 100, height: 100, child: _buildPlatformView(1)),
+            // Overlay A painted between PV1 and PV2, overlapping PV1.
+            const Positioned(
+              left: 10,
+              top: 10,
+              width: 50,
+              height: 50,
+              child: ColoredBox(color: Color(0xFFFF0000)),
+            ),
+            // PV2 at (300, 300) to (400, 400), disjoint from PV1.
+            Positioned(left: 300, top: 300, width: 100, height: 100, child: _buildPlatformView(2)),
+            // Overlay B painted after PV2, physically overlapping PV1 (at index 0) but disjoint from PV2.
+            const Positioned(
+              left: 20,
+              top: 20,
+              width: 40,
+              height: 40,
+              child: ColoredBox(color: Color(0xFF00FF00)),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
+      equals(
+        Float64List.fromList(<double>[
+          1.0,
+          1.0,
+          10.0,
+          10.0,
+          60.0,
+          60.0,
+          2.0,
+          1.0,
+          20.0,
+          20.0,
+          60.0,
+          60.0,
+        ]),
+      ),
+    );
+  });
 }
