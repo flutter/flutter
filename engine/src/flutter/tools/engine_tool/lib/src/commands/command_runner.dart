@@ -49,7 +49,12 @@ final class ToolCommandRunner extends CommandRunner<int> {
         usageLineLength: _usageLineLength,
       ),
       RunCommand(environment: environment, configs: configs, usageLineLength: _usageLineLength),
-      LintCommand(environment: environment, usageLineLength: _usageLineLength),
+      LintCommand(
+        environment: environment,
+        configs: configs,
+        help: help,
+        usageLineLength: _usageLineLength,
+      ),
       TestCommand(
         environment: environment,
         configs: configs,

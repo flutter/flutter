@@ -38,19 +38,12 @@ final class BuildPlan {
     required List<Build> builds,
     String? Function() defaultBuild = _defaultHostDebug,
   }) {
-    final Build build = () {
-      final String? name = args.option(_flagConfig) ?? defaultBuild();
-      final Build? config = builds.firstWhereOrNull(
-        (b) => mangleConfigName(environment, b.name) == name,
-      );
-      if (config == null) {
-        if (name == null) {
-          throw FatalError('No build configuration specified.');
-        }
-        throw FatalError('Unknown build configuration: $name');
-      }
-      return config;
-    }();
+    final Build build = buildFromArgResults(
+      args,
+      environment,
+      builds: builds,
+      defaultBuild: defaultBuild,
+    );
     return BuildPlan._(
       build: build,
       strategy: BuildStrategy.values.byName(args.option(_flagStrategy)!),
@@ -82,12 +75,7 @@ final class BuildPlan {
         _checkExtraGnArgs(value);
         return value;
       }(),
-      backend: () {
-        final String? name = args.option(_flagBackend);
-        return name == null
-            ? BuildBackend.fromEnvironment(environment)
-            : BuildBackend.values.byName(name);
-      }(),
+      backend: backendFromArgResults(args, environment),
     );
   }
 
@@ -103,6 +91,36 @@ final class BuildPlan {
     if (!useRbe && strategy == BuildStrategy.remote) {
       throw FatalError('Cannot use remote builds without RBE enabled.\n\n$_rbeInstructions');
     }
+  }
+
+  /// The build `--config` names among [builds] (added by [addConfigOption]),
+  /// or [defaultBuild]'s when the option was not given.
+  static Build buildFromArgResults(
+    ArgResults args,
+    Environment environment, {
+    required List<Build> builds,
+    String? Function() defaultBuild = _defaultHostDebug,
+  }) {
+    final String? name = args.option(_flagConfig) ?? defaultBuild();
+    final Build? config = builds.firstWhereOrNull(
+      (b) => mangleConfigName(environment, b.name) == name,
+    );
+    if (config == null) {
+      if (name == null) {
+        throw FatalError('No build configuration specified.');
+      }
+      throw FatalError('Unknown build configuration: $name');
+    }
+    return config;
+  }
+
+  /// The build system `--backend` names (added by [addBackendOption]), or
+  /// the environment's default (`ET_BACKEND`, `gn` without it).
+  static BuildBackend backendFromArgResults(ArgResults args, Environment environment) {
+    final String? name = args.option(_flagBackend);
+    return name == null
+        ? BuildBackend.fromEnvironment(environment)
+        : BuildBackend.values.byName(name);
   }
 
   /// Arguments that cannot be provided to [BuildPlan.extraGnArgs].
@@ -168,37 +186,7 @@ final class BuildPlan {
     required Map<String, BuilderConfig> configs,
   }) {
     // Add --config.
-    final List<Build> builds = _extractBuilds(
-      environment.platform,
-      runnableConfigs: _runnableBuildConfigs(environment.platform, configsByName: configs),
-      hideCiSpecificBuilds: help && !environment.verbose,
-    );
-    debugCheckBuilds(builds);
-    parser.addOption(
-      _flagConfig,
-      abbr: 'c',
-      help:
-          ''
-          'Selects a build configuration for the current platform.\n'
-          '\n'
-          'If omitted, et attempts '
-          'to default to a suitable target platform. This is typically a '
-          '"host_debug" build when building on a supported desktop OS, or a '
-          'suitable build when targeting (via "et run") a flutter app.\n'
-          '\n'
-          '${environment.verbose ? ''
-                    'Since verbose mode was selected, both local development '
-                    'configurations and configurations that are typically only '
-                    'used on CI will be visible, including possible duplicates.' : ''
-                    'Configurations include (use --verbose for more details):'}',
-      allowed: [for (final config in builds) mangleConfigName(environment, config.name)]..sort(),
-      allowedHelp: environment.verbose
-          ? {
-              for (final config in builds)
-                mangleConfigName(environment, config.name): config.description,
-            }
-          : null,
-    );
+    final List<Build> builds = addConfigOption(parser, environment, help: help, configs: configs);
 
     // Add --lto.
     parser.addFlag(
@@ -240,21 +228,7 @@ final class BuildPlan {
     parser.addOption(_flagConcurrency, abbr: 'j', help: 'How many jobs to run in parallel.');
 
     // Add --backend.
-    parser.addOption(
-      _flagBackend,
-      allowed: BuildBackend.values.map((e) => e.name),
-      allowedHelp: {
-        BuildBackend.gn.name: "GN and ninja: the engine's build.",
-        BuildBackend.bazel.name:
-            'Bazel, with the configuration generated for the build '
-            '(flutter/ci/builders/configs.bazelrc). Experimental: Linux x64 host builds only.',
-      },
-      help:
-          ''
-          'Which build system runs the build.\n'
-          'ET_BACKEND in the environment sets the default; without it, gn.',
-      hide: !environment.verbose,
-    );
+    addBackendOption(parser, environment);
 
     // Add --gn-args.
     parser.addMultiOption(
@@ -270,6 +244,71 @@ final class BuildPlan {
     );
 
     return builds;
+  }
+
+  /// Adds `--config` to [parser]; returns the builds it can name.
+  ///
+  /// [buildFromArgResults] reads it. Commands that run a build take the whole
+  /// of [configureArgParser]; one that only needs to know which build
+  /// (`et lint`, for the build directory its linter reads) takes this.
+  @useResult
+  static List<Build> addConfigOption(
+    ArgParser parser,
+    Environment environment, {
+    required bool help,
+    required Map<String, BuilderConfig> configs,
+  }) {
+    final List<Build> builds = _extractBuilds(
+      environment.platform,
+      runnableConfigs: _runnableBuildConfigs(environment.platform, configsByName: configs),
+      hideCiSpecificBuilds: help && !environment.verbose,
+    );
+    debugCheckBuilds(builds);
+    parser.addOption(
+      _flagConfig,
+      abbr: 'c',
+      help:
+          ''
+          'Selects a build configuration for the current platform.\n'
+          '\n'
+          'If omitted, et attempts '
+          'to default to a suitable target platform. This is typically a '
+          '"host_debug" build when building on a supported desktop OS, or a '
+          'suitable build when targeting (via "et run") a flutter app.\n'
+          '\n'
+          '${environment.verbose ? ''
+                    'Since verbose mode was selected, both local development '
+                    'configurations and configurations that are typically only '
+                    'used on CI will be visible, including possible duplicates.' : ''
+                    'Configurations include (use --verbose for more details):'}',
+      allowed: [for (final config in builds) mangleConfigName(environment, config.name)]..sort(),
+      allowedHelp: environment.verbose
+          ? {
+              for (final config in builds)
+                mangleConfigName(environment, config.name): config.description,
+            }
+          : null,
+    );
+    return builds;
+  }
+
+  /// Adds `--backend` to [parser]; [backendFromArgResults] reads it.
+  static void addBackendOption(ArgParser parser, Environment environment) {
+    parser.addOption(
+      _flagBackend,
+      allowed: BuildBackend.values.map((e) => e.name),
+      allowedHelp: {
+        BuildBackend.gn.name: "GN and ninja: the engine's build.",
+        BuildBackend.bazel.name:
+            'Bazel, with the configuration generated for the build '
+            '(flutter/ci/builders/configs.bazelrc). Experimental: Linux x64 host builds only.',
+      },
+      help:
+          ''
+          'Which build system runs the build.\n'
+          'ET_BACKEND in the environment sets the default; without it, gn.',
+      hide: !environment.verbose,
+    );
   }
 
   /// The build configuration to use.
