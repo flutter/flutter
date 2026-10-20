@@ -73,6 +73,33 @@ _OS_CONSTRAINTS = {
     for os in _OS_CONSTRAINTS
 ]
 
+# GN's `current_toolchain == host_toolchain`, which the engine's files test
+# for "the host's own build" (testing.gni's enable_unittests, the shell's
+# tester, glfw's shell), read in Bazel's terms: the target OS is one a host
+# runs. A cross-compile for the host's own OS and another CPU is the one GN
+# case this does not tell apart. The converter names the predicate
+# is_host_toolchain (gn_eval's hostToolchainPredicate); the complement is
+# the OSes only a target runs.
+_HOST_OSES = [
+    "linux",
+    "mac",
+    "win",
+]
+
+selects.config_setting_group(
+    name = "host_toolchain",
+    match_any = [_OS_CONSTRAINTS[os] for os in _HOST_OSES],
+)
+
+selects.config_setting_group(
+    name = "not_host_toolchain",
+    match_any = [
+        constraint
+        for os, constraint in _OS_CONSTRAINTS.items()
+        if os not in _HOST_OSES
+    ],
+)
+
 # GN's is_asan (build/config/sanitizers/sanitizers.gni; tools/gn --asan,
 # which Linux's host_debug_unopt test builder passes): AddressSanitizer on
 # every compile and link. The toolchain's `asan` feature selects on it

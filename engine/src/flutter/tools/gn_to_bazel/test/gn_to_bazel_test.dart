@@ -428,6 +428,66 @@ if (current_toolchain == unknown_toolchain) {
       );
     });
 
+    test(
+      '`current_toolchain == host_toolchain` with neither assumed is the host predicate',
+      () async {
+        // The web scope: the toolchains open (a wasm build has the host's
+        // toolchain beside its own), the comparison GN's "the host's own build".
+        final open = Assumptions(const <String, GnValue>{});
+        final GnFileEvaluation evaluation = await evaluate('''
+if (current_toolchain == host_toolchain) {
+  source_set("host_only") {
+    sources = [ "a.cc" ]
+  }
+}
+if (host_toolchain != current_toolchain) {
+  source_set("target_only") {
+    sources = [ "b.cc" ]
+  }
+}
+''', assumptions: open);
+        expect(evaluation.targets[0].condition, const ConditionVariable(hostToolchainPredicate));
+        expect(
+          evaluation.targets[1].condition,
+          const ConditionVariable(hostToolchainPredicate).negated,
+        );
+        // Emitted: the host group of build/bazel, and its complement in a
+        // conjunction.
+        final String output = await convert('''
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (current_toolchain == host_toolchain) {
+    sources += [ "host.cc" ]
+  }
+  if (is_wasm && current_toolchain != host_toolchain) {
+    sources += [ "wasm_target.cc" ]
+  }
+}
+''', assumptions: open);
+        expect(output, contains('load("@bazel_skylib//lib:selects.bzl", "selects")'));
+        expect(
+          output,
+          contains(
+            '        "//engine/src/flutter/build/bazel:host_toolchain": [\n'
+            '            "host.cc",  # current_toolchain == host_toolchain\n'
+            '        ],\n',
+          ),
+        );
+        expect(
+          output,
+          contains(
+            'selects.config_setting_group(\n'
+            '    name = "when_is_wasm_and_not_is_host_toolchain",\n'
+            '    match_all = [\n'
+            '        "@platforms//os:emscripten",\n'
+            '        "//engine/src/flutter/build/bazel:not_host_toolchain",\n'
+            '    ],\n'
+            ')\n',
+          ),
+        );
+      },
+    );
+
     test('knows the OS predicates and the values of one variable exclude each other', () {
       const Condition mac = ConditionVariable('is_mac');
       const Condition ios = ConditionVariable('is_ios');
