@@ -112,6 +112,7 @@ Future<int> run(
       body: () async {
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
+          extensionManager: toolDeps.extensionManager,
           featureFlags: featureFlags,
           toolContext: toolDeps.toolContext,
           verboseHelp: verboseHelp,

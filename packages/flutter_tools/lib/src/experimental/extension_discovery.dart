@@ -215,6 +215,15 @@ class ExtensionDiscovery {
   /// Active extension connections.
   List<ExtensionConnection> get connections => List<ExtensionConnection>.unmodifiable(_connections);
 
+  /// Spawns an in-process [entryPoint] isolate connection and completes the
+  /// capability handshake.
+  Future<ExtensionConnection> spawnEntryPoint(
+    ExtensionEntryPoint entryPoint, {
+    String? extensionName,
+  }) {
+    return ExtensionConnection.spawn(entryPoint, logger: _logger, extensionName: extensionName);
+  }
+
   /// Registers an active [connection].
   void registerConnection(ExtensionConnection connection) {
     _logger.printTrace('ExtensionDiscovery registering active connection.');

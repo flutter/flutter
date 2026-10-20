@@ -34,7 +34,7 @@ class ExtensionManager {
     required this.hostPlatform,
     required Logger logger,
     ExtensionDiscovery? discovery,
-    this._entryPoints = const <ExtensionEntryPoint>[],
+    @visibleForTesting this._entryPoints = const <ExtensionEntryPoint>[],
     this._extensionFinder,
     this._kernelCompiler,
     ExtensionUriSpawner? uriSpawner,
@@ -59,8 +59,16 @@ class ExtensionManager {
 
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
+  bool get isDisabled => _isDisabled;
+  bool _isDisabled = false;
   bool _entryPointsSpawned = false;
   Future<void>? _pendingInit;
+
+  /// Disables tool extension discovery and initialization for the current CLI
+  /// invocation (for example, when `--no-extensions` is passed).
+  void disable() {
+    _isDisabled = true;
+  }
 
   final _discoveredByPackageName = <String, DiscoveredProjectExtension>{};
   final _discoveredDirs = <String>{};
@@ -80,7 +88,7 @@ class ExtensionManager {
   /// Discovers project extensions starting from [startDir] using static
   /// `extension/flutter_tools/config.yaml` metadata without spawning isolates.
   Future<List<DiscoveredProjectExtension>> discoverExtensions({Directory? startDir}) async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
+    if (_isDisabled || !_featureFlags.isToolExtensionsEnabled) {
       return const <DiscoveredProjectExtension>[];
     }
     final ProjectExtensionFinder? finder = _extensionFinder;
@@ -127,7 +135,7 @@ class ExtensionManager {
   }
 
   Future<void> _doInitialize({Set<String>? requiredServices, Directory? startDir}) async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
+    if (_isDisabled || !_featureFlags.isToolExtensionsEnabled) {
       _isInitialized = true;
       return;
     }
@@ -190,11 +198,7 @@ class ExtensionManager {
       'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
     for (final entryPoint in entryPoints) {
-      // ignore: invalid_use_of_visible_for_testing_member
-      final ExtensionConnection connection = await ExtensionConnection.spawn(
-        entryPoint,
-        logger: _logger,
-      );
+      final ExtensionConnection connection = await _discovery.spawnEntryPoint(entryPoint);
       await _registerOrDisposeConnection(connection);
     }
     await _populateServiceClients();
@@ -280,6 +284,7 @@ class ExtensionManager {
     _failedExtensionNames.clear();
     _registeredClientConnections.clear();
     _entryPointsSpawned = false;
+    _isDisabled = false;
     _isInitialized = false;
     _pendingInit = null;
     _connectionGeneration++;
