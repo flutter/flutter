@@ -13,11 +13,14 @@ import android.app.Presentation;
 import android.content.Context;
 import android.content.MutableContextWrapper;
 import android.content.res.AssetManager;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.util.SparseArray;
+import android.view.AttachedSurfaceControl;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -51,6 +54,7 @@ import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.view.TextureRegistry;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -2119,6 +2123,155 @@ public class PlatformViewsControllerTest {
         MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
     wrapper.onTouchEvent(moveEvent);
     assertFalse(wrapper.getFlutterWonGesture());
+  }
+
+  private static class TransactionTrackingController extends PlatformViewsController {
+    final List<SurfaceControl.Transaction> transactions = new ArrayList<>();
+
+    @Override
+    SurfaceControl.Transaction newTransaction() {
+      SurfaceControl.Transaction tx = spy(super.newTransaction());
+      transactions.add(tx);
+      return tx;
+    }
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onDisplayPlatformView_appliesSurfaceControlAlphaAndCropForSurfaceView() {
+    final TransactionTrackingController controller = new TransactionTrackingController();
+    final int platformViewId = 0;
+
+    final Context context = ApplicationProvider.getApplicationContext();
+    final SurfaceView surfaceView = spy(new SurfaceView(context));
+    final SurfaceControl surfaceControl = new SurfaceControl.Builder().setName("test").build();
+    doReturn(surfaceControl).when(surfaceView).getSurfaceControl();
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(surfaceView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    controller.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    controller.setFlutterJNI(jni);
+    final FlutterView flutterView = spy(attach(jni, controller));
+    final AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    doReturn(rootSurfaceControl).when(flutterView).getRootSurfaceControl();
+    controller.attachToView(flutterView);
+
+    createPlatformView(jni, controller, platformViewId, "testType", /*hybrid=*/ true);
+
+    final FlutterMutatorsStack mutatorsStack = new FlutterMutatorsStack();
+    mutatorsStack.pushTransform(new float[] {1, 0, 10, 0, 1, 20, 0, 0, 1});
+    mutatorsStack.pushClipRect(30, 40, 90, 80);
+    mutatorsStack.pushOpacity(0.5f);
+
+    controller.onBeginFrame();
+    controller.onDisplayPlatformView(platformViewId, 10, 20, 100, 80, 100, 80, mutatorsStack);
+
+    verify(surfaceView).setAlpha(0.5f);
+    assertEquals(1, controller.transactions.size());
+    final SurfaceControl.Transaction tx = controller.transactions.get(0);
+    verify(tx).setCrop(surfaceControl, new Rect(30, 40, 90, 80));
+    verify(rootSurfaceControl, never()).applyTransactionOnDraw(any());
+
+    controller.onEndFrame();
+    verify(rootSurfaceControl).applyTransactionOnDraw(tx);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onDisplayPlatformView_defersSurfaceControlAlphaAndCropUntilSurfaceCreated() {
+    final TransactionTrackingController controller = new TransactionTrackingController();
+    final int platformViewId = 0;
+
+    final Context context = ApplicationProvider.getApplicationContext();
+    final SurfaceView surfaceView = spy(new SurfaceView(context));
+    final SurfaceHolder surfaceHolder = mock(SurfaceHolder.class);
+    doReturn(surfaceHolder).when(surfaceView).getHolder();
+    doReturn(null).when(surfaceView).getSurfaceControl();
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(surfaceView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    controller.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    controller.setFlutterJNI(jni);
+    final FlutterView flutterView = spy(attach(jni, controller));
+    final AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    doReturn(rootSurfaceControl).when(flutterView).getRootSurfaceControl();
+    controller.attachToView(flutterView);
+
+    createPlatformView(jni, controller, platformViewId, "testType", /*hybrid=*/ true);
+
+    final FlutterMutatorsStack mutatorsStack = new FlutterMutatorsStack();
+    mutatorsStack.pushOpacity(0.25f);
+
+    controller.onBeginFrame();
+    controller.onDisplayPlatformView(platformViewId, 0, 0, 100, 80, 100, 80, mutatorsStack);
+    // Calling onDisplayPlatformView again while SurfaceControl is still null should not register
+    // a duplicate callback.
+    controller.onDisplayPlatformView(platformViewId, 0, 0, 100, 80, 100, 80, mutatorsStack);
+    controller.onEndFrame();
+
+    verify(surfaceView, times(2)).setAlpha(0.25f);
+    final ArgumentCaptor<SurfaceHolder.Callback> callbackCaptor =
+        ArgumentCaptor.forClass(SurfaceHolder.Callback.class);
+    verify(surfaceHolder, times(1)).addCallback(callbackCaptor.capture());
+    assertTrue(controller.transactions.isEmpty());
+
+    final SurfaceControl surfaceControl = new SurfaceControl.Builder().setName("test").build();
+    doReturn(surfaceControl).when(surfaceView).getSurfaceControl();
+
+    callbackCaptor.getValue().surfaceCreated(surfaceHolder);
+
+    assertEquals(1, controller.transactions.size());
+    final SurfaceControl.Transaction tx = controller.transactions.get(0);
+    verify(tx).setCrop(surfaceControl, new Rect(0, 0, 100, 80));
+    verify(rootSurfaceControl).applyTransactionOnDraw(tx);
+    verify(surfaceHolder).removeCallback(callbackCaptor.getValue());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void detachFromView_closesPendingSurfaceControlTransaction() {
+    final TransactionTrackingController controller = new TransactionTrackingController();
+    final int platformViewId = 0;
+
+    final Context context = ApplicationProvider.getApplicationContext();
+    final SurfaceView surfaceView = spy(new SurfaceView(context));
+    final SurfaceControl surfaceControl = new SurfaceControl.Builder().setName("test").build();
+    doReturn(surfaceControl).when(surfaceView).getSurfaceControl();
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(surfaceView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    controller.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    controller.setFlutterJNI(jni);
+    attach(jni, controller);
+
+    createPlatformView(jni, controller, platformViewId, "testType", /*hybrid=*/ true);
+
+    final FlutterMutatorsStack mutatorsStack = new FlutterMutatorsStack();
+    mutatorsStack.pushOpacity(0.75f);
+
+    controller.onBeginFrame();
+    controller.onDisplayPlatformView(platformViewId, 0, 0, 100, 80, 100, 80, mutatorsStack);
+    assertEquals(1, controller.transactions.size());
+    final SurfaceControl.Transaction tx = controller.transactions.get(0);
+    verify(tx, never()).close();
+
+    controller.detachFromView();
+    verify(tx).close();
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
