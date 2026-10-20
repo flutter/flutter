@@ -6,14 +6,10 @@
 
 #include <array>
 #include <atomic>
-#include <chrono>
-#include <cstdio>
-#include <cstdlib>
-#include <mutex>
 #include <optional>
 
 #include "dart_api.h"
-#include "flutter/fml/time/time_point.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/raw_ptr.h"
@@ -97,63 +93,6 @@ class SamplerCache {
       entries_;
 };
 
-// Per-second replay totals, logged to stderr when FLUTTER_GPU_REPLAY_STATS
-// is set. Timestamps are wall-clock microseconds so they line up with
-// app-side logs.
-// TODO(gpu-raster-timeline): Prototype instrumentation. Replace with trace
-// events before upstreaming.
-class ReplayStats {
- public:
-  static void Record(int64_t replay_micros, size_t draws, size_t failed) {
-    static const bool enabled = std::getenv("FLUTTER_GPU_REPLAY_STATS");
-    if (!enabled) {
-      return;
-    }
-    static std::mutex mutex;
-    static ReplayStats stats;
-    std::scoped_lock lock(mutex);
-    stats.Add(replay_micros, draws, failed);
-  }
-
- private:
-  int64_t window_start_us_ = 0;
-  size_t submits_ = 0;
-  size_t draws_ = 0;
-  size_t failed_ = 0;
-  int64_t replay_us_ = 0;
-  int64_t replay_max_us_ = 0;
-
-  static int64_t WallMicros() {
-    return std::chrono::duration_cast<std::chrono::microseconds>(
-               std::chrono::system_clock::now().time_since_epoch())
-        .count();
-  }
-
-  void Add(int64_t replay_micros, size_t draws, size_t failed) {
-    const int64_t now = WallMicros();
-    if (window_start_us_ == 0) {
-      window_start_us_ = now;
-    }
-    submits_++;
-    draws_ += draws;
-    failed_ += failed;
-    replay_us_ += replay_micros;
-    replay_max_us_ = std::max(replay_max_us_, replay_micros);
-    if (now - window_start_us_ < 1000000) {
-      return;
-    }
-    std::fprintf(stderr,
-                 "FGPU_REPLAY {\"start_us\":%lld,\"end_us\":%lld,"
-                 "\"submits\":%zu,\"draws\":%zu,\"failed\":%zu,"
-                 "\"replay_ms\":%.3f,\"replay_max_ms\":%.3f}\n",
-                 static_cast<long long>(window_start_us_),
-                 static_cast<long long>(now), submits_, draws_, failed_,
-                 replay_us_ / 1000.0, replay_max_us_ / 1000.0);
-    std::fflush(stderr);
-    *this = ReplayStats{};
-  }
-};
-
 class PassReplayer {
  public:
   PassReplayer(impeller::Context& context,
@@ -175,7 +114,7 @@ class PassReplayer {
     return std::move(pipelines_);
   }
 
-  void Run(size_t& draws, size_t& failed) {
+  void Run() {
     for (const auto& [op, index] : recording_.ops) {
       switch (op) {
         case RecordedOp::kBindUniform: {
@@ -232,10 +171,7 @@ class PassReplayer {
           viewport_ = recording_.viewports[index];
           break;
         case RecordedOp::kDraw:
-          draws++;
-          if (!ReplayDraw(recording_.draws[index])) {
-            failed++;
-          }
+          ReplayDraw(recording_.draws[index]);
           break;
       }
     }
@@ -301,10 +237,10 @@ class PassReplayer {
     return pipelines_[index];
   }
 
-  bool ReplayDraw(const RenderPassRecording::Draw& draw) {
+  void ReplayDraw(const RenderPassRecording::Draw& draw) {
     const auto& pipeline = ResolvePipeline(draw.pipeline_state);
     if (!pipeline) {
-      return false;
+      return;
     }
     pass_.SetPipeline(impeller::PipelineRef(pipeline));
 
@@ -358,7 +294,10 @@ class PassReplayer {
     if (scissor_.has_value()) {
       pass_.SetScissor(scissor_.value());
     }
-    return pass_.Draw().ok();
+    if (auto status = pass_.Draw(); !status.ok()) {
+      VALIDATION_LOG << "Failed to encode a recorded draw: "
+                     << status.message();
+    }
   }
 };
 
@@ -410,9 +349,7 @@ fml::RefPtr<fml::TaskRunner> GetReplayTaskRunner() {
 bool ReplayAndSubmit(const std::shared_ptr<impeller::Context>& context,
                      std::shared_ptr<const CommandBufferRecording> recording,
                      impeller::CommandBuffer::CompletionCallback completion) {
-  const fml::TimePoint start = fml::TimePoint::Now();
-  size_t draws = 0;
-  size_t failed = 0;
+  TRACE_EVENT0("flutter", "FlutterGPU::ReplayAndSubmit");
   // Backends report kError themselves for some failed submissions, so the
   // completion runs at most once however the submission fails.
   auto completed = std::make_shared<std::atomic<bool>>(false);
@@ -450,7 +387,7 @@ bool ReplayAndSubmit(const std::shared_ptr<impeller::Context>& context,
       return fail();
     }
     PassReplayer replayer(*context, *encodable.render_pass, *pass, samplers);
-    replayer.Run(draws, failed);
+    replayer.Run();
     for (auto& pipeline : replayer.TakePipelines()) {
       if (pipeline) {
         pipelines.push_back(std::move(pipeline));
@@ -472,8 +409,6 @@ bool ReplayAndSubmit(const std::shared_ptr<impeller::Context>& context,
     complete(impeller::CommandBuffer::Status::kError);
   }
   context->DisposeThreadLocalCachedResources();
-  ReplayStats::Record((fml::TimePoint::Now() - start).ToMicroseconds(), draws,
-                      failed);
   return status.ok();
 }
 

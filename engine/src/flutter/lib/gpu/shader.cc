@@ -8,6 +8,7 @@
 #include <cstring>
 #include <utility>
 
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/gpu/recording.h"
 #include "fml/make_copyable.h"
@@ -167,6 +168,7 @@ void Shader::ScheduleRegistration(Context& context) {
   registration_->Set(promise->get_future().share());
   auto task = [context = context.GetContextShared(), name = GetScopedName(),
                stage = stage_, code = code_mapping_, promise]() {
+    TRACE_EVENT0("flutter", "FlutterGPU::RegisterShader");
     auto& library = *context->GetShaderLibrary();
     // After a reload an earlier version still occupies the scoped slot.
     // Evict it, and the pipelines built from it, before registering the new
