@@ -305,10 +305,14 @@ abstract class CkSurface extends Surface {
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) async {
     await _initialized.future;
+    _drawPicture(picture as CkPicture);
+  }
+
+  /// Synchronously clears the surface, draws [picture] into it, and flushes.
+  void _drawPicture(CkPicture picture) {
     final canvas = CkCanvas.fromSkCanvas(_skSurface!.getCanvas());
-    final ckPicture = picture as CkPicture;
     canvas.clear(const ui.Color(0x00000000));
-    canvas.drawPicture(ckPicture);
+    canvas.drawPicture(picture);
     _skSurface!.flush();
   }
 
@@ -334,14 +338,39 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   }
 
   @override
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) async {
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(
+    BitmapSize size,
+    List<ui.Picture> pictures,
+  ) async {
     await _initialized.future;
-    final bitmaps = <DomImageBitmap>[];
+    // Everything from here until all bitmaps have been requested must be
+    // synchronous so that no other operation can resize or draw into the
+    // canvas in between. `createImageBitmap` copies the canvas contents at the
+    // time it is called; only the resolution of the returned promise is
+    // asynchronous.
+    setSize(size);
+    final bitmapFutures = <Future<DomImageBitmap>>[];
     for (final picture in pictures) {
-      await rasterizeToCanvas(picture);
-      bitmaps.add(await createImageBitmap(_canvas));
+      _drawPicture(picture as CkPicture);
+      bitmapFutures.add(createImageBitmap(_canvas));
     }
-    return bitmaps;
+    return Future.wait(bitmapFutures);
+  }
+
+  @override
+  Future<void> rasterizeToCanvasSource(
+    BitmapSize size,
+    List<ui.Picture> pictures,
+    void Function(int index, DomCanvasImageSource source) onRendered,
+  ) async {
+    await _initialized.future;
+    // Everything from here on must be synchronous so that no other operation
+    // can resize or draw into the canvas while `onRendered` reads from it.
+    setSize(size);
+    for (var i = 0; i < pictures.length; i++) {
+      _drawPicture(pictures[i] as CkPicture);
+      onRendered(i, canvasImageSource);
+    }
   }
 
   @override
