@@ -53,7 +53,7 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
   // of config.gni's arguments, which no GN file declares as targets.
   ConvertedFile(
     '//flutter/common',
-    appendix: '''
+    appendix: r'''
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
@@ -161,6 +161,83 @@ selects.config_setting_group(
         "@platforms//os:windows",
     ],
 )
+
+# GN's full_target_platform_name (config.gni: `<target_platform_name>-<target_cpu>`,
+# mac spelled darwin and win windows), the pairs tools/gn builds, each the
+# group of its OS and CPU constraints: the archives' and font-subset's
+# paths are spelled out per pair (one select() case each), so a string
+# such as "$full_target_platform_name/font-subset.zip" needs no string
+# arithmetic in Starlark.
+_TARGET_PLATFORMS = {
+    "android-arm": [
+        "@platforms//os:android",
+        "@platforms//cpu:armv7",
+    ],
+    "android-arm64": [
+        "@platforms//os:android",
+        "@platforms//cpu:aarch64",
+    ],
+    "android-x64": [
+        "@platforms//os:android",
+        "@platforms//cpu:x86_64",
+    ],
+    "android-x86": [
+        "@platforms//os:android",
+        "@platforms//cpu:x86_32",
+    ],
+    "darwin-arm64": [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+    "darwin-x64": [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+    "fuchsia-arm64": [
+        "@platforms//os:fuchsia",
+        "@platforms//cpu:aarch64",
+    ],
+    "fuchsia-x64": [
+        "@platforms//os:fuchsia",
+        "@platforms//cpu:x86_64",
+    ],
+    "ios-arm64": [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+    ],
+    "ios-x64": [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+    ],
+    "linux-arm64": [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+    ],
+    "linux-x64": [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    "wasm-wasm": [
+        "@platforms//os:emscripten",
+        "@platforms//cpu:wasm32",
+    ],
+    "windows-arm64": [
+        "@platforms//os:windows",
+        "@platforms//cpu:aarch64",
+    ],
+    "windows-x64": [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+}
+
+[
+    selects.config_setting_group(
+        name = "platform_" + name.replace("-", "_"),
+        match_all = constraints,
+    )
+    for name, constraints in _TARGET_PLATFORMS.items()
+]
 
 # config("export_dynamic_symbols") and config("export_dynamic_test_symbols")
 # in //flutter/BUILD.gn read these.
