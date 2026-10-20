@@ -207,6 +207,12 @@ TEST_F(FlTaskRunnerTest, DueTaskRunsWithoutDelay) {
         return kSuccess;
       }));
 
+  // Process any events left over from the fixture setup, so the next iteration
+  // only has the task runner to dispatch.
+  while (g_main_context_pending(nullptr)) {
+    g_main_context_iteration(nullptr, FALSE);
+  }
+
   uint64_t target_time_nanos = g_get_monotonic_time() * 1000;
   fl_task_runner_post_flutter_task(task_runner, make_task(1),
                                    target_time_nanos);
