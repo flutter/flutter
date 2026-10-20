@@ -1024,6 +1024,13 @@ config("optimize") {
   } else if (is_wasm) {
     if (wasm_prioritize_size) {
       cflags = [ "-Oz" ]
+
+      # In Emscripten, `-Wl,-O2` (from `common_optimize_on_ldflags`) is
+      # forwarded directly to `wasm-ld` without changing `em++`'s driver-level
+      # `OPT_LEVEL`, so `config("no_optimize")` links with `wasm-ld -O2` while
+      # skipping post-link Binaryen (`wasm-opt`) optimization. Passing `-Oz`
+      # here sets `em++`'s `OPT_LEVEL=2, SHRINK_LEVEL=2` so `wasm-opt -Oz` only
+      # runs in optimized builds (alongside `wasm-ld -O2`).
       ldflags += [ "-Oz" ]
     } else {
       cflags = [ "-O3" ]

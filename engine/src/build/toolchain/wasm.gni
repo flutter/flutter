@@ -48,8 +48,12 @@ template("wasm_toolchain") {
     # overwritten. If the target does not, the dummy file will satisfy the
     # toolchain's requirement that it has this as an output.
     # Disable Binaryen's internal thread pool (`BINARYEN_CORES=1`) when linking
-    # so `wasm-opt` runs single-threaded inside Ninja's parallel build jobs and
-    # avoids a spurious-wakeup race in Binaryen's `ThreadPool` (threads.cpp).
+    # so `wasm-opt` runs single-threaded on the main thread inside Ninja's
+    # parallel build jobs instead of spawning worker pthreads that hit
+    # Binaryen's spurious-wakeup race in `Thread::mainLoop`:
+    # - https://github.com/WebAssembly/binaryen/blob/dcc70bbfb16c2f8fce29dad94d80d1b78123655f/src/support/threads.cpp#L61-L82
+    # - https://github.com/WebAssembly/binaryen/issues/8594
+    # - https://github.com/flutter/flutter/issues/194888
     ld = "BINARYEN_CORES=1 $emsdk_dir/upstream/emscripten/em++ --em-config $em_config_path"
     readelf = "readelf"
     nm = "nm"
