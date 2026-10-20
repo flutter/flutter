@@ -850,7 +850,12 @@ Not installed yet: the web SDK, and GN's own bookkeeping (`args.gn`,
 depfiles). `compile_commands.json`, which `tools/clang_tidy` and clangd
 read, comes from `tools/gn_to_bazel/tool/compile_commands.py` over
 `bazel aquery` after a build (a tool, since no action can query the
-graph). The builder-specific targets below install the archives alone.
+graph); its entries run from the execution root, where Bazel's relative
+include paths resolve, but name the source and the compiler as the
+checkout spells them, so that `tools/clang_tidy`'s file selection and its
+search for `clang-tidy` beside the compiler work on it as they do on GN's
+(`ci/clang_tidy.sh --variant <build directory>`). The builder-specific
+targets below install the archives alone.
 
 ## The builders: `--config=<build>` and their install targets
 
