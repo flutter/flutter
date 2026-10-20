@@ -94,13 +94,21 @@ void RenderPass::ClearPipelineStateDirtyForTesting() {
 }
 
 bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
-  render_pass_ =
-      command_buffer.GetCommandBuffer()->CreateRenderPass(render_target_);
+  render_pass_ = command_buffer.CreateRenderPass(render_target_);
   if (!render_pass_) {
     return false;
   }
-  command_buffer.AddRenderPass(render_pass_);
+  command_buffer_ = fml::Ref(&command_buffer);
   return true;
+}
+
+bool RenderPass::End() {
+  if (!command_buffer_) {
+    return true;
+  }
+  bool result = command_buffer_->EndRenderPass(render_pass_.get());
+  command_buffer_ = nullptr;
+  return result;
 }
 
 void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
@@ -467,6 +475,14 @@ Dart_Handle InternalFlutterGpu_RenderPass_Begin(
     flutter::gpu::CommandBuffer* command_buffer) {
   if (!wrapper->Begin(*command_buffer)) {
     return tonic::ToDart("Failed to begin RenderPass");
+  }
+  return Dart_Null();
+}
+
+Dart_Handle InternalFlutterGpu_RenderPass_End(
+    flutter::gpu::RenderPass* wrapper) {
+  if (!wrapper->End()) {
+    return tonic::ToDart("Failed to end RenderPass");
   }
   return Dart_Null();
 }
