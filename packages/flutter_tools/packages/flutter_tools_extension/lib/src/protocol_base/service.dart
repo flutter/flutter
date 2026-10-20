@@ -41,10 +41,7 @@ class ToolExtensionCapabilities {
     return ToolExtensionCapabilities(
       services: json.stringIterable(servicesKey).toList(),
       supportedPlatforms: json
-          .stringIterable(
-            supportedPlatformsKey,
-            defaultValue: const <String>{'linux', 'macos', 'windows'},
-          )
+          .stringIterable(supportedPlatformsKey)
           .map((String p) => p.toLowerCase())
           .toSet(),
     );

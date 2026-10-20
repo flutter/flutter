@@ -94,11 +94,7 @@ void main() {
             'services': <Object?>['diagnostics'],
           },
         );
-        expect(defaultPlatformsCapabilities.supportedPlatforms, const <String>{
-          'linux',
-          'macos',
-          'windows',
-        });
+        expect(defaultPlatformsCapabilities.supportedPlatforms, isEmpty);
       },
     );
 
