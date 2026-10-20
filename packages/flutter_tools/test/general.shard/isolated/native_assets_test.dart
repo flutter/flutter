@@ -619,6 +619,112 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       ),
     );
   });
+
+  testWithoutContext(
+    'FlutterNativeAssetsBuildRunnerImpl.build throws ToolExit on FileSystemException '
+    '(regression test for https://github.com/flutter/flutter/issues/194568)',
+    () async {
+      final logger = BufferLogger.test();
+      final lockErrorFileSystem = MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (operation == FileSystemOp.exists && context.endsWith('build.dart')) {
+            throw const FileSystemException(
+              'Could not acquire the lock to /project/.dart_tool/hooks_runner/shared/my_app/.lock. '
+                  'Move your project to a filesystem that supports file locking.',
+              '/project/.dart_tool/hooks_runner/shared/my_app/.lock',
+            );
+          }
+        },
+      );
+      final Directory projectDir = lockErrorFileSystem.directory('/project')
+        ..createSync(recursive: true);
+      final File pubspecFile = projectDir.childFile('pubspec.yaml')
+        ..writeAsStringSync('name: my_app\n');
+      final File packageConfigFile = writePackageConfigFiles(
+        directory: projectDir,
+        mainLibName: 'my_app',
+      );
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        packageConfigFile,
+        logger: logger,
+      );
+      final runner = FlutterNativeAssetsBuildRunnerImpl(
+        packageConfigFile.path,
+        packageConfig,
+        lockErrorFileSystem,
+        logger,
+        FakePlatform(),
+        'my_app',
+        pubspecFile.path,
+        includeDevDependencies: false,
+      );
+
+      await expectLater(
+        runner.build(extensions: <ProtocolExtension>[], linkingEnabled: false),
+        throwsToolExit(
+          message:
+              'Failed to build native assets: '
+              'Could not acquire the lock to /project/.dart_tool/hooks_runner/shared/my_app/.lock. '
+              'Move your project to a filesystem that supports file locking.',
+        ),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'FlutterNativeAssetsBuildRunnerImpl.link throws ToolExit on FileSystemException '
+    '(regression test for https://github.com/flutter/flutter/issues/194568)',
+    () async {
+      final logger = BufferLogger.test();
+      final lockErrorFileSystem = MemoryFileSystem.test(
+        opHandle: (String context, FileSystemOp operation) {
+          if (operation == FileSystemOp.exists && context.endsWith('link.dart')) {
+            throw const FileSystemException(
+              'Could not acquire the lock to /project/.dart_tool/hooks_runner/shared/my_app/.lock. '
+                  'Move your project to a filesystem that supports file locking.',
+              '/project/.dart_tool/hooks_runner/shared/my_app/.lock',
+            );
+          }
+        },
+      );
+      final Directory projectDir = lockErrorFileSystem.directory('/project')
+        ..createSync(recursive: true);
+      final File pubspecFile = projectDir.childFile('pubspec.yaml')
+        ..writeAsStringSync('name: my_app\n');
+      final File packageConfigFile = writePackageConfigFiles(
+        directory: projectDir,
+        mainLibName: 'my_app',
+      );
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        packageConfigFile,
+        logger: logger,
+      );
+      final runner = FlutterNativeAssetsBuildRunnerImpl(
+        packageConfigFile.path,
+        packageConfig,
+        lockErrorFileSystem,
+        logger,
+        FakePlatform(),
+        'my_app',
+        pubspecFile.path,
+        includeDevDependencies: false,
+      );
+
+      await expectLater(
+        runner.link(
+          extensions: <ProtocolExtension>[],
+          buildResult: const FakeFlutterNativeAssetsBuilderResult(),
+          recordedUsesFile: null,
+        ),
+        throwsToolExit(
+          message:
+              'Failed to build native assets: '
+              'Could not acquire the lock to /project/.dart_tool/hooks_runner/shared/my_app/.lock. '
+              'Move your project to a filesystem that supports file locking.',
+        ),
+      );
+    },
+  );
 }
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {

@@ -615,35 +615,36 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   Future<BuildResult?> build({
     required List<ProtocolExtension> extensions,
     required bool linkingEnabled,
-  }) async {
-    final Result<BuildResult, HooksRunnerFailure> result;
-    try {
-      result = await _buildRunner.build(linkingEnabled: linkingEnabled, extensions: extensions);
-    } on TimeoutException catch (e) {
-      _throwNativeAssetsLockTimeout('Building', e);
-    }
-    if (result.isSuccess) {
-      return result.success;
-    } else {
-      return null;
-    }
-  }
+  }) => _runWithLockExceptionHandling(
+    stage: 'Building',
+    action: () => _buildRunner.build(linkingEnabled: linkingEnabled, extensions: extensions),
+  );
 
   @override
   Future<LinkResult?> link({
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
     required File? recordedUsesFile,
+  }) => _runWithLockExceptionHandling(
+    stage: 'Linking',
+    action: () => _buildRunner.link(
+      extensions: extensions,
+      buildResult: buildResult,
+      resourceIdentifiers: recordedUsesFile?.uri,
+    ),
+  );
+
+  Future<T?> _runWithLockExceptionHandling<T extends Object>({
+    required String stage,
+    required Future<Result<T, HooksRunnerFailure>> Function() action,
   }) async {
-    final Result<LinkResult, HooksRunnerFailure> result;
+    final Result<T, HooksRunnerFailure> result;
     try {
-      result = await _buildRunner.link(
-        extensions: extensions,
-        buildResult: buildResult,
-        resourceIdentifiers: recordedUsesFile?.uri,
-      );
+      result = await action();
     } on TimeoutException catch (e) {
-      _throwNativeAssetsLockTimeout('Linking', e);
+      _throwNativeAssetsLockTimeout(stage, e);
+    } on FileSystemException catch (e) {
+      throwToolExit('Failed to build native assets: ${e.message}');
     }
     if (result.isSuccess) {
       return result.success;
