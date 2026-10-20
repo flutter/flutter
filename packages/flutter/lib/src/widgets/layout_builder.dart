@@ -126,7 +126,10 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   // and the idle phase, so the layout data can be safely read.
   bool _deferredCallbackScheduled = false;
   void _scheduleRebuild() {
-    if (_deferredCallbackScheduled) {
+    // Descendants can still be marked dirty after this element is unmounted,
+    // for example when an exception thrown while updating the child left part
+    // of the old subtree active. There is no render object to lay out then.
+    if (!mounted || _deferredCallbackScheduled) {
       return;
     }
 
