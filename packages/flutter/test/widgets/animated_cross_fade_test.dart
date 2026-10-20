@@ -635,7 +635,7 @@ void main() {
     expect(box.size, const Size(150.0, 150.0));
   });
 
-  testWidgets('AnimatedCrossFade idle on first child resizes with reverseDuration', (
+  testWidgets('AnimatedCrossFade idle on first child resizes with duration', (
     WidgetTester tester,
   ) async {
     Widget build(double size) {
@@ -658,9 +658,9 @@ void main() {
     expect(box.size, const Size(100.0, 100.0));
 
     await tester.pumpWidget(build(200.0));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(box.size, const Size(125.0, 125.0));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(box.size, const Size(150.0, 150.0));
+    await tester.pump(const Duration(milliseconds: 50));
     expect(box.size, const Size(200.0, 200.0));
   });
 }
