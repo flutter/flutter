@@ -15,7 +15,7 @@ void main() {
         const TextStyle(fontSize: 14).getTextStyle(textScaleFactor: 2.0).toString(),
         contains('fontSize: 28'),
       );
-    }, skip: kIsWeb); // [intended] CkTextStyle doesn't have a custom toString implementation.
+    });
   });
   group('TextPainter', () {
     test('textScaleFactor translates to textScaler', () {
