@@ -179,9 +179,9 @@ class TextureSourceVK {
 
  private:
   struct CachedFrameDataEntry {
-    SampleCount sample_count;
-    uint32_t mip_level;
-    uint32_t slice;
+    SampleCount sample_count = SampleCount::kCount1;
+    uint32_t mip_level = 0;
+    uint32_t slice = 0;
     FramebufferAndRenderPass data;
   };
   // Linear-scanned because N is typically 1 and bounded by

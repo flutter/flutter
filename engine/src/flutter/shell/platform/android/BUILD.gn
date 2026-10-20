@@ -57,6 +57,7 @@ executable("flutter_shell_native_unittests") {
     sources += [ "android_context_gl_unittests.cc" ]
   }
   public_configs = [ "//flutter:config" ]
+  defines = [ "TESTING" ]
   deps = [
     ":flutter_shell_native_src",
     "//flutter/fml",
@@ -449,7 +450,8 @@ action("check_imports") {
 
   stamp_file = "$root_out_dir/check_android_imports"
 
-  # File does not actually get created, but GN expects us to have an output here.
+  # File does not actually get created, but GN expects us to have an output
+  # here.
   outputs = [ stamp_file ]
 
   args = [

@@ -154,7 +154,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 #endif  // IMPELLER_DEBUG
 
           FML_DCHECK(!color_filter_);
-          FSExternal::FragInfo frag_info;
+          FSExternal::FragInfo frag_info{};
           frag_info.x_tile_mode =
               static_cast<Scalar>(sampler_descriptor_.width_address_mode);
           frag_info.y_tile_mode =
@@ -194,7 +194,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         pass.SetCommandLabel("TextureFill");
 #endif  // IMPELLER_DEBUG
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
         frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
         frag_info.alpha =

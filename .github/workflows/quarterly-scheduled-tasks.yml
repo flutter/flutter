@@ -65,7 +65,7 @@ jobs:
             ### Checklist
             - [ ] Check for the latest `goldctl` git revision (e.g. from [CIPD](https://chrome-infra-packages.appspot.com/p/skia/tools/goldctl) or the [Skia Gold repository](https://skia.googlesource.com/buildbot/+/refs/heads/main/gold-client)).
             - [ ] Update `goldctl` in `flutter/flutter`:
-              - [ ] Update `git_revision` for `goldctl` instances in `.ci.yaml`.
+              - [ ] Update `git_revision` for `goldctl` instances in `.ci.yaml` and `engine/src/flutter/.ci.yaml`.
               - [ ] Validate `.ci.yaml` changes and ensure tests pass.
               - [ ] Open PR in `flutter/flutter` to close this issue.
             - [ ] Update `goldctl` in `flutter/packages`:
