@@ -30,15 +30,18 @@ abstract class ToolExtensionService {
 /// Represents the capabilities and supported service namespaces reported by an extension.
 @immutable
 class ToolExtensionCapabilities {
-  /// Creates [ToolExtensionCapabilities] listing supported [services] and [supportedPlatforms].
+  /// Creates [ToolExtensionCapabilities] listing supported [services],
+  /// [supportedPlatforms], and optional [extensionName].
   const ToolExtensionCapabilities({
     required this.services,
+    this.extensionName,
     this.supportedPlatforms = const <String>{'linux', 'macos', 'windows'},
   });
 
   /// Deserializes [ToolExtensionCapabilities] from a JSON map payload.
   factory ToolExtensionCapabilities.fromJson(Map<String, Object?> json) {
     return ToolExtensionCapabilities(
+      extensionName: json.nullableField<String>(extensionNameKey),
       services: json.stringIterable(servicesKey).toList(),
       supportedPlatforms: json
           .stringIterable(supportedPlatformsKey)
@@ -47,11 +50,20 @@ class ToolExtensionCapabilities {
     );
   }
 
+  /// Map key for [extensionName].
+  static const String extensionNameKey = 'extensionName';
+
   /// Map key for [services].
   static const String servicesKey = 'services';
 
   /// Map key for [supportedPlatforms].
   static const String supportedPlatformsKey = 'supportedPlatforms';
+
+  /// Optional identifier name of the extension package.
+  ///
+  /// When provided, this should match the extension's package name. The host
+  /// tool uses this identifier in error messages and artifact cache paths.
+  final String? extensionName;
 
   /// The list of service namespace identifiers supported by the extension.
   final List<String> services;
@@ -66,6 +78,7 @@ class ToolExtensionCapabilities {
 
   /// Serializes capabilities to a map payload.
   Map<String, Object?> toMap() => <String, Object?>{
+    extensionNameKey: ?extensionName,
     servicesKey: services,
     supportedPlatformsKey: supportedPlatforms.toList(),
   };

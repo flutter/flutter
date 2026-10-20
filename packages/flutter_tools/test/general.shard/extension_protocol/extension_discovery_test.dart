@@ -101,6 +101,12 @@ void main() {
     test('ToolExtensionCapabilities.fromJson throws FormatException on invalid field types', () {
       expect(
         () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.extensionNameKey: 42,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
           ToolExtensionCapabilities.servicesKey: 'not-a-list',
         }),
         throwsFormatException,
