@@ -142,6 +142,61 @@ parameter file or environment variable mentions a path outside the execution
 root, or if a C/C++ action runs anything but a `clang_<platform>` binary (see
 `tools/bazel_tools/README.md`).
 
+### The Emscripten toolchain (the spike)
+
+`toolchains/emscripten/` is GN's `build/toolchain/wasm:wasm` -- the
+toolchain that builds the web engine's modules (skwasm, CanvasKit) -- over
+the synced SDK, `@emsdk` (`engine/src/flutter/prebuilts/emsdk`, which
+`gclient sync` populates under `download_emsdk`). Its tools are three
+wrapper scripts (`emcc.sh`, `em++.sh`, `emar.sh`) that run the SDK's
+Python drivers under the engine's `@cpython3` with the SDK's paths taken
+from the action's environment (`EM_BIN_PATH`, `EM_CONFIG_PATH`, ...,
+which the toolchain configuration sets), so that nothing in the toolchain
+names a repository or a machine; `emscripten_config` is the Python
+configuration emcc reads in place of the SDK's `.emscripten`, with the
+same roles resolved against the execution root and the SDK's prebuilt
+cache **frozen** -- a system library variant the cache lacks (LTO
+variants, say: `lto/libembind.a`) is an error, where GN's emcc would
+build it into the shared tree on the spot. The SDK reaches every action
+as directory inputs. `emscripten_cc_toolchain_config.bzl` holds the
+flags of `out/wasm_release`'s compile and link lines, in their order,
+minus what GN attaches per target; the one thing GN's lines do not have
+is the explicit, relative `--sysroot` and `-resource-dir`, because emcc
+resolves them to absolute paths (through the repository's symlink, into
+the checkout) that Bazel's header check would reject.
+
+`wasm.bzl`'s `wasm_module` is GN's `wasm_lib`: a configuration transition
+to the `wasm32_emscripten` platform (so a module can be named from any
+build; `--force_pic` is turned off there), a compile through
+`cc_common.compile`, and a link that is the rule's own action over the
+toolchain's command line -- `cc_common.link` declares one output per
+link and the three a module has (`.js`, `.wasm`, `.js.symbols`: GN's
+`link_outputs`) are Bazel's private API -- with GN's `-Wl,--start-group
+@objects -Wl,--end-group` around the objects. `wasm_objects` is the
+compile alone.
+
+`toolchains/emscripten/spike/` is Phase 0's metric 0.6: an embind module
+(`spike_module`) and one Skia translation unit (`skia_unit`,
+`src/core/SkPath.cpp` with the wasm_release's defines), both `manual`
+since the SDK is optional in the checkout, and `spike_test`, which
+serves the module over a local HTTP server (an ES-module loader fetches
+its `.wasm`) and reads its exports' results from headless Chrome's DOM
+dump -- the host's Chrome, or `--test_env=CHROME=`; a hermetic browser
+is the web phase's.
+
+```
+bazelisk build -c opt //engine/src/flutter/build/bazel/toolchains/emscripten/spike:all
+bazelisk test -c opt //engine/src/flutter/build/bazel/toolchains/emscripten/spike:spike_test
+```
+
+Against `out/wasm_release`: the Skia unit's compile line carries every
+flag and define GN's does, in GN's order but for the per-target `-Werror`
+(copts.bzl's class) and the include directories' spelling; the module's
+link line is GN's skwasm link in GN's order (the module's flags, the
+compiler config's, the optimized build's, the libs), plus the relative
+sysroot and Bazel's `-o` first. The module loads and runs in Chrome,
+5 of 5.
+
 ## Wrapped GN builds: the Dart SDK
 
 The Dart SDK (VM, `gen_snapshot`, the frontend server, ...) is not converted

@@ -1,0 +1,57 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @emsdk: engine/src/flutter/prebuilts/emsdk, the
+# Emscripten SDK checkout that `gclient sync` populates under
+# `download_emsdk` and tools/activate_emsdk.py activates -- `upstream/` (the
+# emscripten compiler scripts, their clang and binaryen under `bin/`, the
+# prebuilt sysroot and libraries under `emscripten/cache/`) and `node/`
+# (the Node.js emcc runs its JavaScript tools with). GN's wasm toolchain
+# (build/toolchain/wasm.gni) runs `upstream/emscripten/emcc` from here;
+# the Bazel toolchain (build/bazel/toolchains/emscripten) does the same.
+#
+# Everything is exposed as directory inputs: one symlink per action in the
+# sandbox for the whole SDK rather than its tens of thousands of files (the
+# root .bazelrc enables sound directory tracking), as the clang toolchain's
+# header trees are.
+
+package(default_visibility = ["//visibility:public"])
+
+# emcc, em++ and emar are shell launchers of the .py files next to them;
+# the toolchain's wrappers run the .py files under the engine's Python.
+exports_files(glob(["upstream/emscripten/em*.py"]))
+
+# A file whose directory is the emscripten root (upstream/emscripten); the
+# toolchain derives the SDK's paths from it.
+filegroup(
+    name = "emscripten_marker",
+    srcs = ["upstream/emscripten/emcc.py"],
+)
+
+# A file in the compiler's builtin include directory
+# (upstream/lib/clang/<version>/include); the toolchain passes the resource
+# directory above it explicitly, by a relative path.
+filegroup(
+    name = "resource_include_marker",
+    srcs = glob(["upstream/lib/clang/*/include/stddef.h"]),
+)
+
+# The Node.js the SDK ships (NODE_JS in its .emscripten), found by glob
+# since the version is in the path.
+filegroup(
+    name = "node",
+    srcs = glob(["node/*/bin/node"]),
+)
+
+# The whole SDK, as the directories under upstream/ and node/.
+filegroup(
+    name = "all_files",
+    srcs = glob(
+        [
+            "upstream/*",
+            "node/*",
+        ],
+        exclude_directories = 0,
+    ),
+)
