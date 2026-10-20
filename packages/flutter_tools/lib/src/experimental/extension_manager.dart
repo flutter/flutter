@@ -59,7 +59,6 @@ class ExtensionManager {
 
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
-  bool get isDisabled => _isDisabled;
   bool _isDisabled = false;
   bool _entryPointsSpawned = false;
   Future<void>? _pendingInit;
@@ -284,7 +283,6 @@ class ExtensionManager {
     _failedExtensionNames.clear();
     _registeredClientConnections.clear();
     _entryPointsSpawned = false;
-    _isDisabled = false;
     _isInitialized = false;
     _pendingInit = null;
     _connectionGeneration++;

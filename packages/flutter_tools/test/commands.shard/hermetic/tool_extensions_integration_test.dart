@@ -239,7 +239,6 @@ void main() {
 
         await runner.run(args);
         expect(logger.statusText, isNot(contains('Extension Settings:')));
-        expect(manager.isDisabled, isTrue);
         expect(manager.connections, isEmpty);
 
         await manager.dispose();
@@ -247,7 +246,7 @@ void main() {
     );
 
     testWithoutContext(
-      'disables ExtensionDeviceManager discovery when --no-extensions is passed',
+      'disables ExtensionDevices discovery when --no-extensions is passed',
       () async {
         final logger = BufferLogger.test();
         final platform = FakePlatform(
@@ -282,7 +281,6 @@ void main() {
 
         await runner.run(const <String>['--no-extensions', 'probe-devices']);
         expect(probeCommand.discoveredDevices, isEmpty);
-        expect(manager.isDisabled, isTrue);
         expect(manager.connections, isEmpty);
 
         await manager.dispose();
