@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
+import 'package:flutter_tools/src/plugin_yaml_parser.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -2545,19 +2546,19 @@ iosPrefix: FLT
       });
 
       testUsingContext('Platform plugin parseFromYaml methods perform validation', () async {
-        final emptyYaml = YamlMap.wrap(<String, dynamic>{});
+        final invalidYaml = YamlMap.wrap(<String, dynamic>{'pluginClass': 123});
         expect(
-          AndroidPlugin.parseFromYaml('foo', emptyYaml, pluginPath: '', fileSystem: globals.fs),
-          isA<ParseResultFail<AndroidPlugin>>(),
+          AndroidPlugin.parseFromYaml('foo', invalidYaml, pluginPath: '', fileSystem: globals.fs),
+          isA<ParseResultFail<AndroidPlugin?>>(),
         );
-        expect(IOSPlugin.parseFromYaml('foo', emptyYaml), isA<ParseResultFail<IOSPlugin>>());
-        expect(MacOSPlugin.parseFromYaml('foo', emptyYaml), isA<ParseResultFail<MacOSPlugin>>());
+        expect(IOSPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<IOSPlugin?>>());
+        expect(MacOSPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<MacOSPlugin?>>());
         expect(
-          WindowsPlugin.parseFromYaml('foo', emptyYaml),
-          isA<ParseResultFail<WindowsPlugin>>(),
+          WindowsPlugin.parseFromYaml('foo', invalidYaml),
+          isA<ParseResultFail<WindowsPlugin?>>(),
         );
-        expect(LinuxPlugin.parseFromYaml('foo', emptyYaml), isA<ParseResultFail<LinuxPlugin>>());
-        expect(WebPlugin.parseFromYaml('foo', emptyYaml), isA<ParseResultFail<WebPlugin>>());
+        expect(LinuxPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<LinuxPlugin?>>());
+        expect(WebPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<WebPlugin>>());
       });
     });
 

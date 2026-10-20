@@ -9,6 +9,7 @@ import 'package:yaml/yaml.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'platform_plugins.dart';
+import 'plugin_yaml_parser.dart';
 
 class Plugin {
   Plugin({
@@ -184,76 +185,69 @@ class Plugin {
     final defaultPackages = <String, String>{};
     final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
 
-    void parseNativeOrDartPlatform<T extends PluginPlatform>(
+    void parsePlatform<T extends PluginPlatform>(
       String platformKey,
-      ParseResult<T> Function(YamlMap) parse, {
-      bool ignoreEmptyConfig = false,
-      bool Function(YamlMap)? skipIf,
+      ParseResult<T?> Function(YamlMap) parse, {
+      bool isWebPlugin = false,
     }) {
       if (!platformsYaml.containsKey(platformKey)) {
         return;
       }
       final Object? yamlValue = platformsYaml[platformKey];
       if (yamlValue is! YamlMap) {
-        if (!ignoreEmptyConfig) {
+        if (!isWebPlugin) {
+          // Unlike native/Dart platforms, an empty `web:` entry (where the value is
+          // null rather than a YamlMap) is ignored rather than rejected, as existing
+          // published packages use an empty `web:` key to declare web support without
+          // a WebPlugin registrant class.
           errors.add('Invalid "$platformKey" plugin specification.');
         }
         return;
       }
-      if (skipIf != null && skipIf(yamlValue)) {
+      if (isWebPlugin && yamlValue.containsKey(kDefaultPackage)) {
+        // Unlike native/Dart platforms, a `web:` entry with `default_package` is
+        // ignored.
         return;
       }
-      switch (parse(yamlValue)) {
-        case ParseResultFail(errors: final List<String> platformErrors):
-          errors.addAll(platformErrors);
-          return;
-        case ParseResultPass(value: final T parsed):
-          if (parsed case final NativeOrDartPlugin nativeOrDart) {
-            if (nativeOrDart.defaultPackage != null) {
-              defaultPackages[platformKey] = nativeOrDart.defaultPackage!;
-            } else {
+      final parser = PluginYamlParser(yamlValue, pluginName: name, configKey: platformKey);
+      final ParseResult<void> result =
+          (parser.string(kDefaultPackage, allowNull: false), parse(yamlValue)).map((
+            String? defaultPackage,
+            T? parsed,
+          ) {
+            if (defaultPackage != null) {
+              defaultPackages[platformKey] = defaultPackage;
+            } else if (parsed != null) {
               platforms[platformKey] = parsed;
+            } else {
+              errors.add('Invalid "$platformKey" plugin specification.');
             }
-            if (nativeOrDart.dartPluginClass != null) {
+            if (parsed case DartPlugin(:final String dartPluginClass, :final String dartFileName)) {
               dartPluginClasses[platformKey] = (
-                dartClass: nativeOrDart.dartPluginClass!,
-                dartFileName: nativeOrDart.dartFileName ?? '$name.dart',
+                dartClass: dartPluginClass,
+                dartFileName: dartFileName,
               );
             }
-          } else {
-            platforms[platformKey] = parsed;
-          }
+          });
+      if (result case ParseResultFail(errors: final List<String> platformErrors)) {
+        errors.addAll(platformErrors);
       }
     }
 
-    parseNativeOrDartPlatform(
+    parsePlatform(
       AndroidPlugin.kConfigKey,
       (YamlMap yaml) =>
           AndroidPlugin.parseFromYaml(name, yaml, pluginPath: path, fileSystem: fileSystem),
     );
-    parseNativeOrDartPlatform(
-      IOSPlugin.kConfigKey,
-      (YamlMap yaml) => IOSPlugin.parseFromYaml(name, yaml),
-    );
-    parseNativeOrDartPlatform(
-      LinuxPlugin.kConfigKey,
-      (YamlMap yaml) => LinuxPlugin.parseFromYaml(name, yaml),
-    );
-    parseNativeOrDartPlatform(
-      MacOSPlugin.kConfigKey,
-      (YamlMap yaml) => MacOSPlugin.parseFromYaml(name, yaml),
-    );
-    parseNativeOrDartPlatform(
+    parsePlatform(IOSPlugin.kConfigKey, (YamlMap yaml) => IOSPlugin.parseFromYaml(name, yaml));
+    parsePlatform(LinuxPlugin.kConfigKey, (YamlMap yaml) => LinuxPlugin.parseFromYaml(name, yaml));
+    parsePlatform(MacOSPlugin.kConfigKey, (YamlMap yaml) => MacOSPlugin.parseFromYaml(name, yaml));
+    parsePlatform(
       WebPlugin.kConfigKey,
       (YamlMap yaml) => WebPlugin.parseFromYaml(name, yaml),
-      // Unlike native/Dart platforms, an empty `web:` entry (where the value is
-      // null rather than a YamlMap) or a `web:` entry with `default_package` is
-      // ignored rather than rejected, as existing published packages use an empty
-      // `web:` key to declare web support without a WebPlugin registrant class.
-      ignoreEmptyConfig: true,
-      skipIf: (YamlMap yaml) => yaml.containsKey(kDefaultPackage),
+      isWebPlugin: true,
     );
-    parseNativeOrDartPlatform(
+    parsePlatform(
       WindowsPlugin.kConfigKey,
       (YamlMap yaml) => WindowsPlugin.parseFromYaml(name, yaml),
     );

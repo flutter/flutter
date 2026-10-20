@@ -645,7 +645,7 @@ void main() {
             'Invalid "android" plugin specification.\n'
             '"dartFileName" cannot be specified without "dartPluginClass" in iOS platform of plugin "$_kTestPluginName"\n'
             'The plugin `$_kTestPluginName` has an invalid `dartFileName` for platform `linux` in pubspec.yaml.\n'
-            'The plugin `$_kTestPluginName` has an invalid `pluginClass` in its web plugin declaration.\n'
+            'Invalid "web" plugin specification: the "pluginClass" field must be a valid identifier, optionally with dot-separated segments.\n'
             'The plugin `$_kTestPluginName` is missing the required field `fileName` in pubspec.yaml',
       ),
     );
@@ -705,7 +705,6 @@ void main() {
         message:
             'Invalid plugin specification $_kTestPluginName.\n'
             'Invalid "android" plugin specification: the "ffiPlugin" field must be a boolean.\n'
-            'Invalid "android" plugin specification: at least one of "package" and "pluginClass", "dartPluginClass", "ffiPlugin: true", or "default_package" must be specified.\n'
             'Invalid "ios" plugin specification: the "sharedDarwinSource" field must be a boolean.\n'
             'Invalid "windows" plugin specification: the "supportedVariants" field must be a list of strings.\n'
             'Invalid "implements" specification.',

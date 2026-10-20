@@ -1271,7 +1271,7 @@ void main() {
             throwsToolExit(
               message:
                   'Invalid plugin specification url_launcher_macos.\n'
-                  'Invalid "macos" plugin specification: at least one of "pluginClass", "dartPluginClass", "ffiPlugin: true", "sharedDarwinSource: true", or "default_package" must be specified.',
+                  'Invalid "macos" plugin specification.',
             ),
           );
         },

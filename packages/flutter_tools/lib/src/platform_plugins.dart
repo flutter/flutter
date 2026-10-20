@@ -7,51 +7,16 @@ import 'package:yaml/yaml.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
+import 'plugin_yaml_parser.dart';
 
 /// Constant for 'pluginClass' key in plugin maps.
 const kPluginClass = 'pluginClass';
-
-/// Constant for 'dartPluginClass' key in plugin maps.
-const kDartPluginClass = 'dartPluginClass';
-
-/// Constant for 'dartPluginFile' key in plugin maps.
-const kDartFileName = 'dartFileName';
 
 /// Constant for 'fileName' key in plugin maps.
 const kFileName = 'fileName';
 
 /// Constant for 'ffiPlugin' key in plugin maps.
 const kFfiPlugin = 'ffiPlugin';
-
-// Constant for 'defaultPackage' key in plugin maps.
-const kDefaultPackage = 'default_package';
-
-/// Matches a valid native plugin class or dot-separated package identifier.
-///
-/// Plugin `class`/`package` values are interpolated verbatim into the generated
-/// GeneratedPluginRegistrant source files (Java/Kotlin, Swift, Objective-C,
-/// C++). Restricting them to identifier characters prevents a (possibly
-/// transitive) dependency from injecting arbitrary native code into the
-/// consuming app's build via its pubspec plugin declaration.
-final RegExp _pluginIdentifierPattern = RegExp(
-  r'^[a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*$',
-);
-
-/// Whether [value] is a valid native plugin class or dot-separated package
-/// identifier. Callers first confirm the value is a String via the schema type
-/// checks; absent fields are not validated here.
-bool isValidPluginIdentifier(String value) => _pluginIdentifierPattern.hasMatch(value);
-
-/// Matches a safe relative Dart source path (e.g. `src/foo_web.dart`) ending in
-/// `.dart`. Plugin `fileName`/`dartFileName` values are interpolated into an
-/// `import` in the generated registrant, so they must not contain quotes,
-/// semicolons, whitespace or parent-directory segments.
-final RegExp pluginDartFileNamePattern = RegExp(r'^\w[\w./-]*\.dart$');
-
-/// Whether [value] is a safe relative Dart source path for a plugin. Callers
-/// first confirm the value is a String via the schema type checks.
-bool isValidPluginDartFileName(String value) =>
-    pluginDartFileNamePattern.hasMatch(value) && !value.contains('..');
 
 /// Constant for 'sharedDarwinSource' key in plugin maps.
 /// Can be set for iOS and macOS plugins.
@@ -79,123 +44,20 @@ abstract class VariantPlatformPlugin {
   Set<PluginPlatformVariant> get supportedVariants;
 }
 
-abstract class NativeOrDartPlugin {
-  /// Determines whether the plugin has a Dart implementation.
-  bool hasDart();
-
+abstract class NativePlugin {
   /// Determines whether the plugin has a FFI implementation.
   bool hasFfi();
 
   /// Determines whether the plugin has a method channel implementation.
   bool hasMethodChannel();
+}
 
-  /// The default implementation package defined in pubspec.yaml, if any.
-  String? get defaultPackage;
-
+abstract class DartPlugin {
   /// The Dart plugin main class defined in pubspec.yaml, if any.
   String? get dartPluginClass;
 
   /// Path to file in which dartPluginClass is defined, if any.
   String? get dartFileName;
-}
-
-typedef _CommonPlatformFields = ({
-  String? pluginClass,
-  String? dartPluginClass,
-  String? dartFileName,
-  bool ffiPlugin,
-  String? defaultPackage,
-});
-
-sealed class ParseResult<T> {
-  factory ParseResult.pass(T value) => ParseResultPass<T>(value: value);
-  factory ParseResult.fail(List<String> errors) => ParseResultFail<T>(errors: errors);
-}
-
-final class ParseResultPass<T>({required final T value}) implements ParseResult<T>;
-
-final class ParseResultFail<T>({required final List<String> errors}) implements ParseResult<T> {
-  this {
-    if (errors.isEmpty) {
-      throw StateError('The error list must not be empty');
-    }
-  }
-}
-
-/// Helper for extracting and validating fields from a platform plugin [YamlMap].
-final class _PluginPlatformYaml {
-  _PluginPlatformYaml(this._yaml, {required this.configKey});
-
-  final YamlMap _yaml;
-  final String configKey;
-  final errors = <String>[];
-
-  void invalid(String reason) {
-    errors.add('Invalid "$configKey" plugin specification: $reason');
-  }
-
-  String? string(String key, {bool allowNull = true}) {
-    final Object? value = _yaml[key];
-    if (value is String) {
-      return value;
-    }
-    if (value == null && (allowNull || !_yaml.containsKey(key))) {
-      return null;
-    }
-    invalid('the "$key" field must be a string.');
-    return null;
-  }
-
-  String? identifier(String key, {bool allowNull = true}) {
-    final String? value = string(key, allowNull: allowNull);
-    if (value != null && !isValidPluginIdentifier(value)) {
-      invalid(
-        'the "$key" field must be a valid identifier, optionally with dot-separated segments.',
-      );
-      return null;
-    }
-    return value;
-  }
-
-  bool flag(String key) {
-    final Object? value = _yaml[key];
-    if (value is! bool?) {
-      invalid('the "$key" field must be a boolean.');
-      return false;
-    }
-    return value ?? false;
-  }
-
-  /// Parses the common platform fields from [_yaml].
-  _CommonPlatformFields parseCommonFields(String name, {required String displayName}) {
-    final String? defaultPackage = string(kDefaultPackage, allowNull: false);
-    final String? pluginClass = identifier(kPluginClass);
-    final String? dartPluginClass = identifier(kDartPluginClass, allowNull: false);
-    final String? dartFileName = string(kDartFileName);
-    final bool ffiPlugin = flag(kFfiPlugin);
-
-    if (dartFileName != null) {
-      if (_yaml[kDartPluginClass] == null) {
-        errors.add(
-          '"dartFileName" cannot be specified without "dartPluginClass" in $displayName platform of plugin "$name"',
-        );
-      }
-      if (!isValidPluginDartFileName(dartFileName)) {
-        errors.add(
-          'The plugin `$name` has an invalid `dartFileName` for platform `$configKey` '
-          'in pubspec.yaml.',
-        );
-      }
-    }
-
-    return (
-      pluginClass: pluginClass,
-      dartPluginClass: dartPluginClass,
-      dartFileName: dartFileName,
-      ffiPlugin: ffiPlugin,
-      defaultPackage: defaultPackage,
-    );
-  }
 }
 
 abstract class DarwinPlugin {
@@ -206,14 +68,12 @@ abstract class DarwinPlugin {
 /// Contains parameters to template an Android plugin.
 ///
 /// The [name] of the plugin is required. Additionally, either:
-/// - [defaultPackage], or
-/// - an implementation consisting of:
-///   - the [package] and [pluginClass] that will be the entry point to the
-///     plugin's native code, and/or
-///   - the [dartPluginClass] with optional [dartFileName] that will be
-///     the entry point for the plugin's Dart code
+/// - the [package] and [pluginClass] that will be the entry point to the
+///   plugin's native code, and/or
+/// - the [dartPluginClass] with optional [dartFileName] that will be the entry
+///   point for the plugin's Dart code
 /// is required.
-class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
+class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
   AndroidPlugin({
     required this.name,
     required this.pluginPath,
@@ -222,49 +82,46 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     this.dartPluginClass,
     this.dartFileName,
     bool? ffiPlugin,
-    this.defaultPackage,
     required this._fileSystem,
   }) : ffiPlugin = ffiPlugin ?? false;
 
   /// Parses the Android plugin configuration from the given [yaml].
-  static ParseResult<AndroidPlugin> parseFromYaml(
+  ///
+  /// Returns `null` as the parsed value if [yaml] does not declare a valid
+  /// Android plugin (none of `package` with `pluginClass`, `dartPluginClass`,
+  /// or `ffiPlugin: true`).
+  static ParseResult<AndroidPlugin?> parseFromYaml(
     String name,
     YamlMap yaml, {
     required String pluginPath,
     required FileSystem fileSystem,
   }) {
-    final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
-    final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'Android');
-    final String? package = parser.identifier('package');
-
-    final bool hasPluginDeclaration =
-        (package != null && fields.pluginClass != null) ||
-        fields.dartPluginClass != null ||
-        fields.ffiPlugin ||
-        fields.defaultPackage != null;
-    if (!hasPluginDeclaration) {
-      parser.invalid(
-        'at least one of "package" and "$kPluginClass", "$kDartPluginClass", "$kFfiPlugin: true", or "$kDefaultPackage" must be specified.',
-      );
-    }
-
-    if (parser.errors.isNotEmpty) {
-      return .fail(parser.errors);
-    }
-
-    return .pass(
-      AndroidPlugin(
-        name: name,
-        package: package,
-        pluginClass: fields.pluginClass,
-        dartPluginClass: fields.dartPluginClass,
-        dartFileName: fields.dartFileName,
-        ffiPlugin: fields.ffiPlugin,
-        defaultPackage: fields.defaultPackage,
-        pluginPath: pluginPath,
-        fileSystem: fileSystem,
-      ),
-    );
+    final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
+    return (
+      parser.identifier(kPluginClass),
+      parser.flag(kFfiPlugin),
+      parser.identifier('package'),
+      parser.parseDartPluginFields(displayName: 'Android'),
+    ).map((
+      String? pluginClass,
+      bool ffiPlugin,
+      String? package,
+      ({String dartPluginClass, String dartFileName})? dartPluginFields,
+    ) {
+      if ((package != null && pluginClass != null) || ffiPlugin || dartPluginFields != null) {
+        return AndroidPlugin(
+          name: name,
+          package: package,
+          pluginClass: pluginClass,
+          dartPluginClass: dartPluginFields?.dartPluginClass,
+          dartFileName: dartPluginFields?.dartFileName,
+          ffiPlugin: ffiPlugin,
+          pluginPath: pluginPath,
+          fileSystem: fileSystem,
+        );
+      }
+      return null;
+    });
   }
 
   final FileSystem _fileSystem;
@@ -274,9 +131,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
 
   @override
   bool hasFfi() => ffiPlugin;
-
-  @override
-  bool hasDart() => dartPluginClass != null;
 
   static const kConfigKey = 'android';
 
@@ -300,10 +154,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   /// Is FFI plugin defined in pubspec.yaml.
   final bool ffiPlugin;
 
-  /// The default implementation package defined in pubspec.yaml, if any.
-  @override
-  final String? defaultPackage;
-
   /// The absolute path to the plugin in the pub cache.
   final String pluginPath;
 
@@ -316,7 +166,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       kDartPluginClass: ?dartPluginClass,
       kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
-      kDefaultPackage: ?defaultPackage,
       // Mustache doesn't support complex types.
       'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
       'supportsEmbeddingV2': _supportedEmbeddings.contains('2'),
@@ -387,14 +236,12 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
 /// Contains the parameters to template an iOS plugin.
 ///
 /// The [name] of the plugin is required. Additionally, either:
-/// - [defaultPackage], or
-/// - an implementation consisting of:
-///   - the [classPrefix] (with optional [pluginClass]) that will be the entry
-///     point to the plugin's native code, and/or
-///   - the [dartPluginClass] with optional [dartFileName] that will be
-///     the entry point for the plugin's Dart code
+/// - the [classPrefix] (with optional [pluginClass]) that will be the entry
+///   point to the plugin's native code, and/or
+/// - the [dartPluginClass] with optional [dartFileName] that will be the entry
+///   point for the plugin's Dart code
 /// is required.
-class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlugin {
+class IOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, DarwinPlugin {
   const IOSPlugin({
     required this.name,
     required this.classPrefix,
@@ -402,45 +249,41 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
     this.dartPluginClass,
     this.dartFileName,
     bool? ffiPlugin,
-    this.defaultPackage,
     bool? sharedDarwinSource,
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
   /// Parses the iOS plugin configuration from the given [yaml].
-  static ParseResult<IOSPlugin> parseFromYaml(String name, YamlMap yaml) {
-    final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
-    final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'iOS');
-    final bool sharedDarwinSource = parser.flag(kSharedDarwinSource);
-
-    final bool hasPluginDeclaration =
-        fields.pluginClass != null ||
-        fields.dartPluginClass != null ||
-        fields.ffiPlugin ||
-        sharedDarwinSource ||
-        fields.defaultPackage != null;
-    if (!hasPluginDeclaration) {
-      parser.invalid(
-        'at least one of "$kPluginClass", "$kDartPluginClass", "$kFfiPlugin: true", "$kSharedDarwinSource: true", or "$kDefaultPackage" must be specified.',
-      );
-    }
-
-    if (parser.errors.isNotEmpty) {
-      return .fail(parser.errors);
-    }
-
-    return .pass(
-      IOSPlugin(
-        name: name,
-        classPrefix: '',
-        pluginClass: fields.pluginClass,
-        dartPluginClass: fields.dartPluginClass,
-        dartFileName: fields.dartFileName,
-        ffiPlugin: fields.ffiPlugin,
-        defaultPackage: fields.defaultPackage,
-        sharedDarwinSource: sharedDarwinSource,
-      ),
-    );
+  ///
+  /// Returns `null` as the parsed value if [yaml] does not declare a valid
+  /// iOS plugin (none of `pluginClass`, `dartPluginClass`, `ffiPlugin: true`,
+  /// or `sharedDarwinSource: true`).
+  static ParseResult<IOSPlugin?> parseFromYaml(String name, YamlMap yaml) {
+    final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
+    return (
+      parser.identifier(kPluginClass),
+      parser.flag(kFfiPlugin),
+      parser.flag(kSharedDarwinSource),
+      parser.parseDartPluginFields(displayName: 'iOS'),
+    ).map((
+      String? pluginClass,
+      bool ffiPlugin,
+      bool sharedDarwinSource,
+      ({String dartPluginClass, String dartFileName})? dartPluginFields,
+    ) {
+      if (pluginClass != null || ffiPlugin || sharedDarwinSource || dartPluginFields != null) {
+        return IOSPlugin(
+          name: name,
+          classPrefix: '',
+          pluginClass: pluginClass,
+          dartPluginClass: dartPluginFields?.dartPluginClass,
+          dartFileName: dartPluginFields?.dartFileName,
+          ffiPlugin: ffiPlugin,
+          sharedDarwinSource: sharedDarwinSource,
+        );
+      }
+      return null;
+    });
   }
 
   static const kConfigKey = 'ios';
@@ -456,8 +299,6 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   @override
   final String? dartFileName;
   final bool ffiPlugin;
-  @override
-  final String? defaultPackage;
 
   /// Indicates the iOS native code is shareable with macOS in
   /// the subdirectory "darwin", otherwise in the subdirectory "ios".
@@ -471,9 +312,6 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   bool hasFfi() => ffiPlugin;
 
   @override
-  bool hasDart() => dartPluginClass != null;
-
-  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
@@ -484,7 +322,6 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
       kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (sharedDarwinSource) kSharedDarwinSource: true,
-      kDefaultPackage: ?defaultPackage,
     };
   }
 }
@@ -496,51 +333,47 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
 /// [pluginClass] will be the entry point to the plugin's native code.
 /// [dartFileName] is not required and will be used only if [dartPluginClass]
 /// provided.
-class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlugin {
+class MacOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, DarwinPlugin {
   const MacOSPlugin({
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
     this.dartFileName,
     bool? ffiPlugin,
-    this.defaultPackage,
     bool? sharedDarwinSource,
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
   /// Parses the macOS plugin configuration from the given [yaml].
-  static ParseResult<MacOSPlugin> parseFromYaml(String name, YamlMap yaml) {
-    final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
-    final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'macOS');
-    final bool sharedDarwinSource = parser.flag(kSharedDarwinSource);
-
-    final bool hasPluginDeclaration =
-        fields.pluginClass != null ||
-        fields.dartPluginClass != null ||
-        fields.ffiPlugin ||
-        sharedDarwinSource ||
-        fields.defaultPackage != null;
-    if (!hasPluginDeclaration) {
-      parser.invalid(
-        'at least one of "$kPluginClass", "$kDartPluginClass", "$kFfiPlugin: true", "$kSharedDarwinSource: true", or "$kDefaultPackage" must be specified.',
-      );
-    }
-
-    if (parser.errors.isNotEmpty) {
-      return .fail(parser.errors);
-    }
-
-    return .pass(
-      MacOSPlugin(
-        name: name,
-        pluginClass: fields.pluginClass,
-        dartPluginClass: fields.dartPluginClass,
-        dartFileName: fields.dartFileName,
-        ffiPlugin: fields.ffiPlugin,
-        defaultPackage: fields.defaultPackage,
-        sharedDarwinSource: sharedDarwinSource,
-      ),
-    );
+  ///
+  /// Returns `null` as the parsed value if [yaml] does not declare a valid
+  /// macOS plugin (none of `pluginClass`, `dartPluginClass`,
+  /// `ffiPlugin: true`, or `sharedDarwinSource: true`).
+  static ParseResult<MacOSPlugin?> parseFromYaml(String name, YamlMap yaml) {
+    final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
+    return (
+      parser.identifier(kPluginClass),
+      parser.flag(kFfiPlugin),
+      parser.flag(kSharedDarwinSource),
+      parser.parseDartPluginFields(displayName: 'macOS'),
+    ).map((
+      String? pluginClass,
+      bool ffiPlugin,
+      bool sharedDarwinSource,
+      ({String dartPluginClass, String dartFileName})? dartPluginFields,
+    ) {
+      if (pluginClass != null || ffiPlugin || sharedDarwinSource || dartPluginFields != null) {
+        return MacOSPlugin(
+          name: name,
+          pluginClass: pluginClass,
+          dartPluginClass: dartPluginFields?.dartPluginClass,
+          dartFileName: dartPluginFields?.dartFileName,
+          ffiPlugin: ffiPlugin,
+          sharedDarwinSource: sharedDarwinSource,
+        );
+      }
+      return null;
+    });
   }
 
   static const kConfigKey = 'macos';
@@ -552,8 +385,6 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   @override
   final String? dartFileName;
   final bool ffiPlugin;
-  @override
-  final String? defaultPackage;
 
   /// Indicates the macOS native code is shareable with iOS in
   /// the subdirectory "darwin", otherwise in the subdirectory "macos".
@@ -567,9 +398,6 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   bool hasFfi() => ffiPlugin;
 
   @override
-  bool hasDart() => dartPluginClass != null;
-
-  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
@@ -578,7 +406,6 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
       kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (sharedDarwinSource) kSharedDarwinSource: true,
-      kDefaultPackage: ?defaultPackage,
     };
   }
 }
@@ -589,30 +416,28 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
 /// [pluginClass] will be the entry point to the plugin's native code.
 /// [dartFileName] is not required and will be used only if [dartPluginClass]
 /// provided.
-class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, VariantPlatformPlugin {
+class WindowsPlugin extends PluginPlatform
+    implements NativePlugin, DartPlugin, VariantPlatformPlugin {
   const WindowsPlugin({
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
     this.dartFileName,
     bool? ffiPlugin,
-    this.defaultPackage,
     this.variants = const <PluginPlatformVariant>{},
   }) : ffiPlugin = ffiPlugin ?? false,
-       assert(
-         pluginClass != null ||
-             dartPluginClass != null ||
-             defaultPackage != null ||
-             (ffiPlugin ?? false),
-       );
+       assert(pluginClass != null || dartPluginClass != null || (ffiPlugin ?? false));
 
   /// Parses the Windows plugin configuration from the given [yaml].
-  static ParseResult<WindowsPlugin> parseFromYaml(String name, YamlMap yaml) {
-    final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
-    final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'Windows');
-
+  ///
+  /// Returns `null` as the parsed value if [yaml] does not declare a valid
+  /// Windows plugin (none of `pluginClass`, `dartPluginClass`, or
+  /// `ffiPlugin: true`).
+  static ParseResult<WindowsPlugin?> parseFromYaml(String name, YamlMap yaml) {
+    final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
     final variants = <PluginPlatformVariant>{};
     final Object? variantList = yaml[kSupportedVariants];
+    ParseResult<Set<PluginPlatformVariant>> variantsResult = .pass(variants);
     if (variantList == null) {
       // If no variant list is provided assume Win32 for backward compatibility.
       variants.add(PluginPlatformVariant.win32);
@@ -627,35 +452,32 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
         // future non-breaking.
       }
     } else {
-      parser.invalid('the "$kSupportedVariants" field must be a list of strings.');
+      variantsResult = parser.invalid('the "$kSupportedVariants" field must be a list of strings.');
     }
 
-    final bool hasPluginDeclaration =
-        fields.pluginClass != null ||
-        fields.dartPluginClass != null ||
-        fields.ffiPlugin ||
-        fields.defaultPackage != null;
-    if (!hasPluginDeclaration) {
-      parser.invalid(
-        'at least one of "$kPluginClass", "$kDartPluginClass", "$kFfiPlugin: true", or "$kDefaultPackage" must be specified.',
-      );
-    }
-
-    if (parser.errors.isNotEmpty) {
-      return .fail(parser.errors);
-    }
-
-    return .pass(
-      WindowsPlugin(
-        name: name,
-        pluginClass: fields.pluginClass,
-        dartPluginClass: fields.dartPluginClass,
-        dartFileName: fields.dartFileName,
-        ffiPlugin: fields.ffiPlugin,
-        defaultPackage: fields.defaultPackage,
-        variants: variants,
-      ),
-    );
+    return (
+      parser.identifier(kPluginClass),
+      parser.flag(kFfiPlugin),
+      variantsResult,
+      parser.parseDartPluginFields(displayName: 'Windows'),
+    ).map((
+      String? pluginClass,
+      bool ffiPlugin,
+      Set<PluginPlatformVariant> variants,
+      ({String dartPluginClass, String dartFileName})? dartPluginFields,
+    ) {
+      if (pluginClass != null || ffiPlugin || dartPluginFields != null) {
+        return WindowsPlugin(
+          name: name,
+          pluginClass: pluginClass,
+          dartPluginClass: dartPluginFields?.dartPluginClass,
+          dartFileName: dartPluginFields?.dartFileName,
+          ffiPlugin: ffiPlugin,
+          variants: variants,
+        );
+      }
+      return null;
+    });
   }
 
   static const kConfigKey = 'windows';
@@ -667,8 +489,6 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
   @override
   final String? dartFileName;
   final bool ffiPlugin;
-  @override
-  final String? defaultPackage;
   final Set<PluginPlatformVariant> variants;
 
   @override
@@ -681,9 +501,6 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
   bool hasFfi() => ffiPlugin;
 
   @override
-  bool hasDart() => dartPluginClass != null;
-
-  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
@@ -692,7 +509,6 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
       kDartPluginClass: ?dartPluginClass,
       kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
-      kDefaultPackage: ?defaultPackage,
     };
   }
 }
@@ -703,52 +519,43 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
 /// [pluginClass] will be the entry point to the plugin's native code.
 /// [dartFileName] is not required and will be used only if [dartPluginClass]
 /// provided.
-class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
+class LinuxPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
   const LinuxPlugin({
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
     this.dartFileName,
     bool? ffiPlugin,
-    this.defaultPackage,
   }) : ffiPlugin = ffiPlugin ?? false,
-       assert(
-         pluginClass != null ||
-             dartPluginClass != null ||
-             (ffiPlugin ?? false) ||
-             defaultPackage != null,
-       );
+       assert(pluginClass != null || dartPluginClass != null || (ffiPlugin ?? false));
 
   /// Parses the Linux plugin configuration from the given [yaml].
-  static ParseResult<LinuxPlugin> parseFromYaml(String name, YamlMap yaml) {
-    final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
-    final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'Linux');
-
-    final bool hasPluginDeclaration =
-        fields.pluginClass != null ||
-        fields.dartPluginClass != null ||
-        fields.ffiPlugin ||
-        fields.defaultPackage != null;
-    if (!hasPluginDeclaration) {
-      parser.invalid(
-        'at least one of "$kPluginClass", "$kDartPluginClass", "$kFfiPlugin: true", or "$kDefaultPackage" must be specified.',
-      );
-    }
-
-    if (parser.errors.isNotEmpty) {
-      return .fail(parser.errors);
-    }
-
-    return .pass(
-      LinuxPlugin(
-        name: name,
-        pluginClass: fields.pluginClass,
-        dartPluginClass: fields.dartPluginClass,
-        dartFileName: fields.dartFileName,
-        ffiPlugin: fields.ffiPlugin,
-        defaultPackage: fields.defaultPackage,
-      ),
-    );
+  ///
+  /// Returns `null` as the parsed value if [yaml] does not declare a valid
+  /// Linux plugin (none of `pluginClass`, `dartPluginClass`, or
+  /// `ffiPlugin: true`).
+  static ParseResult<LinuxPlugin?> parseFromYaml(String name, YamlMap yaml) {
+    final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
+    return (
+      parser.identifier(kPluginClass),
+      parser.flag(kFfiPlugin),
+      parser.parseDartPluginFields(displayName: 'Linux'),
+    ).map((
+      String? pluginClass,
+      bool ffiPlugin,
+      ({String dartPluginClass, String dartFileName})? dartPluginFields,
+    ) {
+      if (pluginClass != null || ffiPlugin || dartPluginFields != null) {
+        return LinuxPlugin(
+          name: name,
+          pluginClass: pluginClass,
+          dartPluginClass: dartPluginFields?.dartPluginClass,
+          dartFileName: dartPluginFields?.dartFileName,
+          ffiPlugin: ffiPlugin,
+        );
+      }
+      return null;
+    });
   }
 
   static const kConfigKey = 'linux';
@@ -760,17 +567,12 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   @override
   final String? dartFileName;
   final bool ffiPlugin;
-  @override
-  final String? defaultPackage;
 
   @override
   bool hasMethodChannel() => pluginClass != null;
 
   @override
   bool hasFfi() => ffiPlugin;
-
-  @override
-  bool hasDart() => dartPluginClass != null;
 
   @override
   Map<String, dynamic> toMap() {
@@ -781,7 +583,6 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
       kDartPluginClass: ?dartPluginClass,
       kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
-      kDefaultPackage: ?defaultPackage,
     };
   }
 }
@@ -796,31 +597,11 @@ class WebPlugin extends PluginPlatform {
 
   /// Parses the Web plugin configuration from the given [yaml].
   static ParseResult<WebPlugin> parseFromYaml(String name, YamlMap yaml) {
-    final errors = <String>[];
-    final Object? rawPluginClass = yaml[kPluginClass];
-    String? pluginClass;
-    if (rawPluginClass is! String) {
-      errors.add('The plugin `$name` is missing the required field `pluginClass` in pubspec.yaml');
-    } else if (!isValidPluginIdentifier(rawPluginClass)) {
-      errors.add('The plugin `$name` has an invalid `pluginClass` in its web plugin declaration.');
-    } else {
-      pluginClass = rawPluginClass;
-    }
-
-    final Object? rawFileName = yaml[kFileName];
-    String? fileName;
-    if (rawFileName is! String) {
-      errors.add('The plugin `$name` is missing the required field `fileName` in pubspec.yaml');
-    } else if (!isValidPluginDartFileName(rawFileName)) {
-      errors.add('The plugin `$name` has an invalid `fileName` in its web plugin declaration.');
-    } else {
-      fileName = rawFileName;
-    }
-
-    if (errors.isNotEmpty) {
-      return .fail(errors);
-    }
-    return .pass(WebPlugin(name: name, pluginClass: pluginClass!, fileName: fileName!));
+    final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
+    return (parser.requiredIdentifier(kPluginClass), parser.requiredDartFileName(kFileName)).map(
+      (String pluginClass, String fileName) =>
+          WebPlugin(name: name, pluginClass: pluginClass, fileName: fileName),
+    );
   }
 
   static const kConfigKey = 'web';
