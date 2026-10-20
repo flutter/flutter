@@ -30,6 +30,7 @@ static constexpr char kPlaySoundMethod[] = "SystemSound.play";
 static constexpr char kSetApplicationSwitcherDescriptionMethod[] =
     "SystemChrome.setApplicationSwitcherDescription";
 static constexpr char kLabelKey[] = "label";
+static constexpr char kViewIdKey[] = "viewId";
 
 static constexpr char kExitCodeKey[] = "exitCode";
 
@@ -464,19 +465,21 @@ void PlatformHandler::QuitApplication(std::optional<HWND> hwnd,
 }
 
 void PlatformHandler::SetApplicationSwitcherDescription(
-    const std::string& label,
-    std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-  FlutterWindowsView* view =
-      engine_ != nullptr ? engine_->view(kImplicitViewId) : nullptr;
-  HWND hwnd = view != nullptr ? view->GetWindowHandle() : nullptr;
-  if (hwnd != nullptr) {
-    // The view's HWND is a child window; the title belongs on its top-level
-    // window.
-    HWND root = ::GetAncestor(hwnd, GA_ROOT);
-    ::SetWindowText(root != nullptr ? root : hwnd,
-                    fml::Utf8ToWideString(label).c_str());
+    FlutterViewId view_id,
+    const std::string& label) {
+  FlutterWindowsView* view = engine_->view(view_id);
+  if (view == nullptr) {
+    return;
   }
-  result->Success();
+  HWND hwnd = view->GetWindowHandle();
+  if (hwnd == nullptr) {
+    return;
+  }
+  // The view's HWND is a child window; the title belongs on its top-level
+  // window.
+  HWND root = ::GetAncestor(hwnd, GA_ROOT);
+  ::SetWindowText(root != nullptr ? root : hwnd,
+                  fml::Utf8ToWideString(label).c_str());
 }
 
 void PlatformHandler::HandleMethodCall(
@@ -541,19 +544,32 @@ void PlatformHandler::HandleMethodCall(
 
     SystemSoundPlay(sound_type.GetString(), std::move(result));
   } else if (method.compare(kSetApplicationSwitcherDescriptionMethod) == 0) {
-    const rapidjson::Value& arguments = *method_call.arguments();
-    if (!arguments.IsObject()) {
+    const rapidjson::Value* arguments = method_call.arguments();
+    if (arguments == nullptr || !arguments->IsObject()) {
       result->Error(kWindowTitleError, kInvalidWindowTitleMessage);
       return;
     }
-    rapidjson::Value::ConstMemberIterator itr = arguments.FindMember(kLabelKey);
-    if (itr == arguments.MemberEnd() || !itr->value.IsString()) {
+    rapidjson::Value::ConstMemberIterator label_itr =
+        arguments->FindMember(kLabelKey);
+    if (label_itr == arguments->MemberEnd() || !label_itr->value.IsString()) {
       result->Error(kWindowTitleError, kInvalidWindowTitleMessage);
       return;
+    }
+    // Older frameworks do not send a view ID.
+    FlutterViewId view_id = kImplicitViewId;
+    rapidjson::Value::ConstMemberIterator view_id_itr =
+        arguments->FindMember(kViewIdKey);
+    if (view_id_itr != arguments->MemberEnd()) {
+      if (!view_id_itr->value.IsInt64()) {
+        result->Error(kWindowTitleError, kInvalidWindowTitleMessage);
+        return;
+      }
+      view_id = view_id_itr->value.GetInt64();
     }
     SetApplicationSwitcherDescription(
-        std::string(itr->value.GetString(), itr->value.GetStringLength()),
-        std::move(result));
+        view_id, std::string(label_itr->value.GetString(),
+                             label_itr->value.GetStringLength()));
+    result->Success();
   } else if (method.compare(kInitializationCompleteMethod) == 0) {
     // Deprecated but should not cause an error.
     result->Success();
