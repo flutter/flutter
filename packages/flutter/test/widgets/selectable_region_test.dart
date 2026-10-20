@@ -623,8 +623,7 @@ void main() {
         expect(anchorFocusNode.hasFocus, isTrue);
         expect(paragraph.selections, isNotEmpty);
       },
-      // [intended] Tap outside to dismiss the selection is only supported on web.
-      skip: !kIsWeb,
+      variant: TargetPlatformVariant.all(),
     );
 
     group('focus moving to a descendant', () {
