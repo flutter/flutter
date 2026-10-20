@@ -1158,7 +1158,7 @@ final class _Emitter {
 
   /// The string [member] of [scope] (`source`, `destination`): its one
   /// value, or one per condition it takes a value under.
-  static List<GnScalarCase> _scopeMember(GnScopeValue scope, String member, GnLocation location) {
+  List<GnScalarCase> _scopeMember(GnScopeValue scope, String member, GnLocation location) {
     final GnVariable? variable = scope.variables[member];
     if (variable == null || variable.isList) {
       throw GnError(location, 'the scope has no $member string');
@@ -1170,6 +1170,38 @@ final class _Emitter {
     return cases;
   }
 
+  /// Whether `name == "value"` can hold under the assumptions: the value
+  /// itself is not assumed otherwise, and for an OS name or a platform name
+  /// neither is the OS predicate it asserts (nor, for a platform name, the
+  /// CPU).
+  bool _assumptionsAllow(String name, String value) {
+    final GnValue? assumed = assumptions[name];
+    if (assumed is GnStringValue) {
+      return assumed.value == value;
+    }
+    String? osPredicate;
+    String? cpu;
+    if (name == 'target_os' || name == 'current_os') {
+      osPredicate = osNamePredicates[value];
+    } else if (name == 'full_target_platform_name') {
+      final ({String osPredicate, String cpu})? parts = targetPlatformParts(value);
+      osPredicate = parts?.osPredicate;
+      cpu = parts?.cpu;
+    } else if (name == 'target_cpu') {
+      cpu = value;
+    }
+    if (osPredicate != null && assumptions[osPredicate] == const GnBoolValue(false)) {
+      return false;
+    }
+    if (cpu != null) {
+      final GnValue? assumedCpu = assumptions['target_cpu'];
+      if (assumedCpu is GnStringValue && assumedCpu.value != cpu) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// [cases] with every string around a reference to a variable whose
   /// values the mapping enumerates (`flutter_runtime_mode`:
   /// [comparisonSettings]) spelled out, one case per value under the
@@ -1177,7 +1209,7 @@ final class _Emitter {
   /// under `flutter_runtime_mode != "debug"` is three cases, one per other
   /// mode -- since a `select()` cannot nest one. Other strings stay as they
   /// are.
-  static List<GnScalarCase> _enumerated(List<GnScalarCase> cases, GnLocation location) {
+  List<GnScalarCase> _enumerated(List<GnScalarCase> cases, GnLocation location) {
     final out = <GnScalarCase>[];
     for (final scalarCase in cases) {
       final GnValue value = scalarCase.value;
@@ -1193,13 +1225,15 @@ final class _Emitter {
         out.add(scalarCase);
         continue;
       }
-      // One case per combination of the variables' values.
+      // One case per combination of the variables' values -- those the
+      // assumptions allow: a platform name whose OS or CPU is assumed away
+      // (`wasm-wasm` with target_cpu x64) is no case.
       var combinations = <Map<String, String>>[<String, String>{}];
       for (final name in names) {
         combinations = <Map<String, String>>[
           for (final partial in combinations)
             for (final String option in comparisonSettings[name]!.keys)
-              <String, String>{...partial, name: option},
+              if (_assumptionsAllow(name, option)) <String, String>{...partial, name: option},
         ];
       }
       for (final bound in combinations) {

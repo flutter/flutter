@@ -971,16 +971,59 @@ const Map<String, String> negatedSettings = <String, String>{
 
 /// The Bazel config_setting for `variable == "value"`, by variable and value.
 /// `target_os == "wasm"` (fml) is the OS predicate's constraint.
-const Map<String, Map<String, String>> comparisonSettings = <String, Map<String, String>>{
-  'flutter_runtime_mode': <String, String>{
-    'debug': '//engine/src/flutter/common:runtime_mode_debug',
-    'profile': '//engine/src/flutter/common:runtime_mode_profile',
-    'release': '//engine/src/flutter/common:runtime_mode_release',
-    'jit_release': '//engine/src/flutter/common:runtime_mode_jit_release',
-  },
-  'target_os': _osNameSettings,
-  'current_os': _osNameSettings,
+final Map<String, Map<String, String>> comparisonSettings =
+    Map<String, Map<String, String>>.unmodifiable(<String, Map<String, String>>{
+      'flutter_runtime_mode': <String, String>{
+        'debug': '//engine/src/flutter/common:runtime_mode_debug',
+        'profile': '//engine/src/flutter/common:runtime_mode_profile',
+        'release': '//engine/src/flutter/common:runtime_mode_release',
+        'jit_release': '//engine/src/flutter/common:runtime_mode_jit_release',
+      },
+      'target_os': _osNameSettings,
+      'current_os': _osNameSettings,
+      'target_cpu': _cpuNameSettings,
+      'full_target_platform_name': _targetPlatformSettings,
+    });
+
+/// BUILDCONFIG.gn's CPU names, as `target_cpu` spells them, to the CPU
+/// constraints.
+const Map<String, String> _cpuNameSettings = <String, String>{
+  'arm': '@platforms//cpu:armv7',
+  'arm64': '@platforms//cpu:aarch64',
+  'wasm': '@platforms//cpu:wasm32',
+  'x64': '@platforms//cpu:x86_64',
+  'x86': '@platforms//cpu:x86_32',
 };
+
+/// config.gni's full_target_platform_name values the engine builds
+/// (tools/gn's --target-os/--<os>-cpu pairs), each to the group of its OS and
+/// CPU constraints in //flutter/common's appendix (`platform_<name>`, the
+/// dash an underscore).
+final Map<String, String> _targetPlatformSettings = Map<String, String>.unmodifiable(
+  <String, String>{
+    for (final String name in targetPlatformNames)
+      name: '//engine/src/flutter/common:platform_${name.replaceAll('-', '_')}',
+  },
+);
+
+/// The `<target_platform_name>-<target_cpu>` pairs tools/gn builds.
+const List<String> targetPlatformNames = <String>[
+  'android-arm',
+  'android-arm64',
+  'android-x64',
+  'android-x86',
+  'darwin-arm64',
+  'darwin-x64',
+  'fuchsia-arm64',
+  'fuchsia-x64',
+  'ios-arm64',
+  'ios-x64',
+  'linux-arm64',
+  'linux-x64',
+  'wasm-wasm',
+  'windows-arm64',
+  'windows-x64',
+];
 
 /// The config_setting that holds exactly when `variable != "value"` does,
 /// for the denied comparisons of a conjunction: the OS names' complements.
@@ -1040,6 +1083,10 @@ const Set<String> knownExternalVariables = <String>{
   'target_cpu',
   'target_os',
   'use_flutter_cxx',
+  // //flutter/common/config.gni's names of the target, read in strings
+  // (the archives' prefixes); the emitter enumerates their values
+  // (comparisonSettings).
+  'full_target_platform_name',
   // //flutter/build/dart/dart.gni
   'dart_src',
   // //flutter/common/config.gni

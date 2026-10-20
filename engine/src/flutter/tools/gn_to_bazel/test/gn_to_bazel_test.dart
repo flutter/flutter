@@ -503,6 +503,30 @@ source_set("x") {
       expect(mac.negated.or(ios.negated), Condition.always);
       expect(mac.negated.or(ios), mac.negated);
       expect(wasm.and(fuchsia), Condition.never);
+      // An OS name or a platform name compared asserts the OS predicate it
+      // names (and the platform name its CPU): `is_linux` beside
+      // `target_os == "wasm"` or `full_target_platform_name == "wasm-wasm"`
+      // never holds, and `wasm-wasm` beside `target_cpu == "x64"` neither.
+      const Condition linux = ConditionVariable('is_linux');
+      const Condition wasmWasm = ConditionComparison(
+        'full_target_platform_name',
+        true,
+        'wasm-wasm',
+      );
+      const Condition linuxX64 = ConditionComparison(
+        'full_target_platform_name',
+        true,
+        'linux-x64',
+      );
+      const Condition x64 = ConditionComparison('target_cpu', true, 'x64');
+      expect(linux.and(wasm), Condition.never);
+      expect(linux.and(wasmWasm), Condition.never);
+      expect(wasmWasm.and(x64), Condition.never);
+      expect(linux.and(linuxX64), const ConditionAnd(<Condition>[linux, linuxX64]));
+      expect(linuxX64.and(x64), const ConditionAnd(<Condition>[linuxX64, x64]));
+      expect(targetPlatformParts('darwin-arm64'), (osPredicate: 'is_mac', cpu: 'arm64'));
+      expect(targetPlatformParts('windows-x64'), (osPredicate: 'is_win', cpu: 'x64'));
+      expect(targetPlatformParts('nonsense'), isNull);
       expect(wasm.and(fuchsia.negated), wasm);
       expect(wasm.negated.or(fuchsia.negated), Condition.always);
       // Unrelated predicates are left alone, in order; so is anything that
@@ -2476,6 +2500,69 @@ source_set("x") {
           '        "//engine/src/flutter/build/bazel:not_wasm",\n'
           '    ],\n',
         ),
+      );
+    });
+
+    test('spells a platform name out per pair the assumptions allow', () async {
+      // font_subset's archive path with the OS open: one case per
+      // full_target_platform_name the OS predicates and target_cpu leave
+      // possible -- the Linux pairs and wasm under `is_linux || is_wasm`,
+      // and under target_cpu x64 only linux-x64.
+      const gn = r'''
+import("//flutter/build/zip_bundle.gni")
+zip_bundle("font_subset") {
+  output = "${full_target_platform_name}/font-subset.zip"
+  files = [
+    {
+      source = "$root_out_dir/font-subset"
+      destination = "font-subset"
+    },
+  ]
+  deps = [ ":font_subset_bin" ]
+}
+executable("font_subset_bin") {
+  output_name = "font-subset"
+  sources = [ "main.cc" ]
+}
+''';
+      final open = Assumptions(const <String, GnValue>{
+        'is_android': GnBoolValue(false),
+        'is_fuchsia': GnBoolValue(false),
+        'is_ios': GnBoolValue(false),
+        'is_mac': GnBoolValue(false),
+        'is_qnx': GnBoolValue(false),
+        'is_win': GnBoolValue(false),
+      });
+      final String output = await convert(gn, assumptions: open, templates: <String>{'zip_bundle'});
+      expect(
+        output,
+        contains(
+          '    output = select({\n'
+          '        "//engine/src/flutter/common:platform_linux_arm64": "linux-arm64/font-subset.zip",\n'
+          '        "//engine/src/flutter/common:platform_linux_x64": "linux-x64/font-subset.zip",\n'
+          '        "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/font-subset.zip",\n'
+          '        "//conditions:default": None,\n'
+          '    }),\n',
+        ),
+      );
+      final String x64 = await convert(
+        gn,
+        assumptions: open.withValues(const <String, GnValue>{'target_cpu': GnStringValue('x64')}),
+        templates: <String>{'zip_bundle'},
+      );
+      expect(
+        x64,
+        contains(
+          '    output = select({\n'
+          '        "//engine/src/flutter/common:platform_linux_x64": "linux-x64/font-subset.zip",\n'
+          '        "//conditions:default": None,\n'
+          '    }),\n',
+        ),
+      );
+      // Under the host assumptions the name is a string.
+      expect(
+        await convert(gn, templates: <String>{'zip_bundle'}),
+        contains('    output = "linux-x64/font-subset.zip",\n'),
       );
     });
 
