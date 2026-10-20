@@ -122,14 +122,9 @@ self.addEventListener('fetch', (event) => {
 }
 
 Future<AppServer> _startServer({required bool headless}) async {
-  final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-  final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
   return AppServer.start(
     headless: headless,
     appDirectory: _appBuildDirectory,
-    serverPort: serverPort,
-    browserDebugPort: browserDebugPort,
-    appUrl: 'http://localhost:$serverPort/index.html',
     cacheControl: 'max-age=0',
     additionalRequestHandlers: <Handler>[
       (Request request) {

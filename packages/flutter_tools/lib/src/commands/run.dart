@@ -33,7 +33,6 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
@@ -50,14 +49,29 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     required super.verboseHelp,
     super.outputPreferences,
   }) {
-    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
-    usesDartDefineOption();
-    usesWebDefineOption();
-    usesFlavorOption();
-    usesWebResourcesCdnFlag();
-    addNativeNullAssertions(hide: !verboseHelp);
-    usesApplicationBinaryOption();
+    registerOptionBundles(const <OptionBundle>[
+      BuildModeOptionsBundle(defaultToRelease: false),
+      VmServicePortOptionsBundle(),
+      DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
+      DdsAndDevToolsOptionsBundle(),
+      AndroidGradleOptionsBundle(),
+      EngineRenderingFlagsBundle(includeTestFlag: true),
+      WebServerOptionsBundle(),
+    ]);
+    CommonOptions.nativeNullAssertions.addTo(argParser, hideOverride: !verboseHelp);
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
+      WebOptions.webDefines,
+      BuildInfoOptions.flavor,
+      WebOptions.webResourcesCdn,
+      CommonOptions.useApplicationBinary,
+      WebOptions.deprecatedJsInterop,
+      CommonOptions.target,
+      CommonOptions.pub,
+      BuildInfoOptions.trackWidgetCreation,
+      CommonOptions.fatalWarnings,
+      DebuggingOptionDescriptors.adbLogFiltering,
       DebuggingOptionDescriptors.traceStartup,
       DebuggingOptionDescriptors.cacheStartupProfile,
       DebuggingOptionDescriptors.verboseSystemLogs,
@@ -84,27 +98,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       WebOptions.wasm,
       DebuggingOptionDescriptors.iosProfileDebugger,
     ], verboseHelp: verboseHelp);
-    usesWebOptions(verboseHelp: verboseHelp);
-    usesDeprecatedJsInteropFlag(verboseHelp: verboseHelp);
-    usesTargetOption();
-    usesPortOptions(verboseHelp: verboseHelp);
-    usesIpv6Flag(verboseHelp: verboseHelp);
-    usesPubOption();
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    usesDeviceUserOption();
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
-    addDdsOptions(verboseHelp: verboseHelp);
-    addDevToolsOptions(verboseHelp: verboseHelp);
-    addAndroidSpecificBuildOptions(hide: !verboseHelp);
-    usesFatalWarningsOption(verboseHelp: verboseHelp);
-    addEnableImpellerFlag(verboseHelp: verboseHelp);
-    addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
-    addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
-    addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
-    addEnableHcppFlag(verboseHelp: verboseHelp);
-    addTestFlag(verboseHelp: verboseHelp);
-    usesAdbLogFilteringOption(hide: !verboseHelp);
   }
 
   final BuildSystem buildSystem;
@@ -122,8 +115,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       getValue(DebuggingOptionDescriptors.disableServiceOriginCheck);
   bool get cacheStartupProfile => getValue(DebuggingOptionDescriptors.cacheStartupProfile);
   bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
-  String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
-  bool get trackWidgetCreation => boolArg('track-widget-creation');
+  String? get prebuiltApplicationBinaryPath => getValue(CommonOptions.useApplicationBinary);
+  bool get trackWidgetCreation => getValue(BuildInfoOptions.trackWidgetCreation);
   ImpellerStatus get enableImpeller =>
       ImpellerStatus.fromBool(getValue(DebuggingOptionDescriptors.enableImpeller));
   bool get enableFlutterGpu => getValue(DebuggingOptionDescriptors.enableFlutterGpu) ?? false;
@@ -264,7 +257,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         enableDevTools: getValue(DebuggingOptionDescriptors.enableDevTools),
         ipv6: getValue(DebuggingOptionDescriptors.ipv6),
-        printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+        printDtd: getValue(CommonOptions.printDtd),
         enableHcpp: explicitEnableHcpp,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
@@ -313,9 +306,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     }
 
     // Then, verify an Android prebuilt application is being run.
-    final String? applicationBinary =
-        argParser.options.containsKey(FlutterOptions.kUseApplicationBinary)
-        ? stringArg(FlutterOptions.kUseApplicationBinary)
+    final String? applicationBinary = hasOption(CommonOptions.useApplicationBinary)
+        ? getValue(CommonOptions.useApplicationBinary)
         : null;
     if (applicationBinary != null && applicationBinary.toLowerCase().endsWith('.apk')) {
       final Iterable<String> intentFlags = AndroidEngineCliFlags.allFlags.where(
@@ -345,80 +337,64 @@ class RunCommand extends RunCommandBase {
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
-    usesFilesystemOptions(hide: !verboseHelp);
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
-    usesInitializeFromDillOption(hide: !verboseHelp);
-    usesNativeAssetsOption(hide: !verboseHelp);
-
-    // By default, the app should to publish the VM service port over mDNS.
-    // This will allow subsequent "flutter attach" commands to connect to the VM
-    // without needing to know the port.
-    addPublishPort(verboseHelp: verboseHelp);
-    addIgnoreDeprecationOption();
-    addMachineOutputFlag(verboseHelp: verboseHelp);
-    argParser.addDescriptor(DebuggingOptionDescriptors.useTestFonts);
-    argParser
-      ..addFlag(
-        'await-first-frame-when-tracing',
-        defaultsTo: true,
-        help:
-            'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
-            'or just dump the trace as soon as the application is running. The first frame '
-            'is detected by looking for a Timeline event with the name '
-            '"${Tracing.firstUsefulFrameEventName}". '
-            "By default, the widgets library's binding takes care of sending this event.",
-      )
-      ..addFlag(
-        'build',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help:
-            '(deprecated) If necessary, build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
-            'flag with an existing application artifact.',
-      )
-      ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
-      ..addFlag(
-        'hot',
-        defaultsTo: kHotReloadDefault,
-        help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
-      )
-      ..addFlag(
-        'resident',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help:
-            'Stay resident after launching the application. Not available with "--trace-startup".',
-      )
-      ..addOption(
-        'pid-file',
-        help:
-            'Specify a file to write the process ID to. '
-            'You can send SIGUSR1 to trigger a hot reload '
-            'and SIGUSR2 to trigger a hot restart. '
-            'The file is created when the signal handlers '
-            'are hooked and deleted when they are removed.',
-      )
-      ..addFlag(
-        'report-ready',
-        help:
-            'Print "ready" to the console after handling a keyboard command.\n'
-            'This is primarily useful for tests and other automation, but consider '
-            'using "--machine" instead.',
-        hide: !verboseHelp,
-      )
-      ..addFlag(
-        'benchmark',
-        negatable: false,
-        hide: !verboseHelp,
-        help:
-            'Enable a benchmarking mode. This will run the given application, '
-            'measure the startup time and the app restart time, write the '
-            'results out to "refresh_benchmark.json", and exit. This flag is '
-            'intended for use in generating automated flutter benchmarks.',
-      );
+    registerOptionBundles(const <OptionBundle>[
+      FilesystemOptionsBundle(),
+      ResidentCompilerOptionsBundle(
+        includeFrontendServerStarterPath: true,
+        includeExtraDartFlags: true,
+      ),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.enableExperiment,
+      DebuggingOptionDescriptors.publishPort,
+      BuildInfoOptions.ignoreDeprecation,
+      CommonOptions.machine,
+      DebuggingOptionDescriptors.useTestFonts,
+      _awaitFirstFrameWhenTracing,
+      DebuggingOptionDescriptors.build,
+      DebuggingOptionDescriptors.projectRoot,
+      _hot,
+      _resident,
+      DebuggingOptionDescriptors.pidFile,
+      DebuggingOptionDescriptors.reportReady,
+      _benchmark,
+    ], verboseHelp: verboseHelp);
   }
+
+  static const _awaitFirstFrameWhenTracing = FlagOptionDescriptor(
+    name: 'await-first-frame-when-tracing',
+    defaultsTo: true,
+    help:
+        'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
+        'or just dump the trace as soon as the application is running. The first frame '
+        'is detected by looking for a Timeline event with the name '
+        '"${Tracing.firstUsefulFrameEventName}". '
+        "By default, the widgets library's binding takes care of sending this event.",
+  );
+
+  static const _hot = FlagOptionDescriptor(
+    name: 'hot',
+    defaultsTo: kHotReloadDefault,
+    help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
+  );
+
+  static const _resident = FlagOptionDescriptor(
+    name: 'resident',
+    defaultsTo: true,
+    verboseOnly: true,
+    help: 'Stay resident after launching the application. Not available with "--trace-startup".',
+  );
+
+  static const _benchmark = FlagOptionDescriptor(
+    name: 'benchmark',
+    negatable: false,
+    verboseOnly: true,
+    help:
+        'Enable a benchmarking mode. This will run the given application, '
+        'measure the startup time and the app restart time, write the '
+        'results out to "refresh_benchmark.json", and exit. This flag is '
+        'intended for use in generating automated flutter benchmarks.',
+  );
 
   final AndroidContext? _androidContext;
   final AndroidWorkflow? _androidWorkflow;
@@ -429,8 +405,9 @@ class RunCommand extends RunCommandBase {
   final name = 'run';
 
   @override
-  DeprecationBehavior get deprecationBehavior =>
-      boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : _deviceDeprecationBehavior;
+  DeprecationBehavior get deprecationBehavior => getValue(BuildInfoOptions.ignoreDeprecation)
+      ? DeprecationBehavior.ignore
+      : _deviceDeprecationBehavior;
   DeprecationBehavior _deviceDeprecationBehavior = DeprecationBehavior.none;
 
   @override
@@ -454,7 +431,7 @@ class RunCommand extends RunCommandBase {
     return null;
   }
 
-  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  String? get userIdentifier => getValue(CommonOptions.deviceUser);
 
   @override
   bool get startPausedDefault => false;
@@ -592,13 +569,13 @@ class RunCommand extends RunCommandBase {
   }
 
   bool shouldUseHotMode(BuildInfo buildInfo) {
-    final bool hotArg = boolArg('hot');
+    final bool hotArg = getValue(_hot);
     final bool shouldUseHotMode = hotArg && !traceStartup;
     return buildInfo.isDebug && shouldUseHotMode;
   }
 
-  bool get stayResident => boolArg('resident');
-  bool get awaitFirstFrameWhenTracing => boolArg('await-first-frame-when-tracing');
+  bool get stayResident => getValue(_resident);
+  bool get awaitFirstFrameWhenTracing => getValue(_awaitFirstFrameWhenTracing);
 
   @override
   Future<void> validateCommand() async {
@@ -642,7 +619,7 @@ class RunCommand extends RunCommandBase {
     }
 
     final Logger logger = toolContext.logger;
-    final String? flavor = stringArg('flavor');
+    final String? flavor = getValue(BuildInfoOptions.flavor);
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
     );
@@ -654,8 +631,8 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    if (argResults!.wasParsed('build')) {
-      if (boolArg('build')) {
+    if (wasParsed(DebuggingOptionDescriptors.build)) {
+      if (getValue(DebuggingOptionDescriptors.build)) {
         logger.printWarning(
           'The "--build" flag is deprecated and will be removed in a future release. '
           'Building is the default behavior, so this flag can be safely removed.',
@@ -689,13 +666,13 @@ class RunCommand extends RunCommandBase {
         flutterDevices,
         target: targetFile,
         debuggingOptions: debuggingOptions,
-        benchmarkMode: boolArg('benchmark'),
+        benchmarkMode: getValue(_benchmark),
         applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
-        projectRootPath: stringArg('project-root'),
-        dillOutputPath: stringArg('output-dill'),
+        projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
+        dillOutputPath: getValue(BuildInfoOptions.outputDill),
         stayResident: stayResident,
         analytics: this.analytics,
-        nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        nativeAssetsYamlFile: getValue(BuildInfoOptions.nativeAssetsYamlFile),
         dartBuilder: hookRunner,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
@@ -788,9 +765,9 @@ class RunCommand extends RunCommandBase {
           webDefines: extractWebDefines(),
           applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
-          projectRootPath: stringArg('project-root'),
-          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
-          dillOutputPath: stringArg('output-dill'),
+          projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
+          packagesFilePath: getValue(CommonOptions.packages),
+          dillOutputPath: getValue(BuildInfoOptions.outputDill),
           userIdentifier: userIdentifier,
         );
       } on Exception catch (error) {
@@ -865,8 +842,8 @@ class RunCommand extends RunCommandBase {
                   terminal: terminal,
                   signals: signals,
                   processInfo: processInfo,
-                  reportReady: boolArg('report-ready'),
-                  pidFile: stringArg('pid-file'),
+                  reportReady: getValue(DebuggingOptionDescriptors.reportReady),
+                  pidFile: getValue(DebuggingOptionDescriptors.pidFile),
                 )
                 ..registerSignalHandlers()
                 ..setupTerminal();
