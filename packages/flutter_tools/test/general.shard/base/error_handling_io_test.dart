@@ -465,8 +465,11 @@ void main() {
       );
 
       const expectedMessage = 'The filename or extension is too long.';
-      expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: expectedMessage));
-      expect(() async => file.writeAsString(''), throwsToolExit(message: expectedMessage));
+      await expectLater(
+        () => file.writeAsBytes(<int>[0]),
+        throwsToolExit(message: expectedMessage),
+      );
+      await expectLater(() => file.writeAsString(''), throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
@@ -1374,7 +1377,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
       );
     });
 
-    testWithoutContext('when the filename or extension is too long', () {
+    testWithoutContext('when the filename or extension is too long', () async {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['foo', '--bar'],
@@ -1416,12 +1419,12 @@ Please ensure that the SDK and/or project is installed in a location that has re
           '  Command: foo --bar\n'
           'Please consider moving the Flutter SDK and/or project to a shorter path, '
           'or enabling long paths on Windows.';
-      expect(
-        () async => processManager.start(<String>['foo', '--bar']),
+      await expectLater(
+        () => processManager.start(<String>['foo', '--bar']),
         throwsToolExit(message: expectedMessage),
       );
-      expect(
-        () async => processManager.run(<String>['foo', '--bar']),
+      await expectLater(
+        () => processManager.run(<String>['foo', '--bar']),
         throwsToolExit(message: expectedMessage),
       );
       expect(
