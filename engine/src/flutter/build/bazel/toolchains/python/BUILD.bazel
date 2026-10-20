@@ -1,0 +1,37 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Python toolchain for rules that need one (rules_python's
+# toolchain_type): the interpreter is @cpython3, the CIPD build of CPython
+# the engine's own Python actions already run (extensions.bzl), so that no
+# rule set's default toolchain downloads an interpreter of its own and no
+# action reaches for the host's python3. Registered first in MODULE.bazel,
+# ahead of rules_python's hermetic toolchains.
+
+load("@rules_python//python:py_runtime.bzl", "py_runtime")
+load("@rules_python//python:py_runtime_pair.bzl", "py_runtime_pair")
+
+package(default_visibility = ["//visibility:public"])
+
+py_runtime(
+    name = "cpython3_runtime",
+    files = ["@cpython3//:runtime"],
+    interpreter = "@cpython3//:bin/python3",
+    interpreter_version_info = {
+        "major": "3",
+        "minor": "11",
+        "micro": "9",
+    },
+)
+
+py_runtime_pair(
+    name = "cpython3_runtime_pair",
+    py3_runtime = ":cpython3_runtime",
+)
+
+toolchain(
+    name = "cpython3_toolchain",
+    toolchain = ":cpython3_runtime_pair",
+    toolchain_type = "@rules_python//python:toolchain_type",
+)
