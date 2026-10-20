@@ -109,9 +109,11 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
     bazelFlag: '--//engine/src/flutter/txt:use_fontconfig',
   ),
   '--asan': GnFlag(GnFlagEffect.unsupported, note: 'the toolchain has no sanitizer feature yet'),
+  // runtime_args.gni's dart_debug: the wrap's flag (build/bazel/dart_wrap),
+  // which @dart//:dart_config follows for the engine's own file under it.
   '--dart-debug': GnFlag(
-    GnFlagEffect.unsupported,
-    note: 'the wrapped Dart SDK build is not parameterized by dart_debug',
+    GnFlagEffect.setting,
+    bazelFlag: '--//engine/src/flutter/build/bazel/dart_wrap:dart_debug',
   ),
   // GN: glfw_vulkan_library, which puts SwiftShader, the Vulkan loader and
   // the validation layers beside impeller_unittests; the Bazel suites always

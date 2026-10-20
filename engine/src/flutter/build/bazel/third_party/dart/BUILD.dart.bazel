@@ -42,18 +42,22 @@ cc_library(
 )
 
 # runtime/BUILD.gn's config("dart_config"), which the engine's dart:io glue
-# (//flutter/lib/io) lists privately: the defines it resolves to under every
-# host configuration tools/gn writes (dart_debug is false unless --dart-debug
-# is given; SUPPORT_PERFETTO and EXPERIMENTAL_VM_SERVICE are the Dart
-# arguments' defaults). Its compiler flags cannot ride a dependency; the
-# converter inlines them from its mapping (ConfigDependency.copts).
+# (//flutter/lib/io) lists privately: the defines it resolves to under the
+# host configurations tools/gn writes (DEBUG under --dart-debug, the wrap's
+# dart_debug flag, NDEBUG otherwise; SUPPORT_PERFETTO and
+# EXPERIMENTAL_VM_SERVICE are the Dart arguments' defaults). Its compiler
+# flags cannot ride a dependency; the converter inlines them from its mapping
+# (ConfigDependency.copts), and they are the same either way since
+# dart_debug_optimization_level stays "2".
 cc_library(
     name = "dart_config",
     defines = [
-        "NDEBUG",
         "SUPPORT_PERFETTO",
         "EXPERIMENTAL_VM_SERVICE",
-    ],
+    ] + select({
+        "@flutter//engine/src/flutter/build/bazel/dart_wrap:dart_debug_enabled": ["DEBUG"],
+        "//conditions:default": ["NDEBUG"],
+    }),
     deps = [":dart_api_headers"],
 )
 
