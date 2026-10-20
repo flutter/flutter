@@ -12,6 +12,7 @@
 #include "flutter/fml/task_runner.h"
 #include "impeller/base/promise.h"
 #include "impeller/base/thread.h"
+#include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/unique_handle_gles.h"
@@ -36,6 +37,24 @@ class PipelineLibraryGLES final
   PipelineLibraryGLES(const PipelineLibraryGLES&) = delete;
 
   PipelineLibraryGLES& operator=(const PipelineLibraryGLES&) = delete;
+
+  //----------------------------------------------------------------------------
+  /// @brief      The maximum number of pipeline compile jobs that are started
+  ///             but not yet finished for a device with the given
+  ///             capabilities.
+  ///
+  ///             Jobs only overlap if the driver supports compiling shaders in
+  ///             parallel (GL_KHR_parallel_shader_compile). Otherwise, starting
+  ///             more jobs before finishing earlier ones only delays when the
+  ///             earlier pipelines become available, so jobs are run one at a
+  ///             time.
+  ///
+  /// @param[in]  capabilities  The capabilities of the device.
+  ///
+  /// @return     The maximum number of active compile jobs, at least 1 and at
+  ///             most `PipelineCompileQueueGLES::kDefaultMaxActiveJobs`.
+  ///
+  static size_t GetMaxActiveCompileJobs(const CapabilitiesGLES& capabilities);
 
  private:
   friend ContextGLES;

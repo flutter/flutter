@@ -290,4 +290,51 @@ TEST(PipelineLibraryGLESAsyncTest, FulfillsPromiseWhenReactorOpsAreDropped) {
 }
 // NOLINTEND(bugprone-unchecked-optional-access)
 
+namespace {
+
+/// Returns the maximum number of active compile jobs for a device that
+/// supports GL_KHR_parallel_shader_compile and reports `max_threads` for
+/// GL_MAX_SHADER_COMPILER_THREADS_KHR.
+size_t GetMaxActiveCompileJobsWithParallelCompile(GLint max_threads) {
+  auto impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  ON_CALL(*impl, GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(max_threads));
+  std::shared_ptr<MockGLES> mock_gles = MockGLES::Init(
+      std::move(impl), std::vector<const char*>{
+                           "GL_KHR_debug", "GL_KHR_parallel_shader_compile"});
+  // The mock's own proc table is created before the impl is attached, so
+  // create a new one that queries the impl.
+  ProcTableGLES gl(kMockResolverGLES);
+  return PipelineLibraryGLES::GetMaxActiveCompileJobs(*gl.GetCapabilities());
+}
+
+}  // namespace
+
+TEST(PipelineLibraryGLESMaxActiveCompileJobsTest, IsOneWithoutParallelCompile) {
+  std::shared_ptr<MockGLES> mock_gles = MockGLES::Init();
+  EXPECT_EQ(PipelineLibraryGLES::GetMaxActiveCompileJobs(
+                *mock_gles->GetProcTable().GetCapabilities()),
+            1u);
+}
+
+TEST(PipelineLibraryGLESMaxActiveCompileJobsTest, IsOneWithZeroThreads) {
+  EXPECT_EQ(GetMaxActiveCompileJobsWithParallelCompile(0), 1u);
+}
+
+TEST(PipelineLibraryGLESMaxActiveCompileJobsTest,
+     UsesMaxShaderCompilerThreads) {
+  EXPECT_EQ(GetMaxActiveCompileJobsWithParallelCompile(2), 2u);
+}
+
+TEST(PipelineLibraryGLESMaxActiveCompileJobsTest, IsCappedAtDefault) {
+  EXPECT_EQ(GetMaxActiveCompileJobsWithParallelCompile(64),
+            PipelineCompileQueueGLES::kDefaultMaxActiveJobs);
+}
+
+TEST(PipelineLibraryGLESMaxActiveCompileJobsTest,
+     UsesDefaultForImplementationMaximum) {
+  EXPECT_EQ(GetMaxActiveCompileJobsWithParallelCompile(-1),
+            PipelineCompileQueueGLES::kDefaultMaxActiveJobs);
+}
+
 }  // namespace impeller::testing
