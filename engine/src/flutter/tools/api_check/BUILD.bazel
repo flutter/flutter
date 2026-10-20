@@ -21,11 +21,11 @@ filegroup(
 dart_package_test(
     name = "tests",
     data = [
-        "//engine/src/flutter:shell/platform/darwin/ios/framework/Source/AccessibilityFeatures.swift",
         "//engine/src/flutter:web_ui_dart_sources",
         "//engine/src/flutter/lib/ui:dart_ui",
         "//engine/src/flutter/lib/ui:semantics/semantics_node.h",
         "//engine/src/flutter/lib/ui:window/platform_configuration.h",
+        "//engine/src/flutter/shell:platform/darwin/ios/framework/Source/AccessibilityFeatures.swift",
         "//engine/src/flutter/shell/platform/android:io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
         "//engine/src/flutter/shell/platform/android:io/flutter/view/AccessibilityBridge.java",
         "//engine/src/flutter/shell/platform/common:app_lifecycle_state.h",

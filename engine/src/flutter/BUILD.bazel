@@ -81,14 +81,11 @@ cc_library(
 # dart_package_test targets in the packages' own directories, see the suite
 # below): .ci.yaml (engine_build_configs, engine_tool; the builder
 # configurations are //engine/src/flutter/ci's), bin/et (engine_tool's
-# entry-point test), and for api_check the
-# web engine's dart:ui sources and the iOS embedding's AccessibilityFeatures
-# (lib/web_ui and shell/platform/darwin have no build file of their own yet;
-# when they do, these move there).
-exports_files([
-    ".ci.yaml",
-    "shell/platform/darwin/ios/framework/Source/AccessibilityFeatures.swift",
-])
+# entry-point test), and for api_check the web engine's dart:ui sources
+# (lib/web_ui has no build file of its own yet; when it does, these move
+# there, as the iOS embedding's AccessibilityFeatures moved to
+# //engine/src/flutter/shell).
+exports_files([".ci.yaml"])
 
 filegroup(
     name = "et_entry_points",
