@@ -7,7 +7,6 @@ import 'dart:isolate';
 
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../base/logger.dart';
@@ -69,7 +68,6 @@ class ExtensionConnection {
   ///
   /// Used by unit tests to exercise extension protocol behavior in-process
   /// without compiling a `.dill` kernel file.
-  @visibleForTesting
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
     required Logger logger,
@@ -214,15 +212,6 @@ class ExtensionDiscovery {
 
   /// Active extension connections.
   List<ExtensionConnection> get connections => List<ExtensionConnection>.unmodifiable(_connections);
-
-  /// Spawns an in-process [entryPoint] isolate connection and completes the
-  /// capability handshake.
-  Future<ExtensionConnection> spawnEntryPoint(
-    ExtensionEntryPoint entryPoint, {
-    String? extensionName,
-  }) {
-    return ExtensionConnection.spawn(entryPoint, logger: _logger, extensionName: extensionName);
-  }
 
   /// Registers an active [connection].
   void registerConnection(ExtensionConnection connection) {

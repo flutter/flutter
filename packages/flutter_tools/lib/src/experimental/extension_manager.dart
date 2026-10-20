@@ -197,7 +197,10 @@ class ExtensionManager {
       'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
     for (final entryPoint in entryPoints) {
-      final ExtensionConnection connection = await _discovery.spawnEntryPoint(entryPoint);
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        entryPoint,
+        logger: _logger,
+      );
       await _registerOrDisposeConnection(connection);
     }
     await _populateServiceClients();
