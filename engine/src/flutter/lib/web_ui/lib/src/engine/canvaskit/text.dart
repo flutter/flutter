@@ -41,7 +41,7 @@ SkStrutStyleProperties _toSkStrutStyleProperties(
   }
 
   if (style.fontWeight != null || style.fontStyle != null) {
-    skStrutStyle.fontStyle = toSkFontStyle(style.fontWeight, style.fontStyle);
+    skStrutStyle.fontStyle = _toSkFontStyle(style.fontWeight, style.fontStyle);
   }
 
   if (style.forceStrutHeight != null) {
@@ -194,7 +194,7 @@ SkTextStyleProperties _toSkTextStyleProperties(EngineTextStyle style) {
   );
 
   if (fontWeight != null || fontStyle != null) {
-    properties.fontStyle = toSkFontStyle(fontWeight, fontStyle);
+    properties.fontStyle = _toSkFontStyle(fontWeight, fontStyle);
   }
 
   if (foreground != null) {
@@ -240,7 +240,7 @@ SkTextStyle _toSkTextStyle(EngineTextStyle style) {
   return canvasKit.TextStyle(_toSkTextStyleProperties(style));
 }
 
-SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
+SkFontStyle _toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
   final style = SkFontStyle();
   if (fontWeight != null) {
     style.weight = toSkFontWeight(fontWeight);
@@ -294,7 +294,7 @@ class CkParagraph implements BackendParagraph {
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() => _boxesForPlaceholders;
-  late List<ui.TextBox> _boxesForPlaceholders;
+  List<ui.TextBox> _boxesForPlaceholders = const <ui.TextBox>[];
 
   @override
   List<ui.TextBox> getBoxesForRange(
@@ -310,10 +310,10 @@ class CkParagraph implements BackendParagraph {
       toSkRectWidthStyle(boxWidthStyle),
     );
 
-    return skRectsToTextBoxes(skRects);
+    return _skRectsToTextBoxes(skRects);
   }
 
-  List<ui.TextBox> skRectsToTextBoxes(List<SkRectWithDirection> skRects) {
+  List<ui.TextBox> _skRectsToTextBoxes(List<SkRectWithDirection> skRects) {
     final result = <ui.TextBox>[];
 
     for (var i = 0; i < skRects.length; i++) {
@@ -373,7 +373,7 @@ class CkParagraph implements BackendParagraph {
       _maxIntrinsicWidth = skiaObject.getMaxIntrinsicWidth();
       _minIntrinsicWidth = skiaObject.getMinIntrinsicWidth();
       _width = skiaObject.getMaxWidth();
-      _boxesForPlaceholders = skRectsToTextBoxes(skiaObject.getRectsForPlaceholders());
+      _boxesForPlaceholders = _skRectsToTextBoxes(skiaObject.getRectsForPlaceholders());
     } catch (e) {
       printWarning(
         'CanvasKit threw an exception while laying '

@@ -11,7 +11,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-int getFourByteTag(String s) {
+int _getFourByteTag(String s) {
   assert(s.length == 4);
   return s.codeUnitAt(0) << 24 | s.codeUnitAt(1) << 16 | s.codeUnitAt(2) << 8 | s.codeUnitAt(3);
 }
@@ -218,7 +218,7 @@ class SkwasmParagraph implements BackendParagraph {
   }
 }
 
-void withScopedFontList(
+void _withScopedFontList(
   List<String> fontFamilies,
   void Function(Pointer<SkStringHandle>, int) callback,
 ) {
@@ -279,7 +279,7 @@ void _applyTextStyleToNative(EngineTextStyle style, SkwasmNativeTextStyle native
 
   final List<String> effectiveFontFamilies = style.effectiveFontFamilies;
   if (effectiveFontFamilies.isNotEmpty) {
-    withScopedFontList(
+    _withScopedFontList(
       effectiveFontFamilies,
       (Pointer<SkStringHandle> families, int count) =>
           textStyleAddFontFamilies(handle, families, count),
@@ -342,7 +342,7 @@ void _applyTextStyleToNative(EngineTextStyle style, SkwasmNativeTextStyle native
     final Pointer<Float> valueBuffer = scope.allocFloatArray(variationCount);
     for (var i = 0; i < variationCount; i++) {
       final ui.FontVariation variation = effectiveFontVariations[i];
-      axisBuffer[i] = getFourByteTag(variation.axis);
+      axisBuffer[i] = _getFourByteTag(variation.axis);
       valueBuffer[i] = variation.value;
     }
     textStyleSetFontVariations(handle, axisBuffer, valueBuffer, variationCount);
@@ -353,7 +353,7 @@ StrutStyleHandle _createNativeStrutStyle(EngineStrutStyle style) {
   final StrutStyleHandle handle = strutStyleCreate();
   final List<String> effectiveFontFamilies = style.effectiveFontFamilies;
   if (effectiveFontFamilies.isNotEmpty) {
-    withScopedFontList(
+    _withScopedFontList(
       effectiveFontFamilies,
       (Pointer<SkStringHandle> families, int count) =>
           strutStyleSetFontFamilies(handle, families, count),

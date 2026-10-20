@@ -21,7 +21,11 @@ String? _computeEffectiveFontFamily(String? fontFamily) {
       : fontFamily;
 }
 
-List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
+List<String> _computeEffectiveFontFamilies(String? fontFamily, [List<String>? fontFamilyFallback]) {
+  if (fontFamily == null && (fontFamilyFallback == null || fontFamilyFallback.isEmpty)) {
+    return ui_web.TestEnvironment.instance.forceTestFonts ? _testFonts : const <String>[];
+  }
+  final fontFamilies = <String>[?fontFamily, ...?fontFamilyFallback];
   if (!ui_web.TestEnvironment.instance.forceTestFonts) {
     return fontFamilies;
   }
@@ -159,7 +163,7 @@ class EngineStrutStyle implements ui.StrutStyle {
   final bool? forceStrutHeight;
 
   List<String> get effectiveFontFamilies =>
-      _computeEffectiveFontFamilies(<String>[?fontFamily, ...?fontFamilyFallback]);
+      _computeEffectiveFontFamilies(fontFamily, fontFamilyFallback);
 
   @override
   bool operator ==(Object other) {
@@ -170,7 +174,7 @@ class EngineStrutStyle implements ui.StrutStyle {
       return false;
     }
     return other is EngineStrutStyle &&
-        other.effectiveFontFamily == effectiveFontFamily &&
+        other.fontFamily == fontFamily &&
         other.fontSize == fontSize &&
         other.height == height &&
         other.leading == leading &&
@@ -178,13 +182,13 @@ class EngineStrutStyle implements ui.StrutStyle {
         other.fontWeight == fontWeight &&
         other.fontStyle == fontStyle &&
         other.forceStrutHeight == forceStrutHeight &&
-        listEquals<String>(other.effectiveFontFamilyFallback, effectiveFontFamilyFallback);
+        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback);
   }
 
   @override
   int get hashCode => Object.hash(
-    effectiveFontFamily,
-    effectiveFontFamilyFallback != null ? Object.hashAll(effectiveFontFamilyFallback!) : null,
+    fontFamily,
+    fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback!) : null,
     fontSize,
     height,
     leading,
@@ -251,7 +255,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   final ui.Locale? locale;
   final ui.Hyphens? hyphens;
 
-  List<String> get effectiveFontFamilies => _computeEffectiveFontFamilies(<String>[?fontFamily]);
+  List<String> get effectiveFontFamilies => _computeEffectiveFontFamilies(fontFamily);
 
   EngineTextStyle getTextStyle() {
     return EngineTextStyle(
@@ -446,7 +450,7 @@ class EngineTextStyle implements ui.TextStyle {
   final List<ui.FontVariation>? fontVariations;
 
   List<String> get effectiveFontFamilies =>
-      _computeEffectiveFontFamilies(<String>[?fontFamily, ...?fontFamilyFallback]);
+      _computeEffectiveFontFamilies(fontFamily, fontFamilyFallback);
 
   List<ui.FontVariation> get effectiveFontVariations {
     final List<ui.FontVariation>? fontVariations = this.fontVariations;
@@ -723,8 +727,8 @@ class EngineParagraph implements ui.Paragraph {
       return;
     }
 
-    _lastLayoutConstraints = constraints.width;
     backendParagraph.layout(constraints.width);
+    _lastLayoutConstraints = constraints.width;
 
     if (!ui_web.TestEnvironment.instance.disableFontFallbacks && !_hasCheckedForMissingCodePoints) {
       _hasCheckedForMissingCodePoints = true;

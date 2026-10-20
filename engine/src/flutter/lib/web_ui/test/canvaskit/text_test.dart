@@ -38,8 +38,12 @@ void testMain() {
           defaultTestFontFamily,
         );
         expect(
+          EngineStrutStyle(fontFamily: 'BogusFontFamily').effectiveFontFamily,
+          defaultTestFontFamily,
+        );
+        expect(
           ui.StrutStyle(fontFamily: 'BogusFontFamily'),
-          ui.StrutStyle(fontFamily: defaultTestFontFamily),
+          isNot(ui.StrutStyle(fontFamily: defaultTestFontFamily)),
         );
       });
 
@@ -48,7 +52,7 @@ void testMain() {
 
         expect(EngineTextStyle().effectiveFontFamily, defaultTestFontFamily);
         expect(EngineParagraphStyle().getTextStyle().effectiveFontFamily, defaultTestFontFamily);
-        expect(ui.StrutStyle(), ui.StrutStyle(fontFamily: defaultTestFontFamily));
+        expect(EngineStrutStyle().effectiveFontFamily, defaultTestFontFamily);
       });
 
       test('Can specify test fontFamily to use', () {
@@ -58,6 +62,7 @@ void testMain() {
             EngineParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamily,
             testFont,
           );
+          expect(EngineStrutStyle(fontFamily: testFont).effectiveFontFamily, testFont);
         }
       });
     });
