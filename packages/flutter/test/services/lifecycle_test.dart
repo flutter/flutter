@@ -18,6 +18,20 @@ void main() {
     // even though no lifecycle event was fired from the platform.
     expect(binding.lifecycleState.toString(), equals('AppLifecycleState.paused'));
   });
+  testWidgets('Unknown lifecycle states are ignored', (WidgetTester tester) async {
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    binding.resetInternalState();
+    binding.platformDispatcher.initialLifecycleStateTestValue = 'AppLifecycleState.unknown';
+    binding.readTestInitialLifecycleStateFromNativeWindow();
+    expect(binding.lifecycleState, isNull);
+
+    await binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/lifecycle',
+      const StringCodec().encodeMessage('AppLifecycleState.unknown'),
+      (_) {},
+    );
+    expect(binding.lifecycleState, isNull);
+  });
   testWidgets('Handles all of the allowed states of AppLifecycleState', (
     WidgetTester tester,
   ) async {

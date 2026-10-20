@@ -329,8 +329,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   Future<String?> _handleLifecycleMessage(String? message) async {
-    final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
-    _setAppLifecycleState(state!);
+    final AppLifecycleState? state = message == null ? null : _parseAppLifecycleMessage(message);
+    if (state != null) {
+      _setAppLifecycleState(state);
+    }
     return null;
   }
 
