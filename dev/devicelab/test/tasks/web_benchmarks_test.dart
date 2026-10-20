@@ -566,8 +566,25 @@ zero.average                                                      0.0       2.2 
       );
     });
 
-    test('--clean with --no-build exits with code 2', () async {
-      expect(await runBenchmarkCli(<String>['--clean', '--no-build']), 2);
+    test('--clean or --local-web-sdk with --no-build exits with code 2', () async {
+      // The missing baseline makes the run stop before anything is built even
+      // if the conflict is not detected, so the conflict is identified by its
+      // error message rather than by the exit code alone.
+      final String missingBaseline = path.join(tempDir.path, 'missing.json');
+      const cases = <String, String>{
+        '--clean': 'Cannot use --clean and --no-build together.',
+        '--local-web-sdk=wasm_release': 'Cannot use --local-web-sdk and --no-build together.',
+      };
+      for (final MapEntry<String, String>(key: String flag, value: String message)
+          in cases.entries) {
+        final stderr = _RecordingStdout();
+        final int exitCode = await io.IOOverrides.runZoned(
+          () => runBenchmarkCli(<String>[flag, '--no-build', '--baseline=$missingBaseline']),
+          stderr: () => stderr,
+        );
+        expect(exitCode, 2, reason: flag);
+        expect(stderr.output.toString().trim(), message, reason: flag);
+      }
     });
 
     test('--local-engine-src-path without --local-web-sdk exits with code 2', () async {
@@ -615,6 +632,21 @@ zero.average                                                      0.0       2.2 
       }
     });
   });
+}
+
+/// An [io.Stdout] that records everything written to it with [write] or
+/// [writeln] in [output].
+class _RecordingStdout implements io.Stdout {
+  final StringBuffer output = StringBuffer();
+
+  @override
+  void write(Object? object) => output.write(object);
+
+  @override
+  void writeln([Object? object = '']) => output.writeln(object);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Matches the exception thrown when target benchmarks and a filter pattern are
