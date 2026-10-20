@@ -49,6 +49,7 @@ typedef struct {
   void (*system_sound_play)(const gchar* type, gpointer user_data);
   void (*system_chrome_set_application_switcher_description)(
       const gchar* label,
+      int64_t view_id,
       gpointer user_data);
   void (*system_navigator_pop)(gpointer user_data);
 } FlPlatformChannelVTable;

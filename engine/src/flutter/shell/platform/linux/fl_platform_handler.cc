@@ -7,8 +7,10 @@
 #include <gtk/gtk.h>
 #include <cstring>
 
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_platform_channel.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 static constexpr char kInProgressError[] = "In Progress";
 static constexpr char kUnknownClipboardFormatError[] =
@@ -22,6 +24,8 @@ static constexpr char kSoundTypeTick[] = "SystemSoundType.tick";
 
 struct _FlPlatformHandler {
   GObject parent_instance;
+
+  GWeakRef engine;
 
   FlPlatformChannel* channel;
 
@@ -219,20 +223,24 @@ static void system_sound_play(const gchar* type, gpointer user_data) {
 // Called when Flutter wants to set the window title.
 static void system_chrome_set_application_switcher_description(
     const gchar* label,
+    int64_t view_id,
     gpointer user_data) {
-  GtkWindow* window = nullptr;
-  GApplication* app = g_application_get_default();
-  if (app != nullptr && GTK_IS_APPLICATION(app)) {
-    window = gtk_application_get_active_window(GTK_APPLICATION(app));
+  FlPlatformHandler* self = FL_PLATFORM_HANDLER(user_data);
+
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
+    return;
   }
-  if (window == nullptr) {
-    g_autoptr(GList) toplevels = gtk_window_list_toplevels();
-    if (toplevels != nullptr) {
-      window = GTK_WINDOW(toplevels->data);
-    }
+
+  FlRenderable* renderable = fl_engine_get_renderable(engine, view_id);
+  if (renderable == nullptr || !FL_IS_VIEW(renderable)) {
+    return;
   }
+
+  GtkWidget* window =
+      gtk_widget_get_ancestor(GTK_WIDGET(renderable), GTK_TYPE_WINDOW);
   if (window != nullptr) {
-    gtk_window_set_title(window, label);
+    gtk_window_set_title(GTK_WINDOW(window), label);
   }
 }
 
@@ -246,6 +254,7 @@ static void fl_platform_handler_dispose(GObject* object) {
 
   g_cancellable_cancel(self->cancellable);
 
+  g_weak_ref_clear(&self->engine);
   g_clear_object(&self->channel);
   g_clear_object(&self->exit_application_method_call);
   g_clear_object(&self->cancellable);
@@ -273,14 +282,15 @@ static FlPlatformChannelVTable platform_channel_vtable = {
     .system_navigator_pop = system_navigator_pop,
 };
 
-FlPlatformHandler* fl_platform_handler_new(FlBinaryMessenger* messenger) {
-  g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
+FlPlatformHandler* fl_platform_handler_new(FlEngine* engine) {
+  g_return_val_if_fail(FL_IS_ENGINE(engine), nullptr);
 
   FlPlatformHandler* self = FL_PLATFORM_HANDLER(
       g_object_new(fl_platform_handler_get_type(), nullptr));
 
-  self->channel =
-      fl_platform_channel_new(messenger, &platform_channel_vtable, self);
+  g_weak_ref_init(&self->engine, engine);
+  self->channel = fl_platform_channel_new(
+      fl_engine_get_binary_messenger(engine), &platform_channel_vtable, self);
   self->app_initialization_complete = FALSE;
 
   return self;
