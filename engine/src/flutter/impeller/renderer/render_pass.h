@@ -14,6 +14,7 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/pipeline_use_counter.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
@@ -275,6 +276,11 @@ class RenderPass : public ResourceBinder {
 
   virtual bool OnEncodeCommands(const Context& context) const = 0;
 
+  /// Counts a use of [pipeline] for the pipeline library's use counts,
+  /// which the pass reports when it is encoded. Backends that override
+  /// `SetPipeline` call this from the override.
+  void CountPipelineUse(PipelineRef pipeline);
+
  private:
   RenderPass(const RenderPass&) = delete;
 
@@ -290,6 +296,8 @@ class RenderPass : public ResourceBinder {
                    raw_ptr<const Sampler>);
 
   Command pending_;
+  // Mutable so the const `EncodeCommands` can report the counts.
+  mutable PipelineUseCounter pipeline_uses_;
   std::optional<size_t> bound_buffers_start_ = std::nullopt;
   std::optional<size_t> bound_textures_start_ = std::nullopt;
   std::optional<size_t> vertex_buffers_start_ = std::nullopt;

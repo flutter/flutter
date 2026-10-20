@@ -358,7 +358,7 @@ void RenderPassVK::SetPipeline(PipelineRef pipeline) {
   if (!pipeline_) {
     return;
   }
-  context_->GetPipelineLibrary()->LogPipelineUsage(pipeline->GetDescriptor());
+  CountPipelineUse(pipeline);
 
   pipeline_uses_input_attachments_ =
       pipeline_->GetDescriptor().GetVertexDescriptor()->UsesInputAttachments();
