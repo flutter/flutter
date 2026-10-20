@@ -2393,13 +2393,13 @@ source_set("x") {
     });
 
     test('rejects conditions without a config_setting', () async {
-      // enable_backtrace (common/config.gni) has none yet.
+      // is_component_build (BUILDCONFIG.gn) has none: the engine never sets it.
       await expectLater(
         convert('''
 source_set("x") {
   sources = [ "a.cc" ]
-  if (enable_backtrace) {
-    sources += [ "backtrace.cc" ]
+  if (is_component_build) {
+    sources += [ "component.cc" ]
   }
 }
 ''', assumptions: Assumptions(const <String, GnValue>{})),
@@ -2407,7 +2407,7 @@ source_set("x") {
           isA<GnError>().having(
             (GnError e) => e.message,
             'message',
-            contains('no config_setting for `enable_backtrace`'),
+            contains('no config_setting for `is_component_build`'),
           ),
         ),
       );
@@ -2424,6 +2424,50 @@ source_set("x") {
 }
 ''', assumptions: Assumptions(const <String, GnValue>{}));
       expect(output, contains('"//engine/src/flutter/shell:enable_metal": ['));
+      // A denied variable in a disjunction, and an OS name compared,
+      // asserted and denied (fml's backtrace and wasm branches).
+      final String fml = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (enable_backtrace && !is_wasm) {
+    sources += [ "backtrace.cc" ]
+  } else {
+    sources += [ "backtrace_stub.cc" ]
+  }
+  if (target_os == "wasm") {
+    sources += [ "wasm.cc" ]
+  }
+  if (target_os != "wasm" && is_linux) {
+    sources += [ "linux_not_wasm.cc" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        fml,
+        contains(
+          '        "//engine/src/flutter/common:backtrace_disabled": [\n'
+          '            "backtrace_stub.cc",  # !(enable_backtrace && !is_wasm)\n'
+          '        ],\n'
+          '        "@platforms//os:emscripten": [\n'
+          '            "backtrace_stub.cc",  # !(enable_backtrace && !is_wasm)\n'
+          '        ],\n',
+        ),
+      );
+      expect(
+        fml,
+        contains(
+          '        "@platforms//os:emscripten": [\n            "wasm.cc",  # target_os == "wasm"\n',
+        ),
+      );
+      expect(
+        fml,
+        contains(
+          '    match_all = [\n'
+          '        "//engine/src/flutter/build/bazel:not_wasm",\n'
+          '        "@platforms//os:linux",\n'
+          '    ],\n',
+        ),
+      );
       expect(
         output,
         contains(
