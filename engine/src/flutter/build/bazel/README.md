@@ -936,10 +936,10 @@ Apple phase's.
 
 ## `et` with `--backend bazel`
 
-`et build`, `et test` and `et query targets` take `--backend bazel` (or
-`ET_BACKEND=bazel` in the environment; `gn` otherwise, and nothing changes
-for anyone who does not ask), which drives the Bazel build of the same
-configuration instead of GN and ninja. `et` asks the converter's code (`tools/gn_to_bazel`'s
+`et build`, `et test`, `et query targets` and `et lint` take `--backend
+bazel` (or `ET_BACKEND=bazel` in the environment; `gn` otherwise, and
+nothing changes for anyone who does not ask), which drives the Bazel build
+of the same configuration instead of GN and ninja. `et` asks the converter's code (`tools/gn_to_bazel`'s
 `builders.dart`, the same that generates `configs.bazelrc`) which
 `--config=<name>` the build has -- `host_debug_unopt` for the developer's
 `host_debug_unopt`, `ci_host_debug_unopt` for `ci/host_debug_unopt` -- and
@@ -958,6 +958,7 @@ et test --backend bazel --config host_debug_unopt //flutter/fml:fml_unittests
 et test --backend bazel --config ci/host_debug_test       # the builder's own suite (its run_tests.py steps)
 et query targets --backend bazel //flutter/fml/...        # the rules under fml, as GN labels
 et query targets --backend bazel --testonly //flutter/... # the tests
+et lint --backend bazel --config host_debug_unopt         # clang-tidy over the build's compile_commands.json
 ```
 
 `et build` with no targets is GN's default target, everything, which under
@@ -973,10 +974,15 @@ configuration, since the targets are the same under every one, and leaves
 out targets of other repositories, which have no GN spelling. It lists
 every rule, the converter's own included (a test's `_binary`, a config's
 library), where the GN path lists the kinds its parser knows (executables,
-libraries, actions, groups). `--gn-args`
+libraries, actions, groups). `et lint` under the Bazel backend first
+writes the `--config` build's `compile_commands.json` into its build
+directory through `compile_commands.py` (the build must have been built:
+clang-tidy reads the generated headers) and runs `ci/clang_tidy.sh
+--variant <build directory>` against it; the Dart, Java and Python linters
+read no build and run as before. `--gn-args`
 has no Bazel counterpart (the configuration is the whole of it) and is
 refused; `--rbe`, `--lto` and `--build-strategy` are GN's concerns and are
-ignored. `et run`, `et lint` and the rest stay on GN for now. bazelisk must
+ignored. `et run` and the rest stay on GN for now. bazelisk must
 be on PATH (`.bazelversion` pins the version); `bazel` is accepted when it
 is not.
 
