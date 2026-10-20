@@ -478,7 +478,7 @@ class Shell final : public PlatformView::Delegate,
   const fml::RefPtr<fml::RasterThreadMerger> parent_raster_thread_merger_;
   std::shared_ptr<ResourceCacheLimitCalculator>
       resource_cache_limit_calculator_;
-  size_t resource_cache_limit_;
+  size_t resource_cache_limit_ = 0;
   const Settings settings_;
   DartVMRef vm_;
   mutable std::mutex time_recorder_mutex_;

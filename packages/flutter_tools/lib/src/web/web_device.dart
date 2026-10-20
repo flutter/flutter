@@ -126,12 +126,18 @@ abstract class ChromiumDevice extends WebDevice {
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
+    final WebDebugConfig(
+      :String? launchUrl,
+      :bool runHeadless,
+      :int? browserDebugPort,
+      :List<String> browserFlags,
+    ) = debuggingOptions.webConfig;
     String url;
-    if (debuggingOptions.webLaunchUrl != null) {
-      if (_isLaunchUrlValid(debuggingOptions.webLaunchUrl!)) {
-        url = debuggingOptions.webLaunchUrl!;
+    if (launchUrl != null) {
+      if (_isLaunchUrlValid(launchUrl)) {
+        url = launchUrl;
       } else {
-        throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
+        throwToolExit('"$launchUrl" is not a valid HTTP URL.');
       }
     } else {
       url = platformArgs['uri']! as String;
@@ -143,9 +149,9 @@ abstract class ChromiumDevice extends WebDevice {
         cacheDir: _fileSystem.currentDirectory
             .childDirectory('.dart_tool')
             .childDirectory('chrome-device'),
-        headless: debuggingOptions.webRunHeadless,
-        debugPort: debuggingOptions.webBrowserDebugPort,
-        webBrowserFlags: debuggingOptions.webBrowserFlags,
+        headless: runHeadless,
+        debugPort: browserDebugPort,
+        webBrowserFlags: browserFlags,
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});

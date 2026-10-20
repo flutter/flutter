@@ -29,7 +29,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
  public:
   struct UniformBinding {
-    impeller::ShaderUniformSlot slot;
+    impeller::ShaderUniformSlot slot{};
     impeller::ShaderMetadata metadata;
     size_t size_in_bytes = 0;
 
@@ -38,7 +38,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   };
 
   struct TextureBinding {
-    impeller::SampledImageSlot slot;
+    impeller::SampledImageSlot slot{};
     impeller::ShaderMetadata metadata;
   };
 
@@ -164,7 +164,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   // the bundle was loaded from.
   std::string library_id_;
   std::string entrypoint_;
-  impeller::ShaderStage stage_;
+  impeller::ShaderStage stage_ = impeller::ShaderStage::kUnknown;
   std::shared_ptr<fml::Mapping> code_mapping_;
   std::vector<impeller::ShaderStageIOSlot> inputs_;
   std::vector<impeller::ShaderStageBufferLayout> layouts_;

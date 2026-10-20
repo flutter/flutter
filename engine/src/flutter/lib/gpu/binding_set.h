@@ -41,18 +41,18 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
 
  public:
   struct BufferBinding {
-    impeller::ShaderStage stage;
-    impeller::ShaderUniformSlot slot;
+    impeller::ShaderStage stage = impeller::ShaderStage::kUnknown;
+    impeller::ShaderUniformSlot slot{};
     /// Borrowed from the shader that declared the binding, which this set
     /// keeps alive.
-    const impeller::ShaderMetadata* metadata;
+    const impeller::ShaderMetadata* metadata = nullptr;
     impeller::BufferView view;
   };
 
   struct TextureBinding {
-    impeller::ShaderStage stage;
-    impeller::SampledImageSlot slot;
-    const impeller::ShaderMetadata* metadata;
+    impeller::ShaderStage stage = impeller::ShaderStage::kUnknown;
+    impeller::SampledImageSlot slot{};
+    const impeller::ShaderMetadata* metadata = nullptr;
     std::shared_ptr<const impeller::Texture> texture;
     /// Owned by the context's sampler library, which caches it for the
     /// context's lifetime. The Dart wrapper holds the context that resolved

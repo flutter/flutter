@@ -8,6 +8,10 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/exit.dart';
@@ -785,6 +789,80 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    group('lazy Android dependency evaluation', () {
+      var sdkEvaluations = 0;
+      var studioEvaluations = 0;
+      var gradleEvaluations = 0;
+      var javaEvaluations = 0;
+
+      setUp(() {
+        sdkEvaluations = 0;
+        studioEvaluations = 0;
+        gradleEvaluations = 0;
+        javaEvaluations = 0;
+      });
+
+      testUsingContext(
+        'does not eagerly evaluate AndroidSdk, AndroidStudio, GradleUtils, or Java during bootstrap or generateCommands',
+        () async {
+          late final ToolDependencies capturedDependencies;
+          final command = _DeviceManagerRecordingFlutterCommand();
+          await runner.run(
+            <String>[command.name],
+            (ToolDependencies toolDependencies) {
+              capturedDependencies = toolDependencies;
+              return <FlutterCommand>[
+                ...generateCommands(
+                  toolDependencies: toolDependencies,
+                  verbose: false,
+                  verboseHelp: false,
+                ),
+                command,
+              ];
+            },
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            shutdownHooks: ShutdownHooks(),
+          );
+
+          expect(sdkEvaluations, 0);
+          expect(studioEvaluations, 0);
+          expect(gradleEvaluations, 0);
+          expect(javaEvaluations, 0);
+
+          expect(capturedDependencies.androidContext.androidSdk, isA<FakeAndroidSdk>());
+          expect(sdkEvaluations, 1);
+          expect(capturedDependencies.androidContext.androidStudio, isA<_FakeAndroidStudio>());
+          expect(studioEvaluations, 1);
+          expect(capturedDependencies.androidContext.gradleUtils, isA<FakeGradleUtils>());
+          expect(gradleEvaluations, 1);
+          expect(capturedDependencies.androidContext.java, isA<FakeJava>());
+          expect(javaEvaluations, 1);
+        },
+        overrides: <Type, Generator>{
+          AndroidSdk: () {
+            sdkEvaluations++;
+            return FakeAndroidSdk();
+          },
+          AndroidStudio: () {
+            studioEvaluations++;
+            return _FakeAndroidStudio();
+          },
+          DeviceManager: () => null,
+          FileSystem: () => MemoryFileSystem.test(),
+          GradleUtils: () {
+            gradleEvaluations++;
+            return FakeGradleUtils();
+          },
+          Java: () {
+            javaEvaluations++;
+            return FakeJava();
+          },
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    });
   });
 
   group('unified_analytics', () {
@@ -1130,3 +1208,5 @@ class FakeCache extends Fake implements Cache {
   MapEntry<String, String> get dyLdLibEntry =>
       const MapEntry<String, String>('DYLD_LIBRARY_PATH', 'fake_path');
 }
+
+class _FakeAndroidStudio extends Fake implements AndroidStudio {}

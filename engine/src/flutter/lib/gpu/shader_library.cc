@@ -417,7 +417,7 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
       inputs.reserve(inputs_fb->size());
       size_t default_stride = 0;
       for (const auto& input : *inputs_fb) {
-        impeller::ShaderStageIOSlot slot;
+        impeller::ShaderStageIOSlot slot{};
         slot.name = input->name()->c_str();
         slot.location = input->location();
         slot.set = input->set();
