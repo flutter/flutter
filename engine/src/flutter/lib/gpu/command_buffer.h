@@ -11,6 +11,7 @@
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/device_buffer.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/recording.h"
 #include "flutter/lib/gpu/texture.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "impeller/geometry/point.h"
@@ -28,12 +29,11 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   FML_FRIEND_MAKE_REF_COUNTED(CommandBuffer);
 
  public:
-  CommandBuffer(std::shared_ptr<impeller::Context> context,
-                std::shared_ptr<impeller::CommandBuffer> command_buffer);
+  explicit CommandBuffer(std::shared_ptr<impeller::Context> context);
 
-  std::shared_ptr<impeller::CommandBuffer> GetCommandBuffer();
-
-  void AddRenderPass(std::shared_ptr<impeller::RenderPass> render_pass);
+  /// Appends a render pass recording, replayed in the order passes are
+  /// begun. Fails once the command buffer is submitted.
+  bool AddRenderPass(std::shared_ptr<RenderPassRecording> render_pass);
 
   bool AddCompletionCallback(
       impeller::CommandBuffer::CompletionCallback completion_callback);
@@ -56,6 +56,11 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
                             impeller::IRect source_region,
                             impeller::IPoint destination_origin);
 
+  /// Seals the recording and hands it to the raster thread, which creates
+  /// the Impeller command buffer, encodes, and submits. Without a raster
+  /// task runner (unit tests) the work is replayed on the calling thread
+  /// and the result is the submission's. Otherwise failures are reported
+  /// through the completion callback.
   bool Submit();
   bool Submit(
       const impeller::CommandBuffer::CompletionCallback& completion_callback);
@@ -64,21 +69,14 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
 
  private:
   std::shared_ptr<impeller::Context> context_;
-  std::shared_ptr<impeller::CommandBuffer> command_buffer_;
-
-  struct Encodable {
-    std::shared_ptr<impeller::RenderPass> render_pass;
-    std::shared_ptr<impeller::BlitPass> blit_pass;
-
-    bool EncodeCommands() const;
-  };
-
-  std::shared_ptr<impeller::BlitPass> GetOrCreateBlitPass();
-
-  std::vector<Encodable> encodables_;
+  std::shared_ptr<CommandBufferRecording> recording_;
   std::vector<impeller::CommandBuffer::CompletionCallback>
       completion_callbacks_;
   bool submitted_ = false;
+
+  /// The blit run at the end of the recording, started if the last
+  /// encodable is a render pass. Null once submitted.
+  std::vector<RecordedBlit>* OpenBlits();
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);
 };

@@ -48,11 +48,11 @@ void PipelineLibrary::LogPipelineCreation(const PipelineDescriptor& p) {
 #endif
 }
 
-void PipelineLibrary::LogPipelineUsage(const PipelineDescriptor& p) {
+void PipelineLibrary::LogPipelineUsage(const PipelineDescriptor& p, int count) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   WriterLock lock(pipeline_use_counts_mutex_);
-  ++pipeline_use_counts_[p];
+  pipeline_use_counts_[p] += count;
 #endif
 }
 

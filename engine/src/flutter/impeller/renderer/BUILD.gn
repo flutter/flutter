@@ -59,6 +59,8 @@ impeller_component("renderer") {
     "pipeline_descriptor.h",
     "pipeline_library.cc",
     "pipeline_library.h",
+    "pipeline_use_counter.cc",
+    "pipeline_use_counter.h",
     "pool.h",
     "render_pass.cc",
     "render_pass.h",

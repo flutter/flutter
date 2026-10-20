@@ -76,7 +76,10 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   virtual void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) = 0;
 
-  void LogPipelineUsage(const PipelineDescriptor& p);
+  /// Adds [count] uses of [p] to the use counts. Render passes report once
+  /// per distinct pipeline through a `PipelineUseCounter` rather than once
+  /// per draw.
+  void LogPipelineUsage(const PipelineDescriptor& p, int count = 1);
 
   void LogPipelineCreation(const PipelineDescriptor& p);
 

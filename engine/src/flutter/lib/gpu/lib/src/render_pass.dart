@@ -701,6 +701,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// instance receives the same vertex buffer data. This is valid, but every
   /// instance will produce the same geometry unless the shader varies its output
   /// another way.
+  ///
+  /// Throws when the draw cannot be recorded. Whether the backend can build
+  /// the pipeline for the current state is only known once the pass is
+  /// encoded, so a draw whose pipeline fails to build is dropped and logged
+  /// then, and later draws with that state throw here.
   void draw(int vertexCount, {int instanceCount = 1}) {
     RangeError.checkNotNegative(vertexCount, 'vertexCount');
     RangeError.checkNotNegative(instanceCount, 'instanceCount');
@@ -731,6 +736,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// instance receives the same vertex and index buffer data. This is valid, but
   /// every instance will produce the same geometry unless the shader varies its
   /// output another way.
+  ///
+  /// Failures are reported as for [draw].
   void drawIndexed(int indexCount, {int instanceCount = 1}) {
     RangeError.checkNotNegative(indexCount, 'indexCount');
     RangeError.checkNotNegative(instanceCount, 'instanceCount');

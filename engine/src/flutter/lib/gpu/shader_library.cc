@@ -414,7 +414,7 @@ std::string ShaderLibrary::ReloadFromFlatbuffer(
   // reload so user-held Dart wrappers stay attached to live data. Names
   // that disappeared in the new bundle drop out of the map; names that
   // are new get added. The eviction of old shader functions happens
-  // lazily in `Shader::RegisterSync` when the dirty bit is observed.
+  // lazily in `Shader::ScheduleRegistration` when the dirty bit is observed.
   ShaderMap merged;
   for (auto& [name, parsed] : new_shaders) {
     auto it = shaders_.find(name);
