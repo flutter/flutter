@@ -2393,12 +2393,13 @@ source_set("x") {
     });
 
     test('rejects conditions without a config_setting', () async {
+      // enable_backtrace (common/config.gni) has none yet.
       await expectLater(
         convert('''
 source_set("x") {
   sources = [ "a.cc" ]
-  if (shell_enable_metal) {
-    sources += [ "metal.cc" ]
+  if (enable_backtrace) {
+    sources += [ "backtrace.cc" ]
   }
 }
 ''', assumptions: Assumptions(const <String, GnValue>{})),
@@ -2406,8 +2407,30 @@ source_set("x") {
           isA<GnError>().having(
             (GnError e) => e.message,
             'message',
-            contains('no config_setting for `shell_enable_metal`'),
+            contains('no config_setting for `enable_backtrace`'),
           ),
+        ),
+      );
+      // shell/config.gni's arguments have theirs (//flutter/shell's appendix).
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (shell_enable_metal) {
+    sources += [ "metal.cc" ]
+  }
+  if (test_enable_vulkan && !is_wasm) {
+    sources += [ "vulkan_test.cc" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(output, contains('"//engine/src/flutter/shell:enable_metal": ['));
+      expect(
+        output,
+        contains(
+          '    match_all = [\n'
+          '        "//engine/src/flutter/shell:test_enable_vulkan",\n'
+          '        "//engine/src/flutter/build/bazel:not_wasm",\n'
+          '    ],\n',
         ),
       );
     });

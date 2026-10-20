@@ -917,6 +917,16 @@ const Map<String, String> conditionSettings = <String, String>{
   // --gn-args=dart_dynamic_modules=true, the `_ddm` builders): the Dart
   // wrap's flag, which the archives' names also read.
   'dart_dynamic_modules': '//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled',
+  // shell/config.gni's backend arguments, as its defaults and tools/gn set
+  // them by platform: the groups in //flutter/shell's appendix.
+  'shell_enable_gl': '//engine/src/flutter/shell:enable_gl',
+  'shell_enable_metal': '//engine/src/flutter/shell:enable_metal',
+  'shell_enable_software': '//engine/src/flutter/shell:enable_software',
+  'shell_enable_vulkan': '//engine/src/flutter/shell:enable_vulkan',
+  'test_enable_gl': '//engine/src/flutter/shell:test_enable_gl',
+  'test_enable_metal': '//engine/src/flutter/shell:test_enable_metal',
+  'test_enable_software': '//engine/src/flutter/shell:test_enable_software',
+  'test_enable_vulkan': '//engine/src/flutter/shell:test_enable_vulkan',
 };
 
 /// The config_setting that holds exactly when a GN predicate is *false*, for
@@ -936,6 +946,13 @@ const Map<String, String> negatedSettings = <String, String>{
   'is_win': '//engine/src/flutter/build/bazel:not_win',
   // The host's own build, denied: the OSes only a target runs.
   'is_host_toolchain': '//engine/src/flutter/build/bazel:not_host_toolchain',
+  // The shell's backends, denied (software is everywhere: no complement).
+  'shell_enable_gl': '//engine/src/flutter/shell:not_enable_gl',
+  'shell_enable_metal': '//engine/src/flutter/shell:not_enable_metal',
+  'shell_enable_vulkan': '//engine/src/flutter/shell:not_enable_vulkan',
+  'test_enable_gl': '//engine/src/flutter/shell:not_enable_gl',
+  'test_enable_metal': '//engine/src/flutter/shell:not_enable_metal',
+  'test_enable_vulkan': '//engine/src/flutter/shell:not_enable_vulkan',
   // A flag's denial has a setting of its own where a conjunction needs one
   // (`!dart_dynamic_modules && flutter_runtime_mode == "debug"`: the
   // archives' names).
