@@ -46,32 +46,17 @@ load(
     "with_feature_set",
 )
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("//engine/src/flutter/build/bazel:copts.bzl", "WASM_DEFAULT_WARNING_FLAGS")
 
 # Flags GN passes to every compile of the wasm toolchain
 # (//build/config/compiler:compiler, :runtime_library, :default_warnings
-# under is_wasm, //build/config/clang:extra_warnings), in GN's order.
+# under is_wasm, //build/config/clang:extra_warnings), in GN's order:
+# default_warning_flags as the is_wasm branch has them (copts.bzl), without
+# -Werror, which is a target's (see copts.bzl for why).
 _WASM_COMPILE_FLAGS = [
     "-fno-strict-aliasing",
     "-fcolor-diagnostics",
-    # default_warning_flags as the is_wasm branch has them: the Linux list
-    # (copts.bzl's DEFAULT_WARNING_FLAGS, without -Werror, which is a
-    # target's) plus the four the branch adds for zlib and freetype2, minus
-    # the two it adds for clang on other platforms.
-    "-Wendif-labels",
-    "-Wno-missing-field-initializers",
-    "-Wno-unused-parameter",
-    "-Wno-shift-negative-value",
-    "-Wno-unused-function",
-    "-Wno-unused-variable",
-    "-Wno-sign-conversion",
-    "-Wno-unused-but-set-parameter",
-    "-Wno-unused-but-set-variable",
-    "-Wno-psabi",
-    "-Wno-implicit-int-float-conversion",
-    "-Wno-deprecated-copy",
-    "-Wno-deprecated-literal-operator",
-    "-Wno-non-c-typedef-for-linkage",
-    "-Wno-range-loop-construct",
+] + [flag for flag in WASM_DEFAULT_WARNING_FLAGS if flag != "-Werror"] + [
     "-Wstring-conversion",
     "-Wnewline-eof",
 ]
