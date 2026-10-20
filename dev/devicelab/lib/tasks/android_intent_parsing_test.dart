@@ -13,9 +13,8 @@ import '../framework/utils.dart';
 
 TaskFunction createAndroidIntentParsingTest() {
   return () async {
-    final Device device = await devices.workingDevice;
+    final device = await devices.workingDevice as AndroidDevice;
     await device.unlock();
-    final String deviceId = device.deviceId;
     final String testDirectory = path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ui');
 
     const testPackageName = 'com.yourcompany.integration_ui';
@@ -28,15 +27,11 @@ TaskFunction createAndroidIntentParsingTest() {
         final String apkPath = path.join('build', 'app', 'outputs', 'flutter-apk', 'app-$mode.apk');
 
         // Ensure clean state
-        await exec('adb', <String>['-s', deviceId, 'uninstall', testPackageName], canFail: true);
-        await exec('adb', <String>['-s', deviceId, 'install', '-r', apkPath]);
-        await exec('adb', <String>['-s', deviceId, 'logcat', '-c']);
+        await device.adb(<String>['uninstall', testPackageName], canFail: true);
+        await device.adb(<String>['install', '-r', apkPath]);
+        await device.adb(<String>['logcat', '-c']);
 
-        await exec('adb', <String>[
-          '-s',
-          deviceId,
-          'shell',
-          'am',
+        await device.shellExec('am', <String>[
           'start',
           '-W',
           '-n',
@@ -52,7 +47,7 @@ TaskFunction createAndroidIntentParsingTest() {
         await Future<void>.delayed(const Duration(seconds: 1));
 
         section('--- Check logcat for verbose logs in $mode ---');
-        final String logcat = await eval('adb', <String>['-s', deviceId, 'logcat', '-d']);
+        final String logcat = await device.adb(<String>['logcat', '-d']);
         final bool foundInfoLog = logcat.contains('[INFO:flutter');
 
         if (expectVerbose && !foundInfoLog) {

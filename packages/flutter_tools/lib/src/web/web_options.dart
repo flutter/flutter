@@ -316,6 +316,21 @@ abstract final class WebOptions {
         'and this flag can be used to override the default. To disable this for the '
         'skwasm renderer, use "--no-cross-origin-isolation".',
   );
+
+  static const deprecatedJsInterop = NullableFlagOptionDescriptor(
+    name: 'deprecated-js-interop',
+    help:
+        'Whether to allow the deprecated JS interop libraries (such as '
+        '"dart:html", "dart:js", and "dart:js_util") when compiling to '
+        'JavaScript.\n'
+        'With "--no-deprecated-js-interop", importing these libraries is a '
+        'compile-time error and conditional imports on them resolve to false. '
+        'Use this to find code that still needs to migrate to "package:web" '
+        'and "dart:js_interop".\n'
+        'If not specified, the Dart compiler default is used. '
+        'Has no effect when compiling to WebAssembly.',
+    verboseOnly: true,
+  );
 }
 
 /// A bundle encapsulating general Flutter Web options and flags.
@@ -355,6 +370,7 @@ class WebJsOptionsBundle extends OptionBundle {
     WebOptions.minifyJs,
     WebOptions.noFrequencyBasedMinification,
     CommonOptions.nativeNullAssertions,
+    WebOptions.deprecatedJsInterop,
   ];
 }
 
@@ -384,5 +400,30 @@ class WebOptionsBundle extends OptionBundle {
     WebCoreOptionsBundle(),
     WebJsOptionsBundle(),
     WebWasmOptionsBundle(),
+  ];
+}
+
+/// A bundle encapsulating web development server and browser debugging options.
+class WebServerOptionsBundle extends OptionBundle {
+  const WebServerOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
+    WebOptions.webHeader,
+    WebOptions.webHostname,
+    WebOptions.webPort,
+    WebOptions.webTlsCertPath,
+    WebOptions.webTlsCertKeyPath,
+    WebOptions.webServerDebugProtocol,
+    WebOptions.webServerDebugBackendProtocol,
+    WebOptions.webServerDebugInjectedClientProtocol,
+    WebOptions.webAllowExposeUrl,
+    WebOptions.webRunHeadless,
+    WebOptions.webBrowserDebugPort,
+    WebOptions.webEnableExpressionEvaluation,
+    WebOptions.webLaunchUrl,
+    WebOptions.webBrowserFlags,
+    WebOptions.crossOriginIsolation,
+    WebOptions.baseHref,
   ];
 }

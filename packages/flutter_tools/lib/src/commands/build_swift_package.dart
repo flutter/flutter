@@ -81,7 +81,6 @@ class BuildSwiftPackage extends BuildSubCommand {
       _output,
       _platformOption,
       _buildMode,
-      _static,
     ], verboseHelp: verboseHelp);
   }
 
@@ -104,11 +103,6 @@ class BuildSwiftPackage extends BuildSubCommand {
     defaultsTo: <String>['debug', 'profile', 'release'],
     allowed: <String>['debug', 'profile', 'release'],
     help: 'Build modes to include.',
-  );
-
-  static const _static = FlagOptionDescriptor(
-    name: 'static',
-    help: 'Build CocoaPods plugins as static frameworks.',
   );
 
   @override
@@ -381,7 +375,7 @@ class BuildSwiftPackage extends BuildSubCommand {
 
     await cocoapodDependencies.generateArtifacts(
       buildInfo: buildInfo,
-      buildStatic: getValue(_static),
+      buildStatic: getValue(DarwinAddToAppOptionsBundle.staticFrameworks),
       cacheDirectory: cacheDirectory,
       xcframeworkOutput: xcframeworkOutput,
       codesignIdentity: codesignIdentity,
@@ -1908,7 +1902,7 @@ class FlutterNativeIntegrationSwiftPackage {
       manifest: nativeToolsPackage.childFile('Package.swift'),
       name: _kFlutterNativeTools,
       platforms: <SwiftPackageSupportedPlatform>[],
-      products: [_pluginTool.product, _assembleTool.product, _prebuildTool.product],
+      products: [..._pluginTool.products, _assembleTool.product, _prebuildTool.product],
       dependencies: [],
       targets: [
         SwiftPackageTarget.defaultTarget(name: _kFlutterToolHelper),
@@ -2009,13 +2003,15 @@ class FlutterNativeIntegrationSwiftPackage {
     }
   }
 
-  ({SwiftPackageProduct product, List<SwiftPackageTarget> targets}) get _pluginTool {
-    final product = SwiftPackageProduct.plugin(
-      name: 'FlutterBuildModePlugin',
-      targets: BuildSwiftPackage.availableBuildModes
-          .map((mode) => 'Switch to ${mode.uppercaseName} Mode')
-          .toList(),
-    );
+  ({List<SwiftPackageProduct> products, List<SwiftPackageTarget> targets}) get _pluginTool {
+    final List<SwiftPackageProduct> products = BuildSwiftPackage.availableBuildModes
+        .map(
+          (mode) => SwiftPackageProduct.plugin(
+            name: 'FlutterBuildMode${mode.uppercaseName}Plugin',
+            targets: ['Switch to ${mode.uppercaseName} Mode'],
+          ),
+        )
+        .toList();
     final targets = <SwiftPackageTarget>[
       SwiftPackageTarget.executableTarget(
         name: _kFlutterPluginTool,
@@ -2034,7 +2030,7 @@ class FlutterNativeIntegrationSwiftPackage {
           ),
         ),
     ];
-    return (product: product, targets: targets);
+    return (products: products, targets: targets);
   }
 
   ({SwiftPackageProduct product, SwiftPackageTarget target}) get _assembleTool {
