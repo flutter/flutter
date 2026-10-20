@@ -241,6 +241,7 @@ final class BuilderBuild {
     required this.unsupported,
     required this.otherPlatform,
     required this.testTypes,
+    required this.binaryTests,
     required this.otherTests,
   }) : configName = bareName(name);
 
@@ -315,10 +316,17 @@ final class BuilderBuild {
     flags.add(unoptimized ? '--compilation_mode=fastbuild' : '--compilation_mode=opt');
     flags.add('--$runtimeModeSetting=${runtimeMode ?? 'debug'}');
     flags.addAll(settings);
-    // The tests: run_tests.py's types, and every other step by name.
+    // The tests: run_tests.py's types, the test executables a step runs
+    // from the build directory, and every other step by name.
     final testTypes = <String>[];
+    final binaryTests = <String>[];
     final otherTests = <String>[];
+    final String? outPrefix = buildDirectory == null ? null : 'out/$buildDirectory/';
     for (final BuildTest test in build.tests) {
+      if (outPrefix != null && test.script.startsWith(outPrefix)) {
+        binaryTests.add(test.script.substring(outPrefix.length));
+        continue;
+      }
       if (!test.script.endsWith('testing/run_tests.py')) {
         otherTests.add(test.name);
         continue;
@@ -347,6 +355,7 @@ final class BuilderBuild {
       unsupported: unsupported,
       otherPlatform: otherPlatform,
       testTypes: testTypes,
+      binaryTests: binaryTests,
       otherTests: otherTests,
     );
   }
@@ -380,6 +389,10 @@ final class BuilderBuild {
 
   /// The types its run_tests.py steps run (`dart`, `engine`, ...).
   final List<String> testTypes;
+
+  /// The test executables its steps run directly from the build directory
+  /// (`out/<dir>/licenses_cpp_testrunner`), by name: each a Bazel test.
+  final List<String> binaryTests;
 
   /// Its other test steps, by name (scripts a Bazel test does not stand for).
   final List<String> otherTests;
@@ -613,11 +626,19 @@ String buildersBuildFile(
 
 /// `<name>_tests`: the suites of [build]'s run_tests.py types.
 void _testSuiteInto(StringBuffer out, BuilderBuild build, Map<String, Set<String>> convertedTests) {
-  if (build.testTypes.isEmpty && build.otherTests.isEmpty) {
+  if (build.testTypes.isEmpty && build.binaryTests.isEmpty && build.otherTests.isEmpty) {
     return;
   }
   final suites = <String>[];
   final missing = <String>[];
+  for (final String name in build.binaryTests) {
+    final String? label = _ninjaTargetLabel(name, convertedTests);
+    if (label == null) {
+      missing.add('$name (run from the build directory)');
+    } else if (!suites.contains(label)) {
+      suites.add(label);
+    }
+  }
   for (final String type in build.testTypes) {
     if (type == 'engine') {
       for (final String name in runTestsEngineSuites) {
@@ -644,6 +665,11 @@ void _testSuiteInto(StringBuffer out, BuilderBuild build, Map<String, Set<String
   out.writeln();
   if (build.testTypes.isNotEmpty) {
     out.writeln("# ${build.name}'s tests: run_tests.py --type ${build.testTypes.join(',')}.");
+  }
+  if (build.binaryTests.isNotEmpty) {
+    out.writeln(
+      "# ${build.name}'s tests run from the build directory: ${build.binaryTests.join(', ')}.",
+    );
   }
   if (missing.isNotEmpty) {
     out.writeln('# Not run, no Bazel test yet: ${missing.join(', ')}.');
