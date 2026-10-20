@@ -283,6 +283,7 @@ TEST_F(FlTaskRunnerTest, PostFromMultipleThreads) {
   constexpr int kThreads = 4;
   constexpr int kTasksPerThread = 100;
   std::vector<std::thread> threads;
+  threads.reserve(kThreads);
   for (int i = 0; i < kThreads; i++) {
     threads.emplace_back([task_runner]() {
       for (int j = 0; j < kTasksPerThread; j++) {
