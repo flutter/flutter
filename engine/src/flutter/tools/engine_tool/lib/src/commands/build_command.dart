@@ -4,6 +4,7 @@
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 
+import '../bazel.dart';
 import '../build_plan.dart';
 import '../build_utils.dart';
 import '../gn.dart';
@@ -18,9 +19,11 @@ final class BuildCommand extends CommandBase {
     required Map<String, BuilderConfig> configs,
     super.help = false,
     super.usageLineLength,
-  }) {
+  }) : _configs = configs {
     builds = BuildPlan.configureArgParser(argParser, environment, configs: configs, help: help);
   }
+
+  final Map<String, BuilderConfig> _configs;
 
   /// List of compatible builds.
   late final List<Build> builds;
@@ -41,6 +44,9 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
     final plan = BuildPlan.fromArgResults(argResults!, environment, builds: builds);
 
     final List<String> commandLineTargets = argResults!.rest;
+    if (plan.backend == BuildBackend.bazel) {
+      return _runBazel(plan, commandLineTargets);
+    }
     if (commandLineTargets.isNotEmpty &&
         !await ensureBuildDir(environment, plan.build, enableRbe: plan.useRbe)) {
       return 1;
@@ -79,5 +85,37 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       enableRbe: plan.useRbe,
       rbeConfig: plan.toRbeConfig(),
     );
+  }
+
+  /// The Bazel build of the same configuration: `bazel build --config=<name>`
+  /// of the targets' Bazel counterparts, or -- with no targets, GN's default
+  /// of everything -- the build's install target run into its build
+  /// directory, which is what a GN build leaves behind.
+  Future<int> _runBazel(BuildPlan plan, List<String> commandLineTargets) async {
+    final bazel = Bazel(environment, _configs);
+    final String? config = bazel.configFor(plan.build);
+    if (config == null) {
+      return 1;
+    }
+    if (plan.extraGnArgs.isNotEmpty) {
+      environment.logger.error(
+        '--gn-args has no Bazel counterpart; the configuration is the whole of it.',
+      );
+      return 1;
+    }
+    if (commandLineTargets.isEmpty) {
+      return bazel.run(<String>[
+        'run',
+        '--config=$config',
+        bazel.installTargetFor(plan.build),
+        '--',
+        bazel.buildDirectoryFor(plan.build),
+      ]);
+    }
+    return bazel.run(<String>[
+      'build',
+      '--config=$config',
+      for (final String pattern in commandLineTargets) Bazel.labelFor(TargetPattern.parse(pattern)),
+    ]);
   }
 }

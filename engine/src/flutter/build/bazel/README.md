@@ -929,6 +929,42 @@ runs what `Linux linux_host_engine_test`'s `host_debug_test` runs.
 `generated_file` over `metadata` (the macOS entitlements lists) is the
 Apple phase's.
 
+## `et` with `--backend bazel`
+
+`et build` and `et test` take `--backend bazel` (or `ET_BACKEND=bazel` in
+the environment; `gn` otherwise, and nothing changes for anyone who does not
+ask), which drives the Bazel build of the same configuration instead of GN
+and ninja. `et` asks the converter's code (`tools/gn_to_bazel`'s
+`builders.dart`, the same that generates `configs.bazelrc`) which
+`--config=<name>` the build has -- `host_debug_unopt` for the developer's
+`host_debug_unopt`, `ci_host_debug_unopt` for `ci/host_debug_unopt` -- and
+refuses, naming the flag, a build the Bazel build cannot express
+(`ci/host_debug_no_prebuilt_dart_sdk`). GN labels and patterns are spelled
+the Bazel way through the converter's table: `//flutter/fml:fml_unittests`
+is `//engine/src/flutter/fml:fml_unittests`, `//flutter/shell/...` is
+`//engine/src/flutter/shell/...`, `//flutter/fml:all` is
+`//engine/src/flutter/fml:all`; a directory the converter has not converted
+is left to Bazel to report.
+
+```sh
+et build --backend bazel --config host_debug_unopt //flutter/fml:fml_unittests //flutter/txt/...
+et build --backend bazel --config host_debug_unopt        # everything: install into out/host_debug_unopt
+et test --backend bazel --config host_debug_unopt //flutter/fml:fml_unittests
+et test --backend bazel --config ci/host_debug_test       # the builder's own suite (its run_tests.py steps)
+```
+
+`et build` with no targets is GN's default target, everything, which under
+Bazel is the build's install target run into its build directory
+(`//engine/src/flutter:install` for a developer's build;
+`//engine/src/flutter/ci/builders:<name>` for a CI build, over its ninja
+targets) -- GN's layout from Bazel's outputs, in the directory GN would have
+used. `et test` with no patterns runs the build's `<name>_tests` suite, and
+errors when the build has no `run_tests.py` step. `--gn-args` has no Bazel
+counterpart (the configuration is the whole of it) and is refused; `--rbe`,
+`--lto` and `--build-strategy` are GN's concerns and are ignored. `et run`,
+`et query` and the rest stay on GN for now. bazelisk must be on PATH
+(`.bazelversion` pins the version); `bazel` is accepted when it is not.
+
 ## Impeller's shader pipeline
 
 Every Impeller library with shaders invokes `impeller_shaders()`

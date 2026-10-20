@@ -4,6 +4,7 @@
 
 import 'package:engine_build_configs/engine_build_configs.dart';
 
+import '../bazel.dart';
 import '../build_plan.dart';
 import '../build_utils.dart';
 import '../gn.dart';
@@ -20,9 +21,11 @@ final class TestCommand extends CommandBase {
     required Map<String, BuilderConfig> configs,
     super.help = false,
     super.usageLineLength,
-  }) {
+  }) : _configs = configs {
     builds = BuildPlan.configureArgParser(argParser, environment, configs: configs, help: help);
   }
+
+  final Map<String, BuilderConfig> _configs;
 
   /// List of compatible builds.
   late final List<Build> builds;
@@ -41,6 +44,10 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
   @override
   Future<int> run() async {
     final plan = BuildPlan.fromArgResults(argResults!, environment, builds: builds);
+
+    if (plan.backend == BuildBackend.bazel) {
+      return _runBazel(plan, argResults!.rest);
+    }
 
     if (!await ensureBuildDir(environment, plan.build, enableRbe: plan.useRbe)) {
       return 1;
@@ -93,5 +100,31 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
       );
     }
     return await workerPool.run(tasks) ? 0 : 1;
+  }
+
+  /// `bazel test --config=<name>` of the patterns' Bazel counterparts (Bazel
+  /// picks the tests among them itself), or of the build's own test suite --
+  /// what its `run_tests.py` steps run -- when no pattern is given.
+  Future<int> _runBazel(BuildPlan plan, List<String> patterns) async {
+    final bazel = Bazel(environment, _configs);
+    final String? config = bazel.configFor(plan.build);
+    if (config == null) {
+      return 1;
+    }
+    final targets = <String>[
+      for (final String pattern in patterns) Bazel.labelFor(TargetPattern.parse(pattern)),
+    ];
+    if (targets.isEmpty) {
+      final String? suite = bazel.testSuiteFor(plan.build);
+      if (suite == null) {
+        environment.logger.error(
+          'No targets given, and ${plan.build.name} has no test steps of its own '
+          '(no <name>_tests suite in flutter/ci/builders/BUILD.bazel).',
+        );
+        return 1;
+      }
+      targets.add(suite);
+    }
+    return bazel.run(<String>['test', '--config=$config', ...targets]);
   }
 }

@@ -59,10 +59,11 @@ class TestEnvironment {
     bool verbose = false,
     DateTime Function() now = DateTime.now,
     this.cannedProcesses = const <CannedProcess>[],
+    Map<String, String> environment = const <String, String>{},
   }) {
     testLogs = <LogRecord>[];
     logger ??= Logger.test(testLogs.add);
-    environment = Environment(
+    this.environment = Environment(
       abi: abi,
       engine: engine,
       platform: FakePlatform(
@@ -70,6 +71,7 @@ class TestEnvironment {
         resolvedExecutable: io.Platform.resolvedExecutable,
         pathSeparator: _pathSeparatorForAbi(abi),
         numberOfProcessors: 32,
+        environment: environment,
       ),
       processRunner: ProcessRunner(
         processManager: FakeProcessManager(
@@ -109,6 +111,7 @@ class TestEnvironment {
     List<CannedProcess> cannedProcesses = const <CannedProcess>[],
     bool verbose = false,
     DateTime Function() now = DateTime.now,
+    Map<String, String> environment = const <String, String>{},
   }) {
     final io.Directory rootDir = io.Directory.systemTemp.createTempSync('et');
     final engine = TestEngine.createTemp(rootDir: rootDir);
@@ -130,6 +133,7 @@ class TestEnvironment {
       cannedProcesses: cannedProcesses + <CannedProcess>[cannedGn],
       verbose: verbose,
       now: now,
+      environment: environment,
     );
     return testEnvironment;
   }

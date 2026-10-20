@@ -596,4 +596,120 @@ The input testing/foo:foo matches no targets, configs or files.
       reason: 'The log should not contain CI-prefixed builds',
     );
   });
+
+  group('--backend bazel', () {
+    // A Linux host build of a builder file: the kind the converter gives a
+    // Bazel configuration (tools/gn_to_bazel/lib/src/builders.dart).
+    Map<String, BuilderConfig> linuxConfigs() {
+      final builder = TestBuilderConfig();
+      builder.addBuild(
+        name: 'linux/host_debug',
+        dimension: TestDroneDimension.linux,
+        enableLto: false,
+        targetDir: 'host_debug',
+      );
+      // A developer's build: ninja's default target, everything (the helper
+      // names a target along with the directory).
+      final Map<String, Object?> json = builder.buildJson();
+      final build = (json['builds']! as List<Object?>).single! as Map<String, Object?>;
+      (build['ninja']! as Map<String, Object?>)['targets'] = <String>[];
+      return {
+        'local_engine': BuilderConfig.fromJson(map: json, path: 'ci/builders/local_engine.json'),
+      };
+    }
+
+    test("builds the targets' Bazel counterparts under the build's configuration", () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'host_debug',
+        '--backend',
+        'bazel',
+        '//flutter/fml:fml_unittests',
+        '//flutter/shell/...',
+        '//flutter/display_list:all',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory, hasLength(1));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'build',
+        '--config=host_debug',
+        '//engine/src/flutter/fml:fml_unittests',
+        '//engine/src/flutter/shell/...',
+        '//engine/src/flutter/display_list:all',
+      ]);
+    });
+
+    test('with no targets runs the install target into the build directory', () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'host_debug',
+        '--backend',
+        'bazel',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'run',
+        '--config=host_debug',
+        '//engine/src/flutter:install',
+        '--',
+        path.join(testEnv.environment.engine.outDir.path, 'host_debug'),
+      ]);
+    });
+
+    test('ET_BACKEND selects the backend', () async {
+      final testEnv = TestEnvironment.withTestEngine(
+        environment: <String, String>{'ET_BACKEND': 'bazel'},
+      );
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+      final int result = await runner.run(['build', '--config', 'host_debug', '//flutter/fml:fml']);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command.take(2), <String>['bazelisk', 'build']);
+    });
+
+    test('refuses a build the Bazel build has no configuration for', () async {
+      final testEnv = TestEnvironment.withTestEngine(abi: Abi.macosArm64);
+      addTearDown(testEnv.cleanup);
+
+      final builder = TestBuilderConfig();
+      builder.addBuild(name: 'macos/host_debug', dimension: TestDroneDimension.mac);
+      final runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
+      );
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'host_debug',
+        '--backend',
+        'bazel',
+      ]);
+
+      expect(result, equals(1));
+      expect(testEnv.processHistory, isEmpty);
+      expect(
+        testEnv.testLogs.map((r) => r.message),
+        contains(contains('no configuration for macos/host_debug')),
+      );
+    });
+  });
 }
