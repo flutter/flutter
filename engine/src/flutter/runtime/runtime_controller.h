@@ -289,23 +289,6 @@ class RuntimeController : public PlatformConfigurationClient,
   bool SetUserSettingsData(const std::string& data);
 
   //----------------------------------------------------------------------------
-  /// @brief      Forward the initial lifecycle state data to the running
-  ///             isolate. If the isolate is not running, this data will be
-  ///             saved and flushed to the isolate when it starts running.
-  ///             This is only set by the deprecated lifecycle platform
-  ///             channel, see `SetAppLifecycleState`.
-  ///
-  /// @deprecated The persistent isolate data must be used for this purpose
-  ///             instead.
-  ///
-  /// @param[in]  data  The lifecycle state data.
-  ///
-  /// @return     If the lifecycle state data was forwarded to the running
-  ///             isolate.
-  ///
-  bool SetInitialLifecycleState(const std::string& data);
-
-  //----------------------------------------------------------------------------
   /// @brief      Forward the lifecycle state of the application to the running
   ///             isolate. If the isolate is not running, the state will be
   ///             saved and flushed to the isolate when it starts running.
@@ -714,6 +697,22 @@ class RuntimeController : public PlatformConfigurationClient,
   RuntimeController(RuntimeDelegate& p_client, const TaskRunners& task_runners);
 
  private:
+  //----------------------------------------------------------------------------
+  /// @brief      Forward the initial lifecycle state data to the running
+  ///             isolate. If the isolate is not running, this data will be
+  ///             saved and flushed to the isolate when it starts running.
+  ///             This is updated by `SetAppLifecycleState`.
+  ///
+  /// @deprecated Kept for `PlatformDispatcher.initialLifecycleState`, use
+  ///             `PlatformDispatcher.appLifecycleState` instead.
+  ///
+  /// @param[in]  data  The lifecycle state data.
+  ///
+  /// @return     If the lifecycle state data was forwarded to the running
+  ///             isolate.
+  ///
+  bool SetInitialLifecycleState(const std::string& data);
+
   struct Locale {
     Locale(std::string language_code_,
            std::string country_code_,

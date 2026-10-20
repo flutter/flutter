@@ -1119,8 +1119,8 @@ class PlatformDispatcher {
   /// It is used to initialize [SchedulerBinding.lifecycleState] at startup with
   /// any buffered lifecycle state events.
   ///
-  /// This is only set by embedders using the deprecated `flutter/lifecycle`
-  /// platform channel. Use [appLifecycleState] instead.
+  /// Use [appLifecycleState] instead, which is also updated as the lifecycle
+  /// changes.
   String get initialLifecycleState {
     _initialLifecycleStateAccessed = true;
     return _initialLifecycleState;

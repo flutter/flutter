@@ -397,7 +397,6 @@ bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
       state == "AppLifecycleState.inactive") {
     ScheduleFrame();
   }
-  runtime_controller_->SetInitialLifecycleState(state);
 
   // The framework receives the state through dart:ui, so the message is not
   // forwarded to it.

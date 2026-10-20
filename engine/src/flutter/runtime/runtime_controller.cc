@@ -278,6 +278,26 @@ bool RuntimeController::SetInitialLifecycleState(const std::string& data) {
 bool RuntimeController::SetAppLifecycleState(LifecycleState state) {
   platform_data_.app_lifecycle_state = state;
 
+  // Keep the deprecated initial lifecycle state up to date until it is
+  // removed.
+  switch (state) {
+    case LifecycleState::kDetached:
+      SetInitialLifecycleState("AppLifecycleState.detached");
+      break;
+    case LifecycleState::kResumed:
+      SetInitialLifecycleState("AppLifecycleState.resumed");
+      break;
+    case LifecycleState::kInactive:
+      SetInitialLifecycleState("AppLifecycleState.inactive");
+      break;
+    case LifecycleState::kHidden:
+      SetInitialLifecycleState("AppLifecycleState.hidden");
+      break;
+    case LifecycleState::kPaused:
+      SetInitialLifecycleState("AppLifecycleState.paused");
+      break;
+  }
+
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
     platform_configuration->UpdateAppLifecycleState(state);
     return true;

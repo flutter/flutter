@@ -1061,6 +1061,15 @@ void can_receive_app_lifecycle_state() {
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
+void reports_initial_lifecycle_state() {
+  PlatformDispatcher.instance.onAppLifecycleStateChanged = () {
+    signalNativeMessage(PlatformDispatcher.instance.initialLifecycleState);
+  };
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 void can_receive_locale_updates() {
   PlatformDispatcher.instance.onLocaleChanged = () {
     signalNativeCount(PlatformDispatcher.instance.locales.length);

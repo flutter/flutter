@@ -2509,6 +2509,36 @@ TEST_F(EmbedderTest, CanSetAppLifecycleState) {
             kInvalidArguments);
 }
 
+TEST_F(EmbedderTest, AppLifecycleStateSetsInitialLifecycleState) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("reports_initial_lifecycle_state");
+  fml::AutoResetWaitableEvent ready;
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+
+  fml::AutoResetWaitableEvent message_latch;
+  std::string message;
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        message = tonic::DartConverter<std::string>::FromDart(message_handle);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Wait for the application to attach the callback.
+  ready.Wait();
+
+  ASSERT_EQ(FlutterEngineSetAppLifecycleState(engine.get(),
+                                              kFlutterAppLifecycleStatePaused),
+            kSuccess);
+  message_latch.Wait();
+  EXPECT_EQ(message, "AppLifecycleState.paused");
+}
+
 TEST_F(EmbedderTest, DeprecatedLifecycleChannelWarnsOnce) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);
