@@ -844,6 +844,6 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($_controller)';
+    return '${describeIdentity(this)}($_controller, correction: ${_correction.toStringAsFixed(1)})';
   }
 }

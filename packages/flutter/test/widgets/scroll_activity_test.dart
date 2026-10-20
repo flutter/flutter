@@ -383,6 +383,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(controller.offset, moreOrLessEquals(960.0));
+    expect(controller.position.activity.toString(), endsWith(', correction: 0.0)'));
 
     // Grow the spacer by 200 px while it is entirely above the viewport. In
     // this frame the animation first moves to 880, then the spacer reports a
@@ -401,6 +402,7 @@ void main() {
       tester.getTopLeft(find.text('Item 3')).dy,
       moreOrLessEquals(itemTopAfterCorrection + 80.0),
     );
+    expect(controller.position.activity.toString(), endsWith(', correction: 200.0)'));
 
     // Let the animation finish, which should end at its initial target of
     // 400 px, moved partway through the animation by the 200 px correction.
