@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:test/test.dart';
 
@@ -121,5 +122,91 @@ void main() {
       ),
       reason: 'protoc is not marked as testonly',
     );
+  });
+
+  group('--backend bazel', () {
+    Map<String, BuilderConfig> linuxConfigs({bool withTests = false}) {
+      final builder = TestBuilderConfig();
+      builder.addBuild(
+        name: 'linux/host_debug',
+        dimension: TestDroneDimension.linux,
+        enableLto: false,
+        targetDir: 'host_debug',
+      );
+      final Map<String, Object?> json = builder.buildJson();
+      if (withTests) {
+        // A run_tests.py step, as the CI builds have (a `script` of its own:
+        // the shared helper's `testTask` writes a `scripts` list the model
+        // does not read).
+        final build = (json['builds']! as List<Object?>).single! as Map<String, Object?>;
+        build['tests'] = <Object?>[
+          <String, Object?>{
+            'name': 'Host Tests',
+            'language': 'python3',
+            'script': 'flutter/testing/run_tests.py',
+            'parameters': <String>['--variant', 'host_debug', '--type', 'engine'],
+            'contexts': <String>[],
+          },
+        ];
+      }
+      return {
+        'local_engine': BuilderConfig.fromJson(map: json, path: 'ci/builders/local_engine.json'),
+      };
+    }
+
+    test("runs the patterns' Bazel counterparts with bazel test", () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+      final int result = await runner.run([
+        'test',
+        '--config',
+        'host_debug',
+        '--backend',
+        'bazel',
+        '//flutter/fml:fml_unittests',
+        '//flutter/display_list/...',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'test',
+        '--config=host_debug',
+        '//engine/src/flutter/fml:fml_unittests',
+        '//engine/src/flutter/display_list/...',
+      ]);
+    });
+
+    test("with no patterns runs the build's own suite, if it has test steps", () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: linuxConfigs(withTests: true),
+      );
+      final int result = await runner.run(['test', '--config', 'host_debug', '--backend', 'bazel']);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'test',
+        '--config=host_debug',
+        '//engine/src/flutter/ci/builders:host_debug_tests',
+      ]);
+
+      final without = TestEnvironment.withTestEngine();
+      addTearDown(without.cleanup);
+      final int none = await ToolCommandRunner(
+        environment: without.environment,
+        configs: linuxConfigs(),
+      ).run(['test', '--config', 'host_debug', '--backend', 'bazel']);
+      expect(none, equals(1));
+      expect(without.processHistory, isEmpty);
+    });
   });
 }

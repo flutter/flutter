@@ -12,10 +12,13 @@ load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_tes
 
 package(default_visibility = ["//visibility:public"])
 
-# The library and the in-tree packages it imports.
+# The library and the in-tree packages it imports (gn_to_bazel for the
+# Bazel backend of `et build` and `et test`: the configuration a build has,
+# the Bazel spelling of labels).
 filegroup(
     name = "dart_sources",
     srcs = glob(["lib/**/*.dart"]) + [
+        "//engine/src/flutter/tools/gn_to_bazel:dart_sources",
         "//engine/src/flutter/tools/pkg/engine_build_configs:dart_sources",
         "//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources",
     ],

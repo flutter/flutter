@@ -8,6 +8,7 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
+import 'bazel.dart';
 import 'build_utils.dart';
 import 'environment.dart';
 import 'logger.dart';
@@ -18,6 +19,7 @@ const _flagStrategy = 'build-strategy';
 const _flagRbe = 'rbe';
 const _flagLto = 'lto';
 const _flagExtraGnArgs = 'gn-args';
+const _flagBackend = 'backend';
 
 /// Describes what (platform, targets) and how (strategy, options) to build.
 ///
@@ -80,6 +82,12 @@ final class BuildPlan {
         _checkExtraGnArgs(value);
         return value;
       }(),
+      backend: () {
+        final String? name = args.option(_flagBackend);
+        return name == null
+            ? BuildBackend.fromEnvironment(environment)
+            : BuildBackend.values.byName(name);
+      }(),
     );
   }
 
@@ -90,6 +98,7 @@ final class BuildPlan {
     required this.useLto,
     required this.concurrency,
     required Iterable<String> extraGnArgs,
+    this.backend = BuildBackend.gn,
   }) : extraGnArgs = List.unmodifiable(extraGnArgs) {
     if (!useRbe && strategy == BuildStrategy.remote) {
       throw FatalError('Cannot use remote builds without RBE enabled.\n\n$_rbeInstructions');
@@ -230,6 +239,23 @@ final class BuildPlan {
     // Add --concurrency.
     parser.addOption(_flagConcurrency, abbr: 'j', help: 'How many jobs to run in parallel.');
 
+    // Add --backend.
+    parser.addOption(
+      _flagBackend,
+      allowed: BuildBackend.values.map((e) => e.name),
+      allowedHelp: {
+        BuildBackend.gn.name: "GN and ninja: the engine's build.",
+        BuildBackend.bazel.name:
+            'Bazel, with the configuration generated for the build '
+            '(flutter/ci/builders/configs.bazelrc). Experimental: Linux x64 host builds only.',
+      },
+      help:
+          ''
+          'Which build system runs the build.\n'
+          'ET_BACKEND in the environment sets the default; without it, gn.',
+      hide: !environment.verbose,
+    );
+
     // Add --gn-args.
     parser.addMultiOption(
       _flagExtraGnArgs,
@@ -248,6 +274,9 @@ final class BuildPlan {
 
   /// The build configuration to use.
   final Build build;
+
+  /// Which build system runs the build.
+  final BuildBackend backend;
 
   /// How to prefer remote or local builds.
   final BuildStrategy strategy;

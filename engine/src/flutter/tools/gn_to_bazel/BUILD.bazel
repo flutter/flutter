@@ -1,0 +1,21 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:gn_to_bazel: the converter that generates the engine's BUILD.bazel
+# files from its GN (README.md). It runs outside Bazel -- by hand, and at
+# fetch time in the synced repositories' rules -- and its own tests run with
+# `dart test` from this directory, so nothing here builds or tests it. The
+# filegroup is for the in-tree packages that import it: `et` asks it for the
+# Bazel configuration a builder file's build corresponds to and for the Bazel
+# spelling of GN labels (tools/engine_tool/lib/src/bazel.dart).
+
+package(default_visibility = ["//visibility:public"])
+
+# The library and the in-tree package it imports.
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]) + [
+        "//engine/src/flutter/tools/pkg/engine_build_configs:dart_sources",
+    ],
+)

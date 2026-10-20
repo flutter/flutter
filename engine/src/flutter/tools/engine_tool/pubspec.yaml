@@ -18,6 +18,7 @@ dependencies:
   engine_build_configs: any
   engine_repo_tools: any
   file: any
+  gn_to_bazel: any
   logging: any
   meta: any
   path: any
