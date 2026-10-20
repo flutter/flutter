@@ -22,7 +22,15 @@
 # path races with the client under load (an unchecked attach of a segment
 # the client has already released), and six of sixteen shards died of it
 # with the extension on. It listens on no TCP port, and lives as long as
-# the test does.
+# the test does. It does not reset: an X server regenerates itself (and
+# runs xkbcomp again) each time its last client leaves, which under
+# gtest-parallel is between every two test processes, and a client that
+# connects while the server is regenerating can lose its connection -- GTK
+# then says "cannot open display" for a display that is up. Alone on a
+# machine the suite never hit it; with three of its instances sharing the
+# machine, 14 of 20 runs did (a handful of the 1,710 test processes each),
+# and none of 6 runs with -noreset. The server resets between sessions for
+# nobody here.
 #
 # A sharded test (`shard_count`) gets Bazel's shard variables handed to
 # googletest under the names it reads (the in-tree googletest knows only
@@ -40,7 +48,13 @@
 # systemd user session); a sandboxed test inherits nothing, so the wrapper
 # starts one, as it starts the display. dbus-daemon and at-spi2-core (whose
 # launcher the bus activates on demand) are host prerequisites, as GTK's
-# own packages bring them.
+# own packages bring them. The wrapper asks the new bus for the
+# accessibility bus once itself, before the binary runs: the launcher is
+# activated by the first request, and when eight test processes make it at
+# once (gtest-parallel's first wave) the launcher has been seen to
+# disconnect under them, failing all eight with "Error retrieving
+# accessibility bus address" (1 of 41 runs here); activated once, serially,
+# it is there for everyone.
 #
 # Usage: xvfb_run.sh <binary> <arguments>...
 
@@ -95,6 +109,12 @@ if [[ "${FLUTTER_TEST_SESSION_BUS:-}" == 2 ]]; then
   fi
   unset FLUTTER_TEST_SESSION_BUS FLUTTER_TEST_SAVED_G_DEBUG
   echo "xvfb_run.sh: DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS HOME=$HOME" >&2
+  # Activate the accessibility bus once, serially (see above). A failure
+  # here is the binary's to report, in its own words.
+  if command -v dbus-send >/dev/null 2>&1; then
+    dbus-send --session --print-reply --dest=org.a11y.Bus /org/a11y/bus \
+      org.a11y.Bus.GetAddress >/dev/null 2>&1 || :
+  fi
 fi
 
 if [[ -n "${DISPLAY:-}" ]]; then
@@ -126,7 +146,7 @@ trap clean_up EXIT
 
 # Xvfb writes the display number to the descriptor once it listens.
 Xvfb -displayfd 3 -screen 0 1280x800x24 -ac -dpi 96 -maxclients 512 \
-  -extension MIT-SHM -nolisten tcp \
+  -extension MIT-SHM -nolisten tcp -noreset \
   3>"$scratch/display" 2>"$xvfb_log" &
 xvfb_pid=$!
 for ((i = 0; i < 300; i++)); do
