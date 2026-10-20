@@ -166,16 +166,18 @@ UniqueAotDataPtr FlutterProjectBundle::LoadAotData(
         << "Attempted to load AOT data, but no aot_library_path was provided.";
     return UniqueAotDataPtr(nullptr, nullptr);
   }
+  // Streaming std::filesystem::path converts it to the ANSI code page and
+  // crashes on characters outside of it, so log the UTF-8 string instead.
+  std::string path_string = fml::PathToUtf8(aot_library_path_);
   if (!std::filesystem::exists(aot_library_path_)) {
-    FML_LOG(ERROR) << "Can't load AOT data from " << aot_library_path_
+    FML_LOG(ERROR) << "Can't load AOT data from " << path_string
                    << "; no such file.";
     return UniqueAotDataPtr(nullptr, nullptr);
   }
-  std::string path_string = fml::PathToUtf8(aot_library_path_);
   absl::StatusOr<FlutterEngineAOTDataSourceType> type =
       GetAotDataSourceType(path_string);
   if (!type.ok()) {
-    FML_LOG(ERROR) << "Can't load AOT data from " << aot_library_path_ << "; "
+    FML_LOG(ERROR) << "Can't load AOT data from " << path_string << "; "
                    << type.status().message() << ".";
     return UniqueAotDataPtr(nullptr, nullptr);
   }
