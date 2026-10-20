@@ -782,9 +782,14 @@ ArgParser buildBenchmarkArgParser() {
     ..addFlag(
       'no-build',
       negatable: false,
-      help: 'Skip compilation and reuse the existing build artifacts.',
+      help:
+          'Skip compilation and reuse the existing build artifacts. '
+          'Cannot be combined with --clean or --local-web-sdk.',
     )
-    ..addOption('local-engine-src-path', help: 'Path to a local engine src directory.')
+    ..addOption(
+      'local-engine-src-path',
+      help: 'Path to a local engine src directory. Requires --local-web-sdk.',
+    )
     ..addOption(
       'local-web-sdk',
       help: 'Local engine web SDK build to compile against (e.g. wasm_release).',
@@ -797,8 +802,9 @@ ArgParser buildBenchmarkArgParser() {
 ///
 ///  * 0: success.
 ///  * 1: one or more metrics exceeded `--regression-threshold`.
-///  * 2: usage error (invalid flags, unreadable baseline, missing build
-///    artifacts, unwritable results file, or no metrics to compare).
+///  * 2: usage error (invalid or conflicting flags, unreadable or invalid
+///    baseline, no build for the requested renderer with `--no-build`,
+///    unwritable results file, or no metrics to compare).
 ///  * 3: benchmark or infrastructure failure.
 Future<int> runBenchmarkCli(List<String> rawArgs) async {
   void printError(String message) => io.stderr.writeln(message);
@@ -906,6 +912,12 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
     flutterRoot = initialCwd;
   } else {
     flutterRoot = flutterDirectory.path;
+  }
+  if (!io.Directory(path.join(flutterRoot, 'dev', 'devicelab')).existsSync()) {
+    printError(
+      'Could not locate the Flutter repository root (expected $flutterRoot/dev/devicelab).',
+    );
+    return 2;
   }
 
   final renderer = args['renderer'] as String;
