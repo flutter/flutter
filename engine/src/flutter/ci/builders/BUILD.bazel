@@ -300,11 +300,20 @@ test_suite(
 
 # linux_unopt.json: ci/host_release_licenses
 #   bazel run --config=host_release_licenses :host_release_licenses
-# Not built, no Bazel counterpart yet: flutter/tools/licenses_cpp, flutter/tools/licenses_cpp:licenses_cpp_testrunner.
-# Nothing to install.
+# Tests, run by `bazel test` rather than installed: flutter/tools/licenses_cpp:licenses_cpp_testrunner.
+install(
+    name = "host_release_licenses",
+    testonly = True,
+    contents = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp"],
+    directory = "ci/host_release_licenses",
+)
 
-# Other steps, scripts of the checkout: Run license_cpp unittests.
-# Nothing to run.
+# ci/host_release_licenses's tests run from the build directory: licenses_cpp_testrunner.
+test_suite(
+    name = "host_release_licenses_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner"],
+)
 
 # linux_unopt.json: ci/host_debug_no_prebuilt_dart_sdk
 #   no configuration (configs.bazelrc); the flags would be:

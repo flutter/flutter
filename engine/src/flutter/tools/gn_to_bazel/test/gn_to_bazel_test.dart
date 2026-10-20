@@ -3163,6 +3163,28 @@ executable("display_list_region_benchmarks") {
       expect(binaryOutput, isNot(contains('tags')));
     });
 
+    test('a testonly executable named *testrunner is a cc_test', () async {
+      // licenses_cpp_testrunner: the gtest executable a builder runs from the
+      // build directory rather than through run_tests.py.
+      final GnFileEvaluation evaluation = await evaluate('''
+executable("licenses_cpp_testrunner") {
+  testonly = true
+  sources = [ "src/catalog_unittests.cc" ]
+  deps = [ "//flutter/third_party/googletest:gtest_main" ]
+}
+
+executable("runner") {
+  sources = [ "src/main.cc" ]
+}
+''');
+      final String output = emitBuildFile(evaluation, gnPackage: '//flutter/tools/licenses_cpp');
+      expect(
+        output,
+        contains('cc_test(\n    name = "licenses_cpp_testrunner",\n    size = "small",'),
+      );
+      expect(output, contains('cc_binary(\n    name = "runner",'));
+    });
+
     test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
       final String output = await convert('''
 config("vulkan_public") {
@@ -4946,7 +4968,8 @@ cc_library(
   ${build('ci/host_debug_test', '--target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --no-lto', <String>['flutter:unittests'], tests: '${runTests('Host Tests', 'dart,dart-host,engine,impeller-golden')}, {"name": "Lint", "language": "bash", "script": "flutter/ci/lint.sh", "parameters": [], "contexts": []}')},
   ${build('ci/host_debug_unopt', '--runtime-mode debug --unoptimized --asan --dart-debug', <String>['flutter/tools/font_subset', 'flutter/fml:fml_unittests'])},
   ${build('ci/host_profile_lto', '--runtime-mode profile --prebuilt-dart-sdk', <String>['flutter/tools/font_subset'])},
-  ${build('ci/android_debug', '--android --android-cpu=arm --no-lto', <String>['flutter'])}
+  ${build('ci/android_debug', '--android --android-cpu=arm --no-lto', <String>['flutter'])},
+  ${build('ci/host_release_licenses', '--target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: '{"name": "Run license_cpp unittests", "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"}, {"name": "Run another runner", "script": "out/ci/host_release_licenses/other_testrunner"}')}
 ]}''',
         'mac_host_engine.json':
             '{"builds": [${build('ci/mac_host', '--runtime-mode debug --no-lto', <String>['flutter'])}]}',
@@ -4969,6 +4992,7 @@ cc_library(
         'host_debug_test',
         'ci_host_debug_unopt',
         'host_profile_lto',
+        'host_release_licenses',
         'host_debug',
         'host_debug_unopt',
       ]);
@@ -4995,6 +5019,10 @@ build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/co
 #   --runtime-mode profile --prebuilt-dart-sdk
 # No configuration: the Bazel build cannot express
 #   LTO, which tools/gn enables without --no-lto (the Bazel toolchain has no LTO)
+
+# linux_host_engine.json: ci/host_release_licenses
+#   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
+build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
 
 # local_engine.json: linux/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
@@ -5032,10 +5060,12 @@ build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
           '//flutter/tools/font_subset': <String>{'font_subset'},
           '//flutter/sky/packages/sky_engine': <String>{'sky_engine'},
           '//flutter/impeller/compiler/shader_lib/flutter': <String>{'flutter'},
+          '//flutter/tools/licenses_cpp': <String>{'licenses_cpp', 'license_file_compare'},
         },
         convertedTests: <String, Set<String>>{
           '//flutter/fml': <String>{'fml_unittests'},
           '//flutter/txt': <String>{'txt_unittests'},
+          '//flutter/tools/licenses_cpp': <String>{'licenses_cpp_testrunner'},
         },
       );
       // `flutter` is the directory //flutter (not converted), not the
@@ -5114,6 +5144,32 @@ test_suite(
         "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure",
         "//engine/src/flutter/txt:txt_unittests",
     ],
+)
+'''),
+      );
+      // A step that runs a test executable from the build directory
+      // (out/<dir>/<name>) is that executable's Bazel test in the suite; one
+      // with no Bazel test is on record. The directory spelling of the ninja
+      // target is the target of the directory's name.
+      expect(
+        buildFile,
+        contains('''
+# linux_host_engine.json: ci/host_release_licenses
+#   bazel run --config=host_release_licenses :host_release_licenses
+# Tests, run by `bazel test` rather than installed: flutter/tools/licenses_cpp:licenses_cpp_testrunner.
+install(
+    name = "host_release_licenses",
+    testonly = True,
+    contents = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp"],
+    directory = "ci/host_release_licenses",
+)
+
+# ci/host_release_licenses's tests run from the build directory: licenses_cpp_testrunner, other_testrunner.
+# Not run, no Bazel test yet: other_testrunner (run from the build directory).
+test_suite(
+    name = "host_release_licenses_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner"],
 )
 '''),
       );
