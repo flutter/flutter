@@ -4,6 +4,10 @@
 
 #include "flutter/lib/gpu/render_pipeline.h"
 
+#include <chrono>
+#include <future>
+#include <vector>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -57,14 +61,27 @@ class FakeShaderLibrary : public impeller::ShaderLibrary {
                         std::shared_ptr<fml::Mapping> code,
                         RegistrationCallback callback) override {
     registrations++;
+    if (defer) {
+      deferred.push_back(std::move(callback));
+      return;
+    }
     callback(succeed);
   }
 
   void UnregisterFunction(std::string name,
                           impeller::ShaderStage stage) override {}
 
+  void RunDeferred() {
+    for (auto& callback : deferred) {
+      callback(succeed);
+    }
+    deferred.clear();
+  }
+
   int registrations = 0;
   bool succeed = true;
+  bool defer = false;
+  std::vector<RegistrationCallback> deferred;
 };
 
 // Registration is scheduled, not waited on, so a shader registers once per
@@ -82,7 +99,7 @@ TEST(FlutterGpuRenderPipelineTest, ScheduleRegistrationOncePerVersion) {
   EXPECT_TRUE(shader->IsDirty());
   shader->ScheduleRegistration(context);
   EXPECT_FALSE(shader->IsDirty());
-  EXPECT_TRUE(shader->GetRegistration()->Wait());
+  EXPECT_TRUE(shader->GetRegistration().get());
   shader->ScheduleRegistration(context);
   EXPECT_EQ(library->registrations, 1);
 
@@ -95,12 +112,11 @@ TEST(FlutterGpuRenderPipelineTest, ScheduleRegistrationOncePerVersion) {
   library->succeed = false;
   shader->ResetFrom(*MakeShader(impeller::ShaderStage::kVertex));
   shader->ScheduleRegistration(context);
-  EXPECT_FALSE(shader->GetRegistration()->Wait());
-  EXPECT_TRUE(shader->GetRegistration()->HasFailed());
+  EXPECT_FALSE(shader->GetRegistration().get());
   library->succeed = true;
   shader->ScheduleRegistration(context);
   EXPECT_EQ(library->registrations, 4);
-  EXPECT_TRUE(shader->GetRegistration()->Wait());
+  EXPECT_TRUE(shader->GetRegistration().get());
 }
 
 // Resolving a pipeline waits on its shaders' registrations, so a failed one
@@ -123,6 +139,38 @@ TEST(FlutterGpuRenderPipelineTest, BindFailsWhenRegistrationFailed) {
   impeller::PipelineDescriptor desc;
   impeller::ScopedValidationDisable disable_validation;
   EXPECT_FALSE(pipeline->GetCore()->BindToPipelineDescriptor(*library, desc));
+}
+
+// A reload can schedule a registration after a replay that uses an existing
+// pipeline was queued, behind it on the same thread. Resolving that pipeline
+// must not wait on the newer registration, or the replay thread deadlocks.
+TEST(FlutterGpuRenderPipelineTest, BindIgnoresRegistrationsAfterCreation) {
+  auto library = std::make_shared<FakeShaderLibrary>();
+  auto impeller_context = std::make_shared<
+      ::testing::NiceMock<impeller::testing::MockImpellerContext>>();
+  ON_CALL(*impeller_context, GetShaderLibrary)
+      .WillByDefault(::testing::Return(library));
+  Context context(impeller_context);
+  auto vertex = MakeShader(impeller::ShaderStage::kVertex);
+  auto fragment = MakeShader(impeller::ShaderStage::kFragment);
+  vertex->ScheduleRegistration(context);
+  fragment->ScheduleRegistration(context);
+  auto pipeline = fml::MakeRefCounted<RenderPipeline>(
+      vertex, fragment, vertex->CreateVertexDescriptor());
+
+  library->defer = true;
+  vertex->ResetFrom(*MakeShader(impeller::ShaderStage::kVertex));
+  vertex->ScheduleRegistration(context);
+  ASSERT_EQ(library->deferred.size(), 1u);
+
+  impeller::ScopedValidationDisable disable_validation;
+  auto bind = std::async(std::launch::async, [&pipeline, &library]() {
+    impeller::PipelineDescriptor desc;
+    return pipeline->GetCore()->BindToPipelineDescriptor(*library, desc);
+  });
+  EXPECT_EQ(bind.wait_for(std::chrono::seconds(5)), std::future_status::ready);
+  library->RunDeferred();
+  bind.wait();
 }
 
 }  // namespace

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_GPU_RENDER_PIPELINE_H_
 #define FLUTTER_LIB_GPU_RENDER_PIPELINE_H_
 
+#include <future>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -31,16 +32,16 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
    public:
     Core(std::string vertex_name,
          std::string vertex_entrypoint,
-         std::shared_ptr<const Shader::Registration> vertex_registration,
+         std::shared_future<bool> vertex_registration,
          std::string fragment_name,
          std::string fragment_entrypoint,
-         std::shared_ptr<const Shader::Registration> fragment_registration,
+         std::shared_future<bool> fragment_registration,
          std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor);
 
     /// Sets the vertex descriptor and stage entrypoints on [desc], after
-    /// waiting for the shaders' latest registrations. Returns false (after a
-    /// validation log naming the shader) when a registration failed or a
-    /// stage's function is not in [library].
+    /// waiting for the shader registrations current when the pipeline was
+    /// created. Returns false (after a validation log naming the shader) when
+    /// a registration failed or a stage's function is not in [library].
     [[nodiscard]] bool BindToPipelineDescriptor(
         impeller::ShaderLibrary& library,
         impeller::PipelineDescriptor& desc) const;
@@ -55,10 +56,10 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
    private:
     const std::string vertex_name_;
     const std::string vertex_entrypoint_;
-    const std::shared_ptr<const Shader::Registration> vertex_registration_;
+    const std::shared_future<bool> vertex_registration_;
     const std::string fragment_name_;
     const std::string fragment_entrypoint_;
-    const std::shared_ptr<const Shader::Registration> fragment_registration_;
+    const std::shared_future<bool> fragment_registration_;
     const std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor_;
     mutable std::mutex failed_mutex_;
     mutable std::unordered_set<size_t> failed_keys_;

@@ -58,10 +58,10 @@ const std::shared_ptr<const RenderPipeline::Core>& RenderPipeline::GetCore()
 RenderPipeline::Core::Core(
     std::string vertex_name,
     std::string vertex_entrypoint,
-    std::shared_ptr<const Shader::Registration> vertex_registration,
+    std::shared_future<bool> vertex_registration,
     std::string fragment_name,
     std::string fragment_entrypoint,
-    std::shared_ptr<const Shader::Registration> fragment_registration,
+    std::shared_future<bool> fragment_registration,
     std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor)
     : vertex_name_(std::move(vertex_name)),
       vertex_entrypoint_(std::move(vertex_entrypoint)),
@@ -74,12 +74,15 @@ RenderPipeline::Core::Core(
 bool RenderPipeline::Core::BindToPipelineDescriptor(
     impeller::ShaderLibrary& library,
     impeller::PipelineDescriptor& desc) const {
-  if (!vertex_registration_->Wait()) {
+  // Both were queued ahead of any replay that uses this pipeline, so on the
+  // replay thread they have already run. A later registration from a reload
+  // may be queued behind this replay, so waiting on that one would deadlock.
+  if (vertex_registration_.valid() && !vertex_registration_.get()) {
     VALIDATION_LOG << "Unable to register the vertex shader function '"
                    << vertex_entrypoint_ << "'.";
     return false;
   }
-  if (!fragment_registration_->Wait()) {
+  if (fragment_registration_.valid() && !fragment_registration_.get()) {
     VALIDATION_LOG << "Unable to register the fragment shader function '"
                    << fragment_entrypoint_ << "'.";
     return false;

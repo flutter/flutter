@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <future>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -68,26 +67,6 @@ class Shader : public RefCountedDartWrappable<Shader> {
       std::unordered_map<std::string, TextureBinding> uniform_textures,
       std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts);
 
-  /// The outcome of the latest registration of this shader's code with the
-  /// impeller shader library. Registration runs where pipelines are resolved,
-  /// so resolving waits on this rather than racing a registration in flight.
-  /// Safe to use from any thread.
-  class Registration {
-   public:
-    void Set(std::shared_future<bool> latest);
-
-    /// Waits for the latest registration and returns whether it succeeded.
-    /// True when nothing was ever scheduled.
-    bool Wait() const;
-
-    /// Whether the latest registration finished and failed.
-    bool HasFailed() const;
-
-   private:
-    mutable std::mutex mutex_;
-    std::shared_future<bool> latest_;
-  };
-
   /// Schedules registration of this shader's code when it changed since it
   /// was last scheduled, or when the last registration failed. Registration
   /// runs on the thread that encodes Flutter GPU work, after evicting
@@ -95,7 +74,10 @@ class Shader : public RefCountedDartWrappable<Shader> {
   /// touches the shader or pipeline library.
   void ScheduleRegistration(Context& context);
 
-  const std::shared_ptr<Registration>& GetRegistration() const;
+  /// The latest scheduled registration, resolving to whether it succeeded.
+  /// Invalid until one is scheduled. A pipeline keeps the one current at its
+  /// creation, which was queued ahead of every replay that uses it.
+  const std::shared_future<bool>& GetRegistration() const;
 
   /// Whether this shader needs to be re-registered with the impeller shader
   /// library on next use. Fresh shaders start dirty. Cleared by
@@ -170,8 +152,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::vector<impeller::ShaderStageBufferLayout> layouts_;
   // Replaced, never mutated, so recordings may hold the old one.
   std::shared_ptr<const Reflection> reflection_;
-  std::shared_ptr<Registration> registration_ =
-      std::make_shared<Registration>();
+  std::shared_future<bool> registration_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
   bool is_dirty_ = true;
 

@@ -132,40 +132,22 @@ void Shader::ResetFrom(Shader& other) {
   }
 }
 
-void Shader::Registration::Set(std::shared_future<bool> latest) {
-  std::scoped_lock lock(mutex_);
-  latest_ = std::move(latest);
-}
-
-bool Shader::Registration::Wait() const {
-  std::shared_future<bool> latest;
-  {
-    std::scoped_lock lock(mutex_);
-    latest = latest_;
-  }
-  return !latest.valid() || latest.get();
-}
-
-bool Shader::Registration::HasFailed() const {
-  std::scoped_lock lock(mutex_);
-  return latest_.valid() &&
-         latest_.wait_for(std::chrono::seconds(0)) ==
-             std::future_status::ready &&
-         !latest_.get();
-}
-
-const std::shared_ptr<Shader::Registration>& Shader::GetRegistration() const {
+const std::shared_future<bool>& Shader::GetRegistration() const {
   return registration_;
 }
 
 void Shader::ScheduleRegistration(Context& context) {
-  if (!is_dirty_ && !registration_->HasFailed()) {
+  const bool failed = registration_.valid() &&
+                      registration_.wait_for(std::chrono::seconds(0)) ==
+                          std::future_status::ready &&
+                      !registration_.get();
+  if (!is_dirty_ && !failed) {
     return;
   }
   is_dirty_ = false;
 
   auto promise = std::make_shared<impeller::NoExceptionPromise<bool>>();
-  registration_->Set(promise->get_future().share());
+  registration_ = promise->get_future().share();
   auto task = [context = context.GetContextShared(), name = GetScopedName(),
                stage = stage_, code = code_mapping_, promise]() {
     TRACE_EVENT0("flutter", "FlutterGPU::RegisterShader");
