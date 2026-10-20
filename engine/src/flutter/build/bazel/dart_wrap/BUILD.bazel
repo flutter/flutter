@@ -11,6 +11,7 @@
 # toolchain explicitly. Other hosts and target platforms will select()
 # between toolchain repositories once they exist.
 
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:deps.lock.bzl", "GIT_DEPS")
 load("//engine/src/flutter/build/bazel/gn_build:gn_build.bzl", "gn_build")
@@ -18,6 +19,22 @@ load("//engine/src/flutter/build/bazel/gn_build:gn_build.bzl", "gn_build")
 package(default_visibility = ["//visibility:public"])
 
 _DART_REVISION = GIT_DEPS["engine/src/flutter/third_party/dart"]["revision"]
+
+# tools/gn's --dart-debug: runtime_args.gni's dart_debug, a Debug build of
+# the VM (DEBUG rather than NDEBUG: its assertions on, at the same -O2 since
+# dart_debug_optimization_level stays "2") inside whatever build the engine
+# is. Off, as every builder but Linux's host_debug_unopt test builder has it
+# (ci/builders/configs.bazelrc); the engine's own one file under
+# runtime:dart_config (lib/io) follows through @dart//:dart_config.
+bool_flag(
+    name = "dart_debug",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "dart_debug_enabled",
+    flag_values = {":dart_debug": "True"},
+)
 
 # What tools/gn would write to args.gn for this build, restricted to the
 # arguments the pruned GN graph declares (gn gen runs with
@@ -56,6 +73,11 @@ _GN_ARGS = {
     "//engine/src/flutter/common:runtime_mode_jit_release": {"dart_runtime_mode": '"release"'},
     "//engine/src/flutter/common:runtime_mode_profile": {"dart_runtime_mode": '"profile"'},
     "//engine/src/flutter/common:runtime_mode_release": {"dart_runtime_mode": '"release"'},
+}) | select({
+    # The flag above; runtime/BUILD.gn asserts it off in release mode, as
+    # tools/gn does for --dart-debug with --runtime-mode release.
+    ":dart_debug_enabled": {"dart_debug": "true"},
+    "//conditions:default": {},
 })
 
 gn_build(

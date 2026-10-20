@@ -4940,7 +4940,6 @@ build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runti
 #   --runtime-mode debug --unoptimized --asan --dart-debug
 # No configuration: the Bazel build cannot express
 #   --asan (the toolchain has no sanitizer feature yet)
-#   --dart-debug (the wrapped Dart SDK build is not parameterized by dart_debug)
 
 # linux_host_engine.json: ci/host_profile_lto
 #   --runtime-mode profile --prebuilt-dart-sdk
@@ -5014,7 +5013,7 @@ install(
         contains('''
 # linux_host_engine.json: ci/host_debug_unopt
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
 # Tests, run by `bazel test` rather than installed: flutter/fml:fml_unittests.
 install(
     name = "host_debug_unopt",

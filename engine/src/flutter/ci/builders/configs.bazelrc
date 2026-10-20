@@ -57,7 +57,6 @@ build:host_release_test --compilation_mode=opt --//engine/src/flutter/common:run
 #   --target-dir ci/host_debug_unopt --runtime-mode debug --unoptimized --prebuilt-dart-sdk --asan --dart-debug --rbe --no-goma
 # No configuration: the Bazel build cannot express
 #   --asan (the toolchain has no sanitizer feature yet)
-#   --dart-debug (the wrapped Dart SDK build is not parameterized by dart_debug)
 
 # linux_unopt.json: ci/host_debug_unopt_impeller_tests
 #   --runtime-mode debug --unoptimized --prebuilt-dart-sdk --target-dir ci/host_debug_unopt_impeller_tests --rbe --no-goma --use-glfw-swiftshader
