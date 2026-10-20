@@ -269,6 +269,14 @@ bool debugDisablePhysicalShapeLayers = false;
 /// when building the scene.
 bool debugDisableOpacityLayers = false;
 
+/// Whether hit-test regions should be computed on all platforms when
+/// [RendererBinding.automaticPointerInterceptorsEnabled] is true, even when not
+/// running on the web.
+///
+/// This is intended for testing the hit-test region computation on non-web
+/// platforms.
+bool debugEnableHitTestRegionsOnAllPlatforms = false;
+
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
   final path = Path()
     ..fillType = PathFillType.evenOdd

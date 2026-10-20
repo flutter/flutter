@@ -555,9 +555,37 @@ mixin RendererBinding
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
+    _flushedHitTestRegionsThisFrame = false;
     drawFrame();
+    if (!_flushedHitTestRegionsThisFrame && sendFramesToEngine && _shouldFlushHitTestRegions) {
+      rootPipelineOwner.flushHitTestRegions();
+    }
     _scheduleMouseTrackerUpdate();
   }
+
+  bool _automaticPointerInterceptorsEnabled = false;
+
+  /// Whether the framework automatically computes hit-test regions that overlap
+  /// platform views and sends them to the engine each frame.
+  ///
+  /// Defaults to false.
+  bool get automaticPointerInterceptorsEnabled => _automaticPointerInterceptorsEnabled;
+  set automaticPointerInterceptorsEnabled(bool value) {
+    if (_automaticPointerInterceptorsEnabled == value) {
+      return;
+    }
+    final bool wasEnabled = _automaticPointerInterceptorsEnabled;
+    _automaticPointerInterceptorsEnabled = value;
+    if (wasEnabled && !value) {
+      rootPipelineOwner.clearHitTestRegions();
+    }
+    scheduleFrame();
+  }
+
+  bool _flushedHitTestRegionsThisFrame = false;
+
+  bool get _shouldFlushHitTestRegions =>
+      _automaticPointerInterceptorsEnabled && (kIsWeb || debugEnableHitTestRegionsOnAllPlatforms);
 
   bool _debugMouseTrackerUpdateScheduled = false;
   void _scheduleMouseTrackerUpdate() {
@@ -695,6 +723,10 @@ mixin RendererBinding
     if (sendFramesToEngine) {
       for (final RenderView renderView in renderViews) {
         renderView.compositeFrame(); // this sends the bits to the GPU
+      }
+      if (_shouldFlushHitTestRegions) {
+        _flushedHitTestRegionsThisFrame = true;
+        rootPipelineOwner.flushHitTestRegions();
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;

@@ -9,6 +9,7 @@
 ///
 /// @docImport 'box.dart';
 /// @docImport 'paragraph.dart';
+/// @docImport 'platform_view.dart';
 /// @docImport 'proxy_box.dart';
 /// @docImport 'sliver.dart';
 /// @docImport 'view.dart';
@@ -24,6 +25,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
+import '_hit_test_regions.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
@@ -1029,6 +1031,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     this.onSemanticsOwnerCreated,
     this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
+    this.onHitTestRegionsUpdate,
   }) {
     assert(debugMaybeDispatchCreated('rendering', 'PipelineOwner', this));
   }
@@ -1062,6 +1065,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   ///
   /// Typical implementations will tear down the semantics tree.
   final VoidCallback? onSemanticsOwnerDisposed;
+
+  /// Called whenever this pipeline owner computes updated hit-test regions that
+  /// overlap attached platform views.
+  final ValueSetter<Float64List>? onHitTestRegionsUpdate;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
@@ -1675,6 +1682,88 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
+    }
+  }
+
+  int _attachedPlatformViewCount = 0;
+  bool _sentNonEmptyHitTestRegions = false;
+  Float64List? _debugLastHitTestRegions;
+
+  /// Called when a [PlatformViewRenderBox] is attached to this pipeline owner.
+  @internal
+  void didAttachPlatformView() {
+    _attachedPlatformViewCount += 1;
+  }
+
+  /// Called when a [PlatformViewRenderBox] is detached from this pipeline owner.
+  @internal
+  void didDetachPlatformView() {
+    assert(_attachedPlatformViewCount > 0);
+    _attachedPlatformViewCount -= 1;
+  }
+
+  /// The hit-test region payload computed during the most recent
+  /// [flushHitTestRegions] pass, or null if no platform views were active.
+  @visibleForTesting
+  Float64List? get debugLastHitTestRegions {
+    if (_debugLastHitTestRegions != null) {
+      return _debugLastHitTestRegions;
+    }
+    if (rootNode == null) {
+      for (final PipelineOwner child in _children) {
+        final Float64List? childRegions = child.debugLastHitTestRegions;
+        if (childRegions != null) {
+          return childRegions;
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Computes the hit-test regions that overlap any attached platform views
+  /// and dispatches the encoded payload to [onHitTestRegionsUpdate].
+  void flushHitTestRegions() {
+    if (_attachedPlatformViewCount > 0 && rootNode != null) {
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('HIT TEST REGIONS$_debugRootSuffixForTimelineEventNames');
+      }
+      try {
+        final Float64List? regions = computeHitTestRegions(rootNode!);
+        _debugLastHitTestRegions = regions;
+        if (regions != null && regions.isNotEmpty) {
+          _sentNonEmptyHitTestRegions = true;
+          onHitTestRegionsUpdate?.call(regions);
+        } else if (_sentNonEmptyHitTestRegions) {
+          _sentNonEmptyHitTestRegions = false;
+          onHitTestRegionsUpdate?.call(Float64List(0));
+        } else if (regions != null) {
+          onHitTestRegionsUpdate?.call(regions);
+        }
+      } finally {
+        if (!kReleaseMode) {
+          FlutterTimeline.finishSync();
+        }
+      }
+    } else {
+      _debugLastHitTestRegions = null;
+      if (_sentNonEmptyHitTestRegions) {
+        _sentNonEmptyHitTestRegions = false;
+        onHitTestRegionsUpdate?.call(Float64List(0));
+      }
+    }
+    for (final PipelineOwner child in _children) {
+      child.flushHitTestRegions();
+    }
+  }
+
+  /// Clears any cached hit-test regions and notifies [onHitTestRegionsUpdate]
+  /// with an empty list.
+  void clearHitTestRegions() {
+    _debugLastHitTestRegions = null;
+    _sentNonEmptyHitTestRegions = false;
+    onHitTestRegionsUpdate?.call(Float64List(0));
+    for (final PipelineOwner child in _children) {
+      child.clearHitTestRegions();
     }
   }
 
