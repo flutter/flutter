@@ -51,13 +51,52 @@ DEFAULT_WARNING_FLAGS = [
 # What the toolchain passes to every compile (see the module docstring).
 TOOLCHAIN_WARNING_FLAGS = [flag for flag in DEFAULT_WARNING_FLAGS if flag != "-Werror"]
 
+# `default_warning_flags` as the same file has it under `is_wasm`: the four
+# the branch adds (zlib's, freetype2's, -Wno-sign-conversion) and without
+# the two it adds for clang on the other platforms, which the Emscripten
+# SDK's clang (20) does not know. The Emscripten toolchain passes this
+# list, minus -Werror, to every compile (toolchains/emscripten).
+WASM_DEFAULT_WARNING_FLAGS = [
+    "-Wendif-labels",
+    "-Wno-missing-field-initializers",
+    "-Wno-unused-parameter",
+    "-Werror",
+    "-Wno-shift-negative-value",
+    "-Wno-unused-function",
+    "-Wno-unused-variable",
+    "-Wno-sign-conversion",
+    "-Wno-unused-but-set-parameter",
+    "-Wno-unused-but-set-variable",
+    "-Wno-psabi",
+    "-Wno-implicit-int-float-conversion",
+    "-Wno-deprecated-copy",
+    "-Wno-deprecated-literal-operator",
+    "-Wno-non-c-typedef-for-linkage",
+    "-Wno-range-loop-construct",
+]
+
+# The per-target lists differ by platform where GN's configs test is_wasm:
+# a select() over the converter's OS settings (build/bazel/BUILD.bazel),
+# which a BUILD file's `copts = FLUTTER_COPTS + [...]` composes with. A
+# Label, since the overlays of external repositories load this file too.
+_NOT_WASM = Label("//engine/src/flutter/build/bazel:not_wasm")
+
+def _by_platform(other, wasm):
+    return select({
+        _NOT_WASM: other,
+        "//conditions:default": wasm,
+    })
+
 # //build/config/compiler:chromium_code (cflags): first-party code and the
 # few third-party targets GN does not switch to no_chromium_code. Goes with
-# FLUTTER_LOCAL_DEFINES.
-CHROMIUM_CODE_COPTS = [
-    "-Wall",
-    "-Wextra",
-] + DEFAULT_WARNING_FLAGS
+# FLUTTER_LOCAL_DEFINES. No -Wall -Wextra under is_wasm (as on Windows).
+CHROMIUM_CODE_COPTS = _by_platform(
+    [
+        "-Wall",
+        "-Wextra",
+    ] + DEFAULT_WARNING_FLAGS,
+    WASM_DEFAULT_WARNING_FLAGS,
+)
 
 # //build/config/compiler:chromium_code (cflags) + //flutter:config.
 FLUTTER_COPTS = CHROMIUM_CODE_COPTS + [
@@ -70,14 +109,22 @@ FLUTTER_LOCAL_DEFINES = [
     "__STDC_FORMAT_MACROS",
 ]
 
-# //build/config/compiler:no_chromium_code (clang, non-wasm).
-FLUTTER_THIRD_PARTY_COPTS = [
-    # TODO(zra): Remove when zlib no longer needs this.
-    # https://github.com/flutter/flutter/issues/103568
-    "-Wno-deprecated-non-prototype",
-    "-Wno-newline-eof",
-    "-Wno-typedef-redefinition",
-] + DEFAULT_WARNING_FLAGS
+# //build/config/compiler:no_chromium_code (clang): the two clang flags,
+# -Wno-deprecated-non-prototype on every platform but wasm, then the
+# platform's default_warning_flags.
+FLUTTER_THIRD_PARTY_COPTS = _by_platform(
+    [
+        # TODO(zra): Remove when zlib no longer needs this.
+        # https://github.com/flutter/flutter/issues/103568
+        "-Wno-deprecated-non-prototype",
+        "-Wno-newline-eof",
+        "-Wno-typedef-redefinition",
+    ] + DEFAULT_WARNING_FLAGS,
+    [
+        "-Wno-newline-eof",
+        "-Wno-typedef-redefinition",
+    ] + WASM_DEFAULT_WARNING_FLAGS,
+)
 
 # config.gni's `feature_defines_list`: the runtime mode and slimpeller as
 # macros, which //flutter/common:flutter_config (converted from GN) carries to
