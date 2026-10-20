@@ -446,7 +446,10 @@ if (current_toolchain == unknown_toolchain) {
       expect(wasm.and(fuchsia.negated), wasm);
       expect(wasm.negated.or(fuchsia.negated), Condition.always);
       // Unrelated predicates are left alone, in order; so is anything that
-      // would take more than one look (no resolution, no absorption).
+      // would take more than one look (no resolution). A disjunction beside
+      // the negation of one of its terms is absorbed, though: `!(slim &&
+      // mac) && slim` is `!mac && slim` -- the shape of a scalar's earlier
+      // case once a later write under a second condition overrides it.
       expect(slim.and(mac), const ConditionAnd(<Condition>[slim, mac]));
       expect(
         mac.or(ios).negated,
@@ -454,10 +457,7 @@ if (current_toolchain == unknown_toolchain) {
       );
       expect(
         slim.and(mac).negated.and(slim),
-        const ConditionAnd(<Condition>[
-          ConditionOr(<Condition>[ConditionNot(slim), ConditionNot(mac)]),
-          slim,
-        ]),
+        const ConditionAnd(<Condition>[ConditionNot(mac), slim]),
       );
     });
 
@@ -507,6 +507,55 @@ source_set("x") {
         '[is_mac] "mac"',
         '[!is_win && !is_mac] "posix"',
       ]);
+    });
+
+    test('simplifies the cases of a scalar overridden under a second condition', () async {
+      // build/archives' prefix: a value per runtime mode, then `-ddm` added
+      // under dart_dynamic_modules. Each earlier case stands where the
+      // later write does not happen, `a && !(b && a)`, which is `a && !b`.
+      final GnFileEvaluation evaluation = await evaluate(r'''
+source_set("x") {
+  if (flutter_runtime_mode != "debug") {
+    prefix = "linux-x64-$flutter_runtime_mode"
+  } else {
+    prefix = "linux-x64"
+  }
+  if (dart_dynamic_modules) {
+    prefix = "$prefix-ddm"
+  }
+  output_name = prefix
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      final GnTarget target = evaluation.targets.single;
+      expect(
+        target.variables['output_name']!
+            .cases(target.location)
+            .map((GnScalarCase c) => '${c.condition}'),
+        <String>[
+          'flutter_runtime_mode != "debug" && !dart_dynamic_modules',
+          'flutter_runtime_mode == "debug" && !dart_dynamic_modules',
+          'dart_dynamic_modules && flutter_runtime_mode != "debug"',
+          'dart_dynamic_modules && flutter_runtime_mode == "debug"',
+        ],
+      );
+      expect(
+        Condition.conjunction(const <Condition>[
+          ConditionVariable('a'),
+          ConditionVariable('b'),
+          ConditionOr(<Condition>[
+            ConditionNot(ConditionVariable('a')),
+            ConditionNot(ConditionVariable('b')),
+          ]),
+        ]),
+        Condition.never,
+      );
+      expect(
+        Condition.conjunction(const <Condition>[
+          ConditionVariable('a'),
+          ConditionOr(<Condition>[ConditionVariable('a'), ConditionVariable('b')]),
+        ]),
+        const ConditionVariable('a'),
+      );
     });
 
     test('takes is_clang as given under any assumptions', () async {
