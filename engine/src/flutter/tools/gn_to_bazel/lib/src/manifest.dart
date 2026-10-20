@@ -400,8 +400,29 @@ exports_files(["README"] + glob(
   ConvertedFile(
     '//flutter/txt',
     // The fonts are fixtures of other packages' tests (display_list's).
+    // GN's flutter_use_fontconfig (declared here) and Skia's
+    // skia_use_fontconfig, which tools/gn sets together from
+    // --enable-fontconfig: one flag, off by default as both arguments are,
+    // and the setting the generated files select() on (conditionSettings).
     appendix: '''
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
 exports_files(glob(["third_party/fonts/*"]))
+
+# tools/gn's --enable-fontconfig: flutter_use_fontconfig (this file's
+# argument) and skia_use_fontconfig at once. Off, as in every host build; the
+# Linux desktop builders turn it on (ci/builders/configs.bazelrc), and with
+# it txt's Linux font manager is Skia's fontconfig one (SkFontMgr_fontconfig,
+# SK_FONTMGR_FONTCONFIG_AVAILABLE) over the sysroot's libfontconfig.
+bool_flag(
+    name = "use_fontconfig",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "fontconfig",
+    flag_values = {":use_fontconfig": "True"},
+)
 ''',
   ),
   ConvertedFile(
