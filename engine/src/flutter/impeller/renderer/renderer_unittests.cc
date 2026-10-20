@@ -639,7 +639,7 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.lod = 0;
         FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 
@@ -760,7 +760,7 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.lod = 0;
         FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 
@@ -888,7 +888,7 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
                          Matrix::MakeScale(GetContentScale());
         VS::BindFrameInfo(*pass, data_host_buffer->EmplaceUniform(frame_info));
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.lod = lod;
         FS::BindFragInfo(*pass, data_host_buffer->EmplaceUniform(frag_info));
 

@@ -63,11 +63,11 @@ class FrameTiming {
 
  private:
   fml::TimePoint data_[kCount];
-  uint64_t frame_number_;
-  size_t layer_cache_count_;
-  size_t layer_cache_bytes_;
-  size_t picture_cache_count_;
-  size_t picture_cache_bytes_;
+  uint64_t frame_number_ = 0;
+  size_t layer_cache_count_ = 0;
+  size_t layer_cache_bytes_ = 0;
+  size_t picture_cache_count_ = 0;
+  size_t picture_cache_bytes_ = 0;
 };
 
 using TaskObserverAdd =
