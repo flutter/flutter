@@ -28,7 +28,7 @@ import 'debug.dart';
 ///
 ///  * [Padding], a widget that describes margins using [EdgeInsetsGeometry].
 @immutable
-abstract class EdgeInsetsGeometry {
+abstract base class EdgeInsetsGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const EdgeInsetsGeometry();
@@ -387,7 +387,7 @@ abstract class EdgeInsetsGeometry {
 ///  * [EdgeInsetsDirectional], which (for properties and arguments that accept
 ///    the type [EdgeInsetsGeometry]) allows the horizontal insets to be
 ///    specified in a [TextDirection]-aware manner.
-class EdgeInsets extends EdgeInsetsGeometry {
+base class EdgeInsets extends EdgeInsetsGeometry {
   /// Creates insets from offsets from the left, top, right, and bottom.
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
@@ -739,7 +739,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
 ///
 ///  * [EdgeInsets], a variant that uses physical labels (left and right instead
 ///    of start and end).
-class EdgeInsetsDirectional extends EdgeInsetsGeometry {
+base class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// Creates insets from offsets from the start, top, end, and bottom.
   const EdgeInsetsDirectional.fromSTEB(this.start, this.top, this.end, this.bottom);
 
@@ -973,7 +973,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   }
 }
 
-class _MixedEdgeInsets extends EdgeInsetsGeometry {
+base class _MixedEdgeInsets extends EdgeInsetsGeometry {
   const _MixedEdgeInsets.fromLRSETB(
     this._left,
     this._right,

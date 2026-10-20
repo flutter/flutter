@@ -77,7 +77,7 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 
 /// Parent data used by [RenderParagraph] and [RenderEditable] to annotate
 /// inline contents (such as [WidgetSpan]s) with.
-class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox> {
+base class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox> {
   /// The offset at which to paint the child in the parent's coordinate system.
   ///
   /// A `null` value indicates this inline widget is not laid out. For instance,

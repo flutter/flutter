@@ -160,7 +160,7 @@ mixin RenderSliverWithKeepAliveMixin implements RenderSliver {
 }
 
 /// Parent data structure used by [RenderSliverMultiBoxAdaptor].
-class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData
+base class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData
     with ContainerParentDataMixin<RenderBox>, KeepAliveParentDataMixin {
   /// The index of this child according to the [RenderSliverBoxChildManager].
   int? index;

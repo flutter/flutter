@@ -560,7 +560,7 @@ class DebugViewMetricsOverride with Diagnosticable {
         this.deterministicCursor,
       ),
     );
-    assert(result._debugAssertIsValid());
+    assert(_debugAssertIsValid(result));
     return result;
   }
 
@@ -601,46 +601,8 @@ class DebugViewMetricsOverride with Diagnosticable {
     };
   }
 
-  // The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged,
-  // plus alwaysUse24HourFormat, which dart:ui reports through
-  // PlatformDispatcher.onPlatformConfigurationChanged because it has no
-  // callback of its own.
-  //
-  // This grouping, `_accessibilityFeatures`, and the standalone `textScaling`
-  // and `platformBrightness` are what == and hashCode compare, so a metric that
-  // reaches none of them is never compared. A record is used so that adding a
-  // field without adding it here shows up as a completeness guard failure
-  // rather than as a metric that only sometimes takes effect. The paddings are
-  // reduced to their edges because ui.ViewPadding has no == of its own.
-  (double?, ui.Size?, _Edges?, _Edges?, _Edges?, _Edges?, bool?) get _viewMetrics => (
-    devicePixelRatio,
-    physicalSize,
-    _edges(padding),
-    _edges(viewPadding),
-    _edges(viewInsets),
-    _edges(systemGestureInsets),
-    alwaysUse24HourFormat,
-  );
-
   static _Edges? _edges(ui.ViewPadding? padding) =>
       padding == null ? null : (padding.left, padding.top, padding.right, padding.bottom);
-
-  // The flags dart:ui delivers through
-  // PlatformDispatcher.onAccessibilityFeaturesChanged.
-  (bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?)
-  get _accessibilityFeatures => (
-    accessibleNavigation,
-    invertColors,
-    disableAnimations,
-    boldText,
-    reduceMotion,
-    highContrast,
-    onOffSwitchLabels,
-    supportsAnnounce,
-    autoPlayAnimatedImages,
-    autoPlayVideos,
-    deterministicCursor,
-  );
 
   @override
   bool operator ==(Object other) {
@@ -648,18 +610,18 @@ class DebugViewMetricsOverride with Diagnosticable {
       return true;
     }
     return other is DebugViewMetricsOverride &&
-        other._viewMetrics == _viewMetrics &&
+        _viewMetrics(other) == _viewMetrics(this) &&
         listEquals(other.textScaling, textScaling) &&
         other.platformBrightness == platformBrightness &&
-        other._accessibilityFeatures == _accessibilityFeatures;
+        _accessibilityFeatures(other) == _accessibilityFeatures(this);
   }
 
   @override
   int get hashCode => Object.hash(
-    _viewMetrics,
+    _viewMetrics(this),
     textScaling == null ? null : Object.hashAll(textScaling!),
     platformBrightness,
-    _accessibilityFeatures,
+    _accessibilityFeatures(this),
   );
 
   @override
@@ -803,56 +765,6 @@ class DebugViewMetricsOverride with Diagnosticable {
     return points;
   }
 
-  /// Throws a [FlutterError] describing the first value this override sets
-  /// that cannot be applied.
-  ///
-  /// The constructor checks [devicePixelRatio], but [physicalSize], the
-  /// paddings and [textScaling] cannot be asserted in a `const` constructor
-  /// because reading a field off a [ui.Size] or a [ui.ViewPadding], or an
-  /// element of a [List], is not a constant expression.
-  /// [DebugViewMetricsOverride.fromJson] rejects them for values arriving from
-  /// tooling, and [debugSetViewMetricsOverride] calls this for values built
-  /// directly, so that a negative or non-finite size cannot reach layout as a
-  /// tight [ui.ViewConstraints] or as NaN [MediaQueryData] geometry, and a
-  /// table that cannot be interpolated cannot reach text layout.
-  ///
-  /// Returns true so it can be used inside an `assert`.
-  bool _debugAssertIsValid() {
-    void checkExtent(double extent, String description) {
-      if (!_isUsableExtent(extent)) {
-        throw FlutterError(
-          'DebugViewMetricsOverride.$description must be finite and non-negative, '
-          'but was $extent.',
-        );
-      }
-    }
-
-    void checkPadding(ui.ViewPadding? padding, String name) {
-      if (padding == null) {
-        return;
-      }
-      checkExtent(padding.left, '$name.left');
-      checkExtent(padding.top, '$name.top');
-      checkExtent(padding.right, '$name.right');
-      checkExtent(padding.bottom, '$name.bottom');
-    }
-
-    if (physicalSize case final ui.Size size) {
-      checkExtent(size.width, 'physicalSize.width');
-      checkExtent(size.height, 'physicalSize.height');
-    }
-    checkPadding(padding, 'padding');
-    checkPadding(viewPadding, 'viewPadding');
-    checkPadding(viewInsets, 'viewInsets');
-    checkPadding(systemGestureInsets, 'systemGestureInsets');
-    if (textScaling case final List<ui.Offset> points) {
-      if (_textScalingProblem(points) case final String problem) {
-        throw FlutterError('DebugViewMetricsOverride.textScaling $problem.');
-      }
-    }
-    return true;
-  }
-
   // A nested object with an unrecognized member is a tooling mistake for the
   // same reason an unrecognized metric is: the value it was meant to carry is
   // silently not applied, and the call still reports success. Returns [value]
@@ -914,6 +826,97 @@ class DebugViewMetricsOverride with Diagnosticable {
   }
 }
 
+// The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged,
+// plus alwaysUse24HourFormat, which dart:ui reports through
+// PlatformDispatcher.onPlatformConfigurationChanged because it has no
+// callback of its own.
+//
+// This grouping, `_accessibilityFeatures`, and the standalone `textScaling`
+// and `platformBrightness` are what == and hashCode compare, so a metric that
+// reaches none of them is never compared. A record is used so that adding a
+// field without adding it here shows up as a completeness guard failure
+// rather than as a metric that only sometimes takes effect. The paddings are
+// reduced to their edges because ui.ViewPadding has no == of its own.
+(double?, ui.Size?, _Edges?, _Edges?, _Edges?, _Edges?, bool?) _viewMetrics(
+  DebugViewMetricsOverride override,
+) => (
+  override.devicePixelRatio,
+  override.physicalSize,
+  DebugViewMetricsOverride._edges(override.padding),
+  DebugViewMetricsOverride._edges(override.viewPadding),
+  DebugViewMetricsOverride._edges(override.viewInsets),
+  DebugViewMetricsOverride._edges(override.systemGestureInsets),
+  override.alwaysUse24HourFormat,
+);
+
+// The flags dart:ui delivers through
+// PlatformDispatcher.onAccessibilityFeaturesChanged.
+(bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?)
+_accessibilityFeatures(DebugViewMetricsOverride override) => (
+  override.accessibleNavigation,
+  override.invertColors,
+  override.disableAnimations,
+  override.boldText,
+  override.reduceMotion,
+  override.highContrast,
+  override.onOffSwitchLabels,
+  override.supportsAnnounce,
+  override.autoPlayAnimatedImages,
+  override.autoPlayVideos,
+  override.deterministicCursor,
+);
+
+/// Throws a [FlutterError] describing the first value [override] sets
+/// that cannot be applied.
+///
+/// The constructor checks [DebugViewMetricsOverride.devicePixelRatio], but
+/// [DebugViewMetricsOverride.physicalSize], the paddings and
+/// [DebugViewMetricsOverride.textScaling] cannot be asserted in a `const`
+/// constructor because reading a field off a [ui.Size] or a [ui.ViewPadding],
+/// or an element of a [List], is not a constant expression.
+/// [DebugViewMetricsOverride.fromJson] rejects them for values arriving from
+/// tooling, and [debugSetViewMetricsOverride] calls this for values built
+/// directly, so that a negative or non-finite size cannot reach layout as a
+/// tight [ui.ViewConstraints] or as NaN [MediaQueryData] geometry, and a
+/// table that cannot be interpolated cannot reach text layout.
+///
+/// Returns true so it can be used inside an `assert`.
+bool _debugAssertIsValid(DebugViewMetricsOverride override) {
+  void checkExtent(double extent, String description) {
+    if (!DebugViewMetricsOverride._isUsableExtent(extent)) {
+      throw FlutterError(
+        'DebugViewMetricsOverride.$description must be finite and non-negative, '
+        'but was $extent.',
+      );
+    }
+  }
+
+  void checkPadding(ui.ViewPadding? padding, String name) {
+    if (padding == null) {
+      return;
+    }
+    checkExtent(padding.left, '$name.left');
+    checkExtent(padding.top, '$name.top');
+    checkExtent(padding.right, '$name.right');
+    checkExtent(padding.bottom, '$name.bottom');
+  }
+
+  if (override.physicalSize case final ui.Size size) {
+    checkExtent(size.width, 'physicalSize.width');
+    checkExtent(size.height, 'physicalSize.height');
+  }
+  checkPadding(override.padding, 'padding');
+  checkPadding(override.viewPadding, 'viewPadding');
+  checkPadding(override.viewInsets, 'viewInsets');
+  checkPadding(override.systemGestureInsets, 'systemGestureInsets');
+  if (override.textScaling case final List<ui.Offset> points) {
+    if (DebugViewMetricsOverride._textScalingProblem(points) case final String problem) {
+      throw FlutterError('DebugViewMetricsOverride.textScaling $problem.');
+    }
+  }
+  return true;
+}
+
 /// Debug-only view metric overrides, keyed by [ui.FlutterView.viewId].
 ///
 /// Developer tooling installs entries here — normally through the
@@ -957,7 +960,7 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
   var changed = false;
   assert(() {
     assert(viewId >= 0, 'viewId must be non-negative, got $viewId.');
-    assert(override?._debugAssertIsValid() ?? true);
+    assert(override == null || _debugAssertIsValid(override));
     final DebugViewMetricsOverride? previous = _viewMetricsOverrides[viewId];
     final DebugViewMetricsOverride? next = override == null || override.isEmpty ? null : override;
     if (previous == next) {

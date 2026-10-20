@@ -67,7 +67,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// parameters change without affecting the sheet's current size. It does not
 /// fire when [pixels] changes without [size] changing. For example, if the
 /// constraints provided to an attached sheet change.
-class DraggableScrollableController extends ChangeNotifier {
+base class DraggableScrollableController extends ChangeNotifier {
   /// Creates a controller for [DraggableScrollableSheet].
   DraggableScrollableController() {
     if (kFlutterMemoryAllocationsEnabled) {

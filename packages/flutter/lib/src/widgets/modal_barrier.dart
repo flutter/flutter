@@ -401,7 +401,8 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   String get debugDescription => 'any tap';
 }
 
-class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
+base class _AnyTapGestureRecognizerFactory
+    extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
   const _AnyTapGestureRecognizerFactory({this.onAnyTapUp});
 
   final VoidCallback? onAnyTapUp;

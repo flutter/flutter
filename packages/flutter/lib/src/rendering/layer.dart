@@ -2403,7 +2403,7 @@ class BackdropFilterLayer extends ContainerLayer {
 ///  * [CompositedTransformFollower], the widget that creates a [FollowerLayer].
 ///  * [RenderLeaderLayer] and [RenderFollowerLayer], the corresponding
 ///    render objects.
-class LayerLink {
+base class LayerLink {
   /// The [LeaderLayer] connected to this link.
   LeaderLayer? get leader => _leader;
   LeaderLayer? _leader;

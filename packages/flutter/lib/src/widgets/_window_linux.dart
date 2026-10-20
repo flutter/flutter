@@ -232,7 +232,7 @@ class WindowingOwnerLinux extends WindowingOwner {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-class LinuxWindowRegistrar {
+base class LinuxWindowRegistrar {
   final Map<int, _GtkWindow> _windows = <int, _GtkWindow>{};
   final Map<int, _FlView> _views = <int, _FlView>{};
 

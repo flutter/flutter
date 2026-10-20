@@ -798,7 +798,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 ///
 /// This is used to identify the precise resource in the [imageCache].
 @immutable
-class ResizeImageKey {
+base class ResizeImageKey {
   // Private constructor so nobody from the outside can poison the image cache
   // with this key. It's only accessible to [ResizeImage] internally.
   const ResizeImageKey._(

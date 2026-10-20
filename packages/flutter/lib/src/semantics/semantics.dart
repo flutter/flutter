@@ -5345,7 +5345,7 @@ class SemanticsOwner extends ChangeNotifier {
 ///
 /// The information provided in the configuration is used to generate the
 /// semantics tree.
-class SemanticsConfiguration {
+base class SemanticsConfiguration {
   // SEMANTIC BOUNDARY BEHAVIOR
 
   /// Whether the [RenderObject] owner of this configuration wants to own its
