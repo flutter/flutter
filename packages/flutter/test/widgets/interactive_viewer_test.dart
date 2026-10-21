@@ -1257,7 +1257,8 @@ void main() {
         ),
       );
 
-      // A PointerScaleEvent does not go through the scale gesture handlers.
+      // A PointerScaleEvent is a pointer signal, so InteractiveViewer handles
+      // it in onPointerSignal and not in the scale gesture handlers.
       final pointer = TestPointer(1, PointerDeviceKind.trackpad);
       await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.byType(SizedBox))));
       await tester.sendEventToBinding(pointer.scale(0.0));
