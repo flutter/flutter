@@ -27,19 +27,25 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 # The checkout's engine/src, under which GN's build directory lives.
 ENGINE_SRC = "engine/src"
 
-# GN's build directory names by runtime mode (tools/gn: host_<mode>, with
-# _unopt when not optimized).
-BUILD_DIRECTORY_NAMES = {
-    "//engine/src/flutter/common:runtime_mode_jit_release": "host_jit_release",
-    "//engine/src/flutter/common:runtime_mode_profile": "host_profile",
-    "//engine/src/flutter/common:runtime_mode_release": "host_release",
-    "//conditions:default": "host_debug",
+# GN's build directory names (tools/gn's get_out_dir): what is built for --
+# `host` for the host's own build, `wasm` for --web -- then the runtime
+# mode, then `_unopt` when not optimized (`host_debug_unopt`, `wasm_release`).
+BUILD_DIRECTORY_TARGETS = {
+    "@platforms//os:emscripten": "wasm",
+    "//conditions:default": "host",
+}
+
+BUILD_DIRECTORY_MODES = {
+    "//engine/src/flutter/common:runtime_mode_jit_release": "jit_release",
+    "//engine/src/flutter/common:runtime_mode_profile": "profile",
+    "//engine/src/flutter/common:runtime_mode_release": "release",
+    "//conditions:default": "debug",
 }
 
 def build_directory_attrs():
     """The rule attributes a macro sets for the build directory's name: `build_directory_name` and `optimized`."""
     return {
-        "build_directory_name": select(BUILD_DIRECTORY_NAMES),
+        "build_directory_name": select(BUILD_DIRECTORY_TARGETS) + "_" + select(BUILD_DIRECTORY_MODES),
         "optimized": select({
             "//engine/src/flutter/build/bazel:optimized": True,
             "//conditions:default": False,
@@ -54,7 +60,7 @@ BUILD_DIRECTORY_ATTRS = {
     ),
     "build_directory_name": attr.string(
         mandatory = True,
-        doc = "GN's name for the build directory in this mode (host_debug, host_release, ...): build_directory_attrs().",
+        doc = "GN's name for the build directory of this configuration (host_debug, host_release, wasm_release, ...): build_directory_attrs().",
     ),
     "optimized": attr.bool(
         doc = "Whether this is an optimized build; GN's name carries _unopt otherwise: build_directory_attrs().",

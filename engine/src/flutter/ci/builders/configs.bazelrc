@@ -4,13 +4,14 @@
 
 # Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.
 #
-# Each Linux x64 host build of the builder files as a Bazel configuration:
-# `bazel build --config=<name> ...` sets what the build's tools/gn flags
-# set, as far as the Bazel build has settings for them (gnFlags in
-# tools/gn_to_bazel/lib/src/builders.dart says what each flag amounts to).
-# A build with a flag the Bazel build cannot express yet is listed with the
-# reason and gets no configuration; the install target of each build is in
-# BUILD.bazel beside this file.
+# Each Linux build of the builder files -- the x64 host's own and the web's
+# -- as a Bazel configuration: `bazel build --config=<name> ...` sets what
+# the build's tools/gn flags set, as far as the Bazel build has settings for
+# them (gnFlags in tools/gn_to_bazel/lib/src/builders.dart says what each
+# flag amounts to; --web is the wasm platform). A build with a flag the
+# Bazel build cannot express yet is listed with the reason and gets no
+# configuration; the install target of each build is in BUILD.bazel beside
+# this file.
 
 # linux_clang_tidy.json: ci/host_debug_clang_tidy
 #   --runtime-mode debug --prebuilt-dart-sdk --no-lto --target-dir ci/host_debug_clang_tidy --rbe --no-goma
@@ -69,6 +70,10 @@ build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common
 # No configuration: the Bazel build cannot express
 #   --no-prebuilt-dart-sdk (the generated files assume the prebuilt Dart SDK)
 
+# linux_web_engine_build.json: ci/wasm_release
+#   --web --runtime-mode=release --no-rbe --no-goma
+build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+
 # local_engine.json: linux/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
 # The same configuration as linux_host_engine.json's ci/host_debug, above.
@@ -84,3 +89,11 @@ build:host_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_
 # local_engine.json: linux/host_release
 #   --runtime-mode release --no-stripped --no-lto --rbe --no-goma --xcode-symlinks
 # The same configuration as linux_host_engine.json's ci/host_release, above.
+
+# local_engine.json: linux/wasm_release
+#   --web --runtime-mode=release --no-rbe --no-goma
+# The same configuration as linux_web_engine_build.json's ci/wasm_release, above.
+
+# local_engine.json: linux/wasm_debug_unopt
+#   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
+build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
