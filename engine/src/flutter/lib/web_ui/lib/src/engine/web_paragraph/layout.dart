@@ -100,10 +100,10 @@ class TextLayout {
     }
   }
 
-  // Split text spans at paragraph-level BiDi region boundaries and assign each
-  // sub-span its resolved region direction so Canvas2D measures neutrals and
-  // weak characters with the same UAX #9 direction as the full paragraph.
+  // Splits text spans at paragraph-level UAX #9 region boundaries so each returned
+  // sub-span has a single resolved textDirection without mutating paragraph.spans.
   List<ParagraphSpan> _resolveSpans() {
+    // Empty or placeholder-only paragraphs have no UAX #9 text regions to split across.
     if (paragraph.spans.isEmpty || _bidiRegions.isEmpty) {
       return paragraph.spans;
     }
@@ -111,22 +111,32 @@ class TextLayout {
     var regionIndex = 0;
     for (final ParagraphSpan span in paragraph.spans) {
       assert(span.isNotEmpty);
+      // Placeholders occupy a single U+FFFC code unit and do not measure text via Canvas2D.
       if (span is PlaceholderSpan) {
         resolvedSpans.add(span);
         continue;
       }
       final textSpan = span as TextSpan;
+      // Both spans and BiDi regions are sorted by UTF-16 offset, so skip regions that end
+      // before this span (including regions consumed by preceding spans or placeholders).
       while (regionIndex < _bidiRegions.length && _bidiRegions[regionIndex].end <= textSpan.start) {
         regionIndex++;
       }
+      // Keep regionIndex anchored at the first overlapping region because that region may
+      // extend past textSpan.end into the next span.
       var i = regionIndex;
       while (i < _bidiRegions.length && _bidiRegions[i].start < textSpan.end) {
         final BidiRegion region = _bidiRegions[i];
         final int start = math.max(textSpan.start, region.start);
         final int end = math.min(textSpan.end, region.end);
+        // UAX #9 even embedding levels resolve to LTR and odd levels to RTL. Assigning the
+        // paragraph-resolved direction per sub-span prevents Canvas2D from re-running BiDi in
+        // isolation and flipping neutral characters (such as spaces or punctuation) between
+        // same-direction spans.
         final ui.TextDirection regionDirection = region.level.isEven
             ? ui.TextDirection.ltr
             : ui.TextDirection.rtl;
+        // Reuse the existing TextSpan when it already lies within a single matching BiDi region.
         if (start == textSpan.start &&
             end == textSpan.end &&
             textSpan.textDirection == regionDirection) {
@@ -151,6 +161,8 @@ class TextLayout {
   void extractTextClusters() {
     assert(allClusters.isEmpty);
 
+    // Measure clusters on BiDi-resolved sub-spans so each Canvas2D measureText call uses a
+    // single UAX #9 direction instead of the paragraph's default direction.
     for (final ParagraphSpan span in _spans) {
       assert(span.isNotEmpty);
       allClusters.addAll(span.extractClusters());
