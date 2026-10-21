@@ -147,6 +147,7 @@ cc_library(
         "//engine/src/flutter/impeller/renderer",
         "//engine/src/flutter/impeller/shader_archive",
         "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )

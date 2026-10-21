@@ -32,9 +32,14 @@ files are used where they are maintained and flag-compatible (`googletest`,
 `abseil-cpp`); everything else gets an overlay. An overlay replaces the
 upstream root `BUILD` file and hides upstream `BUILD` files in subdirectories
 (ICU ships some for its data-generation tools), so the overlay's globs can
-span the whole tree. Engine code includes such dependencies by their
-canonical paths (`absl/...`, `unicode/...`), which both GN and the upstream
-or overlay `BUILD` files resolve.
+span the whole tree. Engine code includes such dependencies as it always
+has, by either the canonical path (`absl/...`, `unicode/...`) or the
+engine's root-relative one (`third_party/abseil-cpp/absl/...`,
+`third_party/icu/source/common/unicode/...`, which GN's root include
+directory resolves): a `root_includes` library in the abseil tree's and
+ICU's overlays is a view of the same headers under that prefix
+(`include_prefix`), carried by ICU's libraries and listed by the converter
+beside every abseil dependency -- no engine include changes for Bazel.
 
 Prebuilt tools (clang, gn, ninja, ...) default to the synced copy as well. Set
 

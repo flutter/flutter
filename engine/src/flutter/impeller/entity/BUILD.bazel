@@ -260,6 +260,7 @@ cc_library(
         "//engine/src/flutter/impeller/typographer",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/hash",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )
@@ -325,6 +326,7 @@ cc_library(
         "//engine/src/flutter/testing:testing_lib",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )

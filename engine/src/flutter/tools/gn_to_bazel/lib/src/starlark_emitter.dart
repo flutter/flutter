@@ -2715,6 +2715,12 @@ final class _Emitter {
         location: e.assignment.location,
       );
       attribute.addUnique(e.condition, _item(_localLabel(label), e));
+      // An abseil dependency brings the view of abseil's headers under the
+      // engine's root-relative spelling, as GN's root include directory
+      // does for every target.
+      if (label.startsWith('@abseil-cpp//')) {
+        attribute.addUnique(e.condition, const _Item(abseilRootIncludes));
+      }
     });
   }
 
@@ -2780,6 +2786,12 @@ final class _Emitter {
           ? 'data'
           : 'deps';
       rule.list(list).addUnique(e.condition, _item(_localLabel(label), e));
+      // An abseil dependency brings the view of abseil's headers under the
+      // engine's root-relative spelling, as GN's root include directory
+      // does for every target.
+      if (label.startsWith('@abseil-cpp//')) {
+        rule.list(list).addUnique(e.condition, const _Item(abseilRootIncludes));
+      }
     });
   }
 

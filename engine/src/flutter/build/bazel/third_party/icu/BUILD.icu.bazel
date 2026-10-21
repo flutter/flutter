@@ -83,6 +83,20 @@ cc_library(
     ],
 )
 
+# The public headers under the engine's root-relative spelling,
+# "third_party/icu/source/{common,i18n}/unicode/<name>.h", which GN's root
+# include directory (-I../..) resolves beside the canonical "unicode/<name>.h":
+# a view of the same files under that prefix, so that no engine include
+# changes for Bazel. icuuc and icui18n carry it to their dependents.
+cc_library(
+    name = "root_includes",
+    hdrs = glob([
+        "source/common/unicode/*.h",
+        "source/i18n/unicode/*.h",
+    ]),
+    include_prefix = "third_party/icu",
+)
+
 # generate_icuuc("icuuc_private") plus the icuuc_public headers. Private
 # headers are exported too: icui18n includes them, as GN allows through the
 # source/common include directory.
@@ -105,6 +119,7 @@ cc_library(
         "U_COMMON_IMPLEMENTATION",
         "U_ICUDATAENTRY_IN_COMMON",
     ],
+    deps = [":root_includes"],
 )
 
 # generate_icui18n("icui18n").
@@ -120,7 +135,10 @@ cc_library(
     includes = ["source/i18n"],
     linkstatic = True,
     local_defines = _ICU_CODE_DEFINES + ["U_I18N_IMPLEMENTATION"],
-    deps = [":icuuc"],
+    deps = [
+        ":icuuc",
+        ":root_includes",
+    ],
 )
 
 # The data file (copy("copy_icudata") puts it at the root of the GN output

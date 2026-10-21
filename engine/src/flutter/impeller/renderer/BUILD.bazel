@@ -100,6 +100,7 @@ cc_library(
         "//engine/src/flutter/impeller/tessellator",
         "@abseil-cpp//absl/container:linked_hash_map",
         "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )

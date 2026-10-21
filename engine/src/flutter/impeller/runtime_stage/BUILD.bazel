@@ -54,6 +54,7 @@ cc_library(
         "//engine/src/flutter/impeller/base",
         "//engine/src/flutter/impeller/core",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )
@@ -79,6 +80,7 @@ cc_library(
         "//engine/src/flutter/impeller/playground:playground_test",
         "//engine/src/flutter/testing:testing_lib",
         "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )
