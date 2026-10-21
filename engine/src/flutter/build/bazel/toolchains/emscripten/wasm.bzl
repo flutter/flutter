@@ -27,9 +27,12 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 
 WASM_PLATFORM = Label("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten")
 
-def _wasm_transition_impl(_settings, _attr):
+def _wasm_transition_impl(_settings, attr):
     return {
-        "//command_line_option:platforms": [str(WASM_PLATFORM)],
+        # The module's platform: one of the web build's variants (a child of
+        # the wasm platform carrying a GN wasm toolchain's arguments as
+        # flags, third_party/canvaskit), or the wasm platform itself.
+        "//command_line_option:platforms": [str(attr.platform)],
         # Every object is position independent under the root .bazelrc; the
         # wasm toolchain has no PIC.
         "//command_line_option:force_pic": False,
@@ -68,6 +71,10 @@ _MODULE_ATTRS = {
     ),
     "defines": attr.string_list(doc = "Defines of the compiles."),
     "copts": attr.string_list(doc = "The target's cflags (after wasm_lib's -s MAIN_MODULE=1 in a module)."),
+    "platform": attr.label(
+        default = WASM_PLATFORM,
+        doc = "The platform to build for: the wasm platform, or a variant of the web build (a platform with the GN toolchain's arguments as flags).",
+    ),
     "_allowlist_function_transition": attr.label(
         default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
     ),
@@ -225,3 +232,75 @@ wasm_objects = rule(
     fragments = ["cpp"],
     toolchains = use_cc_toolchain(),
 )
+
+# ---------------------------------------------------------------------------
+# wasm_platform: GN's wasm_toolchain
+# ---------------------------------------------------------------------------
+
+_WEB_SETTINGS = "//engine/src/flutter/build/bazel/web"
+
+# The toolchain arguments that are build settings (build/bazel/web).
+_SETTING_ARGS = [
+    "skia_use_icu",
+    "skia_use_client_icu",
+    "skia_use_libjpeg_turbo_decode",
+    "skia_use_libpng_decode",
+    "skia_use_libwebp_decode",
+    "skia_use_no_png_encode",
+    "skia_use_libpng_encode",
+    "skia_enable_threadlocal_strikecache",
+]
+
+# The toolchain arguments that are compiler flags in GN
+# (//build/config/compiler), each a feature of the emscripten toolchain
+# configuration.
+_FEATURE_ARGS = {
+    "wasm_use_workers": "wasm_use_workers",
+    "wasm_prioritize_size": "wasm_prioritize_size",
+}
+
+# enable_lto: see wasm_platform; accepted, not applied.
+_DEFERRED_ARGS = ["enable_lto"]
+
+# skia_icu_bidi_third_party_dir names the directory of the client ICU's bidi
+# library (//flutter/third_party/canvaskit/icu_bidi, the one value it ever
+# has), which the skunicode conversion lists as a dependency under
+# skia_use_client_icu: a label there, nothing here.
+_LABEL_ARGS = ["skia_icu_bidi_third_party_dir"]
+
+def wasm_platform(name, extra_toolchain_args = {}, **kwargs):
+    """GN's wasm_toolchain: a platform for one variant of the web build.
+
+    A child of the wasm platform whose flags are the toolchain's
+    `extra_toolchain_args` -- the arguments GN re-evaluates Skia and the
+    engine's libraries under in that toolchain -- as build-setting flags
+    and toolchain features (Bazel's platform-based flags apply them to
+    everything built for the platform).
+
+    enable_lto: GN's web build has it on (is_official_build) where a
+    toolchain does not say otherwise, and its first link builds the LTO
+    variants of emscripten's system libraries into the prebuilt SDK's
+    cache. The synced SDK ships without them (no lto/ beside the ww/ and mt/
+    variants) and the Bazel toolchain freezes the cache, so the platforms
+    do not turn the `lto` feature on until the variants are built at fetch
+    time (research/12); the skwasm modules link without -flto meanwhile.
+
+    Args:
+      name: the toolchain's name (the platform's).
+      extra_toolchain_args: GN's block, argument name to value.
+      **kwargs: `visibility`.
+    """
+    flags = []
+    for argument, value in extra_toolchain_args.items():
+        if argument in _SETTING_ARGS:
+            flags.append("--%s:%s=%s" % (_WEB_SETTINGS, argument, "true" if value else "false"))
+        elif argument in _FEATURE_ARGS:
+            flags.append("--features=%s%s" % ("" if value else "-", _FEATURE_ARGS[argument]))
+        elif argument not in _LABEL_ARGS and argument not in _DEFERRED_ARGS:
+            fail("wasm_platform(%s): %s is not an argument the web build's platforms carry" % (name, argument))
+    native.platform(
+        name = name,
+        flags = flags,
+        parents = [str(WASM_PLATFORM)],
+        **kwargs
+    )

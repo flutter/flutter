@@ -47,6 +47,14 @@ final class ConvertedFile {
   final List<String> implicitDeps;
 }
 
+/// Why the copies of //flutter/third_party/canvaskit are skipped.
+const String _webSdkAssembly =
+    "the web SDK's assembly (flutter_web_sdk/canvaskit): with the web SDK";
+
+/// Why the CanvasKit module's toolchains are skipped.
+const String _canvasKitModule =
+    "the CanvasKit module's platform: with its conversion, whose arguments become settings";
+
 const List<ConvertedFile> convertedFiles = <ConvertedFile>[
   // GN's config("flutter_config") is feature_defines_list, which copts.bzl
   // keeps as FLUTTER_FEATURE_DEFINES over the flags below: the Bazel side
@@ -255,6 +263,41 @@ exports_files([
   // through the source root; Bazel's headers-only @dart//:dart_api_headers
   // loads anywhere, so it is listed in every configuration.
   ConvertedFile('//flutter/fml', implicitDeps: <String>['@dart//:dart_api_headers']),
+  // The web build's wasm toolchains as platforms carrying their arguments as
+  // flags: skwasm's two now; the CanvasKit module's three with that module's
+  // conversion (Skia's modules/canvaskit), whose arguments -- skia_use_bidi,
+  // the skia_canvaskit_* ones, skia_enable_skparagraph and skshaper,
+  // skia_use_harfbuzz and freetype, flutter_use_freetype_woff2 -- become
+  // settings then. The copies that assemble the web SDK's directory from
+  // the modules' outputs wait for the web SDK's conversion.
+  ConvertedFile(
+    '//flutter/third_party/canvaskit',
+    skip: <String, String>{
+      'canvaskit': _canvasKitModule,
+      'canvaskit_chromium': _canvasKitModule,
+      'canvaskit_webparagraph': _canvasKitModule,
+      'canvaskit_group': _webSdkAssembly,
+      'canvaskit_chromium_group': _webSdkAssembly,
+      'canvaskit_webparagraph_group': _webSdkAssembly,
+      'skwasm_group': _webSdkAssembly,
+      'skwasm_heavy_group': _webSdkAssembly,
+      'wimp_group': _webSdkAssembly,
+    },
+  ),
+  // skwasm, the web engine's rendering module: three wasm_lib variants over
+  // display_list, Skia's paragraph and unicode modules, and Skia or
+  // Impeller -- wasm_module rules, each built for its toolchain's platform.
+  // skwasm and wimp build Skia with the client ICU (skia_use_client_icu),
+  // whose bidi library (//flutter/third_party/canvaskit/icu_bidi) is not
+  // converted yet: its GN names its include directories with -isystem
+  // through rebase_path(), an idiom the converter has to learn.
+  ConvertedFile(
+    '//flutter/skwasm',
+    skip: <String, String>{
+      'skwasm': 'needs the client ICU (icu_bidi) under skia_use_client_icu; see the file comment',
+      'wimp': 'needs the client ICU (icu_bidi) under skia_use_client_icu; see the file comment',
+    },
+  ),
   // The benchmark library (google/benchmark through @benchmark) and the
   // engine's wrapper of it, for the benchmark executables run_tests.py
   // --type benchmarks runs (benchmarkRuns).
