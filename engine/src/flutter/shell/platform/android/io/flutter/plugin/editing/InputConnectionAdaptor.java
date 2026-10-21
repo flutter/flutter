@@ -351,7 +351,9 @@ public class InputConnectionAdaptor extends BaseInputConnection
         }
 
         beginBatchEdit();
-        if (selMin != selMax) mEditable.delete(selMin, selMax);
+        if (selMin != selMax) {
+          mEditable.delete(selMin, selMax);
+        }
         mEditable.insert(selMin, String.valueOf((char) character));
         setSelection(selMin + 1, selMin + 1);
         endBatchEdit();
