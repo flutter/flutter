@@ -211,18 +211,26 @@ def gn_build(name, outs = [], out_paths = None, archives = {}, visibility = None
 
     Args:
       name: name of the build target.
-      outs: the products to export, by name: each a file of that name under
-        the GN build directory unless `out_paths` says where it is.
+      outs: the products to export, by name -- a base name, the file's under
+        the target's directory and its target in this package -- each a file
+        of that name under the GN build directory unless `out_paths` says
+        where it is.
       out_paths: the products' paths under the GN build directory when they
         differ from their names or depend on the configuration (a dict of
         name to path, or a select() over the platforms of such dicts: a
-        cross build's host tools under clang_x64/). A product `out_paths`
-        does not name is at its own name.
+        cross build's host tools under clang_x64/, a manifest GN writes under
+        vulkan-data/). A product `out_paths` does not name is at its own
+        name.
       archives: archive file name -> GN library label (see the module docstring).
       visibility: visibility of the build target and the product targets.
       **kwargs: the attributes of the underlying rule (`build_file`, `root_target_dir`,
         `ninja_target`, `tree`, `gn_args`, `archive_boundaries`, `ar`, `env`).
     """
+    for out in outs:
+        if "/" in out:
+            fail(("gn_build(%s): a product is named by its base name and reached as :%s; " +
+                  "a product at another path under the GN build directory is named in outs " +
+                  "and placed in out_paths: %s") % (name, paths.basename(out), out))
     paths_by_name = {out: out for out in outs}
     if out_paths != None:
         paths_by_name = paths_by_name | out_paths
