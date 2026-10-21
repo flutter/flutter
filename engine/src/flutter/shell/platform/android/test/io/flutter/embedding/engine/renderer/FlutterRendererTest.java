@@ -843,6 +843,44 @@ public class FlutterRendererTest {
   }
 
   @Test
+  @Config(sdk = 29)
+  public void createSurfaceProducer_resetInBackgroundKeepsHardwareBufferDefectFallback() {
+    // Plugins can also ask for resetInBackground, they must keep the #166481 fallback.
+    ShadowBuild.setManufacturer("HUAWEI");
+
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer =
+        flutterRenderer.createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
+
+    assertTrue(producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 29)
+  public void createPlatformViewSurfaceProducer_usesImageReaderWhenHardwareBufferDefect() {
+    // See https://github.com/flutter/flutter/issues/188303.
+    ShadowBuild.setManufacturer("HUAWEI");
+
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer =
+        flutterRenderer.createPlatformViewSurfaceProducer(
+            TextureRegistry.SurfaceLifecycle.resetInBackground);
+
+    assertTrue(producer instanceof FlutterRenderer.ImageReaderSurfaceProducer);
+  }
+
+  @Test
+  @Config(sdk = 28)
+  public void createPlatformViewSurfaceProducer_usesSurfaceTextureBelowApi29() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer =
+        flutterRenderer.createPlatformViewSurfaceProducer(
+            TextureRegistry.SurfaceLifecycle.resetInBackground);
+
+    assertTrue(producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
   public void ImageReaderSurfaceProducerDoesNotCropOrRotate() {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();

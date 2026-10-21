@@ -192,6 +192,43 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
+  @Config(
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
+      sdk = 29)
+  public void itUsesPlatformViewSurfaceProducerOfFlutterRenderer() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+    FlutterRenderer renderer = spy(new FlutterRenderer(jni));
+    doReturn(mock(TextureRegistry.SurfaceProducer.class))
+        .when(renderer)
+        .createPlatformViewSurfaceProducer(any());
+    platformViewsController.textureRegistry = renderer;
+
+    PlatformViewRegistry registry = platformViewsController.getRegistry();
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
+            0, CountingPlatformView.VIEW_TYPE_ID, 0, 0, 128, 128, View.LAYOUT_DIRECTION_LTR, null);
+    PlatformView pView = platformViewsController.createPlatformView(request, true);
+    platformViewsController.configureForTextureLayerComposition(pView, request);
+
+    // Platform views must not get the HardwareBuffer defect fallback meant for plugins.
+    verify(renderer, times(1))
+        .createPlatformViewSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
+    verify(renderer, never()).createSurfaceProducer(any());
+  }
+
+  @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void itNotifiesPlatformViewsOfEngineAttachmentAndDetachment() {
     PlatformViewsController platformViewsController = new PlatformViewsController();

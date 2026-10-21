@@ -1055,7 +1055,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
               ? TextureRegistry.SurfaceLifecycle.resetInBackground
               : TextureRegistry.SurfaceLifecycle.manual;
       final TextureRegistry.SurfaceProducer textureEntry =
-          textureRegistry.createSurfaceProducer(lifecycle);
+          textureRegistry instanceof FlutterRenderer
+              ? ((FlutterRenderer) textureRegistry).createPlatformViewSurfaceProducer(lifecycle)
+              : textureRegistry.createSurfaceProducer(lifecycle);
       Log.i(TAG, "PlatformView is using SurfaceProducer backend");
       return new SurfaceProducerPlatformViewRenderTarget(textureEntry);
     }
