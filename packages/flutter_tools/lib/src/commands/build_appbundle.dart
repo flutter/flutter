@@ -149,7 +149,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = AndroidBuildInfo(
-      await getBuildInfo(),
+      await getBuildInfo(forcedTargetPlatform: TargetPlatform.android),
       targetArchs: getValue(AndroidBuildOptionsBundle.targetPlatformWithDefaults)
           .map<CpuArch>(getCpuArchForName),
     );

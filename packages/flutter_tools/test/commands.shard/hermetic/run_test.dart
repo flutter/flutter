@@ -2628,6 +2628,7 @@ class TestRunCommandForUsageValues extends RunCommand {
     FlutterProject? project,
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
+    TargetPlatform? forcedTargetPlatform,
     bool? forcedUseLocalCanvasKit,
     bool? forcedWebEnableHotReload,
   }) async {
