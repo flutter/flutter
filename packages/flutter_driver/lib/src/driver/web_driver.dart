@@ -72,8 +72,24 @@ class WebFlutterDriver extends FlutterDriver {
   /// Getter for file pathname where logs are written when _logCommunicationToFile is true
   String get logFilePathName => _logFilePathName;
 
+  /// Environment map override for testing.
+  @visibleForTesting
+  static Map<String, String>? environmentOverride;
+
+  static Map<String, String> get _environment => environmentOverride ?? Platform.environment;
+
+  /// Factory used to connect to the Flutter web application under test.
+  @visibleForTesting
+  static Future<FlutterWebConnection> Function(
+    String url,
+    Map<String, Object?> settings, {
+    Duration? timeout,
+  })
+  connectionFactory = FlutterWebConnection.connect;
+
   /// Creates a driver that uses a connection provided by the given
-  /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
+  /// [hostUrl] which falls back to the environment variables
+  /// `FLUTTER_WEB_APP_URL` or `VM_SERVICE_URL`.
   /// Driver also depends on environment variables DRIVER_SESSION_ID,
   /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC,
   /// DRIVER_SESSION_CAPABILITIES and ANDROID_CHROME_ON_EMULATOR for
@@ -86,16 +102,16 @@ class WebFlutterDriver extends FlutterDriver {
     bool logCommunicationToFile = true,
     Duration? timeout,
   }) async {
-    hostUrl ??= Platform.environment['VM_SERVICE_URL'];
-    final settings = <String, dynamic>{
-      'support-timeline-action': Platform.environment['SUPPORT_TIMELINE_ACTION'] == 'true',
-      'session-id': Platform.environment['DRIVER_SESSION_ID'],
-      'session-uri': Platform.environment['DRIVER_SESSION_URI'],
-      'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
-      'android-chrome-on-emulator': Platform.environment['ANDROID_CHROME_ON_EMULATOR'] == 'true',
-      'session-capabilities': Platform.environment['DRIVER_SESSION_CAPABILITIES'],
+    hostUrl ??= _environment['FLUTTER_WEB_APP_URL'] ?? _environment['VM_SERVICE_URL'];
+    final settings = <String, Object?>{
+      'support-timeline-action': _environment['SUPPORT_TIMELINE_ACTION'] == 'true',
+      'session-id': _environment['DRIVER_SESSION_ID'],
+      'session-uri': _environment['DRIVER_SESSION_URI'],
+      'session-spec': _environment['DRIVER_SESSION_SPEC'],
+      'android-chrome-on-emulator': _environment['ANDROID_CHROME_ON_EMULATOR'] == 'true',
+      'session-capabilities': _environment['DRIVER_SESSION_CAPABILITIES'],
     };
-    final FlutterWebConnection connection = await FlutterWebConnection.connect(
+    final FlutterWebConnection connection = await connectionFactory(
       hostUrl!,
       settings,
       timeout: timeout,
