@@ -153,8 +153,9 @@ abstract class ScrollActivity {
   ///
   ///  * [ScrollPosition.correctBy], which calls this method.
   ///  * [SliverGeometry.scrollOffsetCorrection], the usual origin of such a
-  ///    correction, which a sliver reports when content before the viewport
-  ///    has changed size.
+  ///    correction, which a sliver reports when the positions of its children
+  ///    turn out to be inconsistent, for example because content before the
+  ///    viewport has changed size.
   ///  * [SingleChildScrollView], which corrects the scroll offset during layout
   ///    when it is out of range for the new scroll extents.
   void correctBy(double correction) {}
