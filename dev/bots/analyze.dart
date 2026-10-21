@@ -1821,6 +1821,7 @@ const Set<String> kExecutableAllowlist = <String>{
   '.claude/skills',
   '.github/scripts/did_engine_change.sh',
   '.github/scripts/git_files_changed.sh',
+  '.github/scripts/resolve_engine_change.sh',
   'bin/dart',
   'bin/flutter',
   'bin/flutter-dev',

@@ -10,6 +10,7 @@ jobs:
   Tree_analyze:
     permissions:
       contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
     timeout-minutes: 130
 
@@ -30,12 +31,34 @@ jobs:
           persist-credentials: false
 
       - name: Wait for Engine Build
+        id: wait_for_engine
         uses: ./.github/actions/wait-for-engine-build
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           check-name: 'Linux linux_host_engine,Linux linux_android_debug_engine'
 
       - uses: ./.github/actions/composite-flutter-setup
+
+      - name: Sync local sky_engine Dart sources (fork repositories)
+        if: steps.wait_for_engine.outputs.changed == 'true' && github.repository != 'flutter/flutter'
+        shell: bash
+        run: |
+          echo "Syncing local dart:ui and dart:ui_web sources into bin/cache/pkg/sky_engine for fork analysis..."
+          mkdir -p bin/cache/pkg/sky_engine/lib/ui bin/cache/pkg/sky_engine/lib/fix_data bin/cache/pkg/sky_engine/lib/ui_web
+          rm -rf bin/cache/pkg/sky_engine/lib/ui/*.dart bin/cache/pkg/sky_engine/lib/ui_web/*
+          cp engine/src/flutter/lib/ui/*.dart bin/cache/pkg/sky_engine/lib/ui/
+          cp engine/src/flutter/lib/ui/fix_dart_ui.yaml bin/cache/pkg/sky_engine/lib/fix_data/fix_dart_ui.yaml
+          TMP_REWRITE="$(mktemp -d)"
+          ./bin/cache/dart-sdk/bin/dart engine/src/flutter/web_sdk/sdk_rewriter.dart \
+            --output-dir=bin/cache/pkg/sky_engine/lib/ui_web/ \
+            --input-dir=engine/src/flutter/lib/web_ui/lib/ui_web/src/ui_web/ \
+            --public \
+            --library-name=ui_web \
+            --api-file=engine/src/flutter/lib/web_ui/lib/ui_web/src/ui_web.dart \
+            --stamp="$TMP_REWRITE/ui_web.stamp" \
+            --depfile="$TMP_REWRITE/ui_web.d" \
+            --build-dir="."
+          rm -rf "$TMP_REWRITE"
 
       - name: Run Analyze
         run: |

@@ -12,6 +12,10 @@ inputs:
     description: 'Filter checks using regex pattern'
     required: false
     default: ''
+outputs:
+  changed:
+    description: "Returns 'true' if there are engine changes relative to the target base, 'false' otherwise"
+    value: ${{ steps.check_engine.outputs.changed }}
 runs:
   using: "composite"
   steps:
@@ -19,32 +23,71 @@ runs:
       id: check_engine
       uses: ./.github/actions/has-engine-changes
 
+    - name: Skip LUCI wait on forks
+      if: steps.check_engine.outputs.changed == 'true' && github.repository != 'flutter/flutter'
+      shell: bash
+      env:
+        REPO_NAME: ${{ github.repository }}
+      run: |
+        echo "Skipping LUCI engine build wait on fork repository '$REPO_NAME' (flutter_archives_v2 is only built on flutter/flutter)."
+
+    - name: Resolve target engine SHA
+      id: target_engine
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        EVENT_NAME: ${{ github.event_name }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        ENGINE_SHA: ${{ steps.check_engine.outputs.engine_sha }}
+      run: |
+        TARGET_SHA="${ENGINE_SHA:-$HEAD_SHA}"
+        if [ "$EVENT_NAME" = "pull_request" ] && [ "$TARGET_SHA" != "$HEAD_SHA" ] && [ "${ACT:-}" != "true" ]; then
+          # If an ancestor stacked PR contains multiple commits (e.g. engine commit followed
+          # by framework commit), Cocoon builds flutter_archives_v2 at that ancestor PR's head SHA.
+          while read -r base_sha pr_head_sha; do
+            if [ -n "$base_sha" ] && [ -n "$pr_head_sha" ] && \
+               git cat-file -e "${base_sha}^{commit}" 2>/dev/null && \
+               git merge-base --is-ancestor "$pr_head_sha" "$HEAD_SHA" 2>/dev/null; then
+              if [ "$(git diff --name-only "$base_sha"..."$pr_head_sha" | .github/scripts/did_engine_change.sh)" = "true" ]; then
+                TARGET_SHA="$pr_head_sha"
+                break
+              fi
+            fi
+          done < <(gh api "repos/$GITHUB_REPOSITORY/commits/$ENGINE_SHA/pulls" \
+            --jq '.[] | select(.state == "open") | "\(.base.sha) \(.head.sha)"' 2>/dev/null || true)
+        fi
+        echo "Target prebuilt engine SHA: $TARGET_SHA"
+        echo "sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+
     - name: Log wait requirement
-      if: steps.check_engine.outputs.changed == 'true'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter'
       shell: bash
       env:
         INPUTS_CHECK_NAME: ${{ inputs.check-name }}
         INPUTS_CHECK_REGEXP: ${{ inputs.check-regexp }}
+        TARGET_ENGINE_SHA: ${{ steps.target_engine.outputs.sha }}
       run: |
-        echo "Engine file changed - forced to wait for check-name: '${INPUTS_CHECK_NAME}', check-regexp: '${INPUTS_CHECK_REGEXP}'"
+        echo "Engine file changed - forced to wait for check-name: '${INPUTS_CHECK_NAME}', check-regexp: '${INPUTS_CHECK_REGEXP}' on SHA '${TARGET_ENGINE_SHA}'"
 
     # Note: Use the Cocoon wait-for-tests action to poll the Cocoon API.
     - name: Wait for test check-in
-      if: steps.check_engine.outputs.changed == 'true' && env.ACT != 'true'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && env.ACT != 'true'
       uses: flutter/cocoon/packages/wait_for_tests@c82f779e201b2d22f43b531268cfbd2ce4fbd4ab
       with:
-        sha: ${{ github.event.pull_request.head.sha || github.sha }}
+        sha: ${{ steps.target_engine.outputs.sha }}
         repo: ${{ github.repository }}
         required-tests: ${{ inputs.check-name }}
 
     - name: Redirect engine.version - Realm
-      if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && github.event_name == 'pull_request'
       shell: bash
       run: echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV # zizmor: ignore[github-env]
 
     - name: Redirect engine.version - Prebuilt Engine Version
-      if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && github.event_name == 'pull_request'
       shell: bash
-      run: echo "FLUTTER_PREBUILT_ENGINE_VERSION=$HEAD_SHA" >> $GITHUB_ENV # zizmor: ignore[github-env]
+      run: echo "FLUTTER_PREBUILT_ENGINE_VERSION=$TARGET_ENGINE_SHA" >> $GITHUB_ENV # zizmor: ignore[github-env]
       env:
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        TARGET_ENGINE_SHA: ${{ steps.target_engine.outputs.sha }}
