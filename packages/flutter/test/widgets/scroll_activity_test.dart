@@ -635,14 +635,15 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
 /// changes.
 ///
 /// The correction equals the change in [extent] and is only reported while the
-/// sliver is scrolled above the viewport. Otherwise the change is laid out like
+/// sliver is entirely above the viewport. Otherwise the change is laid out like
 /// any other change in size.
 ///
 /// See also:
 ///
 ///  * [SliverGeometry.scrollOffsetCorrection], which carries the correction.
-///  * [RenderSliverList], which reports corrections when children above the
-///    viewport have changed size.
+///  * [RenderSliverList], which reports a correction when the positions of its
+///    children turn out to be inconsistent, for example because content before
+///    the viewport has changed size.
 class _CorrectingSpacer extends LeafRenderObjectWidget {
   const _CorrectingSpacer({required this.extent});
 
@@ -676,7 +677,10 @@ class _RenderCorrectingSpacer extends RenderSliver {
 
   @override
   void performLayout() {
-    if (_pendingCorrection != 0.0 && constraints.scrollOffset > 0.0) {
+    // Only report the change as a correction if the sliver was entirely above
+    // the viewport before it changed size.
+    final double previousExtent = _extent - _pendingCorrection;
+    if (_pendingCorrection != 0.0 && constraints.scrollOffset >= previousExtent) {
       geometry = SliverGeometry(scrollOffsetCorrection: _pendingCorrection);
       _pendingCorrection = 0.0;
       return;
