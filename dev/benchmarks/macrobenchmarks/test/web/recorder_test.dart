@@ -222,4 +222,23 @@ void main() {
       ('bench_test', 'measure'),
     ]);
   });
+
+  test('toJson without options with custom warm-up emits exactly legacy key set', () {
+    final profile = Profile(name: 'custom_legacy', useCustomWarmUp: true);
+    profile.addDataPoint('frame', _warmUpDuration(1), reported: true);
+    profile.stopWarmingUp();
+    profile.addDataPoint('frame', _measuredDuration(5000, 0), reported: true);
+    profile.stopBenchmark();
+
+    final Map<String, dynamic> json = profile.toJson();
+    expect(json.containsKey('frame.samples'), isFalse);
+    expect(json.keys.toSet(), <String>{
+      'name',
+      'scoreKeys',
+      'frame.average',
+      'frame.outlierAverage',
+      'frame.outlierRatio',
+      'frame.noise',
+    });
+  });
 }
