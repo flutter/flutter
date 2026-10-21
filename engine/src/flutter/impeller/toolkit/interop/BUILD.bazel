@@ -442,6 +442,14 @@ zip_bundle(
         "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/impeller_sdk.zip",
         "//conditions:default": None,
     }),
+    sources = select({
+        "@platforms//os:linux": {
+            "lib/libimpeller.so": "libimpeller.so",
+            "lib/libimpeller.a": "obj/flutter/impeller/toolkit/interop/libimpeller.a",
+            "bin/impellerc": "impellerc",
+        },
+        "//conditions:default": {},
+    }),
 )
 
 # `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.

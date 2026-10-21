@@ -1253,6 +1253,11 @@ final class _Emitter {
     }
     final always = <String, String>{};
     final conditional = <Condition, Map<String, String>>{};
+    // The entries whose source is an output of the build, with its path
+    // under the build directory (the rule's `sources`: where ninja's build
+    // of the archive leaves the file, and an install lays it).
+    final alwaysSources = <String, String>{};
+    final conditionalSources = <Condition, Map<String, String>>{};
     for (final GnListItem item in variable.liveItems) {
       final GnLocation location = item.assignment.location;
       final GnValue value = item.value;
@@ -1326,7 +1331,8 @@ final class _Emitter {
             rule.list('trees').add(condition, _Item(':$name'));
             continue;
           }
-          final String label = path.startsWith('$buildDirRoot/') || path.startsWith('$genDirRoot/')
+          final bool built = path.startsWith('$buildDirRoot/') || path.startsWith('$genDirRoot/');
+          final String label = built
               ? _buildOutputLabel(path, target, location)
               : _filePath(path, location);
           final Map<String, String> entries = condition == Condition.always
@@ -1336,12 +1342,34 @@ final class _Emitter {
             throw GnError(location, 'two entries of ${variable.name} go to $at');
           }
           entries[at] = label;
+          if (built) {
+            final Map<String, String> sources = condition == Condition.always
+                ? alwaysSources
+                : conditionalSources.putIfAbsent(condition, () => <String, String>{});
+            sources[at] = _buildDirectoryPath(_unmarked(path), location);
+          }
         }
       }
     }
     if (always.isEmpty && conditional.isEmpty) {
       return '';
     }
+    if (alwaysSources.isNotEmpty || conditionalSources.isNotEmpty) {
+      rule.scalars['sources'] = _entryDictText(alwaysSources, conditionalSources, variable, rule);
+    }
+    return _entryDictText(always, conditional, variable, rule);
+  }
+
+  /// A dictionary attribute of entries by destination: the unconditional
+  /// ones as a literal, those under a condition in a `select()` joined to
+  /// it with `|` (Bazel merges the dictionaries; a condition that does not
+  /// hold adds nothing).
+  String _entryDictText(
+    Map<String, String> always,
+    Map<Condition, Map<String, String>> conditional,
+    GnVariable variable,
+    _Rule rule,
+  ) {
     // One select() per set of settings: entries under a setting and entries
     // under its negation (the patched SDK's two layouts, by the release
     // mode) are the two branches of one.

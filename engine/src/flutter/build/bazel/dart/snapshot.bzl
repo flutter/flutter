@@ -25,6 +25,7 @@ GN's gen_snapshot is a host binary targeting another architecture, are a
 later phase.
 """
 
+load("//engine/src/flutter/build/bazel:build_directory.bzl", "BuildDirectoryInfo")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "PYTHON_ATTRS", "run_python")
 
 # A tool of the wrapped Dart SDK build, see the module docstring.
@@ -93,7 +94,20 @@ def _compile_platform_impl(ctx):
         mnemonic = "CompilePlatform",
         progress_message = "Compiling the Dart platform %{label}",
     )
-    return [DefaultInfo(files = depset([ctx.outputs.platform, ctx.outputs.outline]))]
+
+    # GN writes the two under the build directory at their names
+    # ($root_out_dir/flutter_patched_sdk/platform_strong.dill), which the
+    # outputs are declared as under this package: so says BuildDirectoryInfo,
+    # and an install of the archive over them lays them there as ninja does.
+    outputs = [ctx.outputs.platform, ctx.outputs.outline]
+    prefix = ctx.label.package + "/"
+    return [
+        DefaultInfo(files = depset(outputs)),
+        BuildDirectoryInfo(entries = depset([
+            (output, output.short_path[len(prefix):] if output.short_path.startswith(prefix) else output.basename)
+            for output in outputs
+        ])),
+    ]
 
 compile_platform = rule(
     implementation = _compile_platform_impl,

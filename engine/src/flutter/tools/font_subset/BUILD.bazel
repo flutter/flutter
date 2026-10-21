@@ -40,6 +40,7 @@ zip_bundle(
         "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/font-subset.zip",
         "//conditions:default": None,
     }),
+    sources = {"font-subset": "font-subset"},
 )
 
 # What GN has no words for; maintained in the converter's manifest

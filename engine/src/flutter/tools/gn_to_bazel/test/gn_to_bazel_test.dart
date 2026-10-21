@@ -4762,6 +4762,14 @@ zip_bundle(
         "//conditions:default": {},
     }),
     output = "linux-x64/tool.zip",
+    sources = {
+        "tool": "tool",
+        "flutter_embedder.h": "flutter_embedder.h",
+        "libengine.so": "libengine.so",
+    } | select({
+        "//engine/src/flutter/common:runtime_mode_release": {"extra/tool": "tool"},
+        "//conditions:default": {},
+    }),
 )
 '''),
       );
@@ -5045,6 +5053,10 @@ zip_bundle(
         "//engine/src/flutter/common:runtime_mode_release": "flutter_patched_sdk_product.zip",
         "//conditions:default": "flutter_patched_sdk.zip",
     }),
+    sources = select({
+        "//engine/src/flutter/common:runtime_mode_release": {"flutter_patched_sdk_product/platform_strong.dill": "flutter_patched_sdk/platform_strong.dill"},
+        "//conditions:default": {"flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk/platform_strong.dill"},
+    }),
 )
 '''),
       );
@@ -5068,6 +5080,7 @@ zip_bundle(
         "//engine/src/flutter/common:runtime_mode_debug": "linux-x64/artifacts.zip",
         "//conditions:default": None,
     }),
+    sources = {"flutter_tester": "flutter_tester"},
     trees = select({
         "//engine/src/flutter/common:runtime_mode_debug": [":artifacts_shader_lib"],
         "//conditions:default": [],
@@ -5171,6 +5184,10 @@ zip_bundle(
         "//engine/src/flutter/common:runtime_mode_jit_release": "linux-x64-jit_release/linux-x64-flutter-gtk.zip",
         "//conditions:default": None,
     }),
+    sources = {
+        "libflutter_linux_gtk.so": "libflutter_linux_gtk.so",
+        "gen_snapshot": "gen_snapshot",
+    },
     trees = [":flutter_gtk_publish_headers_linux"],
 )
 '''),
