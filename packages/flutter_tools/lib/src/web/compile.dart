@@ -162,28 +162,11 @@ class WebBuilder {
                 : null,
           );
         }
-        final bool hasDeprecatedJsInteropFlag = compilerConfigs.any(
-          (WebCompilerConfig config) =>
-              config is JsCompilerConfig && config.deprecatedJsInterop != null,
+        _sendFailedBuildAnalytics(
+          compilerConfigs: compilerConfigs,
+          exceptions: result.exceptions,
+          settings: buildSettingsString,
         );
-        if (hasDeprecatedJsInteropFlag) {
-          final List<String> failedTargets = <String>{
-            for (final ExceptionMeasurement measurement in result.exceptions.values)
-              measurement.target,
-          }.toList()..sort();
-          final rawError = failedTargets.isEmpty
-              ? 'web-compile-failure'
-              : '${failedTargets.join(',')}-failure';
-          final error = rawError.length > 100 ? '${rawError.substring(0, 92)}...-fail' : rawError;
-          _analytics.send(
-            Event.flutterBuildInfo(
-              label: 'web-compile',
-              buildType: 'web',
-              settings: buildSettingsString,
-              error: error,
-            ),
-          );
-        }
         throwToolExit('Failed to compile application for the Web.');
       }
     } on Exception catch (err) {
@@ -211,6 +194,35 @@ class WebBuilder {
         workflow: 'build',
         variableName: variableName,
         elapsedMilliseconds: elapsedDuration.inMilliseconds,
+      ),
+    );
+  }
+
+  void _sendFailedBuildAnalytics({
+    required List<WebCompilerConfig> compilerConfigs,
+    required Map<String, ExceptionMeasurement> exceptions,
+    required String settings,
+  }) {
+    final bool hasDeprecatedJsInteropFlag = compilerConfigs.any(
+      (WebCompilerConfig config) =>
+          config is JsCompilerConfig && config.deprecatedJsInterop != null,
+    );
+    if (!hasDeprecatedJsInteropFlag) {
+      return;
+    }
+    final List<String> failedTargets = <String>{
+      for (final ExceptionMeasurement measurement in exceptions.values) measurement.target,
+    }.toList()..sort();
+    final rawError = failedTargets.isEmpty
+        ? 'web-compile-failure'
+        : '${failedTargets.join(',')}-failure';
+    final error = rawError.length > 100 ? '${rawError.substring(0, 92)}...-fail' : rawError;
+    _analytics.send(
+      Event.flutterBuildInfo(
+        label: 'web-compile',
+        buildType: 'web',
+        settings: settings,
+        error: error,
       ),
     );
   }
