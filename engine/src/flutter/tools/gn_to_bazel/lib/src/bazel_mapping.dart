@@ -1289,10 +1289,16 @@ enum TemplateArgumentKind {
 
 /// One argument of a known template: the macro attribute it becomes and how.
 final class TemplateArgument {
-  const TemplateArgument(this.attribute, this.kind);
+  const TemplateArgument(this.attribute, this.kind, {this.appliedUnder});
 
   final String attribute;
   final TemplateArgumentKind kind;
+
+  /// The predicate under which alone the macro reads the argument
+  /// (impeller_shaders applies gles_exclusions to the GLES backend): a
+  /// condition that predicate implies says nothing more there, and the
+  /// emitter drops it, so that the macro gets a list rather than a select().
+  final String? appliedUnder;
 }
 
 /// The `.gni` templates the converter knows, with the Bazel macro for each
@@ -1477,8 +1483,16 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
         'require_framebuffer_fetch',
         TemplateArgumentKind.scalar,
       ),
-      'gles_exclusions': TemplateArgument('gles_exclusions', TemplateArgumentKind.files),
-      'vulkan_exclusions': TemplateArgument('vulkan_exclusions', TemplateArgumentKind.files),
+      'gles_exclusions': TemplateArgument(
+        'gles_exclusions',
+        TemplateArgumentKind.files,
+        appliedUnder: 'impeller_enable_opengles',
+      ),
+      'vulkan_exclusions': TemplateArgument(
+        'vulkan_exclusions',
+        TemplateArgumentKind.files,
+        appliedUnder: 'impeller_enable_vulkan',
+      ),
       'entry_point_prefix': TemplateArgument('entry_point_prefix', TemplateArgumentKind.scalar),
       'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
     },
