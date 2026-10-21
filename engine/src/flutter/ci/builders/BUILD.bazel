@@ -31,6 +31,48 @@ filegroup(
     srcs = glob(["**/*.json"]),
 )
 
+# linux_arm_host_desktop_engine.json: ci/linux_debug_arm64_desktop
+#   bazel run --config=linux_debug_arm64_desktop :linux_debug_arm64_desktop
+install(
+    name = "linux_debug_arm64_desktop",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+    directory = "ci/linux_debug_arm64_desktop",
+)
+
+# linux_arm_host_desktop_engine.json: ci/linux_profile_arm64_desktop
+#   bazel run --config=linux_profile_arm64_desktop :linux_profile_arm64_desktop
+install(
+    name = "linux_profile_arm64_desktop",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+    directory = "ci/linux_profile_arm64_desktop",
+)
+
+# linux_arm_host_desktop_engine.json: ci/linux_release_arm64_desktop
+#   bazel run --config=linux_release_arm64_desktop :linux_release_arm64_desktop
+install(
+    name = "linux_release_arm64_desktop",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
+    directory = "ci/linux_release_arm64_desktop",
+)
+
+# linux_arm_host_engine.json: ci/linux_debug_arm64
+#   bazel run --config=linux_debug_arm64 :linux_debug_arm64
+install(
+    name = "linux_debug_arm64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/build/archives:dart_sdk_archive",
+        "//engine/src/flutter/build/archives:embedder",
+        "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+    directory = "ci/linux_debug_arm64",
+)
+
 # linux_clang_tidy.json: ci/host_debug_clang_tidy
 #   ninja's default target, everything: bazel run --config=host_debug_clang_tidy //engine/src/flutter:install
 

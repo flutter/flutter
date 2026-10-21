@@ -401,6 +401,13 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/prebuilts/linux-x64/dart-sdk",
         build_file = _OVERLAYS + ":dart_sdk/BUILD.dart_sdk.bazel",
     ),
+    # The Linux arm64 cross build's target SDK (GN's target_prebuilt_dart_sdk,
+    # the one its dart-sdk/ and dart-sdk-linux-arm64.zip ship; the tools that
+    # run at build time stay the host's, above).
+    "dart_sdk_linux_arm64": struct(
+        path = "engine/src/flutter/prebuilts/linux-arm64/dart-sdk",
+        build_file = _OVERLAYS + ":dart_sdk/BUILD.dart_sdk.bazel",
+    ),
     # esbuild, which bundles the web SDK's flutter.js (build/esbuild).
     "esbuild": struct(
         path = "engine/src/flutter/prebuilts/linux-x64/esbuild",

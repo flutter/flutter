@@ -41,3 +41,17 @@ filegroup(
         ],
     ) + ["third_party/llvm-16.0/BUILD.gn"],
 )
+
+# Reactor's LLVM backend, which SwiftShader's GN build uses on arm64 (x64
+# has Subzero): the sources the arm64 cross build's wrap adds to its tree
+# (gl_wrap/BUILD.bazel), left out of :build_tree for the host's.
+filegroup(
+    name = "llvm_sources",
+    srcs = glob(
+        ["third_party/llvm-16.0/**"],
+        exclude = [
+            "**/.git/**",
+            "**/__pycache__/**",
+        ],
+    ),
+)
