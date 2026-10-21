@@ -2727,6 +2727,63 @@ source_set("x") {
       expect(output, contains('"FLUTTER_CFLAGS_OBJC", "FLUTTER_CFLAGS_OBJCC"'));
     });
 
+    test('an argument the macro applies under a predicate loses that condition', () async {
+      // impeller/fixtures: gles_exclusions under impeller_enable_opengles,
+      // which impeller_shaders asks `in` of, and applies to the GLES backend
+      // alone -- a list, not a select().
+      final String output = await convert(
+        '''
+import("//flutter/impeller/tools/impeller.gni")
+impeller_shaders("fixtures") {
+  name = "fixtures"
+  shaders = [ "a.frag", "b.comp" ]
+  if (impeller_enable_opengles) {
+    gles_exclusions = [ "b.comp" ]
+  }
+}
+''',
+        gnPackage: '//flutter/impeller/fixtures',
+        assumptions: Assumptions(const <String, GnValue>{}),
+        templates: <String>{'impeller_shaders'},
+      );
+      expect(
+        output,
+        contains(
+          '    gles_exclusions = [\n        "b.comp",  # impeller_enable_opengles\n    ],\n',
+        ),
+      );
+      expect(output, isNot(contains('gles_exclusions = select')));
+    });
+
+    test('a dependency listed outright is not listed again under a condition', () async {
+      // impeller_unittests: geometry_unittests in deps and again under
+      // impeller_supports_rendering; GN's deps are a set, Bazel rejects the
+      // duplicate the select() would make.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  deps = [ "//flutter/fml" ]
+  if (is_wasm) {
+    deps += [ "//flutter/fml", "//flutter/testing" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains(
+          '    deps = [\n'
+          '        "//engine/src:include_root",\n'
+          '        "//engine/src/flutter/fml",\n'
+          '    ] + select({\n'
+          '        "@platforms//os:emscripten": [\n'
+          '            "//engine/src/flutter/testing",  # is_wasm\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+    });
+
     test('renders a scalar with several cases as select()', () async {
       // metal_version as impeller/renderer writes it (an else-if chain over
       // the OS predicates, undefined elsewhere); vulkan_language_version

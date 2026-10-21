@@ -120,11 +120,16 @@ final class _ListAttribute {
   /// Adds [item] unless the same text is already there under [condition]
   /// (two GN labels can translate to one Bazel label, which Bazel rejects as
   /// a duplicate).
+  /// Adds [item] under [condition] unless it is there already -- or in the
+  /// unconditional part, which holds wherever the condition does (GN lists
+  /// impeller_unittests' geometry_unittests outright and again under a
+  /// backend; GN's deps are a set, Bazel's reject a duplicate).
   void addUnique(Condition condition, _Item item) {
     final List<_Item> bucket = condition == Condition.always
         ? always
         : conditional.putIfAbsent(condition, () => <_Item>[]);
-    if (bucket.any((_Item existing) => existing.text == item.text)) {
+    if (bucket.any((_Item existing) => existing.text == item.text) ||
+        (bucket != always && always.any((_Item existing) => existing.text == item.text))) {
       return;
     }
     bucket.add(item);
@@ -446,13 +451,25 @@ final class _Emitter {
         // exists nowhere else: no select() for them -- and a macro that
         // inspects the list in Starlark gets a list.
         for (final _ListAttribute list in rule.lists.values) {
-          final implied = <Condition>[
-            for (final Condition c in list.conditional.keys)
-              if (target.condition.and(c) == target.condition) c,
-          ];
-          for (final c in implied) {
-            list.always.addAll(list.conditional.remove(c)!);
-          }
+          _dropImplied(list, target.condition);
+        }
+      }
+    }
+  }
+
+  /// Moves the items of [list] whose condition [context] implies (context &&
+  /// condition is context) to its unconditional part -- those not already
+  /// there (impeller_unittests lists geometry_unittests outright and again
+  /// under a backend; Bazel rejects a duplicated dependency).
+  static void _dropImplied(_ListAttribute list, Condition context) {
+    final implied = <Condition>[
+      for (final Condition c in list.conditional.keys)
+        if (context.and(c) == context) c,
+    ];
+    for (final c in implied) {
+      for (final _Item item in list.conditional.remove(c)!) {
+        if (!list.always.any((_Item present) => present.text == item.text)) {
+          list.always.add(item);
         }
       }
     }
@@ -965,6 +982,15 @@ final class _Emitter {
                 .replaceFirst('$genDirRoot/', r'$root_gen_dir/')
                 .replaceFirst('$buildDirRoot/', r'$root_out_dir/'),
           );
+      }
+      // An argument the macro applies only under a predicate (the GLES
+      // exclusions, under impeller_enable_opengles): items under a condition
+      // that predicate implies are unconditional there, which keeps the
+      // list a list for the macro to inspect in Starlark.
+      final String? appliedUnder = argument.appliedUnder;
+      final _ListAttribute? list = rule.lists[argument.attribute];
+      if (appliedUnder != null && list != null) {
+        _dropImplied(list, ConditionVariable(appliedUnder));
       }
     }
     // What GN discovers after the fact (templateAttributeOverrides).
