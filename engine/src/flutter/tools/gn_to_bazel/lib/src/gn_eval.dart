@@ -2960,6 +2960,7 @@ final class _Evaluator {
 /// The converter's name for GN's `current_toolchain == host_toolchain` when
 /// neither toolchain is assumed: the build is the host's own. Its
 /// config_setting (bazel_mapping's conditionSettings) is the group of the
-/// OSes a host runs, which is how //flutter/testing's unittests_enabled
-/// already reads testing.gni's default.
+/// OSes a host runs with the host's CPU (build/bazel's host_toolchain),
+/// which //flutter/testing's unittests_enabled reads too, with testing.gni's
+/// other two cases.
 const String hostToolchainPredicate = 'is_host_toolchain';
