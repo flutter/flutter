@@ -1,5 +1,6 @@
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
@@ -44,6 +45,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.extensions.core.extra
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.assertThrows
@@ -86,6 +88,43 @@ class FlutterPluginTest {
         assertContains(registeredPrintTasks, "kgpVersion")
         assertContains(registeredPrintTasks, "printBuildVariants")
         assertContains(registeredPrintTasks, "printNdkVersion")
+    }
+
+    @Test
+    fun `FlutterPlugin apply rejects unsupported AGP version before accessing Android DSL extensions`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        every { project.gradle.gradleVersion } returns DependencyVersionChecker.warnGradleVersion.toString()
+        val extraProperties = mutableMapOf<String, Any?>()
+        every { project.extra.set(any(), any()) } answers {
+            extraProperties[firstArg()] = secondArg()
+        }
+        every { project.hasProperty(DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY) } answers {
+            extraProperties.containsKey(DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY)
+        }
+        every { project.properties } answers { extraProperties }
+        val mockComponentsExtension = setupMockComponentsExtension(project)
+        val unsupportedAgpVersion = AndroidPluginVersion(8, 11, 1)
+        every { mockComponentsExtension.pluginVersion } returns unsupportedAgpVersion
+        val extensionContainer = project.extensions
+        every { extensionContainer.getByType(ApplicationExtension::class.java) } throws
+            AssertionError("ApplicationExtension was accessed before DependencyVersionChecker rejected the AGP version")
+        every { extensionContainer.findByName("android") } throws
+            AssertionError("Android extension was accessed before DependencyVersionChecker rejected the AGP version")
+
+        val exception =
+            assertThrows<DependencyValidationException> {
+                FlutterPlugin().apply(project)
+            }
+        assertContains(
+            exception.message!!,
+            "Your project's Android Gradle Plugin version ($unsupportedAgpVersion) is lower " +
+                "than Flutter's minimum supported version of ${DependencyVersionChecker.errorAGPVersion}"
+        )
+        verify(exactly = 0) { extensionContainer.getByType(ApplicationExtension::class.java) }
+        verify(exactly = 0) { extensionContainer.findByName("android") }
     }
 
     @Test

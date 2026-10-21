@@ -130,6 +130,36 @@ class FlutterPlugin : Plugin<Project> {
         flutterExtension.flutterVersionName =
             rootProjectLocalProperties.getProperty("flutter.versionName", "1.0")
 
+        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
+        // supported range. This runs before addFlutterTasks and subsequent Android extension
+        // configuration so that unsupported AGP versions fail with DependencyVersionChecker's
+        // diagnostic rather than a NoSuchMethodError when calling AGP DSL APIs.
+        val shouldSkipDependencyChecks: Boolean =
+            project.hasProperty("skipDependencyChecks") &&
+                (
+                    project.properties["skipDependencyChecks"].toString().toBoolean()
+                )
+        if (!shouldSkipDependencyChecks) {
+            try {
+                DependencyVersionChecker.checkDependencyVersions(project)
+            } catch (e: Exception) {
+                if (!project.hasProperty("usesUnsupportedDependencyVersions") ||
+                    !(project.properties["usesUnsupportedDependencyVersions"] as Boolean)
+                ) {
+                    // Possible bug in dependency checking code - warn and do not block build.
+                    project.logger.error(
+                        "Warning: Flutter was unable to detect project Gradle, Java, " +
+                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                            e
+                    )
+                } else {
+                    // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
+                    // in the dependency version checker plugin so re-throw it here.
+                    throw e
+                }
+            }
+        }
+
         this.addFlutterTasks(project)
 
         val propDeferredComponentNames = "deferred-component-names"
@@ -160,34 +190,6 @@ class FlutterPlugin : Plugin<Project> {
         val flutterExecutableName = getExecutableNameForPlatform("flutter")
         flutterExecutable =
             Paths.get(flutterRoot!!.absolutePath, "bin", flutterExecutableName).toFile()
-
-        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
-        // supported range.
-        val shouldSkipDependencyChecks: Boolean =
-            project.hasProperty("skipDependencyChecks") &&
-                (
-                    project.properties["skipDependencyChecks"].toString().toBoolean()
-                )
-        if (!shouldSkipDependencyChecks) {
-            try {
-                DependencyVersionChecker.checkDependencyVersions(project)
-            } catch (e: Exception) {
-                if (!project.hasProperty("usesUnsupportedDependencyVersions") ||
-                    !(project.properties["usesUnsupportedDependencyVersions"] as Boolean)
-                ) {
-                    // Possible bug in dependency checking code - warn and do not block build.
-                    project.logger.error(
-                        "Warning: Flutter was unable to detect project Gradle, Java, " +
-                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
-                    )
-                } else {
-                    // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
-                    // in the dependency version checker plugin so re-throw it here.
-                    throw e
-                }
-            }
-        }
 
         BaseApplicationNameHandler.setBaseName(project)
         val flutterProguardRules =
