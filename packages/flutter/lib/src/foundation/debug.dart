@@ -16,7 +16,41 @@ library;
 
 import 'dart:collection';
 import 'dart:typed_data' show ByteData;
-import 'dart:ui' as ui;
+import 'dart:ui'
+    as ui
+    show
+        AccessibilityFeatures,
+        Brightness,
+        DartPerformanceMode,
+        Display,
+        DisplayCornerRadii,
+        DisplayFeature,
+        ErrorCallback,
+        FlutterView,
+        FrameCallback,
+        FrameData,
+        GestureSettings,
+        HitTestCallback,
+        KeyDataCallback,
+        Locale,
+        Offset,
+        PlatformDispatcher,
+        PlatformMessageCallback,
+        PlatformMessageResponseCallback,
+        PointerDataPacketCallback,
+        Rect,
+        RootIsolateToken,
+        Scene,
+        SemanticsActionEventCallback,
+        SemanticsUpdate,
+        Size,
+        TimingsCallback,
+        ViewConstraints,
+        ViewFocusChangeCallback,
+        ViewFocusDirection,
+        ViewFocusState,
+        ViewPadding,
+        VoidCallback;
 
 import 'package:meta/meta.dart';
 
@@ -641,11 +675,12 @@ class DebugViewMetricsOverride with Diagnosticable {
   // callback of its own.
   //
   // This grouping, `_accessibilityFeatures`, and the standalone `textScaling`
-  // and `platformBrightness` are what == and hashCode compare, so a metric that
-  // reaches none of them is never compared. A record is used so that adding a
-  // field without adding it here shows up as a completeness guard failure
-  // rather than as a metric that only sometimes takes effect. The paddings are
-  // reduced to their edges because ui.ViewPadding has no == of its own.
+  // and `platformBrightness` are what `_changesFrom`, and so == and hashCode,
+  // compare, so a metric that reaches none of them is never compared. A record
+  // is used so that adding a field without adding it here shows up as a
+  // completeness guard failure rather than as a metric that only sometimes
+  // takes effect. The paddings are reduced to their edges because
+  // ui.ViewPadding has no == of its own.
   (double?, ui.Size?, _Edges?, _Edges?, _Edges?, _Edges?, bool?) get _viewMetrics => (
     devicePixelRatio,
     physicalSize,
@@ -676,16 +711,39 @@ class DebugViewMetricsOverride with Diagnosticable {
     deterministicCursor,
   );
 
+  // Which of the groups dart:ui announces separately differ between this
+  // override and [other]: the view metrics (onMetricsChanged), the text scaling
+  // table (onTextScaleFactorChanged), the brightness
+  // (onPlatformBrightnessChanged), the accessibility flags
+  // (onAccessibilityFeaturesChanged), and the 24 hour format, which is one of
+  // the view metrics but is also announced through
+  // onPlatformConfigurationChanged.
+  //
+  // The one definition of "changed" that == and the replay of dart:ui
+  // callbacks on an override change share, so that a metric cannot be compared
+  // by one and missed by the other.
+  _Changes _changesFrom(DebugViewMetricsOverride other) => (
+    viewMetrics: _viewMetrics != other._viewMetrics,
+    textScaling: !listEquals(textScaling, other.textScaling),
+    platformBrightness: platformBrightness != other.platformBrightness,
+    accessibilityFeatures: _accessibilityFeatures != other._accessibilityFeatures,
+    alwaysUse24HourFormat: alwaysUse24HourFormat != other.alwaysUse24HourFormat,
+  );
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    return other is DebugViewMetricsOverride &&
-        other._viewMetrics == _viewMetrics &&
-        listEquals(other.textScaling, textScaling) &&
-        other.platformBrightness == platformBrightness &&
-        other._accessibilityFeatures == _accessibilityFeatures;
+    if (other is! DebugViewMetricsOverride) {
+      return false;
+    }
+    // alwaysUse24HourFormat is one of the view metrics.
+    final _Changes changes = _changesFrom(other);
+    return !changes.viewMetrics &&
+        !changes.textScaling &&
+        !changes.platformBrightness &&
+        !changes.accessibilityFeatures;
   }
 
   @override
@@ -1080,9 +1138,13 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
     if (view is _DebugViewMetricsFlutterView) {
       return true;
     }
-    final ui.PlatformDispatcher? dispatcher = _debugIfImplemented(() => view.platformDispatcher)
-        ?.$1;
-    final int? viewId = _debugIfImplemented(() => view.viewId)?.$1;
+    // A partial test double (one that extends Fake, or has a noSuchMethod of
+    // its own) may not implement these. Such a view is not an engine view, and
+    // is left alone.
+    final ui.PlatformDispatcher? dispatcher = _debugReadIfImplemented(
+      () => view.platformDispatcher,
+    );
+    final int? viewId = _debugReadIfImplemented(() => view.viewId);
     if (dispatcher == null || viewId == null) {
       return true;
     }
@@ -1101,16 +1163,14 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   return result;
 }
 
-// Reads one member of a dart:ui object that an incomplete test double may not
-// implement, and reports "not implemented" as null. The value comes back in a
-// one-element record so that a member whose own type is nullable can still be
-// told apart from an absent one. A rendering-layer double can omit `viewId` or
-// `platformDispatcher`: `Fake` answers with an UnimplementedError, a
-// noSuchMethod of the double's own with a NoSuchMethodError. [read] must do
-// nothing but read the member, or its own failures would be misattributed.
-(T,)? _debugIfImplemented<T>(T Function() read) {
+// Reads one non-nullable member of a dart:ui object that an incomplete test
+// double may not implement, and reports "not implemented" as null: `Fake`
+// answers with an UnimplementedError, a noSuchMethod of the double's own with a
+// NoSuchMethodError. [read] must do nothing but read the member, or its own
+// failures would be misattributed.
+T? _debugReadIfImplemented<T extends Object>(T Function() read) {
   try {
-    return (read(),);
+    return read();
   } on NoSuchMethodError {
     return null;
   } on UnimplementedError {
@@ -1135,20 +1195,19 @@ void _debugNotifyViewMetricsOverrideChanged(
   DebugViewMetricsOverride before,
   DebugViewMetricsOverride after,
 ) {
-  final bool textScaling = !listEquals(before.textScaling, after.textScaling);
-  final platformBrightness = before.platformBrightness != after.platformBrightness;
-  final accessibilityFeatures = before._accessibilityFeatures != after._accessibilityFeatures;
+  final _Changes changes = before._changesFrom(after);
   final bool platformConfiguration =
-      textScaling ||
-      platformBrightness ||
-      accessibilityFeatures ||
-      before.alwaysUse24HourFormat != after.alwaysUse24HourFormat;
+      changes.textScaling ||
+      changes.platformBrightness ||
+      changes.accessibilityFeatures ||
+      changes.alwaysUse24HourFormat;
   final callbacks = <ui.VoidCallback? Function(ui.PlatformDispatcher)>[
     if (platformConfiguration) (ui.PlatformDispatcher d) => d.onPlatformConfigurationChanged,
-    if (textScaling) (ui.PlatformDispatcher d) => d.onTextScaleFactorChanged,
-    if (platformBrightness) (ui.PlatformDispatcher d) => d.onPlatformBrightnessChanged,
-    if (accessibilityFeatures) (ui.PlatformDispatcher d) => d.onAccessibilityFeaturesChanged,
-    if (before._viewMetrics != after._viewMetrics) (ui.PlatformDispatcher d) => d.onMetricsChanged,
+    if (changes.textScaling) (ui.PlatformDispatcher d) => d.onTextScaleFactorChanged,
+    if (changes.platformBrightness) (ui.PlatformDispatcher d) => d.onPlatformBrightnessChanged,
+    if (changes.accessibilityFeatures)
+      (ui.PlatformDispatcher d) => d.onAccessibilityFeaturesChanged,
+    if (changes.viewMetrics) (ui.PlatformDispatcher d) => d.onMetricsChanged,
   ];
   // Iterated over a copy, because a callback is free to wrap another dispatcher.
   for (final WeakReference<_DebugViewMetricsPlatformDispatcher> reference
@@ -1250,6 +1309,16 @@ enum DebugViewMetric {
 // right, bottom.
 typedef _Edges = (double, double, double, double);
 
+// Which of the groups dart:ui announces separately differ between two
+// overrides; see [DebugViewMetricsOverride._changesFrom].
+typedef _Changes = ({
+  bool viewMetrics,
+  bool textScaling,
+  bool platformBrightness,
+  bool accessibilityFeatures,
+  bool alwaysUse24HourFormat,
+});
+
 // What [DebugViewMetricsOverride.fromJson] builds for the paddings, because
 // [ui.ViewPadding] cannot be constructed outside `dart:ui`.
 class _ViewPadding implements ui.ViewPadding {
@@ -1277,10 +1346,14 @@ class _ViewPadding implements ui.ViewPadding {
 }
 
 // The wrapper of each wrapped dispatcher, keyed by the dispatcher so that the
-// wrapper cannot outlive it. An Expando cannot be enumerated, so the wrappers
-// are also kept in a list, weakly, because every one of them is told when an
-// override changes; dead references are pruned whenever one is added, which
-// bounds the list by the number of live wrappers plus the ones that died since.
+// wrapper cannot outlive it. In an application that is one dispatcher, the
+// engine's; there are more when a binding supplies a dispatcher of its own and
+// wraps it, and in tests that wrap fakes. A change of an override is announced
+// on every one of them, so that it reaches whichever dispatcher the framework
+// registered its callbacks on. An Expando cannot be enumerated, so the wrappers
+// are also kept in a list, weakly; dead references are pruned whenever one is
+// added, which bounds the list by the number of live wrappers plus the ones
+// that died since.
 final Expando<_DebugViewMetricsPlatformDispatcher> _debugDispatcherWrappers =
     Expando<_DebugViewMetricsPlatformDispatcher>();
 final List<WeakReference<_DebugViewMetricsPlatformDispatcher>> _debugWrappedDispatchers =
@@ -1308,8 +1381,12 @@ _DebugViewMetricsPlatformDispatcher _debugWrapDispatcher(ui.PlatformDispatcher d
 final Expando<_DebugViewMetricsFlutterView> _debugViewMetricsViews =
     Expando<_DebugViewMetricsFlutterView>();
 
-_DebugViewMetricsFlutterView _debugWrapView(ui.FlutterView view) =>
-    _debugViewMetricsViews[view] ??= _DebugViewMetricsFlutterView(view);
+_DebugViewMetricsFlutterView _debugWrapView(ui.FlutterView view) {
+  if (view is _DebugViewMetricsFlutterView) {
+    return view;
+  }
+  return _debugViewMetricsViews[view] ??= _DebugViewMetricsFlutterView(view);
+}
 
 // A [ui.PlatformDispatcher] that reports the platform-wide metrics of a
 // [debugViewMetricsOverrides] entry in place of the ones the platform reports,

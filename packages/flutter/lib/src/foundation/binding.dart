@@ -257,9 +257,9 @@ abstract class BindingBase {
   /// this accessor should apply [debugApplyViewMetricsOverrides] to whatever it
   /// returns, the way [TestWidgetsFlutterBinding] does.
   ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
-  final ui.PlatformDispatcher _platformDispatcher = debugApplyViewMetricsOverrides(
-    ui.PlatformDispatcher.instance,
-  );
+  final ui.PlatformDispatcher _platformDispatcher = kDebugMode
+      ? debugApplyViewMetricsOverrides(ui.PlatformDispatcher.instance)
+      : ui.PlatformDispatcher.instance;
 
   /// The initialization method.
   ///

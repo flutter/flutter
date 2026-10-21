@@ -22,12 +22,12 @@ import 'framework.dart';
 import 'lookup_boundary.dart';
 import 'media_query.dart';
 
-// The view [View] and [RawView] actually use: normalized once, for rendering,
-// for MediaQuery, for focus, and for the identity-based lookups all of those
-// rely on. Engine views are normalized even when the widget is constructed
-// before the binding is.
+// The view [View] and [RawView] actually use: in debug mode, normalized once,
+// for rendering, for MediaQuery, for focus, and for the identity-based lookups
+// all of those rely on. Engine views are normalized even when the widget is
+// constructed before the binding is.
 FlutterView _normalizeViewForOverrides(FlutterView view, RenderView? deprecatedRenderView) {
-  final FlutterView normalized = debugViewWithMetricsOverrides(view);
+  final FlutterView normalized = kDebugMode ? debugViewWithMetricsOverrides(view) : view;
   assert(
     deprecatedRenderView == null || identical(deprecatedRenderView.flutterView, normalized),
     'A RenderView passed to View or RawView must render into the FlutterView '
