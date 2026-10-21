@@ -196,13 +196,17 @@ void main() {
         const missingJson = <String, Object?>{secretKey: secretValue};
         expect(
           () => missingJson.stringMap(fieldKey),
-          throwsFormatExceptionWith('Missing required "$fieldKey" (expected Map<String, String>).'),
+          throwsFormatExceptionWith(
+            'Missing required "$fieldKey" (expected Map<String, Object?>).',
+          ),
         );
 
         const nullJson = <String, Object?>{fieldKey: null, secretKey: secretValue};
         expect(
           () => nullJson.stringMap(fieldKey),
-          throwsFormatExceptionWith('Missing required "$fieldKey" (expected Map<String, String>).'),
+          throwsFormatExceptionWith(
+            'Missing required "$fieldKey" (expected Map<String, Object?>).',
+          ),
         );
       });
 
@@ -211,7 +215,7 @@ void main() {
         expect(
           () => json.stringMap(fieldKey),
           throwsFormatExceptionWith(
-            'Invalid "$fieldKey": expected Map<String, String>, got String.',
+            'Invalid "$fieldKey": expected Map<String, Object?>, got String.',
           ),
         );
       });
