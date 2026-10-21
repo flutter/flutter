@@ -25,9 +25,9 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
-import '_hit_test_regions.dart';
 import 'binding.dart';
 import 'debug.dart';
+import 'hit_test_regions.dart';
 import 'layer.dart';
 
 export 'package:flutter/foundation.dart'
@@ -1685,8 +1685,27 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     }
   }
 
+  /// The number of [PlatformViewRenderBox]es currently attached to this
+  /// pipeline owner (not counting those attached to child pipeline owners).
+  ///
+  /// Maintained by [didAttachPlatformView] and [didDetachPlatformView].
+  /// [flushHitTestRegions] skips walking this owner's render tree entirely
+  /// while the count is zero, so apps without platform views pay nothing for
+  /// the hit-test region pass.
   int _attachedPlatformViewCount = 0;
+
+  /// Whether the most recent payload sent to [onHitTestRegionsUpdate] was
+  /// non-empty.
+  ///
+  /// Used to send a single empty payload when the last platform view goes
+  /// away (or stops being laid out), so that the engine can discard the
+  /// regions it received earlier, without sending an empty payload on every
+  /// frame afterwards.
   bool _sentNonEmptyHitTestRegions = false;
+
+  /// The payload computed by the most recent [flushHitTestRegions] call on this
+  /// owner, or null if none was computed. Exposed to tests through
+  /// [debugLastHitTestRegions].
   Float64List? _debugLastHitTestRegions;
 
   /// Called when a [PlatformViewRenderBox] is attached to this pipeline owner.

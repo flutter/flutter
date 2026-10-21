@@ -59,6 +59,7 @@ mixin RendererBinding
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
     addPersistentFrameCallback(_handlePersistentFrameCallback);
+    addPersistentFrameCallback(_handleHitTestRegionsFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
@@ -555,12 +556,25 @@ mixin RendererBinding
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
-    _flushedHitTestRegionsThisFrame = false;
     drawFrame();
-    if (!_flushedHitTestRegionsThisFrame && sendFramesToEngine && _shouldFlushHitTestRegions) {
+    _scheduleMouseTrackerUpdate();
+  }
+
+  // Runs every frame, after [_handlePersistentFrameCallback] (and therefore
+  // after [drawFrame]) because it is registered right after it in
+  // [initInstances]. The hit-test region pass has to run after the frame has
+  // been composited, because some render objects (such as
+  // [RenderFollowerLayer]) only learn their final paint transform while the
+  // scene is being built.
+  //
+  // This is a separate persistent frame callback rather than a step in
+  // [drawFrame] so that it also runs for bindings that override [drawFrame]
+  // without calling the superclass implementation (such as the test bindings
+  // in package:flutter_test).
+  void _handleHitTestRegionsFrameCallback(Duration timeStamp) {
+    if (sendFramesToEngine && _shouldFlushHitTestRegions) {
       rootPipelineOwner.flushHitTestRegions();
     }
-    _scheduleMouseTrackerUpdate();
   }
 
   bool _automaticPointerInterceptorsEnabled = false;
@@ -583,8 +597,6 @@ mixin RendererBinding
     }
     scheduleFrame();
   }
-
-  bool _flushedHitTestRegionsThisFrame = false;
 
   bool get _shouldFlushHitTestRegions =>
       _automaticPointerInterceptorsEnabled && (kIsWeb || debugEnableHitTestRegionsOnAllPlatforms);
@@ -725,10 +737,6 @@ mixin RendererBinding
     if (sendFramesToEngine) {
       for (final RenderView renderView in renderViews) {
         renderView.compositeFrame(); // this sends the bits to the GPU
-      }
-      if (_shouldFlushHitTestRegions) {
-        _flushedHitTestRegionsThisFrame = true;
-        rootPipelineOwner.flushHitTestRegions();
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
