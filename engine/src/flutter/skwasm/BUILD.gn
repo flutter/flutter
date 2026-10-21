@@ -29,6 +29,7 @@ template("skwasm_variant") {
       "skwasm_support.h",
       "string.cc",
       "surface.cc",
+      "surface.h",
       "text/line_metrics.cc",
       "text/paragraph.cc",
       "text/paragraph_builder.cc",
@@ -83,6 +84,7 @@ template("skwasm_variant") {
       sources += [
         "canvas_text_impeller.cc",
         "image_precache_impeller.cc",
+        "image_precache_impeller.h",
         "images_impeller.cc",
         "render_context_impeller.cc",
         "shaders_impeller.cc",
