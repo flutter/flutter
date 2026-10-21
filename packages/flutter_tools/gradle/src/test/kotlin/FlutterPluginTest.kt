@@ -117,6 +117,40 @@ class FlutterPluginTest {
     }
 
     @Test
+    fun `FlutterPlugin apply rethrows DependencyValidationException and logs other exceptions`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        mockkStatic(DependencyVersionChecker::class)
+
+        val validationException = DependencyValidationException("Unsupported AGP version")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws validationException
+
+        val thrown =
+            assertThrows<DependencyValidationException> {
+                FlutterPlugin().apply(project)
+            }
+        assertEquals(validationException, thrown)
+
+        val unexpectedException = IllegalStateException("Unexpected failure")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws unexpectedException
+
+        FlutterPlugin().apply(project)
+
+        verify {
+            project.logger.error(
+                "Warning: Flutter was unable to detect project Gradle, Java, " +
+                    "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                    unexpectedException
+            )
+        }
+    }
+
+    @Test
     fun `FlutterPlugin apply wires flutter embedding dependencies on all build types`(
         @TempDir tempDir: Path
     ) {

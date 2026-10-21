@@ -57,21 +57,15 @@ class FlutterPlugin : Plugin<Project> {
         if (!shouldSkipDependencyChecks) {
             try {
                 DependencyVersionChecker.checkDependencyVersions(project)
+            } catch (e: DependencyValidationException) {
+                throw e
             } catch (e: Exception) {
-                if (!project.hasProperty(DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY) ||
-                    project.properties[DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY]?.toString()?.toBoolean() != true
-                ) {
-                    // Possible bug in dependency checking code - warn and do not block build.
-                    project.logger.error(
-                        "Warning: Flutter was unable to detect project Gradle, Java, " +
-                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
-                    )
-                } else {
-                    // If OUT_OF_SUPPORT_RANGE_PROPERTY is set, the exception was thrown by us
-                    // in the dependency version checker plugin so re-throw it here.
-                    throw e
-                }
+                // Possible bug in dependency checking code - warn and do not block build.
+                project.logger.error(
+                    "Warning: Flutter was unable to detect project Gradle, Java, " +
+                        "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                        e
+                )
             }
         }
 
