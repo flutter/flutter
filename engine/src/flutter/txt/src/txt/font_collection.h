@@ -11,7 +11,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
-#include "gtest/gtest_prod.h"
+#include "third_party/googletest/googletest/include/gtest/gtest_prod.h"  // nogncheck
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/modules/skparagraph/include/FontCollection.h"  // nogncheck
