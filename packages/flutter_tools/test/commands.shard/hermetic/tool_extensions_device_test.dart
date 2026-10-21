@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
@@ -22,7 +23,12 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
-    show ExtensionBuildResult, ExtensionBuildTarget, ExtensionDebuggingOptions, TargetDevice;
+    show
+        ExtensionBuildResult,
+        ExtensionBuildTarget,
+        ExtensionDebuggingOptions,
+        ExtensionFlutterProject,
+        TargetDevice;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/fake.dart';
@@ -109,8 +115,10 @@ final class _FakeTestDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async =>
-      deviceId == 'fake_test_device';
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => deviceId == 'fake_test_device';
 
   @override
   Future<bool> launchApp({
@@ -227,6 +235,47 @@ void main() {
   });
 
   group('Tool Extensions Device Integration - Enabled', () {
+    testWithoutContext(
+      'FlutterProject.toExtensionProject extracts project and manifest metadata',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'flutter_tool_extensions_project_test.',
+        );
+        tempDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: sample_app
+version: 2.1.0+5
+workspace:
+  - packages/sub_pkg
+dependencies:
+  flutter:
+    sdk: flutter
+  path: ^1.9.0
+flutter:
+  module:
+    androidX: true
+''');
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          tempDir,
+          BufferLogger.test(),
+        );
+        final ExtensionFlutterProject extProject = project.toExtensionProject();
+
+        expect(extProject.appName, 'sample_app');
+        expect(extProject.appVersion, '2.1.0+5');
+        expect(extProject.directory, project.directory.uri);
+        expect(extProject.buildDirectory, project.buildDirectory.uri);
+        expect(extProject.dependencies, <String>{'flutter', 'path'});
+        expect(extProject.isEmpty, isFalse);
+        expect(extProject.isModule, isTrue);
+        expect(extProject.isPlugin, isFalse);
+        expect(extProject.workspace, <String>['packages/sub_pkg']);
+        expect(extProject.workspace.runtimeType, <String>[].runtimeType);
+        expect(() => jsonEncode(extProject.toMap()), returnsNormally);
+      },
+    );
+
     testUsingContext(
       'ExtensionDevices discovers custom device when feature flag enabled',
       () async {

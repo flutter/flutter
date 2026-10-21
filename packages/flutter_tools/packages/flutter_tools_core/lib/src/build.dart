@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
+import 'project.dart';
 
 final _upperRegex = RegExp(r'[A-Z]');
 
@@ -128,12 +129,6 @@ class ExtensionBuildTarget {
 
   @override
   int get hashCode => Object.hash(description, name);
-}
-
-/// Validation helpers for file [Uri]s exchanged over the tool extension protocol.
-extension ExtensionFileUriValidation on Uri {
-  /// Whether this [Uri] uses the `file` scheme and has a non-directory absolute path.
-  bool get isValidFileUri => isScheme('file') && hasAbsolutePath && !path.endsWith('/');
 }
 
 /// Representation of a build result returned by a tool extension.

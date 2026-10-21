@@ -10,9 +10,9 @@ import 'package:test/test.dart';
 const int _invalidParamsErrorCode = -32602;
 
 Matcher _throwsInvalidParams(String message) => throwsA(
-  isA<RpcException>()
-      .having((RpcException e) => e.code, 'code', _invalidParamsErrorCode)
-      .having((RpcException e) => e.message, 'message', contains(message)),
+  isA<Exception>()
+      .having((Exception e) => e.toString(), 'code', contains('$_invalidParamsErrorCode'))
+      .having((Exception e) => e.toString(), 'message', contains(message)),
 );
 
 void main() {

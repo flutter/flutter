@@ -29,7 +29,6 @@ final class LinuxDeviceService extends DeviceService {
   );
 
   final _runningApps = <String, _RunningApp>{};
-
   @override
   Future<List<TargetDevice>> getDevices() async {
     return const <TargetDevice>[
@@ -46,11 +45,14 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async {
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async {
     if (deviceId != customLinuxDeviceId) {
       return false;
     }
-    return Directory.fromUri(projectRoot.resolve('linux')).existsSync();
+    return Directory.fromUri(project.directory.resolve('linux')).existsSync();
   }
 
   @override

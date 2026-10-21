@@ -38,8 +38,8 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
 
-  /// RPC parameter key for the project root URI.
-  static const String projectRootParam = 'projectRoot';
+  /// RPC parameter key for the serialized [ExtensionFlutterProject].
+  static const String projectParam = 'project';
 
   /// RPC parameter key for the executable URI to launch.
   static const String executableUriParam = 'executableUri';
@@ -56,9 +56,11 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Returns the target devices contributed by this extension.
   Future<List<TargetDevice>> getDevices();
 
-  /// Returns whether the target device with [deviceId] is supported for the
-  /// Flutter project at [projectRoot].
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot});
+  /// Returns whether the target device with [deviceId] is supported for [project].
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  });
 
   /// Launches the application at [executableUri] on the device with [deviceId]
   /// using the given [debuggingOptions].
@@ -106,9 +108,18 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
-    final String deviceId = params.optionalField<String>(deviceIdParam, defaultValue: '');
-    final String projectRootStr = params.optionalField<String>(projectRootParam, defaultValue: '');
-    return isSupportedForProject(deviceId: deviceId, projectRoot: Uri.parse(projectRootStr));
+    final String deviceId;
+    final ExtensionFlutterProject project;
+    try {
+      deviceId = params.requiredField<String>(deviceIdParam);
+      final Map<String, Object?> projectMap = params.requiredField<Map<String, Object?>>(
+        projectParam,
+      );
+      project = ExtensionFlutterProject.fromJson(projectMap);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    return isSupportedForProject(deviceId: deviceId, project: project);
   }
 
   Future<bool> _launchAppRpc(Map<String, Object?> params) async {

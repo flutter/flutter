@@ -633,6 +633,8 @@ class ToolDependencies {
           analytics: finalAnalytics,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
           androidWorkflow: finalAndroidWorkflow,
+          buildSystem: finalBuildSystem,
+          buildTargets: finalBuildTargets,
           extensionBuildManager: extensionBuildManager,
           extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
