@@ -111,9 +111,11 @@ if [ "$EVENT_NAME" = "pull_request" ]; then
         echo "$STACK_CHANGED_FILES"
         if [ "$(printf '%s\n' "$STACK_CHANGED_FILES" | "$SCRIPT_DIR/did_engine_change.sh")" = "true" ]; then
           CHANGED="true"
-          MERGE_BASE="$(git merge-base "$TRUNK_REF" HEAD)"
-          ENGINE_SHA="$(git log -1 --pretty=format:%H "$MERGE_BASE..HEAD" -- \
-            DEPS engine bin/internal/content_aware_hash.sh bin/internal/content_aware_hash.ps1 bin/internal/release-candidate-branch.version)"
+          MERGE_BASE="$(git merge-base "$TRUNK_REF" HEAD 2>/dev/null || true)"
+          if [ -n "$MERGE_BASE" ]; then
+            ENGINE_SHA="$(git log -1 --pretty=format:%H "$MERGE_BASE..HEAD" -- \
+              DEPS engine bin/internal/content_aware_hash.sh bin/internal/content_aware_hash.ps1 bin/internal/release-candidate-branch.version)"
+          fi
           if [ -z "$ENGINE_SHA" ]; then
             ENGINE_SHA="$PR_HEAD_SHA"
           fi
@@ -128,6 +130,9 @@ else
     BASE_REF="$PUSH_BEFORE_SHA"
   else
     BASE_REF="$(resolve_trunk_ref)"
+  fi
+  if [ -z "$BASE_REF" ]; then
+    BASE_REF="HEAD"
   fi
 
   echo "Comparing against base SHA: $BASE_REF"

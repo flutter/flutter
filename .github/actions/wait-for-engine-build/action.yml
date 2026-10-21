@@ -45,18 +45,21 @@ runs:
         TARGET_SHA="${ENGINE_SHA:-$HEAD_SHA}"
         if [ "$EVENT_NAME" = "pull_request" ] && [ "$TARGET_SHA" != "$HEAD_SHA" ] && [ "${ACT:-}" != "true" ]; then
           # If an ancestor stacked PR contains multiple commits (e.g. engine commit followed
-          # by framework commit), Cocoon builds flutter_archives_v2 at that ancestor PR's head SHA.
-          while read -r base_sha pr_head_sha; do
-            if [ -n "$base_sha" ] && [ -n "$pr_head_sha" ] && \
-               git cat-file -e "${base_sha}^{commit}" 2>/dev/null && \
+          # by framework commit), Cocoon built flutter_archives_v2 at that ancestor PR's head SHA.
+          # Pick the closest ancestor PR head SHA containing ENGINE_SHA (open or already merged).
+          BEST_DISTANCE=""
+          while read -r pr_head_sha; do
+            if [ -n "$pr_head_sha" ] && [ "$pr_head_sha" != "$HEAD_SHA" ] && \
+               git merge-base --is-ancestor "$ENGINE_SHA" "$pr_head_sha" 2>/dev/null && \
                git merge-base --is-ancestor "$pr_head_sha" "$HEAD_SHA" 2>/dev/null; then
-              if [ "$(git diff --name-only "$base_sha"..."$pr_head_sha" | .github/scripts/did_engine_change.sh)" = "true" ]; then
+              dist="$(git rev-list --count "$ENGINE_SHA..$pr_head_sha")"
+              if [ -z "$BEST_DISTANCE" ] || [ "$dist" -lt "$BEST_DISTANCE" ]; then
+                BEST_DISTANCE="$dist"
                 TARGET_SHA="$pr_head_sha"
-                break
               fi
             fi
           done < <(gh api "repos/$GITHUB_REPOSITORY/commits/$ENGINE_SHA/pulls" \
-            --jq '.[] | select(.state == "open") | "\(.base.sha) \(.head.sha)"' 2>/dev/null || true)
+            --jq '.[].head.sha' 2>/dev/null || true)
         fi
         echo "Target prebuilt engine SHA: $TARGET_SHA"
         echo "sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
@@ -81,12 +84,12 @@ runs:
         required-tests: ${{ inputs.check-name }}
 
     - name: Redirect engine.version - Realm
-      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && github.event_name == 'pull_request'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && github.event_name == 'pull_request' && env.ACT != 'true'
       shell: bash
       run: echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV # zizmor: ignore[github-env]
 
     - name: Redirect engine.version - Prebuilt Engine Version
-      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && github.event_name == 'pull_request'
+      if: steps.check_engine.outputs.changed == 'true' && github.repository == 'flutter/flutter' && github.event_name == 'pull_request' && env.ACT != 'true'
       shell: bash
       run: echo "FLUTTER_PREBUILT_ENGINE_VERSION=$TARGET_ENGINE_SHA" >> $GITHUB_ENV # zizmor: ignore[github-env]
       env:

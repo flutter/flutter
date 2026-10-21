@@ -39,6 +39,8 @@ jobs:
 
       - uses: ./.github/actions/composite-flutter-setup
 
+      # Syncs local dart:ui and dart:ui_web Dart sources on fork repositories where
+      # LUCI does not build flutter_archives_v2 (does not cover DEPS Dart SDK rolls).
       - name: Sync local sky_engine Dart sources (fork repositories)
         if: steps.wait_for_engine.outputs.changed == 'true' && github.repository != 'flutter/flutter'
         shell: bash
@@ -49,7 +51,8 @@ jobs:
           cp engine/src/flutter/lib/ui/*.dart bin/cache/pkg/sky_engine/lib/ui/
           cp engine/src/flutter/lib/ui/fix_dart_ui.yaml bin/cache/pkg/sky_engine/lib/fix_data/fix_dart_ui.yaml
           TMP_REWRITE="$(mktemp -d)"
-          ./bin/cache/dart-sdk/bin/dart engine/src/flutter/web_sdk/sdk_rewriter.dart \
+          ./bin/cache/dart-sdk/bin/dart --packages=.dart_tool/package_config.json \
+            engine/src/flutter/web_sdk/sdk_rewriter.dart \
             --output-dir=bin/cache/pkg/sky_engine/lib/ui_web/ \
             --input-dir=engine/src/flutter/lib/web_ui/lib/ui_web/src/ui_web/ \
             --public \

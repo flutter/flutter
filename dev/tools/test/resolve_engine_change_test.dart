@@ -15,15 +15,26 @@ void main() {
   const FileSystem localFs = LocalFileSystem();
   final Directory flutterRoot = _findFlutterRoot(localFs);
 
-  late Directory tmpDir;
+  Directory? tmpDir;
   late Directory repoDir;
   late File outputFile;
+
+  Map<String, String> hermeticGitEnv([Map<String, String> extra = const <String, String>{}]) {
+    return <String, String>{
+      'PATH': io.Platform.environment['PATH'] ?? '',
+      'HOME': tmpDir!.path,
+      'GIT_CONFIG_NOSYSTEM': '1',
+      ...extra,
+    };
+  }
 
   io.ProcessResult runGit(List<String> args, {Directory? dir}) {
     final io.ProcessResult result = io.Process.runSync(
       'git',
       args,
       workingDirectory: (dir ?? repoDir).path,
+      environment: hermeticGitEnv(),
+      includeParentEnvironment: false,
     );
     if (result.exitCode != 0) {
       fail(
@@ -65,11 +76,7 @@ void main() {
       'bash',
       <String>[scriptPath],
       workingDirectory: repoDir.path,
-      environment: <String, String>{
-        'PATH': io.Platform.environment['PATH'] ?? '',
-        'GITHUB_OUTPUT': outputFile.path,
-        ...env,
-      },
+      environment: hermeticGitEnv(<String, String>{'GITHUB_OUTPUT': outputFile.path, ...env}),
       includeParentEnvironment: false,
     );
     if (result.exitCode != 0) {
@@ -90,9 +97,12 @@ void main() {
   }
 
   setUp(() {
-    tmpDir = localFs.systemTempDirectory.createTempSync('resolve_engine_change_test.');
-    repoDir = tmpDir.childDirectory('repo')..createSync(recursive: true);
-    outputFile = tmpDir.childFile('github_output.txt');
+    final Directory temp = localFs.systemTempDirectory.createTempSync(
+      'resolve_engine_change_test.',
+    );
+    tmpDir = temp;
+    repoDir = temp.childDirectory('repo')..createSync(recursive: true);
+    outputFile = temp.childFile('github_output.txt');
 
     for (final scriptName in <String>[
       'did_engine_change.sh',
@@ -109,6 +119,8 @@ void main() {
     runGit(<String>['init', '--initial-branch', 'master']);
     runGit(<String>['config', '--local', 'user.email', 'test@example.com']);
     runGit(<String>['config', '--local', 'user.name', 'Test User']);
+    runGit(<String>['config', '--local', 'commit.gpgsign', 'false']);
+    runGit(<String>['config', '--local', 'core.hooksPath', '/dev/null']);
     commitFiles(<String, String>{
       'DEPS': 'vars = {}',
       'engine/src/flutter/lib/ui/window.dart': '// window v0',
@@ -120,8 +132,10 @@ void main() {
   });
 
   tearDown(() {
-    if (tmpDir.existsSync()) {
-      tmpDir.deleteSync(recursive: true);
+    final temp = tmpDir;
+    tmpDir = null;
+    if (temp != null && temp.existsSync()) {
+      temp.deleteSync(recursive: true);
     }
   });
 
@@ -302,6 +316,35 @@ void main() {
         'PR_HEAD_SHA': headSha,
       }),
       <String, String>{'changed': 'true', 'engine_sha': headSha},
+    );
+  });
+
+  test('release-candidate marker and remote-less workflow_dispatch are handled cleanly', () {
+    final String masterSha = revParse('master');
+    runGit(<String>['switch', '-c', 'rc-marker']);
+    final String headSha = commitFiles(<String, String>{
+      'bin/internal/release-candidate-branch.version': 'flutter-3.50-candidate.0',
+    }, 'Update release candidate marker');
+
+    expect(
+      runResolveEngineChange(<String, String>{
+        'EVENT_NAME': 'pull_request',
+        'GITHUB_REPOSITORY': 'flutter/flutter',
+        'PR_BASE_REF': 'master',
+        'PR_BASE_SHA': masterSha,
+        'PR_HEAD_SHA': headSha,
+      }),
+      <String, String>{'changed': 'true', 'engine_sha': headSha},
+    );
+
+    // Remove remote tracking refs and verify workflow_dispatch falls back cleanly to HEAD.
+    runGit(<String>['remote', 'remove', 'origin']);
+    expect(
+      runResolveEngineChange(<String, String>{
+        'EVENT_NAME': 'workflow_dispatch',
+        'PR_HEAD_SHA': headSha,
+      }),
+      <String, String>{'changed': 'false', 'engine_sha': ''},
     );
   });
 }
