@@ -10,12 +10,10 @@ import 'package:meta/meta.dart';
 
 import 'protocol_base/service.dart';
 
-/// Context passed to an extension target's [BuildTarget.build] or
-/// [AssembleTarget.build] method.
+/// Context passed to an extension target's [BuildTarget.build] method.
 @immutable
 class ExtensionBuildContext {
   const ExtensionBuildContext({
-    required this.buildDir,
     required this.buildMode,
     required this.flutterRoot,
     required this.mainPath,
@@ -23,9 +21,6 @@ class ExtensionBuildContext {
     required this.projectRoot,
     required this.resolvedArtifacts,
   });
-
-  /// The absolute directory URI (ending with `/`) used for temporary build artifacts.
-  final Uri buildDir;
 
   /// The compilation mode for the build.
   final BuildMode buildMode;
@@ -46,6 +41,24 @@ class ExtensionBuildContext {
   ///
   /// Keys correspond to [ExtensionArtifact.name] or [ExtensionHostArtifact.name] values.
   final Map<String, String> resolvedArtifacts;
+}
+
+/// Context passed to an extension target's [AssembleTarget.build] method.
+@immutable
+class ExtensionAssembleContext extends ExtensionBuildContext {
+  const ExtensionAssembleContext({
+    required this.buildDir,
+    required super.buildMode,
+    required super.flutterRoot,
+    required super.mainPath,
+    required super.outputDir,
+    required super.projectRoot,
+    required super.resolvedArtifacts,
+  });
+
+  /// The absolute directory URI (ending with `/`) used for intermediate build
+  /// artifacts (matching [BuiltInPlaceholders.buildDir]).
+  final Uri buildDir;
 }
 
 /// Abstract target for a custom `flutter build <subcommand>` target.
@@ -137,10 +150,10 @@ abstract class AssembleTarget {
 
   /// Performs the actual compilation/build steps in the extension process/isolate.
   ///
-  /// Access resolved artifact paths from [ExtensionBuildContext.resolvedArtifacts] using
+  /// Access resolved artifact paths from [ExtensionAssembleContext.resolvedArtifacts] using
   /// [ExtensionArtifact.name] or [ExtensionHostArtifact.name] as keys.
   /// Returns an [ExtensionBuildResult] indicating whether the build succeeded.
-  Future<ExtensionBuildResult> build(ExtensionBuildContext context);
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context);
 }
 
 /// Extension service interface for custom builds.
@@ -163,7 +176,7 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC method identifier to trigger a custom `flutter assemble` target.
   static const String assembleMethod = 'build.assemble';
 
-  /// RPC parameter key for the temporary build directory.
+  /// RPC parameter key for the intermediate build directory (used by [assembleMethod]).
   static const String buildDirParam = 'buildDir';
 
   /// RPC parameter key for the build mode.
@@ -262,7 +275,6 @@ abstract base class BuildService extends ToolExtensionService {
     final String mainPath;
     final String buildMode;
     final Uri outputDirUri;
-    final Uri buildDirUri;
     final Uri flutterRootUri;
     final Map<String, Object?> rawResolvedArtifacts;
     try {
@@ -271,7 +283,6 @@ abstract base class BuildService extends ToolExtensionService {
       mainPath = params.requiredField<String>(mainPathParam);
       buildMode = params.requiredField<String>(buildModeParam);
       outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
-      buildDirUri = _requireAbsoluteDirectoryUri(params, buildDirParam);
       flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
       rawResolvedArtifacts = params.requiredField<Map<String, Object?>>(resolvedArtifactsParam);
     } on FormatException catch (e) {
@@ -295,13 +306,34 @@ abstract base class BuildService extends ToolExtensionService {
     }
 
     final context = ExtensionBuildContext(
-      buildDir: buildDirUri,
       buildMode: mode,
       flutterRoot: flutterRootUri,
       mainPath: mainPath,
       outputDir: outputDirUri,
       projectRoot: projectRootUri,
       resolvedArtifacts: resolvedArtifacts,
+    );
+    return (targetName, context);
+  }
+
+  static (String targetName, ExtensionAssembleContext context) _parseAssembleRequest(
+    Map<String, Object?> params,
+  ) {
+    final (String targetName, ExtensionBuildContext buildContext) = _parseBuildRequest(params);
+    final Uri buildDirUri;
+    try {
+      buildDirUri = _requireAbsoluteDirectoryUri(params, buildDirParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    final context = ExtensionAssembleContext(
+      buildDir: buildDirUri,
+      buildMode: buildContext.buildMode,
+      flutterRoot: buildContext.flutterRoot,
+      mainPath: buildContext.mainPath,
+      outputDir: buildContext.outputDir,
+      projectRoot: buildContext.projectRoot,
+      resolvedArtifacts: buildContext.resolvedArtifacts,
     );
     return (targetName, context);
   }
@@ -322,7 +354,7 @@ abstract base class BuildService extends ToolExtensionService {
   }
 
   Future<Map<String, Object?>> _assembleRpc(Map<String, Object?> params) async {
-    final (String targetName, ExtensionBuildContext context) = _parseBuildRequest(params);
+    final (String targetName, ExtensionAssembleContext context) = _parseAssembleRequest(params);
     final AssembleTarget? target = assembleTargets
         .where((AssembleTarget t) => t.name == targetName)
         .firstOrNull;

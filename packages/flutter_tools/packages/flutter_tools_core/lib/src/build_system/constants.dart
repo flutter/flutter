@@ -51,12 +51,14 @@ abstract final class BuiltInPlaceholders {
   ///
   /// Only substituted in [ExtensionBuildTarget.outputDir]; not supported in
   /// [ExtensionSource.pattern].
+  // TODO(bkonyi): Support BuiltInPlaceholders.buildMode in ExtensionSource.pattern.
   static const String buildMode = '{BUILD_MODE}';
 
   /// Placeholder substituted with the target platform name (e.g. `'linux-x64'`).
   ///
   /// Only substituted in [ExtensionBuildTarget.outputDir]; not supported in
   /// [ExtensionSource.pattern].
+  // TODO(bkonyi): Support BuiltInPlaceholders.targetPlatform in ExtensionSource.pattern.
   static const String targetPlatform = '{TARGET_PLATFORM}';
 }
 
@@ -91,6 +93,7 @@ abstract final class BuiltInHostArtifacts {
 // TODO(bkonyi): Propagate extension targetPlatform to built-in dependency targets
 // (copy_assets defaults to TargetPlatform.android when kTargetPlatform is unset, and
 // kernel_snapshot_program requires -dTargetPlatform).
+// TODO(bkonyi): Add BuiltInOutputs constants for the outputs of BuiltInTargets.copyAssets and BuiltInTargets.kernelSnapshot.
 abstract final class BuiltInTargets {
   /// Compiles the application to `{BUILD_DIR}/app.dill`.
   static const String kernelSnapshot = 'kernel_snapshot_program';

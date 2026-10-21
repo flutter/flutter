@@ -111,7 +111,7 @@ class ExtensionTarget extends Target {
   }
 }
 
-final _placeholderRegex = RegExp(r'\{[^}]+\}');
+final _placeholderRegex = RegExp(r'\{[A-Z_]+\}');
 
 const _supportedOutputDirPlaceholders = <String>{
   BuiltInPlaceholders.outputDir,
@@ -165,6 +165,7 @@ Directory resolveExtensionOutputDir({
 /// [artifacts] and [buildMode].
 ///
 /// Throws a [ToolExit] if any requested artifact name is invalid or unsupported.
+// TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
@@ -173,9 +174,8 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionArtifact artifact in target.artifacts) {
-    final Artifact hostArtifact = _resolveArtifact(artifact);
     resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
-      hostArtifact,
+      _resolveArtifact(artifact),
       platform: targetPlatform,
       mode: buildMode,
     );
@@ -192,6 +192,7 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
 ///
 /// Throws a [ToolExit] if any artifact platform name or requested artifact
 /// name is invalid or unsupported.
+// TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionAssembleTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
@@ -208,10 +209,9 @@ Map<String, String> resolveExtensionAssembleTargetArtifacts({
         :final String? platform,
         :final BuildMode? mode,
       ):
-        final Artifact hostArtifact = _resolveArtifact(artifact);
         final TargetPlatform? resolvedPlatform = _resolveArtifactPlatform(platform, artifact);
         resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
-          hostArtifact,
+          _resolveArtifact(artifact),
           platform: resolvedPlatform ?? targetPlatform,
           mode: mode ?? buildMode,
         );

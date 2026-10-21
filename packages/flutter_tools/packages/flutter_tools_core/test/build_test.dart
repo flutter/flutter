@@ -50,7 +50,7 @@ void main() {
 
   group('ExtensionSource', () {
     test('pattern, artifact, and hostArtifact serialize and deserialize', () {
-      const patternSource = ExtensionSource.pattern('{PROJECT_DIR}/pubspec.yaml', optional: true);
+      final patternSource = ExtensionSource.pattern('{PROJECT_DIR}/pubspec.yaml', optional: true);
       expect(ExtensionSource.fromJson(patternSource.toMap()), equals(patternSource));
       expect(patternSource.toString(), contains('{PROJECT_DIR}/pubspec.yaml'));
 
@@ -67,6 +67,14 @@ void main() {
       expect(hostArtifactSource.toString(), contains('impellerc'));
     });
 
+    test('ExtensionSource.pattern asserts when pattern does not start with valid directory placeholder', () {
+      expect(() => ExtensionSource.pattern('relative/path.txt'), throwsA(isA<AssertionError>()));
+      expect(
+        () => ExtensionSource.pattern('{PROJECT_DIR}foo/bar.dart'),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     test('fromJson throws FormatException on invalid type or missing fields', () {
       expect(() => ExtensionSource.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
@@ -79,6 +87,14 @@ void main() {
       );
       expect(
         () => ExtensionSource.fromJson(const <String, Object?>{'type': 'artifact'}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionSource.fromJson(const <String, Object?>{
+          'type': 'artifact',
+          'artifact': 'genSnapshot',
+          'mode': 'invalid_mode',
+        }),
         throwsFormatException,
       );
       expect(
@@ -320,15 +336,15 @@ void main() {
 
   group('ExtensionAssembleTarget', () {
     test('serializes and deserializes correctly with all fields', () {
-      const target = ExtensionAssembleTarget(
+      final target = ExtensionAssembleTarget(
         description: 'A custom Linux assemble target.',
         name: 'custom-linux-assemble-only-debug',
         targetPlatform: 'linux-x64',
-        dependencies: <String>[BuiltInTargets.copyAssets],
-        depfiles: <String>['custom_linux.d'],
+        dependencies: const <String>[BuiltInTargets.copyAssets],
+        depfiles: const <String>['custom_linux.d'],
         inputs: <ExtensionSource>[
           ExtensionSource.pattern('{PROJECT_DIR}/pubspec.yaml'),
-          ExtensionSource.artifact(BuiltInArtifacts.icuData),
+          const ExtensionSource.artifact(BuiltInArtifacts.icuData),
         ],
         outputs: <ExtensionSource>[ExtensionSource.pattern('{OUTPUT_DIR}/bundle/*')],
       );
