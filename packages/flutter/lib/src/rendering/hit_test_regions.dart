@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/services.dart';
 ///
+/// @docImport 'stack.dart';
 /// @docImport 'view.dart';
 library;
 
@@ -22,18 +23,20 @@ import 'proxy_box.dart';
 ///
 /// * `viewId` is the [PlatformViewController.viewId] of the platform view, so
 ///   the engine can tell which platform view the regions sit on top of.
-/// * `pvRect` is the platform view's bounds in the root coordinate space,
+/// * `platformViewRect` is the platform view's bounds in the root coordinate space,
 ///   intersected with any ancestor paint clip. It is used to decide whether a
 ///   render object painted later actually covers a platform view.
 /// * `rects` are the bounds, in the root coordinate space, of the render
 ///   objects painted after this platform view (and before the next one) that
 ///   overlap a platform view and accept pointer events.
-typedef _PlatformViewHitTestGroup = ({int viewId, Rect pvRect, List<Rect> rects});
+typedef _PlatformViewHitTestGroup = ({int viewId, Rect platformViewRect, List<Rect> rects});
 
-/// Walks the render tree rooted at [root] in paint order and encodes the
-/// bounding rectangles (in physical device pixels) of render objects that paint
-/// on top of one or more [PlatformViewRenderBox] instances and claim pointer
-/// events.
+/// Walks the render tree rooted at [root] in (approximate) paint order and
+/// encodes the bounding rectangles of render objects that paint on top of one
+/// or more [PlatformViewRenderBox] instances and claim pointer events.
+///
+/// The rectangles are in [root]'s coordinate space, which is physical pixels
+/// when [root] is a [RenderView].
 ///
 /// On the web, a platform view is a DOM element that sits on top of (or
 /// between) Flutter's canvases, so the browser routes pointer events over it
@@ -44,7 +47,7 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect pvRect, List<Rect> rects}
 ///
 /// ## How the regions are collected
 ///
-/// In one sentence: walk the render tree in paint order, tracking the
+/// In one sentence: walk the render tree in child order, tracking the
 /// accumulated paint transform and clip; every time a platform view is
 /// painted, start a new group for it, and every render box painted after that
 /// which would accept a pointer event and overlaps any platform view painted
@@ -52,16 +55,22 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect pvRect, List<Rect> rects}
 ///
 /// In more detail:
 ///
-/// * The walk follows [RenderObject.visitChildren], which visits children in
-///   paint order, so anything visited after a platform view paints on top of
-///   it.
+/// * The walk follows [RenderObject.visitChildren] and treats anything visited
+///   after a platform view as painting on top of it. Child order matches paint
+///   order for most render objects, but not all: for example, viewports may
+///   paint their slivers in reverse order, and [RenderIndexedStack] lays out
+///   (and so is visited for) children that it does not paint. Such render
+///   objects are not handled specially yet, so regions under them may be
+///   missing or spurious.
 /// * Each child's transform is computed with [RenderObject.applyPaintTransform]
 ///   and each child's clip with [RenderObject.describeApproximatePaintClip],
 ///   so the rectangles are in the same coordinate space as the root (physical
 ///   pixels when [root] is a [RenderView]).
 /// * Subtrees that cannot receive pointer events are skipped: offstage
 ///   subtrees ([RenderOffstage]) are not visited at all, and render objects
-///   under an ignoring [RenderIgnorePointer] never claim a region.
+///   under an ignoring [RenderIgnorePointer] never claim a region. A platform
+///   view under an ignoring [RenderIgnorePointer] still starts a group, because
+///   the browser still delivers pointer events to it.
 /// * A render box claims its bounds if it is an absorbing
 ///   [RenderAbsorbPointer] (its subtree is then skipped, since the absorber
 ///   already covers it), or if [RenderBox.hitTestSelf] returns true at its
@@ -69,8 +78,9 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect pvRect, List<Rect> rects}
 ///   region themselves; their children are visited instead.
 /// * A claimed rectangle is kept only if it is non-empty after clipping and
 ///   overlaps at least one platform view painted before it. It is attributed
-///   to the most recently painted platform view, which is the topmost platform
-///   view beneath it in paint order.
+///   to the most recently painted platform view (even if it only overlaps an
+///   earlier one), because that is the platform view directly beneath it in
+///   paint order.
 /// * Platform views themselves are leaves of the walk; their children (if any)
 ///   are not visited.
 ///
@@ -110,8 +120,10 @@ Float64List? computeHitTestRegions(RenderObject root) {
     // else Flutter already receives the pointer events.
     var overlapsAnyPlatformView = false;
     for (final group in groups) {
-      final Rect pvRect = group.pvRect;
-      if (pvRect.isFinite && !pvRect.isEmpty && claimedRect.overlaps(pvRect)) {
+      final Rect platformViewRect = group.platformViewRect;
+      if (platformViewRect.isFinite &&
+          !platformViewRect.isEmpty &&
+          claimedRect.overlaps(platformViewRect)) {
         overlapsAnyPlatformView = true;
         break;
       }
@@ -122,7 +134,7 @@ Float64List? computeHitTestRegions(RenderObject root) {
     }
   }
 
-  // Visits [node] and its descendants in paint order. [transform] maps
+  // Visits [node] and its descendants in child order (see above). [transform] maps
   // [node]'s local coordinates to the root's, [clip] is the accumulated paint
   // clip in root coordinates (or null if unclipped), and [ignoringPointers] is
   // true when an ancestor [RenderIgnorePointer] is ignoring pointer events.
@@ -139,11 +151,15 @@ Float64List? computeHitTestRegions(RenderObject root) {
     // paints on top of it.
     if (node is PlatformViewRenderBox) {
       if (node.hasSize && !node.size.isEmpty) {
-        Rect pvRect = MatrixUtils.transformRect(transform, Offset.zero & node.size);
+        Rect platformViewRect = MatrixUtils.transformRect(transform, Offset.zero & node.size);
         if (clip != null) {
-          pvRect = pvRect.intersect(clip);
+          platformViewRect = platformViewRect.intersect(clip);
         }
-        groups.add((viewId: node.controller.viewId, pvRect: pvRect, rects: <Rect>[]));
+        groups.add((
+          viewId: node.controller.viewId,
+          platformViewRect: platformViewRect,
+          rects: <Rect>[],
+        ));
       }
       return;
     }
@@ -162,15 +178,22 @@ Float64List? computeHitTestRegions(RenderObject root) {
           addClaimedRect(node, transform, clip);
           return;
         }
+      } else {
+        // hitTestSelf is protected, but asking whether a box would accept a
+        // pointer event at its center is exactly the question this pass needs
+        // answered, without running a full hit test.
         // ignore: invalid_use_of_protected_member
-      } else if (node.hitTestSelf(node.size.center(Offset.zero))) {
-        // The box itself accepts pointer events (e.g. it paints an opaque
-        // background or handles gestures), so its bounds are a region.
-        addClaimedRect(node, transform, clip);
+        final bool hitsSelf = node.hitTestSelf(node.size.center(Offset.zero));
+        if (hitsSelf) {
+          // The box itself accepts pointer events (for example, it paints an
+          // opaque background or handles gestures), so its bounds are a
+          // region.
+          addClaimedRect(node, transform, clip);
+        }
       }
     }
 
-    // Descend into the children in paint order, accumulating each child's
+    // Descend into the children in child order, accumulating each child's
     // paint transform and clip.
     node.visitChildren((RenderObject child) {
       var childClip = clip;
@@ -194,7 +217,7 @@ Float64List? computeHitTestRegions(RenderObject root) {
   }
 
   // Flatten the groups into the encoding described above: for each group,
-  // [viewId, rectCount] followed by rectCount × [left, top, right, bottom].
+  // [viewId, rectCount] followed by rectCount * [left, top, right, bottom].
   var totalFloats = 0;
   for (final group in groups) {
     totalFloats += 2 + group.rects.length * 4;

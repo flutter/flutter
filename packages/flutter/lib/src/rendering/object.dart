@@ -1066,8 +1066,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Typical implementations will tear down the semantics tree.
   final VoidCallback? onSemanticsOwnerDisposed;
 
-  /// Called whenever this pipeline owner computes updated hit-test regions that
-  /// overlap attached platform views.
+  /// Called with the hit-test regions computed by [flushHitTestRegions] for the
+  /// platform views attached to this pipeline owner.
+  ///
+  /// While a platform view with a non-empty size is attached, this is called on
+  /// every
+  /// [flushHitTestRegions] with the latest payload (even if it is unchanged).
+  /// The payload is a flat list of groups, one per platform view in paint
+  /// order, each encoded as the platform view ID, the number of rectangles
+  /// `n`, and then `n` rectangles as left, top, right, bottom values in the
+  /// root render object's coordinate space (physical pixels for a
+  /// [RenderView]).
+  ///
+  /// An empty list means that any previously reported regions should be
+  /// discarded. It is sent once when the last platform view goes away, and by
+  /// [clearHitTestRegions].
   final ValueSetter<Float64List>? onHitTestRegionsUpdate;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
@@ -1704,9 +1717,14 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   bool _sentNonEmptyHitTestRegions = false;
 
   /// The payload computed by the most recent [flushHitTestRegions] call on this
-  /// owner, or null if none was computed. Exposed to tests through
+  /// owner, or null if none was computed (no platform views attached, or none
+  /// with a non-empty size). Exposed to tests through
   /// [debugLastHitTestRegions].
-  Float64List? _debugLastHitTestRegions;
+  Float64List? _lastHitTestRegions;
+
+  /// The payload sent to [onHitTestRegionsUpdate] to discard previously
+  /// reported regions.
+  static final Float64List _emptyHitTestRegions = Float64List(0);
 
   /// Called when a [PlatformViewRenderBox] is attached to this pipeline owner.
   @internal
@@ -1722,11 +1740,16 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   }
 
   /// The hit-test region payload computed during the most recent
-  /// [flushHitTestRegions] pass, or null if no platform views were active.
+  /// [flushHitTestRegions] pass, or null if no platform view with a non-empty
+  /// size was found.
+  ///
+  /// If this pipeline owner has no [rootNode] (for example, the root pipeline
+  /// owner in a multi-view app), this returns the first non-null payload of
+  /// its child pipeline owners.
   @visibleForTesting
   Float64List? get debugLastHitTestRegions {
-    if (_debugLastHitTestRegions != null) {
-      return _debugLastHitTestRegions;
+    if (_lastHitTestRegions != null) {
+      return _lastHitTestRegions;
     }
     if (rootNode == null) {
       for (final PipelineOwner child in _children) {
@@ -1741,32 +1764,32 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// Computes the hit-test regions that overlap any attached platform views
   /// and dispatches the encoded payload to [onHitTestRegionsUpdate].
+  ///
+  /// Each pipeline owner only walks its own render tree, and only while it has
+  /// platform views attached; child pipeline owners are always visited, since
+  /// in a multi-view app the root pipeline owner has no render tree of its own.
   void flushHitTestRegions() {
+    Float64List? regions;
     if (_attachedPlatformViewCount > 0 && rootNode != null) {
       if (!kReleaseMode) {
         FlutterTimeline.startSync('HIT TEST REGIONS$_debugRootSuffixForTimelineEventNames');
       }
       try {
-        final Float64List? regions = computeHitTestRegions(rootNode!);
-        _debugLastHitTestRegions = regions;
-        if (regions != null) {
-          _sentNonEmptyHitTestRegions = true;
-          onHitTestRegionsUpdate?.call(regions);
-        } else if (_sentNonEmptyHitTestRegions) {
-          _sentNonEmptyHitTestRegions = false;
-          onHitTestRegionsUpdate?.call(Float64List(0));
-        }
+        regions = computeHitTestRegions(rootNode!);
       } finally {
         if (!kReleaseMode) {
           FlutterTimeline.finishSync();
         }
       }
-    } else {
-      _debugLastHitTestRegions = null;
-      if (_sentNonEmptyHitTestRegions) {
-        _sentNonEmptyHitTestRegions = false;
-        onHitTestRegionsUpdate?.call(Float64List(0));
-      }
+    }
+    _lastHitTestRegions = regions;
+    if (regions != null) {
+      _sentNonEmptyHitTestRegions = true;
+      onHitTestRegionsUpdate?.call(regions);
+    } else if (_sentNonEmptyHitTestRegions) {
+      // Tell the engine once to drop the regions it received earlier.
+      _sentNonEmptyHitTestRegions = false;
+      onHitTestRegionsUpdate?.call(_emptyHitTestRegions);
     }
     for (final PipelineOwner child in _children) {
       child.flushHitTestRegions();
@@ -1775,10 +1798,14 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// Clears any cached hit-test regions and notifies [onHitTestRegionsUpdate]
   /// with an empty list.
+  ///
+  /// Unlike [flushHitTestRegions], this always sends the empty list, even if no
+  /// regions were reported before, so that turning the feature off is
+  /// guaranteed to reset the engine's state.
   void clearHitTestRegions() {
-    _debugLastHitTestRegions = null;
+    _lastHitTestRegions = null;
     _sentNonEmptyHitTestRegions = false;
-    onHitTestRegionsUpdate?.call(Float64List(0));
+    onHitTestRegionsUpdate?.call(_emptyHitTestRegions);
     for (final PipelineOwner child in _children) {
       child.clearHitTestRegions();
     }

@@ -570,7 +570,9 @@ mixin RendererBinding
   // This is a separate persistent frame callback rather than a step in
   // [drawFrame] so that it also runs for bindings that override [drawFrame]
   // without calling the superclass implementation (such as the test bindings
-  // in package:flutter_test).
+  // in package:flutter_test). As a consequence, it does not observe the
+  // `EnginePhase` early exits of those test bindings: it runs even if a
+  // test frame stopped before compositing.
   void _handleHitTestRegionsFrameCallback(Duration timeStamp) {
     if (sendFramesToEngine && _shouldFlushHitTestRegions) {
       rootPipelineOwner.flushHitTestRegions();
@@ -581,6 +583,9 @@ mixin RendererBinding
 
   /// Whether the framework automatically computes hit-test regions that overlap
   /// platform views and sends them to the engine each frame.
+  ///
+  /// When enabled, [PipelineOwner.flushHitTestRegions] runs after every frame
+  /// and reports the regions through [PipelineOwner.onHitTestRegionsUpdate].
   ///
   /// This flag is experimental and only has an effect on the web (unless
   /// [debugEnableHitTestRegionsOnAllPlatforms] is enabled in tests).
