@@ -164,8 +164,14 @@ cache **frozen** -- a system library variant the cache lacks (LTO
 variants, say: `lto/libembind.a`) is an error, where GN's emcc would
 build it into the shared tree on the spot. The SDK reaches every action
 as directory inputs. `emscripten_cc_toolchain_config.bzl` holds the
-flags of `out/wasm_release`'s compile and link lines, in their order,
-minus what GN attaches per target; the one thing GN's lines do not have
+flags of `out/wasm_release`'s and `out/wasm_debug_unopt`'s compile and
+link lines, in their order, minus what GN attaches per target (`-c opt` is
+GN's optimized web build, `-O3 -g0`; `-c dbg` and `-c fastbuild` are both
+its one unoptimized build, `-O1 -gsource-map` -- GN keeps `-O1` because a
+fully deoptimized module has functions with too many locals for Chrome --
+and the link carries `-Wl,-O2`, or `-Oz` under `wasm_prioritize_size`, and
+`-Wl,--gc-sections` in every mode, as GN's `no_optimize` does for wasm);
+the one thing GN's lines do not have
 is the explicit, relative `--sysroot` and `-resource-dir`, because emcc
 resolves them to absolute paths (through the repository's symlink, into
 the checkout) that Bazel's header check would reject.
@@ -177,7 +183,11 @@ build; `--force_pic` is turned off there), a compile through
 toolchain's command line -- `cc_common.link` declares one output per
 link and the three a module has (`.js`, `.wasm`, `.js.symbols`: GN's
 `link_outputs`) are Bazel's private API -- with GN's `-Wl,--start-group
-@objects -Wl,--end-group` around the objects. `wasm_objects` is the
+@objects -Wl,--end-group` around the objects. In the unoptimized modes the
+module has a fourth output, `<name>.wasm.map`, which emcc writes beside the
+`.wasm` under the toolchain's `source_map` feature (`-gsource-map`) and
+GN's web SDK copies under `is_debug` without declaring (ninja finds it on
+disk). `wasm_objects` is the
 compile alone.
 
 `toolchains/emscripten/spike/` is Phase 0's metric 0.6: an embind module

@@ -22,8 +22,10 @@ configuration puts in the action's environment -- so neither the scripts
 nor the emcc configuration file name a repository or a machine.
 
 Compilation modes: -c opt is GN's release for wasm (-O3 -g0, NDEBUG; the
-modules' own configs add -Oz and LTO), -c dbg GN's debug (-O0 -g2,
-_DEBUG), -c fastbuild like dbg with minimal debug info.
+modules' own configs add -Oz and LTO); -c dbg and -c fastbuild are both
+GN's one unoptimized web build (-O1 -gsource-map, _DEBUG, a source map
+beside each module). The link carries GN's optimization flags in every
+mode, as GN's no_optimize does for wasm.
 """
 
 load(
@@ -40,6 +42,7 @@ load(
     "env_entry",
     "env_set",
     "feature",
+    "feature_set",
     "flag_group",
     "flag_set",
     "tool",
@@ -112,13 +115,17 @@ _WASM_LINK_FLAGS = [
 ]
 
 # //build/config:debug / :release, :no_optimize / :optimize and the symbol
-# configs, as the wasm_release and a debug wasm build compile.
-_DBG_COMPILE_FLAGS = ["-O0", "-g2"]
+# configs, as the wasm_release and wasm_debug_unopt builds compile. GN has
+# one unoptimized web build, which both of Bazel's unoptimized modes are:
+# -O1 rather than -O0 (no_optimize under is_wasm: a fully deoptimized module
+# has functions with too many locals for Chrome), -gsource-map (symbols
+# under is_wasm without wasm_use_dwarf: the `source_map` feature below, on
+# compiles and the link).
+_DBG_COMPILE_FLAGS = ["-O1"]
 _DBG_DEFINES = ["_DEBUG"]
-_FASTBUILD_COMPILE_FLAGS = ["-O0", "-g1"]
+_FASTBUILD_COMPILE_FLAGS = ["-O1"]
 _OPT_COMPILE_FLAGS = ["-O3", "-g0"]
 _OPT_DEFINES = ["NDEBUG", "NVALGRIND", "DYNAMIC_ANNOTATIONS_ENABLED=0"]
-_OPT_LINK_FLAGS = ["-Wl,--gc-sections"]
 
 # The `libs` GN's link rule ends with (the runtime library config's), after
 # the objects; emcc places system libraries itself, so the position is
@@ -187,14 +194,33 @@ def _impl(ctx):
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("opt", _OPT_COMPILE_FLAGS + _defines(_OPT_DEFINES)),
+        # //build/config/compiler:symbols under is_wasm (symbol_level 2: the
+        # unoptimized build) without wasm_use_dwarf: -gsource-map on every
+        # compile, and on the link (flutter_optimize_link_flags below, in
+        # GN's place for it), where emcc writes <module>.wasm.map beside the
+        # .wasm -- which wasm.bzl declares when this feature holds. Enabled
+        # in the unoptimized modes alone; wasm_use_dwarf (-g3, DWARF in the
+        # module) is not carried: tools/gn's default is false and no builder
+        # sets it.
+        feature(
+            name = "source_map",
+            enabled = True,
+            requires = [feature_set(features = ["dbg"]), feature_set(features = ["fastbuild"])],
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-gsource-map"])],
+                ),
+            ],
+        ),
         # The wasm toolchains' arguments that are compiler flags in GN
         # (//build/config/compiler:compiler under is_wasm, :optimize), each a
         # feature a variant's platform turns on (third_party/canvaskit's
         # platforms carry `--features=...` among their flags, as GN's
         # toolchains carry extra_toolchain_args). wasm_use_workers: the Wasm
         # Workers API on every compile and link. wasm_prioritize_size: -Oz
-        # for the optimized build's -O3, and on the link line, after the
-        # mode's flags so that the compiler takes it.
+        # for the optimized build's -O3, after the mode's flags so that the
+        # compiler takes it; its link flag is flutter_optimize_link_flags'.
         feature(
             name = "wasm_use_workers",
             flag_sets = [
@@ -208,7 +234,7 @@ def _impl(ctx):
             name = "wasm_prioritize_size",
             flag_sets = [
                 flag_set(
-                    actions = ALL_CC_COMPILE_ACTION_NAMES + CC_LINK_EXECUTABLE_ACTION_NAMES,
+                    actions = ALL_CC_COMPILE_ACTION_NAMES,
                     flag_groups = [flag_group(flags = ["-Oz"])],
                     with_features = [with_feature_set(features = ["opt"])],
                 ),
@@ -266,16 +292,34 @@ def _impl(ctx):
             ],
         ),
         _flag_feature("flutter_link_flags", CC_LINK_EXECUTABLE_ACTION_NAMES, _WASM_LINK_FLAGS),
-        # The optimized build's link flags come after the compiler config's,
-        # as GN orders its configs.
+        # //build/config/compiler's common_optimize_on_ldflags under is_wasm,
+        # which :optimize and :no_optimize both put on the link (the
+        # unoptimized web build links with them too), after the compiler
+        # config's flags as GN orders its configs: -Oz when
+        # wasm_prioritize_size, -Wl,-O2 otherwise, then -Wl,--gc-sections;
+        # and the symbols config's -gsource-map after them (source_map).
         feature(
-            name = "flutter_opt_link_flags",
+            name = "flutter_optimize_link_flags",
             enabled = True,
             flag_sets = [
                 flag_set(
                     actions = CC_LINK_EXECUTABLE_ACTION_NAMES,
-                    flag_groups = [flag_group(flags = _OPT_LINK_FLAGS)],
-                    with_features = [with_feature_set(features = ["opt"])],
+                    flag_groups = [flag_group(flags = ["-Oz"])],
+                    with_features = [with_feature_set(features = ["wasm_prioritize_size"])],
+                ),
+                flag_set(
+                    actions = CC_LINK_EXECUTABLE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-Wl,-O2"])],
+                    with_features = [with_feature_set(not_features = ["wasm_prioritize_size"])],
+                ),
+                flag_set(
+                    actions = CC_LINK_EXECUTABLE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-Wl,--gc-sections"])],
+                ),
+                flag_set(
+                    actions = CC_LINK_EXECUTABLE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-gsource-map"])],
+                    with_features = [with_feature_set(features = ["source_map"])],
                 ),
             ],
         ),

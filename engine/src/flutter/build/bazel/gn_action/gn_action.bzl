@@ -208,6 +208,15 @@ def _gn_copy_impl(ctx):
     # name. The empty CcInfo keeps the edges that GN has from libraries and
     # binaries to copies, which order them.
     files = ctx.files.srcs
+    if ctx.attr.files:
+        # The copy names some of a target's files (a wasm module's .js,
+        # .wasm and .js.symbols, and its .wasm.map in the unoptimized build
+        # where GN's copy lists it): those, in the order named.
+        by_name = {file.basename: file for file in files}
+        missing = [name for name in ctx.attr.files if name not in by_name]
+        if missing:
+            fail("%s: %s not among the sources' files (%s)" % (ctx.label, ", ".join(missing), ", ".join(by_name.keys())))
+        files = [by_name[name] for name in ctx.attr.files]
     if ctx.outputs.outs:
         if len(ctx.outputs.outs) != len(files):
             fail("%s: %d outs for %d sources" % (ctx.label, len(ctx.outputs.outs), len(files)))
@@ -230,6 +239,11 @@ gn_copy = rule(
             mandatory = True,
             cfg = module_platform_transition,
             doc = "GN's `sources`; a target among them stands for its files (a wasm module's, built for `platform`).",
+        ),
+        "files": attr.string_list(
+            doc = "The sources' files the copy takes, by base name, when GN names some of a target's " +
+                  "files rather than the target (a wasm module's outputs; the unoptimized build's " +
+                  ".wasm.map where GN's copy lists it under is_debug). Every file otherwise.",
         ),
         "outs": attr.output_list(
             doc = "The copies, one per source in order, when GN's `outputs` name the files literally " +

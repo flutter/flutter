@@ -1952,7 +1952,7 @@ final class _Emitter {
       switch (variable.name) {
         case 'sources':
           if (edge != null) {
-            _moduleOutputsInto(rule.list('srcs'), variable, edge, target);
+            _moduleOutputsInto(rule, variable, edge, target);
           } else {
             _filesInto(rule.list('srcs'), variable);
           }
@@ -2096,28 +2096,28 @@ final class _Emitter {
   /// The sources of a copy with a toolchain edge: the module's outputs
   /// under the toolchain's directory of the build directory
   /// (`$root_out_dir/<toolchain>/<module>.js`, `.wasm`, `.js.symbols`, and
-  /// `.wasm.map` where the toolchain's link writes one), which are the
-  /// module target's files -- the one source here, whatever the module's
-  /// configuration writes.
-  void _moduleOutputsInto(
-    _ListAttribute attribute,
-    GnVariable variable,
-    _ToolchainEdge edge,
-    GnTarget target,
-  ) {
+  /// `.wasm.map` under is_debug, where the unoptimized link writes one),
+  /// which are the module target's files -- the one source here, with the
+  /// files GN names as `files`, under their conditions, since a copy may
+  /// name fewer than the module writes (CanvasKit's leave the source map).
+  void _moduleOutputsInto(_Rule rule, GnVariable variable, _ToolchainEdge edge, GnTarget target) {
     const outputs = <String>['.js', '.wasm', '.js.symbols', '.wasm.map'];
     final directory = '$buildDirRoot/${edge.toolchainName}/';
-    _forEachItem(variable, into: attribute, (_Element e) {
+    final _ListAttribute srcs = rule.list('srcs');
+    final _ListAttribute files = rule.list('files');
+    _forEachItem(variable, into: srcs, (_Element e) {
       final String path = _string(e);
       final String file = path.startsWith(directory) ? path.substring(directory.length) : '';
       if (!outputs.any((String extension) => file == '${edge.moduleName}$extension')) {
         throw GnError(
           e.assignment.location,
           'source ${_rawString(e)} of copy ${target.name} is not an output of ${edge.gnLabel} '
-          'in toolchain :${edge.toolchainName} (${edge.moduleName}.js, .wasm, .js.symbols)',
+          'in toolchain :${edge.toolchainName} (${edge.moduleName}.js, .wasm, .js.symbols, '
+          '.wasm.map)',
         );
       }
-      attribute.addUnique(e.condition, _item(_localLabel(edge.moduleLabel), e, note: false));
+      srcs.addUnique(e.condition, _item(_localLabel(edge.moduleLabel), e, note: false));
+      files.addUnique(e.condition, _Item(file));
     });
   }
 
