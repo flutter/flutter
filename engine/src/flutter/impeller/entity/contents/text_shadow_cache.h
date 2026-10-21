@@ -8,12 +8,12 @@
 #include <cstdint>
 #include <memory>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/hash/hash.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
 #include "impeller/typographer/text_frame.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
+#include "third_party/abseil-cpp/absl/hash/hash.h"
 
 namespace impeller {
 

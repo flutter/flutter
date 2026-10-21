@@ -9,9 +9,9 @@
 #include <cstdint>
 #include <memory>
 
-#include "absl/container/flat_hash_map.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/command_buffer_scheduling_receipt.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 

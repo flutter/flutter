@@ -10,8 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "absl/status/status_matchers.h"
-#include "absl/strings/str_format.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "fml/logging.h"
@@ -61,6 +59,8 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
+#include "third_party/abseil-cpp/absl/strings/str_format.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
