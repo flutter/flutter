@@ -136,6 +136,7 @@ cc_library(
         # This abseil dependency is only used by backtrace.cc.
         "@abseil-cpp//absl/debugging:symbolize",  # enable_backtrace
         "@abseil-cpp//absl/numeric:int128",
+        "@abseil_cpp_tree//:root_includes",
         # trace_event.h uses the Dart timeline API. The Dart runtime's build
         # files cannot be loaded for target_os == "wasm", where the header is
         # found through the source root alone.
