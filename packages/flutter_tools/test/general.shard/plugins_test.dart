@@ -2545,10 +2545,15 @@ iosPrefix: FLT
         expect(map.isEmpty, true);
       });
 
-      testUsingContext('Platform plugin parseFromYaml methods perform validation', () async {
-        final invalidYaml = YamlMap.wrap(<String, dynamic>{'pluginClass': 123});
+      testWithoutContext('Platform plugin parseFromYaml methods perform validation', () {
+        final invalidYaml = YamlMap.wrap(<String, Object?>{'pluginClass': 123});
         expect(
-          AndroidPlugin.parseFromYaml('foo', invalidYaml, pluginPath: '', fileSystem: globals.fs),
+          AndroidPlugin.parseFromYaml(
+            'foo',
+            invalidYaml,
+            pluginPath: '',
+            fileSystem: MemoryFileSystem.test(),
+          ),
           isA<ParseResultFail<AndroidPlugin?>>(),
         );
         expect(IOSPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<IOSPlugin?>>());

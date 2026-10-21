@@ -211,7 +211,7 @@ class Plugin {
       }
       final parser = PluginYamlParser(yamlValue, pluginName: name, configKey: platformKey);
       final ParseResult<void> result =
-          (parser.string(kDefaultPackage, allowNull: false), parse(yamlValue)).map((
+          (parser.string(kDefaultPackage, allowNull: false), parse(yamlValue)).flatMap((
             String? defaultPackage,
             T? parsed,
           ) {
@@ -220,7 +220,7 @@ class Plugin {
             } else if (parsed != null) {
               platforms[platformKey] = parsed;
             } else {
-              errors.add('Invalid "$platformKey" plugin specification.');
+              return .fail(<String>['Invalid "$platformKey" plugin specification.']);
             }
             if (parsed case DartPlugin(:final String dartPluginClass, :final String dartFileName)) {
               dartPluginClasses[platformKey] = (
@@ -228,6 +228,7 @@ class Plugin {
                 dartFileName: dartFileName,
               );
             }
+            return .pass(null);
           });
       if (result case ParseResultFail(errors: final List<String> platformErrors)) {
         errors.addAll(platformErrors);
@@ -380,7 +381,7 @@ class Plugin {
     return YamlMap.wrap(map);
   }
 
-  static List<String> validatePluginYaml(YamlMap? yaml, {String packageName = 'plugin'}) {
+  static List<String> validatePluginYaml(YamlMap? yaml, {required String packageName}) {
     final ParseResult<Plugin> result = _parseFromYaml(
       packageName,
       '',
@@ -392,7 +393,8 @@ class Plugin {
       // `validatePluginYaml` is called from `FlutterManifest` where no
       // `FileSystem` is available and the parsed `Plugin` is discarded here,
       // an unused `MemoryFileSystem` is passed.
-      // TODO(chingjun): Remove the required fileSystem parameter here.
+      // TODO(chingjun): Remove the required fileSystem parameter here,
+      // https://github.com/flutter/flutter/issues/194900.
       fileSystem: MemoryFileSystem(),
       isDevDependency: false,
     );

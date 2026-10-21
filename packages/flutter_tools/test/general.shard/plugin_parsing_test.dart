@@ -672,7 +672,7 @@ void main() {
 
     expect(plugin.platforms.keys, contains(AndroidPlugin.kConfigKey));
     expect(plugin.platforms.keys, isNot(contains(WebPlugin.kConfigKey)));
-    expect(Plugin.validatePluginYaml(pluginYaml), isEmpty);
+    expect(Plugin.validatePluginYaml(pluginYaml, packageName: _kTestPluginName), isEmpty);
   });
 
   testWithoutContext('Plugin parsing rejects non-string implements, non-bool flags, and non-string supportedVariants', () {
