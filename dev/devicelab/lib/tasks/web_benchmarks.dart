@@ -510,6 +510,9 @@ Handler createBuildDirectoryHandler(String buildDirectoryPath) {
   };
 }
 
+/// Standard curated fast smoke-test benchmarks.
+const List<String> kSmokeTestBenchmarks = <String>['draw_rect', 'bench_card_infinite_scroll'];
+
 /// Filters benchmarks based on an exact list of targets or a regular expression pattern.
 ///
 /// If [targetBenchmarks] is provided, only the exact benchmarks listed will be run. If

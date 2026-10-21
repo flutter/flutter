@@ -53,24 +53,21 @@ abstract base class ArtifactService extends ToolExtensionService {
   Future<void> shutdown() async {}
 
   Future<List<Map<String, Object?>>> _downloadArtifactsRpc(Map<String, Object?> params) async {
-    if (params case {hostPlatformParam: final String hp}) {
-      final HostPlatform hostPlatform =
-          HostPlatform.tryFromName(hp) ??
-          (throw RpcException.invalidParams('Invalid "$hostPlatformParam" parameter: "$hp"'));
-      final Set<String>? targetPlatforms = switch (params[targetPlatformsParam]) {
-        final List<Object?> list when list.every((Object? e) => e is String) =>
-          list.cast<String>().toSet(),
-        null => null,
-        final Object? invalid => throw RpcException.invalidParams(
-          'Invalid "$targetPlatformsParam" parameter: $invalid',
-        ),
-      };
-      final List<ArtifactDependency> deps = await downloadArtifacts(
-        hostPlatform: hostPlatform,
-        targetPlatforms: targetPlatforms,
-      );
-      return deps.map((ArtifactDependency d) => d.toMap()).toList();
+    final HostPlatform hostPlatform;
+    final Set<String>? targetPlatforms;
+    try {
+      final String hp = params.requiredField<String>(hostPlatformParam);
+      hostPlatform = HostPlatform.fromName(hp);
+      targetPlatforms = params[targetPlatformsParam] != null
+          ? params.stringIterable(targetPlatformsParam).toSet()
+          : null;
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
     }
-    throw RpcException.invalidParams('Missing "$hostPlatformParam" parameter.');
+    final List<ArtifactDependency> deps = await downloadArtifacts(
+      hostPlatform: hostPlatform,
+      targetPlatforms: targetPlatforms,
+    );
+    return deps.map((ArtifactDependency d) => d.toMap()).toList();
   }
 }

@@ -42,6 +42,7 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
+import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
@@ -1221,6 +1222,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._emulatorManager,
     this.extensionArtifactManager,
     this.extensionBuildManager,
+    this.extensionCleanManager,
     this.extensionManager,
     this._featureFlags,
     this._toolContext,
@@ -1270,6 +1272,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   final ExtensionBuildManager? extensionBuildManager;
+
+  @override
+  final ExtensionCleanManager? extensionCleanManager;
 
   @override
   final ExtensionManager? extensionManager;

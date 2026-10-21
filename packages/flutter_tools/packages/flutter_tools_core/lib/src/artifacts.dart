@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 /// Host platforms that Flutter tools can be executed on.
 enum HostPlatform {
   darwin_x64,
@@ -76,42 +78,29 @@ class ArtifactDependency {
   ///
   /// Throws a [FormatException] if any required field is missing or invalid.
   factory ArtifactDependency.fromJson(Map<String, Object?> json) {
-    if (json case {
-      nameKey: final String name,
-      urlKey: final String urlStr,
-      sha256Key: final String sha256,
-    }) {
-      if (!isValidSinglePathSegment(name)) {
-        throw FormatException('Invalid artifact dependency name: "$name"');
-      }
-      if (!_sha256RegExp.hasMatch(sha256)) {
-        throw FormatException(
-          'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
-        );
-      }
-      final Uri? uri = Uri.tryParse(urlStr);
-      if (uri == null || (!uri.isScheme(_httpScheme) && !uri.isScheme(_httpsScheme))) {
-        throw FormatException('Invalid artifact dependency URL (expected http/https): "$urlStr"');
-      }
-      final HostPlatform? hostPlatform = switch (json[hostPlatformKey]) {
-        final String hp => HostPlatform.fromName(hp),
-        null => null,
-        final Object? invalid => throw FormatException('Invalid "$hostPlatformKey": $invalid'),
-      };
-      final String? targetPlatform = switch (json[targetPlatformKey]) {
-        final String tp => tp,
-        null => null,
-        final Object? invalid => throw FormatException('Invalid "$targetPlatformKey": $invalid'),
-      };
-      return ArtifactDependency(
-        name: name,
-        sha256: sha256,
-        url: uri,
-        hostPlatform: hostPlatform,
-        targetPlatform: targetPlatform,
+    final String name = json.requiredField<String>(nameKey);
+    if (!isValidSinglePathSegment(name)) {
+      throw FormatException('Invalid artifact dependency name: "$name"');
+    }
+    final String sha256 = json.requiredField<String>(sha256Key);
+    if (!_sha256RegExp.hasMatch(sha256)) {
+      throw FormatException(
+        'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
       );
     }
-    throw FormatException('Invalid ArtifactDependency JSON: $json');
+    final String urlStr = json.requiredField<String>(urlKey);
+    final Uri? uri = Uri.tryParse(urlStr);
+    if (uri == null || (!uri.isScheme(_httpScheme) && !uri.isScheme(_httpsScheme))) {
+      throw FormatException('Invalid artifact dependency URL (expected http/https): "$urlStr"');
+    }
+    final String? hostPlatformName = json.nullableField<String>(hostPlatformKey);
+    return ArtifactDependency(
+      name: name,
+      sha256: sha256,
+      url: uri,
+      hostPlatform: hostPlatformName != null ? HostPlatform.fromName(hostPlatformName) : null,
+      targetPlatform: json.nullableField<String>(targetPlatformKey),
+    );
   }
 
   static const String _httpScheme = 'http';
