@@ -428,12 +428,17 @@ final class _Emitter {
     _convertTarget(target);
     // A target GN defines only under a condition exists in Bazel but is
     // incompatible wherever the condition does not hold: dependents cannot
-    // build it there, as in GN they could not name it. (The condition may
-    // add a config_setting_group of its own after the target's rules.)
+    // build it there, as in GN they could not name it. The settings the
+    // target's select()s add to the file (config_setting_groups of its
+    // conditions) are not targets of GN's and take no compatibility: a
+    // setting holds or not, wherever it is asked.
     if (target.condition != Condition.always) {
       final int last = rules.length;
       final String compatibility = _compatibility(target);
       for (final _Rule rule in rules.sublist(first, last)) {
+        if (rule.kind == 'selects.config_setting_group') {
+          continue;
+        }
         rule.scalars['target_compatible_with'] = compatibility;
       }
     }
