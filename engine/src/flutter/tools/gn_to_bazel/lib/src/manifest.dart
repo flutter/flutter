@@ -47,11 +47,6 @@ final class ConvertedFile {
   final List<String> implicitDeps;
 }
 
-/// Why the CanvasKit module's toolchains and copies are skipped.
-const String _canvasKitModule =
-    "the CanvasKit module's platforms and copies: with its conversion, whose arguments become "
-    'settings';
-
 const List<ConvertedFile> convertedFiles = <ConvertedFile>[
   // GN's config("flutter_config") is feature_defines_list, which copts.bzl
   // keeps as FLUTTER_FEATURE_DEFINES over the flags below: the Bazel side
@@ -261,25 +256,10 @@ exports_files([
   // loads anywhere, so it is listed in every configuration.
   ConvertedFile('//flutter/fml', implicitDeps: <String>['@dart//:dart_api_headers']),
   // The web build's wasm toolchains as platforms carrying their arguments as
-  // flags, and the copies that place each module's outputs in the web SDK's
-  // directory (flutter_web_sdk/canvaskit), each naming the toolchain its
-  // module is built in: skwasm's two platforms and three copies now; the
-  // CanvasKit module's three platforms and copies with that module's
-  // conversion (Skia's modules/canvaskit), whose arguments -- skia_use_bidi,
-  // the skia_canvaskit_* ones, skia_enable_skparagraph and skshaper,
-  // skia_use_harfbuzz and freetype, flutter_use_freetype_woff2 -- become
-  // settings then.
-  ConvertedFile(
-    '//flutter/third_party/canvaskit',
-    skip: <String, String>{
-      'canvaskit': _canvasKitModule,
-      'canvaskit_chromium': _canvasKitModule,
-      'canvaskit_webparagraph': _canvasKitModule,
-      'canvaskit_group': _canvasKitModule,
-      'canvaskit_chromium_group': _canvasKitModule,
-      'canvaskit_webparagraph_group': _canvasKitModule,
-    },
-  ),
+  // flags (skwasm's two, CanvasKit's three), and the copies that place each
+  // module's outputs in the web SDK's directory (flutter_web_sdk/canvaskit),
+  // each naming the toolchain its module is built in.
+  ConvertedFile('//flutter/third_party/canvaskit'),
   // The client ICU's bidi library: a few of ICU's source/common files under
   // Skia's own library suffix, which skunicode links where
   // skia_use_client_icu holds (the skwasm and wimp variants).
@@ -985,6 +965,14 @@ cc_library(
 )
 ''',
   ),
+  // CanvasKit, the web SDK's other rendering module: the engine's GN over
+  // Skia's modules/canvaskit sources, an executable in a wasm toolchain
+  // (output_extension = "js", the toolchain's .js/.wasm/.js.symbols link) --
+  // a wasm_executable here -- and the group the web SDK's copies name in
+  // each of its three toolchains (third_party/canvaskit). Its sources are
+  // the package's own (modules/canvaskit of the Skia tree); Skia's headers
+  // come as for the other modules.
+  ConvertedFile('//flutter/skia/modules/canvaskit', implicitDeps: <String>['@skia//:skia_headers']),
   // Skia's own GN for the config that hides ICU's C++ API from skunicode.
   ConvertedFile('//flutter/third_party/skia/third_party/icu/config'),
   ConvertedFile(

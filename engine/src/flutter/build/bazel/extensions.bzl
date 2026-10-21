@@ -249,6 +249,7 @@ _SOURCE_REPOSITORIES = {
         build_file = None,
         gn_build_files = [
             "engine/src/flutter/skia/BUILD.gn",
+            "engine/src/flutter/skia/modules/canvaskit/BUILD.gn",
             "engine/src/flutter/skia/modules/skcms/BUILD.gn",
             "engine/src/flutter/skia/modules/skparagraph/BUILD.gn",
             "engine/src/flutter/skia/modules/skshaper/BUILD.gn",

@@ -50,8 +50,9 @@ WASM_PLATFORM = Label("//engine/src/flutter/build/bazel/toolchains/emscripten:wa
 MODULE_PLATFORM = "//engine/src/flutter/build/bazel/web:module_platform"
 
 # The constraint every wasm_platform carries and the bare wasm platform does
-# not: what a wasm module is compatible with.
-VARIANT = "//engine/src/flutter/build/bazel/web:variant"
+# not: what a wasm module is compatible with (a Label: the macros are called
+# from other repositories' files too, Skia's for CanvasKit).
+VARIANT = Label("//engine/src/flutter/build/bazel/web:variant")
 
 def _module_transition_impl(settings, _attr):
     platform = settings[MODULE_PLATFORM]
@@ -166,10 +167,11 @@ def _wasm_module_impl(ctx):
         requested_features = ctx.features,
         unsupported_features = ctx.disabled_features,
     )
-    name = ctx.label.name
+    name = ctx.attr.output_name or ctx.label.name
+    wasm_lib = ctx.attr.wasm_lib
     sources, headers = _split_sources(ctx.files.srcs)
     _, compilation_outputs = cc_common.compile(
-        name = name,
+        name = ctx.label.name,
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
@@ -178,7 +180,7 @@ def _wasm_module_impl(ctx):
         includes = [marker.dirname for marker in ctx.files.include_markers],
         defines = ctx.attr.defines,
         # wasm_lib's cflags, then the target's.
-        user_compile_flags = ["-s", "MAIN_MODULE=1"] + ctx.attr.copts,
+        user_compile_flags = (["-s", "MAIN_MODULE=1"] if wasm_lib else []) + ctx.attr.copts,
         compilation_contexts = [dep[CcInfo].compilation_context for dep in ctx.attr.deps],
     )
     js = ctx.actions.declare_file(name + ".js")
@@ -202,7 +204,7 @@ def _wasm_module_impl(ctx):
         is_static_linking_mode = True,
         # wasm_lib's ldflags, then the target's, a file among them named
         # by its $(execpath) over link_inputs (--js-library, --pre-js).
-        user_link_flags = ["-s", "EXPORT_NAME=" + (ctx.attr.export_name or name)] + [
+        user_link_flags = (["-s", "EXPORT_NAME=" + (ctx.attr.export_name or name)] if wasm_lib else []) + [
             ctx.expand_location(flag, targets = ctx.attr.link_inputs)
             for flag in ctx.attr.linkopts
         ],
@@ -266,6 +268,12 @@ _wasm_module = rule(
             doc = "Files the link reads besides objects: the --js-library and --pre-js files linkopts name.",
         ),
         "export_name": attr.string(doc = "EXPORT_NAME; the target's name by default, as in wasm_lib."),
+        "output_name": attr.string(doc = "GN's output_name: what the .js, .wasm and .js.symbols are called; the target's name by default."),
+        "wasm_lib": attr.bool(
+            default = True,
+            doc = "Whether the target is a wasm_lib (-s MAIN_MODULE=1 on the compiles, -s EXPORT_NAME on the link) " +
+                  "or a plain executable in the wasm toolchain (CanvasKit's, which passes its own flags).",
+        ),
     },
     cfg = module_transition,
     fragments = ["cpp"],
@@ -287,6 +295,25 @@ def wasm_module(name, **kwargs):
     _wasm_module(
         name = name,
         target_compatible_with = [VARIANT],
+        **kwargs
+    )
+
+def wasm_executable(name, **kwargs):
+    """GN's executable() in a wasm toolchain with `output_extension = "js"`.
+
+    The same link as a wasm_module's (the toolchain writes the .js, .wasm
+    and .js.symbols), without wasm_lib's flags: the target passes its own
+    (CanvasKit's -sEXPORT_NAME=CanvasKitInit among its ldflags), and names
+    its outputs with `output_name` where GN does.
+
+    Args:
+      name: the target's name.
+      **kwargs: the rule's attributes.
+    """
+    _wasm_module(
+        name = name,
+        target_compatible_with = [VARIANT],
+        wasm_lib = False,
         **kwargs
     )
 
@@ -338,6 +365,18 @@ _SETTING_ARGS = [
     "skia_use_no_png_encode",
     "skia_use_libpng_encode",
     "skia_enable_threadlocal_strikecache",
+    "skia_use_bidi",
+    "skia_canvaskit_enable_bidi",
+    "skia_enable_skparagraph",
+    "skia_canvaskit_enable_paragraph",
+    "skia_enable_skshaper",
+    "skia_use_harfbuzz",
+    "skia_use_freetype",
+    "flutter_use_freetype_woff2",
+    "skia_enable_fontmgr_custom_embedded",
+    "skia_enable_fontmgr_custom_empty",
+    "skia_canvaskit_enable_font",
+    "skia_canvaskit_enable_alias_font",
 ]
 
 # The toolchain arguments that are compiler flags in GN

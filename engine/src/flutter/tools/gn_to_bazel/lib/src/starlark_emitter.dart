@@ -130,6 +130,14 @@ final class _EntrySelect {
 /// A list attribute: unconditional items, plus items per condition in the
 /// order the conditions first appeared.
 final class _ListAttribute {
+  _ListAttribute({this.setLike = false});
+
+  /// Whether the attribute is a set of labels Bazel rejects a duplicate in
+  /// (deps, srcs, data), where an item under a condition implying another
+  /// item's condition is a duplicate wherever it appears; a flag list keeps
+  /// GN's repeats in GN's order.
+  final bool setLike;
+
   final List<_Item> always = <_Item>[];
   final Map<Condition, List<_Item>> conditional = <Condition, List<_Item>>{};
 
@@ -167,29 +175,33 @@ final class _ListAttribute {
   /// can translate to one Bazel label, which Bazel rejects as a duplicate)
   /// -- or in the unconditional part, which holds wherever the condition
   /// does (GN lists impeller_unittests' geometry_unittests outright and
-  /// again under a backend; GN's deps are a set, Bazel's reject a duplicate).
-  /// An unconditional item, likewise, takes the place of its conditional
-  /// copies (fml's Dart API headers, listed by GN outside the web build and
-  /// by the manifest everywhere).
+  /// again under a backend; GN's deps are a set, Bazel's reject a duplicate),
+  /// or under a condition the new one implies (skshaper lists skunicode
+  /// under `skia_enable_skunicode` and again under `skia_use_harfbuzz &&
+  /// skia_enable_skunicode`: wherever the second holds, the first does, and
+  /// both select() branches would name it). An unconditional item,
+  /// likewise, takes the place of its conditional copies (fml's Dart API
+  /// headers, listed by GN outside the web build and by the manifest
+  /// everywhere), and an item under a weaker condition the place of its
+  /// copies under conditions implying it.
   void addUnique(Condition condition, _Item item) {
     bool same(_Item existing) => existing.text == item.text;
     if (always.any(same)) {
       return;
     }
     if (condition == Condition.always) {
-      for (final Condition when in conditional.keys.toList()) {
-        final List<_Item> items = conditional[when]!;
-        items.removeWhere(same);
-        if (items.isEmpty) {
-          conditional.remove(when);
-        }
-      }
-      sequence.removeWhere(
-        ((Condition, _Item) entry) => entry.$1 != Condition.always && same(entry.$2),
-      );
+      _displace(same, (Condition when) => true);
       always.add(item);
       sequence.add((condition, item));
       return;
+    }
+    if (setLike) {
+      for (final MapEntry<Condition, List<_Item>> entry in conditional.entries) {
+        if (entry.value.any(same) && _implies(condition, entry.key)) {
+          return;
+        }
+      }
+      _displace(same, (Condition when) => when != condition && _implies(when, condition));
     }
     final List<_Item> bucket = conditional.putIfAbsent(condition, () => <_Item>[]);
     if (bucket.any(same)) {
@@ -197,6 +209,42 @@ final class _ListAttribute {
     }
     bucket.add(item);
     sequence.add((condition, item));
+  }
+
+  /// Removes the items [same] matches from the conditional buckets [where]
+  /// selects (and from the sequence), dropping emptied buckets.
+  void _displace(bool Function(_Item) same, bool Function(Condition) where) {
+    for (final Condition when in conditional.keys.toList()) {
+      if (!where(when)) {
+        continue;
+      }
+      final List<_Item> items = conditional[when]!;
+      items.removeWhere(same);
+      if (items.isEmpty) {
+        conditional.remove(when);
+      }
+    }
+    sequence.removeWhere(
+      ((Condition, _Item) entry) =>
+          entry.$1 != Condition.always && where(entry.$1) && same(entry.$2),
+    );
+  }
+
+  /// Whether [stronger] holding guarantees [weaker] holds, as far as the
+  /// shape says: the same condition, or a conjunction that has [weaker]
+  /// among its terms (or all of [weaker]'s terms, when that is a
+  /// conjunction too).
+  static bool _implies(Condition stronger, Condition weaker) {
+    if (stronger == weaker) {
+      return true;
+    }
+    if (stronger is! ConditionAnd) {
+      return false;
+    }
+    if (weaker is ConditionAnd) {
+      return weaker.terms.every(stronger.terms.contains);
+    }
+    return stronger.terms.contains(weaker);
   }
 
   /// Moves the items under [condition] to the unconditional part, in their
@@ -240,7 +288,23 @@ final class _Rule {
   /// command line; spliced in once the copts constants are placed.
   final Map<String, List<_Item>> ownFlags = <String, List<_Item>>{};
 
-  _ListAttribute list(String attribute) => lists.putIfAbsent(attribute, _ListAttribute.new);
+  _ListAttribute list(String attribute) => lists.putIfAbsent(
+    attribute,
+    () => _ListAttribute(setLike: _setLikeAttributes.contains(attribute)),
+  );
+
+  /// The label-list attributes Bazel rejects a duplicate in.
+  static const Set<String> _setLikeAttributes = <String>{
+    'srcs',
+    'hdrs',
+    'deps',
+    'implementation_deps',
+    'data',
+    'tools',
+    'fixtures',
+    'link_inputs',
+    'exports',
+  };
 }
 
 /// buildifier's order of two strings of a sorted list (labels): compared
@@ -591,6 +655,8 @@ final class _Emitter {
       case 'source_set':
       case 'static_library':
         _convertCcTarget(target, 'cc_library', library: true);
+      case 'executable' when _isWasmExecutable(target):
+        _convertTemplate(target, templateMappings[wasmExecutableRule]!);
       case 'executable':
         _convertCcTarget(
           target,
@@ -756,6 +822,10 @@ final class _Emitter {
   /// (Bazel's implementation_deps need sources), so `deps` and
   /// `public_deps` both become `deps`, which is what GN does for linking.
   void _convertGroup(GnTarget target) {
+    if (_isFilesGroup(target)) {
+      _convertFilesGroup(target);
+      return;
+    }
     _use('@rules_cc//cc:defs.bzl', 'cc_library');
     final rule = _Rule('cc_library', target.name, target.comments);
     final propagated = <ForwardedFlag>[];
@@ -792,6 +862,55 @@ final class _Emitter {
     }
     _checkPropagatedFlags(target, propagated);
     _inheritedConfigsInto(rule, target);
+    rules.add(rule);
+  }
+
+  /// Whether a group stands for wasm modules: every dependency is a link in
+  /// a wasm toolchain of this file (CanvasKit's `group("canvaskit") {
+  /// public_deps = [ ":canvaskit_js" ] }`, which the web SDK's copies name),
+  /// and the group adds no configs. Such a group is a filegroup -- its
+  /// dependencies' files -- where a group of libraries is a cc_library (and
+  /// a group of other files, which libraries may list among their deps,
+  /// stays one with the files as `data`).
+  bool _isFilesGroup(GnTarget target) {
+    var any = false;
+    for (final GnVariable variable in target.variables.values) {
+      switch (variable.name) {
+        case 'deps' || 'public_deps':
+          for (final GnListItem item in variable.liveItems) {
+            final GnValue value = item.value;
+            if (value is! GnStringValue || !_isLocalWasmLink(_withoutToolchain(value.value))) {
+              return false;
+            }
+            any = true;
+          }
+        case 'testonly':
+          break;
+        default:
+          if (!_ignoredVariables.contains(variable.name) &&
+              !variable.forwarded &&
+              !_isHelperVariable(variable)) {
+            return false;
+          }
+      }
+    }
+    return any;
+  }
+
+  /// A group of files as a filegroup: its dependencies' files are its own
+  /// (what a copy of the group's outputs takes).
+  void _convertFilesGroup(GnTarget target) {
+    final rule = _Rule('filegroup', target.name, target.comments);
+    for (final GnVariable variable in target.variables.values) {
+      switch (variable.name) {
+        case 'deps' || 'public_deps':
+          _labelsInto(rule.list('srcs'), variable, target);
+        case 'testonly':
+          _scalar(rule, 'testonly', variable);
+        default:
+          break;
+      }
+    }
     rules.add(rule);
   }
 
@@ -965,6 +1084,17 @@ final class _Emitter {
   /// tools stay binaries -- but for the benchmarks run_tests.py runs
   /// ([benchmarkRuns]), which are tests tagged `benchmark` and `manual`.
   static bool _isTest(GnTarget target) => isTestTarget(target);
+
+  /// An `executable()` with `output_extension = "js"`: a link in a wasm
+  /// toolchain (CanvasKit's), converted through [wasmExecutableRule]'s
+  /// mapping.
+  static bool _isWasmExecutable(GnTarget target) {
+    final List<GnValue>? items = target.variables['output_extension']?.unconditionalItems;
+    return items != null &&
+        items.length == 1 &&
+        items.single is GnStringValue &&
+        (items.single as GnStringValue).value == 'js';
+  }
 
   /// A known template becomes a call of its Bazel macro, with the arguments
   /// the mapping names translated by kind (see [TemplateMapping.arguments]).
@@ -2944,7 +3074,21 @@ final class _Emitter {
   /// file in the build directory; in Bazel the files must be the binary's
   /// runfiles.
   bool _isLocalData(String gnLabel) {
-    return _isFilesRule(_localRule(gnLabel) ?? _ruleElsewhere(gnLabel));
+    return _isLocalWasmLink(gnLabel) ||
+        _isFilesRule(_localRule(gnLabel) ?? _ruleElsewhere(gnLabel));
+  }
+
+  /// Whether a `:name` label names a link in a wasm toolchain of this file:
+  /// a wasm_lib, or an executable with `output_extension = "js"`.
+  bool _isLocalWasmLink(String gnLabel) {
+    if (!gnLabel.startsWith(':')) {
+      return false;
+    }
+    final GnTarget? local = localTargets[_withoutToolchain(gnLabel).substring(1)];
+    if (local == null) {
+      return false;
+    }
+    return local.rule == 'wasm_lib' || (local.rule == 'executable' && _isWasmExecutable(local));
   }
 
   /// Whether a target of GN rule [rule] is files rather than a library: a
@@ -3146,13 +3290,25 @@ final class _Emitter {
         strings.add(e.condition, _item(_tokenizerEscaped(_string(e)), e));
         return;
       }
-      final String path = _unmarked(raw);
-      if (path.contains(rebasedPathMarker)) {
-        throw GnError(e.assignment.location, 'a rebased path inside a string: $raw');
+      // The item is a rebased path, or a string with rebased paths inside
+      // it (CanvasKit's `--closure-args=--externs=$externs_path`): each
+      // becomes the file's $(execpath), which the rule expands anywhere in
+      // the string.
+      final buffer = StringBuffer();
+      final List<String> parts = raw.split(rebasedPathMarker);
+      if (parts.length.isEven) {
+        throw GnError(e.assignment.location, 'an unterminated rebased path in a string: $raw');
       }
-      final String file = _filePath(path, e.assignment.location);
-      strings.add(e.condition, _item('\$(execpath $file)', e));
-      inputs.addUnique(e.condition, _Item(file));
+      for (var i = 0; i < parts.length; i++) {
+        if (i.isEven) {
+          buffer.write(_tokenizerEscaped(parts[i]));
+          continue;
+        }
+        final String file = _filePath(parts[i], e.assignment.location);
+        buffer.write('\$(execpath $file)');
+        inputs.addUnique(e.condition, _Item(file));
+      }
+      strings.add(e.condition, _item(buffer.toString(), e));
     });
   }
 
@@ -3883,8 +4039,16 @@ final class _Emitter {
       case ConditionNot(:final Condition operand):
         return _SelectKeys(<String>[_setting(operand, rule)], negated: true);
       case ConditionOr(:final List<Condition> terms):
+        // A conjunction among the alternatives (Skia's fontmgr_custom:
+        // `skia_enable_fontmgr_android || ...`, the former being
+        // `!is_wasm && skia_use_freetype`) is its match_all group, one key
+        // among the others.
         return _SelectKeys(<String>[
-          for (final Condition t in terms) _setting(t, rule),
+          for (final Condition t in terms)
+            if (t case ConditionAnd(terms: final List<Condition> conjuncts))
+              _conjunctionSetting(t, conjuncts, rule, location, where)
+            else
+              _setting(t, rule),
         ], negated: false);
       case ConditionAnd(:final List<Condition> terms)
           when terms.every(

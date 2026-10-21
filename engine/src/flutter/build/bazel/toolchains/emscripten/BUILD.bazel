@@ -34,6 +34,9 @@ platform(
         # the optimized build's compiles and links (the `lto` feature holds
         # under -c opt). A variant's `enable_lto = false` turns it off.
         "--features=lto",
+        # flutter_use_freetype_woff2, which tools/gn turns on for the web
+        # (FreeType reads WOFF2 over brotli); a variant may turn it off.
+        "--//engine/src/flutter/build/bazel/web:flutter_use_freetype_woff2=true",
     ],
 )
 
