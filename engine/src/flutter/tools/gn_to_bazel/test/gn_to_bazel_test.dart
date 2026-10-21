@@ -3901,7 +3901,9 @@ wasm_module(
     test("a copy naming a module in a wasm toolchain is the module's files under the toolchain's platform", () {
       // The web SDK's copies (third_party/canvaskit): the module's outputs
       // under the toolchain's directory of the build directory, the
-      // toolchain named on the dependency edge.
+      // toolchain named on the dependency edge; the files GN names, by
+      // name, with the unoptimized build's source map under its condition
+      // (a copy may name fewer files than the module writes).
       final GnSourceTree tree = sourceTree(<String, String>{
         'flutter/ck/BUILD.gn': r'''
 template("skw_toolchain") {
@@ -3947,6 +3949,14 @@ copy("skw_group") {
 gn_copy(
     name = "skw_group",
     srcs = ["//engine/src/flutter/skwasm"],
+    files = [
+        "skwasm.js",
+        "skwasm.js.symbols",
+        "skwasm.wasm",
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": ["skwasm.wasm.map"],
+        "//conditions:default": [],
+    }),
     outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
     platform = ":skw",
 )
@@ -4823,6 +4833,101 @@ zip_bundle("bundle") {
         ),
       );
     });
+
+    test(
+      'zip_bundle_from_file over a directory of the build directory is a build_directory_tree',
+      () async {
+        // The web SDK's archive (web_sdk/BUILD.gn): every entry is a source
+        // under one directory of the build directory at its path below it,
+        // `rebase_path(source, "$root_build_dir/<dir>")` -- a target's outputs
+        // and literal paths alike -- so the archive is one tree over the
+        // bundle's deps, which place their files there (BuildDirectoryInfo).
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/wsdk/BUILD.gn': r'''
+import("//flutter/build/zip_bundle.gni")
+
+copy("lib") {
+  sources = [ "ui.dart" ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/lib/{{source_file_part}}" ]
+}
+
+copy("kernel") {
+  sources = [ "platform.dill" ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/kernel/{{source_file_part}}" ]
+}
+
+zip_bundle_from_file("sdk_archive") {
+  output = "flutter-web-sdk.zip"
+  deps = [ ":kernel", ":lib" ]
+  sources = get_target_outputs(":kernel")
+  sources += [ "$root_out_dir/flutter_web_sdk/lib/ui.dart" ]
+  if (is_wasm) {
+    sources += [ "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.wasm" ]
+  }
+  tmp_files = []
+  foreach(source, sources) {
+    tmp_files += [
+      {
+        source = rebase_path(source)
+        destination = rebase_path(source, "$root_build_dir/flutter_web_sdk")
+      },
+    ]
+  }
+  files = tmp_files
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/wsdk/BUILD.gn', templates: <String>{'zip_bundle_from_file'}),
+          gnPackage: '//flutter/wsdk',
+          tree: tree,
+        );
+        expect(
+          output,
+          contains('''
+build_directory_tree(
+    name = "sdk_archive_tree",
+    srcs = [
+        ":kernel",
+        ":lib",
+    ],
+    under = "flutter_web_sdk",
+)
+
+zip_bundle_from_file(
+    name = "sdk_archive",
+    output = "flutter-web-sdk.zip",
+    trees = [":sdk_archive_tree"],
+)
+'''),
+        );
+        // An entry at the build directory's root is not under a directory:
+        // the plain bundle shape, entry by entry.
+        await expectLater(
+          convert(
+            r'''
+import("//flutter/build/zip_bundle.gni")
+
+zip_bundle_from_file("mixed") {
+  output = "mixed.zip"
+  files = [
+    {
+      source = rebase_path("$root_build_dir/flutter_web_sdk/lib/ui.dart")
+      destination = "lib/ui.dart"
+    },
+    {
+      source = rebase_path("$root_build_dir/version")
+      destination = "version"
+    },
+  ]
+}
+''',
+            templates: <String>{'zip_bundle_from_file'},
+          ),
+          completion(isNot(contains('build_directory_tree'))),
+        );
+      },
+    );
 
     test("zip_bundle: an entry produced by another file's target, through the resolver", () {
       final GnSourceTree tree = sourceTree(<String, String>{

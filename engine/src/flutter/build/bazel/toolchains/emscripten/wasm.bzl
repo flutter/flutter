@@ -13,8 +13,9 @@ compiles its sources and links them with the C++ toolchain's own actions
 (cc_common.compile and cc_common.link, so the flags are the toolchain
 configuration's) under the wasm platform -- a configuration transition, so
 a module can be named from any build -- and declares the same three
-outputs. (The link itself is the rule's own action over the toolchain's
-command line; see the implementation.)
+outputs, with the unoptimized build's `.wasm.map` as a fourth. (The link
+itself is the rule's own action over the toolchain's command line; see the
+implementation.)
 
 The module is the whole of the C++ it needs: `srcs` compiled here, `deps`
 linked in (cc_library targets, themselves built under the transition).
@@ -130,6 +131,7 @@ WasmModuleInfo = provider(
         "js": "The JavaScript loader (<name>.js).",
         "wasm": "The module (<name>.wasm).",
         "symbols": "The symbol map (<name>.js.symbols).",
+        "source_map": "The source map (<name>.wasm.map) of an unoptimized build; None otherwise.",
     },
 )
 
@@ -186,6 +188,17 @@ def _wasm_module_impl(ctx):
     js = ctx.actions.declare_file(name + ".js")
     wasm = ctx.actions.declare_file(name + ".wasm")
     symbols = ctx.actions.declare_file(name + ".js.symbols")
+    outputs = [js, wasm, symbols]
+
+    # The unoptimized build's source map (the toolchain's `source_map`
+    # feature: -gsource-map on the link), which emcc writes beside the
+    # .wasm. GN's link rule does not declare it -- the web SDK's copies name
+    # it under is_debug and ninja finds it on disk -- so here it is the
+    # module's fourth output when the feature holds, and nothing otherwise.
+    source_map = None
+    if cc_common.is_enabled(feature_configuration = feature_configuration, feature_name = "source_map"):
+        source_map = ctx.actions.declare_file(name + ".wasm.map")
+        outputs.append(source_map)
 
     # The link is an action of this rule's own rather than cc_common.link:
     # that API declares one output per link, and the three a module has
@@ -249,11 +262,11 @@ def _wasm_module_impl(ctx):
             objects + archives + ctx.files.link_inputs,
             transitive = [cc_toolchain.all_files],
         ),
-        outputs = [js, wasm, symbols],
+        outputs = outputs,
     )
     return [
-        DefaultInfo(files = depset([js, wasm, symbols])),
-        WasmModuleInfo(js = js, wasm = wasm, symbols = symbols),
+        DefaultInfo(files = depset(outputs)),
+        WasmModuleInfo(js = js, wasm = wasm, symbols = symbols, source_map = source_map),
     ]
 
 _wasm_module = rule(
