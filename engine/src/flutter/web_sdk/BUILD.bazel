@@ -171,6 +171,29 @@ zip_bundle_from_file(
     name = "flutter_web_sdk_archive",
     output = "flutter-web-sdk.zip",
     trees = [":flutter_web_sdk_archive_tree"],
+    deps = [
+        ":flutter_ddc_modules",
+        ":flutter_platform_dills",
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
+        ":web_locale_keymap_library",
+        ":web_test_fonts_library",
+        ":web_ui_library",
+        ":web_ui_library_sources",
+        ":web_ui_ui_web",
+        "//engine/src/flutter/lib/web_ui/flutter_js",
+    ] + select({
+        "@platforms//os:emscripten": [
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_chromium_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_webparagraph_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:skwasm_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:skwasm_heavy_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:wimp_group",  # is_wasm
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # What GN has no words for; maintained in the converter's manifest

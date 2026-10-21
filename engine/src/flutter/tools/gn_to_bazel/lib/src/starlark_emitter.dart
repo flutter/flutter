@@ -397,6 +397,11 @@ String emitBuildFile(
   for (final GnTarget target in evaluation.targets) {
     if (skipTargets.contains(target.name)) {
       skipped.add(target.name);
+    }
+  }
+  emitter.skippedTargets.addAll(skipped);
+  for (final GnTarget target in evaluation.targets) {
+    if (skipTargets.contains(target.name)) {
       continue;
     }
     emitter.convert(target);
@@ -512,6 +517,11 @@ final class _Emitter {
 
   /// Every target of the file, by name.
   final Map<String, GnTarget> localTargets = <String, GnTarget>{};
+
+  /// The targets of the file that are not converted (the evaluation's
+  /// skipped and the run's skipTargets): a template's label list leaves a
+  /// dependency on one out, there being no target to name.
+  final Set<String> skippedTargets = <String>{};
 
   /// The local configs some target of the file lists (whose compiler flags
   /// are therefore inlined there).
@@ -3179,11 +3189,14 @@ final class _Emitter {
 
   void _labelsInto(_ListAttribute attribute, GnVariable variable, GnTarget target) {
     _forEachItem(variable, into: attribute, (_Element e) {
-      final String label = bazelLabel(
-        _string(e),
-        package: gnPackage,
-        location: e.assignment.location,
-      );
+      final String gnLabel = _string(e);
+      // A dependency on a target of this file that is not converted (the
+      // entitlement lists an archive depends on) has nothing to name; the
+      // file's header lists the target.
+      if (gnLabel.startsWith(':') && skippedTargets.contains(_localName(gnLabel))) {
+        return;
+      }
+      final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
       attribute.addUnique(e.condition, _item(_localLabel(label), e));
       _rootIncludeViewsInto(attribute, label, e.condition);
     });
@@ -3257,12 +3270,14 @@ final class _Emitter {
     if (!gnLabel.startsWith(':')) {
       return null;
     }
-    String name = gnLabel.substring(1);
+    return localTargets[_localName(gnLabel)]?.rule;
+  }
+
+  /// The target name of a local label (`:name`, `:name(toolchain)`).
+  static String _localName(String gnLabel) {
+    final String name = gnLabel.substring(1);
     final int paren = name.indexOf('(');
-    if (paren >= 0) {
-      name = name.substring(0, paren);
-    }
-    return localTargets[name]?.rule;
+    return paren >= 0 ? name.substring(0, paren) : name;
   }
 
   /// Like [_labelsInto] for a compiled target's dependencies: those on

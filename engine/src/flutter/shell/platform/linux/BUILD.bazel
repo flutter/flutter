@@ -612,4 +612,9 @@ zip_bundle(
         "gen_snapshot": "gen_snapshot",
     },
     trees = [":flutter_gtk_publish_headers_linux"],
+    deps = [
+        ":flutter_linux_gtk",
+        ":publish_headers_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",
+    ],
 )

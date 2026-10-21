@@ -12,10 +12,10 @@
 # exports (generate_snapshot_bins) are artifact packaging, a later phase.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/dart:snapshot.bzl", "bin_to_assembly", "compile_platform", "core_snapshot")
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_generated_file")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -47,17 +47,20 @@ filegroup(
 )
 
 # generated_file("vm_isolate_snapshot_data"), ("vm_isolate_snapshot_instructions"):
-# empty, for the artifact layout.
-write_file(
+# empty, for the artifact layout (gen/flutter/lib/snapshot/, where an install
+# lays them: `outputs`).
+gn_generated_file(
     name = "vm_isolate_snapshot_data",
     out = "vm_isolate_snapshot.bin",
     content = [],
+    outputs = ["$root_gen_dir/flutter/lib/snapshot/vm_isolate_snapshot.bin"],
 )
 
-write_file(
+gn_generated_file(
     name = "vm_isolate_snapshot_instructions",
     out = "vm_snapshot_instructions.bin",
     content = [],
+    outputs = ["$root_gen_dir/flutter/lib/snapshot/vm_snapshot_instructions.bin"],
 )
 
 # GN: --enable_asserts when is_debug and the runtime mode is debug.
@@ -79,6 +82,10 @@ core_snapshot(
     }),
     instructions = "isolate_snapshot_instructions.bin",
     platform = ":flutter_patched_sdk/platform_strong.dill",
+    deps = [
+        ":vm_isolate_snapshot_data",
+        ":vm_isolate_snapshot_instructions",
+    ],
 )
 
 # bin_to_linkable(...): the blobs as symbols.

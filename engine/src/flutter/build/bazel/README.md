@@ -103,8 +103,17 @@ build has no tests, as GN's has none (`enable_unittests` is false outside
 Against GN's `out/linux_debug_arm64`, `install_diff.py` finds the archives'
 entry lists identical (`dart-sdk`'s 1,057 files among them), and
 `flutter_embedder.h` and the frontend snapshot byte-identical; the binaries
-differ as the host's do, by compile flags, and by the `--strip-all` GN's
-toolchains apply to what they ship, which the Bazel build does not do yet.
+differ as the host's do, by compile flags (and by GN's `--strip-all`, which
+the install reproduces: see the install section). One cost to know about:
+`--platforms` on the command line does not enter the output directory's
+name, so the host's and the arm64 build's files of one compilation mode
+share `bazel-out/k8-opt` (and `k8-fastbuild`), and switching between the
+two rebuilds the tree -- from the disk cache when it holds the other
+build's actions (2 to 6 minutes for an arm64 install after a host build),
+from the compilers otherwise (20 minutes for the host's archives after an
+arm64 build). Bazel's `--experimental_platform_in_output_dir` would give
+each platform its own directory at the price of a one-time rebuild of
+everything; not turned on.
 
 `cc_toolchain_config.bzl` reproduces GN's toolchain-wide flags (warnings,
 visibility, `-std=c++20`, `-fno-exceptions -fno-rtti`, the linker hardening
@@ -874,7 +883,12 @@ the build directory too: the web builder's install lays the
 not reach a rule through its output files, a `zip_bundle` places the
 entries whose GN source is an output of the build itself, at the source's
 build-directory path the converter hands it as `sources`: the patched
-SDK's dills, the snapshots under `gen/`), so that one target --
+SDK's dills, the snapshots under `gen/`; and it carries GN's `deps`, the
+targets whose outputs the entries are, so that what their closure places
+is laid too, as ninja's build of the archive leaves every output of those
+targets in the build directory and not only the ones the archive packs:
+the core snapshot's `isolate_snapshot_instructions.bin` and
+`vm_snapshot_instructions.bin` beside the two `artifacts.zip` takes), so that one target --
 the sky_engine package's -- brings its thirty copies, its generated file
 and its assembled directory along. The script copies from the runfiles
 tree, where each file is symlinked by its index in the install's list
