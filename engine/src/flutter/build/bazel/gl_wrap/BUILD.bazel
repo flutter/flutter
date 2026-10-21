@@ -65,9 +65,14 @@ _GN_ARGS = {
     # gn gen time, as GN's own host build does.
     "is_official_build": "true",
     "stripped_symbols": "true",
-    "target_cpu": '"x64"',
     "target_os": '"linux"',
 } | select({
+    # The target CPU, as in dart_wrap: the host's, or arm64 for the Linux
+    # arm64 cross build (SwiftShader's Reactor on LLVM there, Subzero on x64;
+    # flutter_tester links swiftshader_static on either).
+    "@platforms//cpu:aarch64": {"target_cpu": '"arm64"'},
+    "//conditions:default": {"target_cpu": '"x64"'},
+}) | select({
     # As in dart_wrap: -c opt is tools/gn without --unoptimized.
     "//engine/src/flutter/build/bazel:optimized": {"is_debug": "false"},
     "//conditions:default": {"is_debug": "true"},
@@ -129,6 +134,7 @@ gn_build(
         "//engine/src/flutter/build/bazel/gl_wrap/stubs": "",
         "//engine/src/build:gn_files": "build",
         "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
+        "@sysroot_linux_arm64//:build_tree": "build/linux/debian_bullseye_arm64-sysroot",
         "//engine/src/flutter/build:gn_files": "flutter/build",
         "@clang_linux_x64//:all_files": "flutter/buildtools/linux-x64/clang",
         "@cpython3//:runtime": "flutter/buildtools/linux-x64/cpython3",
@@ -143,7 +149,13 @@ gn_build(
         "@vulkan_memory_allocator_tree//:build_tree": "flutter/third_party/vulkan_memory_allocator",
         "@zlib//:build_tree": "flutter/third_party/zlib",
         "@abseil_cpp_tree//:build_tree": "third_party/abseil-cpp",
-    },
+    } | select({
+        # Reactor's LLVM backend sources, which SwiftShader's GN build reads
+        # on arm64 alone (Subzero on x64): 6,000 files the host's wrap does
+        # not need as inputs.
+        "@platforms//cpu:aarch64": {"@swiftshader//:llvm_sources": "flutter/third_party/swiftshader"},
+        "//conditions:default": {},
+    }),
 )
 
 # ---------------------------------------------------------------------------

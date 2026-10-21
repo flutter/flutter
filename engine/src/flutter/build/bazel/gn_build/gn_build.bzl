@@ -200,7 +200,7 @@ _gn_build = rule(
     },
 )
 
-def gn_build(name, outs = [], archives = {}, visibility = None, **kwargs):
+def gn_build(name, outs = [], out_paths = None, archives = {}, visibility = None, **kwargs):
     """A GN build of one root target, with its products as targets of this package.
 
     Besides the `name` target (all products), each product is available as
@@ -210,6 +210,10 @@ def gn_build(name, outs = [], archives = {}, visibility = None, **kwargs):
     Args:
       name: name of the build target.
       outs: build products to export, relative to the GN build directory.
+      out_paths: the products' paths under the GN build directory when they
+        depend on the configuration (a select() over the platforms: a cross
+        build's host tools under clang_x64/), each `outs` entry's by base
+        name; `outs` themselves otherwise.
       archives: archive file name -> GN library label (see the module docstring).
       visibility: visibility of the build target and the product targets.
       **kwargs: the attributes of the underlying rule (`build_file`, `root_target_dir`,
@@ -217,7 +221,7 @@ def gn_build(name, outs = [], archives = {}, visibility = None, **kwargs):
     """
     _gn_build(
         name = name,
-        outs = outs,
+        outs = out_paths if out_paths != None else outs,
         archives = archives,
         visibility = visibility,
         **kwargs
