@@ -138,17 +138,20 @@ cc_library(
         "surface_gles.h",
         "texture_gles.h",
         "unique_handle_gles.h",
-        "@angle//:include/GLES2/gl2ext.h",  # !is_android && !is_fuchsia
-        # The GLES3 API is a superset of GLES2. Although we target GLES2, we use
-        # some GLES3 features if the driver supports them.
-        "@angle//:include/GLES3/gl3.h",  # !is_android && !is_fuchsia
-    ],
+    ] + select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "@angle//:include/GLES2/gl2ext.h",  # !is_android && !is_fuchsia
+            # The GLES3 API is a superset of GLES2. Although we target GLES2, we use
+            # some GLES3 features if the driver supports them.
+            "@angle//:include/GLES3/gl3.h",  # !is_android && !is_fuchsia
+        ],
+    }),
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
-        ":gles_config",  # !is_android && !is_fuchsia
         "//engine/src:include_root",
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller:impeller_public_config",
@@ -156,6 +159,11 @@ cc_library(
         "//engine/src/flutter/impeller/shader_archive",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil_cpp_tree//:root_includes",
-    ],
+    ] + select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            ":gles_config",  # !is_android && !is_fuchsia
+        ],
+    }),
     alwayslink = True,
 )
