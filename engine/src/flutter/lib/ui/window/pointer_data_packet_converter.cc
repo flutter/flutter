@@ -124,9 +124,12 @@ void PointerDataPacketConverter::ConvertPointerData(
         break;
       }
       case PointerData::Change::kRemove: {
-        // Makes sure we have an existing pointer
+        // Drops the remove if the pointer was not added, which happens when
+        // its add or down was dropped because its position was not finite.
         auto iter = states_.find(pointer_data.device);
-        FML_DCHECK(iter != states_.end());
+        if (iter == states_.end()) {
+          break;
+        }
         PointerState state = iter->second;
         if (state.view_id != pointer_data.view_id) {
           // Ignores remove event if the pointer was previously added to a
@@ -299,12 +302,15 @@ void PointerDataPacketConverter::ConvertPointerData(
         break;
       }
       case PointerData::Change::kPanZoomUpdate: {
-        // Makes sure we have an existing pointer in pan_zoom_active state
+        // Drops the update if the pointer is not in a pan/zoom, which happens
+        // when its pan/zoom start was dropped because its position was not
+        // finite.
         auto iter = states_.find(pointer_data.device);
-        FML_DCHECK(iter != states_.end());
+        if (iter == states_.end() || !iter->second.is_pan_zoom_active) {
+          break;
+        }
         PointerState state = iter->second;
         FML_DCHECK(!state.is_down);
-        FML_DCHECK(state.is_pan_zoom_active);
 
         UpdatePointerIdentifier(pointer_data, state, false);
         UpdateDeltaAndState(pointer_data, state);
@@ -313,11 +319,14 @@ void PointerDataPacketConverter::ConvertPointerData(
         break;
       }
       case PointerData::Change::kPanZoomEnd: {
-        // Makes sure we have an existing pointer in pan_zoom_active state
+        // Drops the end if the pointer is not in a pan/zoom, which happens
+        // when its pan/zoom start was dropped because its position was not
+        // finite.
         auto iter = states_.find(pointer_data.device);
-        FML_DCHECK(iter != states_.end());
+        if (iter == states_.end() || !iter->second.is_pan_zoom_active) {
+          break;
+        }
         PointerState state = iter->second;
-        FML_DCHECK(state.is_pan_zoom_active);
 
         UpdatePointerIdentifier(pointer_data, state, false);
 

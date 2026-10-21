@@ -926,7 +926,7 @@ TEST(PointerDataPacketConverterTest, IgnoresGestureWithNonFiniteDown) {
   TestDelegate delegate;
   delegate.AddView(kImplicitViewId);
   PointerDataPacketConverter converter(delegate);
-  auto packet = std::make_unique<PointerDataPacket>(4);
+  auto packet = std::make_unique<PointerDataPacket>(5);
   PointerData data{};
   CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, NAN, NAN, 1);
   packet->SetPointerData(0, data);
@@ -937,12 +937,41 @@ TEST(PointerDataPacketConverterTest, IgnoresGestureWithNonFiniteDown) {
   CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 3.0, 4.0,
                              0);
   packet->SetPointerData(3, data);
+  // Android sends a remove right after the up of a touch.
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(4, data);
   auto converted_packet = converter.Convert(*packet);
 
   std::vector<PointerData> result;
   UnpackPointerPacket(result, std::move(converted_packet));
 
   // Without a down, the rest of the gesture is dropped too.
+  ASSERT_EQ(result.size(), (size_t)0);
+}
+
+TEST(PointerDataPacketConverterTest,
+     IgnoresTrackpadGestureWithNonFinitePanZoomStart) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(3);
+  PointerData data{};
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, NAN, NAN, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 3.0, 4.0, 1.0, 1.0, 1.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     3.0, 4.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(2, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // Without a pan/zoom start, the rest of the gesture is dropped too.
   ASSERT_EQ(result.size(), (size_t)0);
 }
 
