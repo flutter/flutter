@@ -9,7 +9,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "absl/hash/hash.h"
 #include "display_list/dl_vertices.h"
 #include "display_list/effects/color_filters/dl_blend_color_filter.h"
 #include "display_list/effects/color_filters/dl_matrix_color_filter.h"
@@ -68,6 +67,7 @@
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command_buffer.h"
+#include "third_party/abseil-cpp/absl/hash/hash.h"
 
 namespace impeller {
 
