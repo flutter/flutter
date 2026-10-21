@@ -839,16 +839,25 @@ places the one file), `gn_action` under `gen/<package>/`,
 `gn_generated_file` at its output, `zip_bundle` under `zip_archives/`,
 `dart_pkg` and `sdk_rewriter` where their GN outputs go; `install`'s
 `contents` collects these over a target's dependency closure (an aspect
-over `deps`, `srcs` and `data`), so that one target -- the sky_engine
-package's -- brings its thirty copies, its generated file and its assembled
-directory along. For rules that do not say, `files` maps a target to the
+over `deps`, `srcs` and `data`, and over an archive's `files` and `trees`,
+since ninja building GN's archive target writes its inputs' closure into
+the build directory too: the web builder's install lays the
+`flutter_web_sdk/` tree beside `flutter-web-sdk.zip`, a host builder's the
+`flutter_tester` and libraries its archives pack), so that one target --
+the sky_engine package's -- brings its thirty copies, its generated file
+and its assembled directory along. The script copies from the runfiles
+tree, where each file is symlinked by its index in the install's list
+rather than at its short path: one target built under several
+configurations (CanvasKit's module under its three platforms) has one
+short path for its several files, and a short-path runfiles tree would
+hold one of them. For rules that do not say, `files` maps a target to the
 directory under the build directory that holds its files by base name,
 `trees` are `zip_tree` targets whose files go at their paths under the
 tree's destination (the Dart SDK, the GTK headers), and `archives` are
 `zip_bundle` targets whose archives go under `zip_archives/`. The
 destination is `engine/src/out/<variant>/` -- `<variant>` GN's name for the
 configuration's build directory (`host_debug_unopt`, `host_debug`,
-`host_release`; `checkout_view.bzl`) -- or a directory named after `--`,
+`host_release`, `wasm_release`; `checkout_view.bzl`) -- or a directory named after `--`,
 relative to the checkout; the copies land in the checkout
 (`BUILD_WORKSPACE_DIRECTORY`), outside Bazel's output tree, as GN's would,
 and writable, as GN's are (Bazel's outputs are not; a second install
