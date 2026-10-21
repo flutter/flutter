@@ -70,7 +70,10 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
   }
 
   if (pools_.empty()) {
-    CreateNewPool(context_vk);
+    fml::Status pool_status = CreateNewPool(context_vk);
+    if (!pool_status.ok()) {
+      return pool_status;
+    }
   }
 
   vk::DescriptorSetAllocateInfo set_info;
@@ -83,20 +86,30 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
   if (result == vk::Result::eErrorOutOfPoolMemory ||
       // FragmentedPool == OutOfMemory AND most likely due to fragmentation
       result == vk::Result::eErrorFragmentedPool) {
-    // If the pool ran out of memory, we need to create a new pool.
-    CreateNewPool(context_vk);
+    // If the pool ran out of memory, we need to create a new pool. Retrying on
+    // the exhausted pool would fail the same way, so if no new pool can be
+    // made the allocation fails.
+    fml::Status pool_status = CreateNewPool(context_vk);
+    if (!pool_status.ok()) {
+      return pool_status;
+    }
     set_info.setDescriptorPool(pools_.back().get());
     result = context_vk.GetDevice().allocateDescriptorSets(&set_info, &set);
   }
-  auto lookup_result =
-      descriptor_sets_.try_emplace(pipeline_key, DescriptorCache{});
-  lookup_result.first->second.used.push_back(set);
 
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not allocate descriptor sets: "
                    << vk::to_string(result);
     return fml::Status(fml::StatusCode::kUnknown, "");
   }
+
+  // Only a set that was actually allocated goes into the per pipeline cache.
+  // The used sets become the unused sets when the pool is recycled, so a set
+  // recorded here after a failed allocation would be handed out as a valid set
+  // in a later frame.
+  auto lookup_result =
+      descriptor_sets_.try_emplace(pipeline_key, DescriptorCache{});
+  lookup_result.first->second.used.push_back(set);
   return set;
 }
 

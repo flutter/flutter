@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
+#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -131,6 +132,117 @@ TEST(DescriptorPoolRecyclerVKTest, DescriptorsAreRecycled) {
   EXPECT_EQ(
       std::count(called->begin(), called->end(), "vkAllocateDescriptorSets"),
       2);
+}
+
+TEST(DescriptorPoolRecyclerVKTest, FirstPoolCreationFailurePropagates) {
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetCreateDescriptorPoolCallback(
+              [](VkDevice, const VkDescriptorPoolCreateInfo*,
+                 const VkAllocationCallbacks*, VkDescriptorPool*) -> VkResult {
+                return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+              })
+          .Build();
+  ScopedValidationDisable disable_validation;
+
+  std::shared_ptr<DescriptorPoolVK> pool =
+      context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+  fml::StatusOr<vk::DescriptorSet> result =
+      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+  EXPECT_FALSE(result.ok());
+
+  // Without a pool there is nothing to allocate from.
+  std::shared_ptr<std::vector<std::string>> called =
+      GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(
+      std::count(called->begin(), called->end(), "vkCreateDescriptorPool"), 1u);
+  EXPECT_EQ(
+      std::count(called->begin(), called->end(), "vkAllocateDescriptorSets"),
+      0u);
+
+  context->Shutdown();
+}
+
+TEST(DescriptorPoolRecyclerVKTest, RetryFailsWhenNoReplacementPoolCanBeMade) {
+  // The first pool is created and every later one fails. The first allocation
+  // reports the pool as exhausted; the mock would grant a second attempt.
+  size_t pools_created = 0u;
+  size_t allocations = 0u;
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetCreateDescriptorPoolCallback(
+              [&pools_created](VkDevice, const VkDescriptorPoolCreateInfo*,
+                               const VkAllocationCallbacks*,
+                               VkDescriptorPool*) -> VkResult {
+                return pools_created++ == 0u ? VK_SUCCESS
+                                             : VK_ERROR_OUT_OF_DEVICE_MEMORY;
+              })
+          .SetAllocateDescriptorSetsCallback(
+              [&allocations](VkDevice, const VkDescriptorSetAllocateInfo*,
+                             VkDescriptorSet*) -> VkResult {
+                return allocations++ == 0u ? VK_ERROR_OUT_OF_POOL_MEMORY
+                                           : VK_SUCCESS;
+              })
+          .Build();
+  ScopedValidationDisable disable_validation;
+
+  std::shared_ptr<DescriptorPoolVK> pool =
+      context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+  fml::StatusOr<vk::DescriptorSet> result =
+      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+  EXPECT_FALSE(result.ok());
+
+  // The exhausted pool is asked exactly once. With no replacement pool there
+  // is nothing to retry on.
+  std::shared_ptr<std::vector<std::string>> called =
+      GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(
+      std::count(called->begin(), called->end(), "vkCreateDescriptorPool"), 2u);
+  EXPECT_EQ(
+      std::count(called->begin(), called->end(), "vkAllocateDescriptorSets"),
+      1u);
+
+  context->Shutdown();
+}
+
+TEST(DescriptorPoolRecyclerVKTest, FailedAllocationIsNotRecycled) {
+  bool fail_allocations = true;
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetAllocateDescriptorSetsCallback(
+              [&fail_allocations](VkDevice, const VkDescriptorSetAllocateInfo*,
+                                  VkDescriptorSet*) -> VkResult {
+                return fail_allocations ? VK_ERROR_OUT_OF_POOL_MEMORY
+                                        : VK_SUCCESS;
+              })
+          .Build();
+
+  {
+    // Both attempts fail, on the first pool and on its replacement. The pool
+    // is recycled when the holder goes out of scope.
+    ScopedValidationDisable disable_validation;
+    std::shared_ptr<DescriptorPoolVK> pool =
+        context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+    EXPECT_FALSE(
+        pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context).ok());
+  }
+
+  // The recycled pool must not hand out the set that was never allocated:
+  // allocating for the same pipeline key has to go to the driver again.
+  fail_allocations = false;
+  std::shared_ptr<DescriptorPoolVK> pool =
+      context->GetDescriptorPoolRecycler()->GetDescriptorPool();
+  fml::StatusOr<vk::DescriptorSet> result =
+      pool->AllocateDescriptorSets({}, /*pipeline_key=*/0, *context);
+  EXPECT_TRUE(result.ok());
+
+  std::shared_ptr<std::vector<std::string>> called =
+      GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(
+      std::count(called->begin(), called->end(), "vkAllocateDescriptorSets"),
+      3u);
+
+  context->Shutdown();
 }
 
 }  // namespace testing
