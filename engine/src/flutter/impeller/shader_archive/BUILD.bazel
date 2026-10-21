@@ -49,6 +49,7 @@ cc_library(
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/base",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )

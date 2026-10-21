@@ -236,6 +236,7 @@ flutter_cc_test(
         "//engine/src/flutter/testing",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
     ],
 )
 

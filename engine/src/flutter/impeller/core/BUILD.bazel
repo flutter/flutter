@@ -62,6 +62,7 @@ cc_library(
         "//engine/src/flutter/impeller/geometry",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )
@@ -89,6 +90,7 @@ cc_library(
         "//engine/src/flutter/impeller/renderer/testing:mocks",
         "//engine/src/flutter/testing:testing_lib",
         "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )

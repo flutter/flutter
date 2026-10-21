@@ -48,6 +48,7 @@ cc_library(
         "//engine/src/flutter/shell/platform/android/jni",
         "//engine/src/flutter/shell/platform/android/surface",
         "@abseil-cpp//absl/container:flat_hash_set",
+        "@abseil_cpp_tree//:root_includes",
         "@skia",
     ],
     alwayslink = True,

@@ -74,6 +74,7 @@ cc_library(
         "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "@abseil-cpp//absl/hash",
+        "@abseil_cpp_tree//:root_includes",
         "@skia",
     ],
     alwayslink = True,
@@ -129,6 +130,7 @@ cc_library(
         "//engine/src/flutter/impeller/testing:screenshot",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )
@@ -187,6 +189,7 @@ cc_library(
         "//engine/src/flutter/impeller/testing:screenshot",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )
@@ -259,6 +262,7 @@ cc_library(
         "//engine/src/flutter/testing:testing_lib",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )
@@ -289,6 +293,7 @@ cc_library(
         "//engine/src/flutter/testing:testing_lib",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
     ],
     alwayslink = True,
 )
