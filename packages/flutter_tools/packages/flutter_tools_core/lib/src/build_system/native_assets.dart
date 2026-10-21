@@ -7,6 +7,8 @@ import 'dart:convert' show jsonEncode;
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+import '../json_utils.dart';
+
 /// C compiler toolchain configuration for running Dart build and link hooks
 /// (`native_assets`) on an extension build target.
 ///
@@ -24,26 +26,15 @@ class ExtensionCCompilerConfig {
 
   /// Deserializes an [ExtensionCCompilerConfig] from a JSON-serializable map.
   factory ExtensionCCompilerConfig.fromJson(Map<String, Object?> json) {
+    final String? rawEnvScript = json.nullableField<String>(envScriptKey);
     return ExtensionCCompilerConfig(
-      ar: _parseAbsoluteUri(json[arKey], arKey),
-      cc: _parseAbsoluteUri(json[ccKey], ccKey),
-      ld: _parseAbsoluteUri(json[ldKey], ldKey),
-      envScript: switch (json[envScriptKey]) {
-        final String value => _parseAbsoluteUri(value, envScriptKey),
-        null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$envScriptKey": $invalid'),
-      },
-      envScriptArgs: switch (json[envScriptArgsKey]) {
-        final List<Object?> rawArgs => <String>[
-          for (final Object? item in rawArgs)
-            switch (item) {
-              final String arg => arg,
-              _ => throw ArgumentError('Invalid entry in "$envScriptArgsKey": $item'),
-            },
-        ],
-        null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$envScriptArgsKey": $invalid'),
-      },
+      ar: _parseAbsoluteUri(json.requiredField<String>(arKey), arKey),
+      cc: _parseAbsoluteUri(json.requiredField<String>(ccKey), ccKey),
+      ld: _parseAbsoluteUri(json.requiredField<String>(ldKey), ldKey),
+      envScript: rawEnvScript != null ? _parseAbsoluteUri(rawEnvScript, envScriptKey) : null,
+      envScriptArgs: json[envScriptArgsKey] != null
+          ? json.stringIterable(envScriptArgsKey).toList()
+          : null,
     );
   }
 
@@ -78,15 +69,15 @@ class ExtensionCCompilerConfig {
   /// Optional arguments passed to [envScript] on Windows.
   final List<String>? envScriptArgs;
 
-  static Uri _parseAbsoluteUri(Object? rawValue, String fieldName) {
-    if (rawValue is! String || rawValue.isEmpty) {
-      throw ArgumentError(
+  static Uri _parseAbsoluteUri(String rawValue, String fieldName) {
+    if (rawValue.isEmpty) {
+      throw FormatException(
         'Missing or invalid "$fieldName" for ExtensionCCompilerConfig: $rawValue',
       );
     }
     final Uri? uri = Uri.tryParse(rawValue);
     if (uri == null || !uri.isScheme('file') || !uri.hasAbsolutePath) {
-      throw ArgumentError('"$fieldName" must be an absolute file:// URI: $rawValue');
+      throw FormatException('"$fieldName" must be an absolute file:// URI: $rawValue');
     }
     return uri;
   }
@@ -142,24 +133,27 @@ class ExtensionNativeAssetsConfig {
 
   /// Deserializes an [ExtensionNativeAssetsConfig] from a JSON-serializable map.
   factory ExtensionNativeAssetsConfig.fromJson(Map<String, Object?> json) {
+    final String targetArchitecture = json.requiredField<String>(targetArchitectureKey);
+    if (targetArchitecture.isEmpty) {
+      throw const FormatException(
+        'Missing or invalid "$targetArchitectureKey" for ExtensionNativeAssetsConfig.',
+      );
+    }
+    final String targetOs = json.requiredField<String>(targetOsKey);
+    if (targetOs.isEmpty) {
+      throw const FormatException(
+        'Missing or invalid "$targetOsKey" for ExtensionNativeAssetsConfig.',
+      );
+    }
+    final Map<String, Object?>? rawCompilerConfig = json.nullableField<Map<String, Object?>>(
+      cCompilerConfigKey,
+    );
     return ExtensionNativeAssetsConfig(
-      targetArchitecture: switch (json[targetArchitectureKey]) {
-        final String value when value.isNotEmpty => value,
-        _ => throw ArgumentError(
-          'Missing or invalid "$targetArchitectureKey" for ExtensionNativeAssetsConfig.',
-        ),
-      },
-      targetOs: switch (json[targetOsKey]) {
-        final String value when value.isNotEmpty => value,
-        _ => throw ArgumentError(
-          'Missing or invalid "$targetOsKey" for ExtensionNativeAssetsConfig.',
-        ),
-      },
-      cCompilerConfig: switch (json[cCompilerConfigKey]) {
-        final Map<String, Object?> map => ExtensionCCompilerConfig.fromJson(map),
-        null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$cCompilerConfigKey": $invalid'),
-      },
+      targetArchitecture: targetArchitecture,
+      targetOs: targetOs,
+      cCompilerConfig: rawCompilerConfig != null
+          ? ExtensionCCompilerConfig.fromJson(rawCompilerConfig)
+          : null,
     );
   }
 

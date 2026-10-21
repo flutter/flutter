@@ -89,22 +89,40 @@ void main() {
       expect(parsed.pluginPlatformKey, isNull);
     });
 
-    test('fromJson throws ArgumentError on malformed nativeAssetsConfig or pluginPlatformKey', () {
+    test(
+      'fromJson throws FormatException on malformed nativeAssetsConfig or pluginPlatformKey',
+      () {
+        expect(
+          () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+            'name': 't',
+            'description': 'd',
+            'nativeAssetsConfig': 'not-a-map',
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+            'name': 't',
+            'description': 'd',
+            'pluginPlatformKey': 123,
+          }),
+          throwsFormatException,
+        );
+      },
+    );
+
+    test('fromJson throws FormatException when fields have invalid types', () {
       expect(
         () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          'name': 't',
-          'description': 'd',
-          'nativeAssetsConfig': 'not-a-map',
+          ExtensionBuildTarget.nameKey: 123,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(const <String, Object?>{
-          'name': 't',
-          'description': 'd',
-          'pluginPlatformKey': 123,
+          ExtensionBuildTarget.descriptionKey: false,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
     });
 
@@ -168,6 +186,21 @@ void main() {
       expect(result1, isNot(equals(result2)));
       expect(result1.hashCode, isNot(equals(result2.hashCode)));
     });
+
+    test('fromJson throws FormatException when fields have invalid types', () {
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          ExtensionBuildResult.successKey: 'yes',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          ExtensionBuildResult.errorMessageKey: 404,
+        }),
+        throwsFormatException,
+      );
+    });
   });
 
   group('ExtensionNativeAssetsConfig and ExtensionCCompilerConfig', () {
@@ -218,16 +251,16 @@ void main() {
       expect(parsed.cCompilerConfig, isNull);
     });
 
-    test('fromJson throws ArgumentError on invalid fields', () {
+    test('fromJson throws FormatException on invalid fields', () {
       expect(
         () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{'targetOs': 'linux'}),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
           'targetArchitecture': 'x64',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionNativeAssetsConfig.fromJson(const <String, Object?>{
@@ -235,7 +268,7 @@ void main() {
           'targetOs': 'linux',
           'cCompilerConfig': 'not-a-map',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
@@ -243,7 +276,7 @@ void main() {
           'cc': 'file:///usr/bin/clang',
           'ld': 'file:///usr/bin/ld.lld',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
@@ -251,7 +284,7 @@ void main() {
           'cc': 'file:///usr/bin/clang',
           'ld': 'file:///usr/bin/ld.lld',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionCCompilerConfig.fromJson(const <String, Object?>{
@@ -260,7 +293,7 @@ void main() {
           'ld': 'file:///usr/bin/ld.lld',
           'envScriptArgs': <Object?>[123],
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
     });
 
@@ -320,26 +353,26 @@ void main() {
 
       final List<ExtensionPlugin> list = ExtensionPlugin.listFromJson(<Object?>[roundTripped]);
       expect(list, equals(<ExtensionPlugin>[plugin]));
-      expect(() => ExtensionPlugin.listFromJson(null), throwsArgumentError);
-      expect(() => ExtensionPlugin.listFromJson('invalid'), throwsArgumentError);
-      expect(() => ExtensionPlugin.listFromJson(<Object?>['not-a-map']), throwsArgumentError);
+      expect(() => ExtensionPlugin.listFromJson(null), throwsFormatException);
+      expect(() => ExtensionPlugin.listFromJson('invalid'), throwsFormatException);
+      expect(() => ExtensionPlugin.listFromJson(<Object?>['not-a-map']), throwsFormatException);
     });
 
-    test('fromJson throws ArgumentError on missing or invalid fields', () {
-      expect(() => ExtensionPlugin.fromJson(const <String, Object?>{}), throwsArgumentError);
+    test('fromJson throws FormatException on missing or invalid fields', () {
+      expect(() => ExtensionPlugin.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
         () => ExtensionPlugin.fromJson(const <String, Object?>{
           'name': 'my_plugin',
           'path': 'file:///pub-cache/my_plugin',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionPlugin.fromJson(const <String, Object?>{
           'name': 'my_plugin',
           'path': 'relative/my_plugin/',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionPlugin.fromJson(const <String, Object?>{
@@ -347,7 +380,7 @@ void main() {
           'path': 'file:///pub-cache/my_plugin/',
           'configuration': 'not-a-map',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
     });
   });

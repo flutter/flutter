@@ -11,10 +11,10 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
+import '../../context_runner.dart' show GlobalToolContext;
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show os;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/targets.dart' show parseNativeOS;
 import '../../project.dart';
@@ -440,13 +440,7 @@ abstract class AotSnapshotBase extends Target {
     // TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
     // See: https://github.com/flutter/flutter/issues/190897
     final String? windowsLinkerPath = targetPlatform == TargetPlatform.windows_x64
-        ? VisualStudio(
-            fileSystem: environment.fileSystem,
-            processManager: environment.processManager,
-            platform: environment.platform,
-            logger: environment.logger,
-            osUtils: globals.os,
-          ).linkPath
+        ? VisualStudio(toolContext: const GlobalToolContext()).linkPath
         : null;
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,

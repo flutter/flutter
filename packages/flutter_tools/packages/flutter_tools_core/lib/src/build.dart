@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'build_system/native_assets.dart';
+import 'json_utils.dart';
 
 final _upperRegex = RegExp(r'[A-Z]');
 
@@ -90,25 +91,15 @@ class ExtensionPlugin {
 
   /// Deserializes an [ExtensionPlugin] from a JSON-serializable map.
   factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
-    final String name = switch (json[nameKey]) {
-      final String value when value.isNotEmpty => value,
-      final Object? invalid => throw ArgumentError(
-        'Missing or invalid "$nameKey" for ExtensionPlugin: $invalid',
-      ),
-    };
-    final Uri path = switch (json[pathKey]) {
-      final String value when value.isNotEmpty => _parseDirectoryUri(value, pathKey),
-      final Object? invalid => throw ArgumentError(
-        'Missing or invalid "$pathKey" for ExtensionPlugin: $invalid',
-      ),
-    };
-    final Map<String, Object?> configuration = switch (json[configurationKey]) {
-      final Map<String, Object?> value => value,
-      null => const <String, Object?>{},
-      final Object? invalid => throw ArgumentError(
-        'Invalid "$configurationKey" for ExtensionPlugin: $invalid',
-      ),
-    };
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Missing or invalid "$nameKey" for ExtensionPlugin.');
+    }
+    final Uri path = _parseDirectoryUri(json.requiredField<String>(pathKey), pathKey);
+    final Map<String, Object?> configuration = json.optionalField<Map<String, Object?>>(
+      configurationKey,
+      defaultValue: const <String, Object?>{},
+    );
     return ExtensionPlugin(name: name, path: path, configuration: configuration);
   }
 
@@ -124,7 +115,7 @@ class ExtensionPlugin {
   static Uri _parseDirectoryUri(String rawUri, String fieldName) {
     final Uri? uri = Uri.tryParse(rawUri);
     if (uri == null || !uri.isScheme('file') || !uri.hasAbsolutePath || !uri.path.endsWith('/')) {
-      throw ArgumentError(
+      throw FormatException(
         '"$fieldName" must be an absolute file:// directory URI ending with "/": $rawUri',
       );
     }
@@ -138,13 +129,13 @@ class ExtensionPlugin {
         for (final Object? item in list)
           switch (item) {
             final Map<String, Object?> map => ExtensionPlugin.fromJson(map),
-            final Object? invalid => throw ArgumentError(
+            final Object? invalid => throw FormatException(
               'Invalid entry in ExtensionPlugin list: $invalid',
             ),
           },
       ];
     }
-    throw ArgumentError('Invalid ExtensionPlugin list: $rpcResult');
+    throw FormatException('Invalid ExtensionPlugin list: $rpcResult');
   }
 
   /// The package name of the plugin.
@@ -192,25 +183,16 @@ class ExtensionBuildTarget {
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
+    final Map<String, Object?>? rawNativeAssetsConfig = json.nullableField<Map<String, Object?>>(
+      nativeAssetsConfigKey,
+    );
     return ExtensionBuildTarget(
-      description: switch (json[descriptionKey]) {
-        final String value => value,
-        _ => '',
-      },
-      name: switch (json[nameKey]) {
-        final String value => value,
-        _ => '',
-      },
-      nativeAssetsConfig: switch (json[nativeAssetsConfigKey]) {
-        final Map<String, Object?> map => ExtensionNativeAssetsConfig.fromJson(map),
-        null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$nativeAssetsConfigKey": $invalid'),
-      },
-      pluginPlatformKey: switch (json[pluginPlatformKeyKey]) {
-        final String value => value,
-        null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$pluginPlatformKeyKey": $invalid'),
-      },
+      description: json.optionalField<String>(descriptionKey, defaultValue: ''),
+      name: json.optionalField<String>(nameKey, defaultValue: ''),
+      nativeAssetsConfig: rawNativeAssetsConfig != null
+          ? ExtensionNativeAssetsConfig.fromJson(rawNativeAssetsConfig)
+          : null,
+      pluginPlatformKey: json.nullableField<String>(pluginPlatformKeyKey),
     );
   }
 
@@ -287,14 +269,8 @@ class ExtensionBuildResult {
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
     return ExtensionBuildResult(
-      success: switch (json[successKey]) {
-        final bool value => value,
-        _ => false,
-      },
-      errorMessage: switch (json[errorMessageKey]) {
-        final String value => value,
-        _ => null,
-      },
+      success: json.optionalField<bool>(successKey, defaultValue: false),
+      errorMessage: json.nullableField<String>(errorMessageKey),
     );
   }
 
