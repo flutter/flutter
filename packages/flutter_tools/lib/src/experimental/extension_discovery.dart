@@ -27,20 +27,16 @@ class ExtensionConnection {
     required this._receivePort,
   }) {
     _errorPort.handler = (Object? error) {
-      if (_isDisposed) {
-        return;
-      }
       final Object? message = error is List && error.isNotEmpty ? error[0] : error;
-      _logger.printTrace('Extension isolate "$extensionName" unhandled error: $message');
-      _receivePort.close();
+      _logger.printError('Extension isolate "$extensionName" unhandled error: $message');
     };
 
     _exitPort.handler = (Object? _) {
-      if (_isDisposed) {
-        return;
-      }
       _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
+      _errorPort.close();
+      _exitPort.close();
       _receivePort.close();
+      unawaited(_closeNotificationControllers());
     };
   }
 
@@ -69,23 +65,24 @@ class ExtensionConnection {
     if (_isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
-    final StreamController<Map<String, Object?>> controller = _notificationControllers.putIfAbsent(
-      method,
-      () {
-        final newController = StreamController<Map<String, Object?>>.broadcast();
-        _peer.registerMethod(method, (json_rpc.Parameters params) {
-          if (newController.isClosed) {
-            return;
-          }
-          final Object? rawValue = params.value;
-          final Map<String, Object?> payload = rawValue is Map<String, Object?>
-              ? rawValue
-              : (rawValue is Map ? rawValue.cast<String, Object?>() : const <String, Object?>{});
-          newController.add(payload);
-        });
-        return newController;
-      },
-    );
+    final StreamController<Map<String, Object?>>
+    controller = _notificationControllers.putIfAbsent(method, () {
+      final newController = StreamController<Map<String, Object?>>.broadcast();
+      _peer.registerMethod(method, (json_rpc.Parameters params) {
+        if (newController.isClosed) {
+          return;
+        }
+        final Object? rawValue = params.value;
+        if (rawValue is! Map<String, Object?>) {
+          _logger.printWarning(
+            'Extension "$extensionName" sent malformed notification for "$method": expected Map<String, Object?>.',
+          );
+          return;
+        }
+        newController.add(rawValue);
+      });
+      return newController;
+    });
     return controller.stream;
   }
 
@@ -197,6 +194,14 @@ class ExtensionConnection {
     }
   }
 
+  Future<void> _closeNotificationControllers() async {
+    for (final StreamController<Map<String, Object?>> controller
+        in _notificationControllers.values) {
+      await controller.close();
+    }
+    _notificationControllers.clear();
+  }
+
   /// Disposes the extension isolate connection.
   Future<void> dispose() async {
     if (_isDisposed) {
@@ -207,11 +212,7 @@ class ExtensionConnection {
     _errorPort.close();
     _exitPort.close();
     _receivePort.close();
-    for (final StreamController<Map<String, Object?>> controller
-        in _notificationControllers.values) {
-      await controller.close();
-    }
-    _notificationControllers.clear();
+    await _closeNotificationControllers();
     try {
       await _peer.close();
     } on Object catch (error) {
