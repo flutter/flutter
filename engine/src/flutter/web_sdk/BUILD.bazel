@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/web_sdk/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: flutter_web_sdk_archive.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "build_directory_tree", "zip_bundle_from_file")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/web_sdk:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "ddc_sdk", "sdk_rewriter", "web_platform_dill", "web_sdk_root", "web_ui_ui_web_with_output")
 
@@ -135,6 +135,42 @@ cc_library(
         ":flutter_ddc_canary_sdk",
         ":flutter_ddc_stable_sdk",
     ],
+)
+
+# `files`: what the deps place under flutter_web_sdk in the build directory, at
+# its path below it.
+build_directory_tree(
+    name = "flutter_web_sdk_archive_tree",
+    srcs = [
+        ":flutter_ddc_modules",
+        ":flutter_platform_dills",
+        ":skwasm_impl_library",
+        ":skwasm_stub_library",
+        ":web_engine_library",
+        ":web_locale_keymap_library",
+        ":web_test_fonts_library",
+        ":web_ui_library",
+        ":web_ui_library_sources",
+        ":web_ui_ui_web",
+        "//engine/src/flutter/lib/web_ui/flutter_js",
+    ] + select({
+        "@platforms//os:emscripten": [
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_chromium_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:canvaskit_webparagraph_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:skwasm_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:skwasm_heavy_group",  # is_wasm
+            "//engine/src/flutter/third_party/canvaskit:wimp_group",  # is_wasm
+        ],
+        "//conditions:default": [],
+    }),
+    under = "flutter_web_sdk",
+)
+
+zip_bundle_from_file(
+    name = "flutter_web_sdk_archive",
+    output = "flutter-web-sdk.zip",
+    trees = [":flutter_web_sdk_archive_tree"],
 )
 
 # What GN has no words for; maintained in the converter's manifest

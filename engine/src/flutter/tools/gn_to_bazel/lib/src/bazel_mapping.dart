@@ -1423,6 +1423,20 @@ final class TemplateArgument {
   final String? appliedUnder;
 }
 
+/// zip_bundle's and zip_bundle_from_file's arguments.
+const Map<String, TemplateArgument> _zipBundleArguments = <String, TemplateArgument>{
+  'output': TemplateArgument('output', TemplateArgumentKind.scalar),
+  'files': TemplateArgument('files', TemplateArgumentKind.archiveEntries),
+  // The deps carry no dependency of their own here (the entries' labels
+  // do), except where the entries are a directory of the build directory
+  // (build_directory_tree), whose srcs they become.
+  'deps': TemplateArgument('deps', TemplateArgumentKind.ignored),
+  'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+  // The invocations' helpers for their names and paths (`exe`, `prefix`,
+  // `zip_out_dir`) are read by the strings of their own blocks, which
+  // is how the converter tells them from arguments (GnTarget.readVariables).
+};
+
 /// The arguments of a link in a wasm toolchain (wasm_lib, and an executable
 /// with `output_extension = "js"`), shared by their mappings.
 const Map<String, TemplateArgument> _wasmLinkArguments = <String, TemplateArgument>{
@@ -1706,15 +1720,15 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   'zip_bundle': TemplateMapping(
     '//engine/src/flutter/build/bazel:zip_bundle.bzl',
     'zip_bundle',
-    <String, TemplateArgument>{
-      'output': TemplateArgument('output', TemplateArgumentKind.scalar),
-      'files': TemplateArgument('files', TemplateArgumentKind.archiveEntries),
-      'deps': TemplateArgument('deps', TemplateArgumentKind.ignored),
-      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
-      // The invocations' helpers for their names and paths (`exe`, `prefix`,
-      // `zip_out_dir`) are read by the strings of their own blocks, which
-      // is how the converter tells them from arguments (GnTarget.readVariables).
-    },
+    _zipBundleArguments,
+    files: true,
+  ),
+  // zip_bundle.gni's other template: the same archive from a file listing
+  // the entries (the web SDK's), without zip_bundle's license file.
+  'zip_bundle_from_file': TemplateMapping(
+    '//engine/src/flutter/build/bazel:zip_bundle.bzl',
+    'zip_bundle_from_file',
+    _zipBundleArguments,
     files: true,
   ),
   // web_sdk.gni's wrapper of sdk_rewriter for dart:ui_web: the macro spells
