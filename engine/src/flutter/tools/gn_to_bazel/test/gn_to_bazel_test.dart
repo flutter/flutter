@@ -539,8 +539,25 @@ source_set("x") {
       final Assumptions host = linuxHostAssumptions();
       final Assumptions generation = generationAssumptions();
       for (final String name in generation.names) {
-        expect(generation[name], host[name], reason: name);
+        final GnValue? value = generation[name];
+        if (value is GnConditionValue) {
+          // An argument the web build passes differently: a formula over
+          // the OS that comes out as the host's value on the host.
+          final GnValue? expected = host[name];
+          expect(expected, isA<GnBoolValue>(), reason: name);
+          expect(
+            host.apply(value.condition),
+            ConditionConstant((expected! as GnBoolValue).value),
+            reason: name,
+          );
+          continue;
+        }
+        expect(value, host[name], reason: name);
       }
+      expect(
+        generation.names.where((String n) => generation[n] is GnConditionValue).toList()..sort(),
+        perTargetOsArguments.keys.toList()..sort(),
+      );
       expect(host.names.where((String name) => generation[name] == null).toList()..sort(), <String>[
         'build_engine_artifacts',
         'current_cpu',
@@ -561,6 +578,12 @@ source_set("x") {
         'shell_enable_metal',
         'shell_enable_software',
         'shell_enable_vulkan',
+        // skia.gni's defaults give both builds' values: derivations.
+        'skia_gl_standard',
+        'skia_use_gl',
+        'skia_use_rust_png_decode',
+        'skia_use_rust_png_encode',
+        'skia_use_wuffs',
         'target_cpu',
         'target_os',
         'target_platform_name',
