@@ -277,7 +277,13 @@ void main() {
       final service = _DummyService('test', 'ping');
       expect(
         () => service.sendNotification('test.event', const <String, Object?>{}),
-        throwsStateError,
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('is not attached to an active peer'),
+          ),
+        ),
       );
     });
 
@@ -368,10 +374,22 @@ void main() {
         );
         addTearDown(connection.dispose);
 
+        final Stream<Map<String, Object?>> notificationStream = connection.onNotification(
+          'notify.customEvent',
+        );
+        final Future<void> streamDone = expectLater(notificationStream, emitsDone);
+
         await expectLater(
           connection.sendRequest('exit.triggerExit', timeout: null),
-          throwsA(isA<StateError>()),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('The client closed with pending request "exit.triggerExit"'),
+            ),
+          ),
         );
+        await streamDone;
       },
     );
 
@@ -385,8 +403,15 @@ void main() {
 
       await expectLater(
         connection.sendRequest('error.triggerUnhandledError', timeout: null),
-        throwsA(isA<StateError>()),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('The client closed with pending request "error.triggerUnhandledError"'),
+          ),
+        ),
       );
+      expect(logger.errorText, contains('Simulated unhandled async error'));
     });
   });
 }
