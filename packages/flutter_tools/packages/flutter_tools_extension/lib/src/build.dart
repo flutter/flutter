@@ -240,13 +240,8 @@ abstract base class BuildService extends ToolExtensionService {
         .toList();
   }
 
-  static String _requireString(Map<String, Object?> params, String key) => switch (params[key]) {
-    final String value => value,
-    _ => throw RpcException.invalidParams('Missing or invalid "$key" parameter.'),
-  };
-
   static Uri _requireAbsoluteDirectoryUri(Map<String, Object?> params, String key) {
-    final String raw = _requireString(params, key);
+    final String raw = params.requiredField<String>(key);
     final Uri? uri = Uri.tryParse(raw);
     if (uri == null || !uri.hasAbsolutePath) {
       throw RpcException.invalidParams('Missing or invalid "$key" parameter.');
@@ -257,19 +252,26 @@ abstract base class BuildService extends ToolExtensionService {
   static (String targetName, ExtensionBuildContext context) _parseBuildRequest(
     Map<String, Object?> params,
   ) {
-    final String targetName = _requireString(params, targetNameParam);
-    final Uri projectRootUri = _requireAbsoluteDirectoryUri(params, projectRootParam);
-    final String mainPath = _requireString(params, mainPathParam);
-    final String buildMode = _requireString(params, buildModeParam);
-    final Uri outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
-    final Uri buildDirUri = _requireAbsoluteDirectoryUri(params, buildDirParam);
-    final Uri flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
-    final Map<String, Object?> rawResolvedArtifacts = switch (params[resolvedArtifactsParam]) {
-      final Map<String, Object?> value => value,
-      _ => throw RpcException.invalidParams(
-        'Missing or invalid "$resolvedArtifactsParam" parameter.',
-      ),
-    };
+    final String targetName;
+    final Uri projectRootUri;
+    final String mainPath;
+    final String buildMode;
+    final Uri outputDirUri;
+    final Uri buildDirUri;
+    final Uri flutterRootUri;
+    final Map<String, Object?> rawResolvedArtifacts;
+    try {
+      targetName = params.requiredField<String>(targetNameParam);
+      projectRootUri = _requireAbsoluteDirectoryUri(params, projectRootParam);
+      mainPath = params.requiredField<String>(mainPathParam);
+      buildMode = params.requiredField<String>(buildModeParam);
+      outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
+      buildDirUri = _requireAbsoluteDirectoryUri(params, buildDirParam);
+      flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
+      rawResolvedArtifacts = params.requiredField<Map<String, Object?>>(resolvedArtifactsParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
 
     final BuildMode mode;
     try {
@@ -279,11 +281,12 @@ abstract base class BuildService extends ToolExtensionService {
     }
 
     final resolvedArtifacts = <String, String>{};
-    for (final MapEntry(:String key, :Object? value) in rawResolvedArtifacts.entries) {
-      if (value is! String) {
-        throw RpcException.invalidParams('Missing or invalid "$resolvedArtifactsParam" parameter.');
+    try {
+      for (final String key in rawResolvedArtifacts.keys) {
+        resolvedArtifacts[key] = rawResolvedArtifacts.requiredField<String>(key);
       }
-      resolvedArtifacts[key] = value;
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams('Invalid "$resolvedArtifactsParam" parameter: ${e.message}');
     }
 
     final context = ExtensionBuildContext(

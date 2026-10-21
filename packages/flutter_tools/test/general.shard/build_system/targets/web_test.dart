@@ -1807,6 +1807,7 @@ _flutter.loader.load();
       );
       final String result = generateServiceWorker(
         fileGeneratorsPath,
+        fileSystem: environment.fileSystem,
         serviceWorkerStrategy: ServiceWorkerStrategy.none,
       );
 

@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'build_system/constants.dart';
 import 'build_system/source.dart';
+import 'json_utils.dart';
 
 export 'build_system/constants.dart';
 export 'build_system/source.dart';
@@ -97,43 +98,16 @@ class ExtensionBuildTarget {
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
     return ExtensionBuildTarget(
-      description: switch (json[descriptionKey]) {
-        final String value => value,
-        final Object? invalid => throw ArgumentError('Invalid "$descriptionKey": $invalid'),
+      description: json.requiredField<String>(descriptionKey),
+      name: json.requiredField<String>(nameKey),
+      outputDir: json.requiredField<String>(outputDirKey),
+      targetPlatform: json.requiredField<String>(targetPlatformKey),
+      artifacts: <ExtensionArtifact>{
+        for (final String name in json.stringIterable(artifactsKey)) ExtensionArtifact(name),
       },
-      name: switch (json[nameKey]) {
-        final String value => value,
-        final Object? invalid => throw ArgumentError('Invalid "$nameKey": $invalid'),
-      },
-      targetPlatform: switch (json[targetPlatformKey]) {
-        final String value => value,
-        final Object? invalid => throw ArgumentError('Invalid "$targetPlatformKey": $invalid'),
-      },
-      artifacts: switch (json[artifactsKey]) {
-        final List<Object?> rawArtifacts => <ExtensionArtifact>{
-          for (final item in rawArtifacts)
-            switch (item) {
-              final String name => ExtensionArtifact(name),
-              _ => throw ArgumentError('Invalid entry in "$artifactsKey": $item'),
-            },
-        },
-        null => const <ExtensionArtifact>{},
-        final Object? invalid => throw ArgumentError('Invalid "$artifactsKey": $invalid'),
-      },
-      hostArtifacts: switch (json[hostArtifactsKey]) {
-        final List<Object?> rawHostArtifacts => <ExtensionHostArtifact>{
-          for (final item in rawHostArtifacts)
-            switch (item) {
-              final String name => ExtensionHostArtifact(name),
-              _ => throw ArgumentError('Invalid entry in "$hostArtifactsKey": $item'),
-            },
-        },
-        null => const <ExtensionHostArtifact>{},
-        final Object? invalid => throw ArgumentError('Invalid "$hostArtifactsKey": $invalid'),
-      },
-      outputDir: switch (json[outputDirKey]) {
-        final String value => value,
-        final Object? invalid => throw ArgumentError('Invalid "$outputDirKey": $invalid'),
+      hostArtifacts: <ExtensionHostArtifact>{
+        for (final String name in json.stringIterable(hostArtifactsKey))
+          ExtensionHostArtifact(name),
       },
     );
   }
@@ -253,52 +227,29 @@ class ExtensionAssembleTarget {
   /// Deserializes an [ExtensionAssembleTarget] from a JSON-serializable map.
   factory ExtensionAssembleTarget.fromJson(Map<String, Object?> json) {
     return ExtensionAssembleTarget(
-      description: switch (json[descriptionKey]) {
-        final String value => value,
-        _ => '',
-      },
-      name: switch (json[nameKey]) {
-        final String value => value,
-        _ => '',
-      },
-      targetPlatform: switch (json[targetPlatformKey]) {
-        final String value => value,
-        _ => '',
-      },
-      dependencies: switch (json[dependenciesKey]) {
-        final List<Object?> rawDependencies => <String>[
-          for (final item in rawDependencies)
-            switch (item) {
-              final String dep => dep,
-              _ => throw ArgumentError('Invalid entry in "$dependenciesKey": $item'),
-            },
-        ],
-        null => const <String>[],
-        final Object? invalid => throw ArgumentError('Invalid "$dependenciesKey": $invalid'),
-      },
-      inputs: switch (json[inputsKey]) {
-        final List<Object?> rawInputs => <ExtensionSource>[
-          for (final item in rawInputs)
-            switch (item) {
-              final Map<String, Object?> map => ExtensionSource.fromJson(map),
-              _ => throw ArgumentError('Invalid entry in "$inputsKey": $item'),
-            },
-        ],
-        null => const <ExtensionSource>[],
-        final Object? invalid => throw ArgumentError('Invalid "$inputsKey": $invalid'),
-      },
-      outputs: switch (json[outputsKey]) {
-        final List<Object?> rawOutputs => <ExtensionSource>[
-          for (final item in rawOutputs)
-            switch (item) {
-              final Map<String, Object?> map => ExtensionSource.fromJson(map),
-              _ => throw ArgumentError('Invalid entry in "$outputsKey": $item'),
-            },
-        ],
-        null => const <ExtensionSource>[],
-        final Object? invalid => throw ArgumentError('Invalid "$outputsKey": $invalid'),
-      },
+      description: json.requiredField<String>(descriptionKey),
+      name: json.requiredField<String>(nameKey),
+      targetPlatform: json.requiredField<String>(targetPlatformKey),
+      dependencies: json.stringIterable(dependenciesKey).toList(),
+      inputs: _parseSources(json, inputsKey),
+      outputs: _parseSources(json, outputsKey),
     );
+  }
+
+  static List<ExtensionSource> _parseSources(Map<String, Object?> json, String key) {
+    final List<Object?> rawSources = json.optionalField<List<Object?>>(
+      key,
+      defaultValue: const <Object?>[],
+    );
+    return <ExtensionSource>[
+      for (final Object? item in rawSources)
+        if (item case final Map<String, Object?> map)
+          ExtensionSource.fromJson(map)
+        else
+          throw FormatException(
+            'Invalid "$key" element: expected Map<String, Object?>, got ${item.runtimeType}.',
+          ),
+    ];
   }
 
   /// Map key for [dependencies].
@@ -400,14 +351,8 @@ class ExtensionBuildResult {
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
     return ExtensionBuildResult(
-      success: switch (json[successKey]) {
-        final bool value => value,
-        _ => false,
-      },
-      errorMessage: switch (json[errorMessageKey]) {
-        final String value => value,
-        _ => null,
-      },
+      success: json.optionalField<bool>(successKey, defaultValue: false),
+      errorMessage: json.nullableField<String>(errorMessageKey),
     );
   }
 
