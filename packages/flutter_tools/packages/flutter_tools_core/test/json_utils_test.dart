@@ -227,9 +227,7 @@ void main() {
         };
         expect(
           () => json.stringMap(fieldKey),
-          throwsFormatExceptionWith(
-            'Invalid "$fieldKey" value for "key": expected String, got int.',
-          ),
+          throwsFormatExceptionWith('Invalid "key" value: expected String, got int.'),
         );
       });
     });

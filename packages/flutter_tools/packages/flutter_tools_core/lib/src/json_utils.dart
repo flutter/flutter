@@ -78,13 +78,11 @@ extension ExtensionJsonParsing on Map<String, Object?> {
   /// `Map<String, Object?>`, or contains non-[String] values.
   Map<String, String> stringMap(String key) {
     return <String, String>{
-      for (final MapEntry(key: entryKey, value: entryValue) in requiredField<Map<String, Object?>>(
-        key,
-      ).entries)
-        entryKey: switch (entryValue) {
+      for (final MapEntry(:key, :value) in requiredField<Map<String, Object?>>(key).entries)
+        key: switch (value) {
           final String v => v,
           _ => throw FormatException(
-            'Invalid "$key" value for "$entryKey": expected String, got ${entryValue.runtimeType}.',
+            'Invalid "$key" value: expected String, got ${value.runtimeType}.',
           ),
         },
     };
