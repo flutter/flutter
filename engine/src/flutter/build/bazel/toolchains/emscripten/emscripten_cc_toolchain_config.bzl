@@ -187,6 +187,45 @@ def _impl(ctx):
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("opt", _OPT_COMPILE_FLAGS + _defines(_OPT_DEFINES)),
+        # The wasm toolchains' arguments that are compiler flags in GN
+        # (//build/config/compiler:compiler under is_wasm, :optimize), each a
+        # feature a variant's platform turns on (third_party/canvaskit's
+        # platforms carry `--features=...` among their flags, as GN's
+        # toolchains carry extra_toolchain_args). wasm_use_workers: the Wasm
+        # Workers API on every compile and link. wasm_prioritize_size: -Oz
+        # for the optimized build's -O3, and on the link line, after the
+        # mode's flags so that the compiler takes it.
+        feature(
+            name = "wasm_use_workers",
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES + CC_LINK_EXECUTABLE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-sWASM_WORKERS=1"])],
+                ),
+            ],
+        ),
+        feature(
+            name = "wasm_prioritize_size",
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES + CC_LINK_EXECUTABLE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-Oz"])],
+                    with_features = [with_feature_set(features = ["opt"])],
+                ),
+            ],
+        ),
+        # enable_lto: -flto on the optimized build's compiles and link
+        # (//build/config/compiler:optimize's lto_flags, under is_wasm).
+        feature(
+            name = "lto",
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES + CC_LINK_EXECUTABLE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-flto"])],
+                    with_features = [with_feature_set(features = ["opt"])],
+                ),
+            ],
+        ),
         _flag_feature("flutter_c_flags", [ACTION_NAMES.c_compile], _WASM_C_FLAGS),
         _flag_feature("flutter_cxx_flags", ALL_CPP_COMPILE_ACTION_NAMES, _WASM_CXX_FLAGS),
         # A target's copts (Bazel's own feature, defined here so that it
