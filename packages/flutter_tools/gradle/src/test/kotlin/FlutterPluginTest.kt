@@ -830,6 +830,7 @@ class FlutterPluginTest {
         every { project.rootProject } returns project
         every { project.state.failure as Throwable? } returns null
         every { project.configurations.named("api") } returns mockk()
+        every { project.gradle.gradleVersion } returns DependencyVersionChecker.warnGradleVersion.toString()
 
         val flutterExtension = FlutterExtension()
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
@@ -901,6 +902,9 @@ class FlutterPluginTest {
     private fun setupMockComponentsExtension(project: Project): AndroidComponentsExtension<Any, VariantBuilder, Variant> {
         val mockAndroidComponentsExtension =
             mockk<AndroidComponentsExtension<Any, VariantBuilder, Variant>>(relaxed = true)
+        every {
+            mockAndroidComponentsExtension.pluginVersion
+        } returns DependencyVersionChecker.warnAGPVersion
         every {
             project.extensions.getByType(AndroidComponentsExtension::class.java)
         } returns (mockAndroidComponentsExtension as AndroidComponentsExtension<*, *, *>)
