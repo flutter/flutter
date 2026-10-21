@@ -13,15 +13,16 @@ import '../device.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand({required ToolContext toolContext, required super.verboseHelp})
-    : super(toolContext: toolContext) {
-    addBuildModeFlags(verboseHelp: verboseHelp);
+  InstallCommand({required ToolContext super.toolContext, required super.verboseHelp}) {
     requiresPubspecYaml();
-    usesApplicationBinaryOption();
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
-    usesDeviceUserOption();
-    usesFlavorOption();
+    registerOptionBundles(const <OptionBundle>[
+      BuildModeOptionsBundle(),
+      DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.useApplicationBinary,
+      BuildInfoOptions.flavor,
+    ], verboseHelp: verboseHelp);
     argParser.addFlag(
       'uninstall-only',
       help: 'Uninstall the app if already on the device. Skip install.',

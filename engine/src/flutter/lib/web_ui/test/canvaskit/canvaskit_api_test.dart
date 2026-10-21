@@ -403,9 +403,8 @@ return u_color;
     uniformData[2] = 0.0;
     uniformData[3] = 1.0;
 
-    final SkShader? shaderWithUniform = MakeRuntimeEffect(
-      kSkSlProgramWithUniforms,
-    )!.makeShader(uniforms);
+    final SkShader? shaderWithUniform = MakeRuntimeEffect(kSkSlProgramWithUniforms)!
+        .makeShader(uniforms);
 
     expect(shaderWithUniform, isNotNull);
   });
@@ -1406,17 +1405,17 @@ void _canvasTests() {
   });
 
   test('drawParagraph', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
+    final builder = EngineParagraphBuilder(EngineParagraphStyle());
     builder.addText('Hello');
-    final CkParagraph paragraph = builder.build();
+    final EngineParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));
-    canvas.drawParagraph(paragraph.skiaObject, 10, 20);
+    canvas.drawParagraph((paragraph.backendParagraph as CkParagraph).skiaObject, 10, 20);
   });
 
-  test('Paragraph converts caret position to charactor position', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
+  test('Paragraph converts caret position to character position', () {
+    final builder = EngineParagraphBuilder(EngineParagraphStyle());
     builder.addText('Hello there');
-    final CkParagraph paragraph = builder.build();
+    final EngineParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));
     ui.TextRange range = paragraph.getWordBoundary(
       const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream),
@@ -1430,9 +1429,9 @@ void _canvasTests() {
   });
 
   test('Paragraph dispose', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
+    final builder = EngineParagraphBuilder(EngineParagraphStyle());
     builder.addText('Hello');
-    final CkParagraph paragraph = builder.build();
+    final EngineParagraph paragraph = builder.build();
 
     paragraph.dispose();
     expect(paragraph.debugDisposed, true);
@@ -1745,49 +1744,41 @@ void _paragraphTests() {
     );
   });
 
-  test(
-    'MakeOnScreenGLSurface test',
-    () {
-      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
-      final WebGLContext gl = canvas.getGlContext(webGLVersion);
-      final int sampleCount = gl.getParameter(gl.samples);
-      final int stencilBits = gl.getParameter(gl.stencilBits);
+  test('MakeOnScreenGLSurface test', () {
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+    final WebGLContext gl = canvas.getGlContext(webGLVersion);
+    final int sampleCount = gl.getParameter(gl.samples);
+    final int stencilBits = gl.getParameter(gl.stencilBits);
 
-      final double glContext = canvasKit.GetWebGLContext(
-        canvas,
-        SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
-      );
-      final SkGrContext? grContext = canvasKit.MakeGrContext(glContext);
-      final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
-        grContext!,
-        100,
-        100,
-        SkColorSpaceSRGB,
-        sampleCount,
-        stencilBits,
-      );
+    final double glContext = canvasKit.GetWebGLContext(
+      canvas,
+      SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
+    );
+    final SkGrContext? grContext = canvasKit.MakeGrContext(glContext);
+    final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
+      grContext!,
+      100,
+      100,
+      SkColorSpaceSRGB,
+      sampleCount,
+      stencilBits,
+    );
 
-      expect(skSurface, isNotNull);
-    },
-    skip: isFirefox,
-  ); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
+    expect(skSurface, isNotNull);
+  }, skip: isFirefox); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
 
-  test(
-    'MakeRenderTarget test',
-    () {
-      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+  test('MakeRenderTarget test', () {
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
 
-      final int glContext = canvasKit.GetWebGLContext(
-        canvas,
-        SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
-      ).toInt();
-      final SkGrContext? grContext = canvasKit.MakeGrContext(glContext.toDouble());
-      final SkSurface? surface = canvasKit.MakeRenderTarget(grContext!, 1, 1);
+    final int glContext = canvasKit.GetWebGLContext(
+      canvas,
+      SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
+    ).toInt();
+    final SkGrContext? grContext = canvasKit.MakeGrContext(glContext.toDouble());
+    final SkSurface? surface = canvasKit.MakeRenderTarget(grContext!, 1, 1);
 
-      expect(surface, isNotNull);
-    },
-    skip: isFirefox,
-  ); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
+    expect(surface, isNotNull);
+  }, skip: isFirefox); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
 
   group('getCanvasKitJsFileNames', () {
     JSAny? oldV8BreakIterator = v8BreakIterator;

@@ -300,6 +300,7 @@ TEST(CommandLineTest, OddArguments) {
     EXPECT_EQ(std::string(), cl.argv0());
     std::vector<CommandLine::Option> expected_options = {
         CommandLine::Option("flag", "value")};
+    EXPECT_EQ(expected_options, cl.options());
     std::vector<std::string> expected_positional_args = {"--not-a-flag", "arg",
                                                          "--"};
     EXPECT_EQ(expected_positional_args, cl.positional_args());
@@ -313,6 +314,7 @@ TEST(CommandLineTest, MultipleOccurrencesOfOption) {
       CommandLine::Option("flag1", "value1"),
       CommandLine::Option("flag2", "value2"),
       CommandLine::Option("flag1", "value3")};
+  EXPECT_EQ(expected_options, cl.options());
   EXPECT_EQ("value3", cl.GetOptionValueWithDefault("flag1", "nope"));
   EXPECT_EQ("value2", cl.GetOptionValueWithDefault("flag2", "nope"));
   std::vector<std::string_view> values = cl.GetOptionValues("flag1");

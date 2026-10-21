@@ -171,16 +171,30 @@ void Rasterizer::DisableThreadMergerIfNeeded() {
 }
 
 void Rasterizer::NotifyLowMemoryWarning() const {
-#if !SLIMPELLER
+  ClearRenderTargetCache();
+}
+
+void Rasterizer::ClearRenderTargetCache() const {
   if (!surface_) {
     FML_DLOG(INFO)
-        << "Rasterizer::NotifyLowMemoryWarning called with no surface.";
+        << "Rasterizer::ClearRenderTargetCache called with no surface.";
     return;
   }
+#if IMPELLER_SUPPORTS_RENDERING
+  if (auto aiks_context = surface_->GetAiksContext()) {
+    auto context_switch = surface_->MakeRenderContextCurrent();
+    if (context_switch->GetResult()) {
+      aiks_context->ClearRenderTargetCache();
+      aiks_context->ClearCachedTextures();
+    }
+    return;
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+#if !SLIMPELLER
   auto context = surface_->GetContext();
   if (!context) {
     FML_DLOG(INFO)
-        << "Rasterizer::NotifyLowMemoryWarning called with no GrContext.";
+        << "Rasterizer::ClearRenderTargetCache called with no GrContext.";
     return;
   }
   auto context_switch = surface_->MakeRenderContextCurrent();
@@ -188,7 +202,7 @@ void Rasterizer::NotifyLowMemoryWarning() const {
     return;
   }
   context->performDeferredCleanup(std::chrono::milliseconds(0));
-#endif  //  !SLIMPELLER
+#endif  // !SLIMPELLER
 }
 
 void Rasterizer::CollectView(int64_t view_id) {
@@ -454,20 +468,20 @@ sk_sp<SkImage> Rasterizer::MakeSkiaSnapshotSync(
 }
 
 void Rasterizer::MakeImpellerSnapshot(
-    sk_sp<DisplayList> display_list,
+    SnapshotDisplayListProvider provider,
     DlISize picture_size,
     std::function<void(std::shared_ptr<impeller::Texture>)> callback,
     SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeImpellerSnapshot(
-      display_list, picture_size, std::move(callback), pixel_format);
+      std::move(provider), picture_size, std::move(callback), pixel_format);
 }
 
 std::shared_ptr<impeller::Texture> Rasterizer::MakeImpellerSnapshotSync(
-    sk_sp<DisplayList> display_list,
+    SnapshotDisplayListProvider provider,
     DlISize picture_size,
     SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeImpellerSnapshotSync(
-      std::move(display_list), picture_size, pixel_format);
+      std::move(provider), picture_size, pixel_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {

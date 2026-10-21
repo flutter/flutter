@@ -56,13 +56,17 @@ void main() {
     });
     log.add('before drain');
 
-    buffers.drain(channel, (
-      ByteData? drainedData,
-      ui.PlatformMessageResponseCallback drainedCallback,
-    ) async {
-      log.add('callback');
-      completer.complete();
-    });
+    // Ignoring the returned future because the completion of the drain is
+    // communicated using the `completer`.
+    unawaited(
+      buffers.drain(channel, (
+        ByteData? drainedData,
+        ui.PlatformMessageResponseCallback drainedCallback,
+      ) async {
+        log.add('callback');
+        completer.complete();
+      }),
+    );
     log.add('after drain, before await');
     await completer.future;
     log.add('after await');

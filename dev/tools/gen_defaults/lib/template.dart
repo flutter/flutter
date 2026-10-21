@@ -118,7 +118,7 @@ abstract class TokenTemplate {
   /// bottom of the file.
   String generate();
 
-  /// Generate a [ColorScheme] color name for the given token.
+  /// Generate a `ColorScheme` color name for the given token.
   ///
   /// If there is a value for the given token, this will return
   /// the value prepended with [colorSchemePrefix].
@@ -136,7 +136,7 @@ abstract class TokenTemplate {
     return tokenVal == null ? effectiveDefault : '$colorSchemePrefix$tokenVal';
   }
 
-  /// Generate a [ColorScheme] color name for the given token or a transparent
+  /// Generate a `ColorScheme` color name for the given token or a transparent
   /// color if there is no value for the token.
   ///
   /// If there is a value for the given token, this will return
@@ -148,7 +148,7 @@ abstract class TokenTemplate {
   ///   * [componentColor], that provides support for an optional opacity.
   String? colorOrTransparent(String token) => color(token, 'Colors.transparent');
 
-  /// Generate a [ColorScheme] color name for the given component's color
+  /// Generate a `ColorScheme` color name for the given component's color
   /// with opacity if available.
   ///
   /// If there is a value for the given component's color, this will return
@@ -221,8 +221,8 @@ abstract class TokenTemplate {
   /// Generate a shape constant for the given component token.
   ///
   /// Currently supports family:
-  ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
-  ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
+  ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to `RoundedRectangleBorder`.
+  ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a `StadiumBorder`.
   String shape(String componentToken, [String prefix = 'const ']) {
     final shape = getToken(getToken('$componentToken.shape') as String) as Map<String, dynamic>;
     switch (shape['family']) {
@@ -257,7 +257,7 @@ abstract class TokenTemplate {
     return '';
   }
 
-  /// Generate a [BorderSide] for the given component.
+  /// Generate a `BorderSide` for the given component.
   String border(String componentToken) {
     if (!tokenAvailable('$componentToken.color')) {
       return 'null';
@@ -271,7 +271,7 @@ abstract class TokenTemplate {
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 
-  /// Generate a [TextTheme] text style name for the given component token.
+  /// Generate a `TextTheme` text style name for the given component token.
   String textStyle(String componentToken) {
     return '$textThemePrefix${getToken("$componentToken.text-style")}';
   }

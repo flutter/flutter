@@ -12,6 +12,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
@@ -19,10 +21,12 @@ import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const linuxFlutterRoot = '/flutter';
@@ -860,19 +864,16 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'custom-devices delete command throws tool exit with invalid device id',
-      () async {
-        final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
-        await expectLater(
-          runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
-          throwsToolExit(
-            message:
-                'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"',
-          ),
-        );
-      },
-    );
+    testUsingContext('custom-devices delete command throws tool exit with invalid device id', () async {
+      final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
+      await expectLater(
+        runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
+        throwsToolExit(
+          message:
+              'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"',
+        ),
+      );
+    });
 
     testWithoutContext(
       'custom-devices list command throws tool exit when config contains errors',
@@ -1027,8 +1028,10 @@ void main() {
       );
       final customDevice = CustomDevice(
         config: customDeviceConfig,
-        logger: BufferLogger.test(),
-        processManager: processManager,
+        analytics: const NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const NoOpBuildTargets(),
+        toolContext: FakeToolContext(logger: BufferLogger.test(), processManager: processManager),
       );
       final DeviceLogReader logReader = await customDevice.getLogReader();
       expect(logReader.logLines, emitsInOrder(expectedLogLines));

@@ -41,43 +41,25 @@ class WebTestsSuite {
   ///
   ///  * Test code cannot be compiled because it uses Dart VM-specific
   ///    functionality. In this case `skip` doesn't help because the code cannot
-  ///    reach the point where it can even run the skipping logic.
+  ///    reach the point where it can even run the skipping logic. Note that
+  ///    `@TestOn('!chrome')` doesn't help either: `flutter test --platform=chrome`
+  ///    compiles all test files into a single entrypoint before the test
+  ///    runner gets a chance to evaluate the annotation.
   ///  * Migrations. It is OK to put tests here that need to be temporarily
   ///    disabled in certain modes because of some migration or initial bringup.
-  ///
-  /// The key in the map is whether it's for `wasm` mode or not. The value
-  /// is the list of tests known to fail for that mode.
   //
   // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
-  static const Map<bool, List<String>> kWebTestFileKnownFailures = <bool, List<String>>{
-    // useWasm: false
-    false: <String>[
-      // These tests are not compilable on the web due to dependencies on
-      // VM-specific functionality.
-      'test/services/message_codecs_vm_test.dart',
-      'test/examples/sector_layout_test.dart',
+  static const List<String> kWebTestFileKnownFailures = <String>[
+    // These tests are not compilable on the web due to dependencies on
+    // VM-specific functionality.
+    'test/services/message_codecs_vm_test.dart',
+    'test/examples/sector_layout_test.dart',
 
-      // These tests are broken and need to be fixed.
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
-      'test/material/text_field_test.dart',
-      'test/widgets/performance_overlay_test.dart',
-      'test/widgets/html_element_view_test.dart',
-      'test/cupertino/scaffold_test.dart',
-      'test/rendering/platform_view_test.dart',
-    ],
-    // useWasm: true
-    true: <String>[
-      // These tests are not compilable on the web due to dependencies on
-      // VM-specific functionality.
-      'test/services/message_codecs_vm_test.dart',
-      'test/examples/sector_layout_test.dart',
-
-      // These tests are broken and need to be fixed.
-      // TODO(jacksongardner): https://github.com/flutter/flutter/issues/71604
-      'test/material/text_field_test.dart',
-      'test/widgets/performance_overlay_test.dart',
-    ],
-  };
+    // This test has a few failing cases on the web that need `skip`s, but the
+    // file is under the Material code freeze and can't be modified here.
+    // TODO(mdebbar): https://github.com/flutter/flutter/issues/188444
+    'test/material/text_field_test.dart',
+  ];
 
   static const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
@@ -246,11 +228,11 @@ class WebTestsSuite {
   }
 
   Future<void> runWebCanvasKitUnitTests() {
-    return _runWebUnitTests(useWasm: false, webShardCount: 8);
+    return _runWebUnitTests(useWasm: false);
   }
 
   Future<void> runWebSkwasmUnitTests() {
-    return _runWebUnitTests(useWasm: true, webShardCount: 2);
+    return _runWebUnitTests(useWasm: true);
   }
 
   /// Runs one of the `dev/integration_tests/web_e2e_tests` tests.
@@ -436,14 +418,7 @@ class WebTestsSuite {
     );
 
     // Run the app.
-    final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-    final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-    final String result = await evalTestAppInChrome(
-      appUrl: 'http://localhost:$serverPort/index.html',
-      appDirectory: appBuildDirectory,
-      serverPort: serverPort,
-      browserDebugPort: browserDebugPort,
-    );
+    final String result = await evalTestAppInChrome(appDirectory: appBuildDirectory);
 
     if (!result.contains('--- TEST SUCCEEDED ---')) {
       foundError(<String>[result, '${red}Web stack trace integration test failed.$reset']);
@@ -529,23 +504,14 @@ class WebTestsSuite {
     );
 
     // Run the app.
-    final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-    final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-    final String result = await evalTestAppInChrome(
-      appUrl: 'http://localhost:$serverPort/index.html',
-      appDirectory: appBuildDirectory,
-      serverPort: serverPort,
-      browserDebugPort: browserDebugPort,
-    );
+    final String result = await evalTestAppInChrome(appDirectory: appBuildDirectory);
 
     if (!result.contains('--- TEST SUCCEEDED ---')) {
       foundError(<String>[result, '${red}Web release mode test failed.$reset']);
     }
   }
 
-  Future<void> _runWebUnitTests({required bool useWasm, required int webShardCount}) async {
-    final subshards = <String, ShardRunner>{};
-
+  Future<void> _runWebUnitTests({required bool useWasm}) async {
     final flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
     final flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
 
@@ -564,7 +530,7 @@ class WebTestsSuite {
             )
             .where(
               (String filePath) =>
-                  !kWebTestFileKnownFailures[useWasm]!.contains(path.split(filePath).join('/')),
+                  !kWebTestFileKnownFailures.contains(path.split(filePath).join('/')),
             )
             .toList()
           // Finally we shuffle the list because we want the average cost per file to be uniformly
@@ -573,29 +539,31 @@ class WebTestsSuite {
           // We use a constant seed for repeatability.
           ..shuffle(math.Random(0));
 
-    assert(webShardCount >= 1);
-    final int testsPerShard = (allTests.length / webShardCount).ceil();
-    assert(testsPerShard * webShardCount >= allTests.length);
+    final String? subshardName = Platform.environment[kSubshardKey];
+    var isLastShard = true;
+    var testsToRun = allTests;
 
-    // This for loop computes all but the last shard.
-    for (var index = 0; index < webShardCount - 1; index += 1) {
-      subshards['$index'] = () => _runFlutterWebTest(
-        flutterPackageDirectory.path,
-        allTests.sublist(index * testsPerShard, (index + 1) * testsPerShard),
-        useWasm,
-      );
+    if (subshardName != null) {
+      final Pattern indexTotalPattern = RegExp(r'^(\d+)_(\d+)$');
+      final Match? match = indexTotalPattern.matchAsPrefix(subshardName);
+
+      if (match == null) {
+        foundError(<String>[
+          '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" (e.g. "1_8").',
+        ]);
+        throw Exception('Invalid subshard name: $subshardName');
+      }
+
+      final int index = int.parse(match.group(1)!);
+      final int total = int.parse(match.group(2)!);
+      isLastShard = index == total;
+      testsToRun = selectIndexOfTotalSubshard<String>(allTests);
     }
 
-    // The last shard also runs the flutter_web_plugins tests.
-    //
-    // We make sure the last shard ends in _last so it's easier to catch mismatches
-    // between `.ci.yaml` and `test.dart`.
-    Future<void> lastShardRunner() async {
-      await _runFlutterWebTest(
-        flutterPackageDirectory.path,
-        allTests.sublist((webShardCount - 1) * testsPerShard, allTests.length),
-        useWasm,
-      );
+    await _runFlutterWebTest(flutterPackageDirectory.path, testsToRun, useWasm);
+
+    // The last shard also runs the flutter_web_plugins and flutter_driver tests.
+    if (isLastShard) {
       await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_web_plugins'), <String>[
         'test',
       ], useWasm);
@@ -603,11 +571,6 @@ class WebTestsSuite {
         path.join('test', 'src', 'web_tests', 'web_extension_test.dart'),
       ], useWasm);
     }
-
-    subshards['${webShardCount - 1}'] = lastShardRunner;
-    subshards['${webShardCount - 1}_last'] = lastShardRunner;
-
-    await selectSubshard(subshards);
   }
 
   Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests, bool useWasm) async {

@@ -109,7 +109,7 @@ class _LiveWidgetController extends LiveWidgetController {
   /// until there are no pending frames in the app under test.
   bool frameSync = true;
 
-  /// Waits until at the end of a frame the provided [condition] is [true].
+  /// Waits until at the end of a frame the provided [condition] is `true`.
   Future<void> _waitUntilFrame(bool Function() condition, [Completer<void>? completer]) {
     completer ??= Completer<void>();
     if (!condition()) {

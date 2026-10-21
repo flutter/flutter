@@ -56,9 +56,8 @@ void main() {
       );
 
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
+        () => createTestCommandRunner(command)
+            .run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
@@ -72,9 +71,9 @@ void main() {
     testWithoutContext('rasterizer and skia screenshots require VM Service uri', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: toolContext),
-        ).run(<String>['screenshot', '--type=skia']),
+        () =>
+            createTestCommandRunner(ScreenshotCommand(toolContext: toolContext))
+                .run(<String>['screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
     });
@@ -82,9 +81,9 @@ void main() {
     testUsingContext('device screenshots require device', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: toolContext),
-        ).run(<String>['screenshot']),
+        () =>
+            createTestCommandRunner(ScreenshotCommand(toolContext: toolContext))
+                .run(<String>['screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
@@ -92,9 +91,9 @@ void main() {
     testWithoutContext('device screenshots cannot provide VM Service', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: toolContext),
-        ).run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
+        () =>
+            createTestCommandRunner(ScreenshotCommand(toolContext: toolContext))
+                .run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
         throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
       );
     });
@@ -284,9 +283,8 @@ Device 2 (mobile) • 456 • android • 1.2.3
             },
       );
 
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']);
+      await createTestCommandRunner(command)
+          .run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']);
 
       expect(
         logger.errorText,
@@ -297,8 +295,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
 }
 
 class _ScreenshotDevice extends Fake implements Device {
-  _ScreenshotDevice({required this.id, required this.name, required bool isSupportedForProject})
-    : _isSupportedForProject = isSupportedForProject;
+  _ScreenshotDevice({required this.id, required this.name, required this._isSupportedForProject});
 
   @override
   final String name;

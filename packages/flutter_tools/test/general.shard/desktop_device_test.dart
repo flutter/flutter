@@ -211,35 +211,32 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled',
-    () async {
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['debug'],
-          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-          completer: completer,
-          environment: const <String, String>{
-            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
-            'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
-            'FLUTTER_ENGINE_SWITCHES': '3',
-          },
-        ),
-      ]);
-      final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final package = FakeApplicationPackage();
-      final LaunchResult result = await device.startApp(
-        package,
-        prebuiltApplication: true,
-        platformArgs: <String, Object>{'trace-startup': true},
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug, traceAllowlist: 'foo,bar'),
-      );
+  testWithoutContext('startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled', () async {
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
+        completer: completer,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCHES': '3',
+        },
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      platformArgs: <String, Object>{'trace-startup': true},
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug, traceAllowlist: 'foo,bar'),
+    );
 
-      expect(result.started, true);
-    },
-  );
+    expect(result.started, true);
+  });
 
   testWithoutContext('Port forwarder is a no-op', () async {
     final FakeDesktopDevice device = setUpDesktopDevice();
@@ -397,15 +394,18 @@ void main() {
     );
   });
 
-  testUsingContext(
+  testWithoutContext(
     'macOS devices print warning if Dart VM not found within timeframe in CI',
     () async {
       final logger = BufferLogger.test();
       final device = FakeMacOSDevice(
-        fileSystem: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        logger: logger,
+        toolContext: FakeToolContext(
+          botDetector: const FakeBotDetector(true),
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       );
 
       final package = FakeApplicationPackage();
@@ -589,23 +589,20 @@ FakeDesktopDevice setUpDesktopDevice({
   bool nullExecutablePathForDevice = false,
 }) {
   return FakeDesktopDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
-    logger: logger ?? BufferLogger.test(),
-    processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+    toolContext: FakeToolContext(
+      fs: fileSystem ?? MemoryFileSystem.test(),
+      logger: logger ?? BufferLogger.test(),
+      os: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+      processManager: processManager ?? FakeProcessManager.any(),
+    ),
     nullExecutablePathForDevice: nullExecutablePathForDevice,
   );
 }
 
 /// A trivial subclass of DesktopDevice for testing the shared functionality.
 class FakeDesktopDevice extends DesktopDevice {
-  FakeDesktopDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-    this.nullExecutablePathForDevice = false,
-  }) : super('dummy', platformType: PlatformType.linux, ephemeral: false);
+  FakeDesktopDevice({required super.toolContext, this.nullExecutablePathForDevice = false})
+    : super('dummy', platformType: PlatformType.linux, ephemeral: false);
 
   /// The `mainPath` last passed to [buildForDevice].
   String? lastBuiltMainPath;
@@ -658,12 +655,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 }
 
 class FakeMacOSDevice extends MacOSDevice {
-  FakeMacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  });
+  FakeMacOSDevice({required super.toolContext});
 
   @override
   String get name => 'dummy';

@@ -88,7 +88,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// On the first call, this will find plugins in the project.
   /// On subsequent calls, this will return the cached list of plugins.
   Future<List<Plugin>> getPlugins() async {
-    _plugins ??= await findPlugins(parent);
+    _plugins ??= await findPlugins(parent, logger: globals.logger);
     return _plugins!;
   }
 
@@ -1061,7 +1061,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        targetOverride: bundle.defaultMainPath,
+        targetOverride: bundle.defaultMainPath(parent.directory.fileSystem),
       );
     }
   }
