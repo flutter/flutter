@@ -6181,6 +6181,15 @@ cc_library(
 ]}''',
         'mac_host_engine.json':
             '{"builds": [${build('ci/mac_host', '--runtime-mode debug --no-lto', <String>['flutter'])}]}',
+        // Linux arm64: --target-os=linux --linux-cpu=arm64 is the arm64
+        // platform (a Linux toolchain: --no-lto as the host's); another
+        // --target-os is out of scope.
+        'linux_arm_host_engine.json':
+            '''
+{"builds": [
+  ${build('ci/linux_debug_arm64', '--target-dir ci/linux_debug_arm64 --runtime-mode debug --target-os=linux --linux-cpu=arm64 --prebuilt-dart-sdk --no-lto --rbe --no-goma', <String>['flutter/build/archives:artifacts'], archives: <String>['out/ci/linux_debug_arm64/zip_archives/linux-arm64/artifacts.zip'])},
+  ${build('ci/fuchsia_debug_x64', '--target-os=fuchsia --fuchsia-cpu=x64 --runtime-mode debug --no-lto', <String>['flutter/shell/platform/fuchsia:fuchsia'])}
+]}''',
         // The web: --web is the wasm platform, whose optimized build links
         // with LTO as GN's does (so --no-lto is what it cannot express).
         'linux_web_engine_build.json':
@@ -6205,6 +6214,7 @@ cc_library(
       // CI's host_debug_unopt sets flags the developer's does not (asan, a
       // Debug VM): the developer's keeps the bare name, CI's its prefix.
       expect(builds.map((BuilderBuild b) => b.configName), <String>[
+        'linux_debug_arm64',
         'host_debug',
         'host_release',
         'host_debug_test',
@@ -6221,6 +6231,10 @@ cc_library(
       expect(
         configsBazelrc(builds),
         contains('''
+# linux_arm_host_engine.json: ci/linux_debug_arm64
+#   --target-dir ci/linux_debug_arm64 --runtime-mode debug --target-os=linux --linux-cpu=arm64 --prebuilt-dart-sdk --no-lto --rbe --no-goma
+build:linux_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64
+
 # linux_host_engine.json: ci/host_debug
 #   --target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma
 build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
@@ -6240,7 +6254,7 @@ build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/co
 # linux_host_engine.json: ci/host_profile_lto
 #   --runtime-mode profile --prebuilt-dart-sdk
 # No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the host toolchain has no LTO)
+#   LTO, which tools/gn enables without --no-lto (the Linux toolchains have no LTO)
 
 # linux_host_engine.json: ci/host_release_licenses
 #   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
@@ -6373,6 +6387,20 @@ install(
 '''),
       );
       expect(buildFile, isNot(contains('ci/android_debug')));
+      expect(buildFile, isNot(contains('fuchsia_debug_x64')));
+      expect(
+        buildFile,
+        contains('''
+# linux_arm_host_engine.json: ci/linux_debug_arm64
+#   bazel run --config=linux_debug_arm64 :linux_debug_arm64
+install(
+    name = "linux_debug_arm64",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/archives:artifacts"],
+    directory = "ci/linux_debug_arm64",
+)
+'''),
+      );
       expect(buildFile, isNot(contains('mac_host')));
       expect(
         buildFile,

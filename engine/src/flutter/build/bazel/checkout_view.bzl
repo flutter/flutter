@@ -28,10 +28,15 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 ENGINE_SRC = "engine/src"
 
 # GN's build directory names (tools/gn's get_out_dir): what is built for --
-# `host` for the host's own build, `wasm` for --web -- then the runtime
-# mode, then `_unopt` when not optimized (`host_debug_unopt`, `wasm_release`).
+# `host` for the host's own build, `wasm` for --web, `linux` for the Linux
+# arm64 cross build (--target-os=linux) -- then the runtime mode, then the
+# CPU when not the host's (`_arm64`), then `_unopt` when not optimized
+# (`host_debug_unopt`, `wasm_release`, `linux_debug_arm64`).
 BUILD_DIRECTORY_TARGETS = {
     "@platforms//os:emscripten": "wasm",
+    # Linux arm64 is the one arm64 build so far; Android's names come with
+    # its platform.
+    "@platforms//cpu:aarch64": "linux",
     "//conditions:default": "host",
 }
 
@@ -42,10 +47,16 @@ BUILD_DIRECTORY_MODES = {
     "//conditions:default": "debug",
 }
 
+BUILD_DIRECTORY_CPUS = {
+    "@platforms//cpu:aarch64": "_arm64",
+    "//conditions:default": "",
+}
+
 def build_directory_attrs():
     """The rule attributes a macro sets for the build directory's name: `build_directory_name` and `optimized`."""
     return {
-        "build_directory_name": select(BUILD_DIRECTORY_TARGETS) + "_" + select(BUILD_DIRECTORY_MODES),
+        "build_directory_name": select(BUILD_DIRECTORY_TARGETS) + "_" + select(BUILD_DIRECTORY_MODES) +
+                                select(BUILD_DIRECTORY_CPUS),
         "optimized": select({
             "//engine/src/flutter/build/bazel:optimized": True,
             "//conditions:default": False,

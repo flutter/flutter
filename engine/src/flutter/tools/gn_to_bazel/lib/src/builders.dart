@@ -42,6 +42,12 @@ enum GnFlagEffect {
   /// configuration's `--platforms` names ([GnFlag.bazelFlag]).
   platform,
 
+  /// `--target-os <os>`, `--linux-cpu <cpu>`: the target, from which
+  /// [BuilderBuild.of] decides the platform (the Linux arm64 cross build is
+  /// a platform; another OS is out of scope; Linux on the host's CPU is the
+  /// host's own build).
+  target,
+
   /// `--lto`/`--no-lto`: whether the optimized build links with LTO, which
   /// the target platform decides here: the host toolchain has no LTO, the
   /// wasm platform's optimized build always has it.
@@ -95,9 +101,12 @@ final class GnFlag {
   final List<String> alongside;
 }
 
-/// The wasm platform: GN's `--web` build (build/bazel/toolchains/emscripten).
+/// The Bazel platforms a build's flags select: `--web` the wasm platform
+/// (build/bazel/toolchains/emscripten), `--target-os=linux --linux-cpu=arm64`
+/// the Linux arm64 cross build (build/bazel/toolchains).
 const String wasmPlatform =
     '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten';
+const String linuxArm64Platform = '//engine/src/flutter/build/bazel/toolchains:linux_arm64';
 
 /// The `tools/gn` flags of the Linux builder files, as far as they appear.
 const Map<String, GnFlag> gnFlags = <String, GnFlag>{
@@ -175,8 +184,8 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   // (to_gn_wasm_args), which the wasm platform's flags carry.
   '--web': GnFlag(GnFlagEffect.platform, bazelFlag: '--platforms=$wasmPlatform'),
   '--windows': GnFlag(GnFlagEffect.otherPlatform),
-  '--target-os': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
-  '--linux-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
+  '--target-os': GnFlag(GnFlagEffect.target, takesValue: true),
+  '--linux-cpu': GnFlag(GnFlagEffect.target, takesValue: true),
   '--embedder-for-target': GnFlag(GnFlagEffect.otherPlatform),
 };
 
@@ -274,6 +283,8 @@ final class BuilderBuild {
     String? runtimeMode;
     String? buildDirectory;
     String? platform;
+    String? targetOs;
+    String? linuxCpu;
     final List<String> gn = build.gn;
     for (var i = 0; i < gn.length; i++) {
       String flag = gn[i];
@@ -304,6 +315,12 @@ final class BuilderBuild {
           buildDirectory = value;
         case GnFlagEffect.platform:
           platform = known.bazelFlag;
+        case GnFlagEffect.target:
+          if (flag == '--target-os') {
+            targetOs = value;
+          } else {
+            linuxCpu = value;
+          }
         case GnFlagEffect.lto:
           lto = flag == '--lto';
         case GnFlagEffect.setting:
@@ -329,15 +346,28 @@ final class BuilderBuild {
           otherPlatform = true;
       }
     }
+    // The target: --target-os=linux --linux-cpu=arm64 is the Linux arm64
+    // cross build, a platform of the Bazel build (tools/gn counts it a host
+    // build: the prebuilt Dart SDK is the target's); --target-os=linux on
+    // the host's CPU is the host's own build; any other OS, or CPU, is a
+    // platform the Bazel build has none for yet.
+    if (targetOs != null && targetOs != 'linux') {
+      otherPlatform = true;
+    } else if (linuxCpu == 'arm64') {
+      platform = '--platforms=$linuxArm64Platform';
+    } else if (linuxCpu != null && linuxCpu != 'x64') {
+      otherPlatform = true;
+    }
     // tools/gn: LTO is on unless --no-lto, and off in unoptimized builds.
-    // The host toolchain has no LTO, so an optimized host build has to say
-    // --no-lto; the wasm platform links the optimized build with LTO, as
-    // GN's web build does, and has no setting that turns it off.
-    if (!unoptimized && lto && platform == null) {
+    // The Linux toolchains have no LTO, so an optimized host or arm64 build
+    // has to say --no-lto; the wasm platform links the optimized build with
+    // LTO, as GN's web build does, and has no setting that turns it off.
+    final wasm = platform == '--platforms=$wasmPlatform';
+    if (!unoptimized && lto && !wasm) {
       unsupported.add(
-        'LTO, which tools/gn enables without --no-lto (the host toolchain has no LTO)',
+        'LTO, which tools/gn enables without --no-lto (the Linux toolchains have no LTO)',
       );
-    } else if (!unoptimized && !lto && platform != null) {
+    } else if (!unoptimized && !lto && wasm) {
       unsupported.add('--no-lto (the wasm platform links the optimized build with LTO)');
     }
     flags.add(unoptimized ? '--compilation_mode=fastbuild' : '--compilation_mode=opt');
@@ -412,8 +442,9 @@ final class BuilderBuild {
   /// GN's `--target-dir`, under engine/src/out.
   final String? buildDirectory;
 
-  /// The `--platforms` of a build for the web (`--web`, [wasmPlatform]);
-  /// null for the host's own build.
+  /// The `--platforms` of a build for another platform than the host's own
+  /// (`--web`: [wasmPlatform]; `--target-os=linux --linux-cpu=arm64`:
+  /// [linuxArm64Platform]); null for the host's own build.
   final String? platform;
 
   /// The flags the Bazel build cannot express, with the reason each.
@@ -457,8 +488,9 @@ final class BuilderBuild {
 
 /// The Linux builds of [configs] (a builder file's name to its
 /// configuration), by file and build order: the `linux_*.json` files' builds
-/// that target the host or the web, and local_engine.json's `linux/` builds
-/// -- the developer's configurations, which `et build --config <name>` runs.
+/// that target the host, the web or Linux arm64, and local_engine.json's
+/// `linux/` builds -- the developer's configurations, which `et build
+/// --config <name>` runs.
 List<BuilderBuild> linuxBuilds(Map<String, BuilderConfig> configs) {
   final builds = <BuilderBuild>[];
   final List<String> files =

@@ -13,6 +13,22 @@
 # configuration; the install target of each build is in BUILD.bazel beside
 # this file.
 
+# linux_arm_host_desktop_engine.json: ci/linux_debug_arm64_desktop
+#   --runtime-mode debug --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/linux_debug_arm64_desktop --target-os=linux --linux-cpu=arm64
+build:linux_debug_arm64_desktop --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64 --//engine/src/flutter/txt:use_fontconfig
+
+# linux_arm_host_desktop_engine.json: ci/linux_profile_arm64_desktop
+#   --runtime-mode profile --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/linux_profile_arm64_desktop --target-os=linux --linux-cpu=arm64
+build:linux_profile_arm64_desktop --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64 --//engine/src/flutter/txt:use_fontconfig
+
+# linux_arm_host_desktop_engine.json: ci/linux_release_arm64_desktop
+#   --runtime-mode release --enable-fontconfig --prebuilt-dart-sdk --no-lto --rbe --no-goma --target-dir ci/linux_release_arm64_desktop --target-os=linux --linux-cpu=arm64
+build:linux_release_arm64_desktop --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64 --//engine/src/flutter/txt:use_fontconfig
+
+# linux_arm_host_engine.json: ci/linux_debug_arm64
+#   --target-dir ci/linux_debug_arm64 --runtime-mode debug --target-os=linux --linux-cpu=arm64 --prebuilt-dart-sdk --no-lto --rbe --no-goma
+build:linux_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64
+
 # linux_clang_tidy.json: ci/host_debug_clang_tidy
 #   --runtime-mode debug --prebuilt-dart-sdk --no-lto --target-dir ci/host_debug_clang_tidy --rbe --no-goma
 build:host_debug_clang_tidy --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug

@@ -419,7 +419,7 @@ selects.config_setting_group(
 
 zip_tree(
     name = "dart_sdk_archive_dart-sdk",
-    srcs = ["@dart_sdk_linux_x64//:all_files"],
+    srcs = ["//engine/src/flutter/build/bazel/dart_wrap:prebuilt_dart_sdk"],
     destination = "dart-sdk",
     root = "",
     target_compatible_with = select({
