@@ -66,6 +66,7 @@ class ExtensionManager {
   /// Disables tool extension discovery and initialization for the current CLI
   /// invocation (for example, when `--no-extensions` is passed).
   void disable() {
+    assert(_initFuture == null, 'disable() cannot be called after initialization has started.');
     _isDisabled = true;
   }
 

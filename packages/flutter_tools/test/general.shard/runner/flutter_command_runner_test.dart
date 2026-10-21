@@ -749,6 +749,27 @@ void main() {
           },
         );
 
+        testWithoutContext('resolves global options with arguments after a subcommand during dynamic option initialization', () async {
+          final toolContext = FakeToolContext();
+          final dynamicSubcommand = _FakeDynamicFlutterCommand(
+            commandName: 'dynamic-sub',
+            toolContext: toolContext,
+          );
+          final parentCommand = _FakeParentFlutterCommand(
+            subcommand: dynamicSubcommand,
+            toolContext: toolContext,
+          );
+          final runner = FlutterCommandRunner(
+            toolContext: toolContext,
+            featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          )..addCommand(parentCommand);
+
+          // Pass global option '--wrap-column' with value '80' between parent command and subcommand.
+          await runner.run(<String>['parent-cmd', '--wrap-column', '80', 'dynamic-sub']);
+
+          expect(dynamicSubcommand.didInitializeDynamicOptions, isTrue);
+        });
+
         testWithoutContext(
           'initializes dynamic options when --extensions overrides preceding --no-extensions',
           () async {

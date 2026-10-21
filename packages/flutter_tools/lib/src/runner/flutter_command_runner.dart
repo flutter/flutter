@@ -431,7 +431,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (name.contains('=')) {
       return 1;
     }
-    final Option? option = parser.findByNameOrAlias(name) ?? parser.findByAbbreviation(name);
+    final Option? option =
+        parser.findByNameOrAlias(name) ??
+        parser.findByAbbreviation(name) ??
+        argParser.findByNameOrAlias(name) ??
+        argParser.findByAbbreviation(name);
     if (option != null) {
       return option.isFlag ? 1 : 2;
     }
