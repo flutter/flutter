@@ -401,6 +401,11 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/prebuilts/linux-x64/dart-sdk",
         build_file = _OVERLAYS + ":dart_sdk/BUILD.dart_sdk.bazel",
     ),
+    # esbuild, which bundles the web SDK's flutter.js (build/esbuild).
+    "esbuild": struct(
+        path = "engine/src/flutter/prebuilts/linux-x64/esbuild",
+        build_file = _OVERLAYS + ":esbuild/BUILD.esbuild.bazel",
+    ),
     "gn": struct(
         path = "engine/src/flutter/third_party/gn",
         build_file = _OVERLAYS + ":gn/BUILD.gn_tool.bazel",

@@ -101,8 +101,7 @@ filegroup(
 
 # dart:ui_web's sources and API file, which web_sdk.gni's
 # web_ui_ui_web_with_output (web_sdk/web_sdk.bzl) rewrites into the
-# sky_engine package for sky/packages/sky_engine; the web SDK's own build,
-# which rewrites them again for the web, is the web phase's.
+# sky_engine package for sky/packages/sky_engine, and into the web SDK.
 filegroup(
     name = "ui_web_sources",
     srcs = glob(["lib/web_ui/lib/ui_web/src/ui_web/**/*.dart"]),
@@ -110,6 +109,47 @@ filegroup(
 )
 
 exports_files(["lib/web_ui/lib/ui_web/src/ui_web.dart"])
+
+# The web engine's other source directories web_sdk/BUILD.gn's sdk_rewriter
+# invocations read (each `input_dir`, less its `exclude_pattern`; the
+# converter's directorySources names them): dart:ui's own sources without
+# the engine under src/, the engine without skwasm, and skwasm's two halves
+# with their API files.
+filegroup(
+    name = "web_ui_sources",
+    srcs = glob(
+        ["lib/web_ui/lib/**/*.dart"],
+        exclude = ["lib/web_ui/lib/src/**"],
+    ),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "web_engine_sources",
+    srcs = glob(
+        ["lib/web_ui/lib/src/engine/**/*.dart"],
+        exclude = ["lib/web_ui/lib/src/engine/skwasm/**"],
+    ),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "skwasm_stub_sources",
+    srcs = glob(["lib/web_ui/lib/src/engine/skwasm/skwasm_stub/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "skwasm_impl_sources",
+    srcs = glob(["lib/web_ui/lib/src/engine/skwasm/skwasm_impl/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
+
+exports_files([
+    "lib/web_ui/lib/src/engine.dart",
+    "lib/web_ui/lib/src/engine/skwasm/skwasm_impl.dart",
+    "lib/web_ui/lib/src/engine/skwasm/skwasm_stub.dart",
+])
 
 # run_tests.py --type dart-host: `dart test` in each Dart package of
 # build_dart_host_test_list, as dart_package_test runs it

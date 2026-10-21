@@ -23,6 +23,14 @@ filegroup(
 # The whole SDK, as dart-sdk-<platform>.zip ships it (build/archives'
 # dart_sdk_archive; directorySources in the converter's bazel_mapping.dart):
 # every file of the checkout's directory, not the repository's own markers.
+# The SDK's libraries (lib/libraries.json and the sources it names), which
+# the web SDK's compilers read as `dart-sdk/lib` beside flutter_web_sdk
+# (web_sdk/web_sdk.bzl).
+filegroup(
+    name = "lib",
+    srcs = glob(["lib/**"]),
+)
+
 filegroup(
     name = "all_files",
     srcs = glob(

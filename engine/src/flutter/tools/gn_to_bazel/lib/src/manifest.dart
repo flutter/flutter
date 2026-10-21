@@ -281,6 +281,35 @@ exports_files([
   // sources and dart:ui's, dart:ui_web rewritten by web_sdk's sdk_rewriter,
   // the embedder specification, and the package assembled by dart_pkg.py.
   ConvertedFile('//flutter/sky/packages/sky_engine'),
+  // The web SDK's Dart side (web_sdk/web_sdk.bzl): the seven libraries
+  // sdk_rewriter rewrites into flutter_web_sdk/lib, libraries.json beside
+  // them, the three platform kernels and the two DDC compilations of the
+  // SDK -- the file's own templates over the prebuilt SDK's kernel_worker
+  // and dartdevc, mapped to rules reading the tree web_sdk_root stages
+  // (the appendix). The archive (zip_bundle_from_file over everything,
+  // the modules included) is with the archives.
+  ConvertedFile(
+    '//flutter/web_sdk',
+    skip: <String, String>{
+      'flutter_web_sdk_archive':
+          "flutter-web-sdk.zip (zip_bundle_from_file over the SDK's tree): with the archives",
+    },
+    appendix: '''
+load("//engine/src/flutter/web_sdk:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "web_sdk_root")
+
+exports_files(["sdk_rewriter.dart"])
+
+# The flutter_web_sdk tree the compilers above read, staged beside the
+# prebuilt SDK (BUILD.gn's web_engine_libraries; web_sdk.bzl).
+web_sdk_root(
+    name = "flutter_web_sdk_root",
+    libraries = WEB_ENGINE_LIBRARIES,
+)
+''',
+  ),
+  // flutter.js, the web SDK's loader: its sources copied under
+  // flutter_web_sdk/flutter_js and bundled by esbuild (build/esbuild).
+  ConvertedFile('//flutter/lib/web_ui/flutter_js'),
   // The archives a host build uploads (research/09): artifacts.zip, the
   // patched SDK's, the prebuilt Dart SDK's, the embedder's. The
   // entitlement lists are the macOS signing step's.
@@ -1386,9 +1415,6 @@ const Set<String> handWrittenPackages = <String>{
   // sub-packages include.
   'engine/src/flutter/shell/platform/android',
   'engine/src/flutter/third_party',
-  // The web SDK, until the web phase converts it: web_sdk.gni's
-  // sdk_rewriter template as a rule, and the script it runs.
-  'engine/src/flutter/web_sdk',
 };
 
 /// The main repository's layout: its packages are the generated ones and

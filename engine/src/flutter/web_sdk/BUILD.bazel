@@ -2,8 +2,149 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# The web SDK (GN's //flutter/web_sdk), whose own build is the web phase's.
-# This package exists for web_sdk.bzl -- the sdk_rewriter template of
-# web_sdk.gni as a rule, which sky/packages/sky_engine invokes -- and the
-# script it runs.
+# Generated from //flutter/web_sdk/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: flutter_web_sdk_archive.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
+load("//engine/src/flutter/web_sdk:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "ddc_sdk", "sdk_rewriter", "web_platform_dill", "web_sdk_root", "web_ui_ui_web_with_output")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "web_sdk",
+    deps = [
+        ":flutter_ddc_modules",
+        ":flutter_platform_dills",
+        "//engine/src/flutter/lib/web_ui/flutter_js",
+    ],
+)
+
+sdk_rewriter(
+    name = "web_ui_library_sources",
+    srcs = ["//engine/src/flutter:web_ui_sources"],
+    exclude = "engine/src/flutter/lib/web_ui/lib/src",
+    input_dir = "engine/src/flutter/lib/web_ui/lib",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/ui/",
+    ui = True,
+)
+
+web_ui_ui_web_with_output(
+    name = "web_ui_ui_web",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/ui_web/",
+)
+
+sdk_rewriter(
+    name = "web_engine_library",
+    srcs = ["//engine/src/flutter:web_engine_sources"],
+    api_file = "//engine/src/flutter:lib/web_ui/lib/src/engine.dart",
+    exclude = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm",
+    input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine",
+    library_name = "engine",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_engine/",
+)
+
+sdk_rewriter(
+    name = "skwasm_stub_library",
+    srcs = ["//engine/src/flutter:skwasm_stub_sources"],
+    api_file = "//engine/src/flutter:lib/web_ui/lib/src/engine/skwasm/skwasm_stub.dart",
+    input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub",
+    library_name = "skwasm_stub",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_stub/",
+)
+
+sdk_rewriter(
+    name = "skwasm_impl_library",
+    srcs = ["//engine/src/flutter:skwasm_impl_sources"],
+    api_file = "//engine/src/flutter:lib/web_ui/lib/src/engine/skwasm/skwasm_impl.dart",
+    input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl",
+    library_name = "skwasm_impl",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_impl/",
+)
+
+sdk_rewriter(
+    name = "web_test_fonts_library",
+    srcs = ["//engine/src/flutter/third_party:web_test_fonts_sources"],
+    api_file = "//engine/src/flutter/third_party:web_test_fonts/lib/web_test_fonts.dart",
+    input_dir = "engine/src/flutter/third_party/web_test_fonts/lib/web_test_fonts",
+    library_name = "web_test_fonts",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_web_test_fonts/",
+)
+
+sdk_rewriter(
+    name = "web_locale_keymap_library",
+    srcs = ["//engine/src/flutter/third_party:web_locale_keymap_sources"],
+    api_file = "//engine/src/flutter/third_party:web_locale_keymap/lib/web_locale_keymap.dart",
+    input_dir = "engine/src/flutter/third_party/web_locale_keymap/lib/web_locale_keymap",
+    library_name = "web_locale_keymap",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_web_locale_keymap/",
+)
+
+gn_copy(
+    name = "web_ui_library",
+    srcs = ["libraries.json"],
+    outputs = ["$root_out_dir/flutter_web_sdk/{{source_file_part}}"],
+)
+
+web_platform_dill(
+    name = "flutter_dartdevc_kernel_sdk_outline",
+    kernel_target = "ddc",
+    output_dill = "$root_out_dir/flutter_web_sdk/kernel/ddc_outline.dill",
+    summary_only = True,
+)
+
+web_platform_dill(
+    name = "flutter_dart2js_kernel_sdk_full",
+    kernel_target = "dart2js",
+    null_environment = True,
+    output_dill = "$root_out_dir/flutter_web_sdk/kernel/dart2js_platform.dill",
+    summary_only = False,
+)
+
+web_platform_dill(
+    name = "flutter_dart2wasm_kernel_sdk_full",
+    kernel_target = "dart2wasm",
+    null_environment = True,
+    output_dill = "$root_out_dir/flutter_web_sdk/kernel/dart2wasm_platform.dill",
+    summary_only = False,
+)
+
+cc_library(
+    name = "flutter_platform_dills",
+    data = [
+        ":flutter_dart2js_kernel_sdk_full",
+        ":flutter_dart2wasm_kernel_sdk_full",
+        ":flutter_dartdevc_kernel_sdk_outline",
+    ],
+)
+
+# Compile the SDK with the stable and canary versions of DDC.
+ddc_sdk(
+    name = "flutter_ddc_stable_sdk",
+    canary = False,
+)
+
+ddc_sdk(
+    name = "flutter_ddc_canary_sdk",
+    canary = True,
+)
+
+cc_library(
+    name = "flutter_ddc_modules",
+    data = [
+        ":flutter_ddc_canary_sdk",
+        ":flutter_ddc_stable_sdk",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
 exports_files(["sdk_rewriter.dart"])
+
+# The flutter_web_sdk tree the compilers above read, staged beside the
+# prebuilt SDK (BUILD.gn's web_engine_libraries; web_sdk.bzl).
+web_sdk_root(
+    name = "flutter_web_sdk_root",
+    libraries = WEB_ENGINE_LIBRARIES,
+)
