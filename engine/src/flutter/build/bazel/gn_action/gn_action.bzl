@@ -97,10 +97,12 @@ def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_messa
     # -B: no bytecode caches next to the script.
     args.add("-B")
     args.add(script)
-    args.add_all(arguments)
     ctx.actions.run(
         executable = ctx.executable._python,
-        arguments = [args],
+        # The caller's arguments follow: strings, or Args objects of its own
+        # (dart_pkg, the snapshots), which is what the list holds.
+        # buildifier: disable=pass-args-to-actions
+        arguments = [args] + arguments,
         inputs = depset([script] + inputs),
         tools = ctx.attr._python_runtime[DefaultInfo].files,
         outputs = outputs,
