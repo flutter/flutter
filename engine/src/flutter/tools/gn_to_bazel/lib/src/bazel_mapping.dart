@@ -386,6 +386,9 @@ const Map<String, String> labelOverrides = <String, String>{
   // secondary tree over synced trees (inja, json, SPIRV-Cross, flatbuffers)
   // and SPIRV-Headers' own GN, each a fetch-time repository.
   '//third_party/inja': '@inja',
+  // The secondary tree's //third_party/brotli (build/secondary), over the
+  // synced tree, which FreeType names for WOFF2.
+  '//third_party/brotli': '@brotli',
   '//flutter/third_party/json': '@json',
   '//third_party/spirv_cross_flutter': '@spirv-cross//:spirv_cross_flutter',
   '//flutter/third_party/flatbuffers': '@flatbuffers',
@@ -455,6 +458,7 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/libwebp/': '@libwebp//',
   '//flutter/third_party/wuffs/': '@wuffs//',
   '//flutter/third_party/inja/': '@inja//',
+  '//flutter/third_party/brotli/': '@brotli//',
   '//flutter/third_party/json/': '@json//',
   '//flutter/third_party/rapidjson/': '@rapidjson//',
   '//flutter/third_party/vulkan-deps/spirv-cross/src/': '@spirv-cross//',
@@ -1858,6 +1862,9 @@ const Map<String, ({bool host, bool web})> perTargetOsArguments = <String, ({boo
   'skia_use_no_webp_encode': (host: false, web: true),
   'skia_enable_skottie': (host: true, web: false),
   'skia_enable_fontmgr_custom_directory': (host: true, web: false),
+  // The engine's own: FreeType's WOFF2 support (over brotli), which the web
+  // build turns on.
+  'flutter_use_freetype_woff2': (host: false, web: true),
 };
 
 /// Which assumptions describe the Linux x64 host build (the values
@@ -1962,6 +1969,7 @@ Assumptions linuxHostAssumptions() {
     'skia_use_no_webp_encode': GnBoolValue(false),
     'skia_enable_skottie': GnBoolValue(true),
     'skia_enable_fontmgr_custom_directory': GnBoolValue(true),
+    'flutter_use_freetype_woff2': GnBoolValue(false),
     'skia_icu_bidi_third_party_dir': GnStringValue('//flutter/third_party/canvaskit/icu_bidi'),
   });
 }
