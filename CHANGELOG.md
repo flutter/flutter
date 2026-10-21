@@ -32,6 +32,13 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.7](https://github.com/flutter/flutter/releases/tag/3.47.7)
+- [flutter/182604](https://github.com/flutter/flutter/issues/182604) When an OverlayPortal is displayed on iOS, accessibility frames are shrunk by the device pixel ratio and anchored to the top-left, so VoiceOver focus and XCUITest taps miss the visible controls.
+- [flutter/100946](https://github.com/flutter/flutter/issues/100946) When using VoiceOver on iOS with a ReorderableListView, Semantics focus is incorrectly shifted to the top left of the screen.
+
+### [3.47.6](https://github.com/flutter/flutter/releases/tag/3.47.6)
+- [flutter/192513](https://github.com/flutter/flutter/issues/192513) Fixed an issue that caused Windows production apps to hang.
+
 ### [3.47.5](https://github.com/flutter/flutter/releases/tag/3.47.5)
 - [flutter/190307](https://github.com/flutter/flutter/issues/190307) When debugging on physical iOS 27 devices, app occasionally crashes.
 - [flutter/191242](https://github.com/flutter/flutter/issues/191242) When re-expanding a preview group in the Widget Previewer, previews crash due to a type error in scroll restoration.
@@ -88,6 +95,13 @@ Learn about what's new in this release in [the blog post](https://flutter.dev/bl
 
 
 ## Flutter 3.44 Changes
+
+### [3.44.9](https://github.com/flutter/flutter/releases/tag/3.44.9)
+- [flutter/186366](https://github.com/flutter/flutter/issues/186366) When debugging an iOS app, if the app crashes, the Flutter CLI and tests that crash will hang.
+
+### [3.44.8](https://github.com/flutter/flutter/releases/tag/3.44.8)
+- [flutter/188346](https://github.com/flutter/flutter/issues/188346) When building on macOS or iOS using the Xcode 27 toolchain, the build will fail due to a lipo verification error.
+- [flutter/184286](https://github.com/flutter/flutter/issues/184286) On some devices with vendor-modified Android 11 ROMs, `AccessibilityBridge.java` field fails to resolve.
 
 ### [3.44.7](https://github.com/flutter/flutter/releases/tag/3.44.7)
 - [flutter/188161](https://github.com/flutter/flutter/issues/188161) Fixes a resource leak that sometimes caused crashes when using external textures on some GPUs (such as Arm Mali).
