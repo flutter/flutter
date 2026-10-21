@@ -513,14 +513,27 @@ def _synced_deps_impl(mctx):
         _download_cipd_package(name, spec.package, spec.version, platform, spec.build_file)
 
     _sysroot_repositories(mctx, fetch)
+    return _metadata(mctx)
 
-    return mctx.extension_metadata(
-        root_module_direct_deps = "all",
-        root_module_direct_dev_deps = [],
-        # Everything here is derived from checked-in files and the host
-        # platform; nothing needs to be recorded in MODULE.bazel.lock.
-        reproducible = True,
-    )
+def _metadata(mctx):
+    """The extension's metadata.
+
+    Everything the extensions define is derived from checked-in files and
+    the host platform, so nothing needs recording in MODULE.bazel.lock
+    (`reproducible`). Every repository is a direct dependency of the
+    engine's module, whose use_repo() lists them all (`bazel mod tidy`
+    keeps the list complete); another root module that depends on the
+    engine (the Fuchsia spike's, engine/src/flutter/build/bazel/toolchains/
+    fuchsia) imports the few it uses, and is not held to the full list.
+    """
+    root = mctx.modules[0] if mctx.modules else None
+    if root != None and root.is_root and root.name == "flutter":
+        return mctx.extension_metadata(
+            root_module_direct_deps = "all",
+            root_module_direct_dev_deps = [],
+            reproducible = True,
+        )
+    return mctx.extension_metadata(reproducible = True)
 
 synced_deps = module_extension(
     implementation = _synced_deps_impl,
@@ -540,11 +553,7 @@ def _engine_version_impl(mctx):
         skia_version = GIT_DEPS[_SKIA_PATH]["revision"],
         dart_version = GIT_DEPS[_DART_PATH]["revision"],
     )
-    return mctx.extension_metadata(
-        root_module_direct_deps = "all",
-        root_module_direct_dev_deps = [],
-        reproducible = True,
-    )
+    return _metadata(mctx)
 
 engine_version = module_extension(
     implementation = _engine_version_impl,
