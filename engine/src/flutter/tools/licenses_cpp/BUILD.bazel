@@ -114,5 +114,7 @@ cc_test(
         "@abseil_cpp_tree//:root_includes",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
 )

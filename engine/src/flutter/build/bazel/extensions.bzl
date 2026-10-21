@@ -278,6 +278,13 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/third_party/abseil-cpp",
         build_file = _OVERLAYS + ":abseil_cpp_tree/BUILD.abseil_cpp_tree.bazel",
     ),
+    # googletest's headers under the engine's root-relative spellings
+    # (third_party/googletest/googletest/include/gtest/...); @googletest
+    # itself keeps upstream's build files.
+    "googletest_tree": struct(
+        path = "engine/src/flutter/third_party/googletest",
+        build_file = _OVERLAYS + ":googletest_tree/BUILD.googletest_tree.bazel",
+    ),
     "vulkan_memory_allocator_tree": struct(
         path = "engine/src/flutter/third_party/vulkan_memory_allocator",
         build_file = _OVERLAYS + ":vulkan_memory_allocator_tree/BUILD.vulkan_memory_allocator_tree.bazel",
