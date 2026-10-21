@@ -6059,6 +6059,14 @@ cc_library(
 ]}''',
         'mac_host_engine.json':
             '{"builds": [${build('ci/mac_host', '--runtime-mode debug --no-lto', <String>['flutter'])}]}',
+        // The web: --web is the wasm platform, whose optimized build links
+        // with LTO as GN's does (so --no-lto is what it cannot express).
+        'linux_web_engine_build.json':
+            '''
+{"builds": [
+  ${build('ci/wasm_release', '--web --runtime-mode=release --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'], archives: <String>['out/wasm_release/zip_archives/flutter-web-sdk.zip'])},
+  ${build('ci/wasm_profile', '--web --runtime-mode=profile --no-lto', <String>['flutter/web_sdk:flutter_web_sdk_archive'])}
+]}''',
         // The developer's configurations: linux/host_debug sets what
         // ci/host_debug sets (one configuration); macos/ is not the host.
         'local_engine.json':
@@ -6066,10 +6074,12 @@ cc_library(
 {"builds": [
   ${build('linux/host_debug', '--runtime-mode debug --no-stripped --no-lto --rbe --no-goma', <String>[])},
   ${build('linux/host_debug_unopt', '--runtime-mode debug --unopt --no-stripped --no-lto', <String>[])},
+  ${build('linux/wasm_release', '--web --runtime-mode=release --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'])},
+  ${build('linux/wasm_debug_unopt', '--web --runtime-mode=debug --unoptimized --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'])},
   ${build('macos/host_debug', '--runtime-mode debug --no-stripped --no-lto --xcode-symlinks', <String>[])}
 ]}''',
       });
-      final List<BuilderBuild> builds = linuxHostBuilds(loaded);
+      final List<BuilderBuild> builds = linuxBuilds(loaded);
       // CI's host_debug_unopt sets flags the developer's does not (asan, a
       // Debug VM): the developer's keeps the bare name, CI's its prefix.
       expect(builds.map((BuilderBuild b) => b.configName), <String>[
@@ -6079,8 +6089,12 @@ cc_library(
         'ci_host_debug_unopt',
         'host_profile_lto',
         'host_release_licenses',
+        'wasm_release',
+        'wasm_profile',
         'host_debug',
         'host_debug_unopt',
+        'wasm_release',
+        'wasm_debug_unopt',
       ]);
       expect(
         configsBazelrc(builds),
@@ -6104,11 +6118,20 @@ build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/co
 # linux_host_engine.json: ci/host_profile_lto
 #   --runtime-mode profile --prebuilt-dart-sdk
 # No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Bazel toolchain has no LTO)
+#   LTO, which tools/gn enables without --no-lto (the host toolchain has no LTO)
 
 # linux_host_engine.json: ci/host_release_licenses
 #   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
 build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+
+# linux_web_engine_build.json: ci/wasm_release
+#   --web --runtime-mode=release --no-rbe --no-goma
+build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+
+# linux_web_engine_build.json: ci/wasm_profile
+#   --web --runtime-mode=profile --no-lto
+# No configuration: the Bazel build cannot express
+#   --no-lto (the wasm platform links the optimized build with LTO)
 
 # local_engine.json: linux/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
@@ -6117,12 +6140,20 @@ build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common
 # local_engine.json: linux/host_debug_unopt
 #   --runtime-mode debug --unopt --no-stripped --no-lto
 build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+
+# local_engine.json: linux/wasm_release
+#   --web --runtime-mode=release --no-rbe --no-goma
+# The same configuration as linux_web_engine_build.json's ci/wasm_release, above.
+
+# local_engine.json: linux/wasm_debug_unopt
+#   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
+build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
 '''),
       );
       // Two builds of one name with different flags cannot share it.
       expect(
         () => configsBazelrc(
-          linuxHostBuilds(
+          linuxBuilds(
             configs(<String, String>{
               'linux_a.json':
                   '{"builds": [${build('ci/host_x', '--runtime-mode debug --no-lto', <String>[])}]}',
@@ -6147,6 +6178,7 @@ build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
           '//flutter/sky/packages/sky_engine': <String>{'sky_engine'},
           '//flutter/impeller/compiler/shader_lib/flutter': <String>{'flutter'},
           '//flutter/tools/licenses_cpp': <String>{'licenses_cpp', 'license_file_compare'},
+          '//flutter/web_sdk': <String>{'flutter_web_sdk_archive'},
         },
         convertedTests: <String, Set<String>>{
           '//flutter/fml': <String>{'fml_unittests'},
@@ -6172,6 +6204,37 @@ install(
     ],
     directory = "ci/host_debug",
 )
+'''),
+      );
+      // The web build installs into the directory tools/gn names for its
+      // flags (out/wasm_release: the install rule's variant under the wasm
+      // platform), having no --target-dir.
+      expect(
+        buildFile,
+        contains('''
+# linux_web_engine_build.json: ci/wasm_release
+#   bazel run --config=wasm_release :wasm_release
+install(
+    name = "wasm_release",
+    testonly = True,
+    contents = ["//engine/src/flutter/web_sdk:flutter_web_sdk_archive"],
+)
+
+# linux_web_engine_build.json: ci/wasm_profile
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+install(
+    name = "wasm_profile",
+'''),
+      );
+      // The developer's linux/wasm_release builds what CI's ci/wasm_release
+      // builds under the same name: one install.
+      expect(
+        buildFile,
+        contains('''
+# local_engine.json: linux/wasm_release
+#   bazel run --config=wasm_release :wasm_release
+# The same install as linux_web_engine_build.json's ci/wasm_release, above.
 '''),
       );
       expect(

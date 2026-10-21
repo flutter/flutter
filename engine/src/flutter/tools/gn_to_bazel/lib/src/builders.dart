@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Linux x64 host builds of `ci/builders/*.json` as Bazel configurations
-/// and install targets.
+/// The Linux builds of `ci/builders/*.json` -- the x64 host's own and the
+/// web's -- as Bazel configurations and install targets.
 ///
 /// Each builder file describes builds: a `tools/gn` flag list, the ninja
 /// targets to build, the archives to upload, the tests to run. The Bazel
 /// build has settings for some of what the flags set (the runtime mode, the
-/// compilation mode) and assumptions for the rest; this module turns each
-/// Linux x64 host build into a `--config=<name>` of a generated bazelrc
-/// (`ci/builders/configs.bazelrc`, which the root `.bazelrc` imports) when
-/// every flag maps, and into an `install` target of a generated BUILD file
-/// (`ci/builders/BUILD.bazel`) over the Bazel counterparts of its ninja
-/// targets, installing into GN's build directory (`--target-dir`). A flag
+/// compilation mode, the target platform) and assumptions for the rest;
+/// this module turns each Linux build into a `--config=<name>` of a
+/// generated bazelrc (`ci/builders/configs.bazelrc`, which the root
+/// `.bazelrc` imports) when every flag maps, and into an `install` target
+/// of a generated BUILD file (`ci/builders/BUILD.bazel`) over the Bazel
+/// counterparts of its ninja targets, installing into GN's build directory
+/// (`--target-dir`, or the directory tools/gn names for the flags). A flag
 /// the Bazel build cannot express yet costs the build its configuration,
 /// with the reason on record in the generated file; a ninja target with no
 /// Bazel counterpart is listed the same way.
@@ -37,6 +38,15 @@ enum GnFlagEffect {
   /// `--target-dir <dir>`: the build directory under engine/src/out.
   buildDirectory,
 
+  /// `--web`: a target platform the Bazel build has, which the
+  /// configuration's `--platforms` names ([GnFlag.bazelFlag]).
+  platform,
+
+  /// `--lto`/`--no-lto`: whether the optimized build links with LTO, which
+  /// the target platform decides here: the host toolchain has no LTO, the
+  /// wasm platform's optimized build always has it.
+  lto,
+
   /// A flag the Bazel build has a setting for ([GnFlag.bazelFlag]).
   setting,
 
@@ -44,7 +54,7 @@ enum GnFlagEffect {
   /// argument, unsupported otherwise.
   gnArgument,
 
-  /// What the generated files assume already (the prebuilt Dart SDK, no LTO).
+  /// What the generated files assume already (the prebuilt Dart SDK).
   assumed,
 
   /// Infrastructure, or something a configuration cannot carry (targets).
@@ -53,7 +63,8 @@ enum GnFlagEffect {
   /// Something the Bazel build has no setting for yet.
   unsupported,
 
-  /// A platform other than the Linux x64 host: the build is out of scope.
+  /// A platform the Bazel build has none for yet (Android, iOS, ...): the
+  /// build is out of scope.
   otherPlatform,
 }
 
@@ -75,13 +86,18 @@ final class GnFlag {
   /// Why it is assumed, ignored or unsupported.
   final String? note;
 
-  /// The Bazel flag a [GnFlagEffect.setting] flag amounts to.
+  /// The Bazel flag a [GnFlagEffect.setting] flag amounts to, or the
+  /// `--platforms` of a [GnFlagEffect.platform] one.
   final String? bazelFlag;
 
   /// Bazel options the configuration carries besides [bazelFlag]: what the
   /// setting implies for the run that `tools/gn` has no flag for.
   final List<String> alongside;
 }
+
+/// The wasm platform: GN's `--web` build (build/bazel/toolchains/emscripten).
+const String wasmPlatform =
+    '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten';
 
 /// The `tools/gn` flags of the Linux builder files, as far as they appear.
 const Map<String, GnFlag> gnFlags = <String, GnFlag>{
@@ -103,11 +119,10 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
     GnFlagEffect.unsupported,
     note: 'the generated files assume the prebuilt Dart SDK',
   ),
-  '--no-lto': GnFlag(
-    GnFlagEffect.assumed,
-    note: 'the Bazel toolchain never links with LTO (enable_lto is false)',
-  ),
-  '--lto': GnFlag(GnFlagEffect.unsupported, note: 'the Bazel toolchain has no LTO'),
+  // tools/gn: LTO is on unless --no-lto, and off in unoptimized builds.
+  // Whether the Bazel build can follow is the platform's (BuilderBuild.of).
+  '--no-lto': GnFlag(GnFlagEffect.lto),
+  '--lto': GnFlag(GnFlagEffect.lto),
   '--rbe': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
   '--no-rbe': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
   '--goma': GnFlag(GnFlagEffect.ignored, note: 'where the build runs'),
@@ -156,7 +171,9 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--fuchsia-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
   '--ios': GnFlag(GnFlagEffect.otherPlatform),
   '--mac': GnFlag(GnFlagEffect.otherPlatform),
-  '--web': GnFlag(GnFlagEffect.otherPlatform),
+  // tools/gn's --web: target_os wasm, the web build's GN arguments
+  // (to_gn_wasm_args), which the wasm platform's flags carry.
+  '--web': GnFlag(GnFlagEffect.platform, bazelFlag: '--platforms=$wasmPlatform'),
   '--windows': GnFlag(GnFlagEffect.otherPlatform),
   '--target-os': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
   '--linux-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
@@ -238,6 +255,7 @@ final class BuilderBuild {
     required this.archives,
     required this.bazelFlags,
     required this.buildDirectory,
+    required this.platform,
     required this.unsupported,
     required this.otherPlatform,
     required this.testTypes,
@@ -255,6 +273,7 @@ final class BuilderBuild {
     var lto = true;
     String? runtimeMode;
     String? buildDirectory;
+    String? platform;
     final List<String> gn = build.gn;
     for (var i = 0; i < gn.length; i++) {
       String flag = gn[i];
@@ -283,6 +302,10 @@ final class BuilderBuild {
           unoptimized = true;
         case GnFlagEffect.buildDirectory:
           buildDirectory = value;
+        case GnFlagEffect.platform:
+          platform = known.bazelFlag;
+        case GnFlagEffect.lto:
+          lto = flag == '--lto';
         case GnFlagEffect.setting:
           final String setting = known.bazelFlag! + (value == null ? '' : '=$value');
           for (final option in <String>[setting, ...known.alongside]) {
@@ -298,9 +321,6 @@ final class BuilderBuild {
             settings.add(argument);
           }
         case GnFlagEffect.assumed:
-          if (flag == '--no-lto') {
-            lto = false;
-          }
         case GnFlagEffect.ignored:
           break;
         case GnFlagEffect.unsupported:
@@ -310,11 +330,21 @@ final class BuilderBuild {
       }
     }
     // tools/gn: LTO is on unless --no-lto, and off in unoptimized builds.
-    if (lto && !unoptimized) {
-      unsupported.add('LTO, which tools/gn enables without --no-lto (${gnFlags['--lto']!.note})');
+    // The host toolchain has no LTO, so an optimized host build has to say
+    // --no-lto; the wasm platform links the optimized build with LTO, as
+    // GN's web build does, and has no setting that turns it off.
+    if (!unoptimized && lto && platform == null) {
+      unsupported.add(
+        'LTO, which tools/gn enables without --no-lto (the host toolchain has no LTO)',
+      );
+    } else if (!unoptimized && !lto && platform != null) {
+      unsupported.add('--no-lto (the wasm platform links the optimized build with LTO)');
     }
     flags.add(unoptimized ? '--compilation_mode=fastbuild' : '--compilation_mode=opt');
     flags.add('--$runtimeModeSetting=${runtimeMode ?? 'debug'}');
+    if (platform != null) {
+      flags.add(platform);
+    }
     flags.addAll(settings);
     // The tests: run_tests.py's types, the test executables a step runs
     // from the build directory, and every other step by name.
@@ -352,6 +382,7 @@ final class BuilderBuild {
       ],
       bazelFlags: flags,
       buildDirectory: buildDirectory,
+      platform: platform,
       unsupported: unsupported,
       otherPlatform: otherPlatform,
       testTypes: testTypes,
@@ -381,10 +412,14 @@ final class BuilderBuild {
   /// GN's `--target-dir`, under engine/src/out.
   final String? buildDirectory;
 
+  /// The `--platforms` of a build for the web (`--web`, [wasmPlatform]);
+  /// null for the host's own build.
+  final String? platform;
+
   /// The flags the Bazel build cannot express, with the reason each.
   final List<String> unsupported;
 
-  /// Whether the build targets another platform than the Linux x64 host.
+  /// Whether the build targets a platform the Bazel build has none for yet.
   final bool otherPlatform;
 
   /// The types its run_tests.py steps run (`dart`, `engine`, ...).
@@ -420,11 +455,11 @@ final class BuilderBuild {
   }
 }
 
-/// The Linux x64 host builds of [configs] (a builder file's name to its
+/// The Linux builds of [configs] (a builder file's name to its
 /// configuration), by file and build order: the `linux_*.json` files' builds
-/// that target the host, and local_engine.json's `linux/` builds -- the
-/// developer's configurations, which `et build --config <name>` runs.
-List<BuilderBuild> linuxHostBuilds(Map<String, BuilderConfig> configs) {
+/// that target the host or the web, and local_engine.json's `linux/` builds
+/// -- the developer's configurations, which `et build --config <name>` runs.
+List<BuilderBuild> linuxBuilds(Map<String, BuilderConfig> configs) {
   final builds = <BuilderBuild>[];
   final List<String> files =
       configs.keys.where((String f) => f.startsWith('linux_') || f == 'local_engine').toList()
@@ -465,13 +500,14 @@ String configsBazelrc(List<BuilderBuild> builds) {
     ..writeln()
     ..writeln('# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.')
     ..writeln('#')
-    ..writeln('# Each Linux x64 host build of the builder files as a Bazel configuration:')
-    ..writeln("# `bazel build --config=<name> ...` sets what the build's tools/gn flags")
-    ..writeln('# set, as far as the Bazel build has settings for them (gnFlags in')
-    ..writeln('# tools/gn_to_bazel/lib/src/builders.dart says what each flag amounts to).')
-    ..writeln('# A build with a flag the Bazel build cannot express yet is listed with the')
-    ..writeln('# reason and gets no configuration; the install target of each build is in')
-    ..writeln('# BUILD.bazel beside this file.');
+    ..writeln("# Each Linux build of the builder files -- the x64 host's own and the web's")
+    ..writeln('# -- as a Bazel configuration: `bazel build --config=<name> ...` sets what')
+    ..writeln("# the build's tools/gn flags set, as far as the Bazel build has settings for")
+    ..writeln('# them (gnFlags in tools/gn_to_bazel/lib/src/builders.dart says what each')
+    ..writeln('# flag amounts to; --web is the wasm platform). A build with a flag the')
+    ..writeln('# Bazel build cannot express yet is listed with the reason and gets no')
+    ..writeln('# configuration; the install target of each build is in BUILD.bazel beside')
+    ..writeln('# this file.');
   // A name may be two builds' (CI's ci/host_debug and the developer's
   // linux/host_debug): one configuration, if they set the same flags.
   final written = <String, BuilderBuild>{};
@@ -523,20 +559,21 @@ String buildersBuildFile(
     ..writeln()
     ..writeln('# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.')
     ..writeln('#')
-    ..writeln('# An install target per Linux x64 host build of the builder files, over the')
-    ..writeln('# Bazel counterparts of its ninja targets: `bazel run --config=<name> :<name>`')
-    ..writeln("# builds what the build builds and lays it into GN's build directory for it")
-    ..writeln("# (--target-dir), as the builder's recipe expects to find it. A ninja target")
-    ..writeln('# with no Bazel counterpart yet is listed; a build whose configuration the')
-    ..writeln('# Bazel build cannot express yet (configs.bazelrc) is built with the flags')
-    ..writeln('# of the nearest one; a test executable among the targets is not installed,')
-    ..writeln('# since `bazel test` runs tests from their own place. A build with tests has')
-    ..writeln('# a <name>_tests suite over the Bazel suites that stand for its run_tests.py')
-    ..writeln('# types (runTestsTypeSuites, runTestsEngineSuites in builders.dart):')
-    ..writeln('# `bazel test --config=<name> :<name>_tests` runs what the build runs, with')
-    ..writeln('# its other test steps (scripts of the checkout) listed. The suites are')
-    ..writeln('# manual: each stands for one builder, named; a wildcard run of the tree')
-    ..writeln('# has the tests themselves.')
+    ..writeln("# An install target per Linux build of the builder files (the x64 host's own")
+    ..writeln("# and the web's), over the Bazel counterparts of its ninja targets:")
+    ..writeln('# `bazel run --config=<name> :<name>` builds what the build builds and lays')
+    ..writeln("# it into GN's build directory for it (--target-dir, or the directory")
+    ..writeln("# tools/gn names for the flags), as the builder's recipe expects to find it.")
+    ..writeln('# A ninja target with no Bazel counterpart yet is listed; a build whose')
+    ..writeln('# configuration the Bazel build cannot express yet (configs.bazelrc) is built')
+    ..writeln('# with the flags of the nearest one; a test executable among the targets is')
+    ..writeln('# not installed, since `bazel test` runs tests from their own place. A build')
+    ..writeln('# with tests has a <name>_tests suite over the Bazel suites that stand for its')
+    ..writeln('# run_tests.py types (runTestsTypeSuites, runTestsEngineSuites in')
+    ..writeln('# builders.dart): `bazel test --config=<name> :<name>_tests` runs what the')
+    ..writeln('# build runs, with its other test steps (scripts of the checkout) listed. The')
+    ..writeln('# suites are manual: each stands for one builder, named; a wildcard run of')
+    ..writeln('# the tree has the tests themselves.')
     ..writeln()
     ..writeln('load("//engine/src/flutter/build/bazel:install.bzl", "install")')
     ..writeln()
@@ -548,6 +585,11 @@ String buildersBuildFile(
     ..writeln('    name = "json",')
     ..writeln('    srcs = glob(["**/*.json"]),')
     ..writeln(')');
+  // A name may be two builds' (CI's ci/wasm_release and the developer's
+  // linux/wasm_release, one configuration): one install and one suite, if
+  // they build and run the same.
+  final installs = <String, (BuilderBuild, String)>{};
+  final suites = <String, (BuilderBuild, String)>{};
   for (final build in builds) {
     final resolved = <String>[];
     final missing = <String>[];
@@ -597,9 +639,24 @@ String buildersBuildFile(
     }
     if (resolved.isEmpty) {
       out.writeln('# Nothing to install.');
-      _testSuiteInto(out, build, convertedTests);
+      _testSuiteInto(out, build, convertedTests, suites);
       continue;
     }
+    resolved.sort(compareBuildifierStrings);
+    final install = '${resolved.join(' ')} into ${build.buildDirectory ?? 'the variant'}';
+    final (BuilderBuild, String)? earlier = installs[build.configName];
+    if (earlier != null) {
+      if (earlier.$2 != install) {
+        throw FormatException(
+          "${build.file}'s ${build.name} and ${earlier.$1.file}'s ${earlier.$1.name} would both be "
+          'the install :${build.configName} with different contents: $install against ${earlier.$2}',
+        );
+      }
+      out.writeln("# The same install as ${earlier.$1.file}'s ${earlier.$1.name}, above.");
+      _testSuiteInto(out, build, convertedTests, suites);
+      continue;
+    }
+    installs[build.configName] = (build, install);
     // A build's ninja targets include its test executables; the install
     // of them is testonly, as anything depending on a test must be.
     out
@@ -610,7 +667,7 @@ String buildersBuildFile(
       out.writeln('    contents = ["${resolved.single}"],');
     } else {
       out.writeln('    contents = [');
-      for (final label in resolved..sort(compareBuildifierStrings)) {
+      for (final label in resolved) {
         out.writeln('        "$label",');
       }
       out.writeln('    ],');
@@ -619,13 +676,20 @@ String buildersBuildFile(
       out.writeln('    directory = "${build.buildDirectory}",');
     }
     out.writeln(')');
-    _testSuiteInto(out, build, convertedTests);
+    _testSuiteInto(out, build, convertedTests, suites);
   }
   return out.toString();
 }
 
-/// `<name>_tests`: the suites of [build]'s run_tests.py types.
-void _testSuiteInto(StringBuffer out, BuilderBuild build, Map<String, Set<String>> convertedTests) {
+/// `<name>_tests`: the suites of [build]'s run_tests.py types. [written]
+/// has the suites written so far by name: a second build of a name gets a
+/// note instead, when it runs the same.
+void _testSuiteInto(
+  StringBuffer out,
+  BuilderBuild build,
+  Map<String, Set<String>> convertedTests,
+  Map<String, (BuilderBuild, String)> written,
+) {
   if (build.testTypes.isEmpty && build.binaryTests.isEmpty && build.otherTests.isEmpty) {
     return;
   }
@@ -681,6 +745,20 @@ void _testSuiteInto(StringBuffer out, BuilderBuild build, Map<String, Set<String
     out.writeln('# Nothing to run.');
     return;
   }
+  suites.sort(compareBuildifierStrings);
+  final (BuilderBuild, String)? earlier = written[build.configName];
+  if (earlier != null) {
+    if (earlier.$2 != suites.join(' ')) {
+      throw FormatException(
+        "${build.file}'s ${build.name} and ${earlier.$1.file}'s ${earlier.$1.name} would both be "
+        'the suite :${build.configName}_tests with different tests: ${suites.join(' ')} '
+        'against ${earlier.$2}',
+      );
+    }
+    out.writeln("# The same suite as ${earlier.$1.file}'s ${earlier.$1.name}, above.");
+    return;
+  }
+  written[build.configName] = (build, suites.join(' '));
   // Manual: a suite stands for one builder's run, invoked by name; a
   // wildcard run of the tree would otherwise run the builders' suites over
   // again, the benchmarks among them, which are manual for a reason.
@@ -692,7 +770,7 @@ void _testSuiteInto(StringBuffer out, BuilderBuild build, Map<String, Set<String
     out.writeln('    tests = ["${suites.single}"],');
   } else {
     out.writeln('    tests = [');
-    for (final label in suites..sort(compareBuildifierStrings)) {
+    for (final label in suites) {
       out.writeln('        "$label",');
     }
     out.writeln('    ],');
