@@ -1084,6 +1084,20 @@ cc_library(
   // GN in the secondary source tree over synced trees it names by absolute
   // path (`$source_root/...`), and SPIRV-Headers' own GN.
   ConvertedFile('//third_party/inja'),
+  // Brotli's decoder (FreeType's WOFF2 support, the web build's
+  // flutter_use_freetype_woff2), over a tree whose headers GN never
+  // declares: the public ones under c/include, the decoder's own beside its
+  // sources.
+  ConvertedFile(
+    '//third_party/brotli',
+    implicitDeps: <String>['@brotli//:brotli_headers'],
+    appendix: '''
+cc_library(
+    name = "brotli_headers",
+    hdrs = glob(["c/**/*.h"]),
+)
+''',
+  ),
   ConvertedFile(
     '//flutter/third_party/json',
     implicitDeps: <String>['@json//:flutter_root_headers'],

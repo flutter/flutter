@@ -51,6 +51,15 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/benchmark/BUILD.gn"],
         gn_repository = "@benchmark=//flutter/third_party/benchmark",
     ),
+    # Brotli's decoder, which FreeType's WOFF2 support links (the web build's
+    # flutter_use_freetype_woff2): the engine's GN for the tree, in the
+    # secondary source tree, converted at fetch time.
+    "brotli": struct(
+        path = "engine/src/flutter/third_party/brotli",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/third_party/brotli/BUILD.gn"],
+        gn_repository = "@brotli=//flutter/third_party/brotli",
+    ),
     # Embedding API headers and the inputs of the wrapped GN build (see the
     # overlay).
     "dart": struct(
