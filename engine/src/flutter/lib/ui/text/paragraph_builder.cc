@@ -19,13 +19,13 @@
 #include "flutter/txt/src/txt/text_baseline.h"
 #include "flutter/txt/src/txt/text_decoration.h"
 #include "flutter/txt/src/txt/text_style.h"
+#include "third_party/icu/source/common/unicode/ustring.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
-#include "unicode/ustring.h"
 
 namespace flutter {
 namespace {
