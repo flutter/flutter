@@ -338,5 +338,7 @@ flutter_cc_test(
         "//engine/src/flutter/shell/version",
         "//engine/src/flutter/testing:fixture_test",
         "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
 )

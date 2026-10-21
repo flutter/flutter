@@ -358,6 +358,8 @@ cc_library(
         "//engine/src/flutter/display_list",
         "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
         "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
 )
 

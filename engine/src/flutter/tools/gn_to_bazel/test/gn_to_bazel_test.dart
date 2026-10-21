@@ -2246,6 +2246,8 @@ cc_test(
         ":archive",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
 )
 '''),

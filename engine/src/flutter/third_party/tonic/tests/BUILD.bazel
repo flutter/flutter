@@ -41,5 +41,7 @@ flutter_cc_test(
         "//engine/src/flutter/third_party/tonic",
         "@dart//:dart_api_headers",
         "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
 )
