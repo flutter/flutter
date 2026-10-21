@@ -77,7 +77,7 @@ class ExtensionManager {
       'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
     for (final entryPoint in entryPoints) {
-      // ignore: invalid_use_of_visible_for_testing_member // Transitional until #194774.
+      // ignore: invalid_use_of_visible_for_testing_member, transitional until #194774.
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         entryPoint,
         logger: _logger,
