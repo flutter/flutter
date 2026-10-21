@@ -734,6 +734,22 @@ void main() {
         );
 
         testWithoutContext(
+          'does not initialize dynamic options when --no-extensions follows command',
+          () async {
+            final toolContext = FakeToolContext();
+            final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
+            final runner = FlutterCommandRunner(
+              toolContext: toolContext,
+              featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+            )..addCommand(dynamicCommand);
+
+            await runner.run(<String>['dynamic-cmd', '--no-extensions']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isFalse);
+          },
+        );
+
+        testWithoutContext(
           'initializes dynamic options when --extensions overrides preceding --no-extensions',
           () async {
             final toolContext = FakeToolContext();
