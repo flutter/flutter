@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 #include <memory>
-#include "absl/strings/match.h"
 #include "flutter/testing/testing.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/testing/mocks.h"
+#include "third_party/abseil-cpp/absl/strings/match.h"
 
 namespace impeller {
 namespace testing {
