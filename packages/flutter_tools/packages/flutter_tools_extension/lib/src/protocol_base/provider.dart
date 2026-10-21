@@ -9,6 +9,7 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:stream_channel/isolate_channel.dart';
 
+import '../device.dart';
 import 'service.dart';
 
 /// Entrypoint runner for a Flutter Tool Extension running in an Isolate.
@@ -25,6 +26,7 @@ class ToolExtensionEntryPoint {
     ToolExtensionService.progressNotificationMethod,
     ToolExtensionService.heartbeatNotificationMethod,
     ToolExtensionService.cancelRequestNotificationMethod,
+    DeviceService.logEntryNotificationMethod,
   };
 
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
