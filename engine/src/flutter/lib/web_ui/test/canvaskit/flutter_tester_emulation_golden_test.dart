@@ -37,12 +37,12 @@ void testMain() {
         List<String>? strutStyleFontFallbacks,
         double? strutStyleFontSize,
       }) {
-        final CkStrutStyle? strutStyle;
+        final EngineStrutStyle? strutStyle;
 
         if (strutStyleFontFamily != null ||
             strutStyleFontFallbacks != null ||
             strutStyleFontSize != null) {
-          strutStyle = CkStrutStyle(
+          strutStyle = EngineStrutStyle(
             fontFamily: strutStyleFontFamily,
             fontFamilyFallback: strutStyleFontFallbacks,
             fontSize: strutStyleFontSize,
@@ -51,15 +51,15 @@ void testMain() {
           strutStyle = null;
         }
 
-        final builder = CkParagraphBuilder(
-          CkParagraphStyle(fontFamily: paragraphFontFamily, strutStyle: strutStyle),
+        final builder = EngineParagraphBuilder(
+          EngineParagraphStyle(fontFamily: paragraphFontFamily, strutStyle: strutStyle),
         );
 
         final bool needsTextStyle = textFontFamily != null || textFontFallbacks != null;
 
         if (needsTextStyle) {
           builder.pushStyle(
-            CkTextStyle(fontFamily: textFontFamily, fontFamilyFallback: textFontFallbacks),
+            EngineTextStyle(fontFamily: textFontFamily, fontFamilyFallback: textFontFallbacks),
           );
         }
 
@@ -69,7 +69,7 @@ void testMain() {
           builder.pop();
         }
 
-        final CkParagraph paragraph = builder.build();
+        final EngineParagraph paragraph = builder.build();
         paragraph.layout(const ui.ParagraphConstraints(width: 10000));
         canvas.drawParagraph(paragraph, ui.Offset.zero);
         canvas.drawRect(

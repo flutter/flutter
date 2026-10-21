@@ -5,6 +5,8 @@
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 /// Static metadata parsed from an extension package's
 /// `extension/flutter_tools/config.yaml` file.
 ///
@@ -86,13 +88,16 @@ final class ExtensionPackageConfig {
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
   factory ExtensionPackageConfig.fromMap(Map<Object?, Object?> map, {String? packageName}) {
-    final Object? rawName = map[nameKey] ?? packageName;
-    if (rawName is! String || rawName.trim().isEmpty) {
+    final Map<String, Object?> json = map.cast<String, Object?>();
+    final String rawName = packageName != null && json[nameKey] == null
+        ? packageName
+        : json.requiredField<String>(nameKey);
+    final String name = rawName.trim();
+    if (name.isEmpty) {
       throw const FormatException(
         'Extension config.yaml must specify a non-empty string for "$nameKey".',
       );
     }
-    final String name = rawName.trim();
 
     if (packageName != null && name != packageName) {
       throw FormatException(
@@ -100,32 +105,22 @@ final class ExtensionPackageConfig {
       );
     }
 
-    final Object? rawProtocolVersion = map[protocolVersionKey];
-    final int protocolVersion = switch (rawProtocolVersion) {
-      final int v => v,
-      null => currentProtocolVersion,
-      final Object? other => throw FormatException(
-        'Extension config.yaml "$protocolVersionKey" must be an int, got: $other.',
-      ),
-    };
-
-    final String entrypoint = switch (map[entrypointKey]) {
-      final String e when e.trim().isNotEmpty => _validateEntrypoint(e),
-      null => _validateEntrypoint('bin/$name.dart'),
-      final Object? other => throw FormatException(
-        'Extension config.yaml "$entrypointKey" must be a non-empty string, got: $other.',
-      ),
-    };
+    final int protocolVersion = json.optionalField<int>(
+      protocolVersionKey,
+      defaultValue: currentProtocolVersion,
+    );
+    final String? rawEntrypoint = json.nullableField<String>(entrypointKey);
+    final String entrypoint = _validateEntrypoint(rawEntrypoint ?? 'bin/$name.dart');
 
     return ExtensionPackageConfig(
       name: name,
       protocolVersion: protocolVersion,
       entrypoint: entrypoint,
-      supportedPlatforms: _parseStringSet(map[supportedPlatformsKey], supportedPlatformsKey),
-      services: _parseStringSet(map[servicesKey], servicesKey),
-      buildTargets: _parseStringSet(map[buildTargetsKey], buildTargetsKey),
-      templates: _parseStringSet(map[templatesKey], templatesKey),
-      platforms: _parseStringSet(map[platformsKey], platformsKey),
+      supportedPlatforms: _parseStringSet(json, supportedPlatformsKey),
+      services: _parseStringSet(json, servicesKey),
+      buildTargets: _parseStringSet(json, buildTargetsKey),
+      templates: _parseStringSet(json, templatesKey),
+      platforms: _parseStringSet(json, platformsKey),
     );
   }
 
@@ -238,21 +233,15 @@ final class ExtensionPackageConfig {
     return Set<String>.unmodifiable(validated);
   }
 
-  static Set<String> _parseStringSet(Object? raw, String fieldName) {
-    return switch (raw) {
-      null => const <String>{},
-      final List<Object?> list => <String>{
-        for (final Object? item in list)
-          if (item is String && item.trim().isNotEmpty)
-            item.trim()
-          else
-            throw FormatException(
-              'Extension config.yaml "$fieldName" entries must be non-empty strings, got: $item.',
-            ),
-      },
-      final Object other => throw FormatException(
-        'Extension config.yaml "$fieldName" must be a list of strings, got: $other.',
-      ),
+  static Set<String> _parseStringSet(Map<String, Object?> json, String fieldName) {
+    return <String>{
+      for (final String item in json.stringIterable(fieldName))
+        if (item.trim().isNotEmpty)
+          item.trim()
+        else
+          throw FormatException(
+            'Extension config.yaml "$fieldName" entries must be non-empty strings, got: "$item".',
+          ),
     };
   }
 
