@@ -67,22 +67,23 @@ void main() {
       expect(hostArtifactSource.toString(), contains('impellerc'));
     });
 
-    test('fromJson throws ArgumentError on invalid type or missing fields', () {
+    test('fromJson throws FormatException on invalid type or missing fields', () {
+      expect(() => ExtensionSource.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
         () => ExtensionSource.fromJson(const <String, Object?>{'type': 'unknown'}),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionSource.fromJson(const <String, Object?>{'type': 'pattern'}),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionSource.fromJson(const <String, Object?>{'type': 'artifact'}),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionSource.fromJson(const <String, Object?>{'type': 'host_artifact'}),
-        throwsArgumentError,
+        throwsFormatException,
       );
     });
 
@@ -161,65 +162,80 @@ void main() {
       expect(parsed.outputDir, '{OUTPUT_DIR}/linux');
     });
 
-    test('fromJson throws ArgumentError on missing required fields or malformed fields', () {
+    test('fromJson throws FormatException on missing required fields or malformed fields', () {
       final validRequired = <String, Object?>{
         'description': 'A custom Linux build target.',
         'name': 'custom-linux-build',
         'outputDir': '{OUTPUT_DIR}/linux',
         'targetPlatform': 'linux-x64',
       };
-      expect(() => ExtensionBuildTarget.fromJson(const <String, Object?>{}), throwsArgumentError);
+      expect(() => ExtensionBuildTarget.fromJson(const <String, Object?>{}), throwsFormatException);
       expect(
         () =>
             ExtensionBuildTarget.fromJson(<String, Object?>{...validRequired, 'description': null}),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{...validRequired, 'name': null}),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{
           ...validRequired,
           'targetPlatform': 123,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{...validRequired, 'outputDir': null}),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{...validRequired, 'outputDir': 123}),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{
           ...validRequired,
           'artifacts': const <Object?>[123],
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{
           ...validRequired,
           'artifacts': 'invalid',
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{
           ...validRequired,
           'hostArtifacts': const <Object?>[123],
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
         () => ExtensionBuildTarget.fromJson(<String, Object?>{
           ...validRequired,
           'hostArtifacts': 'invalid',
         }),
-        throwsArgumentError,
+        throwsFormatException,
+      );
+    });
+
+    test('fromJson throws FormatException when fields have invalid types', () {
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          ExtensionBuildTarget.nameKey: 123,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          ExtensionBuildTarget.descriptionKey: false,
+        }),
+        throwsFormatException,
       );
     });
 
@@ -302,46 +318,89 @@ void main() {
       expect(parsed.toString(), contains('custom-linux-assemble-only-debug'));
     });
 
-    test('deserializes with defaults when fields are missing', () {
-      final parsed = ExtensionAssembleTarget.fromJson(const <String, Object?>{});
-      expect(parsed.name, isEmpty);
-      expect(parsed.targetPlatform, isEmpty);
-      expect(parsed.description, isEmpty);
+    test('deserializes with defaults when optional fields are missing', () {
+      final parsed = ExtensionAssembleTarget.fromJson(const <String, Object?>{
+        'description': 'A custom Linux assemble target.',
+        'name': 'custom-linux-assemble-only-debug',
+        'targetPlatform': 'linux-x64',
+      });
+      expect(parsed.name, 'custom-linux-assemble-only-debug');
+      expect(parsed.targetPlatform, 'linux-x64');
+      expect(parsed.description, 'A custom Linux assemble target.');
       expect(parsed.dependencies, isEmpty);
       expect(parsed.inputs, isEmpty);
       expect(parsed.outputs, isEmpty);
     });
 
-    test('fromJson throws ArgumentError on malformed dependencies, inputs, or outputs', () {
+    test('fromJson throws FormatException on missing required fields or malformed fields', () {
+      final validRequired = <String, Object?>{
+        'description': 'A custom Linux assemble target.',
+        'name': 'custom-linux-assemble-only-debug',
+        'targetPlatform': 'linux-x64',
+      };
       expect(
-        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{
-          'dependencies': <Object?>[123],
+        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'description': null,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
-        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{'dependencies': 'invalid'}),
-        throwsArgumentError,
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{...validRequired, 'name': null}),
+        throwsFormatException,
       );
       expect(
-        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{
-          'inputs': <Object?>['not-a-map'],
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'targetPlatform': null,
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
-        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{'inputs': 'invalid'}),
-        throwsArgumentError,
-      );
-      expect(
-        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{
-          'outputs': <Object?>['not-a-map'],
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'dependencies': const <Object?>[123],
         }),
-        throwsArgumentError,
+        throwsFormatException,
       );
       expect(
-        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{'outputs': 'invalid'}),
-        throwsArgumentError,
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'dependencies': 'invalid',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'inputs': const <Object?>['not-a-map'],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'inputs': 'invalid',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'outputs': const <Object?>['not-a-map'],
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(<String, Object?>{
+          ...validRequired,
+          'outputs': 'invalid',
+        }),
+        throwsFormatException,
       );
     });
 
@@ -414,6 +473,21 @@ void main() {
 
       expect(result1, isNot(equals(result2)));
       expect(result1.hashCode, isNot(equals(result2.hashCode)));
+    });
+
+    test('fromJson throws FormatException when fields have invalid types', () {
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          ExtensionBuildResult.successKey: 'yes',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          ExtensionBuildResult.errorMessageKey: 404,
+        }),
+        throwsFormatException,
+      );
     });
   });
 }

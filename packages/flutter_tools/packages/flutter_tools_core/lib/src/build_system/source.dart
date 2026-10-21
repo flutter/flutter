@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../build.dart';
+import '../json_utils.dart';
 
 const _validLeadingDirectoryPlaceholders = <String>{
   BuiltInPlaceholders.projectDir,
@@ -76,44 +77,24 @@ sealed class ExtensionSource {
 
   /// Deserializes an [ExtensionSource] from a JSON-serializable map.
   factory ExtensionSource.fromJson(Map<String, Object?> json) {
-    return switch (json[typeKey]) {
+    final String type = json.requiredField<String>(typeKey);
+    return switch (type) {
       patternType => ExtensionSource.pattern(
-        switch (json[valueKey]) {
-          final String value => ExtensionPatternSource.parse(value),
-          _ => throw ArgumentError(
-            'Missing or invalid "$valueKey" for $patternType ExtensionSource.',
-          ),
-        },
-        optional: switch (json[optionalKey]) {
-          final bool optional => optional,
-          _ => false,
-        },
+        ExtensionPatternSource.parse(json.requiredField<String>(valueKey)),
+        optional: json.optionalField<bool>(optionalKey, defaultValue: false),
       ),
       artifactType => ExtensionSource.artifact(
-        ExtensionArtifact(switch (json[artifactKey]) {
-          final String artifact => artifact,
-          _ => throw ArgumentError(
-            'Missing or invalid "$artifactKey" for $artifactType ExtensionSource.',
-          ),
-        }),
-        mode: switch (json[modeKey]) {
+        ExtensionArtifact(json.requiredField<String>(artifactKey)),
+        mode: switch (json.nullableField<String>(modeKey)) {
           final String mode => BuildMode.fromCliName(mode),
-          _ => null,
+          null => null,
         },
-        platform: switch (json[platformKey]) {
-          final String platform => platform,
-          _ => null,
-        },
+        platform: json.nullableField<String>(platformKey),
       ),
       hostArtifactType => ExtensionSource.hostArtifact(
-        ExtensionHostArtifact(switch (json[artifactKey]) {
-          final String artifact => artifact,
-          _ => throw ArgumentError(
-            'Missing or invalid "$artifactKey" for $hostArtifactType ExtensionSource.',
-          ),
-        }),
+        ExtensionHostArtifact(json.requiredField<String>(artifactKey)),
       ),
-      final Object? type => throw ArgumentError('Unknown ExtensionSource type in JSON: $type'),
+      _ => throw FormatException('Unknown ExtensionSource type in JSON: $type'),
     };
   }
 
