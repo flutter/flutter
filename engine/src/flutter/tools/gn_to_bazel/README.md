@@ -41,12 +41,14 @@ A run over the manifest also reads the builder files
 (`ci/builders/linux_*.json` and `local_engine.json`'s `linux/` builds, the
 developer's, through `package:engine_build_configs`) and
 generates, beside them, `configs.bazelrc` -- a `--config=<build>` per Linux
-x64 host build whose `tools/gn` flags the Bazel build can express (`gnFlags`
-in `lib/src/builders.dart` says what each flag amounts to: a setting, an
-assumption, infrastructure, or nothing yet, in which case the build is
-listed with the reason and gets no configuration) -- and `BUILD.bazel`, an
-`install` per build over the Bazel counterparts of its ninja targets, into
-GN's `--target-dir`, and a `<build>_tests` suite over the Bazel suites that
+build, the x64 host's own and the web's (`--web` is the wasm platform),
+whose `tools/gn` flags the Bazel build can express (`gnFlags`
+in `lib/src/builders.dart` says what each flag amounts to: a setting, the
+platform, an assumption, infrastructure, or nothing yet, in which case the
+build is listed with the reason and gets no configuration) -- and
+`BUILD.bazel`, an `install` per build over the Bazel counterparts of its
+ninja targets, into GN's `--target-dir` or the directory `tools/gn` names
+for the flags, and a `<build>_tests` suite over the Bazel suites that
 stand for its `run_tests.py` types (`runTestsTypeSuites`;
 `runTestsEngineSuites` is the `engine` type's executables by name, resolved
 among the converted tests); both files are covered by `--check`.
