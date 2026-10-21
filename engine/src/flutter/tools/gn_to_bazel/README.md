@@ -31,7 +31,11 @@ out by GN package). `--check` compares with the existing file instead and
 fails on a difference. The output is piped through `buildifier` when one is
 on `PATH` (or named by `--buildifier`; `--buildifier=none` for none); the
 emitter already writes buildifier's format, so the result is the same either
-way. `--depfile` writes the GN files read (the inputs and every imported
+way -- it sorts the lists buildifier sorts (`srcs`, `deps`, `data`, ...),
+except `includes`, whose order is the compiler's search order and GN's
+(freetype2's `include/freetype-flutter-config` ahead of `include`, so that
+Flutter's `public-macros.h` is found first): that list keeps GN's order and
+leads with `# do not sort` when buildifier would reorder it. `--depfile` writes the GN files read (the inputs and every imported
 `.gni`), one per line. A run over the manifest also checks the hand-written
 files that repeat a list of their GN file (`mirroredLists`: the Dart test
 packages' `tests`, GN's `foreach` over it being what keeps those files
