@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Linux builds of `ci/builders/*.json` -- the x64 host's own and the
-/// web's -- as Bazel configurations and install targets.
+/// The Linux builds of `ci/builders/*.json` -- the x64 host's own, the web's
+/// and the arm64 cross builds' -- as Bazel configurations and install targets.
 ///
 /// Each builder file describes builds: a `tools/gn` flag list, the ninja
 /// targets to build, the archives to upload, the tests to run. The Bazel
@@ -532,14 +532,15 @@ String configsBazelrc(List<BuilderBuild> builds) {
     ..writeln()
     ..writeln('# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.')
     ..writeln('#')
-    ..writeln("# Each Linux build of the builder files -- the x64 host's own and the web's")
-    ..writeln('# -- as a Bazel configuration: `bazel build --config=<name> ...` sets what')
-    ..writeln("# the build's tools/gn flags set, as far as the Bazel build has settings for")
-    ..writeln('# them (gnFlags in tools/gn_to_bazel/lib/src/builders.dart says what each')
-    ..writeln('# flag amounts to; --web is the wasm platform). A build with a flag the')
-    ..writeln('# Bazel build cannot express yet is listed with the reason and gets no')
-    ..writeln('# configuration; the install target of each build is in BUILD.bazel beside')
-    ..writeln('# this file.');
+    ..writeln("# Each Linux build of the builder files -- the x64 host's own, the web's and")
+    ..writeln("# the arm64 cross builds' -- as a Bazel configuration: `bazel build")
+    ..writeln("# --config=<name> ...` sets what the build's tools/gn flags set, as far as the")
+    ..writeln('# Bazel build has settings for them (gnFlags in')
+    ..writeln('# tools/gn_to_bazel/lib/src/builders.dart says what each flag amounts to;')
+    ..writeln('# --web is the wasm platform, --target-os=linux --linux-cpu=arm64 the arm64')
+    ..writeln('# one). A build with a flag the Bazel build cannot express yet is listed with')
+    ..writeln('# the reason and gets no configuration; the install target of each build is')
+    ..writeln('# in BUILD.bazel beside this file.');
   // A name may be two builds' (CI's ci/host_debug and the developer's
   // linux/host_debug): one configuration, if they set the same flags.
   final written = <String, BuilderBuild>{};
@@ -591,12 +592,12 @@ String buildersBuildFile(
     ..writeln()
     ..writeln('# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.')
     ..writeln('#')
-    ..writeln("# An install target per Linux build of the builder files (the x64 host's own")
-    ..writeln("# and the web's), over the Bazel counterparts of its ninja targets:")
-    ..writeln('# `bazel run --config=<name> :<name>` builds what the build builds and lays')
-    ..writeln("# it into GN's build directory for it (--target-dir, or the directory")
-    ..writeln("# tools/gn names for the flags), as the builder's recipe expects to find it.")
-    ..writeln('# A ninja target with no Bazel counterpart yet is listed; a build whose')
+    ..writeln("# An install target per Linux build of the builder files (the x64 host's own,")
+    ..writeln("# the web's and the arm64 cross builds'), over the Bazel counterparts of its")
+    ..writeln('# ninja targets: `bazel run --config=<name> :<name>` builds what the build')
+    ..writeln("# builds and lays it into GN's build directory for it (--target-dir, or the")
+    ..writeln("# directory tools/gn names for the flags), as the builder's recipe expects to")
+    ..writeln('# find it. A ninja target with no Bazel counterpart yet is listed; a build whose')
     ..writeln('# configuration the Bazel build cannot express yet (configs.bazelrc) is built')
     ..writeln('# with the flags of the nearest one; a test executable among the targets is')
     ..writeln('# not installed, since `bazel test` runs tests from their own place. A build')

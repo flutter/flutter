@@ -73,11 +73,38 @@ Bazel never uses a compiler found on the host
 (`BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1` in `.bazelrc`). Each registered
 toolchain is assembled from the same pieces GN uses for that platform:
 
-| Piece | linux-x64 |
-| --- | --- |
-| Compiler, linker, archiver | `@clang_linux_x64` (the `DEPS` clang package; `-fuse-ld=lld`, `llvm-ar`). |
-| Sysroot | `@sysroot_linux_x64`, the Debian bullseye sysroot pinned in `sysroots.json` (symlinked from `build/linux/`, or downloaded from the same URL under `FLUTTER_BAZEL_FETCH_TOOLCHAINS`). |
-| C++ standard library | The engine's own libc++ / libc++abi / llvm-libc from `DEPS`, built from source (`@libcxx`, `@libcxxabi`, `@llvm_libc`), with the engine's `__config_site` (ABI namespace `__fl`). Headers replace clang's (`-nostdinc++`), and the archive is linked into every binary through `--@bazel_tools//tools/cpp:link_extra_libs`. |
+| Piece | linux-x64 (the host; the default platform) | linux-arm64 (`--platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64`) |
+| --- | --- | --- |
+| Compiler, linker, archiver | `@clang_linux_x64` (the `DEPS` clang package; `-fuse-ld=lld`, `llvm-ar`). | The same `@clang_linux_x64`, driven with `--target=aarch64-linux-gnu` (and `-DBORINGSSL_CLANG_SUPPORTS_DOT_ARCH`) as GN's `clang_arm64` toolchain drives it. |
+| Sysroot | `@sysroot_linux_x64`, the Debian bullseye sysroot pinned in `sysroots.json` (symlinked from `build/linux/`, or downloaded from the same URL under `FLUTTER_BAZEL_FETCH_TOOLCHAINS`). | `@sysroot_linux_arm64`, `sysroots.json`'s `bullseye_arm64`, which gclient's `linux_sysroot_arm64` hook unpacks beside the x64 one. |
+| C++ standard library | The engine's own libc++ / libc++abi / llvm-libc from `DEPS`, built from source (`@libcxx`, `@libcxxabi`, `@llvm_libc`), with the engine's `__config_site` (ABI namespace `__fl`). Headers replace clang's (`-nostdinc++`), and the archive is linked into every binary through `--@bazel_tools//tools/cpp:link_extra_libs`. | The same sources, built for aarch64 by the arm64 toolchain like the rest of the target configuration. |
+
+The arm64 platform is GN's `--target-os=linux --linux-cpu=arm64` cross
+build (CI's `linux_debug_arm64` and the three `linux_*_arm64_desktop`
+builds). `--platforms` picks the `linux_arm64_clang` toolchain for the
+target configuration only: the exec configuration keeps the host's, so the
+tools a build runs (`gen_snapshot_host`, `impellerc`, the shader compilers,
+the Dart SDK's `dart`) are x64 binaries built once, as GN builds them in its
+`host_toolchain`, and what the build ships is aarch64 -- `flutter_tester`
+included, which links SwiftShader's LLVM Reactor there (the GPU backends'
+wrap carries LLVM's sources in its tree under arm64, as GN's
+`swiftshader_static` picks Reactor over x64's Subzero). The generated files
+needed nothing: the converter already rendered `current_cpu`/`target_cpu`
+conditions as `select()`s over `@platforms//cpu:*`; the hand-written
+overlays that lacked an aarch64 branch (zlib's) got one. `host_toolchain`,
+the setting the generated `unittests_enabled` and the hand-written rules
+read as "this is the host's build", is the host's OS *and* CPU, so the cross
+build has no tests, as GN's has none (`enable_unittests` is false outside
+`host_toolchain`); `build_directory_attrs` names its directory
+`linux_<mode>_arm64`. The Dart wrap builds its tools for the host and its
+`gen_snapshot` for arm64, and the prebuilt SDK a build ships is the target's
+(`@dart_sdk_linux_arm64`, `prebuilts/linux-arm64/dart-sdk`, GN's
+`target_prebuilt_dart_sdk`; `dart_wrap:prebuilt_dart_sdk` selects by CPU).
+Against GN's `out/linux_debug_arm64`, `install_diff.py` finds the archives'
+entry lists identical (`dart-sdk`'s 1,057 files among them), and
+`flutter_embedder.h` and the frontend snapshot byte-identical; the binaries
+differ as the host's do, by compile flags, and by the `--strip-all` GN's
+toolchains apply to what they ship, which the Bazel build does not do yet.
 
 `cc_toolchain_config.bzl` reproduces GN's toolchain-wide flags (warnings,
 visibility, `-std=c++20`, `-fno-exceptions -fno-rtti`, the linker hardening
@@ -953,15 +980,18 @@ GN configuration, the ninja targets it builds, the archives it uploads from
 converter reads the Linux builder files (`tools/gn_to_bazel`'s
 `builders.dart`, run with the rest) and generates two files beside them.
 `ci/builders/configs.bazelrc`, which the root `.bazelrc` imports, has a
-`build:<name>` configuration per Linux build -- the x64 host's own and the
-web's -- whose flags the Bazel build can all express -- `--runtime-mode` is the runtime mode setting,
+`build:<name>` configuration per Linux build -- the x64 host's own, the
+web's and the arm64 cross builds' -- whose flags the Bazel build can all express -- `--runtime-mode` is the runtime mode setting,
 `--unoptimized` the compilation mode (its absence `-c opt`), `--target-dir`
 the build directory, `--web` the wasm platform
 (`--platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten`,
 whose flags carry what `tools/gn`'s `to_gn_wasm_args` sets, LTO on the
 optimized build among them -- so for the web `--no-lto` is the flag the
 Bazel build cannot express, where for the host, whose toolchain has no LTO,
-it is LTO itself), `--enable-fontconfig` the fontconfig flag
+it is LTO itself), `--target-os=linux --linux-cpu=arm64` the arm64 platform
+(`--platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64`; the
+two flags are read as one, since `--linux-cpu` means nothing without
+`--target-os=linux`), `--enable-fontconfig` the fontconfig flag
 (`//engine/src/flutter/txt:use_fontconfig`, which the three `*_desktop`
 builds set: txt links the sysroot's libfontconfig and Skia's fontconfig font
 manager is built and chosen, as in CI's Linux desktop artifact),
@@ -992,20 +1022,23 @@ flags -- CI's `ci/host_debug` and the developer's `linux/host_debug`, CI's
 one configuration; where CI's flags differ from the developer's under one
 bare name, the developer keeps the name `et` knows and CI's keeps its prefix
 as its build directory does: `ci_host_debug_unopt` (`out/ci/host_debug_unopt`,
-asan and a Debug VM) beside `host_debug_unopt`. Of the twenty-one builds,
-twenty have a configuration, seventeen distinct: `host_debug`,
+asan and a Debug VM) beside `host_debug_unopt`. Of the twenty-five builds,
+twenty-four have a configuration, twenty-one distinct: `host_debug`,
 `host_debug_unopt`, `host_profile`, `host_release`, `host_debug_desktop`,
 `host_profile_desktop`, `host_release_desktop`, `host_debug_test`,
 `host_profile_test`, `host_release_test`, `ci_host_debug_unopt`,
 `host_debug_unopt_impeller_tests`, `host_debug_ddm`,
 `host_release_licenses`, `host_debug_clang_tidy`, `wasm_release`,
-`wasm_debug_unopt`. `ci/builders/BUILD.bazel` has an `install` per
+`wasm_debug_unopt`, `linux_debug_arm64`, `linux_debug_arm64_desktop`,
+`linux_profile_arm64_desktop`, `linux_release_arm64_desktop`.
+`ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a
 directory for its target of the same name, a bare unique name, as GN's
 ninja files spell them), installing into GN's `--target-dir` -- or, for a
 build without one, the directory `tools/gn` names for its flags, which the
 install rule reads off its configuration (`checkout_view.bzl`'s
-`build_directory_attrs`: `host` or `wasm`, the runtime mode, `_unopt`) --
+`build_directory_attrs`: `host`, `wasm` or `linux`, the runtime mode,
+`_unopt`, `_arm64`) --
 with the
 targets nothing converted answers to listed (`flutter:unittests`,
 `flutter/build/dart:dart_sdk`, the licenses tool):
@@ -1015,12 +1048,16 @@ bazel run --config=host_release //engine/src/flutter/ci/builders:host_release
 bazel run --config=host_debug //engine/src/flutter/ci/builders:host_debug
 bazel run --config=host_profile //engine/src/flutter:install   # the developer's: everything
 bazel run --config=wasm_release //engine/src/flutter/ci/builders:wasm_release
+bazel run --config=linux_debug_arm64 //engine/src/flutter/ci/builders:linux_debug_arm64
 ```
 
 lay `out/ci/host_release/zip_archives/flutter_patched_sdk_product.zip`,
-`out/ci/host_debug/zip_archives/`'s six archives and
-`out/wasm_release/zip_archives/flutter-web-sdk.zip` where the builders'
-recipes read them. The executables and shared libraries a build's targets
+`out/ci/host_debug/zip_archives/`'s six archives,
+`out/wasm_release/zip_archives/flutter-web-sdk.zip` and
+`out/ci/linux_debug_arm64/zip_archives/`'s five (`dart-sdk-linux-arm64.zip`
+and `linux-arm64/`'s `artifacts.zip`, `linux-arm64-embedder.zip`,
+`font-subset.zip` and `impeller_sdk.zip`, every binary in them aarch64)
+where the builders' recipes read them. The executables and shared libraries a build's targets
 produce (`flutter_tester`, `libpath_ops.so`) land in the build root, as GN
 puts them. A build with tests also gets a `<name>_tests` suite over the
 Bazel suites that stand for its `run_tests.py` types (`dart` is the Dart
