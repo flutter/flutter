@@ -69,8 +69,8 @@ def _gn_build_impl(ctx):
     root_target_dir = ctx.attr.root_target_dir.strip("/")
 
     outputs = {}
-    for gn_path in ctx.attr.outs:
-        f = ctx.actions.declare_file(paths.join(name, paths.basename(gn_path)))
+    for product, gn_path in ctx.attr.outs.items():
+        f = ctx.actions.declare_file(paths.join(name, product))
         outputs[f] = gn_path
     archives = {}
     for file_name, label in ctx.attr.archives.items():
@@ -163,9 +163,11 @@ _gn_build = rule(
         "gn_args": attr.string_dict(
             doc = "Contents of args.gn; values are GN literals (`true`, `\"linux\"`, `3`).",
         ),
-        "outs": attr.string_list(
-            doc = "Build products to export, as paths relative to the GN build directory. Each is " +
-                  "exported under its base name.",
+        "outs": attr.string_dict(
+            doc = "Build products to export: the product's name (a file name under the target's " +
+                  "directory, and its output group) to its path relative to the GN build directory. " +
+                  "Two products may name one path (the host's gen_snapshot is the tool and the " +
+                  "shipped binary in the host's own build, two files in a cross build).",
         ),
         "archives": attr.string_dict(
             doc = "Archives to produce: file name to the GN label of the library target whose " +
@@ -204,29 +206,34 @@ def gn_build(name, outs = [], out_paths = None, archives = {}, visibility = None
     """A GN build of one root target, with its products as targets of this package.
 
     Besides the `name` target (all products), each product is available as
-    `:<basename>`: `:gen_snapshot` for an `outs` entry `gen_snapshot`,
+    `:<name>`: `:gen_snapshot` for an `outs` entry `gen_snapshot`,
     `:libdart_jit.a` for an `archives` key, plus `:compile_commands.json`.
 
     Args:
       name: name of the build target.
-      outs: build products to export, relative to the GN build directory.
+      outs: the products to export, by name: each a file of that name under
+        the GN build directory unless `out_paths` says where it is.
       out_paths: the products' paths under the GN build directory when they
-        depend on the configuration (a select() over the platforms: a cross
-        build's host tools under clang_x64/), each `outs` entry's by base
-        name; `outs` themselves otherwise.
+        differ from their names or depend on the configuration (a dict of
+        name to path, or a select() over the platforms of such dicts: a
+        cross build's host tools under clang_x64/). A product `out_paths`
+        does not name is at its own name.
       archives: archive file name -> GN library label (see the module docstring).
       visibility: visibility of the build target and the product targets.
       **kwargs: the attributes of the underlying rule (`build_file`, `root_target_dir`,
         `ninja_target`, `tree`, `gn_args`, `archive_boundaries`, `ar`, `env`).
     """
+    paths_by_name = {out: out for out in outs}
+    if out_paths != None:
+        paths_by_name = paths_by_name | out_paths
     _gn_build(
         name = name,
-        outs = out_paths if out_paths != None else outs,
+        outs = paths_by_name,
         archives = archives,
         visibility = visibility,
         **kwargs
     )
-    products = [paths.basename(out) for out in outs] + list(archives.keys()) + ["compile_commands.json"]
+    products = list(outs) + list(archives.keys()) + ["compile_commands.json"]
     if len(products) != len({p: None for p in products}):
         fail("gn_build(%s): product base names must be unique: %s" % (name, products))
     for product in products:
