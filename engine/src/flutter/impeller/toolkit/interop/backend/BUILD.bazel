@@ -10,8 +10,20 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "backend",
-    deps = [
-        "//engine/src/flutter/impeller/toolkit/interop/backend/gles",  # impeller_enable_opengles
-        "//engine/src/flutter/impeller/toolkit/interop/backend/vulkan",  # impeller_enable_vulkan
-    ],
+    deps = select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/toolkit/interop/backend/metal",  # impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/toolkit/interop/backend/gles",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/toolkit/interop/backend/vulkan",  # impeller_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
 )

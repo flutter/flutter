@@ -54,13 +54,18 @@ cc_library(
     hdrs = ["system_utils.h"],
     copts = FLUTTER_COPTS,
     cxxopts = ["-Wno-deprecated-declarations"],
-    implementation_deps = [
-        "//engine/src/flutter/shell/platform/common:desktop_library_implementation",
-        "//engine/src/flutter/shell/platform/linux/config:x11",  # is_linux
-    ],
-    linkopts = [
-        "-lGL",  # is_linux
-    ],
+    implementation_deps = ["//engine/src/flutter/shell/platform/common:desktop_library_implementation"] + select({
+        "@platforms//os:linux": [
+            "//engine/src/flutter/shell/platform/linux/config:x11",  # is_linux
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = select({
+        "@platforms//os:linux": [
+            "-lGL",  # is_linux
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":flutter_glfw_headers",

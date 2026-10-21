@@ -13,6 +13,10 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "shaders",
     testonly = True,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":fixtures",
         "//engine/src/flutter/lib/ui/fixtures/shaders/general_shaders",
@@ -35,6 +39,10 @@ impellerc(
     ],
     shaders = ["//engine/src/flutter/impeller/fixtures:ink_sparkle.frag"],
     sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 impellerc(
@@ -45,6 +53,10 @@ impellerc(
     shader_target_flags = ["--sksl"],
     shaders = ["//engine/src/flutter/impeller/fixtures:ink_sparkle.frag"],
     sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 impellerc(
@@ -61,6 +73,10 @@ impellerc(
         "//engine/src/flutter/third_party:test_shaders/selman/glow_shader.frag",
     ],
     sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 impellerc(
@@ -78,6 +94,10 @@ impellerc(
         "//engine/src/flutter/impeller/fixtures:flutter_gpu_texture.vert",
         "//engine/src/flutter/impeller/fixtures:flutter_gpu_array_texture.frag",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # A second shader bundle that exposes the same entrypoint names as
@@ -93,6 +113,10 @@ impellerc(
         "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit.frag",
         "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit.vert",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # Same entrypoint names as `flutter_gpu_shaders` but `UnlitFragment` maps
@@ -106,6 +130,10 @@ impellerc(
         "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit_reload.frag",
         "//engine/src/flutter/impeller/fixtures:flutter_gpu_unlit.vert",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_test_fixtures(
@@ -117,6 +145,10 @@ flutter_test_fixtures(
         ":flutter_gpu_shaders_alt": [],
         ":flutter_gpu_shaders_reload": [],
     },
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":flutter_gpu_shaders",
         ":flutter_gpu_shaders_alt",

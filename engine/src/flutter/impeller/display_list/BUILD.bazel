@@ -71,12 +71,22 @@ cc_library(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/entity",
-        "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "@abseil-cpp//absl/hash",
         "@abseil_cpp_tree//:root_includes",
         "@skia",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -118,6 +128,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":aiks_unittests",
         ":display_list",
@@ -177,6 +191,10 @@ cc_library(
         "IMPELLER_ENABLE_VALIDATION=1",
         "_USE_MATH_DEFINES",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":aiks_unittests_golden",
         ":display_list",
@@ -204,6 +222,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":skia_conversions",
         "//engine/src:include_root",
@@ -224,6 +246,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":display_list",
         "//engine/src:include_root",
@@ -240,16 +266,29 @@ cc_library(
     testonly = True,
     srcs = [
         "aiks_unittests.cc",
-        "canvas_gles_unittests.cc",
         "canvas_unittests.cc",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "canvas_gles_unittests.cc",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }),
     hdrs = ["aiks_unittests.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/renderer/backend/gles:mock_gles
-    ],
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
+    ] + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "-Wno-inconsistent-missing-override",  # from //flutter/impeller/renderer/backend/gles:mock_gles
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":aiks_playground",
         ":display_list",
@@ -258,12 +297,16 @@ cc_library(
         "//engine/src/flutter/impeller/geometry:geometry_asserts",
         "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
         "//engine/src/flutter/impeller/playground:playground_test",
-        "//engine/src/flutter/impeller/renderer/backend/gles:mock_gles",  # impeller_enable_opengles
         "//engine/src/flutter/testing:testing_lib",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil_cpp_tree//:root_includes",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/renderer/backend/gles:mock_gles",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -282,6 +325,10 @@ cc_library(
         "IMPELLER_ENABLE_VALIDATION=1",
         "_USE_MATH_DEFINES",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":aiks_playground",
         ":display_list",

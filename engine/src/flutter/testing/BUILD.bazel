@@ -6,16 +6,19 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_CFLAGS_OBJC", "FLUTTER_CFLAGS_OBJCC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_dart_snapshot_aot", "flutter_dart_snapshot_kernel", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "dynamic_symbols",
-    linkopts = [
-        "-rdynamic",  # is_clang && is_linux
-    ],
+    linkopts = select({
+        "@platforms//os:linux": [
+            "-rdynamic",  # is_clang && is_linux
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # Test helpers that depend only on fml and googletest. Tests of code below
@@ -129,8 +132,12 @@ cc_library(
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :testing_lib
-        "-Wno-redundant-parens",  # from //flutter/runtime
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/runtime
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":testing_lib",
@@ -191,8 +198,12 @@ cc_library(
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :dart
-        "-Wno-redundant-parens",  # from :dart
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :dart
+        ],
+        "//conditions:default": [],
+    }),
     data = select({
         "//engine/src/flutter/common:runtime_mode_profile": [
             ":vmservice_snapshot",  # flutter_runtime_mode == "profile"
@@ -241,6 +252,10 @@ cc_library(
         ],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES + ["TEST_VULKAN_PROCS"],
+    target_compatible_with = select({
+        ":when_enable_unittests_and_shell_enable_vulkan": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":skia",
         "//engine/src:include_root",
@@ -254,8 +269,21 @@ cc_library(
     alwayslink = True,
 )
 
+# `enable_unittests && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_shell_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
 flutter_test_fixtures(
     name = "testing_fixtures",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 cc_library(
@@ -285,6 +313,10 @@ cc_library(
     hdrs = ["test_swangle_utils.h"],
     copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_toolchain": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter/build/bazel/gl_wrap:angle",
@@ -314,6 +346,10 @@ cc_library(
     ],
     implementation_deps = ["@angle//:gl_prototypes"],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_enable_unittests_and_shell_enable_gl": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":skia",
         ":test_swangle_utils",
@@ -323,16 +359,46 @@ cc_library(
     alwayslink = True,
 )
 
+# `enable_unittests && shell_enable_gl`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_shell_enable_gl",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "//engine/src/flutter/shell:enable_gl",
+    ],
+)
+
 flutter_cc_test(
     name = "testing_unittests",
     size = "small",
+    srcs = select({
+        "//engine/src/flutter/shell:test_enable_metal": [
+            "test_metal_surface_unittests.mm",  # test_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    copts = CHROMIUM_CODE_COPTS + select({
+        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC + FLUTTER_CFLAGS_OBJCC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":testing_fixtures",
+        "//engine/src:include_root",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
         "@googletest_tree//:root_includes",
         "@googletest_tree//:third_party_dir_includes",
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:test_enable_metal": [
+            ":metal",  # test_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # What GN has no words for; maintained in the converter's manifest

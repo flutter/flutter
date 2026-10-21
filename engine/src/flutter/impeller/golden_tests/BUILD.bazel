@@ -22,6 +22,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":digest",
         "//engine/src:include_root",
@@ -52,6 +56,10 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter/fml",

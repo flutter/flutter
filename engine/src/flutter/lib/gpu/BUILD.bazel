@@ -48,24 +48,31 @@ cc_library(
         # for Flutter application developers, so it should be explicitly handled
         # via SafeNarrow.
         "-Wimplicit-float-conversion",
-    ] + FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/impeller
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
-        "-Wno-deprecated-copy",  # from //flutter/impeller
-        "-Wno-implicit-fallthrough",  # from //flutter/impeller
-        "-Wno-nullability-completeness",  # from //flutter/impeller
-        "-Wno-suggest-destructor-override",  # from //flutter/impeller
-        "-Wno-suggest-override",  # from //flutter/impeller
-        "-Wno-unused-private-field",  # from //flutter/impeller
-        "-Wno-unused-variable",  # from //flutter/impeller
-    ],
+    ] + FLUTTER_COPTS + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/lib/ui
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/assets",
         "//engine/src/flutter/impeller",
-        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/display_list:skia_conversions",
         "//engine/src/flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
         "//engine/src/flutter/lib/ui",
@@ -74,7 +81,18 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil_cpp_tree//:root_includes",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 

@@ -47,6 +47,10 @@ flutter_cc_test(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":assets",
         ":assets_fixtures",

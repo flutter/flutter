@@ -31,10 +31,18 @@ final class GnLocation {
 
 /// An error about a GN construct, with its location.
 final class GnError implements Exception {
-  GnError(this.location, this.message);
+  GnError(this.location, this.message) : isUnreadImport = false;
+
+  /// An import of a file the converter's policy neither evaluates nor
+  /// knows: the file imports a tree the converter does not read (the Dart
+  /// runtime's, abseil's), which is all a dependency resolver needs to know
+  /// about it (dependency_resolver.dart), where any other error is the
+  /// converter's own.
+  GnError.unreadImport(this.location, this.message) : isUnreadImport = true;
 
   final GnLocation location;
   final String message;
+  final bool isUnreadImport;
 
   @override
   String toString() => '$location: $message';

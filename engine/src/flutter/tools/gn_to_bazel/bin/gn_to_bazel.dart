@@ -45,7 +45,9 @@ Future<int> run(List<String> arguments) async {
       'assume',
       help:
           'A GN variable value to take as given, as name=value. '
-          'Defaults to the Linux x64 host build; pass --assume=none to keep every condition.',
+          'Defaults to the generation scope (a Linux x64 host building for Linux or the web; '
+          "bazel_mapping.dart's generationAssumptions); --assume=host is the Linux host's full "
+          "set (linuxHostAssumptions, the oracle's), --assume=none keeps every condition.",
     )
     ..addMultiOption(
       'skip',
@@ -351,8 +353,11 @@ Assumptions _assumptions(List<String> specs) {
   if (specs.contains('none')) {
     return Assumptions(const <String, GnValue>{});
   }
-  if (specs.isEmpty) {
+  if (specs.contains('host')) {
     return linuxHostAssumptions();
+  }
+  if (specs.isEmpty) {
+    return generationAssumptions();
   }
   final values = <String, GnValue>{};
   for (final spec in specs) {
