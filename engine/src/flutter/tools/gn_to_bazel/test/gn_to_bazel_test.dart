@@ -2784,6 +2784,42 @@ source_set("x") {
       );
     });
 
+    test("an ordered attribute keeps GN's interleaving of conditional appends", () async {
+      // impeller_public_config's defines: IMPELLER_DEBUG under the runtime
+      // mode first, the rest after -- the compiler reads defines, copts and
+      // include directories in order, so the select() sits where GN's append
+      // was. deps, which buildifier sorts, keep the two-part layout.
+      final String output = await convert('''
+config("x") {
+  defines = []
+  if (flutter_runtime_mode == "debug") {
+    defines += [ "A_DEBUG=1" ]
+  }
+  defines += [ "B=1" ]
+  if (is_wasm) {
+    defines += [ "C_WASM=1" ]
+  }
+  defines += [ "D=1" ]
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains(
+          '    defines = select({\n'
+          '        "//engine/src/flutter/common:runtime_mode_debug": [\n'
+          '            "A_DEBUG=1",  # flutter_runtime_mode == "debug"\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }) + ["B=1"] + select({\n'
+          '        "@platforms//os:emscripten": [\n'
+          '            "C_WASM=1",  # is_wasm\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }) + ["D=1"],\n',
+        ),
+      );
+    });
+
     test('renders a scalar with several cases as select()', () async {
       // metal_version as impeller/renderer writes it (an else-if chain over
       // the OS predicates, undefined elsewhere); vulkan_language_version
