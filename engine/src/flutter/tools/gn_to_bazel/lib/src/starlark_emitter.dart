@@ -1230,6 +1230,27 @@ final class _Emitter {
   /// directory is the output of a target ([_buildOutputLabel]); any other
   /// is a source file.
   String _archiveEntriesText(GnVariable variable, GnTarget target, _Rule rule) {
+    // An archive of one directory of the build directory (the web SDK's:
+    // every entry an output under flutter_web_sdk at its path below it,
+    // `rebase_path(source, "$root_build_dir/flutter_web_sdk")`) is one
+    // build_directory_tree over the bundle's deps, whose closure places the
+    // files -- GN's own source of the list.
+    final String? under = _archiveDirectory(variable);
+    if (under != null) {
+      _use(templateMappings['zip_bundle']!.bzl, 'build_directory_tree');
+      final name = '${target.name}_tree';
+      final tree = _Rule('build_directory_tree', name, <String>[
+        '# `${variable.name}`: what the deps place under $under in the build directory, at',
+        '# its path below it.',
+      ])..scalars['under'] = _starlarkString(under);
+      final GnVariable? deps = target.variables['deps'];
+      if (deps != null) {
+        _labelsInto(tree.list('srcs'), deps, target);
+      }
+      rules.add(tree);
+      rule.list('trees').add(Condition.always, _Item(':$name'));
+      return '';
+    }
     final always = <String, String>{};
     final conditional = <Condition, Map<String, String>>{};
     for (final GnListItem item in variable.liveItems) {
@@ -1353,6 +1374,55 @@ final class _Emitter {
       parts.add(out.toString());
     }
     return parts.join(' | ');
+  }
+
+  /// The directory of the build directory an archive's entries all come
+  /// from, at their paths below it -- each entry's destination being
+  /// `rebase_path(source, "$root_build_dir/<dir>")` of a source under it,
+  /// a target's outputs (symbolic, with that base) or a literal path -- or
+  /// null when the entries are not all of that form.
+  String? _archiveDirectory(GnVariable variable) {
+    String? under;
+    var any = false;
+    for (final GnListItem item in variable.liveItems) {
+      final GnValue value = item.value;
+      if (value is! GnScopeValue) {
+        return null;
+      }
+      final GnValue? source = value.variables['source']?.unconditionalItems?.singleOrNull;
+      final GnValue? destination = value.variables['destination']?.unconditionalItems?.singleOrNull;
+      String base;
+      switch ((source, destination)) {
+        case (
+              GnTargetOutputsValue(label: final String from) ||
+                  GnTargetOutputPathsValue(label: final String from, base: ''),
+              GnTargetOutputPathsValue(label: final String to, base: final String b),
+            )
+            when from == to && b.isNotEmpty:
+          base = b;
+        case (GnStringValue(value: final String path), GnStringValue(value: final String at)):
+          final String absolute = _unmarked(path);
+          const int start = buildDirRoot.length + 1;
+          final int end = absolute.length - at.length - 1;
+          if (!absolute.startsWith('$buildDirRoot/') ||
+              at.isEmpty ||
+              !absolute.endsWith('/$at') ||
+              end <= start) {
+            // Not under a directory of the build directory (a file at its
+            // root, artifacts.zip's flutter_tester).
+            return null;
+          }
+          base = absolute.substring(start, end);
+        default:
+          return null;
+      }
+      if (under != null && under != base) {
+        return null;
+      }
+      under = base;
+      any = true;
+    }
+    return any ? under : null;
   }
 
   /// The zip_tree `root` for the outputs of the copy [gnLabel]: a copy whose

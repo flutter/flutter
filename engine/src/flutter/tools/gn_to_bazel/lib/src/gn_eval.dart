@@ -609,21 +609,30 @@ final class GnTargetOutputsValue extends GnValue {
 /// The outputs of a target as paths relative to the build directory:
 /// `rebase_path(get_target_outputs(":copy"), root_build_dir)` -- the GTK
 /// bundle's idiom for "every output of the copy at its build-directory
-/// path", which the emitter reads together with the outputs themselves.
+/// path", which the emitter reads together with the outputs themselves --
+/// or relative to a directory under it ([base]: the web SDK's archive,
+/// `rebase_path(source, "$root_build_dir/flutter_web_sdk")`).
 final class GnTargetOutputPathsValue extends GnValue {
-  const GnTargetOutputPathsValue(this.label);
+  const GnTargetOutputPathsValue(this.label, {this.base = ''});
 
   /// The target, as `//dir:name`.
   final String label;
 
-  @override
-  bool operator ==(Object other) => other is GnTargetOutputPathsValue && other.label == label;
+  /// The directory the paths are relative to, under the build directory;
+  /// empty for the build directory itself.
+  final String base;
 
   @override
-  int get hashCode => label.hashCode;
+  bool operator ==(Object other) =>
+      other is GnTargetOutputPathsValue && other.label == label && other.base == base;
 
   @override
-  String toString() => 'rebase_path(get_target_outputs("$label"), root_build_dir)';
+  int get hashCode => Object.hash(label, base);
+
+  @override
+  String toString() => base.isEmpty
+      ? 'rebase_path(get_target_outputs("$label"), root_build_dir)'
+      : 'rebase_path(get_target_outputs("$label"), "\$root_build_dir/$base")';
 }
 
 /// A boolean whose value the assumptions did not decide: the result of
@@ -2172,6 +2181,55 @@ final class _Evaluator {
           }
           final String path = _absolutePath(_unmarkedPath(_stringExpression(args[0], scope)), node);
           return _Expression.scalar(GnStringValue('$rebasedPathMarker$path$rebasedPathMarker'));
+        }
+        // rebase_path(x, "$root_build_dir/<dir>"): x, under that directory
+        // of the build directory, relative to it -- the web SDK's archive
+        // placing the tree under flutter_web_sdk at its paths below it. A
+        // target's outputs keep their symbol with the base; a literal path
+        // loses the prefix.
+        if (args.length == 2 && args[1] is! GnIdentifier) {
+          final String destination = _unmarkedPath(_stringExpression(args[1], scope));
+          if (destination.startsWith('$buildDirRoot/')) {
+            final String base = destination.substring(buildDirRoot.length + 1);
+            GnValue rebased(GnValue value) {
+              switch (value) {
+                // The outputs, or their absolute paths (`source =
+                // rebase_path(source)` in the same scope, read back by the
+                // destination's line): the same outputs.
+                case GnTargetOutputsValue(:final String label):
+                case GnTargetOutputPathsValue(:final String label, base: ''):
+                  return GnTargetOutputPathsValue(label, base: base);
+                case GnStringValue(value: final String path)
+                    when _unmarkedPath(path).startsWith('$buildDirRoot/$base/'):
+                  return GnStringValue(
+                    _unmarkedPath(path).substring(buildDirRoot.length + base.length + 2),
+                  );
+                default:
+                  throw GnError(
+                    node.location,
+                    'rebase_path() of $value against $destination is not supported',
+                  );
+              }
+            }
+
+            final _Expression input = _expression(args[0], scope);
+            if (input.isList) {
+              return _Expression(<_Value>[
+                for (final _Value item in input.items)
+                  _Value(
+                    rebased(item.value),
+                    item.comments,
+                    condition: item.condition,
+                    sourceConditions: item.sourceConditions,
+                  ),
+              ], isList: true);
+            }
+            final GnValue? single = input.scalar;
+            if (single == null) {
+              throw GnError(node.location, 'rebase_path() of nothing');
+            }
+            return _Expression.scalar(rebased(single));
+          }
         }
         // rebase_path(x, "", base): x, relative to base, as an absolute
         // path -- sky_engine's way of naming the Dart SDK's library sources
