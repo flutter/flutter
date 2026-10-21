@@ -54,4 +54,44 @@ extension ExtensionJsonParsing on Map<String, Object?> {
       ),
     };
   }
+
+  /// Extracts a required map of [String] keys to [String] values from this
+  /// JSON map.
+  ///
+  /// Throws a [FormatException] if [key] is missing, `null`, not a
+  /// `Map<String, Object?>`, or contains non-[String] values.
+  Map<String, String> stringMap(String key) {
+    final Object? value = this[key];
+    return switch (value) {
+      final Map<String, Object?> entries => <String, String>{
+        for (final MapEntry(key: String entryKey, value: Object? entryValue) in entries.entries)
+          entryKey: switch (entryValue) {
+            final String v => v,
+            _ => throw FormatException(
+              'Invalid "$key" value for "$entryKey": expected String, got ${entryValue.runtimeType}.',
+            ),
+          },
+      },
+      null => throw FormatException('Missing required "$key" (expected Map<String, String>).'),
+      _ => throw FormatException(
+        'Invalid "$key": expected Map<String, String>, got ${value.runtimeType}.',
+      ),
+    };
+  }
+
+  /// Extracts a trailing-slash-terminated absolute `file:` directory [Uri] from
+  /// this JSON map, throwing a [FormatException] if the key is missing, not a
+  /// [String], or not a valid directory URI.
+  Uri directoryUri(String key) {
+    final String rawUri = requiredField<String>(key);
+    final Uri? uri = Uri.tryParse(rawUri);
+    if (uri != null &&
+        uri.isScheme('file') &&
+        !uri.hasQuery &&
+        !uri.hasFragment &&
+        uri.path.endsWith('/')) {
+      return uri;
+    }
+    throw FormatException('Invalid "$key": expected trailing-slash-terminated absolute file: URI.');
+  }
 }
