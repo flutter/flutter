@@ -621,7 +621,7 @@ void main() {
     },
   );
 
-  testWidgets('Constrained slivers are laid out when viewport cross-axis extent is zero', (
+  testWidgets('Children are laid out when viewport cross-axis extent is zero', (
     WidgetTester tester,
   ) async {
     final items = List<int>.generate(20, (int i) => i);
@@ -631,19 +631,19 @@ void main() {
         slivers: <Widget>[
           SliverConstrainedCrossAxis(
             maxExtent: 200,
-            sliver: _buildSliverList(
-              itemMainAxisExtent: 300,
-              items: items,
-              label: (int item) => Text('Tile $item'),
-            ),
+            sliver: _buildSliverList(items: items, label: (int item) => Text('Constrained $item')),
           ),
+          _buildSliverList(items: items, label: (int item) => Text('Flexible $item')),
         ],
       ),
     );
-    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
 
-    final RenderSliverList renderSliver = tester.renderObject(find.byType(SliverList));
-    expect(renderSliver.constraints.crossAxisExtent, equals(0));
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
+    expect(renderSlivers[0].constraints.crossAxisExtent, 0);
+    expect(renderSlivers[1].constraints.crossAxisExtent, 0);
   });
 
   testWidgets('Flexible slivers get zero extent when constrained slivers use all space', (
