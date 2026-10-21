@@ -272,7 +272,10 @@ class ProjectExtensionFinder {
         continue;
       }
       try {
-        final parsedConfig = ExtensionPackageConfig.fromMap(config, packageName: package);
+        final parsedConfig = ExtensionPackageConfig.fromMap(
+          config.cast<String, Object?>(),
+          packageName: package,
+        );
         if (parsedConfig.protocolVersion != ExtensionPackageConfig.currentProtocolVersion) {
           _logger.printWarning(
             'Skipping extension "$package": unsupported protocolVersion '

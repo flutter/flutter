@@ -620,7 +620,7 @@ services:
         packageUri: Uri.directory(extDir.childDirectory('lib').path),
         packageConfigUri: packageConfigFile.uri,
         workspaceRootPath: projectDir.path,
-        config: ExtensionPackageConfig(name: 'my_ext'),
+        config: ExtensionPackageConfig(name: 'my_ext', services: const <String>['diagnostics']),
       );
 
       // 1. Initial compilation runs `dart compile kernel`.
@@ -666,7 +666,10 @@ services:
           packageUri: Uri.directory(pubCacheExtDir.childDirectory('lib').path),
           packageConfigUri: packageConfigFile.uri,
           workspaceRootPath: '/workspace/app',
-          config: ExtensionPackageConfig(name: 'hosted_ext'),
+          config: ExtensionPackageConfig(
+            name: 'hosted_ext',
+            services: const <String>['diagnostics'],
+          ),
         );
 
         final processManager = FakeProcessManager.empty();
@@ -782,7 +785,7 @@ services:
           packageUri: Uri.directory(extDir.childDirectory('lib').path),
           packageConfigUri: packageConfigFile.uri,
           workspaceRootPath: '/workspace/app',
-          config: ExtensionPackageConfig(name: 'my_ext'),
+          config: ExtensionPackageConfig(name: 'my_ext', services: const <String>['diagnostics']),
         );
 
         await expectLater(compiler.compile(extension), throwsA(isA<ExtensionCompileException>()));
