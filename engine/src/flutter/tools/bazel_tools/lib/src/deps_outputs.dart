@@ -38,6 +38,12 @@ const List<String> defaultIgnoredDirectories = <String>[
   'engine/src/build/linux/debian_trixie_riscv64-sysroot',
   // Downloaded by tools/download_fuchsia_sdk.py.
   'engine/src/third_party/fuchsia-sdk',
+  // Bazel modules of their own inside the checkout, which depend on the
+  // engine's module rather than belong to it: their packages load rules the
+  // engine's module graph does not declare (the Fuchsia spike's
+  // rules_fuchsia and rules_python), so the engine's wildcard must not load
+  // them. Each is built from its own directory.
+  'engine/src/flutter/build/bazel/toolchains/fuchsia',
 ];
 
 /// Generates the contents of `deps.lock.bzl` from [deps].
