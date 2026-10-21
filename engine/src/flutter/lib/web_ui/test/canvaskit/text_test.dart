@@ -30,34 +30,39 @@ void testMain() {
         final String defaultTestFontFamily = testFonts.first;
 
         expect(
-          CkTextStyle(fontFamily: 'BogusFontFamily').effectiveFontFamily,
+          EngineTextStyle(fontFamily: 'BogusFontFamily').effectiveFontFamily,
           defaultTestFontFamily,
         );
         expect(
-          CkParagraphStyle(fontFamily: 'BogusFontFamily').getTextStyle().effectiveFontFamily,
+          EngineParagraphStyle(fontFamily: 'BogusFontFamily').getTextStyle().effectiveFontFamily,
+          defaultTestFontFamily,
+        );
+        expect(
+          EngineStrutStyle(fontFamily: 'BogusFontFamily').effectiveFontFamily,
           defaultTestFontFamily,
         );
         expect(
           ui.StrutStyle(fontFamily: 'BogusFontFamily'),
-          ui.StrutStyle(fontFamily: defaultTestFontFamily),
+          isNot(ui.StrutStyle(fontFamily: defaultTestFontFamily)),
         );
       });
 
       test('The default test font is used when fontFamily is unspecified', () {
         final String defaultTestFontFamily = testFonts.first;
 
-        expect(CkTextStyle().effectiveFontFamily, defaultTestFontFamily);
-        expect(CkParagraphStyle().getTextStyle().effectiveFontFamily, defaultTestFontFamily);
-        expect(ui.StrutStyle(), ui.StrutStyle(fontFamily: defaultTestFontFamily));
+        expect(EngineTextStyle().effectiveFontFamily, defaultTestFontFamily);
+        expect(EngineParagraphStyle().getTextStyle().effectiveFontFamily, defaultTestFontFamily);
+        expect(EngineStrutStyle().effectiveFontFamily, defaultTestFontFamily);
       });
 
       test('Can specify test fontFamily to use', () {
         for (final testFont in testFonts) {
-          expect(CkTextStyle(fontFamily: testFont).effectiveFontFamily, testFont);
+          expect(EngineTextStyle(fontFamily: testFont).effectiveFontFamily, testFont);
           expect(
-            CkParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamily,
+            EngineParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamily,
             testFont,
           );
+          expect(EngineStrutStyle(fontFamily: testFont).effectiveFontFamily, testFont);
         }
       });
     });
