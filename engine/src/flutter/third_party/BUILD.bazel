@@ -45,3 +45,27 @@ source_tree_files(
     trees = {"@skia//:resources_images": "skia"},
     visibility = ["//engine/src/flutter/testing:__subpackages__"],
 )
+
+# The two Dart packages of this directory the web SDK rewrites into
+# dart:_web_test_fonts and dart:_web_locale_keymap (web_sdk/BUILD.gn's
+# sdk_rewriter invocations; the converter's directorySources names the
+# filegroups): each library's sources and its API file.
+filegroup(
+    name = "web_test_fonts_sources",
+    srcs = glob(["web_test_fonts/lib/web_test_fonts/**/*.dart"]),
+    visibility = ["//engine/src/flutter/web_sdk:__pkg__"],
+)
+
+filegroup(
+    name = "web_locale_keymap_sources",
+    srcs = glob(["web_locale_keymap/lib/web_locale_keymap/**/*.dart"]),
+    visibility = ["//engine/src/flutter/web_sdk:__pkg__"],
+)
+
+exports_files(
+    [
+        "web_locale_keymap/lib/web_locale_keymap.dart",
+        "web_test_fonts/lib/web_test_fonts.dart",
+    ],
+    visibility = ["//engine/src/flutter/web_sdk:__pkg__"],
+)

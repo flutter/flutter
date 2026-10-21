@@ -38,35 +38,47 @@ def build_directory_path(gn_output):
         return "gen/" + gn_output[len("$root_gen_dir/"):]
     return None
 
-def expand_output_pattern(pattern, file):
-    """A GN output pattern expanded for one source file: `{{source_file_part}}` and `{{source_name_part}}`.
+def expand_output_pattern(pattern, file, package = None):
+    """A GN output pattern expanded for one source file.
+
+    `{{source_file_part}}`, `{{source_name_part}}`, and, given the copy's
+    package, `{{source_target_relative}}` for a file of that package (its
+    path under the package, as GN's is under the BUILD file's directory).
 
     Args:
       pattern: GN's output, with or without source expansions.
       file: the source File.
+      package: the copy's package, for `{{source_target_relative}}`.
 
     Returns:
       The pattern with the expansions replaced, or None when it holds one
-      this does not know.
+      this does not know (or cannot say for the file).
     """
     name = file.basename
     stem = name[:-len(file.extension) - 1] if file.extension else name
     expanded = pattern.replace("{{source_file_part}}", name).replace("{{source_name_part}}", stem)
+    if "{{source_target_relative}}" in expanded:
+        prefix = package + "/" if package else None
+        if not prefix or not file.short_path.startswith(prefix):
+            return None
+        expanded = expanded.replace("{{source_target_relative}}", file.short_path[len(prefix):])
     if "{{" in expanded:
         return None
     return expanded
 
-def copy_entries(outputs, files):
+def copy_entries(outputs, files, package = None):
     """The BuildDirectoryInfo entries of a copy: its files at GN's `outputs`.
 
     A pattern output (`{{source_file_part}}`) places every file; literal
     outputs place the files one to one, in order. Outputs of a form this
     does not read (under a target's own gen dir written as such, an
-    expansion other than the two above) place nothing, as before.
+    expansion other than the ones expand_output_pattern knows) place
+    nothing, as before.
 
     Args:
       outputs: GN's `outputs`.
       files: the copy's files, in GN's `sources` order.
+      package: the copy's package, for `{{source_target_relative}}`.
 
     Returns:
       A list of (file, path) pairs.
@@ -77,7 +89,7 @@ def copy_entries(outputs, files):
         for file in files:
             for pattern in patterns:
                 path = build_directory_path(pattern)
-                expanded = expand_output_pattern(path, file) if path else None
+                expanded = expand_output_pattern(path, file, package) if path else None
                 if expanded:
                     entries.append((file, expanded))
         return entries

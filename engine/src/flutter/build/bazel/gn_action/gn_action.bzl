@@ -217,7 +217,7 @@ def _gn_copy_impl(ctx):
     return [
         DefaultInfo(files = depset(files)),
         CcInfo(),
-        BuildDirectoryInfo(entries = depset(copy_entries(ctx.attr.outputs, files))),
+        BuildDirectoryInfo(entries = depset(copy_entries(ctx.attr.outputs, files, ctx.label.package))),
     ]
 
 gn_copy = rule(
