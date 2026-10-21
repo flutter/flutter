@@ -320,6 +320,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final bool headersChanged = publicHeadersChanged(
     environmentType: environmentType,
     mode: buildInfo.mode,
+    configuration: configuration,
     buildDirectory: buildDirectoryPath,
     artifacts: globals.artifacts,
     fileSystem: globals.fs,
@@ -701,10 +702,12 @@ Future<void> ensureTargetBuildDirAttribute(String targetBuildDirPath) async {
   }
 }
 
-/// Check if the Flutter framework's public headers have changed since last built.
+/// Check if the Flutter framework's public headers have changed since the last build with the same
+/// Xcode build [configuration] and SDK ([environmentType]).
 bool publicHeadersChanged({
   required BuildMode mode,
   required EnvironmentType environmentType,
+  required String configuration,
   required String buildDirectory,
   required Artifacts? artifacts,
   required FileSystem fileSystem,
@@ -730,10 +733,32 @@ bool publicHeadersChanged({
       .map<String>((FileSystemEntity header) => header.path)
       .toList();
 
-  final String fingerprintPath = fileSystem.path.join(
-    buildDirectory,
-    'framework_public_headers.fingerprint',
+  // The headers live in a different directory for each build mode and environment, and the
+  // fingerprint is keyed by path, so a single fingerprint would mistake switching between them
+  // (e.g. simulator and physical device) for a header change. Instead, keep one for each build
+  // configuration and SDK, like the TARGET_BUILD_DIR that the caller deletes on Xcode 26+ when the
+  // headers have changed.
+  final Directory fingerprintDirectory = fileSystem.directory(
+    fileSystem.path.join(buildDirectory, 'framework_public_headers'),
   );
+  final String fingerprintPath = fileSystem.path.join(
+    fingerprintDirectory.path,
+    '$configuration-${getSDKNameForIOSEnvironmentType(environmentType)}.fingerprint',
+  );
+
+  // Older versions of Flutter keep a single fingerprint and don't update these. If it exists, such
+  // a version may have built the app since these were written, so discard them. Delete it as well,
+  // so that such a version sees a header change on its next build instead of trusting it.
+  final File legacyFingerprint = fileSystem.file(
+    fileSystem.path.join(buildDirectory, 'framework_public_headers.fingerprint'),
+  );
+  if (legacyFingerprint.existsSync()) {
+    legacyFingerprint.deleteSync();
+    if (fingerprintDirectory.existsSync()) {
+      fingerprintDirectory.deleteSync(recursive: true);
+    }
+  }
+
   final fingerprinter = Fingerprinter(
     fingerprintPath: fingerprintPath,
     paths: files,

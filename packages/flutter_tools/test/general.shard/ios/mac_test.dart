@@ -1193,12 +1193,17 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
         ..createSync(recursive: true);
       final File fingerprintFile =
-          mockBuildDirectory.childFile('framework_public_headers.fingerprint')..writeAsStringSync(
-            '{"files":{"/.tmp_rand0/Flutter.framework/Headers/FlutterPlugin.h":"incorrect_hash"}}',
-          );
+          mockBuildDirectory
+              .childDirectory('framework_public_headers')
+              .childFile('Debug-iphoneos.fingerprint')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(
+              '{"files":{"/.tmp_rand0/Flutter.framework/Headers/FlutterPlugin.h":"incorrect_hash"}}',
+            );
       final bool headersChanged = publicHeadersChanged(
         environmentType: EnvironmentType.physical,
         mode: BuildMode.debug,
+        configuration: 'Debug',
         buildDirectory: mockBuildDirectory.path,
         artifacts: FakeArtifacts(frameworkPath: mockFlutterFramework.path),
         fileSystem: fs,
@@ -1220,12 +1225,13 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           .createSync(recursive: true);
       final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
         ..createSync(recursive: true);
-      final File fingerprintFile = mockBuildDirectory.childFile(
-        'framework_public_headers.fingerprint',
-      );
+      final File fingerprintFile = mockBuildDirectory
+          .childDirectory('framework_public_headers')
+          .childFile('Debug-iphoneos.fingerprint');
       final bool headersChanged = publicHeadersChanged(
         environmentType: EnvironmentType.physical,
         mode: BuildMode.debug,
+        configuration: 'Debug',
         buildDirectory: mockBuildDirectory.path,
         artifacts: FakeArtifacts(frameworkPath: mockFlutterFramework.path),
         fileSystem: fs,
@@ -1247,12 +1253,16 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           .createSync(recursive: true);
       final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
         ..createSync(recursive: true);
-      final File fingerprintFile = mockBuildDirectory.childFile(
-        'framework_public_headers.fingerprint',
-      )..writeAsStringSync(correctHeaderFingerprint);
+      final File fingerprintFile =
+          mockBuildDirectory
+              .childDirectory('framework_public_headers')
+              .childFile('Debug-iphoneos.fingerprint')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(correctHeaderFingerprint);
       final bool headersChanged = publicHeadersChanged(
         environmentType: EnvironmentType.physical,
         mode: BuildMode.debug,
+        configuration: 'Debug',
         buildDirectory: mockBuildDirectory.path,
         artifacts: FakeArtifacts(frameworkPath: mockFlutterFramework.path),
         fileSystem: fs,
@@ -1260,6 +1270,115 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
       expect(headersChanged, isFalse);
       expect(fingerprintFile.readAsStringSync(), correctHeaderFingerprint);
+    });
+
+    testWithoutContext('tracks each build configuration and SDK separately', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      // Returns a different framework for each build mode and environment, like the real engine
+      // artifacts.
+      final artifacts = Artifacts.test(fileSystem: fs);
+      final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
+        ..createSync(recursive: true);
+
+      // Two flavors, built in debug for the simulator and a physical device, and in release for a
+      // physical device.
+      const builds = <(String, EnvironmentType, BuildMode)>[
+        ('Debug-free', EnvironmentType.simulator, BuildMode.debug),
+        ('Debug-free', EnvironmentType.physical, BuildMode.debug),
+        ('Debug-paid', EnvironmentType.simulator, BuildMode.debug),
+        ('Debug-paid', EnvironmentType.physical, BuildMode.debug),
+        ('Release-free', EnvironmentType.physical, BuildMode.release),
+        ('Release-paid', EnvironmentType.physical, BuildMode.release),
+      ];
+
+      File header(EnvironmentType environmentType, BuildMode mode) {
+        final String frameworkPath = artifacts.getArtifactPath(
+          Artifact.flutterFramework,
+          platform: TargetPlatform.ios,
+          mode: mode,
+          environmentType: environmentType,
+        );
+        return fs.directory(frameworkPath).childDirectory('Headers').childFile('FlutterPlugin.h');
+      }
+
+      bool headersChanged((String, EnvironmentType, BuildMode) build) {
+        final (String configuration, EnvironmentType environmentType, BuildMode mode) = build;
+        return publicHeadersChanged(
+          environmentType: environmentType,
+          mode: mode,
+          configuration: configuration,
+          buildDirectory: mockBuildDirectory.path,
+          artifacts: artifacts,
+          fileSystem: fs,
+          logger: logger,
+        );
+      }
+
+      for (final (_, EnvironmentType environmentType, BuildMode mode) in builds) {
+        header(environmentType, mode).createSync(recursive: true);
+      }
+
+      // The first build of each has no fingerprint yet.
+      for (final build in builds) {
+        expect(headersChanged(build), isTrue, reason: '$build');
+      }
+      // Switching between them is not a header change.
+      for (final build in builds) {
+        expect(headersChanged(build), isFalse, reason: '$build');
+      }
+
+      // A header change, such as from a Flutter upgrade, is detected once for each of them,
+      // including flavors that share a build mode and environment.
+      for (final (_, EnvironmentType environmentType, BuildMode mode) in builds) {
+        header(environmentType, mode).writeAsStringSync('changed');
+      }
+      for (final build in builds) {
+        expect(headersChanged(build), isTrue, reason: '$build');
+      }
+      for (final build in builds) {
+        expect(headersChanged(build), isFalse, reason: '$build');
+      }
+    });
+
+    testWithoutContext('starts over when an older version of Flutter has built the app', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory mockFlutterFramework = fs.systemTempDirectory.childDirectory(
+        'Flutter.framework',
+      );
+      mockFlutterFramework
+          .childDirectory('Headers')
+          .childFile('FlutterPlugin.h')
+          .createSync(recursive: true);
+      final Directory mockBuildDirectory = fs.systemTempDirectory.childDirectory('build')
+        ..createSync(recursive: true);
+
+      bool headersChanged(EnvironmentType environmentType) {
+        return publicHeadersChanged(
+          environmentType: environmentType,
+          mode: BuildMode.debug,
+          configuration: 'Debug',
+          buildDirectory: mockBuildDirectory.path,
+          artifacts: FakeArtifacts(frameworkPath: mockFlutterFramework.path),
+          fileSystem: fs,
+          logger: logger,
+        );
+      }
+
+      expect(headersChanged(EnvironmentType.physical), isTrue);
+      expect(headersChanged(EnvironmentType.simulator), isTrue);
+
+      // An older version of Flutter, which keeps a single fingerprint, built the app.
+      final File legacyFingerprint = mockBuildDirectory.childFile(
+        'framework_public_headers.fingerprint',
+      )..writeAsStringSync(correctHeaderFingerprint);
+
+      expect(headersChanged(EnvironmentType.physical), isTrue);
+      expect(legacyFingerprint.existsSync(), isFalse);
+      expect(headersChanged(EnvironmentType.simulator), isTrue);
+      expect(headersChanged(EnvironmentType.physical), isFalse);
+      expect(headersChanged(EnvironmentType.simulator), isFalse);
     });
   });
 }

@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/fingerprint.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -611,6 +612,119 @@ void main() {
             platformArgs: <String, Object>{},
           );
 
+          expect(processManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          ProcessManager: () => processManager,
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          OperatingSystemUtils: () =>
+              FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+          Pub: () => const ThrowingPub(),
+          Platform: () => macPlatform,
+          XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
+          Xcode: () => xcode,
+          Artifacts: () => fakeArtifacts,
+        },
+      );
+
+      testUsingContext(
+        'does not clean when headers have not changed for this configuration and SDK',
+        () async {
+          final IOSDevice iosDevice = setUpIOSDevice(
+            fileSystem: fileSystem,
+            processManager: processManager,
+            logger: logger,
+            artifacts: artifacts,
+          );
+          setUpIOSProject(fileSystem);
+          final FlutterProject flutterProject = FlutterProject.fromDirectory(
+            fileSystem.currentDirectory,
+          );
+          final buildableIOSApp = BuildableIOSApp(
+            flutterProject.ios,
+            'flutter',
+            'My Super Awesome App',
+          );
+          fileSystem
+              .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
+              .createSync(recursive: true);
+          final File header =
+              fileSystem.systemTempDirectory
+                  .childDirectory('Flutter.framework')
+                  .childDirectory('Headers')
+                  .childFile('FlutterPlugin.h')
+                ..createSync(recursive: true);
+          // The fingerprint for this configuration and SDK matches the current headers.
+          Fingerprinter(
+            fingerprintPath: 'build/ios/framework_public_headers/Release-iphoneos.fingerprint',
+            paths: <String>[header.path],
+            fileSystem: fileSystem,
+            logger: logger,
+          ).writeFingerprint();
+          processManager.addCommands([
+            const FakeCommand(
+              command: <String>[
+                'xcrun',
+                'xcodebuild',
+                '-configuration',
+                'Release',
+                '-quiet',
+                '-allowProvisioningUpdates',
+                '-allowProvisioningDeviceRegistration',
+                '-workspace',
+                'Runner.xcworkspace',
+                '-scheme',
+                'Runner',
+                'BUILD_DIR=/build/ios',
+                '-sdk',
+                'iphoneos',
+                '-destination',
+                'id=123',
+                'ONLY_ACTIVE_ARCH=NO',
+                'ARCHS=arm64',
+                '-resultBundlePath',
+                '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
+                '-resultBundleVersion',
+                '3',
+                'FLUTTER_SUPPRESS_ANALYTICS=true',
+                'COMPILER_INDEX_STORE_ENABLE=NO',
+              ],
+            ),
+            xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'),
+            const FakeCommand(
+              command: <String>[
+                'rsync',
+                '-8',
+                '-av',
+                '--delete',
+                'build/ios/Release-iphoneos/My Super Awesome App.app',
+                'build/ios/iphoneos',
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                iosDeployPath,
+                '--id',
+                '123',
+                '--bundle',
+                'build/ios/iphoneos/My Super Awesome App.app',
+                '--app_deltas',
+                'build/ios/app-delta',
+                '--no-wifi',
+                '--justlaunch',
+                '--args',
+                const <String>['--enable-dart-profiling'].join(' '),
+              ],
+            ),
+          ]);
+          final LaunchResult launchResult = await iosDevice.startApp(
+            buildableIOSApp,
+            debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+            platformArgs: <String, Object>{},
+          );
+
+          expect(launchResult.started, true);
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
