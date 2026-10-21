@@ -20,6 +20,7 @@ side or a file differs unexpectedly.
     python3 install_diff.py --gn engine/src/out/host_debug_unopt \\
         --bazel engine/src/out/host_debug_unopt_bazel \\
         --expect-different=flutter_tester --expect-different='*.so' ...
+    python3 install_diff.py --web --gn engine/src/out/wasm_release --bazel <dir>
 """
 
 import argparse
@@ -54,6 +55,22 @@ DEFAULT_PATHS = [
     "gen/frontend_server_aot.dart.snapshot",
     "gen/dart-pkg/sky_engine",
     "zip_archives",
+]
+
+# The web build directory (wasm_release, wasm_debug_unopt): the SDK tree the
+# flutter tool's --local-web-sdk reads and the archive CI uploads, with the
+# six modules' files -- .wasm, .js.symbols, the .wasm.map of an unoptimized
+# build and the .js loaders -- expected to differ as builds under different
+# toolchains' flags do (--web).
+WEB_PATHS = ["flutter_web_sdk", "zip_archives/flutter-web-sdk.zip"]
+WEB_EXPECTED_DIFFERENT = [
+    "*.wasm",
+    "*.js.symbols",
+    "*.wasm.map",
+    "canvaskit.js",
+    "skwasm.js",
+    "skwasm_heavy.js",
+    "wimp.js",
 ]
 
 # GN's bookkeeping and intermediates next to its outputs, which no consumer
@@ -106,9 +123,19 @@ def main(argv):
         help=f"Files under a directory to leave out (default: {', '.join(DEFAULT_IGNORED)}); may repeat.",
     )
     parser.add_argument(
-        "paths", nargs="*", default=DEFAULT_PATHS, help="Paths under the build directory to compare."
+        "--web",
+        action="store_true",
+        help="Compare a web build directory: the paths default to flutter_web_sdk/ and the SDK "
+        "archive, and the modules' files are expected to differ.",
+    )
+    parser.add_argument(
+        "paths", nargs="*", help="Paths under the build directory to compare (default: the Linux host's)."
     )
     args = parser.parse_args(argv)
+    if args.web:
+        args.expect_different = args.expect_different + WEB_EXPECTED_DIFFERENT
+    if not args.paths:
+        args.paths = WEB_PATHS if args.web else DEFAULT_PATHS
 
     def expected(path):
         return any(
@@ -144,7 +171,13 @@ def main(argv):
             elif _same(gn_files[relative], bazel_files[relative]):
                 identical.append(full)
             elif expected(full):
+                # The sizes, so that two Bazel files that should differ and do
+                # not (one module installed at every variant's place) show.
                 expected_different.append(full)
+                details.append(
+                    f"  expected different: {full} (GN {os.path.getsize(gn_files[relative])} B, "
+                    f"Bazel {os.path.getsize(bazel_files[relative])} B)"
+                )
             else:
                 different.append(full)
                 details.append(f"  different: {full}")
