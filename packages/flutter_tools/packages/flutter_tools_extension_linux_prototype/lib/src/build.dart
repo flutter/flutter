@@ -150,17 +150,18 @@ class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
     BuiltInTargets.kernelSnapshot,
   ];
 
+  // TODO(bkonyi): Add BuiltInOutputs constants for the outputs of BuiltInTargets.copyAssets and BuiltInTargets.kernelSnapshot.
   @override
-  List<ExtensionSource> get inputs => const <ExtensionSource>[
+  List<ExtensionSource> get inputs => <ExtensionSource>[
     ExtensionSource.pattern('${BuiltInPlaceholders.buildDir}/$_kAppDill'),
-    ExtensionSource.artifact(LinuxArtifacts.linuxHeaders),
-    ExtensionSource.artifact(LinuxArtifacts.linuxDesktopPath),
-    ExtensionSource.artifact(BuiltInArtifacts.icuData),
+    const ExtensionSource.artifact(LinuxArtifacts.linuxHeaders),
+    const ExtensionSource.artifact(LinuxArtifacts.linuxDesktopPath),
+    const ExtensionSource.artifact(BuiltInArtifacts.icuData),
     ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/pubspec.yaml'),
   ];
 
   @override
-  List<ExtensionSource> get outputs => const <ExtensionSource>[
+  List<ExtensionSource> get outputs => <ExtensionSource>[
     ExtensionSource.pattern(
       '${BuiltInPlaceholders.outputDir}/bundle/data/$_kFlutterAssets/$_kKernelBlob',
     ),
@@ -169,7 +170,7 @@ class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
   ];
 
   @override
-  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
     final outputDir = Directory.fromUri(context.outputDir);
     final buildDir = Directory.fromUri(context.buildDir);
 

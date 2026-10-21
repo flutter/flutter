@@ -9,7 +9,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 
-final _placeholderRegex = RegExp(r'\{[^}]+\}');
+final _placeholderRegex = RegExp(r'\{[A-Z_]+\}');
 
 const _supportedOutputDirPlaceholders = <String>{
   BuiltInPlaceholders.outputDir,
@@ -54,6 +54,7 @@ Directory resolveExtensionOutputDir({
 /// [artifacts] and [buildMode].
 ///
 /// Throws a [ToolExit] if any requested artifact name is invalid or unsupported.
+// TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
@@ -62,9 +63,8 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionArtifact artifact in target.artifacts) {
-    final Artifact hostArtifact = _resolveArtifact(artifact);
     resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
-      hostArtifact,
+      _resolveArtifact(artifact),
       platform: targetPlatform,
       mode: buildMode,
     );

@@ -48,7 +48,7 @@ sealed class ExtensionSource {
   /// See also:
   ///
   /// * [BuiltInPlaceholders], the available directory placeholders.
-  const factory ExtensionSource.pattern(String pattern, {bool optional}) = ExtensionPatternSource;
+  factory ExtensionSource.pattern(String pattern, {bool optional}) = ExtensionPatternSource;
 
   /// An [ExtensionSource] representing a target-platform or build-mode specific
   /// engine artifact downloaded from the Flutter cache (for example, `icudtl.dat`
@@ -86,7 +86,7 @@ sealed class ExtensionSource {
       artifactType => ExtensionSource.artifact(
         ExtensionArtifact(json.requiredField<String>(artifactKey)),
         mode: switch (json.nullableField<String>(modeKey)) {
-          final String mode => BuildMode.fromCliName(mode),
+          final String mode => _parseBuildMode(mode),
           null => null,
         },
         platform: json.nullableField<String>(platformKey),
@@ -96,6 +96,14 @@ sealed class ExtensionSource {
       ),
       _ => throw FormatException('Unknown ExtensionSource type in JSON: $type'),
     };
+  }
+
+  static BuildMode _parseBuildMode(String mode) {
+    try {
+      return BuildMode.fromCliName(mode);
+    } on ArgumentError {
+      throw FormatException('Invalid "$modeKey" in ExtensionSource: $mode');
+    }
   }
 
   /// Map key for the source type discriminator.
@@ -136,7 +144,20 @@ sealed class ExtensionSource {
 /// * [BuiltInPlaceholders], the available directory placeholders.
 @immutable
 final class ExtensionPatternSource extends ExtensionSource {
-  const ExtensionPatternSource(this.value, {this.optional = false});
+  ExtensionPatternSource(this.value, {this.optional = false})
+    : assert(
+        _hasValidLeadingPlaceholder(value),
+        'Invalid pattern "$value": must start with a directory placeholder followed by "/".',
+      );
+
+  static bool _hasValidLeadingPlaceholder(String value) {
+    for (final String placeholder in _validLeadingDirectoryPlaceholders) {
+      if (value == placeholder || value.startsWith('$placeholder/')) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /// Parses and validates a pattern string starting with a directory placeholder.
   ///
@@ -146,10 +167,8 @@ final class ExtensionPatternSource extends ExtensionSource {
   /// Throws a [FormatException] if [value] does not begin with a valid directory
   /// placeholder.
   static String parse(String value) {
-    for (final String placeholder in _validLeadingDirectoryPlaceholders) {
-      if (value == placeholder || value.startsWith('$placeholder/')) {
-        return value;
-      }
+    if (_hasValidLeadingPlaceholder(value)) {
+      return value;
     }
     throw FormatException(
       'Invalid pattern "$value": must start with a directory placeholder followed by "/".',

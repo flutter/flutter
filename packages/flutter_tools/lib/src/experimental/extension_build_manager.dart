@@ -62,7 +62,7 @@ base class ExtensionBuildManager {
               );
               return (connection, ExtensionBuildTarget.listFromJson(result));
             } on Object catch (e) {
-              _logger.printTrace('Failed to query build targets from extension: $e');
+              _logger.printWarning('Failed to query build targets from extension: $e');
               return (connection, const <ExtensionBuildTarget>[]);
             }
           }),
@@ -90,7 +90,6 @@ base class ExtensionBuildManager {
 
   /// Triggers a custom `flutter build` target for the given [targetName] by routing to the active extension.
   Future<ExtensionBuildResult> build({
-    required Uri buildDir,
     required BuildMode buildMode,
     required Uri flutterRoot,
     required String mainPath,
@@ -104,9 +103,6 @@ base class ExtensionBuildManager {
     }
     if (!outputDir.hasAbsolutePath) {
       throw ArgumentError.value(outputDir, 'outputDir', 'Must be an absolute path.');
-    }
-    if (!buildDir.hasAbsolutePath) {
-      throw ArgumentError.value(buildDir, 'buildDir', 'Must be an absolute path.');
     }
     if (!flutterRoot.hasAbsolutePath) {
       throw ArgumentError.value(flutterRoot, 'flutterRoot', 'Must be an absolute path.');
@@ -144,7 +140,6 @@ base class ExtensionBuildManager {
       final Object? result = await connection.sendRequest(
         BuildService.buildMethod,
         params: <String, Object?>{
-          BuildService.buildDirParam: buildDir.toString(),
           BuildService.buildModeParam: buildMode.cliName,
           BuildService.flutterRootParam: flutterRoot.toString(),
           BuildService.mainPathParam: mainPath,

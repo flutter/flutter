@@ -310,9 +310,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
-    final Directory buildDir = projectDir
-        .childDirectory('.dart_tool')
-        .childDirectory('flutter_build');
     final Directory outputDir = resolveExtensionOutputDir(
       buildMode: buildInfo.mode,
       buildOutputDir: projectDir.childDirectory(getBuildDirectory(config, fs)),
@@ -327,7 +324,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     );
 
     final ExtensionBuildResult result = await _buildManager.build(
-      buildDir: buildDir.uri,
       buildMode: buildInfo.mode,
       flutterRoot: fs.directory(Cache.flutterRoot).uri,
       mainPath: targetFile,

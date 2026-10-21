@@ -46,7 +46,6 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
 
   @override
   Future<ExtensionBuildResult> build({
-    required Uri buildDir,
     required BuildMode buildMode,
     required Uri flutterRoot,
     required String mainPath,
@@ -56,7 +55,6 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
     required String targetName,
   }) async {
     lastBuildArgs = <String, Object?>{
-      'buildDir': buildDir,
       'buildMode': buildMode,
       'flutterRoot': flutterRoot,
       'mainPath': mainPath,
@@ -165,6 +163,19 @@ void _secondDuplicateExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+final class _ThrowingQueryBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => throw StateError('Simulated getBuildTargets failure');
+}
+
+void _throwingQueryExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_ThrowingQueryBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -213,7 +224,6 @@ void main() {
         );
 
         final ExtensionBuildResult result = await buildManager.build(
-          buildDir: Uri.parse('/build'),
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
           mainPath: 'lib/main.dart',
@@ -313,6 +323,28 @@ void main() {
       },
     );
 
+    testWithoutContext('ExtensionBuildManager.getBuildTargets() logs warning when querying targets from extension fails', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[_throwingQueryExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+
+      final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+      expect(targets, isEmpty);
+      expect(logger.warningText, contains('Failed to query build targets from extension:'));
+
+      await manager.dispose();
+    });
+
     testUsingContext(
       'ExtensionBuildManager.build() throws ArgumentError when directories are relative',
       () async {
@@ -331,7 +363,6 @@ void main() {
 
         await expectLater(
           () => buildManager.build(
-            buildDir: Uri.parse('/build'),
             buildMode: .debug,
             flutterRoot: Uri.parse('/flutter'),
             mainPath: 'lib/main.dart',
@@ -345,21 +376,6 @@ void main() {
 
         await expectLater(
           () => buildManager.build(
-            buildDir: Uri.parse('relative/build'),
-            buildMode: .debug,
-            flutterRoot: Uri.parse('/flutter'),
-            mainPath: 'lib/main.dart',
-            outputDir: Uri.parse('/out'),
-            projectRoot: Uri.parse('/'),
-            resolvedArtifacts: const <String, String>{},
-            targetName: 'custom-linux-build',
-          ),
-          throwsArgumentError,
-        );
-
-        await expectLater(
-          () => buildManager.build(
-            buildDir: Uri.parse('/build'),
             buildMode: .debug,
             flutterRoot: Uri.parse('relative/flutter'),
             mainPath: 'lib/main.dart',
@@ -373,7 +389,6 @@ void main() {
 
         await expectLater(
           () => buildManager.build(
-            buildDir: Uri.parse('/build'),
             buildMode: .debug,
             flutterRoot: Uri.parse('/flutter'),
             mainPath: 'lib/main.dart',
@@ -409,7 +424,6 @@ void main() {
         );
 
         final ExtensionBuildResult result = await buildManager.build(
-          buildDir: Uri.parse('/build'),
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
           mainPath: 'lib/main.dart',
@@ -460,7 +474,6 @@ void main() {
         );
 
         final ExtensionBuildResult result = await buildManager.build(
-          buildDir: Uri.parse('/build'),
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
           mainPath: 'lib/main.dart',
@@ -520,7 +533,7 @@ void main() {
     );
 
     testUsingContext(
-      'ExtensionBuildSubCommand forwards buildDir, flutterRoot, outputDir, and resolvedArtifacts in build parameters',
+      'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
       () async {
         final fakeBuildManager = _RecordingExtensionBuildManager();
         const target = ExtensionBuildTarget(
@@ -546,10 +559,6 @@ void main() {
         expect(
           fakeBuildManager.lastBuildArgs!['flutterRoot'],
           equals(fs.directory('/flutter').uri),
-        );
-        expect(
-          fakeBuildManager.lastBuildArgs!['buildDir'],
-          equals(fs.directory('/.dart_tool/flutter_build').uri),
         );
         expect(
           fakeBuildManager.lastBuildArgs!['outputDir'],
