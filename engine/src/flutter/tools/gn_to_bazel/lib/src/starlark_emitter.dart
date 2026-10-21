@@ -103,11 +103,26 @@ final class _ListAttribute {
   final List<_Item> always = <_Item>[];
   final Map<Condition, List<_Item>> conditional = <Condition, List<_Item>>{};
 
+  /// Every item with its condition, in the order GN appended them: the
+  /// attributes the compiler reads in order (copts, defines, linkopts, the
+  /// include directories) are laid out run by run in this order, a select()
+  /// per run of one condition, where GN interleaves its conditional appends
+  /// with the rest. Items put into [always] directly (a group's members) are
+  /// not here, and the layout falls back to the two parts when the counts
+  /// disagree.
+  final List<(Condition, _Item)> sequence = <(Condition, _Item)>[];
+
   /// Comment lines above the attribute (GN's comments on the `=` that
   /// defined the variable).
   final List<String> comments = <String>[];
 
   bool get isEmpty => always.isEmpty && conditional.isEmpty;
+
+  int get _count =>
+      always.length + conditional.values.fold(0, (int n, List<_Item> items) => n + items.length);
+
+  /// Whether [sequence] has every item, so that the order is known.
+  bool get hasOrder => sequence.length == _count;
 
   void add(Condition condition, _Item item) {
     if (condition == Condition.always) {
@@ -115,15 +130,14 @@ final class _ListAttribute {
     } else {
       conditional.putIfAbsent(condition, () => <_Item>[]).add(item);
     }
+    sequence.add((condition, item));
   }
 
-  /// Adds [item] unless the same text is already there under [condition]
-  /// (two GN labels can translate to one Bazel label, which Bazel rejects as
-  /// a duplicate).
-  /// Adds [item] under [condition] unless it is there already -- or in the
-  /// unconditional part, which holds wherever the condition does (GN lists
-  /// impeller_unittests' geometry_unittests outright and again under a
-  /// backend; GN's deps are a set, Bazel's reject a duplicate).
+  /// Adds [item] under [condition] unless it is there already (two GN labels
+  /// can translate to one Bazel label, which Bazel rejects as a duplicate)
+  /// -- or in the unconditional part, which holds wherever the condition
+  /// does (GN lists impeller_unittests' geometry_unittests outright and
+  /// again under a backend; GN's deps are a set, Bazel's reject a duplicate).
   void addUnique(Condition condition, _Item item) {
     final List<_Item> bucket = condition == Condition.always
         ? always
@@ -133,6 +147,32 @@ final class _ListAttribute {
       return;
     }
     bucket.add(item);
+    sequence.add((condition, item));
+  }
+
+  /// Moves the items under [condition] to the unconditional part, in their
+  /// places; one the unconditional part already holds is dropped.
+  void makeUnconditional(Condition condition) {
+    final List<_Item>? items = conditional.remove(condition);
+    if (items == null) {
+      return;
+    }
+    for (final _Item item in items) {
+      final bool present = always.any((_Item existing) => existing.text == item.text);
+      final int at = sequence.indexWhere(
+        ((Condition, _Item) entry) => identical(entry.$2, item) && entry.$1 == condition,
+      );
+      if (present) {
+        if (at >= 0) {
+          sequence.removeAt(at);
+        }
+        continue;
+      }
+      always.add(item);
+      if (at >= 0) {
+        sequence[at] = (Condition.always, item);
+      }
+    }
   }
 }
 
@@ -466,13 +506,7 @@ final class _Emitter {
       for (final Condition c in list.conditional.keys)
         if (context.and(c) == context) c,
     ];
-    for (final c in implied) {
-      for (final _Item item in list.conditional.remove(c)!) {
-        if (!list.always.any((_Item present) => present.text == item.text)) {
-          list.always.add(item);
-        }
-      }
-    }
+    implied.forEach(list.makeUnconditional);
   }
 
   /// `target_compatible_with` for a target defined under its condition:
@@ -3413,15 +3447,48 @@ final class _Emitter {
       }
     }
 
-    for (final _Item item in list.always) {
-      if (constant(item)) {
-        flush();
-        parts.add(item.text);
-      } else {
-        elements.add(item);
+    void unconditional(List<_Item> items) {
+      for (final item in items) {
+        if (constant(item)) {
+          flush();
+          parts.add(item.text);
+        } else {
+          elements.add(item);
+        }
       }
+      flush();
     }
-    flush();
+
+    if (!sorted && list.conditional.isNotEmpty && list.hasOrder) {
+      // In GN's order: a run of unconditional items, a select() for a run
+      // under one condition, and so on -- the compiler reads these
+      // attributes in order (an include directory's place is its priority).
+      Condition? current;
+      final run = <_Item>[];
+      void flushRun() {
+        if (run.isEmpty) {
+          return;
+        }
+        if (current == Condition.always) {
+          unconditional(run);
+        } else {
+          parts.add(_renderSelect(current!, List<_Item>.of(run), rule));
+        }
+        run.clear();
+      }
+
+      for (final (Condition condition, _Item item) in list.sequence) {
+        if (condition != current) {
+          flushRun();
+          current = condition;
+        }
+        run.add(item);
+      }
+      flushRun();
+      out.write(parts.join(' + '));
+      return;
+    }
+    unconditional(list.always);
     if (parts.isEmpty && list.conditional.isEmpty) {
       parts.add('[]');
     }

@@ -12,11 +12,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "impeller_public_config",
-    defines = [
-        "IMPELLER_SUPPORTS_RENDERING=1",  # impeller_supports_rendering
-        "IMPELLER_ENABLE_OPENGLES=1",  # impeller_enable_opengles
-        "IMPELLER_ENABLE_VULKAN=1",  # impeller_enable_vulkan
-    ] + select({
+    defines = select({
         "//engine/src/flutter/common:runtime_mode_debug": [
             "IMPELLER_DEBUG=1",  # impeller_debug
         ],
@@ -24,7 +20,11 @@ cc_library(
             "IMPELLER_DEBUG=1",  # impeller_debug
         ],
         "//conditions:default": [],
-    }),
+    }) + [
+        "IMPELLER_SUPPORTS_RENDERING=1",  # impeller_supports_rendering
+        "IMPELLER_ENABLE_OPENGLES=1",  # impeller_enable_opengles
+        "IMPELLER_ENABLE_VULKAN=1",  # impeller_enable_vulkan
+    ],
     deps = ["//engine/src/flutter:config"],
 )
 
