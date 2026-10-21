@@ -132,10 +132,12 @@ static gboolean redraw_cb(gpointer user_data) {
           g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
                              g_object_ref(self), g_object_unref);
     }
-    GtkWidget* toplevel_window = fl_view_gtk4_get_toplevel_window(self);
-    if (toplevel_window != nullptr) {
-      gtk_window_set_default_size(GTK_WINDOW(toplevel_window),
-                                  logical_frame_width, logical_frame_height);
+    // A popover is its own native surface. Resizing its content must not
+    // resize the parent window returned by gtk_widget_get_root().
+    GtkNative* native = gtk_widget_get_native(GTK_WIDGET(self->render_area));
+    if (GTK_IS_WINDOW(native)) {
+      gtk_window_set_default_size(GTK_WINDOW(native), logical_frame_width,
+                                  logical_frame_height);
     }
 #else
     GtkWidget* toplevel =
