@@ -99,12 +99,14 @@ class FlutterPluginTest {
         val mockApplicationExtension = setupMockApplicationExtension(project)
         val mockComponentsExtension = setupMockComponentsExtension(project)
         setupMockNativePluginLoader(project, env.flutterExtension)
+        mockkStatic(FlutterPluginUtils::class)
         mockkStatic(DependencyVersionChecker::class)
         every { DependencyVersionChecker.checkDependencyVersions(project) } just Runs
 
         FlutterPlugin().apply(project)
 
         verifyOrder {
+            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(project)
             DependencyVersionChecker.checkDependencyVersions(project)
             project.tasks.register("javaVersion", PrintTask::class.java, any())
             mockComponentsExtension.finalizeDsl(any<(Any) -> Unit>())
