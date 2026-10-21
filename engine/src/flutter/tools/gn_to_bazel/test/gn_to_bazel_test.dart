@@ -2506,7 +2506,13 @@ executable("archive_unittests") {
   ]
 }
 ''');
-      expect(output, isNot(contains('alwayslink')));
+      expect(output, isNot(contains('alwayslink = True')));
+      // An archive with no headers of its own: buildifier would have it
+      // alwayslink, which a static_library is not.
+      expect(
+        output,
+        contains('# buildifier: disable=no-hdrs-no-alwayslink\ncc_library(\n    name = "archive",'),
+      );
       // gmock and gtest are one Bazel target; the duplicate is dropped.
       expect(
         output,

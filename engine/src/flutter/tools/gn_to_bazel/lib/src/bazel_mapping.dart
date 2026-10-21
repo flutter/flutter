@@ -503,6 +503,11 @@ const Map<String, String> genDirIncludeTargets = <String, String>{
 /// paths as `//dir`.
 const Map<String, String> includeDirLibraries = <String, String>{
   '//flutter/third_party/angle/include': '@angle//:headers',
+  // ICU's source directories, which Skia's client-ICU bidi library names
+  // as include directories (and as -isystem directories, which go: see
+  // withoutSystemIncludeDirs): the overlay's headers library.
+  '//flutter/third_party/icu/source/common': '@icu//:headers',
+  '//flutter/third_party/icu/source/i18n': '@icu//:headers',
   // tonic's config: its headers as "tonic/..." and "third_party/tonic/...".
   '//flutter/third_party': '//engine/src/flutter/third_party:include_dir',
   '//flutter': '//engine/src/flutter:config',

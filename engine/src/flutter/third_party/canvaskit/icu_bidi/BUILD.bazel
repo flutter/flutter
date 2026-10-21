@@ -1,0 +1,54 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/canvaskit/icu_bidi/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "icu_bidi_public",
+    defines = [
+        "U_USING_ICU_NAMESPACE=0",
+        "U_DISABLE_RENAMING=0",
+        "U_HAVE_LIB_SUFFIX=1",
+        "U_LIB_SUFFIX_C_NAME=_skia",
+        "U_DISABLE_VERSION_SUFFIX=1",
+        "SK_USING_THIRD_PARTY_ICU",
+    ],
+    deps = ["@icu//:headers"],
+)
+
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "icu_bidi",
+    srcs = [
+        "@icu//:source/common/cmemory.cpp",
+        "@icu//:source/common/cstring.cpp",
+        "@icu//:source/common/ubidi.cpp",
+        "@icu//:source/common/ubidi_props.cpp",
+        "@icu//:source/common/ubidiln.cpp",
+        "@icu//:source/common/ubidiwrt.cpp",
+        "@icu//:source/common/uchar.cpp",
+        "@icu//:source/common/udataswp.cpp",
+        "@icu//:source/common/uinvchar.cpp",
+        "@icu//:source/common/ustring.cpp",
+        "@icu//:source/common/ustrtrns.cpp",
+        "@icu//:source/common/utf_impl.cpp",
+        "@icu//:source/common/utrie2.cpp",
+        "@icu//:source/common/utypes.cpp",
+    ],
+    copts = ["-w"] + CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "U_COMMON_IMPLEMENTATION",
+        "U_STATIC_IMPLEMENTATION",
+        "U_I18N_IMPLEMENTATION",
+    ],
+    deps = [
+        ":icu_bidi_public",
+        "//engine/src:include_root",
+    ],
+)

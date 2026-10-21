@@ -14,11 +14,22 @@ package(default_visibility = ["//visibility:public"])
 
 # The wasm target platform; the OS constraint is the one the converter's
 # config_settings map GN's is_wasm to (build/bazel/BUILD.bazel).
+# The flags GN derives from the OS and the Bazel build keeps as flags with
+# the Linux host's defaults (impeller/tools/BUILD.bazel): Impeller's
+# backends, as impeller/tools/args.gni has them for wasm -- OpenGL ES, no
+# Vulkan, no Metal. Bazel's platform-based flags apply them to everything
+# built for this platform and its children (the web build's variants,
+# //flutter/third_party/canvaskit).
 platform(
     name = "wasm32_emscripten",
     constraint_values = [
         "@platforms//os:emscripten",
         "@platforms//cpu:wasm32",
+    ],
+    flags = [
+        "--//engine/src/flutter/impeller/tools:enable_metal=false",
+        "--//engine/src/flutter/impeller/tools:enable_opengles=true",
+        "--//engine/src/flutter/impeller/tools:enable_vulkan=false",
     ],
 )
 

@@ -245,8 +245,31 @@ List<ForwardedFlag> flagsOfConfig(GnTarget config) {
   return <ForwardedFlag>[
     for (final GnVariable variable in config.variables.values)
       if (flagVariables.contains(variable.name))
-        for (final GnListItem item in variable.liveItems)
+        for (final GnListItem item in withoutSystemIncludeDirs(variable.liveItems))
           if (item.value case GnStringValue(:final String value) when !value.startsWith('-std='))
             (condition: item.condition, flag: value),
   ];
+}
+
+/// [items] less the `-isystem <dir>` pairs whose directory is a
+/// `rebase_path()` result: a config that names its include directories a
+/// second time as system include directories (Skia's third-party ICU and
+/// brotli: `foreach(dir, include_dirs) { cflags += [ "-isystem",
+/// rebase_path(dir) ] }`). Bazel reaches a directory through the
+/// `includes` of the library that carries it, spelled as the toolchain
+/// spells include directories (-I, as GN's include_dirs are), and a flag
+/// cannot name a directory of another repository; the pair goes.
+List<GnListItem> withoutSystemIncludeDirs(List<GnListItem> items) {
+  final kept = <GnListItem>[];
+  for (var i = 0; i < items.length; i++) {
+    if (i + 1 < items.length &&
+        items[i].value == const GnStringValue('-isystem') &&
+        items[i + 1].value is GnStringValue &&
+        (items[i + 1].value as GnStringValue).value.startsWith(rebasedPathMarker)) {
+      i++;
+      continue;
+    }
+    kept.add(items[i]);
+  }
+  return kept;
 }
