@@ -30,7 +30,7 @@ directory in the filesystem's order; here the files come in Bazel's, sorted.
 """
 
 load("@engine_version//:version.bzl", "ENGINE_VERSION")
-load(":build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries")
+load(":build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries", "shipped_file")
 
 ZipTreeInfo = provider(
     doc = "The entries a zip_tree contributes to an archive.",
@@ -188,10 +188,14 @@ def _zip_bundle_impl(ctx):
         files = target[DefaultInfo].files.to_list()
         if len(files) != 1:
             fail("%s: %s should be one file for %s, is %s" % (ctx.label, target.label, destination, files))
-        args.add_all(["-i", files[0], destination])
-        inputs.append(files[0])
+
+        # An executable or shared library goes in as GN's link tool leaves
+        # it in the build root: stripped (build_directory.bzl).
+        file = shipped_file(target, files[0])
+        args.add_all(["-i", file, destination])
+        inputs.append(file)
         if destination in ctx.attr.sources:
-            placed.append((files[0], ctx.attr.sources[destination]))
+            placed.append((file, ctx.attr.sources[destination]))
     for tree in ctx.attr.trees:
         for file, destination in tree[ZipTreeInfo].entries:
             args.add_all(["-i", file, destination])
@@ -224,7 +228,9 @@ zip_bundle = rule(
         ),
         "files": attr.string_keyed_label_dict(
             allow_files = True,
-            doc = "The archive's entries: each destination path mapped to the target of the one file placed there.",
+            aspects = [build_directory_aspect],
+            doc = "The archive's entries: each destination path mapped to the target of the one file placed there; " +
+                  "an executable or shared library is placed stripped, as GN links it.",
         ),
         "sources": attr.string_dict(
             doc = "For the entries whose GN source is an output of the build (`$root_out_dir/flutter_tester`, " +

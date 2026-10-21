@@ -11,8 +11,12 @@ Bazel writes each under its package in bazel-bin instead, and `install`
 (install.bzl) lays them out as GN does for the consumers that read the
 build directory. A rule that knows where GN would put its files says so
 with BuildDirectoryInfo; `install` collects it over a target's dependency
-closure with `build_directory_aspect`.
+closure with `build_directory_aspect`, which also places an executable or
+shared library at the build root as GN's link tools leave it: stripped, with
+the binary as linked under exe.unstripped/ or lib.unstripped/.
 """
+
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 
 BuildDirectoryInfo = provider(
     doc = "Where a target's files sit in GN's build directory.",
@@ -118,33 +122,118 @@ def _targets_of(value):
 # directory too (the web SDK's tree beside flutter-web-sdk.zip).
 _FOLLOWED_ATTRIBUTES = ["deps", "srcs", "data", "files", "trees"]
 
+def _binary_entries(target, ctx):
+    # GN's link tools write an executable to exe.unstripped/ and
+    # `llvm-objcopy --strip-all` it into the build root, always; a shared
+    # library goes through lib.unstripped/ the same way under
+    # stripped_symbols (the `stripped` flag; tools/gn's default, which only
+    # the developer's --no-stripped configurations turn off). The binary in
+    # bazel-bin stays as linked -- the tests run it, as GN's unstripped copy
+    # is there to be run under a debugger -- and what an install or an
+    # archive ships is stripped here, by the same tool with the same flag.
+    shared = ctx.rule.kind == "cc_shared_library" or getattr(ctx.rule.attr, "linkshared", False)
+    entries = []
+    shipped = {}
+    for binary in target[DefaultInfo].files.to_list():
+        if shared and not ctx.attr._stripped[BuildSettingInfo].value:
+            entries.append((binary, binary.basename))
+            continue
+
+        # `<name>.stripped` is cc_binary's own (its CcStrip action, the
+        # toolchain's strip with -S: debug sections only); this is GN's
+        # --strip-all copy, the file an archive or install ships.
+        stripped = ctx.actions.declare_file(binary.basename + ".shipped", sibling = binary)
+        objcopy = [f for f in ctx.files._objcopy if f.basename == "llvm-objcopy"]
+        if len(objcopy) != 1:
+            fail("%s: _objcopy should hold llvm-objcopy, holds %s" % (ctx.label, ctx.files._objcopy))
+        args = ctx.actions.args()
+        args.add("--strip-all")
+        args.add(binary)
+        args.add(stripped)
+        ctx.actions.run(
+            executable = objcopy[0],
+            arguments = [args],
+            inputs = [binary],
+            tools = ctx.files._objcopy,
+            outputs = [stripped],
+            mnemonic = "Strip",
+            progress_message = "Stripping %{output}",
+        )
+        entries.append((stripped, binary.basename))
+        entries.append((binary, ("lib.unstripped/" if shared else "exe.unstripped/") + binary.basename))
+        shipped[binary] = stripped
+    return entries, shipped
+
 def _build_directory_aspect_impl(target, ctx):
     transitive = []
     for attribute in _FOLLOWED_ATTRIBUTES:
         for dep in _targets_of(getattr(ctx.rule.attr, attribute, None)):
             if _CollectedInfo in dep:
                 transitive.append(dep[_CollectedInfo].entries)
+    binary = None
+    shipped = {}
     if BuildDirectoryInfo in target:
         direct = target[BuildDirectoryInfo].entries
     elif ctx.rule.kind in ("cc_binary", "cc_shared_library"):
         # GN writes an executable or a shared library into the build root.
-        direct = depset([(f, f.basename) for f in target[DefaultInfo].files.to_list()])
+        binary, shipped = _binary_entries(target, ctx)
+        direct = depset(binary)
     else:
         direct = depset()
-    return [_CollectedInfo(entries = depset(transitive = [direct] + transitive))]
+    return [_CollectedInfo(
+        entries = depset(transitive = [direct] + transitive),
+        binary = binary,
+        shipped = shipped,
+    )]
 
 _CollectedInfo = provider(
     doc = "BuildDirectoryInfo entries over a target's dependency closure.",
-    fields = {"entries": "A depset of (file, path) pairs."},
+    fields = {
+        "entries": "A depset of (file, path) pairs.",
+        "binary": "For an executable or shared library: its own (file, path) pairs -- the stripped copy at the " +
+                  "build root and the binary under exe.unstripped/ or lib.unstripped/ -- else None.",
+        "shipped": "For a binary: its files mapped to the copies an archive or install ships.",
+    },
 )
 
 build_directory_aspect = aspect(
     implementation = _build_directory_aspect_impl,
     doc = "Collects BuildDirectoryInfo over deps, srcs, data and an archive's files and trees, with executables " +
-          "and shared libraries at the build root.",
+          "and shared libraries at the build root, stripped as GN's link tools strip them.",
     attr_aspects = _FOLLOWED_ATTRIBUTES,
+    attrs = {
+        "_stripped": attr.label(default = "//engine/src/flutter/build/bazel:stripped"),
+        "_objcopy": attr.label(
+            default = "@clang_linux_x64//:objcopy_files",
+            allow_files = True,
+            cfg = "exec",
+        ),
+    },
 )
 
 def collected_build_directory_entries(target):
     """The (file, path) pairs collected over `target`'s closure by build_directory_aspect."""
     return target[_CollectedInfo].entries.to_list()
+
+def binary_entries(target):
+    """An executable's or shared library's own (file, path) pairs, or None for any other target.
+
+    The pairs are what GN's link tool leaves: the stripped binary at the
+    build root and the one linked under exe.unstripped/ or lib.unstripped/
+    (a shared library under `stripped` only; otherwise just the library).
+
+    Args:
+      target: a target the aspect ran on.
+
+    Returns:
+      A list of (file, path) pairs, or None.
+    """
+    if _CollectedInfo not in target:
+        return None
+    return target[_CollectedInfo].binary
+
+def shipped_file(target, file):
+    """The copy of `file` of `target` that an archive or install ships: the stripped one for a binary, else `file`."""
+    if _CollectedInfo not in target:
+        return file
+    return target[_CollectedInfo].shipped.get(file, file)

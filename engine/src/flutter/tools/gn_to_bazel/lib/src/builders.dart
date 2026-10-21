@@ -53,6 +53,12 @@ enum GnFlagEffect {
   /// wasm platform's optimized build always has it.
   lto,
 
+  /// `--stripped`/`--no-stripped`: tools/gn's stripped_symbols, whether the
+  /// shared libraries a build ships are stripped (executables always are);
+  /// the `stripped` setting for the Linux platforms, nothing for the wasm
+  /// platform, whose toolchain strips nothing.
+  stripped,
+
   /// A flag the Bazel build has a setting for ([GnFlag.bazelFlag]).
   setting,
 
@@ -114,10 +120,12 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--unoptimized': GnFlag(GnFlagEffect.unoptimized),
   // argparse takes a flag's unambiguous prefix; local_engine.json writes this one.
   '--unopt': GnFlag(GnFlagEffect.unoptimized),
-  '--no-stripped': GnFlag(
-    GnFlagEffect.assumed,
-    note: "the Bazel build makes no stripped copies (GN's lib.stripped/) either way",
-  ),
+  // tools/gn: stripped_symbols is on unless --no-stripped (local_engine.json's
+  // developer builds), and off for Android. GN's Linux toolchains strip every
+  // executable regardless and shared libraries under it (gcc_toolchain.gni);
+  // the wasm toolchain strips nothing.
+  '--stripped': GnFlag(GnFlagEffect.stripped),
+  '--no-stripped': GnFlag(GnFlagEffect.stripped),
   '--xcode-symlinks': GnFlag(GnFlagEffect.ignored, note: 'a macOS build directory matter'),
   '--target-dir': GnFlag(GnFlagEffect.buildDirectory, takesValue: true),
   '--prebuilt-dart-sdk': GnFlag(
@@ -200,6 +208,10 @@ const Map<String, String> gnArguments = <String, String>{
 /// The runtime mode setting of the Bazel build.
 const String runtimeModeSetting = '//engine/src/flutter/common:runtime_mode';
 
+/// The stripped setting of the Bazel build (build/bazel/BUILD.bazel): whether
+/// the shared libraries an install or an archive ships are stripped.
+const String strippedSetting = '//engine/src/flutter/build/bazel:stripped';
+
 /// testing/run_tests.py's test types, as the Bazel suites that run the same
 /// tests: `dart` is the Dart tests under flutter_tester with the VM
 /// service's and the smoke test (gather_dart_smoke_test, gather_dart_tests),
@@ -280,6 +292,7 @@ final class BuilderBuild {
     var otherPlatform = false;
     var unoptimized = false;
     var lto = true;
+    var stripped = true;
     String? runtimeMode;
     String? buildDirectory;
     String? platform;
@@ -323,6 +336,8 @@ final class BuilderBuild {
           }
         case GnFlagEffect.lto:
           lto = flag == '--lto';
+        case GnFlagEffect.stripped:
+          stripped = flag == '--stripped';
         case GnFlagEffect.setting:
           final String setting = known.bazelFlag! + (value == null ? '' : '=$value');
           for (final option in <String>[setting, ...known.alongside]) {
@@ -369,6 +384,13 @@ final class BuilderBuild {
       );
     } else if (!unoptimized && !lto && wasm) {
       unsupported.add('--no-lto (the wasm platform links the optimized build with LTO)');
+    }
+    // tools/gn: stripped_symbols is on unless --no-stripped. The Linux
+    // toolchains strip what they ship (executables always, shared libraries
+    // under it); the wasm toolchain strips nothing, so for the web the flag
+    // is nothing either way.
+    if (!stripped && !wasm) {
+      settings.add('--$strippedSetting=false');
     }
     flags.add(unoptimized ? '--compilation_mode=fastbuild' : '--compilation_mode=opt');
     flags.add('--$runtimeModeSetting=${runtimeMode ?? 'debug'}');

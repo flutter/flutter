@@ -104,9 +104,9 @@ install(
 )
 
 # linux_host_engine.json: ci/host_debug
-#   bazel run --config=host_debug :host_debug
+#   bazel run --config=ci_host_debug :ci_host_debug
 install(
-    name = "host_debug",
+    name = "ci_host_debug",
     testonly = True,
     contents = [
         "//engine/src/flutter/build/archives:artifacts",
@@ -120,9 +120,9 @@ install(
 )
 
 # linux_host_engine.json: ci/host_release
-#   bazel run --config=host_release :host_release
+#   bazel run --config=ci_host_release :ci_host_release
 install(
-    name = "host_release",
+    name = "ci_host_release",
     testonly = True,
     contents = ["//engine/src/flutter/build/archives:flutter_patched_sdk"],
     directory = "ci/host_release",

@@ -25,7 +25,9 @@ the rule's own output is the script that copies.
 `contents` are targets whose dependency closure says where GN's build
 directory holds its files (BuildDirectoryInfo, build_directory.bzl: copies,
 actions, generated files, archives; a cc_binary's executable or shared
-library at the build root, as GN puts them); `files` maps a target to the directory
+library at the build root, as GN puts them -- stripped, as GN's link tools
+leave them, with the binary as linked under exe.unstripped/ or
+lib.unstripped/); `files` maps a target to the directory
 under the build directory that holds its files by base name (`` for the
 build directory itself, `gen`, `flutter_patched_sdk`), for rules that do not
 say; `trees` are zip_tree targets, whose files go at their paths under the
@@ -34,7 +36,7 @@ whose archives go under `zip_archives/` at the path the bundle names.
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load(":build_directory.bzl", "build_directory_aspect", "collected_build_directory_entries")
+load(":build_directory.bzl", "binary_entries", "build_directory_aspect", "collected_build_directory_entries")
 load(":checkout_view.bzl", "ENGINE_SRC", "build_directory_attrs", "build_directory_variant")
 load(":zip_bundle.bzl", "ZipTreeInfo")
 
@@ -44,6 +46,15 @@ def _install_impl(ctx):
         entries.extend(collected_build_directory_entries(target))
     for target, directory in ctx.attr.files.items():
         directory = directory.strip("/")
+
+        # An executable or shared library lands as GN's link tool leaves it:
+        # stripped, with the binary as linked under exe.unstripped/ or
+        # lib.unstripped/ (build_directory.bzl).
+        binary = binary_entries(target)
+        if binary != None:
+            for file, path in binary:
+                entries.append((file, paths.join(directory, path) if directory else path))
+            continue
         for file in target[DefaultInfo].files.to_list():
             entries.append((file, paths.join(directory, file.basename) if directory else file.basename))
     for target in ctx.attr.trees:
@@ -129,8 +140,10 @@ _install = rule(
         ),
         "files": attr.label_keyed_string_dict(
             allow_files = True,
+            aspects = [build_directory_aspect],
             doc = "Targets mapped to the directory under the build directory that holds their " +
-                  "files by base name (``, `gen`, `flutter_patched_sdk`).",
+                  "files by base name (``, `gen`, `flutter_patched_sdk`); an executable or shared library " +
+                  "stripped, with the binary as linked under exe.unstripped/ or lib.unstripped/ there.",
         ),
         "trees": attr.label_list(
             providers = [ZipTreeInfo],
