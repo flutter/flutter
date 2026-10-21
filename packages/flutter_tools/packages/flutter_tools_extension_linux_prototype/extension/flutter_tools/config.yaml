@@ -13,6 +13,7 @@ services:
   - template
   - device
   - build
+  - clean
 build_targets:
   - custom-linux
 templates:

@@ -4,7 +4,9 @@
 
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
-import 'package:test/test.dart';
+import 'package:flutter_devicelab/tasks/web_benchmarks_comparison.dart';
+
+import '../common.dart';
 
 void main() {
   group('BenchmarkFilter', () {
@@ -323,6 +325,162 @@ void main() {
       expect(result.message, contains('Cannot combine'));
       expect(result.message, contains('BENCHMARK_TARGETS'));
       expect(result.message, contains('BENCHMARK_FILTER'));
+    });
+  });
+
+  group('compareResults', () {
+    for (final (
+          String description,
+          num baseline,
+          num current,
+          double? threshold,
+          double delta,
+          bool regression,
+        )
+        in <(String, num, num, double?, double, bool)>[
+          ('slowdown above the threshold is a regression', 100.0, 115.0, 10.0, 15.0, true),
+          ('slowdown within the threshold is not a regression', 100.0, 105.0, 10.0, 5.0, false),
+          ('slowdown equal to the threshold is not a regression', 100.0, 110.0, 10.0, 10.0, false),
+          ('speedup beyond the threshold is not a regression', 100.0, 75.0, 10.0, -25.0, false),
+          ('slowdown without a threshold is not a regression', 100.0, 150.0, null, 50.0, false),
+          ('any slowdown is a regression at threshold 0', 100.0, 101.0, 0.0, 1.0, true),
+          ('no change is not a regression at threshold 0', 100.0, 100.0, 0.0, 0.0, false),
+          ('rise from zero is an infinite regression', 0.0, 150.0, 10.0, double.infinity, true),
+          (
+            'rise from zero without a threshold is not a regression',
+            0.0,
+            150.0,
+            null,
+            double.infinity,
+            false,
+          ),
+          ('zero to zero is unchanged', 0.0, 0.0, 10.0, 0.0, false),
+          ('integer values are accepted', 100, 150, 10.0, 50.0, true),
+        ]) {
+      test(description, () {
+        final BenchmarkComparison result = compareResults(
+          baseline: <String, dynamic>{'a.average': baseline},
+          current: <String, dynamic>{'a.average': current},
+          regressionThreshold: threshold,
+        );
+        final MetricComparison metric = result.metrics.single;
+        expect(metric.metricKey, 'a.average');
+        expect(metric.baseline, baseline);
+        expect(metric.current, current);
+        expect(metric.deltaPercent, delta);
+        expect(metric.isRegression, regression);
+        expect(result.hasRegressions, regression);
+      });
+    }
+
+    test('compares only .average keys present in both maps, sorted by key', () {
+      final BenchmarkComparison result = compareResults(
+        baseline: <String, dynamic>{
+          'c.average': 1,
+          'a.average': 1,
+          'a.median': double.nan,
+          'baseline_only.average': -1,
+          'name': 'draw_rect',
+        },
+        current: <String, dynamic>{
+          'a.average': 1,
+          'c.average': 1,
+          'a.median': double.nan,
+          'current_only.average': null,
+        },
+      );
+      expect(result.metrics.map((MetricComparison m) => m.metricKey), <String>[
+        'a.average',
+        'c.average',
+      ]);
+      expect(
+        compareResults(
+          baseline: <String, dynamic>{'a.average': 1},
+          current: <String, dynamic>{'b.average': 1},
+        ).metrics,
+        isEmpty,
+      );
+    });
+
+    test('rejects negative and non-finite thresholds', () {
+      for (final threshold in <double>[-5.0, double.nan, double.infinity]) {
+        expect(
+          () => compareResults(
+            baseline: <String, dynamic>{'a.average': 1},
+            current: <String, dynamic>{'a.average': 1},
+            regressionThreshold: threshold,
+          ),
+          throwsArgumentError,
+          reason: '$threshold',
+        );
+      }
+    });
+
+    test('rejects compared values that are not finite, non-negative numbers', () {
+      for (final value in <Object?>[-1.0, double.nan, double.infinity, 'fast', null]) {
+        expect(
+          () => compareResults(
+            baseline: <String, dynamic>{'a.average': value},
+            current: <String, dynamic>{'a.average': 1},
+          ),
+          throwsFormatException,
+          reason: 'baseline $value',
+        );
+        expect(
+          () => compareResults(
+            baseline: <String, dynamic>{'a.average': 1},
+            current: <String, dynamic>{'a.average': value},
+          ),
+          throwsFormatException,
+          reason: 'current $value',
+        );
+      }
+    });
+  });
+
+  group('formatAnsiSummaryTable', () {
+    final BenchmarkComparison comparison = compareResults(
+      baseline: <String, dynamic>{
+        'zero.average': 0,
+        'a.average': 4915.7,
+        'bench_card_infinite_scroll.canvaskit.apply_frame.average': 67.2,
+        'huge.average': 123456789,
+      },
+      current: <String, dynamic>{
+        'zero.average': 2.2,
+        'a.average': 4596.2,
+        'bench_card_infinite_scroll.canvaskit.apply_frame.average': 75.6,
+        'huge.average': 123457,
+      },
+      regressionThreshold: 10.0,
+    );
+
+    test('renders an aligned table with a header and separator', () {
+      expect(formatAnsiSummaryTable(comparison, enableAnsi: false), '''
+Metric                                                       Baseline   Current   Delta  Status
+--------------------------------------------------------  -----------  --------  ------  ------
+a.average                                                      4915.7    4596.2   -6.5%  PASS
+bench_card_infinite_scroll.canvaskit.apply_frame.average         67.2      75.6   12.5%  FAIL
+huge.average                                              123456789.0  123457.0  -99.9%  PASS
+zero.average                                                      0.0       2.2     N/A  FAIL
+''');
+    });
+
+    test('colors only the status when ANSI is enabled', () {
+      final String ansi = formatAnsiSummaryTable(comparison, enableAnsi: true);
+      expect(ansi, contains('\x1B[31mFAIL\x1B[0m'));
+      expect(ansi, contains('\x1B[32mPASS\x1B[0m'));
+      expect(
+        ansi.replaceAll(RegExp(r'\x1B\[\d+m'), ''),
+        formatAnsiSummaryTable(comparison, enableAnsi: false),
+      );
+    });
+
+    test('returns an empty string when there are no metrics', () {
+      expect(
+        formatAnsiSummaryTable(const BenchmarkComparison(<MetricComparison>[]), enableAnsi: true),
+        isEmpty,
+      );
     });
   });
 }

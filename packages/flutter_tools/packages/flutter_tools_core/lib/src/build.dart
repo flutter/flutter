@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 final _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
@@ -84,14 +86,8 @@ class ExtensionBuildTarget {
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
     return ExtensionBuildTarget(
-      description: switch (json[descriptionKey]) {
-        final String value => value,
-        _ => '',
-      },
-      name: switch (json[nameKey]) {
-        final String value => value,
-        _ => '',
-      },
+      description: json.optionalField<String>(descriptionKey, defaultValue: ''),
+      name: json.optionalField<String>(nameKey, defaultValue: ''),
     );
   }
 
@@ -142,14 +138,8 @@ class ExtensionBuildResult {
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
     return ExtensionBuildResult(
-      success: switch (json[successKey]) {
-        final bool value => value,
-        _ => false,
-      },
-      errorMessage: switch (json[errorMessageKey]) {
-        final String value => value,
-        _ => null,
-      },
+      success: json.optionalField<bool>(successKey, defaultValue: false),
+      errorMessage: json.nullableField<String>(errorMessageKey),
     );
   }
 
