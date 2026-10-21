@@ -351,67 +351,44 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// dynamic option initialization (via [FlutterCommand.initializeDynamicOptions])
   /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
-    if (_evaluateTopLevelFlag(args, FlutterGlobalOptions.kExtensionsFlag) == false) {
+    final (:Command<void>? command, :bool extensionsEnabled) = _findTargetCommand(args);
+    if (!extensionsEnabled) {
       _extensionManager?.disable();
       return;
     }
     if (_featureFlags?.isToolExtensionsEnabled != true) {
       return;
     }
-    if (_findTargetCommand(args) case var command?) {
-      if (command.name == 'help') {
-        // If the top-level 'help' command was matched (e.g. `flutter help config` or `flutter help --verbose config`),
-        // identify the target command whose help documentation is requested rather than the help command itself.
-        command =
-            _findTargetCommand(
-              args.skipWhile((String arg) => arg == 'help' || arg.startsWith('-')),
-            ) ??
-            command;
+    var current = command;
+    if (current?.name == 'help') {
+      // If the top-level 'help' command was matched (e.g. `flutter help config` or `flutter help --verbose config`),
+      // identify the target command whose help documentation is requested rather than the help command itself.
+      current =
+          _findTargetCommand(args.skipWhile((String arg) => arg == 'help' || arg.startsWith('-')))
+              .command ??
+          current;
+    }
+    while (current != null) {
+      if (current case final FlutterCommand flutterCommand) {
+        await flutterCommand.initializeDynamicOptions();
       }
-      Command<void>? current = command;
-      while (current != null) {
-        if (current case final FlutterCommand flutterCommand) {
-          await flutterCommand.initializeDynamicOptions();
-        }
-        current = current.parent;
-      }
+      current = current.parent;
     }
   }
 
-  /// Evaluates raw CLI [args] for a top-level boolean flag [flagName] before
-  /// full argument parsing (which depends on dynamic options from extensions).
+  /// Helper to find the target command from [args] and determine whether
+  /// tool extensions are enabled (`--no-extensions` disables them).
   ///
-  /// Skips non-flag top-level options and their value arguments (e.g.,
-  /// `-d linux`) and stops scanning at the first command token or `--`. If both
-  /// `--<flagName>` and `--no-<flagName>` appear, the last one wins.
-  bool? _evaluateTopLevelFlag(Iterable<String> args, String flagName) {
-    bool? result;
-    final List<String> argsList = args.toList();
-    var i = 0;
-    while (i < argsList.length) {
-      final String arg = argsList[i];
-      if (!arg.startsWith('-') || arg == '--') {
-        break;
-      }
-      if (arg == '--$flagName') {
-        result = true;
-      } else if (arg == '--no-$flagName') {
-        result = false;
-      }
-      i += _optionTokenCount(argParser, arg);
-    }
-    return result;
-  }
-
-  /// Helper to find the target command from the list of arguments, traversing subcommands and skipping options.
-  ///
-  /// Skips global and command-level options (e.g., `--verbose`, `-v`, `--device-id <id>`, `--device-id=id`)
-  /// so that non-option arguments are matched against registered command and subcommand names.
-  Command<void>? _findTargetCommand(Iterable<String> args) {
+  /// Skips global and command-level options and their values so that
+  /// non-option arguments are matched against registered command and
+  /// subcommand names. Stops scanning at `--`. If both `--extensions` and
+  /// `--no-extensions` appear, the last one wins.
+  ({Command<void>? command, bool extensionsEnabled}) _findTargetCommand(Iterable<String> args) {
     Map<String, Command<void>> commandsMap = commands;
     Command<void>? lastFoundCommand;
     ArgParser currentParser = argParser;
     final List<String> argsList = args.toList();
+    var extensionsEnabled = true;
     var i = 0;
     while (i < argsList.length) {
       final String arg = argsList[i];
@@ -420,17 +397,26 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
       // Options and flags start with '-'.
       if (arg.startsWith('-')) {
+        if (arg == '--${FlutterGlobalOptions.kExtensionsFlag}') {
+          extensionsEnabled = true;
+        } else if (arg == '--no-${FlutterGlobalOptions.kExtensionsFlag}') {
+          extensionsEnabled = false;
+        }
         i += _optionTokenCount(currentParser, arg);
       } else {
         if (commandsMap[arg] case final matchedCommand?) {
           lastFoundCommand = matchedCommand;
-          commandsMap = matchedCommand.subcommands;
-          currentParser = matchedCommand.argParser;
+          final Command<void>(
+            subcommands: Map<String, Command<void>> nextCommands,
+            argParser: ArgParser nextParser,
+          ) = matchedCommand;
+          commandsMap = nextCommands;
+          currentParser = nextParser;
         }
         i++;
       }
     }
-    return lastFoundCommand;
+    return (command: lastFoundCommand, extensionsEnabled: extensionsEnabled);
   }
 
   /// Returns the number of argument tokens consumed by [arg] against [parser]
@@ -445,11 +431,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (name.contains('=')) {
       return 1;
     }
-    for (final Option opt in parser.options.values) {
-      if (opt.name == name || opt.abbr == name) {
-        // Non-flag options (single/multi options) consume the subsequent argument as their value (e.g., '-d' 'linux').
-        return opt.isFlag ? 1 : 2;
-      }
+    final Option? option = parser.findByNameOrAlias(name) ?? parser.findByAbbreviation(name);
+    if (option != null) {
+      return option.isFlag ? 1 : 2;
     }
     return 1;
   }
