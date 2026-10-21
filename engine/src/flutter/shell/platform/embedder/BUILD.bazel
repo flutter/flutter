@@ -1362,6 +1362,10 @@ zip_bundle(
         "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/wasm-wasm-embedder.zip",
         "//conditions:default": None,
     }),
+    sources = {
+        "flutter_embedder.h": "flutter_embedder.h",
+        "libflutter_engine.so": "libflutter_engine.so",
+    },
 )
 
 # `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.

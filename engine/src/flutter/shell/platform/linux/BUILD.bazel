@@ -607,5 +607,9 @@ zip_bundle(
         ":when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_jit_release": "wasm-wasm-jit_release/wasm-wasm-flutter-gtk.zip",
         "//conditions:default": None,
     }),
+    sources = {
+        "libflutter_linux_gtk.so": "libflutter_linux_gtk.so",
+        "gen_snapshot": "gen_snapshot",
+    },
     trees = [":flutter_gtk_publish_headers_linux"],
 )
