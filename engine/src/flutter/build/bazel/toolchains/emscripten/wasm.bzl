@@ -18,6 +18,24 @@ command line; see the implementation.)
 
 The module is the whole of the C++ it needs: `srcs` compiled here, `deps`
 linked in (cc_library targets, themselves built under the transition).
+
+Which wasm platform: GN builds a wasm_lib in the toolchain a dependent names
+on the edge (`"//flutter/skwasm(:skwasm)"`, the web SDK's copies in
+//flutter/third_party/canvaskit/BUILD.gn -- a child toolchain whose
+extra_toolchain_args are the variant's configuration) and in no other. Here
+the edge is a gn_copy with a `platform`: its transition
+(module_platform_transition) sets the `module_platform` flag of
+build/bazel/web and --platforms for the copy's sources, and the module's own
+transition (module_transition) builds it for the platform the flag names,
+spending the flag, so that nothing below the module is configured by it
+(the flag is the edge, the platform is the configuration). The module is compatible with the
+variant platforms alone (every wasm_platform carries the `variant`
+constraint; the bare wasm platform does not), as GN has no module outside
+those toolchains: `bazel build //engine/src/flutter/skwasm:skwasm` wants
+`--//engine/src/flutter/build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:skwasm`
+(or `--platforms` of the same), or the copy that names it, and a wildcard
+build skips the bare module. wasm_objects, a compile alone, takes the bare
+platform.
 """
 
 load("@rules_cc//cc:action_names.bzl", "ACTION_NAMES")
@@ -27,14 +45,46 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 
 WASM_PLATFORM = Label("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten")
 
-def _wasm_transition_impl(_settings, attr):
+# The platform wasm modules are built for (build/bazel/web): a wasm_platform's
+# label, or empty.
+MODULE_PLATFORM = "//engine/src/flutter/build/bazel/web:module_platform"
+
+# The constraint every wasm_platform carries and the bare wasm platform does
+# not: what a wasm module is compatible with.
+VARIANT = "//engine/src/flutter/build/bazel/web:variant"
+
+def _module_transition_impl(settings, _attr):
+    platform = settings[MODULE_PLATFORM]
     return {
-        # The module's platform: one of the web build's variants (a child of
-        # the wasm platform carrying a GN wasm toolchain's arguments as
-        # flags, third_party/canvaskit), or the wasm platform itself.
-        "//command_line_option:platforms": [str(attr.platform)],
+        # The module's platform: the one the module_platform flag names (a
+        # variant of the web build, third_party/canvaskit), else the one the
+        # build has -- compatible only when that is a variant, see
+        # wasm_module. The flag is spent here: nothing below the module is
+        # configured by it.
+        "//command_line_option:platforms": [platform] if platform else settings["//command_line_option:platforms"],
         # Every object is position independent under the root .bazelrc; the
         # wasm toolchain has no PIC.
+        "//command_line_option:force_pic": False,
+        MODULE_PLATFORM: "",
+    }
+
+module_transition = transition(
+    implementation = _module_transition_impl,
+    inputs = [
+        "//command_line_option:platforms",
+        MODULE_PLATFORM,
+    ],
+    outputs = [
+        "//command_line_option:platforms",
+        "//command_line_option:force_pic",
+        MODULE_PLATFORM,
+    ],
+)
+
+def _wasm_transition_impl(_settings, _attr):
+    return {
+        # A compile alone (wasm_objects) takes the wasm platform itself.
+        "//command_line_option:platforms": [str(WASM_PLATFORM)],
         "//command_line_option:force_pic": False,
     }
 
@@ -44,6 +94,32 @@ wasm_transition = transition(
     outputs = [
         "//command_line_option:platforms",
         "//command_line_option:force_pic",
+    ],
+)
+
+def _module_platform_transition_impl(settings, attr):
+    if not attr.platform:
+        return {
+            "//command_line_option:platforms": settings["//command_line_option:platforms"],
+            MODULE_PLATFORM: settings[MODULE_PLATFORM],
+        }
+    return {
+        "//command_line_option:platforms": [str(attr.platform)],
+        MODULE_PLATFORM: str(attr.platform),
+    }
+
+# GN's `label(:toolchain)` edge, for a rule with a `platform` attribute
+# (gn_copy): what the rule names is built for that platform, and a wasm
+# module among them reads it from the flag.
+module_platform_transition = transition(
+    implementation = _module_platform_transition_impl,
+    inputs = [
+        "//command_line_option:platforms",
+        MODULE_PLATFORM,
+    ],
+    outputs = [
+        "//command_line_option:platforms",
+        MODULE_PLATFORM,
     ],
 )
 
@@ -71,10 +147,6 @@ _MODULE_ATTRS = {
     ),
     "defines": attr.string_list(doc = "Defines of the compiles."),
     "copts": attr.string_list(doc = "The target's cflags (after wasm_lib's -s MAIN_MODULE=1 in a module)."),
-    "platform": attr.label(
-        default = WASM_PLATFORM,
-        doc = "The platform to build for: the wasm platform, or a variant of the web build (a platform with the GN toolchain's arguments as flags).",
-    ),
     "_allowlist_function_transition": attr.label(
         default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
     ),
@@ -182,9 +254,9 @@ def _wasm_module_impl(ctx):
         WasmModuleInfo(js = js, wasm = wasm, symbols = symbols),
     ]
 
-wasm_module = rule(
+_wasm_module = rule(
     implementation = _wasm_module_impl,
-    doc = "GN's wasm_lib: a wasm module (.js, .wasm, .js.symbols) linked by the Emscripten toolchain under the wasm platform.",
+    doc = "GN's wasm_lib: a wasm module (.js, .wasm, .js.symbols) linked by the Emscripten toolchain under the wasm platform the module_platform flag names.",
     attrs = _MODULE_ATTRS | {
         "linkopts": attr.string_list(
             doc = "The module's ldflags, after wasm_lib's -s EXPORT_NAME=<name>; $(execpath ...) over link_inputs is expanded.",
@@ -195,11 +267,28 @@ wasm_module = rule(
         ),
         "export_name": attr.string(doc = "EXPORT_NAME; the target's name by default, as in wasm_lib."),
     },
-    cfg = wasm_transition,
+    cfg = module_transition,
     fragments = ["cpp"],
     toolchains = use_cc_toolchain(),
     provides = [WasmModuleInfo],
 )
+
+def wasm_module(name, **kwargs):
+    """GN's wasm_lib: a wasm module, built for the platform a dependent names.
+
+    See the module docstring: the module is compatible with the web build's
+    variant platforms alone (a wildcard build skips it; the web SDK's copies
+    name the platform, or the command line does).
+
+    Args:
+      name: the module's name (EXPORT_NAME, unless `export_name` says otherwise).
+      **kwargs: the rule's attributes.
+    """
+    _wasm_module(
+        name = name,
+        target_compatible_with = [VARIANT],
+        **kwargs
+    )
 
 def _wasm_objects_impl(ctx):
     cc_toolchain = find_cc_toolchain(ctx)
@@ -300,6 +389,7 @@ def wasm_platform(name, extra_toolchain_args = {}, **kwargs):
             fail("wasm_platform(%s): %s is not an argument the web build's platforms carry" % (name, argument))
     native.platform(
         name = name,
+        constraint_values = [VARIANT],
         flags = flags,
         parents = [str(WASM_PLATFORM)],
         **kwargs

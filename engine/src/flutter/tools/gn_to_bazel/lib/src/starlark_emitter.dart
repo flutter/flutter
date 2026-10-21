@@ -47,6 +47,36 @@ final class _Item {
   String get starlark => quoted ? '"${text.replaceAll(r'\', r'\\').replaceAll('"', r'\"')}"' : text;
 }
 
+/// A copy's dependency edge into a wasm toolchain of its file
+/// (`"//flutter/skwasm(:skwasm)"`): the dependency and the toolchain, with
+/// the Bazel names of both.
+final class _ToolchainEdge {
+  const _ToolchainEdge({
+    required this.gnLabel,
+    required this.moduleLabel,
+    required this.moduleName,
+    required this.toolchainName,
+    required this.platform,
+  });
+
+  /// The dependency as written, without the toolchain (`//flutter/skwasm`).
+  final String gnLabel;
+
+  /// Its Bazel label.
+  final String moduleLabel;
+
+  /// Its target name (`skwasm`), which names its outputs.
+  final String moduleName;
+
+  /// The toolchain's name (`skwasm`): its directory under the build
+  /// directory.
+  final String toolchainName;
+
+  /// The platform standing for the toolchain (the wasm_platform this file
+  /// declares for it).
+  final String platform;
+}
+
 /// One element of a GN list variable as it reached the emitter.
 final class _Element {
   const _Element(this.condition, this.value, this.assignment, this.comments);
@@ -941,12 +971,6 @@ final class _Emitter {
   void _convertTemplate(GnTarget target, TemplateMapping template) {
     _use(template.bzl, template.symbol);
     final rule = _Rule(template.symbol, target.name, target.comments);
-    // A wasm module is built for the platform of the wasm toolchain GN's
-    // dependents build it in (wasmModulePlatforms).
-    final String? platform = wasmModulePlatforms['$gnPackage:${target.name}'];
-    if (platform != null && template.symbol == 'wasm_module') {
-      rule.scalars['platform'] = '"${_localLabel(platform)}"';
-    }
     for (final GnVariable variable in target.variables.values) {
       final TemplateArgument? argument = template.arguments[variable.name];
       if (argument == null) {
@@ -1663,13 +1687,29 @@ final class _Emitter {
   /// name around them (the Linux shell's schemas go to
   /// `assets/{{source_name_part}}/gschemas.compiled`), the copies under
   /// their new names (`outs`), expanded here per source as GN expands them.
+  ///
+  /// A copy whose dependency edges name a wasm toolchain of this file
+  /// (`"//flutter/skwasm(:skwasm)"`: the web SDK's copies of the modules,
+  /// third_party/canvaskit) is built for that toolchain's platform
+  /// (`platform`, which gn_copy's transition applies to what it names), and
+  /// its sources -- the module's outputs under the toolchain's directory of
+  /// the build directory, `$root_out_dir/skwasm/skwasm.js` -- are the module
+  /// itself, whose files they are.
   void _convertCopy(GnTarget target) {
     _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_copy');
     final rule = _Rule('gn_copy', target.name, target.comments);
+    final _ToolchainEdge? edge = _toolchainEdge(target);
+    if (edge != null) {
+      rule.scalars['platform'] = '"${_localLabel(edge.platform)}"';
+    }
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'sources':
-          _filesInto(rule.list('srcs'), variable);
+          if (edge != null) {
+            _moduleOutputsInto(rule.list('srcs'), variable, edge, target);
+          } else {
+            _filesInto(rule.list('srcs'), variable);
+          }
         case 'outputs':
           // As GN wrote them, for the record.
           _forEachItem(variable, into: rule.list('outputs'), (_Element e) {
@@ -1703,7 +1743,23 @@ final class _Emitter {
           }
         case 'deps':
         case 'public_deps':
-          _labelsInto(rule.list('deps'), variable, target);
+          if (edge != null) {
+            // The module is among the sources (its files); any other
+            // dependency orders, as ever.
+            _forEachItem(variable, into: rule.list('deps'), (_Element e) {
+              if (_withoutToolchain(_string(e)) == edge.gnLabel) {
+                return;
+              }
+              final String label = bazelLabel(
+                _string(e),
+                package: gnPackage,
+                location: e.assignment.location,
+              );
+              rule.list('deps').addUnique(e.condition, _item(_localLabel(label), e));
+            });
+          } else {
+            _labelsInto(rule.list('deps'), variable, target);
+          }
         case 'testonly':
           _scalar(rule, 'testonly', variable);
         default:
@@ -1719,6 +1775,104 @@ final class _Emitter {
       }
     }
     rules.add(rule);
+  }
+
+  /// The wasm toolchain a copy's dependency edges name
+  /// (`"//flutter/skwasm(:skwasm)"`), when they name one of this file's:
+  /// GN builds the dependency in that toolchain, a platform here. Null for
+  /// a copy whose edges name no toolchain (or `$default_toolchain`, which
+  /// is the one configuration a Bazel build has).
+  _ToolchainEdge? _toolchainEdge(GnTarget target) {
+    _ToolchainEdge? edge;
+    for (final name in const <String>['deps', 'public_deps']) {
+      final GnVariable? variable = target.variables[name];
+      if (variable == null) {
+        continue;
+      }
+      for (final GnListItem item in variable.liveItems) {
+        final GnValue value = item.value;
+        if (value is! GnStringValue) {
+          continue;
+        }
+        final GnLocation location = item.assignment.location;
+        final String label = value.value;
+        final int paren = label.indexOf('(');
+        if (paren < 0 || !label.endsWith(')')) {
+          continue;
+        }
+        final String toolchain = label.substring(paren + 1, label.length - 1);
+        if (toolchain == r'$default_toolchain') {
+          continue;
+        }
+        if (!toolchain.startsWith(':')) {
+          throw GnError(
+            location,
+            "copy ${target.name} names toolchain $toolchain, which is not one of this file's",
+          );
+        }
+        final String toolchainName = toolchain.substring(1);
+        if (localTargets[toolchainName]?.rule != 'wasm_toolchain') {
+          throw GnError(
+            location,
+            'copy ${target.name} names toolchain $toolchain, which is not a wasm_toolchain of '
+            'this file',
+          );
+        }
+        final String gnLabel = label.substring(0, paren);
+        final String absolute = absoluteGnLabel(gnLabel, package: gnPackage, implicitName: true);
+        final found = _ToolchainEdge(
+          gnLabel: gnLabel,
+          moduleLabel: bazelLabel(gnLabel, package: gnPackage, location: location),
+          moduleName: absolute.substring(absolute.indexOf(':') + 1),
+          toolchainName: toolchainName,
+          platform: bazelLabel(toolchain, package: gnPackage, location: location),
+        );
+        if (edge != null &&
+            (edge.gnLabel != found.gnLabel || edge.toolchainName != toolchainName)) {
+          throw GnError(
+            location,
+            'copy ${target.name} names more than one dependency in a toolchain '
+            '(${edge.gnLabel}(:${edge.toolchainName}) and $label)',
+          );
+        }
+        edge = found;
+      }
+    }
+    return edge;
+  }
+
+  /// [label] without its `(toolchain)` suffix.
+  static String _withoutToolchain(String label) {
+    final int paren = label.indexOf('(');
+    return paren > 0 && label.endsWith(')') ? label.substring(0, paren) : label;
+  }
+
+  /// The sources of a copy with a toolchain edge: the module's outputs
+  /// under the toolchain's directory of the build directory
+  /// (`$root_out_dir/<toolchain>/<module>.js`, `.wasm`, `.js.symbols`, and
+  /// `.wasm.map` where the toolchain's link writes one), which are the
+  /// module target's files -- the one source here, whatever the module's
+  /// configuration writes.
+  void _moduleOutputsInto(
+    _ListAttribute attribute,
+    GnVariable variable,
+    _ToolchainEdge edge,
+    GnTarget target,
+  ) {
+    const outputs = <String>['.js', '.wasm', '.js.symbols', '.wasm.map'];
+    final directory = '$buildDirRoot/${edge.toolchainName}/';
+    _forEachItem(variable, into: attribute, (_Element e) {
+      final String path = _string(e);
+      final String file = path.startsWith(directory) ? path.substring(directory.length) : '';
+      if (!outputs.any((String extension) => file == '${edge.moduleName}$extension')) {
+        throw GnError(
+          e.assignment.location,
+          'source ${_rawString(e)} of copy ${target.name} is not an output of ${edge.gnLabel} '
+          'in toolchain :${edge.toolchainName} (${edge.moduleName}.js, .wasm, .js.symbols)',
+        );
+      }
+      attribute.addUnique(e.condition, _item(_localLabel(edge.moduleLabel), e, note: false));
+    });
   }
 
   /// A copy elsewhere in the build directory whose literal outputs rename

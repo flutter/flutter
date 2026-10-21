@@ -17,7 +17,7 @@
 # (wasm_use_workers, wasm_prioritize_size) are features of the emscripten
 # toolchain instead, and enable_lto its `lto` feature.
 
-load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -60,3 +60,32 @@ _SETTINGS = [
     )
     for name, _ in _SETTINGS
 ]
+
+# Which of the platforms a wasm module is built for. GN builds a wasm_lib in
+# the toolchain its dependent names on the dependency edge
+# (`"//flutter/skwasm(:skwasm)"` in the web SDK's copies,
+# //flutter/third_party/canvaskit/BUILD.gn) and in no other: the module has
+# no build of its own in the default toolchain. Here the edge is a gn_copy
+# with a `platform`, whose transition sets this flag (and --platforms) for
+# the copy's sources, and wasm_module's own transition builds the module
+# for the platform the flag names and spends the flag -- so that a module
+# named from the command line can be given one too (`--//engine/src/flutter/
+# build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:skwasm`,
+# or --platforms of the same). See toolchains/emscripten/wasm.bzl.
+string_flag(
+    name = "module_platform",
+    build_setting_default = "",
+)
+
+# What makes a platform one of the web build's variants: every wasm_platform
+# carries `variant`, the bare wasm platform does not, and a wasm module is
+# compatible with the variants alone (GN has no module outside those
+# toolchains).
+constraint_setting(
+    name = "variant_platform",
+)
+
+constraint_value(
+    name = "variant",
+    constraint_setting = ":variant_platform",
+)
