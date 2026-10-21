@@ -56,7 +56,10 @@ WasmModuleInfo = provider(
 # What a compile under the wasm platform takes (wasm_module and
 # wasm_objects alike).
 _MODULE_ATTRS = {
-    "srcs": attr.label_list(allow_files = [".cc", ".cpp", ".c"], doc = "The sources compiled here."),
+    "srcs": attr.label_list(
+        allow_files = [".cc", ".cpp", ".c", ".h"],
+        doc = "The sources compiled here, and headers among them (GN's `sources` lists both).",
+    ),
     "hdrs": attr.label_list(allow_files = [".h"], doc = "Headers the sources include."),
     "deps": attr.label_list(providers = [CcInfo], doc = "cc_library targets, built under the wasm platform too."),
     "include_markers": attr.label_list(
@@ -70,6 +73,12 @@ _MODULE_ATTRS = {
     ),
 }
 
+def _split_sources(files):
+    """GN's `sources`: the files to compile and the headers among them."""
+    sources = [f for f in files if f.extension != "h"]
+    headers = [f for f in files if f.extension == "h"]
+    return sources, headers
+
 def _wasm_module_impl(ctx):
     cc_toolchain = find_cc_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
@@ -79,13 +88,14 @@ def _wasm_module_impl(ctx):
         unsupported_features = ctx.disabled_features,
     )
     name = ctx.label.name
+    sources, headers = _split_sources(ctx.files.srcs)
     _, compilation_outputs = cc_common.compile(
         name = name,
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
-        srcs = ctx.files.srcs,
-        private_hdrs = ctx.files.hdrs,
+        srcs = sources,
+        private_hdrs = ctx.files.hdrs + headers,
         includes = [marker.dirname for marker in ctx.files.include_markers],
         defines = ctx.attr.defines,
         # wasm_lib's cflags, then the target's.
@@ -111,8 +121,12 @@ def _wasm_module_impl(ctx):
         is_using_linker = True,
         is_linking_dynamic_library = False,
         is_static_linking_mode = True,
-        # wasm_lib's ldflags, then the target's.
-        user_link_flags = ["-s", "EXPORT_NAME=" + (ctx.attr.export_name or name)] + ctx.attr.linkopts,
+        # wasm_lib's ldflags, then the target's, a file among them named
+        # by its $(execpath) over link_inputs (--js-library, --pre-js).
+        user_link_flags = ["-s", "EXPORT_NAME=" + (ctx.attr.export_name or name)] + [
+            ctx.expand_location(flag, targets = ctx.attr.link_inputs)
+            for flag in ctx.attr.linkopts
+        ],
     )
     link_action = ACTION_NAMES.cpp_link_executable
     objects = compilation_outputs.objects
@@ -165,10 +179,12 @@ wasm_module = rule(
     implementation = _wasm_module_impl,
     doc = "GN's wasm_lib: a wasm module (.js, .wasm, .js.symbols) linked by the Emscripten toolchain under the wasm platform.",
     attrs = _MODULE_ATTRS | {
-        "linkopts": attr.string_list(doc = "The module's ldflags, after wasm_lib's -s EXPORT_NAME=<name>."),
+        "linkopts": attr.string_list(
+            doc = "The module's ldflags, after wasm_lib's -s EXPORT_NAME=<name>; $(execpath ...) over link_inputs is expanded.",
+        ),
         "link_inputs": attr.label_list(
             allow_files = True,
-            doc = "Files the link reads besides objects: --js-library and --pre-js files named in linkopts.",
+            doc = "Files the link reads besides objects: the --js-library and --pre-js files linkopts name.",
         ),
         "export_name": attr.string(doc = "EXPORT_NAME; the target's name by default, as in wasm_lib."),
     },
@@ -186,13 +202,14 @@ def _wasm_objects_impl(ctx):
         requested_features = ctx.features,
         unsupported_features = ctx.disabled_features,
     )
+    sources, headers = _split_sources(ctx.files.srcs)
     _, compilation_outputs = cc_common.compile(
         name = ctx.label.name,
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
-        srcs = ctx.files.srcs,
-        private_hdrs = ctx.files.hdrs,
+        srcs = sources,
+        private_hdrs = ctx.files.hdrs + headers,
         includes = [marker.dirname for marker in ctx.files.include_markers],
         defines = ctx.attr.defines,
         user_compile_flags = ctx.attr.copts,

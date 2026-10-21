@@ -3804,6 +3804,89 @@ flutter_display_test(
       expect(output, isNot(contains('args')));
     });
 
+    test(r"wasm_lib becomes a wasm_module; a rebase_path() among its ldflags is the file's $(execpath)", () {
+      // skwasm's shape: a module over the engine's and Skia's libraries, a
+      // JavaScript library named on the link line by its rebased path and
+      // listed among the inputs, flags under is_debug.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/skw/BUILD.gn': '''
+template("variant") {
+  wasm_lib(target_name) {
+    public_configs = [ "//flutter:config" ]
+    sources = [
+      "canvas.cc",
+      "helpers.h",
+    ]
+    cflags = [ "-mreference-types" ]
+    ldflags = [
+      "-lGL",
+      "--js-library",
+      rebase_path("library_support.js"),
+    ]
+    inputs = [ rebase_path("library_support.js") ]
+    if (invoker.is_heavy) {
+      sources += [ "animated_image.cc" ]
+    }
+    if (is_debug) {
+      ldflags += [ "-sASSERTIONS=1" ]
+    } else {
+      ldflags += [ "--closure=1" ]
+    }
+    deps = [ "//flutter/display_list" ]
+  }
+}
+variant("m") {
+  is_heavy = true
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/skw/BUILD.gn', templates: <String>{'wasm_lib'}),
+        gnPackage: '//flutter/skw',
+        tree: tree,
+      );
+      expect(
+        output,
+        contains(
+          'load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_module")',
+        ),
+      );
+      expect(
+        output,
+        contains(r'''
+wasm_module(
+    name = "m",
+    srcs = [
+        "animated_image.cc",  # invoker.is_heavy
+        "canvas.cc",
+        "helpers.h",
+    ],
+    copts = ["-mreference-types"],
+    link_inputs = ["library_support.js"],
+    linkopts = [
+        "-lGL",
+        "--js-library",
+        "$(execpath library_support.js)",
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": [
+            "-sASSERTIONS=1",  # is_debug
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:unoptimized": [],
+        "//conditions:default": [
+            "--closure=1",  # !(is_debug)
+        ],
+    }),
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/display_list",
+    ],
+)
+'''),
+      );
+    });
+
     test('a suite run_tests.py puts through gtest-parallel becomes a flutter_cc_test', () async {
       // ui_unittests (gtestParallelSuites, with testRuns' runnerArgs): the
       // macro that runs the binary through the runner, with run_tests.py's
