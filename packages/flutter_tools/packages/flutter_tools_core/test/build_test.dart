@@ -71,6 +71,21 @@ void main() {
       expect(parsed.description, isEmpty);
     });
 
+    test('fromJson throws FormatException when fields have invalid types', () {
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          ExtensionBuildTarget.nameKey: 123,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          ExtensionBuildTarget.descriptionKey: false,
+        }),
+        throwsFormatException,
+      );
+    });
+
     test('listFromJson handles valid and invalid lists', () {
       final validJson = <String, Object?>{
         'name': 'custom-linux-build',
@@ -130,6 +145,21 @@ void main() {
 
       expect(result1, isNot(equals(result2)));
       expect(result1.hashCode, isNot(equals(result2.hashCode)));
+    });
+
+    test('fromJson throws FormatException when fields have invalid types', () {
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          ExtensionBuildResult.successKey: 'yes',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          ExtensionBuildResult.errorMessageKey: 404,
+        }),
+        throwsFormatException,
+      );
     });
   });
 }
