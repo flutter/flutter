@@ -19,7 +19,12 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
+# The CPUs the engine builds zlib for: GN's use_x86_x64_optimizations (x64),
+# use_arm_neon_optimizations (arm64, the Linux cross build) and neither
+# (wasm32: CPU_NO_SIMD, the plain inflate.c).
 _X86_64 = "@platforms//cpu:x86_64"
+
+_AARCH64 = "@platforms//cpu:aarch64"
 
 _WASM32 = "@platforms//cpu:wasm32"
 
@@ -42,12 +47,23 @@ _ADLER32_SIMD_DEFINES = select({
         "ADLER32_SIMD_SSSE3",
         "X86_NOT_WINDOWS",
     ],
+    _AARCH64: ["ADLER32_SIMD_NEON"],
     _WASM32: [],
 })
 
 _CRC32_SIMD_DEFINES = select({
     _X86_64: ["CRC32_SIMD_SSE42_PCLMUL"],
+    _AARCH64: [],
     _WASM32: [],
+})
+
+# config("zlib_arm_crc32_config"): the ARMv8 CRC32 instructions, on Linux.
+_ARM_CRC32_DEFINES = select({
+    _AARCH64: [
+        "CRC32_ARMV8_CRC32",
+        "ARMV8_OS_LINUX",
+    ],
+    "//conditions:default": [],
 })
 
 _DATA_CHUNK_SIMD_DEFINES = select({
@@ -56,11 +72,17 @@ _DATA_CHUNK_SIMD_DEFINES = select({
         "INFLATE_CHUNK_READ_64LE",
         "DEFLATE_CHUNK_WRITE_64LE",
     ],
+    _AARCH64: [
+        "INFLATE_CHUNK_SIMD_NEON",
+        "INFLATE_CHUNK_READ_64LE",
+        "DEFLATE_CHUNK_WRITE_64LE",
+    ],
     _WASM32: [],
 })
 
 _SLIDE_HASH_SIMD_DEFINES = select({
     _X86_64: ["DEFLATE_SLIDE_HASH_SSE2"],
+    _AARCH64: ["DEFLATE_SLIDE_HASH_NEON"],
     _WASM32: [],
 })
 
@@ -86,7 +108,10 @@ cc_library(
     name = "zlib_adler32_simd",
     srcs = ["adler32_simd.c"],
     hdrs = ["adler32_simd.h"],
-    copts = CHROMIUM_CODE_COPTS + select({_X86_64: ["-mssse3"]}),
+    copts = CHROMIUM_CODE_COPTS + select({
+        _X86_64: ["-mssse3"],
+        "//conditions:default": [],
+    }),
     linkstatic = True,
     local_defines = FLUTTER_LOCAL_DEFINES + _INTERNAL_DEFINES + _ADLER32_SIMD_DEFINES,
     visibility = ["//visibility:private"],
@@ -101,12 +126,28 @@ cc_library(
         "crc_folding.c",
     ],
     hdrs = ["crc32_simd.h"],
-    copts = CHROMIUM_CODE_COPTS + select({_X86_64: [
+    copts = CHROMIUM_CODE_COPTS + [
         "-msse4.2",
         "-mpclmul",
-    ]}),
+    ],
     linkstatic = True,
     local_defines = FLUTTER_LOCAL_DEFINES + _INTERNAL_DEFINES + _CRC32_SIMD_DEFINES,
+    target_compatible_with = [_X86_64],
+    visibility = ["//visibility:private"],
+    deps = [":zlib_common_headers"],
+)
+
+# source_set("zlib_arm_crc32") -- the arm64 build's CRC32 (clang needs no
+# -march for the intrinsics; GN adds one for gcc alone).
+cc_library(
+    name = "zlib_arm_crc32",
+    srcs = ["crc32_simd.c"],
+    hdrs = ["crc32_simd.h"],
+    copts = CHROMIUM_CODE_COPTS,
+    includes = ["."],
+    linkstatic = True,
+    local_defines = FLUTTER_LOCAL_DEFINES + _INTERNAL_DEFINES + _ARM_CRC32_DEFINES,
+    target_compatible_with = [_AARCH64],
     visibility = ["//visibility:private"],
     deps = [":zlib_common_headers"],
 )
@@ -173,6 +214,7 @@ cc_library(
         "zutil.h",
     ] + select({
         _X86_64: [],
+        _AARCH64: [],
         # Without the chunk-copying inflate of zlib_data_chunk_simd.
         _WASM32: ["inflate.c"],
     }),
@@ -186,14 +228,22 @@ cc_library(
     includes = ["."],
     linkstatic = True,
     local_defines = _INTERNAL_DEFINES + _ADLER32_SIMD_DEFINES + _CRC32_SIMD_DEFINES +
-                    _DATA_CHUNK_SIMD_DEFINES + _SLIDE_HASH_SIMD_DEFINES + select({
-        _X86_64: [],
-        _WASM32: ["CPU_NO_SIMD"],
-    }),
+                    _ARM_CRC32_DEFINES + _DATA_CHUNK_SIMD_DEFINES + _SLIDE_HASH_SIMD_DEFINES +
+                    select({
+                        _X86_64: [],
+                        _AARCH64: [],
+                        _WASM32: ["CPU_NO_SIMD"],
+                    }),
     deps = [":zlib_common_headers"] + select({
         _X86_64: [
             ":zlib_adler32_simd",
             ":zlib_crc32_simd",
+            ":zlib_data_chunk_simd",
+            ":zlib_slide_hash_simd",
+        ],
+        _AARCH64: [
+            ":zlib_adler32_simd",
+            ":zlib_arm_crc32",
             ":zlib_data_chunk_simd",
             ":zlib_slide_hash_simd",
         ],
