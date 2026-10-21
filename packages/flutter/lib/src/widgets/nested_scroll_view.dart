@@ -775,7 +775,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   @override
-  void goBallistic(double velocity) {
+  void goBallistic(double velocity, {Set<_NestedScrollPosition> settledBodies = const {}}) {
     if (_innerPositions.isEmpty) {
       beginActivity(
         _outerPosition!.createBallisticScrollActivity(
@@ -792,6 +792,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         _outerPosition!,
         _innerPositions.toList(),
         velocity,
+        settledBodies: settledBodies,
       );
       beginActivity(
         group.done(_outerPosition!)
@@ -1480,22 +1481,24 @@ class _NestedBallisticGroup {
     this.coordinator,
     this.outer,
     List<_NestedScrollPosition> bodies,
-    double velocity,
-  ) {
+    double velocity, {
+    Set<_NestedScrollPosition> settledBodies = const {},
+  }) {
     final bool holdBeforeOuter = velocity < 0.0 || bodies.any((body) => body.outOfRange);
     for (final body in bodies) {
       _simulations[body] = _NestedCoordinatedSimulation(
         coordinator,
         outer,
         body,
-        velocity,
+        settledBodies.contains(body) ? 0.0 : velocity,
         holdBeforeOuter: holdBeforeOuter,
+        settled: settledBodies.contains(body),
       );
     }
     _independent = _simulations.values.every((simulation) => simulation.outerFinished);
     _waiting = !_independent && holdBeforeOuter;
     if (!_waiting && !_independent) {
-      _leader = _simulations.values.reduce((a, b) => a.innerStart <= b.innerStart ? a : b);
+      _leader = _participants.reduce((a, b) => a.innerStart <= b.innerStart ? a : b);
     }
   }
 
@@ -1849,7 +1852,16 @@ class _NestedGroupedBallisticActivity extends BallisticScrollActivity {
   @override
   void applyNewDimensions() {
     if (!group.updateDimensions()) {
-      group.coordinator.goBallistic(group.restartVelocity(simulation.position));
+      group.coordinator.goBallistic(
+        group.restartVelocity(simulation.position),
+        // A layout restart shares the leader's velocity only with unfinished
+        // participants. Settled bodies must not rejoin the fling, unless their
+        // new bounds require recovery. New gestures still start every body.
+        settledBodies: <_NestedScrollPosition>{
+          for (final entry in group._simulations.entries)
+            if (entry.value._done && entry.value.outerFinished && !entry.key.outOfRange) entry.key,
+        },
+      );
     }
   }
 }
@@ -1935,6 +1947,7 @@ class _NestedCoordinatedSimulation extends Simulation {
     bool holdBeforeOuter = false,
     bool bodyOnly = false,
     bool stoppedBeforeOuter = false,
+    bool settled = false,
   }) : innerStart = inner.pixels,
        combinedMax = math.max(
          outer.maxScrollExtent,
@@ -1947,6 +1960,11 @@ class _NestedCoordinatedSimulation extends Simulation {
     _innerPixels = innerStart;
     _velocity = velocity;
     _holdBeforeOuter = holdBeforeOuter;
+    if (settled) {
+      _phases.add(_NestedPhase.body(bodyOuter: _outerPixels));
+      _done = true;
+      return;
+    }
     if (stoppedBeforeOuter) {
       // A dimension update must retain a stopped body's veto even when its
       // zero velocity would otherwise select only a terminal body phase.
@@ -2114,12 +2132,13 @@ class _NestedCoordinatedSimulation extends Simulation {
     if ((newMax - combinedMax).abs() <= precisionErrorTolerance) {
       return true;
     }
-    if (_done &&
-        outerFinished &&
-        _innerPixels >= inner.minScrollExtent &&
-        _innerPixels <= inner.maxScrollExtent) {
+    if (_done && outerFinished) {
       // Header movement can resize a settled body's viewport. There is no live
-      // segment to reconstruct, and restarting the group would revive this body.
+      // segment to reconstruct. Preserve its stop unless changed bounds require
+      // a new recovery, including for bodies retained across a group restart.
+      if (_innerPixels < inner.minScrollExtent || _innerPixels > inner.maxScrollExtent) {
+        return false;
+      }
       combinedMax = newMax;
       return true;
     }

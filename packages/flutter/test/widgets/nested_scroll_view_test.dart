@@ -384,6 +384,162 @@ void main() {
     expect(offsets[1], closeTo(offsets[0], 1));
   });
 
+  for (final resizedExtent in <double>[150, 250]) {
+    const velocity = 1000.0;
+    testWidgets(
+      'NestedScrollView preserves settled recovery during an attached header resize ($resizedExtent)',
+      (WidgetTester tester) async {
+        final key = GlobalKey<NestedScrollViewState>();
+        late StateSetter rebuild;
+        var headerExtent = 200.0;
+        await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return _buildBallisticTestWidget(
+                key,
+                physics: const BouncingScrollPhysics(),
+                headerExtent: headerExtent,
+                body: Row(
+                  children: <Widget>[
+                    for (var i = 0; i < 3; i++)
+                      Expanded(
+                        key: ValueKey<int>(i),
+                        child: ListView.builder(
+                          primary: true,
+                          physics: i == 0
+                              ? const _OverdampedScrollPhysics()
+                              : const BouncingScrollPhysics(),
+                          itemExtent: 50,
+                          itemCount: 100,
+                          itemBuilder: (context, index) => const SizedBox.expand(),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+        final ScrollPosition outer = key.currentState!.outerController.position;
+        final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
+        outer.jumpTo(100);
+        await tester.pumpAndSettle();
+        bodies[0].setPixels(-50);
+        bodies[1].setPixels(100);
+        bodies[2].setPixels(50);
+        _flingBallisticBody(bodies[1], velocity);
+        await tester.pump();
+        for (var i = 0; i < 2000 && outer.pixels == 100; i++) {
+          await tester.pump(const Duration(milliseconds: 1));
+        }
+        expect(outer.pixels, isNot(100));
+        expect(outer.pixels, inExclusiveRange(0, 200));
+        expect(bodies[0].pixels, 0);
+        final double peerOffset = bodies[2].pixels;
+        rebuild(() {
+          headerExtent = resizedExtent;
+        });
+        await tester.pump();
+        expect(key.currentState!.innerController.positions.toList(), bodies);
+        for (var i = 0; i < 400; i++) {
+          await tester.pump(const Duration(milliseconds: 8));
+          expect(bodies[0].pixels, 0, reason: 'a resize must not revive the settled body');
+          expect(bodies[0].activity!.velocity, 0);
+          expect(outer.pixels, inInclusiveRange(outer.minScrollExtent, outer.maxScrollExtent));
+          if (outer.activity!.velocity != 0) {
+            expect(
+              bodies[2].pixels,
+              peerOffset,
+              reason: 'the other participant must wait for the header',
+            );
+          }
+        }
+        await tester.pumpAndSettle();
+        expect(bodies[0].pixels, 0);
+        expect(outer.pixels, outer.maxScrollExtent);
+        expect(bodies[1].pixels, greaterThan(100));
+        expect(bodies[2].pixels, greaterThan(peerOffset));
+        // A new gesture must still be able to move the previously settled body.
+        _flingBallisticBody(bodies[0], velocity);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(bodies[0].pixels, greaterThan(0));
+        await tester.pumpAndSettle();
+        expect(tester.binding.transientCallbackCount, 0);
+      },
+    );
+  }
+
+  testWidgets('NestedScrollView recovers a preserved settled body when its content shrinks', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NestedScrollViewState>();
+    late StateSetter rebuild;
+    var headerExtent = 200.0;
+    var itemCount = 100;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (context, setState) {
+          rebuild = setState;
+          return _buildBallisticTestWidget(
+            key,
+            physics: const BouncingScrollPhysics(),
+            headerExtent: headerExtent,
+            body: Row(
+              children: <Widget>[
+                for (var i = 0; i < 3; i++)
+                  Expanded(
+                    key: ValueKey<int>(i),
+                    child: ListView.builder(
+                      primary: true,
+                      physics: i == 0
+                          ? const _OverdampedScrollPhysics()
+                          : const BouncingScrollPhysics(),
+                      itemExtent: 50,
+                      itemCount: i == 0 ? itemCount : 100,
+                      itemBuilder: (context, index) => const SizedBox.expand(),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+    final ScrollPosition outer = key.currentState!.outerController.position;
+    final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
+    outer.jumpTo(100);
+    await tester.pumpAndSettle();
+    final double edge = bodies[0].maxScrollExtent;
+    bodies[0].setPixels(edge + 50);
+    bodies[1].setPixels(100);
+    bodies[2].setPixels(50);
+    _flingBallisticBody(bodies[1], -1000);
+    await tester.pump();
+    for (var i = 0; i < 2000 && outer.pixels == 100; i++) {
+      await tester.pump(const Duration(milliseconds: 1));
+    }
+    expect(outer.pixels, isNot(100));
+    expect(outer.pixels, inExclusiveRange(0, 200));
+    expect(bodies[0].pixels, edge);
+    rebuild(() {
+      headerExtent = 250;
+    });
+    await tester.pump();
+    expect(key.currentState!.innerController.positions.toList(), bodies);
+    rebuild(() {
+      itemCount = 50;
+    });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+    expect(bodies[0].maxScrollExtent, lessThan(edge));
+    expect(bodies[0].outOfRange, isFalse);
+    expect(bodies[0].isScrollingNotifier.value, isFalse);
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
   for (final change in <String>['unchanged', 'physics', 'dimensions']) {
     testWidgets('NestedScrollView preserves settled recovery when the leader detaches ($change)', (
       WidgetTester tester,
