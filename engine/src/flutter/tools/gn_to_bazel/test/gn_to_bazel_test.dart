@@ -2635,6 +2635,38 @@ configuration("gpu") {
       );
     });
 
+    test("a conditional target's conjunction group takes no compatibility", () async {
+      // A target under a condition is incompatible elsewhere; the
+      // config_setting_group its select() adds to the file is a setting, not
+      // a target, and selects.config_setting_group has no such attribute.
+      final String output = await convert('''
+if (is_linux) {
+  source_set("x") {
+    sources = [ "a.cc" ]
+    if (shell_enable_vulkan && !is_wasm) {
+      sources += [ "vulkan.cc" ]
+    }
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains('    target_compatible_with = select({\n        "@platforms//os:linux": [],\n'),
+      );
+      expect(
+        output,
+        contains(
+          'selects.config_setting_group(\n'
+          '    name = "when_shell_enable_vulkan_and_not_is_wasm",\n'
+          '    match_all = [\n'
+          '        "//engine/src/flutter/shell:enable_vulkan",\n'
+          '        "//engine/src/flutter/build/bazel:not_wasm",\n'
+          '    ],\n'
+          ')\n',
+        ),
+      );
+    });
+
     test('renders a scalar with several cases as select()', () async {
       // metal_version as impeller/renderer writes it (an else-if chain over
       // the OS predicates, undefined elsewhere); vulkan_language_version
