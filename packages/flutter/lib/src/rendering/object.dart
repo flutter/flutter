@@ -1730,14 +1730,12 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       try {
         final Float64List? regions = computeHitTestRegions(rootNode!);
         _debugLastHitTestRegions = regions;
-        if (regions != null && regions.isNotEmpty) {
+        if (regions != null) {
           _sentNonEmptyHitTestRegions = true;
           onHitTestRegionsUpdate?.call(regions);
         } else if (_sentNonEmptyHitTestRegions) {
           _sentNonEmptyHitTestRegions = false;
           onHitTestRegionsUpdate?.call(Float64List(0));
-        } else if (regions != null) {
-          onHitTestRegionsUpdate?.call(regions);
         }
       } finally {
         if (!kReleaseMode) {

@@ -83,7 +83,11 @@ void main() {
   void configureTestView(WidgetTester tester, {double devicePixelRatio = 1.0}) {
     tester.view.devicePixelRatio = devicePixelRatio;
     tester.view.physicalSize = Size(800.0 * devicePixelRatio, 600.0 * devicePixelRatio);
-    addTearDown(tester.view.reset);
+    addTearDown(() {
+      debugEnableHitTestRegionsOnAllPlatforms = false;
+      RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
+      tester.view.reset();
+    });
   }
 
   testWidgets('does not compute hit-test regions when flag is off or not on web without override', (
@@ -442,7 +446,6 @@ void main() {
       );
       expect(exitingGroups, hasLength(1));
       expect(exitingGroups.single.viewId, 1);
-      expect(exitingGroups.single.rects, isNot(contains(barrierRect)));
       expect(exitingGroups.single.rects, isEmpty);
     },
   );

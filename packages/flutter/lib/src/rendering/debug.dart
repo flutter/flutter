@@ -352,7 +352,8 @@ bool debugAssertAllRenderVarsUnset(String reason, {bool debugCheckIntrinsicSizes
         debugOnProfilePaint != null ||
         debugDisableClipLayers ||
         debugDisablePhysicalShapeLayers ||
-        debugDisableOpacityLayers) {
+        debugDisableOpacityLayers ||
+        debugEnableHitTestRegionsOnAllPlatforms) {
       throw FlutterError(reason);
     }
     return true;

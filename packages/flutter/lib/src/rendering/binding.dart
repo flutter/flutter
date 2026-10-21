@@ -568,15 +568,17 @@ mixin RendererBinding
   /// Whether the framework automatically computes hit-test regions that overlap
   /// platform views and sends them to the engine each frame.
   ///
+  /// This flag is experimental and only has an effect on the web (unless
+  /// [debugEnableHitTestRegionsOnAllPlatforms] is enabled in tests).
+  ///
   /// Defaults to false.
   bool get automaticPointerInterceptorsEnabled => _automaticPointerInterceptorsEnabled;
   set automaticPointerInterceptorsEnabled(bool value) {
     if (_automaticPointerInterceptorsEnabled == value) {
       return;
     }
-    final bool wasEnabled = _automaticPointerInterceptorsEnabled;
     _automaticPointerInterceptorsEnabled = value;
-    if (wasEnabled && !value) {
+    if (!value) {
       rootPipelineOwner.clearHitTestRegions();
     }
     scheduleFrame();

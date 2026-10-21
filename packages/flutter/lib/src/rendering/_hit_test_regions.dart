@@ -27,16 +27,13 @@ Float64List? computeHitTestRegions(RenderObject root) {
     if (clip != null) {
       claimedRect = claimedRect.intersect(clip);
     }
-    if (claimedRect.isEmpty || claimedRect.width <= 0.0 || claimedRect.height <= 0.0) {
+    if (!claimedRect.isFinite || claimedRect.isEmpty) {
       return;
     }
     var overlapsAnyPlatformView = false;
     for (final group in groups) {
       final Rect pvRect = group.pvRect;
-      if (!pvRect.isEmpty &&
-          pvRect.width > 0.0 &&
-          pvRect.height > 0.0 &&
-          claimedRect.overlaps(pvRect)) {
+      if (pvRect.isFinite && !pvRect.isEmpty && claimedRect.overlaps(pvRect)) {
         overlapsAnyPlatformView = true;
         break;
       }
@@ -86,7 +83,9 @@ Float64List? computeHitTestRegions(RenderObject root) {
       var childClip = clip;
       final Rect? localClip = node.describeApproximatePaintClip(child);
       if (localClip != null) {
-        final Rect globalClip = MatrixUtils.transformRect(transform, localClip);
+        final Rect globalClip = localClip.isEmpty
+            ? Rect.zero
+            : MatrixUtils.transformRect(transform, localClip);
         childClip = childClip == null ? globalClip : childClip.intersect(globalClip);
       }
       final Matrix4 childTransform = transform.clone();
