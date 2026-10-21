@@ -110,8 +110,15 @@ API_AVAILABLE(ios(27.1))
 ///
 /// This must be called from the view controller's `viewDidLayoutSubviews`.
 /// Reserved regions lag the hinge, and UIKit offers no notification for them;
-/// instead it tracks a read made during layout and runs layout again when the
-/// region changes. Measured on the iPhone Duo simulator: with the read inside
+/// instead a read made during layout is tracked, and UIKit runs layout again
+/// when the region changes. Apple documents this for `updateConstraints`
+/// ("UIKit tracks the regions you read in updateConstraints() and runs it
+/// again when they change"):
+/// https://developer.apple.com/documentation/uikit/uiview/reservedregion
+/// and lists `viewDidLayoutSubviews` among the methods with automatic
+/// observation tracking:
+/// https://developer.apple.com/documentation/uikit/automatic-observation-tracking
+/// Measured on the iPhone Duo simulator: with the read inside
 /// `viewDidLayoutSubviews`, a layout pass follows every change of the division
 /// (about a second after the hinge reads partially open, and within 15 ms of
 /// it reading fully open). With the read made only outside layout, no layout

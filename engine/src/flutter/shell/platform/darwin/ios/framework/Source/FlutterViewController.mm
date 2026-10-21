@@ -1379,11 +1379,19 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self checkAndUpdateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
   if (@available(iOS 27.1, *)) {
-    // This read has to happen during layout. Reserved regions lag the hinge and
-    // UIKit has no notification for them; it tracks a read made here and runs
-    // layout again when a region changes, which is the only signal there is
-    // while folding, since the view's bounds stay the same. A change of hinge
-    // posture requests a pass too, so this is the only place regions are read.
+    // This read has to happen during layout. Reserved regions lag the hinge
+    // and UIKit has no notification for them. Instead, a region read made in
+    // viewDidLayoutSubviews is tracked, and UIKit runs layout again when that
+    // region changes. Apple documents the tracking for updateConstraints
+    // ("UIKit tracks the regions you read in updateConstraints() and runs it
+    // again when they change"):
+    // https://developer.apple.com/documentation/uikit/uiview/reservedregion
+    // and lists viewDidLayoutSubviews among the methods with automatic
+    // observation tracking:
+    // https://developer.apple.com/documentation/uikit/automatic-observation-tracking
+    // That pass is the only signal there is while folding, since the view's
+    // bounds stay the same. A change of hinge posture requests a pass too, so
+    // this is the only place regions are read.
     [_displayFeaturesMonitor refresh];
   }
   [self updateViewportMetricsIfNeeded];
