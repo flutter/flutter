@@ -27,44 +27,56 @@ void testMain() {
       const testFonts = <String>['FlutterTest', 'Ahem'];
 
       test('The default test font is used when a non-test fontFamily is specified', () {
-        final String defaultTestFontFamily = testFonts.first;
-
+        expect(EngineTextStyle(fontFamily: 'BogusFontFamily').effectiveFontFamilies, testFonts);
         expect(
-          EngineTextStyle(fontFamily: 'BogusFontFamily').effectiveFontFamily,
-          defaultTestFontFamily,
+          const EngineParagraphStyle(fontFamily: 'BogusFontFamily')
+              .getTextStyle()
+              .effectiveFontFamilies,
+          testFonts,
         );
         expect(
-          EngineParagraphStyle(fontFamily: 'BogusFontFamily').getTextStyle().effectiveFontFamily,
-          defaultTestFontFamily,
-        );
-        expect(
-          EngineStrutStyle(fontFamily: 'BogusFontFamily').effectiveFontFamily,
-          defaultTestFontFamily,
+          const EngineStrutStyle(fontFamily: 'BogusFontFamily').effectiveFontFamilies,
+          testFonts,
         );
         expect(
           ui.StrutStyle(fontFamily: 'BogusFontFamily'),
-          isNot(ui.StrutStyle(fontFamily: defaultTestFontFamily)),
+          isNot(ui.StrutStyle(fontFamily: testFonts.first)),
         );
       });
 
       test('The default test font is used when fontFamily is unspecified', () {
-        final String defaultTestFontFamily = testFonts.first;
-
-        expect(EngineTextStyle().effectiveFontFamily, defaultTestFontFamily);
-        expect(EngineParagraphStyle().getTextStyle().effectiveFontFamily, defaultTestFontFamily);
-        expect(EngineStrutStyle().effectiveFontFamily, defaultTestFontFamily);
+        expect(EngineTextStyle().effectiveFontFamilies, testFonts);
+        expect(const EngineParagraphStyle().getTextStyle().effectiveFontFamilies, testFonts);
+        expect(const EngineStrutStyle().effectiveFontFamilies, testFonts);
       });
 
       test('Can specify test fontFamily to use', () {
         for (final testFont in testFonts) {
-          expect(EngineTextStyle(fontFamily: testFont).effectiveFontFamily, testFont);
+          expect(EngineTextStyle(fontFamily: testFont).effectiveFontFamilies, <String>[testFont]);
           expect(
-            EngineParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamily,
-            testFont,
+            EngineParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamilies,
+            <String>[testFont],
           );
-          expect(EngineStrutStyle(fontFamily: testFont).effectiveFontFamily, testFont);
+          expect(EngineStrutStyle(fontFamily: testFont).effectiveFontFamilies, <String>[testFont]);
         }
       });
+    });
+
+    test('effectiveFontFamilies deduplicates fontFamilyFallback against fontFamily', () {
+      expect(
+        EngineTextStyle(
+          fontFamily: 'Roboto',
+          fontFamilyFallback: const <String>['Roboto', 'Noto Sans'],
+        ).effectiveFontFamilies,
+        const <String>['Roboto', 'Noto Sans'],
+      );
+      expect(
+        const EngineStrutStyle(
+          fontFamily: 'Roboto',
+          fontFamilyFallback: <String>['Roboto'],
+        ).effectiveFontFamilies,
+        const <String>['Roboto'],
+      );
     });
   });
 }
