@@ -324,6 +324,15 @@ zip_bundle(
         "//engine/src/flutter/common:runtime_mode_debug": [":artifacts_shader_lib"],
         "//conditions:default": [],
     }),
+    deps = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",
+        "//engine/src/flutter/flutter_frontend_server:frontend_server",
+        "//engine/src/flutter/impeller/compiler:impellerc",
+        "//engine/src/flutter/impeller/tessellator:tessellator_shared",
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bin",
+        "//engine/src/flutter/shell/testing",
+        "//engine/src/flutter/tools/path_ops",
+    ],
 )
 
 cc_library(
@@ -361,6 +370,7 @@ zip_bundle(
             "flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk/platform_strong.dill",
         },
     }),
+    deps = ["//engine/src/flutter/lib/snapshot:strong_platform"],
 )
 
 # `dart_dynamic_modules && full_target_platform_name == "linux-arm64"`, for the select()s of this file.

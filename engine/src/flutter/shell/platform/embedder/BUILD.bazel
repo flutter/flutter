@@ -1366,6 +1366,10 @@ zip_bundle(
         "flutter_embedder.h": "flutter_embedder.h",
         "libflutter_engine.so": "libflutter_engine.so",
     },
+    deps = [
+        ":copy_headers",
+        ":flutter_engine_library",
+    ],
 )
 
 # `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.

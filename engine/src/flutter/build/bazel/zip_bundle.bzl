@@ -246,6 +246,12 @@ zip_bundle = rule(
             providers = [ZipTreeInfo],
             doc = "zip_tree targets: files at their paths under a destination (GN's directory sources).",
         ),
+        "deps": attr.label_list(
+            aspects = [build_directory_aspect],
+            doc = "GN's deps: the targets whose outputs the entries are. An install of the archive lays what " +
+                  "their closure places (BuildDirectoryInfo), as ninja's build of the archive leaves every " +
+                  "output of those targets in the build directory, not only the ones the archive packs.",
+        ),
         "_script": attr.label(
             default = "//engine/src/flutter/build:zip.py",
             allow_single_file = True,

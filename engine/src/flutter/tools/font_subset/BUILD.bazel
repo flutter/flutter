@@ -41,6 +41,7 @@ zip_bundle(
         "//conditions:default": None,
     }),
     sources = {"font-subset": "font-subset"},
+    deps = [":_font-subset"],
 )
 
 # What GN has no words for; maintained in the converter's manifest

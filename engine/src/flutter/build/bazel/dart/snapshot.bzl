@@ -26,7 +26,7 @@ later phase.
 """
 
 load("//engine/src/flutter/build/bazel:build_directory.bzl", "BuildDirectoryInfo")
-load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "PYTHON_ATTRS", "run_python")
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "PYTHON_ATTRS", "gn_package", "run_python")
 
 # A tool of the wrapped Dart SDK build, see the module docstring.
 def _dart_tool(name):
@@ -164,7 +164,20 @@ def _core_snapshot_impl(ctx):
         mnemonic = "GenSnapshot",
         progress_message = "Generating the core snapshot %{label}",
     )
-    return [DefaultInfo(files = depset([ctx.outputs.data, ctx.outputs.instructions]))]
+
+    # GN's compiled_action writes the two under $target_gen_dir
+    # (gen/flutter/lib/snapshot/), where the flutter tool's --local-engine
+    # reads them with the two generated files beside them (`deps`); an
+    # install of a target that depends on this one lays all four there.
+    outputs = [ctx.outputs.data, ctx.outputs.instructions]
+    package = gn_package(ctx)
+    return [
+        DefaultInfo(files = depset(outputs)),
+        BuildDirectoryInfo(entries = depset([
+            (output, "gen/" + package + "/" + output.basename)
+            for output in outputs
+        ] if package != None else [])),
+    ]
 
 core_snapshot = rule(
     implementation = _core_snapshot_impl,
@@ -185,6 +198,10 @@ core_snapshot = rule(
         "instructions": attr.output(
             mandatory = True,
             doc = "The isolate snapshot instructions (GN's isolate_snapshot_instructions.bin).",
+        ),
+        "deps": attr.label_list(
+            doc = "GN's public_deps: the generated files beside the snapshot (vm_isolate_snapshot.bin, " +
+                  "vm_snapshot_instructions.bin), which an install of a dependent lays with it.",
         ),
         "_gen_snapshot": _dart_tool("gen_snapshot_host"),
     },
