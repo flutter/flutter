@@ -135,12 +135,13 @@ class PointerDataPacketConverter {
                                PointerState& state,
                                bool start_new_pointer);
 
-  // Handles a non-finite position of `pointer_data`.
+  // Handles non-finite values in `pointer_data`.
   //
-  // Returns false if `pointer_data` should be dropped: down, move and hover
-  // data, and data of a pointer without a previous position. Otherwise,
-  // replaces the position with the last position of the pointer and returns
-  // true.
+  // Returns false if `pointer_data` should be dropped: pan/zoom update data
+  // with a non-finite pan, scale or rotation, and, if the position is not
+  // finite, down, move, hover and pan/zoom start data, and data of a pointer
+  // without a previous position. Otherwise, replaces a non-finite position
+  // with the last position of the pointer and returns true.
   bool SanitizeNonFinitePosition(PointerData& pointer_data);
 
   bool LocationNeedsUpdate(const PointerData pointer_data,
