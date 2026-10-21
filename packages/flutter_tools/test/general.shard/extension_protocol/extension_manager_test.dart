@@ -81,5 +81,20 @@ void main() {
         await disabledManager.dispose();
       },
     );
+
+    testWithoutContext(
+      'disable throws AssertionError when called after initialization has started',
+      () async {
+        final logger = BufferLogger.test();
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        await manager.ensureInitialized();
+        expect(() => manager.disable(), throwsA(isA<AssertionError>()));
+        await manager.dispose();
+      },
+    );
   });
 }
