@@ -3954,6 +3954,73 @@ gn_copy(
       );
     });
 
+    test(
+      'an executable with output_extension "js" is a wasm_executable; its group is a filegroup',
+      () {
+        // CanvasKit's shape (flutter/skia/modules/canvaskit): a template over
+        // executable() in the wasm toolchain, a rebased path inside a flag,
+        // and the group the web SDK's copies name.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/ckm/BUILD.gn': r'''
+template("ck_lib") {
+  _lib_name = target_name
+  executable("${_lib_name}_js") {
+    forward_variables_from(invoker, [ "sources", "ldflags", "deps", "check_includes" ])
+    output_extension = "js"
+    output_name = "${_lib_name}"
+  }
+  group("$_lib_name") {
+    public_deps = [ ":${_lib_name}_js" ]
+  }
+}
+ck_lib("canvaskit") {
+  check_includes = false
+  deps = [ "//flutter/display_list" ]
+  sources = [ "bindings.cpp" ]
+  externs_path = rebase_path("externs.js")
+  ldflags = [
+    "--pre-js",
+    rebase_path("release.js"),
+    "--closure-args=--externs=$externs_path",
+    "-sEXPORT_NAME=CanvasKitInit",
+  ]
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/ckm/BUILD.gn', templates: <String>{'wasm_lib'}),
+          gnPackage: '//flutter/ckm',
+          tree: tree,
+        );
+        expect(
+          output,
+          contains(r'''
+wasm_executable(
+    name = "canvaskit_js",
+    srcs = ["bindings.cpp"],
+    link_inputs = [
+        "release.js",
+        "externs.js",
+    ],
+    linkopts = [
+        "--pre-js",
+        "$(execpath release.js)",
+        "--closure-args=--externs=$(execpath externs.js)",
+        "-sEXPORT_NAME=CanvasKitInit",
+    ],
+    output_name = "canvaskit",
+    deps = ["//engine/src/flutter/display_list"],
+)
+
+filegroup(
+    name = "canvaskit",
+    srcs = [":canvaskit_js"],
+)
+'''),
+        );
+      },
+    );
+
     test('a copy in a wasm toolchain whose source is not an output of its module is an error', () {
       final GnSourceTree tree = sourceTree(<String, String>{
         'flutter/ck/BUILD.gn': r'''
