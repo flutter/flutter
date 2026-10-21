@@ -4,12 +4,12 @@
 
 # Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.
 #
-# An install target per Linux build of the builder files (the x64 host's own
-# and the web's), over the Bazel counterparts of its ninja targets:
-# `bazel run --config=<name> :<name>` builds what the build builds and lays
-# it into GN's build directory for it (--target-dir, or the directory
-# tools/gn names for the flags), as the builder's recipe expects to find it.
-# A ninja target with no Bazel counterpart yet is listed; a build whose
+# An install target per Linux build of the builder files (the x64 host's own,
+# the web's and the arm64 cross builds'), over the Bazel counterparts of its
+# ninja targets: `bazel run --config=<name> :<name>` builds what the build
+# builds and lays it into GN's build directory for it (--target-dir, or the
+# directory tools/gn names for the flags), as the builder's recipe expects to
+# find it. A ninja target with no Bazel counterpart yet is listed; a build whose
 # configuration the Bazel build cannot express yet (configs.bazelrc) is built
 # with the flags of the nearest one; a test executable among the targets is
 # not installed, since `bazel test` runs tests from their own place. A build
