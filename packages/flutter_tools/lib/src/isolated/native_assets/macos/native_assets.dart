@@ -5,6 +5,7 @@
 import 'package:code_assets/code_assets.dart';
 
 import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
 import '../../../build_info.dart';
 import '../native_assets.dart';
 import '../native_assets_manifest.dart';
@@ -157,24 +158,37 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
 /// referenced in dependent libraries are updated to match the new install name,
 /// so that the referenced library can be found the dynamic linker.
 ///
+/// A dylib whose header has no room for its absolute path, such as a prebuilt
+/// one linked without `-headerpad_max_install_names`, keeps its own install
+/// name, and [logger] prints a warning. Its dependents and the native assets
+/// manifest still use the absolute path. dyld matches a load against the path
+/// an image was loaded from, so every load of that path gets the same image,
+/// also after a later run replaced the file. App builds must not do this:
+/// there the manifest entry is the install name, which has to match
+/// (https://github.com/flutter/flutter/issues/190799).
+///
+/// A dylib without room whose dependencies are referenced by names shorter than
+/// their absolute paths (such as `@rpath/...`) may still fail if those updated
+/// load commands do not fit in its header either.
+///
 /// Code signing is also done here.
 Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
   Uri targetUri,
   Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
+  FileSystem fileSystem, {
+  required Logger logger,
+}) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
-  final dylibs = <(File, String)>[];
+  final dylibs =
+      <({File dylibFile, String newInstallName, String assetId, String oldInstallNames})>[];
 
-  for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
-    final Uri target = assetMapping.key;
+  for (final MapEntry(key: target, value: sourceAssets) in assetTargetLocations.entries) {
     final sources = <File>[
-      for (final FlutterCodeAsset source in assetMapping.value)
-        fileSystem.file(source.codeAsset.file),
+      for (final FlutterCodeAsset source in sourceAssets) fileSystem.file(source.codeAsset.file),
     ];
     final Uri assetTargetUri = targetUri.resolveUri(target);
     final File dylibFile = fileSystem.file(assetTargetUri);
@@ -189,11 +203,33 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
-    dylibs.add((dylibFile, newInstallName));
+    dylibs.add((
+      dylibFile: dylibFile,
+      newInstallName: newInstallName,
+      assetId: sourceAssets.first.codeAsset.id,
+      oldInstallNames: oldInstallNames.join(', '),
+    ));
   }
 
-  for (final (File dylibFile, String newInstallName) in dylibs) {
-    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
+  for (final (:File dylibFile, :String newInstallName, :String assetId, :String oldInstallNames)
+      in dylibs) {
+    final bool installNameSet = await setInstallNamesDylib(
+      dylibFile,
+      newInstallName,
+      oldToNewInstallNames,
+      keepInstallNameIfItDoesNotFit: true,
+    );
+    if (!installNameSet) {
+      // Not fatal: the asset loads correctly, so `--fatal-warnings` should not
+      // fail the run of a package that cannot relink a vendor's dylib.
+      logger.printWarning(
+        'Code asset "$assetId" keeps its install name "$oldInstallNames", because '
+        'the header of ${dylibFile.basename} has no room for its path. The asset '
+        'still loads. Linking the dylib with -headerpad_max_install_names avoids '
+        'this.',
+        fatal: false,
+      );
+    }
     await codesignDylib(codesignIdentity, buildMode, dylibFile);
   }
   return installedFiles;
