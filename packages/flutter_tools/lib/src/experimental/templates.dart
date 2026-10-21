@@ -165,6 +165,9 @@ base class ExtensionTemplateManager extends TemplateService {
       startDir: projectDir,
     );
     final Set<String>? platformSet = platforms?.toSet();
+    final discoveredNames = <String>{
+      for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions) ext.name,
+    };
     final Set<String>? matchingExtensionNames = platformSet == null
         ? null
         : <String>{
@@ -176,7 +179,7 @@ base class ExtensionTemplateManager extends TemplateService {
           (ExtensionConnection c) =>
               c.capabilities.services.contains(TemplateService.serviceNamespace) &&
               (matchingExtensionNames == null ||
-                  c.extensionName == null ||
+                  !discoveredNames.contains(c.extensionName) ||
                   matchingExtensionNames.contains(c.extensionName)),
         )
         .toList();

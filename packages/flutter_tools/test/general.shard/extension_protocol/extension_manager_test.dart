@@ -41,13 +41,14 @@ class _FakeExtensionKernelCompiler extends Fake implements ExtensionKernelCompil
 }
 
 class _FakeExtensionConnection extends Fake implements ExtensionConnection {
-  _FakeExtensionConnection({required this.capabilities, this.extensionName});
+  _FakeExtensionConnection({required this.capabilities, String? extensionName})
+    : extensionName = extensionName ?? ExtensionConnection.defaultExtensionName;
 
   @override
   final ToolExtensionCapabilities capabilities;
 
   @override
-  final String? extensionName;
+  final String extensionName;
 
   bool _disposed = false;
 
