@@ -48,6 +48,7 @@ cc_library(
         "//engine/src/flutter/impeller/geometry",
         "//engine/src/flutter/impeller/renderer",
         "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil_cpp_tree//:root_includes",
         "@skia",
     ],
     alwayslink = True,

@@ -424,6 +424,12 @@ const Map<String, String> labelOverrides = <String, String>{
       '//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static',
 };
 
+/// The view of abseil's headers under the engine's root-relative spelling
+/// (`third_party/abseil-cpp/absl/...`, which GN's root include directory
+/// resolves): listed beside every `@abseil-cpp` dependency, so that the
+/// engine's includes stay as they are.
+const String abseilRootIncludes = '@abseil_cpp_tree//:root_includes';
+
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
 /// becomes `@abseil-cpp//absl/x:y`.
 const Map<String, String> labelRepositoryPrefixes = <String, String>{

@@ -91,6 +91,7 @@ cc_binary(
         "//engine/src/flutter/shell/gpu:gpu_surface_software",
         "//engine/src/flutter/third_party/tonic",
         "@abseil-cpp//absl/base:no_destructor",
+        "@abseil_cpp_tree//:root_includes",
         "@skia",
     ],
 )
@@ -147,6 +148,7 @@ cc_binary(
         "//engine/src/flutter/third_party/tonic",
         "@abseil-cpp//absl/base:no_destructor",
         "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
+        "@abseil_cpp_tree//:root_includes",
         "@skia",
     ],
 )

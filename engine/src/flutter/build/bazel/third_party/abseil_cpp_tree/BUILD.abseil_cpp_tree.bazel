@@ -9,7 +9,31 @@
 # over the same tree; the wrap's archive stops at abseil, which the facades
 # take from there.
 
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
+
+# Abseil's headers under the engine's root-relative spelling,
+# "third_party/abseil-cpp/absl/<path>.h", which GN's root include directory
+# (-I../..) resolves beside the canonical "absl/<path>.h" that abseil's own
+# Bazel build exposes: a view of the same files under that prefix, so that
+# no engine include changes for Bazel. The converter lists it beside every
+# @abseil-cpp dependency (bazel_mapping's abseilRootIncludes).
+cc_library(
+    name = "root_includes",
+    hdrs = glob(
+        [
+            "absl/**/*.h",
+            "absl/**/*.inc",
+        ],
+        exclude = [
+            "**/*_test.h",
+            "**/*_testing.h",
+            "**/testdata/**",
+        ],
+    ),
+    include_prefix = "third_party/abseil-cpp",
+)
 
 filegroup(
     name = "build_tree",

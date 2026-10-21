@@ -201,6 +201,7 @@ cc_library(
         "//engine/src/flutter/third_party/tonic",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil_cpp_tree//:root_includes",
         "@rapidjson",
         "@skia",
         "@skia//modules/skparagraph",

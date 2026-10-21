@@ -44,6 +44,7 @@ cc_library(
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
         "@re2",
     ],
     alwayslink = True,
@@ -64,6 +65,7 @@ cc_binary(
         "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
     ],
 )
 
@@ -87,6 +89,7 @@ cc_binary(
         "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
         "@re2",
     ],
 )
@@ -108,6 +111,7 @@ cc_test(
         "//engine/src:include_root",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
