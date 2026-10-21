@@ -1373,18 +1373,6 @@ final class TemplateArgument {
   final String? appliedUnder;
 }
 
-/// The platform each wasm module is built for: GN builds a wasm_lib in the
-/// wasm toolchain its dependents name (`"//flutter/skwasm(:skwasm)"` in
-/// //flutter/third_party/canvaskit/BUILD.gn's skwasm_group), which is a
-/// property of the dependency edge; here the module's wasm_module carries it
-/// (`platform`), from this table of GN's edges until the web SDK's
-/// assembly (those copies) is converted and names them itself.
-const Map<String, String> wasmModulePlatforms = <String, String>{
-  '//flutter/skwasm:skwasm': '//engine/src/flutter/third_party/canvaskit:skwasm',
-  '//flutter/skwasm:skwasm_heavy': '//engine/src/flutter/third_party/canvaskit:skwasm_heavy',
-  '//flutter/skwasm:wimp': '//engine/src/flutter/third_party/canvaskit:skwasm',
-};
-
 /// The `.gni` templates the converter knows, with the Bazel macro for each
 /// (`load` label and symbol) and the arguments it accepts.
 final class TemplateMapping {
@@ -1560,8 +1548,10 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // build/toolchain/wasm.gni's wasm_lib: an executable in a wasm toolchain
   // with the module's flags (`-s MAIN_MODULE=1`, `-s EXPORT_NAME=<name>`),
   // which the emsdk toolchain's wasm_module rule compiles and links under
-  // the wasm platform by a transition, so that a module can be named from
-  // any build (skwasm's three variants).
+  // the wasm platform a dependent names (GN's `label(:toolchain)` edge, the
+  // web SDK's copies; the module_platform flag of build/bazel/web) by a
+  // transition, so that a module can be named from any build (skwasm's
+  // three variants).
   'wasm_lib': TemplateMapping(
     '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl',
     'wasm_module',
@@ -1808,6 +1798,11 @@ Assumptions generationAssumptions() {
     'is_mac': const GnBoolValue(false),
     'is_minimal_linux': const GnBoolValue(false),
     'is_official_build': const GnBoolValue(true),
+    // tools/gn's --wasm-use-dwarf (DWARF rather than source maps for a
+    // debug web build's symbols), off unless asked; the source map a debug
+    // link writes without it (`<module>.wasm.map`) is the branch this
+    // leaves out, and the wasm_module rule does not write one yet.
+    'wasm_use_dwarf': const GnBoolValue(false),
     'is_qnx': const GnBoolValue(false),
     'is_win': const GnBoolValue(false),
     'platform_name': const GnStringValue('linux'),
@@ -1899,6 +1894,7 @@ Assumptions linuxHostAssumptions() {
     // own configuration (the wrap's args).
     'is_minimal_linux': GnBoolValue(false),
     'is_official_build': GnBoolValue(true),
+    'wasm_use_dwarf': GnBoolValue(false),
     'is_qnx': GnBoolValue(false),
     'is_wasm': GnBoolValue(false),
     'is_win': GnBoolValue(false),

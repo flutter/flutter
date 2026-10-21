@@ -47,13 +47,10 @@ final class ConvertedFile {
   final List<String> implicitDeps;
 }
 
-/// Why the copies of //flutter/third_party/canvaskit are skipped.
-const String _webSdkAssembly =
-    "the web SDK's assembly (flutter_web_sdk/canvaskit): with the web SDK";
-
-/// Why the CanvasKit module's toolchains are skipped.
+/// Why the CanvasKit module's toolchains and copies are skipped.
 const String _canvasKitModule =
-    "the CanvasKit module's platform: with its conversion, whose arguments become settings";
+    "the CanvasKit module's platforms and copies: with its conversion, whose arguments become "
+    'settings';
 
 const List<ConvertedFile> convertedFiles = <ConvertedFile>[
   // GN's config("flutter_config") is feature_defines_list, which copts.bzl
@@ -264,24 +261,23 @@ exports_files([
   // loads anywhere, so it is listed in every configuration.
   ConvertedFile('//flutter/fml', implicitDeps: <String>['@dart//:dart_api_headers']),
   // The web build's wasm toolchains as platforms carrying their arguments as
-  // flags: skwasm's two now; the CanvasKit module's three with that module's
+  // flags, and the copies that place each module's outputs in the web SDK's
+  // directory (flutter_web_sdk/canvaskit), each naming the toolchain its
+  // module is built in: skwasm's two platforms and three copies now; the
+  // CanvasKit module's three platforms and copies with that module's
   // conversion (Skia's modules/canvaskit), whose arguments -- skia_use_bidi,
   // the skia_canvaskit_* ones, skia_enable_skparagraph and skshaper,
   // skia_use_harfbuzz and freetype, flutter_use_freetype_woff2 -- become
-  // settings then. The copies that assemble the web SDK's directory from
-  // the modules' outputs wait for the web SDK's conversion.
+  // settings then.
   ConvertedFile(
     '//flutter/third_party/canvaskit',
     skip: <String, String>{
       'canvaskit': _canvasKitModule,
       'canvaskit_chromium': _canvasKitModule,
       'canvaskit_webparagraph': _canvasKitModule,
-      'canvaskit_group': _webSdkAssembly,
-      'canvaskit_chromium_group': _webSdkAssembly,
-      'canvaskit_webparagraph_group': _webSdkAssembly,
-      'skwasm_group': _webSdkAssembly,
-      'skwasm_heavy_group': _webSdkAssembly,
-      'wimp_group': _webSdkAssembly,
+      'canvaskit_group': _canvasKitModule,
+      'canvaskit_chromium_group': _canvasKitModule,
+      'canvaskit_webparagraph_group': _canvasKitModule,
     },
   ),
   // The client ICU's bidi library: a few of ICU's source/common files under

@@ -3,8 +3,9 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/third_party/canvaskit/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: canvaskit, canvaskit_group, canvaskit_chromium, canvaskit_chromium_group, canvaskit_webparagraph, canvaskit_webparagraph_group, skwasm_group, skwasm_heavy_group, wimp_group.
+# Not converted: canvaskit, canvaskit_group, canvaskit_chromium, canvaskit_chromium_group, canvaskit_webparagraph, canvaskit_webparagraph_group.
 
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_platform")
 
 package(default_visibility = ["//visibility:public"])
@@ -40,4 +41,25 @@ wasm_platform(
         "wasm_use_workers": True,
         "wasm_prioritize_size": True,
     },
+)
+
+gn_copy(
+    name = "skwasm_group",
+    srcs = ["//engine/src/flutter/skwasm"],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skwasm",
+)
+
+gn_copy(
+    name = "skwasm_heavy_group",
+    srcs = ["//engine/src/flutter/skwasm:skwasm_heavy"],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skwasm_heavy",
+)
+
+gn_copy(
+    name = "wimp_group",
+    srcs = ["//engine/src/flutter/skwasm:wimp"],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skwasm",
 )
