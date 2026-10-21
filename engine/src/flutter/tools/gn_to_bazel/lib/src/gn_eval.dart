@@ -1640,7 +1640,12 @@ final class _Evaluator {
         return;
       }
     }
-    final _Template? template = scope.lookupTemplate(call.name);
+    // A template the converter maps to a rule (settings.templates) is a
+    // target here even where the file defines it itself (web_sdk's
+    // _compile_platform): the mapping is the conversion of its body.
+    final _Template? template = settings.templates.contains(call.name)
+        ? null
+        : scope.lookupTemplate(call.name);
     if (template != null) {
       _invokeTemplate(template, call, scope, condition, source, comments: comments);
       return;
