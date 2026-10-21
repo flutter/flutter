@@ -1296,9 +1296,12 @@ const Map<String, DirectorySource> directorySources = <String, DirectorySource>{
     '//engine/src/flutter/impeller/compiler/shader_lib:all_files',
     root: 'engine/src/flutter/impeller/compiler/shader_lib',
   ),
-  // The prebuilt Dart SDK, which dart-sdk-<platform>.zip is.
+  // The prebuilt Dart SDK, which dart-sdk-<platform>.zip is: GN's
+  // prebuilt_dart_sdk, the target's -- a target selecting the SDK of the
+  // target CPU (the host's, or linux-arm64's in the Linux arm64 cross
+  // build; dart_wrap/BUILD.bazel), as config.gni's formula does.
   '//flutter/prebuilts/linux-x64/dart-sdk': DirectorySource(
-    '@dart_sdk_linux_x64//:all_files',
+    '//engine/src/flutter/build/bazel/dart_wrap:prebuilt_dart_sdk',
     root: '',
   ),
   // The web engine's source directories web_sdk's sdk_rewriter reads (the
@@ -1967,6 +1970,13 @@ Assumptions generationAssumptions() {
     'platform_name': const GnStringValue('linux'),
     'full_platform_name': const GnStringValue('linux-x64'),
     'flutter_prebuilt_dart_sdk': const GnBoolValue(true),
+    // The prebuilt Dart SDKs: the host's, which the tools that run at build
+    // time come from, and the target's (config.gni's `prebuilt_dart_sdk`
+    // outside the host toolchain, `target_prebuilt_dart_sdk`), which the
+    // build ships as dart-sdk/ and dart-sdk-<platform>.zip. The target's is
+    // written as the host's path here and mapped (directorySources) to a
+    // target that selects the SDK of the target CPU -- linux-arm64's in the
+    // Linux arm64 cross build -- as config.gni's formula does.
     'prebuilt_dart_sdk': const GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
     'host_prebuilt_dart_sdk': const GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
     'target_prebuilt_dart_sdk': const GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),

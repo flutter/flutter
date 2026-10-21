@@ -57,6 +57,20 @@ config_setting(
     flag_values = {":dart_dynamic_modules": "False"},
 )
 
+# GN's prebuilt_dart_sdk outside the host toolchain (common/config.gni): the
+# prebuilt SDK of the *target* -- the host's own for the host's build, and
+# linux-arm64's for the Linux arm64 cross build -- which build/dart lays
+# into the build directory as dart-sdk/ and build/archives ships as
+# dart-sdk-<platform>.zip. The tools that run at build time are always the
+# host's (@dart_sdk_linux_x64, GN's host_prebuilt_dart_sdk).
+filegroup(
+    name = "prebuilt_dart_sdk",
+    srcs = select({
+        "@platforms//cpu:aarch64": ["@dart_sdk_linux_arm64//:all_files"],
+        "//conditions:default": ["@dart_sdk_linux_x64//:all_files"],
+    }),
+)
+
 # What tools/gn would write to args.gn for this build, restricted to the
 # arguments the pruned GN graph declares (gn gen runs with
 # --fail-on-unused-args; dart_version, for one, belongs to
@@ -67,7 +81,6 @@ _GN_ARGS = {
     "dart_component_kind": '"static_library"',
     "dart_lib_export_symbols": "false",
     "dart_sdk_verification_hash": '"%s"' % _DART_REVISION[:10],
-    "dart_target_arch": '"x64"',
     "dart_version_git_info": "false",
     # No LTO in either mode: every host builder in ci/builders passes
     # tools/gn --no-lto (so does et's local_engine.json), and the Bazel
@@ -82,9 +95,20 @@ _GN_ARGS = {
     "is_minimal_linux": "true",
     "is_official_build": "true",
     "stripped_symbols": "true",
-    "target_cpu": '"x64"',
     "target_os": '"linux"',
 } | select({
+    # The target CPU: the host's, or arm64 for the Linux arm64 cross build
+    # (tools/gn --target-os=linux --linux-cpu=arm64), in which GN builds the
+    # VM's libraries for arm64 and the build-time tools for the host.
+    "@platforms//cpu:aarch64": {
+        "dart_target_arch": '"arm64"',
+        "target_cpu": '"arm64"',
+    },
+    "//conditions:default": {
+        "dart_target_arch": '"x64"',
+        "target_cpu": '"x64"',
+    },
+}) | select({
     # -c opt is an optimized build (tools/gn without --unoptimized);
     # anything else is --unoptimized.
     "//engine/src/flutter/build/bazel:optimized": {"is_debug": "false"},
@@ -110,7 +134,10 @@ _GN_ARGS = {
 
 gn_build(
     name = "dart_sdk",
-    # Executables and snapshots, in the GN root build directory.
+    # Executables and snapshots. The build-time tools are the host
+    # toolchain's (BUILD.gn): in the build root when the host's toolchain is
+    # the default, under clang_x64/ in the arm64 cross build. Named by base
+    # name either way (:gen_snapshot).
     outs = [
         "analyze_snapshot",
         "bootstrap_compile_platform.exe",
@@ -138,6 +165,18 @@ gn_build(
     build_file = "BUILD.gn",
     gn_args = _GN_ARGS,
     ninja_target = "dart_wrap",
+    out_paths = ["frontend_server_aot.dart.snapshot"] + select({
+        "@platforms//cpu:aarch64": [
+            "clang_x64/analyze_snapshot",
+            "clang_x64/bootstrap_compile_platform.exe",
+            "clang_x64/gen_snapshot",
+        ],
+        "//conditions:default": [
+            "analyze_snapshot",
+            "bootstrap_compile_platform.exe",
+            "gen_snapshot",
+        ],
+    }),
     root_target_dir = "flutter/build/bazel/dart_wrap",
     # The GN source root: the engine's build configuration, the trees GN
     # reads, and the toolchain, each at the path the engine's GN files expect.
@@ -145,6 +184,9 @@ gn_build(
         "//engine/src:gn_root_files": "",
         "//engine/src/build:gn_files": "build",
         "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
+        # The arm64 cross build's sysroot (sysroot.gni asserts the target
+        # CPU's exists); the host's own build does not read it.
+        "@sysroot_linux_arm64//:build_tree": "build/linux/debian_bullseye_arm64-sysroot",
         "//engine/src/flutter/build:gn_files": "flutter/build",
         "@clang_linux_x64//:all_files": "flutter/buildtools/linux-x64/clang",
         "@cpython3//:runtime": "flutter/buildtools/linux-x64/cpython3",
