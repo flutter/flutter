@@ -14,7 +14,9 @@
 # Everything is exposed as directory inputs: one symlink per action in the
 # sandbox for the whole SDK rather than its tens of thousands of files (the
 # root .bazelrc enables sound directory tracking), as the clang toolchain's
-# header trees are.
+# header trees are. The cache's working files (what emcc writes when a GN
+# build runs it with the cache unfrozen) are not in the repository at all;
+# see the emsdk entry of extensions.bzl.
 
 package(default_visibility = ["//visibility:public"])
 
