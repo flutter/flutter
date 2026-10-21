@@ -50,6 +50,8 @@ class TargetDevice {
     this.ephemeral = true,
     this.isSupported = true,
     this.sdkNameAndVersion,
+    this.supportsScreenRecording = false,
+    this.supportsScreenshot = false,
     this.targetPlatform,
   });
 
@@ -64,6 +66,11 @@ class TargetDevice {
       ephemeral: json.optionalField<bool>(ephemeralKey, defaultValue: true),
       isSupported: json.optionalField<bool>(isSupportedKey, defaultValue: true),
       sdkNameAndVersion: json.nullableField<String>(sdkNameAndVersionKey),
+      supportsScreenRecording: json.optionalField<bool>(
+        supportsScreenRecordingKey,
+        defaultValue: false,
+      ),
+      supportsScreenshot: json.optionalField<bool>(supportsScreenshotKey, defaultValue: false),
       targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
   }
@@ -85,6 +92,14 @@ class TargetDevice {
 
   /// Map key for [sdkNameAndVersion].
   static const String sdkNameAndVersionKey = 'sdkNameAndVersion';
+
+  /// Map key for [supportsScreenshot].
+  @visibleForTesting
+  static const supportsScreenshotKey = 'supportsScreenshot';
+
+  /// Map key for [supportsScreenRecording].
+  @visibleForTesting
+  static const supportsScreenRecordingKey = 'supportsScreenRecording';
 
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
@@ -125,6 +140,13 @@ class TargetDevice {
   /// Operating system SDK name and version string (e.g. `'Custom Linux 1.0.0'`).
   final String? sdkNameAndVersion;
 
+  /// Whether the device supports capturing screenshots via `DeviceService.takeScreenshot`.
+  final bool supportsScreenshot;
+
+  /// Whether the device supports screen recording via
+  /// `DeviceService.startScreenRecording` and `DeviceService.stopScreenRecording`.
+  final bool supportsScreenRecording;
+
   /// Target platform identifier string (e.g. `'linux-x64'`, `'linux-arm64'`, `'android-arm64'`).
   final String? targetPlatform;
 
@@ -136,6 +158,8 @@ class TargetDevice {
     ephemeralKey: ephemeral,
     isSupportedKey: isSupported,
     sdkNameAndVersionKey: ?sdkNameAndVersion,
+    supportsScreenshotKey: supportsScreenshot,
+    supportsScreenRecordingKey: supportsScreenRecording,
     targetPlatformKey: ?targetPlatform,
   };
 
@@ -143,7 +167,9 @@ class TargetDevice {
   String toString() =>
       'TargetDevice(id: $id, name: $name, category: $category, '
       'targetPlatform: $targetPlatform, sdkNameAndVersion: $sdkNameAndVersion, '
-      'ephemeral: $ephemeral, isSupported: $isSupported)';
+      'ephemeral: $ephemeral, isSupported: $isSupported, '
+      'supportsScreenshot: $supportsScreenshot, '
+      'supportsScreenRecording: $supportsScreenRecording)';
 
   @override
   bool operator ==(Object other) {
@@ -155,10 +181,21 @@ class TargetDevice {
             other.ephemeral == ephemeral &&
             other.isSupported == isSupported &&
             other.sdkNameAndVersion == sdkNameAndVersion &&
+            other.supportsScreenshot == supportsScreenshot &&
+            other.supportsScreenRecording == supportsScreenRecording &&
             other.targetPlatform == targetPlatform);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(category, id, name, ephemeral, isSupported, sdkNameAndVersion, targetPlatform);
+  int get hashCode => Object.hash(
+    category,
+    id,
+    name,
+    ephemeral,
+    isSupported,
+    sdkNameAndVersion,
+    supportsScreenshot,
+    supportsScreenRecording,
+    targetPlatform,
+  );
 }

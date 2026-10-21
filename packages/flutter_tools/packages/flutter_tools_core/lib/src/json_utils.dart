@@ -55,3 +55,9 @@ extension ExtensionJsonParsing on Map<String, Object?> {
     };
   }
 }
+
+/// Validation helpers for file [Uri]s exchanged over the tool extension protocol.
+extension ExtensionFileUriValidation on Uri {
+  /// Whether this [Uri] uses the `file` scheme and has a non-empty absolute path.
+  bool get isValidFileUri => isScheme('file') && hasAbsolutePath && path.isNotEmpty;
+}

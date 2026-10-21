@@ -184,4 +184,15 @@ void main() {
       expect(decoded.stringIterable('tags'), const <String>['one', 'two']);
     });
   });
+
+  group('ExtensionFileUriValidation', () {
+    test('returns true only for absolute file URIs', () {
+      expect(Uri.file('/tmp/app.apk').isValidFileUri, isTrue);
+      expect(Uri.directory('/tmp/app.bundle').isValidFileUri, isTrue);
+      expect(Uri.parse('relative/app.apk').isValidFileUri, isFalse);
+      expect(Uri.parse('/tmp/without_scheme').isValidFileUri, isFalse);
+      expect(Uri.parse('https://example.com/app.apk').isValidFileUri, isFalse);
+      expect(Uri.parse('').isValidFileUri, isFalse);
+    });
+  });
 }
