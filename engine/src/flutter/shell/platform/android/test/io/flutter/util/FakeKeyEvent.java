@@ -9,7 +9,9 @@ public class FakeKeyEvent extends KeyEvent {
     super(action, keyCode);
   }
 
-  public FakeKeyEvent(int action, int keyCode, char character) {
+  // `character` is an int so that it can carry KeyCharacterMap.COMBINING_ACCENT
+  // for dead keys.
+  public FakeKeyEvent(int action, int keyCode, int character) {
     super(action, keyCode);
     this.character = character;
   }
@@ -39,7 +41,7 @@ public class FakeKeyEvent extends KeyEvent {
     this.character = character;
   }
 
-  private char character = 0;
+  private int character = 0;
 
   public final int getUnicodeChar() {
     if (getKeyCode() == KeyEvent.KEYCODE_BACK) {

@@ -18,6 +18,7 @@ import android.text.InputType;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.TextPaint;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
@@ -63,6 +64,9 @@ public class InputConnectionAdaptor extends BaseInputConnection
   private FlutterTextUtils flutterTextUtils;
   private final KeyboardDelegate keyboardDelegate;
   private int batchEditNestDepth = 0;
+  // The accent of a dead key that was just typed. It sits right before the caret and is combined
+  // with the next typed character, unless the editing state changes in between.
+  private int pendingDeadKeyAccent = 0;
 
   @SuppressWarnings("deprecation")
   public InputConnectionAdaptor(
@@ -322,18 +326,37 @@ public class InputConnectionAdaptor extends BaseInputConnection
         // Enter a character.
         final int selStart = Selection.getSelectionStart(mEditable);
         final int selEnd = Selection.getSelectionEnd(mEditable);
-        final int character = event.getUnicodeChar();
+        int character = event.getUnicodeChar();
         if (selStart < 0 || selEnd < 0 || character == 0) {
           return false;
         }
 
-        final int selMin = Math.min(selStart, selEnd);
+        // A dead key inserts its accent, like a native EditText does. The accent is replaced
+        // when the next character combines with it, e.g. "ˇ" followed by "n" becomes "ň".
+        boolean isDeadKey = (character & KeyCharacterMap.COMBINING_ACCENT) != 0;
+        character &= KeyCharacterMap.COMBINING_ACCENT_MASK;
+
+        int selMin = Math.min(selStart, selEnd);
         final int selMax = Math.max(selStart, selEnd);
+        if (pendingDeadKeyAccent != 0
+            && selMin == selMax
+            && selMin > 0
+            && mEditable.charAt(selMin - 1) == pendingDeadKeyAccent) {
+          final int composed = KeyCharacterMap.getDeadChar(pendingDeadKeyAccent, character);
+          if (composed != 0) {
+            character = composed;
+            isDeadKey = false;
+            selMin -= 1;
+          }
+        }
+
         beginBatchEdit();
         if (selMin != selMax) mEditable.delete(selMin, selMax);
         mEditable.insert(selMin, String.valueOf((char) character));
         setSelection(selMin + 1, selMin + 1);
         endBatchEdit();
+        // Set after endBatchEdit, whose change notification clears the pending accent.
+        pendingDeadKeyAccent = isDeadKey ? character : 0;
         return true;
       }
     }
@@ -563,6 +586,9 @@ public class InputConnectionAdaptor extends BaseInputConnection
   @Override
   public void didChangeEditingState(
       boolean textChanged, boolean selectionChanged, boolean composingRegionChanged) {
+    // Moving the caret or editing the text cancels a pending dead key.
+    pendingDeadKeyAccent = 0;
+
     // This method notifies the input method that the editing state has changed.
     // updateSelection is mandatory. updateExtractedText and updateCursorAnchorInfo
     // are on demand (if the input method set the correspoinding monitoring
