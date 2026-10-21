@@ -304,6 +304,18 @@ zip_bundle(
         ":when_dart_dynamic_modules_and_flutter_runtime_mode_debug_and_full_target_platform_name_wasm_wasm": "wasm-wasm-ddm/artifacts.zip",
         "//conditions:default": None,
     }),
+    sources = {"gen_snapshot": "gen_snapshot"} | select({
+        "//engine/src/flutter/common:runtime_mode_debug": {
+            "flutter_tester": "flutter_tester",
+            "impellerc": "impellerc",
+            "libpath_ops.so": "libpath_ops.so",
+            "libtessellator.so": "libtessellator.so",
+            "isolate_snapshot.bin": "gen/flutter/lib/snapshot/isolate_snapshot.bin",
+            "vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot/vm_isolate_snapshot.bin",
+            "frontend_server_aot.dart.snapshot": "gen/frontend_server_aot.dart.snapshot",
+        },
+        "//conditions:default": {},
+    }),
     target_compatible_with = select({
         "//engine/src/flutter/common:engine_artifacts": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -338,6 +350,16 @@ zip_bundle(
     output = select({
         "//engine/src/flutter/common:runtime_mode_release": "flutter_patched_sdk_product.zip",
         "//conditions:default": "flutter_patched_sdk.zip",
+    }),
+    sources = select({
+        "//engine/src/flutter/common:runtime_mode_release": {
+            "flutter_patched_sdk_product/vm_outline_strong.dill": "flutter_patched_sdk/vm_outline_strong.dill",
+            "flutter_patched_sdk_product/platform_strong.dill": "flutter_patched_sdk/platform_strong.dill",
+        },
+        "//conditions:default": {
+            "flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk/vm_outline_strong.dill",
+            "flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk/platform_strong.dill",
+        },
     }),
 )
 
