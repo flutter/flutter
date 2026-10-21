@@ -48,11 +48,11 @@ build:host_release_desktop --compilation_mode=opt --//engine/src/flutter/common:
 
 # linux_host_engine.json: ci/host_debug
 #   --target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma
-build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+build:ci_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
 
 # linux_host_engine.json: ci/host_release
 #   --target-dir ci/host_release --runtime-mode release --prebuilt-dart-sdk --no-lto --rbe --no-goma
-build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
+build:ci_host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release
 
 # linux_host_engine_ddm.json: ci/host_debug_ddm
 #   --target-dir ci/host_debug_ddm --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma --gn-args=dart_dynamic_modules=true
@@ -93,19 +93,19 @@ build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 
 # local_engine.json: linux/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
-# The same configuration as linux_host_engine.json's ci/host_debug, above.
+build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/host_debug_unopt
 #   --runtime-mode debug --unoptimized --no-stripped --no-lto --rbe --no-goma
-build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/host_profile
 #   --runtime-mode profile --no-stripped --no-lto --rbe --no-goma
-build:host_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile
+build:host_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/host_release
 #   --runtime-mode release --no-stripped --no-lto --rbe --no-goma --xcode-symlinks
-# The same configuration as linux_host_engine.json's ci/host_release, above.
+build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma
