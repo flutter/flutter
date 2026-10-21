@@ -274,48 +274,55 @@ class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
-      child: ListTileTheme(
-        data: ListTileTheme.of(context).copyWith(
-          dense: true,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              WidgetPreviewGroupWidget._kCardRadius,
+      // The group's ListTile styling is applied through ThemeData rather than
+      // through an inherited ListTileTheme widget. ListTileTheme.of prefers an
+      // inherited ListTileTheme over ThemeData.listTileTheme, so an inherited
+      // widget here would leak the previewer's styling into previewed widgets,
+      // even when they provide their own MaterialApp and ThemeData.
+      //
+      // See https://github.com/flutter/flutter/issues/194660.
+      child: Theme(
+        data: theme.copyWith(
+          // Prevents divider lines appearing at the top and bottom of the
+          // expanded ExpansionTile.
+          dividerColor: Colors.transparent,
+          listTileTheme: theme.listTileTheme.copyWith(
+            dense: true,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                WidgetPreviewGroupWidget._kCardRadius,
+              ),
             ),
           ),
         ),
-        child: Theme(
-          // Prevents divider lines appearing at the top and bottom of the
-          // expanded ExpansionTile.
-          data: theme.copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            key: PageStorageKey(widget.group.name),
-            title: Text(widget.group.name),
-            initiallyExpanded: true,
-            children: [
-              // Wrap children in a PageStorage to create a storage boundary.
-              // Without this, descendant scrollables (which search ancestor
-              // elements for a PageStorageKey when restoring scroll offset)
-              // inherit the PageStorageKey from the ExpansionTile and attempt
-              // to read the ExpansionTile's boolean expansion state as a double,
-              // throwing a TypeError (see https://github.com/flutter/flutter/issues/191242).
-              PageStorage(
-                bucket: _bucket,
-                child: ValueListenableBuilder<LayoutType>(
-                  valueListenable: widget.controller.layoutTypeListenable,
-                  builder: (context, selectedLayout, _) {
-                    return switch (selectedLayout) {
-                      LayoutType.gridView => _buildGridViewFlex(
-                        widget.group.previews,
-                      ),
-                      LayoutType.listView => _buildVerticalListView(
-                        widget.group.previews,
-                      ),
-                    };
-                  },
-                ),
+        child: ExpansionTile(
+          key: PageStorageKey(widget.group.name),
+          title: Text(widget.group.name),
+          initiallyExpanded: true,
+          children: [
+            // Wrap children in a PageStorage to create a storage boundary.
+            // Without this, descendant scrollables (which search ancestor
+            // elements for a PageStorageKey when restoring scroll offset)
+            // inherit the PageStorageKey from the ExpansionTile and attempt
+            // to read the ExpansionTile's boolean expansion state as a double,
+            // throwing a TypeError (see https://github.com/flutter/flutter/issues/191242).
+            PageStorage(
+              bucket: _bucket,
+              child: ValueListenableBuilder<LayoutType>(
+                valueListenable: widget.controller.layoutTypeListenable,
+                builder: (context, selectedLayout, _) {
+                  return switch (selectedLayout) {
+                    LayoutType.gridView => _buildGridViewFlex(
+                      widget.group.previews,
+                    ),
+                    LayoutType.listView => _buildVerticalListView(
+                      widget.group.previews,
+                    ),
+                  };
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
