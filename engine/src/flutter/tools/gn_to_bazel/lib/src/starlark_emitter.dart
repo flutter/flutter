@@ -2098,6 +2098,13 @@ final class _Emitter {
       // helper source_set, for one) relies on the former.
       if (target.rule == 'source_set') {
         rule.scalars['alwayslink'] = 'True';
+      } else if (target.rule == 'static_library' &&
+          library &&
+          (rule.lists['hdrs']?.isEmpty ?? true)) {
+        // An archive of sources whose headers another library carries
+        // (icu_bidi over ICU's): buildifier would have it alwayslink,
+        // which a static_library is not.
+        rule.comments.add('# buildifier: disable=no-hdrs-no-alwayslink');
       }
       // GN's default include dirs, applied to every target by BUILDCONFIG.gn.
       if (layout.isMain) {
@@ -2594,7 +2601,13 @@ final class _Emitter {
         into.comments.addAll(assignment.comments);
       }
     }
-    for (final GnListItem item in variable.liveItems) {
+    // A compiler flag list's `-isystem <rebased include dir>` pairs go (see
+    // withoutSystemIncludeDirs); the resolver drops them the same way for
+    // the flags a config hands on.
+    final List<GnListItem> items = flagVariables.contains(variable.name)
+        ? withoutSystemIncludeDirs(variable.liveItems)
+        : variable.liveItems;
+    for (final item in items) {
       visit(_element(item, withComments: item.assignment.op == '+='));
     }
   }
