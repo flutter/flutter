@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
-#include "absl/status/status_matchers.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
@@ -16,6 +15,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/render_target.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {

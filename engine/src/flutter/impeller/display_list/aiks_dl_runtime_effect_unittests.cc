@@ -6,7 +6,6 @@
 
 #include "absl/status/statusor.h"
 
-#include "absl/status/status_matchers.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_color_source.h"
@@ -18,6 +17,7 @@
 #include "imgui.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {

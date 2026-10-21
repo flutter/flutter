@@ -6,9 +6,9 @@
 #define FLUTTER_IMPELLER_CORE_TEXTURE_DESCRIPTOR_H_
 
 #include <cstdint>
-#include "absl/status/status.h"
 #include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
