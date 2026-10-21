@@ -66,7 +66,7 @@ class ExtensionManager {
   /// Disables tool extension discovery and initialization for the current CLI
   /// invocation (for example, when `--no-extensions` is passed).
   void disable() {
-    assert(_initFuture == null, 'disable() cannot be called after initialization has started.');
+    assert(_pendingInit == null, 'disable() cannot be called after initialization has started.');
     _isDisabled = true;
   }
 
@@ -198,7 +198,7 @@ class ExtensionManager {
       'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
     for (final entryPoint in entryPoints) {
-      // ignore: invalid_use_of_visible_for_testing_member // initialize is itself test-only.
+      // ignore: invalid_use_of_visible_for_testing_member, transitional until #194774.
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         entryPoint,
         logger: _logger,

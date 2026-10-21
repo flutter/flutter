@@ -21,8 +21,6 @@ import 'json_utils.dart';
 ///   [ExtensionPackageConfig.fromMap], otherwise required): The Dart package
 ///   name of the extension. If both `name` in `config.yaml` and `packageName`
 ///   are provided, they must match.
-/// - `protocol_version` (`int`, optional): The extension RPC protocol version
-///   targeted by the package. Defaults to [currentProtocolVersion] (`1`).
 /// - `entrypoint` (`String`, optional): Relative POSIX path within the package
 ///   to the isolate entrypoint script (must not be absolute, contain `\`,
 ///   include `..` segments, or specify a URI scheme). Defaults to
@@ -54,7 +52,6 @@ import 'json_utils.dart';
 ///
 /// ```yaml
 /// name: my_custom_extension
-/// protocol_version: 1
 /// entrypoint: bin/my_custom_extension.dart
 /// supported_platforms:
 ///   - linux
@@ -79,7 +76,6 @@ final class ExtensionPackageConfig {
     Iterable<String> buildTargets = const <String>{},
     String? entrypoint,
     Iterable<String> platforms = const <String>{},
-    this.protocolVersion = currentProtocolVersion,
     required Iterable<String> services,
     Iterable<String> supportedPlatforms = const <String>{},
     Iterable<String> templates = const <String>{},
@@ -113,10 +109,6 @@ final class ExtensionPackageConfig {
       );
     }
 
-    final int protocolVersion = json.optionalField<int>(
-      protocolVersionKey,
-      defaultValue: currentProtocolVersion,
-    );
     final String? rawEntrypoint = json.nullableField<String>(entrypointKey);
     final String entrypoint = _validateEntrypoint(rawEntrypoint ?? 'bin/$name.dart');
 
@@ -129,7 +121,6 @@ final class ExtensionPackageConfig {
 
     return ExtensionPackageConfig(
       name: name,
-      protocolVersion: protocolVersion,
       entrypoint: entrypoint,
       supportedPlatforms: json.stringSet(supportedPlatformsKey, rejectEmpty: true),
       services: services,
@@ -139,14 +130,8 @@ final class ExtensionPackageConfig {
     );
   }
 
-  /// Current supported extension protocol version.
-  static const int currentProtocolVersion = 1;
-
   /// Map key for [name].
   static const String nameKey = 'name';
-
-  /// Map key for [protocolVersion].
-  static const String protocolVersionKey = 'protocol_version';
 
   /// Map key for [entrypoint].
   static const String entrypointKey = 'entrypoint';
@@ -170,9 +155,6 @@ final class ExtensionPackageConfig {
 
   /// The Dart package name of the extension.
   final String name;
-
-  /// The extension protocol version targeted by this package.
-  final int protocolVersion;
 
   /// Relative path from the extension package root to the isolate entrypoint script.
   final String entrypoint;
@@ -206,7 +188,6 @@ final class ExtensionPackageConfig {
   Map<String, Object?> toMap() {
     return <String, Object?>{
       nameKey: name,
-      protocolVersionKey: protocolVersion,
       entrypointKey: entrypoint,
       supportedPlatformsKey: supportedPlatforms.toList(),
       servicesKey: services.toList(),
@@ -257,7 +238,6 @@ final class ExtensionPackageConfig {
     }
     return other is ExtensionPackageConfig &&
         other.name == name &&
-        other.protocolVersion == protocolVersion &&
         other.entrypoint == entrypoint &&
         _stringSetEquality.equals(other.supportedPlatforms, supportedPlatforms) &&
         _stringSetEquality.equals(other.services, services) &&
@@ -269,7 +249,6 @@ final class ExtensionPackageConfig {
   @override
   int get hashCode => Object.hash(
     name,
-    protocolVersion,
     entrypoint,
     _stringSetEquality.hash(supportedPlatforms),
     _stringSetEquality.hash(services),
@@ -282,7 +261,6 @@ final class ExtensionPackageConfig {
   String toString() =>
       'ExtensionPackageConfig('
       'name: $name, '
-      'protocolVersion: $protocolVersion, '
       'entrypoint: $entrypoint, '
       'supportedPlatforms: $supportedPlatforms, '
       'services: $services, '

@@ -26,7 +26,6 @@ void main() {
 
       final Map<String, Object?> map = config.toMap();
       expect(map[ExtensionPackageConfig.nameKey], 'my_custom_ext');
-      expect(map[ExtensionPackageConfig.protocolVersionKey], 1);
       expect(map[ExtensionPackageConfig.entrypointKey], 'bin/custom_entry.dart');
       expect(
         map[ExtensionPackageConfig.supportedPlatformsKey],
@@ -51,14 +50,13 @@ void main() {
       expect(parsed.toString(), contains('bin/custom_entry.dart'));
     });
 
-    test('applies default protocolVersion and entrypoint when omitted', () {
+    test('applies default entrypoint when omitted', () {
       final config = ExtensionPackageConfig.fromMap(const <String, Object?>{
         ExtensionPackageConfig.nameKey: 'minimal_ext',
         ExtensionPackageConfig.servicesKey: <String>['diagnostics'],
       });
 
       expect(config.name, 'minimal_ext');
-      expect(config.protocolVersion, ExtensionPackageConfig.currentProtocolVersion);
       expect(config.entrypoint, 'bin/minimal_ext.dart');
       expect(config.supportedPlatforms, isEmpty);
       expect(config.supportsHostPlatform('windows'), isTrue);
@@ -135,14 +133,6 @@ void main() {
           ExtensionPackageConfig.nameKey: 'wrong_name',
           ExtensionPackageConfig.servicesKey: <String>['diagnostics'],
         }, packageName: 'expected_name'),
-        throwsFormatException,
-      );
-      expect(
-        () => ExtensionPackageConfig.fromMap(const <String, Object?>{
-          ExtensionPackageConfig.nameKey: 'my_ext',
-          ExtensionPackageConfig.protocolVersionKey: '1',
-          ExtensionPackageConfig.servicesKey: <String>['diagnostics'],
-        }),
         throwsFormatException,
       );
       expect(
