@@ -1006,7 +1006,7 @@ class _BuildInstance {
         node.target.name,
         exception,
         stackTrace,
-        fatal: true,
+        fatal: exception is! CompilerException,
       );
     } finally {
       resource.release();

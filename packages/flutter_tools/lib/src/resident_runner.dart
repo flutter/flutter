@@ -1149,10 +1149,12 @@ abstract class ResidentRunner extends ResidentHandlers {
     _lastBuild = await buildSystem.buildIncremental(compositeTarget, _environment, _lastBuild);
     if (!_lastBuild!.success) {
       for (final ExceptionMeasurement exceptionMeasurement in _lastBuild!.exceptions.values) {
-        logger.printError(
-          exceptionMeasurement.exception.toString(),
-          stackTrace: logger.isVerbose ? exceptionMeasurement.stackTrace : null,
-        );
+        if (exceptionMeasurement.fatal || logger.isVerbose) {
+          logger.printError(
+            exceptionMeasurement.exception.toString(),
+            stackTrace: logger.isVerbose ? exceptionMeasurement.stackTrace : null,
+          );
+        }
       }
     }
     logger.printTrace('complete');

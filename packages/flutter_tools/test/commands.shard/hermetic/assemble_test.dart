@@ -339,6 +339,68 @@ void main() {
     expect(logger.errorText, isNot(contains(stackTrace.toString())));
   });
 
+  testWithoutContext(
+    'flutter assemble does not log error message for non-fatal build failure',
+    () async {
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          featureFlags: TestFeatureFlags(),
+          buildSystem: TestBuildSystem.all(
+            BuildResult(
+              success: false,
+              exceptions: <String, ExceptionMeasurement>{
+                'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+              },
+            ),
+          ),
+          toolContext: toolContext,
+        ),
+      );
+
+      await expectLater(
+        commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
+        throwsToolExit(),
+      );
+      expect(logger.errorText, isEmpty);
+    },
+  );
+
+  testWithoutContext('flutter assemble logs error message and stack trace for non-fatal build failure with --verbose', () async {
+    final verboseToolContext = FakeToolContext(
+      artifacts: artifacts,
+      cache: cache,
+      fs: fileSystem,
+      logger: VerboseLogger(logger),
+      processManager: FakeProcessManager.any(),
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(
+        featureFlags: TestFeatureFlags(),
+        buildSystem: TestBuildSystem.all(
+          BuildResult(
+            success: false,
+            exceptions: <String, ExceptionMeasurement>{
+              'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+            },
+          ),
+        ),
+        toolContext: verboseToolContext,
+      ),
+    );
+
+    await expectLater(
+      commandRunner.run(<String>[
+        'assemble',
+        '-v',
+        '-o Output',
+        'debug_macos_bundle_flutter_assets',
+      ]),
+      throwsToolExit(),
+    );
+    expect(logger.errorText, contains('Target hello failed: bar'));
+    expect(logger.errorText, contains('#0      main'));
+  });
+
   testWithoutContext('flutter assemble outputs JSON performance data to provided file', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
