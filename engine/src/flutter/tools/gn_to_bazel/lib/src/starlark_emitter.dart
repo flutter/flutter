@@ -997,6 +997,8 @@ final class _Emitter {
           _scalar(rule, argument.attribute, variable);
         case TemplateArgumentKind.strings:
           _stringsInto(rule.list(argument.attribute), variable);
+        case TemplateArgumentKind.pathStrings:
+          _pathStringsInto(rule, argument, variable);
         case TemplateArgumentKind.pathString:
           final String? text = _singleString(variable);
           if (text == null) {
@@ -2921,6 +2923,32 @@ final class _Emitter {
     }
     final String rest = relative == owner ? '' : relative.substring(ownerPrefix.length);
     return '//$owner:$rest';
+  }
+
+  /// Strings among which a `rebase_path()` result names a file (a wasm
+  /// module's `--js-library` and its library): the file's `$(execpath)`,
+  /// with the file listed in the attribute the rule expands against.
+  void _pathStringsInto(_Rule rule, TemplateArgument argument, GnVariable variable) {
+    final _ListAttribute strings = rule.list(argument.attribute);
+    final _ListAttribute inputs = rule.list(argument.inputs!);
+    _forEachItem(variable, into: strings, (_Element e) {
+      if (e.value is! GnStringValue) {
+        strings.add(e.condition, _flagItem(e));
+        return;
+      }
+      final String raw = _rawString(e);
+      if (!raw.contains(rebasedPathMarker)) {
+        strings.add(e.condition, _item(_tokenizerEscaped(_string(e)), e));
+        return;
+      }
+      final String path = _unmarked(raw);
+      if (path.contains(rebasedPathMarker)) {
+        throw GnError(e.assignment.location, 'a rebased path inside a string: $raw');
+      }
+      final String file = _filePath(path, e.assignment.location);
+      strings.add(e.condition, _item('\$(execpath $file)', e));
+      inputs.addUnique(e.condition, _Item(file));
+    });
   }
 
   void _filesInto(_ListAttribute attribute, GnVariable variable) {
