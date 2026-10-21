@@ -35,12 +35,7 @@ cc_library(
         "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
-    ] + select({
-        "//engine/src/flutter/shell:enable_vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/flow
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",

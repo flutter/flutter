@@ -278,12 +278,7 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
-    ] + select({
-        "//engine/src/flutter/impeller/tools:opengles": [
-            "-Wno-inconsistent-missing-override",  # from //flutter/impeller/renderer/backend/gles:mock_gles
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
