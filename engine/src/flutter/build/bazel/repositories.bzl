@@ -94,7 +94,7 @@ def _directories_with_bazel_files(source):
                     found["/".join(parts[:depth])] = True
     fail("synced_repository: %s has more than %d directories; is there a symlink cycle?" % (source, _MAX_DIRECTORIES))
 
-def _link_tree(rctx, source, overlaying, exclude):
+def _link_tree(rctx, source, overlaying, exclude, links):
     """Populates the repository with symlinks to the contents of `source`.
 
     Entries are symlinked whole, with three exceptions, all re-created as real
@@ -119,12 +119,18 @@ def _link_tree(rctx, source, overlaying, exclude):
       GN link (and vanish under Bazel's feet while it fingerprints the
       directory). These ancestors are listed without a watch, since their
       entries are exactly what the other build adds and removes.
+
+    `links` (path to label) puts a directory of another repository at a path
+    of the tree, in place of whatever the synced tree has there: the LTO
+    system libraries built at fetch time (toolchains/emscripten/
+    lto_libraries.bzl) where emcc's frozen cache looks for them. The label
+    names the directory, in a repository whose root holds a BUILD file.
     """
     expanded = _directories_with_bazel_files(source) if overlaying else {}
     expanded[""] = True
     excluded = {}
     unwatched = {}
-    for path in exclude:
+    for path in exclude + links.keys():
         parts = path.split("/")
         for depth in range(len(parts)):
             ancestor = "/".join(parts[:depth])
@@ -132,6 +138,10 @@ def _link_tree(rctx, source, overlaying, exclude):
                 unwatched[ancestor] = True
             expanded[ancestor] = True
         excluded[path] = True
+    for path, label in links.items():
+        target = Label(label)
+        root = rctx.path(target.relative(":BUILD.bazel")).dirname
+        rctx.symlink(root.get_child(target.name), path)
 
     pending = [""]
     for _ in range(_MAX_DIRECTORIES):
@@ -247,7 +257,7 @@ def _synced_repository_impl(rctx):
             "`gclient sync`; run it from the repository root (see DEPS).",
         )
 
-    _link_tree(rctx, source, overlaying, rctx.attr.exclude)
+    _link_tree(rctx, source, overlaying, rctx.attr.exclude, rctx.attr.links)
     if converting:
         _link_secondary(rctx)
         _convert_gn(rctx)
@@ -308,6 +318,10 @@ synced_repository = repository_rule(
         "exclude": attr.string_list(
             doc = "Entries of the synced tree (paths relative to `path`) left out of the repository: " +
                   "what another build writes into the tree and Bazel must not see (see _link_tree).",
+        ),
+        "links": attr.string_dict(
+            doc = "Directories of other repositories put at paths of the tree (path relative to `path` " +
+                  "to the directory's label), in place of the synced tree's entry (see _link_tree).",
         ),
     },
     # The repository only symlinks into the checkout, so it must be re-created

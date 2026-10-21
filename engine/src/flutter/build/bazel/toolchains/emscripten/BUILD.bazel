@@ -30,6 +30,10 @@ platform(
         "--//engine/src/flutter/impeller/tools:enable_metal=false",
         "--//engine/src/flutter/impeller/tools:enable_opengles=true",
         "--//engine/src/flutter/impeller/tools:enable_vulkan=false",
+        # enable_lto, tools/gn's --lto default for the web build: -flto on
+        # the optimized build's compiles and links (the `lto` feature holds
+        # under -c opt). A variant's `enable_lto = false` turns it off.
+        "--features=lto",
     ],
 )
 

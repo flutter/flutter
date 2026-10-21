@@ -18,6 +18,7 @@ are always downloaded.
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("//engine/src/flutter/build/bazel/toolchains/emscripten:lto_libraries.bzl", "emsdk_lto_libraries")
 load(":deps.lock.bzl", "CIPD_DEPS", "GIT_DEPS")
 load(":repositories.bzl", "cipd_package", "engine_version_repository", "synced_repository")
 
@@ -33,6 +34,8 @@ _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 #                   directory holding the GN file over a synced subdirectory.
 #   exclude:        entries of the tree left out of the repository (paths
 #                   relative to `path`): what another build writes into it.
+#   links:          directories of other repositories put at paths of the
+#                   tree (the emsdk's LTO system libraries).
 _SOURCE_REPOSITORIES = {
     "abseil-cpp": struct(
         path = "engine/src/third_party/abseil-cpp",
@@ -87,10 +90,6 @@ _SOURCE_REPOSITORIES = {
             "upstream/emscripten/cache/sanity.txt",  # names this machine's paths
             "upstream/emscripten/cache/symbol_lists",  # JS symbol lists of past links
             "upstream/emscripten/cache/symbol_lists.lock",
-            # The LTO variants of the system libraries GN's -flto links build
-            # on first use (the prebuilt cache has none; the Bazel toolchain's
-            # LTO is pending its own copies, see build/bazel/toolchains/emscripten).
-            "upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto",
             # Python's bytecode caches of emcc's modules (stamped with this
             # checkout's source mtimes).
             "upstream/emscripten/__pycache__",
@@ -99,6 +98,14 @@ _SOURCE_REPOSITORIES = {
             "upstream/emscripten/tools/ports/__pycache__",
             "upstream/emscripten/tools/ports/contrib/__pycache__",
         ],
+        # The LTO variants of the system libraries, which GN's -flto links
+        # build into the prebuilt's cache on first use: the Bazel build's own
+        # copies (@emsdk_lto, built at fetch time by the SDK's embuilder --
+        # toolchains/emscripten/lto_libraries.bzl), where the frozen cache
+        # looks for them.
+        links = {
+            "upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto": "@emsdk_lto//:lto",
+        },
     ),
     # Skia's codec and font dependencies, each converted at fetch time from
     # its GN file: in the synced tree (libpng, freetype2), in the engine's
@@ -534,7 +541,15 @@ def _synced_deps_impl(mctx):
             gn_repository = getattr(spec, "gn_repository", ""),
             gn_secondary_dir = getattr(spec, "gn_secondary_dir", ""),
             exclude = getattr(spec, "exclude", []),
+            links = getattr(spec, "links", {}),
         )
+
+    # The LTO variants of emscripten's system libraries, which the emsdk
+    # repository's view links into the SDK's cache.
+    emsdk_lto_libraries(
+        name = "emsdk_lto",
+        emsdk_path = _SOURCE_REPOSITORIES["emsdk"].path,
+    )
 
     fetch = _fetch_toolchains(mctx)
     platform = _cipd_platform(mctx)
