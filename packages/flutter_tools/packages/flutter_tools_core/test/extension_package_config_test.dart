@@ -86,6 +86,21 @@ void main() {
       expect(config.platforms, const <String>{'custom_os'});
     });
 
+    test('constructor trims string list entries', () {
+      final config = ExtensionPackageConfig(
+        name: 'my_ext',
+        services: const <String>[' diagnostics ', 'build '],
+        supportedPlatforms: const <String>[' Linux '],
+        buildTargets: const <String>[' custom-build '],
+        templates: const <String>[' custom-app '],
+      );
+
+      expect(config.services, const <String>{'diagnostics', 'build'});
+      expect(config.supportedPlatforms, const <String>{'linux'});
+      expect(config.buildTargets, const <String>{'custom-build'});
+      expect(config.templates, const <String>{'custom-app'});
+    });
+
     test('throws FormatException when services is missing or empty', () {
       const servicesError =
           'Extension config.yaml must specify a non-empty list of services for '
