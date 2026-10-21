@@ -51,7 +51,12 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   impeller::PipelineDescriptor& GetPipelineDescriptor();
 
+  /// Ends the command buffer's open pass and starts recording this one.
   bool Begin(flutter::gpu::CommandBuffer& command_buffer);
+
+  /// Ends this pass if it is still the command buffer's open pass. Does
+  /// nothing if a later command already ended it.
+  bool End();
 
   void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
 
@@ -154,6 +159,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   impeller::RenderTarget render_target_;
   std::shared_ptr<impeller::RenderPass> render_pass_;
+  fml::RefPtr<CommandBuffer> command_buffer_;
 
   // Command encoding state.
   fml::RefPtr<RenderPipeline> render_pipeline_;
@@ -214,6 +220,10 @@ FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_Begin(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::CommandBuffer* command_buffer);
+
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_RenderPass_End(
+    flutter::gpu::RenderPass* wrapper);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_BindPipeline(

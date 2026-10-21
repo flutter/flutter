@@ -12,15 +12,16 @@ class BotDetector {
   final Platform _platform;
 
   bool get isRunningOnBot {
-    if (
-    // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
-    _platform.environment.containsKey('FLUTTER_HOST')
-        // When set, GA logs to a local file (normally for tests) so we don't need to filter.
-        ||
-        _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')) {
+    final Map<String, String> environment = _platform.environment;
+    // Set by IDEs to the IDE name, so a strong signal that this is not a bot.
+    if (environment.containsKey('FLUTTER_HOST')) {
+      return false;
+    }
+    // When set, GA logs to a local file (normally for tests) so we don't need to filter.
+    if (environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')) {
       return false;
     }
 
-    return Analytics.isBot(_platform.environment);
+    return Analytics.isBot(environment);
   }
 }
