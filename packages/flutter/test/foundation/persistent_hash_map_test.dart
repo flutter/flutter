@@ -77,4 +77,18 @@ void main() {
       }
     }
   });
+
+  test('PersistentHashMap - bit 31 and compressed bitmap popcount', () {
+    // Exercise 15 distinct level-0 indices including index 31 (1 << 31) while
+    // staying below the 16-entry _FullNode inflation threshold.
+    const indices = <int>[0, 1, 2, 5, 7, 11, 13, 15, 17, 19, 23, 25, 29, 30, 31];
+    var map = const PersistentHashMap<_MockKey, int>.empty();
+    for (final index in indices) {
+      map = map.put(_MockKey(hashCode: index, payload: 'k$index'), index * 10);
+    }
+    for (final index in indices) {
+      expect(map[_MockKey(hashCode: index, payload: 'k$index')], equals(index * 10));
+    }
+    expect(map[const _MockKey(hashCode: 28, payload: 'missing')], isNull);
+  });
 }
