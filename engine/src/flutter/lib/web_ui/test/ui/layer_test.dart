@@ -179,5 +179,42 @@ void testMain() {
       // scene.toImage flattens the LayerTree (preroll + flatten paint).
       await expectLater(scene.toImage(200, 200), completes);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/189178
+    test('Scene.toImage and Scene.toImageSync dispose the flattened picture', () async {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
+      canvas.drawRect(
+        const ui.Rect.fromLTWH(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
+
+      final sb = LayerSceneBuilder();
+      sb.addPicture(ui.Offset.zero, picture);
+      final LayerScene scene = sb.build();
+
+      final created = <ui.Picture>[];
+      final disposed = <ui.Picture>[];
+      ui.Picture.onCreate = created.add;
+      ui.Picture.onDispose = disposed.add;
+      try {
+        final ui.Image syncImage = scene.toImageSync(100, 100);
+        expect(created, hasLength(1));
+        expect(disposed, equals(created));
+        syncImage.dispose();
+
+        final ui.Image asyncImage = await scene.toImage(100, 100);
+        expect(created, hasLength(2));
+        expect(disposed, equals(created));
+        asyncImage.dispose();
+      } finally {
+        ui.Picture.onCreate = null;
+        ui.Picture.onDispose = null;
+      }
+
+      scene.dispose();
+      picture.dispose();
+    });
   });
 }
