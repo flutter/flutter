@@ -177,12 +177,21 @@ def _zip_bundle_impl(ctx):
         )
         args.add_all(["-i", readme, readme_name])
         inputs.append(readme)
+
+    # The archive's own place, and its entries' places: ninja building GN's
+    # archive target writes each input that is an output of the build into
+    # the build directory on the way (`sources`: GN's `$root_out_dir/...`
+    # source of an entry, as a path under the build directory), and an
+    # install of the archive lays them there too.
+    placed = [(output, "zip_archives/" + ctx.attr.output)]
     for destination, target in ctx.attr.files.items():
         files = target[DefaultInfo].files.to_list()
         if len(files) != 1:
             fail("%s: %s should be one file for %s, is %s" % (ctx.label, target.label, destination, files))
         args.add_all(["-i", files[0], destination])
         inputs.append(files[0])
+        if destination in ctx.attr.sources:
+            placed.append((files[0], ctx.attr.sources[destination]))
     for tree in ctx.attr.trees:
         for file, destination in tree[ZipTreeInfo].entries:
             args.add_all(["-i", file, destination])
@@ -202,7 +211,7 @@ def _zip_bundle_impl(ctx):
     )
     return [
         DefaultInfo(files = depset([output])),
-        BuildDirectoryInfo(entries = depset([(output, "zip_archives/" + ctx.attr.output)])),
+        BuildDirectoryInfo(entries = depset(placed)),
     ]
 
 zip_bundle = rule(
@@ -216,6 +225,11 @@ zip_bundle = rule(
         "files": attr.string_keyed_label_dict(
             allow_files = True,
             doc = "The archive's entries: each destination path mapped to the target of the one file placed there.",
+        ),
+        "sources": attr.string_dict(
+            doc = "For the entries whose GN source is an output of the build (`$root_out_dir/flutter_tester`, " +
+                  "`$root_gen_dir/...`): the destination mapped to the source's path under the build directory, " +
+                  "where an install lays the file as ninja's build of the archive leaves it.",
         ),
         "license": attr.bool(
             default = True,
