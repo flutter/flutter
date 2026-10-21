@@ -18,7 +18,7 @@ package(default_visibility = ["//visibility:public"])
 # (-I../..) resolves beside the canonical "absl/<path>.h" that abseil's own
 # Bazel build exposes: a view of the same files under that prefix, so that
 # no engine include changes for Bazel. The converter lists it beside every
-# @abseil-cpp dependency (bazel_mapping's abseilRootIncludes).
+# @abseil-cpp dependency (bazel_mapping's rootIncludeViews).
 cc_library(
     name = "root_includes",
     hdrs = glob(

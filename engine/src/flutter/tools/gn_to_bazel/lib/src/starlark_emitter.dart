@@ -2715,13 +2715,21 @@ final class _Emitter {
         location: e.assignment.location,
       );
       attribute.addUnique(e.condition, _item(_localLabel(label), e));
-      // An abseil dependency brings the view of abseil's headers under the
-      // engine's root-relative spelling, as GN's root include directory
-      // does for every target.
-      if (label.startsWith('@abseil-cpp//')) {
-        attribute.addUnique(e.condition, const _Item(abseilRootIncludes));
-      }
+      _rootIncludeViewsInto(attribute, label, e.condition);
     });
+  }
+
+  /// A dependency into a repository with header views brings them along:
+  /// the headers under the engine's root-relative spellings, as GN's root
+  /// include directories give every target.
+  void _rootIncludeViewsInto(_ListAttribute attribute, String label, Condition condition) {
+    for (final MapEntry<String, List<String>> views in rootIncludeViews.entries) {
+      if (label.startsWith(views.key)) {
+        for (final String view in views.value) {
+          attribute.addUnique(condition, _Item(view));
+        }
+      }
+    }
   }
 
   /// GN's `action()` targets of this file, whose outputs a dependent takes
@@ -2786,12 +2794,7 @@ final class _Emitter {
           ? 'data'
           : 'deps';
       rule.list(list).addUnique(e.condition, _item(_localLabel(label), e));
-      // An abseil dependency brings the view of abseil's headers under the
-      // engine's root-relative spelling, as GN's root include directory
-      // does for every target.
-      if (label.startsWith('@abseil-cpp//')) {
-        rule.list(list).addUnique(e.condition, const _Item(abseilRootIncludes));
-      }
+      _rootIncludeViewsInto(rule.list(list), label, e.condition);
     });
   }
 

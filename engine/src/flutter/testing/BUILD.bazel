@@ -55,6 +55,8 @@ cc_library(
         "//engine/src/flutter:config",
         "//engine/src/flutter/fml",
         "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
     alwayslink = True,
 )
@@ -328,6 +330,8 @@ flutter_cc_test(
         ":testing_fixtures",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
 )
 

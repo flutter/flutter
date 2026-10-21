@@ -78,6 +78,8 @@ cc_library(
         "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "@googletest//:gtest_prod",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
         "@harfbuzz",
         "@icu",
         "@skia",

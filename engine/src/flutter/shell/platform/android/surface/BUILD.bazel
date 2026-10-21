@@ -79,6 +79,8 @@ cc_library(
         "//engine/src/flutter/shell/gpu:gpu_surface_gl",
         "//engine/src/flutter/vulkan",  # shell_enable_vulkan
         "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
     alwayslink = True,
 )

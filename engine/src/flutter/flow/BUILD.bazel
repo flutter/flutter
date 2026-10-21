@@ -155,6 +155,8 @@ cc_library(
         "//engine/src/flutter/common/graphics",
         "//engine/src/flutter/testing:skia",
         "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
     ],
     alwayslink = True,
 )
@@ -225,6 +227,8 @@ flutter_cc_test(
         "//engine/src/flutter/testing:skia",
         "//engine/src/flutter/testing:testing_lib",
         "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
         "@skia",
     ],
 )
