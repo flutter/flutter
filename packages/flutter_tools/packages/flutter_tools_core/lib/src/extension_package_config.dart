@@ -29,18 +29,26 @@ import 'json_utils.dart';
 ///   `'bin/<name>.dart'`.
 /// - `supported_platforms` (`List<String>`, optional): Host operating systems on
 ///   which the extension can run (normalized to lowercase, e.g., `'linux'`,
-///   `'macos'`, `'windows'`). When omitted or empty, [supportsHostPlatform]
-///   imposes no static host platform filter before spawning.
-/// - `services` (`List<String>`, optional): RPC service namespaces implemented
+///   `'macos'`, `'windows'`). Platform-agnostic extensions omit this field to
+///   run on all host platforms (when omitted or empty, [supportsHostPlatform]
+///   imposes no static host platform filter before spawning). Extensions with
+///   host-specific native tools or dependencies must explicitly declare their
+///   supported host operating systems.
+/// - `services` (`List<String>`, required): RPC service namespaces implemented
 ///   by the extension (e.g., `'diagnostics'`, `'config'`, `'template'`,
-///   `'device'`, `'build'`).
-/// - `build_targets` (`List<String>`, optional): Static top-level `flutter build`
-///   subcommand target names contributed by the extension.
-/// - `templates` (`List<String>`, optional): Custom project template names
-///   contributed by the extension.
+///   `'device'`, `'build'`). Required, non-empty. Entries are lowercase service
+///   namespace identifiers matching known tool services (`'build'`,
+///   `'device'`, `'template'`, `'config'`, `'diagnostics'`, `'clean'`,
+///   `'artifacts'`).
+/// - `build_targets` (`List<String>`, optional): Lowercase kebab-case
+///   subcommand target names contributed to `flutter build` (e.g.
+///   `'custom-target'`).
+/// - `templates` (`List<String>`, optional): Lowercase kebab-case template
+///   names contributed to `flutter create -t` (e.g. `'custom-app'`).
 /// - `platforms` (`List<String>`, optional): Custom target platform identifiers
-///   supported for `flutter create --platforms=<platform>`. Each entry must
-///   match `^[a-z][a-z0-9_]*$`.
+///   supported for `flutter create --platforms=<platform>`. Each entry must be
+///   a lowercase snake_case identifier starting with a letter and containing
+///   only lowercase letters, digits, and underscores (e.g. `'custom_os'`).
 ///
 /// ### Example `extension/flutter_tools/config.yaml`
 ///
@@ -72,10 +80,11 @@ final class ExtensionPackageConfig {
     String? entrypoint,
     Iterable<String> platforms = const <String>{},
     this.protocolVersion = currentProtocolVersion,
-    Iterable<String> services = const <String>{},
+    required Iterable<String> services,
     Iterable<String> supportedPlatforms = const <String>{},
     Iterable<String> templates = const <String>{},
-  }) : entrypoint = _validateEntrypoint(entrypoint ?? 'bin/$name.dart'),
+  }) : assert(services.isNotEmpty),
+       entrypoint = _validateEntrypoint(entrypoint ?? 'bin/$name.dart'),
        supportedPlatforms = Set<String>.unmodifiable(
          supportedPlatforms.map((String p) => p.toLowerCase()),
        ),
@@ -84,11 +93,10 @@ final class ExtensionPackageConfig {
        templates = Set<String>.unmodifiable(templates),
        platforms = _validatePlatforms(platforms);
 
-  /// Parses an [ExtensionPackageConfig] from a decoded YAML or JSON [map].
+  /// Parses an [ExtensionPackageConfig] from a decoded YAML or JSON [json] map.
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
-  factory ExtensionPackageConfig.fromMap(Map<Object?, Object?> map, {String? packageName}) {
-    final Map<String, Object?> json = map.cast<String, Object?>();
+  factory ExtensionPackageConfig.fromMap(Map<String, Object?> json, {String? packageName}) {
     final String rawName = packageName != null && json[nameKey] == null
         ? packageName
         : json.requiredField<String>(nameKey);
@@ -112,15 +120,22 @@ final class ExtensionPackageConfig {
     final String? rawEntrypoint = json.nullableField<String>(entrypointKey);
     final String entrypoint = _validateEntrypoint(rawEntrypoint ?? 'bin/$name.dart');
 
+    final Set<String> services = json.stringSet(servicesKey, rejectEmpty: true);
+    if (services.isEmpty) {
+      throw const FormatException(
+        'Extension config.yaml must specify a non-empty list of services for "$servicesKey".',
+      );
+    }
+
     return ExtensionPackageConfig(
       name: name,
       protocolVersion: protocolVersion,
       entrypoint: entrypoint,
-      supportedPlatforms: _parseStringSet(json, supportedPlatformsKey),
-      services: _parseStringSet(json, servicesKey),
-      buildTargets: _parseStringSet(json, buildTargetsKey),
-      templates: _parseStringSet(json, templatesKey),
-      platforms: _parseStringSet(json, platformsKey),
+      supportedPlatforms: json.stringSet(supportedPlatformsKey, rejectEmpty: true),
+      services: services,
+      buildTargets: json.stringSet(buildTargetsKey, rejectEmpty: true),
+      templates: json.stringSet(templatesKey, rejectEmpty: true),
+      platforms: json.stringSet(platformsKey, rejectEmpty: true),
     );
   }
 
@@ -224,25 +239,13 @@ final class ExtensionPackageConfig {
       final String trimmed = platform.trim();
       if (!_platformIdentifierPattern.hasMatch(trimmed)) {
         throw FormatException(
-          'Extension config.yaml "$platformsKey" entries must be valid lowercase identifiers, '
-          'got: "$platform".',
+          'Extension config.yaml "$platformsKey" entries must be lowercase snake_case identifiers '
+          'starting with a letter (e.g. "custom_os"), got: "$platform".',
         );
       }
       validated.add(trimmed);
     }
     return Set<String>.unmodifiable(validated);
-  }
-
-  static Set<String> _parseStringSet(Map<String, Object?> json, String fieldName) {
-    return <String>{
-      for (final String item in json.stringIterable(fieldName))
-        if (item.trim().isNotEmpty)
-          item.trim()
-        else
-          throw FormatException(
-            'Extension config.yaml "$fieldName" entries must be non-empty strings, got: "$item".',
-          ),
-    };
   }
 
   static const SetEquality<String> _stringSetEquality = SetEquality<String>();
