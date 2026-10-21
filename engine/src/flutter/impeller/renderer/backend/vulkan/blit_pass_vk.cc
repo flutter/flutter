@@ -424,7 +424,10 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
       /*image=*/image,
       /*src_access_mask=*/vk::AccessFlagBits::eTransferWrite |
           vk::AccessFlagBits::eColorAttachmentWrite,
-      /*dst_access_mask=*/vk::AccessFlagBits::eTransferRead,
+      // The blits below write mip levels 1..N while they are TransferDst, so
+      // the next access is a transfer write, not a read
+      // (SYNC-HAZARD-WRITE-AFTER-WRITE).
+      /*dst_access_mask=*/vk::AccessFlagBits::eTransferWrite,
       /*old_layout=*/src.GetLayout(),
       /*new_layout=*/vk::ImageLayout::eTransferDstOptimal,
       /*src_stage=*/vk::PipelineStageFlagBits::eTransfer |
