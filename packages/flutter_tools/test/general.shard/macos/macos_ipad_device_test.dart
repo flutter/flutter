@@ -102,7 +102,7 @@ void main() {
       expect(devices, isEmpty);
     });
 
-    testWithoutContext('device discovery on arm', () async {
+    testWithoutContext('reuses the device across polls and refreshes', () async {
       final discoverer = MacOSDesignedForIPadDevices(
         xcode: FakeXcode(),
         xcdevice: FakeXCDevice(),
@@ -121,12 +121,18 @@ void main() {
       expect(devices, hasLength(1));
 
       final Device device = devices.single;
+      final DeviceLogReader logReader = await device.getLogReader();
       expect(device, isA<MacOSDesignedForIPadDevice>());
       expect(device.id, 'mac-designed-for-ipad');
 
       // Timeout ignored.
       devices = await discoverer.discoverDevices(timeout: const Duration(seconds: 10));
       expect(devices, hasLength(1));
+      expect(devices.single, same(device));
+      expect(await devices.single.getLogReader(), same(logReader));
+
+      final List<Device> polledDevices = await discoverer.pollingGetDevices();
+      expect(polledDevices.single, same(device));
     });
   });
 

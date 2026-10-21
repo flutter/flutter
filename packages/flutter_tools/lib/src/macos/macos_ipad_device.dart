@@ -357,6 +357,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   final IOSWorkflow _iosWorkflow;
   final Xcode xcode;
   final XCDevice xcdevice;
+  MacOSDesignedForIPadDevice? _device;
 
   @override
   bool get supportsPlatform => toolContext.platform.isMacOS;
@@ -376,7 +377,11 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      MacOSDesignedForIPadDevice(toolContext: toolContext, xcode: xcode, xcdevice: xcdevice),
+      _device ??= MacOSDesignedForIPadDevice(
+        toolContext: toolContext,
+        xcode: xcode,
+        xcdevice: xcdevice,
+      ),
     ];
   }
 
