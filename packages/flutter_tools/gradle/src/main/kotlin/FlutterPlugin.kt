@@ -45,6 +45,34 @@ class FlutterPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         this.project = project
 
+        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
+        // supported range. This runs before any task registration or extension configuration so
+        // that unsupported dependency versions fail with DependencyVersionChecker's diagnostic
+        // rather than a runtime error when calling AGP or Gradle APIs.
+        val shouldSkipDependencyChecks: Boolean =
+            project.hasProperty("skipDependencyChecks") &&
+                project.properties["skipDependencyChecks"]?.toString()?.toBoolean() == true
+        if (!shouldSkipDependencyChecks) {
+            try {
+                DependencyVersionChecker.checkDependencyVersions(project)
+            } catch (e: Exception) {
+                if (!project.hasProperty(DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY) ||
+                    project.properties[DependencyVersionChecker.OUT_OF_SUPPORT_RANGE_PROPERTY]?.toString()?.toBoolean() != true
+                ) {
+                    // Possible bug in dependency checking code - warn and do not block build.
+                    project.logger.error(
+                        "Warning: Flutter was unable to detect project Gradle, Java, " +
+                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                            e
+                    )
+                } else {
+                    // If OUT_OF_SUPPORT_RANGE_PROPERTY is set, the exception was thrown by us
+                    // in the dependency version checker plugin so re-throw it here.
+                    throw e
+                }
+            }
+        }
+
         val rootProject = project.rootProject
         if (FlutterPluginUtils.isFlutterAppProject(project)) {
             addTaskForLockfileGeneration(rootProject)
@@ -129,36 +157,6 @@ class FlutterPlugin : Plugin<Project> {
             rootProjectLocalProperties.getProperty("flutter.versionCode", "1")
         flutterExtension.flutterVersionName =
             rootProjectLocalProperties.getProperty("flutter.versionName", "1.0")
-
-        // Validate that the provided Gradle, Java, AGP, and KGP versions are all within our
-        // supported range. This runs before addFlutterTasks and subsequent Android extension
-        // configuration so that unsupported AGP versions fail with DependencyVersionChecker's
-        // diagnostic rather than a NoSuchMethodError when calling AGP DSL APIs.
-        val shouldSkipDependencyChecks: Boolean =
-            project.hasProperty("skipDependencyChecks") &&
-                (
-                    project.properties["skipDependencyChecks"].toString().toBoolean()
-                )
-        if (!shouldSkipDependencyChecks) {
-            try {
-                DependencyVersionChecker.checkDependencyVersions(project)
-            } catch (e: Exception) {
-                if (!project.hasProperty("usesUnsupportedDependencyVersions") ||
-                    !(project.properties["usesUnsupportedDependencyVersions"] as Boolean)
-                ) {
-                    // Possible bug in dependency checking code - warn and do not block build.
-                    project.logger.error(
-                        "Warning: Flutter was unable to detect project Gradle, Java, " +
-                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
-                    )
-                } else {
-                    // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
-                    // in the dependency version checker plugin so re-throw it here.
-                    throw e
-                }
-            }
-        }
 
         this.addFlutterTasks(project)
 
