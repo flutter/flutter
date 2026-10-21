@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
-#include "gtest/gtest.h"
 #include "impeller/entity/draw_order_resolver.h"
+#include "third_party/googletest/googletest/include/gtest/gtest.h"
 
 namespace impeller {
 namespace testing {
