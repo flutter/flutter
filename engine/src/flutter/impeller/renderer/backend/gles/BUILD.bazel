@@ -25,6 +25,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":gles",
         "//engine/src:include_root",
@@ -62,6 +66,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from :mock_gles
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":gles",
         ":mock_gles",

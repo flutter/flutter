@@ -15,12 +15,21 @@ cc_library(
     srcs = ["test_font_data.cc"],
     hdrs = ["test_font_data.h"],
     copts = FLUTTER_COPTS,
-    local_defines = FLUTTER_LOCAL_DEFINES + [
-        # Though the test font data is small, we dont want to add to the binary size
-        # on the device (in profile and release modes). We only add the same on the
-        # host test shells and the debug device shell.
-        "EMBED_TEST_FONT_DATA=1",  # flutter_runtime_mode == "debug" || (current_toolchain == host_toolchain)
-    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            # Though the test font data is small, we dont want to add to the binary size
+            # on the device (in profile and release modes). We only add the same on the
+            # host test shells and the debug device shell.
+            "EMBED_TEST_FONT_DATA=1",  # flutter_runtime_mode == "debug" || (current_toolchain == host_toolchain)
+        ],
+        "//engine/src/flutter/build/bazel:host_toolchain": [
+            # Though the test font data is small, we dont want to add to the binary size
+            # on the device (in profile and release modes). We only add the same on the
+            # host test shells and the debug device shell.
+            "EMBED_TEST_FONT_DATA=1",  # flutter_runtime_mode == "debug" || (current_toolchain == host_toolchain)
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter:config",
@@ -107,9 +116,12 @@ cc_library(
         "service_protocol.h",
         "skia_concurrent_executor.h",
     ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/lib/ui
-    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/lib/ui
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":dart_plugin_registrant",
@@ -139,6 +151,10 @@ cc_library(
 flutter_test_fixtures(
     name = "runtime_fixtures",
     dart_main = "fixtures/runtime_test.dart",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # SwiftShader, its ICD manifest and the Vulkan loader, next to the
@@ -146,6 +162,10 @@ flutter_test_fixtures(
 # ANGLE).
 flutter_gpu_test_backends(
     name = "gpu_test_backends",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_cc_test(
@@ -162,19 +182,32 @@ flutter_cc_test(
         "type_conversions_unittests.cc",
     ],
     copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from :runtime
         "-Wno-inconsistent-missing-override",  # from //flutter/shell/common:shell_test_fixture_sources
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/common:shell_test_fixture_sources
-        "-Wno-deprecated-copy",  # from //flutter/shell/common:shell_test_fixture_sources
-        "-Wno-implicit-fallthrough",  # from //flutter/shell/common:shell_test_fixture_sources
-        "-Wno-nullability-completeness",  # from //flutter/shell/common:shell_test_fixture_sources
-        "-Wno-suggest-destructor-override",  # from //flutter/shell/common:shell_test_fixture_sources
-        "-Wno-suggest-override",  # from //flutter/shell/common:shell_test_fixture_sources
-        "-Wno-unused-private-field",  # from //flutter/shell/common:shell_test_fixture_sources
-        "-Wno-unused-variable",  # from //flutter/shell/common:shell_test_fixture_sources
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :runtime
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-deprecated-copy",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-implicit-fallthrough",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-nullability-completeness",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-suggest-destructor-override",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-suggest-override",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-unused-private-field",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-unused-variable",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }),
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":libdart",
         ":runtime",
@@ -197,6 +230,10 @@ flutter_cc_test(
 flutter_test_fixtures(
     name = "no_plugin_registrant",
     dart_main = "fixtures/no_dart_plugin_registrant_test.dart",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     use_target_as_artifact_prefix = True,
 )
 
@@ -206,9 +243,17 @@ flutter_cc_test(
     srcs = ["no_dart_plugin_registrant_unittests.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":no_plugin_registrant",
         "//engine/src:include_root",
@@ -223,6 +268,10 @@ flutter_cc_test(
 flutter_test_fixtures(
     name = "plugin_registrant",
     dart_main = "fixtures/dart_tool/flutter_build/dart_plugin_registrant.dart",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     use_target_as_artifact_prefix = True,
 )
 
@@ -232,9 +281,17 @@ flutter_cc_test(
     srcs = ["dart_plugin_registrant_unittests.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":dart_plugin_registrant",
         ":plugin_registrant",

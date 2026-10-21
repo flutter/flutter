@@ -19,7 +19,15 @@ impeller_shaders(
         "prefix_sum_test.comp",
         "threadgroup_sizing_test.comp",
     ],
-    vulkan_language_version = 130,
+    target_compatible_with = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [],
+        "//engine/src/flutter/impeller/tools:metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    vulkan_language_version = select({
+        "//engine/src/flutter/impeller/tools:vulkan": 130,
+        "//conditions:default": None,
+    }),
 )
 
 cc_library(
@@ -89,7 +97,6 @@ cc_library(
     ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
-        ":compute_shaders",  # impeller_enable_compute
         "//engine/src:include_root",
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller:impeller_public_config",
@@ -101,7 +108,15 @@ cc_library(
         "@abseil-cpp//absl/container:linked_hash_map",
         "@abseil-cpp//absl/strings",
         "@abseil_cpp_tree//:root_includes",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            ":compute_shaders",  # impeller_enable_compute
+        ],
+        "//engine/src/flutter/impeller/tools:metal": [
+            ":compute_shaders",  # impeller_enable_compute
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -113,7 +128,6 @@ cc_library(
         "capabilities_unittests.cc",
         "command_buffer_scheduling_receipt_unittests.cc",
         "command_queue_unittests.cc",
-        "compute_unittests.cc",
         "device_buffer_unittests.cc",
         "pipeline_compile_queue_unittests.cc",
         "pipeline_descriptor_unittests.cc",
@@ -121,13 +135,25 @@ cc_library(
         "pool_unittests.cc",
         "renderer_golden_unittests.cc",
         "renderer_unittests.cc",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "compute_unittests.cc",  # impeller_enable_compute
+        ],
+        "//engine/src/flutter/impeller/tools:metal": [
+            "compute_unittests.cc",  # impeller_enable_compute
+        ],
+        "//conditions:default": [],
+    }),
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":renderer",
         "//engine/src:include_root",
@@ -152,7 +178,6 @@ cc_library(
         "capabilities_unittests.cc",
         "command_buffer_scheduling_receipt_unittests.cc",
         "command_queue_unittests.cc",
-        "compute_unittests.cc",
         "device_buffer_unittests.cc",
         "pipeline_compile_queue_unittests.cc",
         "pipeline_descriptor_unittests.cc",
@@ -160,7 +185,15 @@ cc_library(
         "pool_unittests.cc",
         "renderer_golden_unittests.cc",
         "renderer_unittests.cc",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "compute_unittests.cc",  # impeller_enable_compute
+        ],
+        "//engine/src/flutter/impeller/tools:metal": [
+            "compute_unittests.cc",  # impeller_enable_compute
+        ],
+        "//conditions:default": [],
+    }),
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
@@ -170,6 +203,10 @@ cc_library(
         "IMPELLER_GOLDEN_TESTS",
         "IMPELLER_ENABLE_VALIDATION=1",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":renderer",
         "//engine/src:include_root",
@@ -194,10 +231,18 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
-        "-Wno-redundant-parens",  # from //flutter/runtime
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/runtime
+        ],
+        "//conditions:default": [],
+    }),
     data = ["//engine/src/flutter/impeller/fixtures:flutter_gpu_shaders"],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":renderer",
         "//engine/src:include_root",

@@ -91,17 +91,25 @@ cc_library(
         "surface_frame.h",
         "view_slicer.h",
     ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/common/graphics
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
-        "-Wno-deprecated-copy",  # from //flutter/impeller
-        "-Wno-implicit-fallthrough",  # from //flutter/impeller
-        "-Wno-nullability-completeness",  # from //flutter/impeller
-        "-Wno-suggest-destructor-override",  # from //flutter/impeller
-        "-Wno-suggest-override",  # from //flutter/impeller
-        "-Wno-unused-private-field",  # from //flutter/impeller
-        "-Wno-unused-variable",  # from //flutter/impeller
-    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/common/graphics
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -110,18 +118,36 @@ cc_library(
         "//engine/src/flutter/common/graphics",
         "//engine/src/flutter/display_list",
         "//engine/src/flutter/fml",
-        "//engine/src/flutter/impeller",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
         "//engine/src/flutter/txt",
         "@skia",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
 flutter_test_fixtures(
     name = "flow_fixtures",
     fixtures = ["//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 cc_library(
@@ -146,9 +172,17 @@ cc_library(
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:skia
-        "-Wno-redundant-parens",  # from :flow
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :flow
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":flow",
         "//engine/src:include_root",
@@ -206,14 +240,22 @@ flutter_cc_test(
         "--font-file=engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf",
     ],
     copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from :flow
         "-Wno-inconsistent-missing-override",  # from :flow_testing
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :flow
+        ],
+        "//conditions:default": [],
+    }),
     data = [
         "//engine/src/flutter/testing:resources",
         "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":flow",
         ":flow_fixtures",
