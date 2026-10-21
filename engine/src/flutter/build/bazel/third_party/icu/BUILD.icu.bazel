@@ -141,6 +141,29 @@ cc_library(
     ],
 )
 
+# source_set("headers"): the public and private headers of both libraries
+# with their include directories, for a target that compiles ICU sources of
+# its own (Skia's client-ICU bidi library, //flutter/third_party/canvaskit/
+# icu_bidi, which builds a few of source/common's files under its own
+# library suffix) or includes them without linking the libraries.
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "source/common/*.h",
+        "source/common/unicode/*.h",
+        "source/i18n/*.h",
+        "source/i18n/unicode/*.h",
+    ]),
+    includes = [
+        "source/common",
+        "source/i18n",
+    ],
+    deps = [":root_includes"],
+)
+
+# The sources a target of another repository compiles (icu_bidi, above).
+exports_files(glob(["source/common/*.cpp"]))
+
 # The data file (copy("copy_icudata") puts it at the root of the GN output
 # directory as icudtl.dat). Binaries that initialize ICU load it at runtime;
 # list it in their `data`.

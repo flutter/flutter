@@ -284,20 +284,14 @@ exports_files([
       'wimp_group': _webSdkAssembly,
     },
   ),
+  // The client ICU's bidi library: a few of ICU's source/common files under
+  // Skia's own library suffix, which skunicode links where
+  // skia_use_client_icu holds (the skwasm and wimp variants).
+  ConvertedFile('//flutter/third_party/canvaskit/icu_bidi'),
   // skwasm, the web engine's rendering module: three wasm_lib variants over
   // display_list, Skia's paragraph and unicode modules, and Skia or
   // Impeller -- wasm_module rules, each built for its toolchain's platform.
-  // skwasm and wimp build Skia with the client ICU (skia_use_client_icu),
-  // whose bidi library (//flutter/third_party/canvaskit/icu_bidi) is not
-  // converted yet: its GN names its include directories with -isystem
-  // through rebase_path(), an idiom the converter has to learn.
-  ConvertedFile(
-    '//flutter/skwasm',
-    skip: <String, String>{
-      'skwasm': 'needs the client ICU (icu_bidi) under skia_use_client_icu; see the file comment',
-      'wimp': 'needs the client ICU (icu_bidi) under skia_use_client_icu; see the file comment',
-    },
-  ),
+  ConvertedFile('//flutter/skwasm'),
   // The benchmark library (google/benchmark through @benchmark) and the
   // engine's wrapper of it, for the benchmark executables run_tests.py
   // --type benchmarks runs (benchmarkRuns).
