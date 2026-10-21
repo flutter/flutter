@@ -1225,6 +1225,103 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
+    testUsingContext(
+      'stages a signed bundle from a path with spaces for local installation',
+      () async {
+        final Directory root = globals.fs.systemTempDirectory.createTempSync('flutter_stage.');
+        addTearDown(() => root.deleteSync(recursive: true));
+        final Directory source = root.childDirectory(
+          'source with spaces %20 & Unicode Ω/Runner.app',
+        )..createSync(recursive: true);
+        final File executable = source.childFile('Runner')..writeAsStringSync('signed executable');
+        final Directory destination = root.childDirectory('launcher')..createSync();
+        final Directory stagedBundle = destination.childDirectory('Runner.app');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>['/usr/bin/ditto', source.path, stagedBundle.path],
+            onRun: (_) {
+              stagedBundle.createSync();
+              executable.copySync(stagedBundle.childFile('Runner').path);
+            },
+          ),
+        );
+        final xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: setupXcode(
+            fakeProcessManager: FakeProcessManager.any(),
+            fileSystem: fileSystem,
+            flutterRoot: flutterRoot,
+          ),
+          fileSystem: globals.fs,
+        );
+
+        await xcodeDebug.createXcodeProjectWithCustomBundle(
+          source.path,
+          templateRenderer: globals.templateRenderer,
+          projectDestination: destination,
+          copyApplicationBundle: true,
+        );
+
+        final document = XmlDocument.parse(
+          destination
+              .childFile('Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme')
+              .readAsStringSync(),
+        );
+        expect(
+          document
+              .findAllElements('PathRunnable')
+              .map((XmlElement node) => node.getAttribute('FilePath')),
+          everyElement(stagedBundle.path),
+        );
+        expect(stagedBundle.childFile('Runner').readAsStringSync(), 'signed executable');
+        expect(executable.readAsStringSync(), 'signed executable');
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testUsingContext('failed bundle staging removes the temporary launcher', () async {
+      final Directory destination = globals.fs.systemTempDirectory.createTempSync('flutter_stage.');
+      addTearDown(() {
+        if (destination.existsSync()) {
+          destination.deleteSync(recursive: true);
+        }
+      });
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            '/usr/bin/ditto',
+            '/source with spaces/Runner.app',
+            destination.childDirectory('Runner.app').path,
+          ],
+          exitCode: 1,
+          stderr: 'Copy failed',
+        ),
+      );
+      final xcodeDebug = XcodeDebug(
+        logger: logger,
+        processManager: fakeProcessManager,
+        xcode: setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        ),
+        fileSystem: globals.fs,
+      );
+
+      await expectLater(
+        () => xcodeDebug.createXcodeProjectWithCustomBundle(
+          '/source with spaces/Runner.app',
+          templateRenderer: globals.templateRenderer,
+          projectDestination: destination,
+          copyApplicationBundle: true,
+        ),
+        throwsA(isA<ProcessException>()),
+      );
+      expect(destination.existsSync(), isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
     for (final mode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
       testUsingContext(
         'temporary project launches ${mode.name} with the correct debugger',

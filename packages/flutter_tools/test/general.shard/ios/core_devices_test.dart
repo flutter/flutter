@@ -4270,6 +4270,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     Directory? projectDestination,
     bool verboseLogging = false,
     BuildMode buildMode = BuildMode.debug,
+    bool copyApplicationBundle = false,
     bool debuggerEnabled = true,
     String? lldbInitFile,
   }) async {

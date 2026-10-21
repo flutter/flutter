@@ -175,6 +175,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     final XcodeDebugProject debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
       toolContext.fs.path.absolute(package.deviceBundlePath),
       templateRenderer: globals.templateRenderer,
+      copyApplicationBundle: true,
       buildMode: debuggingOptions.buildInfo.mode,
       debuggerEnabled:
           debuggingOptions.buildInfo.isDebug ||

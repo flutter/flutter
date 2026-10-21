@@ -190,6 +190,7 @@ void main() {
         );
         expect(result.started, isTrue);
         expect(debug.mode, mode);
+        expect(debug.copyApplicationBundle, isTrue);
         expect(debug.debuggerEnabled, mode == BuildMode.debug);
         expect(debug.deviceId, 'host-mac-id');
         expect(debug.devicePlatform, 'iphoneos');
@@ -421,6 +422,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   FakeXcodeDebug(this.fs);
   final FileSystem fs;
   BuildMode? mode;
+  bool? copyApplicationBundle;
   bool? debuggerEnabled;
   String? lldbInitFile;
   String? deviceId;
@@ -438,10 +440,12 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     Directory? projectDestination,
     bool verboseLogging = false,
     BuildMode buildMode = BuildMode.debug,
+    bool copyApplicationBundle = false,
     bool debuggerEnabled = true,
     String? lldbInitFile,
   }) async {
     mode = buildMode;
+    this.copyApplicationBundle = copyApplicationBundle;
     this.debuggerEnabled = debuggerEnabled;
     this.lldbInitFile = lldbInitFile;
     fs.directory('/temporary/Runner.xcodeproj').createSync(recursive: true);
