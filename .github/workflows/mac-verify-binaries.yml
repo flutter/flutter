@@ -32,7 +32,6 @@ jobs:
     if: needs.check-engine-changes.outputs.changed == 'true'
     permissions:
       contents: read
-      pull-requests: read
     runs-on: macos-latest
     timeout-minutes: 130
 
