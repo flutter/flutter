@@ -402,7 +402,7 @@ def flutter_test_fixtures(
         **kwargs
     )
 
-def flutter_gpu_test_backends(name, visibility = None):
+def flutter_gpu_test_backends(name, visibility = None, **kwargs):
     """The GPU test backends in this package, next to its test binaries.
 
     GN's //flutter/third_party/swiftshader group and ANGLE's own data_deps
@@ -419,6 +419,8 @@ def flutter_gpu_test_backends(name, visibility = None):
     Args:
       name: name of the target (a filegroup of the copies).
       visibility: visibility of the target.
+      **kwargs: the filegroup's other attributes (target_compatible_with,
+        for a target GN defines under a condition).
     """
     copies = []
     for product, file in _GPU_TEST_BACKEND_FILES.items():
@@ -434,6 +436,7 @@ def flutter_gpu_test_backends(name, visibility = None):
         name = name,
         srcs = copies,
         visibility = visibility,
+        **kwargs
     )
 
 def _source_tree_files_impl(ctx):
