@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'build.dart';
+import 'json_utils.dart';
 
 /// A description of the kind of workflow the device supports.
 enum Category {
@@ -57,17 +58,16 @@ class TargetDevice {
   /// Deserializes a [TargetDevice] from a JSON-serializable map.
   factory TargetDevice.fromJson(Map<String, Object?> json) {
     return TargetDevice(
-      category: Category.fromString(json[categoryKey] as String? ?? '') ?? Category.desktop,
-      id: json[idKey] as String? ?? '',
-      name: json[nameKey] as String? ?? '',
-      buildTarget: switch (json[buildTargetKey]) {
-        final String value => value,
-        _ => null,
-      },
-      ephemeral: json[ephemeralKey] as bool? ?? true,
-      isSupported: json[isSupportedKey] as bool? ?? true,
-      sdkNameAndVersion: json[sdkNameAndVersionKey] as String?,
-      targetPlatform: json[targetPlatformKey] as String?,
+      category:
+          Category.fromString(json.optionalField<String>(categoryKey, defaultValue: '')) ??
+          Category.desktop,
+      id: json.optionalField<String>(idKey, defaultValue: ''),
+      name: json.optionalField<String>(nameKey, defaultValue: ''),
+      buildTarget: json.nullableField<String>(buildTargetKey),
+      ephemeral: json.optionalField<bool>(ephemeralKey, defaultValue: true),
+      isSupported: json.optionalField<bool>(isSupportedKey, defaultValue: true),
+      sdkNameAndVersion: json.nullableField<String>(sdkNameAndVersionKey),
+      targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
   }
 
@@ -194,27 +194,20 @@ class ExtensionDebuggingOptions {
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
   factory ExtensionDebuggingOptions.fromJson(Map<String, Object?> json) {
-    final BuildMode buildMode = _parseBuildMode(json[buildModeKey], json);
-    final bool debuggingEnabled = switch (json[debuggingEnabledKey]) {
-      final bool enabled => enabled,
-      null => false,
-      _ => throw FormatException(
-        'Invalid "$debuggingEnabledKey" in ExtensionDebuggingOptions.',
-        json,
-      ),
-    };
+    final BuildMode buildMode = _parseBuildMode(json.requiredField<String>(buildModeKey), json);
+    final bool debuggingEnabled = json.optionalField<bool>(
+      debuggingEnabledKey,
+      defaultValue: false,
+    );
     return ExtensionDebuggingOptions(buildMode: buildMode, debuggingEnabled: debuggingEnabled);
   }
 
-  static BuildMode _parseBuildMode(Object? raw, Map<String, Object?> json) {
-    if (raw case final String modeName) {
-      try {
-        return BuildMode.fromCliName(modeName);
-      } on ArgumentError catch (e) {
-        throw FormatException('Invalid "$buildModeKey": ${e.message}', json);
-      }
+  static BuildMode _parseBuildMode(String modeName, Map<String, Object?> json) {
+    try {
+      return BuildMode.fromCliName(modeName);
+    } on ArgumentError catch (e) {
+      throw FormatException('Invalid "$buildModeKey": ${e.message}', json);
     }
-    throw FormatException('Missing or invalid "$buildModeKey" in ExtensionDebuggingOptions.', json);
   }
 
   /// Map key for [buildMode].

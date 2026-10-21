@@ -94,14 +94,19 @@ void main() {
       expect(device1.hashCode, isNot(equals(device2.hashCode)));
     });
 
-    test('fromJson ignores non-string buildTarget', () {
-      final device = TargetDevice.fromJson(const <String, Object?>{
-        'id': 'device_1',
-        'name': 'Device 1',
-        'category': 'desktop',
-        'buildTarget': 123,
-      });
-      expect(device.buildTarget, isNull);
+    test('fromJson throws FormatException when fields have invalid types', () {
+      expect(
+        () => TargetDevice.fromJson(const <String, Object?>{TargetDevice.idKey: 123}),
+        throwsFormatException,
+      );
+      expect(
+        () => TargetDevice.fromJson(const <String, Object?>{TargetDevice.ephemeralKey: 'true'}),
+        throwsFormatException,
+      );
+      expect(
+        () => TargetDevice.fromJson(const <String, Object?>{TargetDevice.buildTargetKey: 123}),
+        throwsFormatException,
+      );
     });
   });
 
@@ -128,20 +133,20 @@ void main() {
 
       expect(
         () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{}),
-        throwsA(isA<FormatException>()),
+        throwsFormatException,
       );
       expect(
         () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
           'buildMode': 'invalid_mode',
         }),
-        throwsA(isA<FormatException>()),
+        throwsFormatException,
       );
       expect(
         () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
           'buildMode': 'debug',
           'debuggingEnabled': 'not_a_bool',
         }),
-        throwsA(isA<FormatException>()),
+        throwsFormatException,
       );
     });
   });

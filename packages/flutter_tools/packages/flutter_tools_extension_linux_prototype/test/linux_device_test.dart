@@ -83,7 +83,9 @@ void main() {
       );
       await expectLater(
         launchAppHandler(<String, Object?>{}),
-        _throwsInvalidParams('Invalid or missing parameters for ${DeviceService.launchAppMethod}.'),
+        _throwsInvalidParams(
+          'Missing required "${DeviceService.deviceIdParam}" (expected String).',
+        ),
       );
       await expectLater(
         launchAppHandler(<String, Object?>{
@@ -116,7 +118,7 @@ void main() {
       await expectLater(
         getVmServiceUriHandler(<String, Object?>{}),
         _throwsInvalidParams(
-          'Invalid or missing parameters for ${DeviceService.getVmServiceUriMethod}.',
+          'Missing required "${DeviceService.deviceIdParam}" (expected String).',
         ),
       );
 
@@ -129,7 +131,9 @@ void main() {
       );
       await expectLater(
         stopAppHandler(<String, Object?>{}),
-        _throwsInvalidParams('Invalid or missing parameters for ${DeviceService.stopAppMethod}.'),
+        _throwsInvalidParams(
+          'Missing required "${DeviceService.deviceIdParam}" (expected String).',
+        ),
       );
     });
 

@@ -81,12 +81,16 @@ void main() {
 
       await expectLater(
         () => buildHandler(const <String, Object?>{}),
-        _throwsInvalidParams('Missing or invalid "${BuildService.targetNameParam}" parameter.'),
+        _throwsInvalidParams(
+          'Missing required "${BuildService.targetNameParam}" (expected String).',
+        ),
       );
 
       await expectLater(
         () => buildHandler(<String, Object?>{BuildService.targetNameParam: 'custom-linux-build'}),
-        _throwsInvalidParams('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
+        _throwsInvalidParams(
+          'Missing required "${BuildService.projectRootParam}" (expected String).',
+        ),
       );
 
       await expectLater(
@@ -94,7 +98,7 @@ void main() {
           BuildService.targetNameParam: 'custom-linux-build',
           BuildService.projectRootParam: '/project',
         }),
-        _throwsInvalidParams('Missing or invalid "${BuildService.mainPathParam}" parameter.'),
+        _throwsInvalidParams('Missing required "${BuildService.mainPathParam}" (expected String).'),
       );
 
       await expectLater(
@@ -103,7 +107,9 @@ void main() {
           BuildService.projectRootParam: '/project',
           BuildService.mainPathParam: 'lib/main.dart',
         }),
-        _throwsInvalidParams('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
+        _throwsInvalidParams(
+          'Missing required "${BuildService.buildModeParam}" (expected String).',
+        ),
       );
 
       await expectLater(

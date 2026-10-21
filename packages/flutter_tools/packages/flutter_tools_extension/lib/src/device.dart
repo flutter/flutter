@@ -106,26 +106,29 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
-    final String deviceId = params[deviceIdParam] as String? ?? '';
-    final String projectRootStr = params[projectRootParam] as String? ?? '';
+    final String deviceId = params.optionalField<String>(deviceIdParam, defaultValue: '');
+    final String projectRootStr = params.optionalField<String>(projectRootParam, defaultValue: '');
     return isSupportedForProject(deviceId: deviceId, projectRoot: Uri.parse(projectRootStr));
   }
 
   Future<bool> _launchAppRpc(Map<String, Object?> params) async {
-    if (params case {
-      debuggingOptionsParam: final Map<String, Object?> optionsMap,
-      deviceIdParam: final String deviceId,
-      executableUriParam: final String executableUriStr,
-    }) {
-      final Uri executableUri = _parseExecutableUri(executableUriStr);
-      final ExtensionDebuggingOptions debuggingOptions = _parseDebuggingOptions(optionsMap);
-      return launchApp(
-        debuggingOptions: debuggingOptions,
-        deviceId: deviceId,
-        executableUri: executableUri,
-      );
+    final String deviceId;
+    final String executableUriStr;
+    final Map<String, Object?> optionsMap;
+    try {
+      deviceId = params.requiredField<String>(deviceIdParam);
+      executableUriStr = params.requiredField<String>(executableUriParam);
+      optionsMap = params.requiredField<Map<String, Object?>>(debuggingOptionsParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
     }
-    throw RpcException.invalidParams('Invalid or missing parameters for $launchAppMethod.');
+    final Uri executableUri = _parseExecutableUri(executableUriStr);
+    final ExtensionDebuggingOptions debuggingOptions = _parseDebuggingOptions(optionsMap);
+    return launchApp(
+      debuggingOptions: debuggingOptions,
+      deviceId: deviceId,
+      executableUri: executableUri,
+    );
   }
 
   static Uri _parseExecutableUri(String executableUriStr) {
@@ -149,17 +152,23 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<Map<String, Object?>> _getVmServiceUriRpc(Map<String, Object?> params) async {
-    if (params case {deviceIdParam: final String deviceId}) {
-      final Uri? uri = await getVmServiceUri(deviceId: deviceId);
-      return <String, Object?>{vmServiceUriKey: uri?.toString()};
+    final String deviceId;
+    try {
+      deviceId = params.requiredField<String>(deviceIdParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
     }
-    throw RpcException.invalidParams('Invalid or missing parameters for $getVmServiceUriMethod.');
+    final Uri? uri = await getVmServiceUri(deviceId: deviceId);
+    return <String, Object?>{vmServiceUriKey: uri?.toString()};
   }
 
   Future<bool> _stopAppRpc(Map<String, Object?> params) async {
-    if (params case {deviceIdParam: final String deviceId}) {
-      return stopApp(deviceId: deviceId);
+    final String deviceId;
+    try {
+      deviceId = params.requiredField<String>(deviceIdParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
     }
-    throw RpcException.invalidParams('Invalid or missing parameters for $stopAppMethod.');
+    return stopApp(deviceId: deviceId);
   }
 }

@@ -12,6 +12,7 @@ library flutter_tools_extension;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 
 export 'src/build.dart';
+export 'src/clean.dart';
 export 'src/config.dart';
 export 'src/device.dart';
 export 'src/diagnostics.dart';
