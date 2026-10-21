@@ -458,13 +458,15 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
 ///
-/// The widget an entry builds can be a [Positioned], in which case the entry is
-/// laid out and placed the way a positioned child of a [Stack] would be. See
-/// [Positioned] for the restrictions that apply. An entry that is not
-/// positioned is given the size of the overlay and aligned to
-/// [AlignmentDirectional.topStart]; unlike [Stack.alignment], this is not
-/// configurable, and unlike [Stack], the overlay does not size itself to its
-/// entries.
+/// The widget an entry builds, or that [OverlayPortal] shows on this overlay,
+/// can be a [Positioned], in which case it is laid out and placed the way a
+/// positioned child of a [Stack] would be. See [Positioned] for the
+/// restrictions that apply. Where such a child leaves an axis unspecified, it
+/// is aligned on that axis as if [Stack.alignment] were
+/// [AlignmentDirectional.topStart] — this is not configurable. Children that
+/// are not positioned normally fill the overlay, as the children of a [Stack]
+/// with [StackFit.expand] do. See [OverlayEntry.canSizeOverlay] and
+/// [alwaysSizeToContent] for when a child sizes the overlay instead.
 ///
 /// For widgets drawn in an [OverlayEntry], do not assume that the size of the
 /// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
@@ -485,8 +487,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 ///  * [MaterialApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [CupertinoApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [Stack], which allows directly displaying a stack of widgets.
-///  * [Positioned], which an entry can be wrapped in to position it within the
-///    overlay, the same way it positions a child of a [Stack].
+///  * [Positioned], which the widget an entry builds can be, to position it
+///    within the overlay the same way it positions a child of a [Stack].
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
   ///

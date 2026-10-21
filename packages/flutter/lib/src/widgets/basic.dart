@@ -4874,18 +4874,19 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 /// A [Positioned] widget must be inside a [Stack], or inside the widget
 /// subtree that an [Overlay] lays out: the widget returned by
-/// [OverlayEntry.builder], [OverlayPortal.overlayChildBuilder] or the builder
-/// passed to [OverlayPortal.overlayChildLayoutBuilder]. Both are laid out with
-/// the stack layout algorithm (see [RenderStack]). In either case, the path
-/// from the [Positioned] up to that boundary must not contain any
-/// [RenderObjectWidget]s; widgets that build other widgets rather than render
-/// anything themselves, such as [StatelessWidget]s, [StatefulWidget]s and
-/// [InheritedWidget]s, are fine.
+/// [OverlayEntry.builder], by [OverlayPortal.overlayChildBuilder] or by the
+/// builder passed to [OverlayPortal.overlayChildLayoutBuilder]. A [Stack] and
+/// an [Overlay] both lay their children out with the stack layout algorithm
+/// (see [RenderStack]). In either case, the path from the [Positioned] up to
+/// that boundary must contain only widgets that build other widgets rather
+/// than render anything themselves, such as [StatelessWidget]s,
+/// [StatefulWidget]s and [InheritedWidget]s; it must not contain
+/// [RenderObjectWidget]s or other [ParentDataWidget]s (such as [Expanded]).
 ///
 /// For a [Stack], the boundary is the [Stack] itself. For an [Overlay], it is
 /// the widget the builder returns, which is itself on that path and so must be
 /// the [Positioned] or something that builds it, rather than a
-/// [RenderObjectWidget].
+/// [RenderObjectWidget] or another [ParentDataWidget].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EgtPleVwxBQ}
 ///
@@ -5152,18 +5153,20 @@ class Positioned extends ParentDataWidget<StackParentData> {
 ///
 /// A [PositionedDirectional] widget must be inside a [Stack], or inside the
 /// widget subtree that an [Overlay] lays out: the widget returned by
-/// [OverlayEntry.builder], [OverlayPortal.overlayChildBuilder] or the builder
-/// passed to [OverlayPortal.overlayChildLayoutBuilder]. Both are laid out with
-/// the stack layout algorithm (see [RenderStack]). In either case, the path
-/// from the [PositionedDirectional] up to that boundary must not contain any
-/// [RenderObjectWidget]s; widgets that build other widgets rather than render
-/// anything themselves, such as [StatelessWidget]s, [StatefulWidget]s and
-/// [InheritedWidget]s, are fine.
+/// [OverlayEntry.builder], by [OverlayPortal.overlayChildBuilder] or by the
+/// builder passed to [OverlayPortal.overlayChildLayoutBuilder]. A [Stack] and
+/// an [Overlay] both lay their children out with the stack layout algorithm
+/// (see [RenderStack]). In either case, the path from the
+/// [PositionedDirectional] up to that boundary must contain only widgets that
+/// build other widgets rather than render anything themselves, such as
+/// [StatelessWidget]s, [StatefulWidget]s and [InheritedWidget]s; it must not
+/// contain [RenderObjectWidget]s or other [ParentDataWidget]s (such as
+/// [Expanded]).
 ///
 /// For a [Stack], the boundary is the [Stack] itself. For an [Overlay], it is
 /// the widget the builder returns, which is itself on that path and so must be
 /// the [PositionedDirectional] or something that builds it, rather than a
-/// [RenderObjectWidget].
+/// [RenderObjectWidget] or another [ParentDataWidget].
 ///
 /// If a widget is wrapped in a [PositionedDirectional], then it is a
 /// _positioned_ widget in its [Stack] or [Overlay]. If the [top] property is
