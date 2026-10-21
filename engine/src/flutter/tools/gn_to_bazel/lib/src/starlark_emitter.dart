@@ -440,6 +440,20 @@ final class _Emitter {
           continue;
         }
         rule.scalars['target_compatible_with'] = compatibility;
+        // Items under a condition the target's own implies (a file-level
+        // list defined in the same `if (enable_unittests)` block as the
+        // target that reads it) are unconditional within the target, which
+        // exists nowhere else: no select() for them -- and a macro that
+        // inspects the list in Starlark gets a list.
+        for (final _ListAttribute list in rule.lists.values) {
+          final implied = <Condition>[
+            for (final Condition c in list.conditional.keys)
+              if (target.condition.and(c) == target.condition) c,
+          ];
+          for (final c in implied) {
+            list.always.addAll(list.conditional.remove(c)!);
+          }
+        }
       }
     }
   }
@@ -3391,6 +3405,35 @@ final class _Emitter {
     out.write(parts.join(' + '));
   }
 
+  /// A select() branch's items: list constants (FLUTTER_CFLAGS_OBJC under
+  /// test_enable_metal) stand as themselves, joined by `+` with the list
+  /// literals of the elements around them, as [_renderList] lays out an
+  /// attribute; a constant's comment has no place in the expression.
+  static String _renderBranch(List<_Item> items, {required int indent}) {
+    if (!items.any((_Item item) => !item.quoted && !item.expression)) {
+      return _renderItems(items, indent: indent);
+    }
+    final parts = <String>[];
+    final elements = <_Item>[];
+    void flush() {
+      if (elements.isNotEmpty) {
+        parts.add(_renderItems(elements, indent: indent));
+        elements.clear();
+      }
+    }
+
+    for (final item in items) {
+      if (!item.quoted && !item.expression) {
+        flush();
+        parts.add(item.text);
+      } else {
+        elements.add(item);
+      }
+    }
+    flush();
+    return parts.join(' + ');
+  }
+
   /// buildifier's order for string lists: plain names, then `:local`, then
   /// `//absolute`, then `@external`; within a group, the strings compared
   /// piecewise after splitting on `.` and `:`.
@@ -3451,7 +3494,7 @@ final class _Emitter {
       GnLocation('$gnPackage/BUILD.gn', 0, 0),
       () => 'on ${rule.kind} ${rule.name}',
     );
-    final String branch = _renderItems(items, indent: 8);
+    final String branch = _renderBranch(items, indent: 8);
     final out = StringBuffer('select({\n');
     for (final String setting in keys.settings) {
       out.writeln('        "$setting": ${keys.negated ? '[]' : branch},');

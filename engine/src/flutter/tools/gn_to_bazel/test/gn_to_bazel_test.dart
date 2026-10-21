@@ -2667,6 +2667,66 @@ if (is_linux) {
       );
     });
 
+    test("items under a condition the target's own implies are unconditional", () async {
+      // lib/ui/fixtures/shaders: a file-level list defined in the same
+      // `if (enable_unittests)` block as the target that reads it. The
+      // target is incompatible elsewhere; within it the items always hold,
+      // and a macro that inspects the list gets a list, not a select().
+      final String output = await convert('''
+if (enable_unittests) {
+  test_sources = [ "a_test.cc", "b_test.cc" ]
+  source_set("x") {
+    sources = test_sources
+    if (is_wasm) {
+      sources += [ "wasm.cc" ]
+    }
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains(
+          '    srcs = [\n'
+          '        "a_test.cc",  # enable_unittests\n'
+          '        "b_test.cc",  # enable_unittests\n'
+          '    ] + select({\n'
+          '        "@platforms//os:emscripten": [\n'
+          '            "wasm.cc",  # is_wasm\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+      expect(output, contains('"//engine/src/flutter/testing:unittests_enabled": [],'));
+    });
+
+    test('list constants in a select() branch stand as themselves', () async {
+      // testing's suites: cflags_objc = flutter_cflags_objc under
+      // test_enable_metal -- a list, joined to the branch with `+`.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (test_enable_metal) {
+    cflags_objc = flutter_cflags_objc
+    cflags_objcc = flutter_cflags_objcc
+    cflags = [ "-fobjc-weak" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains(
+          '    copts = CHROMIUM_CODE_COPTS + select({\n'
+          '        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC + FLUTTER_CFLAGS_OBJCC + [\n'
+          '            "-fobjc-weak",  # test_enable_metal\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+      expect(output, contains('"FLUTTER_CFLAGS_OBJC", "FLUTTER_CFLAGS_OBJCC"'));
+    });
+
     test('renders a scalar with several cases as select()', () async {
       // metal_version as impeller/renderer writes it (an else-if chain over
       // the OS predicates, undefined elsewhere); vulkan_language_version
