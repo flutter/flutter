@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show json;
-import 'dart:io' show sleep, stdout;
+import 'dart:convert' show JsonEncoder, json;
+import 'dart:io' show File, sleep, stdout;
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
@@ -220,6 +220,81 @@ Future<void> runDemos(
   }
 }
 
+/// Summarizes how well the Impeller pipelines created up front (warmed) covered
+/// the draws made so far, as reported by `_flutter.getPipelineUsage`.
+///
+/// Returns no metrics, rather than failing the benchmark, if pipeline usage is
+/// unavailable, for example because the app is not rendering with Impeller.
+Future<Map<String, Object?>> pipelineWarmupMetrics(FlutterDriver driver) async {
+  try {
+    final Map<String, Object?>? views = (await driver.serviceClient.callMethod(
+      '_flutter.listViews',
+    )).json;
+    if (views case {'views': [{'id': final String viewId}, ...]}) {
+      final Map<String, Object?>? usage = (await driver.serviceClient.callMethod(
+        '_flutter.getPipelineUsage',
+        args: <String, Object?>{'viewId': viewId},
+      )).json;
+      if (usage case {'Pipelines': final List<Object?> pipelines}) {
+        return _summarizePipelineUsage(pipelines);
+      }
+    }
+    throw const FormatException('Unexpected response from the Flutter view.');
+  } on Exception catch (error) {
+    stdout.writeln('Not reporting pipeline warmup metrics: $error');
+    return const <String, Object?>{};
+  }
+}
+
+/// The warmup metrics for the `Pipelines` of a `_flutter.getPipelineUsage`
+/// response. Also logs the pipelines that were created lazily, to help track
+/// down regressions.
+Map<String, Object?> _summarizePipelineUsage(List<Object?> pipelines) {
+  var totalDraws = 0;
+  var warmedDraws = 0;
+  var warmedNeverDrawn = 0;
+  final lazyPipelines = <String>[];
+  for (final pipeline in pipelines) {
+    if (pipeline case {
+      'label': final String label,
+      'constants': final List<Object?> constants,
+      'count': final int count,
+      'warmed': final bool warmed,
+    }) {
+      totalDraws += count;
+      if (!warmed) {
+        final name = constants.isEmpty ? label : '$label $constants';
+        lazyPipelines.add('$name: $count draws');
+      } else if (count == 0) {
+        warmedNeverDrawn += 1;
+      } else {
+        warmedDraws += count;
+      }
+    } else {
+      throw FormatException('Unexpected pipeline usage entry: $pipeline');
+    }
+  }
+  if (totalDraws == 0) {
+    throw const FormatException('No pipeline draws were recorded.');
+  }
+
+  final double warmedDrawPercent = warmedDraws * 100 / totalDraws;
+  stdout.writeln(
+    'Impeller pipeline warmup: ${warmedDrawPercent.toStringAsFixed(2)}% of $totalDraws draws '
+    'used a warmed pipeline, $warmedNeverDrawn warmed pipelines were never drawn with, and '
+    '${lazyPipelines.length} pipelines were created lazily:',
+  );
+  lazyPipelines.sort();
+  for (final pipeline in lazyPipelines) {
+    stdout.writeln('  $pipeline');
+  }
+  return <String, Object?>{
+    'warmed_draw_percent': warmedDrawPercent,
+    'lazy_variants': lazyPipelines.length,
+    'warmed_never_drawn_variants': warmedNeverDrawn,
+  };
+}
+
 void main([List<String> args = const <String>[]]) {
   group('Flutter Gallery transitions', () {
     late FlutterDriver driver;
@@ -335,11 +410,20 @@ void main([List<String> args = const <String>[]]) {
       );
 
       final summary = TimelineSummary.summarize(timeline);
-      await summary.writeTimelineToFile('transitions', pretty: true);
+      // The summary is written once every demo has run, so that it can include
+      // the pipeline warmup metrics.
+      await summary.writeTimelineToFile('transitions', pretty: true, includeSummary: false);
 
       // Execute the remaining tests.
       final unprofiledDemos = Set<String>.from(_allDemos)..removeAll(_profiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
+
+      final summaryJson = <String, Object?>{
+        ...summary.summaryJson,
+        ...await pipelineWarmupMetrics(driver),
+      };
+      await File('$testOutputsDirectory/transitions.timeline_summary.json')
+          .writeAsString(const JsonEncoder.withIndent('  ').convert(summaryJson));
     }, timeout: Timeout.none);
   });
 }

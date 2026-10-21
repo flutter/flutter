@@ -167,6 +167,10 @@ class ShellTest : public FixtureTest {
                                      int64_t view_id,
                                      const flutter::LayerTree& tree);
 
+  static void PopulatePipelineUsage(
+      rapidjson::Document* response,
+      const impeller::PipelineLibrary& pipeline_library);
+
  private:
   ThreadHost thread_host_;
 

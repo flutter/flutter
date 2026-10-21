@@ -41,37 +41,28 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibrary::GetPipeline(
 void PipelineLibrary::LogPipelineCreation(const PipelineDescriptor& p) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
-  WriterLock lock(pipeline_use_counts_mutex_);
-  if (!pipeline_use_counts_.contains(p)) {
-    pipeline_use_counts_[p] = 0;
-  }
+  WriterLock lock(pipeline_usage_mutex_);
+  pipeline_usage_[p].warmed = true;
 #endif
 }
 
 void PipelineLibrary::LogPipelineUsage(const PipelineDescriptor& p) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
-  WriterLock lock(pipeline_use_counts_mutex_);
-  ++pipeline_use_counts_[p];
+  WriterLock lock(pipeline_usage_mutex_);
+  ++pipeline_usage_[p].count;
 #endif
 }
 
-std::unordered_map<PipelineDescriptor,
-                   int,
-                   ComparableHash<PipelineDescriptor>,
-                   ComparableEqual<PipelineDescriptor>>
-PipelineLibrary::GetPipelineUseCounts() const {
-  std::unordered_map<PipelineDescriptor, int,
-                     ComparableHash<PipelineDescriptor>,
-                     ComparableEqual<PipelineDescriptor>>
-      counts;
+PipelineUsageMap PipelineLibrary::GetPipelineUsage() const {
+  PipelineUsageMap usage;
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
-  ReaderLock lock(pipeline_use_counts_mutex_);
-  counts = pipeline_use_counts_;
+  ReaderLock lock(pipeline_usage_mutex_);
+  usage = pipeline_usage_;
 #endif
-  return counts;
+  return usage;
 }
 
 void PipelineLibrary::PerformEagerly(const PipelineDescriptor& descriptor) {}

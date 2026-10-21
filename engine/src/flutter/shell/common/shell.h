@@ -842,6 +842,14 @@ class Shell final : public PlatformView::Delegate,
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
 
+  // Adds a "Pipelines" array to a `_flutter.getPipelineUsage` response, with
+  // one entry per pipeline in `pipeline_library`: its label, its
+  // specialization constants, the number of times it was bound, and whether
+  // it was warmed.
+  static void PopulatePipelineUsage(
+      rapidjson::Document* response,
+      const impeller::PipelineLibrary& pipeline_library);
+
   // Send a system font change notification.
   void SendFontChangeNotification();
 

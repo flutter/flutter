@@ -314,6 +314,12 @@ void ShellTest::StorePersistentCache(PersistentCache* cache,
   cache->store(key, value);
 }
 
+void ShellTest::PopulatePipelineUsage(
+    rapidjson::Document* response,
+    const impeller::PipelineLibrary& pipeline_library) {
+  Shell::PopulatePipelineUsage(response, pipeline_library);
+}
+
 void ShellTest::OnServiceProtocol(
     Shell* shell,
     ServiceProtocolEnum some_protocol,

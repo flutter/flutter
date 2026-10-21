@@ -151,4 +151,46 @@ void main() {
       expect(result.data!['illegal_refresh_rate_frame_count'], 10);
     },
   );
+
+  test('reports Impeller pipeline warmup metrics when they are in the data', () async {
+    final fakeData = <String, dynamic>{
+      'frame_count': 5,
+      'average_frame_build_time_millis': 0.1,
+      'worst_frame_build_time_millis': 0.1,
+      '90th_percentile_frame_build_time_millis': 0.1,
+      '99th_percentile_frame_build_time_millis': 0.1,
+      'average_frame_rasterizer_time_millis': 0.1,
+      'worst_frame_rasterizer_time_millis': 0.1,
+      '90th_percentile_frame_rasterizer_time_millis': 0.1,
+      '99th_percentile_frame_rasterizer_time_millis': 0.1,
+      'old_gen_gc_count': 1,
+      'total_ui_gc_time': 1,
+      'average_vsync_transitions_missed': 1,
+      '90th_percentile_vsync_transitions_missed': 1,
+      '99th_percentile_vsync_transitions_missed': 1,
+      'warmed_draw_percent': 92.65,
+      'lazy_variants': 20,
+      'warmed_never_drawn_variants': 3,
+    };
+    const resultFileName = 'fake_result';
+    void driveCallback(List<String> arguments) {
+      final resultFile = File('$perfTestOutputPath/$resultFileName.json')
+        ..createSync(recursive: true);
+      resultFile.writeAsStringSync(json.encode(fakeData));
+    }
+
+    final perfTest = PerfTest(
+      testDirectory.absolute.path,
+      testTarget.absolute.path,
+      'test_file',
+      resultFilename: resultFileName,
+      device: device,
+      flutterDriveCallback: driveCallback,
+    );
+    final TaskResult result = await perfTest.run();
+    expect(
+      result.benchmarkScoreKeys,
+      containsAll(<String>['warmed_draw_percent', 'lazy_variants', 'warmed_never_drawn_variants']),
+    );
+  });
 }

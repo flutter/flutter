@@ -47,6 +47,7 @@
 #include "fml/mapping.h"
 #include "gmock/gmock.h"
 #include "impeller/core/runtime_types.h"
+#include "impeller/renderer/pipeline_library.h"
 #include "lib/ui/semantics/semantics_node.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
@@ -5210,6 +5211,87 @@ TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
   ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
                                                 *min_height));
   DestroyShell(std::move(shell), task_runners);
+}
+
+namespace {
+class StubPipelineLibrary final : public impeller::PipelineLibrary {
+ public:
+  bool IsValid() const override { return true; }
+  impeller::PipelineFuture<impeller::PipelineDescriptor> GetPipeline(
+      impeller::PipelineDescriptor descriptor,
+      bool async,
+      bool threadsafe) override {
+    return {descriptor, {}};
+  }
+  impeller::PipelineFuture<impeller::ComputePipelineDescriptor> GetPipeline(
+      impeller::ComputePipelineDescriptor descriptor,
+      bool async) override {
+    return {descriptor, {}};
+  }
+  bool HasPipeline(const impeller::PipelineDescriptor& descriptor) override {
+    return false;
+  }
+  void RemovePipelinesWithEntryPoint(
+      std::shared_ptr<const impeller::ShaderFunction> function) override {}
+};
+}  // namespace
+
+TEST_F(ShellTest, PopulatePipelineUsageReportsEachPipeline) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \
+    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE
+  GTEST_SKIP() << "Pipeline usage logging is only in debug and profile builds.";
+#endif
+  StubPipelineLibrary library;
+
+  impeller::PipelineDescriptor warmed_solid;
+  warmed_solid.SetLabel("SolidFill Pipeline");
+  library.LogPipelineCreation(warmed_solid);
+  library.LogPipelineUsage(warmed_solid);
+  library.LogPipelineUsage(warmed_solid);
+
+  impeller::PipelineDescriptor warmed_unused;
+  warmed_unused.SetLabel("Clip Pipeline");
+  library.LogPipelineCreation(warmed_unused);
+
+  impeller::PipelineDescriptor lazy_blend;
+  lazy_blend.SetLabel("PorterDuffBlend Pipeline V#1");
+  lazy_blend.SetSpecializationConstants({1, 0, 1});
+  library.LogPipelineUsage(lazy_blend);
+
+  // Distinct pipelines that share a label are still reported separately.
+  impeller::PipelineDescriptor runtime_a;
+  runtime_a.SetLabel("Runtime Stage");
+  runtime_a.SetSampleCount(impeller::SampleCount::kCount1);
+  library.LogPipelineUsage(runtime_a);
+  library.LogPipelineUsage(runtime_a);
+
+  impeller::PipelineDescriptor runtime_b;
+  runtime_b.SetLabel("Runtime Stage");
+  runtime_b.SetSampleCount(impeller::SampleCount::kCount4);
+  library.LogPipelineUsage(runtime_b);
+
+  rapidjson::Document response;
+  response.SetObject();
+  ShellTest::PopulatePipelineUsage(&response, library);
+
+  ASSERT_TRUE(response.HasMember("Pipelines"));
+  ASSERT_TRUE(response["Pipelines"].IsArray());
+  // The entries are in no particular order, so compare them as JSON strings.
+  std::vector<std::string> pipelines;
+  for (const auto& pipeline : response["Pipelines"].GetArray()) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    pipeline.Accept(writer);
+    pipelines.emplace_back(buffer.GetString());
+  }
+  EXPECT_THAT(
+      pipelines,
+      ::testing::UnorderedElementsAre(
+          R"({"label":"SolidFill Pipeline","constants":[],"count":2,"warmed":true})",
+          R"({"label":"Clip Pipeline","constants":[],"count":0,"warmed":true})",
+          R"({"label":"PorterDuffBlend Pipeline V#1","constants":[1.0,0.0,1.0],"count":1,"warmed":false})",
+          R"({"label":"Runtime Stage","constants":[],"count":2,"warmed":false})",
+          R"({"label":"Runtime Stage","constants":[],"count":1,"warmed":false})"));
 }
 
 }  // namespace testing
