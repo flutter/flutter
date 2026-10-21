@@ -343,7 +343,16 @@ def impeller_shaders(
     # What a shader may #include beside itself.
     includes = native.glob(["**/*.glsl"], allow_empty = True)
 
+    # shaders.gni: "wasm builds only use GLES3, no need to build GLES2
+    # shaders" -- the GLES 2 backend's targets are incompatible with the web
+    # platform and the group lists them everywhere else.
+    not_web = select({
+        "@platforms//os:emscripten": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    })
+
     backends = []
+    gles2_backends = []
     for backend in _BACKENDS:
         if backend.opengles and not enable_opengles:
             continue
@@ -351,6 +360,9 @@ def impeller_shaders(
         backend_shaders = [shader for shader in shaders if shader not in exclusions]
         tag = backend.tag + "_" + name
         prefix = backend.subdir + "/" if backend.subdir else ""
+        compatible_with = target_compatible_with
+        if backend.tag == "gles":
+            compatible_with = (target_compatible_with or []) + not_web
 
         # GN's {{source_file_part}}.
         stems = [prefix + shader.rsplit("/", 1)[-1] for shader in backend_shaders]
@@ -373,7 +385,7 @@ def impeller_shaders(
             entry_point_prefix = entry_point_prefix,
             mnemonic = backend.mnemonic,
             testonly = testonly,
-            target_compatible_with = target_compatible_with,
+            target_compatible_with = compatible_with,
             visibility = ["//visibility:private"],
         )
         shader_archive(
@@ -382,7 +394,7 @@ def impeller_shaders(
             out = "genlib_" + tag + ".shar",
             entry_point_prefix = entry_point_prefix,
             testonly = testonly,
-            target_compatible_with = target_compatible_with,
+            target_compatible_with = compatible_with,
             visibility = ["//visibility:private"],
         )
         embed = backend.embed % library_name
@@ -393,7 +405,7 @@ def impeller_shaders(
             header = embed + ".h",
             source = embed + ".cc",
             testonly = testonly,
-            target_compatible_with = target_compatible_with,
+            target_compatible_with = compatible_with,
             visibility = ["//visibility:private"],
         )
 
@@ -408,7 +420,7 @@ def impeller_shaders(
             local_defines = FLUTTER_LOCAL_DEFINES,
             deps = ["//engine/src/flutter:config"],
             testonly = testonly,
-            target_compatible_with = target_compatible_with,
+            target_compatible_with = compatible_with,
             alwayslink = True,
         )
 
@@ -425,20 +437,26 @@ def impeller_shaders(
                 "//engine/src/flutter/impeller/core",
             ],
             testonly = testonly,
-            target_compatible_with = target_compatible_with,
+            target_compatible_with = compatible_with,
             alwayslink = True,
         )
         cc_library(
             name = tag,
             deps = [":embed_" + tag] + ([":reflect_" + tag] if backend.reflect else []),
             testonly = testonly,
-            target_compatible_with = target_compatible_with,
+            target_compatible_with = compatible_with,
         )
-        backends.append(":" + tag)
+        if backend.tag == "gles":
+            gles2_backends.append(":" + tag)
+        else:
+            backends.append(":" + tag)
 
     cc_library(
         name = name,
-        deps = backends,
+        deps = backends + select({
+            "@platforms//os:emscripten": [],
+            "//conditions:default": gles2_backends,
+        }),
         target_compatible_with = target_compatible_with,
         **kwargs
     )

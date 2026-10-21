@@ -138,12 +138,31 @@ final class _ListAttribute {
   /// -- or in the unconditional part, which holds wherever the condition
   /// does (GN lists impeller_unittests' geometry_unittests outright and
   /// again under a backend; GN's deps are a set, Bazel's reject a duplicate).
+  /// An unconditional item, likewise, takes the place of its conditional
+  /// copies (fml's Dart API headers, listed by GN outside the web build and
+  /// by the manifest everywhere).
   void addUnique(Condition condition, _Item item) {
-    final List<_Item> bucket = condition == Condition.always
-        ? always
-        : conditional.putIfAbsent(condition, () => <_Item>[]);
-    if (bucket.any((_Item existing) => existing.text == item.text) ||
-        (bucket != always && always.any((_Item existing) => existing.text == item.text))) {
+    bool same(_Item existing) => existing.text == item.text;
+    if (always.any(same)) {
+      return;
+    }
+    if (condition == Condition.always) {
+      for (final Condition when in conditional.keys.toList()) {
+        final List<_Item> items = conditional[when]!;
+        items.removeWhere(same);
+        if (items.isEmpty) {
+          conditional.remove(when);
+        }
+      }
+      sequence.removeWhere(
+        ((Condition, _Item) entry) => entry.$1 != Condition.always && same(entry.$2),
+      );
+      always.add(item);
+      sequence.add((condition, item));
+      return;
+    }
+    final List<_Item> bucket = conditional.putIfAbsent(condition, () => <_Item>[]);
+    if (bucket.any(same)) {
       return;
     }
     bucket.add(item);
