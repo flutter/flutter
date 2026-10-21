@@ -9,7 +9,25 @@
 # Bazel builds from the same trees (@vulkan-headers, @spirv-tools, ...) are
 # separate, over the subdirectories.
 
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
+
+# The Vulkan headers under the engine's root-relative spelling: the Android
+# swapchain includes
+# "third_party/vulkan-deps/vulkan-headers/src/include/vulkan/vulkan_enums.hpp"
+# through //flutter:config's `include_dirs = [ ".." ]` (GN's //flutter as an
+# include root), where the Linux code includes <vulkan/vulkan.h> through
+# @vulkan-headers' own include directory. A dependency on @vulkan-headers
+# brings this view along (the converter's rootIncludeViews).
+cc_library(
+    name = "root_includes",
+    hdrs = glob([
+        "vulkan-headers/src/include/**/*.h",
+        "vulkan-headers/src/include/**/*.hpp",
+    ]),
+    include_prefix = "third_party/vulkan-deps",
+)
 
 filegroup(
     name = "build_tree",

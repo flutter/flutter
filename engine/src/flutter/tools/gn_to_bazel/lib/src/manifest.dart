@@ -23,6 +23,7 @@ final class ConvertedFile {
     this.skip = const <String, String>{},
     this.appendix,
     this.implicitDeps = const <String>[],
+    this.condition,
   });
 
   /// The GN directory (`//flutter/fml`); the input is its `BUILD.gn`.
@@ -45,6 +46,13 @@ final class ConvertedFile {
   /// do not carry its headers along its dependency edges (Skia's) gets them
   /// from one library of all its headers.
   final List<String> implicitDeps;
+
+  /// The GN variable under which GN reaches the file at all, when no `if`
+  /// of the file's own says so: impeller's Android toolkit, which only an
+  /// `if (is_android)` dependency names. The file is evaluated as if inside
+  /// that block, so its targets are incompatible elsewhere and a wildcard
+  /// build of the tree skips them.
+  final String? condition;
 }
 
 const List<ConvertedFile> convertedFiles = <ConvertedFile>[
@@ -490,6 +498,17 @@ filegroup(
   ConvertedFile('//flutter/impeller/toolkit/interop/backend'),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/gles'),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/vulkan'),
+  // The Android toolkit (NDK surface control, hardware buffers, the
+  // choreographer), which the Vulkan backend and the Android shell reach
+  // under is_android; its suite is an Android executable and an APK.
+  ConvertedFile(
+    '//flutter/impeller/toolkit/android',
+    condition: 'is_android',
+    skip: <String, String>{
+      'apk_unittests': 'an APK of the suite (native_activity_apk): the Android test phase',
+      'unittests': 'an Android executable under output_name: the Android test phase',
+    },
+  ),
   ConvertedFile('//flutter/impeller/playground/image'),
   ConvertedFile('//flutter/impeller/playground/imgui'),
   ConvertedFile('//flutter/impeller/playground'),
@@ -660,7 +679,19 @@ selects.config_setting_group(
   // Impeller's rendering backends (what //flutter/impeller's group and
   // //flutter/flow need) and their test suites, on the playground.
   ConvertedFile('//flutter/impeller/renderer/backend/gles'),
-  ConvertedFile('//flutter/impeller/renderer/backend/vulkan'),
+  ConvertedFile(
+    '//flutter/impeller/renderer/backend/vulkan',
+    skip: <String, String>{
+      // Under is_android: the suite as an APK (testing/android's
+      // native_activity_apk template, which the converter does not know);
+      // the Android test phase's.
+      'vulkan_android_apk_unittests':
+          'an APK of the suite (native_activity_apk): the Android test phase',
+      // The same suite as an Android executable, under an output_name the
+      // converter has no counterpart for (a cc_binary is named by its file).
+      'vulkan_android_unittests': 'an Android executable under output_name: the Android test phase',
+    },
+  ),
   ConvertedFile('//flutter/impeller/renderer/backend'),
   ConvertedFile('//flutter/flow'),
   // The Dart bindings library (engine-owned third_party), on the way to
@@ -1077,6 +1108,25 @@ cc_library(
         "src/**/*.c",
         "src/**/*.h",
     ]),
+)
+''',
+  ),
+  // Google's cpu_features (the src/ subtree is the synced repository, the
+  // GN file the engine's): the NDK-compatible cpu-features.c that libwebp
+  // reads on Android. Its public headers sit under src/include, the
+  // compatibility header under src/ndk_compat, and the .inl files the
+  // implementations include beside them.
+  ConvertedFile(
+    '//flutter/third_party/cpu_features',
+    implicitDeps: <String>['@cpu_features//:cpu_features_headers'],
+    appendix: '''
+cc_library(
+    name = "cpu_features_headers",
+    hdrs = glob([
+        "src/include/**/*.h",
+        "src/ndk_compat/*.h",
+    ]),
+    textual_hdrs = glob(["src/src/*.inl"]),
 )
 ''',
   ),
