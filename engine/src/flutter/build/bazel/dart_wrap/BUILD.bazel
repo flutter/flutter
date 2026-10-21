@@ -134,15 +134,18 @@ _GN_ARGS = {
 
 gn_build(
     name = "dart_sdk",
-    # Executables and snapshots. The build-time tools are the host
-    # toolchain's (BUILD.gn): in the build root when the host's toolchain is
-    # the default, under clang_x64/ in the arm64 cross build. Named by base
-    # name either way (:gen_snapshot).
+    # Executables and snapshots. The build-time tools (analyze_snapshot,
+    # bootstrap_compile_platform, gen_snapshot_host: what the snapshot rules
+    # run) are the host toolchain's (BUILD.gn): in the build root when the
+    # host's toolchain is the default, under clang_x64/ in the arm64 cross
+    # build (out_paths). gen_snapshot is the target's own -- the binary
+    # artifacts.zip ships -- which in the host's build is the tool's file.
     outs = [
         "analyze_snapshot",
         "bootstrap_compile_platform.exe",
         "frontend_server_aot.dart.snapshot",
         "gen_snapshot",
+        "gen_snapshot_host",
     ],
     ar = "@clang_linux_x64//:bin/llvm-ar",
     # Dependencies the Bazel side builds itself (the facades depend on them).
@@ -165,17 +168,13 @@ gn_build(
     build_file = "BUILD.gn",
     gn_args = _GN_ARGS,
     ninja_target = "dart_wrap",
-    out_paths = ["frontend_server_aot.dart.snapshot"] + select({
-        "@platforms//cpu:aarch64": [
-            "clang_x64/analyze_snapshot",
-            "clang_x64/bootstrap_compile_platform.exe",
-            "clang_x64/gen_snapshot",
-        ],
-        "//conditions:default": [
-            "analyze_snapshot",
-            "bootstrap_compile_platform.exe",
-            "gen_snapshot",
-        ],
+    out_paths = select({
+        "@platforms//cpu:aarch64": {
+            "analyze_snapshot": "clang_x64/analyze_snapshot",
+            "bootstrap_compile_platform.exe": "clang_x64/bootstrap_compile_platform.exe",
+            "gen_snapshot_host": "clang_x64/gen_snapshot",
+        },
+        "//conditions:default": {"gen_snapshot_host": "gen_snapshot"},
     }),
     root_target_dir = "flutter/build/bazel/dart_wrap",
     # The GN source root: the engine's build configuration, the trees GN
