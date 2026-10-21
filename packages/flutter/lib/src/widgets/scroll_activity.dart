@@ -140,14 +140,18 @@ abstract class ScrollActivity {
   /// An activity that holds absolute scroll offsets, such as the target offset
   /// of an animation, must shift them by [correction] as well, otherwise its
   /// next update undoes the correction and the content visibly jumps by that
-  /// amount. Implementations must not change the scroll position from this
-  /// method.
+  /// amount.
+  ///
+  /// Implementations must not change the scroll offset or start another
+  /// activity from this method. An activity that needs to start another
+  /// activity in response to a correction can do so from [applyNewDimensions],
+  /// which is also called after every correction, once the new scroll extents
+  /// are known.
   ///
   /// The default implementation does nothing, which is correct for activities
   /// that operate on relative offsets, and for activities such as
   /// [BallisticScrollActivity] that restart from the corrected position in
-  /// [applyNewDimensions], which is also called after every correction, later
-  /// in the same layout and with the new scroll extents.
+  /// [applyNewDimensions].
   ///
   /// See also:
   ///
