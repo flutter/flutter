@@ -14,9 +14,12 @@ cc_library(
     name = "platform_view_android_delegate",
     srcs = ["platform_view_android_delegate.cc"],
     hdrs = ["platform_view_android_delegate.h"],
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/lib/ui
-    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/lib/ui
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -41,8 +44,12 @@ flutter_cc_test(
     srcs = ["platform_view_android_delegate_unittests.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-Wno-redundant-parens",  # from //flutter/testing:dart
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/testing:dart
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":platform_view_android_delegate",

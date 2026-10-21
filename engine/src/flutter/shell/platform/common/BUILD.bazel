@@ -164,6 +164,10 @@ cc_library(
 
 flutter_test_fixtures(
     name = "common_cpp_core_fixtures",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_cc_test(
@@ -174,6 +178,10 @@ flutter_cc_test(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":common_cpp_core",
         ":common_cpp_core_fixtures",
@@ -186,6 +194,10 @@ flutter_cc_test(
 
 flutter_test_fixtures(
     name = "common_cpp_fixtures",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_cc_test(
@@ -204,6 +216,10 @@ flutter_cc_test(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":common_cpp",
         ":common_cpp_fixtures",

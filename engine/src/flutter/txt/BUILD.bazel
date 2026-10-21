@@ -32,13 +32,22 @@ cc_library(
         "src/txt/paragraph_builder.cc",
         "src/txt/paragraph_style.cc",
         "src/txt/placeholder_run.cc",
-        "src/txt/platform_linux.cc",  # !(is_mac || is_ios) && !(is_android) && is_linux
         "src/txt/test_font_manager.cc",
         "src/txt/text_decoration.cc",
         "src/txt/text_shadow.cc",
         "src/txt/text_style.cc",
         "src/txt/typeface_font_asset_provider.cc",
-    ],
+    ] + select({
+        "@platforms//os:linux": [
+            "src/txt/platform_linux.cc",  # !(is_mac || is_ios) && !(is_android) && is_linux
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": [],
+        "//conditions:default": [
+            "src/txt/platform.cc",  # !(is_mac || is_ios) && !(is_android) && !(is_linux) && !(is_fuchsia) && !(is_win)
+        ],
+    }),
     hdrs = [
         "src/skia/paragraph_builder_skia.h",
         "src/skia/paragraph_skia.h",
@@ -75,7 +84,6 @@ cc_library(
         "//engine/src:include_root",
         "//engine/src/flutter/display_list",
         "//engine/src/flutter/fml",
-        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "@googletest//:gtest_prod",
         "@googletest_tree//:root_includes",
@@ -84,7 +92,18 @@ cc_library(
         "@icu",
         "@skia",
         "@skia//modules/skparagraph",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -94,6 +113,10 @@ flutter_test_fixtures(
         "third_party/fonts/NotoColorEmoji.ttf",
         "third_party/fonts/Roboto-Regular.ttf",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 cc_test(
@@ -115,6 +138,10 @@ cc_test(
         "benchmark",
         "manual",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":txt",
         ":txt_fixtures",
@@ -142,6 +169,10 @@ flutter_cc_test(
     ],
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":txt",
         ":txt_config",

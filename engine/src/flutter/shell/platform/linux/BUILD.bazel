@@ -4,6 +4,7 @@
 
 # Generated from //flutter/shell/platform/linux/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle", "zip_tree")
@@ -14,15 +15,19 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "linux",
-    data = [
-        ":publish_headers_linux",
-        "//engine/src/flutter/shell/platform/glfw:publish_headers_glfw",  # build_glfw_shell
-    ],
-    deps = [
-        ":flutter_linux_glfw",  # build_glfw_shell
-        ":flutter_linux_gtk",
-        "//engine/src/flutter/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",  # build_glfw_shell
-    ],
+    data = [":publish_headers_linux"] + select({
+        ":when_is_linux_and_is_host_toolchain": [
+            "//engine/src/flutter/shell/platform/glfw:publish_headers_glfw",  # build_glfw_shell
+        ],
+        "//conditions:default": [],
+    }),
+    deps = [":flutter_linux_gtk"] + select({
+        ":when_is_linux_and_is_host_toolchain": [
+            ":flutter_linux_glfw",  # build_glfw_shell
+            "//engine/src/flutter/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",  # build_glfw_shell
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # Temporary workaround for the issue describe in
@@ -39,6 +44,10 @@ cc_binary(
     name = "libflutter_linux_glfw.so",
     linkopts = ["-Wl,--no-fatal-warnings"],
     linkshared = True,
+    target_compatible_with = select({
+        ":when_is_linux_and_is_host_toolchain": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         "//engine/src/flutter:config",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
@@ -49,6 +58,19 @@ cc_binary(
 alias(
     name = "flutter_linux_glfw",
     actual = ":libflutter_linux_glfw.so",
+    target_compatible_with = select({
+        ":when_is_linux_and_is_host_toolchain": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# `is_linux && is_host_toolchain`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_linux_and_is_host_toolchain",
+    match_all = [
+        "@platforms//os:linux",
+        "//engine/src/flutter/build/bazel:host_toolchain",
+    ],
 )
 
 cc_library(
@@ -449,6 +471,114 @@ gn_copy(
     outputs = ["$root_out_dir/flutter_linux/{{source_file_part}}"],
 )
 
+# `full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_debug",
+    match_all = [
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_linux_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `full_target_platform_name == "linux-x64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_linux_x64_and_flutter_runtime_mode_debug",
+    match_all = [
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `full_target_platform_name == "linux-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_linux_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `full_target_platform_name == "linux-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_linux_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `full_target_platform_name == "linux-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_linux_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_linux_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_debug",
+    match_all = [
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `full_target_platform_name == "wasm-wasm" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_wasm_wasm",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
 zip_tree(
     name = "flutter_gtk_publish_headers_linux",
     srcs = [":publish_headers_linux"],
@@ -463,10 +593,18 @@ zip_bundle(
         "gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",
     },
     output = select({
-        "//engine/src/flutter/common:runtime_mode_debug": "linux-x64-debug/linux-x64-flutter-gtk.zip",
-        "//engine/src/flutter/common:runtime_mode_profile": "linux-x64-profile/linux-x64-flutter-gtk.zip",
-        "//engine/src/flutter/common:runtime_mode_release": "linux-x64-release/linux-x64-flutter-gtk.zip",
-        "//engine/src/flutter/common:runtime_mode_jit_release": "linux-x64-jit_release/linux-x64-flutter-gtk.zip",
+        ":when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_debug": "linux-arm64-debug/linux-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_profile": "linux-arm64-profile/linux-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_release": "linux-arm64-release/linux-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_jit_release": "linux-arm64-jit_release/linux-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_linux_x64_and_flutter_runtime_mode_debug": "linux-x64-debug/linux-x64-flutter-gtk.zip",
+        ":when_full_target_platform_name_linux_x64_and_flutter_runtime_mode_profile": "linux-x64-profile/linux-x64-flutter-gtk.zip",
+        ":when_full_target_platform_name_linux_x64_and_flutter_runtime_mode_release": "linux-x64-release/linux-x64-flutter-gtk.zip",
+        ":when_full_target_platform_name_linux_x64_and_flutter_runtime_mode_jit_release": "linux-x64-jit_release/linux-x64-flutter-gtk.zip",
+        ":when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_debug": "wasm-wasm-debug/wasm-wasm-flutter-gtk.zip",
+        ":when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_profile": "wasm-wasm-profile/wasm-wasm-flutter-gtk.zip",
+        ":when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_release": "wasm-wasm-release/wasm-wasm-flutter-gtk.zip",
+        ":when_full_target_platform_name_wasm_wasm_and_flutter_runtime_mode_jit_release": "wasm-wasm-jit_release/wasm-wasm-flutter-gtk.zip",
         "//conditions:default": None,
     }),
     trees = [":flutter_gtk_publish_headers_linux"],

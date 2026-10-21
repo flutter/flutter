@@ -213,6 +213,40 @@ sealed class Condition {
           denied[alternative.family] != null &&
           denied[alternative.family] != alternative.member;
     });
+    // The dual of the conjunction's last step: a conjunction beside the
+    // negation of one of its own terms loses that term (`a || (!a && b)` is
+    // `a || b`), beside one of its terms goes altogether (`a || (a && b)` is
+    // `a`), and one with every term denied beside it holds always (`(a &&
+    // b) || !a || !b`: a target defined in both branches of an `if` on a
+    // conjunction, skcms's arch() template).
+    for (var i = 0; i < terms.length; i++) {
+      final Condition term = terms[i];
+      if (term is! ConditionAnd) {
+        continue;
+      }
+      final others = <Condition>[...terms.sublist(0, i), ...terms.sublist(i + 1)];
+      if (term.terms.any(others.contains)) {
+        terms.removeAt(i--);
+        continue;
+      }
+      final List<Condition> remaining = term.terms
+          .where((Condition t) => !others.contains(t.negated))
+          .toList();
+      if (remaining.length != term.terms.length) {
+        if (remaining.isEmpty) {
+          return always;
+        }
+        final Condition reduced = conjunction(remaining);
+        if (others.contains(reduced.negated)) {
+          return always;
+        }
+        if (others.contains(reduced)) {
+          terms.removeAt(i--);
+          continue;
+        }
+        terms[i] = reduced;
+      }
+    }
     return switch (terms.length) {
       0 => never,
       1 => terms.single,
@@ -949,6 +983,9 @@ final class Assumptions {
 
   GnValue? operator [](String name) => _values[name];
 
+  /// The variables these assumptions fix (the build invariants among them).
+  Iterable<String> get names => _values.keys;
+
   /// These assumptions with [overrides] added or replaced.
   Assumptions withValues(Map<String, GnValue> overrides) =>
       Assumptions(<String, GnValue>{..._values, ...overrides});
@@ -1199,6 +1236,27 @@ GnTarget _merged(GnTarget first, GnTarget second, Condition condition, Condition
       isList: either.isList,
       forwarded: (x?.forwarded ?? true) && (y?.forwarded ?? true),
     );
+    if (x != null && y != null && either.isList) {
+      // An item both branches append the same way (the raw_ptr dependency
+      // skia_source_set adds in whichever branch of optional() runs) is in
+      // the list wherever either branch is: once, under their disjunction.
+      bool same(GnListItem p, GnListItem q) =>
+          p.value == q.value && p.assignment.condition == q.assignment.condition;
+      final List<GnListItem> xs = x.liveItems;
+      final List<GnListItem> ys = y.liveItems;
+      variable.assignments.addAll(
+        _under(
+          x,
+          a,
+          branchOf: (GnListItem p) => ys.any((GnListItem q) => same(p, q)) ? a.or(b) : a,
+        ),
+      );
+      variable.assignments.addAll(
+        _under(y, b, skip: (GnListItem q) => xs.any((GnListItem p) => same(p, q))),
+      );
+      merged.variables[name] = variable;
+      continue;
+    }
     if (x != null) {
       variable.assignments.addAll(_under(x, a));
     }
@@ -1228,22 +1286,37 @@ bool _sameValue(GnVariable a, GnVariable b) {
 /// [variable]'s effective assignments, each under its own condition and
 /// [branch]: a list's live items (an unconditional `=` having started it
 /// over), grouped as they were assigned, as `+=`; a scalar's cases as `=`.
-List<GnAssignment> _under(GnVariable variable, Condition branch) {
+/// A list item [skip] accepts is left out; [branchOf] names the branch of a
+/// list item that is not under [branch] (see [_merged]).
+List<GnAssignment> _under(
+  GnVariable variable,
+  Condition branch, {
+  Condition Function(GnListItem)? branchOf,
+  bool Function(GnListItem)? skip,
+}) {
   final result = <GnAssignment>[];
   if (variable.isList) {
-    final groups = <GnAssignment, List<int>>{};
+    final groups = <(GnAssignment, Condition), List<int>>{};
     for (final GnListItem item in variable.liveItems) {
-      groups.putIfAbsent(item.assignment, () => <int>[]).add(item.index);
+      if (skip != null && skip(item)) {
+        continue;
+      }
+      groups
+          .putIfAbsent((item.assignment, branchOf?.call(item) ?? branch), () => <int>[])
+          .add(item.index);
     }
-    for (final MapEntry<GnAssignment, List<int>> entry in groups.entries) {
-      final GnAssignment a = entry.key;
+    for (final MapEntry<(GnAssignment, Condition), List<int>> entry in groups.entries) {
+      final (GnAssignment a, Condition under) = entry.key;
       result.add(
         GnAssignment(
           a.location,
-          branch.and(a.condition),
+          under.and(a.condition),
           '+=',
           <GnValue>[for (final int i in entry.value) a.items[i]],
-          sourceConditions: <String>[branch.gnSource, ...a.sourceConditions],
+          sourceConditions: <String>[
+            if (under != Condition.always) under.gnSource,
+            ...a.sourceConditions,
+          ],
           comments: a.comments,
           itemComments: a.itemComments.isEmpty
               ? const <GnItemComments>[]
@@ -1685,7 +1758,7 @@ final class _Evaluator {
       return;
     }
     if (!settings.importPolicy.evaluates(gnPath)) {
-      throw GnError(
+      throw GnError.unreadImport(
         call.location,
         'import of $gnPath is neither evaluated nor known to the converter',
       );
@@ -2452,6 +2525,10 @@ final class _Evaluator {
     r'\$(?:\{([A-Za-z_][A-Za-z0-9_]*)\}|([A-Za-z_][A-Za-z0-9_]*))',
   );
 
+  static final RegExp _defaultToolchainSuffix = RegExp(
+    r'\(\$(?:default_toolchain|\{default_toolchain\})\)$',
+  );
+
   /// Resolves `$name` and `${name}` in a string from the known strings
   /// (assumptions and local scalar variables). An external variable with no
   /// assumed value stays a reference inside a [GnExpandedString]; anything
@@ -2461,7 +2538,11 @@ final class _Evaluator {
     _Scope? scope, {
     Map<String, GnValue> bound = const <String, GnValue>{},
   }) {
-    final String text = node.stringValue;
+    // `:x($default_toolchain)` names the default toolchain's instance of a
+    // target; a Bazel package is loaded once for every configuration, so
+    // the suffix is dropped (as bazelLabel and _labelInfo drop it from a
+    // plain string) rather than expanded into a label.
+    final String text = node.stringValue.replaceFirst(_defaultToolchainSuffix, '');
     var last = 0;
     final parts = <GnValue>[];
     final literal = StringBuffer();
@@ -2733,6 +2814,16 @@ final class _Evaluator {
         const condition = ConditionVariable(hostToolchainPredicate);
         return equals ? condition : condition.negated;
       }
+      if (leftValue == null &&
+          rightValue == null &&
+          _isDefaultToolchainTest(left.name, right.name)) {
+        // `current_toolchain == default_toolchain` (glslang's build_info
+        // action): GN defines the target once, in the default toolchain, and
+        // the other toolchains' targets name it as `:x($default_toolchain)`.
+        // A Bazel package is loaded once for every configuration, so the
+        // test holds.
+        return ConditionConstant(equals);
+      }
       if (leftValue == null || rightValue == null) {
         throw GnError(
           node.location,
@@ -2748,18 +2839,58 @@ final class _Evaluator {
     if (leftValue != null) {
       return ConditionConstant((leftValue == value) == equals);
     }
+    final Condition? byCases = _casesComparison(left.name, equals, value, scope, node);
+    if (byCases != null) {
+      return byCases;
+    }
     if (assumptions[left.name] != null || scope.lookup(left.name) != null) {
       throw GnError(node.location, 'comparison with ${left.name}, which is not a known string');
     }
     if (!settings.externalVariables.contains(left.name)) {
       throw GnError(node.location, 'unknown variable ${left.name} in condition');
     }
+    // An OS name's comparison asserts that OS's predicate (_alternatives);
+    // where the assumptions deny the predicate (`target_os != "android"` in
+    // the generation scope, is_android being false there) the comparison is
+    // decided too.
+    final String? predicate = switch (left.name) {
+      'target_os' || 'current_os' => osNamePredicates[value],
+      'full_target_platform_name' => targetPlatformParts(value)?.osPredicate,
+      _ => null,
+    };
+    if (predicate != null && assumptions[predicate] == const GnBoolValue(false)) {
+      return ConditionConstant(!equals);
+    }
     return ConditionComparison(left.name, equals, value);
+  }
+
+  /// `name == "value"` for a string variable written under conditions
+  /// (skia.gni's skia_gl_standard: "webgl" where `is_wasm`, "" otherwise):
+  /// the comparison holds where a case with that string (for `!=`, another
+  /// string) is the one in force. Null for anything but such a variable.
+  Condition? _casesComparison(String name, bool equals, String value, _Scope scope, GnNode node) {
+    final GnVariable? variable = scope.lookup(name);
+    if (variable == null || variable.isList) {
+      return null;
+    }
+    final _Expression cases = _scalarItems(variable, node.location);
+    if (cases.items.any((_Value i) => i.value is! GnStringValue)) {
+      return null;
+    }
+    return Condition.disjunction(<Condition>[
+      for (final _Value i in cases.items)
+        if (((i.value as GnStringValue).value == value) == equals) i.condition,
+    ]);
   }
 
   static bool _isHostToolchainTest(String a, String b) {
     return (a == 'current_toolchain' && b == 'host_toolchain') ||
         (a == 'host_toolchain' && b == 'current_toolchain');
+  }
+
+  static bool _isDefaultToolchainTest(String a, String b) {
+    return (a == 'current_toolchain' && b == 'default_toolchain') ||
+        (a == 'default_toolchain' && b == 'current_toolchain');
   }
 }
 

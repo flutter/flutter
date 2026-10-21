@@ -21,9 +21,12 @@ cc_library(
         "persistent_cache.h",
         "texture.h",
     ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
-    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     # Heed caution when adding targets to the dependencies. This is a minimal
     # target containing graphics sources that embedders can depend on. Any
@@ -39,7 +42,11 @@ cc_library(
         "//engine/src/flutter/third_party/boringssl",
         "@rapidjson",
         "@skia",
-        "@vulkan-headers//:vulkan_headers",  # shell_enable_vulkan
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "@vulkan-headers//:vulkan_headers",  # shell_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )

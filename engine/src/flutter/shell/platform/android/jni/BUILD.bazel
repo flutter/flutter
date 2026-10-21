@@ -14,9 +14,12 @@ cc_library(
     name = "jni",
     srcs = ["platform_view_android_jni.cc"],
     hdrs = ["platform_view_android_jni.h"],
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/flow
-    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -57,8 +60,12 @@ flutter_cc_test(
     srcs = ["jni_mock_unittest.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-Wno-redundant-parens",  # from //flutter/testing:dart
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/testing:dart
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":jni_fixtures",

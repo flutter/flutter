@@ -13,6 +13,10 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "uniforms",
     testonly = True,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [":fixtures"],
 )
 
@@ -46,11 +50,19 @@ impellerc(
         "mat4_array_uniform.frag",  # enable_unittests
     ],
     sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_test_fixtures(
     name = "fixtures",
     dest = "//engine/src/flutter/lib/ui",
     fixtures_targets = {":compile_uniforms": []},
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [":compile_uniforms"],
 )

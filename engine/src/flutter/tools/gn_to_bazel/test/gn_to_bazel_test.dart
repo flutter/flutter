@@ -431,6 +431,167 @@ if (current_toolchain == unknown_toolchain) {
     });
 
     test(
+      r'`current_toolchain == default_toolchain` holds; `($default_toolchain)` is dropped',
+      () async {
+        // glslang's shape: an action defined in the default toolchain alone
+        // and named with the suffix. A Bazel package is loaded once per
+        // configuration, so the test holds and the suffix says nothing --
+        // with the toolchains open (the generation scope) as with them known.
+        for (final assumptions in <Assumptions>[generationAssumptions(), linuxHostAssumptions()]) {
+          final GnFileEvaluation evaluation = await evaluate(r'''
+if (current_toolchain == default_toolchain) {
+  source_set("build_info") {
+    sources = [ "info.cc" ]
+  }
+}
+if (default_toolchain != current_toolchain) {
+  source_set("elsewhere") {
+    sources = [ "e.cc" ]
+  }
+}
+source_set("lib") {
+  sources = [ "lib.cc" ]
+  public_deps = [ ":build_info($default_toolchain)" ]
+  deps = [ "//flutter/other:thing(${default_toolchain})" ]
+}
+''', assumptions: assumptions);
+          expect(evaluation.targets.map((GnTarget t) => '${t.name} [${t.condition}]'), <String>[
+            'build_info [true]',
+            'lib [true]',
+          ]);
+          expect(strings(evaluation.targets[1], 'public_deps'), <String>[':build_info']);
+          expect(strings(evaluation.targets[1], 'deps'), <String>['//flutter/other:thing']);
+        }
+      },
+    );
+
+    test('compares a string written under conditions case by case', () async {
+      // skia.gni's skia_gl_standard: "webgl" where is_wasm, "" otherwise.
+      // `== "webgl"` is the wasm case's condition, `== "gles"` no case at
+      // all, `!= "gles"` every case.
+      final GnFileEvaluation evaluation = await evaluate('''
+if (is_wasm) {
+  gl_standard = "webgl"
+} else {
+  gl_standard = ""
+}
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (gl_standard == "webgl") {
+    defines = [ "WEBGL" ]
+  }
+  if (gl_standard == "gles") {
+    sources += [ "gles.cc" ]
+  }
+  if (gl_standard != "gles") {
+    sources += [ "not_gles.cc" ]
+  }
+}
+''', assumptions: generationAssumptions());
+      final GnTarget target = evaluation.targets.single;
+      expect(
+        target.variables['defines']!.assignments.map((GnAssignment a) => a.toString()),
+        <String>['[is_wasm] = ["WEBGL"]'],
+      );
+      expect(
+        target.variables['sources']!.assignments.map((GnAssignment a) => a.toString()),
+        <String>['[true] = ["x.cc"]', '[true] += ["not_gles.cc"]'],
+      );
+    });
+
+    test("an OS name's comparison the assumptions deny is decided", () async {
+      // skcms: `target_os != "android"` where is_android is false (the
+      // generation scope), `full_target_platform_name == "ios-arm64"` where
+      // is_ios is; `target_os == "wasm"` stays open there.
+      final GnFileEvaluation evaluation = await evaluate('''
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (target_os != "android") {
+    sources += [ "not_android.cc" ]
+  }
+  if (full_target_platform_name == "ios-arm64") {
+    sources += [ "ios.cc" ]
+  }
+  if (target_os == "wasm") {
+    sources += [ "wasm.cc" ]
+  }
+}
+''', assumptions: generationAssumptions());
+      expect(
+        evaluation.targets.single.variables['sources']!.assignments.map(
+          (GnAssignment a) => a.toString(),
+        ),
+        <String>[
+          '[true] = ["x.cc"]',
+          '[true] += ["not_android.cc"]',
+          '[target_os == "wasm"] += ["wasm.cc"]',
+        ],
+      );
+    });
+
+    test('the generation scope is the host scope less what GN derives from the target', () {
+      // Every value generationAssumptions fixes is the host's; what it
+      // leaves open is exactly the target (its OS, CPU, toolchains and
+      // names) and the arguments GN derives from it, each with a
+      // config_setting. An argument added to linuxHostAssumptions lands
+      // here, to be classified: derived (and given a setting) or an input
+      // of tools/gn's (and kept, as Skia's are).
+      final Assumptions host = linuxHostAssumptions();
+      final Assumptions generation = generationAssumptions();
+      for (final String name in generation.names) {
+        expect(generation[name], host[name], reason: name);
+      }
+      expect(host.names.where((String name) => generation[name] == null).toList()..sort(), <String>[
+        'build_engine_artifacts',
+        'current_cpu',
+        'current_os',
+        'current_toolchain',
+        'default_toolchain',
+        'disable_vma_stl_shared_mutex',
+        'enable_backtrace',
+        'enable_unittests',
+        'full_target_platform_name',
+        'host_toolchain',
+        'impeller_enable_metal',
+        'impeller_enable_opengles',
+        'impeller_enable_vulkan',
+        'is_linux',
+        'is_wasm',
+        'shell_enable_gl',
+        'shell_enable_metal',
+        'shell_enable_software',
+        'shell_enable_vulkan',
+        'target_cpu',
+        'target_os',
+        'target_platform_name',
+        'test_enable_gl',
+        'test_enable_metal',
+        'test_enable_software',
+        'test_enable_vulkan',
+        'use_flutter_cxx',
+      ]);
+    });
+
+    test('a disjunction of a conjunction and its denied terms always holds', () {
+      // The condition a name defined in both branches of an `if` on a
+      // conjunction is defined under (skcms's arch() template); and the
+      // duals of the conjunction's simplifications.
+      const a = ConditionVariable('a');
+      const b = ConditionVariable('b');
+      final Condition both = Condition.conjunction(const <Condition>[a, b]);
+      expect(Condition.disjunction(<Condition>[both, both.negated]), Condition.always);
+      expect(Condition.disjunction(<Condition>[both, a.negated, b.negated]), Condition.always);
+      expect(
+        Condition.disjunction(<Condition>[
+          a,
+          Condition.conjunction(<Condition>[a.negated, b]),
+        ]),
+        Condition.disjunction(const <Condition>[a, b]),
+      );
+      expect(Condition.disjunction(<Condition>[a, both]), a);
+    });
+
+    test(
       '`current_toolchain == host_toolchain` with neither assumed is the host predicate',
       () async {
         // The web scope: the toolchains open (a wasm build has the host's
@@ -1444,6 +1605,89 @@ cc_library(
         ]);
         expect(off.targets[1].variables.containsKey('sources'), isFalse);
         expect(off.inheritedConfigs['skia'], isEmpty);
+      });
+
+      test('an item both definitions of a name append is in the list under either', () {
+        // skcms's arch() under the generation scope: a source set in both
+        // branches of an `if` on a conjunction (`current_cpu == "x64" &&
+        // target_os != "android"`, the latter decided). The target exists
+        // under either branch, so unconditionally; a dependency both
+        // branches add (skia_source_set's raw_ptr) is unconditional too,
+        // not listed once under each branch -- the denied branch has no
+        // config_setting of its own.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/a/BUILD.gn': '''
+template("arch") {
+  if (invoker.enabled) {
+    source_set(target_name) {
+      forward_variables_from(invoker, "*")
+      deps += [ ":common" ]
+    }
+  } else {
+    source_set(target_name) {
+      forward_variables_from(invoker, "*", [ "sources", "cflags", "deps" ])
+      deps = [ ":common" ]
+    }
+  }
+}
+arch("hsw") {
+  enabled = current_cpu == "x64" && target_os != "android"
+  sources = [ "hsw.cc" ]
+  cflags = [ "-mavx2" ]
+  deps = [ ":extra" ]
+}
+source_set("common") {
+  sources = [ "common.cc" ]
+}
+source_set("extra") {
+  sources = [ "extra.cc" ]
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(
+          tree,
+          '//flutter/a/BUILD.gn',
+          assumptions: generationAssumptions(),
+        );
+        final GnTarget merged = evaluation.targets.first;
+        expect(merged.name, 'hsw');
+        expect(merged.condition, Condition.always);
+        expect(
+          merged.variables['deps']!.assignments.map((GnAssignment a) => a.toString()),
+          <String>['[current_cpu == "x64"] += [":extra"]', '[true] += [":common"]'],
+        );
+        final String output = emitBuildFile(evaluation, gnPackage: '//flutter/a', tree: tree);
+        expect(
+          output,
+          contains('''
+cc_library(
+    name = "hsw",
+    srcs = select({
+        "@platforms//cpu:x86_64": [
+            "hsw.cc",  # current_cpu == "x64"
+        ],
+        "//conditions:default": [],
+    }),
+    copts = CHROMIUM_CODE_COPTS + select({
+        "@platforms//cpu:x86_64": [
+            "-mavx2",  # current_cpu == "x64"
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":common",
+        "//engine/src:include_root",
+    ] + select({
+        "@platforms//cpu:x86_64": [
+            ":extra",  # current_cpu == "x64"
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+'''),
+        );
       });
 
       test('runs templates as closures with invoker and target_name', () {
@@ -4053,6 +4297,36 @@ source_set("b") {
       expect(DependencyResolver.none().flagsOf('//flutter/third_party/quiet:quiet'), isEmpty);
     });
 
+    test('a dependency file outside the import policy says nothing; one the converter '
+        'cannot evaluate is an error', () {
+      // The Dart runtime's and abseil's files import outside the policy:
+      // they hand nothing, as far as the converter can tell. A file within
+      // the policy that fails to evaluate is the converter's own failure,
+      // which must not pass as "no flags" (glslang's -Wno-conversion once
+      // went missing that way).
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/foreign/BUILD.gn': '''
+import("//somewhere/else.gni")
+source_set("foreign") {
+  sources = [ "f.cc" ]
+}
+''',
+        'flutter/third_party/broken/BUILD.gn': '''
+if (current_toolchain == unknown_toolchain) {
+  source_set("broken") {
+    sources = [ "b.cc" ]
+  }
+}
+''',
+      });
+      final resolver = DependencyResolver(tree: tree, assumptions: linuxHostAssumptions());
+      expect(resolver.flagsOf('//flutter/third_party/foreign:foreign'), isEmpty);
+      expect(
+        () => resolver.flagsOf('//flutter/third_party/broken:broken'),
+        throwsGnError(line: 1, message: 'needs both values to be known'),
+      );
+    });
+
     test('zip_bundle: entries by destination, sources resolved to their producers', () async {
       // font_subset's shape: the executable's output_name, a copy into the
       // build root, a shared library, a source file, an entry under the
@@ -5729,7 +6003,7 @@ flutter_dart_tests(
         );
         final GnFileEvaluation evaluation = evaluateGnFile(
           tree.load(p.join(directory, 'BUILD.gn')),
-          assumptions: linuxHostAssumptions(),
+          assumptions: generationAssumptions(),
           templates: templateMappings.keys.toSet(),
           externalVariables: knownExternalVariables,
           booleanVariables: knownBooleanVariables,

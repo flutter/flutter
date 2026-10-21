@@ -86,6 +86,10 @@ cc_library(
     name = "geometry_asserts",
     testonly = True,
     hdrs = ["geometry_asserts.h"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":geometry",
         "//engine/src/flutter/impeller:impeller_public_config",
@@ -119,6 +123,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":geometry",
         ":geometry_asserts",

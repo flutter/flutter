@@ -4,6 +4,7 @@
 
 # Generated from //flutter/impeller/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_display_test", "flutter_gpu_test_backends")
@@ -20,11 +21,33 @@ cc_library(
             "IMPELLER_DEBUG=1",  # impeller_debug
         ],
         "//conditions:default": [],
-    }) + [
-        "IMPELLER_SUPPORTS_RENDERING=1",  # impeller_supports_rendering
-        "IMPELLER_ENABLE_OPENGLES=1",  # impeller_enable_opengles
-        "IMPELLER_ENABLE_VULKAN=1",  # impeller_enable_vulkan
-    ],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "IMPELLER_SUPPORTS_RENDERING=1",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "IMPELLER_SUPPORTS_RENDERING=1",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "IMPELLER_SUPPORTS_RENDERING=1",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "IMPELLER_ENABLE_METAL=1",  # impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "IMPELLER_ENABLE_OPENGLES=1",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "IMPELLER_ENABLE_VULKAN=1",  # impeller_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
     deps = ["//engine/src/flutter:config"],
 )
 
@@ -32,14 +55,32 @@ cc_library(
     name = "impeller",
     deps = [
         "//engine/src/flutter/impeller/base",
-        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/entity",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/geometry",
-        "//engine/src/flutter/impeller/renderer",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/renderer/backend",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/tessellator",
-        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer/backend",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer/backend",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer/backend",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -64,6 +105,10 @@ cc_library(
 # ANGLE).
 flutter_gpu_test_backends(
     name = "gpu_test_backends",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_display_test(
@@ -71,29 +116,68 @@ flutter_display_test(
     size = "large",
     data = [":gpu_test_backends"],
     shard_count = 16,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":impeller_unittesting",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/base:base_unittests",
         "//engine/src/flutter/impeller/compiler:compiler_unittests",
         "//engine/src/flutter/impeller/core:allocator_unittests",
-        "//engine/src/flutter/impeller/display_list:aiks_unittests",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/display_list:display_list_unittests",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/display_list:skia_conversions_unittests",
-        "//engine/src/flutter/impeller/entity:entity_unittests",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/fixtures",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/geometry:geometry_unittests",
-        "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/renderer/backend/gles:gles_unittests",  # impeller_enable_opengles
-        "//engine/src/flutter/impeller/renderer/backend/vulkan:vulkan_unittests",  # impeller_enable_vulkan
         "//engine/src/flutter/impeller/runtime_stage:runtime_stage_unittests",
         "//engine/src/flutter/impeller/shader_archive:shader_archive_unittests",
         "//engine/src/flutter/impeller/tessellator:tessellator_unittests",
         "//engine/src/flutter/impeller/testing:impeller_unittest_suite",
         "//engine/src/flutter/impeller/toolkit/interop:interop_unittests",
-        "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list:aiks_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:display_list_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:entity_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/fixtures",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list:aiks_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:display_list_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:entity_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/fixtures",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list:aiks_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:display_list_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:entity_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/fixtures",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/renderer/backend/metal:metal_unittests",  # impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/renderer/backend/vulkan:vulkan_unittests",  # impeller_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/renderer/backend/gles:gles_unittests",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 flutter_display_test(
@@ -104,9 +188,32 @@ flutter_display_test(
         "--gtest_filter=*Metal",
     ],
     data = [":gpu_test_backends"],
+    target_compatible_with = select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/renderer:renderer_dart_unittests",
         "//engine/src/flutter/testing",
+    ],
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_enable_unittests",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "//engine/src/flutter/testing:unittests_enabled",
     ],
 )

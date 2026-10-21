@@ -4,6 +4,7 @@
 
 # Generated from //flutter/impeller/entity/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
@@ -73,12 +74,27 @@ impeller_shaders(
         "shaders/texture_downsample_gles.frag",
     ],
     use_half_textures = True,
-    vulkan_language_version = 130,
+    vulkan_language_version = select({
+        "//engine/src/flutter/impeller/tools:vulkan": 130,
+        "//conditions:default": None,
+    }),
+)
+
+# `impeller_enable_opengles && !is_wasm`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_not_is_wasm",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/build/bazel:not_wasm",
+    ],
 )
 
 impeller_shaders(
     name = "modern_entity_shaders",
-    gles_language_version = 460,
+    gles_language_version = select({
+        ":when_impeller_enable_opengles_and_not_is_wasm": 460,
+        "//conditions:default": None,
+    }),
     library_name = "modern",
     shaders = [
         "shaders/gradients/conical_gradient_ssbo_fill.frag",
@@ -87,7 +103,10 @@ impeller_shaders(
         "shaders/gradients/sweep_gradient_ssbo_fill.frag",
         "shaders/uber_sdf_ssbo.frag",
     ],
-    vulkan_language_version = 130,
+    vulkan_language_version = select({
+        "//engine/src/flutter/impeller/tools:vulkan": 130,
+        "//conditions:default": None,
+    }),
 )
 
 impeller_shaders(
@@ -274,6 +293,10 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + CHROMIUM_CODE_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":entity",
         "//engine/src:include_root",
@@ -313,6 +336,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":entity",
         ":entity_test_helpers",

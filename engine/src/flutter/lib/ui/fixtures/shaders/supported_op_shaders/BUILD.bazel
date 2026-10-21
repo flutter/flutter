@@ -13,6 +13,10 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "supported_op_shaders",
     testonly = True,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [":fixtures"],
 )
 
@@ -54,11 +58,19 @@ impellerc(
         "33_OpTypeFunction.frag",  # enable_unittests
     ],
     sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_test_fixtures(
     name = "fixtures",
     dest = "//engine/src/flutter/lib/ui",
     fixtures_targets = {":compile_supported_op_shaders": []},
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [":compile_supported_op_shaders"],
 )
