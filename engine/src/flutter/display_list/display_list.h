@@ -169,10 +169,14 @@ class SaveLayerOptions {
   static const SaveLayerOptions kWithAttributes;
   static const SaveLayerOptions kNoAttributes;
 
+  // cppcoreguidelines-pro-type-member-init doesn't understand that the
+  // bitfields share storage with `flags_` in the union below.
+  // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
   SaveLayerOptions() : flags_(0) {}
   SaveLayerOptions(const SaveLayerOptions& options) : flags_(options.flags_) {}
   explicit SaveLayerOptions(const SaveLayerOptions* options)
       : flags_(options->flags_) {}
+  // NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
   SaveLayerOptions without_optimizations() const {
     SaveLayerOptions options;

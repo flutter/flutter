@@ -14,6 +14,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/pipeline_variant_recording.h"
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
@@ -42,6 +43,7 @@ class GenericVariants {
         return;
       }
     }
+    IMPELLER_RECORD_PIPELINE_VARIANT(options, pipeline.get());
     pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
   }
 
@@ -161,8 +163,7 @@ template <class RenderPipelineHandleT>
 RenderPipelineHandleT* CreateIfNeeded(
     const ContentContext* context,
     Variants<RenderPipelineHandleT>& container,
-    ContentContextOptions opts,
-    PipelineCompileQueue* compile_queue) {
+    ContentContextOptions opts) {
   if (!context->IsValid()) {
     return nullptr;
   }
@@ -170,6 +171,8 @@ RenderPipelineHandleT* CreateIfNeeded(
   if (RenderPipelineHandleT* found = container.Get(opts)) {
     return found;
   }
+
+  IMPELLER_PIPELINE_VARIANT_LAZY_SCOPE(context);
 
   RenderPipelineHandleT* default_handle =
       container.GetDefault(*context->GetContext());
@@ -181,7 +184,7 @@ RenderPipelineHandleT* CreateIfNeeded(
   FML_CHECK(default_handle != nullptr);
 
   const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline =
-      default_handle->WaitAndGet(compile_queue);
+      default_handle->WaitAndGet();
   if (!pipeline) {
     return nullptr;
   }
@@ -202,14 +205,11 @@ template <class TypedPipeline>
 PipelineRef GetPipeline(const ContentContext* context,
                         Variants<TypedPipeline>& container,
                         ContentContextOptions opts) {
-  auto compile_queue =
-      context->GetContext()->GetPipelineLibrary()->GetPipelineCompileQueue();
-  TypedPipeline* pipeline =
-      CreateIfNeeded(context, container, opts, compile_queue);
+  TypedPipeline* pipeline = CreateIfNeeded(context, container, opts);
   if (!pipeline) {
     return raw_ptr<Pipeline<PipelineDescriptor>>();
   }
-  return raw_ptr(pipeline->WaitAndGet(compile_queue));
+  return raw_ptr(pipeline->WaitAndGet());
 }
 
 }  // namespace
@@ -231,7 +231,6 @@ struct ContentContext::Pipelines {
   Variants<BlendSaturationPipeline> blend_saturation;
   Variants<BlendScreenPipeline> blend_screen;
   Variants<BlendSoftLightPipeline> blend_softlight;
-  Variants<BorderMaskBlurPipeline> border_mask_blur;
   Variants<CirclePipeline> circle;
   Variants<ClipPipeline> clip;
   Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter;
@@ -278,7 +277,6 @@ struct ContentContext::Pipelines {
   Variants<PorterDuffBlendPipeline> destination_over_blend;
   Variants<PorterDuffBlendPipeline> modulate_blend;
   Variants<PorterDuffBlendPipeline> plus_blend;
-  Variants<PorterDuffBlendPipeline> screen_blend;
   Variants<PorterDuffBlendPipeline> source_a_top_blend;
   Variants<PorterDuffBlendPipeline> source_blend;
   Variants<PorterDuffBlendPipeline> source_in_blend;
@@ -510,7 +508,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   desc.SetPolygonMode(PolygonMode::kFill);
 }
 
-std::array<std::vector<Scalar>, 15> GetPorterDuffSpecConstants(
+std::array<std::vector<Scalar>, 14> GetPorterDuffSpecConstants(
     bool supports_decal) {
   Scalar x = supports_decal ? 1 : 0;
   return {{
@@ -528,7 +526,6 @@ std::array<std::vector<Scalar>, 15> GetPorterDuffSpecConstants(
       {x, 1, -1, 1, -1, 0},  // Xor
       {x, 1, 0, 1, 0, 0},    // Plus
       {x, 0, 0, 0, 0, 1},    // Modulate
-      {x, 0, 0, 1, 0, -1},   // Screen
   }};
 }
 
@@ -572,6 +569,8 @@ ContentContext::ContentContext(
   if (!context_ || !context_->IsValid()) {
     return;
   }
+
+  IMPELLER_PIPELINE_VARIANT_WARMING_SCOPE(this);
 
   // On most backends, indexes and other data can be allocated into the same
   // buffers. However, some backends (namely WebGL) require indexes used in
@@ -719,8 +718,6 @@ ContentContext::ContentContext(
                                             {supports_decal});
     pipelines_->gaussian_blur.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil, {supports_decal});
-    pipelines_->border_mask_blur.CreateDefault(*context_,
-                                               options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
     pipelines_->shadow_vertices_.CreateDefault(*context_, options);
@@ -729,7 +726,7 @@ ContentContext::ContentContext(
     pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
                                                {supports_decal});
 
-    const std::array<std::vector<Scalar>, 15> porter_duff_constants =
+    const std::array<std::vector<Scalar>, 14> porter_duff_constants =
         GetPorterDuffSpecConstants(supports_decal);
     pipelines_->clear_blend.CreateDefault(*context_, options_trianglestrip,
                                           porter_duff_constants[0]);
@@ -759,8 +756,6 @@ ContentContext::ContentContext(
                                          porter_duff_constants[12]);
     pipelines_->modulate_blend.CreateDefault(*context_, options_trianglestrip,
                                              porter_duff_constants[13]);
-    pipelines_->screen_blend.CreateDefault(*context_, options_trianglestrip,
-                                           porter_duff_constants[14]);
   }
 
   if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
@@ -883,7 +878,9 @@ ContentContext::ContentContext(
   InitializeCommonlyUsedShadersIfNeeded();
 }
 
-ContentContext::~ContentContext() = default;
+ContentContext::~ContentContext() {
+  IMPELLER_REPORT_PIPELINE_VARIANTS(this, context_);
+}
 
 bool ContentContext::IsValid() const {
   return is_valid_;
@@ -1170,11 +1167,6 @@ PipelineRef ContentContext::GetGaussianBlurPipeline(
   return GetPipeline(this, pipelines_->gaussian_blur, opts);
 }
 
-PipelineRef ContentContext::GetBorderMaskBlurPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->border_mask_blur, opts);
-}
-
 PipelineRef ContentContext::GetMorphologyFilterPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->morphology_filter, opts);
@@ -1257,7 +1249,6 @@ PipelineRef ContentContext::GetPorterDuffPipeline(
     case BlendMode::kModulate:
       return GetModulateBlendPipeline(opts);
     case BlendMode::kScreen:
-      return GetScreenBlendPipeline(opts);
     case BlendMode::kOverlay:
     case BlendMode::kDarken:
     case BlendMode::kLighten:
@@ -1347,11 +1338,6 @@ PipelineRef ContentContext::GetPlusBlendPipeline(
 PipelineRef ContentContext::GetModulateBlendPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->modulate_blend, opts);
-}
-
-PipelineRef ContentContext::GetScreenBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->screen_blend, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorPipeline(

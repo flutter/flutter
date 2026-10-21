@@ -193,7 +193,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
   FS::BindTextureSampler(pass, texture, dst_sampler);
 
   VS::FrameInfo frame_info;
-  FS::FragInfo frag_info;
+  FS::FragInfo frag_info{};
 
   frame_info.mvp = geometry_result.transform;
   frag_info.alpha = alpha_;

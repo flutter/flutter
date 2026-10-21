@@ -159,7 +159,9 @@ class SkwasmSurface implements OffscreenSurface {
       throw ArgumentError('The image being rasterized must be a Skwasm image.');
     }
 
-    await setSize(BitmapSize(engineImage.width, engineImage.height));
+    // The raster thread resizes the surface to fit the image in the same message
+    // that rasterizes it, so no other operation can resize it in between.
+    _currentSize = BitmapSize(engineImage.width, engineImage.height);
 
     // Initiate the native rasterization call. This schedules the rasterization on the C++
     // side and returns a callback ID that will resolve when the image bytes are ready.
@@ -197,8 +199,15 @@ class SkwasmSurface implements OffscreenSurface {
   }
 
   @override
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) async {
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(
+    BitmapSize size,
+    List<ui.Picture> pictures,
+  ) async {
     await initialized;
+    // The size is sent along with the pictures, so the raster thread resizes and
+    // renders in a single message. Messages are processed in order, so no other
+    // operation can resize the surface in between.
+    _currentSize = size;
     final int callbackId = withStackScope((StackScope scope) {
       final Pointer<PictureHandle> pictureHandles = scope
           .allocPointerArray(pictures.length)
@@ -206,7 +215,13 @@ class SkwasmSurface implements OffscreenSurface {
       for (var i = 0; i < pictures.length; i++) {
         pictureHandles[i] = (pictures[i] as SkwasmPicture).handle;
       }
-      return surfaceRenderPictures(handle, pictureHandles, pictures.length);
+      return surfaceRenderPictures(
+        handle,
+        pictureHandles,
+        pictures.length,
+        size.width,
+        size.height,
+      );
     });
     final rasterResult =
         (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
@@ -269,6 +284,15 @@ class SkwasmSurface implements OffscreenSurface {
   // Skwasm.
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) {
-    throw StateError('rasterizeToCanvas is not supported for SkwasmSurface');
+    throw UnsupportedError('rasterizeToCanvas is not supported for SkwasmSurface');
+  }
+
+  @override
+  Future<void> rasterizeToCanvasSource(
+    BitmapSize size,
+    List<ui.Picture> pictures,
+    void Function(int index, DomCanvasImageSource source) onRendered,
+  ) {
+    throw UnsupportedError('rasterizeToCanvasSource is not supported for SkwasmSurface');
   }
 }

@@ -29,22 +29,47 @@ abstract class ToolExtensionService {
 /// Represents the capabilities and supported service namespaces reported by an extension.
 @immutable
 class ToolExtensionCapabilities {
-  /// Creates [ToolExtensionCapabilities] listing supported [services] and [supportedPlatforms].
+  /// Creates [ToolExtensionCapabilities] listing supported [services],
+  /// [supportedPlatforms], and optional [extensionName].
   const ToolExtensionCapabilities({
     required this.services,
+    this.extensionName,
     this.supportedPlatforms = const <String>{'linux', 'macos', 'windows'},
   });
 
   /// Deserializes [ToolExtensionCapabilities] from a JSON map payload.
   factory ToolExtensionCapabilities.fromJson(Map<String, Object?> json) {
-    final Object? servicesList = json['services'];
+    final Object? servicesList = json[servicesKey];
     final services = servicesList is Iterable ? List<String>.from(servicesList) : <String>[];
-    final Object? platformsList = json['supportedPlatforms'];
+    final Object? platformsList = json[supportedPlatformsKey];
     final Set<String> supportedPlatforms = platformsList is Iterable
         ? platformsList.map((Object? p) => p.toString().toLowerCase()).toSet()
         : const <String>{'linux', 'macos', 'windows'};
-    return ToolExtensionCapabilities(services: services, supportedPlatforms: supportedPlatforms);
+    final String? extensionName = switch (json[extensionNameKey]) {
+      final String name => name,
+      _ => null,
+    };
+    return ToolExtensionCapabilities(
+      services: services,
+      extensionName: extensionName,
+      supportedPlatforms: supportedPlatforms,
+    );
   }
+
+  /// Map key for [extensionName].
+  static const String extensionNameKey = 'extensionName';
+
+  /// Map key for [services].
+  static const String servicesKey = 'services';
+
+  /// Map key for [supportedPlatforms].
+  static const String supportedPlatformsKey = 'supportedPlatforms';
+
+  /// Optional identifier name of the extension package.
+  ///
+  /// When provided, this should match the extension's package name. The host
+  /// tool uses this identifier in error messages and artifact cache paths.
+  final String? extensionName;
 
   /// The list of service namespace identifiers supported by the extension.
   final List<String> services;
@@ -59,7 +84,8 @@ class ToolExtensionCapabilities {
 
   /// Serializes capabilities to a map payload.
   Map<String, Object?> toMap() => <String, Object?>{
-    'services': services,
-    'supportedPlatforms': supportedPlatforms.toList(),
+    extensionNameKey: ?extensionName,
+    servicesKey: services,
+    supportedPlatformsKey: supportedPlatforms.toList(),
   };
 }

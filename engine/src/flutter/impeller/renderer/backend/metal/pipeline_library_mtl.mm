@@ -130,8 +130,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
-  auto pipeline_future =
-      PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
+  auto pipeline_future = PipelineFuture<PipelineDescriptor>{
+      descriptor, promise->get_future(), weak_from_this()};
   {
     Lock lock(pipelines_mutex_);
     auto [found, inserted] =

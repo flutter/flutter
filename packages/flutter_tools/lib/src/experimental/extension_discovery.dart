@@ -20,8 +20,12 @@ class ExtensionConnection {
     required Isolate this._isolate,
     required this._peer,
     required this.capabilities,
+    required this.extensionName,
     required this._logger,
   });
+
+  /// Fallback extension name used when an extension does not report one in its capabilities.
+  static const defaultExtensionName = 'unknown_extension';
 
   Isolate? _isolate;
   final json_rpc.Peer _peer;
@@ -30,20 +34,24 @@ class ExtensionConnection {
   /// The capabilities and supported service namespaces of the extension.
   final ToolExtensionCapabilities capabilities;
 
+  /// The resolved package or extension name of the connected extension.
+  final String extensionName;
+
   bool _isDisposed = false;
 
   /// Sends an RPC request to the extension isolate.
   Future<Object?> sendRequest(
-    String method, [
+    String method, {
     Object? params,
-    Duration timeout = const Duration(seconds: 5),
-  ]) async {
+    Duration? timeout = const Duration(seconds: 5),
+  }) async {
     if (_isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
     _logger.printTrace('ExtensionConnection sending RPC request "$method"...');
     try {
-      final Object? result = await _peer.sendRequest(method, params).timeout(timeout);
+      final Future<Object?> request = _peer.sendRequest(method, params);
+      final Object? result = await (timeout != null ? request.timeout(timeout) : request);
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
     } catch (error) {
@@ -99,7 +107,7 @@ class ExtensionConnection {
 
       logger.printTrace('ExtensionConnection querying extension.getCapabilities...');
       final Object? responseObj = await Future.any<Object?>([
-        peer.sendRequest('extension.getCapabilities'),
+        peer.sendRequest(ToolExtensionEntryPoint.getCapabilitiesMethod),
         errorCompleter.future,
       ]).timeout(timeout);
       if (responseObj is! Map<String, Object?>) {
@@ -116,6 +124,7 @@ class ExtensionConnection {
         isolate: isolate,
         peer: peer,
         capabilities: capabilities,
+        extensionName: capabilities.extensionName ?? defaultExtensionName,
         logger: logger,
       );
     } on TimeoutException {
