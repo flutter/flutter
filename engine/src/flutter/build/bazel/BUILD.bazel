@@ -164,3 +164,18 @@ config_setting(
     name = "asan_enabled",
     flag_values = {":asan": "True"},
 )
+
+# tools/gn's stripped_symbols: on unless --no-stripped, which only the
+# developer's local_engine.json configurations pass (and off for Android,
+# where GN strips elsewhere). GN's Linux toolchains write every executable
+# to exe.unstripped/ and `llvm-objcopy --strip-all` it into the build root
+# regardless, and do the same for a shared library through lib.unstripped/
+# under the argument. The Bazel build's binaries in bazel-bin stay as linked
+# -- its tests run them, and GN keeps the unstripped copies to be run under
+# a debugger -- and the stripping happens where GN's layout is produced:
+# build_directory_aspect (build_directory.bzl) strips what an install or an
+# archive ships, executables always and shared libraries under this flag.
+bool_flag(
+    name = "stripped",
+    build_setting_default = True,
+)
