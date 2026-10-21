@@ -346,10 +346,8 @@ _SETTING_ARGS = [
 _FEATURE_ARGS = {
     "wasm_use_workers": "wasm_use_workers",
     "wasm_prioritize_size": "wasm_prioritize_size",
+    "enable_lto": "lto",
 }
-
-# enable_lto: see wasm_platform; accepted, not applied.
-_DEFERRED_ARGS = ["enable_lto"]
 
 # skia_icu_bidi_third_party_dir names the directory of the client ICU's bidi
 # library (//flutter/third_party/canvaskit/icu_bidi, the one value it ever
@@ -366,13 +364,12 @@ def wasm_platform(name, extra_toolchain_args = {}, **kwargs):
     and toolchain features (Bazel's platform-based flags apply them to
     everything built for the platform).
 
-    enable_lto: GN's web build has it on (is_official_build) where a
-    toolchain does not say otherwise, and its first link builds the LTO
-    variants of emscripten's system libraries into the prebuilt SDK's
-    cache. The synced SDK ships without them (no lto/ beside the ww/ and mt/
-    variants) and the Bazel toolchain freezes the cache, so the platforms
-    do not turn the `lto` feature on until the variants are built at fetch
-    time (research/12); the skwasm modules link without -flto meanwhile.
+    enable_lto: GN's web build has it on (tools/gn's --lto default) where a
+    toolchain does not say otherwise -- the wasm platform carries the `lto`
+    feature (toolchains/emscripten/BUILD.bazel), a toolchain's
+    `enable_lto = false` turns it off here -- and the LTO variants of
+    emscripten's system libraries it links are built at fetch time
+    (lto_libraries.bzl).
 
     Args:
       name: the toolchain's name (the platform's).
@@ -385,7 +382,7 @@ def wasm_platform(name, extra_toolchain_args = {}, **kwargs):
             flags.append("--%s:%s=%s" % (_WEB_SETTINGS, argument, "true" if value else "false"))
         elif argument in _FEATURE_ARGS:
             flags.append("--features=%s%s" % ("" if value else "-", _FEATURE_ARGS[argument]))
-        elif argument not in _LABEL_ARGS and argument not in _DEFERRED_ARGS:
+        elif argument not in _LABEL_ARGS:
             fail("wasm_platform(%s): %s is not an argument the web build's platforms carry" % (name, argument))
     native.platform(
         name = name,
