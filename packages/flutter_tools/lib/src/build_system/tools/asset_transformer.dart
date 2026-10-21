@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -24,14 +25,20 @@ final class AssetTransformer {
     required this._fileSystem,
     required this._dartBinaryPath,
     required this._buildMode,
+    required this._targetPlatform,
   });
 
   static const buildModeEnvVar = 'FLUTTER_BUILD_MODE';
+  static const targetPlatformEnvVar = 'FLUTTER_BUILD_TARGET_PLATFORM';
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
   final String _dartBinaryPath;
   final BuildMode _buildMode;
+  final TargetPlatform _targetPlatform;
+
+  @visibleForTesting
+  TargetPlatform get targetPlatform => _targetPlatform;
 
   /// The [Source] inputs that targets using this should depend on.
   ///
@@ -125,10 +132,24 @@ final class AssetTransformer {
       ...transformer.args,
     ];
 
+    final String? targetPlatformAsString = switch (_targetPlatform) {
+      .android || .android_arm || .android_arm64 || .android_x64 => 'android',
+      .ios => 'ios',
+      .darwin => 'macOS',
+      .linux_x64 || .linux_arm64 || .linux_riscv64 => 'linux',
+      .windows_arm64 || .windows_x64 => 'windows',
+      .fuchsia_arm64 || .fuchsia_x64 => 'fuchsia',
+      .web_javascript => 'web',
+      .unsupported || .tester => null,
+    };
+
     final ProcessResult result = await _processManager.run(
       command,
       workingDirectory: workingDirectory,
-      environment: <String, String>{buildModeEnvVar: _buildMode.cliName},
+      environment: <String, String>{
+        buildModeEnvVar: _buildMode.cliName,
+        targetPlatformEnvVar: ?targetPlatformAsString,
+      },
     );
 
     final stdout = result.stdout as String;
@@ -195,6 +216,9 @@ final class DevelopmentAssetTransformer {
 
   /// The dependencies registered by transformers, indexed by asset key.
   Map<String, Set<Uri>> get dependencies => _dependencies;
+
+  @visibleForTesting
+  TargetPlatform get targetPlatform => _transformer.targetPlatform;
 
   /// Removes dependencies for assets that are no longer active.
   void pruneDependencies(Set<String> activeAssetKeys) {

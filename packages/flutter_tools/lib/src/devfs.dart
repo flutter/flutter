@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -430,6 +431,7 @@ class DevFS {
     this.fsName,
     this.rootDirectory, {
     required BuildMode buildMode,
+    required TargetPlatform targetPlatform,
     required ToolContext toolContext,
     HttpClient? httpClient,
     this._stopwatchFactory = const StopwatchFactory(),
@@ -450,6 +452,7 @@ class DevFS {
            fileSystem: toolContext.fs,
            dartBinaryPath: toolContext.artifacts.getArtifactPath(Artifact.engineDartBinary),
            buildMode: buildMode,
+           targetPlatform: targetPlatform,
          ),
          fileSystem: toolContext.fs,
          logger: toolContext.logger,
@@ -479,6 +482,9 @@ class DevFS {
 
   Uri? _baseUri;
   Uri? get baseUri => _baseUri;
+
+  @visibleForTesting
+  DevelopmentAssetTransformer get assetTransformer => _assetTransformer;
 
   Uri deviceUriToHostUri(Uri deviceUri) {
     final deviceUriString = deviceUri.toString();
