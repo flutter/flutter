@@ -30,6 +30,7 @@ cc_library(
         "//engine/src/flutter:config",
         "//engine/src/flutter/fml",
         "@vulkan-headers//:vulkan_headers",
+        "@vulkan_deps_tree//:root_includes",
     ],
     alwayslink = True,
 )

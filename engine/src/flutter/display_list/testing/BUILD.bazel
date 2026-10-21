@@ -45,9 +45,12 @@ cc_library(
 
 cc_library(
     name = "surface_provider_config",
-    defines = [
-        "ENABLE_SOFTWARE_BENCHMARKS",  # surface_provider_include_software
-    ] + select({
+    defines = select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "ENABLE_SOFTWARE_BENCHMARKS",  # surface_provider_include_software
+        ],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
             "ENABLE_OPENGL_BENCHMARKS",  # surface_provider_include_gl
@@ -61,9 +64,13 @@ cc_library(
     srcs = [
         "dl_test_surface_provider.cc",
         "skia/dl_test_surface_instance_skia.cc",
-        "skia/dl_test_surface_provider_skia_software.cc",  # surface_provider_include_software
-        "skia/dl_test_surface_software.cc",  # surface_provider_include_software
     ] + select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "skia/dl_test_surface_provider_skia_software.cc",  # surface_provider_include_software
+            "skia/dl_test_surface_software.cc",  # surface_provider_include_software
+        ],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
             "dl_test_surface_gl.cc",  # surface_provider_include_gl
@@ -73,8 +80,12 @@ cc_library(
     hdrs = [
         "dl_test_surface_provider.h",
         "skia/dl_test_surface_instance_skia.h",
-        "skia/dl_test_surface_software.h",  # surface_provider_include_software
     ] + select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "skia/dl_test_surface_software.h",  # surface_provider_include_software
+        ],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [],
         "//conditions:default": [
             "dl_test_surface_gl.h",  # surface_provider_include_gl
@@ -85,6 +96,14 @@ cc_library(
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/common/graphics
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = select({
+        "@platforms//os:android": [
+            "-landroid",  # is_android
+            "-lEGL",  # is_android
+            "-lGLESv2",  # is_android
         ],
         "//conditions:default": [],
     }),

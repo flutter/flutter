@@ -45,6 +45,7 @@ cc_library(
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "@vulkan-headers//:vulkan_headers",  # shell_enable_vulkan
+            "@vulkan_deps_tree//:root_includes",
         ],
         "//conditions:default": [],
     }),

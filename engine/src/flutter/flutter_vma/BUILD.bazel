@@ -37,6 +37,7 @@ cc_library(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/vulkan/procs",
         "@vulkan-headers//:vulkan_headers",
+        "@vulkan_deps_tree//:root_includes",
         "@vulkan_memory_allocator",
     ],
     alwayslink = True,

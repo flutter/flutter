@@ -38,11 +38,17 @@ cc_library(
         "src/txt/text_style.cc",
         "src/txt/typeface_font_asset_provider.cc",
     ] + select({
+        "@platforms//os:android": [
+            "src/txt/platform_android.cc",  # !(is_mac || is_ios) && is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
         "@platforms//os:linux": [
             "src/txt/platform_linux.cc",  # !(is_mac || is_ios) && !(is_android) && is_linux
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:android": [],
         "@platforms//os:linux": [],
         "//conditions:default": [
             "src/txt/platform.cc",  # !(is_mac || is_ios) && !(is_android) && !(is_linux) && !(is_fuchsia) && !(is_win)

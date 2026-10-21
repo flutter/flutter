@@ -347,6 +347,7 @@ const Map<String, String> labelOverrides = <String, String>{
   '//third_party/icu:icuuc': '@icu//:icuuc',
   '//third_party/zlib': '@zlib',
   '//third_party/freetype2': '@freetype2',
+  '//third_party/cpu_features': '@cpu_features',
   '//third_party/boringssl': '//engine/src/flutter/third_party/boringssl',
   '//third_party/googletest:gtest': '@googletest//:gtest',
   '//third_party/googletest:gmock': '@googletest//:gtest',
@@ -382,6 +383,7 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/skia:skia': '@skia',
   '//flutter/third_party/expat': '@expat',
   '//flutter/third_party/freetype2': '@freetype2',
+  '//flutter/third_party/cpu_features': '@cpu_features',
   '//flutter/third_party/libjpeg-turbo': '@libjpeg-turbo',
   '//flutter/third_party/libpng': '@libpng',
   '//flutter/third_party/libwebp': '@libwebp',
@@ -442,6 +444,10 @@ const Map<String, String> labelOverrides = <String, String>{
 /// their view in their libraries instead (ICU's root_includes).
 const Map<String, List<String>> rootIncludeViews = <String, List<String>>{
   '@abseil-cpp//': <String>['@abseil_cpp_tree//:root_includes'],
+  // The Vulkan headers under "third_party/vulkan-deps/vulkan-headers/src/
+  // include/..." (the Android swapchain's spelling, through //flutter as an
+  // include root).
+  '@vulkan-headers//': <String>['@vulkan_deps_tree//:root_includes'],
   '@googletest//': <String>[
     '@googletest_tree//:root_includes',
     '@googletest_tree//:third_party_dir_includes',
@@ -1065,6 +1071,12 @@ final Map<String, Map<String, String>> comparisonSettings =
 const Map<String, String> _cpuNameSettings = <String, String>{
   'arm': '@platforms//cpu:armv7',
   'arm64': '@platforms//cpu:aarch64',
+  // The CPUs the engine never builds for but third-party files test
+  // (cpu_features' chain over current_cpu): keys no platform of the build
+  // sets.
+  'mips': '@platforms//cpu:mips64',
+  'ppc': '@platforms//cpu:ppc',
+  'riscv64': '@platforms//cpu:riscv64',
   'wasm': '@platforms//cpu:wasm32',
   'x64': '@platforms//cpu:x86_64',
   'x86': '@platforms//cpu:x86_32',
@@ -1101,10 +1113,27 @@ const List<String> targetPlatformNames = <String>[
 ];
 
 /// The config_setting that holds exactly when `variable != "value"` does,
-/// for the denied comparisons of a conjunction: the OS names' complements.
+/// for the denied comparisons of a conjunction: the OS names' complements,
+/// and the CPU names' (skcms: `target_cpu != "x64" || target_os ==
+/// "android"`).
 const Map<String, Map<String, String>> comparisonNegatedSettings = <String, Map<String, String>>{
   'target_os': _osNameNegatedSettings,
   'current_os': _osNameNegatedSettings,
+  'target_cpu': _cpuNameNegatedSettings,
+  'current_cpu': _cpuNameNegatedSettings,
+};
+
+/// The complements of the CPU constraints (//engine/src/flutter/build/bazel's
+/// `not_cpu_<name>`: any of the other CPUs).
+const Map<String, String> _cpuNameNegatedSettings = <String, String>{
+  'arm': '//engine/src/flutter/build/bazel:not_cpu_arm',
+  'arm64': '//engine/src/flutter/build/bazel:not_cpu_arm64',
+  'mips': '//engine/src/flutter/build/bazel:not_cpu_mips',
+  'ppc': '//engine/src/flutter/build/bazel:not_cpu_ppc',
+  'riscv64': '//engine/src/flutter/build/bazel:not_cpu_riscv64',
+  'wasm': '//engine/src/flutter/build/bazel:not_cpu_wasm',
+  'x64': '//engine/src/flutter/build/bazel:not_cpu_x64',
+  'x86': '//engine/src/flutter/build/bazel:not_cpu_x86',
 };
 
 const Map<String, String> _osNameSettings = <String, String>{
@@ -1961,7 +1990,6 @@ Assumptions generationAssumptions() {
     'default_library_type': const GnStringValue('static_library'),
     'host_cpu': const GnStringValue('x64'),
     'host_os': const GnStringValue('linux'),
-    'is_android': const GnBoolValue(false),
     'is_apple': const GnBoolValue(false),
     'is_component_build': const GnBoolValue(false),
     'is_fuchsia': const GnBoolValue(false),

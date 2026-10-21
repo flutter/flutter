@@ -21,9 +21,19 @@ cc_library(
         "vulkan_native_surface.cc",
         "vulkan_skia_proc_table.cc",
         "vulkan_surface.cc",
-        "vulkan_swapchain_stub.cc",  # !(is_android)
         "vulkan_utilities.cc",
-    ],
+    ] + select({
+        "@platforms//os:android": [
+            "vulkan_native_surface_android.cc",  # is_android
+            "vulkan_swapchain.cc",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "vulkan_swapchain_stub.cc",  # !(is_android)
+        ],
+    }),
     hdrs = [
         "swiftshader_path.h",
         "vulkan_application.h",
@@ -37,7 +47,12 @@ cc_library(
         "vulkan_surface.h",
         "vulkan_swapchain.h",
         "vulkan_utilities.h",
-    ],
+    ] + select({
+        "@platforms//os:android": [
+            "vulkan_native_surface_android.h",  # is_android
+        ],
+        "//conditions:default": [],
+    }),
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from procs
         "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
@@ -58,6 +73,7 @@ cc_library(
         "//engine/src/flutter/vulkan/procs",
         "@skia",
         "@vulkan-headers//:vulkan_headers",
+        "@vulkan_deps_tree//:root_includes",
     ],
     alwayslink = True,
 )

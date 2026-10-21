@@ -1,0 +1,79 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @android_tools: the Android SDK and NDK CIPD package
+# (DEPS: flutter/android/sdk/all/${platform}, under download_android_deps;
+# engine/src/flutter/third_party/android_tools), as the engine's Android
+# toolchains read it. GN compiles for Android with the engine's own clang
+# against the NDK's sysroot (build/config/android/config.gni:
+# android_ndk_version, android_toolchain_root; build/config/sysroot.gni), links
+# -nostdlib with the sysroot's crt objects and libraries of the ABI's API level
+# (build/toolchain/android/BUILD.gn's libs_section_prefix/postfix), and takes
+# the compiler runtime from the NDK's clang, since the engine's clang ships no
+# Android runtimes (-lclang_rt.builtins-<arch>-android). Nothing else of the
+# SDK is read here; the Java side (the SDK's platforms/android.jar, the build
+# tools) is a later phase.
+
+package(default_visibility = ["//visibility:public"])
+
+# build/config/android/config.gni: android_ndk_version. The directory name
+# is the version.
+NDK_VERSION = "28.2.13676358"
+
+NDK = "sdk/ndk/" + NDK_VERSION
+
+# android_toolchain_root: the NDK's LLVM toolchain for a Linux x64 host.
+TOOLCHAIN = NDK + "/toolchains/llvm/prebuilt/linux-x86_64"
+
+# The sysroot (GN's `sysroot` for Android). The toolchain derives the
+# --sysroot path from the NOTICE file's directory.
+SYSROOT = TOOLCHAIN + "/sysroot"
+
+exports_files([SYSROOT + "/NOTICE"])
+
+# usr/include is one directory input, as the Linux sysroots' (see
+# sysroot/BUILD.sysroot_linux.bazel); the per-triple headers
+# (usr/include/aarch64-linux-android) are under it.
+filegroup(
+    name = "sysroot_headers",
+    srcs = [SYSROOT + "/usr/include"],
+)
+
+# GN's ABIs and API levels (build/config/android/config.gni: android_api_level
+# is 24, 35 for riscv64), by the CPU name GN's android_cpu uses.
+ABIS = {
+    "arm": ("arm-linux-androideabi", "24"),
+    "arm64": ("aarch64-linux-android", "24"),
+    "x64": ("x86_64-linux-android", "24"),
+    "x86": ("i686-linux-android", "24"),
+    "riscv64": ("riscv64-linux-android", "35"),
+}
+
+# What the linker resolves for one ABI: the API level's directory -- the crt
+# objects (crtbegin_so.o, crtend_so.o, crtbegin_dynamic.o, crtend_android.o),
+# libc, libm, libdl, liblog, libandroid, libEGL, libGLESv2, libjnigraphics,
+# libvulkan and the rest -- and the compiler runtime archive of the NDK's
+# clang (whatever its version directory: lib/clang/*/lib/linux).
+[
+    filegroup(
+        name = "libraries_" + cpu,
+        srcs = glob([
+            SYSROOT + "/usr/lib/" + triple + "/" + api + "/*",
+            TOOLCHAIN + "/lib/clang/*/lib/linux/libclang_rt.builtins-" + triple.split("-")[0] + "-android.a",
+        ]),
+    )
+    for cpu, (triple, api) in ABIS.items()
+]
+
+# The compiler runtime archive alone, for the toolchain to name its directory
+# (-L) and the library (-l), as GN's android toolchain does.
+[
+    filegroup(
+        name = "builtins_" + cpu,
+        srcs = glob([
+            TOOLCHAIN + "/lib/clang/*/lib/linux/libclang_rt.builtins-" + triple.split("-")[0] + "-android.a",
+        ]),
+    )
+    for cpu, (triple, api) in ABIS.items()
+]
