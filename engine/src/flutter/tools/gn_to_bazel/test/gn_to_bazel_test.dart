@@ -4770,6 +4770,11 @@ zip_bundle(
         "//engine/src/flutter/common:runtime_mode_release": {"extra/tool": "tool"},
         "//conditions:default": {},
     }),
+    deps = [
+        ":_tool",
+        ":copy_headers",
+        ":engine_library",
+    ],
 )
 '''),
       );
@@ -4906,6 +4911,10 @@ zip_bundle_from_file(
     name = "sdk_archive",
     output = "flutter-web-sdk.zip",
     trees = [":sdk_archive_tree"],
+    deps = [
+        ":kernel",
+        ":lib",
+    ],
 )
 '''),
         );
@@ -5085,6 +5094,7 @@ zip_bundle(
         "//engine/src/flutter/common:runtime_mode_debug": [":artifacts_shader_lib"],
         "//conditions:default": [],
     }),
+    deps = ["//engine/src/flutter/shell/testing"],
 )
 '''),
       );
@@ -5189,6 +5199,11 @@ zip_bundle(
         "gen_snapshot": "gen_snapshot",
     },
     trees = [":flutter_gtk_publish_headers_linux"],
+    deps = [
+        ":flutter_linux_gtk",
+        ":publish_headers_linux",
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",
+    ],
 )
 '''),
       );

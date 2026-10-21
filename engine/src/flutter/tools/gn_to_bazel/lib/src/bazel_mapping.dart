@@ -365,6 +365,11 @@ const Map<String, String> labelOverrides = <String, String>{
       '//engine/src/flutter/build/bazel/dart_wrap:elf_loader',
   '//flutter/third_party/dart/runtime/bin:native_assets_api':
       '//engine/src/flutter/build/bazel/dart_wrap:native_assets_api',
+  // The target's gen_snapshot, as a dependency (the archives' deps): the
+  // wrap's product, which an entry naming $root_out_dir/gen_snapshot
+  // resolves to as well (buildOutputLabels).
+  '//flutter/third_party/dart/runtime/bin:gen_snapshot':
+      '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot',
   '//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion':
       '//engine/src/flutter/build/bazel/dart_wrap:libdouble_conversion',
   '//flutter/third_party/dart/third_party/perfetto:libprotozero':
@@ -1430,10 +1435,14 @@ final class TemplateArgument {
 const Map<String, TemplateArgument> _zipBundleArguments = <String, TemplateArgument>{
   'output': TemplateArgument('output', TemplateArgumentKind.scalar),
   'files': TemplateArgument('files', TemplateArgumentKind.archiveEntries),
-  // The deps carry no dependency of their own here (the entries' labels
-  // do), except where the entries are a directory of the build directory
-  // (build_directory_tree), whose srcs they become.
-  'deps': TemplateArgument('deps', TemplateArgumentKind.ignored),
+  // The entries' labels carry the archive's inputs; the deps -- the targets
+  // whose outputs the entries are, in GN -- are the rule's `deps` so that an
+  // install of the archive lays what their closure places, as ninja's build
+  // of the archive leaves every output of those targets in the build
+  // directory (the core snapshot's four files, two of which artifacts.zip
+  // packs). Where the entries are a directory of the build directory
+  // (build_directory_tree), the deps are the tree's srcs as well.
+  'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
   'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
   // The invocations' helpers for their names and paths (`exe`, `prefix`,
   // `zip_out_dir`) are read by the strings of their own blocks, which

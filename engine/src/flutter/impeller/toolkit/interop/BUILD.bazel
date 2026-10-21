@@ -450,6 +450,15 @@ zip_bundle(
         },
         "//conditions:default": {},
     }),
+    deps = [
+        ":shared_library",
+        ":static_library",
+    ] + select({
+        "@platforms//os:linux": [
+            "//engine/src/flutter/impeller/compiler:impellerc",  # is_linux || is_mac || is_win
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
