@@ -64,14 +64,10 @@ prebuilt libraries as `cc_import(strip_include_prefix = "include")`, an
 attribute Bazel 8.2.1's `cc_import` does not have (rules_cc 0.1.5 forwards
 to the native rule on Bazel 8; rules_cc 0.2.x's Starlark `cc_import` is used
 only on Bazel 9). Bazel 8.3.1's has it: the package analyzes and builds
-under 8.3.1, 8.4.2 and 8.8.1 and not under 8.2.1, so the spike is built with
-`USE_BAZEL_VERSION=8.3.1` (or later) until `.bazelversion`, which tracks
-Skia's pin, moves past 8.2.1. A newer Bazel rewrites `MODULE.bazel.lock` in
-its own format (8.8.1: `lockFileVersion` 28, with the `bazel_tools`
-dependencies it resolves), which 8.2.1 cannot read and regenerates piecemeal:
-after building the spike, run `bazelisk build --nobuild
-//engine/src/flutter/...` under the pinned version before committing, which
-restores the lockfile byte for byte.
+under 8.3.1, 8.4.2 and 8.8.1 and not under 8.2.1. `.bazelversion` is 8.8.1
+since 2026-10-20 (the user's call: the engine's pin moves ahead of Skia's
+8.2.1, which only matters once Skia is consumed as a module, and then the
+consumer's Bazel runs), so the spike builds with the pinned version.
 
 ## What the Fuchsia phase will have to decide
 

@@ -24,10 +24,13 @@ module(
     bazel_compatibility = [">=8.0.0"],
 )
 
-# `.bazelversion` and the versions below track Skia's pins
-# (`engine/src/flutter/third_party/skia/{.bazelversion,MODULE.bazel}`) so that
-# the two workspaces agree once Skia is consumed as a Bazel module. Bump them
-# together with Skia rolls rather than independently.
+# The versions below track Skia's pins
+# (`engine/src/flutter/third_party/skia/MODULE.bazel`) so that the two
+# workspaces agree once Skia is consumed as a Bazel module; bump them together
+# with Skia rolls rather than independently. `.bazelversion` is the engine's
+# own (8.8.1, past Skia's 8.2.1): the Fuchsia SDK's rules need Bazel 8.3's
+# `cc_import(strip_include_prefix)`, and a Skia consumed as a module runs
+# under the consumer's Bazel regardless.
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_cc", version = "0.1.5")
