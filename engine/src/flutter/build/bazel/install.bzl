@@ -133,7 +133,7 @@ _install = rule(
         ),
         "build_directory_name": attr.string(
             mandatory = True,
-            doc = "GN's name for the build directory in this mode (host_debug, host_release, ...).",
+            doc = "GN's name for the build directory of this configuration (host_debug, host_release, wasm_release, ...).",
         ),
         "optimized": attr.bool(
             doc = "Whether this is an optimized build; GN's name carries _unopt otherwise.",

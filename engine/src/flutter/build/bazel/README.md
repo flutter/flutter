@@ -930,10 +930,15 @@ GN configuration, the ninja targets it builds, the archives it uploads from
 converter reads the Linux builder files (`tools/gn_to_bazel`'s
 `builders.dart`, run with the rest) and generates two files beside them.
 `ci/builders/configs.bazelrc`, which the root `.bazelrc` imports, has a
-`build:<name>` configuration per Linux x64 host build whose flags the Bazel
-build can all express -- `--runtime-mode` is the runtime mode setting,
+`build:<name>` configuration per Linux build -- the x64 host's own and the
+web's -- whose flags the Bazel build can all express -- `--runtime-mode` is the runtime mode setting,
 `--unoptimized` the compilation mode (its absence `-c opt`), `--target-dir`
-the build directory, `--enable-fontconfig` the fontconfig flag
+the build directory, `--web` the wasm platform
+(`--platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten`,
+whose flags carry what `tools/gn`'s `to_gn_wasm_args` sets, LTO on the
+optimized build among them -- so for the web `--no-lto` is the flag the
+Bazel build cannot express, where for the host, whose toolchain has no LTO,
+it is LTO itself), `--enable-fontconfig` the fontconfig flag
 (`//engine/src/flutter/txt:use_fontconfig`, which the three `*_desktop`
 builds set: txt links the sysroot's libfontconfig and Skia's fontconfig font
 manager is built and chosen, as in CI's Linux desktop artifact),
@@ -955,23 +960,30 @@ target list, neither a flag -- and, for a build with a flag the Bazel build
 has no setting for yet, the reason and no configuration:
 `--no-prebuilt-dart-sdk`, LTO (which `tools/gn` enables without `--no-lto`). The developer's own configurations,
 `local_engine.json`'s `linux/` builds (what `et build --config <name>` runs:
-`host_debug`, `host_debug_unopt`, `host_profile`, `host_release`, with
+`host_debug`, `host_debug_unopt`, `host_profile`, `host_release`,
+`wasm_release`, `wasm_debug_unopt`, with
 `--no-stripped`, which the Bazel build has no stripped copies to answer
 anyway), are read with the rest, and a name two builds share with the same
-flags -- CI's `ci/host_debug` and the developer's `linux/host_debug` -- is
+flags -- CI's `ci/host_debug` and the developer's `linux/host_debug`, CI's
+`ci/wasm_release` and the developer's `linux/wasm_release` -- is
 one configuration; where CI's flags differ from the developer's under one
 bare name, the developer keeps the name `et` knows and CI's keeps its prefix
 as its build directory does: `ci_host_debug_unopt` (`out/ci/host_debug_unopt`,
-asan and a Debug VM) beside `host_debug_unopt`. Of the eighteen builds,
-seventeen have a configuration, fifteen distinct: `host_debug`,
+asan and a Debug VM) beside `host_debug_unopt`. Of the twenty-one builds,
+twenty have a configuration, seventeen distinct: `host_debug`,
 `host_debug_unopt`, `host_profile`, `host_release`, `host_debug_desktop`,
 `host_profile_desktop`, `host_release_desktop`, `host_debug_test`,
 `host_profile_test`, `host_release_test`, `ci_host_debug_unopt`,
 `host_debug_unopt_impeller_tests`, `host_debug_ddm`,
-`host_release_licenses`, `host_debug_clang_tidy`. `ci/builders/BUILD.bazel` has an `install` per
+`host_release_licenses`, `host_debug_clang_tidy`, `wasm_release`,
+`wasm_debug_unopt`. `ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a
 directory for its target of the same name, a bare unique name, as GN's
-ninja files spell them), installing into GN's `--target-dir`, with the
+ninja files spell them), installing into GN's `--target-dir` -- or, for a
+build without one, the directory `tools/gn` names for its flags, which the
+install rule reads off its configuration (`checkout_view.bzl`'s
+`build_directory_attrs`: `host` or `wasm`, the runtime mode, `_unopt`) --
+with the
 targets nothing converted answers to listed (`flutter:unittests`,
 `flutter/build/dart:dart_sdk`, the licenses tool):
 
@@ -979,10 +991,12 @@ targets nothing converted answers to listed (`flutter:unittests`,
 bazel run --config=host_release //engine/src/flutter/ci/builders:host_release
 bazel run --config=host_debug //engine/src/flutter/ci/builders:host_debug
 bazel run --config=host_profile //engine/src/flutter:install   # the developer's: everything
+bazel run --config=wasm_release //engine/src/flutter/ci/builders:wasm_release
 ```
 
-lay `out/ci/host_release/zip_archives/flutter_patched_sdk_product.zip` and
-`out/ci/host_debug/zip_archives/`'s six archives where the builders'
+lay `out/ci/host_release/zip_archives/flutter_patched_sdk_product.zip`,
+`out/ci/host_debug/zip_archives/`'s six archives and
+`out/wasm_release/zip_archives/flutter-web-sdk.zip` where the builders'
 recipes read them. The executables and shared libraries a build's targets
 produce (`flutter_tester`, `libpath_ops.so`) land in the build root, as GN
 puts them. A build with tests also gets a `<name>_tests` suite over the

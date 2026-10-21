@@ -4,20 +4,21 @@
 
 # Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.
 #
-# An install target per Linux x64 host build of the builder files, over the
-# Bazel counterparts of its ninja targets: `bazel run --config=<name> :<name>`
-# builds what the build builds and lays it into GN's build directory for it
-# (--target-dir), as the builder's recipe expects to find it. A ninja target
-# with no Bazel counterpart yet is listed; a build whose configuration the
-# Bazel build cannot express yet (configs.bazelrc) is built with the flags
-# of the nearest one; a test executable among the targets is not installed,
-# since `bazel test` runs tests from their own place. A build with tests has
-# a <name>_tests suite over the Bazel suites that stand for its run_tests.py
-# types (runTestsTypeSuites, runTestsEngineSuites in builders.dart):
-# `bazel test --config=<name> :<name>_tests` runs what the build runs, with
-# its other test steps (scripts of the checkout) listed. The suites are
-# manual: each stands for one builder, named; a wildcard run of the tree
-# has the tests themselves.
+# An install target per Linux build of the builder files (the x64 host's own
+# and the web's), over the Bazel counterparts of its ninja targets:
+# `bazel run --config=<name> :<name>` builds what the build builds and lays
+# it into GN's build directory for it (--target-dir, or the directory
+# tools/gn names for the flags), as the builder's recipe expects to find it.
+# A ninja target with no Bazel counterpart yet is listed; a build whose
+# configuration the Bazel build cannot express yet (configs.bazelrc) is built
+# with the flags of the nearest one; a test executable among the targets is
+# not installed, since `bazel test` runs tests from their own place. A build
+# with tests has a <name>_tests suite over the Bazel suites that stand for its
+# run_tests.py types (runTestsTypeSuites, runTestsEngineSuites in
+# builders.dart): `bazel test --config=<name> :<name>_tests` runs what the
+# build runs, with its other test steps (scripts of the checkout) listed. The
+# suites are manual: each stands for one builder, named; a wildcard run of
+# the tree has the tests themselves.
 
 load("//engine/src/flutter/build/bazel:install.bzl", "install")
 
@@ -321,6 +322,14 @@ test_suite(
 # Not built, no Bazel counterpart yet: default.
 # Nothing to install.
 
+# linux_web_engine_build.json: ci/wasm_release
+#   bazel run --config=wasm_release :wasm_release
+install(
+    name = "wasm_release",
+    testonly = True,
+    contents = ["//engine/src/flutter/web_sdk:flutter_web_sdk_archive"],
+)
+
 # local_engine.json: linux/host_debug
 #   ninja's default target, everything: bazel run --config=host_debug //engine/src/flutter:install
 
@@ -332,3 +341,15 @@ test_suite(
 
 # local_engine.json: linux/host_release
 #   ninja's default target, everything: bazel run --config=host_release //engine/src/flutter:install
+
+# local_engine.json: linux/wasm_release
+#   bazel run --config=wasm_release :wasm_release
+# The same install as linux_web_engine_build.json's ci/wasm_release, above.
+
+# local_engine.json: linux/wasm_debug_unopt
+#   bazel run --config=wasm_debug_unopt :wasm_debug_unopt
+install(
+    name = "wasm_debug_unopt",
+    testonly = True,
+    contents = ["//engine/src/flutter/web_sdk:flutter_web_sdk_archive"],
+)

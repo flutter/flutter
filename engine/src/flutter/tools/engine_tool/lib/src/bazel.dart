@@ -45,8 +45,9 @@ enum BuildBackend {
 /// the `bazel` process itself (bazelisk, run from `engine/src`).
 ///
 /// The Bazel side of a build is what tools/gn_to_bazel generates from the
-/// builder files (`builders.dart`): a `--config=<name>` for every Linux x64
-/// host build whose `tools/gn` flags the Bazel build can express, an install
+/// builder files (`builders.dart`): a `--config=<name>` for every Linux build
+/// (the x64 host's own, the web's) whose `tools/gn` flags the Bazel build can
+/// express, an install
 /// target laying the build's outputs into its build directory, and a test
 /// suite over its `run_tests.py` types. This class asks that code, so that
 /// `et` and the generated files cannot disagree on a name.
@@ -54,7 +55,7 @@ final class Bazel {
   /// The Bazel side of the builds of [configs] (the builder files), for
   /// commands run in [environment].
   Bazel(this._environment, Map<String, BuilderConfig> configs)
-    : _builds = gn_to_bazel.linuxHostBuilds(configs);
+    : _builds = gn_to_bazel.linuxBuilds(configs);
 
   final Environment _environment;
   final List<gn_to_bazel.BuilderBuild> _builds;
@@ -83,8 +84,8 @@ final class Bazel {
     final gn_to_bazel.BuilderBuild? builderBuild = _builderBuild(build);
     if (builderBuild == null) {
       _environment.logger.error(
-        'The Bazel build has no configuration for ${build.name}: only the Linux x64 '
-        'host builds of ci/builders have one (tools/gn_to_bazel generates them).',
+        'The Bazel build has no configuration for ${build.name}: only the Linux '
+        'host and web builds of ci/builders have one (tools/gn_to_bazel generates them).',
       );
       return null;
     }
