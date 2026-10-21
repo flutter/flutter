@@ -9,6 +9,7 @@
 library flutter_tools_core;
 
 export 'src/build.dart';
+export 'src/build_system/depfile.dart';
 export 'src/clean.dart';
 export 'src/config.dart';
 export 'src/device.dart';

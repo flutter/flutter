@@ -74,6 +74,7 @@ ExtensionTarget _createTarget({
   FakeExtensionBuildManager? buildManager,
   List<String> dependencies = const <String>[],
   DependencyResolverCallback? dependencyResolver,
+  List<String> depfiles = const <String>[],
   List<ExtensionSource> inputs = const <ExtensionSource>[],
   String name = 'custom-target',
   List<ExtensionSource> outputs = const <ExtensionSource>[],
@@ -85,6 +86,7 @@ ExtensionTarget _createTarget({
       name: name,
       targetPlatform: targetPlatform,
       dependencies: dependencies,
+      depfiles: depfiles,
       inputs: inputs,
       outputs: outputs,
     ),
@@ -262,6 +264,40 @@ void main() {
   });
 
   testWithoutContext(
+    'ExtensionTarget merges extraDefines into environment.defines and normalizes declared depfiles',
+    () async {
+      final buildManager = FakeExtensionBuildManager(
+        buildResult: const ExtensionBuildResult(
+          success: true,
+          extraDefines: <String, String>{'CustomDefine': 'custom-value'},
+        ),
+      );
+      final ExtensionTarget target = _createTarget(
+        buildManager: buildManager,
+        depfiles: const <String>['custom_target.d'],
+      );
+      expect(target.depfiles, equals(const <String>['custom_target.d']));
+
+      environment.buildDir.createSync(recursive: true);
+      final File depfile = environment.buildDir.childFile('custom_target.d');
+      depfile.writeAsStringSync(
+        const ExtensionDepfile(
+          inputs: <String>['lib/extra_input.dart'],
+          outputs: <String>['build/extra_output.txt'],
+        ).format(),
+      );
+
+      await target.build(environment);
+
+      expect(environment.defines['CustomDefine'], equals('custom-value'));
+      final ResolvedFiles resolvedInputs = target.resolveInputs(environment);
+      expect(resolvedInputs.sources.map((File f) => f.path), contains('/lib/extra_input.dart'));
+      final ResolvedFiles resolvedOutputs = target.resolveOutputs(environment);
+      expect(resolvedOutputs.sources.map((File f) => f.path), contains('/build/extra_output.txt'));
+    },
+  );
+
+  testWithoutContext(
     'ExtensionTarget throws ToolExit for unsupported artifact or hostArtifact',
     () async {
       final ExtensionTarget unknownArtifactTarget = _createTarget(
@@ -412,6 +448,42 @@ void main() {
         );
       },
     );
+
+    testWithoutContext('resolves outputDir without {TARGET_PLATFORM} when targetPlatform is null and throws ToolExit if {TARGET_PLATFORM} is used', () {
+      final Directory projectDir = fileSystem.directory('/project');
+      final Directory buildOutputDir = projectDir.childDirectory('build');
+      final Directory resolved = resolveExtensionOutputDir(
+        buildMode: .release,
+        buildOutputDir: buildOutputDir,
+        fileSystem: fileSystem,
+        projectDir: projectDir,
+        target: const ExtensionBuildTarget(
+          description: 'Platform-agnostic target',
+          name: 'agnostic-target',
+          outputDir: '{OUTPUT_DIR}/agnostic/{BUILD_MODE}',
+        ),
+      );
+      expect(resolved.path, equals('/project/build/agnostic/release'));
+
+      expect(
+        () => resolveExtensionOutputDir(
+          buildMode: .release,
+          buildOutputDir: buildOutputDir,
+          fileSystem: fileSystem,
+          projectDir: projectDir,
+          target: const ExtensionBuildTarget(
+            description: 'Platform-agnostic target with invalid placeholder',
+            name: 'agnostic-target',
+            outputDir: '{OUTPUT_DIR}/{TARGET_PLATFORM}/{BUILD_MODE}',
+          ),
+        ),
+        throwsToolExit(
+          message:
+              'Placeholder "{TARGET_PLATFORM}" in outputDir "{OUTPUT_DIR}/{TARGET_PLATFORM}/{BUILD_MODE}" '
+              'requires targetPlatform to be set on build target "agnostic-target".',
+        ),
+      );
+    });
   });
 
   testWithoutContext('BuiltInArtifacts, BuiltInHostArtifacts, Linux artifacts, and BuiltInTargets match host definitions', () {

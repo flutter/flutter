@@ -54,11 +54,8 @@ class ExtensionBuildContext {
 /// subcommands via [BuildService.buildTargets].
 @immutable
 abstract class BuildTarget {
-  const BuildTarget({
-    required this.description,
-    required this.outputDir,
-    required this.targetPlatform,
-  });
+  const BuildTarget({required this.description, required this.outputDir, this.targetPlatform})
+    : assert(targetPlatform == null || targetPlatform != '');
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
   String get name;
@@ -66,14 +63,14 @@ abstract class BuildTarget {
   /// Description of what this target builds.
   final String description;
 
-  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
+  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
+  /// or `null` if this target is platform-agnostic.
   ///
   /// This is an open [String] rather than an enum so that extensions for custom
   /// embedders can declare platform identifiers that are not built into Flutter.
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
-  // TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
-  final String targetPlatform;
+  final String? targetPlatform;
 
   /// The directory pattern used by `flutter build` to determine this target's
   /// output directory, for example
@@ -123,6 +120,13 @@ abstract class AssembleTarget {
 
   /// The names of other assemble targets that this target depends on.
   List<String> get dependencies => const <String>[];
+
+  /// Names of `.d` dependency files written by this target into the build directory.
+  ///
+  /// See also:
+  ///
+  /// * [ExtensionDepfile], which formats and parses `.d` dependency files.
+  List<String> get depfiles => const <String>[];
 
   /// The input [ExtensionSource]s for this target.
   List<ExtensionSource> get inputs => const <ExtensionSource>[];
@@ -230,6 +234,7 @@ abstract base class BuildService extends ToolExtensionService {
         .map(
           (AssembleTarget target) => ExtensionAssembleTarget(
             dependencies: target.dependencies,
+            depfiles: target.depfiles,
             description: target.description,
             inputs: target.inputs,
             name: target.name,

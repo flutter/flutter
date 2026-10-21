@@ -10,6 +10,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../experimental/extension_build_manager.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 import '../exceptions.dart';
 
 /// Resolves a build target dependency by its [dependency] name.
@@ -52,11 +53,15 @@ class ExtensionTarget extends Target {
       .toList();
 
   @override
+  List<String> get depfiles => assembleTarget.depfiles;
+
+  @override
   Future<void> build(Environment environment) async {
     final Environment(
       :Artifacts artifacts,
       :Directory buildDir,
       :Map<String, String> defines,
+      :DepfileService depFileService,
       :FileSystem fileSystem,
       :Directory outputDir,
       :Directory projectDir,
@@ -93,6 +98,16 @@ class ExtensionTarget extends Target {
             : 'Extension assemble target "${assembleTarget.name}" failed.',
       );
     }
+
+    defines.addAll(result.extraDefines);
+
+    for (final String depfileName in depfiles) {
+      final File depfileFile = buildDir.childFile(depfileName);
+      if (depfileFile.existsSync()) {
+        final Depfile depfile = depFileService.parse(depfileFile, projectDir);
+        depFileService.writeToFile(depfile, depfileFile, writeEmpty: true);
+      }
+    }
   }
 }
 
@@ -110,7 +125,8 @@ const _supportedOutputDirPlaceholders = <String>{
 ///
 /// Relative paths are resolved relative to [projectDir].
 /// Throws a [ToolExit] if [ExtensionBuildTarget.outputDir] contains an
-/// unsupported `{...}` placeholder.
+/// unsupported `{...}` placeholder or uses `{TARGET_PLATFORM}` when
+/// [ExtensionBuildTarget.targetPlatform] is `null`.
 Directory resolveExtensionOutputDir({
   required BuildMode buildMode,
   required Directory buildOutputDir,
@@ -125,12 +141,20 @@ Directory resolveExtensionOutputDir({
         'Unsupported placeholder "$placeholder" in outputDir "${target.outputDir}" for build target "${target.name}".',
       );
     }
+    if (placeholder == BuiltInPlaceholders.targetPlatform && target.targetPlatform == null) {
+      throwToolExit(
+        'Placeholder "${BuiltInPlaceholders.targetPlatform}" in outputDir "${target.outputDir}" '
+        'requires targetPlatform to be set on build target "${target.name}".',
+      );
+    }
   }
   String outputPath = target.outputDir
       .replaceAll(BuiltInPlaceholders.outputDir, buildOutputDir.path)
       .replaceAll(BuiltInPlaceholders.projectDir, projectDir.path)
-      .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName)
-      .replaceAll(BuiltInPlaceholders.targetPlatform, target.targetPlatform);
+      .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName);
+  if (target.targetPlatform case final String targetPlatform) {
+    outputPath = outputPath.replaceAll(BuiltInPlaceholders.targetPlatform, targetPlatform);
+  }
   if (fileSystem.path.isRelative(outputPath)) {
     outputPath = fileSystem.path.join(projectDir.path, outputPath);
   }
@@ -199,8 +223,8 @@ Map<String, String> resolveExtensionAssembleTargetArtifacts({
   return resolvedArtifacts;
 }
 
-TargetPlatform? _tryResolveTargetPlatform(String platformName) {
-  if (platformName.isEmpty) {
+TargetPlatform? _tryResolveTargetPlatform(String? platformName) {
+  if (platformName == null || platformName.isEmpty) {
     return null;
   }
   try {

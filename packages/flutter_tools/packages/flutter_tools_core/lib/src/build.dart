@@ -9,6 +9,7 @@ import 'build_system/source.dart';
 import 'json_utils.dart';
 
 export 'build_system/constants.dart';
+export 'build_system/depfile.dart';
 export 'build_system/source.dart';
 
 final _upperRegex = RegExp(r'[A-Z]');
@@ -90,18 +91,24 @@ class ExtensionBuildTarget {
     required this.description,
     required this.name,
     required this.outputDir,
-    required this.targetPlatform,
+    this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-  });
+  }) : assert(targetPlatform == null || targetPlatform != '');
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
+    final String? targetPlatform = json.nullableField<String>(targetPlatformKey);
+    if (targetPlatform != null && targetPlatform.isEmpty) {
+      throw const FormatException(
+        'Invalid "$targetPlatformKey" in ExtensionBuildTarget: must not be empty.',
+      );
+    }
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
       name: json.requiredField<String>(nameKey),
       outputDir: json.requiredField<String>(outputDirKey),
-      targetPlatform: json.requiredField<String>(targetPlatformKey),
+      targetPlatform: targetPlatform,
       artifacts: <ExtensionArtifact>{
         for (final String name in json.stringIterable(artifactsKey)) ExtensionArtifact(name),
       },
@@ -147,14 +154,14 @@ class ExtensionBuildTarget {
   /// The name of this build target (e.g. `'custom-apk'`).
   final String name;
 
-  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
+  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
+  /// or `null` if this target is platform-agnostic.
   ///
   /// This is an open [String] rather than an enum so that extensions for custom
   /// embedders can declare platform identifiers that are not built into Flutter.
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
-  // TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
-  final String targetPlatform;
+  final String? targetPlatform;
 
   /// Engine artifacts required by this build target, resolved for [targetPlatform]
   /// and the active [BuildMode].
@@ -177,7 +184,7 @@ class ExtensionBuildTarget {
   Map<String, Object?> toMap() => <String, Object?>{
     descriptionKey: description,
     nameKey: name,
-    targetPlatformKey: targetPlatform,
+    targetPlatformKey: ?targetPlatform,
     artifactsKey: artifacts.map((ExtensionArtifact a) => a.name).toList(),
     hostArtifactsKey: hostArtifacts.map((ExtensionHostArtifact a) => a.name).toList(),
     outputDirKey: outputDir,
@@ -220,6 +227,7 @@ class ExtensionAssembleTarget {
     required this.name,
     required this.targetPlatform,
     this.dependencies = const <String>[],
+    this.depfiles = const <String>[],
     this.inputs = const <ExtensionSource>[],
     this.outputs = const <ExtensionSource>[],
   });
@@ -231,6 +239,7 @@ class ExtensionAssembleTarget {
       name: json.requiredField<String>(nameKey),
       targetPlatform: json.requiredField<String>(targetPlatformKey),
       dependencies: json.stringIterable(dependenciesKey).toList(),
+      depfiles: json.stringIterable(depfilesKey).toList(),
       inputs: _parseSources(json, inputsKey),
       outputs: _parseSources(json, outputsKey),
     );
@@ -254,6 +263,10 @@ class ExtensionAssembleTarget {
 
   /// Map key for [dependencies].
   static const String dependenciesKey = 'dependencies';
+
+  /// Map key for [depfiles].
+  @visibleForTesting
+  static const String depfilesKey = 'depfiles';
 
   /// Map key for [description].
   static const String descriptionKey = 'description';
@@ -297,6 +310,9 @@ class ExtensionAssembleTarget {
   /// The names of other targets that this target depends on.
   final List<String> dependencies;
 
+  /// Names of `.d` dependency files written by this target into the build directory.
+  final List<String> depfiles;
+
   /// Input file patterns and artifacts.
   final List<ExtensionSource> inputs;
 
@@ -310,6 +326,7 @@ class ExtensionAssembleTarget {
     nameKey: name,
     targetPlatformKey: targetPlatform,
     dependenciesKey: dependencies,
+    if (depfiles.isNotEmpty) depfilesKey: depfiles,
     inputsKey: inputs.map((ExtensionSource s) => s.toMap()).toList(),
     outputsKey: outputs.map((ExtensionSource s) => s.toMap()).toList(),
   };
@@ -318,7 +335,7 @@ class ExtensionAssembleTarget {
   String toString() =>
       'ExtensionAssembleTarget(name: $name, targetPlatform: $targetPlatform, '
       'description: $description, dependencies: $dependencies, '
-      'inputs: $inputs, outputs: $outputs)';
+      'depfiles: $depfiles, inputs: $inputs, outputs: $outputs)';
 
   @override
   bool operator ==(Object other) {
@@ -328,6 +345,7 @@ class ExtensionAssembleTarget {
             other.name == name &&
             other.targetPlatform == targetPlatform &&
             _listEquals(other.dependencies, dependencies) &&
+            _listEquals(other.depfiles, depfiles) &&
             _listEquals(other.inputs, inputs) &&
             _listEquals(other.outputs, outputs));
   }
@@ -338,6 +356,7 @@ class ExtensionAssembleTarget {
     name,
     targetPlatform,
     Object.hashAll(dependencies),
+    Object.hashAll(depfiles),
     Object.hashAll(inputs),
     Object.hashAll(outputs),
   );
@@ -346,18 +365,50 @@ class ExtensionAssembleTarget {
 /// Representation of a build result returned by a tool extension.
 @immutable
 class ExtensionBuildResult {
-  const ExtensionBuildResult({required this.success, this.errorMessage});
+  const ExtensionBuildResult({
+    required this.success,
+    this.errorMessage,
+    this.extraDefines = const <String, String>{},
+  });
 
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
     return ExtensionBuildResult(
       success: json.optionalField<bool>(successKey, defaultValue: false),
       errorMessage: json.nullableField<String>(errorMessageKey),
+      extraDefines: _parseExtraDefines(json),
     );
+  }
+
+  static Map<String, String> _parseExtraDefines(Map<String, Object?> json) {
+    final Object? raw = json[extraDefinesKey];
+    if (raw == null) {
+      return const <String, String>{};
+    }
+    if (raw is! Map<Object?, Object?>) {
+      throw FormatException(
+        'Invalid "$extraDefinesKey" field: expected Map<String, String>, got ${raw.runtimeType}.',
+      );
+    }
+    final result = <String, String>{};
+    for (final MapEntry(:Object? key, :Object? value) in raw.entries) {
+      if (key is! String || value is! String) {
+        throw FormatException(
+          'Invalid "$extraDefinesKey" entry: expected String key and value, '
+          'got ${key.runtimeType}: ${value.runtimeType}.',
+        );
+      }
+      result[key] = value;
+    }
+    return result;
   }
 
   /// Map key for [errorMessage].
   static const String errorMessageKey = 'errorMessage';
+
+  /// Map key for [extraDefines].
+  @visibleForTesting
+  static const String extraDefinesKey = 'extraDefines';
 
   /// Map key for [success].
   static const String successKey = 'success';
@@ -368,25 +419,40 @@ class ExtensionBuildResult {
   /// Optional error message if the build failed.
   final String? errorMessage;
 
+  /// Additional build defines produced by this target to be merged into the
+  /// build environment for downstream targets.
+  final Map<String, String> extraDefines;
+
   /// Serializes the build result to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     successKey: success,
     errorMessageKey: ?errorMessage,
+    if (extraDefines.isNotEmpty) extraDefinesKey: extraDefines,
   };
 
   @override
-  String toString() => 'ExtensionBuildResult(success: $success, errorMessage: $errorMessage)';
+  String toString() =>
+      'ExtensionBuildResult(success: $success, errorMessage: $errorMessage, '
+      'extraDefines: $extraDefines)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ExtensionBuildResult &&
             other.success == success &&
-            other.errorMessage == errorMessage);
+            other.errorMessage == errorMessage &&
+            _mapEquals(other.extraDefines, extraDefines));
   }
 
   @override
-  int get hashCode => Object.hash(success, errorMessage);
+  int get hashCode => Object.hash(
+    success,
+    errorMessage,
+    Object.hashAllUnordered(<int>[
+      for (final MapEntry(:String key, :String value) in extraDefines.entries)
+        Object.hash(key, value),
+    ]),
+  );
 }
 
 bool _listEquals<T>(List<T> a, List<T> b) {
@@ -398,6 +464,21 @@ bool _listEquals<T>(List<T> a, List<T> b) {
   }
   for (var i = 0; i < a.length; i++) {
     if (a[i] != b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool _mapEquals<K, V>(Map<K, V> a, Map<K, V> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (final MapEntry(:K key, :V value) in a.entries) {
+    if (!b.containsKey(key) || b[key] != value) {
       return false;
     }
   }
