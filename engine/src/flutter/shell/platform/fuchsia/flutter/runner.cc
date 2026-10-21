@@ -26,8 +26,8 @@
 #include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
 #include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmo.h"
 #include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_object.h"
+#include "third_party/icu/source/common/unicode/udata.h"
 #include "third_party/skia/include/core/SkGraphics.h"
-#include "unicode/udata.h"
 
 namespace flutter_runner {
 

@@ -12,7 +12,7 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
-#include "unicode/udata.h"
+#include "third_party/icu/source/common/unicode/udata.h"
 
 namespace fml {
 namespace icu {

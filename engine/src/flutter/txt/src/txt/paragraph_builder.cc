@@ -6,7 +6,7 @@
 
 #include "flutter/txt/src/skia/paragraph_builder_skia.h"
 #include "paragraph_style.h"
-#include "unicode/unistr.h"
+#include "third_party/icu/source/common/unicode/unistr.h"
 
 namespace txt {
 

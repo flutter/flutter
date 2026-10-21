@@ -8,6 +8,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/txt/tests/txt_test_utils.h"
 #include "third_party/benchmark/include/benchmark/benchmark.h"
+#include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -16,7 +17,6 @@
 #include "third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h"
 #include "third_party/skia/modules/skparagraph/utils/TestFontCollection.h"
 #include "third_party/skia/modules/skunicode/include/SkUnicode_icu.h"
-#include "unicode/unistr.h"
 
 namespace sktxt = skia::textlayout;
 
