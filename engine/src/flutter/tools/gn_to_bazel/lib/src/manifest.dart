@@ -249,7 +249,12 @@ exports_files([
 ])
 ''',
   ),
-  ConvertedFile('//flutter/fml'),
+  // fml's trace_event.h includes the Dart timeline API's header. GN's web
+  // build has no dependency for it (fml/BUILD.gn: the Dart runtime's build
+  // files cannot be loaded for target_os == "wasm") and finds the header
+  // through the source root; Bazel's headers-only @dart//:dart_api_headers
+  // loads anywhere, so it is listed in every configuration.
+  ConvertedFile('//flutter/fml', implicitDeps: <String>['@dart//:dart_api_headers']),
   // The benchmark library (google/benchmark through @benchmark) and the
   // engine's wrapper of it, for the benchmark executables run_tests.py
   // --type benchmarks runs (benchmarkRuns).

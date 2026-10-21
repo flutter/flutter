@@ -6,9 +6,12 @@
 # targets of its BUILD.gn that the engine uses (`zlib` and the SIMD source
 # sets it is assembled from) as the engine's GN build configures them.
 #
-# Only x86-64 is covered so far: the select()s below have no default, so a
-# build for another CPU fails at analysis rather than silently producing a
-# zlib without the NEON paths (use_arm_neon_optimizations in BUILD.gn).
+# Two CPUs are covered: x86-64 (use_x86_x64_optimizations in BUILD.gn: the
+# SIMD source sets and their defines) and wasm32 (neither optimization: the
+# portable zlib -- CPU_NO_SIMD, the plain inflate.c, no SIMD source sets --
+# as the web build has it). The select()s have no default, so a build for
+# another CPU fails at analysis rather than silently producing a zlib
+# without the NEON paths (use_arm_neon_optimizations).
 
 # This file is loaded as the root of @zlib, so the main module is named.
 load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_THIRD_PARTY_COPTS")
@@ -17,6 +20,8 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:public"])
 
 _X86_64 = "@platforms//cpu:x86_64"
+
+_WASM32 = "@platforms//cpu:wasm32"
 
 # config("zlib_internal_config"): ZLIB_DEBUG in unoptimized builds.
 _INTERNAL_DEFINES = ["ZLIB_IMPLEMENTATION"] + select({
@@ -32,20 +37,32 @@ _ZLIB_WARNINGS = [
 
 # The public_configs of the SIMD source sets, which apply to them and to
 # the zlib target that depends on them.
-_ADLER32_SIMD_DEFINES = select({_X86_64: [
-    "ADLER32_SIMD_SSSE3",
-    "X86_NOT_WINDOWS",
-]})
+_ADLER32_SIMD_DEFINES = select({
+    _X86_64: [
+        "ADLER32_SIMD_SSSE3",
+        "X86_NOT_WINDOWS",
+    ],
+    _WASM32: [],
+})
 
-_CRC32_SIMD_DEFINES = select({_X86_64: ["CRC32_SIMD_SSE42_PCLMUL"]})
+_CRC32_SIMD_DEFINES = select({
+    _X86_64: ["CRC32_SIMD_SSE42_PCLMUL"],
+    _WASM32: [],
+})
 
-_DATA_CHUNK_SIMD_DEFINES = select({_X86_64: [
-    "INFLATE_CHUNK_SIMD_SSE2",
-    "INFLATE_CHUNK_READ_64LE",
-    "DEFLATE_CHUNK_WRITE_64LE",
-]})
+_DATA_CHUNK_SIMD_DEFINES = select({
+    _X86_64: [
+        "INFLATE_CHUNK_SIMD_SSE2",
+        "INFLATE_CHUNK_READ_64LE",
+        "DEFLATE_CHUNK_WRITE_64LE",
+    ],
+    _WASM32: [],
+})
 
-_SLIDE_HASH_SIMD_DEFINES = select({_X86_64: ["DEFLATE_SLIDE_HASH_SSE2"]})
+_SLIDE_HASH_SIMD_DEFINES = select({
+    _X86_64: ["DEFLATE_SLIDE_HASH_SSE2"],
+    _WASM32: [],
+})
 
 # source_set("zlib_common_headers")
 cc_library(
@@ -154,7 +171,11 @@ cc_library(
         "uncompr.c",
         "zutil.c",
         "zutil.h",
-    ],
+    ] + select({
+        _X86_64: [],
+        # Without the chunk-copying inflate of zlib_data_chunk_simd.
+        _WASM32: ["inflate.c"],
+    }),
     hdrs = [
         "chromeconf.h",
         "zconf.h",
@@ -165,14 +186,19 @@ cc_library(
     includes = ["."],
     linkstatic = True,
     local_defines = _INTERNAL_DEFINES + _ADLER32_SIMD_DEFINES + _CRC32_SIMD_DEFINES +
-                    _DATA_CHUNK_SIMD_DEFINES + _SLIDE_HASH_SIMD_DEFINES,
-    deps = [
-        ":zlib_adler32_simd",
-        ":zlib_common_headers",
-        ":zlib_crc32_simd",
-        ":zlib_data_chunk_simd",
-        ":zlib_slide_hash_simd",
-    ],
+                    _DATA_CHUNK_SIMD_DEFINES + _SLIDE_HASH_SIMD_DEFINES + select({
+        _X86_64: [],
+        _WASM32: ["CPU_NO_SIMD"],
+    }),
+    deps = [":zlib_common_headers"] + select({
+        _X86_64: [
+            ":zlib_adler32_simd",
+            ":zlib_crc32_simd",
+            ":zlib_data_chunk_simd",
+            ":zlib_slide_hash_simd",
+        ],
+        _WASM32: [],
+    }),
 )
 
 # static_library("compression_utils_portable") in google/BUILD.gn: the

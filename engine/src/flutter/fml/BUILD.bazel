@@ -164,13 +164,10 @@ cc_library(
         "//engine/src/flutter/common:flutter_config",
         "@abseil-cpp//absl/numeric:int128",
         "@abseil_cpp_tree//:root_includes",
+        "@dart//:dart_api_headers",
     ] + select({
         "@platforms//os:emscripten": [],
         "//conditions:default": [
-            # trace_event.h uses the Dart timeline API. The Dart runtime's build
-            # files cannot be loaded for target_os == "wasm", where the header is
-            # found through the source root alone.
-            "@dart//:dart_api_headers",  # target_os != "wasm"
             "@icu",  # target_os != "wasm"
         ],
     }) + select({
@@ -189,6 +186,7 @@ cc_library(
     deps = [
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
+        "@dart//:dart_api_headers",
     ],
 )
 
@@ -203,6 +201,7 @@ cc_library(
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
+        "@dart//:dart_api_headers",
     ],
     alwayslink = True,
 )
@@ -213,6 +212,7 @@ cc_library(
     deps = [
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
+        "@dart//:dart_api_headers",
     ],
 )
 
@@ -234,6 +234,7 @@ cc_library(
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
+        "@dart//:dart_api_headers",
     ],
     alwayslink = True,
 )
@@ -266,6 +267,7 @@ cc_test(
         ":fml",
         "//engine/src:include_root",
         "//engine/src/flutter/benchmarking",
+        "@dart//:dart_api_headers",
     ],
 )
 
@@ -324,6 +326,7 @@ flutter_cc_test(
         "//engine/src:include_root",
         "//engine/src/flutter/testing:run_all_unittests",
         "//engine/src/flutter/testing:testing_core",
+        "@dart//:dart_api_headers",
     ],
 )
 
