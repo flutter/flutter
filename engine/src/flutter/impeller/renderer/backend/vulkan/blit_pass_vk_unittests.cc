@@ -64,7 +64,7 @@ TEST(BlitPassVKTest, CopyTextureToBufferBarrierTargetsTheCopy) {
   auto blit_pass = cmd_buffer->CreateBlitPass();
   ASSERT_TRUE(blit_pass);
 
-  auto vk_cmd_buffer = reinterpret_cast<CommandBufferVK*>(cmd_buffer.get());
+  auto vk_cmd_buffer = static_cast<CommandBufferVK*>(cmd_buffer.get());
 
   TextureDescriptor desc;
   desc.size = ISize(16, 16);
