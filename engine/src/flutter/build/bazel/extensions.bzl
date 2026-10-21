@@ -442,6 +442,12 @@ _SYSROOT_REPOSITORIES = {
         key = "bullseye_amd64",
         build_file = _OVERLAYS + ":sysroot/BUILD.sysroot_linux.bazel",
     ),
+    # The arm64 cross build's (tools/gn --target-os=linux --linux-cpu=arm64;
+    # gclient's linux_sysroot_arm64 hook unpacks it).
+    "sysroot_linux_arm64": struct(
+        key = "bullseye_arm64",
+        build_file = _OVERLAYS + ":sysroot/BUILD.sysroot_linux.bazel",
+    ),
 }
 
 _SYSROOTS_JSON = Label("//engine/src/build/linux/sysroot_scripts:sysroots.json")
