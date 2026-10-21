@@ -77,7 +77,7 @@ void main() {
           isA<Object>().having(
             (Object e) => e.toString(),
             'toString',
-            contains('Missing or invalid "${BuildService.targetNameParam}" parameter.'),
+            contains('Missing required "${BuildService.targetNameParam}" (expected String).'),
           ),
         ),
       );
@@ -88,7 +88,7 @@ void main() {
           isA<Object>().having(
             (Object e) => e.toString(),
             'toString',
-            contains('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
+            contains('Missing required "${BuildService.projectRootParam}" (expected String).'),
           ),
         ),
       );
@@ -102,7 +102,7 @@ void main() {
           isA<Object>().having(
             (Object e) => e.toString(),
             'toString',
-            contains('Missing or invalid "${BuildService.mainPathParam}" parameter.'),
+            contains('Missing required "${BuildService.mainPathParam}" (expected String).'),
           ),
         ),
       );
@@ -117,7 +117,7 @@ void main() {
           isA<Object>().having(
             (Object e) => e.toString(),
             'toString',
-            contains('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
+            contains('Missing required "${BuildService.buildModeParam}" (expected String).'),
           ),
         ),
       );

@@ -82,50 +82,62 @@ void main() {
         isTrue,
       );
 
-      for (final invalidParams in <Map<String, Object?>>[
-        const <String, Object?>{},
-        <String, Object?>{
-          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
-          DeviceService.projectParam: const <String, Object?>{},
-        },
-        <String, Object?>{
-          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
-          DeviceService.projectParam: <String, Object?>{
-            ExtensionFlutterProject.appNameKey: 'test_app',
-            ExtensionFlutterProject.buildDirectoryKey: 'relative/build/',
-            ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
-          },
-        },
-        <String, Object?>{
-          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
-          DeviceService.projectParam: <String, Object?>{
-            ExtensionFlutterProject.appNameKey: 'test_app',
-            ExtensionFlutterProject.buildDirectoryKey: 'https://example.com/build/',
-            ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
-          },
-        },
-        <String, Object?>{
-          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
-          DeviceService.projectParam: <String, Object?>{
-            ExtensionFlutterProject.appNameKey: 'test_app',
-            ExtensionFlutterProject.buildDirectoryKey: tempDir.uri.resolve('build/').toString(),
-            ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
-            ExtensionFlutterProject.isModuleKey: 'not_a_bool',
-          },
-        },
-      ]) {
+      for (final (Map<String, Object?> invalidParams, String expectedMessage)
+          in <(Map<String, Object?>, String)>[
+            (
+              const <String, Object?>{},
+              'Missing required "${DeviceService.deviceIdParam}" (expected String).',
+            ),
+            (
+              <String, Object?>{
+                DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+                DeviceService.projectParam: const <String, Object?>{},
+              },
+              'Missing required "${ExtensionFlutterProject.appNameKey}" (expected String).',
+            ),
+            (
+              <String, Object?>{
+                DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+                DeviceService.projectParam: <String, Object?>{
+                  ExtensionFlutterProject.appNameKey: 'test_app',
+                  ExtensionFlutterProject.buildDirectoryKey: 'relative/build/',
+                  ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+                },
+              },
+              'Invalid "${ExtensionFlutterProject.buildDirectoryKey}": expected trailing-slash-terminated absolute file: URI.',
+            ),
+            (
+              <String, Object?>{
+                DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+                DeviceService.projectParam: <String, Object?>{
+                  ExtensionFlutterProject.appNameKey: 'test_app',
+                  ExtensionFlutterProject.buildDirectoryKey: 'https://example.com/build/',
+                  ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+                },
+              },
+              'Invalid "${ExtensionFlutterProject.buildDirectoryKey}": expected trailing-slash-terminated absolute file: URI.',
+            ),
+            (
+              <String, Object?>{
+                DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+                DeviceService.projectParam: <String, Object?>{
+                  ExtensionFlutterProject.appNameKey: 'test_app',
+                  ExtensionFlutterProject.buildDirectoryKey: tempDir.uri
+                      .resolve('build/')
+                      .toString(),
+                  ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+                  ExtensionFlutterProject.isModuleKey: 'not_a_bool',
+                },
+              },
+              'Invalid "${ExtensionFlutterProject.isModuleKey}": expected bool, got String.',
+            ),
+          ]) {
         await expectLater(
           isSupportedHandler(invalidParams),
           throwsA(
             isA<Exception>()
                 .having((Exception e) => e.toString(), 'code', contains('-32602'))
-                .having(
-                  (Exception e) => e.toString(),
-                  'message',
-                  contains(
-                    'Invalid or missing parameters for ${DeviceService.isSupportedForProjectMethod}.',
-                  ),
-                ),
+                .having((Exception e) => e.toString(), 'message', contains(expectedMessage)),
           ),
         );
       }

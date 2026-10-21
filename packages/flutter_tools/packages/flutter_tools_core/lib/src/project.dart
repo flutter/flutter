@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 /// Validation helpers for file system [Uri]s exchanged over the tool
 /// extension protocol.
 extension ExtensionUriValidation on Uri? {
@@ -14,25 +16,6 @@ extension ExtensionUriValidation on Uri? {
     null => false,
   };
 }
-
-T _parseOptionalField<T>(Map<String, Object?> json, String key, {required T defaultValue}) =>
-    switch (json[key]) {
-      final T value => value,
-      null => defaultValue,
-      _ => throw FormatException('Invalid "$key" in ExtensionFlutterProject JSON: $json'),
-    };
-
-Iterable<String> _parseStringIterable(Map<String, Object?> json, String key) => switch (json[key]) {
-  final Iterable<Object?> items => <String>[
-    for (final Object? item in items)
-      switch (item) {
-        final String value => value,
-        _ => throw FormatException('Invalid "$key" element in ExtensionFlutterProject JSON: $json'),
-      },
-  ],
-  null => const <String>[],
-  _ => throw FormatException('Invalid "$key" in ExtensionFlutterProject JSON: $json'),
-};
 
 /// Serializable representation of a Flutter project and its manifest metadata
 /// for tool extensions.
@@ -71,31 +54,26 @@ class ExtensionFlutterProject {
   /// has an invalid type, or if [buildDirectory] or [directory] are not valid
   /// trailing-slash-terminated absolute `file:` directory URIs.
   factory ExtensionFlutterProject.fromJson(Map<String, Object?> json) {
-    if (json case {
-      appNameKey: final String appName,
-      buildDirectoryKey: final String buildDirectoryStr,
-      directoryKey: final String directoryStr,
-    }) {
-      final Uri? buildDirectoryUri = Uri.tryParse(buildDirectoryStr);
-      final Uri? directoryUri = Uri.tryParse(directoryStr);
-      if (buildDirectoryUri != null &&
-          buildDirectoryUri.isValidDirectoryUri &&
-          directoryUri != null &&
-          directoryUri.isValidDirectoryUri) {
-        return ExtensionFlutterProject(
-          appName: appName,
-          buildDirectory: buildDirectoryUri,
-          directory: directoryUri,
-          appVersion: _parseOptionalField<String?>(json, appVersionKey, defaultValue: null),
-          dependencies: _parseStringIterable(json, dependenciesKey).toSet(),
-          isEmpty: _parseOptionalField<bool>(json, isEmptyKey, defaultValue: false),
-          isModule: _parseOptionalField<bool>(json, isModuleKey, defaultValue: false),
-          isPlugin: _parseOptionalField<bool>(json, isPluginKey, defaultValue: false),
-          workspace: _parseStringIterable(json, workspaceKey).toList(),
-        );
-      }
+    return ExtensionFlutterProject(
+      appName: json.requiredField<String>(appNameKey),
+      buildDirectory: _parseDirectoryUri(json, buildDirectoryKey),
+      directory: _parseDirectoryUri(json, directoryKey),
+      appVersion: json.nullableField<String>(appVersionKey),
+      dependencies: json.stringIterable(dependenciesKey).toSet(),
+      isEmpty: json.optionalField<bool>(isEmptyKey, defaultValue: false),
+      isModule: json.optionalField<bool>(isModuleKey, defaultValue: false),
+      isPlugin: json.optionalField<bool>(isPluginKey, defaultValue: false),
+      workspace: json.stringIterable(workspaceKey).toList(),
+    );
+  }
+
+  static Uri _parseDirectoryUri(Map<String, Object?> json, String key) {
+    final String rawUri = json.requiredField<String>(key);
+    final Uri? uri = Uri.tryParse(rawUri);
+    if (uri != null && uri.isValidDirectoryUri) {
+      return uri;
     }
-    throw FormatException('Invalid ExtensionFlutterProject JSON: $json');
+    throw FormatException('Invalid "$key": expected trailing-slash-terminated absolute file: URI.');
   }
 
   /// Map key for [appName].

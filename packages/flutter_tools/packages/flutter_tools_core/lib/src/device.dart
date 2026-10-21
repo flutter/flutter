@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'json_utils.dart';
+
 /// A description of the kind of workflow the device supports.
 enum Category {
   /// Web browser target workflow.
@@ -54,13 +56,15 @@ class TargetDevice {
   /// Deserializes a [TargetDevice] from a JSON-serializable map.
   factory TargetDevice.fromJson(Map<String, Object?> json) {
     return TargetDevice(
-      category: Category.fromString(json[categoryKey] as String? ?? '') ?? Category.desktop,
-      id: json[idKey] as String? ?? '',
-      name: json[nameKey] as String? ?? '',
-      ephemeral: json[ephemeralKey] as bool? ?? true,
-      isSupported: json[isSupportedKey] as bool? ?? true,
-      sdkNameAndVersion: json[sdkNameAndVersionKey] as String?,
-      targetPlatform: json[targetPlatformKey] as String?,
+      category:
+          Category.fromString(json.optionalField<String>(categoryKey, defaultValue: '')) ??
+          Category.desktop,
+      id: json.optionalField<String>(idKey, defaultValue: ''),
+      name: json.optionalField<String>(nameKey, defaultValue: ''),
+      ephemeral: json.optionalField<bool>(ephemeralKey, defaultValue: true),
+      isSupported: json.optionalField<bool>(isSupportedKey, defaultValue: true),
+      sdkNameAndVersion: json.nullableField<String>(sdkNameAndVersionKey),
+      targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
   }
 

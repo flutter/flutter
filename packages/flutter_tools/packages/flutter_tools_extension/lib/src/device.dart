@@ -57,22 +57,17 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
-    if (params case {
-      deviceIdParam: final String deviceId,
-      projectParam: final Map<String, Object?> projectMap,
-    }) {
-      final ExtensionFlutterProject project;
-      try {
-        project = ExtensionFlutterProject.fromJson(projectMap);
-      } on FormatException {
-        throw RpcException.invalidParams(
-          'Invalid or missing parameters for $isSupportedForProjectMethod.',
-        );
-      }
-      return isSupportedForProject(deviceId: deviceId, project: project);
+    final String deviceId;
+    final ExtensionFlutterProject project;
+    try {
+      deviceId = params.requiredField<String>(deviceIdParam);
+      final Map<String, Object?> projectMap = params.requiredField<Map<String, Object?>>(
+        projectParam,
+      );
+      project = ExtensionFlutterProject.fromJson(projectMap);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
     }
-    throw RpcException.invalidParams(
-      'Invalid or missing parameters for $isSupportedForProjectMethod.',
-    );
+    return isSupportedForProject(deviceId: deviceId, project: project);
   }
 }
