@@ -85,6 +85,9 @@ filegroup(
     srcs = glob(
         [
             "lib/*-linux-gnu*/*.so*",
+            # The dynamic linker libc.so's linker script names: lib64/ on
+            # amd64 (ld-linux-x86-64.so.2), lib/ on arm64 (ld-linux-aarch64.so.1).
+            "lib/*.so*",
             "lib64/*",
             "usr/lib/*-linux-gnu*/*.a",
             "usr/lib/*-linux-gnu*/*.o",
