@@ -76,19 +76,41 @@ _OS_CONSTRAINTS = {
 # GN's `current_toolchain == host_toolchain`, which the engine's files test
 # for "the host's own build" (testing.gni's enable_unittests, the shell's
 # tester, glfw's shell), read in Bazel's terms: the target OS is one a host
-# runs. A cross-compile for the host's own OS and another CPU is the one GN
-# case this does not tell apart. The converter names the predicate
+# runs and the target CPU is the host's (x64, the converter's host_cpu) --
+# a cross-compile for the host's own OS and another CPU, the Linux arm64
+# build, is GN's clang_arm64 toolchain and not the host's, so its tests and
+# host-only targets drop out as GN's do. The converter names the predicate
 # is_host_toolchain (gn_eval's hostToolchainPredicate); the complement is
-# the OSes only a target runs.
+# the OSes only a target runs, or a CPU other than the host's.
 _HOST_OSES = [
     "linux",
     "mac",
     "win",
 ]
 
+_HOST_CPU = "@platforms//cpu:x86_64"
+
+# The other CPUs the engine builds for (BUILDCONFIG.gn's target_cpu values,
+# as the converter's CPU settings spell them).
+_OTHER_CPUS = [
+    "@platforms//cpu:aarch64",
+    "@platforms//cpu:armv7",
+    "@platforms//cpu:riscv64",
+    "@platforms//cpu:wasm32",
+    "@platforms//cpu:x86_32",
+]
+
+selects.config_setting_group(
+    name = "host_os",
+    match_any = [_OS_CONSTRAINTS[os] for os in _HOST_OSES],
+)
+
 selects.config_setting_group(
     name = "host_toolchain",
-    match_any = [_OS_CONSTRAINTS[os] for os in _HOST_OSES],
+    match_all = [
+        ":host_os",
+        _HOST_CPU,
+    ],
 )
 
 selects.config_setting_group(
@@ -97,7 +119,7 @@ selects.config_setting_group(
         constraint
         for os, constraint in _OS_CONSTRAINTS.items()
         if os not in _HOST_OSES
-    ],
+    ] + _OTHER_CPUS,
 )
 
 # BUILDCONFIG.gn's use_flutter_cxx, `is_clang && (is_linux || is_android ||

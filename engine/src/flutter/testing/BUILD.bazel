@@ -417,13 +417,16 @@ exports_files([
     "ubsan_suppressions.txt",
 ])
 
+# testing.gni's enable_unittests: `current_toolchain == host_toolchain ||
+# is_fuchsia || is_mac` -- the host's own build (its OS and its CPU:
+# //engine/src/flutter/build/bazel:host_toolchain; the Linux arm64 cross
+# build has no tests, as GN's clang_arm64 toolchain has none), Fuchsia, macOS.
 selects.config_setting_group(
     name = "unittests_enabled",
     match_any = [
+        "//engine/src/flutter/build/bazel:host_toolchain",
         "@platforms//os:fuchsia",
-        "@platforms//os:linux",
         "@platforms//os:macos",
-        "@platforms//os:windows",
     ],
 )
 
