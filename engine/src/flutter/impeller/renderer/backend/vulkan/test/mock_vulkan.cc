@@ -616,9 +616,14 @@ VkResult vkCreateRenderPass(VkDevice device,
   *pRenderPass = reinterpret_cast<VkRenderPass>(0x12341234);
   MockDevice* mock_device = MockDevice::Unwrap(device);
   mock_device->AddCalledFunction("vkCreateRenderPass");
-  mock_device->SetLastRenderPassDependencies(std::vector<VkSubpassDependency>(
-      pCreateInfo->pDependencies,
-      pCreateInfo->pDependencies + pCreateInfo->dependencyCount));
+  if (pCreateInfo->pDependencies != nullptr &&
+      pCreateInfo->dependencyCount > 0) {
+    mock_device->SetLastRenderPassDependencies(std::vector<VkSubpassDependency>(
+        pCreateInfo->pDependencies,
+        pCreateInfo->pDependencies + pCreateInfo->dependencyCount));
+  } else {
+    mock_device->SetLastRenderPassDependencies({});
+  }
   return VK_SUCCESS;
 }
 
