@@ -365,6 +365,12 @@ void _validateAttachmentSubresource(
   }
 }
 
+/// A pass that draws into a [RenderTarget], created by
+/// [CommandBuffer.createRenderPass].
+///
+/// A pass records until [end] is called, or until its command buffer creates
+/// the next pass, records a copy, or is submitted. After that, every method
+/// except [end] throws a [StateError] naming what ended the pass.
 base class RenderPass extends NativeFieldWrapperClass1 {
   /// The maximum number of vertex buffer slots that can be bound to a single
   /// draw. Matches `flutter::gpu::RenderPass::kMaxVertexBufferSlots` on the
@@ -387,10 +393,15 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// the entire bitmask.
   int _maxBoundVertexSlot = -1;
 
+  final CommandBuffer _commandBuffer;
+
+  /// The call that ended this pass, or null while it is recording.
+  String? _endedBy;
+
   /// Creates a new RenderPass.
   RenderPass._(
     GpuContext gpuContext,
-    CommandBuffer commandBuffer,
+    this._commandBuffer,
     RenderTarget renderTarget,
   ) {
     renderTarget._validateAttachments();
@@ -437,13 +448,40 @@ base class RenderPass extends NativeFieldWrapperClass1 {
         throw Exception(error);
       }
     }
-    error = _begin(commandBuffer);
+    _commandBuffer._endOpenPass('CommandBuffer.createRenderPass()');
+    error = _begin(_commandBuffer);
+    if (error != null) {
+      throw Exception(error);
+    }
+    _commandBuffer._openPass = this;
+  }
+
+  /// Ends this pass. Nothing more can be recorded into it.
+  ///
+  /// A pass also ends when its [CommandBuffer] creates the next pass, records
+  /// a copy, or is submitted, so calling this is optional. Calling it on a pass
+  /// that has already ended does nothing.
+  void end() {
+    if (_endedBy != null) {
+      return;
+    }
+    _commandBuffer._openPass = null;
+    _endedBy = 'RenderPass.end()';
+    final String? error = _end();
     if (error != null) {
       throw Exception(error);
     }
   }
 
+  void _checkNotEnded() {
+    final String? endedBy = _endedBy;
+    if (endedBy != null) {
+      throw StateError('This RenderPass was ended by $endedBy.');
+    }
+  }
+
   void bindPipeline(RenderPipeline pipeline) {
+    _checkNotEnded();
     _bindPipeline(pipeline);
   }
 
@@ -467,6 +505,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// buffer bindings). Some devices may also impose a lower limit on the
   /// total number of vertex attributes used by a single pipeline.
   void bindVertexBuffer(BufferView bufferView, {int slot = 0}) {
+    _checkNotEnded();
     if (slot < 0 || slot >= _kMaxVertexBufferSlots) {
       throw RangeError.range(
         slot,
@@ -493,6 +532,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// [indexType] is the width of each index. The number of indices to draw
   /// is passed separately, to [drawIndexed].
   void bindIndexBuffer(BufferView bufferView, IndexType indexType) {
+    _checkNotEnded();
     bufferView.buffer._bindAsIndexBuffer(
       this,
       bufferView.offsetInBytes,
@@ -502,6 +542,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void bindUniform(UniformSlot slot, BufferView bufferView) {
+    _checkNotEnded();
     // The slot's index is resolved once and cached, so steady-state binds
     // pass an integer across the native boundary instead of the name.
     int uniformStructIndex = slot._resolvedStructIndex;
@@ -527,6 +568,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     Texture texture, {
     SamplerOptions? sampler,
   }) {
+    _checkNotEnded();
     if (sampler == null) {
       sampler = SamplerOptions();
     }
@@ -569,6 +611,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   ///
   /// [slot] must be in `[0, maxBindingSets)`.
   void bindSet(BindingSet bindingSet, {int slot = 0}) {
+    _checkNotEnded();
     if (slot < 0 || slot >= maxBindingSets) {
       throw RangeError.range(
         slot,
@@ -583,12 +626,14 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void clearBindings() {
+    _checkNotEnded();
     _clearBindings();
     _boundVertexSlotsMask = 0;
     _maxBoundVertexSlot = -1;
   }
 
   void setColorBlendEnable(bool enable, {int colorAttachmentIndex = 0}) {
+    _checkNotEnded();
     _setColorBlendEnable(colorAttachmentIndex, enable);
   }
 
@@ -596,6 +641,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     ColorBlendEquation equation, {
     int colorAttachmentIndex = 0,
   }) {
+    _checkNotEnded();
     _setColorBlendEquation(
       colorAttachmentIndex,
       equation.colorBlendOperation.index,
@@ -608,10 +654,12 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void setDepthWriteEnable(bool enable) {
+    _checkNotEnded();
     _setDepthWriteEnable(enable);
   }
 
   void setViewport(Viewport viewport) {
+    _checkNotEnded();
     assert(() {
       viewport._validate();
       return true;
@@ -627,10 +675,12 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void setDepthCompareOperation(CompareFunction compareFunction) {
+    _checkNotEnded();
     _setDepthCompareOperation(compareFunction.index);
   }
 
   void setStencilReference(int referenceValue) {
+    _checkNotEnded();
     if (referenceValue < 0 || referenceValue > 0xFFFFFFFF) {
       throw Exception(
         "The stencil reference value must be in the range [0, 2^32 - 1]",
@@ -643,6 +693,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     StencilConfig configuration, {
     StencilFace targetFace = StencilFace.both,
   }) {
+    _checkNotEnded();
     if (configuration.readMask < 0 || configuration.readMask > 0xFFFFFFFF) {
       throw Exception("The stencil read mask must be in the range [0, 255]");
     }
@@ -661,6 +712,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void setScissor(Scissor scissor) {
+    _checkNotEnded();
     assert(() {
       scissor._validate();
       return true;
@@ -669,18 +721,22 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void setCullMode(CullMode cullMode) {
+    _checkNotEnded();
     _setCullMode(cullMode.index);
   }
 
   void setPolygonMode(PolygonMode polygonMode) {
+    _checkNotEnded();
     _setPolygonMode(polygonMode.index);
   }
 
   void setPrimitiveType(PrimitiveType primitiveType) {
+    _checkNotEnded();
     _setPrimitiveType(primitiveType.index);
   }
 
   void setWindingOrder(WindingOrder windingOrder) {
+    _checkNotEnded();
     _setWindingOrder(windingOrder.index);
   }
 
@@ -702,6 +758,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// instance will produce the same geometry unless the shader varies its output
   /// another way.
   void draw(int vertexCount, {int instanceCount = 1}) {
+    _checkNotEnded();
     RangeError.checkNotNegative(vertexCount, 'vertexCount');
     RangeError.checkNotNegative(instanceCount, 'instanceCount');
     if (vertexCount == 0 || instanceCount == 0) {
@@ -732,6 +789,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// every instance will produce the same geometry unless the shader varies its
   /// output another way.
   void drawIndexed(int indexCount, {int instanceCount = 1}) {
+    _checkNotEnded();
     RangeError.checkNotNegative(indexCount, 'indexCount');
     RangeError.checkNotNegative(instanceCount, 'instanceCount');
     if (indexCount == 0 || instanceCount == 0) {
@@ -830,6 +888,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_RenderPass_Begin',
   )
   external String? _begin(CommandBuffer commandBuffer);
+
+  @Native<Handle Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_RenderPass_End',
+  )
+  external String? _end();
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindPipeline',
