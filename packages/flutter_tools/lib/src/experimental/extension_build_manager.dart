@@ -94,6 +94,7 @@ base class ExtensionBuildManager {
     required String mainPath,
     required Uri projectRoot,
     required String targetName,
+    Duration inactivityTimeout = const Duration(minutes: 2),
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
@@ -128,7 +129,7 @@ base class ExtensionBuildManager {
     }
 
     try {
-      final Object? result = await connection.sendRequest(
+      final Object? result = await connection.sendLongRunningRequest(
         BuildService.buildMethod,
         params: <String, Object?>{
           BuildService.buildModeParam: buildMode.cliName,
@@ -136,9 +137,7 @@ base class ExtensionBuildManager {
           BuildService.projectRootParam: projectRoot.toString(),
           BuildService.targetNameParam: targetName,
         },
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
-        timeout: null,
+        inactivityTimeout: inactivityTimeout,
       );
       if (result case final Map<String, Object?> resultMap) {
         return ExtensionBuildResult.fromJson(resultMap);
