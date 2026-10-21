@@ -86,24 +86,37 @@ def _install_impl(ctx):
     directories = {paths.dirname(path) if not file.is_directory else path: None for file, path in unique}
     for directory in sorted(directories.keys()):
         lines.append('mkdir -p "$dest/%s"' % directory if directory else 'mkdir -p "$dest"')
-    for file, path in unique:
+
+    # The script copies each file from the runfiles tree, where it is
+    # symlinked under a staging directory by its index in the list rather
+    # than at its own short path: files of one short path from several
+    # configurations -- CanvasKit's canvaskit.wasm under its three
+    # platforms -- would collide at the one short path (the runfiles tree
+    # has no configuration in its paths), and the install would copy the
+    # last of them to all three destinations. An index rather than the
+    # destination path, because a directory artifact's destination may
+    # hold other entries' files (sky_engine's gen/dart-pkg), and runfiles
+    # entries under a symlinked directory are dropped as obscured.
+    staging = ctx.label.name + ".files"
+    for index, (file, path) in enumerate(unique):
+        source = "%s/%d" % (staging, index)
         if file.is_directory:
             # A directory artifact: its contents under the path. Bazel's
             # output directories are read-only, and a copy keeps the mode;
             # the next install must be able to replace what is inside, as
             # it can in GN's build directory.
-            lines.append('cp -r "%s/." "$dest/%s"' % (file.short_path, path))
+            lines.append('cp -r "%s/." "$dest/%s"' % (source, path))
             lines.append('chmod -R u+w "$dest/%s"' % path)
         else:
             # -f besides the removal above, for a destination the shell
             # cannot remove but can replace.
-            lines.append('cp -f "%s" "$dest/%s"' % (file.short_path, path))
+            lines.append('cp -f "%s" "$dest/%s"' % (source, path))
     lines.append('echo "%d files into $dest"' % len(unique))
     script = ctx.actions.declare_file(ctx.label.name + ".sh")
     ctx.actions.write(script, "\n".join(lines) + "\n", is_executable = True)
     return [DefaultInfo(
         executable = script,
-        runfiles = ctx.runfiles(files = [file for file, _ in unique]),
+        runfiles = ctx.runfiles(symlinks = {"%s/%d" % (staging, index): file for index, (file, _) in enumerate(unique)}),
     )]
 
 _install = rule(
