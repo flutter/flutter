@@ -446,6 +446,15 @@ void PointerDataPacketConverter::UpdateDeltaAndState(PointerData& pointer_data,
 
 bool PointerDataPacketConverter::SanitizeNonFinitePosition(
     PointerData& pointer_data) {
+  if (pointer_data.change == PointerData::Change::kPanZoomUpdate &&
+      (!std::isfinite(pointer_data.pan_x) ||
+       !std::isfinite(pointer_data.pan_y) ||
+       !std::isfinite(pointer_data.scale) ||
+       !std::isfinite(pointer_data.rotation))) {
+    // Like a move, the pan/zoom keeps its last valid values, so the next valid
+    // update gets a finite delta.
+    return false;
+  }
   if (std::isfinite(pointer_data.physical_x) &&
       std::isfinite(pointer_data.physical_y)) {
     return true;
@@ -455,9 +464,10 @@ bool PointerDataPacketConverter::SanitizeNonFinitePosition(
       case PointerData::Change::kDown:
       case PointerData::Change::kMove:
       case PointerData::Change::kHover:
+      case PointerData::Change::kPanZoomStart:
         // The pointer keeps its last valid position, so the next valid event
-        // gets a finite delta. A dropped down also drops the rest of the
-        // gesture.
+        // gets a finite delta. A dropped down or pan/zoom start also drops the
+        // rest of the gesture, instead of starting it at a stale position.
         return false;
       default:
         break;
