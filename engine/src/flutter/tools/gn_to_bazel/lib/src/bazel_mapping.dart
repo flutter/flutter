@@ -897,7 +897,28 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
 };
 
 /// The Bazel config_setting (or constraint) for a GN boolean predicate.
-const Map<String, String> conditionSettings = <String, String>{
+/// The package of the web build's per-variant settings.
+const String _webSettings = '//engine/src/flutter/build/bazel/web';
+
+/// skia.gni's arguments the six wasm toolchains set per variant
+/// (//flutter/third_party/canvaskit/BUILD.gn's extra_toolchain_args; the
+/// list in build/bazel/web/BUILD.bazel): build settings, so that Skia's
+/// fetch-time conversion carries select()s where GN reads them and a
+/// variant's platform sets them (wasm_platform). wasm_use_workers and
+/// wasm_prioritize_size are compiler flags in GN and features of the
+/// emscripten toolchain here; no converted file reads them.
+const List<String> webVariantArguments = <String>[
+  'skia_use_icu',
+  'skia_use_client_icu',
+  'skia_use_libjpeg_turbo_decode',
+  'skia_use_libpng_decode',
+  'skia_use_libwebp_decode',
+  'skia_use_no_png_encode',
+  'skia_use_libpng_encode',
+  'skia_enable_threadlocal_strikecache',
+];
+
+final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<String, String>{
   'is_android': '@platforms//os:android',
   'is_fuchsia': '@platforms//os:fuchsia',
   'is_ios': '@platforms//os:ios',
@@ -929,6 +950,10 @@ const Map<String, String> conditionSettings = <String, String>{
   // //flutter/txt's appendix, where GN declares the engine's argument.
   'flutter_use_fontconfig': '//engine/src/flutter/txt:fontconfig',
   'skia_use_fontconfig': '//engine/src/flutter/txt:fontconfig',
+  // The web build's per-variant arguments (the wasm toolchains'
+  // extra_toolchain_args in //flutter/third_party/canvaskit/BUILD.gn):
+  // build settings a variant's platform sets (build/bazel/web; research/12).
+  for (final String argument in webVariantArguments) argument: '$_webSettings:${argument}_on',
   // runtime_args.gni's dart_dynamic_modules (tools/gn
   // --gn-args=dart_dynamic_modules=true, the `_ddm` builders): the Dart
   // wrap's flag, which the archives' names also read.
@@ -950,7 +975,7 @@ const Map<String, String> conditionSettings = <String, String>{
   'test_enable_metal': '//engine/src/flutter/shell:test_enable_metal',
   'test_enable_software': '//engine/src/flutter/shell:test_enable_software',
   'test_enable_vulkan': '//engine/src/flutter/shell:test_enable_vulkan',
-};
+});
 
 /// The config_setting that holds exactly when a GN predicate is *false*, for
 /// the denied terms of a conjunction (`impeller_enable_opengles && !is_wasm`
@@ -958,7 +983,7 @@ const Map<String, String> conditionSettings = <String, String>{
 /// term). On its own a denial needs none: its `select()` has the key empty
 /// and the default carrying the branch. The OS predicates exclude each other,
 /// so each complement is the group of the other seven (build/bazel/BUILD.bazel).
-const Map<String, String> negatedSettings = <String, String>{
+final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<String, String>{
   'is_android': '//engine/src/flutter/build/bazel:not_android',
   'is_fuchsia': '//engine/src/flutter/build/bazel:not_fuchsia',
   'is_ios': '//engine/src/flutter/build/bazel:not_ios',
@@ -970,6 +995,7 @@ const Map<String, String> negatedSettings = <String, String>{
   // The host's own build, denied: the OSes only a target runs.
   'is_host_toolchain': '//engine/src/flutter/build/bazel:not_host_toolchain',
   'use_flutter_cxx': '//engine/src/flutter/build/bazel:not_flutter_cxx',
+  for (final String argument in webVariantArguments) argument: '$_webSettings:${argument}_off',
   'enable_backtrace': '//engine/src/flutter/common:backtrace_disabled',
   // The shell's backends, denied (software is everywhere: no complement).
   'shell_enable_gl': '//engine/src/flutter/shell:not_enable_gl',
@@ -983,7 +1009,7 @@ const Map<String, String> negatedSettings = <String, String>{
   // archives' names).
   'dart_dynamic_modules':
       '//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled',
-};
+});
 
 /// The Bazel config_setting for `variable == "value"`, by variable and value.
 /// `target_os == "wasm"` (fml) is the OS predicate's constraint.
@@ -1172,6 +1198,9 @@ const Set<String> knownExternalVariables = <String>{
   // (conditionSettings).
   'flutter_use_fontconfig',
   'skia_use_fontconfig',
+  // skia.gni's arguments the wasm toolchains set per variant: the web
+  // build's settings (webVariantArguments, conditionSettings).
+  ...webVariantArguments,
   // $dart_src/runtime/runtime_args.gni (known through zip_bundle.gni): the
   // Dart wrap's flag (conditionSettings).
   'dart_dynamic_modules',
@@ -1293,6 +1322,10 @@ enum TemplateArgumentKind {
   /// rule expands the strings against ([TemplateArgument.inputs]).
   pathStrings,
 
+  /// A scope of booleans and strings (a wasm toolchain's
+  /// extra_toolchain_args), which becomes a dictionary.
+  scope,
+
   /// A helper variable of the invocation the template never reads
   /// (`fixtures = rebase_path(...)` feeding a string of the same block).
   ignored,
@@ -1330,6 +1363,18 @@ final class TemplateArgument {
   /// emitter drops it, so that the macro gets a list rather than a select().
   final String? appliedUnder;
 }
+
+/// The platform each wasm module is built for: GN builds a wasm_lib in the
+/// wasm toolchain its dependents name (`"//flutter/skwasm(:skwasm)"` in
+/// //flutter/third_party/canvaskit/BUILD.gn's skwasm_group), which is a
+/// property of the dependency edge; here the module's wasm_module carries it
+/// (`platform`), from this table of GN's edges until the web SDK's
+/// assembly (those copies) is converted and names them itself.
+const Map<String, String> wasmModulePlatforms = <String, String>{
+  '//flutter/skwasm:skwasm': '//engine/src/flutter/third_party/canvaskit:skwasm',
+  '//flutter/skwasm:skwasm_heavy': '//engine/src/flutter/third_party/canvaskit:skwasm_heavy',
+  '//flutter/skwasm:wimp': '//engine/src/flutter/third_party/canvaskit:skwasm',
+};
 
 /// The `.gni` templates the converter knows, with the Bazel macro for each
 /// (`load` label and symbol) and the arguments it accepts.
@@ -1491,6 +1536,18 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // archives, the embedded blobs and the reflection libraries. GN's `name`
   // is the library name (`entity` in `entity_shaders_vk`); Bazel's is the
   // target's.
+  // build/toolchain/wasm.gni's wasm_toolchain: a gcc_toolchain over emcc
+  // with extra_toolchain_args, the arguments GN re-evaluates Skia and the
+  // engine's libraries under in that toolchain; a platform here, whose
+  // flags set the web build's settings and the emscripten toolchain's
+  // features (wasm_platform; research/12).
+  'wasm_toolchain': TemplateMapping(
+    '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl',
+    'wasm_platform',
+    <String, TemplateArgument>{
+      'extra_toolchain_args': TemplateArgument('extra_toolchain_args', TemplateArgumentKind.scope),
+    },
+  ),
   // build/toolchain/wasm.gni's wasm_lib: an executable in a wasm toolchain
   // with the module's flags (`-s MAIN_MODULE=1`, `-s EXPORT_NAME=<name>`),
   // which the emsdk toolchain's wasm_module rule compiles and links under
@@ -1761,13 +1818,18 @@ Assumptions generationAssumptions() {
     'skia_enable_pdf': const GnBoolValue(false),
     'skia_use_dng_sdk': const GnBoolValue(false),
     'skia_use_freetype': const GnBoolValue(true),
-    'skia_use_icu': const GnBoolValue(true),
-    'skia_use_libpng_decode': const GnBoolValue(true),
-    'skia_use_libpng_encode': const GnBoolValue(true),
     'skia_use_vma': const GnBoolValue(false),
     'skia_use_webgpu': const GnBoolValue(false),
     'skia_use_x11': const GnBoolValue(false),
     'skia_use_xps': const GnBoolValue(false),
+    // Not here: the arguments the wasm toolchains set per variant
+    // (webVariantArguments: skia_use_icu, the codec decoders, ...), which
+    // are build settings with the host's defaults. The one path among
+    // them, the client ICU's bidi library, is the directory the toolchains
+    // name (a dependency under skia_use_client_icu).
+    'skia_icu_bidi_third_party_dir': const GnStringValue(
+      '//flutter/third_party/canvaskit/icu_bidi',
+    ),
     // The arguments tools/gn passes differently for the web (research/12):
     // the host's value off the web, the web's on it.
     for (final MapEntry<String, ({bool host, bool web})> argument in perTargetOsArguments.entries)
@@ -1895,5 +1957,6 @@ Assumptions linuxHostAssumptions() {
     'skia_use_no_webp_encode': GnBoolValue(false),
     'skia_enable_skottie': GnBoolValue(true),
     'skia_enable_fontmgr_custom_directory': GnBoolValue(true),
+    'skia_icu_bidi_third_party_dir': GnStringValue('//flutter/third_party/canvaskit/icu_bidi'),
   });
 }

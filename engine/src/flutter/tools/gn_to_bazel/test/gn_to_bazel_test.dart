@@ -581,6 +581,11 @@ source_set("x") {
         // skia.gni's defaults give both builds' values: derivations.
         'skia_gl_standard',
         'skia_use_gl',
+        // The wasm toolchains set these per variant: the web build's
+        // settings (webVariantArguments).
+        'skia_use_icu',
+        'skia_use_libpng_decode',
+        'skia_use_libpng_encode',
         'skia_use_rust_png_decode',
         'skia_use_rust_png_encode',
         'skia_use_wuffs',
