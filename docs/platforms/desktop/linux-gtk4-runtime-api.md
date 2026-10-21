@@ -68,12 +68,11 @@ and the complete symbol set used by that capability:
 | Capability | Runtime threshold | Behavior when unavailable |
 | --- | --- | --- |
 | Native accessible tree | GTK 4.10 | View exports the widget-backed render surface instead of the native semantics tree |
-| Accessible text queries | GTK 4.14 | Contents, caret, and selection queries are available; this is not editable-text parity |
-| Accessible text extents/offsets | GTK 4.16 | Interface slots exist, but Flutter does not currently provide the layout data needed to implement them accurately |
-| Accessible text mutation | GTK 4.22 | Caret/selection setters are not bound; newer interface fields cannot be added safely by symbol lookup |
+| Accessible text queries and notifications | GTK 4.14 | No native text interface; the native hierarchy alone does not provide text access |
+| Accessible text extents/offsets | GTK 4.16 interface slots | Not implemented by this backend, even when the slots exist; layout data is still required |
 | Announcements | GTK 4.14 | Announcement wrapper does nothing |
 | Platform-state notifications | GTK 4.18 | Native nodes retain queryable focus state but do not emit these notifications |
-| Caret and selection commands | GTK 4.22 | Native text remains queryable without the newer command callbacks |
+| Caret and selection commands | GTK 4.22 interface tail | Native text remains queryable without the newer command callbacks |
 | DMA-BUF texture APIs | GTK 4.14 | Compositor cannot select the DMA-BUF texture route |
 
 Accessibility bounds apply Flutter’s affine and projective transform to the
@@ -82,12 +81,22 @@ full coordinate-space conversion across nested views remains outside this
 backend’s current scope and is not implied by the GTK version gate.
 
 These are the implementation's capability groups, not a claim of complete
-accessibility support at each version. In particular, native text support is
-query-only: GTK version availability does not create editable-text actions,
-per-character geometry, or point-to-offset mapping in the absence of matching
-Flutter semantics data. DMA-BUF API availability is also only
-one prerequisite: display formats, EGL support, synchronization, and buffer
-ownership are checked by the rendering code.
+accessibility support at each version. GTK 4.22 caret/selection callbacks dispatch
+Flutter's `SetSelection` action when advertised by the node; subsequent semantics
+updates determine the resulting state. Named widget actions also dispatch
+supported Flutter semantics operations. Neither mechanism implies complete
+AT-SPI EditableText support, per-character geometry, or point-to-offset mapping.
+
+The separate `GtkEditable` adapter is experimental and requires
+`FLUTTER_GTK4_ENABLE_EDITABLE_TEXT=1`, native text support, a non-obscured field,
+and its `SetText` action. It is disabled by default because of an asynchronous
+paste lifetime concern recorded during investigation. The switch is not the
+caret/selection capability gate or a general accessibility enablement flag.
+See [GTK4 accessibility](linux-gtk4-accessibility.md) for ownership, privacy,
+validation, and remaining behavior gaps.
+
+DMA-BUF API availability is only one prerequisite: display formats, EGL support,
+synchronization, and buffer ownership are checked by the rendering code.
 
 Callers should use the wrappers and feature predicates rather than adding
 ad-hoc lookups or testing a single pointer from a multi-function group.
