@@ -1684,52 +1684,74 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
 /// select()s (decision 168's web scope; landed 2026-10-20 on the user's
 /// call). What stays assumed is the host itself (a Linux x64 host, its
 /// platform names, the prebuilt Dart SDK), the OSes the engine never builds
-/// for from this scope, and the arguments tools/gn passes in for the host
-/// build (Skia's), which GN derives from nothing: the web build passes its
-/// own block of those, and the web phase answers for it as a whole.
+/// for from this scope, and the arguments tools/gn passes in, which GN
+/// derives from nothing: at the host's value where tools/gn's web build
+/// passes the same or none, and as a formula over the OS where the two
+/// builds differ ([perTargetOsArguments]).
 Assumptions generationAssumptions() {
-  return Assumptions(const <String, GnValue>{
-    'default_library_type': GnStringValue('static_library'),
-    'host_cpu': GnStringValue('x64'),
-    'host_os': GnStringValue('linux'),
-    'is_android': GnBoolValue(false),
-    'is_apple': GnBoolValue(false),
-    'is_component_build': GnBoolValue(false),
-    'is_fuchsia': GnBoolValue(false),
-    'is_ios': GnBoolValue(false),
-    'is_mac': GnBoolValue(false),
-    'is_minimal_linux': GnBoolValue(false),
-    'is_official_build': GnBoolValue(true),
-    'is_qnx': GnBoolValue(false),
-    'is_win': GnBoolValue(false),
-    'platform_name': GnStringValue('linux'),
-    'full_platform_name': GnStringValue('linux-x64'),
-    'flutter_prebuilt_dart_sdk': GnBoolValue(true),
-    'prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
-    'host_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
-    'target_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
-    // Skia's arguments as tools/gn passes them for a Linux host
-    // (linuxHostAssumptions has the same list): inputs, not derivations.
+  const isWasm = ConditionVariable('is_wasm');
+  return Assumptions(<String, GnValue>{
+    'default_library_type': const GnStringValue('static_library'),
+    'host_cpu': const GnStringValue('x64'),
+    'host_os': const GnStringValue('linux'),
+    'is_android': const GnBoolValue(false),
+    'is_apple': const GnBoolValue(false),
+    'is_component_build': const GnBoolValue(false),
+    'is_fuchsia': const GnBoolValue(false),
+    'is_ios': const GnBoolValue(false),
+    'is_mac': const GnBoolValue(false),
+    'is_minimal_linux': const GnBoolValue(false),
+    'is_official_build': const GnBoolValue(true),
+    'is_qnx': const GnBoolValue(false),
+    'is_win': const GnBoolValue(false),
+    'platform_name': const GnStringValue('linux'),
+    'full_platform_name': const GnStringValue('linux-x64'),
+    'flutter_prebuilt_dart_sdk': const GnBoolValue(true),
+    'prebuilt_dart_sdk': const GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    'host_prebuilt_dart_sdk': const GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    'target_prebuilt_dart_sdk': const GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    // Skia's arguments tools/gn passes for a Linux host and for the web
+    // alike (or for the host alone, where skia.gni's default would differ
+    // from it: skia_use_dng_sdk, skia_use_vma), and whose default would not
+    // give the web build its value (skia_use_webgpu, skia_use_freetype).
     // The Skia tree is converted when its repository is fetched, under
-    // these; without them skia.gni's defaults would stand (skia_use_vulkan
-    // false: no Vulkan backend to link the tests against).
-    'skia_enable_pdf': GnBoolValue(false),
-    'skia_gl_standard': GnStringValue(''),
-    'skia_use_dng_sdk': GnBoolValue(false),
-    'skia_use_expat': GnBoolValue(true),
-    'skia_use_gl': GnBoolValue(true),
-    'skia_use_icu': GnBoolValue(true),
-    'skia_use_libpng_decode': GnBoolValue(true),
-    'skia_use_libpng_encode': GnBoolValue(true),
-    'skia_use_rust_png_decode': GnBoolValue(false),
-    'skia_use_rust_png_encode': GnBoolValue(false),
-    'skia_use_vma': GnBoolValue(false),
-    'skia_use_vulkan': GnBoolValue(true),
-    'skia_use_wuffs': GnBoolValue(true),
-    'skia_use_x11': GnBoolValue(false),
-    'skia_use_xps': GnBoolValue(false),
+    // these. Not here: the arguments whose skia.gni default already yields
+    // both builds' values (skia_gl_standard, skia_use_gl, skia_use_wuffs,
+    // the Rust PNG codecs), which stay derivations.
+    'skia_enable_pdf': const GnBoolValue(false),
+    'skia_use_dng_sdk': const GnBoolValue(false),
+    'skia_use_freetype': const GnBoolValue(true),
+    'skia_use_icu': const GnBoolValue(true),
+    'skia_use_libpng_decode': const GnBoolValue(true),
+    'skia_use_libpng_encode': const GnBoolValue(true),
+    'skia_use_vma': const GnBoolValue(false),
+    'skia_use_webgpu': const GnBoolValue(false),
+    'skia_use_x11': const GnBoolValue(false),
+    'skia_use_xps': const GnBoolValue(false),
+    // The arguments tools/gn passes differently for the web (research/12):
+    // the host's value off the web, the web's on it.
+    for (final MapEntry<String, ({bool host, bool web})> argument in perTargetOsArguments.entries)
+      argument.key: GnConditionValue(argument.value.web ? isWasm : isWasm.negated),
   });
 }
+
+/// The arguments `tools/gn` passes with one value for a Linux host build and
+/// the other for the web build (`to_gn_wasm_args`), which GN derives from
+/// nothing and the generation scope takes as formulas over the OS, so that
+/// `if (skia_use_vulkan)` renders as a select() on the web platform: what
+/// GN's two builds say, with no flag (NEED_DECISION D4, design A). The
+/// arguments the six wasm toolchains set per variant (`skia_use_icu`, the
+/// codec decoders, ...) are not here: those are the variants' flags.
+const Map<String, ({bool host, bool web})> perTargetOsArguments = <String, ({bool host, bool web})>{
+  'skia_use_vulkan': (host: true, web: false),
+  'skia_use_expat': (host: true, web: false),
+  'skia_use_libjpeg_turbo_encode': (host: true, web: false),
+  'skia_use_no_jpeg_encode': (host: false, web: true),
+  'skia_use_libwebp_encode': (host: true, web: false),
+  'skia_use_no_webp_encode': (host: false, web: true),
+  'skia_enable_skottie': (host: true, web: false),
+  'skia_enable_fontmgr_custom_directory': (host: true, web: false),
+};
 
 /// Which assumptions describe the Linux x64 host build (the values
 /// `tools/gn` gives these arguments for it, as in `out/host_debug*/args.gn`):
@@ -1821,5 +1843,17 @@ Assumptions linuxHostAssumptions() {
     'skia_use_wuffs': GnBoolValue(true),
     'skia_use_x11': GnBoolValue(false),
     'skia_use_xps': GnBoolValue(false),
+    // skia.gni's defaults as they come out on a Linux host, for the
+    // arguments the web build passes differently (perTargetOsArguments), so
+    // that the generation scope's formulas can be held against the host's
+    // values by name.
+    'skia_use_freetype': GnBoolValue(true),
+    'skia_use_webgpu': GnBoolValue(false),
+    'skia_use_libjpeg_turbo_encode': GnBoolValue(true),
+    'skia_use_no_jpeg_encode': GnBoolValue(false),
+    'skia_use_libwebp_encode': GnBoolValue(true),
+    'skia_use_no_webp_encode': GnBoolValue(false),
+    'skia_enable_skottie': GnBoolValue(true),
+    'skia_enable_fontmgr_custom_directory': GnBoolValue(true),
   });
 }
