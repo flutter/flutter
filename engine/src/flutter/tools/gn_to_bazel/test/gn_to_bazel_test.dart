@@ -6198,8 +6198,10 @@ cc_library(
   ${build('ci/wasm_release', '--web --runtime-mode=release --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'], archives: <String>['out/wasm_release/zip_archives/flutter-web-sdk.zip'])},
   ${build('ci/wasm_profile', '--web --runtime-mode=profile --no-lto', <String>['flutter/web_sdk:flutter_web_sdk_archive'])}
 ]}''',
-        // The developer's configurations: linux/host_debug sets what
-        // ci/host_debug sets (one configuration); macos/ is not the host.
+        // The developer's configurations: linux/wasm_release sets what
+        // ci/wasm_release sets (one configuration); linux/host_debug's
+        // --no-stripped (the stripped setting off) parts it from
+        // ci/host_debug's; macos/ is not the host.
         'local_engine.json':
             '''
 {"builds": [
@@ -6215,7 +6217,7 @@ cc_library(
       // Debug VM): the developer's keeps the bare name, CI's its prefix.
       expect(builds.map((BuilderBuild b) => b.configName), <String>[
         'linux_debug_arm64',
-        'host_debug',
+        'ci_host_debug',
         'host_release',
         'host_debug_test',
         'ci_host_debug_unopt',
@@ -6237,7 +6239,7 @@ build:linux_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:run
 
 # linux_host_engine.json: ci/host_debug
 #   --target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma
-build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
+build:ci_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
 
 # linux_host_engine.json: ci/host_release
 #   --target-dir ci/host_release --runtime-mode=release --prebuilt-dart-sdk --no-lto
@@ -6271,11 +6273,11 @@ build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 
 # local_engine.json: linux/host_debug
 #   --runtime-mode debug --no-stripped --no-lto --rbe --no-goma
-# The same configuration as linux_host_engine.json's ci/host_debug, above.
+build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/host_debug_unopt
 #   --runtime-mode debug --unopt --no-stripped --no-lto
-build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma
@@ -6328,10 +6330,10 @@ build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
         buildFile,
         contains('''
 # linux_host_engine.json: ci/host_debug
-#   bazel run --config=host_debug :host_debug
+#   bazel run --config=ci_host_debug :ci_host_debug
 # Not built, no Bazel counterpart yet: flutter, flutter:unittests.
 install(
-    name = "host_debug",
+    name = "ci_host_debug",
     testonly = True,
     contents = [
         "//engine/src/flutter/build/archives:artifacts",

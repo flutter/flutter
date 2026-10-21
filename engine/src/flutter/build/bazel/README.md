@@ -894,6 +894,28 @@ relative to the checkout; the copies land in the checkout
 and writable, as GN's are (Bazel's outputs are not; a second install
 replaces the first's).
 
+An executable or shared library lands as GN's link tools leave it. GN's
+Linux toolchains (`build/toolchain/gcc_toolchain.gni`) link every
+executable to `exe.unstripped/<name>` and `llvm-objcopy --strip-all` it
+into the build root, always; a shared library goes through
+`lib.unstripped/` the same way under `stripped_symbols` -- `tools/gn`'s
+default, which only the developer's `--no-stripped` configurations turn
+off. So GN's `flutter_tester` in `out/linux_debug_arm64` is 57 MB over a
+131 MB `exe.unstripped/flutter_tester`, and its archives pack the stripped
+binaries. Bazel's binary in `bazel-bin` stays as linked -- the tests run it,
+as GN's unstripped copy is there to be run under a debugger -- and the
+aspect that places a `cc_binary` strips what is shipped
+(`build_directory.bzl`): the same tool with the same flag writes
+`<name>.shipped` beside the binary (`<name>.stripped` is `cc_binary`'s own,
+the toolchain's strip with `-S`, debug sections only), which an `install`
+lays at the build root and a `zip_bundle` packs, with the binary as linked
+under `exe.unstripped/` or `lib.unstripped/`; a shared library under
+`--//engine/src/flutter/build/bazel:stripped` (the default), as linked
+otherwise. `--no-stripped` in a builder configuration is that flag off
+(the developer's `host_debug`, `host_debug_unopt`, `host_profile`,
+`host_release`); for the web it is nothing, as GN's wasm toolchain strips
+nothing. The Dart wrap's `gen_snapshot` is already GN's stripped file.
+
 The root package has `//engine/src/flutter:install`, the Linux host's build
 directory as above with all seven archives of the Linux host configurations:
 
@@ -995,6 +1017,10 @@ two flags are read as one, since `--linux-cpu` means nothing without
 (`//engine/src/flutter/txt:use_fontconfig`, which the three `*_desktop`
 builds set: txt links the sysroot's libfontconfig and Skia's fontconfig font
 manager is built and chosen, as in CI's Linux desktop artifact),
+`--no-stripped` the `stripped` flag off (`//engine/src/flutter/build/bazel:stripped`:
+whether the shared libraries an install or archive ships are stripped, as
+GN's `stripped_symbols`; executables always are; for the web, whose
+toolchain strips nothing, the flag is nothing),
 `--asan` the asan flag (`//engine/src/flutter/build/bazel:asan`: the
 toolchain's `asan` feature on every compile and link, `is_asan` in the
 wrapped GN builds, and CI's sanitizer environment --
@@ -1014,17 +1040,20 @@ has no setting for yet, the reason and no configuration:
 `--no-prebuilt-dart-sdk`, LTO (which `tools/gn` enables without `--no-lto`). The developer's own configurations,
 `local_engine.json`'s `linux/` builds (what `et build --config <name>` runs:
 `host_debug`, `host_debug_unopt`, `host_profile`, `host_release`,
-`wasm_release`, `wasm_debug_unopt`, with
-`--no-stripped`, which the Bazel build has no stripped copies to answer
-anyway), are read with the rest, and a name two builds share with the same
-flags -- CI's `ci/host_debug` and the developer's `linux/host_debug`, CI's
-`ci/wasm_release` and the developer's `linux/wasm_release` -- is
-one configuration; where CI's flags differ from the developer's under one
-bare name, the developer keeps the name `et` knows and CI's keeps its prefix
-as its build directory does: `ci_host_debug_unopt` (`out/ci/host_debug_unopt`,
-asan and a Debug VM) beside `host_debug_unopt`. Of the twenty-five builds,
-twenty-four have a configuration, twenty-one distinct: `host_debug`,
-`host_debug_unopt`, `host_profile`, `host_release`, `host_debug_desktop`,
+`wasm_release`, `wasm_debug_unopt`; the host ones with `--no-stripped`,
+the `stripped` flag off -- shared libraries as linked, where CI's are
+stripped), are read with the rest, and a name two builds share with the same
+flags -- CI's `ci/wasm_release` and the developer's `linux/wasm_release`
+-- is one configuration; where CI's flags differ from the developer's under
+one bare name, the developer keeps the name `et` knows and CI's keeps its
+prefix as its build directory does: `ci_host_debug` and `ci_host_release`
+(`out/ci/host_debug`, `out/ci/host_release`: stripped libraries) beside
+`host_debug` and `host_release`, `ci_host_debug_unopt`
+(`out/ci/host_debug_unopt`, asan and a Debug VM) beside `host_debug_unopt`.
+Of the twenty-five builds, twenty-four have a configuration, twenty-three
+distinct: `host_debug`, `ci_host_debug`,
+`host_debug_unopt`, `host_profile`, `host_release`, `ci_host_release`,
+`host_debug_desktop`,
 `host_profile_desktop`, `host_release_desktop`, `host_debug_test`,
 `host_profile_test`, `host_release_test`, `ci_host_debug_unopt`,
 `host_debug_unopt_impeller_tests`, `host_debug_ddm`,
@@ -1044,8 +1073,8 @@ targets nothing converted answers to listed (`flutter:unittests`,
 `flutter/build/dart:dart_sdk`, the licenses tool):
 
 ```sh
-bazel run --config=host_release //engine/src/flutter/ci/builders:host_release
-bazel run --config=host_debug //engine/src/flutter/ci/builders:host_debug
+bazel run --config=ci_host_release //engine/src/flutter/ci/builders:ci_host_release
+bazel run --config=ci_host_debug //engine/src/flutter/ci/builders:ci_host_debug
 bazel run --config=host_profile //engine/src/flutter:install   # the developer's: everything
 bazel run --config=wasm_release //engine/src/flutter/ci/builders:wasm_release
 bazel run --config=linux_debug_arm64 //engine/src/flutter/ci/builders:linux_debug_arm64
@@ -1059,7 +1088,8 @@ and `linux-arm64/`'s `artifacts.zip`, `linux-arm64-embedder.zip`,
 `font-subset.zip` and `impeller_sdk.zip`, every binary in them aarch64)
 where the builders' recipes read them. The executables and shared libraries a build's targets
 produce (`flutter_tester`, `libpath_ops.so`) land in the build root, as GN
-puts them. A build with tests also gets a `<name>_tests` suite over the
+puts them: stripped, with the binaries as linked under `exe.unstripped/`
+and `lib.unstripped/` (see the install section). A build with tests also gets a `<name>_tests` suite over the
 Bazel suites that stand for its `run_tests.py` types (`dart` is the Dart
 tests under flutter_tester with the VM service's and the smoke test,
 `dart-host` the Dart packages' own, `benchmarks`, `font-subset`, and
