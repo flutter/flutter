@@ -24,15 +24,16 @@ import 'sliver.dart';
 /// Every widget has a [SliverPhysicalParentData.crossAxisFlex] value associated with them.
 /// First, lay out all of the slivers with flex of 0 or null, in which case the slivers themselves will
 /// figure out how much cross axis extent to take up. For example, [SliverConstrainedCrossAxis]
-/// is an example of a widget which sets its own flex to 0. If the remaining cross axis
-/// extent is fully consumed, subsequent constrained children are laid out with zero
-/// cross axis extent. Then [RenderSliverCrossAxisGroup] will
+/// is an example of a widget which sets its own flex to 0. Then [RenderSliverCrossAxisGroup] will
 /// divide up the remaining space to all the remaining children proportionally
-/// to each child's flex factor. If the constrained slivers consume all
-/// available cross axis extent, flexible children are laid out with zero cross
-/// axis extent. By default, children of [SliverCrossAxisGroup]
+/// to each child's flex factor. By default, children of [SliverCrossAxisGroup]
 /// are setup to have a flex factor of 1, but a different flex factor can be
 /// specified via the [SliverCrossAxisExpanded] widgets.
+///
+/// If the constrained slivers consume all of the available cross axis extent,
+/// any remaining children, constrained or flexible, are laid out with a cross
+/// axis extent of zero rather than throwing, like [Expanded] children in a
+/// [Flex] that has no free space.
 class RenderSliverCrossAxisGroup extends RenderSliver
     with ContainerRenderObjectMixin<RenderSliver, SliverPhysicalContainerParentData> {
   @override
