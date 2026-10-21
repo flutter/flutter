@@ -108,13 +108,18 @@ flutter:
 ''');
       projectFileSystem.currentDirectory = '/package';
 
-      final command = FakeBuildInfoCommand();
+      final command = FakeBuildInfoCommand(addLinuxGtkOption: true);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['fake']);
 
       expect(command.buildInfo?.linuxGtkVersion, 'gtk4');
       expect(command.buildInfo?.dartDefines, contains('$kLinuxGtkDartDefine=gtk4'));
+
+      final overrideCommand = FakeBuildInfoCommand(addLinuxGtkOption: true);
+      await createTestCommandRunner(overrideCommand).run(<String>['fake', '--linux-gtk=gtk3']);
+      expect(overrideCommand.buildInfo?.linuxGtkVersion, 'gtk3');
+      expect(overrideCommand.buildInfo?.dartDefines, contains('$kLinuxGtkDartDefine=gtk3'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => projectFileSystem,
@@ -140,7 +145,7 @@ dependencies:
   testUsingContext(
     'linux-gtk reads global config default when project does not declare one',
     () async {
-      final command = FakeBuildInfoCommand();
+      final command = FakeBuildInfoCommand(addLinuxGtkOption: true);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['fake']);
@@ -280,7 +285,7 @@ class FakeBuildInfoCommand extends FlutterCommand {
       CommonOptions.dartDefineFromFile,
     ]);
     if (addLinuxGtkOption) {
-      argParser.addOption('linux-gtk', allowed: <String>['gtk3', 'gtk4']);
+      argParser.addOption('linux-gtk', defaultsTo: 'gtk3', allowed: <String>['gtk3', 'gtk4']);
     }
   }
 

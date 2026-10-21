@@ -792,7 +792,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!argParser.options.containsKey(optionName)) {
       return false;
     }
-    return argResults?.options.contains(optionName) ?? false;
+    return argResults?.wasParsed(optionName) ?? false;
   }
 
   void _addLinuxGtkToDartDefines(String linuxGtkVersion, List<String> dartDefines) {
