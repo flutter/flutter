@@ -843,7 +843,11 @@ over `deps`, `srcs` and `data`, and over an archive's `files` and `trees`,
 since ninja building GN's archive target writes its inputs' closure into
 the build directory too: the web builder's install lays the
 `flutter_web_sdk/` tree beside `flutter-web-sdk.zip`, a host builder's the
-`flutter_tester` and libraries its archives pack), so that one target --
+`flutter_tester` and libraries its archives pack -- and, as an aspect does
+not reach a rule through its output files, a `zip_bundle` places the
+entries whose GN source is an output of the build itself, at the source's
+build-directory path the converter hands it as `sources`: the patched
+SDK's dills, the snapshots under `gen/`), so that one target --
 the sky_engine package's -- brings its thirty copies, its generated file
 and its assembled directory along. The script copies from the runfiles
 tree, where each file is symlinked by its index in the install's list
