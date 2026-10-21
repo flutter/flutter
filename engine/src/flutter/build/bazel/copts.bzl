@@ -103,6 +103,21 @@ FLUTTER_COPTS = CHROMIUM_CODE_COPTS + [
     "-Wunreachable-code",
 ]
 
+# //flutter/common/config.gni's flutter_cflags_objc and flutter_cflags_objcc:
+# the Objective-C flags of the Apple embeddings and their tests (ARC, the
+# selector and override checks as errors). Plain lists, since a file names
+# them inside a select() branch (testing's suites under test_enable_metal),
+# where a select() cannot nest: macOS's extra -fapplication-extension is
+# the Apple phase's, on its platform. Nothing compiles Objective-C on the
+# other platforms.
+FLUTTER_CFLAGS_OBJC = [
+    "-Werror=overriding-method-mismatch",
+    "-Werror=undeclared-selector",
+    "-fobjc-arc",
+]
+
+FLUTTER_CFLAGS_OBJCC = FLUTTER_CFLAGS_OBJC
+
 # //build/config/compiler:chromium_code (defines).
 FLUTTER_LOCAL_DEFINES = [
     "__STDC_CONSTANT_MACROS",
