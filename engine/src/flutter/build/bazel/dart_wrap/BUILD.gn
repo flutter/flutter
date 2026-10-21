@@ -15,7 +15,9 @@
 # Linux arm64 one, target_cpu = "arm64") GN writes them under clang_x64/,
 # built for the host and emitting the target's snapshots, while the
 # libraries are the target's; in the host's own build the two toolchains
-# are one and the outputs sit in the build root.
+# are one and the outputs sit in the build root. gen_snapshot is also
+# built for the target itself: artifacts.zip ships that one (build/archives:
+# "a target-platform-specific binary"), the arm64 build's for arm64 hosts.
 
 group("dart_wrap") {
   deps = [
@@ -25,6 +27,7 @@ group("dart_wrap") {
     "//flutter/third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)",
     "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",
     "//flutter/third_party/dart/runtime/bin:elf_loader",
+    "//flutter/third_party/dart/runtime/bin:gen_snapshot",
     "//flutter/third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
     "//flutter/third_party/dart/runtime/bin:native_assets_api",
     "//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion",

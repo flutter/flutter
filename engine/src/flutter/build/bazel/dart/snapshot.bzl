@@ -186,7 +186,7 @@ core_snapshot = rule(
             mandatory = True,
             doc = "The isolate snapshot instructions (GN's isolate_snapshot_instructions.bin).",
         ),
-        "_gen_snapshot": _dart_tool("gen_snapshot"),
+        "_gen_snapshot": _dart_tool("gen_snapshot_host"),
     },
 )
 
@@ -229,7 +229,7 @@ aot_snapshot = rule(
             mandatory = True,
             doc = "The ELF snapshot (GN's assets/<dart_elf_filename>).",
         ),
-        "_gen_snapshot": _dart_tool("gen_snapshot"),
+        "_gen_snapshot": _dart_tool("gen_snapshot_host"),
     },
 )
 
