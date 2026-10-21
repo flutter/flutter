@@ -6629,6 +6629,7 @@ flutter_dart_tests(
           skipTargets: file.skip.keys.toSet(),
           tree: tree,
           importPolicy: engineImportPolicy,
+          condition: file.condition == null ? Condition.always : ConditionVariable(file.condition!),
         );
         final String output = emitBuildFile(
           evaluation,
