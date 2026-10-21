@@ -11,7 +11,6 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 final class LinuxBuildService extends BuildService {
   /// Target name for the prototype Linux build target.
   static const String customLinuxBuildTargetName = 'custom-linux-build';
-  static const String _defaultAppName = 'app';
 
   static String? _getCmakeBinaryName(Uri projectDirUri) {
     final cmakeFile = File.fromUri(projectDirUri.resolve('linux/CMakeLists.txt'));
@@ -29,16 +28,6 @@ final class LinuxBuildService extends BuildService {
       }
     }
     return null;
-  }
-
-  static String? _getPubspecAppName(Uri projectDirUri) {
-    final pubspecFile = File.fromUri(projectDirUri.resolve('pubspec.yaml'));
-    if (!pubspecFile.existsSync()) {
-      return null;
-    }
-    final namePattern = RegExp(r'^\s*name:\s*([a-zA-Z0-9_]+)\s*$', multiLine: true);
-    final RegExpMatch? match = namePattern.firstMatch(pubspecFile.readAsStringSync());
-    return match?.group(1)?.trim();
   }
 
   @override
@@ -60,10 +49,13 @@ final class LinuxBuildService extends BuildService {
   }) async {
     if (targetName == customLinuxBuildTargetName) {
       final Uri projectDirUri = Directory.fromUri(projectRoot).uri;
-      final String appName =
-          _getCmakeBinaryName(projectDirUri) ??
-          _getPubspecAppName(projectDirUri) ??
-          _defaultAppName;
+      final String? appName = _getCmakeBinaryName(projectDirUri);
+      if (appName == null) {
+        return const ExtensionBuildResult(
+          success: false,
+          errorMessage: 'Could not find BINARY_NAME in linux/CMakeLists.txt.',
+        );
+      }
 
       // TODO(bkonyi): Invoke the Linux build pipeline instead of resolving the expected bundle path.
       final executableFile = File.fromUri(

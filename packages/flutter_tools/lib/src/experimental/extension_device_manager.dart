@@ -52,15 +52,13 @@ final class ExtensionDeviceClient extends DeviceService {
       '("${DeviceService.isSupportedForProjectMethod}")...',
     );
     try {
-      final Object? rawResult = await connection
-          .sendRequest(
-            DeviceService.isSupportedForProjectMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: deviceId,
-              DeviceService.projectParam: project.toMap(),
-            },
-          )
-          .timeout(const Duration(seconds: 5));
+      final Object? rawResult = await connection.sendRequest(
+        DeviceService.isSupportedForProjectMethod,
+        params: <String, Object?>{
+          DeviceService.deviceIdParam: deviceId,
+          DeviceService.projectParam: project.toMap(),
+        },
+      );
       if (rawResult case final bool supported) {
         return supported;
       }
@@ -122,9 +120,23 @@ final class ExtensionDeviceClient extends DeviceService {
         // https://github.com/flutter/flutter/issues/193955.
         timeout: null,
       );
-      if (rawResult case {DeviceService.vmServiceUriKey: final String uri}) {
-        return Uri.tryParse(uri);
+      if (rawResult case {DeviceService.vmServiceUriKey: final String uriStr}) {
+        final Uri? parsed = Uri.tryParse(uriStr);
+        if (parsed != null) {
+          return parsed;
+        }
+        _logger.printError(
+          'ExtensionDeviceClient received invalid VM Service URI for "$deviceId": "$uriStr".',
+        );
+        return null;
       }
+      if (rawResult case {DeviceService.vmServiceUriKey: null}) {
+        return null;
+      }
+      _logger.printError(
+        'ExtensionDeviceClient received invalid response for "${DeviceService.getVmServiceUriMethod}": '
+        'expected Map with String or null "${DeviceService.vmServiceUriKey}", got ${rawResult.runtimeType}.',
+      );
     } on Object catch (err, stack) {
       _logger.printError(
         'ExtensionDeviceClient failed to get VM Service URI for "$deviceId": $err',
@@ -236,7 +248,8 @@ class ExtensionBackedDevice extends Device {
     required this._fileSystem,
     required super.logger,
     required this._targetDevice,
-  }) : super(
+  }) : _logger = logger,
+       super(
          _targetDevice.id,
          category: _targetDevice.category,
          platformType: PlatformType.custom,
@@ -246,6 +259,7 @@ class ExtensionBackedDevice extends Device {
   final ExtensionBuildManager _buildManager;
   final DeviceService _deviceService;
   final FileSystem _fileSystem;
+  final Logger _logger;
   final TargetDevice _targetDevice;
 
   @override
@@ -321,51 +335,42 @@ class ExtensionBackedDevice extends Device {
     // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/193955.
     final BuildMode buildMode = debuggingOptions.buildInfo.mode;
 
-    Uri? executableUri;
     if (prebuiltApplication) {
-      if (package is PrebuiltApplicationPackage) {
-        final String path = package.applicationPackage.path;
-        if (path.isNotEmpty) {
-          executableUri = package.applicationPackage.absolute.uri;
-        }
-      }
-      if (executableUri == null || !executableUri.isValidFileUri) {
-        logger.printError('No prebuilt application binary provided for launching on $name.');
-        return LaunchResult.failed();
-      }
-    } else {
-      final String? buildTargetName = _targetDevice.buildTarget;
-      if (buildTargetName == null) {
-        logger.printError(
-          'Device $name does not specify a buildTarget for launching applications.',
-        );
-        return LaunchResult.failed();
-      }
-
-      final String targetMainPath = mainPath ?? 'lib/main.dart';
-      logger.printTrace('Building application using extension target "$buildTargetName"...');
-      final ExtensionBuildResult result = await _buildManager.build(
-        buildMode: buildMode,
-        mainPath: targetMainPath,
-        projectRoot: _fileSystem.currentDirectory.uri,
-        targetName: buildTargetName,
+      _logger.printError(
+        'Prebuilt application bundles are not supported yet for tool extension devices.',
       );
-      if (!result.success) {
-        final String? errorMessage = result.errorMessage;
-        logger.printError(
-          errorMessage != null && errorMessage.isNotEmpty
-              ? 'Build failed: $errorMessage'
-              : 'Build failed.',
-        );
-        return LaunchResult.failed();
-      }
-      executableUri = result.executableUri;
-      if (executableUri == null || !executableUri.isValidFileUri) {
-        logger.printError(
-          'Extension build target "$buildTargetName" did not return a valid executableUri.',
-        );
-        return LaunchResult.failed();
-      }
+      return LaunchResult.failed();
+    }
+
+    final String? buildTargetName = _targetDevice.buildTarget;
+    if (buildTargetName == null) {
+      _logger.printError('Device $name does not specify a buildTarget for launching applications.');
+      return LaunchResult.failed();
+    }
+
+    final String targetMainPath = mainPath ?? 'lib/main.dart';
+    _logger.printTrace('Building application using extension target "$buildTargetName"...');
+    final ExtensionBuildResult result = await _buildManager.build(
+      buildMode: buildMode,
+      mainPath: targetMainPath,
+      projectRoot: _fileSystem.currentDirectory.uri,
+      targetName: buildTargetName,
+    );
+    if (!result.success) {
+      final String? errorMessage = result.errorMessage;
+      _logger.printError(
+        errorMessage != null && errorMessage.isNotEmpty
+            ? 'Build failed: $errorMessage'
+            : 'Build failed.',
+      );
+      return LaunchResult.failed();
+    }
+    final Uri? executableUri = result.executableUri;
+    if (executableUri == null || !executableUri.isValidFileUri) {
+      _logger.printError(
+        'Extension build target "$buildTargetName" did not return a valid executableUri.',
+      );
+      return LaunchResult.failed();
     }
 
     final bool debuggingEnabled = debuggingOptions.debuggingEnabled;
@@ -378,14 +383,14 @@ class ExtensionBackedDevice extends Device {
       executableUri: executableUri,
     );
     if (!launched) {
-      logger.printError('Failed to launch application on $name.');
+      _logger.printError('Failed to launch application on $name.');
       return LaunchResult.failed();
     }
 
     if (debuggingEnabled) {
       final Uri? vmServiceUri = await _deviceService.getVmServiceUri(deviceId: id);
       if (vmServiceUri == null) {
-        logger.printError('Failed to discover VM Service URI for $name.');
+        _logger.printError('Failed to discover VM Service URI for $name.');
         await stopApp(package, userIdentifier: userIdentifier);
         return LaunchResult.failed();
       }

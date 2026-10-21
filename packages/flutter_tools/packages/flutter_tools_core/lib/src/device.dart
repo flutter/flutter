@@ -188,17 +188,14 @@ class TargetDevice {
 /// tool extension target device.
 @immutable
 class ExtensionDebuggingOptions {
-  const ExtensionDebuggingOptions({required this.buildMode, this.debuggingEnabled = false});
+  const ExtensionDebuggingOptions({required this.buildMode, required this.debuggingEnabled});
 
   /// Deserializes [ExtensionDebuggingOptions] from a JSON-serializable map.
   ///
   /// Throws a [FormatException] if required fields are missing or invalid.
   factory ExtensionDebuggingOptions.fromJson(Map<String, Object?> json) {
     final BuildMode buildMode = _parseBuildMode(json.requiredField<String>(buildModeKey), json);
-    final bool debuggingEnabled = json.optionalField<bool>(
-      debuggingEnabledKey,
-      defaultValue: false,
-    );
+    final bool debuggingEnabled = json.requiredField<bool>(debuggingEnabledKey);
     return ExtensionDebuggingOptions(buildMode: buildMode, debuggingEnabled: debuggingEnabled);
   }
 

@@ -7,7 +7,6 @@ import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -31,19 +30,11 @@ import 'package:flutter_tools_core/flutter_tools_core.dart'
         TargetDevice;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
-
-class _FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplicationPackage {
-  _FakePrebuiltApplicationPackage(this.applicationPackage);
-
-  @override
-  final FileSystemEntity applicationPackage;
-}
 
 final class _FakeTestBuildService extends BuildService {
   @override
@@ -127,11 +118,9 @@ final class _FakeTestDeviceService extends DeviceService {
     required Uri executableUri,
   }) async {
     if (deviceId == 'fake_test_device') {
-      return (executableUri == Uri.file('/tmp/fake_bundle/app') &&
-              debuggingOptions ==
-                  const ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true)) ||
-          (executableUri == Uri.file('/prebuilt/app') &&
-              debuggingOptions == const ExtensionDebuggingOptions(buildMode: .release));
+      return executableUri == Uri.file('/tmp/fake_bundle/app') &&
+          debuggingOptions ==
+              const ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
     }
     if (deviceId == 'missing_vm_service_device') {
       return executableUri == Uri.file('/tmp/fake_bundle/app');
@@ -415,38 +404,23 @@ flutter:
         },
       );
 
-      testWithoutContext('launches prebuilt application without invoking build service', () async {
-        final (_, _, MemoryFileSystem fileSystem, List<Device> devices) = await setUpTestDevices();
+      testWithoutContext('fails when prebuiltApplication is true', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
         final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
-        final prebuiltPackage = _FakePrebuiltApplicationPackage(fileSystem.file('/prebuilt/app'));
 
         final LaunchResult prebuiltResult = await device.startApp(
-          prebuiltPackage,
+          null,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         );
-        expect(prebuiltResult.started, isTrue);
-        expect(prebuiltResult.vmServiceUri, isNull);
+        expect(prebuiltResult.started, isFalse);
+        expect(
+          logger.errorText,
+          contains(
+            'Prebuilt application bundles are not supported yet for tool extension devices.',
+          ),
+        );
       });
-
-      testWithoutContext(
-        'fails when prebuiltApplication is true without PrebuiltApplicationPackage',
-        () async {
-          final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
-          final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
-
-          final LaunchResult missingPrebuiltResult = await device.startApp(
-            null,
-            prebuiltApplication: true,
-            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          );
-          expect(missingPrebuiltResult.started, isFalse);
-          expect(
-            logger.errorText,
-            contains('No prebuilt application binary provided for launching on'),
-          );
-        },
-      );
 
       testWithoutContext('fails when device does not specify a buildTarget', () async {
         final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();

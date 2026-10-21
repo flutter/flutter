@@ -172,7 +172,10 @@ void main() {
       );
       await expectLater(
         launchAppHandler(<String, Object?>{
-          DeviceService.debuggingOptionsParam: <String, Object?>{'buildMode': 'debug'},
+          DeviceService.debuggingOptionsParam: <String, Object?>{
+            'buildMode': 'debug',
+            'debuggingEnabled': true,
+          },
           DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
           DeviceService.executableUriParam: 'relative/path/app',
         }),
@@ -182,7 +185,10 @@ void main() {
       );
       await expectLater(
         launchAppHandler(<String, Object?>{
-          DeviceService.debuggingOptionsParam: <String, Object?>{'buildMode': 'invalid_mode'},
+          DeviceService.debuggingOptionsParam: <String, Object?>{
+            'buildMode': 'invalid_mode',
+            'debuggingEnabled': true,
+          },
           DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
           DeviceService.executableUriParam: 'file:///nonexistent/app',
         }),

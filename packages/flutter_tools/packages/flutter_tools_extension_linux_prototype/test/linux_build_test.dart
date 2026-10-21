@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/build.dart';
@@ -17,6 +19,16 @@ Matcher _throwsInvalidParams(String message) => throwsA(
 
 void main() {
   group('LinuxBuildService', () {
+    late Directory tempDir;
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('linux_build_test');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      final cmakeFile = File.fromUri(tempDir.uri.resolve('linux/CMakeLists.txt'))
+        ..createSync(recursive: true);
+      cmakeFile.writeAsStringSync('set(BINARY_NAME "test_app")\n');
+    });
+
     test('getBuildTargets returns prototype custom-linux-build target', () async {
       final service = LinuxBuildService();
       final List<ExtensionBuildTarget> targets = await service.getBuildTargets();
@@ -33,20 +45,35 @@ void main() {
       final ExtensionBuildResult successResult = await service.build(
         buildMode: .debug,
         mainPath: 'lib/main.dart',
-        projectRoot: Uri.parse('/project'),
+        projectRoot: tempDir.uri,
         targetName: LinuxBuildService.customLinuxBuildTargetName,
       );
       expect(successResult.success, isTrue);
       expect(successResult.errorMessage, isNull);
+      expect(successResult.executableUri?.path, contains('bundle/test_app'));
 
       final ExtensionBuildResult failureResult = await service.build(
         buildMode: .debug,
         mainPath: 'lib/main.dart',
-        projectRoot: Uri.parse('/project'),
+        projectRoot: tempDir.uri,
         targetName: 'unknown-target',
       );
       expect(failureResult.success, isFalse);
       expect(failureResult.errorMessage, contains('Unknown build target: unknown-target'));
+    });
+
+    test('build fails when linux/CMakeLists.txt is missing', () async {
+      final Directory emptyDir = Directory.systemTemp.createTempSync('empty_project');
+      addTearDown(() => emptyDir.deleteSync(recursive: true));
+      final service = LinuxBuildService();
+      final ExtensionBuildResult failureResult = await service.build(
+        buildMode: .debug,
+        mainPath: 'lib/main.dart',
+        projectRoot: emptyDir.uri,
+        targetName: LinuxBuildService.customLinuxBuildTargetName,
+      );
+      expect(failureResult.success, isFalse);
+      expect(failureResult.errorMessage, 'Could not find BINARY_NAME in linux/CMakeLists.txt.');
     });
 
     test('initialize registers getBuildTargets and build RPC handlers', () async {
@@ -64,7 +91,7 @@ void main() {
       final Object? buildResultObj = await handlers['build']!(<String, Object?>{
         BuildService.buildModeParam: 'debug',
         BuildService.mainPathParam: 'lib/main.dart',
-        BuildService.projectRootParam: '/project',
+        BuildService.projectRootParam: tempDir.uri.toString(),
         BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
       });
       expect(buildResultObj, isA<Map<String, Object?>>());

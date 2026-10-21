@@ -16,7 +16,6 @@ class _RunningApp {
 
   final Process process;
   final Completer<Uri?> vmServiceCompleter;
-  Uri? vmServiceUri;
 }
 
 /// Prototype Linux [DeviceService] implementation.
@@ -29,6 +28,7 @@ final class LinuxDeviceService extends DeviceService {
   );
 
   final _runningApps = <String, _RunningApp>{};
+
   @override
   Future<List<TargetDevice>> getDevices() async {
     return const <TargetDevice>[
@@ -88,18 +88,17 @@ final class LinuxDeviceService extends DeviceService {
         if (match != null && !uriCompleter.isCompleted) {
           final String? uriStr = match.group(1);
           final Uri? uri = uriStr != null ? Uri.tryParse(uriStr) : null;
-          runningApp.vmServiceUri = uri;
           uriCompleter.complete(uri);
         }
       }
 
       // TODO(bkonyi): Route application logs over a DeviceService log stream.
       process.stdout
-          .transform(utf8.decoder)
+          .transform(const Utf8Decoder(allowMalformed: true))
           .transform(const LineSplitter())
           .listen(checkVmServiceUri);
       process.stderr
-          .transform(utf8.decoder)
+          .transform(const Utf8Decoder(allowMalformed: true))
           .transform(const LineSplitter())
           .listen(checkVmServiceUri);
 
@@ -129,7 +128,7 @@ final class LinuxDeviceService extends DeviceService {
     if (runningApp == null) {
       return null;
     }
-    return runningApp.vmServiceUri ?? runningApp.vmServiceCompleter.future;
+    return runningApp.vmServiceCompleter.future;
   }
 
   @override

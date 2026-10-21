@@ -124,13 +124,15 @@ void main() {
       expect(parsed.toString(), contains('debuggingEnabled: true'));
     });
 
-    test('defaults debuggingEnabled to false and validates fields', () {
-      final parsed = ExtensionDebuggingOptions.fromJson(const <String, Object?>{
-        'buildMode': 'release',
-      });
-      expect(parsed.buildMode, BuildMode.release);
-      expect(parsed.debuggingEnabled, isFalse);
-
+    test('validates fields and throws FormatException when missing or invalid', () {
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{'debuggingEnabled': true}),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{'buildMode': 'release'}),
+        throwsFormatException,
+      );
       expect(
         () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{}),
         throwsFormatException,
@@ -138,6 +140,7 @@ void main() {
       expect(
         () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
           'buildMode': 'invalid_mode',
+          'debuggingEnabled': true,
         }),
         throwsFormatException,
       );
