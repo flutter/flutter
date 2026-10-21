@@ -182,11 +182,15 @@ Future<Depfile> copyAssets(
                 inputToCompiler = environment.fileSystem.file(transformedShaderSourcePath);
               }
 
-              doCopy = !await shaderCompiler.compileShader(
-                input: inputToCompiler,
-                outputPath: file.path,
-                targetPlatform: targetPlatform,
-              );
+              try {
+                doCopy = !await shaderCompiler.compileShader(
+                  input: inputToCompiler,
+                  outputPath: file.path,
+                  targetPlatform: targetPlatform,
+                );
+              } on ShaderCompilerException catch (e) {
+                throwToolExit(e.message);
+              }
           }
           if (doCopy) {
             await (content.file as File).copy(file.path);
