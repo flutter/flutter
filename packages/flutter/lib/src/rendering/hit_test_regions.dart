@@ -90,7 +90,7 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect platformViewRect, List<Re
 /// handed to the engine without allocating an object per rectangle. Groups
 /// appear in paint order, and each group is encoded as:
 ///
-/// ```none
+/// ```csv
 /// [viewId, rectCount, left0, top0, right0, bottom0, ..., leftN, topN, rightN, bottomN]
 /// ```
 ///
