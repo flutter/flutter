@@ -3984,22 +3984,31 @@ final class _Emitter {
   /// way buildifier would, so that GN's order and comments (which buildifier
   /// does not sort across) do not leak into the result. The names are from
   /// buildifier's table of sortable list arguments (`fixtures` is not, but
-  /// GN's order of fixtures carries no meaning either).
+  /// GN's order of fixtures carries no meaning either). `includes` is in
+  /// buildifier's table too, but its order is the compiler's search order --
+  /// freetype2's `include/freetype-flutter-config` ahead of `include`, so
+  /// that Flutter's public-macros.h hides the API where the stock one
+  /// exports it -- so the emitter keeps GN's and marks a list buildifier
+  /// would reorder `# do not sort` ([_keptOrderAttributes]).
   static const Set<String> _sortedAttributes = <String>{
     'srcs',
     'hdrs',
     'deps',
     'implementation_deps',
     'data',
-    'includes',
     'tags',
     'tools',
     'visibility',
     'fixtures',
   };
 
+  /// Attributes buildifier sorts whose order the build reads: emitted in
+  /// GN's order, `# do not sort` leading a list that is not in buildifier's.
+  static const Set<String> _keptOrderAttributes = <String>{'includes'};
+
   void _renderList(StringBuffer out, _ListAttribute list, _Rule rule, String attribute) {
     final bool sorted = _sortedAttributes.contains(attribute);
+    final bool keepOrder = _keptOrderAttributes.contains(attribute);
     final parts = <String>[];
     // Bare list constants (FLUTTER_COPTS, FLUTTER_LOCAL_DEFINES) stand as
     // themselves wherever they sit; the
@@ -4009,7 +4018,9 @@ final class _Emitter {
     final elements = <_Item>[];
     void flush() {
       if (elements.isNotEmpty) {
-        parts.add(_renderItems(sorted ? _sortItems(elements) : elements, indent: 4));
+        parts.add(
+          _renderItems(sorted ? _sortItems(elements) : elements, indent: 4, keepOrder: keepOrder),
+        );
         elements.clear();
       }
     }
@@ -4039,7 +4050,7 @@ final class _Emitter {
         if (current == Condition.always) {
           unconditional(run);
         } else {
-          parts.add(_renderSelect(current!, List<_Item>.of(run), rule));
+          parts.add(_renderSelect(current!, List<_Item>.of(run), rule, keepOrder: keepOrder));
         }
         run.clear();
       }
@@ -4060,7 +4071,14 @@ final class _Emitter {
       parts.add('[]');
     }
     for (final MapEntry<Condition, List<_Item>> entry in list.conditional.entries) {
-      parts.add(_renderSelect(entry.key, sorted ? _sortItems(entry.value) : entry.value, rule));
+      parts.add(
+        _renderSelect(
+          entry.key,
+          sorted ? _sortItems(entry.value) : entry.value,
+          rule,
+          keepOrder: keepOrder,
+        ),
+      );
     }
     out.write(parts.join(' + '));
   }
@@ -4069,15 +4087,15 @@ final class _Emitter {
   /// test_enable_metal) stand as themselves, joined by `+` with the list
   /// literals of the elements around them, as [_renderList] lays out an
   /// attribute; a constant's comment has no place in the expression.
-  static String _renderBranch(List<_Item> items, {required int indent}) {
+  static String _renderBranch(List<_Item> items, {required int indent, bool keepOrder = false}) {
     if (!items.any((_Item item) => !item.quoted && !item.expression)) {
-      return _renderItems(items, indent: indent);
+      return _renderItems(items, indent: indent, keepOrder: keepOrder);
     }
     final parts = <String>[];
     final elements = <_Item>[];
     void flush() {
       if (elements.isNotEmpty) {
-        parts.add(_renderItems(elements, indent: indent));
+        parts.add(_renderItems(elements, indent: indent, keepOrder: keepOrder));
         elements.clear();
       }
     }
@@ -4123,7 +4141,20 @@ final class _Emitter {
     });
   }
 
-  static String _renderItems(List<_Item> items, {required int indent}) {
+  /// Whether [items] already stand in buildifier's order ([_sortItems]).
+  static bool _inBuildifierOrder(List<_Item> items) {
+    final List<_Item> sorted = _sortItems(items);
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].text != sorted[i].text) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// A list literal of [items]; with [keepOrder], in their order, led by
+  /// `# do not sort` when it is not the order buildifier would put them in.
+  static String _renderItems(List<_Item> items, {required int indent, bool keepOrder = false}) {
     if (items.isEmpty) {
       return '[]';
     }
@@ -4132,6 +4163,9 @@ final class _Emitter {
     }
     final String pad = ' ' * (indent + 4);
     final out = StringBuffer('[\n');
+    if (keepOrder && !_inBuildifierOrder(items)) {
+      out.writeln('$pad# do not sort');
+    }
     for (final item in items) {
       for (final String comment in item.before) {
         out.writeln('$pad$comment');
@@ -4147,14 +4181,19 @@ final class _Emitter {
   }
 
   /// `select()` for the items appended under [condition].
-  String _renderSelect(Condition condition, List<_Item> items, _Rule rule) {
+  String _renderSelect(
+    Condition condition,
+    List<_Item> items,
+    _Rule rule, {
+    bool keepOrder = false,
+  }) {
     final _SelectKeys keys = _selectKeys(
       condition,
       rule,
       GnLocation('$gnPackage/BUILD.gn', 0, 0),
       () => 'on ${rule.kind} ${rule.name}',
     );
-    final String branch = _renderBranch(items, indent: 8);
+    final String branch = _renderBranch(items, indent: 8, keepOrder: keepOrder);
     final out = StringBuffer('select({\n');
     for (final String setting in keys.settings) {
       out.writeln('        "$setting": ${keys.negated ? '[]' : branch},');

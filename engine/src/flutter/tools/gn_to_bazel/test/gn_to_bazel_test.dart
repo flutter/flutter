@@ -5346,9 +5346,51 @@ source_set("wuffs") {
           secondarySource: tree.secondarySource,
         ),
       );
-      // Sorted as buildifier sorts `includes`.
-      expect(output, contains('includes = [\n        "config",\n        "release/c",\n    ],'));
+      // In GN's order -- the compiler's search order -- which buildifier
+      // would reverse, so the list says not to.
+      expect(
+        output,
+        contains(
+          'includes = [\n        # do not sort\n        "release/c",\n        "config",\n    ],',
+        ),
+      );
     });
+
+    test(
+      "include_dirs keep GN's order, marked for buildifier when it is not buildifier's",
+      () async {
+        // freetype2: the directory with Flutter's public-macros.h (which hides
+        // the API) ahead of the stock headers; sorted, the stock file wins.
+        final String overriding = await convert('''
+config("freetype_config") {
+  include_dirs = [
+    "include/freetype-flutter-config",
+    "include",
+  ]
+}
+''');
+        expect(
+          overriding,
+          contains(
+            'includes = [\n        # do not sort\n        "include/freetype-flutter-config",\n        "include",\n    ],',
+          ),
+        );
+        // Already in buildifier's order: no mark.
+        final String sorted = await convert('''
+config("c") {
+  include_dirs = [
+    "include",
+    "include/private",
+  ]
+}
+''');
+        expect(
+          sorted,
+          contains('includes = [\n        "include",\n        "include/private",\n    ],'),
+        );
+        expect(sorted, isNot(contains('do not sort')));
+      },
+    );
 
     test("an executable's include_dirs ride a helper library", () async {
       final String output = await convert('''
