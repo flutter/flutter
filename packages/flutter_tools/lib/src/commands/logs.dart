@@ -11,6 +11,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../macos/macos_ipad_device.dart';
 import '../runner/flutter_command.dart';
 
 /// Show log output for running Flutter apps.
@@ -61,6 +62,11 @@ class LogsCommand extends FlutterCommand {
     device = await findTargetDevice(includeDevicesUnsupportedByProject: true);
     if (device == null) {
       throwToolExit(null);
+    }
+    if (device is MacOSDesignedForIPadDevice) {
+      throwToolExit(
+        'Standalone logs are not supported for ${device!.name}. Use "flutter run" or "flutter attach".',
+      );
     }
     return super.verifyThenRunCommand(commandPath);
   }

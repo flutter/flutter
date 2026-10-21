@@ -22,6 +22,7 @@ import '../drive/drive_service.dart';
 import '../drive/import_validator.dart';
 import '../drive/web_driver_service.dart' show Browser;
 import '../ios/devices.dart';
+import '../macos/macos_ipad_device.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../web/devfs_config.dart';
@@ -340,6 +341,9 @@ class DriveCommand extends RunCommandBase {
     final Device? device = await targetedDevice;
     if (device == null) {
       throwToolExit(null);
+    }
+    if (device is MacOSDesignedForIPadDevice) {
+      throwToolExit('"flutter drive" is not supported for ${device.name}.');
     }
     if (screenshot != null && !device.supportsScreenshot) {
       logger.printError('Screenshot not supported for ${device.displayName}.');

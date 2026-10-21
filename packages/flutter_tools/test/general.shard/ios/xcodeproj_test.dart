@@ -355,6 +355,69 @@ void main() {
     },
   );
 
+  testWithoutContext('build settings cache distinguishes destination variants', () {
+    const physical = XcodeProjectBuildContext(deviceId: 'host-id');
+    const designedForIPad = XcodeProjectBuildContext(
+      deviceId: 'host-id',
+      destination: 'platform=macOS,variant=Designed for iPad,arch=arm64',
+    );
+    expect(<XcodeProjectBuildContext, String>{
+      physical: 'physical',
+      designedForIPad: 'ipad-on-mac',
+    }, hasLength(2));
+    expect(
+      designedForIPad,
+      const XcodeProjectBuildContext(
+        deviceId: 'host-id',
+        destination: 'platform=macOS,variant=Designed for iPad,arch=arm64',
+      ),
+    );
+  });
+
+  testUsingContext(
+    'build settings preserves the Designed for iPad destination',
+    () async {
+      platform.environment = const <String, String>{};
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        kResolvePackagesCommand,
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
+            '-project',
+            '/',
+            '-destination',
+            'platform=macOS,variant=Designed for iPad,arch=arm64',
+            '-showBuildSettings',
+            'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+          ],
+          exitCode: 1,
+        ),
+      ]);
+
+      expect(
+        await xcodeProjectInterpreter.getBuildSettings(
+          FakeXcodeBasedProject('', fileSystem),
+          buildContext: const XcodeProjectBuildContext(
+            destination: 'platform=macOS,variant=Designed for iPad,arch=arm64',
+          ),
+        ),
+        const <String, String>{},
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
   testUsingContext(
     'build settings accepts an empty scheme',
     () async {

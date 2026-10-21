@@ -587,6 +587,7 @@ class FakeXcodeBasedProject extends Fake implements XcodeBasedProject {
     String? target,
     EnvironmentType environmentType = EnvironmentType.physical,
     String? deviceId,
+    String? destination,
     bool isWatch = false,
   }) async {
     return buildSettings;

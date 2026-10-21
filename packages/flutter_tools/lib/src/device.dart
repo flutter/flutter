@@ -1269,6 +1269,7 @@ class DebuggingOptions {
     EnvironmentType environmentType,
     String? route,
     Map<String, Object?> platformArgs, {
+    bool isLocal = false,
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
   }) {
     return <String>[
@@ -1301,14 +1302,17 @@ class DebuggingOptions {
       if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
       if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
       if (enableFlutterGpu) '--enable-flutter-gpu',
-      if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
+      if (environmentType == EnvironmentType.physical && !isLocal && deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
       // Use the suggested host port.
-      if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
+      if (!isLocal && environmentType == EnvironmentType.simulator && hostVmServicePort != null)
         '--vm-service-port=$hostVmServicePort',
+      if (isLocal && (hostVmServicePort ?? deviceVmServicePort) != null)
+        '--vm-service-port=${hostVmServicePort ?? deviceVmServicePort}',
+      if (isLocal) '--vm-service-host=${ipv6 ? '::1' : '127.0.0.1'}',
       // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
-      if (interfaceType == DeviceConnectionInterface.wireless)
+      if (!isLocal && interfaceType == DeviceConnectionInterface.wireless)
         '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
       if (enableEmbedderApi) '--enable-embedder-api',
     ];

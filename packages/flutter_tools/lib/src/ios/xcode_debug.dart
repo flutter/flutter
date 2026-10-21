@@ -62,6 +62,8 @@ class XcodeDebug {
     required XcodeDebugProject project,
     required String deviceId,
     required List<String> launchArguments,
+    String? devicePlatform,
+    String? deviceArchitecture,
   }) async {
     // If project is not already opened in Xcode, open it.
     if (!await _isProjectOpenInXcode(project: project)) {
@@ -96,6 +98,8 @@ class XcodeDebug {
         ],
         '--device-id',
         deviceId,
+        if (devicePlatform != null) ...<String>['--device-platform', devicePlatform],
+        if (deviceArchitecture != null) ...<String>['--device-architecture', deviceArchitecture],
         '--scheme',
         project.scheme,
         '--skip-building',
@@ -366,6 +370,9 @@ class XcodeDebug {
     required TemplateRenderer templateRenderer,
     @visibleForTesting Directory? projectDestination,
     bool verboseLogging = false,
+    BuildMode buildMode = BuildMode.debug,
+    bool debuggerEnabled = true,
+    String? lldbInitFile,
   }) async {
     final Directory tempXcodeProject =
         projectDestination ??
@@ -381,6 +388,12 @@ class XcodeDebug {
 
     template.render(tempXcodeProject, <String, Object>{
       'applicationBundlePath': deviceBundlePath,
+      'buildConfiguration': sentenceCase(buildMode.name),
+      'debuggerIdentifier': debuggerEnabled ? 'Xcode.DebuggerFoundation.Debugger.LLDB' : '',
+      'launcherIdentifier': debuggerEnabled
+          ? 'Xcode.DebuggerFoundation.Launcher.LLDB'
+          : 'Xcode.IDEFoundation.Launcher.PosixSpawn',
+      'lldbInitFile': lldbInitFile ?? r'$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit',
     }, printStatusWhenWriting: false);
 
     return XcodeDebugProject(

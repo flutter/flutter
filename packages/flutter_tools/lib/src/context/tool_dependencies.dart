@@ -641,6 +641,7 @@ class ToolDependencies {
           toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
           xcDevice: finalXCDevice,
+          xcode: finalXcode,
         );
 
     return ToolDependencies(
