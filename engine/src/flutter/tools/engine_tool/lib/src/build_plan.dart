@@ -301,7 +301,7 @@ final class BuildPlan {
         BuildBackend.gn.name: "GN and ninja: the engine's build.",
         BuildBackend.bazel.name:
             'Bazel, with the configuration generated for the build '
-            '(flutter/ci/builders/configs.bazelrc). Experimental: Linux x64 host builds only.',
+            '(flutter/ci/builders/configs.bazelrc). Experimental: Linux host and web builds only.',
       },
       help:
           ''

@@ -223,7 +223,7 @@ Future<int> run(List<String> arguments) async {
       stderr.writeln('error: $message');
       failures++;
     }
-    // The builder files' Linux x64 host builds as configurations and
+    // The builder files' Linux builds (the host's own, the web's) as configurations and
     // install targets (lib/src/builders.dart).
     failures += await _builderOutputs(
       root,
@@ -268,7 +268,7 @@ Future<int> _builderOutputs(
     }
     return loader.errors.length;
   }
-  final List<BuilderBuild> builds = linuxHostBuilds(configs);
+  final List<BuilderBuild> builds = linuxBuilds(configs);
   final String bazelrc;
   try {
     bazelrc = configsBazelrc(builds);
@@ -298,7 +298,7 @@ Future<int> _builderOutputs(
     } else {
       file.writeAsStringSync(output.value);
       stdout.writeln(
-        'flutter/ci/builders/linux_*.json -> ${output.key} (${builds.length} Linux x64 host builds, '
+        'flutter/ci/builders/linux_*.json -> ${output.key} (${builds.length} Linux builds, '
         '${builds.where((BuilderBuild b) => b.unsupported.isEmpty).length} with a configuration)',
       );
     }
