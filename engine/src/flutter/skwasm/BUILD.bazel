@@ -77,7 +77,6 @@ wasm_module(
             "--closure=1",  # !(is_debug)
         ],
     }),
-    platform = "//engine/src/flutter/third_party/canvaskit:skwasm",
     deps = [
         "//engine/src/flutter:config",
         "//engine/src/flutter/display_list",
@@ -156,7 +155,6 @@ wasm_module(
             "--closure=1",  # !(is_debug)
         ],
     }),
-    platform = "//engine/src/flutter/third_party/canvaskit:skwasm_heavy",
     deps = [
         "//engine/src/flutter:config",
         "//engine/src/flutter/display_list",
@@ -237,7 +235,6 @@ wasm_module(
             "--closure=1",  # !(is_debug)
         ],
     }),
-    platform = "//engine/src/flutter/third_party/canvaskit:skwasm",
     deps = [
         "//engine/src/flutter:config",
         "//engine/src/flutter/display_list",

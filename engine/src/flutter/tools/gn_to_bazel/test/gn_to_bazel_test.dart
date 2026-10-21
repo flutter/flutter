@@ -3898,6 +3898,101 @@ wasm_module(
       );
     });
 
+    test("a copy naming a module in a wasm toolchain is the module's files under the toolchain's platform", () {
+      // The web SDK's copies (third_party/canvaskit): the module's outputs
+      // under the toolchain's directory of the build directory, the
+      // toolchain named on the dependency edge.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/ck/BUILD.gn': r'''
+template("skw_toolchain") {
+  wasm_toolchain(target_name) {
+    extra_toolchain_args = {
+      skia_use_icu = invoker.heavy
+      wasm_use_workers = true
+    }
+  }
+}
+skw_toolchain("skw") {
+  heavy = false
+}
+copy("skw_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/skwasm(:skw)" ]
+  sources = [
+    "$root_out_dir/skw/skwasm.js",
+    "$root_out_dir/skw/skwasm.js.symbols",
+    "$root_out_dir/skw/skwasm.wasm",
+  ]
+  if (is_debug) {
+    if (!wasm_use_dwarf) {
+      sources += [ "$root_out_dir/skw/skwasm.wasm.map" ]
+    }
+  }
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(
+          tree,
+          '//flutter/ck/BUILD.gn',
+          templates: <String>{'wasm_lib', 'wasm_toolchain'},
+        ),
+        gnPackage: '//flutter/ck',
+        tree: tree,
+      );
+      expect(
+        output,
+        contains(r'''
+gn_copy(
+    name = "skw_group",
+    srcs = ["//engine/src/flutter/skwasm"],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skw",
+)
+'''),
+      );
+    });
+
+    test('a copy in a wasm toolchain whose source is not an output of its module is an error', () {
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/ck/BUILD.gn': r'''
+template("skw_toolchain") {
+  wasm_toolchain(target_name) {
+    extra_toolchain_args = {
+      wasm_use_workers = true
+    }
+  }
+}
+skw_toolchain("skw") {
+}
+copy("skw_group") {
+  public_deps = [ "//flutter/skwasm(:skw)" ]
+  sources = [ "$root_out_dir/skw/other.js" ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
+}
+''',
+      });
+      expect(
+        () => emitBuildFile(
+          evaluateIn(
+            tree,
+            '//flutter/ck/BUILD.gn',
+            templates: <String>{'wasm_lib', 'wasm_toolchain'},
+          ),
+          gnPackage: '//flutter/ck',
+          tree: tree,
+        ),
+        throwsA(
+          isA<GnError>().having(
+            (GnError e) => e.message,
+            'message',
+            contains('is not an output of //flutter/skwasm in toolchain :skw'),
+          ),
+        ),
+      );
+    });
+
     test('a suite run_tests.py puts through gtest-parallel becomes a flutter_cc_test', () async {
       // ui_unittests (gtestParallelSuites, with testRuns' runnerArgs): the
       // macro that runs the binary through the runner, with run_tests.py's

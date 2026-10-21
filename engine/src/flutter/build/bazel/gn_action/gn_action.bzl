@@ -30,6 +30,7 @@ output; `install` (../install.bzl) lays them out there.
 
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//engine/src/flutter/build/bazel:build_directory.bzl", "BuildDirectoryInfo", "build_directory_path", "copy_entries")
+load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "module_platform_transition")
 
 def expand_gn_paths(ctx, arg, targets):
     """Expands the path tokens of one argument (see the module docstring).
@@ -91,10 +92,15 @@ def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_messa
       mnemonic: the action's mnemonic.
       progress_message: the action's progress message.
     """
+    args = ctx.actions.args()
+
+    # -B: no bytecode caches next to the script.
+    args.add("-B")
+    args.add(script)
+    args.add_all(arguments)
     ctx.actions.run(
         executable = ctx.executable._python,
-        # -B: no bytecode caches next to the script.
-        arguments = ["-B", script.path] + arguments,
+        arguments = [args],
         inputs = depset([script] + inputs),
         tools = ctx.attr._python_runtime[DefaultInfo].files,
         outputs = outputs,
@@ -132,6 +138,7 @@ def _gn_action_impl(ctx):
         mnemonic = "GnAction",
         progress_message = "GN action %{label}",
     )
+
     # The outputs are under GN's $target_gen_dir: gen/<GN package>/. An
     # action of another repository (a synced tree's overlay) has its GN
     # directory elsewhere, which install does not reconstruct.
@@ -219,7 +226,8 @@ gn_copy = rule(
         "srcs": attr.label_list(
             allow_files = True,
             mandatory = True,
-            doc = "GN's `sources`.",
+            cfg = module_platform_transition,
+            doc = "GN's `sources`; a target among them stands for its files (a wasm module's, built for `platform`).",
         ),
         "outs": attr.output_list(
             doc = "The copies, one per source in order, when GN's `outputs` name the files literally " +
@@ -230,7 +238,15 @@ gn_copy = rule(
             doc = "GN's `outputs`, for the record: where the build directory would hold the copies.",
         ),
         "deps": attr.label_list(
+            cfg = module_platform_transition,
             doc = "GN's `deps`: ordering only (the sources carry the file dependencies).",
+        ),
+        "platform": attr.label(
+            doc = "GN's `label(:toolchain)` on the copy's dependency edges: the wasm platform the sources " +
+                  "and deps are built for (a wasm_platform of the web build; see toolchains/emscripten/wasm.bzl).",
+        ),
+        "_allowlist_function_transition": attr.label(
+            default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
         ),
     },
 )
