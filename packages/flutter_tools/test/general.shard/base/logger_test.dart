@@ -293,6 +293,23 @@ void main() {
     );
   });
 
+  testWithoutContext('PrefixedErrorLogger prefixes every line of a stack trace', () {
+    final bufferLogger = BufferLogger.test();
+    final logger = PrefixedErrorLogger(bufferLogger);
+
+    logger.printError(
+      'Exception: bar',
+      stackTrace: StackTrace.fromString('#0      main (foo.dart:1:1)\n#1      run (bar.dart:2:2)'),
+    );
+
+    expect(
+      bufferLogger.errorText,
+      '[ERROR] Exception: bar\n'
+      '[ERROR] #0      main (foo.dart:1:1)\n'
+      '[ERROR] #1      run (bar.dart:2:2)\n',
+    );
+  });
+
   group('AppContext', () {
     late FakeStopwatch fakeStopWatch;
 

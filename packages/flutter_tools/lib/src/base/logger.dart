@@ -1119,6 +1119,9 @@ class PrefixedErrorLogger extends DelegatingLogger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
+    if (stackTrace != null) {
+      message = '$message\n$stackTrace';
+    }
     if (message.trim().isNotEmpty) {
       message = message
           .split('\n')
@@ -1127,7 +1130,6 @@ class PrefixedErrorLogger extends DelegatingLogger {
     }
     super.printError(
       message,
-      stackTrace: stackTrace,
       emphasis: emphasis,
       color: color,
       indent: indent,
