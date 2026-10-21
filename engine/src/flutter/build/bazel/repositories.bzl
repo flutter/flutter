@@ -33,6 +33,19 @@ _BUILD_FILE_NAMES = ("BUILD", "BUILD.bazel")
 _BOUNDARY_FILE_NAMES = ("MODULE.bazel", "REPO.bazel", "WORKSPACE", "WORKSPACE.bazel")
 _BAZEL_FILE_NAMES = _BUILD_FILE_NAMES + _BOUNDARY_FILE_NAMES
 
+# The engine module's MODULE.bazel, whichever repository the module is in.
+_MODULE_FILE = Label("//:MODULE.bazel")
+
+def checkout_root(rctx):
+    """The checkout's root directory: the engine module's own.
+
+    Not `rctx.workspace_root`, which is the main module's: the engine is a
+    dependency of the Fuchsia spike's module
+    (engine/src/flutter/build/bazel/toolchains/fuchsia), and the synced
+    trees, the prebuilt Dart SDK and the converter are where the engine is.
+    """
+    return rctx.path(_MODULE_FILE).dirname
+
 # Upper bound on the directories a synced tree may contain. Starlark has no
 # unbounded loops; this is only reached when a symlink cycle makes the tree
 # infinite (the largest tree today, the Dart SDK, has about 12,000).
@@ -148,7 +161,7 @@ def _host_dart(rctx):
         arch_part = "arm64"
     else:
         fail("synced_repository: unsupported host architecture %r" % rctx.os.arch)
-    dart = rctx.workspace_root.get_child("engine/src/flutter/prebuilts/%s-%s/dart-sdk/bin/%s" % (os_part, arch_part, exe))
+    dart = checkout_root(rctx).get_child("engine/src/flutter/prebuilts/%s-%s/dart-sdk/bin/%s" % (os_part, arch_part, exe))
     if not dart.exists:
         fail("synced_repository: %s does not exist; it is populated by `gclient sync`" % dart)
     return dart
@@ -161,8 +174,8 @@ def _convert_gn(rctx):
     watched, so a roll that changes a `.gni` or an edit to the converter
     re-runs the conversion on the next build.
     """
-    root = rctx.workspace_root.get_child(_GN_ROOT)
-    converter = rctx.workspace_root.get_child(_CONVERTER)
+    root = checkout_root(rctx).get_child(_GN_ROOT)
+    converter = checkout_root(rctx).get_child(_CONVERTER)
     depfile = rctx.path("gn_to_bazel.d")
     arguments = [
         _host_dart(rctx),
@@ -180,7 +193,7 @@ def _convert_gn(rctx):
         "--buildifier",
         "none",
     ] + [
-        rctx.workspace_root.get_child(file)
+        checkout_root(rctx).get_child(file)
         for file in rctx.attr.gn_build_files
     ]
     result = rctx.execute(arguments, timeout = 600)
@@ -203,7 +216,7 @@ def _synced_repository_impl(rctx):
         fail("synced_repository(%s): gn_build_files and gn_repository go together" % rctx.name)
     overlaying = converting or rctx.attr.build_file != None or bool(rctx.attr.build_file_content)
 
-    source = rctx.workspace_root.get_child(rctx.attr.path)
+    source = checkout_root(rctx).get_child(rctx.attr.path)
     if not source.exists or not source.is_dir:
         fail(
             "synced_repository(%s): %s does not exist. It is populated by " % (rctx.name, source) +
@@ -229,7 +242,7 @@ def _link_secondary(rctx):
     """
     if not rctx.attr.gn_secondary_dir:
         return
-    secondary = rctx.workspace_root.get_child(rctx.attr.gn_secondary_dir)
+    secondary = checkout_root(rctx).get_child(rctx.attr.gn_secondary_dir)
     for child in secondary.readdir():
         name = child.basename
         if name in _BUILD_FILE_NAMES or name == "BUILD.gn" or name.endswith(".gni"):
@@ -403,7 +416,7 @@ def _content_hash(rctx, root):
     return result.stdout.strip()
 
 def _engine_version_repository_impl(rctx):
-    root = rctx.workspace_root
+    root = checkout_root(rctx)
     engine_version = rctx.getenv(_ENGINE_VERSION_ENV)
     content_hash = rctx.getenv(_CONTENT_HASH_ENV)
     if engine_version == None or content_hash == None:
