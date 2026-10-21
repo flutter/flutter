@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:stream_channel/isolate_channel.dart';
@@ -15,26 +14,41 @@ import '../base/logger.dart';
 /// Typedef for an extension isolate entrypoint function.
 typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 
-/// Callback signature invoked when an extension reports progress for a
-/// long-running request.
-typedef ExtensionProgressCallback = void Function(String? message, double? progress);
-
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
-    required Isolate this._isolate,
-    required this._peer,
     required this.capabilities,
     required this.extensionName,
+    required this._errorPort,
+    required this._exitPort,
+    required Isolate this._isolate,
     required this._logger,
-  });
+    required this._peer,
+    required this._receivePort,
+  }) {
+    _errorPort.handler = (Object? error) {
+      final Object? message = error is List && error.isNotEmpty ? error[0] : error;
+      _logger.printError('Extension isolate "$extensionName" unhandled error: $message');
+    };
+
+    _exitPort.handler = (Object? _) {
+      _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
+      _errorPort.close();
+      _exitPort.close();
+      _receivePort.close();
+      unawaited(_closeNotificationControllers());
+    };
+  }
 
   /// Fallback extension name used when an extension does not report one in its capabilities.
   static const defaultExtensionName = 'unknown_extension';
 
   Isolate? _isolate;
-  final json_rpc.Peer _peer;
+  final RawReceivePort _errorPort;
+  final RawReceivePort _exitPort;
   final Logger _logger;
+  final json_rpc.Peer _peer;
+  final ReceivePort _receivePort;
   final _notificationControllers = <String, StreamController<Map<String, Object?>>>{};
 
   /// The capabilities and supported service namespaces of the extension.
@@ -51,165 +65,25 @@ class ExtensionConnection {
     if (_isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
-    final StreamController<Map<String, Object?>> controller = _notificationControllers.putIfAbsent(
-      method,
-      () {
-        final newController = StreamController<Map<String, Object?>>.broadcast();
-        _peer.registerMethod(method, (json_rpc.Parameters params) {
-          if (newController.isClosed) {
-            return;
-          }
-          final Object? rawValue = params.value;
-          final Map<String, Object?> payload = rawValue is Map
-              ? rawValue.cast<String, Object?>()
-              : <String, Object?>{};
-          newController.add(payload);
-        });
-        return newController;
-      },
-    );
-    return controller.stream;
-  }
-
-  /// Sends a cooperative cancellation notification to the extension isolate for
-  /// the in-flight request identified by [requestId].
-  void cancelRequest(Object requestId) {
-    if (_isDisposed) {
-      return;
-    }
-    _logger.printTrace('ExtensionConnection sending cancelRequest for "$requestId"...');
-    _peer.sendNotification(ToolExtensionService.cancelRequestNotificationMethod, <String, Object?>{
-      ToolExtensionService.requestIdKey: requestId,
-    });
-  }
-
-  /// Sends a long-running RPC request to the extension isolate with a sliding
-  /// [inactivityTimeout] that resets whenever a
-  /// [ToolExtensionService.progressNotificationMethod] or
-  /// [ToolExtensionService.heartbeatNotificationMethod] notification is received.
-  ///
-  /// If [onProgress] is provided, it is invoked with the optional status
-  /// `message` and `progress` value (`0.0` to `1.0`) from each
-  /// [ToolExtensionService.progressNotificationMethod] notification.
-  ///
-  /// If no progress or heartbeat notification arrives within
-  /// [inactivityTimeout], sends a cooperative
-  /// [ToolExtensionService.cancelRequestNotificationMethod] notification via
-  /// [cancelRequest] and completes with a [TimeoutException].
-  Future<Object?> sendLongRunningRequest(
-    String method, {
-    Duration inactivityTimeout = const Duration(minutes: 2),
-    ExtensionProgressCallback? onProgress,
-    Map<String, Object?>? params,
-  }) async {
-    if (_isDisposed) {
-      throw StateError('ExtensionConnection has been disposed.');
-    }
-    _logger.printTrace(
-      'ExtensionConnection sending long-running RPC request "$method" '
-      '(inactivityTimeout: ${inactivityTimeout.inSeconds}s)...',
-    );
-
-    final Object? explicitRequestId = params?[ToolExtensionService.requestIdKey];
-    final Object requestId = explicitRequestId ?? method;
-    final completer = Completer<Object?>();
-    Timer? inactivityTimer;
-
-    void resetInactivityTimer() {
-      inactivityTimer?.cancel();
-      if (completer.isCompleted) {
-        return;
-      }
-      inactivityTimer = Timer(inactivityTimeout, () {
-        if (!completer.isCompleted) {
-          _logger.printTrace(
-            'ExtensionConnection RPC request "$method" timed out after '
-            '${inactivityTimeout.inSeconds} seconds of inactivity; cancelling "$requestId".',
-          );
-          cancelRequest(requestId);
-          completer.completeError(
-            TimeoutException(
-              'Request "$method" timed out after ${inactivityTimeout.inSeconds} seconds of inactivity.',
-              inactivityTimeout,
-            ),
-          );
+    final StreamController<Map<String, Object?>>
+    controller = _notificationControllers.putIfAbsent(method, () {
+      final newController = StreamController<Map<String, Object?>>.broadcast();
+      _peer.registerMethod(method, (json_rpc.Parameters params) {
+        if (newController.isClosed) {
+          return;
         }
+        final Object? rawValue = params.value;
+        if (rawValue is! Map<String, Object?>) {
+          _logger.printWarning(
+            'Extension "$extensionName" sent malformed notification for "$method": expected Map<String, Object?>.',
+          );
+          return;
+        }
+        newController.add(rawValue);
       });
-    }
-
-    bool matchesRequest(Map<String, Object?> notificationParams) {
-      if (explicitRequestId == null) {
-        return true;
-      }
-      final Object? notificationRequestId = notificationParams[ToolExtensionService.requestIdKey];
-      return notificationRequestId == null ||
-          notificationRequestId == explicitRequestId ||
-          notificationRequestId == method;
-    }
-
-    final StreamSubscription<Map<String, Object?>> progressSubscription =
-        onNotification(ToolExtensionService.progressNotificationMethod)
-            .listen((Map<String, Object?> notificationParams) {
-              if (!matchesRequest(notificationParams)) {
-                return;
-              }
-              resetInactivityTimer();
-              if (onProgress != null) {
-                try {
-                  final String? message = notificationParams.nullableField<String>(
-                    ToolExtensionService.messageKey,
-                  );
-                  final double? progress = notificationParams
-                      .nullableField<num>(ToolExtensionService.progressKey)
-                      ?.toDouble();
-                  onProgress(message, progress);
-                } on FormatException catch (error) {
-                  _logger.printTrace('Ignoring malformed progress notification: $error');
-                }
-              }
-            });
-
-    final StreamSubscription<Map<String, Object?>> heartbeatSubscription =
-        onNotification(ToolExtensionService.heartbeatNotificationMethod)
-            .listen((Map<String, Object?> notificationParams) {
-              if (!matchesRequest(notificationParams)) {
-                return;
-              }
-              resetInactivityTimer();
-            });
-
-    resetInactivityTimer();
-
-    unawaited(
-      _peer
-          .sendRequest(method, params)
-          .then<void>(
-            (Object? result) {
-              if (!completer.isCompleted) {
-                _logger.printTrace(
-                  'ExtensionConnection received response for long-running RPC request "$method".',
-                );
-                completer.complete(result);
-              }
-            },
-            onError: (Object error, StackTrace stackTrace) {
-              if (!completer.isCompleted) {
-                _logger.printTrace(
-                  'ExtensionConnection long-running RPC request "$method" failed with error: $error',
-                );
-                completer.completeError(error, stackTrace);
-              }
-            },
-          ),
-    );
-
-    try {
-      return await completer.future;
-    } finally {
-      inactivityTimer?.cancel();
-      await progressSubscription.cancel();
-      await heartbeatSubscription.cancel();
-    }
+      return newController;
+    });
+    return controller.stream;
   }
 
   /// Sends an RPC request to the extension isolate.
@@ -294,26 +168,38 @@ class ExtensionConnection {
       );
 
       return ExtensionConnection._(
-        isolate: isolate,
-        peer: peer,
         capabilities: capabilities,
         extensionName: capabilities.extensionName ?? defaultExtensionName,
+        errorPort: errorPort,
+        exitPort: exitPort,
+        isolate: isolate,
         logger: logger,
+        peer: peer,
+        receivePort: receivePort,
       );
     } on TimeoutException {
       logger.printTrace('ExtensionConnection handshake timed out.');
       receivePort.close();
+      errorPort.close();
+      exitPort.close();
       isolate?.kill(priority: Isolate.immediate);
       throw TimeoutException('Handshake with tool extension isolate timed out.');
     } on Object catch (error) {
       logger.printTrace('ExtensionConnection spawn failed with error: $error');
       receivePort.close();
-      isolate?.kill(priority: Isolate.immediate);
-      rethrow;
-    } finally {
       errorPort.close();
       exitPort.close();
+      isolate?.kill(priority: Isolate.immediate);
+      rethrow;
     }
+  }
+
+  Future<void> _closeNotificationControllers() async {
+    for (final StreamController<Map<String, Object?>> controller
+        in _notificationControllers.values) {
+      await controller.close();
+    }
+    _notificationControllers.clear();
   }
 
   /// Disposes the extension isolate connection.
@@ -323,11 +209,10 @@ class ExtensionConnection {
     }
     _isDisposed = true;
     _logger.printTrace('ExtensionConnection disposing isolate connection.');
-    for (final StreamController<Map<String, Object?>> controller
-        in _notificationControllers.values) {
-      await controller.close();
-    }
-    _notificationControllers.clear();
+    _errorPort.close();
+    _exitPort.close();
+    _receivePort.close();
+    await _closeNotificationControllers();
     try {
       await _peer.close();
     } on Object catch (error) {
@@ -344,7 +229,7 @@ class ExtensionDiscovery {
   /// Creates an [ExtensionDiscovery] instance with required [_logger].
   ExtensionDiscovery({required this._logger});
 
-  final List<ExtensionConnection> _connections = <ExtensionConnection>[];
+  final _connections = <ExtensionConnection>[];
   final Logger _logger;
 
   /// Active extension connections.

@@ -76,35 +76,14 @@ abstract class ToolExtensionService {
   /// emitted by an extension to the host tool.
   static const logNotificationMethod = 'extension.log';
 
-  /// Reserved JSON-RPC 2.0 notification method for reporting long-running
-  /// request progress from an extension to the host tool.
-  static const progressNotificationMethod = 'extension.progress';
-
-  /// Reserved JSON-RPC 2.0 notification method for sending liveness heartbeats
-  /// from an extension to the host tool during a long-running request.
-  static const heartbeatNotificationMethod = 'extension.heartbeat';
-
-  /// Reserved JSON-RPC 2.0 notification method sent by the host tool to
-  /// cooperatively cancel an in-flight extension request.
-  static const cancelRequestNotificationMethod = 'extension.cancelRequest';
-
   /// JSON key for the log severity level in [logNotificationMethod] notifications.
   static const levelKey = 'level';
 
   /// JSON key for the timestamp in [logNotificationMethod] notifications.
   static const timestampKey = 'timestamp';
 
-  /// JSON key for the request identifier in progress, heartbeat, and
-  /// cancellation notifications.
-  static const requestIdKey = 'requestId';
-
-  /// JSON key for the optional human-readable progress message in
-  /// [progressNotificationMethod] notifications.
+  /// JSON key for the log message in [logNotificationMethod] notifications.
   static const messageKey = 'message';
-
-  /// JSON key for the optional fractional progress value (`0.0` to `1.0`) in
-  /// [progressNotificationMethod] notifications.
-  static const progressKey = 'progress';
 
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
@@ -144,35 +123,6 @@ abstract class ToolExtensionService {
       timestampKey: ?timestamp?.toUtc().toIso8601String(),
     });
   }
-
-  /// Sends an [progressNotificationMethod] notification to the host tool for
-  /// [requestId] with an optional human-readable [message] and fractional
-  /// [progress] (`0.0` to `1.0`).
-  ///
-  /// Each progress notification also resets the host's sliding inactivity
-  /// timer for the in-flight request.
-  void reportProgress({required Object requestId, String? message, double? progress}) {
-    sendNotification(progressNotificationMethod, <String, Object?>{
-      requestIdKey: requestId,
-      messageKey: ?message,
-      progressKey: ?progress,
-    });
-  }
-
-  /// Sends a [heartbeatNotificationMethod] notification to the host tool for
-  /// [requestId] during a long-running request.
-  void sendHeartbeat({required Object requestId}) {
-    sendNotification(heartbeatNotificationMethod, <String, Object?>{requestIdKey: requestId});
-  }
-
-  /// Invoked when the host tool sends an [cancelRequestNotificationMethod]
-  /// notification to cooperatively cancel the in-flight request identified by
-  /// [requestId].
-  ///
-  /// Subclasses that run long-lived operations (such as subprocesses or
-  /// downloads) can override this method to abort work associated with
-  /// [requestId].
-  Future<void> onCancelRequest(Object requestId) async {}
 
   /// Cleans up resources held by the service when the extension is shut down.
   Future<void> shutdown() async {}

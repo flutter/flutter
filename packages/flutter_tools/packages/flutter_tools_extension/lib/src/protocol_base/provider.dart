@@ -9,6 +9,7 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:stream_channel/isolate_channel.dart';
 
+import '../device.dart';
 import 'service.dart';
 
 /// Entrypoint runner for a Flutter Tool Extension running in an Isolate.
@@ -23,9 +24,7 @@ class ToolExtensionEntryPoint {
   static const _reservedMethods = <String>{
     getCapabilitiesMethod,
     ToolExtensionService.logNotificationMethod,
-    ToolExtensionService.progressNotificationMethod,
-    ToolExtensionService.heartbeatNotificationMethod,
-    ToolExtensionService.cancelRequestNotificationMethod,
+    DeviceService.logEntryNotificationMethod,
   };
 
   /// Standard `main(List<String> args, Object? message)` adapter for spawning
@@ -96,25 +95,6 @@ class ToolExtensionEntryPoint {
     peer.registerMethod(getCapabilitiesMethod, () {
       logger?.call('[ToolExtensionIsolate] Handling extension.getCapabilities query.');
       return capabilities.toMap();
-    });
-
-    peer.registerMethod(ToolExtensionService.cancelRequestNotificationMethod, (
-      json_rpc.Parameters params,
-    ) async {
-      final Object? rawValue = params.value;
-      final Map<String, Object?> paramMap = rawValue is Map
-          ? rawValue.cast<String, Object?>()
-          : <String, Object?>{};
-      final Object requestId;
-      try {
-        requestId = paramMap.requiredField<Object>(ToolExtensionService.requestIdKey);
-      } on FormatException catch (e) {
-        throw json_rpc.RpcException.invalidParams(e.message);
-      }
-      logger?.call(
-        '[ToolExtensionIsolate] Handling ${ToolExtensionService.cancelRequestNotificationMethod} for "$requestId".',
-      );
-      await Future.wait(services.map((ToolExtensionService s) => s.onCancelRequest(requestId)));
     });
 
     rpcHandlers.forEach((String fullMethod, ExtensionRpcHandler handler) {

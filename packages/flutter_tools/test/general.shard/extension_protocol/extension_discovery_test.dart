@@ -56,11 +56,6 @@ class _FailingInitService extends ToolExtensionService {
 }
 
 class _NotificationTestService extends ToolExtensionService {
-  _NotificationTestService({this.cancelEventsSendPort});
-
-  final SendPort? cancelEventsSendPort;
-  final _stallCompleters = <String, Completer<Object?>>{};
-
   @override
   String get namespace => 'notify';
 
@@ -71,49 +66,7 @@ class _NotificationTestService extends ToolExtensionService {
         sendNotification('notify.customEvent', <String, Object?>{'payload': params['payload']});
         return 'emitted';
       },
-      'longRunningWithProgress': (Map<String, Object?> _) async {
-        final completer = Completer<String>();
-        var ticks = 0;
-        Timer.periodic(const Duration(milliseconds: 25), (Timer timer) {
-          ticks++;
-          if (ticks == 1) {
-            reportProgress(
-              requestId: 'notify.longRunningWithProgress',
-              message: 'Step 1',
-              progress: 0.5,
-            );
-          } else if (ticks == 2) {
-            sendNotification(ToolExtensionService.heartbeatNotificationMethod, <String, Object?>{
-              ToolExtensionService.requestIdKey: 'notify.longRunningWithProgress',
-            });
-          } else if (ticks == 3) {
-            reportProgress(
-              requestId: 'notify.longRunningWithProgress',
-              message: 'Step 2',
-              progress: 1.0,
-            );
-          } else {
-            timer.cancel();
-            completer.complete('completed-after-progress');
-          }
-        });
-        return completer.future;
-      },
-      'stalledTask': (Map<String, Object?> _) {
-        final completer = Completer<Object?>();
-        _stallCompleters['notify.stalledTask'] = completer;
-        return completer.future;
-      },
     };
-  }
-
-  @override
-  Future<void> onCancelRequest(Object requestId) async {
-    cancelEventsSendPort?.send(requestId);
-    final Completer<Object?>? completer = _stallCompleters.remove(requestId);
-    if (completer != null && !completer.isCompleted) {
-      completer.complete('cancelled');
-    }
   }
 }
 
@@ -121,6 +74,45 @@ void _notificationExtensionEntryPoint(SendPort sendPort) {
   unawaited(
     ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_NotificationTestService()]),
   );
+}
+
+class _ExitingService extends ToolExtensionService {
+  @override
+  String get namespace => 'exit';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'triggerExit': (Map<String, Object?> _) {
+        Isolate.exit();
+      },
+    };
+  }
+}
+
+void _exitingExtensionEntryPoint(SendPort sendPort) {
+  unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ExitingService()]));
+}
+
+class _AsyncErrorService extends ToolExtensionService {
+  @override
+  String get namespace => 'error';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'triggerUnhandledError': (Map<String, Object?> _) {
+        Timer.run(() {
+          throw StateError('Simulated unhandled async error');
+        });
+        return Completer<Object?>().future;
+      },
+    };
+  }
+}
+
+void _asyncErrorExtensionEntryPoint(SendPort sendPort) {
+  unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_AsyncErrorService()]));
 }
 
 void main() {
@@ -265,34 +257,33 @@ void main() {
       await pumpEventQueue();
       expect(messages, isEmpty);
 
-      for (final reservedMethod in const <String>[
-        'getCapabilities',
-        'progress',
-        'heartbeat',
-        'cancelRequest',
-      ]) {
-        await expectLater(
-          ToolExtensionEntryPoint.run(receivePort.sendPort, <ToolExtensionService>[
-            _DummyService('extension', reservedMethod),
-          ]),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('Reserved RPC method registered: "extension.$reservedMethod"'),
-            ),
+      await expectLater(
+        ToolExtensionEntryPoint.run(receivePort.sendPort, <ToolExtensionService>[
+          _DummyService('extension', 'getCapabilities'),
+        ]),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Reserved RPC method registered: "extension.getCapabilities"'),
           ),
-        );
-        await pumpEventQueue();
-        expect(messages, isEmpty);
-      }
+        ),
+      );
+      await pumpEventQueue();
+      expect(messages, isEmpty);
     });
 
     test('ToolExtensionService.sendNotification throws StateError before peer attachment', () {
       final service = _DummyService('test', 'ping');
       expect(
         () => service.sendNotification('test.event', const <String, Object?>{}),
-        throwsStateError,
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('is not attached to an active peer'),
+          ),
+        ),
       );
     });
 
@@ -322,7 +313,7 @@ void main() {
       ]);
     });
 
-    test('sendLongRunningRequest resets sliding inactivity timer on progress and heartbeat notifications', () async {
+    test('onNotification supports multiple listeners on broadcast stream', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         _notificationExtensionEntryPoint,
@@ -330,55 +321,97 @@ void main() {
       );
       addTearDown(connection.dispose);
 
-      final progressUpdates = <(String?, double?)>[];
-      final Object? result = await connection.sendLongRunningRequest(
-        'notify.longRunningWithProgress',
-        inactivityTimeout: const Duration(milliseconds: 60),
-        onProgress: (String? message, double? progress) {
-          progressUpdates.add((message, progress));
-        },
+      final listener1Events = <Map<String, Object?>>[];
+      final listener2Events = <Map<String, Object?>>[];
+
+      final Stream<Map<String, Object?>> stream = connection.onNotification('notify.customEvent');
+      final StreamSubscription<Map<String, Object?>> sub1 = stream.listen(listener1Events.add);
+      final StreamSubscription<Map<String, Object?>> sub2 = stream.listen(listener2Events.add);
+      addTearDown(sub1.cancel);
+      addTearDown(sub2.cancel);
+
+      await connection.sendRequest(
+        'notify.emitCustom',
+        params: const <String, Object?>{'payload': 'broadcast'},
       );
 
-      expect(result, 'completed-after-progress');
-      expect(progressUpdates, const <(String?, double?)>[('Step 1', 0.5), ('Step 2', 1.0)]);
+      await pumpEventQueue();
+      expect(listener1Events, <Map<String, Object?>>[
+        const <String, Object?>{'payload': 'broadcast'},
+      ]);
+      expect(listener2Events, <Map<String, Object?>>[
+        const <String, Object?>{'payload': 'broadcast'},
+      ]);
     });
 
-    test('sendLongRunningRequest times out when no heartbeat arrives and sends extension.cancelRequest', () async {
+    test('onNotification throws StateError after dispose', () async {
       final logger = BufferLogger.test();
-      final cancelPort = ReceivePort();
-      addTearDown(cancelPort.close);
-      final SendPort cancelSendPort = cancelPort.sendPort;
-
-      void entryPointWithCancelPort(SendPort sendPort) {
-        unawaited(
-          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-            _NotificationTestService(cancelEventsSendPort: cancelSendPort),
-          ]),
-        );
-      }
-
       final ExtensionConnection connection = await ExtensionConnection.spawn(
-        entryPointWithCancelPort,
+        _dummyExtensionEntryPoint,
+        logger: logger,
+      );
+      await connection.dispose();
+
+      expect(
+        () => connection.onNotification('notify.customEvent'),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('ExtensionConnection has been disposed.'),
+          ),
+        ),
+      );
+    });
+
+    test(
+      'sendRequest with timeout: null completes with StateError when isolate exits unexpectedly',
+      () async {
+        final logger = BufferLogger.test();
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _exitingExtensionEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        final Stream<Map<String, Object?>> notificationStream = connection.onNotification(
+          'notify.customEvent',
+        );
+        final Future<void> streamDone = expectLater(notificationStream, emitsDone);
+
+        await expectLater(
+          connection.sendRequest('exit.triggerExit', timeout: null),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('The client closed with pending request "exit.triggerExit"'),
+            ),
+          ),
+        );
+        await streamDone;
+      },
+    );
+
+    test('sendRequest with timeout: null completes with StateError when isolate throws unhandled async error', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _asyncErrorExtensionEntryPoint,
         logger: logger,
       );
       addTearDown(connection.dispose);
 
       await expectLater(
-        connection.sendLongRunningRequest(
-          'notify.stalledTask',
-          inactivityTimeout: const Duration(milliseconds: 40),
-        ),
+        connection.sendRequest('error.triggerUnhandledError', timeout: null),
         throwsA(
-          isA<TimeoutException>().having(
-            (TimeoutException e) => e.message,
+          isA<StateError>().having(
+            (StateError e) => e.message,
             'message',
-            contains('Request "notify.stalledTask" timed out'),
+            contains('The client closed with pending request "error.triggerUnhandledError"'),
           ),
         ),
       );
-
-      final Object? cancelledRequestId = await cancelPort.first;
-      expect(cancelledRequestId, 'notify.stalledTask');
+      expect(logger.errorText, contains('Simulated unhandled async error'));
     });
   });
 }

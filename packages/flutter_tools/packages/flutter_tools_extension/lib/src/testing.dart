@@ -87,89 +87,6 @@ final class ExtensionLogMessage {
       'ExtensionLogMessage(level: ${level.name}, message: $message, timestamp: $timestamp)';
 }
 
-/// Sealed base class for liveness and progress notifications emitted by a
-/// tool extension during a long-running request.
-@immutable
-sealed class ExtensionProgressEvent {
-  const ExtensionProgressEvent({required this.requestId});
-
-  /// Identifier of the in-flight request associated with this notification.
-  final Object requestId;
-}
-
-/// A structured `'extension.progress'` notification emitted by a tool
-/// extension via [ToolExtensionService.reportProgress].
-@immutable
-final class ExtensionProgressNotification extends ExtensionProgressEvent {
-  const ExtensionProgressNotification({required super.requestId, this.message, this.progress});
-
-  /// Deserializes an [ExtensionProgressNotification] from a JSON map payload.
-  factory ExtensionProgressNotification.fromJson(Map<String, Object?> json) {
-    final Object? rawProgress = json[ToolExtensionService.progressKey];
-    final double? progress = switch (rawProgress) {
-      null => null,
-      final num value => value.toDouble(),
-      _ => throw FormatException(
-        'Field "${ToolExtensionService.progressKey}" must be a number, '
-        'got ${rawProgress.runtimeType}.',
-      ),
-    };
-    return ExtensionProgressNotification(
-      requestId: json.requiredField<Object>(ToolExtensionService.requestIdKey),
-      message: json.nullableField<String>(ToolExtensionService.messageKey),
-      progress: progress,
-    );
-  }
-
-  /// Optional human-readable progress status message.
-  final String? message;
-
-  /// Optional fractional progress value between `0.0` and `1.0`.
-  final double? progress;
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is ExtensionProgressNotification &&
-            other.requestId == requestId &&
-            other.message == message &&
-            other.progress == progress);
-  }
-
-  @override
-  int get hashCode => Object.hash(requestId, message, progress);
-
-  @override
-  String toString() =>
-      'ExtensionProgressNotification(requestId: $requestId, message: $message, progress: $progress)';
-}
-
-/// A structured `'extension.heartbeat'` notification emitted by a tool
-/// extension via [ToolExtensionService.sendHeartbeat].
-@immutable
-final class ExtensionHeartbeatNotification extends ExtensionProgressEvent {
-  const ExtensionHeartbeatNotification({required super.requestId});
-
-  /// Deserializes an [ExtensionHeartbeatNotification] from a JSON map payload.
-  factory ExtensionHeartbeatNotification.fromJson(Map<String, Object?> json) {
-    return ExtensionHeartbeatNotification(
-      requestId: json.requiredField<Object>(ToolExtensionService.requestIdKey),
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is ExtensionHeartbeatNotification && other.requestId == requestId);
-  }
-
-  @override
-  int get hashCode => Object.hash(ExtensionHeartbeatNotification, requestId);
-
-  @override
-  String toString() => 'ExtensionHeartbeatNotification(requestId: $requestId)';
-}
-
 /// Typed JSON-RPC client for invoking [DiagnosticsExtension] methods on an
 /// [ExtensionTestHarness].
 final class ExtensionDiagnosticsClient {
@@ -441,9 +358,8 @@ final class ExtensionCleanClient {
 /// Spawns an extension isolate via [spawn] or [spawnUri], completes the
 /// `extension.getCapabilities` handshake, and exposes typed protocol clients
 /// ([diagnosticsClient], [configClient], [templateClient], [deviceClient],
-/// [buildClient], [cleanClient]) along with notification streams ([onLog],
-/// [progressNotifications]) and raw JSON-RPC helpers ([sendRawRequest],
-/// [sendNotification], [cancelRequest]).
+/// [buildClient], [cleanClient]) along with notification stream ([onLog])
+/// and raw JSON-RPC helpers ([sendRawRequest], [sendNotification]).
 final class ExtensionTestHarness {
   ExtensionTestHarness._({
     required this.capabilities,
@@ -454,7 +370,6 @@ final class ExtensionTestHarness {
     required this._logController,
     required this._logs,
     required this._peer,
-    required this._progressController,
     required this._receivePort,
   });
 
@@ -468,7 +383,6 @@ final class ExtensionTestHarness {
   final StreamController<ExtensionLogMessage> _logController;
   final List<ExtensionLogMessage> _logs;
   final json_rpc.Peer _peer;
-  final StreamController<ExtensionProgressEvent> _progressController;
   final ReceivePort _receivePort;
 
   /// Typed client for invoking `diagnostics.*` RPCs on the extension.
@@ -499,10 +413,6 @@ final class ExtensionTestHarness {
 
   /// Broadcast stream of `'extension.log'` messages emitted by the extension.
   Stream<ExtensionLogMessage> get onLog => _logController.stream;
-
-  /// Broadcast stream of `'extension.progress'` and `'extension.heartbeat'`
-  /// notifications emitted by the extension.
-  Stream<ExtensionProgressEvent> get progressNotifications => _progressController.stream;
 
   /// Spawns an extension isolate running [entryPoint] and completes the
   /// `extension.getCapabilities` handshake.
@@ -549,7 +459,6 @@ final class ExtensionTestHarness {
     final errorCompleter = Completer<Never>();
     final logs = <ExtensionLogMessage>[];
     final logController = StreamController<ExtensionLogMessage>.broadcast();
-    final progressController = StreamController<ExtensionProgressEvent>.broadcast();
 
     Isolate? isolate;
     var handshakeCompleted = false;
@@ -585,36 +494,15 @@ final class ExtensionTestHarness {
       final channel = IsolateChannel<Object?>.connectReceive(receivePort);
       final peer = json_rpc.Peer.withoutJson(channel);
 
-      peer
-        ..registerMethod(ToolExtensionService.logNotificationMethod, (json_rpc.Parameters params) {
-          if (params.value case final Map<String, Object?> rawMap) {
-            final logMessage = ExtensionLogMessage.fromJson(rawMap);
-            logs.add(logMessage);
-            if (!logController.isClosed) {
-              logController.add(logMessage);
-            }
+      peer.registerMethod(ToolExtensionService.logNotificationMethod, (json_rpc.Parameters params) {
+        if (params.value case final Map<String, Object?> rawMap) {
+          final logMessage = ExtensionLogMessage.fromJson(rawMap);
+          logs.add(logMessage);
+          if (!logController.isClosed) {
+            logController.add(logMessage);
           }
-        })
-        ..registerMethod(ToolExtensionService.progressNotificationMethod, (
-          json_rpc.Parameters params,
-        ) {
-          if (params.value case final Map<String, Object?> rawMap) {
-            final notification = ExtensionProgressNotification.fromJson(rawMap);
-            if (!progressController.isClosed) {
-              progressController.add(notification);
-            }
-          }
-        })
-        ..registerMethod(ToolExtensionService.heartbeatNotificationMethod, (
-          json_rpc.Parameters params,
-        ) {
-          if (params.value case final Map<String, Object?> rawMap) {
-            final notification = ExtensionHeartbeatNotification.fromJson(rawMap);
-            if (!progressController.isClosed) {
-              progressController.add(notification);
-            }
-          }
-        });
+        }
+      });
 
       unawaited(peer.listen());
 
@@ -640,7 +528,6 @@ final class ExtensionTestHarness {
         logController: logController,
         logs: logs,
         peer: peer,
-        progressController: progressController,
         receivePort: receivePort,
       );
     } on TimeoutException {
@@ -649,7 +536,6 @@ final class ExtensionTestHarness {
         exitPort: exitPort,
         isolate: isolate,
         logController: logController,
-        progressController: progressController,
         receivePort: receivePort,
       );
       throw TimeoutException('Handshake with tool extension isolate timed out.');
@@ -659,7 +545,6 @@ final class ExtensionTestHarness {
         exitPort: exitPort,
         isolate: isolate,
         logController: logController,
-        progressController: progressController,
         receivePort: receivePort,
       );
       rethrow;
@@ -671,7 +556,6 @@ final class ExtensionTestHarness {
     required RawReceivePort exitPort,
     required Isolate? isolate,
     required StreamController<ExtensionLogMessage> logController,
-    required StreamController<ExtensionProgressEvent> progressController,
     required ReceivePort receivePort,
   }) async {
     errorPort.close();
@@ -679,7 +563,6 @@ final class ExtensionTestHarness {
     receivePort.close();
     isolate?.kill(priority: Isolate.immediate);
     await logController.close();
-    await progressController.close();
   }
 
   /// Sends a raw JSON-RPC 2.0 request to the extension isolate.
@@ -703,14 +586,6 @@ final class ExtensionTestHarness {
     _peer.sendNotification(method, params);
   }
 
-  /// Sends an `'extension.cancelRequest'` notification for [requestId].
-  void cancelRequest(Object requestId) {
-    sendNotification(
-      ToolExtensionService.cancelRequestNotificationMethod,
-      params: <String, Object?>{ToolExtensionService.requestIdKey: requestId},
-    );
-  }
-
   /// Disposes the JSON-RPC peer, kills the extension isolate, and closes all
   /// open receive ports and notification streams.
   ///
@@ -731,7 +606,6 @@ final class ExtensionTestHarness {
       _isolate?.kill(priority: Isolate.immediate);
       _isolate = null;
       await _logController.close();
-      await _progressController.close();
     }
   }
 }

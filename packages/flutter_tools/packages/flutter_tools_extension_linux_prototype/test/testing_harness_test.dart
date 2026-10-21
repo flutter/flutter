@@ -107,10 +107,6 @@ final class _TestDeviceService extends DeviceService {
 }
 
 final class _TestBuildService extends BuildService {
-  _TestBuildService({this.cancelledPort});
-
-  final SendPort? cancelledPort;
-
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
     return const <ExtensionBuildTarget>[
@@ -125,14 +121,7 @@ final class _TestBuildService extends BuildService {
     required Uri projectRoot,
     required String targetName,
   }) async {
-    reportProgress(requestId: 'build-1', message: 'Compiling $targetName', progress: 0.5);
-    sendHeartbeat(requestId: 'build-1');
     return ExtensionBuildResult(success: targetName == 'custom-target');
-  }
-
-  @override
-  Future<void> onCancelRequest(Object requestId) async {
-    cancelledPort?.send(requestId);
   }
 }
 
@@ -284,13 +273,10 @@ void main() {
   });
 
   group('ExtensionTestHarness (Tier 2)', () {
-    test('supports typed clients, logs, progress notifications, and cancellation', () async {
-      final cancelledPort = ReceivePort();
-      addTearDown(cancelledPort.close);
+    test('supports typed clients and logs', () async {
       final cleanedPort = ReceivePort();
       addTearDown(cleanedPort.close);
 
-      final SendPort cancelledSendPort = cancelledPort.sendPort;
       final SendPort cleanedSendPort = cleanedPort.sendPort;
 
       final ExtensionTestHarness harness = await ExtensionTestHarness.spawn((SendPort sendPort) {
@@ -301,7 +287,7 @@ void main() {
             _TestConfigService(),
             _TestTemplateService(),
             _TestDeviceService(),
-            _TestBuildService(cancelledPort: cancelledSendPort),
+            _TestBuildService(),
             _TestCleanService(cleanedPort: cleanedSendPort),
           ],
           extensionName: 'test_extension',
@@ -313,11 +299,6 @@ void main() {
       final receivedLogs = <ExtensionLogMessage>[];
       final StreamSubscription<ExtensionLogMessage> logSub = harness.onLog.listen(receivedLogs.add);
       addTearDown(logSub.cancel);
-
-      final receivedProgress = <ExtensionProgressEvent>[];
-      final StreamSubscription<ExtensionProgressEvent> progressSub = harness.progressNotifications
-          .listen(receivedProgress.add);
-      addTearDown(progressSub.cancel);
 
       expect(await harness.diagnosticsClient.getTitle(), 'Test Diagnostics');
       final List<ValidationResult> diagResults = await harness.diagnosticsClient.runDiagnostics();
@@ -365,15 +346,6 @@ void main() {
         targetName: 'custom-target',
       );
       expect(buildResult.success, isTrue);
-      await pumpEventQueue();
-      expect(receivedProgress, <ExtensionProgressEvent>[
-        const ExtensionProgressNotification(
-          message: 'Compiling custom-target',
-          progress: 0.5,
-          requestId: 'build-1',
-        ),
-        const ExtensionHeartbeatNotification(requestId: 'build-1'),
-      ]);
 
       final cleanEnv = CleanEnvironment(
         buildDir: Uri.parse('file:///app/build/'),
@@ -382,9 +354,6 @@ void main() {
       await harness.cleanClient.clean(cleanEnv);
       final Object? rawCleaned = await cleanedPort.first;
       expect(CleanEnvironment.fromJson(rawCleaned! as Map<String, Object?>), cleanEnv);
-
-      harness.cancelRequest('req-99');
-      expect(await cancelledPort.first, 'req-99');
 
       await expectLater(
         harness.sendRawRequest('nonexistent.method'),

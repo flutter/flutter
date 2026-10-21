@@ -13,6 +13,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
+import '../vmservice.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
@@ -71,6 +72,115 @@ final class ExtensionDeviceClient extends DeviceService {
       );
     }
     return false;
+  }
+
+  @override
+  Future<void> startLogStream({required String deviceId, String? appId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient starting log stream for "$deviceId" via RPC '
+      '("${DeviceService.startLogStreamMethod}")...',
+    );
+    await connection.sendRequest(
+      DeviceService.startLogStreamMethod,
+      params: <String, Object?>{
+        DeviceService.deviceIdParam: deviceId,
+        DeviceService.appIdParam: ?appId,
+      },
+    );
+  }
+
+  @override
+  Future<void> stopLogStream({required String deviceId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient stopping log stream for "$deviceId" via RPC '
+      '("${DeviceService.stopLogStreamMethod}")...',
+    );
+    await connection.sendRequest(
+      DeviceService.stopLogStreamMethod,
+      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
+    );
+  }
+}
+
+/// A [DeviceLogReader] that streams log lines from a tool extension isolate
+/// via [DeviceService.logEntryNotificationMethod] notifications.
+class ExtensionDeviceLogReader extends DeviceLogReader {
+  ExtensionDeviceLogReader({
+    required ExtensionConnection connection,
+    required this._deviceId,
+    required this._deviceService,
+    required this._logger,
+    required this.name,
+    this._appId,
+  }) {
+    _logLinesController = StreamController<String>.broadcast(onListen: _startLogStream);
+    _notificationSubscription = connection
+        .onNotification(DeviceService.logEntryNotificationMethod)
+        .listen((Map<String, Object?> params) {
+          if (_isDisposed || _logLinesController.isClosed) {
+            return;
+          }
+          if (params[DeviceService.deviceIdParam] == _deviceId) {
+            if (params[DeviceService.lineKey] case final String line) {
+              _logLinesController.add(line);
+            }
+          }
+        });
+  }
+
+  final String? _appId;
+  final String _deviceId;
+  final DeviceService _deviceService;
+  final Logger _logger;
+
+  @override
+  final String name;
+
+  late final StreamController<String> _logLinesController;
+  StreamSubscription<Map<String, Object?>>? _notificationSubscription;
+  bool _hasStarted = false;
+  bool _isDisposed = false;
+
+  @override
+  Stream<String> get logLines => _logLinesController.stream;
+
+  void _startLogStream() {
+    if (_hasStarted || _isDisposed) {
+      return;
+    }
+    _hasStarted = true;
+    unawaited(_invokeStartLogStream());
+  }
+
+  Future<void> _invokeStartLogStream() async {
+    try {
+      await _deviceService.startLogStream(deviceId: _deviceId, appId: _appId);
+    } on Object catch (error) {
+      _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
+    }
+  }
+
+  Future<void> _invokeStopLogStream() async {
+    try {
+      await _deviceService.stopLogStream(deviceId: _deviceId);
+    } on Object {
+      // Ignore errors when stopping log streams during disposal.
+    }
+  }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
+
+  @override
+  void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
+    unawaited(_notificationSubscription?.cancel());
+    _notificationSubscription = null;
+    unawaited(_invokeStopLogStream());
+    unawaited(_logLinesController.close());
   }
 }
 
@@ -144,7 +254,8 @@ class ExtensionBackedDevice extends Device {
     required this._deviceService,
     required super.logger,
     required TargetDevice targetDevice,
-  }) : _targetDevice = targetDevice,
+  }) : _logger = logger,
+       _targetDevice = targetDevice,
        super(
          targetDevice.id,
          category: targetDevice.category,
@@ -153,8 +264,10 @@ class ExtensionBackedDevice extends Device {
        );
 
   final DeviceService _deviceService;
+  final Logger _logger;
   final TargetDevice _targetDevice;
   final ExtensionConnection connection;
+  final _logReaders = <String?, ExtensionDeviceLogReader>{};
 
   @override
   String get name => _targetDevice.name;
@@ -199,14 +312,30 @@ class ExtensionBackedDevice extends Device {
   DevicePortForwarder? get portForwarder => null;
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      NoOpDeviceLogReader(name);
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+    return _logReaders.putIfAbsent(
+      app?.id,
+      () => ExtensionDeviceLogReader(
+        appId: app?.id,
+        connection: connection,
+        deviceId: id,
+        deviceService: _deviceService,
+        logger: _logger,
+        name: name,
+      ),
+    );
+  }
 
   @override
   void clearLogs() {}
 
   @override
-  Future<void> dispose() async {}
+  Future<void> dispose() async {
+    for (final ExtensionDeviceLogReader reader in _logReaders.values) {
+      reader.dispose();
+    }
+    _logReaders.clear();
+  }
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
