@@ -10,42 +10,6 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  testWithoutContext('Android Gradle template contract uses canonical included-build paths', () {
-    expect(
-      fileSystem.file('templates/app/android.tmpl/settings.gradle.kts.tmpl').readAsStringSync(),
-      contains(
-        r'includeBuild(file("$flutterSdkPath/packages/flutter_tools/gradle").canonicalPath)',
-      ),
-    );
-    expect(
-      fileSystem
-          .file('templates/module/android/host_app_ephemeral/settings.gradle.tmpl')
-          .readAsStringSync(),
-      contains(
-        r'includeBuild(file("$flutterSdkPath/packages/flutter_tools/gradle").canonicalPath)',
-      ),
-    );
-    expect(
-      fileSystem
-          .file('templates/module/android/library_new_embedding/include_flutter.groovy.copy.tmpl')
-          .readAsStringSync(),
-      contains(
-        r'includeBuild(new File("$flutterSdkPath/packages/flutter_tools/gradle").canonicalPath)',
-      ),
-    );
-  });
-
-  testWithoutContext('canonical path resolves an SDK symbolic link', () {
-    final Directory tempDirectory = fileSystem.systemTempDirectory.createTempSync(
-      'flutter_gradle_',
-    );
-    addTearDown(() => tempDirectory.deleteSync(recursive: true));
-    final Directory sdkDirectory = tempDirectory.childDirectory('sdk')..createSync();
-    final Link sdkLink = tempDirectory.childLink('flutter_sdk')..createSync(sdkDirectory.path);
-
-    expect(sdkLink.resolveSymbolicLinksSync(), sdkDirectory.resolveSymbolicLinksSync());
-  });
-
   testWithoutContext('Android Gradle configuration accepts a symbolic-link flutter.sdk', () async {
     final Directory tempDirectory = createResolvedTempDirectorySync('android_gradle_symlink.');
     addTearDown(() => tempDirectory.deleteSync(recursive: true));
@@ -72,11 +36,24 @@ void main() {
       ),
     );
 
+    final File initScript = tempDirectory.childFile('print_included_builds.gradle')
+      ..writeAsStringSync(r'''
+gradle.settingsEvaluated { settings ->
+  settings.pluginManagement.includedBuilds.each { println "INCLUDED_BUILD=${it.rootDir}" }
+}
+''');
     final Directory androidDirectory = projectDirectory.childDirectory('android');
     final ProcessResult configResult = await processManager.run(<String>[
       '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+      '--init-script',
+      initScript.path,
       'prepareKotlinBuildScriptModel',
     ], workingDirectory: androidDirectory.path);
     expect(configResult, const ProcessResultMatcher());
+
+    final String canonicalGradleDir = fileSystem
+        .directory(fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'gradle'))
+        .resolveSymbolicLinksSync();
+    expect(configResult.stdout, contains('INCLUDED_BUILD=$canonicalGradleDir'));
   });
 }
