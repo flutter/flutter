@@ -25,7 +25,7 @@ class ExtensionConnection {
   ExtensionConnection._({
     required this.capabilities,
     required this.extensionName,
-    required Isolate this._isolate,
+    required this._isolate,
     required this._logger,
     required this._peer,
   });

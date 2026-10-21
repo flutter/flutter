@@ -82,11 +82,11 @@ final class ExtensionPackageConfig {
   }) : assert(services.isNotEmpty),
        entrypoint = _validateEntrypoint(entrypoint ?? 'bin/$name.dart'),
        supportedPlatforms = Set<String>.unmodifiable(
-         supportedPlatforms.map((String p) => p.toLowerCase()),
+         supportedPlatforms.map((String p) => p.trim().toLowerCase()),
        ),
-       services = Set<String>.unmodifiable(services),
-       buildTargets = Set<String>.unmodifiable(buildTargets),
-       templates = Set<String>.unmodifiable(templates),
+       services = Set<String>.unmodifiable(services.map((String s) => s.trim())),
+       buildTargets = Set<String>.unmodifiable(buildTargets.map((String t) => t.trim())),
+       templates = Set<String>.unmodifiable(templates.map((String t) => t.trim())),
        platforms = _validatePlatforms(platforms);
 
   /// Parses an [ExtensionPackageConfig] from a decoded YAML or JSON [json] map.
