@@ -10,6 +10,7 @@
 
 #include "fml/status_or.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/pipeline.h"
 
 namespace impeller {
@@ -35,12 +36,19 @@ using DescriptorCacheMap = std::unordered_map<PipelineKey, DescriptorCache>;
 ///             threading and lifecycle restrictions.
 class DescriptorPoolVK {
  public:
-  explicit DescriptorPoolVK(std::weak_ptr<const ContextVK> context);
+  DescriptorPoolVK(std::weak_ptr<const ContextVK> context,
+                   std::weak_ptr<DeviceHolderVK> device_holder);
 
   DescriptorPoolVK(std::weak_ptr<const ContextVK> context,
+                   std::weak_ptr<DeviceHolderVK> device_holder,
                    DescriptorCacheMap descriptor_sets,
                    std::vector<vk::UniqueDescriptorPool> pools);
 
+  /// @brief      Returns the pools to the recycler for reuse.
+  ///
+  ///             If the device is gone, the pools went with it, and their
+  ///             handles are released without calling vkDestroyDescriptorPool.
+  ///             If only the context is gone, the pools are destroyed.
   ~DescriptorPoolVK();
 
   fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
@@ -52,6 +60,7 @@ class DescriptorPoolVK {
   friend class DescriptorPoolRecyclerVK;
 
   std::weak_ptr<const ContextVK> context_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   DescriptorCacheMap descriptor_sets_;
   std::vector<vk::UniqueDescriptorPool> pools_;
 
@@ -77,9 +86,12 @@ class DescriptorPoolRecyclerVK final
 
   /// @brief      Creates a recycler for the given |ContextVK|.
   ///
-  /// @param[in]  context The context to create the recycler for.
-  explicit DescriptorPoolRecyclerVK(std::weak_ptr<ContextVK> context)
-      : context_(std::move(context)) {}
+  /// @param[in]  context        The context to create the recycler for.
+  /// @param[in]  device_holder  The holder of the device the pools belong to.
+  DescriptorPoolRecyclerVK(std::weak_ptr<ContextVK> context,
+                           std::weak_ptr<DeviceHolderVK> device_holder)
+      : context_(std::move(context)),
+        device_holder_(std::move(device_holder)) {}
 
   /// @brief      Gets a descriptor pool.
   ///
@@ -94,6 +106,7 @@ class DescriptorPoolRecyclerVK final
 
  private:
   std::weak_ptr<ContextVK> context_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
 
   Mutex recycled_mutex_;
   std::vector<std::shared_ptr<DescriptorPoolVK>> recycled_

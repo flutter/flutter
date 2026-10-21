@@ -26,22 +26,34 @@ static const constexpr DescriptorPoolSize kDefaultBindingSize =
         .subpass_bindings = 4u  // Subpass Bindings
 };
 
-DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context)
-    : context_(std::move(context)) {}
+DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context,
+                                   std::weak_ptr<DeviceHolderVK> device_holder)
+    : context_(std::move(context)), device_holder_(std::move(device_holder)) {}
 
 void DescriptorPoolVK::Destroy() {
   pools_.clear();
 }
 
 DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context,
+                                   std::weak_ptr<DeviceHolderVK> device_holder,
                                    DescriptorCacheMap descriptor_sets,
                                    std::vector<vk::UniqueDescriptorPool> pools)
     : context_(std::move(context)),
+      device_holder_(std::move(device_holder)),
       descriptor_sets_(std::move(descriptor_sets)),
       pools_(std::move(pools)) {}
 
 DescriptorPoolVK::~DescriptorPoolVK() {
   if (pools_.empty()) {
+    return;
+  }
+
+  // If the device is gone, the pools went with it. Release the handles rather
+  // than have the wrappers call vkDestroyDescriptorPool on it.
+  if (!device_holder_.lock()) {
+    for (auto& pool : pools_) {
+      pool.release();
+    }
     return;
   }
 
@@ -134,7 +146,7 @@ void DescriptorPoolRecyclerVK::Reclaim(
     recycled_.pop_back();
   }
   recycled_.push_back(std::make_shared<DescriptorPoolVK>(
-      context_, std::move(descriptor_sets), std::move(pools)));
+      context_, device_holder_, std::move(descriptor_sets), std::move(pools)));
 }
 
 vk::UniqueDescriptorPool DescriptorPoolRecyclerVK::Get() {
@@ -182,7 +194,7 @@ DescriptorPoolRecyclerVK::GetDescriptorPool() {
       return result;
     }
   }
-  return std::make_shared<DescriptorPoolVK>(context_);
+  return std::make_shared<DescriptorPoolVK>(context_, device_holder_);
 }
 
 }  // namespace impeller
