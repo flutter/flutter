@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <functional>
 #include <memory>
 
 #include "absl/status/statusor.h"
@@ -47,6 +48,55 @@ absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(
 
   return DlColorSource::MakeRuntimeEffect(dl_runtime_effect, samplers,
                                           uniform_data);
+}
+
+// Draws the image filtered by `make_filter(unclipped_input)` in a 2x2 grid of
+// clipped cells. The top row does not use an unclipped input and the bottom row
+// does. The left column shifts the layer so that `small_shift` of it is outside
+// of the clip, the right column so that `large_shift` of it is outside of the
+// clip.
+sk_sp<DisplayList> MakeUnclippedInputGrid(
+    const sk_sp<DlImage>& image,
+    const std::function<std::shared_ptr<DlImageFilter>(bool)>& make_filter,
+    Scalar small_shift,
+    Scalar large_shift) {
+  constexpr Scalar kCellSize = 300;
+  constexpr Scalar kPadding = 50;
+
+  DisplayListBuilder builder;
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint outline;
+  outline.setColor(DlColor::kGreen());
+  outline.setDrawStyle(DlDrawStyle::kStroke);
+
+  for (int row = 0; row < 2; row++) {
+    std::shared_ptr<DlImageFilter> filter =
+        make_filter(/*unclipped_input=*/row == 1);
+    for (int column = 0; column < 2; column++) {
+      Scalar shift = column == 0 ? small_shift : large_shift;
+      DlRect clip = DlRect::MakeXYWH(kPadding + column * (kCellSize + kPadding),
+                                     kPadding + row * (kCellSize + kPadding),
+                                     kCellSize, kCellSize);
+
+      builder.Save();
+      builder.ClipRect(clip);
+      builder.Translate(clip.GetX() - shift * kCellSize, clip.GetY());
+      DlPaint save_paint;
+      save_paint.setImageFilter(filter);
+      builder.SaveLayer(std::nullopt, &save_paint);
+      builder.DrawImageRect(image, DlRect::MakeWH(kCellSize, kCellSize),
+                            DlImageSampling::kLinear);
+      builder.Restore();
+      builder.Restore();
+
+      builder.DrawRect(clip, outline);
+    }
+  }
+
+  return builder.Build();
 }
 }  // namespace
 
@@ -557,6 +607,163 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
 
   builder.Restore();  // Restore SaveLayer
   builder.Restore();  // Restore Save (Clip)
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/185175.
+//
+// runtime_stage_border.frag draws a border along the edges of its input. When
+// more than 30% of a layer is clipped out, its input is trimmed to the clip by
+// default, so the border moves to the edge of the clip (top right cell). With
+// an unclipped input, the border stays at the edge of the layer contents no
+// matter how much of them is clipped out (bottom row).
+TEST_P(AiksTest, RuntimeEffectFilterWithUnclippedInput) {
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_border.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>(sizeof(Vector2));
+  Scalar small_shift = 0.2;
+  Scalar large_shift = 0.5;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("small_shift", &small_shift, 0, 1);
+      ImGui::SliderFloat("large_shift", &large_shift, 0, 1);
+      ImGui::End();
+    }
+    return MakeUnclippedInputGrid(
+        image,
+        [&](bool unclipped_input) {
+          return DlImageFilter::MakeRuntimeEffect(
+              DlRuntimeEffectImpeller::Make(runtime_stage), {nullptr},
+              uniform_data, DlImageSampling::kNearestNeighbor, unclipped_input);
+        },
+        small_shift, large_shift);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+// Same as RuntimeEffectFilterWithUnclippedInput, but the input of the runtime
+// effect is blurred first, which requires the input to be rerasterized.
+TEST_P(AiksTest, ComposeRuntimeEffectFilterWithUnclippedInputBlurInner) {
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_border.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>(sizeof(Vector2));
+  Scalar sigma = 5.0;
+  Scalar small_shift = 0.2;
+  Scalar large_shift = 0.5;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("sigma", &sigma, 0, 20);
+      ImGui::SliderFloat("small_shift", &small_shift, 0, 1);
+      ImGui::SliderFloat("large_shift", &large_shift, 0, 1);
+      ImGui::End();
+    }
+    return MakeUnclippedInputGrid(
+        image,
+        [&](bool unclipped_input) {
+          auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+              DlRuntimeEffectImpeller::Make(runtime_stage), {nullptr},
+              uniform_data, DlImageSampling::kNearestNeighbor, unclipped_input);
+          auto blur_filter =
+              DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
+          return DlImageFilter::MakeCompose(/*outer=*/runtime_filter,
+                                            /*inner=*/blur_filter);
+        },
+        small_shift, large_shift);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/185175.
+//
+// runtime_stage_filter_mirror.frag mirrors its input horizontally, so the
+// visible half of a layer whose other half is outside of the screen shows that
+// other half. By default (top row) the input only contains the visible half,
+// so the mirrored blue rectangle is shown. With an unclipped input (bottom
+// row) the content outside of the screen is rendered into the input as well,
+// including the red rectangle that the display list would otherwise cull and
+// the translucent circles in a nested save layer.
+TEST_P(AiksTest, RuntimeEffectFilterWithUnclippedInputSamplesOffscreenContent) {
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_filter_mirror.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>(sizeof(Vector2));
+  constexpr Scalar kLayerWidth = 600;
+  constexpr Scalar kLayerHeight = 300;
+
+  // The layer contents are recorded with an rtree so that operations outside
+  // of the culling bounds are skipped, like the contents of a widget.
+  DisplayListBuilder content_builder(/*prepare_rtree=*/true);
+  DlPaint red;
+  red.setColor(DlColor::kRed());
+  content_builder.DrawRect(
+      DlRect::MakeXYWH(0, 0, kLayerWidth / 2, kLayerHeight), red);
+  DlPaint blue;
+  blue.setColor(DlColor::kBlue());
+  content_builder.DrawRect(
+      DlRect::MakeXYWH(kLayerWidth / 2, 0, kLayerWidth / 2, kLayerHeight),
+      blue);
+  // Overlapping circles so that the opacity requires a nested save layer.
+  DlPaint translucent;
+  translucent.setColor(DlColor::kBlack().withAlpha(128));
+  content_builder.SaveLayer(std::nullopt, &translucent);
+  DlPaint white;
+  white.setColor(DlColor::kWhite());
+  content_builder.DrawCircle(DlPoint(130, 150), 100, white);
+  content_builder.DrawCircle(DlPoint(170, 150), 100, white);
+  content_builder.Restore();
+  // Straddles the edge of the screen, so it is never culled.
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+  content_builder.DrawRect(DlRect::MakeXYWH(kLayerWidth / 2 - 20, 130, 40, 40),
+                           green);
+  sk_sp<DisplayList> content = content_builder.Build();
+
+  DisplayListBuilder builder;
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  for (int row = 0; row < 2; row++) {
+    auto filter = DlImageFilter::MakeRuntimeEffect(
+        DlRuntimeEffectImpeller::Make(runtime_stage), {nullptr}, uniform_data,
+        DlImageSampling::kNearestNeighbor, /*unclipped_input=*/row == 1);
+
+    builder.Save();
+    // Move the left half of the layer outside of the screen.
+    builder.Translate(-kLayerWidth / 2, 50 + row * (kLayerHeight + 50));
+    DlPaint save_paint;
+    save_paint.setImageFilter(filter);
+    builder.SaveLayer(std::nullopt, &save_paint);
+    builder.DrawDisplayList(content);
+    builder.Restore();
+    builder.Restore();
+  }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

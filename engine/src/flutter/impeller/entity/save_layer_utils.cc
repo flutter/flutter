@@ -22,7 +22,8 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     const Rect& coverage_limit,
     const std::shared_ptr<FilterContents>& image_filter,
     bool flood_output_coverage,
-    bool flood_input_coverage) {
+    bool flood_input_coverage,
+    std::optional<ISize> max_texture_size) {
   Rect coverage = content_coverage;
   // There are three conditions that should cause input coverage to flood, the
   // first is the presence of a backdrop filter on the saveLayer. The second is
@@ -62,13 +63,21 @@ std::optional<Rect> ComputeSaveLayerCoverage(
       // No intersection with parent coverage limit.
       return std::nullopt;
     }
+    // A maximum source coverage limit means that the image filter needs its
+    // entire input (for example an ImageFilter.shader with unclippedInput), so
+    // the content coverage should not be trimmed by the coverage limit.
+    bool needs_entire_input = source_coverage_limit->IsMaximum();
+
     // The image filter may change the coverage limit required to flood
     // the parent layer. Returning the source coverage limit so that we
     // can guarantee the render target is larger enough.
     //
     // See note below on flood_output_coverage.
     if (flood_output_coverage || coverage.IsMaximum()) {
-      return source_coverage_limit;
+      // The entire input can't be allocated when it is unbounded, and a
+      // flooded output must match the coverage limit anyway, so fall back to
+      // the coverage limit.
+      return needs_entire_input ? coverage_limit : source_coverage_limit;
     }
 
     // Trimming the content coverage by the coverage limit can reduce memory
@@ -84,6 +93,13 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     auto transformed_coverage = coverage.TransformBounds(effect_transform);
     auto intersected_coverage =
         transformed_coverage.Intersection(source_coverage_limit.value());
+    if (needs_entire_input && max_texture_size.has_value() &&
+        (transformed_coverage.GetWidth() > max_texture_size->width ||
+         transformed_coverage.GetHeight() > max_texture_size->height)) {
+      // The entire input is too large to allocate, so fall back to trimming
+      // it by the coverage limit.
+      return transformed_coverage.Intersection(coverage_limit);
+    }
     if (intersected_coverage.has_value() &&
         SizeDifferenceUnderThreshold(transformed_coverage.GetSize(),
                                      intersected_coverage->GetSize(),
@@ -126,6 +142,19 @@ std::optional<Rect> ComputeSaveLayerCoverage(
   }
 
   return intersect_rect;
+}
+
+bool ImageFilterNeedsEntireInput(
+    const std::shared_ptr<FilterContents>& image_filter,
+    const Matrix& effect_transform,
+    const Rect& coverage_limit) {
+  if (!image_filter) {
+    return false;
+  }
+  std::optional<Rect> source_coverage_limit =
+      image_filter->GetSourceCoverage(effect_transform, coverage_limit);
+  return source_coverage_limit.has_value() &&
+         source_coverage_limit->IsMaximum();
 }
 
 }  // namespace impeller
