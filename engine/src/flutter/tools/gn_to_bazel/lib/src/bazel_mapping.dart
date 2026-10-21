@@ -1287,6 +1287,12 @@ enum TemplateArgumentKind {
   /// which become the path tokens of build/bazel/gn_action.
   pathString,
 
+  /// Plain strings and `rebase_path()` results side by side (a wasm
+  /// module's ldflags: `--js-library` and the file's path): a result
+  /// becomes `$(execpath <label>)` and its file joins the attribute the
+  /// rule expands the strings against ([TemplateArgument.inputs]).
+  pathStrings,
+
   /// A helper variable of the invocation the template never reads
   /// (`fixtures = rebase_path(...)` feeding a string of the same block).
   ignored,
@@ -1309,10 +1315,14 @@ enum TemplateArgumentKind {
 
 /// One argument of a known template: the macro attribute it becomes and how.
 final class TemplateArgument {
-  const TemplateArgument(this.attribute, this.kind, {this.appliedUnder});
+  const TemplateArgument(this.attribute, this.kind, {this.appliedUnder, this.inputs});
 
   final String attribute;
   final TemplateArgumentKind kind;
+
+  /// For [TemplateArgumentKind.pathStrings]: the attribute that lists the
+  /// files the strings name (`link_inputs`).
+  final String? inputs;
 
   /// The predicate under which alone the macro reads the argument
   /// (impeller_shaders applies gles_exclusions to the GLES backend): a
@@ -1481,6 +1491,33 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // archives, the embedded blobs and the reflection libraries. GN's `name`
   // is the library name (`entity` in `entity_shaders_vk`); Bazel's is the
   // target's.
+  // build/toolchain/wasm.gni's wasm_lib: an executable in a wasm toolchain
+  // with the module's flags (`-s MAIN_MODULE=1`, `-s EXPORT_NAME=<name>`),
+  // which the emsdk toolchain's wasm_module rule compiles and links under
+  // the wasm platform by a transition, so that a module can be named from
+  // any build (skwasm's three variants).
+  'wasm_lib': TemplateMapping(
+    '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl',
+    'wasm_module',
+    <String, TemplateArgument>{
+      'sources': TemplateArgument('srcs', TemplateArgumentKind.files),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'public_configs': TemplateArgument('deps', TemplateArgumentKind.configs),
+      'defines': TemplateArgument('defines', TemplateArgumentKind.strings),
+      'cflags': TemplateArgument('copts', TemplateArgumentKind.strings),
+      // The ldflags name files (`--js-library` and its JavaScript library,
+      // by rebase_path()), which the rule reads as link_inputs.
+      'ldflags': TemplateArgument(
+        'linkopts',
+        TemplateArgumentKind.pathStrings,
+        inputs: 'link_inputs',
+      ),
+      'inputs': TemplateArgument('link_inputs', TemplateArgumentKind.files),
+      'export_name': TemplateArgument('export_name', TemplateArgumentKind.scalar),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+      'visibility': TemplateArgument('visibility', TemplateArgumentKind.ignored),
+    },
+  ),
   'impeller_shaders': TemplateMapping(
     '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
     'impeller_shaders',
@@ -1671,6 +1708,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//flutter/vulkan/config.gni',
     // The native_activity_apk template, invoked under is_android alone.
     '//flutter/testing/android/native_activity/native_activity.gni',
+    // The wasm toolchain's templates (wasm_toolchain, wasm_lib) and
+    // arguments; wasm_lib is in templateMappings.
+    '//build/toolchain/wasm.gni',
     '//flutter/third_party/flatbuffers/flatbuffers.gni',
     '//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni',
   },
