@@ -74,6 +74,17 @@ cc_library(
             "icu_util.cc",  # target_os != "wasm"
         ],
     }) + select({
+        "@platforms//os:android": [
+            "platform/android/cpu_affinity.cc",  # is_android
+            "platform/android/jni_util.cc",  # is_android
+            "platform/android/jni_weak_ref.cc",  # is_android
+            "platform/android/message_loop_android.cc",  # is_android
+            "platform/android/paths_android.cc",  # is_android
+            "platform/android/scoped_java_ref.cc",  # is_android
+            "platform/linux/timerfd.cc",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
         "@platforms//os:linux": [
             "platform/linux/message_loop_linux.cc",  # is_linux
             "platform/linux/paths_linux.cc",  # is_linux
@@ -146,6 +157,17 @@ cc_library(
             "icu_util.h",  # target_os != "wasm"
         ],
     }) + select({
+        "@platforms//os:android": [
+            "platform/android/cpu_affinity.h",  # is_android
+            "platform/android/jni_util.h",  # is_android
+            "platform/android/jni_weak_ref.h",  # is_android
+            "platform/android/message_loop_android.h",  # is_android
+            "platform/android/paths_android.h",  # is_android
+            "platform/android/scoped_java_ref.h",  # is_android
+            "platform/linux/timerfd.h",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
         "@platforms//os:linux": [
             "platform/linux/message_loop_linux.h",  # is_linux
             "platform/linux/timerfd.h",  # is_linux
@@ -153,6 +175,12 @@ cc_library(
         "//conditions:default": [],
     }),
     copts = FLUTTER_COPTS,
+    linkopts = select({
+        "@platforms//os:android": [
+            "-landroid",  # is_android
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":build_config",

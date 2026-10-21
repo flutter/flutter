@@ -73,6 +73,33 @@ _OS_CONSTRAINTS = {
     for os in _OS_CONSTRAINTS
 ]
 
+# The complements of BUILDCONFIG.gn's CPU names (target_cpu, current_cpu),
+# the same way: `target_cpu != "x64"` inside a disjunction or conjunction
+# (skcms's `target_cpu != "x64" || target_os == "android"`) needs a setting
+# that holds when the CPU is another one. The names are GN's.
+_CPU_CONSTRAINTS = {
+    "arm": "@platforms//cpu:armv7",
+    "arm64": "@platforms//cpu:aarch64",
+    "mips": "@platforms//cpu:mips64",
+    "ppc": "@platforms//cpu:ppc",
+    "riscv64": "@platforms//cpu:riscv64",
+    "wasm": "@platforms//cpu:wasm32",
+    "x64": "@platforms//cpu:x86_64",
+    "x86": "@platforms//cpu:x86_32",
+}
+
+[
+    selects.config_setting_group(
+        name = "not_cpu_" + cpu,
+        match_any = [
+            constraint
+            for other, constraint in _CPU_CONSTRAINTS.items()
+            if other != cpu
+        ],
+    )
+    for cpu in _CPU_CONSTRAINTS
+]
+
 # GN's `current_toolchain == host_toolchain`, which the engine's files test
 # for "the host's own build" (testing.gni's enable_unittests, the shell's
 # tester, glfw's shell), read in Bazel's terms: the target OS is one a host

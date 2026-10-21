@@ -9,6 +9,8 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_toolchain")
 load(
     ":cc_toolchain_config.bzl",
+    "ANDROID_ARM64_COMPILE_FLAGS",
+    "ANDROID_ARM64_LINK_FLAGS",
     "LINUX_ARM64_COMPILE_FLAGS",
     "LINUX_ARM64_LINK_FLAGS",
     "flutter_cc_toolchain_config",
@@ -223,6 +225,112 @@ toolchain(
         "@platforms//cpu:aarch64",
     ],
     toolchain = ":linux_arm64_clang",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+# ---------------------------------------------------------------------------
+# android-arm64: GN's `--android --android-cpu arm64` build (the android
+# clang_arm64 toolchain, build/toolchain/android/BUILD.gn): the same clang,
+# the NDK's sysroot (@android_tools), `--target=aarch64-linux-android24`,
+# and a -nostdlib link that names the sysroot's crt objects and libraries
+# and the NDK clang's compiler runtime (cc_toolchain_config.bzl, os =
+# "android"). Host tools build in the exec configuration, as the arm64
+# cross build's do.
+# ---------------------------------------------------------------------------
+
+platform(
+    name = "android_arm64",
+    constraint_values = [
+        "@platforms//os:android",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+filegroup(
+    name = "android_arm64_compiler_files",
+    srcs = [
+        ":linux_cxx_headers",
+        "@android_tools//:sysroot_headers",
+        "@clang_linux_x64//:compiler_files",
+    ],
+)
+
+filegroup(
+    name = "android_arm64_linker_files",
+    srcs = [
+        "@android_tools//:libraries_arm64",
+        "@clang_linux_x64//:linker_files",
+    ],
+)
+
+filegroup(
+    name = "android_arm64_all_files",
+    srcs = [
+        ":android_arm64_compiler_files",
+        ":android_arm64_linker_files",
+        "@clang_linux_x64//:all_files",
+    ],
+)
+
+ANDROID_ARM64_LIB = "sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/24"
+
+flutter_cc_toolchain_config(
+    name = "android_arm64_clang_config",
+    ar = "@clang_linux_x64//:bin/llvm-ar",
+    arch_copts = ANDROID_ARM64_COMPILE_FLAGS,
+    arch_linkopts = ANDROID_ARM64_LINK_FLAGS,
+    asan = select({
+        "//engine/src/flutter/build/bazel:asan_enabled": True,
+        "//conditions:default": False,
+    }),
+    clang = "@clang_linux_x64//:bin/clang",
+    clangxx = "@clang_linux_x64//:bin/clang++",
+    crt_begin_exe = "@android_tools//:" + ANDROID_ARM64_LIB + "/crtbegin_dynamic.o",
+    crt_begin_so = "@android_tools//:" + ANDROID_ARM64_LIB + "/crtbegin_so.o",
+    crt_end_exe = "@android_tools//:" + ANDROID_ARM64_LIB + "/crtend_android.o",
+    crt_end_so = "@android_tools//:" + ANDROID_ARM64_LIB + "/crtend_so.o",
+    cxx_include_markers = [
+        "@libcxx//:include/__config",
+        "@libcxxabi//:include/cxxabi.h",
+        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
+    ],
+    objcopy = "@clang_linux_x64//:bin/llvm-objcopy",
+    os = "android",
+    resource_include_marker = "@clang_linux_x64//:resource_include_marker",
+    runtime_library = "@android_tools//:builtins_arm64",
+    strip = "@clang_linux_x64//:bin/llvm-strip",
+    sysroot_marker = "@android_tools//:sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/NOTICE",
+    target_cpu = "aarch64",
+    target_libc = "bionic_24",
+    target_system_name = "aarch64-unknown-linux-android",
+    toolchain_identifier = "android_arm64_clang",
+)
+
+cc_toolchain(
+    name = "android_arm64_clang",
+    all_files = ":android_arm64_all_files",
+    ar_files = "@clang_linux_x64//:ar_files",
+    compiler_files = ":android_arm64_compiler_files",
+    dwp_files = ":empty",
+    linker_files = ":android_arm64_linker_files",
+    objcopy_files = "@clang_linux_x64//:objcopy_files",
+    strip_files = "@clang_linux_x64//:strip_files",
+    supports_param_files = True,
+    toolchain_config = ":android_arm64_clang_config",
+    toolchain_identifier = "android_arm64_clang",
+)
+
+toolchain(
+    name = "android_arm64_clang_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:android",
+        "@platforms//cpu:aarch64",
+    ],
+    toolchain = ":android_arm64_clang",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 

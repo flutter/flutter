@@ -124,6 +124,16 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/third_party/freetype2/BUILD.gn"],
         gn_repository = "@freetype2=//flutter/third_party/freetype2",
     ),
+    # Google's cpu_features (DEPS: the src/ subtree) under the engine's GN
+    # file: the NDK-compatible cpu-features.c libwebp reads on Android
+    # (//third_party/cpu_features:ndk_compat, build/secondary's forwarder).
+    "cpu_features": struct(
+        path = "engine/src/flutter/third_party/cpu_features",
+        synced = "engine/src/flutter/third_party/cpu_features/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/cpu_features/BUILD.gn"],
+        gn_repository = "@cpu_features=//flutter/third_party/cpu_features",
+    ),
     # glslang's and SPIRV-Tools' own GN (upstream files): their action()
     # targets become gn_action rules.
     "glslang": struct(
@@ -393,6 +403,14 @@ _TOOL_REPOSITORIES = {
     "clang_linux_x64": struct(
         path = "engine/src/flutter/buildtools/linux-x64/clang",
         build_file = _OVERLAYS + ":clang/BUILD.clang.bazel",
+    ),
+    # The Android SDK and NDK (DEPS: download_android_deps, on for a Linux
+    # x64 or macOS host), for the Android toolchains: the NDK's sysroot,
+    # libraries and compiler runtime (the overlay says which). A checkout
+    # synced without it has no Android build, as GN has none.
+    "android_tools": struct(
+        path = "engine/src/flutter/third_party/android_tools",
+        build_file = _OVERLAYS + ":android_tools/BUILD.android_tools.bazel",
     ),
     # The prebuilt Dart SDK (GN's host_prebuilt_dart_sdk): the runtime and
     # snapshots of the Dart tools the engine runs but does not build, the

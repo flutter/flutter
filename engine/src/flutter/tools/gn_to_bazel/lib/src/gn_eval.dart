@@ -1104,6 +1104,7 @@ GnFileEvaluation evaluateGnFile(
   Set<String> skipTargets = const <String>{},
   GnSourceTree? tree,
   ImportPolicy importPolicy = const ImportPolicy(),
+  Condition condition = Condition.always,
 }) {
   final settings = _Settings(
     assumptions: assumptions,
@@ -1116,7 +1117,7 @@ GnFileEvaluation evaluateGnFile(
     importCache: <String, _ImportedFile>{},
   );
   final evaluator = _Evaluator(settings, file.location.file);
-  evaluator.evaluateFile(file);
+  evaluator.evaluateFile(file, condition);
   final GnFileEvaluation result = evaluator.result;
   final List<GnTarget> resolved = _resolveDefinitions(List<GnTarget>.of(result.targets));
   result.targets
@@ -1502,9 +1503,14 @@ final class _Evaluator {
 
   Assumptions get assumptions => settings.assumptions;
 
-  void evaluateFile(GnBlock file) {
+  /// Evaluates the file under [condition]: the condition GN reaches the
+  /// file under, for a file no `if` of its own guards but which only an
+  /// `if (is_android)` dependency of another file names (impeller's
+  /// Android toolkit) -- its targets exist under it, as if the file were
+  /// one such block.
+  void evaluateFile(GnBlock file, [Condition condition = Condition.always]) {
     fileScope = _Scope(null);
-    _evaluateBlock(file, fileScope, Condition.always, const <String>[], target: null);
+    _evaluateBlock(file, fileScope, condition, const <String>[], target: null);
   }
 
   // -------------------------------------------------------------------------
@@ -1604,6 +1610,17 @@ final class _Evaluator {
     required List<String> comments,
   }) {
     if (_ignoredFunctions.contains(call.name)) {
+      return;
+    }
+    if (call.name == 'error') {
+      // GN stops at error(). Reached unconditionally, the file does not
+      // generate and neither does the conversion; under a condition the
+      // converter leaves open (cpu_features' `else` over current_cpu: "Missing
+      // definition for architecture"), it is the branch no supported
+      // configuration takes, which contributes nothing.
+      if (condition == Condition.always) {
+        throw GnError(call.location, 'error() reached: ${_errorMessage(call)}');
+      }
       return;
     }
     switch (call.name) {
@@ -1817,6 +1834,14 @@ final class _Evaluator {
 
   /// The GN path (`//a/b.gni`) of an import, resolved against the importing
   /// file's directory when relative.
+  /// The message of an error() call, as far as it is a literal.
+  String _errorMessage(GnFunctionCall call) {
+    final GnNode? arg = call.args.firstOrNull;
+    return arg is GnLiteral && arg.isString
+        ? arg.stringValue
+        : (arg == null ? '' : arg.location.toString());
+  }
+
   String _importPath(GnFunctionCall call, _Scope scope) {
     final String path = _stringArgument(call, scope);
     if (path.startsWith('//')) {
@@ -1997,6 +2022,7 @@ final class _Evaluator {
         ? _booleanExpression(node.right, scope)
         : _expression(node.right, scope);
     final GnVariable variable;
+    var reassignedEmpty = false;
     if (node.op == '=') {
       // `=` defines a variable in the current scope (GN forbids shadowing an
       // enclosing scope's variable, which is left to GN to diagnose). A
@@ -2005,10 +2031,18 @@ final class _Evaluator {
       // list under a select(), which no GN file of the engine needs.
       variable = scope.variables.putIfAbsent(name, () => GnVariable(name, isList: value.isList));
       if (variable.isList && variable.assignments.isNotEmpty && condition != Condition.always) {
-        throw GnError(
-          node.location,
-          'conditional reassignment of $name is not supported; use += in the branch',
-        );
+        // One shape is an append in disguise: `public_configs = []` and
+        // then, in a branch, `public_configs = [ ":gles_config" ]`
+        // (impeller's GLES backend outside Android and Fuchsia). With
+        // nothing assigned so far, the branch's `=` is its `+=`.
+        if (variable.assignments.every((GnAssignment a) => a.items.isEmpty)) {
+          reassignedEmpty = true;
+        } else {
+          throw GnError(
+            node.location,
+            'conditional reassignment of $name is not supported; use += in the branch',
+          );
+        }
       }
     } else if (existing == null) {
       if (!_predefinedTargetVariables.contains(name) || !scope.isTarget) {
@@ -2047,7 +2081,7 @@ final class _Evaluator {
     if (groups.isEmpty) {
       groups[Condition.always] = <_Value>[];
     }
-    String op = node.op;
+    String op = reassignedEmpty ? '+=' : node.op;
     var first = true;
     for (final MapEntry<Condition, List<_Value>> group in groups.entries) {
       final Condition when = condition.and(group.key);

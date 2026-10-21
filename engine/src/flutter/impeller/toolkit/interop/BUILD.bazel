@@ -432,11 +432,21 @@ zip_bundle(
         "@platforms//os:linux": {
             "lib/libimpeller.so": ":shared_library",
             "lib/libimpeller.a": ":static_library",
-            "bin/impellerc": "//engine/src/flutter/impeller/compiler:impellerc",
         },
+        "@platforms//os:android": {
+            "lib/libimpeller.so": ":shared_library",
+            "lib/libimpeller.a": ":static_library",
+        },
+        "//conditions:default": {},
+    }) | select({
+        "@platforms//os:linux": {"bin/impellerc": "//engine/src/flutter/impeller/compiler:impellerc"},
         "//conditions:default": {},
     }),
     output = select({
+        "//engine/src/flutter/common:platform_android_arm": "android-arm/impeller_sdk.zip",
+        "//engine/src/flutter/common:platform_android_arm64": "android-arm64/impeller_sdk.zip",
+        "//engine/src/flutter/common:platform_android_x64": "android-x64/impeller_sdk.zip",
+        "//engine/src/flutter/common:platform_android_x86": "android-x86/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_linux_arm64": "linux-arm64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_linux_x64": "linux-x64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/impeller_sdk.zip",
@@ -446,8 +456,14 @@ zip_bundle(
         "@platforms//os:linux": {
             "lib/libimpeller.so": "libimpeller.so",
             "lib/libimpeller.a": "obj/flutter/impeller/toolkit/interop/libimpeller.a",
-            "bin/impellerc": "impellerc",
         },
+        "@platforms//os:android": {
+            "lib/libimpeller.so": "libimpeller.so",
+            "lib/libimpeller.a": "obj/flutter/impeller/toolkit/interop/libimpeller.a",
+        },
+        "//conditions:default": {},
+    }) | select({
+        "@platforms//os:linux": {"bin/impellerc": "impellerc"},
         "//conditions:default": {},
     }),
     deps = [

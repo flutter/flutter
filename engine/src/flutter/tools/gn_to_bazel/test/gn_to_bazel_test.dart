@@ -500,14 +500,15 @@ source_set("x") {
     });
 
     test("an OS name's comparison the assumptions deny is decided", () async {
-      // skcms: `target_os != "android"` where is_android is false (the
-      // generation scope), `full_target_platform_name == "ios-arm64"` where
-      // is_ios is; `target_os == "wasm"` stays open there.
+      // `target_os != "win"` where is_win is false (the generation scope),
+      // `full_target_platform_name == "ios-arm64"` where is_ios is;
+      // `target_os == "wasm"` stays open there, as `target_os != "android"`
+      // does since the Android platform (skcms's condition).
       final GnFileEvaluation evaluation = await evaluate('''
 source_set("x") {
   sources = [ "x.cc" ]
-  if (target_os != "android") {
-    sources += [ "not_android.cc" ]
+  if (target_os != "win") {
+    sources += [ "not_win.cc" ]
   }
   if (full_target_platform_name == "ios-arm64") {
     sources += [ "ios.cc" ]
@@ -523,7 +524,7 @@ source_set("x") {
         ),
         <String>[
           '[true] = ["x.cc"]',
-          '[true] += ["not_android.cc"]',
+          '[true] += ["not_win.cc"]',
           '[target_os == "wasm"] += ["wasm.cc"]',
         ],
       );
@@ -572,6 +573,7 @@ source_set("x") {
         'impeller_enable_metal',
         'impeller_enable_opengles',
         'impeller_enable_vulkan',
+        'is_android',
         'is_linux',
         'is_wasm',
         'shell_enable_gl',
@@ -1682,7 +1684,10 @@ source_set("extra") {
         expect(merged.condition, Condition.always);
         expect(
           merged.variables['deps']!.assignments.map((GnAssignment a) => a.toString()),
-          <String>['[current_cpu == "x64"] += [":extra"]', '[true] += [":common"]'],
+          <String>[
+            '[current_cpu == "x64" && target_os != "android"] += [":extra"]',
+            '[true] += [":common"]',
+          ],
         );
         final String output = emitBuildFile(evaluation, gnPackage: '//flutter/a', tree: tree);
         expect(
@@ -1691,14 +1696,14 @@ source_set("extra") {
 cc_library(
     name = "hsw",
     srcs = select({
-        "@platforms//cpu:x86_64": [
-            "hsw.cc",  # current_cpu == "x64"
+        ":when_current_cpu_x64_and_target_os_not_android": [
+            "hsw.cc",  # current_cpu == "x64" && target_os != "android"
         ],
         "//conditions:default": [],
     }),
     copts = CHROMIUM_CODE_COPTS + select({
-        "@platforms//cpu:x86_64": [
-            "-mavx2",  # current_cpu == "x64"
+        ":when_current_cpu_x64_and_target_os_not_android": [
+            "-mavx2",  # current_cpu == "x64" && target_os != "android"
         ],
         "//conditions:default": [],
     }),
@@ -1707,8 +1712,8 @@ cc_library(
         ":common",
         "//engine/src:include_root",
     ] + select({
-        "@platforms//cpu:x86_64": [
-            ":extra",  # current_cpu == "x64"
+        ":when_current_cpu_x64_and_target_os_not_android": [
+            ":extra",  # current_cpu == "x64" && target_os != "android"
         ],
         "//conditions:default": [],
     }),

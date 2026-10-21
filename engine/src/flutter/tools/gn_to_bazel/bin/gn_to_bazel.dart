@@ -161,6 +161,9 @@ Future<int> run(List<String> arguments) async {
         skipTargets: skip,
         tree: tree,
         importPolicy: engineImportPolicy,
+        condition: manifest?.condition == null
+            ? Condition.always
+            : ConditionVariable(manifest!.condition!),
       );
       convertedTargets[gnPackage] = <String>{
         for (final GnTarget target in evaluation.targets)

@@ -44,7 +44,7 @@ load("//engine/src/flutter/build/bazel:copts.bzl", "TOOLCHAIN_WARNING_FLAGS")
 # Flags GN passes to every C and C++ compile on Linux
 # (//build/config/compiler:compiler, :runtime_library, //build/config/gcc,
 # //build/config/clang:extra_warnings, the `default_warning_flags`).
-_LINUX_COMPILE_FLAGS = [
+_COMMON_COMPILE_FLAGS = [
     # Keep paths as spelled on the command line: clang is invoked through a
     # symlink and must report its builtin headers under that path, not under
     # the checkout's absolute path (//build/config/gcc:relative_paths).
@@ -53,7 +53,9 @@ _LINUX_COMPILE_FLAGS = [
     "-fstack-protector",
     "--param=ssp-buffer-size=8",
     "-pipe",
-    "-pthread",
+]
+
+_WARNING_COMPILE_FLAGS = [
     "-fcolor-diagnostics",
     "-fvisibility=hidden",
     # GN's `default_warning_flags` (part of both the chromium_code and the
@@ -65,6 +67,17 @@ _LINUX_COMPILE_FLAGS = [
     "-Wstring-conversion",
     "-Wnewline-eof",
 ]
+
+_LINUX_COMPILE_FLAGS = _COMMON_COMPILE_FLAGS + ["-pthread"] + _WARNING_COMPILE_FLAGS
+
+# Android (//build/config/compiler:compiler under is_android): no -pthread
+# (bionic has no separate libpthread), and the three flags GN adds for the
+# NDK's ABI: function sections, unwind tables, full-width enums.
+_ANDROID_COMPILE_FLAGS = _COMMON_COMPILE_FLAGS + [
+    "-ffunction-sections",
+    "-funwind-tables",
+    "-fno-short-enums",
+] + _WARNING_COMPILE_FLAGS
 
 # The architecture (//build/config/compiler:compiler), per target CPU:
 # x64's `-m64 -march=x86-64`, arm64's `--target=aarch64-linux-gnu` with the
@@ -94,6 +107,23 @@ _LINUX_DEFINES = [
     "_FILE_OFFSET_BITS=64",
     "_LARGEFILE_SOURCE",
     "_LARGEFILE64_SOURCE",
+    "_LIBCPP_DISABLE_AVAILABILITY=1",
+    "_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS",
+    "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS",
+]
+
+# Android's (//build/config:feature_flags, //build/config/compiler:compiler
+# and :runtime_library under is_android, the libc++ configs): no large-file
+# defines (bionic is 64-bit-offset throughout), the NDK's ANDROID and
+# HAVE_SYS_UIO_H, fortified libc, and two spellings bionic's headers expect.
+_ANDROID_DEFINES = [
+    "USE_OPENSSL=1",
+    "USE_OPENSSL_CERTS=1",
+    "ANDROID",
+    "HAVE_SYS_UIO_H",
+    "_FORTIFY_SOURCE=2",
+    "__compiler_offsetof=__builtin_offsetof",
+    "nan=__builtin_nan",
     "_LIBCPP_DISABLE_AVAILABILITY=1",
     "_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS",
     "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS",
@@ -147,6 +177,36 @@ _LINUX_LINK_FLAGS = [
 LINUX_X64_LINK_FLAGS = ["-m64"]
 LINUX_ARM64_LINK_FLAGS = ["--target=aarch64-linux-gnu"]
 
+# Android's links (//build/config/compiler:compiler under is_android,
+# //build/config/android:runtime_library, build/toolchain/android/BUILD.gn):
+# no -pthread and no unwinder flag; nothing of the C library or the C++
+# runtime comes from the driver (-nostdlib -nostdlib++): the sysroot's crt
+# objects and libraries and the NDK clang's compiler runtime are named one
+# by one, late (see _android_link_libs), as GN's toolchain names them around
+# {{libs}}; undefined symbols are errors, static archives' symbols are not
+# exported, identical code is folded, and pages are 16 KB-aligned.
+_ANDROID_LINK_FLAGS = [
+    "-no-canonical-prefixes",
+    "-fuse-ld=lld",
+    "-Wl,--fatal-warnings",
+    "-Wl,-z,noexecstack",
+    "-Wl,-z,now",
+    "-Wl,-z,relro",
+    "-Wl,--undefined-version",
+    "-Wl,--build-id=sha1",
+    "-Wl,--exclude-libs,ALL",
+    "-Wl,--icf=all",
+    "-Wl,-z,max-page-size=65536",
+    "-nostdlib++",
+    "-nostdlib",
+    "-Wl,--warn-shared-textrel",
+]
+
+# The architecture (--target with the API level, build/config/android/
+# config.gni's android_api_level) for the compiles and the links.
+ANDROID_ARM64_COMPILE_FLAGS = ["--target=aarch64-linux-android24"]
+ANDROID_ARM64_LINK_FLAGS = ["--target=aarch64-linux-android24"]
+
 # Every link GN performs produces a complete artifact -- an executable, or a
 # shared library with all of its static dependencies linked in -- so GN can
 # reject unresolved symbols in all of them (//build/config/compiler:compiler).
@@ -156,6 +216,10 @@ LINUX_ARM64_LINK_FLAGS = ["--target=aarch64-linux-gnu"]
 # counterpart and nothing consumes it with --dynamic_mode=off, but `bazel build
 # //...` still produces it, so it is excluded from this check.
 _LINUX_COMPLETE_LINK_FLAGS = ["-Wl,-z,defs"]
+
+# Android's complete links say it twice (-z defs and --no-undefined, both in
+# GN's ldflags); the nodeps library is excused from both for the same reason.
+_ANDROID_COMPLETE_LINK_FLAGS = ["-Wl,-z,defs", "-Wl,--no-undefined"]
 
 _COMPLETE_LINK_ACTION_NAMES = CC_LINK_EXECUTABLE_ACTION_NAMES + [
     ACTION_NAMES.cpp_link_dynamic_library,
@@ -189,6 +253,12 @@ _OPT_COMPILE_FLAGS = ["-O2", "-g0", "-fno-ident", "-fdata-sections", "-ffunction
 _OPT_DEFINES = ["NDEBUG", "NVALGRIND", "DYNAMIC_ANNOTATIONS_ENABLED=0"]
 _OPT_LINK_FLAGS = ["-Wl,-O2", "-Wl,--gc-sections"]
 
+# Android's optimized build (//build/config/compiler:optimize under
+# is_android, :symbols): for size, without frame pointers, and with full
+# symbols -- symbol_level is 2 on Android, the shipped libflutter.so being
+# stripped separately (symbols.zip carries the unstripped one).
+_ANDROID_OPT_COMPILE_FLAGS = ["-Oz", "-fno-ident", "-fdata-sections", "-ffunction-sections", "-fomit-frame-pointer", "-g2"]
+
 # GN's is_asan (//build/config/compiler:compiler under `using_sanitizer` and
 # `is_asan`, //build/config:feature_flags' define): AddressSanitizer on every
 # compile and link. In GN's command line these come before the mode's -O0
@@ -202,10 +272,12 @@ def _defines(names):
     return ["-D" + name for name in names]
 
 def _flag_feature(name, actions, flags, enabled = True):
+    # A feature with nothing to add (an Android toolchain's executable link
+    # flags) is an empty feature: flag_group refuses an empty list.
     return feature(
         name = name,
         enabled = enabled,
-        flag_sets = [flag_set(actions = actions, flag_groups = [flag_group(flags = flags)])],
+        flag_sets = [flag_set(actions = actions, flag_groups = [flag_group(flags = flags)])] if flags else [],
     )
 
 def _mode_feature(name, compile_flags, link_flags = []):
@@ -214,17 +286,74 @@ def _mode_feature(name, compile_flags, link_flags = []):
         flag_sets.append(flag_set(actions = ALL_CC_LINK_ACTION_NAMES, flag_groups = [flag_group(flags = link_flags)]))
     return feature(name = name, flag_sets = flag_sets)
 
+def _android_link_libs(ctx, begin, end):
+    # GN's libs section for an Android link: the crt object that opens it,
+    # the C library, the dynamic loader, libm, the compiler runtime (found
+    # through -L on the NDK clang's runtime directory), the crt object that
+    # closes it. The -L of the API level's library directory precedes, as
+    # GN's android config puts it in ldflags.
+    triple_dir = ctx.file.crt_begin_so.dirname
+    builtins = ctx.files.runtime_library
+    if len(builtins) != 1:
+        fail("%s: runtime_library should be one archive, is %s" % (ctx.label, builtins))
+    name = builtins[0].basename
+    if not name.startswith("lib") or not name.endswith(".a"):
+        fail("%s: runtime_library should be lib<name>.a, is %s" % (ctx.label, name))
+    return [
+        "-L" + triple_dir,
+        "-L" + builtins[0].dirname,
+        begin.path,
+        "-lc",
+        "-ldl",
+        "-lm",
+        "-l" + name[len("lib"):-len(".a")],
+        end.path,
+    ]
+
 def _impl(ctx):
     cxx_include_flags = []
     for header in ctx.files.cxx_include_markers:
         cxx_include_flags.append("-I" + header.dirname)
+
+    # Bazel passes this as --sysroot to compile and link actions (`sysroot`
+    # legacy feature) and uses it to expand %sysroot% below.
+    sysroot = ctx.file.sysroot_marker.dirname
+
+    android = ctx.attr.os == "android"
+    if android:
+        compile_flags = _ANDROID_COMPILE_FLAGS + _defines(_ANDROID_DEFINES)
+        link_flags = _ANDROID_LINK_FLAGS
+        opt_compile_flags = _ANDROID_OPT_COMPILE_FLAGS
+        complete_link_flags = _ANDROID_COMPLETE_LINK_FLAGS
+        executable_link_flags = []
+        if not ctx.file.crt_begin_so or not ctx.file.crt_end_so or not ctx.file.crt_begin_exe or not ctx.file.crt_end_exe:
+            fail("%s: an Android toolchain names its four crt objects" % ctx.label)
+        executable_link_libs = _android_link_libs(ctx, ctx.file.crt_begin_exe, ctx.file.crt_end_exe)
+        dynamic_library_link_libs = _android_link_libs(ctx, ctx.file.crt_begin_so, ctx.file.crt_end_so)
+        builtin_include_directories = [
+            "%sysroot%/usr/include",
+            "%sysroot%/usr/local/include",
+            "%sysroot%/usr/include/" + ctx.file.crt_begin_so.dirname.split("/")[-2],
+        ]
+    else:
+        compile_flags = _LINUX_COMPILE_FLAGS + _defines(_LINUX_DEFINES)
+        link_flags = _LINUX_LINK_FLAGS
+        opt_compile_flags = _OPT_COMPILE_FLAGS
+        complete_link_flags = _LINUX_COMPLETE_LINK_FLAGS
+        executable_link_flags = _LINUX_EXECUTABLE_LINK_FLAGS
+        executable_link_libs = _LINUX_LINK_LIBS
+        dynamic_library_link_libs = _LINUX_LINK_LIBS
+        builtin_include_directories = [
+            "%sysroot%/usr/include",
+            "%sysroot%/usr/local/include",
+        ]
 
     features = [
         # Compile.
         _flag_feature(
             "flutter_compile_flags",
             ALL_CC_COMPILE_ACTION_NAMES,
-            _LINUX_COMPILE_FLAGS + _defines(_LINUX_DEFINES),
+            compile_flags,
         ),
         _flag_feature("flutter_c_flags", [ACTION_NAMES.c_compile], _LINUX_C_FLAGS),
         _flag_feature("flutter_cxx_flags", ALL_CPP_COMPILE_ACTION_NAMES, _LINUX_CXX_FLAGS + cxx_include_flags),
@@ -247,7 +376,7 @@ def _impl(ctx):
         # Compilation modes; Bazel enables exactly one of dbg/opt/fastbuild.
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
-        _mode_feature("opt", _OPT_COMPILE_FLAGS + _defines(_OPT_DEFINES), _OPT_LINK_FLAGS),
+        _mode_feature("opt", opt_compile_flags + _defines(_OPT_DEFINES), _OPT_LINK_FLAGS),
         # A target's copts (Bazel's own `user_compile_flags` feature, defined
         # here so that it sits before the next one: Bazel appends the legacy
         # features it does not find to the end of this list), then the
@@ -271,16 +400,15 @@ def _impl(ctx):
         ),
         _flag_feature("flutter_arch_flags", ALL_CC_COMPILE_ACTION_NAMES, ctx.attr.arch_copts),
         # Link.
-        _flag_feature("flutter_link_flags", ALL_CC_LINK_ACTION_NAMES, _LINUX_LINK_FLAGS + ctx.attr.arch_linkopts),
-        _flag_feature("flutter_complete_link_flags", _COMPLETE_LINK_ACTION_NAMES, _LINUX_COMPLETE_LINK_FLAGS),
-        _flag_feature("flutter_executable_link_flags", CC_LINK_EXECUTABLE_ACTION_NAMES, _LINUX_EXECUTABLE_LINK_FLAGS),
+        _flag_feature("flutter_link_flags", ALL_CC_LINK_ACTION_NAMES, link_flags + ctx.attr.arch_linkopts),
+        _flag_feature("flutter_complete_link_flags", _COMPLETE_LINK_ACTION_NAMES, complete_link_flags),
+        _flag_feature("flutter_executable_link_flags", CC_LINK_EXECUTABLE_ACTION_NAMES, executable_link_flags),
         # System libraries go after everything Bazel adds (user_link_flags,
-        # libraries_to_link), which is why they are a separate, late feature.
-        _flag_feature(
-            "flutter_link_libs",
-            CC_LINK_EXECUTABLE_ACTION_NAMES + DYNAMIC_LIBRARY_LINK_ACTION_NAMES,
-            _LINUX_LINK_LIBS,
-        ),
+        # libraries_to_link), which is why they are a separate, late feature;
+        # an Android link's differ between an executable and a shared library
+        # (the crt objects).
+        _flag_feature("flutter_link_libs", CC_LINK_EXECUTABLE_ACTION_NAMES, executable_link_libs),
+        _flag_feature("flutter_dynamic_library_link_libs", DYNAMIC_LIBRARY_LINK_ACTION_NAMES, dynamic_library_link_libs),
         # Capabilities Bazel asks about.
         feature(name = "supports_pic", enabled = True),
         feature(name = "supports_dynamic_linker", enabled = True),
@@ -400,10 +528,6 @@ def _impl(ctx):
         action_config(action_name = ACTION_NAMES.objcopy_embed_data, enabled = True, tools = [tool(tool = ctx.file.objcopy)]),
     ]
 
-    # Bazel passes this as --sysroot to compile and link actions (`sysroot`
-    # legacy feature) and uses it to expand %sysroot% below.
-    sysroot = ctx.file.sysroot_marker.dirname
-
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         toolchain_identifier = ctx.attr.toolchain_identifier,
@@ -425,10 +549,7 @@ def _impl(ctx):
         # %workspace% makes an entry exec-root relative, like the paths in the
         # compiler's dependency files; a bare relative path would be taken
         # relative to this package.
-        cxx_builtin_include_directories = [
-            "%sysroot%/usr/include",
-            "%sysroot%/usr/local/include",
-        ] + [
+        cxx_builtin_include_directories = builtin_include_directories + [
             "%workspace%/" + marker.dirname
             for marker in ctx.files.cxx_include_markers
         ] + [
@@ -476,6 +597,25 @@ flutter_cc_toolchain_config = rule(
         "arch_linkopts": attr.string_list(
             default = LINUX_X64_LINK_FLAGS,
             doc = "The architecture's link flags (LINUX_X64_LINK_FLAGS, LINUX_ARM64_LINK_FLAGS).",
+        ),
+        "os": attr.string(
+            default = "linux",
+            values = ["linux", "android"],
+            doc = "The target OS, which picks GN's flag sets: linux (the host's and the arm64 cross " +
+                  "build's) or android (the NDK sysroot, -nostdlib with the crt objects and libraries named).",
+        ),
+        "crt_begin_so": attr.label(
+            allow_single_file = True,
+            doc = "Android: the sysroot's crtbegin_so.o of the ABI's API level, which opens a shared library's " +
+                  "libs section; its directory is the -L of the link and names the triple.",
+        ),
+        "crt_end_so": attr.label(allow_single_file = True, doc = "Android: crtend_so.o."),
+        "crt_begin_exe": attr.label(allow_single_file = True, doc = "Android: crtbegin_dynamic.o, an executable's."),
+        "crt_end_exe": attr.label(allow_single_file = True, doc = "Android: crtend_android.o."),
+        "runtime_library": attr.label(
+            allow_files = True,
+            doc = "Android: the NDK clang's compiler runtime archive for the ABI " +
+                  "(libclang_rt.builtins-<arch>-android.a), linked as -l<name> from its directory.",
         ),
     },
     provides = [CcToolchainConfigInfo],

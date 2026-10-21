@@ -146,6 +146,11 @@ cc_library(
             "embedder_surface_vulkan_impeller.cc",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:android": [
+            "//engine/src:@out/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S",  # is_android
+        ],
+        "//conditions:default": [],
     }),
     hdrs = [
         "embedder_engine.h",
@@ -356,6 +361,11 @@ cc_library(
             "//engine/src/flutter/vulkan/procs",  # embedder_enable_vulkan
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:android": [
+            "//engine/src/flutter/shell/platform/android:icudtl_asm",  # is_android
+        ],
+        "//conditions:default": [],
     }),
     alwayslink = True,
 )
@@ -425,6 +435,11 @@ cc_library(
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "embedder_surface_vulkan_impeller.cc",  # embedder_enable_vulkan && impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:android": [
+            "//engine/src:@out/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S",  # is_android
         ],
         "//conditions:default": [],
     }),
@@ -636,6 +651,11 @@ cc_library(
         "//engine/src/flutter/shell:enable_vulkan": [
             "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # embedder_enable_vulkan
             "//engine/src/flutter/vulkan/procs",  # embedder_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:android": [
+            "//engine/src/flutter/shell/platform/android:icudtl_asm",  # is_android
         ],
         "//conditions:default": [],
     }),
@@ -900,6 +920,7 @@ cc_library(
             "//engine/src/flutter/impeller/renderer/backend/gles",  # test_enable_gl
             "//engine/src/flutter/testing:opengl",  # test_enable_gl
             "@vulkan-headers//:vulkan_headers",  # test_enable_gl
+            "@vulkan_deps_tree//:root_includes",
         ],
         "//conditions:default": [],
     }) + select({
@@ -1357,6 +1378,10 @@ zip_bundle(
         "libflutter_engine.so": ":flutter_engine_library",
     },
     output = select({
+        "//engine/src/flutter/common:platform_android_arm": "android-arm/android-arm-embedder.zip",
+        "//engine/src/flutter/common:platform_android_arm64": "android-arm64/android-arm64-embedder.zip",
+        "//engine/src/flutter/common:platform_android_x64": "android-x64/android-x64-embedder.zip",
+        "//engine/src/flutter/common:platform_android_x86": "android-x86/android-x86-embedder.zip",
         "//engine/src/flutter/common:platform_linux_arm64": "linux-arm64/linux-arm64-embedder.zip",
         "//engine/src/flutter/common:platform_linux_x64": "linux-x64/linux-x64-embedder.zip",
         "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/wasm-wasm-embedder.zip",
