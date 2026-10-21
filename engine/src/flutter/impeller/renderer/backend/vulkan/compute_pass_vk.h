@@ -32,7 +32,7 @@ class ComputePassVK final : public ComputePass {
   /// A resource bound to one binding index of the pass.
   struct BoundResource {
     /// The descriptor type the resource is bound as.
-    DescriptorType type;
+    DescriptorType type = DescriptorType::kUniformBuffer;
     /// Set for a uniform or storage buffer.
     std::optional<vk::DescriptorBufferInfo> buffer_info;
     /// Set for a sampled image.

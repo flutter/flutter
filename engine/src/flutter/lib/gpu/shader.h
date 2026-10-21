@@ -56,7 +56,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
     };
 
     /// Where the buffer is bound on each backend.
-    impeller::ShaderUniformSlot slot;
+    impeller::ShaderUniformSlot slot = {};
     /// Names the buffer. Binding sets and compute passes also use its address
     /// to identify the binding.
     impeller::ShaderMetadata metadata;

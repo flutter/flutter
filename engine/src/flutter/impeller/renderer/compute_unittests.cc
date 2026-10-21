@@ -1055,7 +1055,11 @@ TEST_P(ComputeTest, ComputePassReadsBufferWrittenByBlitPass) {
   for (size_t i = 0; i < kCount; i++) {
     pixels[i * 4] = static_cast<uint8_t>(i);
   }
-  ASSERT_TRUE(texture->SetContents(pixels.data(), pixels.size()));
+  // A device-private texture cannot be written from the CPU, so upload
+  // through a staging buffer.
+  auto staging_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      pixels.data(), pixels.size());
+  ASSERT_TRUE(staging_buffer);
 
   CS::Data<kCount> initial = {};
   auto buffer =
@@ -1066,6 +1070,8 @@ TEST_P(ComputeTest, ComputePassReadsBufferWrittenByBlitPass) {
   auto cmd_buffer = context->CreateCommandBuffer();
   {
     auto pass = cmd_buffer->CreateBlitPass();
+    ASSERT_TRUE(
+        pass->AddCopy(DeviceBuffer::AsBufferView(staging_buffer), texture));
     ASSERT_TRUE(pass->AddCopy(texture, buffer));
     ASSERT_TRUE(pass->EncodeCommands());
   }
