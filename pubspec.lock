@@ -1375,10 +1375,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_wkwebview
-      sha256: "2817367074d4789fee2d13b64bab23cd9adb14032715bcb34d85351fe0b5fd2e"
+      sha256: a9cc3f507ee40127ed0812ca54d00701a27833f51ea0b5820f4b3e7f42518bf3
       url: "https://pub.dev"
     source: hosted
-    version: "3.27.1"
+    version: "3.27.0"
   xdg_directories:
     dependency: "direct main"
     description:
