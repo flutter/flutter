@@ -1698,6 +1698,7 @@ class WebServiceWorker extends Target {
     );
     final String serviceWorker = generateServiceWorker(
       fileGeneratorsPath,
+      fileSystem: environment.fileSystem,
       serviceWorkerStrategy: environment.serviceWorkerStrategy,
     );
     serviceWorkerFile.writeAsStringSync(serviceWorker);
