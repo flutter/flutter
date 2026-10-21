@@ -71,7 +71,6 @@ void main() {
     });
 
     test('constructor validates file:// directory URIs ending with slash', () {
-      expect((null as Uri?).isValidDirectoryUri, isFalse);
       expect(Uri.directory('/path/to/my_app').isValidDirectoryUri, isTrue);
       expect(
         () => ExtensionFlutterProject(

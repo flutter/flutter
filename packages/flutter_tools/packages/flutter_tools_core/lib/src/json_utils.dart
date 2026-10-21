@@ -4,18 +4,11 @@
 
 /// Validation helpers for file system [Uri]s exchanged over the tool
 /// extension protocol.
-extension ExtensionUriValidation on Uri? {
-  /// Whether this URI is a non-null, absolute `file:` directory URI ending
-  /// with a trailing slash (`/`).
-  bool get isValidDirectoryUri => switch (this) {
-    final Uri uri =>
-      uri.isScheme('file') &&
-          uri.hasAbsolutePath &&
-          !uri.hasQuery &&
-          !uri.hasFragment &&
-          uri.path.endsWith('/'),
-    null => false,
-  };
+extension ExtensionUriValidation on Uri {
+  /// Whether this URI is an absolute `file:` directory URI ending with a
+  /// trailing slash (`/`).
+  bool get isValidDirectoryUri =>
+      isScheme('file') && hasAbsolutePath && !hasQuery && !hasFragment && path.endsWith('/');
 }
 
 /// Shared JSON deserialization utilities for Flutter tool extension models.
@@ -78,11 +71,13 @@ extension ExtensionJsonParsing on Map<String, Object?> {
   /// `Map<String, Object?>`, or contains non-[String] values.
   Map<String, String> stringMap(String key) {
     return <String, String>{
-      for (final MapEntry(:key, :value) in requiredField<Map<String, Object?>>(key).entries)
-        key: switch (value) {
+      for (final MapEntry(key: entryKey, :value) in requiredField<Map<String, Object?>>(
+        key,
+      ).entries)
+        entryKey: switch (value) {
           final String v => v,
           _ => throw FormatException(
-            'Invalid "$key" value: expected String, got ${value.runtimeType}.',
+            'Invalid "$entryKey" value: expected String, got ${value.runtimeType}.',
           ),
         },
     };
@@ -94,8 +89,8 @@ extension ExtensionJsonParsing on Map<String, Object?> {
   Uri directoryUri(String key) {
     final String rawUri = requiredField<String>(key);
     final Uri? uri = Uri.tryParse(rawUri);
-    if (uri.isValidDirectoryUri) {
-      return uri!;
+    if (uri != null && uri.isValidDirectoryUri) {
+      return uri;
     }
     throw FormatException('Invalid "$key": expected trailing-slash-terminated absolute file: URI.');
   }
