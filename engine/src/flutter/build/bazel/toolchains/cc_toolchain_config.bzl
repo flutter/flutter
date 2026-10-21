@@ -66,7 +66,10 @@ _LINUX_COMPILE_FLAGS = [
     "-Wnewline-eof",
 ]
 
-# The architecture (//build/config/compiler:compiler). Separate, and placed
+# The architecture (//build/config/compiler:compiler), per target CPU:
+# x64's `-m64 -march=x86-64`, arm64's `--target=aarch64-linux-gnu` with the
+# define GN's compiler config adds beside it (the toolchain's `arch_copts`
+# and `arch_linkopts`; the x64 ones are the defaults). Separate, and placed
 # after a target's own flags (see `flutter_arch_flags` below): in GN the
 # compiler config's cflags follow the target's, so a target's own -march
 # loses to -march=x86-64 -- Skia's `ml3` opts ask for -march=haswell and
@@ -74,9 +77,13 @@ _LINUX_COMPILE_FLAGS = [
 # pipeline; a build in which haswell won differs from them by a few pixels.
 # (-m<feature> flags such as skcms' -mavx2 are unaffected by the order:
 # clang applies them on top of whichever -march wins.)
-_LINUX_X64_COMPILE_FLAGS = [
+LINUX_X64_COMPILE_FLAGS = [
     "-m64",
     "-march=x86-64",
+]
+LINUX_ARM64_COMPILE_FLAGS = [
+    "--target=aarch64-linux-gnu",
+    "-DBORINGSSL_CLANG_SUPPORTS_DOT_ARCH",
 ]
 
 # Defines GN passes to every compile on Linux (//build/config:feature_flags,
@@ -137,7 +144,8 @@ _LINUX_LINK_FLAGS = [
     "--unwindlib=libunwind",
 ]
 
-_LINUX_X64_LINK_FLAGS = ["-m64"]
+LINUX_X64_LINK_FLAGS = ["-m64"]
+LINUX_ARM64_LINK_FLAGS = ["--target=aarch64-linux-gnu"]
 
 # Every link GN performs produces a complete artifact -- an executable, or a
 # shared library with all of its static dependencies linked in -- so GN can
@@ -244,7 +252,7 @@ def _impl(ctx):
         # here so that it sits before the next one: Bazel appends the legacy
         # features it does not find to the end of this list), then the
         # architecture flags, which GN's compiler config puts after a
-        # target's own cflags (see _LINUX_X64_COMPILE_FLAGS).
+        # target's own cflags (see LINUX_X64_COMPILE_FLAGS).
         feature(
             name = "user_compile_flags",
             enabled = True,
@@ -261,9 +269,9 @@ def _impl(ctx):
                 ),
             ],
         ),
-        _flag_feature("flutter_arch_flags", ALL_CC_COMPILE_ACTION_NAMES, _LINUX_X64_COMPILE_FLAGS),
+        _flag_feature("flutter_arch_flags", ALL_CC_COMPILE_ACTION_NAMES, ctx.attr.arch_copts),
         # Link.
-        _flag_feature("flutter_link_flags", ALL_CC_LINK_ACTION_NAMES, _LINUX_LINK_FLAGS + _LINUX_X64_LINK_FLAGS),
+        _flag_feature("flutter_link_flags", ALL_CC_LINK_ACTION_NAMES, _LINUX_LINK_FLAGS + ctx.attr.arch_linkopts),
         _flag_feature("flutter_complete_link_flags", _COMPLETE_LINK_ACTION_NAMES, _LINUX_COMPLETE_LINK_FLAGS),
         _flag_feature("flutter_executable_link_flags", CC_LINK_EXECUTABLE_ACTION_NAMES, _LINUX_EXECUTABLE_LINK_FLAGS),
         # System libraries go after everything Bazel adds (user_link_flags,
@@ -459,6 +467,15 @@ flutter_cc_toolchain_config = rule(
         "asan": attr.bool(
             default = False,
             doc = "Whether every compile and link is instrumented with AddressSanitizer (GN's is_asan).",
+        ),
+        "arch_copts": attr.string_list(
+            default = LINUX_X64_COMPILE_FLAGS,
+            doc = "The architecture's compile flags (//build/config/compiler:compiler's cflags for the " +
+                  "target CPU: LINUX_X64_COMPILE_FLAGS, LINUX_ARM64_COMPILE_FLAGS), after a target's own.",
+        ),
+        "arch_linkopts": attr.string_list(
+            default = LINUX_X64_LINK_FLAGS,
+            doc = "The architecture's link flags (LINUX_X64_LINK_FLAGS, LINUX_ARM64_LINK_FLAGS).",
         ),
     },
     provides = [CcToolchainConfigInfo],

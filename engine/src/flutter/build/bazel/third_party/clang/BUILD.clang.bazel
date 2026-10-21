@@ -14,7 +14,13 @@ exports_files(glob(["bin/*"]))
 # is a symlink to this multicall binary, so it belongs to every tool group.
 _MULTICALL = ["bin/llvm"]
 
-_TARGET = "x86_64-unknown-linux-gnu"
+# The targets the Linux toolchains build for: the x64 host's own, and the
+# arm64 cross build's (toolchains:linux_arm64). Each has its compiler-rt,
+# libunwind and crt objects under these two directories.
+_TARGETS = [
+    "x86_64-unknown-linux-gnu",
+    "aarch64-unknown-linux-gnu",
+]
 
 # A file in the builtin include directory, lib/clang/<version>/include; the
 # toolchain takes its directory as a builtin include directory (found by
@@ -38,10 +44,13 @@ filegroup(
     ] + _MULTICALL + glob(
         ["lib/clang/*/include"],
         exclude_directories = 0,
-    ) + glob([
-        "lib/clang/*/share/**",
-        "lib/clang/*/lib/" + _TARGET + "/**",
-        "lib/" + _TARGET + "/**",
+    ) + glob(["lib/clang/*/share/**"] + [
+        pattern
+        for target in _TARGETS
+        for pattern in [
+            "lib/clang/*/lib/" + target + "/**",
+            "lib/" + target + "/**",
+        ]
     ]),
 )
 
@@ -54,8 +63,12 @@ filegroup(
         "bin/lld",
         "bin/llvm-ar",
     ] + _MULTICALL + glob([
-        "lib/clang/*/lib/" + _TARGET + "/**",
-        "lib/" + _TARGET + "/**",
+        pattern
+        for target in _TARGETS
+        for pattern in [
+            "lib/clang/*/lib/" + target + "/**",
+            "lib/" + target + "/**",
+        ]
     ]),
 )
 
