@@ -54,4 +54,27 @@ extension ExtensionJsonParsing on Map<String, Object?> {
       ),
     };
   }
+
+  /// Extracts an optional set of unique [String]s from this JSON map,
+  /// returning [defaultValue] if the key is missing or `null`, or throwing
+  /// a [FormatException] if the value is not an [Iterable], contains
+  /// non-[String] elements, or contains empty/whitespace-only elements when
+  /// [rejectEmpty] is `true`.
+  Set<String> stringSet(
+    String key, {
+    Set<String> defaultValue = const <String>{},
+    bool rejectEmpty = false,
+  }) {
+    final Iterable<String> items = stringIterable(key, defaultValue: defaultValue);
+    if (!rejectEmpty) {
+      return Set<String>.unmodifiable(items);
+    }
+    return Set<String>.unmodifiable(<String>{
+      for (final String item in items)
+        if (item.trim().isNotEmpty)
+          item.trim()
+        else
+          throw FormatException('Invalid "$key" element: expected non-empty String, got "$item".'),
+    });
+  }
 }
