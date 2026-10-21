@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 /// Prototype Linux [DeviceService] implementation.
 final class LinuxDeviceService extends DeviceService {
+  LinuxDeviceService({required this._dependencies});
+
   /// Identifier of the prototype Linux target device.
   static const String customLinuxDeviceId = 'custom_linux_device';
+
+  final ExtensionDependencies _dependencies;
 
   @override
   Future<List<TargetDevice>> getDevices() async {
@@ -34,6 +36,6 @@ final class LinuxDeviceService extends DeviceService {
     if (deviceId != customLinuxDeviceId) {
       return false;
     }
-    return Directory.fromUri(project.directory.resolve('linux')).existsSync();
+    return _dependencies.fileSystem.directory(project.directory.resolve('linux')).existsSync();
   }
 }

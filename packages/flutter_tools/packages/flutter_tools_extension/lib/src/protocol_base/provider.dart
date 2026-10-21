@@ -22,10 +22,28 @@ class ToolExtensionEntryPoint {
 
   static const _reservedMethods = <String>{
     getCapabilitiesMethod,
+    ToolExtensionService.logNotificationMethod,
     ToolExtensionService.progressNotificationMethod,
     ToolExtensionService.heartbeatNotificationMethod,
     ToolExtensionService.cancelRequestNotificationMethod,
   };
+
+  /// Standard `main(List<String> args, Object? message)` adapter for spawning
+  /// an extension isolate via [Isolate.spawnUri].
+  static Future<void> runMain(
+    List<String> _,
+    Object? message,
+    FutureOr<void> Function(SendPort sendPort) entryPoint,
+  ) async {
+    if (message is! SendPort) {
+      throw ArgumentError.value(
+        message,
+        'message',
+        'Expected a SendPort when spawning a tool extension isolate.',
+      );
+    }
+    await entryPoint(message);
+  }
 
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
@@ -61,7 +79,7 @@ class ToolExtensionEntryPoint {
 
     final capabilities = ToolExtensionCapabilities(
       extensionName: extensionName,
-      supportedPlatforms: supportedPlatforms ?? const <String>{'linux', 'macos', 'windows'},
+      supportedPlatforms: supportedPlatforms ?? ExtensionPackageConfig.defaultSupportedPlatforms,
       services: services.map((ToolExtensionService s) => s.namespace).toList(),
     );
 
