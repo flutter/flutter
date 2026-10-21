@@ -92,10 +92,11 @@ gn_build(
         "libvulkan.so.1",
         "vk_swiftshader_icd.json",
         # The Khronos validation layer and its manifest (from GN's
-        # vulkan-data/, a product by base name here; the suites' copies put
-        # it back under vulkan-data/, which its library_path is relative to).
+        # vulkan-data/ -- out_paths below -- a product by base name here; the
+        # suites' copies put it back under vulkan-data/, which its
+        # library_path is relative to).
         "libVkLayer_khronos_validation.so",
-        "vulkan-data/VkLayer_khronos_validation.json",
+        "VkLayer_khronos_validation.json",
     ],
     ar = "@clang_linux_x64//:bin/llvm-ar",
     # Dependencies the Bazel side builds itself (the facade depends on them):
@@ -125,6 +126,7 @@ gn_build(
     env = {"ANGLE_UPSTREAM_HASH": _ANGLE_REVISION[:12]},
     gn_args = _GN_ARGS,
     ninja_target = "gl_wrap",
+    out_paths = {"VkLayer_khronos_validation.json": "vulkan-data/VkLayer_khronos_validation.json"},
     root_target_dir = "flutter/build/bazel/gl_wrap",
     # The GN source root: the engine's build configuration, the trees GN
     # reads, the toolchain, and the stand-ins (stubs/) for the engine
