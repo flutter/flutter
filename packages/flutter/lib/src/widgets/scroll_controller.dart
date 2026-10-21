@@ -193,15 +193,7 @@ class ScrollController extends ChangeNotifier {
   /// beyond the extents, then going beyond the extents will not interrupt the
   /// animation.)
   ///
-  /// The animation keeps its target unless the scroll offset is corrected while
-  /// it runs. For example, a viewport corrects the scroll offset when one of
-  /// its slivers reports that content before the viewport has changed size, and
-  /// a [SingleChildScrollView] does so when the scroll offset is out of range
-  /// for its new scroll extents. The animation and its target then move by the
-  /// same amount as the scroll offset, otherwise the content would visibly
-  /// jump. The animation can therefore end at a different offset from the given
-  /// value. For example, an animation to the start of a list can stop short of
-  /// it when items above the viewport have changed size.
+  /// {@macro flutter.widgets.ScrollPosition.animateTo.corrections}
   ///
   /// For scrollables that lazily construct their contents, such as
   /// [ListView.builder], a value based on [ScrollPosition.maxScrollExtent] can
