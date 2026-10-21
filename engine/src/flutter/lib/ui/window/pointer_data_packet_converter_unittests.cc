@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 
+#include <cmath>
 #include <cstring>
 #include <unordered_set>
 
@@ -879,6 +880,70 @@ TEST(PointerDataPacketConverterTest, CanConvertViewId) {
   ASSERT_EQ(result.size(), (size_t)2);
   ASSERT_EQ(result[0].view_id, 100);
   ASSERT_EQ(result[1].view_id, 200);
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresNonFinitePositions) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(5);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 1.0, 1.0, 0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 1.0, 1.0, 1);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, NAN, NAN, 1);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
+  packet->SetPointerData(3, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, INFINITY,
+                             INFINITY, 0);
+  packet->SetPointerData(4, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite move is dropped, and the non-finite up uses the last
+  // position of the pointer.
+  ASSERT_EQ(result.size(), (size_t)4);
+  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
+  ASSERT_EQ(result[1].change, PointerData::Change::kDown);
+
+  ASSERT_EQ(result[2].change, PointerData::Change::kMove);
+  ASSERT_EQ(result[2].physical_x, 3.0);
+  ASSERT_EQ(result[2].physical_y, 4.0);
+  ASSERT_EQ(result[2].physical_delta_x, 2.0);
+  ASSERT_EQ(result[2].physical_delta_y, 3.0);
+
+  ASSERT_EQ(result[3].change, PointerData::Change::kUp);
+  ASSERT_EQ(result[3].synthesized, 0);
+  ASSERT_EQ(result[3].physical_x, 3.0);
+  ASSERT_EQ(result[3].physical_y, 4.0);
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresGestureWithNonFiniteDown) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(4);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, NAN, NAN, 1);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0, 0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(3, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // Without a down, the rest of the gesture is dropped too.
+  ASSERT_EQ(result.size(), (size_t)0);
 }
 
 }  // namespace testing

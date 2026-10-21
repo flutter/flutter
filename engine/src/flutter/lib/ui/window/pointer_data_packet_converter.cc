@@ -44,6 +44,11 @@ void PointerDataPacketConverter::ConvertPointerData(
   if (!delegate_.ViewExists(pointer_data.view_id)) {
     return;
   }
+  // Some devices occasionally report non-finite positions. Storing them in
+  // `states_` would make every later delta of the pointer non-finite.
+  if (!SanitizeNonFinitePosition(pointer_data)) {
+    return;
+  }
   if (pointer_data.signal_kind == PointerData::SignalKind::kNone) {
     switch (pointer_data.change) {
       case PointerData::Change::kCancel: {
@@ -51,10 +56,11 @@ void PointerDataPacketConverter::ConvertPointerData(
         // to a non-existing pointer. Drops the cancel if pointer
         // is not previously added.
         // https://github.com/flutter/flutter/issues/20517
+        // The cancel is also dropped if the down was dropped because its
+        // position was not finite.
         auto iter = states_.find(pointer_data.device);
-        if (iter != states_.end()) {
+        if (iter != states_.end() && iter->second.is_down) {
           PointerState state = iter->second;
-          FML_DCHECK(state.is_down);
           UpdatePointerIdentifier(pointer_data, state, false);
 
           if (LocationNeedsUpdate(pointer_data, state)) {
@@ -212,11 +218,13 @@ void PointerDataPacketConverter::ConvertPointerData(
         break;
       }
       case PointerData::Change::kMove: {
-        // Makes sure we have an existing pointer in down state
+        // Drops the move if the pointer is not down, which happens when its
+        // down was dropped because its position was not finite.
         auto iter = states_.find(pointer_data.device);
-        FML_DCHECK(iter != states_.end());
+        if (iter == states_.end() || !iter->second.is_down) {
+          break;
+        }
         PointerState state = iter->second;
-        FML_DCHECK(state.is_down);
 
         UpdatePointerIdentifier(pointer_data, state, false);
         UpdateDeltaAndState(pointer_data, state);
@@ -225,11 +233,13 @@ void PointerDataPacketConverter::ConvertPointerData(
         break;
       }
       case PointerData::Change::kUp: {
-        // Makes sure we have an existing pointer in down state
+        // Drops the up if the pointer is not down, which happens when its
+        // down was dropped because its position was not finite.
         auto iter = states_.find(pointer_data.device);
-        FML_DCHECK(iter != states_.end());
+        if (iter == states_.end() || !iter->second.is_down) {
+          break;
+        }
         PointerState state = iter->second;
-        FML_DCHECK(state.is_down);
 
         UpdatePointerIdentifier(pointer_data, state, false);
 
@@ -423,6 +433,34 @@ void PointerDataPacketConverter::UpdateDeltaAndState(PointerData& pointer_data,
   state.scale = pointer_data.scale;
   state.rotation = pointer_data.rotation;
   states_[pointer_data.device] = state;
+}
+
+bool PointerDataPacketConverter::SanitizeNonFinitePosition(
+    PointerData& pointer_data) {
+  if (std::isfinite(pointer_data.physical_x) &&
+      std::isfinite(pointer_data.physical_y)) {
+    return true;
+  }
+  if (pointer_data.signal_kind == PointerData::SignalKind::kNone) {
+    switch (pointer_data.change) {
+      case PointerData::Change::kDown:
+      case PointerData::Change::kMove:
+      case PointerData::Change::kHover:
+        // The pointer keeps its last valid position, so the next valid event
+        // gets a finite delta. A dropped down also drops the rest of the
+        // gesture.
+        return false;
+      default:
+        break;
+    }
+  }
+  auto iter = states_.find(pointer_data.device);
+  if (iter == states_.end()) {
+    return false;
+  }
+  pointer_data.physical_x = iter->second.physical_x;
+  pointer_data.physical_y = iter->second.physical_y;
+  return true;
 }
 
 bool PointerDataPacketConverter::LocationNeedsUpdate(
