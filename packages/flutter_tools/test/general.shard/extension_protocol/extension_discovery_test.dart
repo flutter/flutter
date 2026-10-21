@@ -294,7 +294,6 @@ dev_dependencies:
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: my_ext
-protocol_version: 1
 supported_platforms:
   - linux
 services:
