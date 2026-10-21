@@ -4021,6 +4021,69 @@ filegroup(
       },
     );
 
+    test('sdk_rewriter takes its directory as a filegroup; a mapped template defined in the file is the rule', () {
+      // web_sdk/BUILD.gn's shape: sdk_rewriter over a directory of another
+      // package (directorySources), its exclusion a rebased path, and the
+      // file's own _compile_platform template, whose mapping stands for
+      // its body.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/wsdk/BUILD.gn': r'''
+template("_compile_platform") {
+  action(target_name) {
+    script = "//build/gn_run_binary.py"
+    outputs = [ invoker.output_dill ]
+    args = [ invoker.kernel_target ]
+  }
+}
+sdk_rewriter("web_engine_library") {
+  library_name = "engine"
+  api_file = "engine.dart"
+  input_dir = "//flutter/lib/web_ui/lib/src/engine/"
+  output_dir = "$root_out_dir/flutter_web_sdk/lib/_engine/"
+  exclude_pattern = rebase_path("//flutter/lib/web_ui/lib/src/engine/skwasm")
+}
+_compile_platform("dart2js_full") {
+  kernel_target = "dart2js"
+  summary_only = false
+  output_dill = "$root_out_dir/flutter_web_sdk/kernel/dart2js_platform.dill"
+  null_environment = true
+}
+''',
+        'flutter/wsdk/engine.dart': '',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(
+          tree,
+          '//flutter/wsdk/BUILD.gn',
+          templates: <String>{'sdk_rewriter', '_compile_platform'},
+        ),
+        gnPackage: '//flutter/wsdk',
+        tree: tree,
+      );
+      expect(
+        output,
+        contains(r'''
+sdk_rewriter(
+    name = "web_engine_library",
+    srcs = ["//engine/src/flutter:web_engine_sources"],
+    api_file = "engine.dart",
+    exclude = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm",
+    input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine",
+    library_name = "engine",
+    output_dir = "$root_out_dir/flutter_web_sdk/lib/_engine/",
+)
+
+web_platform_dill(
+    name = "dart2js_full",
+    kernel_target = "dart2js",
+    null_environment = True,
+    output_dill = "$root_out_dir/flutter_web_sdk/kernel/dart2js_platform.dill",
+    summary_only = False,
+)
+'''),
+      );
+    });
+
     test('a copy in a wasm toolchain whose source is not an output of its module is an error', () {
       final GnSourceTree tree = sourceTree(<String, String>{
         'flutter/ck/BUILD.gn': r'''

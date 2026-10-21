@@ -1,0 +1,11 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @esbuild: the prebuilt esbuild DEPS installs under
+# engine/src/flutter/prebuilts/<host>/esbuild (CIPD flutter/tools/esbuild),
+# which build/esbuild/esbuild.gni runs to bundle flutter.js.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["bin/esbuild"])

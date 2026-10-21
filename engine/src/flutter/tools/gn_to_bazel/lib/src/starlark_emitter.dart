@@ -1183,6 +1183,8 @@ final class _Emitter {
           }
           rule.scalars[argument.attribute] =
               '"${_packageLabel(directory, variable.assignments.first.location)}"';
+        case TemplateArgumentKind.sourceDirectory:
+          _sourceDirectoryInto(rule, argument, variable);
         case TemplateArgumentKind.buildPath:
           final String? path = _singleString(variable);
           if (path == null) {
@@ -1807,6 +1809,50 @@ final class _Emitter {
       out.write(i.isEven ? parts[i] : _pathToken(parts[i], location, rule, declared, target));
     }
     return out.toString();
+  }
+
+  /// A source directory argument (web_sdk's `input_dir`, `exclude_pattern`):
+  /// the directory's path relative to the repository root, and, where the
+  /// mapping names an inputs attribute, the filegroup over its files
+  /// ([directorySources]) there.
+  void _sourceDirectoryInto(_Rule rule, TemplateArgument argument, GnVariable variable) {
+    final GnLocation location = variable.assignments.first.location;
+    final String? raw = _singleString(variable);
+    if (raw == null) {
+      throw GnError(location, '${variable.name} has no value');
+    }
+    String path = _unmarked(raw);
+    if (path.contains(rebasedPathMarker)) {
+      throw GnError(location, 'a rebased path inside a directory name: $raw');
+    }
+    if (path.length > 2 && path.endsWith('/')) {
+      path = path.substring(0, path.length - 1);
+    }
+    final String absolute = _gnPath(path);
+    final DirectorySource? directory = directorySources[absolute];
+    final String? inputs = argument.inputs;
+    if (inputs != null) {
+      if (directory == null) {
+        throw GnError(
+          location,
+          '${variable.name} names $absolute, a directory directorySources does not list '
+          '(a filegroup over its files is needed)',
+        );
+      }
+      rule.list(inputs).addUnique(Condition.always, _Item(_localLabel(directory.label)));
+    }
+    rule.scalars[argument.attribute] = _starlarkString(
+      directory?.root ?? _repositoryPath(absolute, location),
+    );
+  }
+
+  /// A GN directory as a path relative to the output repository's root.
+  String _repositoryPath(String absolute, GnLocation location) {
+    final String? relative = layout.relativePath(absolute);
+    if (relative == null) {
+      throw GnError(location, '$absolute is outside the output repository');
+    }
+    return relative;
   }
 
   /// copy("x") becomes a `gn_copy`: its sources as they are, GN's

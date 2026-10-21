@@ -1301,6 +1301,34 @@ const Map<String, DirectorySource> directorySources = <String, DirectorySource>{
     '@dart_sdk_linux_x64//:all_files',
     root: '',
   ),
+  // The web engine's source directories web_sdk's sdk_rewriter reads (the
+  // filegroups are the root package's appendix and third_party's BUILD):
+  // dart:ui's sources without the engine under src/, the engine without
+  // skwasm, skwasm's two halves, and the two packages of third_party.
+  '//flutter/lib/web_ui/lib': DirectorySource(
+    '//engine/src/flutter:web_ui_sources',
+    root: 'engine/src/flutter/lib/web_ui/lib',
+  ),
+  '//flutter/lib/web_ui/lib/src/engine': DirectorySource(
+    '//engine/src/flutter:web_engine_sources',
+    root: 'engine/src/flutter/lib/web_ui/lib/src/engine',
+  ),
+  '//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub': DirectorySource(
+    '//engine/src/flutter:skwasm_stub_sources',
+    root: 'engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub',
+  ),
+  '//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl': DirectorySource(
+    '//engine/src/flutter:skwasm_impl_sources',
+    root: 'engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl',
+  ),
+  '//flutter/third_party/web_test_fonts/lib/web_test_fonts': DirectorySource(
+    '//engine/src/flutter/third_party:web_test_fonts_sources',
+    root: 'engine/src/flutter/third_party/web_test_fonts/lib/web_test_fonts',
+  ),
+  '//flutter/third_party/web_locale_keymap/lib/web_locale_keymap': DirectorySource(
+    '//engine/src/flutter/third_party:web_locale_keymap_sources',
+    root: 'engine/src/flutter/third_party/web_locale_keymap/lib/web_locale_keymap',
+  ),
 };
 
 /// Starlark constants for GN references that have a Bazel-side value.
@@ -1357,6 +1385,13 @@ enum TemplateArgumentKind {
   /// A directory that names a package (`dest = "$root_gen_dir/flutter/lib/ui"`),
   /// which becomes the package's label.
   package,
+
+  /// A source directory (`input_dir = "//flutter/lib/web_ui/lib/"`, or a
+  /// `rebase_path()` of one), which becomes its path relative to the
+  /// repository root -- and, with [TemplateArgument.inputs], the filegroup
+  /// over its files ([directorySources]) in that attribute, since a rule
+  /// of another package cannot glob them.
+  sourceDirectory,
 
   /// `{ source, destination }` scopes naming an archive's entries (a
   /// zip_bundle's `files`): the macro's dictionary of destination to the
@@ -1694,6 +1729,63 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     },
     files: true,
   ),
+  // web_sdk.gni's sdk_rewriter itself (the web SDK's seven libraries): the
+  // input directory's files are the rule's srcs, from a filegroup of the
+  // package that owns them (directorySources).
+  'sdk_rewriter': TemplateMapping(
+    '//engine/src/flutter/web_sdk:web_sdk.bzl',
+    'sdk_rewriter',
+    <String, TemplateArgument>{
+      'input_dir': TemplateArgument(
+        'input_dir',
+        TemplateArgumentKind.sourceDirectory,
+        inputs: 'srcs',
+      ),
+      'exclude_pattern': TemplateArgument('exclude', TemplateArgumentKind.sourceDirectory),
+      'output_dir': TemplateArgument('output_dir', TemplateArgumentKind.buildPath),
+      'library_name': TemplateArgument('library_name', TemplateArgumentKind.scalar),
+      'api_file': TemplateArgument('api_file', TemplateArgumentKind.file),
+      'ui': TemplateArgument('ui', TemplateArgumentKind.scalar),
+      'is_public': TemplateArgument('public', TemplateArgumentKind.scalar),
+    },
+    files: true,
+  ),
+  // web_sdk/BUILD.gn's own templates over the prebuilt SDK's kernel_worker
+  // and dartdevc (the file defines them; the mappings stand for their
+  // bodies, which read the web engine libraries through the staged tree,
+  // web_sdk.bzl).
+  '_compile_platform': TemplateMapping(
+    '//engine/src/flutter/web_sdk:web_sdk.bzl',
+    'web_platform_dill',
+    <String, TemplateArgument>{
+      'kernel_target': TemplateArgument('kernel_target', TemplateArgumentKind.scalar),
+      'summary_only': TemplateArgument('summary_only', TemplateArgumentKind.scalar),
+      'null_environment': TemplateArgument('null_environment', TemplateArgumentKind.scalar),
+      'output_dill': TemplateArgument('output_dill', TemplateArgumentKind.buildPath),
+    },
+    files: true,
+  ),
+  '_compile_ddc_sdk': TemplateMapping(
+    '//engine/src/flutter/web_sdk:web_sdk.bzl',
+    'ddc_sdk',
+    <String, TemplateArgument>{'canary': TemplateArgument('canary', TemplateArgumentKind.scalar)},
+    files: true,
+  ),
+  // build/esbuild/esbuild.gni: the prebuilt esbuild over an entry point
+  // (flutter.js), which the copy of the sources it imports provides.
+  'esbuild': TemplateMapping(
+    '//engine/src/flutter/build/bazel/esbuild:esbuild.bzl',
+    'esbuild',
+    <String, TemplateArgument>{
+      'entry_point': TemplateArgument('entry_point', TemplateArgumentKind.buildPath),
+      'output_bundle': TemplateArgument('output_bundle', TemplateArgumentKind.buildPath),
+      'bundle': TemplateArgument('bundle', TemplateArgumentKind.scalar),
+      'minify': TemplateArgument('minify', TemplateArgumentKind.scalar),
+      'sourcemap': TemplateArgument('sourcemap', TemplateArgumentKind.scalar),
+      'public_deps': TemplateArgument('srcs', TemplateArgumentKind.labels),
+    },
+    files: true,
+  ),
 };
 
 /// GN actions known by the script they run, converted as a template
@@ -1771,13 +1863,25 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // sky_engine package.
     '//flutter/third_party/dart/sdk/lib/',
     '//flutter/lib/ui/dart_ui.gni',
+    // flutter.js's source list (flutter_js_source_list), which its copy and
+    // the web SDK's archive read.
+    '//flutter/lib/web_ui/flutter_js/sources.gni',
   },
   known: <String>{
     // The Dart package templates (dart_pkg); sky_engine writes its action
     // out by hand and the converter maps it by its script (scriptMappings).
     '//flutter/build/dart/rules.gni',
-    // The web SDK's templates; web_ui_ui_web_with_output is in templateMappings.
+    // The web SDK's templates (sdk_rewriter, web_ui_ui_web_with_output),
+    // in templateMappings; web_sdk.gni's dart_sdk_package_config is the
+    // rules' default.
     '//flutter/web_sdk/web_sdk.gni',
+    // The esbuild template (templateMappings); its argument is the prebuilt
+    // esbuild's path, which the rule knows.
+    '//flutter/build/esbuild/esbuild.gni',
+    // The Dart tree's dart_action templates (prebuilt_dart_action), which
+    // web_sdk.gni and web_sdk/BUILD.gn import; the templates built on them
+    // are mapped.
+    '//flutter/third_party/dart/build/dart/dart_action.gni',
     '//flutter/build/dart/dart.gni',
     '//flutter/common/config.gni',
     '//flutter/impeller/tools/shaders.gni',
