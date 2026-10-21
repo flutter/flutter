@@ -3,12 +3,85 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/third_party/canvaskit/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: canvaskit, canvaskit_group, canvaskit_chromium, canvaskit_chromium_group, canvaskit_webparagraph, canvaskit_webparagraph_group.
 
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_platform")
 
 package(default_visibility = ["//visibility:public"])
+
+# This toolchain is only to be used by canvaskit_group below.
+wasm_platform(
+    name = "canvaskit",
+    extra_toolchain_args = {
+        "skia_use_icu": True,
+        "skia_use_client_icu": False,
+        "skia_use_libjpeg_turbo_decode": True,
+        "skia_use_libpng_decode": True,
+        "skia_use_libwebp_decode": True,
+        "enable_lto": False,
+    },
+)
+
+gn_copy(
+    name = "canvaskit_group",
+    srcs = ["@skia//modules/canvaskit"],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":canvaskit",
+)
+
+# This toolchain is only to be used by canvaskit_chromium_group below.
+wasm_platform(
+    name = "canvaskit_chromium",
+    extra_toolchain_args = {
+        "skia_use_icu": False,
+        "skia_use_client_icu": True,
+        "skia_icu_bidi_third_party_dir": "//flutter/third_party/canvaskit/icu_bidi",
+        "skia_use_libjpeg_turbo_decode": False,
+        "skia_use_libpng_decode": False,
+        "skia_use_libwebp_decode": False,
+        "enable_lto": False,
+    },
+)
+
+gn_copy(
+    name = "canvaskit_chromium_group",
+    srcs = ["@skia//modules/canvaskit"],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/chromium/{{source_file_part}}"],
+    platform = ":canvaskit_chromium",
+)
+
+# This toolchain is only to be used by canvaskit_webparagraph_group below.
+wasm_platform(
+    name = "canvaskit_webparagraph",
+    extra_toolchain_args = {
+        "skia_use_icu": False,
+        "skia_use_client_icu": False,
+        "skia_use_bidi": True,
+        "skia_canvaskit_enable_bidi": True,
+        "skia_icu_bidi_third_party_dir": "//flutter/third_party/canvaskit/icu_bidi",
+        "skia_enable_skparagraph": False,
+        "skia_canvaskit_enable_paragraph": False,
+        "skia_enable_skshaper": False,
+        "skia_use_harfbuzz": False,
+        "skia_use_freetype": False,
+        "flutter_use_freetype_woff2": False,
+        "skia_enable_fontmgr_custom_embedded": False,
+        "skia_enable_fontmgr_custom_empty": False,
+        "skia_canvaskit_enable_font": False,
+        "skia_canvaskit_enable_alias_font": False,
+        "skia_use_libjpeg_turbo_decode": False,
+        "skia_use_libpng_decode": False,
+        "skia_use_libwebp_decode": False,
+        "enable_lto": False,
+    },
+)
+
+gn_copy(
+    name = "canvaskit_webparagraph_group",
+    srcs = ["@skia//modules/canvaskit"],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/webparagraph/{{source_file_part}}"],
+    platform = ":canvaskit_webparagraph",
+)
 
 wasm_platform(
     name = "skwasm",

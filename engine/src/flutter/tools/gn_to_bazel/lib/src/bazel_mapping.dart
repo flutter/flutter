@@ -925,6 +925,21 @@ const List<String> webVariantArguments = <String>[
   'skia_use_no_png_encode',
   'skia_use_libpng_encode',
   'skia_enable_threadlocal_strikecache',
+  // The CanvasKit toolchains' (the WebParagraph variant turns the text
+  // stack off: no paragraph, shaper, HarfBuzz or FreeType, bidi from ICU's
+  // library alone).
+  'skia_use_bidi',
+  'skia_canvaskit_enable_bidi',
+  'skia_enable_skparagraph',
+  'skia_canvaskit_enable_paragraph',
+  'skia_enable_skshaper',
+  'skia_use_harfbuzz',
+  'skia_use_freetype',
+  'flutter_use_freetype_woff2',
+  'skia_enable_fontmgr_custom_embedded',
+  'skia_enable_fontmgr_custom_empty',
+  'skia_canvaskit_enable_font',
+  'skia_canvaskit_enable_alias_font',
 ];
 
 final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<String, String>{
@@ -1373,6 +1388,31 @@ final class TemplateArgument {
   final String? appliedUnder;
 }
 
+/// The arguments of a link in a wasm toolchain (wasm_lib, and an executable
+/// with `output_extension = "js"`), shared by their mappings.
+const Map<String, TemplateArgument> _wasmLinkArguments = <String, TemplateArgument>{
+  'sources': TemplateArgument('srcs', TemplateArgumentKind.files),
+  'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+  'public_configs': TemplateArgument('deps', TemplateArgumentKind.configs),
+  'defines': TemplateArgument('defines', TemplateArgumentKind.strings),
+  'cflags': TemplateArgument('copts', TemplateArgumentKind.strings),
+  // The ldflags name files (`--js-library` and its JavaScript library,
+  // `--pre-js` and its script, by rebase_path()), which the rule reads as
+  // link_inputs.
+  'ldflags': TemplateArgument('linkopts', TemplateArgumentKind.pathStrings, inputs: 'link_inputs'),
+  'inputs': TemplateArgument('link_inputs', TemplateArgumentKind.files),
+  'export_name': TemplateArgument('export_name', TemplateArgumentKind.scalar),
+  'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+  'visibility': TemplateArgument('visibility', TemplateArgumentKind.ignored),
+};
+
+/// The key of [templateMappings] for an `executable()` whose
+/// `output_extension` is `"js"`: a link in a wasm toolchain, as GN's wasm
+/// toolchain treats any executable (its link_outputs are the .js, .wasm and
+/// .js.symbols), which the emitter converts through the mapping rather than
+/// as a cc_binary.
+const String wasmExecutableRule = 'executable(output_extension = "js")';
+
 /// The `.gni` templates the converter knows, with the Bazel macro for each
 /// (`load` label and symbol) and the arguments it accepts.
 final class TemplateMapping {
@@ -1555,24 +1595,25 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   'wasm_lib': TemplateMapping(
     '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl',
     'wasm_module',
+    _wasmLinkArguments,
+    files: true,
+  ),
+  // An executable() in a wasm toolchain with `output_extension = "js"`
+  // (CanvasKit's, flutter/skia/modules/canvaskit): the same link without
+  // wasm_lib's flags, which the target passes itself. Not a GN template:
+  // the emitter maps such an executable here ([wasmExecutableMapping]).
+  wasmExecutableRule: TemplateMapping(
+    '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl',
+    'wasm_executable',
     <String, TemplateArgument>{
-      'sources': TemplateArgument('srcs', TemplateArgumentKind.files),
-      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
-      'public_configs': TemplateArgument('deps', TemplateArgumentKind.configs),
-      'defines': TemplateArgument('defines', TemplateArgumentKind.strings),
-      'cflags': TemplateArgument('copts', TemplateArgumentKind.strings),
-      // The ldflags name files (`--js-library` and its JavaScript library,
-      // by rebase_path()), which the rule reads as link_inputs.
-      'ldflags': TemplateArgument(
-        'linkopts',
-        TemplateArgumentKind.pathStrings,
-        inputs: 'link_inputs',
-      ),
-      'inputs': TemplateArgument('link_inputs', TemplateArgumentKind.files),
-      'export_name': TemplateArgument('export_name', TemplateArgumentKind.scalar),
-      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
-      'visibility': TemplateArgument('visibility', TemplateArgumentKind.ignored),
+      ..._wasmLinkArguments,
+      'output_name': TemplateArgument('output_name', TemplateArgumentKind.scalar),
+      // What marks the executable as a wasm one; the rule's outputs are
+      // the toolchain's (.js, .wasm, .js.symbols).
+      'output_extension': TemplateArgument('output_extension', TemplateArgumentKind.ignored),
+      'check_includes': TemplateArgument('check_includes', TemplateArgumentKind.ignored),
     },
+    files: true,
   ),
   'impeller_shaders': TemplateMapping(
     '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
@@ -1814,18 +1855,24 @@ Assumptions generationAssumptions() {
     // Skia's arguments tools/gn passes for a Linux host and for the web
     // alike (or for the host alone, where skia.gni's default would differ
     // from it: skia_use_dng_sdk, skia_use_vma), and whose default would not
-    // give the web build its value (skia_use_webgpu, skia_use_freetype).
+    // give the web build its value (skia_use_webgpu).
     // The Skia tree is converted when its repository is fetched, under
     // these. Not here: the arguments whose skia.gni default already yields
     // both builds' values (skia_gl_standard, skia_use_gl, skia_use_wuffs,
     // the Rust PNG codecs), which stay derivations.
     'skia_enable_pdf': const GnBoolValue(false),
     'skia_use_dng_sdk': const GnBoolValue(false),
-    'skia_use_freetype': const GnBoolValue(true),
     'skia_use_vma': const GnBoolValue(false),
     'skia_use_webgpu': const GnBoolValue(false),
     'skia_use_x11': const GnBoolValue(false),
     'skia_use_xps': const GnBoolValue(false),
+    // Not here either: CanvasKit's arguments (modules/canvaskit/
+    // canvaskit.gni), read by the module's file alone (flutter/skia/
+    // modules/canvaskit): the ones a toolchain sets are settings
+    // (webVariantArguments), the one whose default tools/gn overrides for
+    // the web is a formula (perTargetOsArguments:
+    // skia_canvaskit_enable_webgl), and the rest keep canvaskit.gni's
+    // defaults, which are the web build's values.
     // Not here: the arguments the wasm toolchains set per variant
     // (webVariantArguments: skia_use_icu, the codec decoders, ...), which
     // are build settings with the host's defaults. The one path among
@@ -1857,9 +1904,9 @@ const Map<String, ({bool host, bool web})> perTargetOsArguments = <String, ({boo
   'skia_use_no_webp_encode': (host: false, web: true),
   'skia_enable_skottie': (host: true, web: false),
   'skia_enable_fontmgr_custom_directory': (host: true, web: false),
-  // The engine's own: FreeType's WOFF2 support (over brotli), which the web
-  // build turns on.
-  'flutter_use_freetype_woff2': (host: false, web: true),
+  // CanvasKit's WebGL binding (canvaskit.gni's default is off; tools/gn
+  // turns it on for the web), read by the module's file alone.
+  'skia_canvaskit_enable_webgl': (host: false, web: true),
 };
 
 /// Which assumptions describe the Linux x64 host build (the values
@@ -1957,7 +2004,6 @@ Assumptions linuxHostAssumptions() {
     // arguments the web build passes differently (perTargetOsArguments), so
     // that the generation scope's formulas can be held against the host's
     // values by name.
-    'skia_use_freetype': GnBoolValue(true),
     'skia_use_webgpu': GnBoolValue(false),
     'skia_use_libjpeg_turbo_encode': GnBoolValue(true),
     'skia_use_no_jpeg_encode': GnBoolValue(false),
@@ -1965,7 +2011,7 @@ Assumptions linuxHostAssumptions() {
     'skia_use_no_webp_encode': GnBoolValue(false),
     'skia_enable_skottie': GnBoolValue(true),
     'skia_enable_fontmgr_custom_directory': GnBoolValue(true),
-    'flutter_use_freetype_woff2': GnBoolValue(false),
+    'skia_canvaskit_enable_webgl': GnBoolValue(false),
     'skia_icu_bidi_third_party_dir': GnStringValue('//flutter/third_party/canvaskit/icu_bidi'),
   });
 }

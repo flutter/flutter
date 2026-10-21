@@ -32,6 +32,22 @@ _SETTINGS = [
     ("skia_use_no_png_encode", False),
     ("skia_use_libpng_encode", True),
     ("skia_enable_threadlocal_strikecache", False),
+    # The CanvasKit toolchains' (the WebParagraph variant turns the text
+    # stack off); the defaults are skia.gni's and canvaskit.gni's on a Linux
+    # host, flutter_use_freetype_woff2's FreeType's. The wasm platform sets
+    # flutter_use_freetype_woff2 for the web (tools/gn's --web).
+    ("skia_use_bidi", False),
+    ("skia_canvaskit_enable_bidi", False),
+    ("skia_enable_skparagraph", True),
+    ("skia_canvaskit_enable_paragraph", True),
+    ("skia_enable_skshaper", True),
+    ("skia_use_harfbuzz", True),
+    ("skia_use_freetype", True),
+    ("flutter_use_freetype_woff2", False),
+    ("skia_enable_fontmgr_custom_embedded", True),
+    ("skia_enable_fontmgr_custom_empty", True),
+    ("skia_canvaskit_enable_font", True),
+    ("skia_canvaskit_enable_alias_font", True),
 ]
 
 [
