@@ -2661,6 +2661,56 @@ TEST(FlutterTextInputPluginTest, FirstResponderIsCorrect) {
   ASSERT_TRUE(window.firstResponder == viewController.flutterView);
 }
 
+TEST(FlutterTextInputPluginTest, HidesSystemInsertionIndicatorWhenShown) {
+  FlutterEngine* engine = CreateTestEngine();
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [viewController loadView];
+
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(flutter::kFlutterImplicitViewId),
+  };
+  [engine.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                         arguments:@[ @(1), setClientConfig ]]
+                result:^(id){
+                }];
+
+  [engine.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show" arguments:@[]]
+                result:^(id){
+                }];
+
+  ASSERT_TRUE(window.firstResponder == engine.textInputPlugin);
+  EXPECT_TRUE([engine.textInputPlugin.insertionPointColor isEqual:NSColor.clearColor]);
+
+  if (@available(macOS 14.0, *)) {
+    BOOL sawInsertionIndicator = NO;
+    for (NSView* view in engine.textInputPlugin.subviews) {
+      if ([view isKindOfClass:[NSTextInsertionIndicator class]]) {
+        sawInsertionIndicator = YES;
+        EXPECT_EQ(((NSTextInsertionIndicator*)view).displayMode,
+                  NSTextInsertionIndicatorDisplayModeHidden);
+      }
+    }
+    // AppKit usually attaches the indicator when the text view becomes first
+    // responder; if it is present it must stay hidden.
+    if (!sawInsertionIndicator) {
+      NSTextInsertionIndicator* indicator =
+          [[NSTextInsertionIndicator alloc] initWithFrame:NSMakeRect(0, 0, 2, 16)];
+      [engine.textInputPlugin addSubview:indicator];
+      EXPECT_EQ(indicator.displayMode, NSTextInsertionIndicatorDisplayModeHidden);
+    }
+  }
+}
+
 TEST(FlutterTextInputPluginTest, HasZeroSizeAndClipsToBounds) {
   id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));

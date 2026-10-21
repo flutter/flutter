@@ -362,6 +362,11 @@ static char markerKey;
 @property(readwrite, nonatomic) NSString* customRunLoopMode;
 @property(nonatomic) NSTextInputContext* textInputContext;
 
+/**
+ * Hides AppKit's system caret. Flutter draws its own caret in the framework.
+ */
+- (void)hideSystemInsertionIndicator;
+
 @end
 
 #pragma mark - FlutterTextInputPlugin
@@ -395,6 +400,11 @@ static char markerKey;
     // an affine transform.
     _editableTransform = CATransform3D();
     _caretRect = CGRectNull;
+
+    // Flutter paints the caret. Keep the AppKit insertion point invisible so it
+    // cannot drive continuous animation while this zero-size field editor is
+    // first responder (see hideSystemInsertionIndicator).
+    self.insertionPointColor = [NSColor clearColor];
   }
   return self;
 }
@@ -406,11 +416,43 @@ static char markerKey;
   return [_currentViewController.view.window firstResponder] == self;
 }
 
+- (BOOL)becomeFirstResponder {
+  BOOL result = [super becomeFirstResponder];
+  [self hideSystemInsertionIndicator];
+  return result;
+}
+
+- (void)didAddSubview:(NSView*)subview {
+  [super didAddSubview:subview];
+  // AppKit may attach NSTextInsertionIndicator after becomeFirstResponder
+  // returns, or recreate it while editing.
+  if (@available(macOS 14.0, *)) {
+    if ([subview isKindOfClass:[NSTextInsertionIndicator class]]) {
+      ((NSTextInsertionIndicator*)subview).displayMode = NSTextInsertionIndicatorDisplayModeHidden;
+    }
+  }
+}
+
 - (void)dealloc {
   [_channel setMethodCallHandler:nil];
 }
 
 #pragma mark - Private
+
+- (void)hideSystemInsertionIndicator {
+  // On macOS 14+, NSTextView owns an animated NSTextInsertionIndicator. Leaving
+  // it active on this hidden zero-size field editor breaks Flutter's frame
+  // presentation pacing and causes severe trackpad scroll jank while a
+  // TextField is focused: https://github.com/flutter/flutter/issues/194947
+  self.insertionPointColor = [NSColor clearColor];
+  if (@available(macOS 14.0, *)) {
+    for (NSView* view in self.subviews) {
+      if ([view isKindOfClass:[NSTextInsertionIndicator class]]) {
+        ((NSTextInsertionIndicator*)view).displayMode = NSTextInsertionIndicatorDisplayModeHidden;
+      }
+    }
+  }
+}
 
 - (void)resignAndRemoveFromSuperview {
   if (self.superview != nil) {
