@@ -11,7 +11,6 @@ import com.android.build.api.variant.Variant
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
-import org.gradle.kotlin.dsl.extra
 
 /**
  * Warns or errors on version ranges of dependencies required to build a Flutter Android app.
@@ -30,11 +29,6 @@ object DependencyVersionChecker {
     @VisibleForTesting internal const val KGP_NAME: String = "Kotlin"
 
     @VisibleForTesting internal const val MIN_SDK_NAME: String = "minimum Android SDK"
-
-    // String constant that defines the name of the Gradle extra property that we set when
-    // detecting that the project is using versions outside of Flutter's support range.
-    // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-project/index.html#-2107180640%2FProperties%2F-1867656071.
-    @VisibleForTesting internal const val OUT_OF_SUPPORT_RANGE_PROPERTY = "usesUnsupportedDependencyVersions"
 
     // The task prefix for assemble builds.
     @VisibleForTesting
@@ -124,8 +118,6 @@ object DependencyVersionChecker {
      * we treat it as within the range for the purpose of this check.
      */
     @JvmStatic fun checkDependencyVersions(project: Project) {
-        project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false)
-
         checkGradleVersion(VersionFetcher.getGradleVersion(project), project)
         checkJavaVersion(VersionFetcher.getJavaVersion(), project)
 
@@ -157,21 +149,17 @@ object DependencyVersionChecker {
     private fun configureMinSdkCheck(project: Project) {
         val androidComponents =
             project.extensions.findByType(AndroidComponentsExtension::class.java)
+        val rootDirPath = project.rootDir.path
 
         androidComponents?.onVariants(
             androidComponents.selector().all()
         ) {
             val taskName = generateMinSdkCheckTaskName(it)
+            val minSdkVersion = getMinSdkVersion(it)
             val minSdkCheckTask =
                 project.tasks.register(taskName) {
                     doLast {
-                        val minSdkVersion = getMinSdkVersion(it)
-                        try {
-                            checkMinSdkVersion(minSdkVersion, project.rootDir.path, project.logger)
-                        } catch (e: DependencyValidationException) {
-                            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
-                            throw e
-                        }
+                        checkMinSdkVersion(minSdkVersion, rootDirPath, logger)
                     }
                 }
 
@@ -248,7 +236,6 @@ object DependencyVersionChecker {
                     errorGradleVersion.toString(),
                     getPotentialGradleFix(project.rootDir.path)
                 )
-            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
             throw DependencyValidationException(errorMessage)
         } else if (version < warnGradleVersion) {
             val warnMessage: String =
@@ -274,7 +261,6 @@ object DependencyVersionChecker {
                     errorJavaVersion.toString(),
                     POTENTIAL_JAVA_FIX
                 )
-            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
             throw DependencyValidationException(errorMessage)
         } else if (version < warnJavaVersion) {
             val warnMessage: String =
@@ -300,7 +286,6 @@ object DependencyVersionChecker {
                     firstUnsupportedAGPMajorVersion,
                     getPotentialAGPFix(project.rootDir.path)
                 )
-            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
             throw DependencyValidationException(errorMessage)
         }
         if (androidPluginVersion < errorAGPVersion) {
@@ -311,7 +296,6 @@ object DependencyVersionChecker {
                     errorAGPVersion.toString(),
                     getPotentialAGPFix(project.rootDir.path)
                 )
-            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
             throw DependencyValidationException(errorMessage)
         } else if (androidPluginVersion < warnAGPVersion) {
             val warnMessage: String =
@@ -337,7 +321,6 @@ object DependencyVersionChecker {
                     errorKGPVersion.toString(),
                     getPotentialKGPFix(project.rootDir.path)
                 )
-            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
             throw DependencyValidationException(errorMessage)
         } else if (version < warnKGPVersion) {
             val warnMessage: String =
@@ -379,7 +362,7 @@ object DependencyVersionChecker {
     }
 }
 
-// Custom error for when the dependency_version_checker.kts script finds a dependency out of
+// Custom error for when DependencyVersionChecker finds a dependency out of
 // the defined support range.
 @VisibleForTesting internal class DependencyValidationException(
     message: String? = null,
