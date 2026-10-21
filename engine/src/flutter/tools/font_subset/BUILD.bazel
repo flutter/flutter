@@ -34,7 +34,12 @@ alias(
 zip_bundle(
     name = "font_subset",
     files = {"font-subset": ":_font-subset"},
-    output = "linux-x64/font-subset.zip",
+    output = select({
+        "//engine/src/flutter/common:platform_linux_arm64": "linux-arm64/font-subset.zip",
+        "//engine/src/flutter/common:platform_linux_x64": "linux-x64/font-subset.zip",
+        "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/font-subset.zip",
+        "//conditions:default": None,
+    }),
 )
 
 # What GN has no words for; maintained in the converter's manifest

@@ -82,6 +82,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/renderer/testing:mocks
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":core",
         "//engine/src:include_root",

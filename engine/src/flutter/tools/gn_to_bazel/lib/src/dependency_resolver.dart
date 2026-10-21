@@ -27,11 +27,14 @@
 /// owner's conversion checks the same reading against its own
 /// (`_checkPropagatedFlags`).
 ///
-/// A dependency whose file is absent or does not evaluate (the Dart
-/// runtime's, abseil's: their imports are outside the converter's policy)
-/// hands nothing, as far as the converter can tell; none of those carries
-/// compiler flags in a public config today, and the compile-command parity
-/// check (tool/compile_command_diff.py) is the backstop.
+/// A dependency whose file is absent or belongs to a tree the converter
+/// does not read (the Dart runtime's, abseil's: their imports are outside
+/// the converter's policy) hands nothing, as far as the converter can tell;
+/// none of those carries compiler flags in a public config today, and the
+/// compile-command parity check (tool/compile_command_diff.py) is the
+/// backstop. A file within the policy that does not evaluate is an error:
+/// the converter reads it for its conversion too, and a regression there
+/// must not silently take a dependency's flags away.
 ///
 /// The same evaluations answer [DependencyResolver.targetOf]: the target a
 /// label names, for a `zip_bundle` whose `files` name a build output
@@ -156,8 +159,15 @@ final class DependencyResolver {
           tree: tree,
           importPolicy: engineImportPolicy,
         );
-      } on GnError {
-        // A file the converter cannot read says nothing.
+      } on GnError catch (e) {
+        // A file of a tree the converter does not read (one importing a
+        // file outside the import policy) says nothing. Any other error is
+        // the converter's own -- a file it read yesterday and cannot today
+        // would otherwise hand nothing, silently (glslang's -Wno-conversion
+        // went missing that way once) -- and fails the conversion.
+        if (!e.isUnreadImport) {
+          rethrow;
+        }
         return null;
       }
     });

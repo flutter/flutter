@@ -4,6 +4,7 @@
 
 # Generated from //flutter/shell/platform/android/external_view_embedder/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
@@ -25,7 +26,7 @@ cc_library(
         "surface_pool.h",
     ],
     copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/flow
+        "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
@@ -34,7 +35,12 @@ cc_library(
         "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -66,17 +72,26 @@ flutter_cc_test(
         "surface_pool_unittests.cc",
     ],
     copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/flow
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
-        "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
-        "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
-        "-Wno-nullability-completeness",  # from //flutter/shell/gpu:gpu_surface_gl
-        "-Wno-suggest-destructor-override",  # from //flutter/shell/gpu:gpu_surface_gl
-        "-Wno-suggest-override",  # from //flutter/shell/gpu:gpu_surface_gl
-        "-Wno-unused-private-field",  # from //flutter/shell/gpu:gpu_surface_gl
-        "-Wno-unused-variable",  # from //flutter/shell/gpu:gpu_surface_gl
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-nullability-completeness",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-suggest-destructor-override",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-suggest-override",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-unused-private-field",  # from //flutter/shell/gpu:gpu_surface_gl
+            "-Wno-unused-variable",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":external_view_embedder",
@@ -91,5 +106,14 @@ flutter_cc_test(
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:dart",
         "//engine/src/flutter/testing:skia",
+    ],
+)
+
+# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
     ],
 )

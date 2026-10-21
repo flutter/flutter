@@ -4,6 +4,7 @@
 
 # Generated from //flutter/shell/testing/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends")
@@ -12,10 +13,12 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "testing",
-    deps = [
-        ":flutter_tester",
-        ":flutter_tester_opengles",  # current_toolchain == host_toolchain
-    ],
+    deps = [":flutter_tester"] + select({
+        "//engine/src/flutter/build/bazel:host_toolchain": [
+            ":flutter_tester_opengles",  # current_toolchain == host_toolchain
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -23,7 +26,12 @@ cc_library(
     deps = [
         "//engine/src/flutter/shell/gpu:gpu_surface_software",  # invoker.enable_software
         "//engine/src/flutter/shell/gpu:gpu_surface_vulkan",  # invoker.enable_vulkan
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "//engine/src/flutter/shell/gpu:gpu_surface_metal",  # invoker.enable_metal
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -31,7 +39,12 @@ cc_library(
     defines = [
         "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
         "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "SHELL_ENABLE_METAL",  # invoker.enable_metal
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -54,38 +67,108 @@ cc_binary(
         "tester_context.h",
         "tester_context_gles_factory.h",
         "tester_context_mtl_factory.h",
-        "tester_context_vk_factory.cc",  # impeller_supports_rendering
         "tester_context_vk_factory.h",
         "tester_main.cc",
-    ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/flow
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
-        "-Wno-deprecated-copy",  # from //flutter/impeller
-        "-Wno-implicit-fallthrough",  # from //flutter/impeller
-        "-Wno-nullability-completeness",  # from //flutter/impeller
-        "-Wno-suggest-destructor-override",  # from //flutter/impeller
-        "-Wno-suggest-override",  # from //flutter/impeller
-        "-Wno-unused-private-field",  # from //flutter/impeller
-        "-Wno-unused-variable",  # from //flutter/impeller
-    ],
-    local_defines = FLUTTER_LOCAL_DEFINES + [
-        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
-        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "tester_context_vk_factory.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "tester_context_vk_factory.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "tester_context_vk_factory.cc",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal": [
+            "tester_context_mtl_factory.mm",  # impeller_supports_rendering && shell_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :tester_gpu_configuration
+            "-Wno-deprecated-copy",  # from :tester_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :tester_gpu_configuration
+            "-Wno-nullability-completeness",  # from :tester_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :tester_gpu_configuration
+            "-Wno-suggest-override",  # from :tester_gpu_configuration
+            "-Wno-unused-private-field",  # from :tester_gpu_configuration
+            "-Wno-unused-variable",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+            "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+            "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+            "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal": [
+            "SHELL_ENABLE_METAL",  # invoker.enable_metal
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
-        ":tester_gpu_configuration",  # impeller_supports_rendering
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter:export_dynamic_test_symbols",
         "//engine/src/flutter/assets",
         "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
         "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
-        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",  # impeller_supports_rendering
         "//engine/src/flutter/common",
         "//engine/src/flutter/flow",
         "//engine/src/flutter/fml",
-        "//engine/src/flutter/impeller",  # impeller_supports_rendering
         "//engine/src/flutter/lib/snapshot",
         "//engine/src/flutter/shell/common",
         "//engine/src/flutter/shell/gpu:gpu_surface_software",
@@ -93,7 +176,24 @@ cc_binary(
         "@abseil-cpp//absl/base:no_destructor",
         "@abseil_cpp_tree//:root_includes",
         "@skia",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            ":tester_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            ":tester_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            ":tester_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # SwiftShader, its ICD manifest and the Vulkan loader, next to the
@@ -101,35 +201,87 @@ cc_binary(
 # ANGLE).
 flutter_gpu_test_backends(
     name = "gpu_test_backends",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_toolchain": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 cc_binary(
     name = "flutter_tester_opengles",
     srcs = [
         "tester_context.h",
-        "tester_context_gles_factory.cc",  # impeller_supports_rendering
         "tester_context_gles_factory.h",
         "tester_context_mtl_factory.h",
         "tester_context_vk_factory.h",
         "tester_main.cc",
-    ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/flow
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
-        "-Wno-deprecated-copy",  # from //flutter/impeller
-        "-Wno-implicit-fallthrough",  # from //flutter/impeller
-        "-Wno-nullability-completeness",  # from //flutter/impeller
-        "-Wno-suggest-destructor-override",  # from //flutter/impeller
-        "-Wno-suggest-override",  # from //flutter/impeller
-        "-Wno-unused-private-field",  # from //flutter/impeller
-        "-Wno-unused-variable",  # from //flutter/impeller
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "tester_context_gles_factory.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "tester_context_gles_factory.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "tester_context_gles_factory.cc",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :tester_opengles_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :tester_opengles_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :tester_opengles_gpu_configuration
+            "-Wno-deprecated-copy",  # from :tester_opengles_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :tester_opengles_gpu_configuration
+            "-Wno-nullability-completeness",  # from :tester_opengles_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :tester_opengles_gpu_configuration
+            "-Wno-suggest-override",  # from :tester_opengles_gpu_configuration
+            "-Wno-unused-private-field",  # from :tester_opengles_gpu_configuration
+            "-Wno-unused-variable",  # from :tester_opengles_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }),
     data = [":gpu_test_backends"],
-    local_defines = FLUTTER_LOCAL_DEFINES + [
-        "SHELL_ENABLE_GL",  # invoker.enable_gl
-    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "SHELL_ENABLE_GL",  # invoker.enable_gl
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "SHELL_ENABLE_GL",  # invoker.enable_gl
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "SHELL_ENABLE_GL",  # invoker.enable_gl
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_toolchain": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
-        ":tester_opengles_gpu_configuration",  # impeller_supports_rendering
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter:export_dynamic_test_symbols",
@@ -139,16 +291,92 @@ cc_binary(
         "//engine/src/flutter/common",
         "//engine/src/flutter/flow",
         "//engine/src/flutter/fml",
-        "//engine/src/flutter/impeller",  # impeller_supports_rendering
         "//engine/src/flutter/lib/snapshot",
         "//engine/src/flutter/shell/common",
         "//engine/src/flutter/shell/gpu:gpu_surface_software",
-        "//engine/src/flutter/testing:test_swangle_utils",  # impeller_supports_rendering
-        "//engine/src/flutter/testing:test_swiftshader_utils",  # impeller_supports_rendering
         "//engine/src/flutter/third_party/tonic",
         "@abseil-cpp//absl/base:no_destructor",
-        "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
         "@abseil_cpp_tree//:root_includes",
         "@skia",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            ":tester_opengles_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/testing:test_swangle_utils",  # impeller_supports_rendering
+            "//engine/src/flutter/testing:test_swiftshader_utils",  # impeller_supports_rendering
+            "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            ":tester_opengles_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/testing:test_swangle_utils",  # impeller_supports_rendering
+            "//engine/src/flutter/testing:test_swiftshader_utils",  # impeller_supports_rendering
+            "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            ":tester_opengles_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/testing:test_swangle_utils",  # impeller_supports_rendering
+            "//engine/src/flutter/testing:test_swiftshader_utils",  # impeller_supports_rendering
+            "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "//engine/src/flutter/shell:enable_metal",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_vulkan",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_shell_enable_vulkan",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `shell_enable_metal && impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
     ],
 )

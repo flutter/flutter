@@ -25,7 +25,12 @@ cc_library(
         "-Wno-unused-private-field",  # from //flutter/third_party/vulkan_memory_allocator
         "-Wno-unused-variable",  # from //flutter/third_party/vulkan_memory_allocator
     ],
-    local_defines = FLUTTER_LOCAL_DEFINES,
+    local_defines = FLUTTER_LOCAL_DEFINES + select({
+        "//engine/src/flutter/flutter_vma:without_stl_shared_mutex": [
+            "VMA_USE_STL_SHARED_MUTEX=0",  # disable_vma_stl_shared_mutex
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter:config",

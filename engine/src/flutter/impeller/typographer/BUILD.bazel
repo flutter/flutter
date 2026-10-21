@@ -64,6 +64,10 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter/display_list/testing:display_list_testing",

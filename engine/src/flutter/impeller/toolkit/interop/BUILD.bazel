@@ -5,6 +5,7 @@
 # Generated from //flutter/impeller/toolkit/interop/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: example_mtl.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:cc_static_library.bzl", "cc_static_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
@@ -94,17 +95,20 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from ../../renderer/backend
-        "-Wno-c++98-compat-extra-semi",  # from ../../renderer/backend
-        "-Wno-deprecated-copy",  # from ../../renderer/backend
-        "-Wno-implicit-fallthrough",  # from ../../renderer/backend
-        "-Wno-nullability-completeness",  # from ../../renderer/backend
-        "-Wno-suggest-destructor-override",  # from ../../renderer/backend
-        "-Wno-suggest-override",  # from ../../renderer/backend
-        "-Wno-unused-private-field",  # from ../../renderer/backend
-        "-Wno-unused-variable",  # from ../../renderer/backend
-    ],
+    ] + FLUTTER_COPTS + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from ../../renderer/backend
+            "-Wno-c++98-compat-extra-semi",  # from ../../renderer/backend
+            "-Wno-deprecated-copy",  # from ../../renderer/backend
+            "-Wno-implicit-fallthrough",  # from ../../renderer/backend
+            "-Wno-nullability-completeness",  # from ../../renderer/backend
+            "-Wno-suggest-destructor-override",  # from ../../renderer/backend
+            "-Wno-suggest-override",  # from ../../renderer/backend
+            "-Wno-unused-private-field",  # from ../../renderer/backend
+            "-Wno-unused-variable",  # from ../../renderer/backend
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":embedded_icu_data",
@@ -128,17 +132,46 @@ cc_library(
     srcs = ["impeller.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from :interop_base
-        "-Wno-c++98-compat-extra-semi",  # from :interop_base
-        "-Wno-deprecated-copy",  # from :interop_base
-        "-Wno-implicit-fallthrough",  # from :interop_base
-        "-Wno-nullability-completeness",  # from :interop_base
-        "-Wno-suggest-destructor-override",  # from :interop_base
-        "-Wno-suggest-override",  # from :interop_base
-        "-Wno-unused-private-field",  # from :interop_base
-        "-Wno-unused-variable",  # from :interop_base
-    ],
+    ] + FLUTTER_COPTS + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :interop_base
+            "-Wno-c++98-compat-extra-semi",  # from :interop_base
+            "-Wno-deprecated-copy",  # from :interop_base
+            "-Wno-implicit-fallthrough",  # from :interop_base
+            "-Wno-nullability-completeness",  # from :interop_base
+            "-Wno-suggest-destructor-override",  # from :interop_base
+            "-Wno-suggest-override",  # from :interop_base
+            "-Wno-unused-private-field",  # from :interop_base
+            "-Wno-unused-variable",  # from :interop_base
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from backend
+            "-Wno-c++98-compat-extra-semi",  # from backend
+            "-Wno-deprecated-copy",  # from backend
+            "-Wno-implicit-fallthrough",  # from backend
+            "-Wno-nullability-completeness",  # from backend
+            "-Wno-suggest-destructor-override",  # from backend
+            "-Wno-suggest-override",  # from backend
+            "-Wno-unused-private-field",  # from backend
+            "-Wno-unused-variable",  # from backend
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from backend
+            "-Wno-c++98-compat-extra-semi",  # from backend
+            "-Wno-deprecated-copy",  # from backend
+            "-Wno-implicit-fallthrough",  # from backend
+            "-Wno-nullability-completeness",  # from backend
+            "-Wno-suggest-destructor-override",  # from backend
+            "-Wno-suggest-override",  # from backend
+            "-Wno-unused-private-field",  # from backend
+            "-Wno-unused-variable",  # from backend
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":interop_base",
@@ -166,10 +199,12 @@ alias(
 
 cc_static_library(
     name = "impeller",
-    deps = [
-        ":interop",
-        "@libcxx",  # use_flutter_cxx
-    ],
+    deps = [":interop"] + select({
+        "//engine/src/flutter/build/bazel:flutter_cxx": [
+            "@libcxx",  # use_flutter_cxx
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 alias(
@@ -182,17 +217,46 @@ cc_binary(
     srcs = ["example_gl.c"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + CHROMIUM_CODE_COPTS + [
-        "-Wno-redundant-parens",  # from :interop
-        "-Wno-c++98-compat-extra-semi",  # from :interop
-        "-Wno-deprecated-copy",  # from :interop
-        "-Wno-implicit-fallthrough",  # from :interop
-        "-Wno-nullability-completeness",  # from :interop
-        "-Wno-suggest-destructor-override",  # from :interop
-        "-Wno-suggest-override",  # from :interop
-        "-Wno-unused-private-field",  # from :interop
-        "-Wno-unused-variable",  # from :interop
-    ],
+    ] + CHROMIUM_CODE_COPTS + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":interop",
@@ -212,17 +276,46 @@ cc_binary(
     srcs = ["example_vk.c"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + CHROMIUM_CODE_COPTS + [
-        "-Wno-redundant-parens",  # from :interop
-        "-Wno-c++98-compat-extra-semi",  # from :interop
-        "-Wno-deprecated-copy",  # from :interop
-        "-Wno-implicit-fallthrough",  # from :interop
-        "-Wno-nullability-completeness",  # from :interop
-        "-Wno-suggest-destructor-override",  # from :interop
-        "-Wno-suggest-override",  # from :interop
-        "-Wno-unused-private-field",  # from :interop
-        "-Wno-unused-variable",  # from :interop
-    ],
+    ] + CHROMIUM_CODE_COPTS + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":interop",
@@ -239,10 +332,22 @@ alias(
 
 cc_library(
     name = "example",
-    deps = [
-        ":example_gl",  # impeller_enable_opengles
-        ":example_vk",  # impeller_enable_vulkan
-    ],
+    deps = select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            ":example_gl",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            ":example_mtl",  # impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            ":example_vk",  # impeller_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -257,18 +362,52 @@ cc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from :interop
-        "-Wno-c++98-compat-extra-semi",  # from :interop
-        "-Wno-deprecated-copy",  # from :interop
-        "-Wno-implicit-fallthrough",  # from :interop
-        "-Wno-nullability-completeness",  # from :interop
-        "-Wno-suggest-destructor-override",  # from :interop
-        "-Wno-suggest-override",  # from :interop
-        "-Wno-unused-private-field",  # from :interop
-        "-Wno-unused-variable",  # from :interop
         "-Wno-inconsistent-missing-override",  # from ../../playground:playground_test
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":interop",
         "//engine/src:include_root",
@@ -289,9 +428,36 @@ zip_bundle(
         "examples/example_gl.c": "example_gl.c",
         "examples/example_vk.c": "example_vk.c",
         "examples/example_mtl.m": "example_mtl.m",
-        "lib/libimpeller.so": ":shared_library",
-        "lib/libimpeller.a": ":static_library",
-        "bin/impellerc": "//engine/src/flutter/impeller/compiler:impellerc",
-    },
-    output = "linux-x64/impeller_sdk.zip",
+    } | select({
+        "@platforms//os:linux": {
+            "lib/libimpeller.so": ":shared_library",
+            "lib/libimpeller.a": ":static_library",
+            "bin/impellerc": "//engine/src/flutter/impeller/compiler:impellerc",
+        },
+        "//conditions:default": {},
+    }),
+    output = select({
+        "//engine/src/flutter/common:platform_linux_arm64": "linux-arm64/impeller_sdk.zip",
+        "//engine/src/flutter/common:platform_linux_x64": "linux-x64/impeller_sdk.zip",
+        "//engine/src/flutter/common:platform_wasm_wasm": "wasm-wasm/impeller_sdk.zip",
+        "//conditions:default": None,
+    }),
+)
+
+# `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
 )

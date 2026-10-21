@@ -13,9 +13,12 @@ cc_library(
     name = "context",
     srcs = ["android_context.cc"],
     hdrs = ["android_context.h"],
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/vulkan
-    ],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/vulkan
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -24,8 +27,12 @@ cc_library(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller/renderer",
         "//engine/src/flutter/shell/platform/android:rendering_selector",
-        "//engine/src/flutter/vulkan",  # shell_enable_vulkan
         "@skia",
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "//engine/src/flutter/vulkan",  # shell_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )

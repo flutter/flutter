@@ -22,7 +22,6 @@ cc_library(
         "painting/canvas.cc",
         "painting/codec.cc",
         "painting/color_filter.cc",
-        "painting/display_list_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
         "painting/display_list_deferred_image_gpu_skia.cc",
         "painting/display_list_image_gpu.cc",
         "painting/engine_layer.cc",
@@ -31,11 +30,9 @@ cc_library(
         "painting/gradient.cc",
         "painting/image.cc",
         "painting/image_decoder.cc",
-        "painting/image_decoder_impeller.cc",  # impeller_supports_rendering
         "painting/image_decoder_skia.cc",
         "painting/image_descriptor.cc",
         "painting/image_encoding.cc",
-        "painting/image_encoding_impeller.cc",  # impeller_supports_rendering
         "painting/image_encoding_skia.cc",
         "painting/image_filter.cc",
         "painting/image_generator.cc",
@@ -50,7 +47,6 @@ cc_library(
         "painting/path_measure.cc",
         "painting/picture.cc",
         "painting/picture_recorder.cc",
-        "painting/pixel_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
         "painting/rrect.cc",
         "painting/rsuperellipse.cc",
         "painting/shader.cc",
@@ -81,7 +77,27 @@ cc_library(
         "window/pointer_data_packet_converter.cc",
         "window/view_focus.cc",
         "window/viewport_metrics.cc",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "painting/display_list_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.cc",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.cc",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "painting/display_list_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.cc",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.cc",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "painting/display_list_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.cc",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.cc",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.cc",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
     hdrs = [
         "compositing/scene.h",
         "compositing/scene_builder.h",
@@ -95,7 +111,6 @@ cc_library(
         "painting/canvas.h",
         "painting/codec.h",
         "painting/color_filter.h",
-        "painting/display_list_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
         "painting/display_list_deferred_image_gpu_skia.h",
         "painting/display_list_image_gpu.h",
         "painting/engine_layer.h",
@@ -104,11 +119,9 @@ cc_library(
         "painting/gradient.h",
         "painting/image.h",
         "painting/image_decoder.h",
-        "painting/image_decoder_impeller.h",  # impeller_supports_rendering
         "painting/image_decoder_skia.h",
         "painting/image_descriptor.h",
         "painting/image_encoding.h",
-        "painting/image_encoding_impeller.h",  # impeller_supports_rendering
         "painting/image_encoding_impl.h",
         "painting/image_encoding_skia.h",
         "painting/image_filter.h",
@@ -124,7 +137,6 @@ cc_library(
         "painting/path_measure.h",
         "painting/picture.h",
         "painting/picture_recorder.h",
-        "painting/pixel_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
         "painting/rrect.h",
         "painting/rsuperellipse.h",
         "painting/shader.h",
@@ -158,7 +170,27 @@ cc_library(
         "window/pointer_data_packet_converter.h",
         "window/view_focus.h",
         "window/viewport_metrics.h",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "painting/display_list_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.h",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.h",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "painting/display_list_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.h",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.h",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "painting/display_list_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+            "painting/image_decoder_impeller.h",  # impeller_supports_rendering
+            "painting/image_encoding_impeller.h",  # impeller_supports_rendering
+            "painting/pixel_deferred_image_gpu_impeller.h",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
     copts = [
         # Dart gives us doubles. Skia and Impeller work in floats.
         # If Dart gives us a double > FLT_MAX or < -FLT_MAX, implicit conversion
@@ -167,17 +199,25 @@ cc_library(
         # for Flutter application developers, so it should be explicitly handled
         # via SafeNarrow.
         "-Wimplicit-float-conversion",
-    ] + FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/flow
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
-        "-Wno-deprecated-copy",  # from //flutter/impeller
-        "-Wno-implicit-fallthrough",  # from //flutter/impeller
-        "-Wno-nullability-completeness",  # from //flutter/impeller
-        "-Wno-suggest-destructor-override",  # from //flutter/impeller
-        "-Wno-suggest-override",  # from //flutter/impeller
-        "-Wno-unused-private-field",  # from //flutter/impeller
-        "-Wno-unused-variable",  # from //flutter/impeller
-    ],
+    ] + FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -189,9 +229,6 @@ cc_library(
         "//engine/src/flutter/display_list",
         "//engine/src/flutter/flow",
         "//engine/src/flutter/fml",
-        "//engine/src/flutter/impeller",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
-        "//engine/src/flutter/impeller/display_list:skia_conversions",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/runtime_stage",
         "//engine/src/flutter/runtime:dart_plugin_registrant",
         "//engine/src/flutter/runtime:test_font",
@@ -206,7 +243,24 @@ cc_library(
         "@skia",
         "@skia//modules/skparagraph",
         "@zlib",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:skia_conversions",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:skia_conversions",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/display_list:skia_conversions",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -228,6 +282,10 @@ flutter_test_fixtures(
         "fixtures/unmultiplied_alpha.png",
         "//engine/src/flutter/txt:third_party/fonts/Roboto-Medium.ttf",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = ["//engine/src/flutter/lib/ui/fixtures/shaders"],
 )
 
@@ -237,15 +295,23 @@ cc_test(
     srcs = ["ui_benchmarks.cc"],
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
     copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from :ui
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:fixture_test
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ui
+        ],
+        "//conditions:default": [],
+    }),
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     tags = [
         "benchmark",
         "manual",
     ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":ui",
         ":ui_unittests_fixtures",
@@ -263,6 +329,10 @@ cc_test(
 # ANGLE).
 flutter_gpu_test_backends(
     name = "gpu_test_backends",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 flutter_cc_test(
@@ -273,7 +343,6 @@ flutter_cc_test(
         "hooks_unittests.cc",
         "painting/image_decoder_no_gl_unittests.cc",
         "painting/image_decoder_no_gl_unittests.h",
-        "painting/image_decoder_unittests.cc",  # shell_enable_gl
         "painting/image_dispose_unittests.cc",
         "painting/image_encoding_unittests.cc",
         "painting/image_generator_apng_unittests.cc",
@@ -287,22 +356,53 @@ flutter_cc_test(
         "window/platform_message_response_dart_unittests.cc",
         "window/pointer_data_packet_converter_unittests.cc",
         "window/pointer_data_packet_unittests.cc",
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_gl": [
+            "painting/image_decoder_unittests.cc",  # shell_enable_gl
+        ],
+        "//conditions:default": [],
+    }),
     copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from :ui
         "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
-        "-Wno-deprecated-copy",  # from //flutter/impeller
-        "-Wno-implicit-fallthrough",  # from //flutter/impeller
-        "-Wno-nullability-completeness",  # from //flutter/impeller
-        "-Wno-suggest-destructor-override",  # from //flutter/impeller
-        "-Wno-suggest-override",  # from //flutter/impeller
-        "-Wno-unused-private-field",  # from //flutter/impeller
-        "-Wno-unused-variable",  # from //flutter/impeller
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ui
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-deprecated-copy",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-implicit-fallthrough",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-nullability-completeness",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-suggest-destructor-override",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-suggest-override",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-unused-private-field",  # from //flutter/shell/common:shell_test_fixture_sources
+            "-Wno-unused-variable",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }),
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     runner_args = ["--timeout=90"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":display_list_deferred_image_unittests",
         ":ui",
@@ -319,23 +419,44 @@ flutter_cc_test(
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:dart",
         "//engine/src/flutter/testing:fixture_test",
-        "//engine/src/flutter/testing:opengl",  # shell_enable_gl
         "//engine/src/flutter/third_party/tonic",
         "@libpng",
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_gl": [
+            "//engine/src/flutter/testing:opengl",  # shell_enable_gl
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
     name = "display_list_deferred_image_unittests",
     testonly = True,
-    srcs = [
-        "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
-    ],
+    srcs = select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
     copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from :ui
         "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
-    ],
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ui
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":ui",
         ":ui_testing_mocks",
@@ -352,15 +473,29 @@ cc_library(
     name = "ui_testing_mocks",
     testonly = True,
     hdrs = ["painting/testing/mocks.h"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":ui",
         "//engine/src/flutter/common/graphics",
         "//engine/src/flutter/display_list",
-        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
         "@googletest//:gtest",
         "@googletest_tree//:root_includes",
         "@googletest_tree//:third_party_dir_includes",
-    ],
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # What GN has no words for; maintained in the converter's manifest

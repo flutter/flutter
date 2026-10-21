@@ -998,11 +998,15 @@ final Map<String, Map<String, String>> comparisonSettings =
       'target_os': _osNameSettings,
       'current_os': _osNameSettings,
       'target_cpu': _cpuNameSettings,
+      // The CPU of the toolchain evaluating the file (libpng's NEON sources):
+      // the configuration's, which for a tool built for the host is the
+      // execution platform's, as a select() on a CPU constraint reads.
+      'current_cpu': _cpuNameSettings,
       'full_target_platform_name': _targetPlatformSettings,
     });
 
-/// BUILDCONFIG.gn's CPU names, as `target_cpu` spells them, to the CPU
-/// constraints.
+/// BUILDCONFIG.gn's CPU names, as `target_cpu` and `current_cpu` spell them,
+/// to the CPU constraints.
 const Map<String, String> _cpuNameSettings = <String, String>{
   'arm': '@platforms//cpu:armv7',
   'arm64': '@platforms//cpu:aarch64',
@@ -1654,6 +1658,10 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // The compiled_action template, which lib/ui's shader fixture
     // directories import without invoking (impellerc() does).
     '//build/compiled_action.gni',
+    // Declares the arm toolchains' arguments (arm_version, arm_use_neon,
+    // arm_optionally_use_neon, ...); libjpeg-turbo imports it where
+    // `current_cpu == "arm"` and reads them only in a Fuchsia branch.
+    '//build/config/arm.gni',
     // Declares use_clang_type_profiler, enable_lto, enable_coverage and
     // stripped_symbols; the embedder imports it and reads none of them.
     '//build/toolchain/clang.gni',
@@ -1668,10 +1676,68 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
   },
 );
 
+/// The assumptions the checked-in files are generated under: the Linux x64
+/// host's ([linuxHostAssumptions]) less everything GN derives from the
+/// target -- the target OS and CPU, the toolchains, the names of the target,
+/// and the arguments BUILDCONFIG.gn and the engine's .gni files compute from
+/// them -- so that the generated files carry the Linux and wasm branches as
+/// select()s (decision 168's web scope; landed 2026-10-20 on the user's
+/// call). What stays assumed is the host itself (a Linux x64 host, its
+/// platform names, the prebuilt Dart SDK), the OSes the engine never builds
+/// for from this scope, and the arguments tools/gn passes in for the host
+/// build (Skia's), which GN derives from nothing: the web build passes its
+/// own block of those, and the web phase answers for it as a whole.
+Assumptions generationAssumptions() {
+  return Assumptions(const <String, GnValue>{
+    'default_library_type': GnStringValue('static_library'),
+    'host_cpu': GnStringValue('x64'),
+    'host_os': GnStringValue('linux'),
+    'is_android': GnBoolValue(false),
+    'is_apple': GnBoolValue(false),
+    'is_component_build': GnBoolValue(false),
+    'is_fuchsia': GnBoolValue(false),
+    'is_ios': GnBoolValue(false),
+    'is_mac': GnBoolValue(false),
+    'is_minimal_linux': GnBoolValue(false),
+    'is_official_build': GnBoolValue(true),
+    'is_qnx': GnBoolValue(false),
+    'is_win': GnBoolValue(false),
+    'platform_name': GnStringValue('linux'),
+    'full_platform_name': GnStringValue('linux-x64'),
+    'flutter_prebuilt_dart_sdk': GnBoolValue(true),
+    'prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    'host_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    'target_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    // Skia's arguments as tools/gn passes them for a Linux host
+    // (linuxHostAssumptions has the same list): inputs, not derivations.
+    // The Skia tree is converted when its repository is fetched, under
+    // these; without them skia.gni's defaults would stand (skia_use_vulkan
+    // false: no Vulkan backend to link the tests against).
+    'skia_enable_pdf': GnBoolValue(false),
+    'skia_gl_standard': GnStringValue(''),
+    'skia_use_dng_sdk': GnBoolValue(false),
+    'skia_use_expat': GnBoolValue(true),
+    'skia_use_gl': GnBoolValue(true),
+    'skia_use_icu': GnBoolValue(true),
+    'skia_use_libpng_decode': GnBoolValue(true),
+    'skia_use_libpng_encode': GnBoolValue(true),
+    'skia_use_rust_png_decode': GnBoolValue(false),
+    'skia_use_rust_png_encode': GnBoolValue(false),
+    'skia_use_vma': GnBoolValue(false),
+    'skia_use_vulkan': GnBoolValue(true),
+    'skia_use_wuffs': GnBoolValue(true),
+    'skia_use_x11': GnBoolValue(false),
+    'skia_use_xps': GnBoolValue(false),
+  });
+}
+
 /// Which assumptions describe the Linux x64 host build (the values
-/// `tools/gn` gives these arguments for it, as in `out/host_debug*/args.gn`).
-/// Everything not fixed here stays a select(): `is_debug`, the runtime mode
-/// and slimpeller in particular, which are Bazel flags.
+/// `tools/gn` gives these arguments for it, as in `out/host_debug*/args.gn`):
+/// what the oracle (tool/gn_desc_diff.dart) compares GN's host build
+/// against, and the tests' default. The generated files take
+/// [generationAssumptions], a subset. Everything not fixed here stays a
+/// select(): `is_debug`, the runtime mode and slimpeller in particular,
+/// which are Bazel flags.
 Assumptions linuxHostAssumptions() {
   return Assumptions(const <String, GnValue>{
     // //build/config/BUILDCONFIG.gn

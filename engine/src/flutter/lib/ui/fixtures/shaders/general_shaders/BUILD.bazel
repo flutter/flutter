@@ -14,6 +14,10 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "general_shaders",
     testonly = True,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [":fixtures"],
 )
 
@@ -55,6 +59,10 @@ impellerc(
         "uniforms.frag",  # enable_unittests
     ],
     sl_file_extension = "iplr",
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # An aliased copy of `no_uniforms.frag.iplr` published under a distinct
@@ -70,6 +78,10 @@ gn_copy(
     srcs = ["iplr/no_uniforms.frag.iplr"],
     outs = ["iplr/no_uniforms_alt.frag.iplr"],
     outputs = ["$root_gen_dir/flutter/lib/ui/fixtures/shaders/general_shaders/iplr/no_uniforms_alt.frag.iplr"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [":compile_general_shaders"],
 )
 
@@ -80,6 +92,10 @@ flutter_test_fixtures(
         ":compile_general_shaders": [],
         ":no_uniforms_alt": [],
     },
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":compile_general_shaders",
         ":no_uniforms_alt",
