@@ -31,6 +31,8 @@ _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 #                   gn_repository and gn_secondary_dir, see repositories.bzl).
 #   synced:         the DEPS entry inside `path`, when `path` is an engine
 #                   directory holding the GN file over a synced subdirectory.
+#   exclude:        entries of the tree left out of the repository (paths
+#                   relative to `path`): what another build writes into it.
 _SOURCE_REPOSITORIES = {
     "abseil-cpp": struct(
         path = "engine/src/third_party/abseil-cpp",
@@ -69,10 +71,34 @@ _SOURCE_REPOSITORIES = {
     # The Emscripten SDK (GN's wasm toolchain, build/toolchain/wasm.gni),
     # a git dependency whose compiler and Node.js tools/activate_emsdk.py
     # installs into it under `download_emsdk`; consumed in place by
-    # build/bazel/toolchains/emscripten (see the overlay).
+    # build/bazel/toolchains/emscripten (see the overlay). The repository is
+    # the SDK as synced: the Bazel toolchain runs emcc with the SDK's cache
+    # frozen and its Python without bytecode files, while GN's toolchain
+    # leaves the cache writable, so a GN build on the same checkout adds
+    # emcc's working files to the tree -- left out of the view, so that they
+    # neither change every wasm action's inputs (nor differ between
+    # machines) nor vanish while Bazel fingerprints the SDK.
     "emsdk": struct(
         path = "engine/src/flutter/prebuilts/emsdk",
         build_file = _OVERLAYS + ":emsdk/BUILD.emsdk.bazel",
+        exclude = [
+            "upstream/emscripten/cache/build",  # system libraries being built
+            "upstream/emscripten/cache/cache.lock",
+            "upstream/emscripten/cache/sanity.txt",  # names this machine's paths
+            "upstream/emscripten/cache/symbol_lists",  # JS symbol lists of past links
+            "upstream/emscripten/cache/symbol_lists.lock",
+            # The LTO variants of the system libraries GN's -flto links build
+            # on first use (the prebuilt cache has none; the Bazel toolchain's
+            # LTO is pending its own copies, see build/bazel/toolchains/emscripten).
+            "upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto",
+            # Python's bytecode caches of emcc's modules (stamped with this
+            # checkout's source mtimes).
+            "upstream/emscripten/__pycache__",
+            "upstream/emscripten/third_party/leb128/__pycache__",
+            "upstream/emscripten/tools/__pycache__",
+            "upstream/emscripten/tools/ports/__pycache__",
+            "upstream/emscripten/tools/ports/contrib/__pycache__",
+        ],
     ),
     # Skia's codec and font dependencies, each converted at fetch time from
     # its GN file: in the synced tree (libpng, freetype2), in the engine's
@@ -507,6 +533,7 @@ def _synced_deps_impl(mctx):
             gn_build_files = getattr(spec, "gn_build_files", []),
             gn_repository = getattr(spec, "gn_repository", ""),
             gn_secondary_dir = getattr(spec, "gn_secondary_dir", ""),
+            exclude = getattr(spec, "exclude", []),
         )
 
     fetch = _fetch_toolchains(mctx)

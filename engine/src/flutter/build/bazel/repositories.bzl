@@ -94,10 +94,10 @@ def _directories_with_bazel_files(source):
                     found["/".join(parts[:depth])] = True
     fail("synced_repository: %s has more than %d directories; is there a symlink cycle?" % (source, _MAX_DIRECTORIES))
 
-def _link_tree(rctx, source, overlaying):
+def _link_tree(rctx, source, overlaying, exclude):
     """Populates the repository with symlinks to the contents of `source`.
 
-    Entries are symlinked whole, with two exceptions, both re-created as real
+    Entries are symlinked whole, with three exceptions, all re-created as real
     directories whose entries are symlinked one by one:
 
     * the root of the tree, so that the overlay BUILD file and the repository
@@ -107,10 +107,31 @@ def _link_tree(rctx, source, overlaying):
       ancestors), with those files left out. Otherwise such a directory would
       be a package (or repository) of its own, and the overlay's globs could
       not see the files in it -- ICU, for example, ships
-      `source/common/BUILD.bazel` for its own data-generation build.
+      `source/common/BUILD.bazel` for its own data-generation build;
+    * the ancestors of each entry in `exclude` (paths relative to `source`),
+      with the entry itself left out: what another build writes into a
+      synced tree and Bazel must not see -- the Emscripten SDK's cache, which
+      GN's wasm toolchain runs with the cache unfrozen, so that emcc builds
+      system library variants into it and writes its symbol lists, lock
+      files and a machine-specific `sanity.txt` beside the prebuilt sysroot,
+      and the `__pycache__` directories of its Python. Exposed as directory
+      inputs, those would change every wasm action's inputs with the first
+      GN link (and vanish under Bazel's feet while it fingerprints the
+      directory). These ancestors are listed without a watch, since their
+      entries are exactly what the other build adds and removes.
     """
     expanded = _directories_with_bazel_files(source) if overlaying else {}
     expanded[""] = True
+    excluded = {}
+    unwatched = {}
+    for path in exclude:
+        parts = path.split("/")
+        for depth in range(len(parts)):
+            ancestor = "/".join(parts[:depth])
+            if ancestor not in expanded:
+                unwatched[ancestor] = True
+            expanded[ancestor] = True
+        excluded[path] = True
 
     pending = [""]
     for _ in range(_MAX_DIRECTORIES):
@@ -120,9 +141,10 @@ def _link_tree(rctx, source, overlaying):
         directory = source.get_child(relative) if relative else source
 
         # readdir() also registers a watch on the directory's entries, so adding
-        # or removing one (for example after a roll) refreshes the repository.
-        # Changes inside the entries are tracked like any source file.
-        for child in directory.readdir():
+        # or removing one (for example after a roll) refreshes the repository
+        # (except under an excluded entry's ancestors, see above). Changes
+        # inside the entries are tracked like any source file.
+        for child in directory.readdir(watch = "no" if relative in unwatched else "auto"):
             name = child.basename
             if name in _BOUNDARY_FILE_NAMES:
                 continue
@@ -131,6 +153,8 @@ def _link_tree(rctx, source, overlaying):
                 # overlay, upstream BUILD files remain visible as packages.
                 continue
             child_relative = _join(relative, name)
+            if child_relative in excluded:
+                continue
             if child_relative in expanded:
                 pending.append(child_relative)
             else:
@@ -223,7 +247,7 @@ def _synced_repository_impl(rctx):
             "`gclient sync`; run it from the repository root (see DEPS).",
         )
 
-    _link_tree(rctx, source, overlaying)
+    _link_tree(rctx, source, overlaying, rctx.attr.exclude)
     if converting:
         _link_secondary(rctx)
         _convert_gn(rctx)
@@ -280,6 +304,10 @@ synced_repository = repository_rule(
             doc = "With gn_build_files: the directory of GN's secondary source tree that stands in for " +
                   "the repository's root, whose files other than build files are mirrored into the " +
                   "repository.",
+        ),
+        "exclude": attr.string_list(
+            doc = "Entries of the synced tree (paths relative to `path`) left out of the repository: " +
+                  "what another build writes into the tree and Bazel must not see (see _link_tree).",
         ),
     },
     # The repository only symlinks into the checkout, so it must be re-created
