@@ -452,6 +452,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// [ScrollActivity.correctBy], so that an activity that holds absolute scroll
   /// offsets, such as the target offset of an animation, can shift them too.
   ///
+  /// Overrides of this method must call `super.correctBy`, which also makes
+  /// sure that [applyNewDimensions] is called after the correction.
+  ///
   /// See also:
   ///
   ///  * [jumpTo], for also changing the scroll position when not in layout.
@@ -460,6 +463,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///    set the offset initially during construction or after
   ///    [applyViewportDimension] or [applyContentDimensions] is called.
   @override
+  @mustCallSuper
   void correctBy(double correction) {
     assert(
       hasPixels,
@@ -723,9 +727,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Called after [applyViewportDimension] or [applyContentDimensions] have
   /// changed the [minScrollExtent], the [maxScrollExtent], or the
-  /// [viewportDimension]. When this method is called, it should be called
-  /// _after_ any corrections are applied to [pixels] using [correctPixels], not
-  /// before.
+  /// [viewportDimension], and after [correctBy] has corrected the scroll
+  /// offset. When this method is called, it should be called _after_ any
+  /// corrections are applied to [pixels] using [correctPixels], not before.
   ///
   /// The default implementation informs the [activity] of the new dimensions by
   /// calling its [ScrollActivity.applyNewDimensions] method.
