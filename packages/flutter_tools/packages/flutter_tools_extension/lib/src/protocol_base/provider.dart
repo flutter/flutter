@@ -16,6 +16,9 @@ import 'service.dart';
 /// entrypoint function, passing the initial Isolate send port and list of supported
 /// extension services.
 class ToolExtensionEntryPoint {
+  /// The reserved JSON-RPC method name used to query extension capabilities.
+  static const String getCapabilitiesMethod = 'extension.getCapabilities';
+
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
   /// If provided, [extensionName] should be the name of the extension package
@@ -28,10 +31,6 @@ class ToolExtensionEntryPoint {
     void Function(String message)? logger,
     String? extensionName,
   }) async {
-    logger?.call('[ToolExtensionIsolate] Initializing isolate channel...');
-    final channel = IsolateChannel<Object?>.connectSend(sendPort);
-    final peer = json_rpc.Peer.withoutJson(channel);
-
     final rpcHandlers = <String, ExtensionRpcHandler>{};
 
     for (final service in services) {
@@ -41,6 +40,9 @@ class ToolExtensionEntryPoint {
       final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
       handlers.forEach((String method, ExtensionRpcHandler handler) {
         final fullMethod = '${service.namespace}.$method';
+        if (fullMethod == getCapabilitiesMethod) {
+          throw StateError('Reserved RPC method registered: "$fullMethod"');
+        }
         if (rpcHandlers.containsKey(fullMethod)) {
           throw StateError('Duplicate RPC method registered: "$fullMethod"');
         }
@@ -55,7 +57,13 @@ class ToolExtensionEntryPoint {
       services: services.map((ToolExtensionService s) => s.namespace).toList(),
     );
 
-    peer.registerMethod('extension.getCapabilities', () {
+    logger?.call('[ToolExtensionIsolate] Initializing isolate channel...');
+    // Connect the channel only after all fallible setup; connectSend opens a
+    // ReceivePort that keeps the isolate alive.
+    final channel = IsolateChannel<Object?>.connectSend(sendPort);
+    final peer = json_rpc.Peer.withoutJson(channel);
+
+    peer.registerMethod(getCapabilitiesMethod, () {
       logger?.call('[ToolExtensionIsolate] Handling extension.getCapabilities query.');
       return capabilities.toMap();
     });
