@@ -33,6 +33,8 @@ class TextLayout {
     paragraph.text,
     paragraph.paragraphStyle.textDirection,
   );
+  // Spans split at paragraph-level BiDi region boundaries without mutating paragraph.spans.
+  late final List<ParagraphSpan> _spans = _resolveSpans();
   final bidiRuns = <BidiRun>[];
   final lines = <TextLine>[];
 
@@ -98,58 +100,58 @@ class TextLayout {
     }
   }
 
+  // Split text spans at paragraph-level BiDi region boundaries and assign each
+  // sub-span its resolved region direction so Canvas2D measures neutrals and
+  // weak characters with the same UAX #9 direction as the full paragraph.
+  List<ParagraphSpan> _resolveSpans() {
+    if (paragraph.spans.isEmpty || _bidiRegions.isEmpty) {
+      return paragraph.spans;
+    }
+    final resolvedSpans = <ParagraphSpan>[];
+    var regionIndex = 0;
+    for (final ParagraphSpan span in paragraph.spans) {
+      assert(span.isNotEmpty);
+      if (span is PlaceholderSpan) {
+        resolvedSpans.add(span);
+        continue;
+      }
+      final textSpan = span as TextSpan;
+      while (regionIndex < _bidiRegions.length && _bidiRegions[regionIndex].end <= textSpan.start) {
+        regionIndex++;
+      }
+      var i = regionIndex;
+      while (i < _bidiRegions.length && _bidiRegions[i].start < textSpan.end) {
+        final BidiRegion region = _bidiRegions[i];
+        final int start = math.max(textSpan.start, region.start);
+        final int end = math.min(textSpan.end, region.end);
+        final ui.TextDirection regionDirection = region.level.isEven
+            ? ui.TextDirection.ltr
+            : ui.TextDirection.rtl;
+        if (start == textSpan.start &&
+            end == textSpan.end &&
+            textSpan.textDirection == regionDirection) {
+          resolvedSpans.add(textSpan);
+        } else {
+          resolvedSpans.add(
+            TextSpan(
+              start: start,
+              end: end,
+              style: textSpan.style,
+              text: paragraph.text.substring(start, end),
+              textDirection: regionDirection,
+            ),
+          );
+        }
+        i++;
+      }
+    }
+    return resolvedSpans;
+  }
+
   void extractTextClusters() {
     assert(allClusters.isEmpty);
 
-    // Split text spans at paragraph-level BiDi region boundaries and assign each
-    // sub-span its resolved region direction so Canvas2D measures neutrals and
-    // weak characters with the same UAX #9 direction as the full paragraph.
-    if (paragraph.spans.isNotEmpty) {
-      final resolvedSpans = <ParagraphSpan>[];
-      var regionIndex = 0;
-      for (final ParagraphSpan span in paragraph.spans) {
-        assert(span.isNotEmpty);
-        if (span is PlaceholderSpan) {
-          resolvedSpans.add(span);
-          continue;
-        }
-        final textSpan = span as TextSpan;
-        while (regionIndex < _bidiRegions.length &&
-            _bidiRegions[regionIndex].end <= textSpan.start) {
-          regionIndex++;
-        }
-        var i = regionIndex;
-        while (i < _bidiRegions.length && _bidiRegions[i].start < textSpan.end) {
-          final BidiRegion region = _bidiRegions[i];
-          final int start = math.max(textSpan.start, region.start);
-          final int end = math.min(textSpan.end, region.end);
-          final ui.TextDirection regionDirection = region.level.isEven
-              ? ui.TextDirection.ltr
-              : ui.TextDirection.rtl;
-          if (start == textSpan.start &&
-              end == textSpan.end &&
-              textSpan.textDirection == regionDirection) {
-            resolvedSpans.add(textSpan);
-          } else {
-            resolvedSpans.add(
-              TextSpan(
-                start: start,
-                end: end,
-                style: textSpan.style,
-                text: paragraph.text.substring(start, end),
-                textDirection: regionDirection,
-              ),
-            );
-          }
-          i++;
-        }
-      }
-      paragraph.spans
-        ..clear()
-        ..addAll(resolvedSpans);
-    }
-
-    for (final ParagraphSpan span in paragraph.spans) {
+    for (final ParagraphSpan span in _spans) {
       assert(span.isNotEmpty);
       allClusters.addAll(span.extractClusters());
     }
@@ -420,7 +422,7 @@ class TextLayout {
 
       // Within an RTL BiDi run, logical spans progress from right to left, so iterate
       // in reverse logical order to append visual blocks from left to right.
-      for (final ParagraphSpan span in bidiRun.isLtr ? paragraph.spans : paragraph.spans.reversed) {
+      for (final ParagraphSpan span in bidiRun.isLtr ? _spans : _spans.reversed) {
         final bool isOverlapping = bidiLineTextRange.overlapsWith(span.start, span.end);
 
         if (!isOverlapping) {

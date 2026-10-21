@@ -89,7 +89,9 @@ Future<void> testMain() async {
 
     builder.addText(' & שלום · Emoji 👨👩👧👦 🏳️🌈 stay atomic.');
     final WebParagraph paragraph = builder.build();
+    expect(paragraph.spans, hasLength(3));
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+    expect(paragraph.spans, hasLength(3));
 
     final List<ui.TextBox> boxesBidi = paragraph.getBoxesForRange(0, 5);
     final List<ui.TextBox> boxesArabic = paragraph.getBoxesForRange(5, 18);
@@ -156,7 +158,9 @@ Future<void> testMain() async {
     builder.pop();
 
     final WebParagraph paragraph = builder.build();
+    expect(paragraph.spans, hasLength(3));
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+    expect(paragraph.spans, hasLength(3));
 
     final List<ui.TextBox> boxesArabic = paragraph.getBoxesForRange(0, 5);
     final List<ui.TextBox> boxesNeutral = paragraph.getBoxesForRange(5, 8);
