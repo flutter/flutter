@@ -88,5 +88,16 @@ void main() {
       expect(device1, isNot(equals(device2)));
       expect(device1.hashCode, isNot(equals(device2.hashCode)));
     });
+
+    test('fromJson throws FormatException when fields have invalid types', () {
+      expect(
+        () => TargetDevice.fromJson(const <String, Object?>{TargetDevice.idKey: 123}),
+        throwsFormatException,
+      );
+      expect(
+        () => TargetDevice.fromJson(const <String, Object?>{TargetDevice.ephemeralKey: 'true'}),
+        throwsFormatException,
+      );
+    });
   });
 }
