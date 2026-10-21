@@ -214,17 +214,17 @@ void main() {
 
   testWithoutContext('ExtensionTarget maps pattern, artifact, and hostArtifact sources', () {
     final ExtensionTarget target = _createTarget(
-      inputs: const <ExtensionSource>[
+      inputs: <ExtensionSource>[
         ExtensionSource.pattern('{PROJECT_DIR}/foo.dart'),
-        ExtensionSource.artifact(BuiltInArtifacts.icuData, mode: .debug),
-        ExtensionSource.artifact(
+        const ExtensionSource.artifact(BuiltInArtifacts.icuData, mode: .debug),
+        const ExtensionSource.artifact(
           BuiltInArtifacts.genSnapshot,
           platform: 'linux-arm64',
           mode: .release,
         ),
-        ExtensionSource.hostArtifact(BuiltInHostArtifacts.impellerc),
+        const ExtensionSource.hostArtifact(BuiltInHostArtifacts.impellerc),
       ],
-      outputs: const <ExtensionSource>[ExtensionSource.pattern('{BUILD_DIR}/bar.dart')],
+      outputs: <ExtensionSource>[ExtensionSource.pattern('{BUILD_DIR}/bar.dart')],
     );
 
     environment.buildDir.createSync(recursive: true);

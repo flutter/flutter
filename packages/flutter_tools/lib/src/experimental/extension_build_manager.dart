@@ -110,7 +110,7 @@ base class ExtensionBuildManager {
           final Object? result = await connection.sendRequest(rpcMethod);
           return (connection, listFromJson(result));
         } on Object catch (e) {
-          _logger.printTrace('Failed to query $targetKind targets from extension: $e');
+          _logger.printWarning('Failed to query $targetKind targets from extension: $e');
           return (connection, <T>[]);
         }
       }),
@@ -137,7 +137,6 @@ base class ExtensionBuildManager {
 
   /// Triggers a custom `flutter build` target for the given [targetName] by routing to the active extension.
   Future<ExtensionBuildResult> build({
-    required Uri buildDir,
     required BuildMode buildMode,
     required Uri flutterRoot,
     required String mainPath,
@@ -147,7 +146,6 @@ base class ExtensionBuildManager {
     required String targetName,
   }) {
     return _executeBuildRpc(
-      buildDir: buildDir,
       buildMode: buildMode,
       connectionMap: _buildTargetToConnection,
       ensureTargetsLoaded: () async {
@@ -198,7 +196,6 @@ base class ExtensionBuildManager {
   }
 
   Future<ExtensionBuildResult> _executeBuildRpc({
-    required Uri buildDir,
     required BuildMode buildMode,
     required Map<String, ExtensionConnection> connectionMap,
     required Future<void> Function() ensureTargetsLoaded,
@@ -210,6 +207,7 @@ base class ExtensionBuildManager {
     required String rpcMethod,
     required String targetKind,
     required String targetName,
+    Uri? buildDir,
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
@@ -217,7 +215,7 @@ base class ExtensionBuildManager {
     if (!outputDir.hasAbsolutePath) {
       throw ArgumentError.value(outputDir, 'outputDir', 'Must be an absolute path.');
     }
-    if (!buildDir.hasAbsolutePath) {
+    if (buildDir != null && !buildDir.hasAbsolutePath) {
       throw ArgumentError.value(buildDir, 'buildDir', 'Must be an absolute path.');
     }
     if (!flutterRoot.hasAbsolutePath) {
@@ -254,7 +252,7 @@ base class ExtensionBuildManager {
       final Object? result = await connection.sendRequest(
         rpcMethod,
         params: <String, Object?>{
-          BuildService.buildDirParam: buildDir.toString(),
+          BuildService.buildDirParam: ?buildDir?.toString(),
           BuildService.buildModeParam: buildMode.cliName,
           BuildService.flutterRootParam: flutterRoot.toString(),
           BuildService.mainPathParam: mainPath,
