@@ -276,6 +276,7 @@ List<FlutterCommand> generateCommands({
   ),
   ChannelCommand(verboseHelp: verboseHelp, toolContext: toolDependencies.toolContext),
   CleanCommand(
+    extensionCleanManager: toolDependencies.extensionCleanManager,
     verbose: verbose,
     toolContext: toolDependencies.toolContext,
     xcode: toolDependencies.appleContext.xcode,

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
@@ -21,12 +22,25 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[]);
+  unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[]));
 }
 
 void _failingExtensionEntryPoint(SendPort sendPort) {
   // Throws during isolate initialization before handshake.
   throw StateError('Simulated isolate startup failure');
+}
+
+void _failingServiceInitEntryPoint(SendPort sendPort) {
+  unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_FailingInitService()]));
+}
+
+void _duplicateRpcEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _DummyService('test', 'ping'),
+      _DummyService('test', 'ping'),
+    ]),
+  );
 }
 
 class _DummyService extends ToolExtensionService {
@@ -39,6 +53,16 @@ class _DummyService extends ToolExtensionService {
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{methodName: (Map<String, Object?> params) => 'ok'};
+  }
+}
+
+class _FailingInitService extends ToolExtensionService {
+  @override
+  String get namespace => 'failing';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    throw StateError('Simulated service initialize failure');
   }
 }
 
@@ -62,9 +86,37 @@ void main() {
 
     test('ExtensionConnection.spawn throws and cleans up on isolate startup failure', () async {
       final logger = BufferLogger.test();
-      expect(
-        () => ExtensionConnection.spawn(_failingExtensionEntryPoint, logger: logger),
+      await expectLater(
+        ExtensionConnection.spawn(_failingExtensionEntryPoint, logger: logger),
         throwsA(isA<StateError>()),
+      );
+    });
+
+    test('ExtensionConnection.spawn throws when service initialize throws', () async {
+      final logger = BufferLogger.test();
+      await expectLater(
+        ExtensionConnection.spawn(_failingServiceInitEntryPoint, logger: logger),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Simulated service initialize failure'),
+          ),
+        ),
+      );
+    });
+
+    test('ExtensionConnection.spawn throws when service registers duplicate RPC method', () async {
+      final logger = BufferLogger.test();
+      await expectLater(
+        ExtensionConnection.spawn(_duplicateRpcEntryPoint, logger: logger),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Duplicate RPC method registered: "test.ping"'),
+          ),
+        ),
       );
     });
 
@@ -99,8 +151,36 @@ void main() {
         expect(capabilities.supportedPlatforms, const <String>{'linux', 'macos'});
         expect(capabilities.supportsHostPlatform('LINUX'), isTrue);
         expect(capabilities.supportsHostPlatform('windows'), isFalse);
+
+        final defaultPlatformsCapabilities = ToolExtensionCapabilities.fromJson(
+          const <String, Object?>{
+            'services': <Object?>['diagnostics'],
+          },
+        );
+        expect(defaultPlatformsCapabilities.supportedPlatforms, isEmpty);
       },
     );
+
+    test('ToolExtensionCapabilities.fromJson throws FormatException on invalid field types', () {
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.extensionNameKey: 42,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.servicesKey: 'not-a-list',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          ToolExtensionCapabilities.supportedPlatformsKey: <Object?>[123],
+        }),
+        throwsFormatException,
+      );
+    });
 
     test('ToolExtensionEntryPoint.run rejects duplicate RPC method registration', () async {
       final service1 = _DummyService('test', 'ping');
@@ -108,9 +188,12 @@ void main() {
 
       final receivePort = ReceivePort();
       addTearDown(receivePort.close);
+      final messages = <Object?>[];
+      final StreamSubscription<Object?> subscription = receivePort.listen(messages.add);
+      addTearDown(subscription.cancel);
 
-      expect(
-        () => ToolExtensionEntryPoint.run(receivePort.sendPort, <ToolExtensionService>[
+      await expectLater(
+        ToolExtensionEntryPoint.run(receivePort.sendPort, <ToolExtensionService>[
           service1,
           service2,
         ]),
@@ -122,6 +205,23 @@ void main() {
           ),
         ),
       );
+      await pumpEventQueue();
+      expect(messages, isEmpty);
+
+      await expectLater(
+        ToolExtensionEntryPoint.run(receivePort.sendPort, <ToolExtensionService>[
+          _DummyService('extension', 'getCapabilities'),
+        ]),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Reserved RPC method registered: "extension.getCapabilities"'),
+          ),
+        ),
+      );
+      await pumpEventQueue();
+      expect(messages, isEmpty);
     });
 
     test('ToolExtensionEntryPoint.runMain validates SendPort message and runs', () async {
