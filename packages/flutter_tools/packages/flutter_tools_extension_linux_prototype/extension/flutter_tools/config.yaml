@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 name: flutter_tools_extension_linux_prototype
-protocol_version: 1
 entrypoint: bin/flutter_tools_extension_linux_prototype.dart
 supported_platforms:
   - linux
