@@ -1,0 +1,187 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:convert';
+
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:test/test.dart';
+
+void main() {
+  const fieldKey = 'field';
+  const secretKey = 'secret';
+  const secretValue = 'super-sensitive-user-path-or-token';
+
+  group('ExtensionJsonParsing', () {
+    group('requiredField', () {
+      test('extracts present field with matching type', () {
+        const json = <String, Object?>{fieldKey: 'value'};
+        expect(json.requiredField<String>(fieldKey), 'value');
+      });
+
+      test('throws FormatException when key is missing or null for non-nullable type', () {
+        const emptyJson = <String, Object?>{};
+        expect(() => emptyJson.requiredField<String>(fieldKey), throwsFormatException);
+
+        const nullJson = <String, Object?>{fieldKey: null};
+        expect(() => nullJson.requiredField<String>(fieldKey), throwsFormatException);
+      });
+
+      test('throws FormatException when value has wrong type without leaking map contents', () {
+        const json = <String, Object?>{fieldKey: 42, secretKey: secretValue};
+        expect(
+          () => json.requiredField<String>(fieldKey),
+          throwsA(
+            isA<FormatException>().having(
+              (FormatException e) => e.message,
+              'message',
+              allOf(
+                contains('Invalid "$fieldKey": expected String, got int.'),
+                isNot(contains(secretValue)),
+              ),
+            ),
+          ),
+        );
+      });
+    });
+
+    group('optionalField', () {
+      test('extracts present field with matching type', () {
+        const json = <String, Object?>{fieldKey: 'value'};
+        expect(json.optionalField<String>(fieldKey, defaultValue: 'default'), 'value');
+      });
+
+      test('returns defaultValue when key is missing or null', () {
+        const emptyJson = <String, Object?>{};
+        expect(emptyJson.optionalField<String>(fieldKey, defaultValue: 'default'), 'default');
+        expect(emptyJson.optionalField<String?>(fieldKey, defaultValue: null), isNull);
+
+        const nullJson = <String, Object?>{fieldKey: null};
+        expect(nullJson.optionalField<String>(fieldKey, defaultValue: 'default'), 'default');
+        expect(nullJson.optionalField<String?>(fieldKey, defaultValue: 'fallback'), 'fallback');
+      });
+
+      test(
+        'throws FormatException when non-null value has wrong type without leaking map contents',
+        () {
+          const json = <String, Object?>{fieldKey: 123, secretKey: secretValue};
+          expect(
+            () => json.optionalField<String>(fieldKey, defaultValue: 'default'),
+            throwsA(
+              isA<FormatException>().having(
+                (FormatException e) => e.message,
+                'message',
+                allOf(
+                  contains('Invalid "$fieldKey": expected String, got int.'),
+                  isNot(contains(secretValue)),
+                ),
+              ),
+            ),
+          );
+          expect(
+            () => json.optionalField<String?>(fieldKey, defaultValue: null),
+            throwsFormatException,
+          );
+        },
+      );
+    });
+
+    group('nullableField', () {
+      test('extracts present field or returns null when missing or null', () {
+        const presentJson = <String, Object?>{fieldKey: 'value'};
+        expect(presentJson.nullableField<String>(fieldKey), 'value');
+
+        const emptyJson = <String, Object?>{};
+        expect(emptyJson.nullableField<String>(fieldKey), isNull);
+
+        const nullJson = <String, Object?>{fieldKey: null};
+        expect(nullJson.nullableField<String>(fieldKey), isNull);
+      });
+
+      test('throws FormatException when non-null value has wrong type', () {
+        const json = <String, Object?>{fieldKey: 123};
+        expect(() => json.nullableField<String>(fieldKey), throwsFormatException);
+      });
+    });
+
+    group('stringIterable', () {
+      test('extracts list or set of strings', () {
+        const listJson = <String, Object?>{
+          fieldKey: <Object?>['a', 'b'],
+        };
+        expect(listJson.stringIterable(fieldKey), const <String>['a', 'b']);
+
+        const setJson = <String, Object?>{
+          fieldKey: <Object?>{'x', 'y'},
+        };
+        expect(setJson.stringIterable(fieldKey), const <String>['x', 'y']);
+      });
+
+      test('returns empty iterable or defaultValue when key is missing or null', () {
+        const emptyJson = <String, Object?>{};
+        expect(emptyJson.stringIterable(fieldKey), isEmpty);
+        expect(
+          emptyJson.stringIterable(fieldKey, defaultValue: const <String>['fallback']),
+          const <String>['fallback'],
+        );
+
+        const nullJson = <String, Object?>{fieldKey: null};
+        expect(nullJson.stringIterable(fieldKey), isEmpty);
+        expect(
+          nullJson.stringIterable(fieldKey, defaultValue: const <String>{'linux'}),
+          const <String>{'linux'},
+        );
+      });
+
+      test('throws FormatException when value is not an Iterable without leaking map contents', () {
+        const json = <String, Object?>{fieldKey: 'not-a-list', secretKey: secretValue};
+        expect(
+          () => json.stringIterable(fieldKey),
+          throwsA(
+            isA<FormatException>().having(
+              (FormatException e) => e.message,
+              'message',
+              allOf(
+                contains('Invalid "$fieldKey": expected Iterable<String>, got String.'),
+                isNot(contains(secretValue)),
+              ),
+            ),
+          ),
+        );
+      });
+
+      test(
+        'throws FormatException when an element is not a String without leaking map contents',
+        () {
+          const json = <String, Object?>{
+            fieldKey: <Object?>['valid', 42],
+            secretKey: secretValue,
+          };
+          expect(
+            () => json.stringIterable(fieldKey),
+            throwsA(
+              isA<FormatException>().having(
+                (FormatException e) => e.message,
+                'message',
+                allOf(
+                  contains('Invalid "$fieldKey" element: expected String, got int.'),
+                  isNot(contains(secretValue)),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    });
+
+    test('parses real jsonDecode map and list structures', () {
+      final decoded = jsonDecode(
+        '{"name": "ext", "count": 3, "tags": ["one", "two"], "extra": null}',
+      ) as Map<String, Object?>;
+      expect(decoded.requiredField<String>('name'), 'ext');
+      expect(decoded.optionalField<int>('count', defaultValue: 0), 3);
+      expect(decoded.nullableField<String>('extra'), isNull);
+      expect(decoded.stringIterable('tags'), const <String>['one', 'two']);
+    });
+  });
+}
