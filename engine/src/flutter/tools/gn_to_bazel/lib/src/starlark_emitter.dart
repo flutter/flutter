@@ -941,6 +941,12 @@ final class _Emitter {
   void _convertTemplate(GnTarget target, TemplateMapping template) {
     _use(template.bzl, template.symbol);
     final rule = _Rule(template.symbol, target.name, target.comments);
+    // A wasm module is built for the platform of the wasm toolchain GN's
+    // dependents build it in (wasmModulePlatforms).
+    final String? platform = wasmModulePlatforms['$gnPackage:${target.name}'];
+    if (platform != null && template.symbol == 'wasm_module') {
+      rule.scalars['platform'] = '"${_localLabel(platform)}"';
+    }
     for (final GnVariable variable in target.variables.values) {
       final TemplateArgument? argument = template.arguments[variable.name];
       if (argument == null) {
@@ -999,6 +1005,8 @@ final class _Emitter {
           _stringsInto(rule.list(argument.attribute), variable);
         case TemplateArgumentKind.pathStrings:
           _pathStringsInto(rule, argument, variable);
+        case TemplateArgumentKind.scope:
+          rule.scalars[argument.attribute] = _scopeText(variable);
         case TemplateArgumentKind.pathString:
           final String? text = _singleString(variable);
           if (text == null) {
@@ -2923,6 +2931,36 @@ final class _Emitter {
     }
     final String rest = relative == owner ? '' : relative.substring(ownerPrefix.length);
     return '//$owner:$rest';
+  }
+
+  /// A scope of booleans and strings (a wasm toolchain's
+  /// extra_toolchain_args) as a dictionary, in GN's order.
+  String _scopeText(GnVariable variable) {
+    final GnLocation location = variable.assignments.first.location;
+    final List<GnValue>? items = variable.unconditionalItems;
+    if (items == null || items.length != 1 || items.single is! GnScopeValue) {
+      throw GnError(location, '${variable.name} is not one unconditional scope');
+    }
+    final scope = items.single as GnScopeValue;
+    final out = StringBuffer('{\n');
+    for (final GnVariable member in scope.variables.values) {
+      final List<GnValue>? values = member.unconditionalItems;
+      if (values == null || values.length != 1) {
+        throw GnError(location, '${variable.name}.${member.name} is not one unconditional value');
+      }
+      final String text = switch (values.single) {
+        GnBoolValue(:final bool value) => value ? 'True' : 'False',
+        GnStringValue(:final String value) => _starlarkString(value),
+        GnIntValue(:final int value) => '$value',
+        final GnValue other => throw GnError(
+          location,
+          '${variable.name}.${member.name} is $other, not a boolean, string or integer',
+        ),
+      };
+      out.writeln('        "${member.name}": $text,');
+    }
+    out.write('    }');
+    return out.toString();
   }
 
   /// Strings among which a `rebase_path()` result names a file (a wasm

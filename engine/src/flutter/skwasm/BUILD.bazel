@@ -1,0 +1,89 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/skwasm/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: skwasm, wimp.
+
+load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_module")
+
+package(default_visibility = ["//visibility:public"])
+
+wasm_module(
+    name = "skwasm_heavy",
+    srcs = [
+        "animated_image.cc",  # invoker.is_heavy
+        "canvas.cc",
+        "canvas_text.h",
+        "canvas_text_skia.cc",  # !(invoker.use_impeller)
+        "contour_measure.cc",
+        "data.cc",
+        "export.h",
+        "filters.cc",
+        "fonts.cc",
+        "helpers.h",
+        "image.cc",
+        "images.h",
+        "images_skia.cc",  # !(invoker.use_impeller)
+        "live_objects.cc",
+        "live_objects.h",
+        "paint.cc",
+        "path.cc",
+        "picture.cc",
+        "render_context.h",
+        "render_context_skia.cc",  # !(invoker.use_impeller)
+        "shaders.cc",
+        "shaders_skia.cc",  # !(invoker.use_impeller)
+        "skwasm_support.h",
+        "string.cc",
+        "surface.cc",
+        "surface.h",
+        "text/line_metrics.cc",
+        "text/paragraph.cc",
+        "text/paragraph_builder.cc",
+        "text/paragraph_builder_builtin_icu.cc",  # invoker.is_heavy
+        "text/paragraph_style.cc",
+        "text/strut_style.cc",
+        "text/text_style.cc",
+        "text/text_types.h",
+        "vertices.cc",
+        "wrappers.h",
+    ],
+    copts = ["-mreference-types"],
+    link_inputs = ["library_skwasm_support.js"],
+    linkopts = [
+        "-std=c++20",
+        "-lGL",
+        "-sUSE_WEBGL2=1",
+        "-sMAX_WEBGL_VERSION=2",
+        "-sOFFSCREENCANVAS_SUPPORT",
+        "-sALLOW_MEMORY_GROWTH",
+        "-sALLOW_TABLE_GROWTH",
+        "-lexports.js",
+        "-sEXPORTED_FUNCTIONS=[stackAlloc,_emscripten_stack_get_free,_emscripten_builtin_malloc,_emscripten_builtin_free]",
+        "-sEXPORTED_RUNTIME_METHODS=[addFunction,wasmExports,wasmMemory,stackAlloc]",
+        "-sINCOMING_MODULE_JS_API=[instantiateWasm,locateFile,noExitRuntime,mainScriptUrlOrBlob,wasmMemory,wasm,skwasmSingleThreaded]",
+        "-sUSE_ES6_IMPORT_META=0",
+        "--js-library",
+        "$(execpath library_skwasm_support.js)",
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": [
+            "-sASSERTIONS=1",  # is_debug
+            "-sGL_ASSERTIONS=1",  # is_debug
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:unoptimized": [],
+        "//conditions:default": [
+            "--closure=1",  # !(is_debug)
+        ],
+    }),
+    platform = "//engine/src/flutter/third_party/canvaskit:skwasm_heavy",
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/display_list",
+        "@skia",  # !(invoker.use_impeller)
+        "@skia//modules/skparagraph",
+        "@skia//modules/skunicode",
+    ],
+)
