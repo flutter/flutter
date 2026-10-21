@@ -286,14 +286,11 @@ exports_files([
   // them, the three platform kernels and the two DDC compilations of the
   // SDK -- the file's own templates over the prebuilt SDK's kernel_worker
   // and dartdevc, mapped to rules reading the tree web_sdk_root stages
-  // (the appendix). The archive (zip_bundle_from_file over everything,
-  // the modules included) is with the archives.
+  // (the appendix), and the archive: zip_bundle_from_file over everything
+  // the tree holds, the modules included, which is one build_directory_tree
+  // over the bundle's deps.
   ConvertedFile(
     '//flutter/web_sdk',
-    skip: <String, String>{
-      'flutter_web_sdk_archive':
-          "flutter-web-sdk.zip (zip_bundle_from_file over the SDK's tree): with the archives",
-    },
     appendix: '''
 load("//engine/src/flutter/web_sdk:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "web_sdk_root")
 

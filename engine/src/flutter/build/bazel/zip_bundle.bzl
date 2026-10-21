@@ -30,7 +30,7 @@ directory in the filesystem's order; here the files come in Bazel's, sorted.
 """
 
 load("@engine_version//:version.bzl", "ENGINE_VERSION")
-load(":build_directory.bzl", "BuildDirectoryInfo")
+load(":build_directory.bzl", "BuildDirectoryInfo", "build_directory_aspect", "collected_build_directory_entries")
 
 ZipTreeInfo = provider(
     doc = "The entries a zip_tree contributes to an archive.",
@@ -75,6 +75,66 @@ zip_tree = rule(
     },
 )
 
+def zip_bundle_from_file(name, **kwargs):
+    """zip_bundle.gni's zip_bundle_from_file: the same archive, without the license file.
+
+    GN's template takes the entries as a list of scopes written to a file
+    for zip.py and adds no LICENSE.<name>.md (zip_bundle does); the archive
+    is otherwise the same.
+
+    Args:
+      name: the target's name.
+      **kwargs: zip_bundle's attributes.
+    """
+    zip_bundle(
+        name = name,
+        license = False,
+        **kwargs
+    )
+
+def _build_directory_tree_impl(ctx):
+    # Every file the closure places under `under` in the build directory, at
+    # its path below it.
+    prefix = ctx.attr.under.strip("/") + "/"
+    entries = []
+    seen = {}
+    for target in ctx.attr.srcs:
+        for file, path in collected_build_directory_entries(target):
+            if not path.startswith(prefix):
+                continue
+            if path in seen:
+                if seen[path] != file:
+                    fail("%s: %s is placed twice (%s, %s)" % (ctx.label, path, seen[path].short_path, file.short_path))
+                continue
+            seen[path] = file
+            entries.append((file, ctx.attr.destination + "/" + path[len(prefix):] if ctx.attr.destination else path[len(prefix):]))
+    return [
+        ZipTreeInfo(entries = sorted(entries, key = lambda e: e[1])),
+        DefaultInfo(files = depset([file for file, _ in entries])),
+    ]
+
+build_directory_tree = rule(
+    implementation = _build_directory_tree_impl,
+    doc = "A directory of GN's build directory as an archive's tree: what the srcs' dependency closure places " +
+          "under it (BuildDirectoryInfo), each at its path below -- GN's " +
+          "`foreach(f, filter_include(outputs, [\"$root_build_dir/<dir>/**\"])) { destination = rebase_path(f, \"$root_build_dir/<dir>\") }` " +
+          "(the web SDK's archive over flutter_web_sdk).",
+    attrs = {
+        "srcs": attr.label_list(
+            aspects = [build_directory_aspect],
+            mandatory = True,
+            doc = "The targets (GN's deps) whose closure places the files.",
+        ),
+        "under": attr.string(
+            mandatory = True,
+            doc = "The directory under the build directory (`flutter_web_sdk`).",
+        ),
+        "destination": attr.string(
+            doc = "The directory in the archive the files go under; empty for the archive's root.",
+        ),
+    },
+)
+
 def _zip_bundle_impl(ctx):
     output = ctx.actions.declare_file("zip_archives/" + ctx.attr.output)
 
@@ -90,21 +150,6 @@ def _zip_bundle_impl(ctx):
     license_path = "sky/packages/sky_engine/LICENSE"
     git_url = "https://github.com/flutter/engine/tree/" + ENGINE_VERSION
     sky_engine_url = "https://storage.googleapis.com/flutter_infra_release/flutter/" + ENGINE_VERSION + "/sky_engine.zip"
-    readme_name = "LICENSE.%s.md" % ctx.label.name
-    readme = ctx.actions.declare_file(readme_name)
-    ctx.actions.write(
-        output = readme,
-        content = "\n".join([
-            "# _%s_license_md" % ctx.label.name,
-            "",
-            "This bundle is part of the the Flutter SDK.",
-            "",
-            "The source code is hosted at [flutter/engine/%s](%s/%s)." % (source_path, git_url, source_path),
-            "The license for this bundle is hosted at [flutter/engine/%s](%s/%s) " % (license_path, git_url, license_path),
-            "and [sky_engine.zip](%s)." % sky_engine_url,
-            "",
-        ]),
-    )
 
     # zip.py stores a symlink as a symlink entry (a macOS framework's), and
     # every input of a sandboxed action is one; GN hands it the build
@@ -113,8 +158,25 @@ def _zip_bundle_impl(ctx):
     args = ctx.actions.args()
     args.add_all([ctx.file._wrapper, ctx.file._script])
     args.add("-o", output)
-    args.add_all(["-i", readme, readme_name])
-    inputs = [readme]
+    inputs = []
+    if ctx.attr.license:
+        readme_name = "LICENSE.%s.md" % ctx.label.name
+        readme = ctx.actions.declare_file(readme_name)
+        ctx.actions.write(
+            output = readme,
+            content = "\n".join([
+                "# _%s_license_md" % ctx.label.name,
+                "",
+                "This bundle is part of the the Flutter SDK.",
+                "",
+                "The source code is hosted at [flutter/engine/%s](%s/%s)." % (source_path, git_url, source_path),
+                "The license for this bundle is hosted at [flutter/engine/%s](%s/%s) " % (license_path, git_url, license_path),
+                "and [sky_engine.zip](%s)." % sky_engine_url,
+                "",
+            ]),
+        )
+        args.add_all(["-i", readme, readme_name])
+        inputs.append(readme)
     for destination, target in ctx.attr.files.items():
         files = target[DefaultInfo].files.to_list()
         if len(files) != 1:
@@ -154,6 +216,11 @@ zip_bundle = rule(
         "files": attr.string_keyed_label_dict(
             allow_files = True,
             doc = "The archive's entries: each destination path mapped to the target of the one file placed there.",
+        ),
+        "license": attr.bool(
+            default = True,
+            doc = "Whether LICENSE.<name>.md leads the archive, as zip_bundle.gni's zip_bundle has it; " +
+                  "its zip_bundle_from_file writes no such file.",
         ),
         "trees": attr.label_list(
             providers = [ZipTreeInfo],
