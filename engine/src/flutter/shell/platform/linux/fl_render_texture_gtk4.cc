@@ -116,8 +116,17 @@ static void fl_render_texture_gtk4_measure(GtkWidget* widget,
   // The Flutter view fills its GTK allocation. Its backing texture must not
   // become a minimum size, otherwise a large frame can prevent the window
   // from shrinking. Sized-to-content views set an explicit size request.
+  int requested_width = -1;
+  int requested_height = -1;
+  gtk_widget_get_size_request(widget, &requested_width, &requested_height);
+  const int requested_size = orientation == GTK_ORIENTATION_HORIZONTAL
+                                 ? requested_width
+                                 : requested_height;
+  // An explicit content size supersedes the previous frame's texture size.
+  // Otherwise a shrinking popover can retain that frame's larger natural
+  // size while the renderer waits for the smaller allocation.
   *minimum = 0;
-  *natural = natural_size;
+  *natural = requested_size >= 0 ? requested_size : natural_size;
   if (minimum_baseline != nullptr) {
     *minimum_baseline = -1;
   }

@@ -5,13 +5,14 @@
 
 """Check native popup creation and parent geometry with the popup demo.
 
-Build lib/popup_demo.dart from the multiple_windows subtree demo. Requires
+Build examples/popup/main.dart from the multiple_windows subtree demo. Requires
 sway, grim, cc, wayland-scanner, and Wayland client development headers.
 """
 
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -141,22 +142,43 @@ def main():
         processes.append(pointer)
         assert pointer.stdout.readline().strip() == 'READY'
         time.sleep(1)
-        pointer.stdin.write('click 190 260 1200 900\n')
-        pointer.stdin.flush()
-        # Allow several full cycles of the popup's content-size animation.
-        time.sleep(4)
-        after = parent_rect()
-        subprocess.run(['grim', str(output / 'popup.png')], env=env, check=True)
-        protocol = (output / 'app.log').read_text()
-        assert '.get_popup(' in protocol, 'No native Wayland popup was created'
-        assert app.poll() is None, 'Demo exited while displaying its popup'
-        result = {
-            'before': before, 'after': after, 'native_popup': True,
-            'parent_unchanged': before == after
-        }
-        (output / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
-        assert before == after, result
-        print(json.dumps(result))
+        cycles = []
+        for cycle in range(3):
+          offset = len((output / 'app.log').read_text())
+          pointer.stdin.write('click 190 260 1200 900\n')
+          pointer.stdin.flush()
+          # Observe two full cycles, including shrinking after the first peak.
+          time.sleep(2.2)
+          after = parent_rect()
+          subprocess.run(['grim', str(output / f'popup-{cycle}.png')], env=env, check=True)
+          protocol = (output / 'app.log').read_text()[offset:]
+          assert '.get_popup(' in protocol, 'No native Wayland popup was created'
+          assert app.poll() is None, 'Demo exited while displaying its popup'
+          sizes = [
+              int(width) for width in
+              re.findall(r'xdg_popup#\d+\.configure\([^,]+, [^,]+, (\d+), \d+\)', protocol)
+          ]
+          # The demo contains a 200-logical-pixel field. Ignore the empty
+          # native surface configured before its first Flutter content frame.
+          sizes = [width for width in sizes if width >= 200]
+          assert sizes, 'No content-sized popup configuration was observed'
+          peak = max(sizes)
+          after_peak = sizes[sizes.index(peak) + 1:]
+          shrank = bool(after_peak) and min(after_peak) <= peak - 20
+          result = {
+              'before': before, 'after': after, 'native_popup': True,
+              'initial_popup_width': sizes[0], 'peak_popup_width': peak,
+              'minimum_after_peak': min(after_peak) if after_peak else None,
+              'parent_unchanged': before == after, 'popup_shrank': shrank
+          }
+          cycles.append(result)
+          (output / 'result.json').write_text(json.dumps(cycles, indent=2) + '\n')
+          assert before == after, result
+          assert shrank, result
+          pointer.stdin.write('click 650 450 1200 900\n')
+          pointer.stdin.flush()
+          time.sleep(.2)
+        print(json.dumps(cycles))
       finally:
         for process in reversed(processes):
           if process.poll() is None:
