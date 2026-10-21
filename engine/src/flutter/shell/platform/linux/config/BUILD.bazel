@@ -46,7 +46,14 @@ cc_library(
         "-lgobject-2.0",
         "-lglib-2.0",
     ],
-    deps = ["@sysroot_linux_x64//:gtk3_include_dirs"],
+    # The target CPU's sysroot: the two directories under its multiarch
+    # library directory hold glibconfig.h and dbus-arch-deps.h, which differ
+    # between the architectures (the arm64 cross build is
+    # //engine/src/flutter/build/bazel/toolchains:linux_arm64).
+    deps = select({
+        "@platforms//cpu:aarch64": ["@sysroot_linux_arm64//:gtk3_include_dirs"],
+        "//conditions:default": ["@sysroot_linux_x64//:gtk3_include_dirs"],
+    }),
 )
 
 # pkg-config egl: [[], [], ["EGL"], []]
