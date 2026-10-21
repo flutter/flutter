@@ -252,6 +252,14 @@ class PlatformViewAndroidJNI {
   virtual ASurfaceTransaction* createTransaction(
       std::function<void()>& out_publish_callback) = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Seals the transactions published during the current raster
+  ///             frame into a batch for the next `swapTransaction()` call.
+  ///
+  /// @note       Must be called from the raster thread.
+  ///
+  virtual void sealFrameTransactions() = 0;
+
   virtual void swapTransaction() = 0;
 
   virtual std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
