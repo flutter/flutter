@@ -101,17 +101,26 @@ def copy_entries(outputs, files, package = None):
     return entries
 
 def _targets_of(value):
+    # A label, a list of labels, or a dict keyed by labels
+    # (label_keyed_string_dict) or holding them (string_keyed_label_dict:
+    # a zip_bundle's `files`, destination to target).
     if type(value) == "Target":
         return [value]
     if type(value) == "dict":
-        return value.keys()
+        return [v for v in value.keys() + value.values() if type(v) == "Target"]
     if type(value) == "list":
         return [v for v in value if type(v) == "Target"]
     return []
 
+# The attributes the aspect follows: a rule's dependencies, sources and
+# data, and an archive's `files` and `trees` (zip_bundle.bzl) -- ninja
+# building GN's archive target writes its inputs' closure into the build
+# directory too (the web SDK's tree beside flutter-web-sdk.zip).
+_FOLLOWED_ATTRIBUTES = ["deps", "srcs", "data", "files", "trees"]
+
 def _build_directory_aspect_impl(target, ctx):
     transitive = []
-    for attribute in ("deps", "srcs", "data"):
+    for attribute in _FOLLOWED_ATTRIBUTES:
         for dep in _targets_of(getattr(ctx.rule.attr, attribute, None)):
             if _CollectedInfo in dep:
                 transitive.append(dep[_CollectedInfo].entries)
@@ -131,8 +140,9 @@ _CollectedInfo = provider(
 
 build_directory_aspect = aspect(
     implementation = _build_directory_aspect_impl,
-    doc = "Collects BuildDirectoryInfo over deps, srcs and data, with executables and shared libraries at the build root.",
-    attr_aspects = ["deps", "srcs", "data"],
+    doc = "Collects BuildDirectoryInfo over deps, srcs, data and an archive's files and trees, with executables " +
+          "and shared libraries at the build root.",
+    attr_aspects = _FOLLOWED_ATTRIBUTES,
 )
 
 def collected_build_directory_entries(target):
