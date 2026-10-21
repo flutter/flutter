@@ -29,5 +29,6 @@ const kManuallyPinnedDependencies = <String, String>{
   // iOS 13, so SwiftPM refuses to resolve the dependency and
   // dev/benchmarks/platform_views_layout fails to build. Unpin once
   // google_mobile_ads raises its minimum iOS version to 15.
+  // https://github.com/flutter/flutter/issues/194871
   'webview_flutter_wkwebview': '3.27.0',
 };
