@@ -4,7 +4,9 @@
 
 # Root BUILD file of @icu: Chromium's ICU fork pinned in DEPS. Mirrors
 # //flutter/third_party/icu/BUILD.gn (the targets the engine uses, as a static
-# library with icu_use_data_file = true and icu_use_stub_data = true).
+# library with icu_use_data_file = true and icu_use_stub_data = true on the
+# host, where binaries load icudtl.dat at runtime, and icu_use_data_file =
+# false on the web -- tools/gn's --web -- where the data is compiled in).
 #
 # Upstream ships BUILD.bazel files under source/ for its own data-generation
 # tools only; they do not build the libraries and are hidden by the
@@ -17,9 +19,13 @@
 
 # This file is loaded as the root of @icu, so the main module is named.
 load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_THIRD_PARTY_COPTS")
+load("@flutter//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_action")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
+
+# icu_use_data_file, by target OS.
+_WEB = "@platforms//os:emscripten"
 
 # config("icu_config"): what every user of ICU compiles with.
 _ICU_CONFIG_DEFINES = [
@@ -36,9 +42,11 @@ _ICU_CONFIG_DEFINES = [
     "U_ENABLE_RESOURCE_TRACING=0",
     # !is_component_build
     "U_STATIC_IMPLEMENTATION",
+] + select({
     # icu_use_data_file
-    "ICU_UTIL_DATA_IMPL=ICU_UTIL_DATA_FILE",
-]
+    _WEB: ["ICU_UTIL_DATA_IMPL=ICU_UTIL_DATA_STATIC"],
+    "//conditions:default": ["ICU_UTIL_DATA_IMPL=ICU_UTIL_DATA_FILE"],
+})
 
 # config("icu_code"): what ICU itself compiles with.
 _ICU_CODE_DEFINES = [
@@ -99,14 +107,19 @@ cc_library(
 
 # generate_icuuc("icuuc_private") plus the icuuc_public headers. Private
 # headers are exported too: icui18n includes them, as GN allows through the
-# source/common include directory.
+# source/common include directory. Its `deps = [ ":icudata" ]` is the data
+# compiled in on the web (icudata_static, below); on the host the data is a
+# file loaded at runtime and the stub data is compiled instead.
 cc_library(
     name = "icuuc",
-    srcs = glob(["source/common/*.cpp"]) + [
-        # icu_use_data_file && icu_use_stub_data
-        "source/stubdata/stubdata.cpp",
-        "source/stubdata/stubdata.h",
-    ],
+    srcs = glob(["source/common/*.cpp"]) + select({
+        _WEB: [],
+        "//conditions:default": [
+            # icu_use_data_file && icu_use_stub_data
+            "source/stubdata/stubdata.cpp",
+            "source/stubdata/stubdata.h",
+        ],
+    }),
     hdrs = glob([
         "source/common/*.h",
         "source/common/unicode/*.h",
@@ -119,7 +132,37 @@ cc_library(
         "U_COMMON_IMPLEMENTATION",
         "U_ICUDATAENTRY_IN_COMMON",
     ],
-    deps = [":root_includes"],
+    deps = [":root_includes"] + select({
+        _WEB: [":icudata_static"],
+        "//conditions:default": [],
+    }),
+)
+
+# The web's data: action("make_data_assembly") with current_cpu == "wasm"
+# turns the trimmed data file (data_dir = "flutter") into a C++ array with
+# scripts/make_data_cpp.py (emcc takes neither data files at runtime nor the
+# assembly the other platforms use), and source_set("icudata") compiles it.
+gn_action(
+    name = "make_data_assembly",
+    args = [
+        "$(execpath flutter/icudtl.dat)",
+        "$(gen icudtl_dat.cpp)",
+    ],
+    inputs = ["flutter/icudtl.dat"],
+    outputs = ["icudtl_dat.cpp"],
+    script = "scripts/make_data_cpp.py",
+)
+
+# The data symbol is referenced by udata.cpp, so the archive's one object is
+# linked (GN's source_set links it unconditionally).
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "icudata_static",
+    srcs = [":make_data_assembly"],
+    copts = FLUTTER_THIRD_PARTY_COPTS,
+    linkstatic = True,
+    local_defines = ["U_HIDE_DATA_SYMBOL"],
+    target_compatible_with = [_WEB],
 )
 
 # generate_icui18n("icui18n").
