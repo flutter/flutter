@@ -51,6 +51,51 @@ class ExtensionTarget extends Target {
       .map((ExtensionSource s) => _toHostSource(s, defaultTargetPlatform: _defaultTargetPlatform))
       .toList();
 
+  BuildMode? _resolveEnvironmentBuildMode(Environment environment) {
+    final String? buildMode = environment.defines[kBuildMode];
+    return buildMode != null ? BuildMode.fromCliName(buildMode) : null;
+  }
+
+  @override
+  ResolvedFiles resolveInputs(Environment environment) {
+    final BuildMode? mode = _resolveEnvironmentBuildMode(environment);
+    final List<Source> resolvedInputs = assembleTarget.inputs
+        .map(
+          (ExtensionSource s) => _toHostSource(
+            s,
+            defaultBuildMode: mode,
+            defaultTargetPlatform: _defaultTargetPlatform,
+          ),
+        )
+        .toList();
+    final collector = SourceVisitor(environment);
+    for (final source in resolvedInputs) {
+      source.accept(collector);
+    }
+    depfiles.forEach(collector.visitDepfile);
+    return collector;
+  }
+
+  @override
+  ResolvedFiles resolveOutputs(Environment environment) {
+    final BuildMode? mode = _resolveEnvironmentBuildMode(environment);
+    final List<Source> resolvedOutputs = assembleTarget.outputs
+        .map(
+          (ExtensionSource s) => _toHostSource(
+            s,
+            defaultBuildMode: mode,
+            defaultTargetPlatform: _defaultTargetPlatform,
+          ),
+        )
+        .toList();
+    final collector = SourceVisitor(environment, false);
+    for (final source in resolvedOutputs) {
+      source.accept(collector);
+    }
+    depfiles.forEach(collector.visitDepfile);
+    return collector;
+  }
+
   @override
   Future<void> build(Environment environment) async {
     final Environment(
@@ -87,7 +132,7 @@ class ExtensionTarget extends Target {
 
     if (!result.success) {
       final String? errorMessage = result.errorMessage;
-      throwToolExit(
+      throw Exception(
         errorMessage != null && errorMessage.isNotEmpty
             ? 'Extension assemble target "${assembleTarget.name}" failed: $errorMessage'
             : 'Extension assemble target "${assembleTarget.name}" failed.',
@@ -211,26 +256,29 @@ TargetPlatform? _tryResolveTargetPlatform(String platformName) {
   }
 }
 
-Source _toHostSource(ExtensionSource source, {TargetPlatform? defaultTargetPlatform}) =>
-    switch (source) {
-      ExtensionPatternSource(:final String value, :final bool optional) => Source.pattern(
-        value,
-        optional: optional,
-      ),
-      ExtensionArtifactSource(
-        :final ExtensionArtifact artifact,
-        :final String? platform,
-        :final BuildMode? mode,
-      ) =>
-        Source.artifact(
-          _resolveArtifact(artifact),
-          platform: _resolveArtifactPlatform(platform, artifact) ?? defaultTargetPlatform,
-          mode: mode,
-        ),
-      ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact) => Source.hostArtifact(
-        _resolveHostArtifact(artifact),
-      ),
-    };
+Source _toHostSource(
+  ExtensionSource source, {
+  BuildMode? defaultBuildMode,
+  TargetPlatform? defaultTargetPlatform,
+}) => switch (source) {
+  ExtensionPatternSource(:final String value, :final bool optional) => Source.pattern(
+    value,
+    optional: optional,
+  ),
+  ExtensionArtifactSource(
+    :final ExtensionArtifact artifact,
+    :final String? platform,
+    :final BuildMode? mode,
+  ) =>
+    Source.artifact(
+      _resolveArtifact(artifact),
+      platform: _resolveArtifactPlatform(platform, artifact) ?? defaultTargetPlatform,
+      mode: mode ?? defaultBuildMode,
+    ),
+  ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact) => Source.hostArtifact(
+    _resolveHostArtifact(artifact),
+  ),
+};
 
 Artifact _resolveArtifact(ExtensionArtifact artifact) => switch (artifact.name) {
   'flutterPatchedSdkPath' => Artifact.flutterPatchedSdkPath,
