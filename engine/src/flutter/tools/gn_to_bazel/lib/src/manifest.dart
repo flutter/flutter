@@ -1004,10 +1004,6 @@ exports_files(["README"] + glob(
       'gen_android_javadoc': 'Java: the Android phase (D10)',
       'android_javadoc': 'Java: the Android phase (D10)',
       'android_entitlement_config': "generated_file over metadata: the Apple phase's",
-      'gen_snapshot':
-          "the host gen_snapshot's archive (get_label_info over the host toolchain): later",
-      'analyze_snapshot':
-          "the host analyze_snapshot's archive (get_label_info over the host toolchain): later",
       'embedding_jars': 'Java: the Android phase (D10)',
       'abi_jars': 'Java: the Android phase (D10)',
     },
