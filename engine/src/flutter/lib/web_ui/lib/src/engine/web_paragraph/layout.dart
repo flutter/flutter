@@ -103,11 +103,26 @@ class TextLayout {
   void extractTextClusters() {
     assert(allClusters.isEmpty);
 
+    // Spans are in logical order and single-run spans emit clusters in ascending start order, so
+    // track monotonic start offsets during insertion and only sort when a multi-run BiDi span
+    // emits clusters out of logical order.
+    var isSorted = true;
+    var previousStart = -1;
     for (final ParagraphSpan span in paragraph.spans) {
       assert(span.isNotEmpty);
-      allClusters.addAll(span.extractClusters());
+      for (final WebCluster cluster in span.extractClusters()) {
+        final int start = cluster.start;
+        // Multi-run BiDi spans emit clusters in visual run order rather than logical order.
+        if (start < previousStart) {
+          isSorted = false;
+        }
+        previousStart = start;
+        allClusters.add(cluster);
+      }
     }
-    allClusters.sort((a, b) => a.start.compareTo(b.start));
+    if (!isSorted) {
+      allClusters.sort((a, b) => a.start.compareTo(b.start));
+    }
     // The browser gives some invisible characters, such as a soft hyphen (U+00AD) or a zero
     // width space (U+200B), no cluster of their own. Map each of those code units to the
     // cluster before it (or the first cluster, at the start of the text), so that text ranges
@@ -1239,6 +1254,9 @@ class TextCluster extends WebCluster {
   TextCluster(this.span, this._cluster, {ui.Rect? advance})
     : startInSpan = _cluster.start,
       endInSpan = _cluster.end,
+      // Cache paragraph-wide UTF-16 bounds so sorting, mapping, and line wrapping avoid span.start additions.
+      start = span.start + _cluster.start,
+      end = span.start + _cluster.end,
       _advance = advance;
 
   @override
@@ -1251,6 +1269,11 @@ class TextCluster extends WebCluster {
   final int startInSpan;
   @override
   final int endInSpan;
+  // Paragraph-wide UTF-16 start and end offsets cached at cluster creation time.
+  @override
+  final int start;
+  @override
+  final int end;
 
   /// The cluster advance computed from `DomTextCluster.x` and the span's font box, if any.
   final ui.Rect? _advance;
