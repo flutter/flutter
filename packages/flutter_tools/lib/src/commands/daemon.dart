@@ -95,6 +95,9 @@ class DaemonCommand extends FlutterCommand {
   final bool hidden;
 
   @override
+  bool get shouldUpdateCache => false;
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
       :Logger logger,

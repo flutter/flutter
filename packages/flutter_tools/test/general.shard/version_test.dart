@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -1420,6 +1422,50 @@ void main() {
   );
 
   testUsingContext(
+    'ensureVersionFile handles Windows sharing violation without throwing ToolExit',
+    () {
+      final handler = FileExceptionHandler();
+      final memoryFs = MemoryFileSystem.test(opHandle: handler.opHandle);
+      final windowsPlatform = FakePlatform(operatingSystem: 'windows');
+      final fs = ErrorHandlingFileSystem(delegate: memoryFs, platform: windowsPlatform);
+      final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
+      flutterRoot.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
+      final File legacyVersionFile = flutterRoot.childFile('version');
+      final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot.path);
+      final processUtils = ProcessUtils(
+        processManager: FakeProcessManager.any(),
+        logger: BufferLogger.test(),
+      );
+
+      final flutterVersion = FlutterVersion(
+        clock: _testClock,
+        fs: fs,
+        flutterRoot: flutterRoot.path,
+        git: Git(currentPlatform: windowsPlatform, runProcessWith: processUtils),
+        platform: windowsPlatform,
+      );
+
+      const sharingViolation = FileSystemException(
+        'The process cannot access the file because it is being used by another process.',
+        '',
+        OSError(
+          'The process cannot access the file because it is being used by another process.',
+          32,
+        ),
+      );
+      handler.addError(memoryFs.file(legacyVersionFile.path), FileSystemOp.write, sharingViolation);
+      handler.addError(memoryFs.file(newVersionFile.path), FileSystemOp.write, sharingViolation);
+
+      expect(flutterVersion.ensureVersionFile, returnsNormally);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isOmitLegacyVersionFileEnabled: false),
+    },
+  );
+
+  testUsingContext(
     'legacy version file is no longer supported',
     () {
       final fs = MemoryFileSystem.test();
@@ -2081,6 +2127,138 @@ void main() {
         Platform: () => FakePlatform(
           environment: <String, String>{'GIT_DIR': '/wrong/repo', 'PATH': '/usr/bin'},
         ),
+      },
+    );
+
+    testWithoutContext(
+      'checkFlutterVersionFreshness handles ProcessException from git log without crashing',
+      () async {
+        const flutterRoot = '/path/to/flutter';
+        final fs = MemoryFileSystem.test();
+        final platform = FakePlatform();
+        final File versionFile = FlutterVersion.getVersionFile(fs, flutterRoot)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            jsonEncode(<String, Object>{
+              'frameworkVersion': '2.5.0',
+              'channel': 'stable',
+              'repositoryUrl': 'https://github.com/flutter/flutter.git',
+              'frameworkRevision': '1234567890',
+              'frameworkCommitDate': '2025-01-01 00:00:00',
+              'engineRevision': 'abcdefg',
+              'dartSdkVersion': '2.14.0',
+              'devToolsVersion': '2.8.0',
+              'flutterVersion': '2.5.0',
+            }),
+          );
+        expect(versionFile, exists);
+
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'git',
+              '-c',
+              'log.showSignature=false',
+              'log',
+              'HEAD',
+              '-n',
+              '1',
+              '--pretty=format:%ad',
+              '--date=iso',
+            ],
+            exception: ProcessException(
+              'git',
+              <String>[
+                '-c',
+                'log.showSignature=false',
+                'log',
+                'HEAD',
+                '-n',
+                '1',
+                '--pretty=format:%ad',
+                '--date=iso',
+              ],
+              'The paging file is too small for this operation to complete.',
+              1455,
+            ),
+          ),
+        );
+
+        final version = FlutterVersion(
+          cache: cache,
+          clock: _testClock,
+          flutterRoot: flutterRoot,
+          fs: fs,
+          git: git,
+          logger: testLogger,
+          platform: platform,
+        );
+
+        await expectLater(version.checkFlutterVersionFreshness(), completes);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'checkFlutterVersionFreshness handles ProcessException from git fetch without crashing',
+      () async {
+        const flutterRoot = '/path/to/flutter';
+        final fs = MemoryFileSystem.test();
+        final platform = FakePlatform();
+        FlutterVersion.getVersionFile(fs, flutterRoot)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            jsonEncode(<String, Object>{
+              'frameworkVersion': '2.5.0',
+              'channel': 'stable',
+              'repositoryUrl': 'https://github.com/flutter/flutter.git',
+              'frameworkRevision': '1234567890',
+              'frameworkCommitDate': '2025-01-01 00:00:00',
+              'engineRevision': 'abcdefg',
+              'dartSdkVersion': '2.14.0',
+              'devToolsVersion': '2.8.0',
+              'flutterVersion': '2.5.0',
+            }),
+          );
+
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'git',
+              '-c',
+              'log.showSignature=false',
+              'log',
+              'HEAD',
+              '-n',
+              '1',
+              '--pretty=format:%ad',
+              '--date=iso',
+            ],
+            stdout: '2025-01-01 00:00:00 -0000',
+          ),
+          const FakeCommand(
+            command: <String>['git', 'fetch', '--tags'],
+            exception: ProcessException(
+              'git',
+              <String>['fetch', '--tags'],
+              'The paging file is too small for this operation to complete.',
+              1455,
+            ),
+          ),
+        ]);
+
+        final version = FlutterVersion(
+          cache: cache,
+          clock: _testClock,
+          flutterRoot: flutterRoot,
+          fs: fs,
+          git: git,
+          logger: testLogger,
+          platform: platform,
+        );
+
+        await expectLater(version.checkFlutterVersionFreshness(), completes);
+        expect(processManager, hasNoRemainingExpectations);
       },
     );
   });

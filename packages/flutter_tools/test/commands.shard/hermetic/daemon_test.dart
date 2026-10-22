@@ -1673,29 +1673,34 @@ void main() {
   });
 
   group('DaemonCommand', () {
-    testWithoutContext('has correct properties', () {
-      final command = DaemonCommand(
-        androidContext: FakeAndroidContext(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        toolContext: FakeToolContext(),
-        xcode: null,
-      );
+    testWithoutContext(
+      'has correct properties and does not require universal cache artifacts',
+      () async {
+        final command = DaemonCommand(
+          androidContext: FakeAndroidContext(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          toolContext: FakeToolContext(),
+          xcode: null,
+        );
 
-      expect(command.name, 'daemon');
-      expect(command.category, FlutterCommandCategory.tools);
-      expect(command.hidden, false);
+        expect(command.name, 'daemon');
+        expect(command.category, FlutterCommandCategory.tools);
+        expect(command.hidden, false);
+        expect(command.shouldUpdateCache, false);
+        expect(await command.requiredArtifacts, isEmpty);
 
-      final hiddenCommand = DaemonCommand(
-        androidContext: FakeAndroidContext(),
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        toolContext: FakeToolContext(),
-        xcode: null,
-        hidden: true,
-      );
-      expect(hiddenCommand.hidden, true);
-    });
+        final hiddenCommand = DaemonCommand(
+          androidContext: FakeAndroidContext(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          toolContext: FakeToolContext(),
+          xcode: null,
+          hidden: true,
+        );
+        expect(hiddenCommand.hidden, true);
+      },
+    );
   });
 }
 

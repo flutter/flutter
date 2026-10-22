@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -1080,7 +1081,7 @@ void main() {
         cache,
         platform: FakePlatform(operatingSystem: 'macos'),
       );
-      iosUsbArtifacts.location.createSync();
+      iosUsbArtifacts.location.createSync(recursive: true);
       final File ideviceSyslogFile = iosUsbArtifacts.location.childFile('idevicesyslog')
         ..createSync();
 
@@ -1100,7 +1101,7 @@ void main() {
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
     );
-    iosUsbArtifacts.location.createSync();
+    iosUsbArtifacts.location.createSync(recursive: true);
     final File iproxy = iosUsbArtifacts.location.childFile('iproxy')..createSync();
 
     expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
@@ -1120,7 +1121,7 @@ void main() {
         cache,
         platform: FakePlatform(operatingSystem: 'macos'),
       );
-      iosUsbArtifacts.location.createSync();
+      iosUsbArtifacts.location.createSync(recursive: true);
 
       expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
     },
@@ -1853,6 +1854,77 @@ void main() {
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.empty(),
         AndroidSdk: () => null, // Android SDK was not located.
+      },
+    );
+
+    testWithoutContext(
+      'getCacheArtifacts and getArtifactDirectory do not create directories during path resolution',
+      () {
+        final handler = FileExceptionHandler();
+        final memoryFs = MemoryFileSystem.test(opHandle: handler.opHandle);
+        final platform = FakePlatform();
+        final fs = ErrorHandlingFileSystem(delegate: memoryFs, platform: platform);
+        final Directory rootOverride = fs.directory('/flutter');
+        final Directory readOnlyArtifactsDir = memoryFs.directory('/flutter/bin/cache/artifacts');
+
+        handler.addError(
+          readOnlyArtifactsDir,
+          FileSystemOp.create,
+          const FileSystemException(
+            'Read-only file system',
+            '',
+            OSError('Read-only file system', 30),
+          ),
+        );
+
+        final testCache = Cache.test(
+          fileSystem: fs,
+          logger: BufferLogger.test(),
+          platform: platform,
+          processManager: FakeProcessManager.empty(),
+          rootOverride: rootOverride,
+        );
+
+        expect(() => testCache.getCacheArtifacts(), returnsNormally);
+        expect(() => testCache.getArtifactDirectory('engine'), returnsNormally);
+        expect(readOnlyArtifactsDir.existsSync(), isFalse);
+      },
+    );
+
+    testWithoutContext(
+      'EngineCachedArtifact and GradleWrapper isUpToDateInner do not create cache directories',
+      () {
+        final handler = FileExceptionHandler();
+        final memoryFs = MemoryFileSystem.test(opHandle: handler.opHandle);
+        final platform = FakePlatform();
+        final fs = ErrorHandlingFileSystem(delegate: memoryFs, platform: platform);
+        final Directory rootOverride = fs.directory('/flutter');
+        final Directory pkgDir = memoryFs.directory('/flutter/bin/cache/pkg');
+        final Directory wrapperDir = memoryFs.directory(
+          '/flutter/bin/cache/artifacts/gradle_wrapper',
+        );
+        const readOnlyError = FileSystemException(
+          'Read-only file system',
+          '',
+          OSError('Read-only file system', 30),
+        );
+        handler.addError(pkgDir, FileSystemOp.create, readOnlyError);
+        handler.addError(wrapperDir, FileSystemOp.create, readOnlyError);
+
+        final testCache = Cache.test(
+          fileSystem: fs,
+          logger: BufferLogger.test(),
+          platform: platform,
+          processManager: FakeProcessManager.empty(),
+          rootOverride: rootOverride,
+        );
+        final flutterSdk = FlutterSdk(testCache, platform: platform);
+        final gradleWrapper = GradleWrapper(testCache);
+
+        expect(flutterSdk.isUpToDateInner(fs), isFalse);
+        expect(gradleWrapper.isUpToDateInner(fs), isFalse);
+        expect(pkgDir.existsSync(), isFalse);
+        expect(wrapperDir.existsSync(), isFalse);
       },
     );
   });
