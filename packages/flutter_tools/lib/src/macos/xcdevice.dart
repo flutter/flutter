@@ -190,6 +190,24 @@ class XCDevice {
     return null;
   }
 
+  /// The local Mac's Xcode device identifier, used by iOS apps on Apple silicon.
+  Future<String?> getMacOSDeviceIdentifier() async {
+    final List<Object>? devices = await _getAllDevices(
+      useCache: true,
+      timeout: const Duration(seconds: 1),
+    );
+    for (final Object device in devices ?? <Object>[]) {
+      if (device case <String, Object?>{
+        'platform': 'com.apple.platform.macosx',
+        'identifier': final String identifier,
+        'available': true,
+      }) {
+        return identifier;
+      }
+    }
+    return null;
+  }
+
   /// Observe identifiers (UDIDs) of devices as they attach and detach.
   ///
   /// Each attach and detach event contains information on the event type,

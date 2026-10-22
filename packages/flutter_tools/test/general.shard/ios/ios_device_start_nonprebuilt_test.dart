@@ -1676,6 +1676,8 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     required XcodeDebugProject project,
     required String deviceId,
     required List<String> launchArguments,
+    String? devicePlatform,
+    String? deviceArchitecture,
   }) async {
     debugStartedCompleter?.complete();
     if (expectedProject != null) {

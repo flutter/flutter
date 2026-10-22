@@ -4269,6 +4269,10 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     required TemplateRenderer templateRenderer,
     Directory? projectDestination,
     bool verboseLogging = false,
+    BuildMode buildMode = BuildMode.debug,
+    bool copyApplicationBundle = false,
+    bool debuggerEnabled = true,
+    String? lldbInitFile,
   }) async {
     isTemporaryProject = true;
     return XcodeDebugProject(
@@ -4286,6 +4290,8 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     required XcodeDebugProject project,
     required String deviceId,
     required List<String> launchArguments,
+    String? devicePlatform,
+    String? deviceArchitecture,
   }) async {
     if (expectedProject != null) {
       expect(expectedProject, project);

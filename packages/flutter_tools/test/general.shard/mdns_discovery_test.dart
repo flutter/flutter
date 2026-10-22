@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:multicast_dns/multicast_dns.dart';
@@ -581,6 +582,111 @@ You can check which processes are using port 5353 by running:
     });
 
     group('for launch', () {
+      testWithoutContext('local host override ignores the same app running on a phone', () async {
+        final client = FakeMDnsClient(
+          <PtrResourceRecord>[
+            PtrResourceRecord('foo', future, domainName: 'com.example.app-phone'),
+            PtrResourceRecord('foo', future, domainName: 'com.example.app-mac'),
+          ],
+          <String, List<SrvResourceRecord>>{
+            'com.example.app-phone': <SrvResourceRecord>[
+              SrvResourceRecord(
+                'phone',
+                future,
+                port: 1111,
+                weight: 1,
+                priority: 1,
+                target: 'My-iPhone.local',
+              ),
+            ],
+            'com.example.app-mac': <SrvResourceRecord>[
+              SrvResourceRecord(
+                'mac',
+                future,
+                port: 2222,
+                weight: 1,
+                priority: 1,
+                target: 'My-Mac.local',
+              ),
+            ],
+          },
+        );
+        final discovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          logger: BufferLogger.test(),
+          analytics: const NoOpAnalytics(),
+        );
+        final Uri? uri = await discovery.getVMServiceUriForLaunch(
+          'com.example.app',
+          FakeIOSDevice(name: 'My iPhone'),
+          deviceName: 'My Mac.local',
+        );
+        expect(uri.toString(), 'http://127.0.0.1:2222/');
+      });
+
+      testWithoutContext(
+        'local iOS app failures do not suggest iPhone USB or Personal Hotspot',
+        () async {
+          final logger = BufferLogger.test();
+          final discovery = MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          );
+          expect(
+            await discovery.getVMServiceUriForLaunch(
+              'com.example.app',
+              FakeMacDesignedForIPadDevice(),
+              deviceName: 'My-Mac.local',
+            ),
+            isNull,
+          );
+          expect(logger.errorText, isEmpty);
+        },
+      );
+
+      testWithoutContext('ignores an endpoint from a previous app launch', () async {
+        final client = FakeMDnsClient(
+          <PtrResourceRecord>[
+            PtrResourceRecord('foo', future, domainName: 'com.example.app-old'),
+            PtrResourceRecord('foo', future, domainName: 'com.example.app-new'),
+          ],
+          <String, List<SrvResourceRecord>>{
+            'com.example.app-old': <SrvResourceRecord>[
+              SrvResourceRecord(
+                'old',
+                future,
+                port: 1111,
+                weight: 1,
+                priority: 1,
+                target: 'My-Mac.local',
+              ),
+            ],
+            'com.example.app-new': <SrvResourceRecord>[
+              SrvResourceRecord(
+                'new',
+                future,
+                port: 2222,
+                weight: 1,
+                priority: 1,
+                target: 'My-Mac.local',
+              ),
+            ],
+          },
+        );
+        final discovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          ignoredServices: <(int, String)>{(1111, '')},
+          logger: BufferLogger.test(),
+          analytics: const NoOpAnalytics(),
+        );
+        final Uri? uri = await discovery.getVMServiceUriForLaunch(
+          'com.example.app',
+          FakeIOSDevice(name: 'My Mac'),
+        );
+        expect(uri.toString(), 'http://127.0.0.1:2222/');
+      });
+
       testWithoutContext('Ensure either port or device name are provided', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[],
@@ -1346,6 +1452,13 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
+  @override
+  DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
+}
+
+class FakeMacDesignedForIPadDevice extends Fake implements MacOSDesignedForIPadDevice {
+  @override
+  String get name => 'Mac Designed for iPad';
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 }
