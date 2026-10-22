@@ -208,6 +208,12 @@ _ANDROID_LINK_FLAGS = [
 ANDROID_ARM64_COMPILE_FLAGS = ["--target=aarch64-linux-android24"]
 ANDROID_ARM64_LINK_FLAGS = ["--target=aarch64-linux-android24"]
 
+# arm64 at API level 26 (build/toolchain/android/BUILD.gn's
+# clang_arm64_apilevel26): the Vulkan validation layer's toolchain, which
+# needs AHardwareBuffer_describe and the rest of API 26.
+ANDROID_ARM64_API26_COMPILE_FLAGS = ["--target=aarch64-linux-android26"]
+ANDROID_ARM64_API26_LINK_FLAGS = ["--target=aarch64-linux-android26"]
+
 # x64: GN spells the triple with androideabi (build/config/compiler, the
 # is_android block), and its posix block adds -m64 -march=x86-64 as for the
 # host (LINUX_X64_COMPILE_FLAGS).
@@ -282,6 +288,12 @@ _FASTBUILD_COMPILE_FLAGS = ["-O0", "-g1"]
 _OPT_COMPILE_FLAGS = ["-O2", "-g0", "-fno-ident", "-fdata-sections", "-ffunction-sections"]
 _OPT_DEFINES = ["NDEBUG", "NVALGRIND", "DYNAMIC_ANNOTATIONS_ENABLED=0"]
 _OPT_LINK_FLAGS = ["-Wl,-O2", "-Wl,--gc-sections"]
+
+# ... and --as-needed, which GN leaves out under a sanitizer (functions the
+# sanitizers interpose can make the linker drop a library that is needed,
+# crbug.com/234010): a library nothing references is no NEEDED entry (the
+# Vulkan validation layer's libdl).
+_OPT_AS_NEEDED_LINK_FLAGS = ["-Wl,--as-needed"]
 
 # Android's optimized build (//build/config/compiler:optimize under
 # is_android, :symbols): for size, without frame pointers, and with full
@@ -424,7 +436,11 @@ def _impl(ctx):
         # Compilation modes; Bazel enables exactly one of dbg/opt/fastbuild.
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
-        _mode_feature("opt", opt_compile_flags + _defines(_OPT_DEFINES), _OPT_LINK_FLAGS),
+        _mode_feature(
+            "opt",
+            opt_compile_flags + _defines(_OPT_DEFINES),
+            _OPT_LINK_FLAGS + ([] if ctx.attr.asan else _OPT_AS_NEEDED_LINK_FLAGS),
+        ),
         # A target's copts (Bazel's own `user_compile_flags` feature, defined
         # here so that it sits before the next one: Bazel appends the legacy
         # features it does not find to the end of this list), then the

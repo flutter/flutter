@@ -222,6 +222,8 @@ exports_files(["lib/web_ui/lib/ui_web/src/ui_web.dart"])
 # and check_imports). A script of a package's own directory needs no export.
 exports_files([
     "tools/android_illegal_imports.py",
+    "tools/androidx/files.json",
+    "tools/androidx/generate_pom_file.py",
     "tools/gen_android_buildconfig.py",
 ])
 
@@ -1004,12 +1006,6 @@ exports_files(["README"] + glob(
     condition: 'is_android',
     filesGroups: <String>{'android'},
     skip: <String, String>{
-      'android_jar': 'flutter.jar: after the Vulkan validation layer at API 26 it packs (J2)',
-      'pom_libflutter': 'the Maven tree, with flutter.jar (J2)',
-      'pom_content_hash_libflutter': 'the Maven tree, with flutter.jar (J2)',
-      'pom_embedding': 'the Maven tree, with flutter.jar (J2)',
-      'pom_content_hash_embedding': 'the Maven tree, with flutter.jar (J2)',
-      'flutter_jar_zip': 'artifacts.zip holds flutter.jar (J2)',
       'gen_android_javadoc': 'Java: the Android phase (D10)',
       'android_javadoc': 'Java: the Android phase (D10)',
       'android_entitlement_config': "generated_file over metadata: the Apple phase's",
@@ -1680,7 +1676,9 @@ cc_library(
     '//flutter/third_party/vulkan-deps/spirv-tools/src',
     implicitDeps: <String>['@spirv-tools//:headers'],
     // Eight headers under source/ (val/instruction.h, the precompiled
-    // header stubs, diff/) are in no GN list.
+    // header stubs, diff/) are in no GN list. The tree's root as an
+    // include directory (root_include) is what the Vulkan validation
+    // layer's GN lists (vvl_glslang_dir; includeDirLibraries).
     appendix: '''
 cc_library(
     name = "headers",
@@ -1688,6 +1686,55 @@ cc_library(
         "include/**/*.h",
         "include/**/*.hpp",
         "source/**/*.h",
+    ]),
+)
+
+cc_library(
+    name = "root_include",
+    hdrs = glob([
+        "include/**/*.h",
+        "include/**/*.hpp",
+        "source/**/*.h",
+    ]),
+    includes = ["."],
+)
+''',
+  ),
+  // The Vulkan validation layer (VkLayer_khronos_validation: the engine's
+  // GN in the secondary tree over the synced tree) and the layer-settings
+  // library of vulkan-utility-libraries it links. The Android embedding's
+  // debug jar packs the layer for arm64, built at API level 26.
+  ConvertedFile(
+    '//third_party/vulkan_validation_layers',
+    // The group over the layer (its data_deps): a group of files, which the
+    // Android embedding's jar action depends on.
+    filesGroups: <String>{'vulkan_validation_layers'},
+    skip: <String, String>{
+      'vulkan_stateless_validation_config':
+          'a config of compiler flags that no target lists (a remnant of the upstream file)',
+    },
+    implicitDeps: <String>['@vulkan_validation_layers//:headers'],
+    // The headers the layer's sources include beyond GN's list (the
+    // generated ones under layers/vulkan/generated, the externals).
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["layers/**/*.h"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/vulkan-deps/vulkan-utility-libraries/src',
+    implicitDeps: <String>['@vulkan-utility-libraries//:headers'],
+    // GN lists some of the public headers; the sources include others
+    // (vk_small_containers.hpp).
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "include/**/*.h",
+        "include/**/*.hpp",
+        "src/**/*.hpp",
     ]),
 )
 ''',

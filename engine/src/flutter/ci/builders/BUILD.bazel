@@ -622,11 +622,13 @@ install(
 
 # linux_unopt.json: ci/android_debug_unopt
 #   bazel run --config=android_debug_unopt :android_debug_unopt
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:android_jar.
 install(
     name = "android_debug_unopt",
     testonly = True,
-    contents = ["//engine/src/flutter/impeller:impeller"],
+    contents = [
+        "//engine/src/flutter/impeller:impeller",
+        "//engine/src/flutter/shell/platform/android:android_jar",
+    ],
     directory = "ci/android_debug_unopt",
 )
 

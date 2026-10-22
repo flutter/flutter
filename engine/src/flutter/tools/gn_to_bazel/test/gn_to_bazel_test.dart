@@ -2273,6 +2273,141 @@ action("jar") {
         },
       );
 
+      test(
+        "evaluates nested lists by index, as the validation layers' foreach reads them",
+        () async {
+          final GnFileEvaluation evaluation = await evaluate(r'''
+layer_sources = [ "a.cpp", "b.cpp" ]
+layers = [ [ "khronos", layer_sources, [ ":glslang" ], [] ] ]
+foreach(layer_info, layers) {
+  name = layer_info[0]
+  shared_library("VkLayer_$name") {
+    sources = layer_info[1]
+    deps = [ ":utils" ]
+    if (layer_info[2] != "") {
+      deps += layer_info[2]
+    }
+    defines = layer_info[3]
+  }
+}
+''');
+          final GnTarget layer = evaluation.targets.single;
+          expect(layer.name, 'VkLayer_khronos');
+          expect(strings(layer, 'sources'), <String>['a.cpp', 'b.cpp']);
+          expect(strings(layer, 'deps'), <String>[':utils', ':glslang']);
+          expect(strings(layer, 'defines'), <String>[]);
+        },
+      );
+
+      test('keeps the order of arguments around a cased string', () async {
+        // `[ "--platform", _platform, dir ]` with _platform cased by OS:
+        // the select() sits where the element is, not after the list.
+        final String output = await convert(r'''
+action("json") {
+  script = "gen.py"
+  outputs = [ "$root_out_dir/data/layer.json" ]
+  if (flutter_runtime_mode == "debug") {
+    _platform = "Debug"
+  } else {
+    _platform = "Other"
+  }
+  args = [ "--platform", _platform, rebase_path("$root_out_dir/data", root_build_dir), rebase_path(root_build_dir, root_build_dir) ]
+  data = outputs
+}
+''');
+        expect(
+          output,
+          contains(r'''
+    args = ["--platform"] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "Debug",  # flutter_runtime_mode == "debug"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [],
+        "//conditions:default": [
+            "Other",  # !(flutter_runtime_mode == "debug")
+        ],
+    }) + [
+        "$(built data)",
+        "$(built .)",
+    ],
+    build_outputs = ["data/layer.json"],
+'''),
+        );
+      });
+
+      test('builds a dependency with a toolchain for its platform, and archives one of several build outputs', () async {
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/example/pack.py': '',
+          'flutter/example/javac.py': '',
+          'flutter/example/BUILD.gn': r'''
+import("//flutter/build/zip_bundle.gni")
+
+action("jar") {
+  script = "pack.py"
+  outputs = [ "$root_build_dir/flutter.jar", "$root_build_dir/engine.jar" ]
+  args = [
+    "--output", rebase_path("flutter.jar", root_build_dir, root_build_dir),
+    "--version", engine_version,
+  ]
+  deps = [ ":java" ]
+  apilevel26_toolchain = "//build/toolchain/android:clang_arm64_apilevel26"
+  validation_layer_target = "//third_party/vulkan_validation_layers($apilevel26_toolchain)"
+  deps += [ validation_layer_target ]
+  validation_layer_out_dir = get_label_info(validation_layer_target, "root_out_dir")
+  args += [ "--native_lib", rebase_path("$validation_layer_out_dir/libVkLayer_khronos_validation.so") ]
+}
+
+action("java") {
+  script = "javac.py"
+  outputs = [ "$target_gen_dir/java.d" ]
+}
+
+zip_bundle("jar_zip") {
+  output = "android-arm64/artifacts.zip"
+  files = [
+    {
+      source = "$root_build_dir/flutter.jar"
+      destination = "flutter.jar"
+    },
+  ]
+  deps = [ ":jar" ]
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn', templates: <String>{'zip_bundle'}),
+          gnPackage: '//flutter/example',
+          tree: tree,
+        );
+        expect(
+          output,
+          contains(r'''
+    args = [
+        "--output",
+        "$(built flutter.jar)",
+        "--version",
+        ENGINE_VERSION,
+        "--native_lib",
+        "$(built clang_arm64_apilevel26/libVkLayer_khronos_validation.so)",
+    ],
+    build_outputs = [
+        "flutter.jar",
+        "engine.jar",
+    ],
+    platform = "//engine/src/flutter/build/bazel/toolchains:android_arm64_api26",
+    platform_build_dir = "clang_arm64_apilevel26",
+    platform_deps = ["@vulkan_validation_layers"],
+    script = "pack.py",
+    deps = [":java"],
+'''),
+        );
+        expect(output, contains('load("@engine_version//:version.bzl", "ENGINE_VERSION")'));
+        expect(output, contains('files = {"flutter.jar": ":jar"}'));
+        expect(output, contains('sources = {"flutter.jar": "flutter.jar"}'));
+      });
+
       test('rebases paths to absolute ones and to the current directory', () async {
         // sky_engine's way of naming the Dart SDK's sources: a base rebased
         // to an absolute path, a directory under it, a list under that; and

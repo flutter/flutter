@@ -9,6 +9,8 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_toolchain")
 load(
     ":cc_toolchain_config.bzl",
+    "ANDROID_ARM64_API26_COMPILE_FLAGS",
+    "ANDROID_ARM64_API26_LINK_FLAGS",
     "ANDROID_ARM64_COMPILE_FLAGS",
     "ANDROID_ARM64_LINK_FLAGS",
     "ANDROID_ARM_COMPILE_FLAGS",
@@ -351,6 +353,130 @@ toolchain(
         "@platforms//cpu:aarch64",
     ],
     toolchain = ":android_arm64_clang",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+# ---------------------------------------------------------------------------
+# android-arm64 at API level 26: GN's clang_arm64_apilevel26 toolchain
+# (build/toolchain/android/BUILD.gn), which builds one target, the Vulkan
+# validation layer (//third_party/vulkan_validation_layers: API 26's
+# AHardwareBuffer functions), for the Android embedding's debug jar. The
+# android_arm64 toolchain with `--target=aarch64-linux-android26` and the
+# API 26 sysroot libraries; its platform carries the api26 constraint, which
+# the action that packs the layer sets through a transition on that one
+# dependency (gn_action's platform_deps), as GN's `($apilevel26_toolchain)`
+# suffix does.
+# ---------------------------------------------------------------------------
+
+# The API level a platform targets, where it departs from the default of
+# GN's android toolchains for the CPU (24 for arm64).
+constraint_setting(
+    name = "android_api_level",
+    default_constraint_value = ":api_default",
+)
+
+constraint_value(
+    name = "api_default",
+    constraint_setting = ":android_api_level",
+)
+
+constraint_value(
+    name = "api26",
+    constraint_setting = ":android_api_level",
+)
+
+platform(
+    name = "android_arm64_api26",
+    constraint_values = [
+        "@platforms//os:android",
+        "@platforms//cpu:aarch64",
+        ":api26",
+    ],
+)
+
+filegroup(
+    name = "android_arm64_api26_linker_files",
+    srcs = [
+        "@android_tools//:libraries_arm64_api26",
+        "@clang_linux_x64//:linker_files",
+    ],
+)
+
+filegroup(
+    name = "android_arm64_api26_all_files",
+    srcs = [
+        ":android_arm64_api26_linker_files",
+        ":android_arm64_compiler_files",
+        "@clang_linux_x64//:all_files",
+    ],
+)
+
+ANDROID_ARM64_API26_LIB = "sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/26"
+
+flutter_cc_toolchain_config(
+    name = "android_arm64_api26_clang_config",
+    ar = "@clang_linux_x64//:bin/llvm-ar",
+    arch_copts = ANDROID_ARM64_API26_COMPILE_FLAGS,
+    arch_linkopts = ANDROID_ARM64_API26_LINK_FLAGS,
+    asan = select({
+        "//engine/src/flutter/build/bazel:asan_enabled": True,
+        "//conditions:default": False,
+    }),
+    clang = "@clang_linux_x64//:bin/clang",
+    clangxx = "@clang_linux_x64//:bin/clang++",
+    crt_begin_exe = "@android_tools//:" + ANDROID_ARM64_API26_LIB + "/crtbegin_dynamic.o",
+    crt_begin_so = "@android_tools//:" + ANDROID_ARM64_API26_LIB + "/crtbegin_so.o",
+    crt_end_exe = "@android_tools//:" + ANDROID_ARM64_API26_LIB + "/crtend_android.o",
+    crt_end_so = "@android_tools//:" + ANDROID_ARM64_API26_LIB + "/crtend_so.o",
+    cxx_include_markers = [
+        "@libcxx//:include/__config",
+        "@libcxxabi//:include/cxxabi.h",
+        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
+    ],
+    lto = select({
+        "//engine/src/flutter/build/bazel:lto_enabled": True,
+        "//conditions:default": False,
+    }),
+    objcopy = "@clang_linux_x64//:bin/llvm-objcopy",
+    os = "android",
+    resource_include_marker = "@clang_linux_x64//:resource_include_marker",
+    runtime_library = "@android_tools//:builtins_arm64_api26",
+    strip = "@clang_linux_x64//:bin/llvm-strip",
+    sysroot_marker = "@android_tools//:sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/NOTICE",
+    target_cpu = "aarch64",
+    target_libc = "bionic_26",
+    target_system_name = "aarch64-unknown-linux-android",
+    toolchain_identifier = "android_arm64_api26_clang",
+)
+
+cc_toolchain(
+    name = "android_arm64_api26_clang",
+    all_files = ":android_arm64_api26_all_files",
+    ar_files = "@clang_linux_x64//:ar_files",
+    compiler_files = ":android_arm64_compiler_files",
+    dwp_files = ":empty",
+    linker_files = ":android_arm64_api26_linker_files",
+    objcopy_files = "@clang_linux_x64//:objcopy_files",
+    strip_files = "@clang_linux_x64//:strip_files",
+    supports_param_files = True,
+    toolchain_config = ":android_arm64_api26_clang_config",
+    toolchain_identifier = "android_arm64_api26_clang",
+)
+
+# Registered ahead of android_arm64_clang_toolchain (MODULE.bazel), which
+# matches the api26 platform too: the first match wins.
+toolchain(
+    name = "android_arm64_api26_clang_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:android",
+        "@platforms//cpu:aarch64",
+        ":api26",
+    ],
+    toolchain = ":android_arm64_api26_clang",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
