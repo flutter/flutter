@@ -547,6 +547,14 @@ const Map<String, String> toolchainPlatforms = <String, String>{
       '//engine/src/flutter/build/bazel/toolchains:android_arm64_api26',
 };
 
+/// The outputs of an action that are directories (GN declares a directory
+/// output like a file: the Android embedding's javadoc tree), by the
+/// action's GN label, each as its path under `$target_gen_dir`: declared
+/// as directories (gn_action's output_dirs).
+const Map<String, Set<String>> actionDirectoryOutputs = <String, Set<String>>{
+  '//flutter/shell/platform/android:gen_android_javadoc': <String>{'javadocs'},
+};
+
 /// Programs an action runs, which GN names by their absolute paths
 /// (`rebase_path("//flutter/third_party/java/openjdk/bin/javac")`), each
 /// with the files it loads at run time: the program is a tool of the rule
