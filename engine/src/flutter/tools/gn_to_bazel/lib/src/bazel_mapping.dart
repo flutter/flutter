@@ -375,18 +375,20 @@ const Map<String, String> labelOverrides = <String, String>{
   // resolves to as well (buildOutputLabels).
   '//flutter/third_party/dart/runtime/bin:gen_snapshot':
       '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot',
-  // The host's analyze_snapshot (the root group lists it beside
-  // gen_snapshot): the wrap's product too.
+  // The target's analyze_snapshot (the root group lists it beside
+  // gen_snapshot where the engine artifacts are built): the wrap's product
+  // too, an aarch64 binary in the Linux arm64 cross build.
   '//flutter/third_party/dart/runtime/bin:analyze_snapshot':
       '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot',
-  // The same two named in the host toolchain (the Android shell's archives
-  // of them): the wrap's host products, which in a cross build sit under
-  // the host toolchain's directory (gen_snapshot_host; analyze_snapshot is
-  // the host's in any build).
+  // The same two named in the host toolchain (lib/snapshot's
+  // generate_snapshot_bins, the Android shell's archives of them): the
+  // wrap's host products, which in a cross build sit under the host
+  // toolchain's directory and in the host's own build are the target's
+  // files.
   r'//flutter/third_party/dart/runtime/bin:gen_snapshot($host_toolchain)':
       '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host',
   r'//flutter/third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)':
-      '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot',
+      '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host',
   '//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion':
       '//engine/src/flutter/build/bazel/dart_wrap:libdouble_conversion',
   '//flutter/third_party/dart/third_party/perfetto:libprotozero':
@@ -1440,7 +1442,7 @@ const Map<String, String> buildOutputLabels = <String, String>{
   // wrap's host products.
   '//@out/clang_x64/gen_snapshot': '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host',
   '//@out/clang_x64/analyze_snapshot':
-      '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot',
+      '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host',
   // The Android shell's assembly of icudtl.dat (bin_to_assembly, a template
   // whose output the converter cannot enumerate), which the embedder's
   // Android sources name by path ([buildOutputCompilerInputs] has what its
