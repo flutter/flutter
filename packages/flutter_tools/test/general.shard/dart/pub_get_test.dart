@@ -1085,6 +1085,61 @@ exit code: 66
     expect(preloadCache.existsSync(), false);
   });
 
+  testWithoutContext(
+    'pub cache preload is not invoked when .pub-preload-cache has no archives',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory preloadCache = fileSystem.currentDirectory.childDirectory(
+        '.pub-preload-cache',
+      )..createSync(recursive: true);
+      preloadCache.childFile('README.txt').createSync();
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('1.0.0'));
+
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'bin/cache/dart-sdk/bin/dart',
+            'pub',
+            '--suppress-analytics',
+            '--directory',
+            '.',
+            'get',
+            '--example',
+          ],
+          environment: const <String, String>{
+            'FLUTTER_ROOT': '',
+            'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
+          },
+          onRun: (_) => writePackageConfigFiles(
+            directory: fileSystem.currentDirectory,
+            mainLibName: 'my_app',
+          ),
+        ),
+      ]);
+
+      final Platform platform = FakePlatform(environment: <String, String>{'HOME': '/global'});
+      final logger = BufferLogger.test();
+      final pub = Pub.test(
+        platform: platform,
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        botDetector: const FakeBotDetector(false),
+        stdio: FakeStdio(),
+      );
+
+      await pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.flutterTests,
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(preloadCache.existsSync(), false);
+    },
+  );
+
   testUsingContext('pub cache in environment is used', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
