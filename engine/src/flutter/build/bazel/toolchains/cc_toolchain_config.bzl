@@ -123,13 +123,14 @@ _LINUX_DEFINES = [
 # Android's (//build/config:feature_flags, //build/config/compiler:compiler
 # and :runtime_library under is_android, the libc++ configs): no large-file
 # defines (bionic is 64-bit-offset throughout), the NDK's ANDROID and
-# HAVE_SYS_UIO_H, fortified libc, and two spellings bionic's headers expect.
+# HAVE_SYS_UIO_H, and two spellings bionic's headers expect. Not here:
+# _FORTIFY_SOURCE=2, which is chromium_code's (copts.bzl's
+# FLUTTER_LOCAL_DEFINES), first-party compiles' alone.
 _ANDROID_DEFINES = [
     "USE_OPENSSL=1",
     "USE_OPENSSL_CERTS=1",
     "ANDROID",
     "HAVE_SYS_UIO_H",
-    "_FORTIFY_SOURCE=2",
     "__compiler_offsetof=__builtin_offsetof",
     "nan=__builtin_nan",
     "_LIBCPP_DISABLE_AVAILABILITY=1",
