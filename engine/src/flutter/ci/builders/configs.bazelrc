@@ -57,13 +57,11 @@ build:android_release_x64_ddm --compilation_mode=opt --//engine/src/flutter/comm
 
 # linux_android_aot_engine_size_exp.json: ci/android_release_arm64_size_exp
 #   --target-dir ci/android_release_arm64_size_exp --runtime-mode release --android --android-cpu arm64 --no-dart-secure-socket --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --no-dart-secure-socket (not in the converter's table of tools/gn flags)
+build:android_release_arm64_size_exp --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine_size_exp.json: ci/android_debug_arm64_size_exp
 #   --target-dir ci/android_debug_arm64_size_exp --android --android-cpu=arm64 --no-lto --no-dart-secure-socket --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --no-dart-secure-socket (not in the converter's table of tools/gn flags)
+build:android_debug_arm64_size_exp --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_debug_engine.json: ci/android_debug
 #   --target-dir ci/android_debug --android --android-cpu=arm --no-lto --rbe --no-goma
@@ -163,8 +161,7 @@ build:host_debug_unopt_impeller_tests --compilation_mode=fastbuild --//engine/sr
 
 # linux_unopt.json: ci/android_debug_arm64_validation_layers
 #   --target-dir ci/android_debug_arm64_validation_layers --android --android-cpu=arm64 --no-lto --enable-vulkan-validation-layers --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --enable-vulkan-validation-layers (not in the converter's table of tools/gn flags)
+build:android_debug_arm64_validation_layers --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_unopt.json: ci/android_debug_unopt
 #   --target-dir ci/android_debug_unopt --android --unoptimized --rbe --no-goma

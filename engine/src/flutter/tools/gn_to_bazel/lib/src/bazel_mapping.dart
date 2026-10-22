@@ -1081,6 +1081,11 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
   // --gn-args=dart_dynamic_modules=true, the `_ddm` builders): the Dart
   // wrap's flag, which the archives' names also read.
   'dart_dynamic_modules': '//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled',
+  // runtime_args.gni's dart_disable_secure_socket (tools/gn
+  // --no-dart-secure-socket, the size-experiment builders): the Dart wrap's
+  // flag, which the archives' names read (`-size-exp`).
+  'dart_disable_secure_socket':
+      '//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled',
   // common/config.gni's enable_backtrace and build_engine_artifacts, as
   // tools/gn and the formula set them by platform: //flutter/common's
   // appendix. BUILDCONFIG.gn's use_flutter_cxx: build/bazel's group, the
@@ -1136,6 +1141,8 @@ final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<St
   // archives' names).
   'dart_dynamic_modules':
       '//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled',
+  'dart_disable_secure_socket':
+      '//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled',
   'stripped_symbols': '//engine/src/flutter/build/bazel:stripped_disabled',
 });
 
@@ -1380,8 +1387,9 @@ const Set<String> knownExternalVariables = <String>{
   // build's settings (webVariantArguments, conditionSettings).
   ...webVariantArguments,
   // $dart_src/runtime/runtime_args.gni (known through zip_bundle.gni): the
-  // Dart wrap's flag (conditionSettings).
+  // Dart wrap's flags (conditionSettings).
   'dart_dynamic_modules',
+  'dart_disable_secure_socket',
 };
 
 /// A Starlark constant the Bazel side keeps for a GN variable the converter
@@ -2196,9 +2204,6 @@ Assumptions generationAssumptions() {
     'is_mac': const GnBoolValue(false),
     'is_minimal_linux': const GnBoolValue(false),
     'is_official_build': const GnBoolValue(true),
-    // runtime_args.gni's dart_disable_secure_socket (tools/gn's
-    // --no-dart-secure-socket, the size-experiment builders' alone): off.
-    'dart_disable_secure_socket': const GnBoolValue(false),
     // tools/gn's --wasm-use-dwarf (DWARF rather than source maps for a
     // debug web build's symbols), off unless asked; the source map a debug
     // link writes without it (`<module>.wasm.map`) is the branch this
@@ -2324,7 +2329,6 @@ Assumptions linuxHostAssumptions() {
     // own configuration (the wrap's args).
     'is_minimal_linux': GnBoolValue(false),
     'is_official_build': GnBoolValue(true),
-    'dart_disable_secure_socket': GnBoolValue(false),
     'wasm_use_dwarf': GnBoolValue(false),
     'is_qnx': GnBoolValue(false),
     'is_wasm': GnBoolValue(false),
