@@ -1586,6 +1586,10 @@ final class _Evaluator {
   /// The root scope of the file, where imports merge.
   late final _Scope fileScope;
 
+  /// The condition the file is evaluated under (a manifest condition such
+  /// as `is_android`, or always).
+  Condition fileCondition = Condition.always;
+
   final List<_Invocation> _invocations = <_Invocation>[];
 
   /// Whether a `declare_args()` block is being evaluated, in which the
@@ -1601,6 +1605,7 @@ final class _Evaluator {
   /// one such block.
   void evaluateFile(GnBlock file, [Condition condition = Condition.always]) {
     fileScope = _Scope(null);
+    fileCondition = condition;
     _evaluateBlock(file, fileScope, condition, const <String>[], target: null);
   }
 
@@ -2409,7 +2414,7 @@ final class _Evaluator {
         }
         return _Expression.scalar(
           GnStringValue(
-            _labelInfo(_stringExpression(args[0], scope), _stringExpression(args[1], scope), node),
+            _labelInfo(_labelArgument(args[0], scope), _stringExpression(args[1], scope), node),
           ),
         );
       case GnFunctionCall(name: 'exec_script'):
@@ -2547,13 +2552,52 @@ final class _Evaluator {
     };
   }
 
+  /// A label argument (get_label_info's): one string, or one whose only
+  /// expansion is a toolchain variable in parentheses
+  /// (`"$dart_src/runtime/bin:gen_snapshot($host_toolchain)"`), kept as
+  /// written for [_labelInfo] to read the toolchain off.
+  String _labelArgument(GnNode node, _Scope scope) {
+    final _Expression expression = _expression(node, scope);
+    final GnValue? value = expression.scalar;
+    if (value is GnExpandedString) {
+      final List<GnValue> parts = value.parts;
+      if (parts.length == 3 &&
+          parts[0] is GnStringValue &&
+          parts[1] is GnReference &&
+          parts[2] == const GnStringValue(')') &&
+          (parts[0] as GnStringValue).value.endsWith('(')) {
+        return '${(parts[0] as GnStringValue).value}\$${(parts[1] as GnReference).name})';
+      }
+    }
+    return _stringExpression(node, scope);
+  }
+
   /// get_label_info(label, what) for the properties that are paths or
-  /// names; a toolchain suffix (`($default_toolchain)`) is ignored.
+  /// names. A toolchain suffix (`($default_toolchain)`) is ignored, except
+  /// that the host toolchain's `root_out_dir` in a cross build is its
+  /// subdirectory of the build directory (`clang_x64` on the Linux x64
+  /// host: the Android shell's archives of the host's gen_snapshot and
+  /// analyze_snapshot), which the file's condition decides: a file
+  /// evaluated under an OS the host does not run is a cross build, one
+  /// under a host OS is not; a file under neither cannot say.
   String _labelInfo(String label, String what, GnNode node) {
     var bare = label;
+    var toolchain = '';
     final int paren = bare.indexOf('(');
     if (paren >= 0) {
+      toolchain = bare.substring(paren + 1, bare.length - 1);
       bare = bare.substring(0, paren);
+    }
+    if (what == 'root_out_dir' && toolchain == r'$host_toolchain') {
+      final bool? host = _isHostBuild();
+      if (host == null) {
+        throw GnError(
+          node.location,
+          'get_label_info(..., "root_out_dir") of a host-toolchain label depends on whether the '
+          "build is a cross build, which the file's condition does not say",
+        );
+      }
+      return host ? buildDirRoot : '$buildDirRoot/$hostToolchainDirectory';
     }
     final int colon = bare.indexOf(':');
     final String directory = colon < 0 ? bare : bare.substring(0, colon);
@@ -3090,6 +3134,23 @@ final class _Evaluator {
     ]);
   }
 
+  /// Whether the build the file is evaluated for is the host's own (its
+  /// condition, or the assumed target OS, names an OS a host runs), a cross
+  /// build (any other OS), or neither is known (null).
+  bool? _isHostBuild() {
+    const hostOses = <String>{'is_linux', 'is_mac', 'is_win'};
+    final Condition condition = fileCondition;
+    if (condition is ConditionVariable && exclusiveOsPredicates.contains(condition.name)) {
+      return hostOses.contains(condition.name);
+    }
+    for (final String os in exclusiveOsPredicates) {
+      if (settings.assumptions[os] == const GnBoolValue(true)) {
+        return hostOses.contains(os);
+      }
+    }
+    return null;
+  }
+
   static bool _isHostToolchainTest(String a, String b) {
     return (a == 'current_toolchain' && b == 'host_toolchain') ||
         (a == 'host_toolchain' && b == 'current_toolchain');
@@ -3108,3 +3169,9 @@ final class _Evaluator {
 /// which //flutter/testing's unittests_enabled reads too, with testing.gni's
 /// other two cases.
 const String hostToolchainPredicate = 'is_host_toolchain';
+
+/// The subdirectory of the build directory that holds the host toolchain's
+/// outputs in a cross build (BUILDCONFIG.gn names the Linux x64 host's
+/// toolchain clang_x64; GN puts every non-default toolchain's outputs under
+/// its name).
+const String hostToolchainDirectory = 'clang_x64';
