@@ -99,9 +99,7 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
       // executables and APKs (the Android test phase).
       '//flutter/lib/gpu:gpu_unittests',
       '//flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests',
-      '//flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests',
       '//flutter/impeller/toolkit/android:apk_unittests',
-      '//flutter/impeller/toolkit/android:unittests',
     ],
     appendix: r'''
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -898,7 +896,6 @@ exports_files(["darwin/ios/framework/Source/AccessibilityFeatures.swift"])
     condition: 'is_android',
     skip: <String, String>{
       'apk_unittests': 'an APK of the suite (native_activity_apk): the Android test phase',
-      'unittests': 'an Android executable under output_name: the Android test phase',
     },
   ),
   ConvertedFile('//flutter/impeller/playground/image'),
@@ -1113,12 +1110,11 @@ selects.config_setting_group(
     skip: <String, String>{
       // Under is_android: the suite as an APK (testing/android's
       // native_activity_apk template, which the converter does not know);
-      // the Android test phase's.
+      // the Android test phase's. The same suite as an Android executable
+      // (vulkan_android_unittests, impeller_vulkan_android_unittests by
+      // output_name) converts: run_tests.py --type android pushes it.
       'vulkan_android_apk_unittests':
           'an APK of the suite (native_activity_apk): the Android test phase',
-      // The same suite as an Android executable, under an output_name the
-      // converter has no counterpart for (a cc_binary is named by its file).
-      'vulkan_android_unittests': 'an Android executable under output_name: the Android test phase',
     },
   ),
   ConvertedFile('//flutter/impeller/renderer/backend'),
