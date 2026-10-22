@@ -207,6 +207,12 @@ _ANDROID_LINK_FLAGS = [
 ANDROID_ARM64_COMPILE_FLAGS = ["--target=aarch64-linux-android24"]
 ANDROID_ARM64_LINK_FLAGS = ["--target=aarch64-linux-android24"]
 
+# x64: GN spells the triple with androideabi (build/config/compiler, the
+# is_android block), and its posix block adds -m64 -march=x86-64 as for the
+# host (LINUX_X64_COMPILE_FLAGS).
+ANDROID_X64_COMPILE_FLAGS = ["--target=x86_64-linux-androideabi24"] + LINUX_X64_COMPILE_FLAGS
+ANDROID_X64_LINK_FLAGS = ["--target=x86_64-linux-androideabi24"] + LINUX_X64_LINK_FLAGS
+
 # Every link GN performs produces a complete artifact -- an executable, or a
 # shared library with all of its static dependencies linked in -- so GN can
 # reject unresolved symbols in all of them (//build/config/compiler:compiler).
