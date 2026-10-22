@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -489,6 +490,22 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
+
+  /// Converts this project into a serializable [ExtensionFlutterProject] representation
+  /// for tool extensions.
+  ExtensionFlutterProject toExtensionProject() {
+    return ExtensionFlutterProject(
+      appName: manifest.appName,
+      buildDirectory: buildDirectory.uri,
+      directory: directory.uri,
+      appVersion: manifest.appVersion,
+      dependencies: <String>{...manifest.dependencies},
+      isEmpty: manifest.isEmpty,
+      isModule: isModule,
+      isPlugin: isPlugin,
+      workspace: <String>[...manifest.workspace],
+    );
+  }
 
   /// Returns a list of platform names that are supported by the project.
   List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
