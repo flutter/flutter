@@ -32,6 +32,32 @@ bool RequestAffinity(CpuAffinity affinity) {
 #endif
 }
 
+namespace {
+
+// Whether the kernel's capacities rule out little cores: every CPU reports
+// one, and none is below half of the fastest. Equal capacities say nothing,
+// since a kernel without capacity data reports 1024 for every CPU.
+bool HasNoLittleCores(const std::vector<CpuIndexAndSpeed>& cpus) {
+  std::optional<int64_t> min_capacity = std::nullopt;
+  std::optional<int64_t> max_capacity = std::nullopt;
+  for (const auto& cpu : cpus) {
+    if (!cpu.capacity.has_value()) {
+      return false;
+    }
+    const int64_t capacity = cpu.capacity.value();
+    if (!min_capacity.has_value() || capacity < min_capacity.value()) {
+      min_capacity = capacity;
+    }
+    if (!max_capacity.has_value() || capacity > max_capacity.value()) {
+      max_capacity = capacity;
+    }
+  }
+  return min_capacity.has_value() && min_capacity != max_capacity &&
+         min_capacity.value() * 2 >= max_capacity.value();
+}
+
+}  // namespace
+
 CPUSpeedTracker::CPUSpeedTracker(std::vector<CpuIndexAndSpeed> data)
     : cpu_speeds_(std::move(data)) {
   std::optional<int64_t> max_speed = std::nullopt;
@@ -60,6 +86,14 @@ CPUSpeedTracker::CPUSpeedTracker(std::vector<CpuIndexAndSpeed> data)
     if (data.speed == min_speed_value) {
       efficiency_.push_back(data.index);
     } else {
+      not_efficiency_.push_back(data.index);
+    }
+  }
+  // The slowest cores are not little ones: excluding them would leave the
+  // fastest group alone, which may be as few as one or two cores.
+  if (HasNoLittleCores(cpu_speeds_)) {
+    not_efficiency_.clear();
+    for (const auto& data : cpu_speeds_) {
       not_efficiency_.push_back(data.index);
     }
   }

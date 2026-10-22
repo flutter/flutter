@@ -29,6 +29,9 @@ enum class CpuAffinity {
   kNotPerformance,
 
   /// @brief Request affinity for all non-efficiency cores.
+  ///
+  ///        On a device without little cores, that is every core. See
+  ///        CPUSpeedTracker.
   kNotEfficiency,
 };
 
@@ -55,10 +58,22 @@ struct CpuIndexAndSpeed {
   size_t index;
   // CPU speed in kHZ
   int64_t speed;
+  // The kernel's capacity of the CPU, if known: its performance at its
+  // highest frequency, scaled so that the fastest CPU is 1024. Parsed from
+  // cpu_capacity files, see also:
+  // https://www.kernel.org/doc/Documentation/devicetree/bindings/cpu/cpu-capacity.txt
+  std::optional<int64_t> capacity = std::nullopt;
 };
 
 /// @brief A class that computes the correct CPU indices for a requested CPU
 ///        affinity.
+///
+///        Efficiency cores are those with the lowest speed. A device without
+///        little cores has a slowest group too: on two prime and six
+///        performance cores, the non-efficiency set would be the two prime
+///        cores alone. When every CPU reports a capacity and none is below
+///        half of the fastest, the device has no little cores, and the
+///        non-efficiency set is every core.
 ///
 /// @note  This is visible for testing.
 class CPUSpeedTracker {

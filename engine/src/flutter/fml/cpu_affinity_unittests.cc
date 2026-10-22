@@ -34,6 +34,56 @@ TEST(CpuAffinity, NormalSlowMedFastCores) {
   ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[1], 2u);
 }
 
+TEST(CpuAffinity, NoLittleCores) {
+  // Two prime and six performance cores, as read on a Snapdragon 8 Elite
+  // Gen 5: the slowest cores are three quarters of the fastest.
+  std::vector<CpuIndexAndSpeed> speeds;
+  for (size_t i = 0; i < 8; i++) {
+    speeds.push_back({.index = i,
+                      .speed = i < 6 ? 3628800 : 4608000,
+                      .capacity = i < 6 ? 762 : 1024});
+  }
+  auto tracker = CPUSpeedTracker(speeds);
+
+  ASSERT_TRUE(tracker.IsValid());
+  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency).size(), 8u);
+  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kEfficiency).size(), 6u);
+  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kPerformance).size(), 2u);
+}
+
+TEST(CpuAffinity, LittleCoresByCapacity) {
+  auto speeds = {
+      CpuIndexAndSpeed{.index = 0, .speed = 2265600, .capacity = 381},
+      CpuIndexAndSpeed{.index = 1, .speed = 3148800, .capacity = 980},
+      CpuIndexAndSpeed{.index = 2, .speed = 3302400, .capacity = 1024}};
+  auto tracker = CPUSpeedTracker(speeds);
+
+  ASSERT_TRUE(tracker.IsValid());
+  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency).size(), 2u);
+  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[0], 1u);
+  ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[1], 2u);
+}
+
+TEST(CpuAffinity, CapacitiesThatSayNothing) {
+  // A kernel without capacity data reports 1024 for every CPU; a missing
+  // capacity leaves the speeds to decide too.
+  for (const auto& capacities :
+       {std::vector<std::optional<int64_t>>{1024, 1024, 1024},
+        std::vector<std::optional<int64_t>>{762, std::nullopt, 1024}}) {
+    std::vector<CpuIndexAndSpeed> speeds;
+    for (size_t i = 0; i < 3; i++) {
+      speeds.push_back({.index = i,
+                        .speed = static_cast<int64_t>(i + 1),
+                        .capacity = capacities[i]});
+    }
+    auto tracker = CPUSpeedTracker(speeds);
+
+    ASSERT_TRUE(tracker.IsValid());
+    ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency).size(), 2u);
+    ASSERT_EQ(tracker.GetIndices(CpuAffinity::kNotEfficiency)[0], 1u);
+  }
+}
+
 TEST(CpuAffinity, NoCpuData) {
   auto tracker = CPUSpeedTracker({});
 
