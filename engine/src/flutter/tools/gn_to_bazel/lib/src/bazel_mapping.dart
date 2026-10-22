@@ -371,6 +371,10 @@ const Map<String, String> labelOverrides = <String, String>{
   // resolves to as well (buildOutputLabels).
   '//flutter/third_party/dart/runtime/bin:gen_snapshot':
       '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot',
+  // The host's analyze_snapshot (the root group lists it beside
+  // gen_snapshot): the wrap's product too.
+  '//flutter/third_party/dart/runtime/bin:analyze_snapshot':
+      '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot',
   '//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion':
       '//engine/src/flutter/build/bazel/dart_wrap:libdouble_conversion',
   '//flutter/third_party/dart/third_party/perfetto:libprotozero':
@@ -740,7 +744,9 @@ String bazelLabel(String gnLabel, {required String package, GnLocation? location
       return entry.value + absolute.substring(entry.key.length);
     }
   }
-  if (absolute.startsWith('//flutter/') || absolute == '//flutter') {
+  if (absolute.startsWith('//flutter/') ||
+      absolute.startsWith('//flutter:') ||
+      absolute == '//flutter') {
     return '$bazelRootPackage${absolute.substring(1)}';
   }
   throw GnError(location ?? GnLocation(package, 0, 0), 'no Bazel home for label $gnLabel');
@@ -1234,6 +1240,8 @@ const Set<String> knownExternalVariables = <String>{
   'build_engine_artifacts',
   'enable_backtrace',
   'enable_unittests',
+  // //flutter/testing/testing.gni (iOS only; assumed off)
+  'enable_ios_unittests',
   'feature_defines_list',
   'flutter_cflags_objc',
   'flutter_cflags_objcc',
@@ -1958,6 +1966,14 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // Declares build_glfw_shell (a Linux host builds the GLFW shell beside
     // the GTK one), which the Linux shell's file reads.
     '//flutter/shell/platform/glfw/config.gni',
+    // Declares build_embedder_examples (off: tools/gn's
+    // --build-embedder-examples turns it on for one builder), which the root
+    // file reads for the example embedders.
+    '//flutter/examples/examples.gni',
+    // Declares enable_desktop_embeddings (on: tools/gn's
+    // --disable-desktop-embeddings turns it off for no Linux builder), which
+    // the platform shells' group reads.
+    '//flutter/shell/platform/config.gni',
     '//flutter/third_party/glfw/glfw_args.gni',
     // The engine's answers to the Khronos trees' build_overrides (where
     // SPIRV-Headers and SPIRV-Tools are, build_with_chromium = false) and
@@ -2008,6 +2024,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//build/config/android/config.gni',
     // The bin_to_assembly template (templateMappings).
     '//flutter/build/bin_to_obj.gni',
+    // The Dart tree's copy_trees template, which the root file imports
+    // without invoking.
+    '//flutter/third_party/dart/build/dart/copy_tree.gni',
     // gen_snapshot.gni: the gen_snapshot templates of the AOT archives, whose
     // invocations are skipped.
     '//flutter/lib/snapshot/gen_snapshot.gni',
@@ -2057,6 +2076,8 @@ Assumptions generationAssumptions() {
     'is_component_build': const GnBoolValue(false),
     'is_fuchsia': const GnBoolValue(false),
     'is_ios': const GnBoolValue(false),
+    // testing.gni: `is_ios && flutter_runtime_mode == "debug"`.
+    'enable_ios_unittests': const GnBoolValue(false),
     'is_mac': const GnBoolValue(false),
     'is_minimal_linux': const GnBoolValue(false),
     'is_official_build': const GnBoolValue(true),
@@ -2166,6 +2187,7 @@ Assumptions linuxHostAssumptions() {
     'is_component_build': GnBoolValue(false),
     'is_fuchsia': GnBoolValue(false),
     'is_ios': GnBoolValue(false),
+    'enable_ios_unittests': GnBoolValue(false),
     'is_linux': GnBoolValue(true),
     'is_mac': GnBoolValue(false),
     // BUILDCONFIG.gn's default; tools/gn sets it only for the Dart SDK's
