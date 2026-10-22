@@ -90,6 +90,7 @@ abstract class ViewRasterizer {
     await prepareToDraw();
     await viewEmbedder.submitFrame(recorder);
     if (presentationTimer != null) {
+      presentationTimer.stop();
       Profiler.instance.benchmark(
         'presentation_duration',
         presentationTimer.elapsedMicroseconds.toDouble(),
