@@ -1017,7 +1017,7 @@ converter reads the Linux builder files (`tools/gn_to_bazel`'s
 `builders.dart`, run with the rest) and generates two files beside them.
 `ci/builders/configs.bazelrc`, which the root `.bazelrc` imports, has a
 `build:<name>` configuration per Linux build -- the x64 host's own, the
-web's and the arm64 cross builds' -- whose flags the Bazel build can all express -- `--runtime-mode` is the runtime mode setting,
+web's, the arm64 cross builds' and Android's -- whose flags the Bazel build can all express -- `--runtime-mode` is the runtime mode setting,
 `--unoptimized` the compilation mode (its absence `-c opt`), `--target-dir`
 the build directory, `--web` the wasm platform
 (`--platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten`,
@@ -1143,7 +1143,15 @@ et query targets --backend bazel //flutter/fml/...        # the rules under fml,
 et query targets --backend bazel --testonly //flutter/... # the tests
 et lint --backend bazel --config host_debug_unopt         # clang-tidy over the build's compile_commands.json
 et run --backend bazel --config host_debug_unopt -- -d linux  # install, then flutter run --local-engine
+et build --backend bazel --config ci/android_debug_x64 //flutter/shell/platform/android:flutter_jar_zip
+et build --backend bazel --config android_debug_unopt_arm64  # the developer's linux/android_debug_unopt_arm64, installed into out/android_debug_unopt_arm64
 ```
+
+Android builds are named as `et` names them under GN: `ci/android_debug_x64`
+for CI's, `android_debug_unopt_arm64` for `local_engine.json`'s
+`linux/android_debug_unopt_arm64` (there is no developer `android_debug_x64`
+on Linux; `et build --help --verbose` lists what there is). `ci/` builds
+are accepted without `--verbose`; `--help` merely hides them.
 
 `et build` with no targets is GN's default target, everything, which under
 Bazel is the build's install target run into its build directory
