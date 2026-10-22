@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
 
 /// Typedef for an extension RPC handler function.
@@ -39,20 +40,13 @@ class ToolExtensionCapabilities {
 
   /// Deserializes [ToolExtensionCapabilities] from a JSON map payload.
   factory ToolExtensionCapabilities.fromJson(Map<String, Object?> json) {
-    final Object? servicesList = json[servicesKey];
-    final services = servicesList is Iterable ? List<String>.from(servicesList) : <String>[];
-    final Object? platformsList = json[supportedPlatformsKey];
-    final Set<String> supportedPlatforms = platformsList is Iterable
-        ? platformsList.map((Object? p) => p.toString().toLowerCase()).toSet()
-        : const <String>{'linux', 'macos', 'windows'};
-    final String? extensionName = switch (json[extensionNameKey]) {
-      final String name => name,
-      _ => null,
-    };
     return ToolExtensionCapabilities(
-      services: services,
-      extensionName: extensionName,
-      supportedPlatforms: supportedPlatforms,
+      extensionName: json.nullableField<String>(extensionNameKey),
+      services: json.stringIterable(servicesKey).toList(),
+      supportedPlatforms: json
+          .stringIterable(supportedPlatformsKey)
+          .map((String p) => p.toLowerCase())
+          .toSet(),
     );
   }
 
