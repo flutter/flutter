@@ -717,6 +717,101 @@ void main() {
           },
         );
 
+        testWithoutContext(
+          'does not initialize dynamic options when --no-extensions precedes command',
+          () async {
+            final toolContext = FakeToolContext();
+            final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
+            final runner = FlutterCommandRunner(
+              toolContext: toolContext,
+              featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+            )..addCommand(dynamicCommand);
+
+            await runner.run(<String>['--wrap-column', '80', '--no-extensions', 'dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isFalse);
+          },
+        );
+
+        testWithoutContext(
+          'does not initialize dynamic options when --no-extensions follows command',
+          () async {
+            final toolContext = FakeToolContext();
+            final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
+            final runner = FlutterCommandRunner(
+              toolContext: toolContext,
+              featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+            )..addCommand(dynamicCommand);
+
+            await runner.run(<String>['dynamic-cmd', '--no-extensions']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isFalse);
+          },
+        );
+
+        testWithoutContext('resolves global options with arguments after a subcommand during dynamic option initialization', () async {
+          final toolContext = FakeToolContext();
+          final dynamicSubcommand = _FakeDynamicFlutterCommand(
+            commandName: 'dynamic-sub',
+            toolContext: toolContext,
+          );
+          final parentCommand = _FakeParentFlutterCommand(
+            subcommand: dynamicSubcommand,
+            toolContext: toolContext,
+          );
+          final runner = FlutterCommandRunner(
+            toolContext: toolContext,
+            featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          )..addCommand(parentCommand);
+
+          // Pass global option '--wrap-column' with value '80' between parent command and subcommand.
+          await runner.run(<String>['parent-cmd', '--wrap-column', '80', 'dynamic-sub']);
+
+          expect(dynamicSubcommand.didInitializeDynamicOptions, isTrue);
+        });
+
+        testWithoutContext(
+          'initializes dynamic options when --extensions overrides preceding --no-extensions',
+          () async {
+            final toolContext = FakeToolContext();
+            final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
+            final runner = FlutterCommandRunner(
+              toolContext: toolContext,
+              featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+            )..addCommand(dynamicCommand);
+
+            await runner.run(<String>['--no-extensions', '--extensions', 'dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isTrue);
+          },
+        );
+
+        testWithoutContext(
+          'stops scanning subcommands at -- separator during dynamic option initialization',
+          () async {
+            final toolContext = FakeToolContext();
+            final dynamicSubcommand = _FakeDynamicFlutterCommand(
+              commandName: 'dynamic-sub',
+              toolContext: toolContext,
+            );
+            final parentCommand = _FakeParentFlutterCommand(
+              subcommand: dynamicSubcommand,
+              toolContext: toolContext,
+            );
+            final runner = FlutterCommandRunner(
+              toolContext: toolContext,
+              featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+            )..addCommand(parentCommand);
+
+            await expectLater(
+              () => runner.run(<String>['parent-cmd', '--', 'dynamic-sub']),
+              throwsA(isA<UsageException>()),
+            );
+
+            expect(dynamicSubcommand.didInitializeDynamicOptions, isFalse);
+          },
+        );
+
         testUsingContext(
           'propagates local engine options to DeferredArtifacts and context Artifacts',
           () async {
@@ -811,7 +906,7 @@ class FakeStdio extends Stdio {
 
 final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
   _FlutterCommandWithItsOwnMachineFlag({required bool verboseHelp}) {
-    addMachineOutputFlag(verboseHelp: verboseHelp);
+    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
   }
 
   @override
@@ -827,7 +922,7 @@ final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
 }
 
 final class _FakeParentFlutterCommand extends FlutterCommand {
-  _FakeParentFlutterCommand({required FlutterCommand subcommand}) {
+  _FakeParentFlutterCommand({required FlutterCommand subcommand, super.toolContext}) {
     addSubcommand(subcommand);
   }
 
@@ -844,7 +939,11 @@ final class _FakeParentFlutterCommand extends FlutterCommand {
 }
 
 final class _FakeDynamicFlutterCommand extends FlutterCommand with ExtensionArgParserMixin {
-  _FakeDynamicFlutterCommand({this.commandName = 'dynamic-cmd', FlutterCommand? subcommand}) {
+  _FakeDynamicFlutterCommand({
+    this.commandName = 'dynamic-cmd',
+    FlutterCommand? subcommand,
+    super.toolContext,
+  }) {
     if (subcommand != null) {
       addSubcommand(subcommand);
     }

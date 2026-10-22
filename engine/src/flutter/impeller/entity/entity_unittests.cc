@@ -1706,7 +1706,7 @@ TEST_P(EntityTest, RuntimeEffect) {
 
     struct FragUniforms {
       Vector2 iResolution;
-      Scalar iTime;
+      Scalar iTime = 0.0f;
     } frag_uniforms = {
         .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
         .iTime = static_cast<Scalar>(GetSecondsElapsed()),
@@ -1767,7 +1767,7 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
 
   struct FragUniforms {
     Vector2 iResolution;
-    Scalar iTime;
+    Scalar iTime = 0.0f;
   } frag_uniforms = {
       .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
       .iTime = static_cast<Scalar>(GetSecondsElapsed()),
@@ -1833,7 +1833,7 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
 
   struct FragUniforms {
     Vector2 iResolution;
-    Scalar iTime;
+    Scalar iTime = 0.0f;
   } frag_uniforms = {
       .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
       .iTime = static_cast<Scalar>(GetSecondsElapsed()),
