@@ -3200,7 +3200,7 @@ selects.config_setting_group(
 
 zip_bundle(
     name = "analyze_snapshot",
-    files = {"analyze_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot"},
+    files = {"analyze_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host"},
     output = select({
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/analyze-snapshot-linux-x64.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/analyze-snapshot-linux-x64.zip",
@@ -3248,7 +3248,7 @@ zip_bundle(
         ":when_is_android_and_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    deps = ["//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot"],
+    deps = ["//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host"],
 )
 
 # `target_cpu == "x64" || target_cpu == "arm64" || target_cpu == "riscv64"`, for the select()s of this file.
