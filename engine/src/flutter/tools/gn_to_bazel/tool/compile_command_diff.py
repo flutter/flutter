@@ -203,12 +203,82 @@ def bazel_commands(aquery_path):
     if not sources:
       continue
     source = bazel_path(sources[-1])
-    if source in chosen and chosen[source] <= rank:
+    if source in chosen and chosen[source] < rank:
       continue
-    chosen[source] = rank
-    commands[source] = normalize(args[1:], 'bazel', None)
+    if chosen.get(source) != rank:
+      chosen[source] = rank
+      commands[source] = {}
+    commands[source][_bazel_target(args)] = normalize(args[1:], 'bazel', None)
     COMPILER_FAMILIES[source] = _compiler_family(args[0])
   return commands
+
+
+def _bazel_target(args):
+  """The name of the rule a Bazel compile belongs to, off its object's `_objs/<name>/` directory."""
+  for i, arg in enumerate(args):
+    if arg == '-o' and i + 1 < len(args):
+      path = args[i + 1]
+      marker = path.find('/_objs/')
+      if marker >= 0:
+        return path[marker + len('/_objs/'):].split('/')[0]
+  return ''
+
+
+def _gn_target(argv):
+  """The name of the GN target a compile belongs to, off its object's `<target>.<source>.o` name."""
+  for i, arg in enumerate(argv):
+    if arg == '-o' and i + 1 < len(argv):
+      base = os.path.basename(argv[i + 1])
+      return base.split('.')[0] if '.' in base else ''
+  return ''
+
+
+def pairs(bazel_compiles, gn_compiles):
+  """The compiles of one source to compare, as (bazel flags, gn flags, label).
+
+  A source compiled once on each side pairs regardless of the targets'
+  names. One compiled several times on a side (dl_benchmarks.cc for two
+  benchmark binaries; ICU's cmemory.cpp for icuuc and the bidi subset) pairs
+  by the compiling target's name where both sides have it, the rest by the
+  likeness of their flag sets, most alike first and only when they are
+  mostly alike (a renamed target; not a target one build has and the other
+  does not, such as the bidi subset of ICU that Bazel's host graph carries
+  and GN's host build never compiles); the label names the targets where
+  it matters. Compiles left unpaired are counted in the summary.
+  """
+  if len(bazel_compiles) == 1 and len(gn_compiles) == 1:
+    return [(next(iter(bazel_compiles.values())), next(iter(gn_compiles.values())), '')]
+  result = []
+  common = sorted(set(bazel_compiles) & set(gn_compiles))
+  for target in common:
+    result.append((bazel_compiles[target], gn_compiles[target], target))
+  rest_bazel = [t for t in sorted(bazel_compiles) if t not in common]
+  rest_gn = [t for t in sorted(gn_compiles) if t not in common]
+  candidates = sorted(((_likeness(bazel_compiles[b], gn_compiles[g]), b, g)
+                       for b in rest_bazel
+                       for g in rest_gn),
+                      key=lambda c: (-c[0], c[1], c[2]))
+  used_bazel, used_gn = set(), set()
+  for likeness, bazel_target, gn_target in candidates:
+    if likeness < LIKENESS_FLOOR or bazel_target in used_bazel or gn_target in used_gn:
+      continue
+    used_bazel.add(bazel_target)
+    used_gn.add(gn_target)
+    result.append(
+        (bazel_compiles[bazel_target], gn_compiles[gn_target], bazel_target + '~' + gn_target)
+    )
+  return result
+
+
+# The least share of flags two compiles of a source must share to count as
+# the same target's under two names.
+LIKENESS_FLOOR = 0.75
+
+
+def _likeness(a, b):
+  """How alike two flag sets are: the share of their union both have."""
+  union = len(a | b)
+  return len(a & b) / union if union else 1.0
 
 
 # Source file -> 'emscripten' or 'clang', from the Bazel compile's compiler:
@@ -232,6 +302,7 @@ def gn_commands(compile_commands_path, wanted, toolchain=None):
   with open(compile_commands_path, encoding='utf-8') as f:
     entries = json.load(f)
   commands = {}
+  toolchain_of = {}
   for entry in entries:
     directory = entry['directory']
     # out/<config>, relative to engine/src, from the absolute directory.
@@ -257,9 +328,16 @@ def gn_commands(compile_commands_path, wanted, toolchain=None):
     if toolchain is not None:
       if _object_directory(argv) != toolchain + '/obj/':
         continue
-    elif source in commands and not _default_toolchain(argv):
-      continue
-    commands[source] = normalize(argv[1:], 'gn', out_dir)
+    elif source in commands:
+      # The default toolchain's compiles displace a secondary toolchain's;
+      # a secondary toolchain's never join the default's.
+      had_default = toolchain_of.get(source) == 'obj/'
+      if had_default and not _default_toolchain(argv):
+        continue
+      if not had_default and _default_toolchain(argv):
+        commands[source] = {}
+    toolchain_of[source] = _object_directory(argv)
+    commands.setdefault(source, {})[_gn_target(argv)] = normalize(argv[1:], 'gn', out_dir)
   return commands
 
 
@@ -305,7 +383,16 @@ def main():
     common = [
         f for f in common if f.startswith('flutter/') and not f.startswith('flutter/third_party/')
     ]
-  print(f'bazel {len(bazel)} compiles, gn matched {len(gn)}, compared {len(common)}')
+  compared = [(source, pair) for source in common for pair in pairs(bazel[source], gn[source])]
+  unpaired_bazel = sum(len(bazel[source]) for source in common) - len(compared)
+  unpaired_gn = sum(len(gn[source]) for source in common) - len(compared)
+  print(
+      f'bazel {sum(len(c) for c in bazel.values())} compiles of {len(bazel)} sources, '
+      f'gn matched {len(gn)} sources, compared {len(compared)} compiles' + (
+          f' (unpaired: {unpaired_bazel} Bazel, {unpaired_gn} GN)'
+          if unpaired_bazel or unpaired_gn else ''
+      )
+  )
   if unknown_repositories:
     print(
         'repositories not in SYNCED_REPOSITORIES (their files did not match):',
@@ -319,13 +406,15 @@ def main():
   class_examples = {}
   full_classes = collections.Counter()
   full_examples = {}
-  for source in common:
-    if bazel[source] == gn[source]:
+  for source, (bazel_flags, gn_flags, target) in compared:
+    if target:
+      source = f'{source} ({target})'
+    if bazel_flags == gn_flags:
       identical += 1
       identical_modulo_includes += 1
       continue
-    only_bazel = bazel[source] - gn[source]
-    only_gn = gn[source] - bazel[source]
+    only_bazel = bazel_flags - gn_flags
+    only_gn = gn_flags - bazel_flags
     full_key = (tuple(sorted(only_bazel)), tuple(sorted(only_gn)))
     full_classes[full_key] += 1
     full_examples.setdefault(full_key, source)
@@ -341,9 +430,9 @@ def main():
       classes[key] += 1
       class_examples.setdefault(key, source)
 
-  print(f'identical flag sets: {identical} of {len(common)}')
+  print(f'identical flag sets: {identical} of {len(compared)}')
   print(
-      f'identical ignoring Bazel-only -I directories: {identical_modulo_includes} of {len(common)}'
+      f'identical ignoring Bazel-only -I directories: {identical_modulo_includes} of {len(compared)}'
   )
   print('Bazel-only defines (files):')
   for define, count in bazel_only_defines.most_common():
