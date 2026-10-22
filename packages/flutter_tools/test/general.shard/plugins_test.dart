@@ -2254,7 +2254,6 @@ platforms:
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: globals.fs,
               isDevDependency: false,
             ),
             throwsToolExit(message: 'Invalid plugin specification evil_plugin'),
@@ -2278,7 +2277,6 @@ platforms:
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: globals.fs,
               isDevDependency: false,
             ),
             throwsToolExit(),
@@ -2303,7 +2301,6 @@ platforms:
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: globals.fs,
               isDevDependency: false,
             ),
             throwsToolExit(message: 'Invalid plugin specification evil_dart_plugin'),
@@ -2329,7 +2326,6 @@ pluginClass: "Evil(); evilInjectedCall(); //"
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: globals.fs,
               isDevDependency: false,
             ),
             throwsToolExit(message: 'The "pluginClass" must be a valid identifier'),
@@ -2351,7 +2347,6 @@ pluginClass: EvilPlugin
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: globals.fs,
               isDevDependency: false,
             ),
             throwsToolExit(message: 'The "androidPackage" must be a valid identifier'),
@@ -2372,7 +2367,6 @@ iosPrefix: "FLT; evilInjectedCall(); //"
             loadYaml(maliciousYaml) as YamlMap,
             null,
             const <String>[],
-            fileSystem: globals.fs,
             isDevDependency: false,
           ),
           throwsToolExit(message: 'The "iosPrefix" must be a valid identifier'),
@@ -2395,7 +2389,6 @@ platforms:
             loadYaml(malformedYaml) as YamlMap,
             null,
             const <String>[],
-            fileSystem: globals.fs,
             isDevDependency: false,
           ),
           throwsToolExit(
@@ -2418,7 +2411,6 @@ platforms:
             loadYaml(malformedYaml) as YamlMap,
             null,
             const <String>[],
-            fileSystem: globals.fs,
             isDevDependency: false,
           ),
           throwsToolExit(
@@ -2445,7 +2437,6 @@ platforms:
             loadYaml(malformedYaml) as YamlMap,
             null,
             const <String>[],
-            fileSystem: globals.fs,
             isDevDependency: false,
           ),
           throwsToolExit(
@@ -2471,7 +2462,6 @@ platforms:
           loadYaml(yamlWithEmptyFileName) as YamlMap,
           null,
           const <String>[],
-          fileSystem: globals.fs,
           isDevDependency: false,
         );
         expect(plugin.pluginDartClassPlatforms['windows']?.dartFileName, 'sample_plugin.dart');
@@ -2492,7 +2482,6 @@ iosPrefix: "FLT; evilInjectedCall(); //"
               loadYaml(maliciousYaml) as YamlMap,
               null,
               const <String>[],
-              fileSystem: globals.fs,
               isDevDependency: false,
             ),
             throwsToolExit(
@@ -2518,7 +2507,6 @@ iosPrefix: FLT
           loadYaml(legacyYaml) as YamlMap,
           null,
           const <String>[],
-          fileSystem: globals.fs,
           isDevDependency: false,
         );
 
@@ -2548,12 +2536,7 @@ iosPrefix: FLT
       testWithoutContext('Platform plugin parseFromYaml methods perform validation', () {
         final invalidYaml = YamlMap.wrap(<String, Object?>{'pluginClass': 123});
         expect(
-          AndroidPlugin.parseFromYaml(
-            'foo',
-            invalidYaml,
-            pluginPath: '',
-            fileSystem: MemoryFileSystem.test(),
-          ),
+          AndroidPlugin.parseFromYaml('foo', invalidYaml, pluginPath: ''),
           isA<ParseResultFail<AndroidPlugin?>>(),
         );
         expect(IOSPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<IOSPlugin?>>());
@@ -3260,7 +3243,6 @@ iosPrefix: FLT
     });
 
     testWithoutContext('ensures the correct federated implementation is selected', () {
-      final fs = MemoryFileSystem.test();
       final appFacingPlugin = Plugin(
         name: 'foo',
         path: '',
@@ -3303,12 +3285,11 @@ iosPrefix: FLT
         implementsPackage: 'foo',
         defaultPackagePlatforms: const <String, String>{},
         pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-        platforms: <String, PluginPlatform>{
+        platforms: const <String, PluginPlatform>{
           AndroidPlugin.kConfigKey: AndroidPlugin(
             name: 'foo_android',
             package: 'com.example',
             pluginPath: '',
-            fileSystem: fs,
           ),
         },
         dependencies: const <String>[],

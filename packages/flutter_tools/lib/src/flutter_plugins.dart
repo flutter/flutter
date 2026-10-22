@@ -152,7 +152,6 @@ Future<Plugin?> _pluginFromPackage(
     flutterConfig['plugin'] as YamlMap?,
     flutterConstraint,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
-    fileSystem: fs,
     appDependencies: appDependencies,
     isDevDependency: isDevDependency,
   );
@@ -555,7 +554,16 @@ public final class GeneratedPluginRegistrant {
 List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String type) {
   return <Map<String, Object?>>[
     for (final Plugin plugin in plugins)
-      if (plugin.platforms[type] case final PluginPlatform platformPlugin) platformPlugin.toMap(),
+      if (plugin.platforms[type] case final PluginPlatform platformPlugin)
+        switch (platformPlugin) {
+          AndroidPlugin() => platformPlugin.toMap(globals.fs),
+          IOSPlugin() => platformPlugin.toMap(),
+          LinuxPlugin() => platformPlugin.toMap(),
+          MacOSPlugin() => platformPlugin.toMap(),
+          WebPlugin() => platformPlugin.toMap(),
+          WindowsPlugin() => platformPlugin.toMap(),
+          _ => throw StateError('Unexpected PluginPlatform type: ${platformPlugin.runtimeType}'),
+        },
   ];
 }
 

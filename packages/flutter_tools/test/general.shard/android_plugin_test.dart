@@ -13,16 +13,15 @@ void main() {
     'AndroidPlugin throws tool exit if the plugin main class can not be found',
     () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final androidPlugin = AndroidPlugin(
+      const androidPlugin = AndroidPlugin(
         name: 'pluginA',
         package: 'com.company',
         pluginClass: 'PluginA',
         pluginPath: '.pub_cache/plugin_a',
-        fileSystem: fileSystem,
       );
 
       expect(
-        () => androidPlugin.toMap(),
+        () => androidPlugin.toMap(fileSystem),
         throwsToolExit(
           message:
               "The plugin `pluginA` doesn't have a main class defined in "
@@ -35,14 +34,13 @@ void main() {
 
   testWithoutContext('AndroidPlugin does not validate the main class for Dart-only plugins', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final androidPlugin = AndroidPlugin(
+    const androidPlugin = AndroidPlugin(
       name: 'pluginA',
       dartPluginClass: 'PluginA',
       pluginPath: '.pub_cache/plugin_a',
-      fileSystem: fileSystem,
     );
 
-    expect(androidPlugin.toMap(), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem), <String, Object>{
       'name': 'pluginA',
       'dartPluginClass': 'PluginA',
       'supportsEmbeddingV1': false,
@@ -52,19 +50,18 @@ void main() {
 
   testWithoutContext('AndroidPlugin parses embedding version 2 from the Java search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final androidPlugin = AndroidPlugin(
+    const androidPlugin = AndroidPlugin(
       name: 'pluginA',
       package: 'com.company',
       pluginClass: 'PluginA',
       pluginPath: '.pub_cache/plugin_a',
-      fileSystem: fileSystem,
     );
 
     fileSystem.file('.pub_cache/plugin_a/android/src/main/java/com/company/PluginA.java')
       ..createSync(recursive: true)
       ..writeAsStringSync('io.flutter.embedding.engine.plugins.FlutterPlugin');
 
-    expect(androidPlugin.toMap(), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem), <String, Object>{
       'name': 'pluginA',
       'package': 'com.company',
       'class': 'PluginA',
@@ -75,19 +72,18 @@ void main() {
 
   testWithoutContext('AndroidPlugin parses embedding version 1 from the Java search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final androidPlugin = AndroidPlugin(
+    const androidPlugin = AndroidPlugin(
       name: 'pluginA',
       package: 'com.company',
       pluginClass: 'PluginA',
       pluginPath: '.pub_cache/plugin_a',
-      fileSystem: fileSystem,
     );
 
     fileSystem.file('.pub_cache/plugin_a/android/src/main/java/com/company/PluginA.java')
       ..createSync(recursive: true)
       ..writeAsStringSync('some.other.string');
 
-    expect(androidPlugin.toMap(), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem), <String, Object>{
       'name': 'pluginA',
       'package': 'com.company',
       'class': 'PluginA',
@@ -98,19 +94,18 @@ void main() {
 
   testWithoutContext('AndroidPlugin parses embedding version 2 from the Kotlin search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final androidPlugin = AndroidPlugin(
+    const androidPlugin = AndroidPlugin(
       name: 'pluginA',
       package: 'com.company',
       pluginClass: 'PluginA',
       pluginPath: '.pub_cache/plugin_a',
-      fileSystem: fileSystem,
     );
 
     fileSystem.file('.pub_cache/plugin_a/android/src/main/kotlin/com/company/PluginA.kt')
       ..createSync(recursive: true)
       ..writeAsStringSync('io.flutter.embedding.engine.plugins.FlutterPlugin');
 
-    expect(androidPlugin.toMap(), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem), <String, Object>{
       'name': 'pluginA',
       'package': 'com.company',
       'class': 'PluginA',
@@ -121,19 +116,18 @@ void main() {
 
   testWithoutContext('AndroidPlugin parses embedding version 1 from the Kotlin search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final androidPlugin = AndroidPlugin(
+    const androidPlugin = AndroidPlugin(
       name: 'pluginA',
       package: 'com.company',
       pluginClass: 'PluginA',
       pluginPath: '.pub_cache/plugin_a',
-      fileSystem: fileSystem,
     );
 
     fileSystem.file('.pub_cache/plugin_a/android/src/main/kotlin/com/company/PluginA.kt')
       ..createSync(recursive: true)
       ..writeAsStringSync('some.other.string');
 
-    expect(androidPlugin.toMap(), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem), <String, Object>{
       'name': 'pluginA',
       'package': 'com.company',
       'class': 'PluginA',
