@@ -146,7 +146,7 @@ TEST(CapabilitiesGLES, MaxShaderCompilerThreadsWithKHRExtension) {
   // The mock's own proc table is created before the impl is attached, so
   // create a new one that queries the impl.
   ProcTableGLES gl(kMockResolverGLES);
-  auto capabilities = gl.GetCapabilities();
+  const auto& capabilities = gl.GetCapabilities();
   EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), 3);
 }
 
@@ -163,7 +163,7 @@ TEST(CapabilitiesGLES, MaxShaderCompilerThreadsWithARBExtension) {
   // The mock's own proc table is created before the impl is attached, so
   // create a new one that queries the impl.
   ProcTableGLES gl(kMockResolverGLES);
-  auto capabilities = gl.GetCapabilities();
+  const auto& capabilities = gl.GetCapabilities();
   EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), 3);
 }
 
@@ -181,7 +181,7 @@ TEST(CapabilitiesGLES, MaxShaderCompilerThreadsReportsImplementationMaximum) {
   // The mock's own proc table is created before the impl is attached, so
   // create a new one that queries the impl.
   ProcTableGLES gl(kMockResolverGLES);
-  auto capabilities = gl.GetCapabilities();
+  const auto& capabilities = gl.GetCapabilities();
   EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), -1);
 }
 
