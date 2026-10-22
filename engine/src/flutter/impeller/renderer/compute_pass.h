@@ -9,10 +9,10 @@
 #include <cstdint>
 #include <string>
 
-#include "fml/status.h"
 #include "impeller/core/resource_binder.h"
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -46,7 +46,7 @@ class ComputePass : public ResourceBinder {
   ///
   /// @return     A cancelled status if any dimension is zero.
   ///
-  virtual fml::Status Compute(std::array<uint32_t, 3> workgroup_count) = 0;
+  virtual absl::Status Compute(std::array<uint32_t, 3> workgroup_count) = 0;
 
   /// @brief Ensures all previously encoded compute command's buffer writes are
   ///        visible to any subsequent compute commands.

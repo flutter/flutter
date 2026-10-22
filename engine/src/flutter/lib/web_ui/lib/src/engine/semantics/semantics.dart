@@ -2959,7 +2959,7 @@ class EngineSemantics {
         return;
       } else {
         // Running a real app. Auto-enable engine semantics.
-        semanticsHelper.dispose(); // placeholder no longer needed
+        semanticsHelper.retirePlaceholders(); // placeholder no longer needed
         semanticsEnabled = true;
       }
     }
