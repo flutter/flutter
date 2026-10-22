@@ -76,7 +76,12 @@ Future<void> testMain() async {
     for (final MapEntry<String, WebParagraph Function()> entry in cases.entries) {
       test('re-layout makes no text metrics queries: ${entry.key}', () {
         final WebParagraph paragraph = entry.value();
+        // First layout measures each text span once plus the trailing empty cluster span,
+        // deriving cluster advances from DomTextCluster.x without getSelectionRects queries.
+        debugTextMetricsQueryCount = 0;
         paragraph.layout(const ParagraphConstraints(width: 500));
+        expect(debugTextMetricsQueryCount, paragraph.spans.whereType<TextSpan>().length + 1);
+
         debugTextMetricsQueryCount = 0;
         for (final width in <double>[120, 260, 80, 500]) {
           paragraph.layout(ParagraphConstraints(width: width));
@@ -200,6 +205,30 @@ Future<void> testMain() async {
       expect(paragraph.lines.single.advance, fresh.lines.single.advance);
       paragraph.dispose();
       fresh.dispose();
+    });
+
+    test('cluster advance matches the span selection across scripts and negative spacing', () {
+      final extraCases = <WebParagraph>[
+        for (final WebParagraph Function() make in cases.values) make(),
+        build((b) => b.addText('\u0645\u0631\u062D\u0628\u0627'), textDirection: TextDirection.rtl),
+        build(
+          (b) => b.addText('\u0644\u0627 \u0644\u0623 \u0644\u0625 \u0644\u0622'),
+          textDirection: TextDirection.rtl,
+        ),
+        build(
+          (b) => b.addText('iiiiiiabcdef'),
+          textStyle: WebTextStyle(color: const Color(0xFF000000), letterSpacing: -15),
+        ),
+      ];
+      for (final paragraph in extraCases) {
+        paragraph.layout(const ParagraphConstraints(width: 500));
+        for (final WebCluster cluster in paragraph.getLayout().allClusters) {
+          if (cluster is TextCluster) {
+            expect(cluster.advance, cluster.span.getClusterSelection(cluster));
+          }
+        }
+        paragraph.dispose();
+      }
     });
   });
 }
