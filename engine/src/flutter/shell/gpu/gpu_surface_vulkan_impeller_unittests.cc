@@ -8,6 +8,7 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan_impeller.h"
 #include "flutter/testing/test_vulkan_context.h"
 #include "flutter/testing/test_vulkan_surface.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "impeller/entity/vk/entity_shaders_vk.h"
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"
@@ -173,57 +174,22 @@ TEST(GPUSurfaceVulkanImpeller, RecreatesTransientsWhenFrameSizeChanges) {
   EXPECT_EQ(surface->transients_size_, impeller::ISize(200, 100));
 }
 
-class TestSwapchainVK : public impeller::SwapchainVK {
+class MockSwapchainVK : public impeller::SwapchainVK {
  public:
-  explicit TestSwapchainVK(const std::shared_ptr<impeller::Context>& context)
-      : context_(context),
-        test_context_(fml::MakeRefCounted<TestVulkanContext>()) {}
-
-  // |SwapchainVK|
-  bool IsValid() const override { return true; }
-
-  // |SwapchainVK|
-  std::unique_ptr<impeller::Surface> AcquireNextDrawable() override {
-    const DlISize size(100, 100);
-    if (!test_surface_) {
-      test_surface_ = TestVulkanSurface::Create(*test_context_, size);
-    }
-    impeller::TextureDescriptor desc;
-    desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
-    desc.size = impeller::ISize{size.width, size.height};
-    desc.storage_mode = impeller::StorageMode::kDevicePrivate;
-    desc.mip_count = 1;
-    desc.compression_type = impeller::CompressionType::kLossless;
-    desc.usage = impeller::TextureUsage::kRenderTarget;
-
-    impeller::vk::Image vk_image(test_surface_->GetImage());
-    std::shared_ptr<impeller::TextureSourceVK> wrapped =
-        impeller::WrapTextureSourceVK(context_, desc, vk_image);
-    if (!transients_) {
-      transients_ = std::make_shared<impeller::SwapchainTransientsVK>(
-          context_, desc, /*enable_msaa=*/true);
-    }
-    return impeller::SurfaceVK::WrapSwapchainImage(transients_, wrapped,
-                                                   []() { return true; });
-  }
-
-  // |SwapchainVK|
-  impeller::vk::Format GetSurfaceFormat() const override {
-    return impeller::vk::Format::eR8G8B8A8Unorm;
-  }
-
-  // |SwapchainVK|
-  void AddFinalCommandBuffer(
-      std::shared_ptr<impeller::CommandBuffer> cmd_buffer) const override {}
-
-  // |SwapchainVK|
-  void UpdateSurfaceSize(const impeller::ISize& size) override {}
-
- private:
-  std::shared_ptr<impeller::Context> context_;
-  fml::RefPtr<TestVulkanContext> test_context_;
-  std::unique_ptr<TestVulkanSurface> test_surface_;
-  std::shared_ptr<impeller::SwapchainTransientsVK> transients_;
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(std::unique_ptr<impeller::Surface>,
+              AcquireNextDrawable,
+              (),
+              (override));
+  MOCK_METHOD(impeller::vk::Format, GetSurfaceFormat, (), (const, override));
+  MOCK_METHOD(void,
+              AddFinalCommandBuffer,
+              (std::shared_ptr<impeller::CommandBuffer> cmd_buffer),
+              (const, override));
+  MOCK_METHOD(void,
+              UpdateSurfaceSize,
+              (const impeller::ISize& size),
+              (override));
 };
 
 // Regression test for https://github.com/flutter/flutter/issues/194406.
@@ -242,8 +208,38 @@ TEST(GPUSurfaceVulkanImpeller,
   std::shared_ptr<impeller::SurfaceContextVK> surface_context =
       context->CreateSurfaceContext();
   ASSERT_NE(surface_context, nullptr);
-  ASSERT_TRUE(surface_context->SetSwapchain(
-      std::make_shared<TestSwapchainVK>(context)));
+
+  // Backs each drawable acquired from the mock swapchain with a real image.
+  const DlISize size(100, 100);
+  fml::RefPtr<TestVulkanContext> test_context =
+      fml::MakeRefCounted<TestVulkanContext>();
+  std::unique_ptr<TestVulkanSurface> test_surface =
+      TestVulkanSurface::Create(*test_context, size);
+  ASSERT_NE(test_surface, nullptr);
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = impeller::ISize{size.width, size.height};
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.mip_count = 1;
+  desc.compression_type = impeller::CompressionType::kLossless;
+  desc.usage = impeller::TextureUsage::kRenderTarget;
+  std::shared_ptr<impeller::SwapchainTransientsVK> transients =
+      std::make_shared<impeller::SwapchainTransientsVK>(context, desc,
+                                                        /*enable_msaa=*/true);
+
+  std::shared_ptr<::testing::NiceMock<MockSwapchainVK>> swapchain =
+      std::make_shared<::testing::NiceMock<MockSwapchainVK>>();
+  ON_CALL(*swapchain, IsValid()).WillByDefault(::testing::Return(true));
+  EXPECT_CALL(*swapchain, AcquireNextDrawable())
+      .Times(2)
+      .WillRepeatedly([&]() -> std::unique_ptr<impeller::Surface> {
+        std::shared_ptr<impeller::TextureSourceVK> wrapped =
+            impeller::WrapTextureSourceVK(
+                context, desc, impeller::vk::Image(test_surface->GetImage()));
+        return impeller::SurfaceVK::WrapSwapchainImage(transients, wrapped,
+                                                       []() { return true; });
+      });
+  ASSERT_TRUE(surface_context->SetSwapchain(swapchain));
 
   std::unique_ptr<Surface> surface = std::make_unique<GPUSurfaceVulkanImpeller>(
       /*delegate=*/nullptr, surface_context);
@@ -253,14 +249,13 @@ TEST(GPUSurfaceVulkanImpeller,
       surface->GetAiksContext()->GetContentContext().GetTransientsDataBuffer();
   EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 0u);
 
-  std::unique_ptr<SurfaceFrame> frame =
-      surface->AcquireFrame(DlISize(100, 100));
+  std::unique_ptr<SurfaceFrame> frame = surface->AcquireFrame(size);
   ASSERT_NE(frame, nullptr);
   frame->set_submit_info({.frame_boundary = false});
   ASSERT_TRUE(frame->Submit());
   EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 1u);
 
-  frame = surface->AcquireFrame(DlISize(100, 100));
+  frame = surface->AcquireFrame(size);
   ASSERT_NE(frame, nullptr);
   frame->set_submit_info({.frame_boundary = true});
   ASSERT_TRUE(frame->Submit());
