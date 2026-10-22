@@ -51,6 +51,16 @@ DEFAULT_WARNING_FLAGS = [
 # What the toolchain passes to every compile (see the module docstring).
 TOOLCHAIN_WARNING_FLAGS = [flag for flag in DEFAULT_WARNING_FLAGS if flag != "-Werror"]
 
+# The same under is_android: GN adds -Wno-deprecated-literal-operator for
+# clang on every platform but Android (`!is_android && is_clang`), so the
+# Android lists go without it.
+ANDROID_DEFAULT_WARNING_FLAGS = [
+    flag
+    for flag in DEFAULT_WARNING_FLAGS
+    if flag != "-Wno-deprecated-literal-operator"
+]
+ANDROID_TOOLCHAIN_WARNING_FLAGS = [flag for flag in ANDROID_DEFAULT_WARNING_FLAGS if flag != "-Werror"]
+
 # `default_warning_flags` as the same file has it under `is_wasm`: the four
 # the branch adds (zlib's, freetype2's, -Wno-sign-conversion) and without
 # the two it adds for clang on the other platforms, which the Emscripten
@@ -75,16 +85,18 @@ WASM_DEFAULT_WARNING_FLAGS = [
     "-Wno-range-loop-construct",
 ]
 
-# The per-target lists differ by platform where GN's configs test is_wasm:
-# a select() over the converter's OS settings (build/bazel/BUILD.bazel),
-# which a BUILD file's `copts = FLUTTER_COPTS + [...]` composes with. A
-# Label, since the overlays of external repositories load this file too.
-_NOT_WASM = Label("//engine/src/flutter/build/bazel:not_wasm")
+# The per-target lists differ by platform where GN's configs test is_wasm
+# and is_android: a select() over the platforms' OS, which a BUILD file's
+# `copts = FLUTTER_COPTS + [...]` composes with. Labels, since the overlays
+# of external repositories load this file too.
+_ANDROID = Label("@platforms//os:android")
+_WASM = Label("@platforms//os:emscripten")
 
-def _by_platform(other, wasm):
+def _by_platform(other, wasm, android):
     return select({
-        _NOT_WASM: other,
-        "//conditions:default": wasm,
+        _ANDROID: android,
+        _WASM: wasm,
+        "//conditions:default": other,
     })
 
 # //build/config/compiler:chromium_code (cflags): first-party code and the
@@ -96,6 +108,10 @@ CHROMIUM_CODE_COPTS = _by_platform(
         "-Wextra",
     ] + DEFAULT_WARNING_FLAGS,
     WASM_DEFAULT_WARNING_FLAGS,
+    [
+        "-Wall",
+        "-Wextra",
+    ] + ANDROID_DEFAULT_WARNING_FLAGS,
 )
 
 # //build/config/compiler:chromium_code (cflags) + //flutter:config.
@@ -139,6 +155,11 @@ FLUTTER_THIRD_PARTY_COPTS = _by_platform(
         "-Wno-newline-eof",
         "-Wno-typedef-redefinition",
     ] + WASM_DEFAULT_WARNING_FLAGS,
+    [
+        "-Wno-deprecated-non-prototype",
+        "-Wno-newline-eof",
+        "-Wno-typedef-redefinition",
+    ] + ANDROID_DEFAULT_WARNING_FLAGS,
 )
 
 # config.gni's `feature_defines_list`: the runtime mode and slimpeller as
