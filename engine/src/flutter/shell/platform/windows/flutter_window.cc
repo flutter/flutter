@@ -339,6 +339,9 @@ void FlutterWindow::OnCursorRectUpdated(const Rect& rect) {
 
 void FlutterWindow::OnResetImeComposing() {
   AbortImeComposing();
+  if (ime_end_composition_deferred_) {
+    EndImeComposition();
+  }
 }
 
 bool FlutterWindow::OnBitmapSurfaceCleared() {
