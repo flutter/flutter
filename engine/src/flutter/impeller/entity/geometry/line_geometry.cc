@@ -82,7 +82,7 @@ namespace {
 /// Minimizes the err when rounding to the closest 0.5 value.
 /// If we round up, it drops down a half.  If we round down it bumps up a half.
 Scalar RoundToHalf(Scalar x) {
-  return std::trunc(x) + 0.5;
+  return std::trunc(x) + static_cast<Scalar>(0.5);
 }
 }  // namespace
 
