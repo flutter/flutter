@@ -13,6 +13,7 @@ import 'bazel_mapping.dart';
 import 'dependency_resolver.dart';
 import 'gn_ast.dart';
 import 'gn_eval.dart';
+import 'manifest.dart';
 
 const String _licenseHeader = '''
 # Copyright 2013 The Flutter Authors. All rights reserved.
@@ -369,6 +370,8 @@ String emitBuildFile(
   List<String> implicitDeps = const <String>[],
   GnSourceTree? tree,
   DependencyResolver? forwardedFlags,
+  List<String> unconvertedDeps = const <String>[],
+  Set<String> filesGroups = const <String>{},
 }) {
   final DependencyResolver forwarded =
       forwardedFlags ??
@@ -400,11 +403,30 @@ String emitBuildFile(
     }
   }
   emitter.skippedTargets.addAll(skipped);
+  emitter.unconvertedDeps.addAll(unconvertedDeps);
+  emitter.filesGroups.addAll(filesGroups);
+  for (final name in filesGroups) {
+    if (emitter.localTargets[name]?.rule != 'group') {
+      throw GnError(
+        GnLocation(evaluation.file, 0, 0),
+        'filesGroups names $name, which is not a group of the file',
+      );
+    }
+  }
   for (final GnTarget target in evaluation.targets) {
     if (skipTargets.contains(target.name)) {
       continue;
     }
     emitter.convert(target);
+  }
+  final List<String> unused = unconvertedDeps
+      .where((String label) => !emitter.usedUnconvertedDeps.contains(label))
+      .toList();
+  if (unused.isNotEmpty) {
+    throw GnError(
+      GnLocation(evaluation.file, 0, 0),
+      'unconvertedDeps lists ${unused.join(', ')}, which no group of the file depends on',
+    );
   }
   return emitter.render(evaluation.file, skipped, appendix: appendix);
 }
@@ -527,6 +549,17 @@ final class _Emitter {
   /// skipped and the run's skipTargets): a template's label list leaves a
   /// dependency on one out, there being no target to name.
   final Set<String> skippedTargets = <String>{};
+
+  /// Dependencies of the file's groups that have no Bazel counterpart yet
+  /// (the manifest's unconvertedDeps), by absolute GN label; left out of the
+  /// generated groups and listed in the header. [usedUnconvertedDeps] has
+  /// the ones met.
+  final Set<String> unconvertedDeps = <String>{};
+  final Set<String> usedUnconvertedDeps = <String>{};
+
+  /// Groups of the file that are groups of things to build, never linked
+  /// against (the manifest's filesGroups): filegroups.
+  final Set<String> filesGroups = <String>{};
 
   /// The local configs some target of the file lists (whose compiler flags
   /// are therefore inlined there).
@@ -834,12 +867,16 @@ final class _Emitter {
     }
   }
 
-  /// group("x") forwards its dependencies: a `cc_library` with only `deps`.
-  /// With nothing to compile it cannot keep a private dependency private
-  /// (Bazel's implementation_deps need sources), so `deps` and
-  /// `public_deps` both become `deps`, which is what GN does for linking.
+  /// group("x") forwards its dependencies: a `cc_library` with only `deps`
+  /// (its actions and copies as `srcs` and `data`), which is what a GN group
+  /// does for linking -- a `filegroup` when it is a group of things to
+  /// build that nothing links against (the manifest's filesGroups: the root
+  /// group `flutter` and what it reaches; wasm links). With nothing to
+  /// compile it cannot keep a private dependency private (Bazel's
+  /// implementation_deps need sources), so `deps` and `public_deps` both
+  /// become `deps`.
   void _convertGroup(GnTarget target) {
-    if (_isFilesGroup(target)) {
+    if (filesGroups.contains(target.name) || _isWasmGroup(target)) {
       _convertFilesGroup(target);
       return;
     }
@@ -852,7 +889,7 @@ final class _Emitter {
           _depsInto(rule, variable, target);
         case 'public_deps':
           _depsInto(rule, variable, target);
-          _forwardedFlagsInto(propagated, variable);
+          _forwardedFlagsInto(propagated, variable, target);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
         case 'public_configs':
@@ -885,11 +922,8 @@ final class _Emitter {
   /// Whether a group stands for wasm modules: every dependency is a link in
   /// a wasm toolchain of this file (CanvasKit's `group("canvaskit") {
   /// public_deps = [ ":canvaskit_js" ] }`, which the web SDK's copies name),
-  /// and the group adds no configs. Such a group is a filegroup -- its
-  /// dependencies' files -- where a group of libraries is a cc_library (and
-  /// a group of other files, which libraries may list among their deps,
-  /// stays one with the files as `data`).
-  bool _isFilesGroup(GnTarget target) {
+  /// a group of files rather than of libraries.
+  bool _isWasmGroup(GnTarget target) {
     var any = false;
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
@@ -921,7 +955,7 @@ final class _Emitter {
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'deps' || 'public_deps':
-          _labelsInto(rule.list('srcs'), variable, target);
+          _labelsInto(rule.list('srcs'), variable, target, withViews: false);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
         default:
@@ -2428,7 +2462,7 @@ final class _Emitter {
           _depsInto(rule, variable, target);
           _propagatedFlagsInto(rule, variable);
           if (variable.name == 'public_deps') {
-            _forwardedFlagsInto(propagated, variable);
+            _forwardedFlagsInto(propagated, variable, target);
           }
         case 'defines':
           _stringsInto(rule.list('local_defines'), variable, defines: true);
@@ -2782,8 +2816,11 @@ final class _Emitter {
   /// ([forwarded]), which GN hands on to its dependents in turn -- public
   /// configs travel along public_deps chains -- collected into
   /// [propagated] for [_checkPropagatedFlags].
-  void _forwardedFlagsInto(List<ForwardedFlag> propagated, GnVariable variable) {
+  void _forwardedFlagsInto(List<ForwardedFlag> propagated, GnVariable variable, GnTarget target) {
     _forEachItem(variable, into: _ListAttribute(), (_Element e) {
+      if (_isUnconvertedDep(target, _string(e))) {
+        return;
+      }
       for (final ForwardedFlag flag in forwarded.flagsOf(_gnLabel(_string(e)))) {
         propagated.add((condition: e.condition.and(flag.condition), flag: flag.flag));
       }
@@ -3205,7 +3242,12 @@ final class _Emitter {
     return text.replaceAll('$genDirRoot/', '');
   }
 
-  void _labelsInto(_ListAttribute attribute, GnVariable variable, GnTarget target) {
+  void _labelsInto(
+    _ListAttribute attribute,
+    GnVariable variable,
+    GnTarget target, {
+    bool withViews = true,
+  }) {
     _forEachItem(variable, into: attribute, (_Element e) {
       final String gnLabel = _string(e);
       // A dependency on a target of this file that is not converted (the
@@ -3214,9 +3256,14 @@ final class _Emitter {
       if (gnLabel.startsWith(':') && skippedTargets.contains(_localName(gnLabel))) {
         return;
       }
+      if (_isUnconvertedDep(target, gnLabel)) {
+        return;
+      }
       final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
       attribute.addUnique(e.condition, _item(_localLabel(label), e));
-      _rootIncludeViewsInto(attribute, label, e.condition);
+      if (withViews) {
+        _rootIncludeViewsInto(attribute, label, e.condition);
+      }
     });
   }
 
@@ -3250,7 +3297,24 @@ final class _Emitter {
   /// runfiles.
   bool _isLocalData(String gnLabel) {
     return _isLocalWasmLink(gnLabel) ||
-        _isFilesRule(_localRule(gnLabel) ?? _ruleElsewhere(gnLabel));
+        _isFilesRule(_localRule(gnLabel) ?? _ruleElsewhere(gnLabel)) ||
+        _isFilesGroup(gnLabel);
+  }
+
+  /// Whether [gnLabel] names a group the manifest marks as a group of things
+  /// to build (filesGroups), of this file or another: a filegroup, which a
+  /// C++ target carries as data.
+  bool _isFilesGroup(String gnLabel) {
+    final String label = _gnLabel(_withoutToolchain(gnLabel));
+    final int colon = label.indexOf(':');
+    if (colon < 0) {
+      return false;
+    }
+    final String directory = label.substring(0, colon);
+    final String name = label.substring(colon + 1);
+    return directory == gnPackage
+        ? filesGroups.contains(name)
+        : manifestEntry(directory)?.filesGroups.contains(name) ?? false;
   }
 
   /// Whether a `:name` label names a link in a wasm toolchain of this file:
@@ -3301,9 +3365,27 @@ final class _Emitter {
   /// Like [_labelsInto] for a compiled target's dependencies: those on
   /// actions of this file go to `srcs` instead, those on copies and
   /// file-producing templates of this file to `data`.
+  /// Whether [gnLabel], a dependency of [target], is one the manifest
+  /// leaves out of a group (unconvertedDeps: no Bazel counterpart yet); the
+  /// header lists it.
+  bool _isUnconvertedDep(GnTarget target, String gnLabel) {
+    if (target.rule != 'group') {
+      return false;
+    }
+    final String label = _gnLabel(_withoutToolchain(gnLabel));
+    if (!unconvertedDeps.contains(label)) {
+      return false;
+    }
+    usedUnconvertedDeps.add(label);
+    return true;
+  }
+
   void _depsInto(_Rule rule, GnVariable variable, GnTarget target) {
     _forEachItem(variable, into: rule.list('deps'), (_Element e) {
       final String gnLabel = _string(e);
+      if (_isUnconvertedDep(target, gnLabel)) {
+        return;
+      }
       final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
       final list = _isLocalAction(gnLabel)
           ? 'srcs'
@@ -3957,14 +4039,22 @@ final class _Emitter {
     if (skipped.isNotEmpty) {
       out.writeln('# Not converted: ${skipped.join(', ')}.');
     }
+    if (usedUnconvertedDeps.isNotEmpty) {
+      final List<String> left = unconvertedDeps.where(usedUnconvertedDeps.contains).toList();
+      out.writeln('# Dependencies left out, having no Bazel counterpart yet: ${left.join(', ')}.');
+    }
     out.writeln();
     final List<String> loadFiles = loads.keys.toList()..sort(_compareLoads);
     for (final bzl in loadFiles) {
       final List<String> symbols = loads[bzl]!.toList()..sort();
       out.writeln('load("$bzl", ${symbols.map((String s) => '"$s"').join(', ')})');
     }
+    // One blank line between the header and the package() (a file of
+    // filegroups alone loads nothing).
+    if (loadFiles.isNotEmpty) {
+      out.writeln();
+    }
     out
-      ..writeln()
       ..writeln('package(default_visibility = ["//visibility:public"])')
       ..write(body);
     if (appendix != null) {

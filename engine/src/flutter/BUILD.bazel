@@ -2,10 +2,181 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# The engine (GN's `//flutter`).
+# Generated from //flutter/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: config, export_dynamic_symbols, export_dynamic_test_symbols, dist.
+# Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart:dart_sdk, //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests, //flutter/impeller/toolkit/android:apk_unittests, //flutter/impeller/toolkit/android:unittests.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:install.bzl", "install")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "flutter",
+    testonly = True,
+    # Compile the engine.
+    srcs = [
+        "//engine/src/flutter/lib/snapshot:generate_snapshot_bins",  # !is_fuchsia && !is_qnx
+        "//engine/src/flutter/shell/platform/embedder:flutter_engine",  # !is_qnx
+        "//engine/src/flutter/sky",  # !is_qnx
+    ] + select({
+        "//engine/src/flutter/testing:unittests_enabled": [
+            ":unittests",  # !is_qnx && enable_unittests
+            "//engine/src/flutter/display_list:display_list_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/display_list:display_list_builder_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/display_list:display_list_region_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/display_list:display_list_transform_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/display_list:primitive_rendering_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/fml:fml_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/impeller/geometry:geometry_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/lib/ui:ui_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/shell/common:shell_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/txt:txt_benchmarks",  # enable_unittests && !is_win && !is_fuchsia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:engine_artifacts": [
+            # Built alongside gen_snapshot for 64 bit targets
+            "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot",  # !is_fuchsia && !is_qnx && build_engine_artifacts && host_os == "linux"
+            # This must be listed explicitly for desktop cross-builds since
+            # //flutter/lib/snapshot:generate_snapshot_bin will only build
+            # gen_snapshot for the host and not the target.
+            "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            "//engine/src/flutter/flutter_frontend_server:frontend_server",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            # Impeller artifacts - compiler and libtessellator
+            "//engine/src/flutter/impeller/compiler:impellerc",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            "//engine/src/flutter/impeller/tessellator:tessellator_shared",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+            "//engine/src/flutter/shell/testing",  # build_engine_artifacts
+            "//engine/src/flutter/tools/engine_tool:tests",  # build_engine_artifacts
+            "//engine/src/flutter/tools/font_subset",  # build_engine_artifacts
+            "//engine/src/flutter/tools/licenses_cpp",  # !is_fuchsia && !is_qnx && build_engine_artifacts && host_os == "linux" || (host_os == "mac")
+            "//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner",  # !is_fuchsia && !is_qnx && build_engine_artifacts && host_os == "linux" || (host_os == "mac")
+            # path_ops
+            "//engine/src/flutter/tools/path_ops",  # !is_fuchsia && !is_qnx && build_engine_artifacts
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": [
+            "//engine/src/flutter/impeller/toolkit/interop:sdk",  # is_mac || is_linux || is_win || is_android || is_qnx
+        ],
+        "@platforms//os:android": [
+            "//engine/src/flutter/impeller/toolkit/interop:sdk",  # is_mac || is_linux || is_win || is_android || is_qnx
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_android_and_flutter_runtime_mode_debug": [
+            "//engine/src/flutter/shell/platform/embedder:embedder-archive",  # is_android && (flutter_runtime_mode == "debug")
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+filegroup(
+    name = "unittests",
+    testonly = True,
+    srcs = select({
+        "@platforms//os:android": [
+            "//engine/src/flutter/shell/platform/android:flutter_shell_native_unittests",  # is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/testing:unittests_enabled": [
+            "//engine/src/flutter/assets:assets_unittests",  # enable_unittests
+            "//engine/src/flutter/display_list:display_list_rendertests",  # enable_unittests
+            "//engine/src/flutter/display_list:display_list_unittests",  # enable_unittests
+            "//engine/src/flutter/flow:flow_unittests",  # enable_unittests
+            "//engine/src/flutter/fml:fml_unittests",  # enable_unittests
+            "//engine/src/flutter/lib/ui:ui_unittests",  # enable_unittests
+            "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",  # enable_unittests
+            "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",  # enable_unittests
+            "//engine/src/flutter/runtime:runtime_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/common:shell_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/geometry:geometry_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/gpu:gpu_surface_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/shell/platform/android/jni:jni_unittests",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",  # enable_unittests && !is_win && !is_fuchsia
+            "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",  # enable_unittests && enable_desktop_embeddings
+            # These tests require the embedder and thus cannot run on fuchsia.
+            # TODO(): Enable when embedder works on fuchsia.
+            "//engine/src/flutter/shell/platform/common:common_cpp_unittests",  # enable_unittests && enable_desktop_embeddings && !is_fuchsia
+            "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",  # enable_unittests && enable_desktop_embeddings
+            "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",  # enable_unittests
+            "//engine/src/flutter/shell/platform/embedder:embedder_unittests",  # enable_unittests
+            # These tests require GLFW and thus cannot run on fuchsia.
+            "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",  # enable_unittests && enable_desktop_embeddings && !is_fuchsia
+            "//engine/src/flutter/testing:testing_unittests",  # enable_unittests
+            "//engine/src/flutter/testing/dart",  # enable_unittests
+            "//engine/src/flutter/testing/smoke_test_failure",  # enable_unittests
+            "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",  # enable_unittests
+            "//engine/src/flutter/txt:txt_unittests",  # enable_unittests
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_enable_unittests_and_is_linux": [
+            "//engine/src/flutter/impeller:impeller_dart_unittests",  # enable_unittests && is_mac || is_linux || is_win
+            "//engine/src/flutter/impeller:impeller_unittests",  # enable_unittests && is_mac || is_linux || is_win
+            "//engine/src/flutter/impeller/toolkit/interop:example",  # enable_unittests && is_mac || is_linux || is_win
+            "//engine/src/flutter/shell/platform/linux:flutter_linux_unittests",  # enable_unittests && enable_desktop_embeddings && is_linux
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_enable_unittests_and_is_linux_and_is_host_toolchain": [
+            "//engine/src/flutter/shell/platform/glfw:flutter_glfw_unittests",  # enable_unittests && enable_desktop_embeddings && is_linux && build_glfw_shell
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+filegroup(
+    name = "archives",
+    testonly = True,
+    srcs = ["//engine/src/flutter/build/archives:artifacts"],
+    target_compatible_with = select({
+        "//engine/src/flutter/common:engine_artifacts": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# `is_android && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_android_and_flutter_runtime_mode_debug",
+    match_all = [
+        "@platforms//os:android",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `enable_unittests && is_linux`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_linux",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "@platforms//os:linux",
+    ],
+)
+
+# `enable_unittests && is_linux && is_host_toolchain`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_linux_and_is_host_toolchain",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "@platforms//os:linux",
+        "//engine/src/flutter/build/bazel:host_toolchain",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# config("config"), config("export_dynamic_symbols") and
+# config("export_dynamic_test_symbols") of BUILD.gn, by hand: the first is the
+# two include roots engine code is written against (engine/src and this
+# directory), which the converter's `includes` cannot say for a directory
+# above the package; the other two carry linker inputs that the converter's
+# configs do not yet. Every engine library depends on :config.
 
 # config("config") in BUILD.gn: the two include roots engine code is written
 # against -- engine/src ("flutter/fml/...") and this directory

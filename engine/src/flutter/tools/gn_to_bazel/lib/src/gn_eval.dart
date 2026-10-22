@@ -2122,11 +2122,17 @@ final class _Evaluator {
       // list under a select(), which no GN file of the engine needs.
       variable = scope.variables.putIfAbsent(name, () => GnVariable(name, isList: value.isList));
       if (variable.isList && variable.assignments.isNotEmpty && condition != Condition.always) {
-        // One shape is an append in disguise: `public_configs = []` and
+        // Two shapes are an append in disguise: `public_configs = []` and
         // then, in a branch, `public_configs = [ ":gles_config" ]`
-        // (impeller's GLES backend outside Android and Fuchsia). With
-        // nothing assigned so far, the branch's `=` is its `+=`.
-        if (variable.assignments.every((GnAssignment a) => a.items.isEmpty)) {
+        // (impeller's GLES backend outside Android and Fuchsia) -- with
+        // nothing assigned so far, the branch's `=` is its `+=` -- and one
+        // `=` per branch of an if/else chain (the platform shells' group:
+        // `deps = [ "android" ]` under is_android, `deps = []` under
+        // is_linux), where no two assignments can both happen.
+        if (variable.assignments.every((GnAssignment a) => a.items.isEmpty) ||
+            variable.assignments.every(
+              (GnAssignment a) => a.condition.and(condition) == Condition.never,
+            )) {
           reassignedEmpty = true;
         } else {
           throw GnError(

@@ -182,6 +182,8 @@ Future<int> run(List<String> arguments) async {
         implicitDeps: manifest?.implicitDeps ?? const <String>[],
         tree: tree,
         forwardedFlags: forwardedFlags,
+        unconvertedDeps: manifest?.unconvertedDeps ?? const <String>[],
+        filesGroups: manifest?.filesGroups ?? const <String>{},
       );
       if (buildifier != null) {
         output = await _format(buildifier, output);
