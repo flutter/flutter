@@ -234,7 +234,7 @@ void main() {
       scriptFile.writeAsStringSync('''
 #!/bin/sh
 echo "The Dart VM service is listening on http://127.0.0.1:41187/wXxrm1n2GUI=/"
-sleep 30
+exec sleep 30
 ''');
       await Process.run('chmod', <String>['+x', scriptFile.path]);
 
@@ -261,6 +261,27 @@ sleep 30
       expect(
         await service.getVmServiceUri(deviceId: LinuxDeviceService.customLinuxDeviceId),
         isNull,
+      );
+
+      scriptFile.writeAsStringSync('''
+#!/bin/sh
+echo "The Dart VM service is listening on http://[::1]:51234/"
+exec sleep 30
+''');
+      expect(
+        await service.launchApp(
+          debuggingOptions: const ExtensionDebuggingOptions(
+            buildMode: .debug,
+            debuggingEnabled: true,
+          ),
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+          executableUri: scriptFile.absolute.uri,
+        ),
+        isTrue,
+      );
+      expect(
+        await service.getVmServiceUri(deviceId: LinuxDeviceService.customLinuxDeviceId),
+        Uri.parse('http://[::1]:51234/'),
       );
     }, skip: !Platform.isLinux && !Platform.isMacOS); // [intended] Uses POSIX shell script.
   });

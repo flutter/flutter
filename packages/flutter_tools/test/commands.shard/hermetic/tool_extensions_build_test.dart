@@ -27,6 +27,36 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+final class _SucceedingBuildService extends BuildService {
+  @override
+  Future<List<ExtensionBuildTarget>> getBuildTargets() async {
+    return const <ExtensionBuildTarget>[
+      ExtensionBuildTarget(
+        description: 'Hermetic custom build target.',
+        name: 'custom-hermetic-build',
+      ),
+    ];
+  }
+
+  @override
+  Future<ExtensionBuildResult> build({
+    required BuildMode buildMode,
+    required String mainPath,
+    required Uri projectRoot,
+    required String targetName,
+  }) async {
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+void _succeedingBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_SucceedingBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
 final class _FailingAndConflictingBuildService extends BuildService {
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
@@ -372,7 +402,7 @@ void main() {
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+          entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
@@ -393,9 +423,9 @@ void main() {
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-        await commandRunner.run(<String>['build', 'custom-linux-build', '--no-pub']);
+        await commandRunner.run(<String>['build', 'custom-hermetic-build', '--no-pub']);
 
-        expect(command.subcommands.containsKey('custom-linux-build'), isTrue);
+        expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
 
         await manager.dispose();
       },

@@ -23,8 +23,9 @@ final class LinuxDeviceService extends DeviceService {
   /// Identifier of the prototype Linux target device.
   static const String customLinuxDeviceId = 'custom_linux_device';
 
+  // Mirrors kVMServiceMessageRegExp in package:flutter_tools/src/vmservice.dart.
   static final _vmServicePattern = RegExp(
-    r'The Dart VM service is listening on (http://127\.0\.0\.1:\d+/[a-zA-Z0-9_=-]+/?)',
+    r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
   );
 
   final _runningApps = <String, _RunningApp>{};
