@@ -599,7 +599,9 @@ action("android_jar") {
         "//third_party/vulkan_validation_layers($apilevel26_toolchain)"
     deps += [ validation_layer_target ]
     if (stripped_symbols) {
-      validation_library = "lib.stripped/libVkLayer_khronos_validation.so"
+      validation_library = rebase_path(
+              "$root_build_dir/lib.stripped/libVkLayer_khronos_validation.so",
+              root_build_dir)
     } else {
       validation_layer_out_dir =
           get_label_info(validation_layer_target, "root_out_dir")
