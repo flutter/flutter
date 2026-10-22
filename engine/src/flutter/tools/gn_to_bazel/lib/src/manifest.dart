@@ -87,9 +87,8 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
       'config': 'hand-written in the appendix (an include root above the package)',
       'export_dynamic_symbols': 'hand-written in the appendix (linker inputs)',
       'export_dynamic_test_symbols': 'hand-written in the appendix (linker inputs)',
-      'dist': 'a group over //flutter/lib/gpu/dist and //flutter/sky/dist, neither converted',
     },
-    filesGroups: <String>{'flutter', 'unittests', 'archives'},
+    filesGroups: <String>{'flutter', 'unittests', 'archives', 'dist'},
     unconvertedDeps: <String>[
       // The Dart SDK copy (copy_tree) and the Dart test fixtures.
       '//flutter/build/dart:dart_sdk',
@@ -888,7 +887,15 @@ filegroup(
 exports_files(["darwin/ios/framework/Source/AccessibilityFeatures.swift"])
 ''',
   ),
-  ConvertedFile('//flutter/sky', filesGroups: <String>{'sky'}),
+  ConvertedFile(
+    '//flutter/sky',
+    filesGroups: <String>{'sky'},
+    appendix: '''
+# sky/dist's action copies the assembled sky_engine package for release with
+# this script.
+exports_files(["tools/dist_dart_pkg.py"])
+''',
+  ),
   ConvertedFile('//flutter/sky/packages', filesGroups: <String>{'packages'}),
   ConvertedFile('//flutter/impeller/toolkit/egl'),
   ConvertedFile('//flutter/impeller/toolkit/gles'),
@@ -1218,8 +1225,41 @@ filegroup(
     name = "dart_sources",
     srcs = glob(["lib/**/*.dart"]),
 )
+
+# The package directory as flutter_gpu.zip ships it (lib/gpu/dist; the
+# converter's directorySources names it): every file of this package and of
+# its dist subpackage, as zip.py's walk of //flutter/lib/gpu takes them.
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]) + ["//engine/src/flutter/lib/gpu/dist:all_files"],
+    visibility = ["//engine/src/flutter/lib/gpu/dist:__pkg__"],
+)
 ''',
   ),
+  // The Flutter GPU package's release archives (flutter_gpu.zip at the
+  // Android archive directory and at the root of zip_archives, the old
+  // location the tool still reads): zip_bundles over the package directory,
+  // which only the Android builders build.
+  ConvertedFile(
+    '//flutter/lib/gpu/dist',
+    condition: 'is_android',
+    filesGroups: <String>{'dist'},
+    appendix: '''
+# This package's own files, for //engine/src/flutter/lib/gpu:all_files (the
+# archive walks the whole of lib/gpu, this directory included).
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]),
+    visibility = ["//engine/src/flutter/lib/gpu:__pkg__"],
+)
+''',
+  ),
+  // The sky_engine package's release archives (sky_engine.zip, likewise at
+  // two locations): dist_dart_pkg.py copies the assembled package
+  // (gen/dart-pkg/sky_engine, a dart_pkg's directory) to
+  // dist/packages/sky_engine, a directory output under the build directory
+  // (actionDirectoryOutputs), which the zip_bundles walk.
+  ConvertedFile('//flutter/sky/dist', condition: 'is_android', filesGroups: <String>{'dist'}),
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.

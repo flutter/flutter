@@ -18,9 +18,16 @@ the paths in the arguments as tokens this rule expands:
                       (`@repo//:dir`), a directory of another repository;
   $(gen PATH)         a generated file or directory, PATH relative to the
                       repository root under the output directory -- where
-                      GN's `$target_gen_dir` and `$root_gen_dir` land;
+                      GN's `$target_gen_dir` and `$root_gen_dir` land; when
+                      the closure of `deps` places gen/PATH in the build
+                      directory (BuildDirectoryInfo), that file -- or, for a
+                      directory that several of them fill (gen/dart-pkg/
+                      sky_engine: dart_pkg's package directory and the
+                      libraries copied beside it), a directory assembled
+                      from what they place there (stage_build_directory.py)
+                      -- which the script then reads;
   $(built PATH)       the file at PATH under GN's build directory: one of the
-                      action's own `build_outputs`, or one that the closure
+                      action's own `build_outputs` (or `build_output_dirs`), or one that the closure
                       of its `deps` places there (BuildDirectoryInfo: another
                       action's build output, a linked shared library, its
                       lib.stripped/ copy), which the script then reads; or
@@ -50,7 +57,7 @@ load(
 )
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "module_platform_transition")
 
-def expand_gn_paths(ctx, arg, targets, placed = {}, used = None):
+def expand_gn_paths(ctx, arg, targets, placed = {}, used = None, staged = None, own = {}):
     """Expands the path tokens of one argument (see the module docstring).
 
     For rules besides gn_action whose arguments the converter writes with the
@@ -63,6 +70,11 @@ def expand_gn_paths(ctx, arg, targets, placed = {}, used = None):
       placed: the files of the build directory `$(built ...)` may name, by
         their path under it.
       used: a list the files `$(built ...)` named are appended to, if given.
+      staged: a dict, build-directory path -> directory artifact, of the
+        directories assembled for the tokens so far, if the rule can assemble
+        one (it has PYTHON_ATTRS); None otherwise.
+      own: the rule's own build outputs among `placed` (a dict of files),
+        which a token names as outputs, not as something to read.
 
     Returns:
       The argument with every token replaced.
@@ -79,14 +91,26 @@ def expand_gn_paths(ctx, arg, targets, placed = {}, used = None):
         token = rest[start + 2:end]
         kind, _, path = token.partition(" ")
         if kind == "gen":
-            value = _gen_path(ctx, path)
+            # What a dep places at gen/PATH, or a placed directory holding
+            # it (a package directory under gen/dart-pkg/), before the
+            # output directory's own path for it. PATH is relative to the
+            # repository root; GN's build directory is rooted at engine/src.
+            gn_root = "engine/src/"
+            placed_path = _placed_input(
+                ctx,
+                "gen/" + (path[len(gn_root):] if path.startswith(gn_root) else path),
+                placed,
+                used,
+                staged,
+                own,
+            )
+            value = placed_path if placed_path != None else _gen_path(ctx, path)
         elif kind == "src":
             value = _src_path(ctx, path)
         elif kind == "built":
-            if path in placed:
-                value = placed[path].path
-                if used != None:
-                    used.append(placed[path])
+            placed_path = _placed_input(ctx, path, placed, used, staged, own) if path not in (".", "") else None
+            if placed_path != None:
+                value = placed_path
             elif path in (".", "") or [p for p in placed if p.startswith(path + "/")]:
                 # The build directory itself, or a directory under it that
                 # holds a placed file: where this rule's own build outputs
@@ -101,6 +125,76 @@ def expand_gn_paths(ctx, arg, targets, placed = {}, used = None):
         out += rest[:start] + value
         rest = rest[end + 1:]
     return out + rest
+
+def _placed_input(ctx, path, placed, used, staged, own):
+    """Where a script finds `path` of the build directory among what the deps place.
+
+    The file placed at `path`; a path inside a placed directory; or, when
+    several placements fall under `path` (a directory of the build directory
+    that more than one target fills), a directory assembled from them
+    (stage_build_directory.py), one per path, which the action reads
+    instead. None when nothing is placed there.
+
+    Args:
+      ctx: the rule context.
+      path: a path under the build directory.
+      placed: build-directory path -> file, what the deps' closures place
+        (and the rule's own build outputs).
+      used: a list the files the script reads are appended to, if given.
+      staged: the directories assembled so far, by path, or None when the
+        rule cannot assemble one.
+      own: the rule's own build outputs (a dict of files): a directory
+        holding only those is where the script writes, not reads (None).
+
+    Returns:
+      The path in the execution root, or None.
+    """
+    under = [(p, file) for p, file in placed.items() if p.startswith(path + "/") and file not in own]
+    above = [
+        (p, file)
+        for p, file in placed.items()
+        if file.is_directory and path.startswith(p + "/")
+    ]
+    if path in placed and not under:
+        if used != None:
+            used.append(placed[path])
+        return placed[path].path
+    if above and not under and path not in placed:
+        p, file = above[0]
+        if used != None:
+            used.append(file)
+        return file.path + path[len(p):]
+    if not under and not above and path not in placed:
+        return None
+    if staged == None:
+        fail("%s: %s is a directory of the build directory that several targets fill; this rule cannot assemble it" % (ctx.label, path))
+    if path not in staged:
+        directory = ctx.actions.declare_directory(ctx.label.name + ".staged/" + path)
+        args = ctx.actions.args()
+        args.add(directory.path)
+        inputs = []
+        if path in placed:
+            args.add_all([placed[path], "."], expand_directories = False)
+            inputs.append(placed[path])
+        for p, file in above:
+            args.add_all([file.path + path[len(p):], "."], expand_directories = False)
+            inputs.append(file)
+        for p, file in under:
+            args.add_all([file, p[len(path) + 1:]], expand_directories = False)
+            inputs.append(file)
+        run_python(
+            ctx,
+            script = ctx.file._stage_script,
+            arguments = [args],
+            inputs = inputs,
+            outputs = [directory],
+            mnemonic = "StageBuildDirectory",
+            progress_message = "Assembling %s of the build directory for %%{label}" % path,
+        )
+        staged[path] = directory
+    if used != None:
+        used.append(staged[path])
+    return staged[path].path
 
 def _built_root(ctx):
     """Where a rule's build outputs are declared: its package's output directory."""
@@ -219,8 +313,12 @@ def _gn_action_impl(ctx):
     for dep in ctx.attr.platform_deps:
         for file, path in _platform_dep_entries(ctx, dep):
             placed[path] = file
-    built = [ctx.actions.declare_file(path) for path in ctx.attr.build_outputs]
-    for file, path in zip(built, ctx.attr.build_outputs):
+    built_paths = ctx.attr.build_outputs + ctx.attr.build_output_dirs
+    built = [ctx.actions.declare_file(path) for path in ctx.attr.build_outputs] + [
+        ctx.actions.declare_directory(path)
+        for path in ctx.attr.build_output_dirs
+    ]
+    for file, path in zip(built, built_paths):
         placed[path] = file
     read = []
     for path in ctx.attr.build_inputs:
@@ -236,8 +334,12 @@ def _gn_action_impl(ctx):
     for target in ctx.attr.srcs + ctx.attr.inputs + ctx.attr.deps + ctx.attr.platform_deps + ctx.attr.tools:
         if str(target.label) not in targets:
             targets[str(target.label)] = target
-    arguments = [expand_gn_paths(ctx, arg, targets.values(), placed, read) for arg in ctx.attr.args]
     own = {file: None for file in built}
+    staged = {}
+    arguments = [
+        expand_gn_paths(ctx, arg, targets.values(), placed, read, staged, own)
+        for arg in ctx.attr.args
+    ]
     inputs = ctx.files.srcs + ctx.files.inputs + dep_files + [file for file in read if file not in own]
     run_python(
         ctx,
@@ -265,7 +367,7 @@ def _gn_action_impl(ctx):
             ([
                 (output, "gen/" + package + "/" + path)
                 for output, path in zip(outputs, ctx.attr.outputs + ctx.attr.output_dirs)
-            ] if package != None else []) + list(zip(built, ctx.attr.build_outputs)) +
+            ] if package != None else []) + list(zip(built, built_paths)) +
             [entry for dep in ctx.attr.platform_deps for entry in _platform_dep_entries(ctx, dep)],
         )),
     ]
@@ -335,6 +437,14 @@ gn_action = rule(
         "output_dirs": attr.string_list(
             doc = "GN's `outputs` under `$target_gen_dir` that are directories (the javadoc tree), as paths " +
                   "relative to this package: declared as directories.",
+        ),
+        "_stage_script": attr.label(
+            default = "//engine/src/flutter/build/bazel/gn_action:stage_build_directory.py",
+            allow_single_file = True,
+        ),
+        "build_output_dirs": attr.string_list(
+            doc = "GN's `outputs` under the build directory itself that are directories " +
+                  "(`$root_build_dir/dist/packages/sky_engine`, a package copied for release), as paths under it.",
         ),
         "build_outputs": attr.string_list(
             doc = "GN's `outputs` under the build directory itself (`$root_out_dir/flutter.jar`, " +

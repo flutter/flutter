@@ -1212,12 +1212,14 @@ final class _Emitter {
               .list(directory ? 'output_dirs' : attribute)
               .addUnique(element.condition, _item(under, element));
         } else if (path.startsWith('$buildDirRoot/')) {
+          // A directory output under the build directory itself (the
+          // sky_engine package copied for release) is declared as one.
+          final String under = path.substring(buildDirRoot.length + 1);
+          final bool directory =
+              actionDirectoryOutputs['$gnPackage:${target.name}']?.contains(under) ?? false;
           rule
-              .list('build_outputs')
-              .addUnique(
-                element.condition,
-                _item(path.substring(buildDirRoot.length + 1), element),
-              );
+              .list(directory ? 'build_output_dirs' : 'build_outputs')
+              .addUnique(element.condition, _item(under, element));
         } else {
           throw GnError(
             e.assignment.location,
