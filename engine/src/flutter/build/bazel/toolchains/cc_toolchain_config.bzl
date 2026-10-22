@@ -34,6 +34,7 @@ load(
     "@rules_cc//cc:cc_toolchain_config_lib.bzl",
     "action_config",
     "feature",
+    "feature_set",
     "flag_group",
     "flag_set",
     "tool",
@@ -288,6 +289,13 @@ _ASAN_COMPILE_FLAGS = ["-fno-omit-frame-pointer", "-gline-tables-only", "-fsanit
 _ASAN_DEFINES = ["ADDRESS_SANITIZER"]
 _ASAN_LINK_FLAGS = ["-fsanitize=address"]
 
+# GN's enable_lto (//build/config/compiler:optimize, under enable_lto on
+# Linux, Android, Apple, Fuchsia and wasm): -flto on the compiles and the
+# link of an optimized build. The `lto` attribute, which BUILD.bazel
+# selects on //engine/src/flutter/build/bazel:lto; tools/gn turns it off in
+# unoptimized builds, so the feature requires the opt mode.
+_LTO_FLAGS = ["-flto"]
+
 def _defines(names):
     return ["-D" + name for name in names]
 
@@ -391,6 +399,17 @@ def _impl(ctx):
                     actions = ALL_CC_LINK_ACTION_NAMES,
                     flag_groups = [flag_group(flags = _ASAN_LINK_FLAGS)],
                 ),
+            ],
+        ),
+        # Link-time optimization, when the build asks for it, in the opt mode
+        # alone (as tools/gn has it).
+        feature(
+            name = "lto",
+            enabled = ctx.attr.lto,
+            requires = [feature_set(features = ["opt"])],
+            flag_sets = [
+                flag_set(actions = ALL_CC_COMPILE_ACTION_NAMES, flag_groups = [flag_group(flags = _LTO_FLAGS)]),
+                flag_set(actions = ALL_CC_LINK_ACTION_NAMES, flag_groups = [flag_group(flags = _LTO_FLAGS)]),
             ],
         ),
         # Compilation modes; Bazel enables exactly one of dbg/opt/fastbuild.
@@ -617,6 +636,10 @@ flutter_cc_toolchain_config = rule(
         "asan": attr.bool(
             default = False,
             doc = "Whether every compile and link is instrumented with AddressSanitizer (GN's is_asan).",
+        ),
+        "lto": attr.bool(
+            default = False,
+            doc = "Whether an optimized build compiles and links with -flto (GN's enable_lto).",
         ),
         "arch_copts": attr.string_list(
             default = LINUX_X64_COMPILE_FLAGS,

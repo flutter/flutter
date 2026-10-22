@@ -32,35 +32,39 @@ filegroup(
 )
 
 # linux_android_aot_engine.json: ci/android_profile
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
+#   bazel run --config=android_profile :android_profile
+# Not built, no Bazel counterpart yet: flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile",
     testonly = True,
-    contents = ["//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host"],
+    contents = [
+        "//engine/src/flutter:flutter",
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+    ],
     directory = "ci/android_profile",
 )
 
 # linux_android_aot_engine.json: ci/android_release
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
+#   bazel run --config=android_release :android_release
+# Not built, no Bazel counterpart yet: flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release",
     testonly = True,
-    contents = ["//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host"],
+    contents = [
+        "//engine/src/flutter:flutter",
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+    ],
     directory = "ci/android_release",
 )
 
 # linux_android_aot_engine.json: ci/android_release_arm64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+#   bazel run --config=ci_android_release_arm64 :ci_android_release_arm64
+# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
-    name = "android_release_arm64",
+    name = "ci_android_release_arm64",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -71,13 +75,13 @@ install(
 # Nothing to run.
 
 # linux_android_aot_engine.json: ci/android_profile_arm64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+#   bazel run --config=ci_android_profile_arm64 :ci_android_profile_arm64
+# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
-    name = "android_profile_arm64",
+    name = "ci_android_profile_arm64",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -85,13 +89,13 @@ install(
 )
 
 # linux_android_aot_engine.json: ci/android_profile_x64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+#   bazel run --config=android_profile_x64 :android_profile_x64
+# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile_x64",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -99,13 +103,13 @@ install(
 )
 
 # linux_android_aot_engine.json: ci/android_release_x64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+#   bazel run --config=android_release_x64 :android_release_x64
+# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release_x64",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -114,12 +118,13 @@ install(
 
 # linux_android_aot_engine.json: ci/android_profile_riscv64
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
+# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile_riscv64",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -128,12 +133,13 @@ install(
 
 # linux_android_aot_engine.json: ci/android_release_riscv64
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
+# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release_riscv64",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -141,13 +147,12 @@ install(
 )
 
 # linux_android_aot_engine_ddm.json: ci/android_release_arm64_ddm
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default.
+#   bazel run --config=android_release_arm64_ddm :android_release_arm64_ddm
 install(
     name = "android_release_arm64_ddm",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -158,13 +163,12 @@ install(
 # Nothing to run.
 
 # linux_android_aot_engine_ddm.json: ci/android_release_x64_ddm
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default.
+#   bazel run --config=android_release_x64_ddm :android_release_x64_ddm
 install(
     name = "android_release_x64_ddm",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -173,12 +177,12 @@ install(
 
 # linux_android_aot_engine_size_exp.json: ci/android_release_arm64_size_exp
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default.
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 install(
     name = "android_release_arm64_size_exp",
     testonly = True,
     contents = [
+        "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
@@ -668,8 +672,12 @@ install(
 # linux_unopt.json: ci/host_debug_no_prebuilt_dart_sdk
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug
-# Not built, no Bazel counterpart yet: default.
-# Nothing to install.
+install(
+    name = "host_debug_no_prebuilt_dart_sdk",
+    testonly = True,
+    contents = ["//engine/src/flutter:flutter"],
+    directory = "ci/host_debug",
+)
 
 # linux_web_engine_build.json: ci/wasm_release
 #   bazel run --config=wasm_release :wasm_release
