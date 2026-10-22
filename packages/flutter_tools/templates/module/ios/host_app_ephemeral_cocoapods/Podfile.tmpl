@@ -30,7 +30,7 @@ target 'Runner' do
   use_frameworks!
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
-  pod 'FlutterPluginRegistrant', :path => File.join('Flutter', 'FlutterPluginRegistrant'), :inhibit_warnings => true
+  pod '{{iosPodName}}', :path => File.join('Flutter', '{{iosPodName}}'), :inhibit_warnings => true
 end
 
 post_install do |installer|

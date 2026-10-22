@@ -114,7 +114,7 @@ void main() {
           '.flutter-plugins-dependencies',
         );
 
-      iosProject = FakeIosProject();
+      iosProject = FakeIosProject(flutterProject);
       flutterProject.ios = iosProject;
       final Directory iosDirectory = flutterProject.directory.childDirectory('ios');
       iosProject
@@ -133,7 +133,7 @@ void main() {
         ..managedDirectory = macosManagedDirectory
         ..exists = false;
 
-      androidProject = FakeAndroidProject();
+      androidProject = FakeAndroidProject(flutterProject);
       flutterProject.android = androidProject;
       final Directory androidDirectory = flutterProject.directory.childDirectory('android');
       androidProject
@@ -1022,6 +1022,68 @@ dependencies:
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        'Registrant uses custom class name if specified in manifest',
+        () async {
+          flutterProject.isModule = true;
+          androidProject.pluginRegistrantHost = flutterProject.directory
+              .childDirectory('.android')
+              .childDirectory('Flutter');
+          iosProject.pluginRegistrantHost = flutterProject.directory
+              .childDirectory('.ios')
+              .childDirectory('Flutter')
+              .childDirectory('CustomPluginRegistrant');
+          androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
+          flutterManifest.pluginRegistrantClassName = 'CustomPluginRegistrant';
+
+          await injectPlugins(
+            flutterProject,
+            androidPlatform: true,
+            iosPlatform: true,
+            releaseMode: false,
+          );
+
+          final File androidRegistrant = flutterProject.android.generatedPluginRegistrantFile;
+
+          expect(androidRegistrant, exists);
+          expect(androidRegistrant.readAsStringSync(), contains('package io.flutter.plugins'));
+          expect(androidRegistrant.readAsStringSync(), contains('class CustomPluginRegistrant'));
+          expect(
+            androidRegistrant.readAsStringSync(),
+            contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'),
+          );
+
+          final IosProject(
+            pluginRegistrantHeader: iosHeader,
+            pluginRegistrantImplementation: iosImplementation,
+            :pluginRegistrantHost,
+          ) = iosProject;
+          final File iosPodspec = pluginRegistrantHost.childFile('CustomPluginRegistrant.podspec');
+
+          expect(iosHeader, exists);
+          expect(
+            iosHeader.readAsStringSync(),
+            contains('@interface CustomPluginRegistrant : NSObject'),
+          );
+          expect(iosImplementation, exists);
+          expect(
+            iosImplementation.readAsStringSync(),
+            contains('@implementation CustomPluginRegistrant'),
+          );
+          expect(iosPodspec, exists);
+          expect(
+            iosPodspec.readAsStringSync(),
+            contains("s.name             = 'CustomPluginRegistrant'"),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter!,
         },
       );
 
@@ -3649,6 +3711,8 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
   late String appName;
   @override
+  String? pluginRegistrantClassName;
+  @override
   YamlMap toYaml() => YamlMap.wrap(<String, String>{});
 }
 
@@ -3719,6 +3783,11 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 }
 
 class FakeIosProject extends Fake implements IosProject {
+  FakeIosProject(this.parent);
+
+  @override
+  final FlutterProject parent;
+
   @override
   String pluginConfigKey = 'ios';
 
@@ -3734,11 +3803,18 @@ class FakeIosProject extends Fake implements IosProject {
   late Directory pluginRegistrantHost;
 
   @override
-  File get pluginRegistrantHeader => pluginRegistrantHost.childFile('GeneratedPluginRegistrant.h');
+  File get pluginRegistrantHeader {
+    final String filename =
+        parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName;
+    return pluginRegistrantHost.childFile('$filename.h');
+  }
 
   @override
-  File get pluginRegistrantImplementation =>
-      pluginRegistrantHost.childFile('GeneratedPluginRegistrant.m');
+  File get pluginRegistrantImplementation {
+    final String filename =
+        parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName;
+    return pluginRegistrantHost.childFile('$filename.m');
+  }
 
   @override
   late File podfile;
@@ -3747,10 +3823,18 @@ class FakeIosProject extends Fake implements IosProject {
   late File podManifestLock;
 
   @override
+  bool flutterPluginSwiftPackageInProjectSettings = false;
+
+  @override
   bool usesSwiftPackageManager = false;
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
+  FakeAndroidProject(this.parent);
+
+  @override
+  final FlutterProject parent;
+
   @override
   String pluginConfigKey = 'android';
 
@@ -3781,15 +3865,18 @@ class FakeAndroidProject extends Fake implements AndroidProject {
   }
 
   @override
-  File get generatedPluginRegistrantFile => hostAppGradleRoot
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childDirectory('java')
-      .childDirectory('io')
-      .childDirectory('flutter')
-      .childDirectory('plugins')
-      .childFile('GeneratedPluginRegistrant.java');
+  File get generatedPluginRegistrantFile {
+    final String filename =
+        parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName;
+    return pluginRegistrantHost
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('io')
+        .childDirectory('flutter')
+        .childDirectory('plugins')
+        .childFile('$filename.java');
+  }
 }
 
 class FakeWebProject extends Fake implements WebProject {

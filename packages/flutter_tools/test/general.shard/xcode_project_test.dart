@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -49,6 +50,78 @@ void main() {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, isModule: true));
       expect(project.ephemeralDirectory.path, 'app_name/.ios/Flutter/ephemeral');
+    });
+
+    testWithoutContext('pluginRegistrantHost with custom class name', () {
+      final fs = MemoryFileSystem.test();
+      final manifest = FakeFlutterManifest(pluginRegistrantClassName: 'CustomPluginRegistrant');
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, manifest: manifest),
+      );
+      expect(project.pluginRegistrantHost.path, 'app_name/ios/Runner');
+    });
+
+    testWithoutContext('module pluginRegistrantHost with custom class name', () {
+      final fs = MemoryFileSystem.test();
+      final manifest = FakeFlutterManifest(
+        isModule: true,
+        pluginRegistrantClassName: 'CustomPluginRegistrant',
+      );
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, isModule: true, manifest: manifest),
+      );
+      expect(project.pluginRegistrantHost.path, 'app_name/.ios/Flutter/CustomPluginRegistrant');
+    });
+
+    testWithoutContext('pluginRegistrantHeader with custom class name in standard app', () {
+      final fs = MemoryFileSystem.test();
+      final manifest = FakeFlutterManifest(pluginRegistrantClassName: 'CustomPluginRegistrant');
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, manifest: manifest),
+      );
+      expect(project.pluginRegistrantHeader.path, 'app_name/ios/Runner/CustomPluginRegistrant.h');
+    });
+
+    testWithoutContext('pluginRegistrantHeader with custom class name in module', () {
+      final fs = MemoryFileSystem.test();
+      final manifest = FakeFlutterManifest(
+        isModule: true,
+        pluginRegistrantClassName: 'CustomPluginRegistrant',
+      );
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, isModule: true, manifest: manifest),
+      );
+      expect(
+        project.pluginRegistrantHeader.path,
+        'app_name/.ios/Flutter/CustomPluginRegistrant/Classes/CustomPluginRegistrant.h',
+      );
+    });
+
+    testWithoutContext('pluginRegistrantImplementation with custom class name in standard app', () {
+      final fs = MemoryFileSystem.test();
+      final manifest = FakeFlutterManifest(pluginRegistrantClassName: 'CustomPluginRegistrant');
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, manifest: manifest),
+      );
+      expect(
+        project.pluginRegistrantImplementation.path,
+        'app_name/ios/Runner/CustomPluginRegistrant.m',
+      );
+    });
+
+    testWithoutContext('pluginRegistrantImplementation with custom class name in module', () {
+      final fs = MemoryFileSystem.test();
+      final manifest = FakeFlutterManifest(
+        isModule: true,
+        pluginRegistrantClassName: 'CustomPluginRegistrant',
+      );
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, isModule: true, manifest: manifest),
+      );
+      expect(
+        project.pluginRegistrantImplementation.path,
+        'app_name/.ios/Flutter/CustomPluginRegistrant/Classes/CustomPluginRegistrant.m',
+      );
     });
 
     testWithoutContext('flutterSwiftPackagesDirectory', () {
@@ -411,6 +484,133 @@ void main() {
             contains('Generated file, do not edit.'),
           );
         }, overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)});
+      });
+
+      group('module ephemeral host app is regenerated', () {
+        late MemoryFileSystem fs;
+        late Directory templateDirectory;
+        late Directory imageDirectory;
+
+        setUp(() {
+          fs = MemoryFileSystem.test();
+          templateDirectory = fs.directory('templates');
+          imageDirectory = fs.directory('image_templates');
+        });
+
+        testUsingContext(
+          'with custom registrant and pod name',
+          () async {
+            final Directory projectDirectory = fs.directory('path');
+
+            // Create .flutter-plugins-dependencies to make hasPlugins return true
+            projectDirectory.childFile('.flutter-plugins-dependencies').createSync(recursive: true);
+            projectDirectory.childFile('.flutter-plugins-dependencies').writeAsStringSync('{}');
+
+            // Create pubspec.yaml to avoid warnings/errors if it is read
+            projectDirectory.childFile('pubspec.yaml').createSync(recursive: true);
+            projectDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+name: test_module
+flutter:
+  module:
+    androidPackage: com.example.test_module
+    iosBundleIdentifier: com.example.testModule
+    pluginRegistrantClassName: CustomPluginRegistrant
+''');
+
+            final Directory libraryFlutterDir =
+                templateDirectory
+                    .childDirectory('module')
+                    .childDirectory('ios')
+                    .childDirectory('library')
+                    .childDirectory('Flutter.tmpl')
+                  ..createSync(recursive: true);
+            libraryFlutterDir
+                .childFile('podhelper.rb.tmpl')
+                .writeAsStringSync(
+                  "pod '{{iosPodName}}', path: File.join(relative, 'Flutter', '{{iosPodName}}')",
+                );
+
+            final Directory hostAppCocoapodsDir =
+                templateDirectory
+                    .childDirectory('module')
+                    .childDirectory('ios')
+                    .childDirectory('host_app_ephemeral_cocoapods')
+                  ..createSync(recursive: true);
+            hostAppCocoapodsDir
+                .childFile('Podfile.tmpl')
+                .writeAsStringSync(
+                  "pod '{{iosPodName}}', :path => File.join('Flutter', '{{iosPodName}}')",
+                );
+
+            final Directory runnerDir = hostAppCocoapodsDir.childDirectory('Runner.tmpl')
+              ..createSync(recursive: true);
+            runnerDir.childFile('AppDelegate.m.tmpl').writeAsStringSync('''
+#import "{{iosPodName}}/{{pluginRegistrantClassName}}.h"
+[{{pluginRegistrantClassName}} registerWithRegistry:engineBridge.pluginRegistry];
+''');
+
+            templateDirectory
+                .childDirectory('module')
+                .childDirectory('ios')
+                .childDirectory('host_app_ephemeral')
+                .createSync(recursive: true);
+
+            final FlutterManifest manifest = FakeFlutterManifest(
+              isModule: true,
+              pluginRegistrantClassName: 'CustomPluginRegistrant',
+            );
+            final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+            final project = IosProject.fromFlutter(flutterProject);
+
+            await project.ensureReadyForPlatformSpecificTooling();
+
+            // Verify that the ephemeral host app was generated
+            final Directory ephemeralDir = project.ephemeralModuleDirectory;
+            expect(ephemeralDir, exists);
+
+            // Verify Podfile uses custom pod name
+            final File podfile = ephemeralDir.childFile('Podfile');
+            expect(podfile, exists);
+            expect(
+              podfile.readAsStringSync(),
+              contains(
+                "pod 'CustomPluginRegistrant', :path => File.join('Flutter', 'CustomPluginRegistrant')",
+              ),
+            );
+
+            // Verify AppDelegate.m uses custom registrant class name
+            final File appDelegateM = ephemeralDir
+                .childDirectory('Runner')
+                .childFile('AppDelegate.m');
+            expect(appDelegateM, exists);
+            expect(
+              appDelegateM.readAsStringSync(),
+              contains('#import "CustomPluginRegistrant/CustomPluginRegistrant.h"'),
+            );
+            expect(
+              appDelegateM.readAsStringSync(),
+              contains(
+                '[CustomPluginRegistrant registerWithRegistry:engineBridge.pluginRegistry];',
+              ),
+            );
+
+            // Verify podhelper.rb
+            final File podhelper = ephemeralDir.childDirectory('Flutter').childFile('podhelper.rb');
+            expect(podhelper, exists);
+            expect(
+              podhelper.readAsStringSync(),
+              contains(
+                "pod 'CustomPluginRegistrant', path: File.join(relative, 'Flutter', 'CustomPluginRegistrant')",
+              ),
+            );
+          },
+          overrides: <Type, Generator>{
+            Cache: () => FakeCache(olderThanToolsStamp: true),
+            TemplatePathProvider: () => FakeTemplatePathProvider(templateDirectory, imageDirectory),
+            FileSystem: () => fs,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
       });
     });
   });
@@ -776,7 +976,8 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject({required this.fileSystem, this.isModule = false});
+  FakeFlutterProject({required this.fileSystem, this.isModule = false, FlutterManifest? manifest})
+    : manifest = manifest ?? FakeFlutterManifest(isModule: isModule);
 
   MemoryFileSystem fileSystem;
 
@@ -787,7 +988,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  FlutterManifest get manifest => FakeFlutterManifest();
+  final FlutterManifest manifest;
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
@@ -816,10 +1017,13 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
-  FakeFlutterManifest({this.isModule = false});
+  FakeFlutterManifest({this.isModule = false, this.pluginRegistrantClassName});
 
   @override
   bool isModule;
+
+  @override
+  String? pluginRegistrantClassName;
 
   @override
   String? buildName;
@@ -890,4 +1094,21 @@ class FakeIosProjectWithCustomFlags extends IosProject {
 
   @override
   final bool flutterPluginSwiftPackageInProjectSettings;
+}
+
+class FakeTemplatePathProvider extends Fake implements TemplatePathProvider {
+  FakeTemplatePathProvider(this.templateDirectory, this.imageDirectoryRoot);
+
+  final Directory templateDirectory;
+  final Directory imageDirectoryRoot;
+
+  @override
+  Directory directoryInPackage(String name, FileSystem fileSystem) {
+    return templateDirectory.childDirectory(name);
+  }
+
+  @override
+  Future<Directory> imageDirectory(String? name, FileSystem fileSystem, Logger logger) async {
+    return name == null ? imageDirectoryRoot : imageDirectoryRoot.childDirectory(name);
+  }
 }
