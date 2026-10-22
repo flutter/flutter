@@ -19075,6 +19075,59 @@ void main() {
   );
 
   testWidgets(
+    'Rejected input re-obscures a character that is still revealed',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/141560.
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            backgroundCursorColor: const Color(0xFFF7F7F7),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            obscureText: true,
+            inputFormatters: <TextInputFormatter>[
+              LengthLimitingTextInputFormatter(
+                5,
+                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+
+      await tester.enterText(find.byType(EditableText), 'abcd');
+      await tester.pump();
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(text: 'abcde', selection: TextSelection.collapsed(offset: 5)),
+      );
+      await tester.pump();
+      expect((findRenderEditable(tester).text! as TextSpan).text, '••••e');
+
+      // While the last character is still revealed, a sixth character is
+      // rejected by the formatter. The rejected edit leaves the value unchanged,
+      // so nothing else would rebuild; the revealed character must be hidden
+      // immediately rather than lingering until the reveal timer expires.
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(text: 'abcdef', selection: TextSelection.collapsed(offset: 6)),
+      );
+      await tester.pump();
+      expect(controller.text, 'abcde');
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•••••');
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+    }),
+  );
+
+  testWidgets(
     'context menu reappears after a non-fling scroll that keeps selection in view while semantics are disabled',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/185052.
