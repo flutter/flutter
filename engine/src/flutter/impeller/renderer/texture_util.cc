@@ -34,20 +34,20 @@ std::shared_ptr<Texture> CreateTexture(
   return texture;
 }
 
-fml::Status AddMipmapGeneration(
+absl::Status AddMipmapGeneration(
     const std::shared_ptr<CommandBuffer>& command_buffer,
     const std::shared_ptr<Context>& context,
     const std::shared_ptr<Texture>& texture) {
   std::shared_ptr<BlitPass> blit_pass = command_buffer->CreateBlitPass();
   bool success = blit_pass->GenerateMipmap(texture);
   if (!success) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
   success = blit_pass->EncodeCommands();
   if (!success) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 }  // namespace impeller
