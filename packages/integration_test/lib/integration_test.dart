@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter_driver/flutter_driver.dart';
+/// @docImport 'package:flutter_driver/flutter_driver.dart' as flutter_driver;
 ///
 /// @docImport 'integration_test_driver_extended.dart';
 library;

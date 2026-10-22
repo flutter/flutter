@@ -40,7 +40,7 @@ struct OverlayLayer {
   // so we can update the overlay with the new context.
   //
   // This may change when the overlay is recycled.
-  intptr_t gr_context_key;
+  intptr_t gr_context_key = 0;
 };
 
 class SurfacePool {

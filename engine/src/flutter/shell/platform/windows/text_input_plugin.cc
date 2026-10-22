@@ -357,9 +357,6 @@ void TextInputPlugin::HandleMethodCall(
     if (selection_base == -1 && selection_extent == -1) {
       selection_base = selection_extent = 0;
     }
-    active_model_->SetText(text->value.GetString());
-    active_model_->SetSelection(TextRange(selection_base, selection_extent));
-
     base = args.FindMember(kComposingBaseKey);
     extent = args.FindMember(kComposingExtentKey);
     if (base == args.MemberEnd() || base->value.IsNull() ||
@@ -369,15 +366,14 @@ void TextInputPlugin::HandleMethodCall(
       return;
     }
     int composing_base = base->value.GetInt();
-    int composing_extent = base->value.GetInt();
+    int composing_extent = extent->value.GetInt();
     if (composing_base == -1 && composing_extent == -1) {
-      active_model_->EndComposing();
-    } else {
-      int composing_start = std::min(composing_base, composing_extent);
-      int cursor_offset = selection_base - composing_start;
-      active_model_->SetComposingRange(
-          TextRange(composing_base, composing_extent), cursor_offset);
+      composing_base = composing_extent = 0;
     }
+
+    active_model_->SetText(text->value.GetString(),
+                           TextRange(selection_base, selection_extent),
+                           TextRange(composing_base, composing_extent));
     if (tsf_bridge_) {
       tsf_bridge_->NotifyTextChanged();
       tsf_bridge_->NotifySelectionChanged();

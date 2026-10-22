@@ -16,7 +16,7 @@ absl::StatusOr<MMapFile> MMapFile::Make(std::string_view path) {
     return absl::UnavailableError("can't open file");
   }
 
-  struct stat st;
+  struct stat st{};
   if (fstat(fd, &st) < 0) {
     close(fd);
     return absl::UnavailableError("can't stat file");

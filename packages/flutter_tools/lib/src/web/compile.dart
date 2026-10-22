@@ -7,15 +7,19 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../cache.dart';
+import '../compile.dart' show kDdcCanaryFeatures;
+import '../context/tool_context.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -43,20 +47,16 @@ const kWebDefinePrefix = 'webDefine:';
 
 class WebBuilder {
   WebBuilder({
-    required this._logger,
-    required this._processManager,
-    required this._buildSystem,
     required this._analytics,
-    required this._flutterVersion,
-    required this._fileSystem,
+    required this._buildSystem,
+    required this._buildTargets,
+    required this._toolContext,
   });
 
-  final Logger _logger;
-  final ProcessManager _processManager;
-  final BuildSystem _buildSystem;
   final Analytics _analytics;
-  final FlutterVersion _flutterVersion;
-  final FileSystem _fileSystem;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final ToolContext _toolContext;
 
   /// Builds the web application using the specified compiler configurations
   /// and generates the necessary web assets in the output directory.
@@ -71,8 +71,19 @@ class WebBuilder {
     String? outputDirectoryPath,
     Map<String, String> webDefines = const <String, String>{},
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      fs: FileSystem fileSystem,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :Terminal terminal,
+    ) = _toolContext;
     if (serviceWorkerStrategy != null) {
-      _logger.printWarning(
+      logger.printWarning(
         'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.\n'
         'For more information, see: https://github.com/flutter/flutter/issues/156910',
       );
@@ -80,28 +91,35 @@ class WebBuilder {
 
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
-      logger: _logger,
+      logger: logger,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
-        ? _fileSystem.directory(
-            _fileSystem.path.join(flutterProject.directory.path, getWebBuildDirectory()),
+        ? fileSystem.directory(
+            fileSystem.path.join(
+              flutterProject.directory.path,
+              getWebBuildDirectory(config: config, fileSystem: fileSystem),
+            ),
           )
-        : _fileSystem.directory(outputDirectoryPath);
+        : fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
 
     // The migrators to apply to a Web project.
-    final migrators = <ProjectMigrator>[
-      ScrubGeneratedPluginRegistrant(flutterProject.web, _logger),
-    ];
+    final migrators = <ProjectMigrator>[ScrubGeneratedPluginRegistrant(flutterProject.web, logger)];
 
     final migration = ProjectMigration(migrators);
     await migration.run();
 
-    final Status status = _logger.startProgress('Compiling $target for the Web...');
+    final Status status = logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-        globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
+        _buildTargets.webServiceWorker(
+          fileSystem,
+          compilerConfigs,
+          _analytics,
+          artifacts,
+          engineRevision: flutterVersion.engineRevision,
+        ),
         Environment(
           projectDir: flutterProject.directory,
           outputDir: outputDirectory,
@@ -119,17 +137,15 @@ class WebBuilder {
             for (final MapEntry(:key, :value) in webDefines.entries) '$kWebDefinePrefix$key': value,
           },
           packageConfigPath: buildInfo.packageConfigPath,
-          artifacts: globals.artifacts!,
-          fileSystem: _fileSystem,
-          logger: _logger,
-          processManager: _processManager,
-          platform: globals.platform,
+          artifacts: artifacts,
+          fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          platform: platform,
           analytics: _analytics,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.artifacts!.usesLocalArtifacts
-              ? null
-              : _flutterVersion.engineRevision,
-          flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
+          cacheDir: cache.getRoot(),
+          engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
+          flutterRootDir: fileSystem.directory(Cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406
           generateDartPluginRegistry: false,
@@ -137,7 +153,7 @@ class WebBuilder {
       );
       if (!result.success) {
         for (final ExceptionMeasurement measurement in result.exceptions.values) {
-          _logger.printError(
+          logger.printError(
             'Target ${measurement.target} failed: ${measurement.exception}',
             stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
                 ? measurement.stackTrace
@@ -154,9 +170,9 @@ class WebBuilder {
 
     // We don't print a size because the output directory can contain
     // optional files not needed by the user.
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}',
+    logger.printStatus(
+      '${terminal.successMark} '
+      'Built ${fileSystem.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
 
@@ -229,29 +245,35 @@ enum WebRendererMode {
   }
 }
 
-/// The correct precompiled artifact to use for each build and render mode for DDC with AMD modules.
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdk,
+/// The correct precompiled artifact to use for each build and render mode for stable DDC.
+const kDDCStableSdkArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCStableSdk,
 };
 
-/// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
+/// The correct source map artifact to use for each build and render mode for stable DDC.
+const kDDCStableSdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCStableSdkSourcemaps,
 };
 
-/// The correct precompiled artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
+/// The correct precompiled artifact to use for each build and render mode for canary DDC.
+const kDDCCanarySdkArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdk,
 };
 
-/// The correct source map artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
+/// The correct source map artifact to use for each build and render mode for canary DDC.
+const kDDCCanarySdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdkSourcemaps,
 };
+
+/// The precompiled DDC SDK artifacts matching [kDdcCanaryFeatures].
+const Map<WebRendererMode, HostArtifact> kDDCSdkArtifactMap = kDdcCanaryFeatures
+    ? kDDCCanarySdkArtifactMap
+    : kDDCStableSdkArtifactMap;
+
+/// The precompiled DDC SDK source map artifacts matching [kDdcCanaryFeatures].
+const Map<WebRendererMode, HostArtifact> kDDCSdkSourcemapsArtifactMap = kDdcCanaryFeatures
+    ? kDDCCanarySdkSourcemapsArtifactMap
+    : kDDCStableSdkSourcemapsArtifactMap;
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {
   final values = <String, Object>{};
