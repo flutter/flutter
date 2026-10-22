@@ -130,19 +130,47 @@ def _targets_of(value):
 # directory too (the web SDK's tree beside flutter-web-sdk.zip).
 _FOLLOWED_ATTRIBUTES = ["deps", "srcs", "data", "files", "trees"]
 
+def _strip(ctx, binary, suffix, flag):
+    """`llvm-objcopy <flag>` of `binary` into a sibling named `<binary>.<suffix>`."""
+    stripped = ctx.actions.declare_file(binary.basename + "." + suffix, sibling = binary)
+    objcopy = [f for f in ctx.files._objcopy if f.basename == "llvm-objcopy"]
+    if len(objcopy) != 1:
+        fail("%s: _objcopy should hold llvm-objcopy, holds %s" % (ctx.label, ctx.files._objcopy))
+    args = ctx.actions.args()
+    args.add(flag)
+    args.add(binary)
+    args.add(stripped)
+    ctx.actions.run(
+        executable = objcopy[0],
+        arguments = [args],
+        inputs = [binary],
+        tools = ctx.files._objcopy,
+        outputs = [stripped],
+        mnemonic = "Strip",
+        progress_message = "Stripping %{output}",
+    )
+    return stripped
+
 def _binary_entries(target, ctx):
     # GN's link tools write an executable to exe.unstripped/ and
     # `llvm-objcopy --strip-all` it into the build root, always; a shared
     # library goes through lib.unstripped/ the same way under
     # stripped_symbols (the `stripped` flag; tools/gn's default, which only
-    # the developer's --no-stripped configurations turn off). The binary in
-    # bazel-bin stays as linked -- the tests run it, as GN's unstripped copy
-    # is there to be run under a debugger -- and what an install or an
-    # archive ships is stripped here, by the same tool with the same flag.
+    # the developer's --no-stripped configurations and Android turn off).
+    # The binary in bazel-bin stays as linked -- the tests run it, as GN's
+    # unstripped copy is there to be run under a debugger -- and what an
+    # install or an archive ships is stripped here, by the same tool with
+    # the same flag. The Android toolchain besides writes every shared
+    # library `--strip-unneeded` into lib.stripped/ (build/toolchain/android,
+    # postsolink), stripped_symbols or not: the copy the Android embedding's
+    # jar packages.
     shared = ctx.rule.kind == "cc_shared_library" or getattr(ctx.rule.attr, "linkshared", False)
+    android = ctx.target_platform_has_constraint(ctx.attr._android[platform_common.ConstraintValueInfo])
     entries = []
     shipped = {}
     for binary in target[DefaultInfo].files.to_list():
+        if shared and android:
+            entries.append((_strip(ctx, binary, "lib_stripped", "--strip-unneeded"), "lib.stripped/" + binary.basename))
         if shared and not ctx.attr._stripped[BuildSettingInfo].value:
             entries.append((binary, binary.basename))
             continue
@@ -150,23 +178,7 @@ def _binary_entries(target, ctx):
         # `<name>.stripped` is cc_binary's own (its CcStrip action, the
         # toolchain's strip with -S: debug sections only); this is GN's
         # --strip-all copy, the file an archive or install ships.
-        stripped = ctx.actions.declare_file(binary.basename + ".shipped", sibling = binary)
-        objcopy = [f for f in ctx.files._objcopy if f.basename == "llvm-objcopy"]
-        if len(objcopy) != 1:
-            fail("%s: _objcopy should hold llvm-objcopy, holds %s" % (ctx.label, ctx.files._objcopy))
-        args = ctx.actions.args()
-        args.add("--strip-all")
-        args.add(binary)
-        args.add(stripped)
-        ctx.actions.run(
-            executable = objcopy[0],
-            arguments = [args],
-            inputs = [binary],
-            tools = ctx.files._objcopy,
-            outputs = [stripped],
-            mnemonic = "Strip",
-            progress_message = "Stripping %{output}",
-        )
+        stripped = _strip(ctx, binary, "shipped", "--strip-all")
         entries.append((stripped, binary.basename))
         entries.append((binary, ("lib.unstripped/" if shared else "exe.unstripped/") + binary.basename))
         shipped[binary] = stripped
@@ -224,6 +236,7 @@ build_directory_aspect = aspect(
     attr_aspects = _FOLLOWED_ATTRIBUTES,
     attrs = {
         "_stripped": attr.label(default = "//engine/src/flutter/build/bazel:stripped"),
+        "_android": attr.label(default = "@platforms//os:android"),
         "_objcopy": attr.label(
             default = "@clang_linux_x64//:objcopy_files",
             allow_files = True,
