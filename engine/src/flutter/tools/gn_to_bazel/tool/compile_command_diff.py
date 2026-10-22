@@ -177,8 +177,21 @@ def bazel_commands(aquery_path):
     sources = [a for a in args if a.endswith(SOURCE_SUFFIXES) and not a.startswith('-')]
     if not sources:
       continue
-    commands[bazel_path(sources[-1])] = normalize(args[1:], 'bazel', None)
+    source = bazel_path(sources[-1])
+    commands[source] = normalize(args[1:], 'bazel', None)
+    COMPILER_FAMILIES[source] = _compiler_family(args[0])
   return commands
+
+
+# Source file -> 'emscripten' or 'clang', from the Bazel compile's compiler:
+# which of GN's toolchains a source's compile is to be compared with.
+COMPILER_FAMILIES = {}
+
+
+def _compiler_family(compiler):
+  """'emscripten' for em++/emcc (and their wrappers), 'clang' otherwise."""
+  name = os.path.basename(compiler)
+  return 'emscripten' if name.startswith(('em++', 'emcc')) else 'clang'
 
 
 def gn_commands(compile_commands_path, wanted):
@@ -198,11 +211,15 @@ def gn_commands(compile_commands_path, wanted):
     # The command is a shell line (ninja's): shlex gives the argv the compiler
     # saw, with GN's \" around a define's value read as the quote it is.
     argv = shlex.split(entry['command'])
-    # A cross build compiles a source for the target (the default toolchain,
-    # whose objects are under obj/) and again for the host tools (a
-    # secondary toolchain's, under clang_x64/obj/ or another toolchain's
-    # directory): the Bazel side is the target configuration, so the
-    # default toolchain's entry is the one to compare, whichever comes last.
+    # A build may compile a source several times: for the target (the
+    # default toolchain, its objects under obj/) and for the host tools (a
+    # secondary toolchain's, under clang_x64/obj/), or for the wasm modules
+    # (the wasm toolchains', under wasm_*/obj/, with em++) and the host.
+    # The entry to compare is the one compiled by the same family of
+    # compiler as Bazel's (em++ against em++, clang against clang) and,
+    # among those, the default toolchain's -- whichever order they come in.
+    if _compiler_family(argv[0]) != COMPILER_FAMILIES.get(source, 'clang'):
+      continue
     if source in commands and not _default_toolchain(argv):
       continue
     commands[source] = normalize(argv[1:], 'gn', out_dir)
