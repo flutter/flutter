@@ -744,6 +744,7 @@ String buildersBuildFile(
   List<BuilderBuild> builds,
   Map<String, Set<String>> convertedTargets, {
   Map<String, Set<String>> convertedTests = const <String, Set<String>>{},
+  Map<String, String?> packageConditions = const <String, String?>{},
 }) {
   final out = StringBuffer()
     ..writeln('# Copyright 2013 The Flutter Authors. All rights reserved.')
@@ -798,7 +799,7 @@ String buildersBuildFile(
         }
         continue;
       }
-      if (_ninjaTargetLabel(target, convertedTests) != null) {
+      if (_ninjaTargetLabel(target, convertedTests, build, packageConditions) != null) {
         // A test executable: GN builds it for run_tests.py to run from the
         // build directory; here `bazel test` runs it from its own place
         // (the build's <name>_tests suite), and an install depending on a
@@ -809,7 +810,7 @@ String buildersBuildFile(
         }
         continue;
       }
-      final String? label = _ninjaTargetLabel(target, convertedTargets);
+      final String? label = _ninjaTargetLabel(target, convertedTargets, build, packageConditions);
       if (label == null) {
         missing.add(target);
       } else if (!resolved.contains(label)) {
@@ -842,7 +843,7 @@ String buildersBuildFile(
     }
     if (resolved.isEmpty) {
       out.writeln('# Nothing to install.');
-      _testSuiteInto(out, build, convertedTests, suites);
+      _testSuiteInto(out, build, convertedTests, suites, packageConditions: packageConditions);
       continue;
     }
     resolved.sort(compareBuildifierStrings);
@@ -856,7 +857,7 @@ String buildersBuildFile(
         );
       }
       out.writeln("# The same install as ${earlier.$1.file}'s ${earlier.$1.name}, above.");
-      _testSuiteInto(out, build, convertedTests, suites);
+      _testSuiteInto(out, build, convertedTests, suites, packageConditions: packageConditions);
       continue;
     }
     installs[build.configName] = (build, install);
@@ -879,7 +880,7 @@ String buildersBuildFile(
       out.writeln('    directory = "${build.buildDirectory}",');
     }
     out.writeln(')');
-    _testSuiteInto(out, build, convertedTests, suites);
+    _testSuiteInto(out, build, convertedTests, suites, packageConditions: packageConditions);
   }
   return out.toString();
 }
@@ -891,15 +892,16 @@ void _testSuiteInto(
   StringBuffer out,
   BuilderBuild build,
   Map<String, Set<String>> convertedTests,
-  Map<String, (BuilderBuild, String)> written,
-) {
+  Map<String, (BuilderBuild, String)> written, {
+  Map<String, String?> packageConditions = const <String, String?>{},
+}) {
   if (build.testTypes.isEmpty && build.binaryTests.isEmpty && build.otherTests.isEmpty) {
     return;
   }
   final suites = <String>[];
   final missing = <String>[];
   for (final String name in build.binaryTests) {
-    final String? label = _ninjaTargetLabel(name, convertedTests);
+    final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
     if (label == null) {
       missing.add('$name (run from the build directory)');
     } else if (!suites.contains(label)) {
@@ -909,7 +911,7 @@ void _testSuiteInto(
   for (final String type in build.testTypes) {
     if (type == 'engine') {
       for (final String name in runTestsEngineSuites) {
-        final String? label = _ninjaTargetLabel(name, convertedTests);
+        final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
         if (label == null) {
           missing.add('$name (engine)');
         } else if (!suites.contains(label)) {
@@ -988,13 +990,23 @@ void _testSuiteInto(
 /// bare target name when it is unique in the build, an output's path under
 /// the build directory, or ninja's `default`; a word is a directory before
 /// it is a name (`flutter` is `//flutter:flutter`).
-String? _ninjaTargetLabel(String target, Map<String, Set<String>> convertedTargets) {
+String? _ninjaTargetLabel(
+  String target,
+  Map<String, Set<String>> convertedTargets,
+  BuilderBuild build,
+  Map<String, String?> packageConditions,
+) {
   // ninja's `default` is every target of the GN build (the root BUILD.gn
   // has no group of that name); the root group `flutter` -- what `ninja
   // flutter` builds, and all the artifacts a build lays -- stands for it.
   if (target == 'default') {
     target = 'flutter';
   }
+  // A target of a file GN reads under a condition (sky/dist under
+  // is_android) exists in the builds the condition holds for and in no
+  // other: a bare name unique in a host build (`sky_engine`, the package)
+  // is not made ambiguous by an Android-only target of the same name.
+  bool exists(String gnPackage) => fileHolds(packageConditions[gnPackage], build);
   String gnPackage;
   String name;
   if (target.contains(':')) {
@@ -1009,7 +1021,7 @@ String? _ninjaTargetLabel(String target, Map<String, Set<String>> convertedTarge
     // A bare name: the one converted target of that name, if there is one.
     final candidates = <String>[
       for (final MapEntry<String, Set<String>> entry in convertedTargets.entries)
-        if (entry.value.contains(target)) entry.key,
+        if (entry.value.contains(target) && exists(entry.key)) entry.key,
     ];
     if (candidates.length != 1) {
       return null;
@@ -1017,8 +1029,25 @@ String? _ninjaTargetLabel(String target, Map<String, Set<String>> convertedTarge
     gnPackage = candidates.single;
     name = target;
   }
-  if (!(convertedTargets[gnPackage]?.contains(name) ?? false)) {
+  if (!(convertedTargets[gnPackage]?.contains(name) ?? false) || !exists(gnPackage)) {
     return null;
   }
   return bazelLabel('$gnPackage:$name', package: gnPackage);
+}
+
+/// Whether a converted file's [condition] (the manifest's
+/// `ConvertedFile.condition`: `is_android`, or null for a file GN always
+/// reads) holds for [build]: the OS predicates against the build's platform;
+/// any other condition is taken to hold.
+bool fileHolds(String? condition, BuilderBuild build) {
+  final String? platform = build.platform;
+  final bool android = androidPlatforms.values.any((String p) => platform == '--platforms=$p');
+  final wasm = platform == '--platforms=$wasmPlatform';
+  return switch (condition) {
+    null => true,
+    'is_android' => android,
+    'is_wasm' => wasm,
+    'is_linux' => !android && !wasm,
+    _ => true,
+  };
 }

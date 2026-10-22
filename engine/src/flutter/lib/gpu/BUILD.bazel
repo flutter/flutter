@@ -103,3 +103,12 @@ filegroup(
     name = "dart_sources",
     srcs = glob(["lib/**/*.dart"]),
 )
+
+# The package directory as flutter_gpu.zip ships it (lib/gpu/dist; the
+# converter's directorySources names it): every file of this package and of
+# its dist subpackage, as zip.py's walk of //flutter/lib/gpu takes them.
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]) + ["//engine/src/flutter/lib/gpu/dist:all_files"],
+    visibility = ["//engine/src/flutter/lib/gpu/dist:__pkg__"],
+)

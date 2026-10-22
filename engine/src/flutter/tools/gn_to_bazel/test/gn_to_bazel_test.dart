@@ -6931,6 +6931,10 @@ build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
           '//flutter/build/archives': <String>{'artifacts', 'flutter_patched_sdk'},
           '//flutter/tools/font_subset': <String>{'font_subset'},
           '//flutter/sky/packages/sky_engine': <String>{'sky_engine'},
+          // sky/dist's action of the same bare name, in a file GN reads
+          // under is_android: a host build's `sky_engine` is still the
+          // package's, unique among the targets that exist for it.
+          '//flutter/sky/dist': <String>{'sky_engine', 'zip'},
           '//flutter/impeller/compiler/shader_lib/flutter': <String>{'flutter'},
           '//flutter/tools/licenses_cpp': <String>{'licenses_cpp', 'license_file_compare'},
           '//flutter/web_sdk': <String>{'flutter_web_sdk_archive'},
@@ -6941,6 +6945,7 @@ build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
           '//flutter/txt': <String>{'txt_unittests'},
           '//flutter/tools/licenses_cpp': <String>{'licenses_cpp_testrunner'},
         },
+        packageConditions: <String, String?>{'//flutter/sky/dist': 'is_android'},
       );
       // `flutter` is the directory //flutter (not converted), not the
       // shader_lib target of that name; `flutter:unittests` is not converted.
@@ -6962,6 +6967,19 @@ install(
 )
 '''),
       );
+      // fileHolds: a file read under is_android exists for the Android
+      // builds and no other; an unconditional file for every build.
+      final BuilderBuild androidBuild = builds.firstWhere(
+        (BuilderBuild b) => b.name == 'ci/android_debug_arm64',
+      );
+      final BuilderBuild hostBuild = builds.firstWhere(
+        (BuilderBuild b) => b.name == 'ci/host_debug',
+      );
+      expect(fileHolds('is_android', androidBuild), isTrue);
+      expect(fileHolds('is_android', hostBuild), isFalse);
+      expect(fileHolds(null, hostBuild), isTrue);
+      expect(fileHolds('is_linux', hostBuild), isTrue);
+      expect(fileHolds('is_linux', androidBuild), isFalse);
       // The Android build: the root group and the Java half's targets have
       // no counterpart yet; the embedder archive installs.
       expect(

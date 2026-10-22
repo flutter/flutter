@@ -14,3 +14,10 @@ filegroup(
         "//engine/src/flutter/sky/packages",
     ],
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# sky/dist's action copies the assembled sky_engine package for release with
+# this script.
+exports_files(["tools/dist_dart_pkg.py"])
