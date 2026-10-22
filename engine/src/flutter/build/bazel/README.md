@@ -1201,7 +1201,12 @@ Android's `android_debug`, `android_profile`, `android_release` (arm),
 `android_debug_arm64_validation_layers`, `android_debug_arm64_clang_tidy`,
 `android_debug_test`, `android_emulator_debug_x64`,
 `android_embedder_debug_unopt`. The one without is
-`ci/host_debug_no_prebuilt_dart_sdk`.
+`ci/host_debug_no_prebuilt_dart_sdk`. The file ends by naming the builds of
+those files that are not configurations at all, each with its reason --
+the twelve Fuchsia builds (a platform the Bazel build has none for yet)
+and the eight web test bundles (no `tools/gn` step) -- so that every build
+of the Linux builder files is in one place or the other, and one filed
+under the wrong reason shows.
 `ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a
 directory for its target of the same name, a bare unique name, as GN's
