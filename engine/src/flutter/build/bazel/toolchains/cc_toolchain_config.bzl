@@ -40,7 +40,7 @@ load(
     "tool",
 )
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("//engine/src/flutter/build/bazel:copts.bzl", "TOOLCHAIN_WARNING_FLAGS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "ANDROID_TOOLCHAIN_WARNING_FLAGS", "TOOLCHAIN_WARNING_FLAGS")
 
 # Flags GN passes to every C and C++ compile on Linux
 # (//build/config/compiler:compiler, :runtime_library, //build/config/gcc,
@@ -56,18 +56,25 @@ _COMMON_COMPILE_FLAGS = [
     "-pipe",
 ]
 
-_WARNING_COMPILE_FLAGS = [
-    "-fcolor-diagnostics",
-    "-fvisibility=hidden",
-    # GN's `default_warning_flags` (part of both the chromium_code and the
-    # no_chromium_code config, so every target gets them), without -Werror;
-    # see copts.bzl for why, and for the per-target lists that repeat them
-    # after -Wall -Wextra.
-] + TOOLCHAIN_WARNING_FLAGS + [
-    # //build/config/clang:extra_warnings.
-    "-Wstring-conversion",
-    "-Wnewline-eof",
-]
+def _warning_compile_flags(default_warning_flags):
+    return [
+        "-fcolor-diagnostics",
+        "-fvisibility=hidden",
+        # GN's `default_warning_flags` (part of both the chromium_code and the
+        # no_chromium_code config, so every target gets them), without -Werror;
+        # see copts.bzl for why, and for the per-target lists that repeat them
+        # after -Wall -Wextra.
+    ] + default_warning_flags + [
+        # //build/config/clang:extra_warnings.
+        "-Wstring-conversion",
+        "-Wnewline-eof",
+    ]
+
+_WARNING_COMPILE_FLAGS = _warning_compile_flags(TOOLCHAIN_WARNING_FLAGS)
+
+# Android's: without -Wno-deprecated-literal-operator, which GN adds for
+# clang on every platform but Android (copts.bzl).
+_ANDROID_WARNING_COMPILE_FLAGS = _warning_compile_flags(ANDROID_TOOLCHAIN_WARNING_FLAGS)
 
 _LINUX_COMPILE_FLAGS = _COMMON_COMPILE_FLAGS + ["-pthread"] + _WARNING_COMPILE_FLAGS
 
@@ -78,7 +85,7 @@ _ANDROID_COMPILE_FLAGS = _COMMON_COMPILE_FLAGS + [
     "-ffunction-sections",
     "-funwind-tables",
     "-fno-short-enums",
-] + _WARNING_COMPILE_FLAGS
+] + _ANDROID_WARNING_COMPILE_FLAGS
 
 # The architecture (//build/config/compiler:compiler), per target CPU:
 # x64's `-m64 -march=x86-64`, arm64's `--target=aarch64-linux-gnu` with the
