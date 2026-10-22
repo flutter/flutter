@@ -124,7 +124,9 @@ _WASM_LINK_FLAGS = [
 _DBG_COMPILE_FLAGS = ["-O1"]
 _DBG_DEFINES = ["_DEBUG"]
 _FASTBUILD_COMPILE_FLAGS = ["-O1"]
-_OPT_COMPILE_FLAGS = ["-O3", "-g0"]
+
+# -O3 (or a size-prioritizing variant's -Oz) is the wasm_optimize feature's.
+_OPT_COMPILE_FLAGS = ["-g0"]
 _OPT_DEFINES = ["NDEBUG", "NVALGRIND", "DYNAMIC_ANNOTATIONS_ENABLED=0"]
 
 # The `libs` GN's link rule ends with (the runtime library config's), after
@@ -193,6 +195,26 @@ def _impl(ctx):
         # symbol configs among them) precede its cflags_cc.
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
+        # //build/config/compiler:optimize under is_wasm: -O3, or -Oz where
+        # the variant's toolchain says wasm_prioritize_size (GN passes one
+        # or the other; an earlier form here passed both, the compiler
+        # taking the later).
+        feature(
+            name = "wasm_optimize",
+            enabled = True,
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-O3"])],
+                    with_features = [with_feature_set(features = ["opt"], not_features = ["wasm_prioritize_size"])],
+                ),
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES,
+                    flag_groups = [flag_group(flags = ["-Oz"])],
+                    with_features = [with_feature_set(features = ["opt", "wasm_prioritize_size"])],
+                ),
+            ],
+        ),
         _mode_feature("opt", _OPT_COMPILE_FLAGS + _defines(_OPT_DEFINES)),
         # //build/config/compiler:symbols under is_wasm (symbol_level 2: the
         # unoptimized build) without wasm_use_dwarf: -gsource-map on every
@@ -218,9 +240,9 @@ def _impl(ctx):
         # feature a variant's platform turns on (third_party/canvaskit's
         # platforms carry `--features=...` among their flags, as GN's
         # toolchains carry extra_toolchain_args). wasm_use_workers: the Wasm
-        # Workers API on every compile and link. wasm_prioritize_size: -Oz
-        # for the optimized build's -O3, after the mode's flags so that the
-        # compiler takes it; its link flag is flutter_optimize_link_flags'.
+        # Workers API on every compile and link. wasm_prioritize_size: a
+        # marker; its compile flag is wasm_optimize's (-Oz in place of -O3),
+        # its link flag flutter_optimize_link_flags'.
         feature(
             name = "wasm_use_workers",
             flag_sets = [
@@ -230,16 +252,7 @@ def _impl(ctx):
                 ),
             ],
         ),
-        feature(
-            name = "wasm_prioritize_size",
-            flag_sets = [
-                flag_set(
-                    actions = ALL_CC_COMPILE_ACTION_NAMES,
-                    flag_groups = [flag_group(flags = ["-Oz"])],
-                    with_features = [with_feature_set(features = ["opt"])],
-                ),
-            ],
-        ),
+        feature(name = "wasm_prioritize_size"),
         # enable_lto: -flto on the optimized build's compiles and link
         # (//build/config/compiler:optimize's lto_flags, under is_wasm).
         feature(

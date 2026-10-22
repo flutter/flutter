@@ -137,13 +137,20 @@ FLUTTER_CFLAGS_OBJCC = FLUTTER_CFLAGS_OBJC
 # //build/config/compiler:chromium_code (defines): the C99 macros, and, off
 # Linux (and without a sanitizer), a fortified libc -- `!is_linux ||
 # !is_clang`, so Android's first-party compiles have _FORTIFY_SOURCE=2 and
-# the host's and the web's do not; no_chromium_code (third-party) never does.
-FLUTTER_LOCAL_DEFINES = [
-    "__STDC_CONSTANT_MACROS",
-    "__STDC_FORMAT_MACROS",
-] + select({
-    _ANDROID: ["_FORTIFY_SOURCE=2"],
-    "//conditions:default": [],
+# the host's do not; no_chromium_code (third-party) never does. The config
+# is empty under is_wasm (as under is_win): the web's compiles define
+# neither.
+FLUTTER_LOCAL_DEFINES = select({
+    _WASM: [],
+    _ANDROID: [
+        "__STDC_CONSTANT_MACROS",
+        "__STDC_FORMAT_MACROS",
+        "_FORTIFY_SOURCE=2",
+    ],
+    "//conditions:default": [
+        "__STDC_CONSTANT_MACROS",
+        "__STDC_FORMAT_MACROS",
+    ],
 })
 
 # //build/config/compiler:no_chromium_code (clang): the two clang flags,
