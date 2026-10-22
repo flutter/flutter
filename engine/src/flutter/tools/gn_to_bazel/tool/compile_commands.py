@@ -34,10 +34,16 @@ as it does for GN's file; and the compiler, so that the toolchain's
 clang++`; the repository symlink resolved, the name kept, since the binary
 is a multicall that reads its name).
 
-A source compiled in both the target configuration and the exec
-configuration (a host tool's, built -c opt) gets the target's command;
-one compiled for the exec configuration alone (impellerc, the shader
-compiler, built only as a tool) gets that.
+A source compiled in several configurations gets the command of the one
+the command line names -- the target configuration of `--config=<name>`,
+whose output directory carries no transition suffix (`k8-opt`) -- before
+a transition's (`k8-opt-ST-<hash>`: a wasm module's compile of a Skia
+source under `module_platform_transition`, an API-26 dependency's under
+gn_action's platform_deps), and either before the exec configuration's
+(`k8-opt-exec-ST-<hash>`: a host tool's, built -c opt); one compiled for
+the exec configuration alone (impellerc, the shader compiler, built only as
+a tool) gets that. clang-tidy reads the one entry per file, and must find
+the build's own compiler flags there rather than em++'s.
 """
 
 import argparse
@@ -131,13 +137,30 @@ def _compiler_path(execution_root, output_base, compiler):
     return os.path.join(os.path.realpath(_lasting_path(execution_root, output_base, directory)), name)
 
 
+def configuration_ranks(aquery):
+    """Configuration id -> 0 for the command line's own configuration, 1 for a transition's, 2 for an exec one.
+
+    The aquery's `configuration` list names each with its output directory
+    (`mnemonic`): the top-level configuration has none of the suffixes,
+    a Starlark transition's carries `-ST-<hash>`, and an exec configuration
+    `-exec-` (and `isTool`).
+    """
+    ranks = {}
+    for c in aquery.get("configuration", []):
+        mnemonic = c.get("mnemonic", "")
+        if c.get("isTool") or "exec" in mnemonic:
+            ranks[c["id"]] = 2
+        elif "-ST-" in mnemonic:
+            ranks[c["id"]] = 1
+        else:
+            ranks[c["id"]] = 0
+    return ranks
+
+
 def compile_commands(aquery, execution_root, output_base):
-    """The compile_commands.json entries of an aquery result: source -> entry, target configuration first."""
-    exec_configurations = {
-        c["id"] for c in aquery.get("configuration", []) if "exec" in c.get("mnemonic", "")
-    }
-    target_entries = {}
-    exec_entries = {}
+    """The compile_commands.json entries of an aquery result: source -> entry, the command line's configuration first."""
+    ranks = configuration_ranks(aquery)
+    best = {}
     for action in aquery.get("actions", []):
         if action.get("mnemonic") != "CppCompile":
             continue
@@ -148,21 +171,24 @@ def compile_commands(aquery, execution_root, output_base):
         ]
         if not sources:
             continue
+        # A transition's configuration before an exec one's; the command
+        # line's own before both (configuration_ranks); an unlisted one last.
+        rank = ranks.get(action.get("configurationId"), 3)
+        source = sources[-1]
+        if source in best and best[source][0] <= rank:
+            continue
         arguments[0] = _compiler_path(execution_root, output_base, arguments[0])
         arguments[1:] = [_lasting_argument(a, execution_root, output_base) for a in arguments[1:]]
-        entry = {
-            "directory": execution_root,
-            "file": _checkout_path(execution_root, output_base, sources[-1]),
-            "arguments": arguments,
-            "command": shlex.join(arguments),
-        }
-        if action.get("configurationId") in exec_configurations:
-            exec_entries.setdefault(sources[-1], entry)
-        else:
-            target_entries.setdefault(sources[-1], entry)
-    entries = dict(exec_entries)
-    entries.update(target_entries)
-    return [entries[source] for source in sorted(entries)]
+        best[source] = (
+            rank,
+            {
+                "directory": execution_root,
+                "file": _checkout_path(execution_root, output_base, source),
+                "arguments": arguments,
+                "command": shlex.join(arguments),
+            },
+        )
+    return [best[source][1] for source in sorted(best)]
 
 
 def main(argv):
