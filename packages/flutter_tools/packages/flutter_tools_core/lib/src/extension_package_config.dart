@@ -112,7 +112,7 @@ final class ExtensionPackageConfig {
     final String? rawEntrypoint = json.nullableField<String>(entrypointKey);
     final String entrypoint = _validateEntrypoint(rawEntrypoint ?? 'bin/$name.dart');
 
-    final Set<String> services = json.stringSet(servicesKey, rejectEmpty: true);
+    final Set<String> services = json.stringSet(servicesKey, rejectEmpty: true, trim: true);
     if (services.isEmpty) {
       throw const FormatException(
         'Extension config.yaml must specify a non-empty list of services for "$servicesKey".',
@@ -122,11 +122,11 @@ final class ExtensionPackageConfig {
     return ExtensionPackageConfig(
       name: name,
       entrypoint: entrypoint,
-      supportedPlatforms: json.stringSet(supportedPlatformsKey, rejectEmpty: true),
+      supportedPlatforms: json.stringSet(supportedPlatformsKey, rejectEmpty: true, trim: true),
       services: services,
-      buildTargets: json.stringSet(buildTargetsKey, rejectEmpty: true),
-      templates: json.stringSet(templatesKey, rejectEmpty: true),
-      platforms: json.stringSet(platformsKey, rejectEmpty: true),
+      buildTargets: json.stringSet(buildTargetsKey, rejectEmpty: true, trim: true),
+      templates: json.stringSet(templatesKey, rejectEmpty: true, trim: true),
+      platforms: json.stringSet(platformsKey, rejectEmpty: true, trim: true),
     );
   }
 

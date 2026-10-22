@@ -378,35 +378,63 @@ void main() {
         );
       });
 
-      test('trims elements and deduplicates when rejectEmpty is true', () {
+      test('trims elements and deduplicates when trim is true', () {
         const json = <String, Object?>{
-          fieldKey: <Object?>[' a ', 'a', 'b\t'],
+          fieldKey: <Object?>[' a ', 'a', 'b\t', ''],
         };
-        expect(json.stringSet(fieldKey, rejectEmpty: true), const <String>{'a', 'b'});
+        expect(json.stringSet(fieldKey, trim: true), const <String>{'a', 'b', ''});
       });
 
-      test(
-        'throws FormatException on empty or whitespace-only element when rejectEmpty is true',
-        () {
-          for (final invalid in const <String>['', '   ', '\t\n']) {
-            final json = <String, Object?>{
-              fieldKey: <Object?>['valid', invalid],
-            };
-            expect(
-              () => json.stringSet(fieldKey, rejectEmpty: true),
-              throwsA(
-                isA<FormatException>().having(
-                  (FormatException e) => e.message,
-                  'message',
-                  contains(
-                    'Invalid "$fieldKey" element: expected non-empty String, got "$invalid".',
-                  ),
-                ),
+      test('preserves whitespace when rejectEmpty is true and trim is false', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>['  padded  ', '   '],
+        };
+        expect(json.stringSet(fieldKey, rejectEmpty: true), const <String>{'  padded  ', '   '});
+      });
+
+      test('throws FormatException on empty element when rejectEmpty is true', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>['valid', ''],
+        };
+        expect(
+          () => json.stringSet(fieldKey, rejectEmpty: true),
+          throwsA(
+            isA<FormatException>().having(
+              (FormatException e) => e.message,
+              'message',
+              contains('Invalid "$fieldKey" element: expected non-empty String, got "".'),
+            ),
+          ),
+        );
+      });
+
+      test('trims elements when rejectEmpty and trim are true', () {
+        const json = <String, Object?>{
+          fieldKey: <Object?>['  diagnostics  ', 'diagnostics', 'b\t'],
+        };
+        expect(json.stringSet(fieldKey, rejectEmpty: true, trim: true), const <String>{
+          'diagnostics',
+          'b',
+        });
+      });
+
+      test('throws FormatException on empty or whitespace-only element when rejectEmpty and trim are true', () {
+        for (final invalid in const <String>['', '   ', '\t\n']) {
+          final json = <String, Object?>{
+            fieldKey: <Object?>['valid', invalid],
+          };
+          expect(
+            () => json.stringSet(fieldKey, rejectEmpty: true, trim: true),
+            throwsA(
+              isA<FormatException>().having(
+                (FormatException e) => e.message,
+                'message',
+                contains('Invalid "$fieldKey" element: expected non-empty String, got "$invalid".'),
               ),
-            );
-          }
-        },
-      );
+            ),
+          );
+        }
+      });
     });
 
     test('parses real jsonDecode map and list structures', () {
