@@ -271,14 +271,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   File get _dartSdkSourcemaps =>
       _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!));
 
-  File _canvasKitFile(String relativePath) {
-    final String canvasKitPath = _fileSystem.path.join(
-      _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
-      'canvaskit',
-    );
-    final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(canvasKitPath, relativePath));
-    return canvasKitFile;
-  }
+  String get _canvasKitPath => _fileSystem.path.join(
+    _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
+    'canvaskit',
+  );
 
   Future<shelf.Response> _handleTestRequest(shelf.Request request) async {
     if (request.url.path.endsWith('main.dart.browser_test.dart.js')) {
@@ -470,13 +466,19 @@ window.\$dartLoader.loader.nextAttempt();
   /// Serves a local build of CanvasKit, replacing the CDN build, which can
   /// cause test flakiness due to reliance on network.
   shelf.Response _localCanvasKitHandler(shelf.Request request) {
-    final String fullPath = _fileSystem.path.fromUri(request.url);
-    if (!fullPath.startsWith('canvaskit/')) {
+    final List<String> pathSegments = request.url.pathSegments;
+    final String canvasKitPath = _canvasKitPath;
+    final String filePath = _fileSystem.path.joinAll(<String>[
+      canvasKitPath,
+      ...pathSegments.skip(1),
+    ]);
+    if (pathSegments.firstOrNull != 'canvaskit' ||
+        !_fileSystem.path.isWithin(canvasKitPath, filePath) ||
+        !_fileSystem.isFileSync(filePath)) {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
-    final String relativePath = fullPath.replaceFirst('canvaskit/', '');
-    final String extension = _fileSystem.path.extension(relativePath);
+    final String extension = _fileSystem.path.extension(filePath);
     String contentType;
     switch (extension) {
       case '.js':
@@ -489,7 +491,7 @@ window.\$dartLoader.loader.nextAttempt();
         return shelf.Response.internalServerError(body: error);
     }
 
-    final File canvasKitFile = _canvasKitFile(relativePath);
+    final File canvasKitFile = _fileSystem.file(filePath);
     return shelf.Response.ok(
       canvasKitFile.openRead(),
       headers: <String, Object>{
