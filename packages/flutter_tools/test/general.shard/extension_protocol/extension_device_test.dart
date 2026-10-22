@@ -146,13 +146,13 @@ void main() {
       );
       final app = _FakeApplicationPackage(_testAppId);
 
-      final DeviceLogReader reader = device.getLogReader(app: app);
-      expect(identical(device.getLogReader(app: app), reader), isTrue);
-
-      final Future<List<String>> receivedLinesFuture = reader.logLines.take(2).toList();
       final Future<Map<String, Object?>> startEventFuture = events.firstWhere(
         (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
       );
+      final DeviceLogReader reader = await device.getLogReader(app: app);
+      expect(identical(await device.getLogReader(app: app), reader), isTrue);
+
+      final Future<List<String>> receivedLinesFuture = reader.logLines.take(2).toList();
 
       final List<String> receivedLines = await receivedLinesFuture;
       expect(
@@ -210,7 +210,7 @@ void main() {
         );
         addTearDown(device.dispose);
 
-        final DeviceLogReader reader = device.getLogReader();
+        final DeviceLogReader reader = await device.getLogReader();
         final List<String> lines = await reader.logLines.take(2).toList();
         expect(lines, equals(<String>['primary-line-1', 'primary-line-2']));
       },
@@ -242,7 +242,10 @@ void main() {
         addTearDown(conn.dispose);
 
         final client = ExtensionDeviceClient(conn, logger: logger);
-        final reader = ExtensionDeviceLogReader(
+        final Future<Map<String, Object?>> startEventFuture = events.firstWhere(
+          (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
+        );
+        final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
           connection: conn,
           deviceId: _primaryDeviceId,
           deviceService: client,
@@ -250,17 +253,13 @@ void main() {
           name: 'Primary Extension Device',
         );
 
-        final Future<Map<String, Object?>> startEventFuture = events.firstWhere(
-          (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
-        );
-        final StreamSubscription<String> sub = reader.logLines.listen((String _) {});
-        addTearDown(sub.cancel);
-        await startEventFuture;
+        final Map<String, Object?> startEvent = await startEventFuture;
+        expect(startEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
 
         final Future<Map<String, Object?>> stopEventFuture = events.firstWhere(
           (Map<String, Object?> event) => event[_eventTypeKey] == _stopEventType,
         );
-        reader.dispose();
+        await reader.dispose();
 
         final Map<String, Object?> stopEvent = await stopEventFuture;
         expect(stopEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
@@ -284,7 +283,7 @@ void main() {
       addTearDown(conn.dispose);
 
       final client = ExtensionDeviceClient(conn, logger: logger);
-      final reader = ExtensionDeviceLogReader(
+      final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
         connection: conn,
         deviceId: _primaryDeviceId,
         deviceService: client,
@@ -293,12 +292,6 @@ void main() {
       );
       addTearDown(reader.dispose);
 
-      final StreamSubscription<String> sub = reader.logLines.listen((String _) {});
-      addTearDown(sub.cancel);
-
-      while (logger.warningText.isEmpty) {
-        await pumpEventQueue();
-      }
       expect(
         logger.warningText,
         contains('Failed to start log stream for extension device "$_primaryDeviceId"'),
