@@ -167,8 +167,10 @@ void main() {
 
 class FakeBuildInfoCommand extends FlutterCommand {
   FakeBuildInfoCommand() : super() {
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.splitDebugInfo,
+      BuildInfoOptions.obfuscate,
+    ]);
   }
 
   @override

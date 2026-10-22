@@ -544,7 +544,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (flutter::PointerData)generatePointerDataForFake {
-  flutter::PointerData pointer_data;
+  flutter::PointerData pointer_data{};
   pointer_data.Clear();
   pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
   // `UITouch.timestamp` is defined as seconds since system startup. Synthesized events can get this
@@ -1174,7 +1174,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   for (UITouch* touch in touches) {
     CGPoint windowCoordinates = [touch locationInView:self.view];
 
-    flutter::PointerData pointer_data;
+    flutter::PointerData pointer_data{};
     pointer_data.Clear();
 
     constexpr int kMicrosecondsPerSecond = 1000 * 1000;
@@ -2017,7 +2017,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGPoint location = [gestureRecognizer locationInView:self.view];
   CGFloat scale = self.flutterScreenIfViewLoaded.scale;
   _mouseState.location = {location.x * scale, location.y * scale};
-  flutter::PointerData pointer_data;
+  flutter::PointerData pointer_data{};
   pointer_data.Clear();
   pointer_data.time_stamp = [[NSProcessInfo processInfo] systemUptime] * kMicrosecondsPerSecond;
   pointer_data.physical_x = _mouseState.location.x;

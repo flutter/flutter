@@ -34,6 +34,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/fake_web_devfs.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 const kTransparentImage = <int>[
@@ -76,10 +77,15 @@ void main() {
           InternetAddress.loopbackIPv4,
           <String, String>{},
           <String, String>{},
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            config: globals.config,
+            fs: globals.fs,
+            flutterVersion: globals.flutterVersion,
+            logger: logger,
+          ),
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
-          fileSystem: globals.fs,
-          logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -335,10 +341,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -355,10 +366,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     // Defaults to "/" when there's no base element.
@@ -377,10 +393,15 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -398,10 +419,15 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -459,10 +485,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: true,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     final Response response = await webAssetServer.handleRequest(
@@ -708,6 +739,22 @@ void main() {
     );
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{Platform: () => linux});
+
+  runInTestbed('does not serve non-Dart files from project root', () async {
+    final files = <String, String>{
+      '.env': 'env_secret',
+      'pubspec.yaml': 'pubspec_secret',
+      '.dart_tool/package_config.json': 'package_config_secret',
+    };
+
+    for (final MapEntry(:String key, :String value) in files.entries) {
+      globals.fs.file(key)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(value);
+
+      expect(await webAssetServer.dartSourceContents(key), isNull);
+    }
+  });
 
   runInTestbed('serves asset files from filesystem with known mime type', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'foo.png');
@@ -1323,6 +1370,8 @@ void main() {
         enableDwds: true,
         ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
+        // If this is any other value, we will do a real IP lookup inside FakeAsync.
+        webDevServerConfig: const WebDevServerConfig(host: webDevAnyHostDefault),
       );
       final firstConnection = FakeAppConnection();
       final secondConnection = FakeAppConnection();
@@ -1357,7 +1406,7 @@ void main() {
     });
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
-  runInTestbed('Can start web server with hostname any', () async {
+  runInTestbed('Can start web server with default hostname', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -1374,6 +1423,29 @@ void main() {
 
     final Uri uri = await webDevFS.create();
     expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress.isLoopback, isTrue);
+    await webDevFS.destroy();
+  });
+
+  runInTestbed('Can start web server with hostname any', () async {
+    final String path = globals.fs.path.join('lib', 'main.dart');
+    final File outputFile = globals.fs.file(path)..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+
+    final WebDevFS webDevFS = createWebDevFS(
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
+      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
+      entrypoint: Uri.base,
+      webDevServerConfig: const WebDevServerConfig(host: webDevAnyHostDefault),
+    );
+
+    final Uri uri = await webDevFS.create();
+    expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress, InternetAddress.anyIPv4);
     await webDevFS.destroy();
   });
 
@@ -1454,20 +1526,25 @@ void main() {
       const DartDevelopmentServiceConfiguration(enable: false),
       Uri.base,
       null,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
       crossOriginIsolation: false,
     );
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  });
 
   runInTestbed('passes on extra headers', () async {
     const extraHeaderKey = 'hurray';
@@ -1491,21 +1568,26 @@ void main() {
       const DartDevelopmentServiceConfiguration(enable: false),
       Uri.base,
       null,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
       crossOriginIsolation: false,
     );
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
 
     await webAssetServer.dispose();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  });
 
   runInTestbed('WebAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await webAssetServer.handleRequest(
@@ -1587,10 +1669,15 @@ void main() {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1649,10 +1736,15 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1696,11 +1788,16 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
         webDefines: <String, String>{}, // Empty webDefines
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1750,11 +1847,16 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
         webDefines: <String, String>{}, // Empty webDefines
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1800,11 +1902,16 @@ const config = {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
       webDefines: <String, String>{'API_URL': 'https://test.api.com', 'DEBUG_MODE': 'true'},
-      logger: logger,
     );
 
     final Response response = await webAssetServer.handleRequest(
