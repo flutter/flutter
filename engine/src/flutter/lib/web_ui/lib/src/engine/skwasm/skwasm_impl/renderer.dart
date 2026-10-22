@@ -21,6 +21,21 @@ class SkwasmRenderer extends Renderer {
 
   bool get isWimp => skwasmIsWimp();
 
+  Surface? _pictureToImageSurface;
+
+  Rasterizer _createRasterizer() {
+    final bool useHybrid = configuration.skwasmUseHybridRasterizer ?? false;
+    if (useHybrid && browserSupportsTransferControlToOffscreen) {
+      return HybridCanvasRasterizer(
+        (OnscreenCanvasProvider provider) => SkwasmOnscreenSurface(provider),
+        SkwasmOffscreenSurface.new,
+      );
+    }
+    return OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => SkwasmOffscreenSurface(canvasProvider),
+    );
+  }
+
   @override
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
@@ -196,9 +211,7 @@ class SkwasmRenderer extends Renderer {
 
   @override
   FutureOr<void> initialize() {
-    rasterizer = OffscreenCanvasRasterizer(
-      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
-    );
+    rasterizer = _createRasterizer();
     return super.initialize();
   }
 
@@ -291,11 +304,19 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
-    rasterizer = OffscreenCanvasRasterizer(
-      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
-    );
+    rasterizer = _createRasterizer();
+    _pictureToImageSurface = null;
   }
 
   @override
-  Surface get pictureToImageSurface => (rasterizer as OffscreenCanvasRasterizer).offscreenSurface;
+  Surface get pictureToImageSurface {
+    final Surface? pictureToImageSurface = _pictureToImageSurface;
+    if (pictureToImageSurface != null) {
+      return pictureToImageSurface;
+    }
+    if (rasterizer is OffscreenCanvasRasterizer) {
+      return (rasterizer as OffscreenCanvasRasterizer).offscreenSurface;
+    }
+    return _pictureToImageSurface = rasterizer.createPictureToImageSurface();
+  }
 }

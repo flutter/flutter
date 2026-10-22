@@ -165,6 +165,8 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   double requestAnimationFrame(DomRequestAnimationFrameCallback callback) =>
       _requestAnimationFrame(_makeAnimationFrameCallbackZoned(callback));
 
+  external void cancelAnimationFrame(double handle);
+
   @JS('postMessage')
   external void _postMessage(JSAny message, String targetOrigin, [JSArray<JSAny?> messagePorts]);
   void postMessage(Object message, String targetOrigin, [List<DomMessagePort>? messagePorts]) {
@@ -983,6 +985,8 @@ extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, Dom
 
   DomImageBitmapRenderingContext get contextBitmapRenderer =>
       getContext('bitmaprenderer')! as DomImageBitmapRenderingContext;
+
+  external DomOffscreenCanvas transferControlToOffscreen();
 }
 
 @visibleForTesting
@@ -993,9 +997,10 @@ void debugResetCanvasCount() {
   debugCanvasCount = 0;
 }
 
-DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
+DomHTMLCanvasElement createDomCanvasElement({int? width, int? height, DomDocument? ownerDocument}) {
   debugCanvasCount++;
-  final canvas = domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
+  final canvas =
+      (ownerDocument ?? domWindow.document).createElement('canvas') as DomHTMLCanvasElement;
   if (width != null) {
     canvas.width = width.toDouble();
   }
@@ -2344,6 +2349,8 @@ extension type DomMessagePort._(JSObject _) implements DomEventTarget {
   void postMessage(Object? message) => _postMessage(message?.toJSAnyDeep);
 
   external void start();
+
+  external void close();
 }
 
 @JS('MessageChannel')
@@ -2737,6 +2744,11 @@ bool browserSupportsFinalizationRegistry = _finalizationRegistryConstructor != n
 external JSAny? get _offscreenCanvasConstructor;
 
 bool browserSupportsOffscreenCanvas = _offscreenCanvasConstructor != null;
+
+@JS('HTMLCanvasElement.prototype.transferControlToOffscreen')
+external JSAny? get _transferControlToOffscreen;
+
+bool get browserSupportsTransferControlToOffscreen => _transferControlToOffscreen != null;
 
 /// Set to `true` to disable `createImageBitmap` support. Used in tests.
 @visibleForTesting
