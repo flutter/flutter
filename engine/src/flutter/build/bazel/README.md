@@ -1006,16 +1006,19 @@ off. So GN's `flutter_tester` in `out/linux_debug_arm64` is 57 MB over a
 binaries. Bazel's binary in `bazel-bin` stays as linked -- the tests run it,
 as GN's unstripped copy is there to be run under a debugger -- and the
 aspect that places a `cc_binary` strips what is shipped
-(`build_directory.bzl`): the same tool with the same flag writes
-`<name>.shipped` beside the binary (`<name>.stripped` is `cc_binary`'s own,
-the toolchain's strip with `-S`, debug sections only), which an `install`
+(`build_directory.bzl`): the same tool with the same flag writes the copy
+under `shipped/` beside the binary, with the binary's own name, since the
+scripts that pack it name entries after their inputs (`<name>.stripped` is
+`cc_binary`'s own, the toolchain's strip with `-S`, debug sections only), which an `install`
 lays at the build root and a `zip_bundle` packs, with the binary as linked
 under `exe.unstripped/` or `lib.unstripped/`; a shared library under
 `--//engine/src/flutter/build/bazel:stripped` (the default), as linked
 otherwise. `--no-stripped` in a builder configuration is that flag off
 (the developer's `host_debug`, `host_debug_unopt`, `host_profile`,
 `host_release`); for the web it is nothing, as GN's wasm toolchain strips
-nothing. The Dart wrap's `gen_snapshot` is already GN's stripped file.
+nothing; for Android it is the default, and the aspect adds GN's android
+toolchain's `--strip-unneeded` copy as `lib.stripped/<name>` (see the
+Android section). The Dart wrap's `gen_snapshot` is already GN's stripped file.
 
 The root package has `//engine/src/flutter:install`, the Linux host's build
 directory as above with all seven archives of the Linux host configurations:
