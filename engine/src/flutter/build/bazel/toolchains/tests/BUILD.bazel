@@ -17,5 +17,11 @@ cc_test(
     ],
     copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
+    # The Linux toolchains' test: it fingerprints the Debian sysroot's glibc,
+    # which the Android (bionic) and wasm platforms have no counterpart of,
+    # and it runs on the host. Under those platforms it is incompatible
+    # rather than a compile error -- which is also what keeps it out of the
+    # Android build's compile_commands.json, and so out of its clang-tidy.
+    target_compatible_with = ["@platforms//os:linux"],
     deps = ["@googletest//:gtest_main"],
 )
