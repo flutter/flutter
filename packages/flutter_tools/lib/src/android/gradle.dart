@@ -47,6 +47,7 @@ import 'migrations/disable_built_in_kotlin_migration.dart';
 import 'migrations/disable_new_dsl_migration.dart';
 import 'migrations/min_sdk_version_migration.dart';
 import 'migrations/multidex_removal_migration.dart';
+import 'migrations/remove_built_in_kotlin_opt_out_migration.dart';
 import 'migrations/remove_new_dsl_opt_out_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 
@@ -541,6 +542,7 @@ To fix this, you can either:
       MultidexRemovalMigration(project.android, _logger),
       CmakeAndroid16kPagesMigration(project.android, _logger),
       DisableBuiltInKotlinMigration(project.android, _logger),
+      RemoveBuiltInKotlinOptOutMigration(project.android, _logger),
       DisableNewDslMigration(project.android, _logger),
       RemoveNewDslOptOutMigration(project.android, _logger),
     ];

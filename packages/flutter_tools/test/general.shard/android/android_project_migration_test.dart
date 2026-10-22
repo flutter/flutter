@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/android/migrations/disable_built_in_kotlin_mig
 import 'package:flutter_tools/src/android/migrations/disable_new_dsl_migration.dart';
 import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/multidex_removal_migration.dart';
+import 'package:flutter_tools/src/android/migrations/remove_built_in_kotlin_opt_out_migration.dart';
 import 'package:flutter_tools/src/android/migrations/remove_new_dsl_opt_out_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -731,6 +732,137 @@ android.newDsl  :  false
           await DisableNewDslMigration(project, bufferLogger).migrate();
 
           expect(topLevelGradlePropertiesFile.readAsStringSync(), contents);
+        });
+      });
+
+      group('built-in Kotlin opt-out removal', () {
+        const builtInKotlinTemplatePair = '''
+# This builtInKotlin flag was added by the Flutter template
+android.builtInKotlin=false''';
+        const builtInKotlinMigratorPair = '''
+# This builtInKotlin flag was added automatically by Flutter migrator
+android.builtInKotlin=false''';
+        const newDslTemplatePair = '''
+# This newDsl flag was added by the Flutter template
+android.newDsl=false''';
+        const newDslMigratorPair = '''
+# This newDsl flag was added automatically by Flutter migrator
+android.newDsl=false''';
+
+        // The order used by AndroidGradleBuilder.
+        Future<void> runMigrators() async {
+          await DisableBuiltInKotlinMigration(project, bufferLogger).migrate();
+          await RemoveBuiltInKotlinOptOutMigration(project, bufferLogger).migrate();
+          await DisableNewDslMigration(project, bufferLogger).migrate();
+          await RemoveNewDslOptOutMigration(project, bufferLogger).migrate();
+        }
+
+        testUsingContext('removes both template-written opt-outs in one run', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
+android.useAndroidX=true
+$newDslTemplatePair
+$builtInKotlinTemplatePair
+''');
+
+          await runMigrators();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), 'android.useAndroidX=true\n');
+          expect(
+            bufferLogger.warningText,
+            contains('Removed the android.builtInKotlin=false opt-out'),
+          );
+          expect(bufferLogger.warningText, contains('without the Flutter comment'));
+          expect(bufferLogger.warningText, contains(kMigrateToBuiltInKotlinDocsUrl));
+          expect(bufferLogger.warningText, contains('Removed the android.newDsl=false opt-out'));
+        });
+
+        testUsingContext('removes both migrator-written opt-outs in one run', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
+android.enableJetifier=true
+$builtInKotlinMigratorPair
+$newDslMigratorPair
+''');
+
+          await runMigrators();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), 'android.enableJetifier=true\n');
+        });
+
+        testUsingContext('keeps both opt-outs when the app applies kotlin-android', () async {
+          project.kotlinAndroidPlugin = true;
+          const contents = '$newDslTemplatePair\n$builtInKotlinTemplatePair\n';
+          topLevelGradlePropertiesFile.writeAsStringSync(contents);
+
+          await runMigrators();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), contents);
+          expect(bufferLogger.warningText, isEmpty);
+        });
+
+        testUsingContext('keeps an opt-out without a Flutter marker', () async {
+          const contents = 'android.builtInKotlin=false\nandroid.newDsl=false\n';
+          topLevelGradlePropertiesFile.writeAsStringSync(contents);
+
+          await runMigrators();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), contents);
+        });
+
+        testUsingContext('keeps a marker followed by an edited value', () async {
+          const contents = '''
+# This builtInKotlin flag was added by the Flutter template
+android.builtInKotlin=true
+''';
+          topLevelGradlePropertiesFile.writeAsStringSync(contents);
+
+          await RemoveBuiltInKotlinOptOutMigration(project, bufferLogger).migrate();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), contents);
+        });
+
+        testUsingContext('reads the value with any separator', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
+# This builtInKotlin flag was added by the Flutter template
+android.builtInKotlin : false
+''');
+
+          await RemoveBuiltInKotlinOptOutMigration(project, bufferLogger).migrate();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), '');
+        });
+
+        testUsingContext('removes the opt-out from a CRLF file', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync(
+            'android.useAndroidX=true\r\n'
+            '# This builtInKotlin flag was added by the Flutter template\r\n'
+            'android.builtInKotlin=false\r\n',
+          );
+
+          await RemoveBuiltInKotlinOptOutMigration(project, bufferLogger).migrate();
+
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), 'android.useAndroidX=true\r\n');
+        });
+
+        testUsingContext('does nothing when gradle.properties is missing', () async {
+          await RemoveBuiltInKotlinOptOutMigration(project, bufferLogger).migrate();
+
+          expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
+          expect(bufferLogger.errorText, isEmpty);
+        });
+
+        testUsingContext('is idempotent', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync(
+            'android.useAndroidX=true\n$builtInKotlinTemplatePair\n',
+          );
+
+          await runMigrators();
+          final String once = topLevelGradlePropertiesFile.readAsStringSync();
+          final String warningsAfterOnce = bufferLogger.warningText;
+          await runMigrators();
+
+          expect(once, 'android.useAndroidX=true\n');
+          expect(topLevelGradlePropertiesFile.readAsStringSync(), once);
+          expect(bufferLogger.warningText, warningsAfterOnce);
         });
       });
 
