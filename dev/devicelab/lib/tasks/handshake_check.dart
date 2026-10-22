@@ -15,9 +15,7 @@ import '../framework/utils.dart';
 
 const String _appName = 'handshake_check_app';
 
-TaskFunction createHandshakeCheckTask({
-  String? deviceIdOverride,
-}) {
+TaskFunction createHandshakeCheckTask({String? deviceIdOverride}) {
   return () async {
     if (deviceIdOverride == null) {
       final Device device = await devices.workingDevice;
