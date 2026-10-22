@@ -4924,14 +4924,28 @@ zip_bundle_from_file(
 '''),
         );
         // An entry at the build directory's root is not under a directory:
-        // the plain bundle shape, entry by entry.
-        await expectLater(
-          convert(
-            r'''
+        // the plain bundle shape, entry by entry (a `rebase_path()` around
+        // a source is the path itself).
+        final String mixed = await convert(
+          r'''
 import("//flutter/build/zip_bundle.gni")
+
+copy("lib") {
+  sources = [ "ui.dart" ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/lib/ui.dart" ]
+}
+
+copy("version") {
+  sources = [ "version" ]
+  outputs = [ "$root_out_dir/version" ]
+}
 
 zip_bundle_from_file("mixed") {
   output = "mixed.zip"
+  deps = [
+    ":lib",
+    ":version",
+  ]
   files = [
     {
       source = rebase_path("$root_build_dir/flutter_web_sdk/lib/ui.dart")
@@ -4944,9 +4958,17 @@ zip_bundle_from_file("mixed") {
   ]
 }
 ''',
-            templates: <String>{'zip_bundle_from_file'},
-          ),
-          completion(isNot(contains('build_directory_tree'))),
+          templates: <String>{'zip_bundle_from_file'},
+        );
+        expect(mixed, isNot(contains('build_directory_tree')));
+        expect(
+          mixed,
+          contains('''
+    files = {
+        "lib/ui.dart": ":lib",
+        "version": ":version",
+    },
+'''),
         );
       },
     );

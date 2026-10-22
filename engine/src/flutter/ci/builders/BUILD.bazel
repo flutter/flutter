@@ -34,20 +34,38 @@ filegroup(
 # linux_android_aot_engine.json: ci/android_profile
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_profile",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host"],
+    directory = "ci/android_profile",
+)
 
 # linux_android_aot_engine.json: ci/android_release
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_release",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host"],
+    directory = "ci/android_release",
+)
 
 # linux_android_aot_engine.json: ci/android_release_arm64
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:abi_jars, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_release_arm64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_release_arm64",
+)
 
 # Other steps, scripts of the checkout: Generate treemap for android_release_arm64.
 # Nothing to run.
@@ -55,38 +73,86 @@ filegroup(
 # linux_android_aot_engine.json: ci/android_profile_arm64
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: clang_x64/gen_snapshot, default, flutter/shell/platform/android:abi_jars, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_profile_arm64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_profile_arm64",
+)
 
 # linux_android_aot_engine.json: ci/android_profile_x64
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:abi_jars, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_profile_x64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_profile_x64",
+)
 
 # linux_android_aot_engine.json: ci/android_release_x64
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:abi_jars, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_release_x64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_release_x64",
+)
 
 # linux_android_aot_engine.json: ci/android_profile_riscv64
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:abi_jars, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_profile_riscv64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_profile_riscv64",
+)
 
 # linux_android_aot_engine.json: ci/android_release_riscv64
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:abi_jars, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_release_riscv64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_release_riscv64",
+)
 
 # linux_android_aot_engine_ddm.json: ci/android_release_arm64_ddm
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default.
+install(
+    name = "android_release_arm64_ddm",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_release_arm64_ddm",
+)
 
 # Other steps, scripts of the checkout: Generate treemap for android_release_arm64_ddm.
 # Nothing to run.
@@ -94,14 +160,30 @@ filegroup(
 # linux_android_aot_engine_ddm.json: ci/android_release_x64_ddm
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default.
+install(
+    name = "android_release_x64_ddm",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_release_x64_ddm",
+)
 
 # linux_android_aot_engine_size_exp.json: ci/android_release_arm64_size_exp
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: default, clang_x64/gen_snapshot, flutter/shell/platform/android:analyze_snapshot.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: default.
+install(
+    name = "android_release_arm64_size_exp",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:analyze_snapshot",
+    ],
+    directory = "ci/android_release_arm64_size_exp",
+)
 
 # Other steps, scripts of the checkout: Generate treemap for android_release_arm64_size_exp.
 # Nothing to run.

@@ -1363,7 +1363,9 @@ final class _Emitter {
           if (condition == Condition.never) {
             continue;
           }
-          final String path = (source.value as GnStringValue).value;
+          // A source written as `rebase_path("$root_out_dir/...")` (the Android
+          // shell's archive of the host gen_snapshot) is the path itself.
+          final String path = _unmarked((source.value as GnStringValue).value);
           final String at = (destination.value as GnStringValue).value;
           // A directory: a zip_tree of its files, named after the bundle
           // and the destination, in the bundle's `trees`.
@@ -1486,9 +1488,12 @@ final class _Emitter {
           if (!absolute.startsWith('$buildDirRoot/') ||
               at.isEmpty ||
               !absolute.endsWith('/$at') ||
-              end <= start) {
+              end <= start ||
+              buildOutputLabels.containsKey(absolute)) {
             // Not under a directory of the build directory (a file at its
-            // root, artifacts.zip's flutter_tester).
+            // root, artifacts.zip's flutter_tester), or a named output
+            // (the host toolchain's gen_snapshot under clang_x64/): an entry
+            // of its own.
             return null;
           }
           base = absolute.substring(start, end);
@@ -3140,9 +3145,22 @@ final class _Emitter {
     return value;
   }
 
-  /// [_string] for an action's args, where a rebased path belongs.
+  /// [_string] for an action's args, where a rebased path belongs. A label
+  /// whose only expansion is its toolchain
+  /// (`"$dart_src/runtime/bin:analyze_snapshot($host_toolchain)"`) is kept
+  /// as written, for the label table to read the toolchain off.
   static String _rawString(_Element element) {
     final GnValue value = element.value;
+    if (value is GnExpandedString) {
+      final List<GnValue> parts = value.parts;
+      if (parts.length == 3 &&
+          parts[0] is GnStringValue &&
+          parts[1] is GnReference &&
+          parts[2] == const GnStringValue(')') &&
+          (parts[0] as GnStringValue).value.endsWith('(')) {
+        return '${(parts[0] as GnStringValue).value}\$${(parts[1] as GnReference).name})';
+      }
+    }
     if (value is! GnStringValue) {
       throw GnError(element.assignment.location, 'expected a string, got $value');
     }

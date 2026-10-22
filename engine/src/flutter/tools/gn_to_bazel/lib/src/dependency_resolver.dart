@@ -149,15 +149,21 @@ final class DependencyResolver {
         return null;
       }
       try {
+        final ConvertedFile? manifest = manifestEntry(directory);
         return evaluateGnFile(
           tree.load(file),
           assumptions: assumptions,
           templates: templateMappings.keys.toSet(),
           externalVariables: knownExternalVariables,
           booleanVariables: knownBooleanVariables,
-          skipTargets: manifestEntry(directory)?.skip.keys.toSet() ?? const <String>{},
+          skipTargets: manifest?.skip.keys.toSet() ?? const <String>{},
           tree: tree,
           importPolicy: engineImportPolicy,
+          // The file's own condition (the Android shell's is_android), as
+          // its conversion evaluates it.
+          condition: manifest?.condition == null
+              ? Condition.always
+              : ConditionVariable(manifest!.condition!),
         );
       } on GnError catch (e) {
         // A file of a tree the converter does not read (one importing a

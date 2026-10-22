@@ -26,6 +26,14 @@ BuildDirectoryInfo = provider(
     },
 )
 
+GnBuildInfo = provider(
+    doc = "Where the products of a wrapped GN build (gn_build) sit in GN's build directory. A product's " +
+          "filegroup -- `output_group` over the build -- places its file there (build_directory_aspect).",
+    fields = {
+        "paths": "Product name (an output group) to its path under the GN build directory.",
+    },
+)
+
 def build_directory_path(gn_output):
     """GN's path under the build directory for an output written as GN does.
 
@@ -164,6 +172,14 @@ def _binary_entries(target, ctx):
         shipped[binary] = stripped
     return entries, shipped
 
+def _gn_build_product(ctx):
+    """The build-directory path of a gn_build product's filegroup, or None for any other filegroup."""
+    group = getattr(ctx.rule.attr, "output_group", "")
+    srcs = getattr(ctx.rule.attr, "srcs", [])
+    if not group or len(srcs) != 1 or GnBuildInfo not in srcs[0]:
+        return None
+    return srcs[0][GnBuildInfo].paths.get(group)
+
 def _build_directory_aspect_impl(target, ctx):
     transitive = []
     for attribute in _FOLLOWED_ATTRIBUTES:
@@ -174,6 +190,11 @@ def _build_directory_aspect_impl(target, ctx):
     shipped = {}
     if BuildDirectoryInfo in target:
         direct = target[BuildDirectoryInfo].entries
+    elif ctx.rule.kind == "filegroup" and _gn_build_product(ctx) != None:
+        # A product of a wrapped GN build (gn_build's `:gen_snapshot`): at
+        # its path in GN's build directory (clang_x64/gen_snapshot for a
+        # cross build's host tool).
+        direct = depset([(f, _gn_build_product(ctx)) for f in target[DefaultInfo].files.to_list()])
     elif ctx.rule.kind in ("cc_binary", "cc_shared_library"):
         # GN writes an executable or a shared library into the build root.
         binary, shipped = _binary_entries(target, ctx)

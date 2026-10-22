@@ -25,6 +25,7 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:path/path.dart' as p;
 
 import 'bazel_mapping.dart';
+import 'gn_eval.dart';
 import 'manifest.dart';
 import 'starlark_emitter.dart';
 
@@ -688,6 +689,16 @@ String buildersBuildFile(
     final missing = <String>[];
     final tests = <String>[];
     for (final String target in build.ninjaTargets) {
+      // A build output named by its path (`clang_x64/gen_snapshot`, the AOT
+      // builders' host gen_snapshot): the target that produces it, when the
+      // build-output table has it.
+      final String? output = buildOutputLabels['$buildDirRoot/$target'];
+      if (output != null) {
+        if (!resolved.contains(output)) {
+          resolved.add(output);
+        }
+        continue;
+      }
       if (_ninjaTargetLabel(target, convertedTests) != null) {
         // A test executable: GN builds it for run_tests.py to run from the
         // build directory; here `bazel test` runs it from its own place
@@ -872,11 +883,12 @@ void _testSuiteInto(
 }
 
 /// The Bazel label of a ninja target of a build (`flutter/build/archives:artifacts`,
-/// `flutter/tools/font_subset`, `sky_engine`), or null when nothing
-/// converted answers to it. GN's ninja targets are labels without the
-/// leading `//`, a directory for its target of the same name, or a bare
-/// target name when it is unique in the build; a word is a directory
-/// before it is a name (`flutter` is `//flutter:flutter`).
+/// `flutter/tools/font_subset`, `sky_engine`, `clang_x64/gen_snapshot`), or
+/// null when nothing converted answers to it. GN's ninja targets are labels
+/// without the leading `//`, a directory for its target of the same name, a
+/// bare target name when it is unique in the build, or an output's path
+/// under the build directory; a word is a directory before it is a name
+/// (`flutter` is `//flutter:flutter`).
 String? _ninjaTargetLabel(String target, Map<String, Set<String>> convertedTargets) {
   String gnPackage;
   String name;
