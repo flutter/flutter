@@ -2746,10 +2746,14 @@ final class _Emitter {
     } else {
       _use('@rules_cc//cc:defs.bzl', kind);
     }
+    // An executable's output_name is the rule's name, GN's name an alias
+    // (below): a binary's, and a test's too (the Android suites run by
+    // their file names: impeller_toolkit_android_unittests for
+    // toolkit/android's `unittests`).
     final String? outputName = _singleString(target.variables['output_name']);
     final String name = shared
         ? 'lib${outputName ?? target.name}.so'
-        : kind == 'cc_binary' && outputName != null
+        : (kind == 'cc_binary' || kind == 'cc_test') && outputName != null
         ? outputName
         : target.name;
     final rule = _Rule(ruleKind, name, target.comments);
@@ -2924,9 +2928,7 @@ final class _Emitter {
           // GN sets one); a shared library's is in the rule's name already;
           // on anything else it would rename the output.
           break;
-        case 'output_name'
-            when target.rule == 'executable' &&
-                (kind == 'cc_binary' || _singleString(variable) == target.name):
+        case 'output_name' when target.rule == 'executable':
           // The rule's name, with an alias under the target's (above); a
           // test named after its own target (flutter_tester's template
           // forwards the name) is the file Bazel produces anyway.

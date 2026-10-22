@@ -4,7 +4,7 @@
 
 # Generated from //flutter/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: config, export_dynamic_symbols, export_dynamic_test_symbols, dist.
-# Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart:dart_sdk, //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests, //flutter/impeller/toolkit/android:apk_unittests, //flutter/impeller/toolkit/android:unittests.
+# Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart:dart_sdk, //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/toolkit/android:apk_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -77,6 +77,8 @@ filegroup(
     testonly = True,
     srcs = select({
         "@platforms//os:android": [
+            "//engine/src/flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",  # is_android
+            "//engine/src/flutter/impeller/toolkit/android:unittests",  # is_android
             "//engine/src/flutter/shell/platform/android:flutter_shell_native_unittests",  # is_android
         ],
         "//conditions:default": [],

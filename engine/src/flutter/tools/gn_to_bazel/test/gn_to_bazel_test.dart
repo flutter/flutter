@@ -2073,6 +2073,30 @@ gn_action(
         );
       });
 
+      test("names a test after its output_name, with GN's name as an alias", () async {
+        // The Android suites run_tests.py pushes by file name
+        // (impeller_toolkit_android_unittests for toolkit/android's
+        // `unittests`), as a binary with an output_name is named.
+        final String output = await convert('''
+source_set("unittests_lib") {
+  testonly = true
+  sources = [ "x_unittests.cc" ]
+}
+executable("unittests") {
+  testonly = true
+  output_name = "impeller_toolkit_android_unittests"
+  deps = [ ":unittests_lib" ]
+}
+''');
+        expect(output, contains('cc_test(\n    name = "impeller_toolkit_android_unittests",'));
+        expect(
+          output,
+          contains(
+            'alias(\n    name = "unittests",\n    actual = ":impeller_toolkit_android_unittests",',
+          ),
+        );
+      });
+
       test('converts action() outputs and inputs in the build directory', () async {
         // The Android embedding's Java actions: outputs at the build root
         // named by the runtime mode, an input another action puts there, a
@@ -3759,18 +3783,17 @@ executable("_font-subset") {
         contains('alias(\n    name = "_font-subset",\n    actual = ":font-subset",\n)'),
       );
       expect(renamed, isNot(contains('output_name')));
-      // A test binary keeps its target's name, so a name of its own would
-      // go unhonoured.
-      await expectLater(
-        convert('''
+      // A test the same way: the file name is what a runner pushes to a
+      // device (the Android suites), GN's name the alias.
+      final String test = await convert('''
 executable("a_unittests") {
   testonly = true
   output_name = "a_tests"
   sources = [ "a.cc" ]
 }
-'''),
-        throwsGnError(line: 3, message: 'variable output_name is not converted yet'),
-      );
+''');
+      expect(test, contains('cc_test(\n    name = "a_tests",'));
+      expect(test, contains('alias(\n    name = "a_unittests",\n    actual = ":a_tests",'));
     });
 
     test('keeps comments and shortens labels into the package', () async {
