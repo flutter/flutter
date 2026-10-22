@@ -276,7 +276,7 @@ Future<int> _builderOutputs(
   final List<BuilderBuild> builds = linuxBuilds(configs);
   final String bazelrc;
   try {
-    bazelrc = configsBazelrc(builds);
+    bazelrc = configsBazelrc(builds, leftOut: leftOutLinuxBuilds(configs));
   } on FormatException catch (e) {
     stderr.writeln('error: ${e.message}');
     return 1;

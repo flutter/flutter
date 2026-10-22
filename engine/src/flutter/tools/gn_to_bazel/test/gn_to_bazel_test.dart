@@ -6888,6 +6888,43 @@ build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
           ),
         ),
       );
+      // What linuxBuilds leaves out is named, with its reason, so that the
+      // generated file accounts for every build of the Linux files: the
+      // fixture's Fuchsia build, and a test-only build with no gn step.
+      final Map<String, BuilderConfig> withTestOnly = configs(<String, String>{
+        'linux_arm_host_engine.json':
+            '{"builds": [${build('ci/fuchsia_debug_x64', '--target-os=fuchsia --fuchsia-cpu=x64 --runtime-mode debug --no-lto', <String>['flutter/shell/platform/fuchsia:fuchsia'])}]}',
+        // linux_web_engine_test.json's bundles: a generator task, no gn step.
+        'linux_web_engine_test.json':
+            '{"builds": [{"name": "web_tests/test_bundles/fallbacks", '
+            '"drone_dimensions": ["os=Linux"], "generators": {"tasks": [{"name": "compile bundle", '
+            '"parameters": ["test", "--compile", "--bundle=fallbacks"], '
+            '"scripts": ["flutter/lib/web_ui/dev/felt"]}]}, "tests": []}]}',
+      });
+      final List<LeftOutBuild> leftOut = leftOutLinuxBuilds(withTestOnly);
+      expect(leftOut, <LeftOutBuild>[
+        (
+          file: 'linux_arm_host_engine.json',
+          name: 'ci/fuchsia_debug_x64',
+          reason: 'a platform the Bazel build has none for yet (--target-os=fuchsia)',
+        ),
+        (
+          file: 'linux_web_engine_test.json',
+          name: 'web_tests/test_bundles/fallbacks',
+          reason: 'no tools/gn step: not a build',
+        ),
+      ]);
+      expect(
+        configsBazelrc(linuxBuilds(withTestOnly), leftOut: leftOut),
+        endsWith('''
+# Not configurations: the builds of these files that are not builds of this
+# scope -- another platform's, or a test-only build with no tools/gn step.
+# Every other build of the Linux builder files is above.
+#   linux_arm_host_engine.json: ci/fuchsia_debug_x64 -- a platform the Bazel build has none for yet (--target-os=fuchsia)
+#   linux_web_engine_test.json: web_tests/test_bundles/fallbacks -- no tools/gn step: not a build
+'''),
+      );
+      expect(configsBazelrc(builds), isNot(contains('Not configurations')));
       final String buildFile = buildersBuildFile(
         builds,
         <String, Set<String>>{
