@@ -416,9 +416,9 @@ filegroup(
 #   bazel run //engine/src/flutter:install
 #   bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
 #
-# Not here: GN's own bookkeeping -- args.gn (its one reader,
-# testing/run_tests.py's is_asan(), is replaced under Bazel by the generated
-# test suites; a GN marker in a Bazel tree would only mislead gn and ninja),
+# Not here: GN's own bookkeeping -- args.gn (nothing in the tree reads it:
+# testing/run_tests.py defines an is_asan() over it that nothing calls; a
+# GN marker in a Bazel tree would only mislead gn and ninja),
 # compile_commands.json (tools/gn_to_bazel/tool/compile_commands.py writes
 # it on demand, `et lint --backend bazel` runs that) and ninja's .d files.
 # The web SDK is the wasm builds' (ci/builders:wasm_release and the rest),
