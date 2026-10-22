@@ -1168,6 +1168,40 @@ final class _Emitter {
     final genDir = '$genDirRoot${gnPackage.substring(1)}/';
     _forEachItem(variable, into: rule.list(attribute), (_Element e) {
       for (final _Element element in _enumeratedElements(e)) {
+        // A path around a constant (the Maven tree's, with the engine
+        // version in it): an expression, its first literal part placing it.
+        if (_isConstantString(element.value)) {
+          final expanded = element.value as GnExpandedString;
+          final GnValue first = expanded.parts.first;
+          final String head = first is GnStringValue ? first.value : '';
+          final String? under = head.startsWith(genDir)
+              ? genDir
+              : head.startsWith('$buildDirRoot/')
+              ? '$buildDirRoot/'
+              : null;
+          if (under == null) {
+            throw GnError(
+              e.assignment.location,
+              'output $expanded of ${target.name} is neither under its target_gen_dir nor under the build directory',
+            );
+          }
+          final stripped = GnExpandedString(<GnValue>[
+            GnStringValue(head.substring(under.length)),
+            ...expanded.parts.sublist(1),
+          ]);
+          rule
+              .list(under == genDir ? attribute : 'build_outputs')
+              .addUnique(
+                element.condition,
+                _item(
+                  _constantExpression(stripped, element),
+                  element,
+                  quoted: false,
+                  expression: true,
+                ),
+              );
+          continue;
+        }
         final String path = _string(element);
         if (path.startsWith(genDir)) {
           rule
@@ -1234,6 +1268,57 @@ final class _Emitter {
           attribute.add(
             element.condition,
             _item(_constant(name, element), element, quoted: false, expression: true),
+          );
+          continue;
+        }
+        // An argument around a constant (a Maven path with the engine
+        // version in it): an expression. A rebased path among its parts
+        // must be a build-directory path, whose token wraps the constants.
+        if (_isConstantString(element.value)) {
+          final expanded = element.value as GnExpandedString;
+          final parts = <GnValue>[];
+          var inPath = false;
+          for (final GnValue part in expanded.parts) {
+            if (part is! GnStringValue) {
+              parts.add(part);
+              continue;
+            }
+            final out = StringBuffer();
+            final List<String> pieces = part.value.split(rebasedPathMarker);
+            for (var i = 0; i < pieces.length; i++) {
+              if (i > 0) {
+                inPath = !inPath;
+                if (inPath) {
+                  if (pieces[i] == buildDirRoot) {
+                    out.write(r'$(built .');
+                    continue;
+                  }
+                  if (!pieces[i].startsWith('$buildDirRoot/')) {
+                    throw GnError(
+                      e.assignment.location,
+                      'a rebased path around a constant must be in the build directory: $expanded',
+                    );
+                  }
+                  out.write('\$(built ${pieces[i].substring(buildDirRoot.length + 1)}');
+                  continue;
+                }
+                out.write(')');
+              }
+              out.write(pieces[i]);
+            }
+            parts.add(GnStringValue(out.toString()));
+          }
+          if (inPath) {
+            throw GnError(e.assignment.location, 'unbalanced rebased path in argument $expanded');
+          }
+          attribute.add(
+            element.condition,
+            _item(
+              _constantExpression(GnExpandedString(parts), element),
+              element,
+              quoted: false,
+              expression: true,
+            ),
           );
           continue;
         }
@@ -1841,11 +1926,20 @@ final class _Emitter {
         out.add(scalarCase);
         continue;
       }
+      // The enumerated variables among the references; a reference the
+      // Bazel side keeps as a constant (engine_version in the Maven tree's
+      // paths) stays in the string, for an expression to spell out.
       final names = <String>{
         for (final GnValue part in value.parts)
-          if (part is GnReference) part.name,
+          if (part is GnReference && comparisonSettings.containsKey(part.name)) part.name,
       };
-      if (!names.every(comparisonSettings.containsKey)) {
+      final bool others = value.parts.any(
+        (GnValue part) =>
+            part is GnReference &&
+            !comparisonSettings.containsKey(part.name) &&
+            !referenceConstants.containsKey(part.name),
+      );
+      if (names.isEmpty || others) {
         out.add(scalarCase);
         continue;
       }
@@ -1868,18 +1962,61 @@ final class _Emitter {
         if (condition == Condition.never || _targetCondition.and(condition) == Condition.never) {
           continue;
         }
-        final String text = value.parts
-            .map(
-              (GnValue part) => switch (part) {
-                GnReference(:final String name) => bound[name]!,
-                _ => (part as GnStringValue).value,
-              },
-            )
-            .join();
-        out.add(GnScalarCase(condition, GnStringValue(text), scalarCase.assignment));
+        final parts = <GnValue>[];
+        for (final GnValue part in value.parts) {
+          final GnValue piece = switch (part) {
+            GnReference(:final String name) when bound.containsKey(name) => GnStringValue(
+              bound[name]!,
+            ),
+            _ => part,
+          };
+          if (piece is GnStringValue && parts.isNotEmpty && parts.last is GnStringValue) {
+            parts[parts.length - 1] = GnStringValue(
+              (parts.last as GnStringValue).value + piece.value,
+            );
+          } else {
+            parts.add(piece);
+          }
+        }
+        final GnValue text = parts.length == 1 && parts.single is GnStringValue
+            ? parts.single
+            : GnExpandedString(List<GnValue>.unmodifiable(parts));
+        out.add(GnScalarCase(condition, text, scalarCase.assignment));
       }
     }
     return out;
+  }
+
+  /// Whether [value] is a string around references the Bazel side keeps as
+  /// constants (version.gni's engine_version, content_hash) and nothing
+  /// else: the Maven tree's paths, which an expression spells out.
+  static bool _isConstantString(GnValue value) =>
+      value is GnExpandedString &&
+      value.parts.every(
+        (GnValue part) =>
+            part is GnStringValue ||
+            part is GnReference && referenceConstants.containsKey(part.name),
+      );
+
+  /// A string around constants as a Starlark expression: its literal parts
+  /// quoted, the constants as themselves, joined with `+`; a path token
+  /// (`$(built ...)`) opened in one literal part and closed in a later one
+  /// wraps the constants between ([_argsInto]'s rebased paths).
+  String _constantExpression(GnExpandedString value, _Element element, {bool quoted = true}) {
+    final pieces = <String>[];
+    for (final GnValue part in value.parts) {
+      switch (part) {
+        case GnStringValue(value: final String text):
+          if (text.isNotEmpty) {
+            pieces.add(quoted ? _starlarkString(text) : text);
+          }
+        case GnReference(:final String name):
+          pieces.add(_constant(name, element));
+        default:
+          throw GnError(element.assignment.location, 'unexpected $part in a string');
+      }
+    }
+    return pieces.join(' + ');
   }
 
   /// The label of the target that produces the build output [path]
