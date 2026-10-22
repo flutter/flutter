@@ -3861,28 +3861,28 @@ class SemanticsNode with DiagnosticableTreeMixin {
     );
 
     final mergeAllDescendantsIntoThisNodeValueChanged =
-        _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
+        _mergeAllDescendantsIntoThisNode != effectiveConfig.isMergingSemanticsOfDescendants;
 
     // Changing whether this node is a traversal child affects whether its
     // hit-test parent includes it in traversal and hit-test child lists.
-    if (_traversalChildIdentifier != config.traversalChildIdentifier) {
+    if (_traversalChildIdentifier != effectiveConfig.traversalChildIdentifier) {
       parent?._markDirty();
     }
 
-    _identifier = config.identifier;
-    _traversalParentIdentifier = config.traversalParentIdentifier;
-    _traversalChildIdentifier = config.traversalChildIdentifier;
-    _attributedLabel = config.attributedLabel;
-    _attributedValue = config.attributedValue;
-    _attributedIncreasedValue = config.attributedIncreasedValue;
-    _attributedDecreasedValue = config.attributedDecreasedValue;
-    _attributedHint = config.attributedHint;
-    _tooltip = config.tooltip;
-    _hintOverrides = config.hintOverrides;
-    _flags = config._flags;
-    _textDirection = config.textDirection;
-    _sortKey = config.sortKey;
-    _actions = Map<SemanticsAction, SemanticsActionHandler>.of(config._actions);
+    _identifier = effectiveConfig.identifier;
+    _traversalParentIdentifier = effectiveConfig.traversalParentIdentifier;
+    _traversalChildIdentifier = effectiveConfig.traversalChildIdentifier;
+    _attributedLabel = effectiveConfig.attributedLabel;
+    _attributedValue = effectiveConfig.attributedValue;
+    _attributedIncreasedValue = effectiveConfig.attributedIncreasedValue;
+    _attributedDecreasedValue = effectiveConfig.attributedDecreasedValue;
+    _attributedHint = effectiveConfig.attributedHint;
+    _tooltip = effectiveConfig.tooltip;
+    _hintOverrides = effectiveConfig.hintOverrides;
+    _flags = effectiveConfig._flags;
+    _textDirection = effectiveConfig.textDirection;
+    _sortKey = effectiveConfig.sortKey;
+    _actions = Map<SemanticsAction, SemanticsActionHandler>.of(effectiveConfig._actions);
     _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.of(
       effectiveConfig._customSemanticsActions,
     );
