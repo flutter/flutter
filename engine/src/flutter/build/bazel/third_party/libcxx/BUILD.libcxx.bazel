@@ -11,6 +11,7 @@
 # see //engine/src/flutter/build/bazel/toolchains), and the toolchain lists
 # them among its compiler inputs.
 
+load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -76,7 +77,6 @@ cc_library(
         "src/memory_resource.cpp",
         "src/mutex.cpp",
         "src/mutex_destructor.cpp",
-        "src/new.cpp",
         "src/new_handler.cpp",
         "src/new_helpers.cpp",
         "src/optional.cpp",
@@ -100,7 +100,10 @@ cc_library(
         "src/vector.cpp",
         "src/verbose_abort.cpp",
     ],
-    copts = [
+    # GN builds libc++ as chromium_code (the secondary BUILD.gn keeps the
+    # default configs): -Wall -Wextra and the default warnings as errors,
+    # the C99 macros, Android's fortified libc.
+    copts = CHROMIUM_CODE_COPTS + [
         # No translation unit in the engine enables RTTI, but a third-party
         # dependency may; keep it available in the runtime (as GN does).
         "-frtti",
@@ -110,17 +113,41 @@ cc_library(
     # Only the pieces a static archive of libc++ needs: nothing here is
     # propagated to the binaries that link it.
     implementation_deps = [
+        ":libcxx_nolto",
         ":src_headers",
         "@libcxxabi",
         "@llvm_libc",
     ],
     linkstatic = True,
-    local_defines = [
+    local_defines = FLUTTER_LOCAL_DEFINES + [
         "_LIBCPP_NO_EXCEPTIONS",
         "_LIBCPP_NO_RTTI",
         "_LIBCPP_BUILDING_LIBRARY",
         "LIBCXX_BUILDING_LIBCXXABI",
     ],
+)
+
+# GN's libcxx_nolto: operator new and delete (src/new.cpp) compiled without
+# LTO, so that a binary built with it keeps replaceable allocation functions
+# a program can override; without -frtti and the thread-safety suppression
+# of the rest, as GN's source_set has them.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libcxx_nolto",
+    srcs = ["src/new.cpp"],
+    copts = CHROMIUM_CODE_COPTS + ["-fno-lto"],
+    implementation_deps = [
+        ":src_headers",
+        "@libcxxabi",
+    ],
+    linkstatic = True,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "_LIBCPP_NO_EXCEPTIONS",
+        "_LIBCPP_NO_RTTI",
+        "_LIBCPP_BUILDING_LIBRARY",
+        "LIBCXX_BUILDING_LIBCXXABI",
+    ],
+    visibility = ["//visibility:private"],
 )
 
 # What the GN build of this tree reads (//flutter/third_party/libcxx in

@@ -9,6 +9,7 @@
 # Like libc++'s, the public headers (include/) reach every C++ compile action
 # through the toolchain and are not declared on the library.
 
+load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -55,13 +56,14 @@ cc_library(
             "src/cxa_personality.cpp",
         ],
     }),
-    copts = ["-frtti"] + select({
+    # chromium_code's flags, as GN builds libc++abi (see @libcxx).
+    copts = CHROMIUM_CODE_COPTS + ["-frtti"] + select({
         "@platforms//os:android": [],
         "//conditions:default": ["-fexceptions"],
     }),
     implementation_deps = ["@libcxx//:src_headers"],
     linkstatic = True,
-    local_defines = [
+    local_defines = FLUTTER_LOCAL_DEFINES + [
         "_LIBCPP_BUILDING_LIBRARY",
         "_LIBCXXABI_BUILDING_LIBRARY",
         "LIBCXXABI_SILENT_TERMINATE",
