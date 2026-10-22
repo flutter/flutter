@@ -135,13 +135,16 @@ void main() {
     var interceptCommands = <(String, FakeProcess? Function(List<String>))>[];
 
     setUp(() {
-      // Builder configuration doesn't change for these tests.
+      // Builder configuration doesn't change for these tests. The Android
+      // build is one the Bazel build has no platform for (x86), which the
+      // refusing test below relies on.
       final builders = TestBuilderConfig();
       builders.addBuild(
         name: 'linux/android_debug_arm64',
         dimension: TestDroneDimension.linux,
         targetDir: 'android_debug_arm64',
         enableRbe: true,
+        gnFlags: const ['--android', '--android-cpu=x86', '--no-lto'],
       );
       builders.addBuild(
         name: 'linux/host_debug',
