@@ -124,7 +124,7 @@ class View extends StatefulWidget {
 
   /// The [FlutterView] into which [child] is drawn.
   ///
-  /// This is the view passed to the constructor, normalized with
+  /// This is the view passed to the constructor, normalized in debug mode with
   /// [debugViewWithMetricsOverrides] so that it applies the
   /// [debugViewMetricsOverrides] entry registered for its id.
   final FlutterView view;
@@ -385,7 +385,7 @@ class RawView extends StatelessWidget {
 
   /// The [FlutterView] into which [child] is drawn.
   ///
-  /// This is the view passed to the constructor, normalized with
+  /// This is the view passed to the constructor, normalized in debug mode with
   /// [debugViewWithMetricsOverrides] so that it applies the
   /// [debugViewMetricsOverrides] entry registered for its id.
   final FlutterView view;

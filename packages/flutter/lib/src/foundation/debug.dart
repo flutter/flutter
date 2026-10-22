@@ -1148,14 +1148,13 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
     if (dispatcher == null || viewId == null) {
       return true;
     }
-    // The engine's dispatcher is wrapped on demand, so that a View constructed
-    // before the binding ends up with the view the binding vends later. Any
-    // other dispatcher has to have been wrapped already: a view of a dispatcher
-    // nobody wrapped is one nobody asked to apply overrides.
-    if (identical(dispatcher, ui.PlatformDispatcher.instance)) {
-      _debugWrapDispatcher(dispatcher);
-    }
-    if (_debugDispatcherWrappers[dispatcher] != null) {
+    // An engine view is normalized even before the binding wraps the engine's
+    // dispatcher, so that a View constructed before the binding ends up with the
+    // view the binding vends later. Any other dispatcher has to have been
+    // wrapped already: a view of a dispatcher nobody wrapped is one nobody asked
+    // to apply overrides.
+    if (identical(dispatcher, ui.PlatformDispatcher.instance) ||
+        _debugDispatcherWrappers[dispatcher] != null) {
       result = _debugWrapView(view);
     }
     return true;
