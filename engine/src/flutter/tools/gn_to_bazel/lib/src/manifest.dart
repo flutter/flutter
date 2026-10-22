@@ -225,6 +225,8 @@ exports_files([
     "tools/androidx/files.json",
     "tools/androidx/generate_pom_file.py",
     "tools/gen_android_buildconfig.py",
+    "tools/javadoc/android_reference",
+    "tools/javadoc/gen_javadoc.py",
 ])
 
 # The web engine's other source directories web_sdk/BUILD.gn's sdk_rewriter
@@ -1006,8 +1008,6 @@ exports_files(["README"] + glob(
     condition: 'is_android',
     filesGroups: <String>{'android'},
     skip: <String, String>{
-      'gen_android_javadoc': 'Java: the Android phase (D10)',
-      'android_javadoc': 'Java: the Android phase (D10)',
       'android_entitlement_config': "generated_file over metadata: the Apple phase's",
     },
     appendix: '''

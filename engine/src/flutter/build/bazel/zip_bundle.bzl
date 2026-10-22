@@ -204,7 +204,10 @@ def _zip_bundle_impl(ctx):
         # An executable or shared library goes in as GN's link tool leaves
         # it in the build root: stripped (build_directory.bzl).
         file = shipped_file(target, files[0])
-        args.add_all(["-i", file, destination])
+
+        # A directory (the javadoc tree) goes to zip.py as itself, which
+        # walks it, not as its files.
+        args.add_all(["-i", file, destination], expand_directories = False)
         inputs.append(file)
         if destination in ctx.attr.sources:
             placed.append((file, ctx.attr.sources[destination]))

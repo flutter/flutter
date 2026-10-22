@@ -14,7 +14,8 @@ the paths in the arguments as tokens this rule expands:
                       be among `srcs`, `inputs`, `tools` or the outputs of
                       `deps`);
   $(src PATH)         a source directory (or file) of this repository, PATH
-                      relative to the repository root;
+                      relative to the repository root -- or, as a label
+                      (`@repo//:dir`), a directory of another repository;
   $(gen PATH)         a generated file or directory, PATH relative to the
                       repository root under the output directory -- where
                       GN's `$target_gen_dir` and `$root_gen_dir` land;
@@ -106,6 +107,14 @@ def _built_root(ctx):
     return ctx.bin_dir.path + "/" + _src_path(ctx, ctx.label.package)
 
 def _src_path(ctx, path):
+    if path.startswith("@") or path.startswith("//"):
+        # A directory of another repository, as a label (the embedding's
+        # dependency jars in @android_embedding_dependencies): where the
+        # repository sits in the execution root. The files the script reads
+        # there are among the inputs on their own.
+        label = Label(path)
+        parts = [part for part in [label.workspace_root, label.package, label.name] if part]
+        return "/".join(parts)
     root = ctx.label.workspace_root
     if root and path:
         return root + "/" + path
@@ -194,7 +203,10 @@ def _platform_dep_entries(ctx, dep):
     return entries
 
 def _gn_action_impl(ctx):
-    outputs = [ctx.actions.declare_file(path) for path in ctx.attr.outputs]
+    outputs = [ctx.actions.declare_file(path) for path in ctx.attr.outputs] + [
+        ctx.actions.declare_directory(path)
+        for path in ctx.attr.output_dirs
+    ]
 
     # The files of the build directory the script may name ($(built PATH)):
     # what the deps' closures place there (a platform_dep's under its
@@ -252,7 +264,7 @@ def _gn_action_impl(ctx):
         BuildDirectoryInfo(entries = depset(
             ([
                 (output, "gen/" + package + "/" + path)
-                for output, path in zip(outputs, ctx.attr.outputs)
+                for output, path in zip(outputs, ctx.attr.outputs + ctx.attr.output_dirs)
             ] if package != None else []) + list(zip(built, ctx.attr.build_outputs)) +
             [entry for dep in ctx.attr.platform_deps for entry in _platform_dep_entries(ctx, dep)],
         )),
@@ -319,6 +331,10 @@ gn_action = rule(
         ),
         "outputs": attr.string_list(
             doc = "GN's `outputs` under `$target_gen_dir`, as paths relative to this package.",
+        ),
+        "output_dirs": attr.string_list(
+            doc = "GN's `outputs` under `$target_gen_dir` that are directories (the javadoc tree), as paths " +
+                  "relative to this package: declared as directories.",
         ),
         "build_outputs": attr.string_list(
             doc = "GN's `outputs` under the build directory itself (`$root_out_dir/flutter.jar`, " +
