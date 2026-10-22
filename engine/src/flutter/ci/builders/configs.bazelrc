@@ -153,15 +153,15 @@ build:host_release_test --compilation_mode=opt --//engine/src/flutter/common:run
 
 # linux_unopt.json: ci/host_debug_unopt
 #   --target-dir ci/host_debug_unopt --runtime-mode debug --unoptimized --prebuilt-dart-sdk --asan --dart-debug --rbe --no-goma
-build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:asan --test_timeout=240,1200,3600,14400 --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
+build:ci_host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:asan --test_timeout=240,1200,3600,14400 --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
 
 # linux_unopt.json: ci/host_debug_unopt_impeller_tests
 #   --runtime-mode debug --unoptimized --prebuilt-dart-sdk --target-dir ci/host_debug_unopt_impeller_tests --rbe --no-goma --use-glfw-swiftshader
-build:host_debug_unopt_impeller_tests --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
+build:host_debug_unopt_impeller_tests --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug
 
 # linux_unopt.json: ci/android_embedder_debug_unopt
 #   --android --embedder-for-target --target-dir ci/android_embedder_debug_unopt --unoptimized --rbe --no-goma
-build:android_embedder_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:embedder_for_target --//engine/src/flutter/build/bazel:stripped=false
+build:android_embedder_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:embedder_for_target --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_unopt.json: ci/android_debug_arm64_validation_layers
 #   --target-dir ci/android_debug_arm64_validation_layers --android --android-cpu=arm64 --no-lto --enable-vulkan-validation-layers --rbe --no-goma
@@ -169,7 +169,7 @@ build:android_debug_arm64_validation_layers --compilation_mode=opt --//engine/sr
 
 # linux_unopt.json: ci/android_debug_unopt
 #   --target-dir ci/android_debug_unopt --android --unoptimized --rbe --no-goma
-build:android_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
+build:android_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_unopt.json: ci/host_release_licenses
 #   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
@@ -198,11 +198,11 @@ build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 
 # local_engine.json: linux/android_debug_unopt_arm64
 #   --runtime-mode debug --unoptimized --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma
-build:android_debug_unopt_arm64 --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
+build:android_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/android_debug_unopt_x64
 #   --runtime-mode debug --unoptimized --android --android-cpu=x64 --no-stripped --no-lto --rbe --no-goma
-build:android_debug_unopt_x64 --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel:stripped=false
+build:android_debug_unopt_x64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/android_profile_arm64
 #   --runtime-mode profile --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma
@@ -218,7 +218,7 @@ build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mo
 
 # local_engine.json: linux/host_debug_unopt
 #   --runtime-mode debug --unoptimized --no-stripped --no-lto --rbe --no-goma
-build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+build:host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/host_profile
 #   --runtime-mode profile --no-stripped --no-lto --rbe --no-goma
@@ -234,7 +234,7 @@ build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 
 # local_engine.json: linux/wasm_debug_unopt
 #   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
-build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
 
 # Not configurations: the builds of these files that are not builds of this
 # scope -- another platform's, or a test-only build with no tools/gn step.
