@@ -99,7 +99,7 @@ static void MockThreadConfigSetter(const fml::Thread::ThreadConfig& config) {
   fml::Thread::SetCurrentThreadName(config);
 
   pthread_t tid = pthread_self();
-  struct sched_param param;
+  struct sched_param param{};
   int policy = SCHED_OTHER;
   switch (config.priority) {
     case fml::Thread::ThreadPriority::kDisplay:
@@ -120,7 +120,7 @@ TEST(Thread, ThreadPriorityCreatedWithConfig) {
                          thread1_name, fml::Thread::ThreadPriority::kNormal));
   bool done = false;
 
-  struct sched_param param;
+  struct sched_param param{};
   int policy;
   thread.GetTaskRunner()->PostTask([&]() {
     done = true;
