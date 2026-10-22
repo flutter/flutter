@@ -7,7 +7,6 @@
 #include <format>
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/fml/status_or.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/timing.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
@@ -17,6 +16,7 @@
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
 #include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -171,7 +171,7 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
 }
 
 namespace {
-fml::StatusOr<vk::UniqueDescriptorSetLayout> MakeDescriptorSetLayout(
+absl::StatusOr<vk::UniqueDescriptorSetLayout> MakeDescriptorSetLayout(
     const PipelineDescriptor& desc,
     const std::shared_ptr<DeviceHolderVK>& device_holder,
     const std::shared_ptr<SamplerVK>& immutable_sampler) {
@@ -208,8 +208,8 @@ fml::StatusOr<vk::UniqueDescriptorSetLayout> MakeDescriptorSetLayout(
           desc_set_layout_info);
   if (descs_result != vk::Result::eSuccess) {
     VALIDATION_LOG << "unable to create uniform descriptors";
-    return {fml::Status(fml::StatusCode::kUnknown,
-                        "unable to create uniform descriptors")};
+    return {absl::Status(absl::StatusCode::kUnknown,
+                         "unable to create uniform descriptors")};
   }
 
 #ifdef IMPELLER_DEBUG
@@ -218,10 +218,10 @@ fml::StatusOr<vk::UniqueDescriptorSetLayout> MakeDescriptorSetLayout(
       std::format("Descriptor Set Layout: {}", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
-  return fml::StatusOr<vk::UniqueDescriptorSetLayout>(std::move(descs_layout));
+  return absl::StatusOr<vk::UniqueDescriptorSetLayout>(std::move(descs_layout));
 }
 
-fml::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
+absl::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
     const PipelineDescriptor& desc,
     const std::shared_ptr<DeviceHolderVK>& device_holder,
     const vk::DescriptorSetLayout& descs_layout) {
@@ -233,8 +233,8 @@ fml::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
     VALIDATION_LOG << "Could not create pipeline layout for pipeline "
                    << desc.GetLabel() << ": "
                    << vk::to_string(pipeline_layout.result);
-    return {fml::Status(fml::StatusCode::kUnknown,
-                        "Could not create pipeline layout for pipeline.")};
+    return {absl::Status(absl::StatusCode::kUnknown,
+                         "Could not create pipeline layout for pipeline.")};
   }
 
 #ifdef IMPELLER_DEBUG
@@ -245,7 +245,7 @@ fml::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
   return std::move(pipeline_layout.value);
 }
 
-fml::StatusOr<vk::UniquePipeline> MakePipeline(
+absl::StatusOr<vk::UniquePipeline> MakePipeline(
     const PipelineDescriptor& desc,
     const std::shared_ptr<DeviceHolderVK>& device_holder,
     const std::shared_ptr<PipelineCacheVK>& pso_cache,
@@ -305,8 +305,8 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
     if (!stage.has_value()) {
       VALIDATION_LOG << "Unsupported shader type in pipeline: "
                      << desc.GetLabel();
-      return {fml::Status(fml::StatusCode::kUnknown,
-                          "Unsupported shader type in pipeline.")};
+      return {absl::Status(absl::StatusCode::kUnknown,
+                           "Unsupported shader type in pipeline.")};
     }
 
     std::vector<vk::SpecializationMapEntry>& entries =
@@ -447,8 +447,8 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
   auto pipeline = pso_cache->CreatePipeline(pipeline_info);
   if (!pipeline) {
     VALIDATION_LOG << "Could not create graphics pipeline: " << desc.GetLabel();
-    return {fml::Status(fml::StatusCode::kUnknown,
-                        "Could not create graphics pipeline.")};
+    return {absl::Status(absl::StatusCode::kUnknown,
+                         "Could not create graphics pipeline.")};
   }
 
   if (supports_pipeline_creation_feedback) {
@@ -480,13 +480,13 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
 
   const auto& pso_cache = PipelineLibraryVK::Cast(*library).GetPSOCache();
 
-  fml::StatusOr<vk::UniqueDescriptorSetLayout> descs_layout =
+  absl::StatusOr<vk::UniqueDescriptorSetLayout> descs_layout =
       MakeDescriptorSetLayout(desc, device_holder, immutable_sampler);
   if (!descs_layout.ok()) {
     return nullptr;
   }
 
-  fml::StatusOr<vk::UniquePipelineLayout> pipeline_layout =
+  absl::StatusOr<vk::UniquePipelineLayout> pipeline_layout =
       MakePipelineLayout(desc, device_holder, descs_layout.value().get());
   if (!pipeline_layout.ok()) {
     return nullptr;
@@ -499,7 +499,7 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
     return nullptr;
   }
 
-  fml::StatusOr<vk::UniquePipeline> pipeline =
+  absl::StatusOr<vk::UniquePipeline> pipeline =
       MakePipeline(desc, device_holder, pso_cache,
                    pipeline_layout.value().get(), render_pass.get());
   if (!pipeline.ok()) {

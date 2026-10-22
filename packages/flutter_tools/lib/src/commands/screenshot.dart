@@ -53,8 +53,7 @@ class ScreenshotCommand extends FlutterCommand {
       },
       defaultsTo: _kDeviceType,
     );
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
+    registerOptionBundle(const DeviceDiscoveryOptionsBundle());
   }
 
   final VMServiceConnector _vmServiceConnector;
