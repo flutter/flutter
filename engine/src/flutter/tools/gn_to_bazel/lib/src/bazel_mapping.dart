@@ -375,6 +375,14 @@ const Map<String, String> labelOverrides = <String, String>{
   // gen_snapshot): the wrap's product too.
   '//flutter/third_party/dart/runtime/bin:analyze_snapshot':
       '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot',
+  // The same two named in the host toolchain (the Android shell's archives
+  // of them): the wrap's host products, which in a cross build sit under
+  // the host toolchain's directory (gen_snapshot_host; analyze_snapshot is
+  // the host's in any build).
+  r'//flutter/third_party/dart/runtime/bin:gen_snapshot($host_toolchain)':
+      '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host',
+  r'//flutter/third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)':
+      '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot',
   '//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion':
       '//engine/src/flutter/build/bazel/dart_wrap:libdouble_conversion',
   '//flutter/third_party/dart/third_party/perfetto:libprotozero':
@@ -718,16 +726,21 @@ String absoluteGnLabel(String gnLabel, {required String package, bool implicitNa
 /// error when it has no Bazel home.
 String bazelLabel(String gnLabel, {required String package, GnLocation? location}) {
   // `:x($default_toolchain)` is `:x` here: a Bazel build has one
-  // configuration of each target.
+  // configuration of each target -- unless the table names the label in
+  // its toolchain (the host's gen_snapshot in a cross build).
+  var toolchain = '';
   final int paren = gnLabel.indexOf('(');
   if (paren > 0 && gnLabel.endsWith(')')) {
+    toolchain = gnLabel.substring(paren);
     gnLabel = gnLabel.substring(0, paren);
   }
   if (gnLabel.startsWith(':')) {
     return gnLabel;
   }
   final String absolute = absoluteGnLabel(gnLabel, package: package);
-  final String? override = labelOverrides[absolute];
+  final String? override =
+      (toolchain.isEmpty ? null : labelOverrides['$absolute$toolchain']) ??
+      labelOverrides[absolute];
   if (override != null) {
     return override;
   }
@@ -1318,6 +1331,12 @@ const Map<String, String> buildOutputLabels = <String, String>{
   // The Dart SDK's gen_snapshot, out of the wrapped GN build of the Dart
   // tree (build/bazel/dart_wrap).
   '//@out/gen_snapshot': '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot',
+  // The host toolchain's gen_snapshot and analyze_snapshot in a cross build
+  // (get_label_info(..., "root_out_dir") of a host-toolchain label), the
+  // wrap's host products.
+  '//@out/clang_x64/gen_snapshot': '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host',
+  '//@out/clang_x64/analyze_snapshot':
+      '//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot',
   // The Android shell's assembly of icudtl.dat (bin_to_assembly, a template
   // whose output the converter cannot enumerate), which the embedder's
   // Android sources name by path ([buildOutputCompilerInputs] has what its

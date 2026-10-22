@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/android/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: gen_android_build_config_java, check_imports, flutter_shell_java, android_jar, pom_libflutter, pom_content_hash_libflutter, pom_embedding, pom_content_hash_embedding, flutter_jar_zip, gen_android_javadoc, android_javadoc, android_entitlement_config, gen_snapshot, analyze_snapshot, embedding_jars, abi_jars.
+# Not converted: gen_android_build_config_java, check_imports, flutter_shell_java, android_jar, pom_libflutter, pom_content_hash_libflutter, pom_embedding, pom_content_hash_embedding, flutter_jar_zip, gen_android_javadoc, android_javadoc, android_entitlement_config, embedding_jars, abi_jars.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
@@ -677,9 +677,119 @@ zip_bundle(
     deps = [":flutter_shell_native"],
 )
 
+zip_bundle(
+    name = "gen_snapshot",
+    files = {"gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host"},
+    output = select({
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm": "android-arm-jit-release/linux-x64.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/linux-x64.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/linux-x64.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm": "android-arm-ddm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64-ddm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64-ddm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64": "android-x64-ddm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm": "android-arm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "android-x64/linux-x64.zip",
+        "//conditions:default": None,
+    }),
+    sources = {"gen_snapshot": "clang_x64/gen_snapshot"},
+    target_compatible_with = select({
+        ":when_is_android_and_target_cpu_not_x86": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src/flutter/lib/snapshot:generate_snapshot_bins"],
+)
+
+# `is_android && target_cpu != "x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_android_and_target_cpu_not_x86",
+    match_all = [
+        "@platforms//os:android",
+        "//engine/src/flutter/build/bazel:not_cpu_x86",
+    ],
+)
+
+zip_bundle(
+    name = "analyze_snapshot",
+    files = {"analyze_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot"},
+    output = select({
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64": "android-x64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "android-x64/analyze-snapshot-linux-x64.zip",
+        "//conditions:default": None,
+    }),
+    sources = {"analyze_snapshot": "clang_x64/analyze_snapshot"},
+    target_compatible_with = select({
+        ":when_is_android_and_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot"],
+)
+
+# `target_cpu == "x64" || target_cpu == "arm64" || target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64",
+    match_any = [
+        "@platforms//cpu:x86_64",
+        "@platforms//cpu:aarch64",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `is_android && (target_cpu == "x64" || target_cpu == "arm64" || target_cpu == "riscv64")`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_android_and_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64",
+    match_all = [
+        "@platforms//os:android",
+        ":when_target_cpu_x64_or_target_cpu_arm64_or_target_cpu_riscv64",
+    ],
+)
+
 filegroup(
     name = "android",
-    srcs = [":android_symbols"],
+    srcs = [":android_symbols"] + select({
+        "@platforms//cpu:x86_32": [],
+        "//conditions:default": [
+            ":gen_snapshot",  # target_cpu != "x86"
+        ],
+    }),
     target_compatible_with = select({
         "@platforms//os:android": [],
         "//conditions:default": ["@platforms//:incompatible"],

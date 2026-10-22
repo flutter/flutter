@@ -31,6 +31,7 @@ incrementally, which is the mode for iterating on the wrapped sources.
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("//engine/src/flutter/build/bazel:build_directory.bzl", "GnBuildInfo")
 
 _SCRATCH_SUFFIX = ".gn"
 
@@ -132,9 +133,28 @@ def _gn_build_impl(ctx):
     )
 
     groups = {paths.basename(f.path): depset([f]) for f in all_outputs}
+
+    # Where each product sits in GN's build directory: an `outs` entry at
+    # its path (out_paths), an archive where GN writes a static library
+    # (obj/<its directory>/<file>). A product that is another name for a
+    # file a product of that name exports (the host's gen_snapshot_host,
+    # which in the host's own build is gen_snapshot) places nothing: the
+    # file is placed once, under its own name.
+    product_paths = {}
+    for f, gn_path in outputs.items():
+        product = paths.basename(f.path)
+        aliased = [p for p, path in ctx.attr.outs.items() if path == gn_path and p != product]
+        if aliased and product != paths.basename(gn_path):
+            continue
+        product_paths[product] = gn_path
+    for f, label in archives.items():
+        product_paths[paths.basename(f.path)] = paths.join("obj", label.split(":")[0].lstrip("/"), f.basename)
     return [
         DefaultInfo(files = depset(all_outputs)),
         OutputGroupInfo(**groups),
+        # For build_directory_aspect: a product's filegroup (below) places
+        # its file where GN's build directory has it.
+        GnBuildInfo(paths = product_paths),
     ]
 
 _gn_build = rule(
