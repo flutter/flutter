@@ -3629,6 +3629,9 @@ final class _Emitter {
               e.condition,
               _item(_localLabel(_buildOutputLabel(path, target, e.assignment.location)), e),
             );
+        for (final String input in buildOutputCompilerInputs[path] ?? const <String>[]) {
+          rule.list('additional_compiler_inputs').addUnique(e.condition, _Item(input));
+        }
         return;
       }
       final int dot = path.lastIndexOf('.');

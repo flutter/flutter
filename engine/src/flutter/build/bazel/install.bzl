@@ -159,7 +159,10 @@ _install = rule(
         ),
         "build_directory_name": attr.string(
             mandatory = True,
-            doc = "GN's name for the build directory of this configuration (host_debug, host_release, wasm_release, ...).",
+            doc = "GN's name for the build directory of this configuration, up to the mode (host_debug, host_release, wasm_release, ...).",
+        ),
+        "build_directory_cpu": attr.string(
+            doc = "The CPU suffix of GN's name for the build directory, after _unopt (`_arm64`, or nothing).",
         ),
         "optimized": attr.bool(
             doc = "Whether this is an optimized build; GN's name carries _unopt otherwise.",
