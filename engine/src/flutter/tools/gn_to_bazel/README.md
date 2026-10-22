@@ -254,8 +254,12 @@ writes the build directory's `compile_commands.json` from `bazel aquery`,
 in the form clang's tools read: an entry per source with the command line
 as the action runs it, from the execution root, so that external
 repositories and generated headers under `bazel-out` resolve as they do for
-the build (a source compiled for both the target and the exec
-configuration gets the target's command). GN writes the file on request
+the build (a source compiled in several configurations gets the command
+line's own -- `--config=<name>`'s, the output directory without a suffix
+-- before a transition's, the wasm modules' `-ST-` compiles of Skia's
+sources with em++, and either before the exec configuration's; so a
+`--config=android_debug_arm64_clang_tidy` database carries the NDK
+command for a source the web build also compiles). GN writes the file on request
 (`--export-compile-commands`, which `tools/gn` passes for the clang-tidy
 builder) and `tools/clang_tidy` and clangd read it; the checkout's
 `clang-tidy -p <dir>` runs over the Bazel file as over GN's. 4,281 entries
