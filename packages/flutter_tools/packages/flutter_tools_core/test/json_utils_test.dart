@@ -4,13 +4,23 @@
 
 import 'dart:convert';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:test/test.dart';
 
 void main() {
   const fieldKey = 'field';
   const secretKey = 'secret';
   const secretValue = 'super-sensitive-user-path-or-token';
+
+  Matcher throwsFormatExceptionWith(String message) {
+    return throwsA(
+      isA<FormatException>().having(
+        (FormatException e) => e.message,
+        'message',
+        allOf(contains(message), isNot(contains(secretValue))),
+      ),
+    );
+  }
 
   group('ExtensionJsonParsing', () {
     group('requiredField', () {
@@ -174,6 +184,138 @@ void main() {
       );
     });
 
+    group('stringMap', () {
+      test('extracts present map with String keys and values', () {
+        const json = <String, Object?>{
+          fieldKey: <String, Object?>{'a': '1', 'b': '2'},
+        };
+        expect(json.stringMap(fieldKey), const <String, String>{'a': '1', 'b': '2'});
+      });
+
+      test('throws FormatException when key is missing or null without leaking map contents', () {
+        const missingJson = <String, Object?>{secretKey: secretValue};
+        expect(
+          () => missingJson.stringMap(fieldKey),
+          throwsFormatExceptionWith(
+            'Missing required "$fieldKey" (expected Map<String, Object?>).',
+          ),
+        );
+
+        const nullJson = <String, Object?>{fieldKey: null, secretKey: secretValue};
+        expect(
+          () => nullJson.stringMap(fieldKey),
+          throwsFormatExceptionWith(
+            'Missing required "$fieldKey" (expected Map<String, Object?>).',
+          ),
+        );
+      });
+
+      test('throws FormatException when value is not a Map without leaking map contents', () {
+        const json = <String, Object?>{fieldKey: 'not-a-map', secretKey: secretValue};
+        expect(
+          () => json.stringMap(fieldKey),
+          throwsFormatExceptionWith(
+            'Invalid "$fieldKey": expected Map<String, Object?>, got String.',
+          ),
+        );
+      });
+
+      test('throws FormatException when a value is not a String without leaking map contents', () {
+        const json = <String, Object?>{
+          fieldKey: <String, Object?>{'key': 42},
+          secretKey: secretValue,
+        };
+        expect(
+          () => json.stringMap(fieldKey),
+          throwsFormatExceptionWith('Invalid "key" value: expected String, got int.'),
+        );
+      });
+    });
+
+    group('directoryUri', () {
+      test('extracts present valid trailing-slash-terminated absolute file URI', () {
+        const json = <String, Object?>{fieldKey: 'file:///path/to/dir/'};
+        expect(json.directoryUri(fieldKey), Uri.parse('file:///path/to/dir/'));
+      });
+
+      test('extracts present valid Windows UNC directory file URI', () {
+        const json = <String, Object?>{fieldKey: 'file://server/share/dir/'};
+        expect(json.directoryUri(fieldKey), Uri.parse('file://server/share/dir/'));
+      });
+
+      test('throws FormatException when key is missing or null', () {
+        const emptyJson = <String, Object?>{};
+        expect(() => emptyJson.directoryUri(fieldKey), throwsFormatException);
+
+        const nullJson = <String, Object?>{fieldKey: null};
+        expect(() => nullJson.directoryUri(fieldKey), throwsFormatException);
+      });
+
+      test('throws FormatException when value is not a String without leaking map contents', () {
+        const json = <String, Object?>{fieldKey: 42, secretKey: secretValue};
+        expect(
+          () => json.directoryUri(fieldKey),
+          throwsFormatExceptionWith('Invalid "$fieldKey": expected String, got int.'),
+        );
+      });
+
+      test('throws FormatException when URI is relative without leaking map contents', () {
+        const json = <String, Object?>{fieldKey: 'relative/dir/', secretKey: secretValue};
+        expect(
+          () => json.directoryUri(fieldKey),
+          throwsFormatExceptionWith(
+            'Invalid "$fieldKey": expected trailing-slash-terminated absolute file: URI.',
+          ),
+        );
+      });
+
+      test('throws FormatException when URI does not end with trailing slash without leaking map contents', () {
+        const json = <String, Object?>{fieldKey: 'file:///path/to/dir', secretKey: secretValue};
+        expect(
+          () => json.directoryUri(fieldKey),
+          throwsFormatExceptionWith(
+            'Invalid "$fieldKey": expected trailing-slash-terminated absolute file: URI.',
+          ),
+        );
+      });
+
+      test('throws FormatException when URI is not a file: URI without leaking map contents', () {
+        const json = <String, Object?>{fieldKey: 'http://example.com/dir/', secretKey: secretValue};
+        expect(
+          () => json.directoryUri(fieldKey),
+          throwsFormatExceptionWith(
+            'Invalid "$fieldKey": expected trailing-slash-terminated absolute file: URI.',
+          ),
+        );
+      });
+
+      test('throws FormatException when URI has a query without leaking map contents', () {
+        const json = <String, Object?>{
+          fieldKey: 'file:///path/to/dir/?query=1',
+          secretKey: secretValue,
+        };
+        expect(
+          () => json.directoryUri(fieldKey),
+          throwsFormatExceptionWith(
+            'Invalid "$fieldKey": expected trailing-slash-terminated absolute file: URI.',
+          ),
+        );
+      });
+
+      test('throws FormatException when URI has a fragment without leaking map contents', () {
+        const json = <String, Object?>{
+          fieldKey: 'file:///path/to/dir/#frag',
+          secretKey: secretValue,
+        };
+        expect(
+          () => json.directoryUri(fieldKey),
+          throwsFormatExceptionWith(
+            'Invalid "$fieldKey": expected trailing-slash-terminated absolute file: URI.',
+          ),
+        );
+      });
+    });
+
     group('stringSet', () {
       test('extracts unmodifiable set of unique strings', () {
         const json = <String, Object?>{
@@ -269,12 +411,15 @@ void main() {
 
     test('parses real jsonDecode map and list structures', () {
       final decoded = jsonDecode(
-        '{"name": "ext", "count": 3, "tags": ["one", "two"], "extra": null}',
+        '{"name": "ext", "count": 3, "tags": ["one", "two"], '
+        '"defines": {"FOO": "bar"}, "dir": "file:///path/to/dir/", "extra": null}',
       ) as Map<String, Object?>;
       expect(decoded.requiredField<String>('name'), 'ext');
       expect(decoded.optionalField<int>('count', defaultValue: 0), 3);
       expect(decoded.nullableField<String>('extra'), isNull);
       expect(decoded.stringIterable('tags'), const <String>['one', 'two']);
+      expect(decoded.stringMap('defines'), const <String, String>{'FOO': 'bar'});
+      expect(decoded.directoryUri('dir'), Uri.parse('file:///path/to/dir/'));
     });
   });
 }

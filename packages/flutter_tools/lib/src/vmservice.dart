@@ -556,7 +556,7 @@ class FlutterVmService {
     }
   }
 
-  /// Set the asset directory for the an attached Flutter view.
+  /// Set the asset directory for an attached Flutter view.
   Future<void> setAssetDirectory({
     required Uri assetsDirectory,
     required String? viewId,
