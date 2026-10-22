@@ -3033,6 +3033,191 @@ void testMain() {
     expect(packets.single.data[0].change, equals(ui.PointerChange.up));
   });
 
+  // POINTER CAPTURE
+  //
+  // A drag that starts on Flutter content must keep receiving `pointermove`
+  // when the pointer crosses an `<iframe>` platform view, which is a separate
+  // document. Capturing the pointer to the view root on presses on Flutter
+  // content achieves that.
+  // See: https://github.com/flutter/flutter/issues/141307
+
+  /// Replaces `setPointerCapture` on the view root with a stub that records
+  /// the pointer ids it is called with, and returns that record.
+  List<int> stubSetPointerCapture() {
+    final captured = <int>[];
+    final root = rootElement as JSObject;
+    root['setPointerCapture'] = (JSNumber pointerId) {
+      captured.add(pointerId.toDartInt);
+    }.toJS;
+    addTearDown(() {
+      root.delete('setPointerCapture'.toJS);
+    });
+    return captured;
+  }
+
+  /// Presses and releases the primary mouse button on [target] with
+  /// [pointerId], and returns the number of `down` changes reported for it.
+  int pressAndRelease(_PointerEventContext context, DomElement target, int pointerId) {
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = packets.add;
+    target.dispatchEvent(
+      context.mouseDown(pointerId: pointerId, button: 0, buttons: 1, clientX: 10, clientY: 10),
+    );
+    rootElement.dispatchEvent(
+      context.mouseUp(pointerId: pointerId, button: 0, buttons: 0, clientX: 10, clientY: 10),
+    );
+    return _allPointerData(packets)
+        .where((ui.PointerData data) => data.change == ui.PointerChange.down)
+        .length;
+  }
+
+  test('captures the pointer to the view root on presses on Flutter content only', () {
+    final context = _PointerEventContext();
+    final List<int> captured = stubSetPointerCapture();
+
+    final DomElement platformViewContent = createDomHTMLDivElement();
+    view.dom.platformViewsHost.append(platformViewContent);
+    addTearDown(() => platformViewContent.remove());
+
+    // Presses on the view root and on the glass pane hit Flutter content.
+    expect(pressAndRelease(context, rootElement, 1), 1);
+    expect(captured, <int>[1]);
+    expect(pressAndRelease(context, view.dom.platformViewsHost, 2), 1);
+    expect(captured, <int>[1, 2]);
+
+    // Platform view content lives in the light DOM of the glass pane. A press
+    // on it belongs to the platform view, which must keep receiving its own
+    // pointer events, so it is not captured.
+    expect(pressAndRelease(context, platformViewContent, 3), 1);
+    expect(captured, <int>[1, 2]);
+  });
+
+  test('does not capture presses on the text editing and semantics hosts', () {
+    final context = _PointerEventContext();
+    final List<int> captured = stubSetPointerCapture();
+
+    // Capturing would retarget the pointer events of the text field to the view
+    // root and break caret placement and selection in it.
+    expect(pressAndRelease(context, view.dom.textEditingHost, 1), 1);
+    // Accessibility trade-off: presses on semantics nodes are not captured, so
+    // a drag starting on one can still stall over an `<iframe>`. Capturing
+    // them would retarget the resulting `click` to the view root, and the
+    // semantics node would never see the click that activates it.
+    expect(pressAndRelease(context, view.dom.semanticsHost, 2), 1);
+
+    expect(captured, isEmpty);
+  });
+
+  test('presses on Flutter content still work when pointer capture throws', () {
+    final context = _PointerEventContext();
+    // A synthetic touch has no active browser pointer, so the real
+    // `setPointerCapture` throws a `NotFoundError` for it. (The mouse pointer
+    // is always active, so it can't be used to exercise this.)
+    expect(() => rootElement.setPointerCapture(2), throwsA(anything));
+
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = packets.add;
+
+    context
+        .multiTouchDown(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 10, clientY: 10)])
+        .forEach(rootElement.dispatchEvent);
+    context
+        .multiTouchMove(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 20, clientY: 10)])
+        .forEach(rootElement.dispatchEvent);
+    context
+        .multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 20, clientY: 10)])
+        .forEach(rootElement.dispatchEvent);
+
+    final List<ui.PointerData> data = _allPointerData(packets);
+    expect(data.map((ui.PointerData d) => d.change).toList(), <ui.PointerChange>[
+      ui.PointerChange.add,
+      ui.PointerChange.down,
+      ui.PointerChange.move,
+      ui.PointerChange.up,
+      ui.PointerChange.remove,
+    ]);
+    expect(data.every((ui.PointerData d) => d.device == 2), isTrue);
+    expect(data[1].physicalX, equals(10 * dpi));
+    expect(data[2].physicalX, equals(20 * dpi));
+    expect(data[3].physicalX, equals(20 * dpi));
+  });
+
+  test('dispatches cancel when pointer capture is lost while buttons are down', () {
+    final context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = packets.add;
+
+    rootElement.dispatchEvent(context.primaryDown(clientX: 10, clientY: 10));
+    rootElement.dispatchEvent(context.primaryMove(clientX: 20, clientY: 10));
+    packets.clear();
+
+    // The browser takes the capture away while the button is still pressed,
+    // e.g. because the page called `releasePointerCapture` or the view root
+    // was removed. No `pointerup` follows, so the press is cancelled.
+    rootElement.dispatchEvent(
+      createDomPointerEvent('lostpointercapture', <String, dynamic>{
+        'bubbles': true,
+        'pointerId': 1,
+        'pointerType': 'mouse',
+        'buttons': 1,
+        'clientX': 20,
+        'clientY': 10,
+      }),
+    );
+
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(1));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
+    expect(packets[0].data[0].kind, equals(ui.PointerDeviceKind.mouse));
+    expect(packets[0].data[0].buttons, equals(0));
+    // The cancel is reported at the position carried by the
+    // `lostpointercapture` event.
+    expect(packets[0].data[0].physicalX, equals(20 * dpi));
+    expect(packets[0].data[0].physicalY, equals(10 * dpi));
+    packets.clear();
+
+    // The pressed buttons were reset, so a later move with the button still
+    // reported as pressed is a hover, not a drag of the cancelled press.
+    rootElement.dispatchEvent(context.primaryMove(clientX: 40, clientY: 10));
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(1));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.hover));
+    expect(packets[0].data[0].buttons, equals(0));
+    packets.clear();
+
+    // The release of the cancelled press is ignored.
+    rootElement.dispatchEvent(context.primaryUp(clientX: 40, clientY: 10));
+    expect(packets, isEmpty);
+  });
+
+  test('ignores lostpointercapture if pointerup already completed', () {
+    final context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = packets.add;
+
+    rootElement.dispatchEvent(context.primaryDown(clientX: 10, clientY: 10));
+    rootElement.dispatchEvent(context.primaryUp(clientX: 10, clientY: 10));
+    expect(
+      _allPointerData(packets).map((ui.PointerData d) => d.change).toList(),
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
+    );
+    packets.clear();
+
+    // The browser releases the capture right after `pointerup`.
+    rootElement.dispatchEvent(
+      createDomPointerEvent('lostpointercapture', <String, dynamic>{
+        'bubbles': true,
+        'pointerId': 1,
+        'pointerType': 'mouse',
+        'buttons': 0,
+        'clientX': 10,
+        'clientY': 10,
+      }),
+    );
+
+    expect(packets, isEmpty);
+  });
+
   test('throws if browser does not support pointer events', () {
     expect(
       () => PointerBinding(view, detector: MockPointerSupportDetector(false)),
