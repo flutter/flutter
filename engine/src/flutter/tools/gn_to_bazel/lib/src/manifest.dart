@@ -95,8 +95,10 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
       '//flutter/build/dart:dart_sdk',
       '//flutter/build/dart/test:gen_dartcli_call',
       '//flutter/build/dart/test:gen_executable_call',
-      // Suites not converted in their files: Flutter GPU's, and the Android
-      // executables and APKs (the Android test phase).
+      // Suites not converted in their files: Flutter GPU's (skipped in its
+      // file: it crashes identically under GN and run_tests.py never runs
+      // it), and the two Android APKs (GN's native_activity_apk; the
+      // Android test phase -- their executables convert).
       '//flutter/lib/gpu:gpu_unittests',
       '//flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests',
       '//flutter/impeller/toolkit/android:apk_unittests',
