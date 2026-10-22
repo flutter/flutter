@@ -240,7 +240,7 @@ Future<Map<String, Object?>> pipelineWarmupMetrics(FlutterDriver driver) async {
       }
     }
     throw const FormatException('Unexpected response from the Flutter view.');
-  } on Exception catch (error) {
+  } catch (error) {
     stdout.writeln('Not reporting pipeline warmup metrics: $error');
     return const <String, Object?>{};
   }
