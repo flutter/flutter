@@ -931,6 +931,9 @@ class _SanitizedDetails {
 class _ButtonSanitizer {
   int _pressedButtons = 0;
 
+  /// Whether any button of the pointer is currently pressed.
+  bool get isPressed => _pressedButtons != 0;
+
   /// Transform [DomPointerEvent.buttons] to Flutter's PointerEvent buttons.
   int _htmlButtonsToFlutterButtons(int buttons) {
     // Flutter's button definition conveniently matches that of JavaScript
@@ -1095,6 +1098,35 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     );
   }
 
+  /// Captures the pointer of [event] to [_viewTarget] if the press landed on
+  /// Flutter content.
+  ///
+  /// While a pointer is captured, the browser sends all of its events to
+  /// [_viewTarget], even when the pointer moves over an `<iframe>` platform
+  /// view, so drags that start on Flutter content keep receiving move events.
+  /// See https://github.com/flutter/flutter/issues/141307
+  ///
+  /// Presses on platform view content, the text editing host and the semantics
+  /// host are not captured, so those elements keep receiving their own pointer
+  /// events.
+  void _capturePointerIfFlutterContent(DomPointerEvent event) {
+    // Events from the scene and from the hit test proxies inside the glass
+    // pane's shadow root are retargeted to the glass pane.
+    final DomEventTarget? target = event.target;
+    if (target != _viewTarget && target != _view.dom.platformViewsHost) {
+      return;
+    }
+    final double? pointerId = event.pointerId;
+    if (pointerId == null) {
+      return;
+    }
+    try {
+      _viewTarget.setPointerCapture(pointerId);
+    } catch (_) {
+      // Throws if the pointer is not active, as with synthetic events in tests.
+    }
+  }
+
   @override
   void setup() {
     _addPointerEventListener(_viewTarget, 'pointerdown', (DomPointerEvent event) {
@@ -1116,6 +1148,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _downTouchDevices.add(device);
       }
       _callback(event, pointerData);
+      _capturePointerIfFlutterContent(event);
 
       if (event.target == _viewTarget) {
         // Ensure smooth focus transitions between text fields within the Flutter view.
@@ -1134,16 +1167,10 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     });
 
-    // Move event listeners should be added to `_globalTarget` instead of
-    // `_viewTarget`. This is because `_viewTarget` (the root) captures pointers
-    // by default, meaning a pointer that starts within `_viewTarget` continues
-    // sending move events to its listener even when dragged outside.
-    //
-    // In contrast, `_globalTarget` (a regular <div>) stops sending move events
-    // when the pointer moves outside its bounds and resumes them only when the
-    // pointer re-enters.
-    //
-    // For demonstration, see this fiddle: https://jsfiddle.net/ditman/7towxaqp
+    // Move event listeners are attached to `_globalTarget` rather than
+    // `_viewTarget`. When a pointer is captured to `_viewTarget` on pointerdown,
+    // its move events are routed to `_viewTarget` even over iframes and bubble
+    // to `_globalTarget`.
     //
     // TODO(dkwingsmt): Investigate whether we can configure the behavior for
     // `_viewTarget`. https://github.com/flutter/flutter/issues/157968
@@ -1217,6 +1244,24 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _removePointerIfUnhoverable(event);
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
         _callback(event, pointerData);
+      }
+    }, checkModifiers: false);
+
+    // The browser can take the capture away without a `pointerup` or a
+    // `pointercancel`, for example when the window loses focus (Alt-Tab, OS
+    // dialogs) or the view root is removed. If buttons are still pressed, the
+    // press will never be released, so cancel it.
+    _addPointerEventListener(_viewTarget, 'lostpointercapture', (DomPointerEvent event) {
+      final int device = _getPointerId(event);
+      if (_hasSanitizer(device)) {
+        final _ButtonSanitizer sanitizer = _getSanitizer(device);
+        if (sanitizer.isPressed) {
+          final pointerData = <ui.PointerData>[];
+          final _SanitizedDetails details = sanitizer.sanitizeCancelEvent();
+          _removePointerIfUnhoverable(event);
+          _convertEventsToPointerData(data: pointerData, event: event, details: details);
+          _callback(event, pointerData);
+        }
       }
     }, checkModifiers: false);
 
