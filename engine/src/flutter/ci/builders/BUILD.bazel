@@ -86,7 +86,7 @@ install(
 
 # linux_android_aot_engine.json: ci/android_profile_x64
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:stripped=false
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel:stripped=false
 # Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile_x64",
@@ -100,7 +100,7 @@ install(
 
 # linux_android_aot_engine.json: ci/android_release_x64
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:stripped=false
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel:stripped=false
 # Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release_x64",
@@ -159,7 +159,7 @@ install(
 
 # linux_android_aot_engine_ddm.json: ci/android_release_x64_ddm
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:stripped=false
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:stripped=false
 # Not built, no Bazel counterpart yet: default.
 install(
     name = "android_release_x64_ddm",
@@ -228,8 +228,7 @@ install(
 )
 
 # linux_android_debug_engine.json: ci/android_debug_x64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_debug_x64 :android_debug_x64
 # Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_debug_x64",
@@ -267,8 +266,7 @@ install(
 )
 
 # linux_android_debug_engine_ddm.json: ci/android_debug_x64_ddm
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_debug_x64_ddm :android_debug_x64_ddm
 install(
     name = "android_debug_x64_ddm",
     testonly = True,
@@ -277,8 +275,7 @@ install(
 )
 
 # linux_android_emulator.json: ci/android_emulator_debug_x64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_emulator_debug_x64 :android_emulator_debug_x64
 # Not built, no Bazel counterpart yet: flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests, flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, flutter/impeller/toolkit/android:unittests.
 # Tests, run by `bazel test` rather than installed: flutter/shell/platform/android:flutter_shell_native_unittests.
 # Nothing to install.
