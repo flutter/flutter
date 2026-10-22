@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
@@ -36,6 +37,23 @@ const fakeCreateFailureOutput =
 const kListEmulatorsCommand = FakeCommand(
   command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
   stderr: fakeCreateFailureOutput,
+  exitCode: 1,
+);
+
+// Like fakeCreateFailureOutput, but with a supported (x86_64) image
+// alongside the unsupported x86 ones, for tests that aren't themselves
+// about ABI selection and just need emulator creation to succeed.
+const fakeCreateFailureOutputWithSupportedAbi =
+    'Error: Package path (-k) not specified. Valid system image paths are:\n'
+    'system-images;android-27;google_apis;x86\n'
+    'system-images;android-P;google_apis;x86\n'
+    'system-images;android-27;google_apis_playstore;x86\n'
+    'system-images;android-27;google_apis_playstore;x86_64\n'
+    'null\n';
+
+const kListEmulatorsCommandWithSupportedAbi = FakeCommand(
+  command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+  stderr: fakeCreateFailureOutputWithSupportedAbi,
   exitCode: 1,
 );
 
@@ -73,6 +91,7 @@ void main() {
           androidSdkBuilder: () => sdk,
           featureFlags: TestFeatureFlags(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
@@ -100,6 +119,7 @@ void main() {
             androidSdkBuilder: () => sdk,
             featureFlags: TestFeatureFlags(),
           ),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         );
 
         final List<Emulator> emulators = await emulatorManager.getAllAvailableEmulators();
@@ -136,6 +156,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
           androidSdkBuilder: () => sdk,
           featureFlags: TestFeatureFlags(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
@@ -151,6 +172,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
           androidSdkBuilder: () => sdk,
           featureFlags: TestFeatureFlags(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
         fileSystem: fileSystem,
       );
 
@@ -183,6 +205,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
           androidSdkBuilder: () => sdk,
           featureFlags: TestFeatureFlags(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
@@ -202,7 +225,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             command: <String>['avdmanager', 'list', 'device', '-c'],
             stdout: 'test\ntest2\npixel\npixel-xl\n',
           ),
-          kListEmulatorsCommand,
+          kListEmulatorsCommandWithSupportedAbi,
           const FakeCommand(
             command: <String>[
               'avdmanager',
@@ -211,7 +234,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               '-n',
               'flutter_emulator',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-27;google_apis_playstore;x86_64',
               '-d',
               'pixel',
             ],
@@ -222,6 +245,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
           androidSdkBuilder: () => sdk,
           featureFlags: TestFeatureFlags(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
@@ -238,7 +262,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             command: <String>['avdmanager', 'list', 'device', '-c'],
             stdout: 'test\ntest2\npixel\npixel-xl\n',
           ),
-          kListEmulatorsCommand,
+          kListEmulatorsCommandWithSupportedAbi,
           const FakeCommand(
             command: <String>[
               'avdmanager',
@@ -248,7 +272,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               '-n',
               'test',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-27;google_apis_playstore;x86_64',
               '-d',
               'pixel',
             ],
@@ -259,11 +283,224 @@ iOS Simulator       • iOS Simulator • Apple        • android
           androidSdkBuilder: () => sdk,
           featureFlags: TestFeatureFlags(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
 
       expect(result.success, true);
     });
+
+    testWithoutContext(
+      'create emulator prefers a 64-bit system image over an unsupported x86 one',
+      () async {
+        final emulatorManager = EmulatorManager(
+          javaBuilder: FakeJava.new,
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            const FakeCommand(
+              command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+              stderr:
+                  'Error: Package path (-k) not specified. Valid system image paths are:\n'
+                  'system-images;android-27;google_apis_playstore;x86\n'
+                  'system-images;android-27;google_apis_playstore;x86_64\n'
+                  'null\n',
+              exitCode: 1,
+            ),
+            const FakeCommand(
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'test',
+                '-k',
+                'system-images;android-27;google_apis_playstore;x86_64',
+                '-d',
+                'pixel',
+              ],
+            ),
+          ]),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        );
+        final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+        expect(result.success, true);
+      },
+    );
+
+    testWithoutContext(
+      'create emulator still prefers a 64-bit system image when avdmanager output uses CRLF',
+      () async {
+        final emulatorManager = EmulatorManager(
+          javaBuilder: FakeJava.new,
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            const FakeCommand(
+              command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+              stderr:
+                  'Error: Package path (-k) not specified. Valid system image paths are:\r\n'
+                  'system-images;android-27;google_apis_playstore;x86\r\n'
+                  'system-images;android-27;google_apis_playstore;x86_64\r\n'
+                  'null\r\n',
+              exitCode: 1,
+            ),
+            const FakeCommand(
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'test',
+                '-k',
+                'system-images;android-27;google_apis_playstore;x86_64',
+                '-d',
+                'pixel',
+              ],
+            ),
+          ]),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        );
+        final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+        expect(result.success, true);
+      },
+    );
+
+    Future<void> testAbiPreferenceForHost(HostPlatform hostPlatform, String preferredAbi) async {
+      final emulatorManager = EmulatorManager(
+        javaBuilder: FakeJava.new,
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['avdmanager', 'list', 'device', '-c'],
+            stdout: 'test\ntest2\npixel\npixel-xl\n',
+          ),
+          const FakeCommand(
+            command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+            stderr:
+                'Error: Package path (-k) not specified. Valid system image paths are:\n'
+                'system-images;android-27;google_apis_playstore;x86\n'
+                'system-images;android-27;google_apis_playstore;x86_64\n'
+                'system-images;android-27;google_apis_playstore;arm64-v8a\n'
+                'null\n',
+            exitCode: 1,
+          ),
+          FakeCommand(
+            command: <String>[
+              'avdmanager',
+              'create',
+              'avd',
+              '-n',
+              'test',
+              '-k',
+              'system-images;android-27;google_apis_playstore;$preferredAbi',
+              '-d',
+              'pixel',
+            ],
+          ),
+        ]),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
+        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: hostPlatform),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+      expect(result.success, true);
+    }
+
+    testWithoutContext(
+      'create emulator prefers arm64-v8a over x86_64 on an arm64 host',
+      () => testAbiPreferenceForHost(HostPlatform.darwin_arm64, 'arm64-v8a'),
+    );
+
+    testWithoutContext(
+      'create emulator prefers x86_64 over arm64-v8a on an x86_64 host',
+      () => testAbiPreferenceForHost(HostPlatform.darwin_x64, 'x86_64'),
+    );
+
+    testWithoutContext(
+      'create emulator falls back to the first available image when no ABI is preferred',
+      () async {
+        final emulatorManager = EmulatorManager(
+          javaBuilder: FakeJava.new,
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            const FakeCommand(
+              command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+              stderr:
+                  'Error: Package path (-k) not specified. Valid system image paths are:\n'
+                  'system-images;android-27;google_apis_playstore;armeabi-v7a\n'
+                  'null\n',
+              exitCode: 1,
+            ),
+            const FakeCommand(
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'test',
+                '-k',
+                'system-images;android-27;google_apis_playstore;armeabi-v7a',
+                '-d',
+                'pixel',
+              ],
+            ),
+          ]),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        );
+        final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+        expect(result.success, true);
+      },
+    );
+
+    testWithoutContext(
+      'create emulator fails with a clear error when only unsupported x86 images are available',
+      () async {
+        final emulatorManager = EmulatorManager(
+          javaBuilder: FakeJava.new,
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            kListEmulatorsCommand,
+          ]),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        );
+        final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+        expect(result.success, false);
+        expect(result.error, contains('No suitable Android AVD system images are available'));
+      },
+    );
 
     testWithoutContext('create emulator with an existing name errors', () async {
       final emulatorManager = EmulatorManager(
@@ -275,7 +512,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             command: <String>['avdmanager', 'list', 'device', '-c'],
             stdout: 'test\ntest2\npixel\npixel-xl\n',
           ),
-          kListEmulatorsCommand,
+          kListEmulatorsCommandWithSupportedAbi,
           const FakeCommand(
             command: <String>[
               'avdmanager',
@@ -284,7 +521,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               '-n',
               'existing-avd-1',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-27;google_apis_playstore;x86_64',
               '-d',
               'pixel',
             ],
@@ -299,6 +536,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
           androidSdkBuilder: () => sdk,
           featureFlags: TestFeatureFlags(),
         ),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(
         name: 'existing-avd-1',
@@ -324,7 +562,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               command: <String>['avdmanager', 'list', 'device', '-c'],
               stdout: 'test\ntest2\npixel\npixel-xl\n',
             ),
-            kListEmulatorsCommand,
+            kListEmulatorsCommandWithSupportedAbi,
             const FakeCommand(
               command: <String>[
                 'avdmanager',
@@ -334,7 +572,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
                 '-n',
                 'flutter_emulator_2',
                 '-k',
-                'system-images;android-27;google_apis_playstore;x86',
+                'system-images;android-27;google_apis_playstore;x86_64',
                 '-d',
                 'pixel',
               ],
@@ -345,6 +583,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             androidSdkBuilder: () => sdk,
             featureFlags: TestFeatureFlags(),
           ),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
         );
         final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
@@ -404,6 +643,7 @@ class TestEmulatorManager extends EmulatorManager {
     required super.processManager,
     required super.androidWorkflow,
     required super.fileSystem,
+    required super.operatingSystemUtils,
   });
 
   final List<Emulator> allEmulators;

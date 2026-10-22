@@ -323,6 +323,7 @@ class Daemon {
         processManager: processManager,
         androidSdk: androidSdk,
         java: java,
+        operatingSystemUtils: toolContext.os,
       ),
     );
     registerDomain(devToolsDomain = DevToolsDomain(this));
@@ -1882,6 +1883,7 @@ class EmulatorDomain extends Domain {
     AndroidSdk? androidSdk,
     EmulatorManager? emulatorManager,
     Java? java,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : emulators =
            emulatorManager ??
            EmulatorManager(
@@ -1891,6 +1893,7 @@ class EmulatorDomain extends Domain {
              androidSdkBuilder: () => androidSdk,
              processManager: processManager,
              androidWorkflow: androidWorkflow,
+             operatingSystemUtils: operatingSystemUtils,
            ),
        super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);

@@ -599,6 +599,7 @@ class ToolDependencies {
           javaBuilder: () => finalAndroidContext.java,
           logger: finalLogger,
           processManager: finalProcessManager,
+          operatingSystemUtils: finalOS,
         );
 
     final MacOSWorkflow finalMacOSWorkflow =
