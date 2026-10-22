@@ -330,9 +330,8 @@ String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) 
 
   final String result = formatValues(values);
   // GA4 / package:unified_analytics enforces a 100-character limit on event
-  // parameter values. When dual-compile (Wasm + JS) combines `dryRun`,
-  // `deprecatedJsInterop`, and `optimizationLevel`, the joined string reaches
-  // 116–117 chars; drop `optimizationLevel` to stay within 95 chars.
+  // parameter values. Drop `optimizationLevel` if the combined settings
+  // exceed the limit.
   if (result.length > 100 && values.remove('optimizationLevel') != null) {
     return formatValues(values);
   }
