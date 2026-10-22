@@ -340,10 +340,11 @@ Future<ui.Codec> engineInstantiateImageCodec(
     );
   } else {
     // The backend codec is the general fallback for anything the browser can't
-    // decode itself, but it can only handle animated images if it was built
-    // with the builtin codecs. When it wasn't, an animated image degrades to a
-    // still of its first frame rather than failing outright.
-    final bool backendCanDecode = !imageType.isAnimated || renderer.supportsAnimatedImages;
+    // decode itself, but only if it was built with the builtin codecs. When it
+    // wasn't, it can't decode anything (static or animated), so it must never
+    // be called. An animated image then degrades to a still of its first frame
+    // via createImageBitmap rather than failing outright.
+    final bool backendCanDecode = renderer.supportsAnimatedImages;
     final bool preferBitmap = !imageType.isAnimated || !backendCanDecode;
     if (preferBitmap && browserSupportsCreateImageBitmap) {
       final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
@@ -516,7 +517,8 @@ Future<ui.Codec> engineInstantiateImageCodecFromUrl(
       return EngineCodec.browser(decoder);
     }
 
-    final bool backendCanDecode = !imageType.isAnimated || renderer.supportsAnimatedImages;
+    // See the comment in [engineInstantiateImageCodec].
+    final bool backendCanDecode = renderer.supportsAnimatedImages;
     final bool preferBitmap = !imageType.isAnimated || !backendCanDecode;
     if (preferBitmap && browserSupportsCreateImageBitmap) {
       final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);

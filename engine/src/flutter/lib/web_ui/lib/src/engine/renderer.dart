@@ -176,12 +176,12 @@ abstract class Renderer {
   /// Whether this renderer natively supports resizing/scaling animated images during decoding.
   bool get supportsResizingAnimatedImages;
 
-  /// Whether this renderer can decode animated images itself via
-  /// [createAnimatedImage].
+  /// Whether this renderer can decode images itself via [createAnimatedImage].
   ///
-  /// When this is false, callers must fall back to a browser-provided decoder.
-  /// Some backends (notably the Impeller-based skwasm variants) are built
-  /// without the builtin image codecs.
+  /// When this is false, [createAnimatedImage] must not be called for any
+  /// image, animated or not, and callers must fall back to a browser-provided
+  /// decoder. Some backends (notably the Impeller-based skwasm variants) are
+  /// built without the builtin image codecs.
   bool get supportsAnimatedImages;
 
   BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight});

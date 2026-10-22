@@ -349,11 +349,26 @@ Future<void> testMain() async {
       );
     });
 
-    // A companion test that decodes a *static* image through the backend codec
-    // (`createImageBitmap` disabled) is missing on purpose. CanvasKit Chromium
-    // reports `supportsAnimatedImages == true` but is built without the PNG,
-    // JPEG and WebP decoders, so it fails that case while still handling GIF.
-    // Covering it needs a real capability probe on the CanvasKit renderer.
+    test('static image throws when nothing can decode it', () async {
+      // A backend without builtin codecs can't decode static images either, so
+      // it must not be used as a fallback for them.
+      //
+      // The case where the backend *does* have a codec is skipped on purpose.
+      // CanvasKit Chromium reports `supportsAnimatedImages == true` but is
+      // built without the PNG, JPEG and WebP decoders, so it fails that case
+      // while still handling GIF. Covering it needs a real capability probe on
+      // the CanvasKit renderer.
+      if (renderer.supportsAnimatedImages) {
+        return;
+      }
+      debugDisableCreateImageBitmapSupport = true;
+      final Uint8List pngBytes = await fetchBytes('/test_images/1x1.png');
+
+      await expectLater(
+        renderer.instantiateImageCodec(pngBytes),
+        throwsA(isA<ImageCodecException>()),
+      );
+    });
   });
 }
 
