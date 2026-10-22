@@ -286,6 +286,8 @@ exports_files(["lib/web_ui/lib/ui_web/src/ui_web.dart"])
 # and check_imports). A script of a package's own directory needs no export.
 exports_files([
     "tools/android_illegal_imports.py",
+    "tools/androidx/files.json",
+    "tools/androidx/generate_pom_file.py",
     "tools/gen_android_buildconfig.py",
 ])
 

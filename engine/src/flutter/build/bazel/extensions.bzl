@@ -297,6 +297,25 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/vulkan-headers/src/BUILD.gn"],
         gn_repository = "@vulkan-headers=//flutter/third_party/vulkan-deps/vulkan-headers/src",
     ),
+    # The Vulkan validation layer (VkLayer_khronos_validation), which the
+    # Android embedding's debug jar packs for arm64
+    # (impeller_enable_vulkan_validation_layers; GN builds it at API level 26
+    # in a toolchain of its own): the engine's GN in the secondary tree over
+    # the synced tree, and the layer-settings library of
+    # vulkan-utility-libraries it links, from that tree's own GN.
+    "vulkan_validation_layers": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps/vulkan-validation-layers/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/third_party/vulkan_validation_layers/BUILD.gn"],
+        gn_repository = "@vulkan_validation_layers=//third_party/vulkan_validation_layers",
+        gn_secondary_dir = "engine/src/flutter/build/secondary/third_party/vulkan_validation_layers",
+    ),
+    "vulkan-utility-libraries": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps/vulkan-utility-libraries/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/BUILD.gn"],
+        gn_repository = "@vulkan-utility-libraries=//flutter/third_party/vulkan-deps/vulkan-utility-libraries/src",
+    ),
     # VulkanMemoryAllocator (one header), from the secondary tree's GN: a
     # config of defines and warning flags over the Vulkan headers.
     "vulkan_memory_allocator": struct(

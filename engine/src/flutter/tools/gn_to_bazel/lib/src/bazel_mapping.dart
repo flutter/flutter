@@ -414,6 +414,11 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/vulkan-deps/spirv-headers/src': '@spirv-headers',
   '//flutter/third_party/vulkan-deps/spirv-tools/src': '@spirv-tools',
   '//flutter/third_party/vulkan-deps/glslang/src': '@glslang',
+  // The Vulkan validation layer (the secondary tree's GN over the synced
+  // tree) and the layer-settings library it links, each a fetch-time
+  // repository; the Android embedding's debug jar packs the layer.
+  '//third_party/vulkan_validation_layers': '@vulkan_validation_layers',
+  '//flutter/third_party/vulkan-deps/vulkan-utility-libraries/src': '@vulkan-utility-libraries',
   '//third_party/shaderc_flutter': '@shaderc//:shaderc_flutter',
   '//flutter/third_party/re2': '@re2',
   '//third_party/libtess2': '@libtess2',
@@ -488,6 +493,8 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/flatbuffers/': '@flatbuffers//',
   '//flutter/third_party/vulkan-deps/spirv-headers/src/': '@spirv-headers//',
   '//flutter/third_party/vulkan-deps/spirv-tools/src/': '@spirv-tools//',
+  '//flutter/third_party/vulkan-deps/vulkan-validation-layers/src/': '@vulkan_validation_layers//',
+  '//flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/': '@vulkan-utility-libraries//',
   '//flutter/third_party/vulkan-deps/glslang/src/': '@glslang//',
   '//flutter/third_party/vulkan-deps/vulkan-headers/src/': '@vulkan-headers//',
   '//flutter/third_party/vulkan_memory_allocator/': '@vulkan_memory_allocator//',
@@ -530,6 +537,16 @@ const Map<String, List<String>> scriptInputs = <String, List<String>>{
   '//build/android/gyp/create_flutter_jar.py': <String>['//engine/src/build:android_gyp_scripts'],
 };
 
+/// The platform a GN toolchain on an action's dependency edge stands for
+/// (`deps += [ "//third_party/vulkan_validation_layers($apilevel26_toolchain)" ]`):
+/// the dependency is built for it (gn_action's platform_deps, through a
+/// transition), and its outputs sit under the toolchain's directory of the
+/// build directory ([toolchainDirectories]).
+const Map<String, String> toolchainPlatforms = <String, String>{
+  '//build/toolchain/android:clang_arm64_apilevel26':
+      '//engine/src/flutter/build/bazel/toolchains:android_arm64_api26',
+};
+
 /// Programs an action runs, which GN names by their absolute paths
 /// (`rebase_path("//flutter/third_party/java/openjdk/bin/javac")`), each
 /// with the files it loads at run time: the program is a tool of the rule
@@ -558,6 +575,10 @@ const Map<String, String> genDirIncludeTargets = <String, String>{
 /// paths as `//dir`.
 const Map<String, String> includeDirLibraries = <String, String>{
   '//flutter/third_party/angle/include': '@angle//:headers',
+  // SPIRV-Tools' root, which the Vulkan validation layer's GN names as an
+  // include directory (build_overrides' vvl_glslang_dir): the appendix's
+  // root_include library of @spirv-tools.
+  '//flutter/third_party/vulkan-deps/spirv-tools/src': '@spirv-tools//:root_include',
   // ICU's source directories, which Skia's client-ICU bidi library names
   // as include directories (and as -isystem directories, which go: see
   // withoutSystemIncludeDirs): the overlay's headers library.
@@ -849,6 +870,13 @@ final class ConfigToolchain extends ConfigEffect {
 /// The configs the engine's build files mention, outside their own package.
 const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//flutter:config': ConfigDependency('//engine/src/flutter:config'),
+  // The Vulkan headers' public config (the include directory and the
+  // platform defines), which the validation layers list as a public config
+  // of their own from the secondary tree's GN: @vulkan-headers' library of
+  // the same name.
+  '//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers_config': ConfigDependency(
+    '@vulkan-headers//:vulkan_headers_config',
+  ),
   '//flutter:export_dynamic_symbols': ConfigDependency(
     '//engine/src/flutter:export_dynamic_symbols',
   ),
@@ -921,6 +949,11 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//build/config/clang:extra_warnings': ConfigToolchain(
     removalCopts: <String>['-Wno-string-conversion', '-Wno-newline-eof'],
   ),
+  // //build/config/compiler:no_rtti, a default config whose -fno-rtti is
+  // the toolchain's; the Vulkan validation layer removes it and lists
+  // :rtti, which is empty outside Windows (/GR): -frtti turns it back on.
+  '//build/config/compiler:no_rtti': ConfigToolchain(removalCopts: <String>['-frtti']),
+  '//build/config/compiler:rtti': ConfigCopts(<(Condition, List<String>)>[]),
   // ANGLE's configs (build/bazel/gl_wrap builds ANGLE; the overlay @angle
   // carries its headers and this define-only config).
   '//flutter/third_party/angle:external_config': ConfigDependency('@angle//:headers'),
@@ -2043,6 +2076,8 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//build_overrides/spirv_tools.gni',
     '//build_overrides/glslang.gni',
     '//build_overrides/vulkan_headers.gni',
+    '//build_overrides/vulkan_utility_libraries.gni',
+    '//build_overrides/vulkan_validation_layers.gni',
     '//flutter/third_party/vulkan-deps/',
     // The Dart SDK's library source lists (<library>_sources.gni) and
     // dart:ui's (dart_ui.gni), which sky/packages/sky_engine copies into the
