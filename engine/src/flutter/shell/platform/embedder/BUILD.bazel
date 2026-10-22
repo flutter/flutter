@@ -6,7 +6,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_CFLAGS_OBJC", "FLUTTER_CFLAGS_OBJCC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_CFLAGS_OBJCC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
@@ -991,7 +991,7 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }),
-    copts = CHROMIUM_CODE_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
     ] + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [
@@ -1125,7 +1125,7 @@ flutter_cc_test(
     name = "embedder_a11y_unittests",
     size = "small",
     srcs = ["tests/embedder_a11y_unittests.cc"],
-    copts = CHROMIUM_CODE_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
     ] + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [

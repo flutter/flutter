@@ -3824,7 +3824,7 @@ source_set("x") {
       expect(
         output,
         contains('''
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     # Why these.
     deps = [
@@ -4008,7 +4008,7 @@ source_set("example") {
         output,
         contains(
           'load("@flutter//engine/src/flutter/build/bazel:copts.bzl", '
-          '"FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")',
+          '"CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")',
         ),
       );
       expect(
@@ -4022,7 +4022,7 @@ cc_library(
         "//modules/skcms:c.cc",
     ],
     hdrs = ["include/a.h"],
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     includes = ["."],
     local_defines = FLUTTER_LOCAL_DEFINES + select({
         "@flutter//engine/src/flutter/build/bazel:unoptimized": [
@@ -4641,7 +4641,7 @@ flutter_cc_test(
     name = "ui_unittests",
     size = "medium",
     srcs = ["ui_unittests.cc"],
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     runner_args = ["--timeout=90"],
@@ -4686,7 +4686,7 @@ cc_test(
     size = "medium",
     srcs = ["message_loop_task_queues_benchmark.cc"],
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     tags = [
@@ -4729,7 +4729,7 @@ executable("runner") {
       final String output = emitBuildFile(evaluation, gnPackage: '//flutter/tools/licenses_cpp');
       expect(
         output,
-        contains('cc_test(\n    name = "licenses_cpp_testrunner",\n    size = "small",'),
+        contains('cc_test(\n    name = "licenses_cpp_testrunner",\n    size = "medium",'),
       );
       expect(output, contains('cc_binary(\n    name = "runner",'));
     });
@@ -4801,15 +4801,100 @@ cc_library(
 )
 '''),
       );
-      // //flutter:config, listed or implied by a dependency on engine code.
+      // //flutter:config listed; a dependency on a file the converter cannot
+      // read (no tree here) hands nothing.
       expect(
         output,
-        contains('name = "engine",\n    srcs = ["engine.cc"],\n    copts = FLUTTER_COPTS,'),
+        contains('name = "engine",\n    srcs = ["engine.cc"],\n    copts = CHROMIUM_CODE_COPTS,'),
       );
       expect(
         output,
         contains('name = "engine_too",\n    srcs = ["engine_too.cc"],\n    copts = FLUTTER_COPTS,'),
       );
+    });
+
+    test("//flutter:config reaches a target as GN applies it: a dependency's public config, "
+        'forwarded along public_deps only', () {
+      // fml exports the config; impeller/geometry lists it privately (dl_path
+      // depends on it and GN compiles dl_path without -Wunreachable-code);
+      // compiler_lib hands fml's on through its public_deps (impellerc gets
+      // it over a plain deps edge); a private deps edge forwards nothing.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/fml/BUILD.gn': '''
+source_set("fml") {
+  sources = [ "fml.cc" ]
+  public_configs = [ "//flutter:config" ]
+}
+''',
+        'flutter/impeller/geometry/BUILD.gn': '''
+source_set("geometry") {
+  sources = [ "geometry.cc" ]
+  configs += [ "//flutter:config" ]
+}
+''',
+        'flutter/impeller/compiler/BUILD.gn': '''
+source_set("compiler_lib") {
+  sources = [ "compiler.cc" ]
+  public_deps = [ "//flutter/fml" ]
+}
+''',
+        'flutter/example/BUILD.gn': '''
+source_set("through_public") {
+  sources = [ "through_public.cc" ]
+  public_deps = [ "//flutter/fml" ]
+}
+
+source_set("through_private") {
+  sources = [ "through_private.cc" ]
+  deps = [ "//flutter/fml" ]
+}
+
+source_set("on_fml") {
+  sources = [ "on_fml.cc" ]
+  deps = [ "//flutter/fml" ]
+}
+
+source_set("on_geometry") {
+  sources = [ "on_geometry.cc" ]
+  deps = [ "//flutter/impeller/geometry" ]
+}
+
+source_set("on_compiler_lib") {
+  sources = [ "on_compiler_lib.cc" ]
+  deps = [ "//flutter/impeller/compiler:compiler_lib" ]
+}
+
+source_set("on_through_public") {
+  sources = [ "on_through_public.cc" ]
+  deps = [ ":through_public" ]
+}
+
+source_set("on_through_private") {
+  sources = [ "on_through_private.cc" ]
+  deps = [ ":through_private" ]
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/example/BUILD.gn'),
+        gnPackage: '//flutter/example',
+        tree: tree,
+        forwardedFlags: DependencyResolver(tree: tree, assumptions: linuxHostAssumptions()),
+      );
+      String coptsOf(String name) {
+        final RegExpMatch? match = RegExp(
+          'name = "$name",\\n    srcs = \\["$name.cc"\\],\\n    copts = ([A-Z_]+),',
+        ).firstMatch(output);
+        return match?.group(1) ?? 'not found';
+      }
+
+      expect(coptsOf('on_fml'), 'FLUTTER_COPTS');
+      expect(coptsOf('through_public'), 'FLUTTER_COPTS');
+      expect(coptsOf('through_private'), 'FLUTTER_COPTS');
+      expect(coptsOf('on_compiler_lib'), 'FLUTTER_COPTS');
+      expect(coptsOf('on_through_public'), 'FLUTTER_COPTS');
+      expect(coptsOf('on_geometry'), 'CHROMIUM_CODE_COPTS');
+      expect(coptsOf('on_through_private'), 'CHROMIUM_CODE_COPTS');
     });
 
     test('hands the flags of a public config to the owner and its dependents', () async {
@@ -5043,7 +5128,7 @@ source_set("maybe") {
       );
       expect(
         shell,
-        contains('    name = "stopped",\n    srcs = ["s.cc"],\n    copts = FLUTTER_COPTS,\n'),
+        contains('    name = "stopped",\n    srcs = ["s.cc"],\n    copts = CHROMIUM_CODE_COPTS,\n'),
       );
       expect(
         shell,
