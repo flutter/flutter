@@ -1328,7 +1328,7 @@ gn_action(
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_vulkan_and_flutter_runtime_mode_debug_and_target_cpu_arm64_and_stripped_symbols": [
-            "lib.stripped/libVkLayer_khronos_validation.so",  # impeller_enable_vulkan_validation_layers && impeller_enable_vulkan_validation_layers && stripped_symbols
+            "$(built lib.stripped/libVkLayer_khronos_validation.so)",  # impeller_enable_vulkan_validation_layers && impeller_enable_vulkan_validation_layers && stripped_symbols
         ],
         "//conditions:default": [],
     }) + select({
