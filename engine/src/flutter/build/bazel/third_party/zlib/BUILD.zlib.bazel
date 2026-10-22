@@ -33,6 +33,9 @@ _ARMV7 = "@platforms//cpu:armv7"
 
 _WASM32 = "@platforms//cpu:wasm32"
 
+# riscv64 (Android): neither optimization, like wasm32.
+_RISCV64 = "@platforms//cpu:riscv64"
+
 # The ARM CPUs on Android and elsewhere (Linux): zlib_arm_crc32_config's
 # ARMV8_OS_* define, which picks the CPU-feature query (the NDK-compatible
 # cpu-features on Android, getauxval on Linux).
@@ -82,6 +85,7 @@ _ADLER32_SIMD_DEFINES = select({
     _AARCH64: ["ADLER32_SIMD_NEON"],
     _ARMV7: ["ADLER32_SIMD_NEON"],
     _WASM32: [],
+    _RISCV64: [],
 })
 
 _CRC32_SIMD_DEFINES = select({
@@ -89,6 +93,7 @@ _CRC32_SIMD_DEFINES = select({
     _AARCH64: [],
     _ARMV7: [],
     _WASM32: [],
+    _RISCV64: [],
 })
 
 # config("zlib_arm_crc32_config"): the ARMv8 CRC32 instructions, and the OS
@@ -116,6 +121,7 @@ _DATA_CHUNK_SIMD_DEFINES = select({
     ],
     _ARMV7: ["INFLATE_CHUNK_SIMD_NEON"],
     _WASM32: [],
+    _RISCV64: [],
 })
 
 _SLIDE_HASH_SIMD_DEFINES = select({
@@ -123,6 +129,7 @@ _SLIDE_HASH_SIMD_DEFINES = select({
     _AARCH64: ["DEFLATE_SLIDE_HASH_NEON"],
     _ARMV7: ["DEFLATE_SLIDE_HASH_NEON"],
     _WASM32: [],
+    _RISCV64: [],
 })
 
 # source_set("zlib_common_headers")
@@ -260,6 +267,7 @@ cc_library(
         _ARMV7: [],
         # Without the chunk-copying inflate of zlib_data_chunk_simd.
         _WASM32: ["inflate.c"],
+        _RISCV64: ["inflate.c"],
     }),
     hdrs = [
         "chromeconf.h",
@@ -277,6 +285,7 @@ cc_library(
                         _AARCH64: [],
                         _ARMV7: [],
                         _WASM32: ["CPU_NO_SIMD"],
+                        _RISCV64: ["CPU_NO_SIMD"],
                     }),
     deps = [":zlib_common_headers"] + select({
         _X86_64: [
@@ -298,6 +307,7 @@ cc_library(
             ":zlib_slide_hash_simd",
         ],
         _WASM32: [],
+        _RISCV64: [],
     }) + select({
         # BUILD.gn: an Android build's CPU detection goes through the
         # NDK-compatible cpu-features (//third_party/cpu_features:ndk_compat).

@@ -1124,6 +1124,7 @@ final Map<String, String> _targetPlatformSettings = Map<String, String>.unmodifi
 const List<String> targetPlatformNames = <String>[
   'android-arm',
   'android-arm64',
+  'android-riscv64',
   'android-x64',
   'android-x86',
   'darwin-arm64',
