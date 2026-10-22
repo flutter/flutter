@@ -24,8 +24,10 @@ Both sides are normalized to a set of flags per source file (paths relative
 to engine/src): output and dependency-file arguments go, include directories
 become engine-relative (Bazel's bazel-out mirrors and virtual-include trees
 and GN's out/gen directories are the build systems' own mechanics and are
-dropped), the sysroot is a placeholder. Actions of Bazel's exec configuration
-(host tools and their closure, built with -c opt by design) are left out.
+dropped), the sysroot is a placeholder. Of a source Bazel compiles in several
+configurations, the command line's compile is compared (a transition's only
+when there is no other); actions of Bazel's exec configuration (host tools and
+their closure, built with -c opt by design) are left out.
 The report lists, per distinct difference, how many files have it and one
 example; `--full` prints every class including Bazel-only include
 directories, which are mostly decision 14's (a dependency's public config
@@ -161,23 +163,38 @@ def normalize(args, side, out_dir):
 
 
 def bazel_commands(aquery_path):
-  """Source file -> flag set, from `bazel aquery --output=jsonproto`, target configuration only."""
+  """Source file -> flag set, from `bazel aquery --output=jsonproto`, the command line's configuration.
+
+  A query over the whole tree sees a source compiled several times: in the
+  configuration the command line asks for, in those the builders' targets
+  and the GPU test backends transition into (`-ST-` in the mnemonic), and
+  in the exec configuration of the host tools (`-exec-`, -c opt by design).
+  The command line's is the one GN's build directory is to be compared
+  with; a transition's stands in only for a source compiled nowhere else;
+  the exec configuration's are left out.
+  """
   with open(aquery_path, encoding='utf-8') as f:
     aquery = json.load(f)
-  exec_configurations = {
-      c['id'] for c in aquery.get('configuration', []) if 'exec' in c.get('mnemonic', '')
-  }
+  ranks = {}
+  for c in aquery.get('configuration', []):
+    mnemonic = c.get('mnemonic', '')
+    ranks[c['id']] = 2 if 'exec' in mnemonic else 1 if '-ST-' in mnemonic else 0
   commands = {}
+  chosen = {}
   for action in aquery.get('actions', []):
     if action.get('mnemonic') != 'CppCompile':
       continue
-    if action.get('configurationId') in exec_configurations:
+    rank = ranks.get(action.get('configurationId'), 0)
+    if rank == 2:
       continue
     args = action.get('arguments', [])
     sources = [a for a in args if a.endswith(SOURCE_SUFFIXES) and not a.startswith('-')]
     if not sources:
       continue
     source = bazel_path(sources[-1])
+    if source in chosen and chosen[source] <= rank:
+      continue
+    chosen[source] = rank
     commands[source] = normalize(args[1:], 'bazel', None)
     COMPILER_FAMILIES[source] = _compiler_family(args[0])
   return commands
