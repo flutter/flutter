@@ -6346,8 +6346,7 @@ build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/co
 
 # linux_host_engine.json: ci/host_profile_lto
 #   --runtime-mode profile --prebuilt-dart-sdk
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:host_profile_lto --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:lto
 
 # linux_host_engine.json: ci/android_debug
 #   --android --no-lto

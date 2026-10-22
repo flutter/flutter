@@ -27,6 +27,7 @@ final class TestBuilderConfig {
     required TestDroneDimension dimension,
     bool enableRbe = false,
     bool? enableLto,
+    List<String> gnFlags = const [],
     String description = 'A default description.',
     String? targetDir,
     (String, List<String>)? generatorTask,
@@ -36,7 +37,7 @@ final class TestBuilderConfig {
       'archives': [],
       'drone_dimensions': [dimension._dimension],
       'gclient_variables': <String, Object?>{},
-      'gn': [if (enableRbe) '--rbe', if (enableLto == false) '--no-lto'],
+      'gn': [...gnFlags, if (enableRbe) '--rbe', if (enableLto == false) '--no-lto'],
       'name': name,
       'description': description,
       'ninja': <String, Object?>{

@@ -192,6 +192,21 @@ config_setting(
     flag_values = {":asan": "True"},
 )
 
+# GN's enable_lto (tools/gn: on unless --no-lto, and never in an unoptimized
+# build): link-time optimization, -flto on every compile and link of an
+# optimized build (//build/config/compiler:optimize). The Android AOT
+# builders are the ones that build with it; every other Linux builder says
+# --no-lto. Off by default, as the developer's configurations have it.
+bool_flag(
+    name = "lto",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "lto_enabled",
+    flag_values = {":lto": "True"},
+)
+
 # tools/gn's stripped_symbols: on unless --no-stripped, which only the
 # developer's local_engine.json configurations pass (and off for Android,
 # where GN strips elsewhere). GN's Linux toolchains write every executable
