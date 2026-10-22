@@ -28,14 +28,9 @@ cc_library(
         "src/cxa_aux_runtime.cpp",
         "src/cxa_default_handlers.cpp",
         "src/cxa_demangle.cpp",
-        # No translation unit in the engine is built with exceptions, but the
-        # sanitizer runtimes on Linux reference __cxa_begin_catch and
-        # __gxx_personality_v0, so the support is built here.
-        "src/cxa_exception.cpp",
         "src/cxa_exception_storage.cpp",
         "src/cxa_guard.cpp",
         "src/cxa_handlers.cpp",
-        "src/cxa_personality.cpp",
         "src/cxa_thread_atexit.cpp",
         "src/cxa_vector.cpp",
         "src/cxa_virtual.cpp",
@@ -44,11 +39,26 @@ cc_library(
         "src/stdlib_exception.cpp",
         "src/stdlib_stdexcept.cpp",
         "src/stdlib_typeinfo.cpp",
-    ] + glob(["src/**/*.h"]),
-    copts = [
-        "-fexceptions",
-        "-frtti",
-    ],
+    ] + glob(["src/**/*.h"]) + select({
+        # GN builds the ABI library without exception support on Android (the
+        # `else` branch of its is_mac/is_ios/is_linux condition): the
+        # no-exception stubs reference no unwinder, which matters because the
+        # engine links Android shared libraries with -nostdlib and no
+        # libunwind.
+        "@platforms//os:android": ["src/cxa_noexception.cpp"],
+        # No translation unit in the engine is built with exceptions, but the
+        # sanitizer runtimes on Linux (and Objective-C exceptions on Apple
+        # platforms) reference __cxa_begin_catch and __gxx_personality_v0, so
+        # the support is built here.
+        "//conditions:default": [
+            "src/cxa_exception.cpp",
+            "src/cxa_personality.cpp",
+        ],
+    }),
+    copts = ["-frtti"] + select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["-fexceptions"],
+    }),
     implementation_deps = ["@libcxx//:src_headers"],
     linkstatic = True,
     local_defines = [

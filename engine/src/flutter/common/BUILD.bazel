@@ -69,6 +69,31 @@ string_flag(
     ]
 ]
 
+# The complements, for `flutter_runtime_mode != "<mode>"` inside a
+# conjunction (the Android archives' directory, zip_bundle.gni's
+# android_zip_archive_dir): any of the other three.
+[
+    selects.config_setting_group(
+        name = "not_runtime_mode_" + mode,
+        match_any = [
+            ":runtime_mode_" + other
+            for other in [
+                "debug",
+                "profile",
+                "release",
+                "jit_release",
+            ]
+            if other != mode
+        ],
+    )
+    for mode in [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ]
+]
+
 # GN's `slimpeller` argument: build without the Skia-backed rendering paths.
 bool_flag(
     name = "slimpeller",

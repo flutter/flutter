@@ -77,3 +77,15 @@ ABIS = {
     )
     for cpu, (triple, api) in ABIS.items()
 ]
+
+# What a GN build for Android reads of the NDK, for the rules that wrap a GN
+# build (build/bazel/dart_wrap): the sysroot's headers and every ABI's
+# libraries, and the compiler runtime archives -- at their paths under the
+# SDK, where build/config/android/config.gni's android_ndk_root finds them.
+filegroup(
+    name = "ndk_build_tree",
+    srcs = [":sysroot_headers"] + glob([
+        SYSROOT + "/usr/lib/*/*/*",
+        TOOLCHAIN + "/lib/clang/*/lib/linux/libclang_rt.builtins-*-android.a",
+    ]),
+)

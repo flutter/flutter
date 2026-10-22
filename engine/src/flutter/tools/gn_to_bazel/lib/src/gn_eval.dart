@@ -139,7 +139,11 @@ sealed class Condition {
     // A disjunction beside the negation of one of its own terms loses that
     // term (`a && (!a || b)` is `a && b`), and beside one of its terms goes
     // altogether (`a && (a || b)` is `a`): the shape a scalar's cases take
-    // when a later conditional write overrides an earlier one.
+    // when a later conditional write overrides an earlier one. A reduced
+    // disjunction may be a term the rules above apply to (`x != "b" &&
+    // (x == "b" || x == "a")` reduces to `x == "a"`, which then subsumes
+    // `x != "b"`), so a reduction starts the simplification over.
+    var reduced = false;
     for (var i = 0; i < terms.length; i++) {
       final Condition term = terms[i];
       if (term is! ConditionOr) {
@@ -150,23 +154,39 @@ sealed class Condition {
         terms.removeAt(i--);
         continue;
       }
-      final List<Condition> remaining = term.terms
-          .where((Condition t) => !others.contains(t.negated))
-          .toList();
+      // A disjunct the others deny -- its literal negation, or another
+      // member of its family asserted (`x == "a"` beside `(x == "b" || !f)`
+      // leaves `!f`) -- drops out.
+      bool denied(Condition t) {
+        if (others.contains(t.negated)) {
+          return true;
+        }
+        final _Alternative? alternative = t._alternative;
+        return alternative != null &&
+            alternative.asserted &&
+            asserted[alternative.family] != null &&
+            asserted[alternative.family] != alternative.member;
+      }
+
+      final List<Condition> remaining = term.terms.where((Condition t) => !denied(t)).toList();
       if (remaining.length != term.terms.length) {
         if (remaining.isEmpty) {
           return never;
         }
-        final Condition reduced = disjunction(remaining);
-        if (others.contains(reduced.negated)) {
+        final Condition replacement = disjunction(remaining);
+        if (others.contains(replacement.negated)) {
           return never;
         }
-        if (others.contains(reduced)) {
+        if (others.contains(replacement)) {
           terms.removeAt(i--);
           continue;
         }
-        terms[i] = reduced;
+        terms[i] = replacement;
+        reduced = true;
       }
+    }
+    if (reduced) {
+      return conjunction(terms);
     }
     return switch (terms.length) {
       0 => always,
@@ -268,6 +288,12 @@ sealed class Condition {
         if (predicate != null) {
           return <_Alternative>[primary, _Alternative('current_os', predicate, asserted: true)];
         }
+      }
+      // The wasm CPU is the wasm OS's alone: `target_cpu == "wasm"` beside
+      // `is_android` never holds (the Android archives' directory names,
+      // expanded over the CPUs under is_android).
+      if ((name == 'target_cpu' || name == 'current_cpu') && value == 'wasm') {
+        return <_Alternative>[primary, const _Alternative('current_os', 'is_wasm', asserted: true)];
       }
       if (name == 'full_target_platform_name') {
         final ({String osPredicate, String cpu})? parts = targetPlatformParts(value);
@@ -812,25 +838,90 @@ final class GnVariable {
     if (isList) {
       throw GnError(use, '$name is a list');
     }
-    final cases = <GnScalarCase>[];
-    for (var i = 0; i < assignments.length; i++) {
-      final GnAssignment assignment = assignments[i];
-      if (assignment.op != '=' || assignment.items.length != 1) {
+    // In order of writing: a `=` is the value from its condition on, which
+    // restricts every earlier case to where the write does not happen (a
+    // write that cannot happen together with an earlier one -- the other
+    // branch of the `if`, another OS -- leaves it alone); a `+=` on a string
+    // (zip_bundle.gni's android_zip_archive_dir, grown by the runtime mode
+    // and the Dart flags) splits every case into the one that takes the
+    // suffix and the one that does not.
+    var cases = <GnScalarCase>[];
+    for (final GnAssignment assignment in assignments) {
+      if (assignment.items.length != 1) {
         throw GnError(assignment.location, '${assignment.op} on the scalar $name is not supported');
       }
-      Condition when = assignment.condition;
-      for (final GnAssignment later in assignments.skip(i + 1)) {
-        // A later write that cannot happen together with this one (the other
-        // branch of the `if`, another OS) cannot override it.
-        if (when.and(later.condition) != Condition.never) {
-          when = when.and(later.condition.negated);
-        }
-      }
-      if (when != Condition.never) {
-        cases.add(GnScalarCase(when, assignment.items.single, assignment));
+      final GnValue value = assignment.items.single;
+      switch (assignment.op) {
+        case '=':
+          final next = <GnScalarCase>[];
+          for (final earlier in cases) {
+            final Condition when = earlier.condition.and(assignment.condition) == Condition.never
+                ? earlier.condition
+                : earlier.condition.and(assignment.condition.negated);
+            if (when != Condition.never) {
+              next.add(GnScalarCase(when, earlier.value, earlier.assignment));
+            }
+          }
+          if (assignment.condition != Condition.never) {
+            next.add(GnScalarCase(assignment.condition, value, assignment));
+          }
+          cases = next;
+        case '+=':
+          if (cases.isEmpty) {
+            throw GnError(assignment.location, '+= on the scalar $name before any value');
+          }
+          final next = <GnScalarCase>[];
+          for (final earlier in cases) {
+            final Condition both = earlier.condition.and(assignment.condition);
+            if (both != Condition.never) {
+              next.add(
+                GnScalarCase(
+                  both,
+                  _concatenated(earlier.value, value, assignment.location),
+                  assignment,
+                ),
+              );
+            }
+            final Condition other = both == Condition.never
+                ? earlier.condition
+                : earlier.condition.and(assignment.condition.negated);
+            if (other != Condition.never) {
+              next.add(GnScalarCase(other, earlier.value, earlier.assignment));
+            }
+          }
+          cases = next;
+        default:
+          throw GnError(
+            assignment.location,
+            '${assignment.op} on the scalar $name is not supported',
+          );
       }
     }
     return cases;
+  }
+
+  /// `a + b` for two strings, either of which may hold references
+  /// (GnExpandedString): the parts in sequence, adjacent literals joined.
+  static GnValue _concatenated(GnValue a, GnValue b, GnLocation location) {
+    List<GnValue> parts(GnValue v) => switch (v) {
+      GnStringValue() => <GnValue>[v],
+      GnExpandedString(:final List<GnValue> parts) => parts,
+      _ => throw GnError(location, '+= of $v to a string scalar'),
+    };
+    final joined = <GnValue>[];
+    for (final part in <GnValue>[...parts(a), ...parts(b)]) {
+      if (part is GnStringValue && joined.isNotEmpty && joined.last is GnStringValue) {
+        joined[joined.length - 1] = GnStringValue(
+          (joined.last as GnStringValue).value + part.value,
+        );
+      } else {
+        joined.add(part);
+      }
+    }
+    if (joined.length == 1 && joined.single is GnStringValue) {
+      return joined.single;
+    }
+    return GnExpandedString(List<GnValue>.unmodifiable(joined));
   }
 }
 
@@ -2767,8 +2858,21 @@ final class _Evaluator {
       return null;
     }
     final _Expression items = _scalarItems(variable, node.location);
+    // One value, or one value under every case (a file evaluated under a
+    // condition of its own -- the Android shell's under is_android -- gives
+    // every file-level variable that condition).
     final GnValue? single = items.scalar;
-    return single is GnExpandedString ? single : null;
+    if (single is GnExpandedString) {
+      return single;
+    }
+    if (items.items.isEmpty) {
+      return null;
+    }
+    final GnValue first = items.items.first.value;
+    if (first is GnExpandedString && items.items.every((_Value i) => i.value == first)) {
+      return first;
+    }
+    return null;
   }
 
   /// The value of [name] when it is a string the converter knows: an
