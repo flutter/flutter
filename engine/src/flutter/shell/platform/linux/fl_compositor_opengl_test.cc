@@ -349,3 +349,9 @@ TEST_F(FlCompositorOpenGLTest, FrameFormatIgnoresTextureFormatExtension) {
   const FlutterLayer* layers[1] = {&layer};
   EXPECT_EQ(fl_compositor_opengl_get_frame_format(layers, 1), GL_RGBA);
 }
+
+TEST_F(FlCompositorOpenGLTest, ClearsGdkGLContextBeforePlatformContext) {
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+  EXPECT_CALL(mock_gtk, gdk_gl_context_clear_current()).Times(2);
+  compositor = fl_compositor_opengl_new(opengl_manager);
+}
