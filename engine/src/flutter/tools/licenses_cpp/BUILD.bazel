@@ -96,7 +96,7 @@ cc_binary(
 
 cc_test(
     name = "licenses_cpp_testrunner",
-    size = "small",
+    size = "medium",
     srcs = [
         "src/catalog_unittests.cc",
         "src/comments_unittests.cc",

@@ -72,6 +72,10 @@ const Map<String, String> testSizes = <String, String>{
   // 24 s alone (46 renders through the software and GPU backends); timed
   // out at small's 60 s on a machine running the other suites.
   'display_list_rendertests': 'medium',
+  // 56 tests, each initializing a git repository and committing to it:
+  // ~2 s a test, 54 of them inside small's 60 s on a machine building the
+  // GPU backends at the same time.
+  'licenses_cpp_testrunner': 'medium',
   // 77 s alone (195 tests: the embedder on the software, GL and Vulkan
   // surfaces, each a Dart VM).
   'embedder_unittests': 'medium',
