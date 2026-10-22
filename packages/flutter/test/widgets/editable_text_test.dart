@@ -19004,6 +19004,77 @@ void main() {
   );
 
   testWidgets(
+    'Does not reveal obscured character when input is rejected by inputFormatters',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/141560.
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            backgroundCursorColor: const Color(0xFFF7F7F7),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            obscureText: true,
+            inputFormatters: <TextInputFormatter>[
+              LengthLimitingTextInputFormatter(
+                5,
+                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+
+      // Type up to the 4th character, then type the 5th character.
+      await tester.enterText(find.byType(EditableText), 'abcd');
+      await tester.pump();
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(text: 'abcde', selection: TextSelection.collapsed(offset: 5)),
+      );
+      await tester.pump();
+      expect((findRenderEditable(tester).text! as TextSpan).text, '••••e');
+
+      // Wait for the revealed character to be obscured.
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•••••');
+
+      // Move cursor to the middle of the string (offset 2).
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(text: 'abcde', selection: TextSelection.collapsed(offset: 2)),
+      );
+      await tester.pump();
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•••••');
+
+      // Attempt to insert a character in the middle when already at maxLength.
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(text: 'abzcde', selection: TextSelection.collapsed(offset: 3)),
+      );
+      await tester.pump();
+      expect(controller.text, 'abcde');
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•••••');
+
+      // Moving the cursor afterward should also not reveal the character at offset 2.
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(text: 'abcde', selection: TextSelection.collapsed(offset: 3)),
+      );
+      await tester.pump();
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•••••');
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+    }),
+  );
+
+  testWidgets(
     'context menu reappears after a non-fling scroll that keeps selection in view while semantics are disabled',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/185052.
