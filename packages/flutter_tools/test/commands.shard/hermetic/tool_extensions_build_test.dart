@@ -471,11 +471,17 @@ void main() {
 
       final List<ExtensionBuildTarget> buildTargets = await buildManager.getBuildTargets();
       expect(buildTargets, isEmpty);
-      expect(logger.warningText, contains('Failed to query build targets from extension:'));
+      expect(
+        logger.warningText,
+        contains('Failed to query build targets from extension "unknown_extension":'),
+      );
 
       final List<ExtensionAssembleTarget> assembleTargets = await buildManager.getAssembleTargets();
       expect(assembleTargets, isEmpty);
-      expect(logger.warningText, contains('Failed to query assemble targets from extension:'));
+      expect(
+        logger.warningText,
+        contains('Failed to query assemble targets from extension "unknown_extension":'),
+      );
 
       await manager.dispose();
     });
@@ -643,7 +649,9 @@ void main() {
         expect(buildTargets.first.description, 'First extension shared target.');
         expect(
           logger.warningText,
-          contains('Skipping duplicate build target "shared-target" from extension.'),
+          contains(
+            'Skipping duplicate build target "shared-target" from extension "unknown_extension".',
+          ),
         );
 
         final ExtensionBuildResult buildResult = await buildManager.build(
@@ -664,7 +672,9 @@ void main() {
         expect(assembleTargets.first.description, 'First extension shared assemble target.');
         expect(
           logger.warningText,
-          contains('Skipping duplicate assemble target "shared-assemble-target" from extension.'),
+          contains(
+            'Skipping duplicate assemble target "shared-assemble-target" from extension "unknown_extension".',
+          ),
         );
 
         final ExtensionBuildResult assembleResult = await buildManager.assemble(

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:meta/meta.dart';
 
 import '../base/logger.dart';
 import '../features.dart';
@@ -34,6 +35,7 @@ base class ExtensionBuildManager {
       _cachedBuildTargets ?? const <ExtensionBuildTarget>[];
 
   /// Retrieve the cached `flutter assemble` targets synchronously.
+  @visibleForTesting
   List<ExtensionAssembleTarget> get cachedAssembleTargets =>
       _cachedAssembleTargets ?? const <ExtensionAssembleTarget>[];
 
@@ -110,7 +112,9 @@ base class ExtensionBuildManager {
           final Object? result = await connection.sendRequest(rpcMethod);
           return (connection, listFromJson(result));
         } on Object catch (e) {
-          _logger.printWarning('Failed to query $targetKind targets from extension: $e');
+          _logger.printWarning(
+            'Failed to query $targetKind targets from extension "${connection.extensionName}": $e',
+          );
           return (connection, <T>[]);
         }
       }),
@@ -123,8 +127,9 @@ base class ExtensionBuildManager {
           continue;
         }
         if (connectionMap.containsKey(name)) {
-          // TODO(bkonyi): Include conflicting extension names once extension manifest metadata is wired into ExtensionConnection.
-          _logger.printWarning('Skipping duplicate $targetKind target "$name" from extension.');
+          _logger.printWarning(
+            'Skipping duplicate $targetKind target "$name" from extension "${connection.extensionName}".',
+          );
           continue;
         }
         targets.add(target);
