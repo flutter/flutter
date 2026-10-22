@@ -33,7 +33,18 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
 
   std::shared_ptr<impeller::CommandBuffer> GetCommandBuffer();
 
-  void AddRenderPass(std::shared_ptr<impeller::RenderPass> render_pass);
+  /// Ends the open pass, then creates a render pass for [render_target] and
+  /// makes it the open pass. Returns null if either step fails.
+  ///
+  /// The open pass is ended before the new backend pass is created, because
+  /// the Metal and Vulkan render pass constructors begin encoding, and Metal
+  /// allows one active encoder per command buffer.
+  std::shared_ptr<impeller::RenderPass> CreateRenderPass(
+      const impeller::RenderTarget& render_target);
+
+  /// Ends [render_pass] if it is the open pass. Does nothing if it was
+  /// already ended by a later command.
+  bool EndRenderPass(const impeller::RenderPass* render_pass);
 
   bool AddCompletionCallback(
       impeller::CommandBuffer::CompletionCallback completion_callback);
@@ -73,9 +84,19 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
     bool EncodeCommands() const;
   };
 
+  /// Ends the pass that is recording, if any. On Metal and Vulkan the pass is
+  /// encoded now, which ends its backend encoder. On OpenGL ES every pass is
+  /// encoded in creation order at submit, on the raster thread.
+  bool EndOpenPass();
+
   std::shared_ptr<impeller::BlitPass> GetOrCreateBlitPass();
 
+  // Every pass in creation order, which is also execution order. Only the
+  // last one can be open.
   std::vector<Encodable> encodables_;
+  bool has_open_pass_ = false;
+  // Set when a pass fails to encode as it ends, so that Submit fails.
+  bool encoding_failed_ = false;
   std::vector<impeller::CommandBuffer::CompletionCallback>
       completion_callbacks_;
   bool submitted_ = false;

@@ -8,9 +8,8 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.LibraryVariant
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.AbstractAppExtension
-import com.android.build.gradle.LibraryExtension
 import com.flutter.gradle.FlutterPluginConstants.PLATFORM_ABI_LIST
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
@@ -21,9 +20,6 @@ import com.flutter.gradle.tasks.FlutterTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.UnknownTaskException
-import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -331,11 +327,7 @@ class FlutterPlugin : Plugin<Project> {
             androidComponents.finalizeDsl { dslVersionCodes = DslVersionCodes.from(appExtension) }
         }
         androidComponents.onVariants { variant ->
-            // Application projects register the Flutter compile task here, from the public variant
-            // API. Add-to-app module (library) projects still register theirs from the
-            // `libraryVariants` callback in [addFlutterDepsForModule] until that path migrates
-            // (https://github.com/flutter/flutter/issues/166550).
-            if (isApplicationProject && shouldCompileFlutterForVariant(projectToAddTasksTo, variant)) {
+            if (shouldCompileFlutterForVariant(projectToAddTasksTo, variant)) {
                 val compileTaskProvider =
                     registerFlutterCompileTask(
                         projectToAddTasksTo,
@@ -344,20 +336,17 @@ class FlutterPlugin : Plugin<Project> {
                         targetPlatforms
                     )
                 registerFlutterAssetTasks(projectToAddTasksTo, variant, compileTaskProvider)
-                check(variant is ApplicationVariant) {
-                    "Expected an application variant for '${variant.name}' in an application " +
-                        "project, but got ${variant::class.java.name}."
+                registerFlutterJniLibsTask(projectToAddTasksTo, variant, compileTaskProvider, targetPlatforms)
+                if (variant is ApplicationVariant) {
+                    configureApplicationOutputs(
+                        projectToAddTasksTo,
+                        variant,
+                        checkNotNull(dslVersionCodes) {
+                            "Flutter read the DSL versionCodes before AGP ran finalizeDsl."
+                        }
+                    )
                 }
-                configureSplitPerAbiVersionCodes(
-                    projectToAddTasksTo,
-                    variant,
-                    checkNotNull(dslVersionCodes) {
-                        "Flutter read the DSL versionCodes before AGP ran finalizeDsl."
-                    }.forVariant(variant.productFlavors)
-                )
-                registerCopyFlutterApksTask(projectToAddTasksTo, variant)
             }
-            registerFlutterJniLibsTask(projectToAddTasksTo, variant, targetPlatforms)
         }
 
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
@@ -374,77 +363,7 @@ class FlutterPlugin : Plugin<Project> {
             return
         }
         // Flutter host module project (Add-to-app).
-        val hostAppProjectName: String? =
-            if (projectToAddTasksTo.rootProject.hasProperty("flutter.hostAppProjectName")) {
-                projectToAddTasksTo.rootProject.property(
-                    "flutter.hostAppProjectName"
-                ) as? String
-            } else {
-                "app"
-            }
-        val appProject: Project? =
-            projectToAddTasksTo.rootProject.findProject(":$hostAppProjectName")
-        check(appProject != null) {
-            "Project :$hostAppProjectName doesn't exist. To customize the host app project name, set `flutter.hostAppProjectName=<project-name>` in gradle.properties."
-        }
-        // Wait for the host app project configuration.
-        appProject.afterEvaluate {
-            val androidLibraryExtension =
-                projectToAddTasksTo.extensions.findByType(LibraryExtension::class.java)
-            check(androidLibraryExtension != null)
-            androidLibraryExtension.libraryVariants.all libraryVariantAll@{
-                val libraryVariant = this
-                var copyFlutterAssetsTask: Task? = null
-                val androidAppExtension =
-                    appProject.extensions.findByName("android") as? AbstractAppExtension
-                check(androidAppExtension != null)
-                androidAppExtension.applicationVariants.all applicationVariantAll@{
-                    val appProjectVariant = this
-                    val appAssembleTask: Task = appProjectVariant.assembleProvider.get()
-                    if (!FlutterPluginUtils.shouldConfigureFlutterTask(project, appAssembleTask)) {
-                        return@applicationVariantAll
-                    }
-
-                    // Find a compatible application variant in the host app.
-                    //
-                    // For example, consider a host app that defines the following variants:
-                    // | ----------------- | ----------------------------- |
-                    // |   Build Variant   |   Flutter Equivalent Variant  |
-                    // | ----------------- | ----------------------------- |
-                    // |   freeRelease     |   release                     |
-                    // |   freeDebug       |   debug                       |
-                    // |   freeDevelop     |   debug                       |
-                    // |   profile         |   profile                     |
-                    // | ----------------- | ----------------------------- |
-                    //
-                    // This mapping is based on the following rules:
-                    // 1. If the host app build variant name is `profile` then the equivalent
-                    //    Flutter variant is `profile`.
-                    // 2. If the host app build variant is debuggable
-                    //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
-                    //    variant is `debug`.
-                    // 3. Otherwise, the equivalent Flutter variant is `release`.
-                    val variantBuildMode: String =
-                        FlutterPluginUtils.buildModeFor(libraryVariant.buildType)
-                    if (FlutterPluginUtils.buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
-                        return@applicationVariantAll
-                    }
-                    copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDepsForModule(
-                        libraryVariant,
-                        flutterGradlePlugin,
-                        targetPlatforms
-                    )
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    val mergeAssets =
-                        projectToAddTasksTo
-                            .tasks
-                            .findByPath(":$hostAppProjectName:merge${FlutterPluginUtils.capitalize(appProjectVariant.name)}Assets")
-                    check(mergeAssets != null)
-                    mergeAssets.dependsOn(copyFlutterAssetsTask)
-                }
-            }
-        }
+        warnIfHostAppProjectNameIsSet(projectToAddTasksTo)
         getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
@@ -465,6 +384,8 @@ class FlutterPlugin : Plugin<Project> {
     companion object {
         const val PROP_LOCAL_ENGINE_REPO: String = "local-engine-repo"
 
+        internal const val PROP_HOST_APP_PROJECT_NAME: String = "flutter.hostAppProjectName"
+
         /**
          * The name prefix for flutter builds. This is used to identify gradle tasks
          * where we expect the flutter tool to provide any error output, and skip the
@@ -474,13 +395,6 @@ class FlutterPlugin : Plugin<Project> {
          */
         private const val FLUTTER_BUILD_PREFIX: String = "flutterBuild"
 
-        /**
-         * The name of the [FlutterTask] (the `flutter assemble` invocation) for [variantName].
-         *
-         * Built identically by the functions that register the task, [registerFlutterCompileTask]
-         * and [addFlutterDepsForModule], and by [registerFlutterJniLibsTask], which references the
-         * task by name because it may be configured before that task is registered.
-         */
         private fun flutterCompileTaskName(variantName: String): String =
             FlutterPluginUtils.toCamelCase(listOf("compile", FLUTTER_BUILD_PREFIX, variantName))
 
@@ -552,15 +466,22 @@ class FlutterPlugin : Plugin<Project> {
          * [FlutterPluginUtils.shouldConfigureFlutterTask] exists to prevent. Removing it is
          * tracked by https://github.com/flutter/flutter/issues/109560, which also documents the
          * AGP behavior that made it necessary.
+         *
+         * Library variants (an add-to-app module) skip this check. The command line names a host
+         * task such as `:app:assembleDemoStaging`, and the host's `matchingFallbacks` pick the
+         * module variant it consumes, so the task name can't identify that variant. Registering
+         * every library variant is safe because registration is lazy: Gradle only runs the module
+         * tasks that the host build depends on.
          */
         private fun shouldCompileFlutterForVariant(
             project: Project,
             variant: Variant
         ): Boolean =
-            FlutterPluginUtils.shouldConfigureFlutterTask(
-                project,
-                "assemble${FlutterPluginUtils.capitalize(variant.name)}"
-            )
+            variant is LibraryVariant ||
+                FlutterPluginUtils.shouldConfigureFlutterTask(
+                    project,
+                    "assemble${FlutterPluginUtils.capitalize(variant.name)}"
+                )
 
         /**
          * Registers the tasks that stage Flutter's assets for [variant], and declares the
@@ -593,8 +514,7 @@ class FlutterPlugin : Plugin<Project> {
                         )
                     )
                 }
-            // The assets source set is expected to exist for application variants; fail loudly
-            // rather than silently building an APK without Flutter assets.
+            // Fail at configuration rather than silently build an APK or AAR without Flutter assets.
             val assetSources =
                 variant.sources.assets
                     ?: throw GradleException(
@@ -616,26 +536,19 @@ class FlutterPlugin : Plugin<Project> {
         private fun registerFlutterJniLibsTask(
             project: Project,
             variant: Variant,
+            compileTaskProvider: TaskProvider<FlutterTask>,
             targetPlatforms: List<String>
         ) {
-            val compileTaskName = flutterCompileTaskName(variant.name)
             val copyJniLibsTaskProvider: TaskProvider<CopyFlutterJniLibsTask> =
                 project.tasks.register(
                     "copyJniLibs$FLUTTER_BUILD_PREFIX${FlutterPluginUtils.capitalize(variant.name)}",
                     CopyFlutterJniLibsTask::class.java
                 ) {
-                    // The Flutter compile task is absent for variants that Flutter is not compiled
-                    // for, such as an `assembleAndroidTest` build. Look it up tolerantly
-                    // (findByName, not named) so this task degrades to a no-op with empty output
-                    // instead of failing to be created.
-                    // See https://github.com/flutter/flutter/issues/188785.
-                    dependsOn(project.tasks.matching { it.name == compileTaskName })
+                    // registerFlutterCompileTask always sets an output directory, so an absent
+                    // value would be a bug that builds an APK or AAR without libapp.so.
                     intermediateDir.set(
                         project.layout.dir(
-                            project.provider {
-                                val compileTask = project.tasks.findByName(compileTaskName) as? FlutterTask
-                                compileTask?.outputDirectory
-                            }
+                            compileTaskProvider.map { requireNotNull(it.outputDirectory) }
                         )
                     )
                     this.targetPlatforms.set(targetPlatforms)
@@ -646,11 +559,7 @@ class FlutterPlugin : Plugin<Project> {
             )
         }
 
-        /**
-         * Registers the [FlutterTask] (the `flutter assemble` invocation) for [variant],
-         * configured entirely from the public variant API. Application projects only; the
-         * add-to-app module path registers its own compile task in [addFlutterDepsForModule].
-         */
+        /** Registers the [FlutterTask] (the `flutter assemble` invocation) for [variant]. */
         private fun registerFlutterCompileTask(
             project: Project,
             variant: Variant,
@@ -681,8 +590,7 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Applies the `flutter assemble` configuration that is common to the application and
-         * add-to-app module paths.
+         * Applies the `flutter assemble` configuration to this task.
          *
          * Every value the task needs from the variant is passed in, because reading it inside the
          * configuration block would resolve against the task itself: in that scope `flavor` is the
@@ -730,6 +638,36 @@ class FlutterPlugin : Plugin<Project> {
             deferredComponents = compileOptions.deferredComponents
             validateDeferredComponents = compileOptions.validateDeferredComponents
             flavor = flavorName
+        }
+
+        /**
+         * Configures the per-ABI versionCodes of [variant] and the copy of its APKs into
+         * `build/outputs/flutter-apk/`.
+         */
+        private fun configureApplicationOutputs(
+            project: Project,
+            variant: ApplicationVariant,
+            dslVersionCodes: DslVersionCodes
+        ) {
+            configureSplitPerAbiVersionCodes(
+                project,
+                variant,
+                dslVersionCodes.forVariant(variant.productFlavors)
+            )
+            registerCopyFlutterApksTask(project, variant)
+        }
+
+        /**
+         * The module ships its assets as a generated assets source of its own variants, so it
+         * does not need the host app's project name.
+         */
+        private fun warnIfHostAppProjectNameIsSet(project: Project) {
+            if (project.providers.gradleProperty(PROP_HOST_APP_PROJECT_NAME).isPresent) {
+                project.logger.warn(
+                    "Warning: The Gradle property '$PROP_HOST_APP_PROJECT_NAME' has no effect. " +
+                        "Remove it from gradle.properties."
+                )
+            }
         }
 
         /**
@@ -797,113 +735,6 @@ class FlutterPlugin : Plugin<Project> {
             project.tasks.configureEach {
                 if (name == assembleTaskName) {
                     dependsOn(copyFlutterApksTaskProvider)
-                }
-            }
-        }
-
-        /**
-         * Registers the Flutter compile and asset copy tasks for an add-to-app module (library)
-         * project, and returns the asset copy task.
-         *
-         * Reads [com.android.build.gradle.api.BaseVariant], which AGP deprecated in favor of the
-         * `onVariants` callback used by application projects in [addFlutterTasks].
-         *
-         * TODO(gmackall): Migrate to AGPs variant api.
-         *  https://github.com/flutter/flutter/issues/166550
-         */
-        private fun addFlutterDepsForModule(
-            @Suppress("DEPRECATION") variant: com.android.build.gradle.api.BaseVariant,
-            flutterGradlePlugin: FlutterPlugin,
-            targetPlatforms: List<String>
-        ): Task {
-            val project: Project = flutterGradlePlugin.project!!
-            val buildMode: String = FlutterPluginUtils.buildModeFor(variant.buildType)
-            val compileTaskProvider: TaskProvider<FlutterTask> =
-                project.tasks.register(flutterCompileTaskName(variant.name), FlutterTask::class.java) {
-                    configureCompileTask(
-                        project = project,
-                        flutterGradlePlugin = flutterGradlePlugin,
-                        buildMode = buildMode,
-                        minSdkVersion = variant.mergedFlavor.minSdkVersion!!.apiLevel,
-                        variantName = variant.name,
-                        flavorName = variant.flavorName,
-                        targetPlatforms = targetPlatforms
-                    )
-                }
-            val flutterCompileTask: FlutterTask = compileTaskProvider.get()
-            val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
-                project.tasks.register(
-                    "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
-                    Copy::class.java
-                ) {
-                    dependsOn(flutterCompileTask)
-                    with(flutterCompileTask.assets)
-                    filePermissions {
-                        user {
-                            read = true
-                            write = true
-                        }
-                    }
-                    val mergeAssets =
-                        try {
-                            variant.mergeAssetsProvider.get()
-                        } catch (e: IllegalStateException) {
-                            // TODO(gmackall): Migrate to AGPs variant api.
-                            //    https://github.com/flutter/flutter/issues/166550
-                            @Suppress("DEPRECATION")
-                            variant.mergeAssets
-                        }
-                    dependsOn(mergeAssets)
-                    dependsOn("clean${FlutterPluginUtils.capitalize(mergeAssets.name)}")
-                    mergeAssets.mustRunAfter("clean${FlutterPluginUtils.capitalize(mergeAssets.name)}")
-                    into(mergeAssets.outputDir)
-                }
-            val copyFlutterAssetsTask: Task = copyFlutterAssetsTaskProvider.get()
-
-            // TODO(gmackall): Migrate to AGPs variant api.
-            //    https://github.com/flutter/flutter/issues/166550
-            @Suppress("DEPRECATION")
-            val variantOutput: com.android.build.gradle.api.BaseVariantOutput = variant.outputs.first()
-            val processResources =
-                try {
-                    variantOutput.processResourcesProvider.get()
-                } catch (e: IllegalStateException) {
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    @Suppress("DEPRECATION")
-                    variantOutput.processResources
-                }
-            processResources.dependsOn(copyFlutterAssetsTask)
-            // The following tasks use the output of copyFlutterAssetsTask,
-            // so it's necessary to declare it as an dependency since Gradle 8.
-            // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
-            addCopyFlutterAssetsDependency(project, variant.name, copyFlutterAssetsTask)
-            return copyFlutterAssetsTask
-        }
-
-        /**
-         * Wires the tasks that consume the output of `copyFlutterAssets<Variant>` to depend on
-         * it explicitly, as required since Gradle 8. See
-         * https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
-         */
-        private fun addCopyFlutterAssetsDependency(
-            project: Project,
-            variantName: String,
-            copyFlutterAssetsTask: Task
-        ) {
-            val tasksToCheck =
-                listOf(
-                    "compress${FlutterPluginUtils.capitalize(variantName)}Assets",
-                    "bundle${FlutterPluginUtils.capitalize(variantName)}Aar",
-                    "bundle${FlutterPluginUtils.capitalize(variantName)}LocalLintAar"
-                )
-            tasksToCheck.forEach { taskToCheck ->
-                try {
-                    project.tasks.named(taskToCheck).configure {
-                        dependsOn(copyFlutterAssetsTask)
-                    }
-                } catch (ignored: UnknownTaskException) {
-                    // ignored
                 }
             }
         }
