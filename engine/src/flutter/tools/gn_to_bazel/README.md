@@ -45,8 +45,9 @@ A run over the manifest also reads the builder files
 (`ci/builders/linux_*.json` and `local_engine.json`'s `linux/` builds, the
 developer's, through `package:engine_build_configs`) and
 generates, beside them, `configs.bazelrc` -- a `--config=<build>` per Linux
-build, the x64 host's own, the web's and the arm64 cross builds' (`--web` is
-the wasm platform, `--target-os=linux --linux-cpu=arm64` the arm64 one),
+build, the x64 host's own, the web's, the arm64 cross builds' and Android's
+(`--web` is the wasm platform, `--target-os=linux --linux-cpu=arm64` the arm64
+one, `--android --android-cpu=<cpu>` the Android ones),
 whose `tools/gn` flags the Bazel build can express (`gnFlags`
 in `lib/src/builders.dart` says what each flag amounts to: a setting, the
 platform, an assumption, infrastructure, or nothing yet, in which case the

@@ -46,11 +46,16 @@ enum BuildBackend {
 ///
 /// The Bazel side of a build is what tools/gn_to_bazel generates from the
 /// builder files (`builders.dart`): a `--config=<name>` for every Linux build
-/// (the x64 host's own, the web's) whose `tools/gn` flags the Bazel build can
-/// express, an install
-/// target laying the build's outputs into its build directory, and a test
-/// suite over its `run_tests.py` types. This class asks that code, so that
-/// `et` and the generated files cannot disagree on a name.
+/// (the x64 host's own, the web's, the Linux arm64 cross builds' and
+/// Android's, `local_engine.json`'s `linux/` ones included) whose `tools/gn`
+/// flags the Bazel build can express, an install target laying the build's
+/// outputs into its build directory, and a test suite over its `run_tests.py`
+/// types. This class asks that code, so that `et` and the generated files
+/// cannot disagree on a name.
+///
+/// A build is named as `et` names it elsewhere: `-c ci/android_debug_x64`
+/// for CI's, `-c android_debug_unopt_x64` for the developer's
+/// (`linux/android_debug_unopt_x64`).
 final class Bazel {
   /// The Bazel side of the builds of [configs] (the builder files), for
   /// commands run in [environment].
@@ -85,7 +90,9 @@ final class Bazel {
     if (builderBuild == null) {
       _environment.logger.error(
         'The Bazel build has no configuration for ${build.name}: only the Linux '
-        'host and web builds of ci/builders have one (tools/gn_to_bazel generates them).',
+        "builds of ci/builders (the x64 host's, the web's, the Linux arm64 cross "
+        "builds' and Android's, local_engine.json's linux/ ones included) have "
+        'one (tools/gn_to_bazel generates them).',
       );
       return null;
     }
