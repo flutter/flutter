@@ -39,8 +39,16 @@ group("dart_wrap") {
     "//flutter/third_party/dart/utils:bootstrap_compile_platform.exe($host_toolchain)",
   ]
 
-  # The analyze_snapshot tool is a 64-bit target's (runtime_args.gni).
+  # The analyze_snapshot tool is a 64-bit target's (runtime_args.gni): the
+  # host toolchain's, which lib/snapshot's generate_snapshot_bins and the
+  # Android shell's archive name, and -- where the engine artifacts are
+  # built (common/config.gni's build_engine_artifacts: never Android) --
+  # the target's own, which the root group lists: an aarch64 binary in the
+  # Linux arm64 cross build, the same file as the host's in the host's own.
   if (build_analyze_snapshot) {
     deps += [ "//flutter/third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
+    if (!is_android) {
+      deps += [ "//flutter/third_party/dart/runtime/bin:analyze_snapshot" ]
+    }
   }
 }

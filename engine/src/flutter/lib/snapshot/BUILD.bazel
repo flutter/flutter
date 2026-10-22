@@ -138,13 +138,14 @@ cc_library(
 # group("generate_snapshot_bins"): the core snapshot and the platform
 # kernels, and -- for a host that builds gen_snapshot directly (a Linux one,
 # for every target CPU GN names) -- the host's gen_snapshot for the target
-# and its analyze_snapshot, the wrap's products. The root group lists it.
+# and its analyze_snapshot (both the host toolchain's: GN names them with
+# ($host_toolchain)), the wrap's products. The root group lists it.
 filegroup(
     name = "generate_snapshot_bins",
     srcs = [
         ":generate_snapshot_bin",
         ":kernel_platform_files",
-        "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot",
+        "//engine/src/flutter/build/bazel/dart_wrap:analyze_snapshot_host",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
     ],
 )

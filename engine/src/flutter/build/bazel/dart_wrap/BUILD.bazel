@@ -213,14 +213,17 @@ _GN_ARGS = {
 
 gn_build(
     name = "dart_sdk",
-    # Executables and snapshots. The build-time tools (analyze_snapshot,
+    # Executables and snapshots. The build-time tools (analyze_snapshot_host,
     # bootstrap_compile_platform, gen_snapshot_host: what the snapshot rules
-    # run) are the host toolchain's (BUILD.gn): in the build root when the
-    # host's toolchain is the default, under clang_x64/ in the arm64 cross
-    # build (out_paths). gen_snapshot is the target's own -- the binary
-    # artifacts.zip ships -- which in the host's build is the tool's file.
+    # run and the Android shell archives) are the host toolchain's
+    # (BUILD.gn): in the build root when the host's toolchain is the
+    # default, under clang_x64/ in the cross builds (out_paths). gen_snapshot
+    # and analyze_snapshot are the target's own -- the binary artifacts.zip
+    # ships, and the one the root group lists where the engine artifacts are
+    # built -- which in the host's build are the tools' files.
     outs = [
         "analyze_snapshot",
+        "analyze_snapshot_host",
         "bootstrap_compile_platform.exe",
         "gen_snapshot",
         "gen_snapshot_host",
@@ -248,15 +251,27 @@ gn_build(
     ninja_target = "dart_wrap",
     out_paths = select({
         ":cross_build": {
-            "analyze_snapshot": "clang_x64/analyze_snapshot",
+            "analyze_snapshot_host": "clang_x64/analyze_snapshot",
             "bootstrap_compile_platform.exe": "clang_x64/bootstrap_compile_platform.exe",
             "gen_snapshot_host": "clang_x64/gen_snapshot",
         },
-        "//conditions:default": {"gen_snapshot_host": "gen_snapshot"},
+        "//conditions:default": {
+            "analyze_snapshot_host": "analyze_snapshot",
+            "gen_snapshot_host": "gen_snapshot",
+        },
     }) | select({
         # The analyze_snapshot tool is a 64-bit target's
         # (runtime_args.gni's build_analyze_snapshot).
-        "@platforms//cpu:armv7": {"analyze_snapshot": ""},
+        "@platforms//cpu:armv7": {
+            "analyze_snapshot": "",
+            "analyze_snapshot_host": "",
+        },
+        "//conditions:default": {},
+    }) | select({
+        # The target's own analyze_snapshot is built where the engine
+        # artifacts are (common/config.gni's build_engine_artifacts), never
+        # for Android (BUILD.gn).
+        "@platforms//os:android": {"analyze_snapshot": ""},
         "//conditions:default": {},
     }),
     root_target_dir = "flutter/build/bazel/dart_wrap",
