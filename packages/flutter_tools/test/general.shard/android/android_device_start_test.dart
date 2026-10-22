@@ -673,6 +673,7 @@ void main() {
 
     // This fails to start due to VM Service discovery issues.
     expect(launchResult.started, false);
+    expect(launchResult.appInstalled, true);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -742,6 +743,7 @@ void main() {
     );
 
     expect(launchResult.started, false);
+    expect(launchResult.appInstalled, true);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -813,6 +815,7 @@ void main() {
       );
 
       expect(launchResult.started, false);
+      expect(launchResult.appInstalled, true);
       expect(processManager, hasNoRemainingExpectations);
     },
   );
