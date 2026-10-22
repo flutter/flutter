@@ -982,7 +982,7 @@ class WebParagraph implements ui.Paragraph {
   List<TextLine> get lines => _layout.lines;
 
   /// The actual paint bounds of the paragraph.
-  late ui.Rect paintBounds;
+  ui.Rect get paintBounds => _layout.paintBounds;
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() => _layout.getBoxesForPlaceholders();

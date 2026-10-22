@@ -72,19 +72,24 @@ class TextLayout {
     // Wrapping text into lines is required on every layout.
     wrapText(width);
     formatLines(width);
-
-    if (paragraph.text.isNotEmpty) {
-      // When the paragraph is empty, instead of setting the bounds to a zero rect, we let it unset.
-      // This will make it easy to detect when there's a bug in our painting pipeline that's trying
-      // to paint an empty paragraph.
-
-      // Calculate the actual paint bounds of the paragraph.
-      _calculatePaintBounds();
-    }
+    _paintBounds = null;
 
     // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
     // clear the paint cache.
     paragraph.clearPaintCache();
+  }
+
+  ui.Rect? _paintBounds;
+
+  /// The actual paint bounds of the paragraph, measured on first use after each layout.
+  ui.Rect get paintBounds {
+    // An empty paragraph has no paint bounds: painting it is a bug in the painting pipeline, so
+    // fail loudly here instead of returning a zero rect.
+    if (paragraph.text.isEmpty) {
+      throw StateError('An empty paragraph has no paint bounds');
+    }
+    // Calculate the actual paint bounds of the paragraph.
+    return _paintBounds ??= _calculatePaintBounds();
   }
 
   void calculateStrutMetrics() {
@@ -646,13 +651,11 @@ class TextLayout {
     }
   }
 
-  void _calculatePaintBounds() {
+  ui.Rect _calculatePaintBounds() {
     if (lines.isEmpty) {
       // A non-empty paragraph containing only clusterless characters has no lines to paint.
-      paragraph.paintBounds = ui.Rect.zero;
-      return;
+      return ui.Rect.zero;
     }
-
     double left = double.infinity;
     double top = double.infinity;
     double right = double.negativeInfinity;
@@ -665,7 +668,7 @@ class TextLayout {
       bottom = math.max(bottom, line.baseline + line.paintBoundsDescent);
     }
 
-    paragraph.paintBounds = ui.Rect.fromLTRB(left, top, right, bottom);
+    return ui.Rect.fromLTRB(left, top, right, bottom);
   }
 
   List<ui.TextBox> getBoxesForRange(
@@ -1635,10 +1638,45 @@ class TextLine {
   bool usesRawDescent = false;
   bool _hasLineMetrics = false;
 
-  double paintBoundsAscent = 0.0;
-  double paintBoundsDescent = 0.0;
-  double paintBoundsLeft = double.infinity;
-  double paintBoundsRight = double.negativeInfinity;
+  /// The line whose ink extent above and below the baseline this synthetic empty line repeats.
+  TextLine? paintBoundsSource;
+
+  // Ink bounds need a browser query per block, so they are measured on the first paint rather
+  // than on every layout(width).
+  late final ({double ascent, double descent, double left, double right}) _paintBounds =
+      _measurePaintBounds();
+
+  double get paintBoundsAscent => _paintBounds.ascent;
+  double get paintBoundsDescent => _paintBounds.descent;
+  double get paintBoundsLeft => _paintBounds.left;
+  double get paintBoundsRight => _paintBounds.right;
+
+  ({double ascent, double descent, double left, double right}) _measurePaintBounds() {
+    final TextLine? source = paintBoundsSource;
+    if (source != null) {
+      return (
+        ascent: source.paintBoundsAscent,
+        descent: source.paintBoundsDescent,
+        left: double.infinity,
+        right: double.negativeInfinity,
+      );
+    }
+    var ascent = 0.0;
+    var descent = 0.0;
+    double left = double.infinity;
+    double right = double.negativeInfinity;
+    // There's no need to update paint bounds because placeholders aren't painted by the
+    // paragraph.
+    for (final LineBlock block in visualBlocks) {
+      if (block is TextBlock) {
+        ascent = math.max(ascent, block.paintBoundsAscent);
+        descent = math.max(descent, block.paintBoundsDescent);
+        left = math.min(left, block.paintBounds.left);
+        right = math.max(right, block.paintBounds.right);
+      }
+    }
+    return (ascent: ascent, descent: descent, left: left, right: right);
+  }
 
   double formattingShift = 0.0; // For centered or right aligned text
   late final double trailingSpacesWidth;
@@ -1656,8 +1694,7 @@ class TextLine {
     fontBoundingBoxDescent = other.fontBoundingBoxDescent;
     rawFontBoundingBoxAscent = other.rawFontBoundingBoxAscent;
     rawFontBoundingBoxDescent = other.rawFontBoundingBoxDescent;
-    paintBoundsAscent = other.paintBoundsAscent;
-    paintBoundsDescent = other.paintBoundsDescent;
+    paintBoundsSource = other;
     _hasLineMetrics = other._hasLineMetrics;
   }
 
@@ -1685,14 +1722,6 @@ class TextLine {
   }
 
   void updateBoundingBox(LineBlock block) {
-    // Only text blocks have painted glyphs; placeholders are not painted by the paragraph.
-    if (block is TextBlock) {
-      paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
-      paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
-      paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
-      paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
-    }
-
     final (double ascent, double descent, double rawAscent, double rawDescent) = switch (block) {
       // Text blocks carry both height-scaled and unscaled font metrics.
       TextBlock() => (
