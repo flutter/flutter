@@ -58,7 +58,13 @@ _ICU_CODE_DEFINES = [
     # No dependency on the default platform encoding. Will cut down the code
     # size.
     "U_CHARSET_IS_UTF8=1",
-]
+] + select({
+    # Tell ICU that we are a 32 bit platform, otherwise,
+    # double-conversion-utils.h doesn't know how to operate (BUILD.gn,
+    # current_cpu == "wasm").
+    _WEB: ["__i386__"],
+    "//conditions:default": [],
+})
 
 _ICU_COPTS = FLUTTER_THIRD_PARTY_COPTS + [
     # ICU uses RTTI; BUILD.gn swaps the default no_rtti config for rtti.

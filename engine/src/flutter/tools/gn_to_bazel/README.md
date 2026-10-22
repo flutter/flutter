@@ -210,10 +210,22 @@ tools compile it too, and the tool compares the default toolchain's entry
 Android and the converter had left to skia.gni's default, and
 `-Wno-deprecated-literal-operator`, which GN adds for clang everywhere but
 Android. What remains on the 630 first-party files is GN's `-I` for abseil
-and the Vulkan headers and allocator (served through their repositories),
-`FLUTTER_ENGINE_VERSION`'s hash, and `-Wunreachable-code` on the two files
-of a `source_set` that lists no `//flutter:config` (every engine library
-gets the flag here).
+and the Vulkan headers and allocator (served through their repositories)
+and `FLUTTER_ENGINE_VERSION`'s hash. (`-Wunreachable-code`, `//flutter:config`'s
+one flag, follows GN's config propagation -- a dependency's public configs
+over either kind of edge, onward along its public_deps -- so it no longer
+shows.)
+
+A web build is compared one variant at a time: GN compiles each module in
+its own toolchain (`canvaskit/obj/`, `skwasm/obj/`, ...; `wimp` in
+skwasm's), Bazel under the variant's platform, so an aquery of the module
+(`deps(//engine/src/flutter/third_party/canvaskit:skwasm_group)` under
+`--config=wasm_release`) goes with `--gn-toolchain=skwasm`. The two ways of
+pointing em++ at the emsdk -- GN's `--em-config`, Bazel's `--sysroot` and
+`-resource-dir` into the SDK -- are not compared. What remains per variant
+is ICU's `-frtti` after the toolchain's `-fno-rtti`, the public-defines
+class above, GN's absolute `-I` for ICU's directories, and a handful of
+third-party files' `-Werror`/runtime-mode defines.
 
 ### Artifact parity
 
