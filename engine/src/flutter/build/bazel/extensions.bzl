@@ -412,6 +412,20 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/third_party/android_tools",
         build_file = _OVERLAYS + ":android_tools/BUILD.android_tools.bazel",
     ),
+    # The JDK (DEPS: flutter/java/openjdk/${platform}), whose javac and jar
+    # the Android embedding's build runs (shell/platform/android/BUILD.gn,
+    # through build/android/gyp/javac.py).
+    "openjdk": struct(
+        path = "engine/src/flutter/third_party/java/openjdk",
+        build_file = _OVERLAYS + ":openjdk/BUILD.openjdk.bazel",
+    ),
+    # The Android embedding's compile-time dependencies (DEPS:
+    # flutter/android/embedding_bundle, under download_android_deps): the
+    # AndroidX jars its javac runs against.
+    "android_embedding_dependencies": struct(
+        path = "engine/src/flutter/third_party/android_embedding_dependencies",
+        build_file = _OVERLAYS + ":android_embedding_dependencies/BUILD.android_embedding_dependencies.bazel",
+    ),
     # The prebuilt Dart SDK (GN's host_prebuilt_dart_sdk): the runtime and
     # snapshots of the Dart tools the engine runs but does not build, the
     # frontend server first (build/bazel/dart/kernel.bzl).

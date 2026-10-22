@@ -11,11 +11,22 @@
 # -nostdlib with the sysroot's crt objects and libraries of the ABI's API level
 # (build/toolchain/android/BUILD.gn's libs_section_prefix/postfix), and takes
 # the compiler runtime from the NDK's clang, since the engine's clang ships no
-# Android runtimes (-lclang_rt.builtins-<arch>-android). Nothing else of the
-# SDK is read here; the Java side (the SDK's platforms/android.jar, the build
-# tools) is a later phase.
+# Android runtimes (-lclang_rt.builtins-<arch>-android). Of the SDK itself,
+# the Java side of the Android embedding's build (shell/platform/android/
+# BUILD.gn) reads the platform's android.jar (build/config/android/config.gni:
+# android_sdk_jar) and the build tools' lambda stubs, exported below; the rest
+# is unread.
 
 package(default_visibility = ["//visibility:public"])
+
+# The SDK's platform and build tools (build/config/android/config.gni:
+# android_sdk_version, android_sdk_build_tools_version), as the Java side
+# names them: the converter's mapping spells out the versions
+# (tools/gn_to_bazel: android_sdk_jar, android_sdk_build_tools).
+exports_files(glob([
+    "sdk/platforms/*/android.jar",
+    "sdk/build-tools/*/core-lambda-stubs.jar",
+]))
 
 # build/config/android/config.gni: android_ndk_version. The directory name
 # is the version.

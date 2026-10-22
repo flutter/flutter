@@ -21,3 +21,19 @@ filegroup(
     ),
     visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
 )
+
+# The Android build scripts GN's android toolchain inherited from Chromium
+# (android/gyp), which the Android embedding's actions run
+# (shell/platform/android/BUILD.gn): the Java compile and jar packaging.
+exports_files([
+    "android/gyp/create_flutter_jar.py",
+    "android/gyp/javac.py",
+])
+
+# What the scripts of android/gyp import (their util/ package, jar.py,
+# md5_check.py), for the actions that run them.
+filegroup(
+    name = "android_gyp_scripts",
+    srcs = glob(["android/gyp/**/*.py"]),
+    visibility = ["//visibility:public"],
+)

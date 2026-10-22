@@ -217,6 +217,14 @@ filegroup(
 
 exports_files(["lib/web_ui/lib/ui_web/src/ui_web.dart"])
 
+# The scripts of tools/ that actions of other packages run (the Android
+# embedding's: shell/platform/android/BUILD.gn's gen_android_build_config_java
+# and check_imports). A script of a package's own directory needs no export.
+exports_files([
+    "tools/android_illegal_imports.py",
+    "tools/gen_android_buildconfig.py",
+])
+
 # The web engine's other source directories web_sdk/BUILD.gn's sdk_rewriter
 # invocations read (each `input_dir`, less its `exclude_pattern`; the
 # converter's directorySources names them): dart:ui's own sources without
@@ -996,9 +1004,6 @@ exports_files(["README"] + glob(
     condition: 'is_android',
     filesGroups: <String>{'android'},
     skip: <String, String>{
-      'gen_android_build_config_java': 'Java: the Android phase (D10)',
-      'check_imports': 'Java: the Android phase (D10)',
-      'flutter_shell_java': 'Java: the Android phase (D10)',
       'android_jar': 'Java: the Android phase (D10)',
       'pom_libflutter': 'the Maven tree: the Android phase (D10)',
       'pom_content_hash_libflutter': 'the Maven tree: the Android phase (D10)',
@@ -1884,6 +1889,9 @@ const Map<String, MirroredList> mirroredLists = <String, MirroredList>{
 
 const Set<String> handWrittenPackages = <String>{
   'engine/src',
+  // GN's //build: its files are inputs of the wrapped GN builds, and
+  // build/android/gyp's scripts the Android embedding's actions.
+  'engine/src/build',
   'engine/src/flutter',
   'engine/src/flutter/impeller/tools',
   'engine/src/flutter/lib/snapshot',
