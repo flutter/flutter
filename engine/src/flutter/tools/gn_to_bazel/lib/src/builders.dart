@@ -333,7 +333,7 @@ final class BuilderBuild {
     final flags = <String>[];
     final settings = <String>[];
     final unsupported = <String>[];
-    var otherPlatform = false;
+    String? otherPlatform;
     var unoptimized = false;
     var lto = true;
     bool? stripped;
@@ -411,7 +411,11 @@ final class BuilderBuild {
         case GnFlagEffect.validationLayers:
           validationLayers = true;
         case GnFlagEffect.otherPlatform:
-          otherPlatform = true;
+          // The OS flag names the platform; its CPU flag (--fuchsia-cpu)
+          // only qualifies it.
+          if (otherPlatform == null || (otherPlatform.contains('-cpu') && !flag.contains('-cpu'))) {
+            otherPlatform = flag;
+          }
       }
     }
     // --enable-vulkan-validation-layers: where GN's default formula has the
@@ -447,11 +451,11 @@ final class BuilderBuild {
         );
       }
     } else if (targetOs != null && targetOs != 'linux') {
-      otherPlatform = true;
+      otherPlatform = '--target-os=$targetOs';
     } else if (linuxCpu == 'arm64') {
       platform = '--platforms=$linuxArm64Platform';
     } else if (linuxCpu != null && linuxCpu != 'x64') {
-      otherPlatform = true;
+      otherPlatform ??= '--linux-cpu=$linuxCpu';
     }
     // tools/gn: LTO is on unless --no-lto, and off in unoptimized builds.
     // An optimized build with it (the Android AOT builders) sets the `lto`
@@ -556,8 +560,10 @@ final class BuilderBuild {
   /// The flags the Bazel build cannot express, with the reason each.
   final List<String> unsupported;
 
-  /// Whether the build targets a platform the Bazel build has none for yet.
-  final bool otherPlatform;
+  /// The flag naming a platform the Bazel build has none for yet
+  /// (`--fuchsia`), when the build targets one: such a build is left out of
+  /// the configurations, and named among [leftOutLinuxBuilds].
+  final String? otherPlatform;
 
   /// The types its run_tests.py steps run (`dart`, `engine`, ...).
   final List<String> testTypes;
@@ -608,7 +614,7 @@ List<BuilderBuild> linuxBuilds(Map<String, BuilderConfig> configs) {
         continue;
       }
       final read = BuilderBuild.of('$file.json', build);
-      if (!read.otherPlatform && read.gn.isNotEmpty) {
+      if (read.otherPlatform == null && read.gn.isNotEmpty) {
         builds.add(read);
       }
     }
@@ -629,8 +635,45 @@ List<BuilderBuild> linuxBuilds(Map<String, BuilderConfig> configs) {
   return builds;
 }
 
-/// The generated bazelrc: a `--config=<name>` per build whose flags all map.
-String configsBazelrc(List<BuilderBuild> builds) {
+/// A build of the Linux builder files that [linuxBuilds] leaves out, and why.
+typedef LeftOutBuild = ({String file, String name, String reason});
+
+/// The builds of the Linux builder files that are not builds of this scope:
+/// those of another platform (Fuchsia's: `--fuchsia`) and those with no
+/// `tools/gn` step (the web test bundles, which test another build's
+/// artifacts). Listed at the end of the generated bazelrc, so that a build
+/// missing from it is missing for a reason the file states -- the Android
+/// embedder build went unlisted for a week behind a misfiled flag.
+List<LeftOutBuild> leftOutLinuxBuilds(Map<String, BuilderConfig> configs) {
+  final leftOut = <LeftOutBuild>[];
+  final List<String> files =
+      configs.keys.where((String f) => f.startsWith('linux_') || f == 'local_engine').toList()
+        ..sort();
+  for (final file in files) {
+    for (final Build build in configs[file]!.builds) {
+      if (file == 'local_engine' && !build.name.startsWith('linux/')) {
+        continue;
+      }
+      final read = BuilderBuild.of('$file.json', build);
+      final String? platformFlag = read.otherPlatform;
+      if (platformFlag != null) {
+        leftOut.add((
+          file: read.file,
+          name: read.name,
+          reason: 'a platform the Bazel build has none for yet ($platformFlag)',
+        ));
+      } else if (read.gn.isEmpty) {
+        leftOut.add((file: read.file, name: read.name, reason: 'no tools/gn step: not a build'));
+      }
+    }
+  }
+  return leftOut;
+}
+
+/// The generated bazelrc: a `--config=<name>` per build whose flags all map,
+/// and, last, the builder files' builds that are not builds of this scope
+/// ([leftOut]), each with its reason.
+String configsBazelrc(List<BuilderBuild> builds, {List<LeftOutBuild> leftOut = const []}) {
   final out = StringBuffer()
     ..writeln('# Copyright 2013 The Flutter Authors. All rights reserved.')
     ..writeln('# Use of this source code is governed by a BSD-style license that can be')
@@ -677,6 +720,16 @@ String configsBazelrc(List<BuilderBuild> builds) {
     }
     written[build.configName] = build;
     out.writeln('build:${build.configName} ${build.bazelFlags.join(' ')}');
+  }
+  if (leftOut.isNotEmpty) {
+    out
+      ..writeln()
+      ..writeln('# Not configurations: the builds of these files that are not builds of this')
+      ..writeln("# scope -- another platform's, or a test-only build with no tools/gn step.")
+      ..writeln('# Every other build of the Linux builder files is above.');
+    for (final build in leftOut) {
+      out.writeln('#   ${build.file}: ${build.name} -- ${build.reason}');
+    }
   }
   return out.toString();
 }
