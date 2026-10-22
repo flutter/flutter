@@ -85,6 +85,38 @@ Future<void> testMain() async {
         }
         paragraph.dispose();
       });
+
+      test('trailing whitespace width matches the span metrics: ${entry.key}', () {
+        final WebParagraph paragraph = entry.value();
+        for (final width in <double>[500, 120, 260, 80]) {
+          paragraph.layout(ParagraphConstraints(width: width));
+          for (final TextLine line in paragraph.lines) {
+            var lastWhitespaceWidth = 0.0;
+            for (final LineBlock block in line.visualBlocks) {
+              if (block is! TextBlock || block is EllipsisBlock) {
+                continue;
+              }
+              // intersect() leaves start > end for disjoint ranges.
+              final TextRange whitespaces = block.textRange.intersect(line.whitespacesRange);
+              if (whitespaces.start >= whitespaces.end) {
+                continue;
+              }
+              lastWhitespaceWidth = block.span
+                  .getTextRangeSelectionInBlock(block, whitespaces)
+                  .width;
+              expect(
+                block.whitespacesWidth,
+                lastWhitespaceWidth,
+                reason: 'width $width, block ${block.textRange}',
+              );
+            }
+            if (!line.visualBlocks.any((LineBlock block) => block is EllipsisBlock)) {
+              expect(line.trailingSpacesWidth, lastWhitespaceWidth, reason: 'width $width');
+            }
+          }
+        }
+        paragraph.dispose();
+      });
     }
   });
 }

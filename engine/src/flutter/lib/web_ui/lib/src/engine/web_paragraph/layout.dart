@@ -440,9 +440,15 @@ class TextLayout {
             _mapping.toTextRange(textIntersection),
           );
           if (blockLineWhitespaces.start < blockLineWhitespaces.end) {
-            trailingSpacesWidth = span
-                .getTextRangeSelectionInBlock(line.visualBlocks.last, blockLineWhitespaces)
-                .width;
+            // Trailing whitespace clusters are cached like the rest, see the block advance.
+            final ui.TextRange physicalWhitespaces = bidiLineSpanPhysicalTextRange.intersect(
+              blockLineWhitespaces,
+            );
+            trailingSpacesWidth = physicalWhitespaces.start >= physicalWhitespaces.end
+                ? 0.0
+                : _clusterSelection(
+                    _mapping.toClusterRange(physicalWhitespaces.start, physicalWhitespaces.end),
+                  ).width;
             (line.visualBlocks.last as TextBlock).clusterRangeWithoutWhitespaces = _mapping
                 .toClusterRange(blockLineNoWhitespaces.start, blockLineNoWhitespaces.end);
             (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
