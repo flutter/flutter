@@ -217,28 +217,36 @@ class GoogleChromeDevice extends ChromiumDevice {
     }
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
     var version = 'unknown';
-    if (_platform.isWindows) {
-      if (_processManager.canRun('reg')) {
-        final ProcessResult result = await _processManager.run(<String>[
-          r'reg',
-          'query',
-          r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon',
-          '/v',
-          'version',
-        ]);
-        if (result.exitCode == 0) {
-          final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
-          if (parts.length > 2) {
-            version = 'Google Chrome ${parts[parts.length - 2]}';
+    try {
+      if (_platform.isWindows) {
+        if (_processManager.canRun('reg')) {
+          final ProcessResult result = await _processManager.run(<String>[
+            r'reg',
+            'query',
+            r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon',
+            '/v',
+            'version',
+          ]);
+          if (result.exitCode == 0) {
+            final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
+            if (parts.length > 2) {
+              version = 'Google Chrome ${parts[parts.length - 2]}';
+            }
           }
         }
+      } else {
+        final String chrome = chromeLauncher.findExecutable();
+        final ProcessResult result = await _processManager.run(<String>[chrome, '--version']);
+        if (result.exitCode == 0) {
+          version = result.stdout as String;
+        }
       }
-    } else {
-      final String chrome = chromeLauncher.findExecutable();
-      final ProcessResult result = await _processManager.run(<String>[chrome, '--version']);
-      if (result.exitCode == 0) {
-        version = result.stdout as String;
-      }
+    } on ProcessException catch (error) {
+      _logger.printTrace('Failed to query Google Chrome version: $error');
+    } on ToolExit catch (error) {
+      // ErrorHandlingProcessManager converts mapped ProcessExceptions (such as
+      // Windows Group Policy errno 1260 or POSIX EACCES) into ToolExit.
+      _logger.printTrace('Failed to query Google Chrome version: $error');
     }
     return version.trim();
   }
@@ -278,18 +286,26 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
 
   Future<String> _getSdkNameAndVersion() async {
     if (_processManager.canRun('reg')) {
-      final ProcessResult result = await _processManager.run(<String>[
-        r'reg',
-        'query',
-        r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon',
-        '/v',
-        'version',
-      ]);
-      if (result.exitCode == 0) {
-        final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
-        if (parts.length > 2) {
-          return 'Microsoft Edge ${parts[parts.length - 2]}';
+      try {
+        final ProcessResult result = await _processManager.run(<String>[
+          r'reg',
+          'query',
+          r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon',
+          '/v',
+          'version',
+        ]);
+        if (result.exitCode == 0) {
+          final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
+          if (parts.length > 2) {
+            return 'Microsoft Edge ${parts[parts.length - 2]}';
+          }
         }
+      } on ProcessException catch (error) {
+        _logger.printTrace('Failed to query Microsoft Edge version: $error');
+      } on ToolExit catch (error) {
+        // ErrorHandlingProcessManager converts mapped ProcessExceptions (such as
+        // Windows Group Policy errno 1260) into ToolExit.
+        _logger.printTrace('Failed to query Microsoft Edge version: $error');
       }
     }
     // Return a non-null string so that the tool can validate the version

@@ -93,11 +93,13 @@ class AndroidDevices extends PollingDeviceDiscovery {
       return <String>[];
     }
 
-    final RunResult result = await _processUtils.run(<String>[
-      _androidSdk!.adbPath!,
-      'devices',
-      '-l',
-    ]);
+    final RunResult result;
+    try {
+      result = await _processUtils.run(<String>[_androidSdk!.adbPath!, 'devices', '-l']);
+    } on ProcessException catch (error) {
+      _logger.printTrace('Error running adb for diagnostics: $error');
+      return <String>[];
+    }
     if (result.exitCode != 0) {
       return <String>[];
     }

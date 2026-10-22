@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -20,6 +21,7 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_devices.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('DeviceManager', () {
@@ -275,6 +277,53 @@ void main() {
       pollingDeviceDiscovery.stopPolling();
     });
   });
+
+  testWithoutContext(
+    'PollingDeviceDiscovery startPolling catches ToolExit and Exception and continues polling',
+    () {
+      FakeAsync().run((FakeAsync time) {
+        final logger = BufferLogger.test();
+        final device = FakeDevice('Nexus 5', '0553790d0a4e726f');
+        var pollCount = 0;
+        final pollingDeviceDiscovery = _CallbackPollingDeviceDiscovery(() async {
+          pollCount += 1;
+          if (pollCount == 1) {
+            throwToolExit('Unable to run "adb"');
+          }
+          if (pollCount == 2) {
+            throw const ProcessException('adb', <String>['devices', '-l']);
+          }
+          return <Device>[device];
+        }, toolContext: FakeToolContext(logger: logger));
+        final addedDevices = <Device>[];
+        pollingDeviceDiscovery.onAdded.listen(addedDevices.add);
+
+        pollingDeviceDiscovery.startPolling();
+
+        // Initial poll (Duration.zero) throws ToolExit; should be caught and not crash.
+        time.elapse(Duration.zero);
+        expect(pollCount, 1);
+        expect(addedDevices, isEmpty);
+        expect(
+          logger.traceText,
+          contains('Error polling for callback: Error: Unable to run "adb"'),
+        );
+
+        // Second poll (after 4 seconds) throws ProcessException; should be caught and not crash.
+        time.elapse(const Duration(milliseconds: 4001));
+        expect(pollCount, 2);
+        expect(addedDevices, isEmpty);
+        expect(logger.traceText, contains('ProcessException:'));
+
+        // Third poll (after another 4 seconds) succeeds and emits the added device.
+        time.elapse(const Duration(milliseconds: 4001));
+        expect(pollCount, 3);
+        expect(addedDevices, <Device>[device]);
+
+        pollingDeviceDiscovery.stopPolling();
+      });
+    },
+  );
 
   group('Filter devices', () {
     final ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne');
@@ -1505,6 +1554,25 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
   }) async {
     return _devices;
   }
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  List<String> get wellKnownIds => <String>[];
+}
+
+class _CallbackPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  _CallbackPollingDeviceDiscovery(this._callback, {super.toolContext}) : super('callback');
+
+  final Future<List<Device>> Function() _callback;
+
+  @override
+  Future<List<Device>> pollingGetDevices({Duration? timeout, bool forWirelessDiscovery = false}) =>
+      _callback();
 
   @override
   bool get supportsPlatform => true;
