@@ -222,7 +222,6 @@ gn_build(
     outs = [
         "analyze_snapshot",
         "bootstrap_compile_platform.exe",
-        "frontend_server_aot.dart.snapshot",
         "gen_snapshot",
         "gen_snapshot_host",
     ],
