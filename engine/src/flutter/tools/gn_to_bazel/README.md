@@ -399,13 +399,18 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    emitter writes it as the rule's token -- `$(execpath label)` for a source
    file (declared as an input if GN did not), `$(src dir)` for a source
    directory, `$(gen path)` for anything generated, `$(built path)` for a
-   file at its path under the build directory itself. Outputs under
+   file at its path under the build directory itself -- the rule resolves
+   both against what its deps place in the build directory, and assembles
+   a directory that several of them fill (gen/dart-pkg/sky_engine) for a
+   script that reads it. Outputs under
    `$target_gen_dir` are the rule's `outputs`; outputs under the build
    directory itself (`$root_out_dir/flutter.jar`, the Android embedding's
    jars) are its `build_outputs`, which `install` lays at those paths and
    other actions find through their `deps` (`build_inputs`:
    `$root_build_dir/libflutter.so`, placed by the library's rule); an
-   output that is a directory (the javadoc tree) is in `output_dirs`.
+   output that is a directory (the javadoc tree) is in `output_dirs`, or
+   `build_output_dirs` under the build directory itself
+   (`dist/packages/sky_engine`), both named by `actionDirectoryOutputs`.
    Programs an action runs (GN's `deps` on `//third_party/java/openjdk`'s
    tools, `toolRuntimes`) are `tools`, built for the execution platform;
    a dependency GN names with a toolchain (`label($apilevel26_toolchain)`)
