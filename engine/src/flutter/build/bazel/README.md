@@ -258,8 +258,12 @@ Linux builder files: `android_{debug,profile,release}` (arm) and their
 `_arm64`, `_x64`, `_riscv64` twins, `_ddm`, the `_unopt` ones,
 `_size_exp` (`--no-dart-secure-socket`, a flag on the Dart wrap),
 `android_debug_arm64_validation_layers`
-(`--enable-vulkan-validation-layers`), `_clang_tidy`, `android_debug_test`
-and the emulator's `android_emulator_debug_x64`. `bazel run
+(`--enable-vulkan-validation-layers`), `_clang_tidy`, `android_debug_test`,
+the emulator's `android_emulator_debug_x64` and
+`android_embedder_debug_unopt` (`--embedder-for-target`: the embedder
+API's `libflutter_engine.so` and `flutter_embedder.h` for Android arm,
+unoptimized; its install lays them with the stripped copy and the Dart
+wrap's archives, 10 files). `bazel run
 --config=android_debug_arm64 //engine/src/flutter/ci/builders:android_debug_arm64
 -- <directory>` lays what the builder builds: `flutter.jar` and the jars,
 poms and stamps at the root, `lib.stripped/`, `clang_arm64_apilevel26/`,
@@ -1128,7 +1132,10 @@ without `--no-lto`, as `tools/gn` has it, which is CI's Android AOT builds),
 (the size-experiment builds; the archives take their `-size-exp` names from
 it), `--enable-vulkan-validation-layers` nothing where GN's default formula
 packs the layer already (the debug runtime mode on Android arm64) and a
-flag the build cannot express elsewhere, `--enable-fontconfig` the fontconfig flag
+flag the build cannot express elsewhere, `--embedder-for-target` the
+`embedder_for_target` flag (`//engine/src/flutter/build/bazel:embedder_for_target`:
+the embedder API's library and header built for the target too, which
+`ci/android_embedder_debug_unopt` builds for Android arm), `--enable-fontconfig` the fontconfig flag
 (`//engine/src/flutter/txt:use_fontconfig`, which the three `*_desktop`
 builds set: txt links the sysroot's libfontconfig and Skia's fontconfig font
 manager is built and chosen, as in CI's Linux desktop artifact),
@@ -1171,7 +1178,7 @@ prefix as its build directory does: `ci_host_debug` and `ci_host_release`
 (`out/ci/host_debug_unopt`, asan and a Debug VM) beside `host_debug_unopt`,
 `ci_android_profile_arm64` and `ci_android_release_arm64` (LTO) beside
 `android_profile_arm64` and `android_release_arm64`.
-Of the fifty-four Linux builds, fifty-three have a configuration, fifty
+Of the fifty-five Linux builds, fifty-four have a configuration, fifty-one
 distinct: the host's `host_debug`, `ci_host_debug`,
 `host_debug_unopt`, `host_profile`, `host_release`, `ci_host_release`,
 `host_debug_desktop`,
@@ -1192,7 +1199,8 @@ Android's `android_debug`, `android_profile`, `android_release` (arm),
 `android_release_arm64_ddm`, `android_release_x64_ddm`,
 `android_debug_arm64_size_exp`, `android_release_arm64_size_exp`,
 `android_debug_arm64_validation_layers`, `android_debug_arm64_clang_tidy`,
-`android_debug_test`, `android_emulator_debug_x64`. The one without is
+`android_debug_test`, `android_emulator_debug_x64`,
+`android_embedder_debug_unopt`. The one without is
 `ci/host_debug_no_prebuilt_dart_sdk`.
 `ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a

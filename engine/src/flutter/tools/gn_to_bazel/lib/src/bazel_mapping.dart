@@ -1055,6 +1055,9 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
   // GN's `current_toolchain == host_toolchain` with neither toolchain
   // assumed (gn_eval's hostToolchainPredicate): the OSes a host runs.
   'is_host_toolchain': '//engine/src/flutter/build/bazel:host_toolchain',
+  // embedder.gni's embedder_for_target (tools/gn --embedder-for-target): the
+  // embedder API built for the target too; a setting (build/bazel/BUILD.bazel).
+  'embedder_for_target': '//engine/src/flutter/build/bazel:embedder_for_target_enabled',
   // testing.gni's default, `current_toolchain == host_toolchain || is_fuchsia
   // || is_mac`, read in Bazel terms (the group in //flutter/testing's
   // appendix).
@@ -1117,6 +1120,7 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
 /// so each complement is the group of the other seven (build/bazel/BUILD.bazel).
 final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<String, String>{
   'is_android': '//engine/src/flutter/build/bazel:not_android',
+  'embedder_for_target': '//engine/src/flutter/build/bazel:embedder_for_target_disabled',
   'is_fuchsia': '//engine/src/flutter/build/bazel:not_fuchsia',
   'is_ios': '//engine/src/flutter/build/bazel:not_ios',
   'is_linux': '//engine/src/flutter/build/bazel:not_linux',
@@ -1343,6 +1347,8 @@ const Set<String> knownExternalVariables = <String>{
   'build_engine_artifacts',
   'enable_backtrace',
   'enable_unittests',
+  // //flutter/shell/platform/embedder/embedder.gni (a setting; see conditionSettings)
+  'embedder_for_target',
   // //flutter/testing/testing.gni (iOS only; assumed off)
   'enable_ios_unittests',
   'feature_defines_list',
@@ -2063,9 +2069,6 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // its name), a scalar over the enumerated variables; the zip_bundle
     // template it defines is mapped (templateMappings).
     '//flutter/build/zip_bundle.gni',
-    // Declares embedder_for_target (false: the embedder's shared library is
-    // a host artifact), which the embedder's own file reads.
-    '//flutter/shell/platform/embedder/embedder.gni',
     // The client wrapper's file lists (the sources and headers of the
     // package, by absolute path), which its own file reads.
     '//flutter/shell/platform/common/client_wrapper/core_wrapper_files.gni',
@@ -2123,6 +2126,10 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//flutter/common/config.gni',
     '//flutter/impeller/tools/shaders.gni',
     '//flutter/shell/config.gni',
+    // Declares embedder_for_target (whether the embedder's shared library is
+    // built for the target as well as the host): a setting, read by the
+    // embedder's own file (knownExternalVariables, conditionSettings).
+    '//flutter/shell/platform/embedder/embedder.gni',
     // Declares the version arguments and asserts they are set; nothing
     // converted reads them (impeller/compiler imports it without use).
     '//flutter/shell/version/version.gni',
@@ -2338,6 +2345,8 @@ Assumptions linuxHostAssumptions() {
     // //flutter/common/config.gni
     'enable_backtrace': GnBoolValue(true),
     'enable_unittests': GnBoolValue(true),
+    // //flutter/shell/platform/embedder/embedder.gni: off for the host.
+    'embedder_for_target': GnBoolValue(false),
     // The artifact names (config.gni computes them from host_os, host_cpu,
     // target_os and target_cpu), and whether the host builds the SDK's
     // artifacts at all: on a Linux x64 host, yes.

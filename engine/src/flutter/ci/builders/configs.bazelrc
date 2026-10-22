@@ -159,6 +159,10 @@ build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/co
 #   --runtime-mode debug --unoptimized --prebuilt-dart-sdk --target-dir ci/host_debug_unopt_impeller_tests --rbe --no-goma --use-glfw-swiftshader
 build:host_debug_unopt_impeller_tests --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug
 
+# linux_unopt.json: ci/android_embedder_debug_unopt
+#   --android --embedder-for-target --target-dir ci/android_embedder_debug_unopt --unoptimized --rbe --no-goma
+build:android_embedder_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:embedder_for_target --//engine/src/flutter/build/bazel:stripped=false
+
 # linux_unopt.json: ci/android_debug_arm64_validation_layers
 #   --target-dir ci/android_debug_arm64_validation_layers --android --android-cpu=arm64 --no-lto --enable-vulkan-validation-layers --rbe --no-goma
 build:android_debug_arm64_validation_layers --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
