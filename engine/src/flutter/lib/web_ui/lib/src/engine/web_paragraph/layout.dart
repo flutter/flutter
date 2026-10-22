@@ -88,6 +88,8 @@ class TextLayout {
     if (paragraph.text.isEmpty) {
       throw StateError('An empty paragraph has no paint bounds');
     }
+    // Before the first layout there are no lines, which would yield an inverted infinite rect.
+    assert(!_isFirstLayout, 'paintBounds read before the first layout');
     // Calculate the actual paint bounds of the paragraph.
     return _paintBounds ??= _calculatePaintBounds();
   }
@@ -1625,8 +1627,12 @@ class TextLine {
   }
 }
 
+/// Counts text metrics queries sent to the browser, so tests can pin which operations make them.
+int debugTextMetricsQueryCount = 0;
+
 extension DomTextMetricsExtension on DomTextMetrics {
   ui.Rect getSelection(int start, int end) {
+    debugTextMetricsQueryCount++;
     final List<DomRectReadOnly> rects = getSelectionRects(start, end);
     double minLeft = rects.first.left;
     double minTop = rects.first.top;
@@ -1646,6 +1652,7 @@ extension DomTextMetricsExtension on DomTextMetrics {
   }
 
   ui.Rect getBounds(int start, int end) {
+    debugTextMetricsQueryCount++;
     final DomRectReadOnly box = getActualBoundingBox(start, end);
     return ui.Rect.fromLTWH(box.left, box.top, box.width, box.height);
   }

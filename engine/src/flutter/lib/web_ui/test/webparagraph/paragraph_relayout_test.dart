@@ -59,10 +59,38 @@ Future<void> testMain() async {
       b.addPlaceholder(30, 20, PlaceholderAlignment.middle);
       b.addText(' after the placeholder and more text');
     }),
+    'zero-width space and soft hyphen': () =>
+        build((b) => b.addText('a\u200Bb soft\u00ADhyphen a\u200Bb soft\u00ADhyphen ' * 3)),
+    'combining marks and directional marks': () =>
+        build((b) => b.addText('e\u0301 x\u200Ey e\u0301 x\u200Ey ' * 3)),
+    'Latin mixed with CJK': () =>
+        build((b) => b.addText('Latin \u6F22\u5B57\u304B\u306A mixed \u4E2D\u6587 text ' * 3)),
+    'CR LF line breaks': () => build((b) => b.addText('First line\r\nSecond line  \r\nThird')),
+    'negative letter spacing': () => build(
+      (b) => b.addText('Tight letters and words here ' * 3),
+      textStyle: WebTextStyle(color: const Color(0xFF000000), letterSpacing: -1.5),
+    ),
   };
 
   group('re-layout block geometry', () {
     for (final MapEntry<String, WebParagraph Function()> entry in cases.entries) {
+      test('re-layout makes no text metrics queries: ${entry.key}', () {
+        final WebParagraph paragraph = entry.value();
+        paragraph.layout(const ParagraphConstraints(width: 500));
+        debugTextMetricsQueryCount = 0;
+        for (final width in <double>[120, 260, 80, 500]) {
+          paragraph.layout(ParagraphConstraints(width: width));
+        }
+        expect(debugTextMetricsQueryCount, 0);
+
+        // Ink bounds are measured once, when painting first needs them.
+        paragraph.paintBounds;
+        expect(debugTextMetricsQueryCount, greaterThan(0));
+        debugTextMetricsQueryCount = 0;
+        paragraph.paintBounds;
+        expect(debugTextMetricsQueryCount, 0);
+        paragraph.dispose();
+      });
       test('block advance matches the span metrics: ${entry.key}', () {
         final WebParagraph paragraph = entry.value();
         for (final width in <double>[500, 120, 260, 80]) {
@@ -99,6 +127,7 @@ Future<void> testMain() async {
               // intersect() leaves start > end for disjoint ranges.
               final TextRange whitespaces = block.textRange.intersect(line.whitespacesRange);
               if (whitespaces.start >= whitespaces.end) {
+                expect(block.whitespacesWidth, 0.0, reason: 'width $width, ${block.textRange}');
                 continue;
               }
               lastWhitespaceWidth = block.span
@@ -119,19 +148,31 @@ Future<void> testMain() async {
       });
     }
 
-    test('paint bounds follow the latest layout', () {
-      final WebParagraph paragraph = cases['latin with trailing spaces']!();
-      paragraph.layout(const ParagraphConstraints(width: 80));
-      final Rect narrowBounds = paragraph.paintBounds;
-      paragraph.layout(const ParagraphConstraints(width: 500));
+    for (final align in <TextAlign>[TextAlign.left, TextAlign.center, TextAlign.right]) {
+      test('paint bounds follow the latest layout: $align', () {
+        // The trailing newline adds a synthetic empty line that repeats the previous line's ink.
+        WebParagraph buildAligned() {
+          final builder = WebParagraphBuilder(
+            WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20, textAlign: align),
+          );
+          builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+          builder.addText('Hello world,   quick brown fox  ' * 4 + '\n');
+          return builder.build();
+        }
 
-      final WebParagraph fresh = cases['latin with trailing spaces']!();
-      fresh.layout(const ParagraphConstraints(width: 500));
-      expect(paragraph.paintBounds, fresh.paintBounds);
-      expect(paragraph.paintBounds, isNot(narrowBounds));
-      paragraph.dispose();
-      fresh.dispose();
-    });
+        final WebParagraph paragraph = buildAligned();
+        paragraph.layout(const ParagraphConstraints(width: 80));
+        final Rect narrowBounds = paragraph.paintBounds;
+        paragraph.layout(const ParagraphConstraints(width: 500));
+
+        final WebParagraph fresh = buildAligned();
+        fresh.layout(const ParagraphConstraints(width: 500));
+        expect(paragraph.paintBounds, fresh.paintBounds);
+        expect(paragraph.paintBounds, isNot(narrowBounds));
+        paragraph.dispose();
+        fresh.dispose();
+      });
+    }
 
     test('a wider re-layout drops the ellipsis of an earlier narrow layout', () {
       WebParagraph buildEllipsized() {

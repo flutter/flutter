@@ -770,6 +770,7 @@ class TextSpan extends ParagraphSpan {
     // Canvas2D will return all clusters placed right to left starting from 0.
     // Also, we have a separate (possibly, different) textDirection for the ellipsis.
     layoutContext.direction = textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
+    debugTextMetricsQueryCount++;
     return layoutContext.measureText(text);
   }
 
