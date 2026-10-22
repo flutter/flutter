@@ -410,6 +410,11 @@ class TextLayout {
               ? allClusters[physicalClusterRange.start]
               : allClusters[physicalClusterRange.end - 1];
           final double blockShiftFromSpanStart = firstVisualClusterInBlock.advance.left;
+          // A re-layout only rearranges clusters measured once per span, so the block advance
+          // comes from their cached selection rects instead of a new browser query.
+          final ui.Rect blockSelection = bidiLineSpanPhysicalTextRange.isEmpty
+              ? ui.Rect.zero
+              : _clusterSelection(physicalClusterRange);
           line.visualBlocks.add(
             block = TextBlock(
               span as TextSpan,
@@ -419,6 +424,12 @@ class TextLayout {
               bidiLineSpanPhysicalTextRange,
               blockShiftFromLineStart,
               blockShiftFromSpanStart,
+              advance: ui.Rect.fromLTWH(
+                blockShiftFromLineStart,
+                blockSelection.top,
+                blockSelection.width,
+                blockSelection.height,
+              ),
             ),
           );
 
@@ -500,6 +511,33 @@ class TextLayout {
     lines.add(line);
 
     return line.advance.height;
+  }
+
+  /// The union of the span-relative selection rects of the clusters in [range], which all
+  /// belong to one span; equals the span metrics' selection of the same text.
+  ui.Rect _clusterSelection(ClusterRange range) {
+    final ui.Rect first = allClusters[range.start].advance;
+    double left = first.left;
+    double top = first.top;
+    double right = first.right;
+    double bottom = first.bottom;
+    for (int i = range.start + 1; i < range.end; i++) {
+      final ui.Rect advance = allClusters[i].advance;
+      // Plain comparisons: math.min/max pay for NaN and -0.0 handling in this hot loop.
+      if (advance.left < left) {
+        left = advance.left;
+      }
+      if (advance.top < top) {
+        top = advance.top;
+      }
+      if (advance.right > right) {
+        right = advance.right;
+      }
+      if (advance.bottom > bottom) {
+        bottom = advance.bottom;
+      }
+    }
+    return ui.Rect.fromLTRB(left, top, right, bottom);
   }
 
   void formatLines(double width) {
@@ -1284,18 +1322,23 @@ class TextBlock extends LineBlock {
     super.textRange,
     this.physicalTextRange,
     super.shiftFromLineStart,
-    double shiftFromSpanStart,
-  ) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart,
-      clusterRangeWithoutWhitespaces = clusterRange,
-      whitespacesWidth = 0.0;
+    double shiftFromSpanStart, {
+    ui.Rect? advance,
+  }) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart,
+       clusterRangeWithoutWhitespaces = clusterRange,
+       whitespacesWidth = 0.0,
+       _advance = advance;
 
   final ui.TextRange physicalTextRange;
 
   @override
   TextSpan get span => super.span as TextSpan;
 
+  /// The block advance computed by the layout from cached cluster advances, if any.
+  final ui.Rect? _advance;
+
   @override
-  late final ui.Rect advance = span.getBlockSelection(this);
+  late final ui.Rect advance = _advance ?? span.getBlockSelection(this);
 
   late final ui.Rect paintBounds = span.getBlockBounds(this);
 
