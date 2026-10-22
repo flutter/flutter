@@ -235,3 +235,27 @@ build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 # local_engine.json: linux/wasm_debug_unopt
 #   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
 build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+
+# Not configurations: the builds of these files that are not builds of this
+# scope -- another platform's, or a test-only build with no tools/gn step.
+# Every other build of the Linux builder files is above.
+#   linux_fuchsia.json: ci/fuchsia_profile_arm64 -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia.json: ci/fuchsia_release_arm64 -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia.json: ci/fuchsia_debug_arm64 -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia.json: ci/fuchsia_profile_x64 -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia.json: ci/fuchsia_release_x64 -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia.json: ci/fuchsia_debug_x64 -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia_tests.json: ci/fuchsia_profile_arm64_tester -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia_tests.json: ci/fuchsia_release_arm64_tester -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia_tests.json: ci/fuchsia_debug_arm64_tester -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia_tests.json: ci/fuchsia_profile_x64_tester -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia_tests.json: ci/fuchsia_release_x64_tester -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_fuchsia_tests.json: ci/fuchsia_debug_x64_tester -- a platform the Bazel build has none for yet (--fuchsia)
+#   linux_web_engine_test.json: web_tests/test_bundles/dart2js-canvaskit-webparagraph -- no tools/gn step: not a build
+#   linux_web_engine_test.json: web_tests/test_bundles/dart2wasm-skwasm-ui -- no tools/gn step: not a build
+#   linux_web_engine_test.json: web_tests/test_bundles/dart2wasm-skwasm-skwasm -- no tools/gn step: not a build
+#   linux_web_engine_test.json: web_tests/test_bundles/dart2js-canvaskit-engine -- no tools/gn step: not a build
+#   linux_web_engine_test.json: web_tests/test_bundles/dart2js-canvaskit-canvaskit -- no tools/gn step: not a build
+#   linux_web_engine_test.json: web_tests/test_bundles/dart2js-canvaskit-ui -- no tools/gn step: not a build
+#   linux_web_engine_test.json: web_tests/test_bundles/dart2wasm-canvaskit-engine -- no tools/gn step: not a build
+#   linux_web_engine_test.json: web_tests/test_bundles/fallbacks -- no tools/gn step: not a build
