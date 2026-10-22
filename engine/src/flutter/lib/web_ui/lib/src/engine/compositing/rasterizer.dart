@@ -39,6 +39,9 @@ abstract class ViewRasterizer {
   /// The queue of render requests for this view.
   final RenderQueue queue = RenderQueue();
 
+  bool get isDisposed => _isDisposed;
+  bool _isDisposed = false;
+
   /// The size of the current frame being rasterized.
   BitmapSize currentFrameSize = BitmapSize.zero;
 
@@ -106,6 +109,10 @@ abstract class ViewRasterizer {
     FrameTimingRecorder? recorder,
   );
 
+  /// Publishes any staged canvas contents in the same task as the composition's
+  /// DOM update. Rasterizers that draw directly need no additional commit.
+  void commitFrame() {}
+
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {
     return displayFactory.getCanvas();
@@ -128,6 +135,10 @@ abstract class ViewRasterizer {
 
   /// Disposes this rasterizer.
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
     viewEmbedder.dispose();
   }
 
