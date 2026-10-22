@@ -23,6 +23,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
+import org.gradle.api.plugins.UnknownPluginException
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
@@ -583,9 +584,12 @@ object FlutterPluginUtils {
             if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
             if (!isBuiltInKotlinEnabled(project, agpVersion) && !pluginState.hasKgpPlugin) {
+                // Only a missing plugin is handled here. Any other failure, such as the
+                // Kotlin Gradle Plugin rejecting `android.newDsl=true`, propagates so that
+                // the build reports the real cause.
                 try {
                     pluginManager.apply("kotlin-android")
-                } catch (_: Exception) {
+                } catch (_: UnknownPluginException) {
                     logger.quiet(
                         """
                         Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
