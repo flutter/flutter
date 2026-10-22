@@ -958,7 +958,9 @@ final class _Emitter {
     final rule = _Rule('filegroup', target.name, target.comments);
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
-        case 'deps' || 'public_deps':
+        // What the group reaches at run time (data_deps: the validation
+        // layers' group over its library) is as much its files.
+        case 'deps' || 'public_deps' || 'data_deps':
           _labelsInto(rule.list('srcs'), variable, target, withViews: false);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
@@ -1028,14 +1030,26 @@ final class _Emitter {
           break; // After the inputs, which it may add to.
         case 'deps':
         case 'public_deps':
-          _labelsInto(rule.list('deps'), variable, target);
+          _actionDepsInto(rule, variable, target);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
         case 'depfile':
         case 'pool':
           // The sandbox declares every input; pools are a scheduling matter.
           break;
-        case 'data' || 'data_deps' || 'response_file_contents' || 'metadata' || 'assert_no_deps':
+        case 'data':
+          // `data = outputs` (the validation layers' JSON manifest): the
+          // outputs are the action's files already, which a dependent
+          // carries; anything else is not converted.
+          final List<GnValue>? data = variable.unconditionalItems;
+          final List<GnValue>? outputs = target.variables['outputs']?.unconditionalItems;
+          if (data == null || outputs == null || !data.every(outputs.contains)) {
+            throw GnError(
+              variable.assignments.first.location,
+              'action variable data is converted only as a subset of the outputs',
+            );
+          }
+        case 'data_deps' || 'response_file_contents' || 'metadata' || 'assert_no_deps':
           throw GnError(
             variable.assignments.first.location,
             'action variable ${variable.name} is not converted yet',
@@ -1051,6 +1065,48 @@ final class _Emitter {
       _argsInto(rule, args, target);
     }
     rules.add(rule);
+  }
+
+  /// An action's `deps`: labels, except that one with a toolchain the
+  /// mapping knows as a platform ([toolchainPlatforms]: the validation
+  /// layer's `($apilevel26_toolchain)`) is a `platform_deps` entry, built
+  /// for that platform by the rule's transition, with the toolchain's
+  /// directory of the build directory on record (`platform_build_dir`),
+  /// where its outputs sit; one action builds for one such platform.
+  void _actionDepsInto(_Rule rule, GnVariable variable, GnTarget target) {
+    _forEachItem(variable, into: rule.list('deps'), (_Element e) {
+      final String gnLabel = _string(e);
+      final int paren = gnLabel.indexOf('(');
+      final String toolchain = paren > 0 && gnLabel.endsWith(')')
+          ? gnLabel.substring(paren + 1, gnLabel.length - 1)
+          : '';
+      final String? platform = toolchainPlatforms[toolchain];
+      if (platform == null) {
+        final String label = bazelLabel(
+          gnLabel,
+          package: gnPackage,
+          location: e.assignment.location,
+        );
+        rule.list('deps').addUnique(e.condition, _item(_localLabel(label), e));
+        return;
+      }
+      final platformText = '"${_localLabel(platform)}"';
+      final String? before = rule.scalars['platform'];
+      if (before != null && before != platformText) {
+        throw GnError(
+          e.assignment.location,
+          'the deps of ${target.name} name two toolchains ($before, $platformText); one platform per action',
+        );
+      }
+      rule.scalars['platform'] = platformText;
+      rule.scalars['platform_build_dir'] = '"${toolchainDirectories[toolchain]!}"';
+      final String label = bazelLabel(
+        _withoutToolchain(gnLabel),
+        package: gnPackage,
+        location: e.assignment.location,
+      );
+      rule.list('platform_deps').addUnique(e.condition, _item(_localLabel(label), e));
+    });
   }
 
   /// An action's `sources` or `inputs` into [attribute]: files, the outputs
@@ -1171,6 +1227,16 @@ final class _Emitter {
         return;
       }
       for (final _Element element in _enumeratedElements(e)) {
+        // A bare variable the Bazel side keeps as a constant (version.gni's
+        // engine_version, content_hash): the constant, as an expression.
+        if (element.value case GnReference(:final String name)
+            when referenceConstants.containsKey(name)) {
+          attribute.add(
+            element.condition,
+            _item(_constant(name, element), element, quoted: false, expression: true),
+          );
+          continue;
+        }
         final String text = _rawString(element);
         final List<String> parts = text.split(rebasedPathMarker);
         if (parts.length.isEven) {
@@ -1205,19 +1271,46 @@ final class _Emitter {
       }
       return '\$(gen $relative)';
     }
+    if (path == buildDirRoot) {
+      // The build directory itself (`rebase_path(root_build_dir,
+      // root_build_dir)`, a script's output directory): where the action's
+      // build outputs are declared.
+      return r'$(built .)';
+    }
     if (path.startsWith('$buildDirRoot/')) {
       // A file of the build directory: one of the action's own build
       // outputs, or one the deps place there, which the rule finds by the
       // path.
       return '\$(built ${path.substring(buildDirRoot.length + 1)})';
     }
-    final String file = _filePath(path, location);
+    // A directory may be written with a trailing slash (`"$dir/layers/"`).
+    final String bare = path.length > 2 && path.endsWith('/')
+        ? path.substring(0, path.length - 1)
+        : path;
+    final String file = _filePath(bare, location);
     final bool isDirectory = switch (tree) {
-      final GnSourceTree t => FileSystemEntity.isDirectorySync(t.resolve(path)),
+      final GnSourceTree t => FileSystemEntity.isDirectorySync(t.resolve(bare)),
       null => !declared.contains(file),
     };
     if (isDirectory) {
-      final String? relative = layout.relativePath(path);
+      // The directory relative to the output repository's root: as the
+      // layout places it, or, for a synced tree's repository whose files
+      // the label table names (`@vulkan_validation_layers//:layers`), as
+      // the label's path.
+      final ownRepository = '${layout.repository}//:';
+      final String? relative;
+      if (!file.startsWith('@') && !file.startsWith('//')) {
+        // Relative to this package.
+        relative = file == '.'
+            ? package.package
+            : package.package.isEmpty
+            ? file
+            : '${package.package}/$file';
+      } else if (file.startsWith(ownRepository) && layout.repository.isNotEmpty) {
+        relative = file.substring(ownRepository.length);
+      } else {
+        relative = layout.relativePath(bare);
+      }
       if (relative == null) {
         throw GnError(location, 'directory $path is outside the output repository');
       }
@@ -1886,7 +1979,12 @@ final class _Emitter {
             outputs['$buildDirRoot/obj${directory.substring(1)}/lib${name()}.a'] = label;
           }
         case 'copy' || 'action':
-          final List<GnValue>? files = target.variables['outputs']?.unconditionalItems;
+          // An action's outputs may be partly conditional (android_jar's
+          // engine jar, named by the CPU, beside flutter.jar): the live
+          // items, of which the plain strings are read below.
+          final List<GnValue>? files = target.rule == 'action'
+              ? target.variables['outputs']?.liveItems.map((GnListItem i) => i.value).toList()
+              : target.variables['outputs']?.unconditionalItems;
           final List<GnValue>? sources = target.variables['sources']?.unconditionalItems;
           if (files == null) {
             break;
@@ -1909,6 +2007,12 @@ final class _Emitter {
             if (file.value.startsWith(genDir)) {
               outputs[file.value] = '$directory:${file.value.substring(genDir.length)}';
             } else if (files.length == 1) {
+              outputs[file.value] = label;
+            } else if (target.rule == 'action' && file.value.startsWith('$buildDirRoot/')) {
+              // One of an action's several build outputs (android_jar's
+              // flutter.jar beside the engine's jar): the action, from which
+              // an archive takes the file at the output's path
+              // (zip_bundle's `sources`; gn_action's build_outputs).
               outputs[file.value] = label;
             } else if (target.rule == 'copy' && source != null) {
               outputs[file.value] = source.startsWith('//')
@@ -3597,6 +3701,13 @@ final class _Emitter {
         if (entry.value.endsWith('//') &&
             (absolute.startsWith(entry.key) || '$absolute/' == entry.key)) {
           final String rest = '$absolute/' == entry.key ? '' : absolute.substring(entry.key.length);
+          // The file of the repository being generated, named from its
+          // root package (the secondary tree's GN over the synced tree
+          // writes `$_checkout_dir/layers/x.cpp`): relative to it, as
+          // `includes` needs and `srcs` reads best.
+          if (entry.value == '${layout.repository}//' && package.package.isEmpty) {
+            return rest.isEmpty ? '.' : rest;
+          }
           return rest.isEmpty ? entry.value : '${entry.value}:$rest';
         }
       }

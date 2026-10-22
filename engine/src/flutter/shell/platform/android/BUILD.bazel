@@ -3,9 +3,10 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/android/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: android_jar, pom_libflutter, pom_content_hash_libflutter, pom_embedding, pom_content_hash_embedding, flutter_jar_zip, gen_android_javadoc, android_javadoc, android_entitlement_config, embedding_jars, abi_jars.
+# Not converted: gen_android_javadoc, android_javadoc, android_entitlement_config, embedding_jars, abi_jars.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_VERSION")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
@@ -1217,6 +1218,778 @@ gn_action(
     ],
 )
 
+gn_action(
+    name = "android_jar",
+    args = [
+        "--output",
+        "$(built flutter.jar)",
+        "--output_native_jar",
+    ] + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built x86_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built x86_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built x86_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built x86_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built armeabi_v7a_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built armeabi_v7a_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built armeabi_v7a_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built armeabi_v7a_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built x86_64_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built x86_64_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built x86_64_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built x86_64_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built arm64_v8a_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built arm64_v8a_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built arm64_v8a_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built arm64_v8a_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built riscv64_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built riscv64_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built riscv64_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built riscv64_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + ["--dist_jar"] + select({
+        ":when_is_android_and_flutter_runtime_mode_debug": ["$(built flutter_embedding_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_android_and_flutter_runtime_mode_profile": ["$(built flutter_embedding_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_android_and_flutter_runtime_mode_release": ["$(built flutter_embedding_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_android_and_flutter_runtime_mode_jit_release": ["$(built flutter_embedding_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + ["--native_lib"] + select({
+        "//engine/src/flutter/build/bazel:stripped_enabled": [
+            "$(built lib.stripped/libflutter.so)",  # stripped_symbols
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:stripped_enabled": [],
+        "//conditions:default": [
+            "$(built libflutter.so)",  # !(stripped_symbols)
+        ],
+    }) + ["--android_abi"] + select({
+        "@platforms//cpu:x86_32": ["x86"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:armv7": ["armeabi-v7a"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:x86_64": ["x86_64"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:aarch64": ["arm64-v8a"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:riscv64": ["riscv64"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_flutter_runtime_mode_debug_and_target_cpu_arm64": [
+            "--native_lib",  # impeller_enable_vulkan_validation_layers
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_flutter_runtime_mode_debug_and_target_cpu_arm64_and_stripped_symbols": [
+            "lib.stripped/libVkLayer_khronos_validation.so",  # impeller_enable_vulkan_validation_layers && impeller_enable_vulkan_validation_layers && stripped_symbols
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_flutter_runtime_mode_debug_and_target_cpu_arm64_and_not_stripped_symbols": [
+            "$(built clang_arm64_apilevel26/libVkLayer_khronos_validation.so)",  # impeller_enable_vulkan_validation_layers && impeller_enable_vulkan_validation_layers && !(stripped_symbols)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "--native_lib",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_flutter_runtime_mode_profile_and_current_cpu_x86": [
+            "$(gen engine/src/flutter/shell/vmservice/android/libs/x86/libvmservice_snapshot.so)",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_flutter_runtime_mode_profile_and_current_cpu_arm": [
+            "$(gen engine/src/flutter/shell/vmservice/android/libs/armeabi-v7a/libvmservice_snapshot.so)",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_flutter_runtime_mode_profile_and_current_cpu_x64": [
+            "$(gen engine/src/flutter/shell/vmservice/android/libs/x86_64/libvmservice_snapshot.so)",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_flutter_runtime_mode_profile_and_current_cpu_arm64": [
+            "$(gen engine/src/flutter/shell/vmservice/android/libs/arm64-v8a/libvmservice_snapshot.so)",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_flutter_runtime_mode_profile_and_current_cpu_riscv64": [
+            "$(gen engine/src/flutter/shell/vmservice/android/libs/riscv64/libvmservice_snapshot.so)",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }),
+    build_inputs = select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:stripped_enabled": [
+            "lib.stripped/libflutter.so",  # stripped_symbols
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/build/bazel:stripped_enabled": [],
+        "//conditions:default": [
+            "libflutter.so",  # !(stripped_symbols)
+        ],
+    }),
+    build_outputs = ["flutter.jar"] + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["x86_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["x86_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["x86_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["x86_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["armeabi_v7a_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["armeabi_v7a_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["armeabi_v7a_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["armeabi_v7a_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["x86_64_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["x86_64_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["x86_64_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["x86_64_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["arm64_v8a_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["arm64_v8a_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["arm64_v8a_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["arm64_v8a_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["riscv64_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["riscv64_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["riscv64_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["riscv64_jit_release.jar"],
+        "//conditions:default": [],
+    }),
+    inputs = ["//engine/src/build:android_gyp_scripts"],
+    platform = "//engine/src/flutter/build/bazel/toolchains:android_arm64_api26",
+    platform_build_dir = "clang_arm64_apilevel26",
+    platform_deps = select({
+        ":when_impeller_enable_vulkan_and_flutter_runtime_mode_debug_and_target_cpu_arm64": [
+            "@vulkan_validation_layers",  # impeller_enable_vulkan_validation_layers && impeller_enable_vulkan_validation_layers
+        ],
+        "//conditions:default": [],
+    }),
+    script = "//engine/src/build:android/gyp/create_flutter_jar.py",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_shell_java",
+        ":flutter_shell_native",
+        ":pom_content_hash_embedding",
+        ":pom_content_hash_libflutter",
+        ":pom_embedding",
+        ":pom_libflutter",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "//engine/src/flutter/shell/vmservice:vmservice_snapshot",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+gn_action(
+    name = "pom_libflutter",
+    args = [
+        "--destination",
+        "$(built .)",
+        "--engine-version",
+        ENGINE_VERSION,
+        "--engine-artifact-id",
+    ] + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["x86_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["x86_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["x86_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["x86_jit_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["armeabi_v7a_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["armeabi_v7a_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["armeabi_v7a_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["armeabi_v7a_jit_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["x86_64_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["x86_64_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["x86_64_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["x86_64_jit_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["arm64_v8a_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["arm64_v8a_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["arm64_v8a_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["arm64_v8a_jit_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["riscv64_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["riscv64_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["riscv64_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["riscv64_jit_release"],
+        "//conditions:default": [],
+    }),
+    build_outputs = select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["x86_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["x86_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["x86_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["x86_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["armeabi_v7a_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["armeabi_v7a_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["armeabi_v7a_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["armeabi_v7a_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["x86_64_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["x86_64_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["x86_64_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["x86_64_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["arm64_v8a_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["arm64_v8a_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["arm64_v8a_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["arm64_v8a_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["riscv64_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["riscv64_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["riscv64_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["riscv64_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["x86_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["x86_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["x86_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["x86_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["armeabi_v7a_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["armeabi_v7a_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["armeabi_v7a_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["armeabi_v7a_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["x86_64_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["x86_64_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["x86_64_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["x86_64_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["arm64_v8a_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["arm64_v8a_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["arm64_v8a_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["arm64_v8a_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["riscv64_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["riscv64_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["riscv64_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["riscv64_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }),
+    inputs = ["//engine/src/flutter:tools/androidx/files.json"],
+    script = "//engine/src/flutter:tools/androidx/generate_pom_file.py",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_action(
+    name = "pom_content_hash_libflutter",
+    args = [
+        "--destination",
+        "$(built content_hash)",
+        "--engine-version",
+        CONTENT_HASH,
+        "--engine-artifact-id",
+    ] + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["x86_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["x86_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["x86_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["x86_jit_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["armeabi_v7a_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["armeabi_v7a_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["armeabi_v7a_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["armeabi_v7a_jit_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["x86_64_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["x86_64_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["x86_64_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["x86_64_jit_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["arm64_v8a_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["arm64_v8a_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["arm64_v8a_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["arm64_v8a_jit_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["riscv64_debug"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["riscv64_profile"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["riscv64_release"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["riscv64_jit_release"],
+        "//conditions:default": [],
+    }),
+    build_outputs = select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["content_hash/x86_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["content_hash/x86_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["content_hash/x86_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["content_hash/x86_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["content_hash/armeabi_v7a_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["content_hash/armeabi_v7a_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["content_hash/armeabi_v7a_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["content_hash/armeabi_v7a_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["content_hash/x86_64_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["content_hash/x86_64_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["content_hash/x86_64_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["content_hash/x86_64_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["content_hash/arm64_v8a_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["content_hash/arm64_v8a_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["content_hash/arm64_v8a_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["content_hash/arm64_v8a_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["content_hash/riscv64_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["content_hash/riscv64_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["content_hash/riscv64_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["content_hash/riscv64_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["content_hash/x86_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["content_hash/x86_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["content_hash/x86_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["content_hash/x86_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["content_hash/armeabi_v7a_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["content_hash/armeabi_v7a_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["content_hash/armeabi_v7a_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["content_hash/armeabi_v7a_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["content_hash/x86_64_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["content_hash/x86_64_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["content_hash/x86_64_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["content_hash/x86_64_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["content_hash/arm64_v8a_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["content_hash/arm64_v8a_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["content_hash/arm64_v8a_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["content_hash/arm64_v8a_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["content_hash/riscv64_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["content_hash/riscv64_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["content_hash/riscv64_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["content_hash/riscv64_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }),
+    inputs = ["//engine/src/flutter:tools/androidx/files.json"],
+    script = "//engine/src/flutter:tools/androidx/generate_pom_file.py",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_action(
+    name = "pom_embedding",
+    args = [
+        "--destination",
+        "$(built .)",
+        "--engine-version",
+        ENGINE_VERSION,
+        "--engine-artifact-id",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release"],
+        "//conditions:default": [],
+    }) + [
+        "--include-embedding-dependencies",
+        "true",
+    ],
+    build_outputs = select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }),
+    inputs = ["//engine/src/flutter:tools/androidx/files.json"],
+    script = "//engine/src/flutter:tools/androidx/generate_pom_file.py",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_action(
+    name = "pom_content_hash_embedding",
+    args = [
+        "--destination",
+        "$(built content_hash)",
+        "--engine-version",
+        CONTENT_HASH,
+        "--engine-artifact-id",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release"],
+        "//conditions:default": [],
+    }) + [
+        "--include-embedding-dependencies",
+        "true",
+    ],
+    build_outputs = select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["content_hash/flutter_embedding_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["content_hash/flutter_embedding_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["content_hash/flutter_embedding_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["content_hash/flutter_embedding_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["content_hash/flutter_embedding_debug.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["content_hash/flutter_embedding_profile.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["content_hash/flutter_embedding_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["content_hash/flutter_embedding_jit_release.maven-metadata.xml"],
+        "//conditions:default": [],
+    }),
+    inputs = ["//engine/src/flutter:tools/androidx/files.json"],
+    script = "//engine/src/flutter:tools/androidx/generate_pom_file.py",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
 # `flutter_runtime_mode == "jit_release" && target_cpu == "arm"`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_flutter_runtime_mode_jit_release_and_target_cpu_arm",
@@ -1612,6 +2385,55 @@ zip_bundle(
 )
 
 zip_bundle(
+    name = "flutter_jar_zip",
+    files = {"flutter.jar": ":android_jar"},
+    output = select({
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm": "android-arm-jit-release/artifacts.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/artifacts.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/artifacts.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/artifacts.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_x86": "android-x86-jit-release/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm": "android-arm-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64": "android-x64-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x86": "android-x86-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm": "android-arm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "android-x64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x86": "android-x86/artifacts.zip",
+        "//conditions:default": None,
+    }),
+    sources = {"flutter.jar": "flutter.jar"},
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":android_jar"],
+)
+
+zip_bundle(
     name = "gen_snapshot",
     files = {"gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host"},
     output = select({
@@ -1718,7 +2540,10 @@ selects.config_setting_group(
 
 filegroup(
     name = "android",
-    srcs = [":android_symbols"] + select({
+    srcs = [
+        ":android_symbols",
+        ":flutter_jar_zip",
+    ] + select({
         "@platforms//cpu:x86_32": [],
         "//conditions:default": [
             ":gen_snapshot",  # target_cpu != "x86"
@@ -1791,6 +2616,263 @@ selects.config_setting_group(
     match_all = [
         "@platforms//os:android",
         "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `current_cpu == "x86" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_x86_and_flutter_runtime_mode_debug",
+    match_all = [
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `current_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_x86_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `current_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_x86_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `current_cpu == "x86" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_x86_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `current_cpu == "arm" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_arm_and_flutter_runtime_mode_debug",
+    match_all = [
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `current_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `current_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `current_cpu == "arm" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_arm_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `current_cpu == "x64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_x64_and_flutter_runtime_mode_debug",
+    match_all = [
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `current_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `current_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `current_cpu == "x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `current_cpu == "arm64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_arm64_and_flutter_runtime_mode_debug",
+    match_all = [
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `current_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `current_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `current_cpu == "arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `current_cpu == "riscv64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_riscv64_and_flutter_runtime_mode_debug",
+    match_all = [
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `current_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `current_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `current_cpu == "riscv64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `impeller_enable_vulkan && flutter_runtime_mode == "debug" && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_vulkan_and_flutter_runtime_mode_debug_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:vulkan",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `impeller_enable_vulkan && flutter_runtime_mode == "debug" && target_cpu == "arm64" && stripped_symbols`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_vulkan_and_flutter_runtime_mode_debug_and_target_cpu_arm64_and_stripped_symbols",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:vulkan",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/build/bazel:stripped_enabled",
+    ],
+)
+
+# `impeller_enable_vulkan && flutter_runtime_mode == "debug" && target_cpu == "arm64" && !stripped_symbols`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_vulkan_and_flutter_runtime_mode_debug_and_target_cpu_arm64_and_not_stripped_symbols",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:vulkan",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/build/bazel:stripped_disabled",
+    ],
+)
+
+# `flutter_runtime_mode == "profile" && current_cpu == "x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_profile_and_current_cpu_x86",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_profile",
+        "@platforms//cpu:x86_32",
+    ],
+)
+
+# `flutter_runtime_mode == "profile" && current_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_profile_and_current_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_profile",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `flutter_runtime_mode == "profile" && current_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_profile_and_current_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_profile",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `flutter_runtime_mode == "profile" && current_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_profile_and_current_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_profile",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `flutter_runtime_mode == "profile" && current_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_profile_and_current_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_profile",
+        "@platforms//cpu:riscv64",
     ],
 )
 

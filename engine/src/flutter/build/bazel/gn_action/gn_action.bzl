@@ -22,7 +22,10 @@ the paths in the arguments as tokens this rule expands:
                       action's own `build_outputs`, or one that the closure
                       of its `deps` places there (BuildDirectoryInfo: another
                       action's build output, a linked shared library, its
-                      lib.stripped/ copy), which the script then reads.
+                      lib.stripped/ copy), which the script then reads; or
+                      a directory holding such a file (`.` for the build
+                      directory itself), as the directory the action's own
+                      build outputs are declared in.
 
 The script runs with the checkout's hermetic Python (`@cpython3`), from the
 execution root, in a sandbox that holds exactly the declared inputs: an
@@ -79,17 +82,28 @@ def expand_gn_paths(ctx, arg, targets, placed = {}, used = None):
         elif kind == "src":
             value = _src_path(ctx, path)
         elif kind == "built":
-            if path not in placed:
+            if path in placed:
+                value = placed[path].path
+                if used != None:
+                    used.append(placed[path])
+            elif path in (".", "") or [p for p in placed if p.startswith(path + "/")]:
+                # The build directory itself, or a directory under it that
+                # holds a placed file: where this rule's own build outputs
+                # are declared (GN's `rebase_path(root_build_dir,
+                # root_build_dir)`, a script's output directory).
+                value = _built_root(ctx) + ("/" + path if path not in (".", "") else "")
+            else:
                 fail("%s: nothing among the deps places %s in the build directory (argument %r)" % (ctx.label, path, arg))
-            value = placed[path].path
-            if used != None:
-                used.append(placed[path])
         else:
             # Bazel's own: $(execpath ...), $(rootpath ...), $(location ...).
             value = ctx.expand_location("$(" + token + ")", targets)
         out += rest[:start] + value
         rest = rest[end + 1:]
     return out + rest
+
+def _built_root(ctx):
+    """Where a rule's build outputs are declared: its package's output directory."""
+    return ctx.bin_dir.path + "/" + _src_path(ctx, ctx.label.package)
 
 def _src_path(ctx, path):
     root = ctx.label.workspace_root
@@ -150,15 +164,48 @@ PYTHON_ATTRS = {
     "_python_runtime": attr.label(default = "@cpython3//:runtime"),
 }
 
+def _platform_transition_impl(settings, attr):
+    if not attr.platform:
+        return {"//command_line_option:platforms": settings["//command_line_option:platforms"]}
+    return {"//command_line_option:platforms": [str(attr.platform)]}
+
+# GN's `label(:toolchain)` on an action's dependency edge (the Android
+# embedding's jar packing the Vulkan validation layer built by
+# clang_arm64_apilevel26): the dependency is built for the `platform`.
+_platform_transition = transition(
+    implementation = _platform_transition_impl,
+    inputs = ["//command_line_option:platforms"],
+    outputs = ["//command_line_option:platforms"],
+)
+
+def _platform_dep_entries(ctx, dep):
+    """A platform_dep's build-directory entries, under GN's directory for its toolchain.
+
+    GN writes a non-default toolchain's outputs under a directory named for
+    it (clang_arm64_apilevel26/libVkLayer_khronos_validation.so) -- except
+    what its link tools write relative to the build directory itself: the
+    Android toolchain's lib.stripped/ copies.
+    """
+    entries = []
+    for file, path in collected_build_directory_entries(dep):
+        if ctx.attr.platform_build_dir and not path.startswith("lib.stripped/"):
+            path = ctx.attr.platform_build_dir + "/" + path
+        entries.append((file, path))
+    return entries
+
 def _gn_action_impl(ctx):
     outputs = [ctx.actions.declare_file(path) for path in ctx.attr.outputs]
 
     # The files of the build directory the script may name ($(built PATH)):
-    # what the deps' closures place there, and the action's own build
-    # outputs, declared under this package at the same paths.
+    # what the deps' closures place there (a platform_dep's under its
+    # toolchain's directory), and the action's own build outputs, declared
+    # under this package at the same paths.
     placed = {}
     for dep in ctx.attr.deps:
         for file, path in collected_build_directory_entries(dep):
+            placed[path] = file
+    for dep in ctx.attr.platform_deps:
+        for file, path in _platform_dep_entries(ctx, dep):
             placed[path] = file
     built = [ctx.actions.declare_file(path) for path in ctx.attr.build_outputs]
     for file, path in zip(built, ctx.attr.build_outputs):
@@ -168,13 +215,13 @@ def _gn_action_impl(ctx):
         if path not in placed:
             fail("%s: nothing among the deps places %s (of build_inputs) in the build directory" % (ctx.label, path))
         read.append(placed[path])
-    dep_files = [f for dep in ctx.attr.deps for f in dep[DefaultInfo].files.to_list()]
+    dep_files = [f for dep in ctx.attr.deps + ctx.attr.platform_deps for f in dep[DefaultInfo].files.to_list()]
 
     # A target among both srcs and deps (GN's `sources +=
     # get_target_outputs(":gen")` beside the dep on it) is one target for
     # the lookup.
     targets = {}
-    for target in ctx.attr.srcs + ctx.attr.inputs + ctx.attr.deps + ctx.attr.tools:
+    for target in ctx.attr.srcs + ctx.attr.inputs + ctx.attr.deps + ctx.attr.platform_deps + ctx.attr.tools:
         if str(target.label) not in targets:
             targets[str(target.label)] = target
     arguments = [expand_gn_paths(ctx, arg, targets.values(), placed, read) for arg in ctx.attr.args]
@@ -199,10 +246,16 @@ def _gn_action_impl(ctx):
     package = gn_package(ctx)
     return [
         DefaultInfo(files = depset(outputs + built)),
-        BuildDirectoryInfo(entries = depset(([
-            (output, "gen/" + package + "/" + path)
-            for output, path in zip(outputs, ctx.attr.outputs)
-        ] if package != None else []) + list(zip(built, ctx.attr.build_outputs)))),
+        # The platform_deps' placements travel with the action's own: the
+        # aspect that collects them for an install follows deps, not
+        # platform_deps (GN lays the toolchain's directory out the same way).
+        BuildDirectoryInfo(entries = depset(
+            ([
+                (output, "gen/" + package + "/" + path)
+                for output, path in zip(outputs, ctx.attr.outputs)
+            ] if package != None else []) + list(zip(built, ctx.attr.build_outputs)) +
+            [entry for dep in ctx.attr.platform_deps for entry in _platform_dep_entries(ctx, dep)],
+        )),
     ]
 
 def gn_package(ctx):
@@ -242,6 +295,21 @@ gn_action = rule(
             aspects = [build_directory_aspect],
             doc = "GN's `deps`: their outputs are inputs of the script, as GN's ordering made them available; " +
                   "what their closures place in the build directory, `$(built PATH)` and `build_inputs` may name.",
+        ),
+        "platform_deps": attr.label_list(
+            cfg = _platform_transition,
+            aspects = [build_directory_aspect],
+            doc = "GN's `deps` with a toolchain (`label($apilevel26_toolchain)`): built for `platform`; what their " +
+                  "closures place in the build directory sits under `platform_build_dir`, as GN's toolchain directory.",
+        ),
+        "platform": attr.label(
+            doc = "The platform the platform_deps are built for (the GN toolchain's; see toolchainPlatforms in the converter).",
+        ),
+        "platform_build_dir": attr.string(
+            doc = "GN's directory under the build directory for the platform's toolchain (`clang_arm64_apilevel26`).",
+        ),
+        "_allowlist_function_transition": attr.label(
+            default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
         ),
         "tools": attr.label_list(
             allow_files = True,

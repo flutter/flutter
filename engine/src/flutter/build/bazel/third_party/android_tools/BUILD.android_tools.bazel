@@ -52,10 +52,13 @@ filegroup(
 )
 
 # GN's ABIs and API levels (build/config/android/config.gni: android_api_level
-# is 24, 35 for riscv64), by the CPU name GN's android_cpu uses.
+# is 24, 35 for riscv64), by the CPU name GN's android_cpu uses -- and arm64
+# at API level 26 (build/toolchain/android's clang_arm64_apilevel26), the
+# toolchain of the Vulkan validation layer alone.
 ABIS = {
     "arm": ("arm-linux-androideabi", "21"),
     "arm64": ("aarch64-linux-android", "24"),
+    "arm64_api26": ("aarch64-linux-android", "26"),
     "x64": ("x86_64-linux-android", "24"),
     "x86": ("i686-linux-android", "21"),
     "riscv64": ("riscv64-linux-android", "35"),
