@@ -1110,8 +1110,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   /// host are not captured, so those elements keep receiving their own pointer
   /// events.
   void _capturePointerIfFlutterContent(DomPointerEvent event) {
-    // Events from the scene and from the hit test proxies inside the glass
-    // pane's shadow root are retargeted to the glass pane.
+    // Events from the scene inside the glass pane's shadow root are retargeted
+    // to the glass pane, so a press on Flutter content targets either the view
+    // root or the glass pane.
     final DomEventTarget? target = event.target;
     if (target != _viewTarget && target != _view.dom.platformViewsHost) {
       return;
@@ -1123,7 +1124,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     try {
       _viewTarget.setPointerCapture(pointerId);
     } catch (_) {
-      // Throws if the pointer is not active, as with synthetic events in tests.
+      // Capture is best-effort. `setPointerCapture` throws if the pointer is
+      // not active (as with synthetic events) or the element is disconnected.
+      // The press itself has already been reported either way.
     }
   }
 
@@ -1170,7 +1173,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     // Move event listeners are attached to `_globalTarget` rather than
     // `_viewTarget`. When a pointer is captured to `_viewTarget` on pointerdown,
     // its move events are routed to `_viewTarget` even over iframes and bubble
-    // to `_globalTarget`.
+    // to `_globalTarget`. Pointers that are not captured (hovers, and presses on
+    // platform views or the text editing host) must still be tracked, including
+    // outside of the view, which a listener on `_viewTarget` alone would miss.
     //
     // TODO(dkwingsmt): Investigate whether we can configure the behavior for
     // `_viewTarget`. https://github.com/flutter/flutter/issues/157968
@@ -1247,9 +1252,10 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     }, checkModifiers: false);
 
-    // The browser can take the capture away without a `pointerup` or a
-    // `pointercancel`, for example when the window loses focus (Alt-Tab, OS
-    // dialogs) or the view root is removed. If buttons are still pressed, the
+    // The capture can be taken away without a `pointerup` or a `pointercancel`,
+    // for example when the page calls `releasePointerCapture` or captures the
+    // pointer to another element, or, in some browsers, when the window loses
+    // focus. If buttons are still pressed, the
     // press will never be released, so cancel it. The event bubbles, so ignore
     // captures lost by descendants (such as platform view content); only the
     // capture this adapter set on the view root matters.

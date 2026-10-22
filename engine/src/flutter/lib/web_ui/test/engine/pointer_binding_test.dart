@@ -3063,11 +3063,11 @@ void testMain() {
   }
 
   /// The changes reported in [packets], in order.
-  List<ui.PointerChange> changes(List<ui.PointerDataPacket> packets) =>
+  List<ui.PointerChange> pointerChanges(List<ui.PointerDataPacket> packets) =>
       _allPointerData(packets).map((ui.PointerData d) => d.change).toList();
 
   /// The devices reported in [packets].
-  Set<int> devices(List<ui.PointerDataPacket> packets) =>
+  Set<int> pointerDevices(List<ui.PointerDataPacket> packets) =>
       _allPointerData(packets).map((ui.PointerData d) => d.device).toSet();
 
   /// Presses and releases the primary mouse button on [target] with
@@ -3080,7 +3080,7 @@ void testMain() {
     rootElement.dispatchEvent(
       context.mouseUp(pointerId: pointerId, button: 0, buttons: 0, clientX: 10, clientY: 10),
     );
-    return changes(packets).where((ui.PointerChange c) => c == ui.PointerChange.down).length;
+    return pointerChanges(packets).where((ui.PointerChange c) => c == ui.PointerChange.down).length;
   }
 
   /// Builds a cancelable pointer event of [type], such as the
@@ -3168,14 +3168,14 @@ void testMain() {
         .multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 20, clientY: 10)])
         .forEach(rootElement.dispatchEvent);
 
-    expect(changes(packets), <ui.PointerChange>[
+    expect(pointerChanges(packets), <ui.PointerChange>[
       ui.PointerChange.add,
       ui.PointerChange.down,
       ui.PointerChange.move,
       ui.PointerChange.up,
       ui.PointerChange.remove,
     ]);
-    expect(devices(packets), <int>{2});
+    expect(pointerDevices(packets), <int>{2});
     final List<ui.PointerData> data = _allPointerData(packets);
     expect(data[1].physicalX, equals(10 * dpi));
     expect(data[2].physicalX, equals(20 * dpi));
@@ -3191,8 +3191,8 @@ void testMain() {
     packets.clear();
 
     // The browser takes the capture away while the button is still pressed,
-    // e.g. because the page called `releasePointerCapture` or the view root
-    // was removed. No `pointerup` follows, so the press is cancelled.
+    // e.g. because the page called `releasePointerCapture`. No `pointerup`
+    // follows, so the press is cancelled.
     rootElement.dispatchEvent(
       pointerEvent('lostpointercapture', pointerId: 1, buttons: 1, clientX: 0, clientY: 0),
     );
@@ -3228,7 +3228,7 @@ void testMain() {
 
     rootElement.dispatchEvent(context.primaryDown(clientX: 10, clientY: 10));
     rootElement.dispatchEvent(context.primaryUp(clientX: 10, clientY: 10));
-    expect(changes(packets), <ui.PointerChange>[
+    expect(pointerChanges(packets), <ui.PointerChange>[
       ui.PointerChange.add,
       ui.PointerChange.down,
       ui.PointerChange.up,
@@ -3256,7 +3256,7 @@ void testMain() {
     packets.clear();
 
     rootElement.dispatchEvent(pointerEvent('lostpointercapture', pointerId: 1, buttons: 3));
-    expect(changes(packets), <ui.PointerChange>[ui.PointerChange.cancel]);
+    expect(pointerChanges(packets), <ui.PointerChange>[ui.PointerChange.cancel]);
     expect(_allPointerData(packets).single.buttons, equals(0));
     packets.clear();
 
@@ -3287,15 +3287,21 @@ void testMain() {
     rootElement.dispatchEvent(
       pointerEvent('lostpointercapture', pointerId: 2, pointerType: 'touch', buttons: 1),
     );
-    expect(changes(packets), <ui.PointerChange>[ui.PointerChange.cancel, ui.PointerChange.remove]);
-    expect(devices(packets), <int>{2});
+    expect(pointerChanges(packets), <ui.PointerChange>[
+      ui.PointerChange.cancel,
+      ui.PointerChange.remove,
+    ]);
+    expect(pointerDevices(packets), <int>{2});
     packets.clear();
 
     // Touch 3 is still down until WebKit abandons it. Touch 2 is forgotten, so
     // it is neither cancelled again nor released.
     rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2, 3]));
-    expect(changes(packets), <ui.PointerChange>[ui.PointerChange.cancel, ui.PointerChange.remove]);
-    expect(devices(packets), <int>{3});
+    expect(pointerChanges(packets), <ui.PointerChange>[
+      ui.PointerChange.cancel,
+      ui.PointerChange.remove,
+    ]);
+    expect(pointerDevices(packets), <int>{3});
     packets.clear();
     context
         .multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 10, clientY: 10)])
@@ -3319,7 +3325,7 @@ void testMain() {
     expect(packets, isEmpty);
 
     rootElement.dispatchEvent(context.primaryUp(clientX: 10, clientY: 10));
-    expect(changes(packets), <ui.PointerChange>[ui.PointerChange.up]);
+    expect(pointerChanges(packets), <ui.PointerChange>[ui.PointerChange.up]);
   });
 
   test('throws if browser does not support pointer events', () {
