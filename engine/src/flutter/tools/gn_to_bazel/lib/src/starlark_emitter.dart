@@ -518,6 +518,11 @@ final class _Emitter {
   /// Every target of the file, by name.
   final Map<String, GnTarget> localTargets = <String, GnTarget>{};
 
+  /// The condition the target being converted exists under (its items carry
+  /// it no longer: _dropImplied), for what the enumeration of a string's
+  /// variables can rule out (`target_cpu == "wasm"` under is_android).
+  Condition _targetCondition = Condition.always;
+
   /// The targets of the file that are not converted (the evaluation's
   /// skipped and the run's skipTargets): a template's label list leaves a
   /// dependency on one out, there being no target to name.
@@ -593,7 +598,9 @@ final class _Emitter {
 
   void convert(GnTarget target) {
     final int first = rules.length;
+    _targetCondition = target.condition;
     _convertTarget(target);
+    _targetCondition = Condition.always;
     // A target GN defines only under a condition exists in Bazel but is
     // incompatible wherever the condition does not hold: dependents cannot
     // build it there, as in GN they could not name it. The settings the
@@ -1604,7 +1611,7 @@ final class _Emitter {
       for (final name in names) {
         combinations = <Map<String, String>>[
           for (final partial in combinations)
-            for (final String option in comparisonSettings[name]!.keys)
+            for (final String option in enumeratedValues[name] ?? comparisonSettings[name]!.keys)
               if (_assumptionsAllow(name, option)) <String, String>{...partial, name: option},
         ];
       }
@@ -1613,7 +1620,7 @@ final class _Emitter {
         for (final MapEntry<String, String> b in bound.entries) {
           condition = condition.and(ConditionComparison(b.key, true, b.value));
         }
-        if (condition == Condition.never) {
+        if (condition == Condition.never || _targetCondition.and(condition) == Condition.never) {
           continue;
         }
         final String text = value.parts
@@ -2448,6 +2455,17 @@ final class _Emitter {
           }
         case 'lib_dirs':
           _requireEmpty(variable);
+        case 'inputs':
+          // Files the link reads besides its objects: the version script
+          // ldflags names (the Android shell's android_exports.lst), which
+          // the ldflags rendering lists as a linker input already; GN's
+          // `inputs` declares the same dependency, so the files join
+          // additional_linker_inputs (once).
+          _forEachItem(variable, into: rule.list('additional_linker_inputs'), (_Element e) {
+            final String file = _filePath(_string(e), e.assignment.location);
+            final label = file.startsWith('//') || file.startsWith('@') ? file : ':$file';
+            rule.list('additional_linker_inputs').addUnique(e.condition, _Item(label));
+          });
         case 'output_name' when target.rule == 'source_set' || shared:
           // A source_set produces no file, so GN ignores the name (harfbuzz's
           // GN sets one); a shared library's is in the rule's name already;
@@ -3566,7 +3584,53 @@ final class _Emitter {
     required bool splitHeaders,
   }) {
     _forEachItem(variable, into: rule.list('srcs'), (_Element e) {
+      // The outputs of another target (`sources += get_target_outputs(
+      // ":icudtl_asm")`, the Android shell's assembly of icudtl.dat): the
+      // target itself, whose files Bazel compiles by their extensions.
+      if (e.value case GnTargetOutputsValue(:final String label, :final List<String> patterns)) {
+        if (patterns.isNotEmpty) {
+          throw GnError(e.assignment.location, 'filtered outputs of $label in sources');
+        }
+        rule
+            .list('srcs')
+            .addUnique(
+              e.condition,
+              _item(
+                _localLabel(bazelLabel(label, package: gnPackage, location: e.assignment.location)),
+                e,
+              ),
+            );
+        // bin_to_assembly's output `.incbin`s its input by path: the compile
+        // of the assembly reads the blob too (lib/snapshot's hand-written
+        // file lists them the same way).
+        final int colon = label.lastIndexOf(':');
+        final GnTarget? producer = label.substring(0, colon) == gnPackage
+            ? localTargets[label.substring(colon + 1)]
+            : null;
+        if (producer != null && producer.rule == 'bin_to_assembly') {
+          final String? input = _singleString(producer.variables['input']);
+          if (input != null) {
+            rule
+                .list('additional_compiler_inputs')
+                .addUnique(e.condition, _Item(_filePath(input, e.assignment.location)));
+          }
+        }
+        return;
+      }
       final String path = _string(e);
+      // A generated file named by its build-directory path (the embedder's
+      // `$root_build_dir/gen/.../icudtl.dat.S`, the Android shell's assembly
+      // of icudtl.dat): the target that produces it, as a zip_bundle's
+      // entries resolve (_buildOutputLabel).
+      if (path.startsWith('$buildDirRoot/') || path.startsWith('$genDirRoot/')) {
+        rule
+            .list('srcs')
+            .addUnique(
+              e.condition,
+              _item(_localLabel(_buildOutputLabel(path, target, e.assignment.location)), e),
+            );
+        return;
+      }
       final int dot = path.lastIndexOf('.');
       final String extension = dot < 0 ? '' : path.substring(dot);
       final String list;
@@ -3945,6 +4009,7 @@ final class _Emitter {
     'name',
     'size',
     'testonly',
+    'src',
     'srcs',
     'out',
     'outs',
