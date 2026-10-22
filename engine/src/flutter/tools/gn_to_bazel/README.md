@@ -278,9 +278,15 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    the targets it defines are ordinary targets (the first one named
    `target_name` takes the invocation's comments). `forward_variables_from`,
    `target(type, name)`, scope values (`x.member`, `defined(x.member)`),
-   `get_path_info(p, "abspath")` (of a path or a list of them), short-circuit `&&`/`||` and integer
-   comparisons are understood; `rebase_path(x, root_build_dir)` is a marked
-   absolute path (of each element, for a list), `rebase_path(x, "", base)`
+   `get_path_info(p, "abspath")` (of a path or a list of them; `"extension"`,
+   `"name"` and `"file"` of a path), `string_replace()`, a list's element by
+   index (`list[i]`, nested lists included) and its comparison with `""`,
+   short-circuit `&&`/`||` and integer
+   comparisons are understood; a variable an assumption gives one value per
+   CPU (`android_app_abi`, `GnCasedValue`) evaluates to its cases, which
+   end as a `select()` over the CPU settings; `rebase_path(x, root_build_dir)` is a marked
+   absolute path (of each element, for a list), so is the three-argument
+   `rebase_path(x, root_build_dir, root_build_dir)`, `rebase_path(x, "", base)`
    the same for `x` under an absolute `base` (sky_engine's way of naming
    the Dart SDK's library sources through its `<library>_sources.gni`
    lists), `rebase_path(x, ".", base)` that path unmarked (a script named
@@ -378,8 +384,21 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    becomes a marked path that only an action's `args` may carry, and the
    emitter writes it as the rule's token -- `$(execpath label)` for a source
    file (declared as an input if GN did not), `$(src dir)` for a source
-   directory, `$(gen path)` for anything generated; outputs must be under
-   `$target_gen_dir`. An action known by its script (`scriptMappings`:
+   directory, `$(gen path)` for anything generated, `$(built path)` for a
+   file at its path under the build directory itself. Outputs under
+   `$target_gen_dir` are the rule's `outputs`; outputs under the build
+   directory itself (`$root_out_dir/flutter.jar`, the Android embedding's
+   jars) are its `build_outputs`, which `install` lays at those paths and
+   other actions find through their `deps` (`build_inputs`:
+   `$root_build_dir/libflutter.so`, placed by the library's rule); an
+   output that is a directory (the javadoc tree) is in `output_dirs`.
+   Programs an action runs (GN's `deps` on `//third_party/java/openjdk`'s
+   tools, `toolRuntimes`) are `tools`, built for the execution platform;
+   a dependency GN names with a toolchain (`label($apilevel26_toolchain)`)
+   is a `platform_deps` entry built for that toolchain's platform
+   (`toolchainPlatforms`), its files placed under GN's directory for the
+   toolchain (`toolchainDirectories`: `clang_arm64_apilevel26/`). An
+   action known by its script (`scriptMappings`:
    `build/dart/tools/dart_pkg.py`, which assembles sky_engine's package
    directory) is converted as a template invocation would be, its
    variables the macro's arguments (`dart_pkg` in `build/bazel/dart`).
@@ -453,10 +472,16 @@ so that the attribute becomes a `select()`; a reference to a variable whose
 values the mapping enumerates (`$flutter_runtime_mode`) is spelled out as
 those values, one case each, since a `select()` cannot nest one.
 
-`foreach(x, list) { ... }` runs its body once per element with `x` bound to
-it in the enclosing scope, as GN does (the loop opens no scope; `x` is
-restored afterwards), an element a condition added to the list running the
-body under that condition. A list the converter cannot enumerate -- the
+`foreach(x, list) { ... }` runs its body once per element, an element a
+condition added to the list running the body under that condition. GN runs
+the body in the enclosing scope itself; the converter runs each pass in a
+scope of its own that holds the loop variable and what the body defines
+afresh (`extension = get_path_info(source, "extension")`), while an
+assignment to a variable of an enclosing scope (`outputs += [...]`) lands
+where GN puts it. The difference is deliberate: when the elements hold under
+conditions (the ABI jars' names by CPU), one pass's values would otherwise
+become cases of the next pass's variable. A list the converter cannot
+enumerate -- the
 outputs of a target, `get_target_outputs()` -- is one symbolic element, the
 outputs themselves, which the body's expressions carry along
 (`rebase_path(x, root_build_dir)` on it is the outputs at their
@@ -484,8 +509,10 @@ executables stay binaries; `displayTests` and
 bus, which the run inherited from the bot), and which executables need the GPU test backends next
 to them (`gpuBackendTests`: suites, and `flutter_tester_opengles`, an
 ordinary executable that the Dart suites run and that carries them as
-runfiles). A test executable's `output_name` must be its own name (the
-file Bazel produces anyway); a binary's names the rule, as above.
+runfiles). A test executable with an `output_name` of its own is named
+after it, with an alias under the GN name, as a binary is (above), since
+the file Bazel produces is the rule's name and `run_tests.py` runs the
+file.
 Extending the converter's coverage means adding to these tables.
 
 ### Strict mode
