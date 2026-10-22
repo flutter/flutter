@@ -73,7 +73,7 @@ const CFAbsoluteTime kTestTimeout = 30.0;
 // Runs the macOS run loop until the predicate evaluates to true or the given
 // timeout is exceeded. The predicate is checked after each run loop source has
 // been handled. ADD_FAILURE is called on timeout.
-static void RunLoopUntilPredicate(NSTimeInterval timeout, BOOL (^predicate)(void)) {
+static void RunLoopUntilPredicate(NSTimeInterval timeout, bool (^predicate)(void)) {
   CFAbsoluteTime const deadline = CFAbsoluteTimeGetCurrent() + timeout;
   while (!predicate()) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.05, true);
@@ -359,7 +359,7 @@ TEST_F(FlutterWindowControllerTest, SatelliteWindowRunsPositionCallbackOnce) {
                  }
                      delay:0];
   RunLoopUntilPredicate(1.0, ^{
-    return NSEqualRects(satelliteWindow.frame, userMovedFrame);
+    return NSEqualRects(satelliteWindow.frame, userMovedFrame) == YES;
   });
 
   EXPECT_EQ(position_callback_calls, 1);
