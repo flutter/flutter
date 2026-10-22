@@ -41,11 +41,21 @@ class ExtensionTarget extends Target {
     assembleTarget.targetPlatform,
   );
 
+  /// Static input sources for this target.
+  ///
+  /// [resolveInputs] resolves the concrete input files at build time by
+  /// supplying [BuildMode] from the build [Environment] to mode-dependent
+  /// artifacts.
   @override
   late final List<Source> inputs = assembleTarget.inputs
       .map((ExtensionSource s) => _toHostSource(s, defaultTargetPlatform: _defaultTargetPlatform))
       .toList();
 
+  /// Static output sources for this target.
+  ///
+  /// [resolveOutputs] resolves the concrete output files at build time by
+  /// supplying [BuildMode] from the build [Environment] to mode-dependent
+  /// artifacts.
   @override
   late final List<Source> outputs = assembleTarget.outputs
       .map((ExtensionSource s) => _toHostSource(s, defaultTargetPlatform: _defaultTargetPlatform))
@@ -57,29 +67,20 @@ class ExtensionTarget extends Target {
   }
 
   @override
-  ResolvedFiles resolveInputs(Environment environment) {
-    final BuildMode? mode = _resolveEnvironmentBuildMode(environment);
-    final List<Source> resolvedInputs = assembleTarget.inputs
-        .map(
-          (ExtensionSource s) => _toHostSource(
-            s,
-            defaultBuildMode: mode,
-            defaultTargetPlatform: _defaultTargetPlatform,
-          ),
-        )
-        .toList();
-    final collector = SourceVisitor(environment);
-    for (final source in resolvedInputs) {
-      source.accept(collector);
-    }
-    depfiles.forEach(collector.visitDepfile);
-    return collector;
-  }
+  ResolvedFiles resolveInputs(Environment environment) =>
+      _resolveSources(assembleTarget.inputs, environment, inputs: true);
 
   @override
-  ResolvedFiles resolveOutputs(Environment environment) {
+  ResolvedFiles resolveOutputs(Environment environment) =>
+      _resolveSources(assembleTarget.outputs, environment, inputs: false);
+
+  ResolvedFiles _resolveSources(
+    List<ExtensionSource> sources,
+    Environment environment, {
+    required bool inputs,
+  }) {
     final BuildMode? mode = _resolveEnvironmentBuildMode(environment);
-    final List<Source> resolvedOutputs = assembleTarget.outputs
+    final List<Source> resolvedSources = sources
         .map(
           (ExtensionSource s) => _toHostSource(
             s,
@@ -88,8 +89,8 @@ class ExtensionTarget extends Target {
           ),
         )
         .toList();
-    final collector = SourceVisitor(environment, false);
-    for (final source in resolvedOutputs) {
+    final collector = SourceVisitor(environment, inputs);
+    for (final source in resolvedSources) {
       source.accept(collector);
     }
     depfiles.forEach(collector.visitDepfile);
