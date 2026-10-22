@@ -187,7 +187,19 @@ def _zip_bundle_impl(ctx):
     for destination, target in ctx.attr.files.items():
         files = target[DefaultInfo].files.to_list()
         if len(files) != 1:
-            fail("%s: %s should be one file for %s, is %s" % (ctx.label, target.label, destination, files))
+            # A target of several files (an action with several build
+            # outputs: the Android embedding's android_jar, flutter.jar and
+            # the engine's jar): the one at the entry's GN source path
+            # under the build directory (BuildDirectoryInfo).
+            source = ctx.attr.sources.get(destination)
+            at_source = [
+                file
+                for file, path in (target[BuildDirectoryInfo].entries.to_list() if BuildDirectoryInfo in target else [])
+                if path == source
+            ]
+            if len(at_source) != 1:
+                fail("%s: %s should be one file for %s, or place one at %s; has %s" % (ctx.label, target.label, destination, source, files))
+            files = at_source
 
         # An executable or shared library goes in as GN's link tool leaves
         # it in the build root: stripped (build_directory.bzl).

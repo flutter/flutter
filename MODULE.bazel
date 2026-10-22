@@ -96,9 +96,11 @@ use_repo(
     "sysroot_linux_x64",
     "vector_math",
     "vulkan-headers",
+    "vulkan-utility-libraries",
     "vulkan_deps_tree",
     "vulkan_memory_allocator",
     "vulkan_memory_allocator_tree",
+    "vulkan_validation_layers",
     "wuffs",
     "zlib",
 )
@@ -116,6 +118,10 @@ register_toolchains(
     # The arm64 cross build (tools/gn --target-os=linux --linux-cpu=arm64),
     # selected through its platform, //engine/src/flutter/build/bazel/toolchains:linux_arm64.
     "//engine/src/flutter/build/bazel/toolchains:linux_arm64_clang_toolchain",
+    # arm64 at API level 26 (the Vulkan validation layer's; GN's
+    # clang_arm64_apilevel26) before the arm64 toolchain, which matches its
+    # platform too: the first registered match wins.
+    "//engine/src/flutter/build/bazel/toolchains:android_arm64_api26_clang_toolchain",
     "//engine/src/flutter/build/bazel/toolchains:android_arm64_clang_toolchain",
     "//engine/src/flutter/build/bazel/toolchains:android_x64_clang_toolchain",
     "//engine/src/flutter/build/bazel/toolchains:android_arm_clang_toolchain",

@@ -493,6 +493,28 @@ final class GnStringValue extends GnValue {
   String toString() => '"$value"';
 }
 
+/// A list held as one value: an element of a list that is itself a list
+/// (the validation layers' `layers = [ [ "khronos_validation", vvl_sources,
+/// [ ":glslang" ], [] ] ]`, which a `foreach` takes apart with
+/// `layer_info[0]`). Read by index, a list element is the list again.
+final class GnListValue extends GnValue {
+  const GnListValue(this.items);
+
+  final List<GnValue> items;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GnListValue &&
+      other.items.length == items.length &&
+      Iterable<int>.generate(items.length).every((int i) => other.items[i] == items[i]);
+
+  @override
+  int get hashCode => Object.hashAll(items);
+
+  @override
+  String toString() => '[${items.join(', ')}]';
+}
+
 final class GnBoolValue extends GnValue {
   const GnBoolValue(this.value);
 
@@ -2202,26 +2224,32 @@ final class _Evaluator {
       );
     }
     // Elements that hold under a condition of their own (read from a
-    // variable with conditional appends) become appends under that
-    // condition, in order of first appearance.
-    final groups = <Condition, List<_Value>>{};
+    // variable with conditional appends, or a cased string among them)
+    // become appends under that condition: one per run of elements under
+    // one condition, in the elements' order, so that an argument list
+    // keeps its order (`[ "--platform", _platform, dir ]` with _platform
+    // cased by OS) where the attribute is read in order.
+    final groups = <(Condition, List<_Value>)>[];
     for (final _Value item in value.items) {
-      groups.putIfAbsent(item.condition, () => <_Value>[]).add(item);
+      if (groups.isEmpty || groups.last.$1 != item.condition) {
+        groups.add((item.condition, <_Value>[]));
+      }
+      groups.last.$2.add(item);
     }
     if (groups.isEmpty) {
-      groups[Condition.always] = <_Value>[];
+      groups.add((Condition.always, <_Value>[]));
     }
     String op = reassignedEmpty ? '+=' : node.op;
     var first = true;
-    for (final MapEntry<Condition, List<_Value>> group in groups.entries) {
-      final Condition when = condition.and(group.key);
+    for (final (Condition groupCondition, List<_Value> groupItems) in groups) {
+      final Condition when = condition.and(groupCondition);
       if (when == Condition.never) {
         continue;
       }
-      if (op == '-=' && group.key != Condition.always) {
+      if (op == '-=' && groupCondition != Condition.always) {
         throw GnError(node.location, '-= of conditional elements is not supported');
       }
-      final List<_Value> items = group.value;
+      final items = groupItems;
       final bool anyItemComments = items.any((_Value i) => !i.comments.isEmpty);
       variable.assignments.add(
         GnAssignment(
@@ -2248,8 +2276,21 @@ final class _Evaluator {
   _Expression _expression(GnNode node, _Scope scope) {
     switch (node) {
       case GnList(:final List<GnNode> items):
+        // An element that is itself a list (a list literal, or a variable
+        // holding one) is one element, as in GN: a nested list, held as a
+        // value (GnListValue) for an index to take apart. A bare variable
+        // the converter does not evaluate (`[ "--mode", flutter_runtime_mode
+        // ]`) is read as a list of flags for want of knowing better; as an
+        // element it is the one string it must be.
         return _Expression(<_Value>[
-          for (final GnNode item in items) ..._expression(item, scope).items,
+          for (final GnNode item in items)
+            if (_expression(item, scope) case final _Expression e when e.isList)
+              if (e.items.length == 1 && e.items.single.value is GnReference)
+                e.items.single
+              else
+                _Value(_nestedList(e, item), _comments(item))
+            else
+              ..._expression(item, scope).items,
         ], isList: true);
       case GnBinary(op: '+', :final GnNode left, :final GnNode right):
         _Expression l = _expression(left, scope);
@@ -2301,8 +2342,11 @@ final class _Evaluator {
       case GnIdentifier(:final String name):
         return _variableValue(name, node, scope);
       case GnAccessor(:final String base, :final GnNode index):
+        if (index is GnLiteral && index.isInteger) {
+          return _indexed(base, int.parse(index.raw), node, scope);
+        }
         if (index is! GnIdentifier) {
-          throw GnError(node.location, 'only scope.member access is supported');
+          throw GnError(node.location, 'only scope.member and list[index] access is supported');
         }
         final GnVariable? member = _scopeVariables(base, node.location, scope)[index.name];
         if (member == null) {
@@ -2789,6 +2833,9 @@ final class _Evaluator {
       }
       return host ? buildDirRoot : '$buildDirRoot/$hostToolchainDirectory';
     }
+    if (what == 'root_out_dir' && toolchainDirectories.containsKey(toolchain)) {
+      return '$buildDirRoot/${toolchainDirectories[toolchain]}';
+    }
     final int colon = bare.indexOf(':');
     final String directory = colon < 0 ? bare : bare.substring(0, colon);
     final String dir = directory.isEmpty ? _directoryOf(node) : _absolutePath(directory, node);
@@ -2804,6 +2851,53 @@ final class _Evaluator {
       'root_out_dir' => buildDirRoot,
       _ => throw GnError(node.location, 'get_label_info(..., "$what") is not supported'),
     };
+  }
+
+  /// A list expression as one value, for an element of a list that is a
+  /// list: its elements must be unconditional (a select() has no place
+  /// inside a value).
+  GnListValue _nestedList(_Expression list, GnNode node) {
+    return GnListValue(
+      List<GnValue>.unmodifiable(<GnValue>[
+        for (final _Value item in list.items)
+          if (item.condition == Condition.always)
+            item.value
+          else
+            throw GnError(node.location, 'an element of a nested list under a condition'),
+      ]),
+    );
+  }
+
+  /// `name[i]`: the element of a list variable, or of a variable holding a
+  /// list (a `foreach` variable over nested lists). An element that is a
+  /// list is the list again.
+  _Expression _indexed(String name, int i, GnNode node, _Scope scope) {
+    final GnVariable? variable = scope.lookup(name);
+    if (variable == null) {
+      throw GnError(node.location, 'unknown variable $name');
+    }
+    final _Expression value = _variableItems(variable, node);
+    final List<GnValue> items;
+    if (value.isList) {
+      if (value.items.any((_Value v) => v.condition != Condition.always)) {
+        throw GnError(node.location, 'an element of $name, which has conditional elements');
+      }
+      items = <GnValue>[for (final _Value v in value.items) v.value];
+    } else if (value.scalar case GnListValue(items: final List<GnValue> held)) {
+      items = held;
+    } else {
+      throw GnError(node.location, '$name[$i] of ${value.scalar}, which is not a list');
+    }
+    if (i < 0 || i >= items.length) {
+      throw GnError(node.location, '$name[$i] is out of range (${items.length} elements)');
+    }
+    final GnValue element = items[i];
+    if (element is GnListValue) {
+      return _Expression(<_Value>[
+        for (final GnValue v in element.items) _Value(v, _comments(node)),
+      ], isList: true);
+    }
+    return _Expression.scalar(element);
   }
 
   _Expression _variableValue(String name, GnNode node, _Scope scope) {
@@ -3073,8 +3167,26 @@ final class _Evaluator {
     final conditional = <String, List<_Value>>{};
     for (final Match match in _expansion.allMatches(text)) {
       final String name = match.group(1) ?? match.group(2)!;
+      if (conditional.containsKey(name)) {
+        continue;
+      }
       final GnVariable? variable = scope?.lookup(name);
-      if (variable == null || variable.isList || conditional.containsKey(name)) {
+      if (variable == null) {
+        // A cased assumption (`"$android_app_abi"`: config.gni's ABI by
+        // CPU) has its cases too.
+        if (assumptions[name] case final GnCasedValue cased) {
+          conditional[name] = <_Value>[
+            for (final MapEntry<String, String> c in cased.values.entries)
+              _Value(
+                GnStringValue(c.value),
+                _comments(node),
+                condition: ConditionComparison(cased.variable, true, c.key),
+              ),
+          ];
+        }
+        continue;
+      }
+      if (variable.isList) {
         continue;
       }
       final _Expression items = _scalarItems(variable, node.location);
@@ -3296,6 +3408,19 @@ final class _Evaluator {
   }
 
   Condition _comparison(GnNode node, bool equals, GnNode left, GnNode right, _Scope scope) {
+    if (left case GnAccessor(:final String base, index: final GnLiteral index)
+        when index.isInteger && right is GnLiteral && right.isString) {
+      // `layer_info[2] != ""`: an element of a nested list against a
+      // string. A list is never equal to a string; a string compares.
+      final _Expression element = _indexed(base, int.parse(index.raw), node, scope);
+      if (element.isList) {
+        return ConditionConstant(!equals);
+      }
+      if (element.scalar case GnStringValue(:final String value)) {
+        return ConditionConstant((value == right.stringValue) == equals);
+      }
+      throw GnError(node.location, 'comparison of ${element.scalar} with a string');
+    }
     if (left is! GnIdentifier) {
       throw GnError(node.location, 'only `variable == "string"` comparisons are supported');
     }
@@ -3422,3 +3547,11 @@ const String hostToolchainPredicate = 'is_host_toolchain';
 /// toolchain clang_x64; GN puts every non-default toolchain's outputs under
 /// its name).
 const String hostToolchainDirectory = 'clang_x64';
+
+/// The other non-default toolchains a label may name, each with the
+/// subdirectory of the build directory that holds its outputs:
+/// build/toolchain/android's clang_arm64_apilevel26 (the Vulkan validation
+/// layer's), under `clang_arm64_apilevel26/`.
+const Map<String, String> toolchainDirectories = <String, String>{
+  '//build/toolchain/android:clang_arm64_apilevel26': 'clang_arm64_apilevel26',
+};
