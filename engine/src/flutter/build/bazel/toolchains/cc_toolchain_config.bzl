@@ -213,6 +213,20 @@ ANDROID_ARM64_LINK_FLAGS = ["--target=aarch64-linux-android24"]
 ANDROID_X64_COMPILE_FLAGS = ["--target=x86_64-linux-androideabi24"] + LINUX_X64_COMPILE_FLAGS
 ANDROID_X64_LINK_FLAGS = ["--target=x86_64-linux-androideabi24"] + LINUX_X64_LINK_FLAGS
 
+# arm (armv7, tools/gn's default --android-cpu): API 21
+# (build/config/android/config.gni), build/config/arm.gni's arm_version 7
+# defaults -- armv7-a, softfp, generic-armv7-a, Thumb, NEON (the
+# compiler_arm_fpu config BUILDCONFIG.gn applies to every target).
+ANDROID_ARM_COMPILE_FLAGS = [
+    "--target=arm-linux-androideabi21",
+    "-march=armv7-a",
+    "-mfloat-abi=softfp",
+    "-mtune=generic-armv7-a",
+    "-mthumb",
+    "-mfpu=neon",
+]
+ANDROID_ARM_LINK_FLAGS = ["--target=arm-linux-androideabi21"]
+
 # Every link GN performs produces a complete artifact -- an executable, or a
 # shared library with all of its static dependencies linked in -- so GN can
 # reject unresolved symbols in all of them (//build/config/compiler:compiler).

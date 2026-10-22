@@ -6261,6 +6261,7 @@ cc_library(
   ${build('ci/host_debug_unopt', '--runtime-mode debug --unoptimized --asan --dart-debug', <String>['flutter/tools/font_subset', 'flutter/fml:fml_unittests'])},
   ${build('ci/host_profile_lto', '--runtime-mode profile --prebuilt-dart-sdk', <String>['flutter/tools/font_subset'])},
   ${build('ci/android_debug', '--android --no-lto', <String>['flutter'])},
+  ${build('ci/android_debug_x86', '--android --android-cpu=x86 --no-lto', <String>['flutter'])},
   ${build('ci/android_debug_arm64', '--target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma', <String>['flutter', 'flutter/shell/platform/android:abi_jars', 'flutter/shell/platform/embedder:embedder-archive'], archives: <String>['out/ci/android_debug_arm64/zip_archives/android-arm64/symbols.zip'])},
   ${build('ci/host_release_licenses', '--target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: '{"name": "Run license_cpp unittests", "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"}, {"name": "Run another runner", "script": "out/ci/host_release_licenses/other_testrunner"}')}
 ]}''',
@@ -6309,6 +6310,7 @@ cc_library(
         'ci_host_debug_unopt',
         'host_profile_lto',
         'android_debug',
+        'android_debug_x86',
         'android_debug_arm64',
         'host_release_licenses',
         'wasm_release',
@@ -6349,8 +6351,12 @@ build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/co
 
 # linux_host_engine.json: ci/android_debug
 #   --android --no-lto
+build:android_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
+
+# linux_host_engine.json: ci/android_debug_x86
+#   --android --android-cpu=x86 --no-lto
 # No configuration: the Bazel build cannot express
-#   --android-cpu=arm (tools/gn's default) (the Bazel build has Android arm64 and x64 platforms only)
+#   --android-cpu=x86 (the Bazel build has Android arm and arm64 and x64 platforms only)
 
 # linux_host_engine.json: ci/android_debug_arm64
 #   --target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma
@@ -6512,7 +6518,7 @@ install(
       expect(
         buildFile,
         contains('''
-# linux_host_engine.json: ci/android_debug
+# linux_host_engine.json: ci/android_debug_x86
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
 # Not built, no Bazel counterpart yet: flutter.
