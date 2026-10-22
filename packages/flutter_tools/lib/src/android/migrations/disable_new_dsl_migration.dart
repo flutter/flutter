@@ -33,11 +33,17 @@ final RegExp _builtInKotlinValueRegex = RegExp(
 /// the Flutter Gradle Plugin's `FlutterPluginUtils.isBuiltInKotlinEnabled`
 /// applies through Kotlin's `String.toBoolean()`. A value with trailing
 /// whitespace, such as `true `, is not `true`.
-/// Without an entry this returns false: `DisableBuiltInKotlinMigration` adds
-/// `android.builtInKotlin=false` to such projects.
+/// Without an entry, built-in Kotlin counts as enabled, which is the Android
+/// Gradle Plugin's default and what `isBuiltInKotlinEnabled` returns.
+/// `DisableBuiltInKotlinMigration` adds `android.builtInKotlin=false` to
+/// projects whose app applies the `kotlin-android` plugin.
+///
+/// Only the project's `gradle.properties` file is read. An
+/// `android.builtInKotlin` value set in `~/.gradle/gradle.properties` or with
+/// `-P` is not seen.
 bool usesBuiltInKotlinWithoutKotlinAndroidPlugin(AndroidProject project, String gradleProperties) {
   final RegExpMatch? lastEntry = _builtInKotlinValueRegex.allMatches(gradleProperties).lastOrNull;
-  final bool builtInKotlin = lastEntry != null && lastEntry.group(1)!.toLowerCase() == 'true';
+  final bool builtInKotlin = lastEntry == null || lastEntry.group(1)!.toLowerCase() == 'true';
   return builtInKotlin && !project.appliesKotlinAndroidPlugin;
 }
 
@@ -57,6 +63,13 @@ class DisableNewDslMigration extends ProjectMigrator {
   @override
   Future<void> migrate() async {
     if (!_gradlePropertiesFile.existsSync()) {
+      if (usesBuiltInKotlinWithoutKotlinAndroidPlugin(_project, '')) {
+        logger.printTrace(
+          'The project uses built-in Kotlin without the kotlin-android plugin, '
+          'skipping the new DSL opt-out.',
+        );
+        return;
+      }
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
       );
