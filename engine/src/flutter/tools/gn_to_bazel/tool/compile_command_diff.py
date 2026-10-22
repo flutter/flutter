@@ -197,8 +197,24 @@ def gn_commands(compile_commands_path, wanted):
       continue
     # The command is a shell line (ninja's): shlex gives the argv the compiler
     # saw, with GN's \" around a define's value read as the quote it is.
-    commands[source] = normalize(shlex.split(entry['command'])[1:], 'gn', out_dir)
+    argv = shlex.split(entry['command'])
+    # A cross build compiles a source for the target (the default toolchain,
+    # whose objects are under obj/) and again for the host tools (a
+    # secondary toolchain's, under clang_x64/obj/ or another toolchain's
+    # directory): the Bazel side is the target configuration, so the
+    # default toolchain's entry is the one to compare, whichever comes last.
+    if source in commands and not _default_toolchain(argv):
+      continue
+    commands[source] = normalize(argv[1:], 'gn', out_dir)
   return commands
+
+
+def _default_toolchain(argv):
+  """Whether a GN compile command is the default toolchain's (its object under obj/)."""
+  for i, arg in enumerate(argv):
+    if arg == '-o' and i + 1 < len(argv):
+      return argv[i + 1].startswith('obj/')
+  return True
 
 
 def main():
