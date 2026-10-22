@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/extension.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
@@ -70,6 +69,34 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
 final class FakeTarget extends Fake implements Target {
   @override
   String get name => 'fake-target';
+}
+
+final class ModeAssertingArtifacts extends Fake implements Artifacts {
+  ModeAssertingArtifacts(this.fileSystem);
+
+  final FileSystem fileSystem;
+
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) {
+    if (artifact == Artifact.genSnapshot && mode == null) {
+      throw ArgumentError('mode is required for genSnapshot');
+    }
+    return fileSystem.path.join(
+      fileSystem.currentDirectory.path,
+      'artifacts',
+      '${artifact.name}_${platform?.toString() ?? 'no_platform'}_${mode?.cliName ?? 'no_mode'}',
+    );
+  }
+
+  @override
+  FileSystemEntity getHostArtifact(HostArtifact artifact) => fileSystem.file(
+    fileSystem.path.join(fileSystem.currentDirectory.path, 'artifacts', artifact.name),
+  );
 }
 
 ExtensionTarget _createTarget({
@@ -292,58 +319,51 @@ void main() {
     );
   });
 
-  testWithoutContext('ExtensionTarget with mode-less genSnapshot artifact builds cleanly through FlutterBuildSystem with CachedArtifacts', () async {
-    final logger = BufferLogger.test();
-    final platform = FakePlatform();
-    final cache = Cache.test(
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: FakeProcessManager.any(),
-    );
-    final cachedArtifacts = CachedArtifacts(
-      cache: cache,
-      fileSystem: fileSystem,
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-      platform: platform,
-    );
-    final cachedEnvironment = Environment.test(
-      fileSystem.currentDirectory,
-      artifacts: cachedArtifacts,
-      defines: <String, String>{kBuildMode: BuildMode.release.cliName},
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: FakeProcessManager.any(),
-    );
+  testWithoutContext(
+    'ExtensionTarget with mode-less genSnapshot artifact builds cleanly through FlutterBuildSystem',
+    () async {
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
+      final modeAssertingArtifacts = ModeAssertingArtifacts(fileSystem);
+      final modeAssertingEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: modeAssertingArtifacts,
+        defines: <String, String>{kBuildMode: BuildMode.release.cliName},
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      );
 
-    final String expectedGenSnapshotPath = cachedArtifacts.getArtifactPath(
-      Artifact.genSnapshot,
-      mode: .release,
-      platform: .android_arm64,
-    );
-    fileSystem.file(expectedGenSnapshotPath).createSync(recursive: true);
+      final String expectedGenSnapshotPath = modeAssertingArtifacts.getArtifactPath(
+        Artifact.genSnapshot,
+        mode: .release,
+        platform: .android_arm64,
+      );
+      fileSystem.file(expectedGenSnapshotPath).createSync(recursive: true);
 
-    final buildManager = FakeExtensionBuildManager();
-    final ExtensionTarget target = _createTarget(
-      buildManager: buildManager,
-      inputs: const <ExtensionSource>[ExtensionSource.artifact(BuiltInArtifacts.genSnapshot)],
-      targetPlatform: 'android-arm64',
-    );
+      final buildManager = FakeExtensionBuildManager();
+      final ExtensionTarget target = _createTarget(
+        buildManager: buildManager,
+        inputs: const <ExtensionSource>[ExtensionSource.artifact(BuiltInArtifacts.genSnapshot)],
+        targetPlatform: 'android-arm64',
+      );
 
-    final buildSystem = FlutterBuildSystem(
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-    );
-    final BuildResult result = await buildSystem.build(target, cachedEnvironment);
+      final buildSystem = FlutterBuildSystem(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+      );
+      final BuildResult result = await buildSystem.build(target, modeAssertingEnvironment);
 
-    expect(result.success, isTrue);
-    expect(
-      buildManager.invokedResolvedArtifacts,
-      equals(<String, String>{'genSnapshot': expectedGenSnapshotPath}),
-    );
-    expect(result.inputFiles.map((File f) => f.path), contains(expectedGenSnapshotPath));
-  });
+      expect(result.success, isTrue);
+      expect(
+        buildManager.invokedResolvedArtifacts,
+        equals(<String, String>{'genSnapshot': expectedGenSnapshotPath}),
+      );
+      expect(result.inputFiles.map((File f) => f.path), contains(expectedGenSnapshotPath));
+    },
+  );
 
   testWithoutContext('ExtensionTarget resolves dependencies', () {
     final depTarget = FakeTarget();
