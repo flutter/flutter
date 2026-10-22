@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @android_embedding_dependencies: the CIPD package of the
+# Android embedding's compile-time dependencies (DEPS:
+# flutter/android/embedding_bundle, under download_android_deps;
+# engine/src/flutter/third_party/android_embedding_dependencies), the
+# AndroidX and Kotlin jars that shell/platform/android/BUILD.gn lists as
+# embedding_dependencies_jars: javac's classpath for the embedding, which the
+# converted action names jar by jar.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(glob(["lib/*.jar"]))

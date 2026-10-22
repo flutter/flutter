@@ -1739,8 +1739,9 @@ template("my_lib") {
       defines = [ "FLAVOUR_" + invoker.flavour ]
     }
   }
+  _invocation = target_name
   group(target_name + "_group") {
-    deps = [ ":" + target_name ]
+    deps = [ ":" + _invocation, ":" + target_name ]
   }
 }
 
@@ -1780,7 +1781,10 @@ my_other_lib("y") {
         final GnTarget group = evaluation.targets[1];
         expect(group.rule, 'group');
         expect(group.comments, isEmpty);
-        expect(strings(group, 'deps'), <String>[':x']);
+        // target_name reflects the innermost scope (GN's reference): inside
+        // the group's block it is the group's own name, and the template's
+        // invocation name is what it saved outside.
+        expect(strings(group, 'deps'), <String>[':x', ':x_group']);
         final GnTarget y = evaluation.targets[2];
         expect(y.rule, 'static_library');
         expect(strings(y, 'sources'), <String>['b.cc']);
@@ -2067,6 +2071,119 @@ gn_action(
           output,
           contains('load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_action")'),
         );
+      });
+
+      test('converts action() outputs and inputs in the build directory', () async {
+        // The Android embedding's Java actions: outputs at the build root
+        // named by the runtime mode, an input another action puts there, a
+        // bare enumerated variable as an argument, a program run by its
+        // absolute path (the JDK's), and a target's outputs among the
+        // sources and arguments.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/example/gen.py': '',
+          'flutter/example/pack.py': '',
+          'flutter/example/a.java': '',
+          'flutter/example/BUILD.gn': r'''
+action("config") {
+  script = "gen.py"
+  outputs = [ "$target_gen_dir/Config.java" ]
+  args = [ "--mode", flutter_runtime_mode ]
+}
+
+action("jar") {
+  script = "pack.py"
+  sources = [ "a.java" ]
+  sources += get_target_outputs(":config")
+  jar_path = "$root_out_dir/embedding_$flutter_runtime_mode.jar"
+  outputs = [ jar_path, "$target_gen_dir/jar.d" ]
+  _jarbin = rebase_path("//flutter/third_party/java/openjdk/bin/jar")
+  args = [
+    "--jar-bin=$_jarbin",
+    "--jar-path=" + rebase_path(jar_path, root_build_dir),
+    "--depfile=" + rebase_path("$target_gen_dir/jar.d", root_build_dir),
+  ] + rebase_path(sources, root_build_dir)
+  deps = [ ":config" ]
+}
+
+action("bundle") {
+  script = "pack.py"
+  inputs = [ "$root_build_dir/embedding_$flutter_runtime_mode.jar", "$root_build_dir/libflutter.so" ]
+  outputs = [ "$root_build_dir/flutter.jar" ]
+  args = [
+    "--output",
+    rebase_path("$root_build_dir/flutter.jar", root_build_dir),
+    "--native",
+    rebase_path("$root_build_dir/libflutter.so", root_build_dir),
+  ]
+  deps = [ ":jar" ]
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn'),
+          gnPackage: '//flutter/example',
+          tree: tree,
+        );
+        // The bare variable: one argument per mode, under the mode.
+        expect(
+          output,
+          contains(r'''
+    args = ["--mode"] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["debug"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["profile"],
+'''),
+        );
+        // The jar: a tool with its runtime, a build output per mode named
+        // by its path under the build directory, the depfile a plain
+        // output, and the generated source as its target's file.
+        expect(output, contains(r'"--jar-bin=$(execpath @openjdk//:bin/jar)"'));
+        expect(
+          output,
+          contains(r'''
+    tools = [
+        "@openjdk//:bin/jar",
+        "@openjdk//:runtime",
+    ],
+'''),
+        );
+        expect(
+          output,
+          contains(r'''
+    build_outputs = select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["embedding_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+'''),
+        );
+        expect(
+          output,
+          contains(
+            r'"//engine/src/flutter/common:runtime_mode_debug": ["--jar-path=$(built embedding_debug.jar)"]',
+          ),
+        );
+        expect(output, contains(r'"--depfile=$(gen engine/src/flutter/example/jar.d)"'));
+        expect(output, contains('outputs = ["jar.d"]'));
+        expect(output, contains(r'"$(execpath :config)"'));
+        expect(output, contains('srcs = [\n        "a.java",\n        ":config",\n    ],'));
+        // The bundle: its inputs of the build directory are build_inputs,
+        // its own output a build output, both named by their paths there.
+        expect(
+          output,
+          contains(r'''
+    build_inputs = select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["embedding_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+'''),
+        );
+        expect(
+          output,
+          contains('    }) + ["libflutter.so"],\n    build_outputs = ["flutter.jar"],'),
+        );
+        expect(output, contains(r'"$(built flutter.jar)"'));
+        expect(output, contains(r'"$(built libflutter.so)"'));
       });
 
       test('keeps rebase_path() and exec_script() opaque until they are used', () async {

@@ -877,7 +877,7 @@ final class GnVariable {
               next.add(
                 GnScalarCase(
                   both,
-                  _concatenated(earlier.value, value, assignment.location),
+                  concatenated(earlier.value, value, assignment.location),
                   assignment,
                 ),
               );
@@ -902,11 +902,11 @@ final class GnVariable {
 
   /// `a + b` for two strings, either of which may hold references
   /// (GnExpandedString): the parts in sequence, adjacent literals joined.
-  static GnValue _concatenated(GnValue a, GnValue b, GnLocation location) {
+  static GnValue concatenated(GnValue a, GnValue b, GnLocation location) {
     List<GnValue> parts(GnValue v) => switch (v) {
       GnStringValue() => <GnValue>[v],
       GnExpandedString(:final List<GnValue> parts) => parts,
-      _ => throw GnError(location, '+= of $v to a string scalar'),
+      _ => throw GnError(location, '+ of $v to a string'),
     };
     final joined = <GnValue>[];
     for (final part in <GnValue>[...parts(a), ...parts(b)]) {
@@ -1799,9 +1799,16 @@ final class _Evaluator {
           ? invocation.comments
           : comments;
     final targetScope = _Scope(scope, isTarget: true);
+    // GN defines target_name in every target's block (an action's depfile
+    // named after it); it is the block's, not a variable of the target.
+    targetScope.variables['target_name'] = GnVariable('target_name', isList: false)
+      ..assignments.add(
+        GnAssignment(call.location, Condition.always, '=', <GnValue>[GnStringValue(name)]),
+      );
     _evaluateBlock(block, targetScope, Condition.always, const <String>[], target: newTarget);
+    targetScope.variables.remove('target_name');
     newTarget.variables.addAll(targetScope.variables);
-    newTarget.readVariables.addAll(targetScope.readNames);
+    newTarget.readVariables.addAll(targetScope.readNames..remove('target_name'));
     result.targets.add(newTarget);
   }
 
@@ -2234,6 +2241,29 @@ final class _Evaluator {
         if (a is GnStringValue && b is GnStringValue) {
           return _Expression.scalar(GnStringValue(a.value + b.value));
         }
+        // Two string scalars, either with cases (a file-level variable of a
+        // file evaluated under a condition, a string around a reference):
+        // the concatenation case by case (`jar_path + ".md5.stamp"`).
+        if (!l.isList && !r.isList && l.items.isNotEmpty && r.items.isNotEmpty) {
+          final out = <_Value>[];
+          for (final _Value x in l.items) {
+            for (final _Value y in r.items) {
+              final Condition when = x.condition.and(y.condition);
+              if (when == Condition.never) {
+                continue;
+              }
+              out.add(
+                _Value(
+                  GnVariable.concatenated(x.value, y.value, node.location),
+                  x.comments,
+                  condition: when,
+                  sourceConditions: x.sourceConditions,
+                ),
+              );
+            }
+          }
+          return _Expression(out, isList: false);
+        }
         throw GnError(node.location, 'unsupported operands of +: $l and $r');
       case GnIdentifier(:final String name):
         return _variableValue(name, node, scope);
@@ -2299,7 +2329,10 @@ final class _Evaluator {
             return _Expression.scalar(GnTargetOutputPathsValue(single.label));
           }
           if (what.isList) {
-            // A list of paths (an action's sources as arguments): each one.
+            // A list of paths (an action's sources as arguments): each one;
+            // a target's outputs among them (`sources +=
+            // get_target_outputs(":gen_android_build_config_java")`), as
+            // their build-directory paths.
             return _Expression(<_Value>[
               for (final _Value item in what.items)
                 if (item.value case GnStringValue(:final String value))
@@ -2311,12 +2344,30 @@ final class _Evaluator {
                     condition: item.condition,
                     sourceConditions: item.sourceConditions,
                   )
+                else if (item.value case GnTargetOutputsValue(:final String label))
+                  _Value(
+                    GnTargetOutputPathsValue(label),
+                    item.comments,
+                    condition: item.condition,
+                    sourceConditions: item.sourceConditions,
+                  )
                 else
                   throw GnError(node.location, 'rebase_path() of a list of ${item.value}'),
             ], isList: true);
           }
-          final String path = _absolutePath(_unmarkedPath(_stringExpression(args[0], scope)), node);
-          return _Expression.scalar(GnStringValue('$rebasedPathMarker$path$rebasedPathMarker'));
+          // A string, with its cases (a file-level variable of a file
+          // evaluated under a condition) and around a reference (the
+          // embedding jar's path, `flutter_embedding_$flutter_runtime_mode.jar`,
+          // which the emitter enumerates): each case marked.
+          return _Expression(<_Value>[
+            for (final _Value item in what.items)
+              _Value(
+                _markedRebased(item.value, node),
+                item.comments,
+                condition: item.condition,
+                sourceConditions: item.sourceConditions,
+              ),
+          ], isList: false);
         }
         // rebase_path(x, "$root_build_dir/<dir>"): x, under that directory
         // of the build directory, relative to it -- the web SDK's archive
@@ -2572,6 +2623,35 @@ final class _Evaluator {
     return _stringExpression(node, scope);
   }
 
+  /// `rebase_path(value, root_build_dir)` of one string: the absolute path,
+  /// marked; a string around a reference keeps the reference, the marks on
+  /// its literal ends.
+  GnValue _markedRebased(GnValue value, GnNode node) {
+    switch (value) {
+      case GnStringValue(value: final String path):
+        return GnStringValue(
+          '$rebasedPathMarker${_absolutePath(_unmarkedPath(path), node)}$rebasedPathMarker',
+        );
+      case GnExpandedString(:final List<GnValue> parts):
+        final GnValue first = parts.first;
+        final String head = first is GnStringValue ? first.value : '';
+        final List<GnValue> rest = first is GnStringValue ? parts.sublist(1) : parts;
+        final out = <GnValue>[
+          GnStringValue('$rebasedPathMarker${_absolutePath(_unmarkedPath(head), node)}'),
+          ...rest,
+        ];
+        final GnValue last = out.last;
+        if (last is GnStringValue) {
+          out[out.length - 1] = GnStringValue(last.value + rebasedPathMarker);
+        } else {
+          out.add(const GnStringValue(rebasedPathMarker));
+        }
+        return GnExpandedString(List<GnValue>.unmodifiable(out));
+      default:
+        throw GnError(node.location, 'rebase_path() of $value');
+    }
+  }
+
   /// get_label_info(label, what) for the properties that are paths or
   /// names. A toolchain suffix (`($default_toolchain)`) is ignored, except
   /// that the host toolchain's `root_out_dir` in a cross build is its
@@ -2813,8 +2893,17 @@ final class _Evaluator {
       // A local variable holding a string around a reference (`prefix =
       // "linux-x64-$flutter_runtime_mode/"`): its parts, spliced in.
       final GnValue? held = value == null ? _heldExpandedString(name, scope, node) : null;
+      // A list expands as GN serializes one -- `["a", "b"]` -- which the
+      // scripts that take such arguments parse back (build_utils.ParseGnList:
+      // javac.py's --classpath); its strings and the marks of rebased paths
+      // among them stay as they are.
+      final List<String>? listed = value == null && held == null
+          ? _heldStringList(name, scope)
+          : null;
       if (value != null) {
         literal.write(value);
+      } else if (listed != null) {
+        literal.write('[${listed.map((String s) => '"$s"').join(', ')}]');
       } else if (held is GnExpandedString) {
         for (final GnValue part in held.parts) {
           if (part is GnStringValue) {
@@ -2923,6 +3012,44 @@ final class _Evaluator {
       return first;
     }
     return null;
+  }
+
+  /// The strings of [name] when it is a local list variable of plain
+  /// strings holding unconditionally (GN serializes such a list into a
+  /// string expansion); null for anything else.
+  List<String>? _heldStringList(String name, _Scope? scope) {
+    final GnVariable? variable = scope?.lookup(name);
+    if (variable == null || !variable.isList) {
+      return null;
+    }
+    // Assignments unconditional or under one condition (a file evaluated
+    // under a condition of its own gives its variables that condition; a
+    // list of literals and rebased paths splits into the two) count as
+    // unconditional here.
+    final conditions = <Condition>{
+      for (final GnAssignment a in variable.assignments)
+        if (!a.isUnconditional) a.condition,
+    };
+    if (conditions.length > 1) {
+      return null;
+    }
+    final items = <GnValue>[];
+    for (final GnAssignment a in variable.assignments) {
+      switch (a.op) {
+        case '=':
+          items
+            ..clear()
+            ..addAll(a.items);
+        case '+=':
+          items.addAll(a.items);
+        case '-=':
+          items.removeWhere(a.items.contains);
+      }
+    }
+    if (items.any((GnValue v) => v is! GnStringValue)) {
+      return null;
+    }
+    return <String>[for (final GnValue v in items) (v as GnStringValue).value];
   }
 
   /// The value of [name] when it is a string the converter knows: an
