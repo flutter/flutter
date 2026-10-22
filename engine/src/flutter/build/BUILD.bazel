@@ -7,9 +7,12 @@
 # files for dependencies which ship none. Inputs of the rules that wrap a GN
 # build of part of the tree. The bazel/ subdirectory is its own package.
 
-# zip_bundle.gni's script, which bazel/zip_bundle.bzl runs the same way, and
-# the dart_pkg action's, which bazel/dart/dart_pkg.bzl runs.
+# zip_bundle.gni's script, which bazel/zip_bundle.bzl runs the same way, the
+# dart_pkg action's, which bazel/dart/dart_pkg.bzl runs, and the Android
+# embedding's Maven layout script (shell/platform/android/BUILD.gn's
+# embedding_jars and abi_jars).
 exports_files([
+    "android_artifacts.py",
     "dart/tools/dart_pkg.py",
     "zip.py",
 ])

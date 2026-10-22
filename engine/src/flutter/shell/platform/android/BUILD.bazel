@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/android/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: gen_android_javadoc, android_javadoc, android_entitlement_config, embedding_jars, abi_jars.
+# Not converted: gen_android_javadoc, android_javadoc, android_entitlement_config.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_VERSION")
@@ -2553,6 +2553,1412 @@ filegroup(
         "@platforms//os:android": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+# Renames embedding android artifacts and places them in the final
+# expected folder structure.
+gn_action(
+    name = "embedding_jars",
+    args = [
+        "-i",  # extension == "jar"
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built flutter_embedding_debug.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built flutter_embedding_profile.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built flutter_embedding_release.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built flutter_embedding_jit_release.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + ENGINE_VERSION + ".jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + ENGINE_VERSION + ".jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + ENGINE_VERSION + ".jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + ENGINE_VERSION + ".jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-i",  # extension == "jar"
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built flutter_embedding_debug-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built flutter_embedding_profile-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built flutter_embedding_release-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built flutter_embedding_jit_release-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + ENGINE_VERSION + "-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + ENGINE_VERSION + "-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + ENGINE_VERSION + "-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + ENGINE_VERSION + "-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-i",  # !(extension == "jar")
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built flutter_embedding_debug.pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built flutter_embedding_profile.pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built flutter_embedding_release.pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built flutter_embedding_jit_release.pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + ENGINE_VERSION + ".pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + ENGINE_VERSION + ".pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + ENGINE_VERSION + ".pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + ENGINE_VERSION + ".pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-i",  # !(extension == "jar")
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built content_hash/flutter_embedding_debug.pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built content_hash/flutter_embedding_profile.pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built content_hash/flutter_embedding_release.pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built content_hash/flutter_embedding_jit_release.pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + CONTENT_HASH + ".pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + CONTENT_HASH + ".pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + CONTENT_HASH + ".pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + CONTENT_HASH + ".pom)",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-i",  # extension == "jar"
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built flutter_embedding_debug.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built flutter_embedding_profile.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built flutter_embedding_release.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built flutter_embedding_jit_release.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + CONTENT_HASH + ".jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + CONTENT_HASH + ".jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + CONTENT_HASH + ".jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + CONTENT_HASH + ".jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-i",  # extension == "jar"
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built flutter_embedding_debug-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built flutter_embedding_profile-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built flutter_embedding_release-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built flutter_embedding_jit_release-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + CONTENT_HASH + "-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + CONTENT_HASH + "-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + CONTENT_HASH + "-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + CONTENT_HASH + "-sources.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }),
+    build_inputs = select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["flutter_embedding_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["flutter_embedding_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["flutter_embedding_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["content_hash/flutter_embedding_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": ["content_hash/flutter_embedding_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": ["content_hash/flutter_embedding_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": ["content_hash/flutter_embedding_jit_release.pom"],
+        "//conditions:default": [],
+    }),
+    build_outputs = select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + ENGINE_VERSION + ".jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + ENGINE_VERSION + ".jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + ENGINE_VERSION + ".jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + ENGINE_VERSION + ".jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + ENGINE_VERSION + "-sources.jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + ENGINE_VERSION + "-sources.jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + ENGINE_VERSION + "-sources.jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + ENGINE_VERSION + "-sources.jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + ENGINE_VERSION + ".pom",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + ENGINE_VERSION + ".pom",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + ENGINE_VERSION + ".pom",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + ENGINE_VERSION + ".pom",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + CONTENT_HASH + ".pom",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + CONTENT_HASH + ".pom",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + CONTENT_HASH + ".pom",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + CONTENT_HASH + ".pom",  # !(extension == "jar")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + CONTENT_HASH + ".jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + CONTENT_HASH + ".jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + CONTENT_HASH + ".jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + CONTENT_HASH + ".jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + CONTENT_HASH + "-sources.jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_profile/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_profile-1.0.0-" + CONTENT_HASH + "-sources.jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_release-1.0.0-" + CONTENT_HASH + "-sources.jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": [
+            "zip_archives/download.flutter.io/io/flutter/flutter_embedding_jit_release/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_jit_release-1.0.0-" + CONTENT_HASH + "-sources.jar",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }),
+    script = "//engine/src/flutter/build:android_artifacts.py",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_shell_java",
+        ":pom_content_hash_embedding",
+        ":pom_embedding",
+    ],
+)
+
+# Renames android artifacts and places them in the final
+# expected folder structure.
+gn_action(
+    name = "abi_jars",
+    args = select({
+        "@platforms//cpu:x86_32": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built x86_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built x86_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built x86_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built x86_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/x86_debug/1.0.0-" + ENGINE_VERSION + "/x86_debug-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/x86_profile/1.0.0-" + ENGINE_VERSION + "/x86_profile-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_release/1.0.0-" + ENGINE_VERSION + "/x86_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_jit_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:armv7": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built armeabi_v7a_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built armeabi_v7a_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built armeabi_v7a_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built armeabi_v7a_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_debug/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_debug-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_profile/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_profile-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_jit_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_jit_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:x86_64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built x86_64_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built x86_64_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built x86_64_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built x86_64_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_debug/1.0.0-" + ENGINE_VERSION + "/x86_64_debug-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_profile/1.0.0-" + ENGINE_VERSION + "/x86_64_profile-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_release/1.0.0-" + ENGINE_VERSION + "/x86_64_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_64_jit_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:aarch64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built arm64_v8a_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built arm64_v8a_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built arm64_v8a_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built arm64_v8a_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_debug/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_debug-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_profile/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_profile-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_jit_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_jit_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:riscv64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built riscv64_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built riscv64_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built riscv64_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built riscv64_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_debug/1.0.0-" + ENGINE_VERSION + "/riscv64_debug-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_profile/1.0.0-" + ENGINE_VERSION + "/riscv64_profile-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_release/1.0.0-" + ENGINE_VERSION + "/riscv64_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_jit_release/1.0.0-" + ENGINE_VERSION + "/riscv64_jit_release-1.0.0-" + ENGINE_VERSION + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:x86_32": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built x86_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built x86_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built x86_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built x86_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/x86_debug/1.0.0-" + ENGINE_VERSION + "/x86_debug-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/x86_profile/1.0.0-" + ENGINE_VERSION + "/x86_profile-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_release/1.0.0-" + ENGINE_VERSION + "/x86_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_jit_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:armv7": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built armeabi_v7a_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built armeabi_v7a_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built armeabi_v7a_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built armeabi_v7a_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_debug/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_debug-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_profile/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_profile-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_jit_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_jit_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:x86_64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built x86_64_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built x86_64_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built x86_64_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built x86_64_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_debug/1.0.0-" + ENGINE_VERSION + "/x86_64_debug-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_profile/1.0.0-" + ENGINE_VERSION + "/x86_64_profile-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_release/1.0.0-" + ENGINE_VERSION + "/x86_64_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_64_jit_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:aarch64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built arm64_v8a_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built arm64_v8a_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built arm64_v8a_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built arm64_v8a_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_debug/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_debug-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_profile/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_profile-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_jit_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_jit_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:riscv64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built riscv64_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built riscv64_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built riscv64_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built riscv64_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_debug/1.0.0-" + ENGINE_VERSION + "/riscv64_debug-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_profile/1.0.0-" + ENGINE_VERSION + "/riscv64_profile-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_release/1.0.0-" + ENGINE_VERSION + "/riscv64_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_jit_release/1.0.0-" + ENGINE_VERSION + "/riscv64_jit_release-1.0.0-" + ENGINE_VERSION + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:x86_32": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built content_hash/x86_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built content_hash/x86_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built content_hash/x86_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built content_hash/x86_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/x86_debug/1.0.0-" + ENGINE_VERSION + "/x86_debug-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/x86_profile/1.0.0-" + ENGINE_VERSION + "/x86_profile-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_release/1.0.0-" + ENGINE_VERSION + "/x86_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_jit_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:armv7": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built content_hash/armeabi_v7a_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built content_hash/armeabi_v7a_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built content_hash/armeabi_v7a_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built content_hash/armeabi_v7a_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_debug/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_debug-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_profile/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_profile-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_jit_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_jit_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:x86_64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built content_hash/x86_64_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built content_hash/x86_64_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built content_hash/x86_64_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built content_hash/x86_64_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_debug/1.0.0-" + ENGINE_VERSION + "/x86_64_debug-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_profile/1.0.0-" + ENGINE_VERSION + "/x86_64_profile-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_release/1.0.0-" + ENGINE_VERSION + "/x86_64_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_64_jit_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:aarch64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built content_hash/arm64_v8a_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built content_hash/arm64_v8a_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built content_hash/arm64_v8a_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built content_hash/arm64_v8a_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_debug/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_debug-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_profile/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_profile-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_jit_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_jit_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:riscv64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built content_hash/riscv64_debug.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built content_hash/riscv64_profile.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built content_hash/riscv64_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built content_hash/riscv64_jit_release.pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_debug/1.0.0-" + ENGINE_VERSION + "/riscv64_debug-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_profile/1.0.0-" + ENGINE_VERSION + "/riscv64_profile-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_release/1.0.0-" + ENGINE_VERSION + "/riscv64_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_jit_release/1.0.0-" + ENGINE_VERSION + "/riscv64_jit_release-1.0.0-" + CONTENT_HASH + ".pom)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:x86_32": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built x86_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built x86_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built x86_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built x86_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/x86_debug/1.0.0-" + ENGINE_VERSION + "/x86_debug-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/x86_profile/1.0.0-" + ENGINE_VERSION + "/x86_profile-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_release/1.0.0-" + ENGINE_VERSION + "/x86_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_jit_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:armv7": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built armeabi_v7a_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built armeabi_v7a_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built armeabi_v7a_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built armeabi_v7a_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_debug/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_debug-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_profile/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_profile-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/armeabi_v7a_jit_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_jit_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:x86_64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built x86_64_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built x86_64_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built x86_64_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built x86_64_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_debug/1.0.0-" + ENGINE_VERSION + "/x86_64_debug-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_profile/1.0.0-" + ENGINE_VERSION + "/x86_64_profile-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_release/1.0.0-" + ENGINE_VERSION + "/x86_64_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/x86_64_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_64_jit_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:aarch64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built arm64_v8a_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built arm64_v8a_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built arm64_v8a_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built arm64_v8a_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_debug/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_debug-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_profile/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_profile-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/arm64_v8a_jit_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_jit_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//cpu:riscv64": ["-i"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built riscv64_debug.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built riscv64_profile.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built riscv64_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built riscv64_jit_release.jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_debug/1.0.0-" + ENGINE_VERSION + "/riscv64_debug-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_profile/1.0.0-" + ENGINE_VERSION + "/riscv64_profile-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_release/1.0.0-" + ENGINE_VERSION + "/riscv64_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["$(built zip_archives/download.flutter.io/io/flutter/riscv64_jit_release/1.0.0-" + ENGINE_VERSION + "/riscv64_jit_release-1.0.0-" + CONTENT_HASH + ".jar)"],
+        "//conditions:default": [],
+    }),
+    build_inputs = select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["x86_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["x86_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["x86_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["x86_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["armeabi_v7a_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["armeabi_v7a_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["armeabi_v7a_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["armeabi_v7a_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["x86_64_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["x86_64_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["x86_64_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["x86_64_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["arm64_v8a_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["arm64_v8a_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["arm64_v8a_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["arm64_v8a_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["riscv64_debug.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["riscv64_profile.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["riscv64_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["riscv64_jit_release.jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["x86_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["x86_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["x86_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["x86_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["armeabi_v7a_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["armeabi_v7a_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["armeabi_v7a_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["armeabi_v7a_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["x86_64_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["x86_64_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["x86_64_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["x86_64_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["arm64_v8a_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["arm64_v8a_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["arm64_v8a_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["arm64_v8a_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["riscv64_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["riscv64_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["riscv64_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["riscv64_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["content_hash/x86_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["content_hash/x86_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["content_hash/x86_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["content_hash/x86_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["content_hash/armeabi_v7a_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["content_hash/armeabi_v7a_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["content_hash/armeabi_v7a_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["content_hash/armeabi_v7a_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["content_hash/x86_64_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["content_hash/x86_64_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["content_hash/x86_64_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["content_hash/x86_64_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["content_hash/arm64_v8a_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["content_hash/arm64_v8a_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["content_hash/arm64_v8a_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["content_hash/arm64_v8a_jit_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["content_hash/riscv64_debug.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["content_hash/riscv64_profile.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["content_hash/riscv64_release.pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["content_hash/riscv64_jit_release.pom"],
+        "//conditions:default": [],
+    }),
+    build_outputs = select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/x86_debug/1.0.0-" + ENGINE_VERSION + "/x86_debug-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/x86_profile/1.0.0-" + ENGINE_VERSION + "/x86_profile-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/x86_release/1.0.0-" + ENGINE_VERSION + "/x86_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/x86_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_jit_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_debug/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_debug-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_profile/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_profile-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_jit_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_jit_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/x86_64_debug/1.0.0-" + ENGINE_VERSION + "/x86_64_debug-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/x86_64_profile/1.0.0-" + ENGINE_VERSION + "/x86_64_profile-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/x86_64_release/1.0.0-" + ENGINE_VERSION + "/x86_64_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/x86_64_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_64_jit_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_debug/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_debug-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_profile/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_profile-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_jit_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_jit_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/riscv64_debug/1.0.0-" + ENGINE_VERSION + "/riscv64_debug-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/riscv64_profile/1.0.0-" + ENGINE_VERSION + "/riscv64_profile-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/riscv64_release/1.0.0-" + ENGINE_VERSION + "/riscv64_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/riscv64_jit_release/1.0.0-" + ENGINE_VERSION + "/riscv64_jit_release-1.0.0-" + ENGINE_VERSION + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/x86_debug/1.0.0-" + ENGINE_VERSION + "/x86_debug-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/x86_profile/1.0.0-" + ENGINE_VERSION + "/x86_profile-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/x86_release/1.0.0-" + ENGINE_VERSION + "/x86_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/x86_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_jit_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_debug/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_debug-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_profile/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_profile-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_jit_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_jit_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/x86_64_debug/1.0.0-" + ENGINE_VERSION + "/x86_64_debug-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/x86_64_profile/1.0.0-" + ENGINE_VERSION + "/x86_64_profile-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/x86_64_release/1.0.0-" + ENGINE_VERSION + "/x86_64_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/x86_64_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_64_jit_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_debug/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_debug-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_profile/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_profile-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_jit_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_jit_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/riscv64_debug/1.0.0-" + ENGINE_VERSION + "/riscv64_debug-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/riscv64_profile/1.0.0-" + ENGINE_VERSION + "/riscv64_profile-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/riscv64_release/1.0.0-" + ENGINE_VERSION + "/riscv64_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/riscv64_jit_release/1.0.0-" + ENGINE_VERSION + "/riscv64_jit_release-1.0.0-" + ENGINE_VERSION + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/x86_debug/1.0.0-" + ENGINE_VERSION + "/x86_debug-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/x86_profile/1.0.0-" + ENGINE_VERSION + "/x86_profile-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/x86_release/1.0.0-" + ENGINE_VERSION + "/x86_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/x86_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_jit_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_debug/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_debug-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_profile/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_profile-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_jit_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_jit_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/x86_64_debug/1.0.0-" + ENGINE_VERSION + "/x86_64_debug-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/x86_64_profile/1.0.0-" + ENGINE_VERSION + "/x86_64_profile-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/x86_64_release/1.0.0-" + ENGINE_VERSION + "/x86_64_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/x86_64_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_64_jit_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_debug/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_debug-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_profile/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_profile-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_jit_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_jit_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/riscv64_debug/1.0.0-" + ENGINE_VERSION + "/riscv64_debug-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/riscv64_profile/1.0.0-" + ENGINE_VERSION + "/riscv64_profile-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/riscv64_release/1.0.0-" + ENGINE_VERSION + "/riscv64_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/riscv64_jit_release/1.0.0-" + ENGINE_VERSION + "/riscv64_jit_release-1.0.0-" + CONTENT_HASH + ".pom"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/x86_debug/1.0.0-" + ENGINE_VERSION + "/x86_debug-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/x86_profile/1.0.0-" + ENGINE_VERSION + "/x86_profile-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/x86_release/1.0.0-" + ENGINE_VERSION + "/x86_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x86_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/x86_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_jit_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_debug/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_debug-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_profile/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_profile-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/armeabi_v7a_jit_release/1.0.0-" + ENGINE_VERSION + "/armeabi_v7a_jit_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/x86_64_debug/1.0.0-" + ENGINE_VERSION + "/x86_64_debug-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/x86_64_profile/1.0.0-" + ENGINE_VERSION + "/x86_64_profile-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/x86_64_release/1.0.0-" + ENGINE_VERSION + "/x86_64_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_x64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/x86_64_jit_release/1.0.0-" + ENGINE_VERSION + "/x86_64_jit_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_debug/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_debug-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_profile/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_profile-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_arm64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/arm64_v8a_jit_release/1.0.0-" + ENGINE_VERSION + "/arm64_v8a_jit_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_debug": ["zip_archives/download.flutter.io/io/flutter/riscv64_debug/1.0.0-" + ENGINE_VERSION + "/riscv64_debug-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_profile": ["zip_archives/download.flutter.io/io/flutter/riscv64_profile/1.0.0-" + ENGINE_VERSION + "/riscv64_profile-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_release": ["zip_archives/download.flutter.io/io/flutter/riscv64_release/1.0.0-" + ENGINE_VERSION + "/riscv64_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }) + select({
+        ":when_current_cpu_riscv64_and_flutter_runtime_mode_jit_release": ["zip_archives/download.flutter.io/io/flutter/riscv64_jit_release/1.0.0-" + ENGINE_VERSION + "/riscv64_jit_release-1.0.0-" + CONTENT_HASH + ".jar"],
+        "//conditions:default": [],
+    }),
+    script = "//engine/src/flutter/build:android_artifacts.py",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":android_jar",
+        ":pom_content_hash_libflutter",
+        ":pom_libflutter",
+    ],
 )
 
 # `flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release"`, for the select()s of this file.
