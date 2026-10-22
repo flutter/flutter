@@ -4,27 +4,43 @@
 
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'artifacts.dart';
 import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
+import 'build_system/build_targets.dart';
 import 'build_system/depfile.dart';
 import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'project.dart';
+import 'version.dart';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
+  BundleBuilder({
+    required this._analytics,
+    required this._buildSystem,
+    required this._buildTargets,
+    required this._toolContext,
+  });
+
+  final Analytics _analytics;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final ToolContext _toolContext;
+
   /// Builds the bundle for the given target platform.
   ///
   /// The default `mainPath` is `lib/main.dart`.
@@ -40,23 +56,31 @@ class BundleBuilder {
     String? assetDirPath,
     BuildSystem? buildSystem,
   }) async {
-    project ??= FlutterProject.current(globals.fs, logger: globals.logger);
-    mainPath ??= defaultMainPath;
-    depfilePath ??= defaultDepfilePath;
-    assetDirPath ??= getAssetBuildDirectory(globals.config, globals.fs);
-    buildSystem ??= globals.buildSystem;
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      :FileSystem fs,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      platform: Platform hostPlatform,
+      :ProcessManager processManager,
+    ) = _toolContext;
+    project ??= FlutterProject.current(fs, logger: logger);
+    mainPath ??= defaultMainPath(fs);
+    depfilePath ??= defaultDepfilePath(config: config, fileSystem: fs);
+    assetDirPath ??= getAssetBuildDirectory(config, fs);
+    buildSystem ??= _buildSystem;
 
     // If the precompiled flag was not passed, force us into debug mode.
     final environment = Environment(
       projectDir: project.directory,
       packageConfigPath: buildInfo.packageConfigPath,
-      outputDir: globals.fs.directory(assetDirPath),
+      outputDir: fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
-      cacheDir: globals.cache.getRoot(),
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion: globals.artifacts!.usesLocalArtifacts
-          ? null
-          : globals.flutterVersion.engineRevision,
+      cacheDir: cache.getRoot(),
+      flutterRootDir: fs.directory(Cache.flutterRoot),
+      engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
         kTargetPlatform: platform.getName(),
@@ -64,22 +88,22 @@ class BundleBuilder {
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
       },
-      artifacts: globals.artifacts!,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-      analytics: globals.analytics,
-      platform: globals.platform,
+      artifacts: artifacts,
+      fileSystem: fs,
+      logger: logger,
+      processManager: processManager,
+      analytics: _analytics,
+      platform: hostPlatform,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug
-        ? globals.buildTargets.copyFlutterBundle
-        : globals.buildTargets.releaseCopyFlutterBundle;
+        ? _buildTargets.copyFlutterBundle
+        : _buildTargets.releaseCopyFlutterBundle;
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError(
+        logger.printError(
           'Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
               ? measurement.stackTrace
@@ -89,7 +113,7 @@ class BundleBuilder {
       throwToolExit('Failed to build bundle.');
     }
     final depfile = Depfile(result.inputFiles, result.outputFiles);
-    final File outputDepfile = globals.fs.file(depfilePath);
+    final File outputDepfile = fs.file(depfilePath);
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
@@ -97,7 +121,7 @@ class BundleBuilder {
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
-      final File outputDill = globals.fs.directory(assetDirPath).childFile('kernel_blob.bin');
+      final File outputDill = fs.directory(assetDirPath).childFile('kernel_blob.bin');
       if (outputDill.existsSync()) {
         outputDill.copySync(applicationKernelFilePath);
       }
@@ -108,13 +132,10 @@ class BundleBuilder {
 
 Future<AssetBundle?> buildAssets({
   required String manifestPath,
-  String? assetDirPath,
   required String packageConfigPath,
   required TargetPlatform targetPlatform,
   String? flavor,
 }) async {
-  assetDirPath ??= getAssetBuildDirectory(globals.config, globals.fs);
-
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
@@ -133,16 +154,19 @@ Future<AssetBundle?> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, AssetBundleEntry> assetEntries, {
-  required TargetPlatform targetPlatform,
-  required ImpellerStatus impellerStatus,
-  required ProcessManager processManager,
-  required FileSystem fileSystem,
-  required Artifacts artifacts,
-  required Logger logger,
-  required Directory projectDir,
   required BuildMode buildMode,
-  required Platform platform,
+  required ImpellerStatus impellerStatus,
+  required Directory projectDir,
+  required TargetPlatform targetPlatform,
+  required ToolContext toolContext,
 }) async {
+  final ToolContext(
+    :Artifacts artifacts,
+    fs: FileSystem fileSystem,
+    :Logger logger,
+    :Platform platform,
+    :ProcessManager processManager,
+  ) = toolContext;
   if (bundleDir.existsSync()) {
     try {
       bundleDir.deleteSync(recursive: true);
