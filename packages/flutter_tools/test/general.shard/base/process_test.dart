@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -491,6 +492,22 @@ void main() {
       await exitWithHooks(0, shutdownHooks: shutdownHooks);
       expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
     }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+
+    testUsingContext(
+      'does not print analytics welcome message if logger.isMachine is true',
+      () async {
+        setExitFunctionForTests((int exitCode) {});
+
+        final shutdownHooks = ShutdownHooks();
+        await exitWithHooks(0, shutdownHooks: shutdownHooks);
+        expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
+        expect(analytics.shouldShowMessage, isTrue);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => analytics,
+        Logger: () => MachineOutputLogger(parent: logger),
+      },
+    );
 
     testUsingContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});
