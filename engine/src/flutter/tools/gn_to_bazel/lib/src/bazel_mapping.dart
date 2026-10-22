@@ -548,11 +548,14 @@ const Map<String, String> toolchainPlatforms = <String, String>{
 };
 
 /// The outputs of an action that are directories (GN declares a directory
-/// output like a file: the Android embedding's javadoc tree), by the
-/// action's GN label, each as its path under `$target_gen_dir`: declared
-/// as directories (gn_action's output_dirs).
+/// output like a file: the Android embedding's javadoc tree, the sky_engine
+/// package copied for release), by the action's GN label, each as its path
+/// under `$target_gen_dir` -- or, for an output under the build directory
+/// itself, under that: declared as directories (gn_action's output_dirs,
+/// build_output_dirs).
 const Map<String, Set<String>> actionDirectoryOutputs = <String, Set<String>>{
   '//flutter/shell/platform/android:gen_android_javadoc': <String>{'javadocs'},
+  '//flutter/sky/dist:sky_engine': <String>{'dist/packages/sky_engine'},
 };
 
 /// Programs an action runs, which GN names by their absolute paths
@@ -1479,6 +1482,13 @@ final class DirectorySource {
 
 /// The directories zip_bundle entries name, by GN path.
 const Map<String, DirectorySource> directorySources = <String, DirectorySource>{
+  // The Flutter GPU package, which flutter_gpu.zip (lib/gpu/dist) ships as
+  // the directory is, BUILD files and tests included, as zip.py's walk takes
+  // it: the package's files and its dist subpackage's (the appendices).
+  '//flutter/lib/gpu': DirectorySource(
+    '//engine/src/flutter/lib/gpu:all_files',
+    root: 'engine/src/flutter/lib/gpu',
+  ),
   // impellerc's shader library (GLSL sources), which artifacts.zip ships
   // beside the compiler; the packages' files, BUILD files included, as
   // zip.py's walk takes them.

@@ -6,4 +6,7 @@
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["gn_action.bzl"])
+exports_files([
+    "gn_action.bzl",
+    "stage_build_directory.py",
+])

@@ -213,7 +213,10 @@ def _zip_bundle_impl(ctx):
             placed.append((file, ctx.attr.sources[destination]))
     for tree in ctx.attr.trees:
         for file, destination in tree[ZipTreeInfo].entries:
-            args.add_all(["-i", file, destination])
+            # A directory among a tree's entries (a build_directory_tree
+            # over an action's directory output: the sky_engine package
+            # copied for release) goes to zip.py as itself, as above.
+            args.add_all(["-i", file, destination], expand_directories = False)
             inputs.append(file)
 
     ctx.actions.run(
