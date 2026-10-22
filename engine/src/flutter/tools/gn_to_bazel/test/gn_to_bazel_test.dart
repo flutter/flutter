@@ -566,6 +566,8 @@ source_set("x") {
         'current_toolchain',
         'default_toolchain',
         'disable_vma_stl_shared_mutex',
+        // A setting (build/bazel:embedder_for_target); off on the host.
+        'embedder_for_target',
         'enable_backtrace',
         'enable_unittests',
         'full_target_platform_name',

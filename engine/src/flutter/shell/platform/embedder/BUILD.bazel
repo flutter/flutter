@@ -1370,11 +1370,18 @@ cc_library(
             # All platforms require the embedder dylib and headers.
             ":copy_headers",  # build_embedder_api
         ],
+        "//engine/src/flutter/build/bazel:embedder_for_target_enabled": [
+            # All platforms require the embedder dylib and headers.
+            ":copy_headers",  # build_embedder_api
+        ],
         "//conditions:default": [],
     }),
     linkstatic = True,
     deps = select({
         "//engine/src/flutter/build/bazel:host_toolchain": [
+            ":flutter_engine_library",  # build_embedder_api
+        ],
+        "//engine/src/flutter/build/bazel:embedder_for_target_enabled": [
             ":flutter_engine_library",  # build_embedder_api
         ],
         "//conditions:default": [],
