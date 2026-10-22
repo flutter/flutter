@@ -919,10 +919,10 @@ action("embedding_jars") {
       ]
       args += [
         "-i",
-        "${name}.jar",
+        rebase_path("$root_out_dir/${name}.jar", root_build_dir),
         rebase_path("${base_name}.jar", root_build_dir),
         "-i",
-        "${name}-sources.jar",
+        rebase_path("$root_out_dir/${name}-sources.jar", root_build_dir),
         rebase_path("${base_name}-sources.jar", root_build_dir),
       ]
     } else {
@@ -953,10 +953,10 @@ action("embedding_jars") {
       ]
       args += [
         "-i",
-        "${name}.jar",
+        rebase_path("$root_out_dir/${name}.jar", root_build_dir),
         rebase_path("${hash_base_name}.jar", root_build_dir),
         "-i",
-        "${name}-sources.jar",
+        rebase_path("$root_out_dir/${name}-sources.jar", root_build_dir),
         rebase_path("${hash_base_name}-sources.jar", root_build_dir),
       ]
     } else {
