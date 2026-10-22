@@ -130,9 +130,17 @@ def _targets_of(value):
 # directory too (the web SDK's tree beside flutter-web-sdk.zip).
 _FOLLOWED_ATTRIBUTES = ["deps", "srcs", "data", "files", "trees"]
 
-def _strip(ctx, binary, suffix, flag):
-    """`llvm-objcopy <flag>` of `binary` into a sibling named `<binary>.<suffix>`."""
-    stripped = ctx.actions.declare_file(binary.basename + "." + suffix, sibling = binary)
+def _strip(ctx, binary, directory, flag):
+    """`llvm-objcopy <flag>` of `binary` into `<directory>/<binary's name>` beside it.
+
+    The copy keeps the binary's name, in a directory of its own: a script
+    that names a file after its input (create_flutter_jar.py, the jar's
+    lib/<abi>/ entries) sees the name GN's layout has.
+    """
+    package = ctx.label.package
+    relative = binary.short_path[len(package) + 1:] if package else binary.short_path
+    parent = relative[:-len(binary.basename)]
+    stripped = ctx.actions.declare_file(parent + directory + "/" + binary.basename)
     objcopy = [f for f in ctx.files._objcopy if f.basename == "llvm-objcopy"]
     if len(objcopy) != 1:
         fail("%s: _objcopy should hold llvm-objcopy, holds %s" % (ctx.label, ctx.files._objcopy))
@@ -170,14 +178,15 @@ def _binary_entries(target, ctx):
     shipped = {}
     for binary in target[DefaultInfo].files.to_list():
         if shared and android:
-            entries.append((_strip(ctx, binary, "lib_stripped", "--strip-unneeded"), "lib.stripped/" + binary.basename))
+            entries.append((_strip(ctx, binary, "lib.stripped", "--strip-unneeded"), "lib.stripped/" + binary.basename))
         if shared and not ctx.attr._stripped[BuildSettingInfo].value:
             entries.append((binary, binary.basename))
             continue
 
         # `<name>.stripped` is cc_binary's own (its CcStrip action, the
         # toolchain's strip with -S: debug sections only); this is GN's
-        # --strip-all copy, the file an archive or install ships.
+        # --strip-all copy, the file an archive or install ships, under
+        # shipped/ in bazel-bin.
         stripped = _strip(ctx, binary, "shipped", "--strip-all")
         entries.append((stripped, binary.basename))
         entries.append((binary, ("lib.unstripped/" if shared else "exe.unstripped/") + binary.basename))
