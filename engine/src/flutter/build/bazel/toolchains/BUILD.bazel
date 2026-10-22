@@ -11,6 +11,8 @@ load(
     ":cc_toolchain_config.bzl",
     "ANDROID_ARM64_COMPILE_FLAGS",
     "ANDROID_ARM64_LINK_FLAGS",
+    "ANDROID_ARM_COMPILE_FLAGS",
+    "ANDROID_ARM_LINK_FLAGS",
     "ANDROID_X64_COMPILE_FLAGS",
     "ANDROID_X64_LINK_FLAGS",
     "LINUX_ARM64_COMPILE_FLAGS",
@@ -430,6 +432,101 @@ toolchain(
         "@platforms//cpu:x86_64",
     ],
     toolchain = ":android_x64_clang",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+# ---------------------------------------------------------------------------
+# android-arm: GN's `--android` build (tools/gn's default CPU, the android
+# clang_arm toolchain): as android-arm64 with the armv7 ABI's API 21
+# sysroot libraries and compiler runtime, `--target=arm-linux-androideabi21`
+# and arm.gni's armv7-a/softfp/Thumb/NEON flags; GN's build directory for
+# it carries no CPU suffix (android_debug).
+# ---------------------------------------------------------------------------
+
+platform(
+    name = "android_arm",
+    constraint_values = [
+        "@platforms//os:android",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+filegroup(
+    name = "android_arm_linker_files",
+    srcs = [
+        "@android_tools//:libraries_arm",
+        "@clang_linux_x64//:linker_files",
+    ],
+)
+
+filegroup(
+    name = "android_arm_all_files",
+    srcs = [
+        ":android_arm64_compiler_files",
+        ":android_arm_linker_files",
+        "@clang_linux_x64//:all_files",
+    ],
+)
+
+ANDROID_ARM_LIB = "sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21"
+
+flutter_cc_toolchain_config(
+    name = "android_arm_clang_config",
+    ar = "@clang_linux_x64//:bin/llvm-ar",
+    arch_copts = ANDROID_ARM_COMPILE_FLAGS,
+    arch_linkopts = ANDROID_ARM_LINK_FLAGS,
+    asan = select({
+        "//engine/src/flutter/build/bazel:asan_enabled": True,
+        "//conditions:default": False,
+    }),
+    clang = "@clang_linux_x64//:bin/clang",
+    clangxx = "@clang_linux_x64//:bin/clang++",
+    crt_begin_exe = "@android_tools//:" + ANDROID_ARM_LIB + "/crtbegin_dynamic.o",
+    crt_begin_so = "@android_tools//:" + ANDROID_ARM_LIB + "/crtbegin_so.o",
+    crt_end_exe = "@android_tools//:" + ANDROID_ARM_LIB + "/crtend_android.o",
+    crt_end_so = "@android_tools//:" + ANDROID_ARM_LIB + "/crtend_so.o",
+    cxx_include_markers = [
+        "@libcxx//:include/__config",
+        "@libcxxabi//:include/cxxabi.h",
+        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
+    ],
+    objcopy = "@clang_linux_x64//:bin/llvm-objcopy",
+    os = "android",
+    resource_include_marker = "@clang_linux_x64//:resource_include_marker",
+    runtime_library = "@android_tools//:builtins_arm",
+    strip = "@clang_linux_x64//:bin/llvm-strip",
+    sysroot_marker = "@android_tools//:sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/sysroot/NOTICE",
+    target_cpu = "armv7",
+    target_libc = "bionic_21",
+    target_system_name = "arm-unknown-linux-androideabi",
+    toolchain_identifier = "android_arm_clang",
+)
+
+cc_toolchain(
+    name = "android_arm_clang",
+    all_files = ":android_arm_all_files",
+    ar_files = "@clang_linux_x64//:ar_files",
+    compiler_files = ":android_arm64_compiler_files",
+    dwp_files = ":empty",
+    linker_files = ":android_arm_linker_files",
+    objcopy_files = "@clang_linux_x64//:objcopy_files",
+    strip_files = "@clang_linux_x64//:strip_files",
+    supports_param_files = True,
+    toolchain_config = ":android_arm_clang_config",
+    toolchain_identifier = "android_arm_clang",
+)
+
+toolchain(
+    name = "android_arm_clang_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:android",
+        "@platforms//cpu:armv7",
+    ],
+    toolchain = ":android_arm_clang",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 

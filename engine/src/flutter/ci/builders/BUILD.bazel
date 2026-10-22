@@ -33,7 +33,7 @@ filegroup(
 
 # linux_android_aot_engine.json: ci/android_profile
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:stripped=false
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
 # Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile",
@@ -44,7 +44,7 @@ install(
 
 # linux_android_aot_engine.json: ci/android_release
 #   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:stripped=false
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
 # Not built, no Bazel counterpart yet: default, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release",
@@ -199,8 +199,7 @@ install(
 )
 
 # linux_android_debug_engine.json: ci/android_debug
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_debug :android_debug
 # Not built, no Bazel counterpart yet: flutter/sky/dist:zip_old_location, flutter/lib/gpu/dist:zip_old_location, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_debug",
@@ -621,8 +620,7 @@ install(
 )
 
 # linux_unopt.json: ci/android_debug_unopt
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_debug_unopt :android_debug_unopt
 # Not built, no Bazel counterpart yet: flutter/shell/platform/android:android_jar.
 install(
     name = "android_debug_unopt",
@@ -654,8 +652,7 @@ test_suite(
 )
 
 # linux_unopt.json: ci/android_debug_test
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_debug_test :android_debug_test
 # Not built, no Bazel counterpart yet: flutter/sky/dist:zip_old_location, flutter/lib/gpu/dist:zip_old_location, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_debug_test",

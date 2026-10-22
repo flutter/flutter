@@ -6,27 +6,59 @@
 # targets of its BUILD.gn that the engine uses (`zlib` and the SIMD source
 # sets it is assembled from) as the engine's GN build configures them.
 #
-# Two CPUs are covered: x86-64 (use_x86_x64_optimizations in BUILD.gn: the
-# SIMD source sets and their defines) and wasm32 (neither optimization: the
+# Four CPUs are covered: x86-64 (use_x86_x64_optimizations in BUILD.gn: the
+# SIMD source sets and their defines), arm64 and arm
+# (use_arm_neon_optimizations: the NEON source sets and the ARMv8 CRC32, the
+# 64-bit chunk reads on arm64 alone) and wasm32 (neither optimization: the
 # portable zlib -- CPU_NO_SIMD, the plain inflate.c, no SIMD source sets --
 # as the web build has it). The select()s have no default, so a build for
 # another CPU fails at analysis rather than silently producing a zlib
-# without the NEON paths (use_arm_neon_optimizations).
+# without its SIMD paths.
 
 # This file is loaded as the root of @zlib, so the main module is named.
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_THIRD_PARTY_COPTS")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
 # The CPUs the engine builds zlib for: GN's use_x86_x64_optimizations (x64),
-# use_arm_neon_optimizations (arm64, the Linux cross build) and neither
-# (wasm32: CPU_NO_SIMD, the plain inflate.c).
+# use_arm_neon_optimizations (arm64: the Linux cross build and Android;
+# arm: Android) and neither (wasm32: CPU_NO_SIMD, the plain inflate.c).
 _X86_64 = "@platforms//cpu:x86_64"
 
 _AARCH64 = "@platforms//cpu:aarch64"
 
+_ARMV7 = "@platforms//cpu:armv7"
+
 _WASM32 = "@platforms//cpu:wasm32"
+
+# The ARM CPUs on Android and elsewhere (Linux): zlib_arm_crc32_config's
+# ARMV8_OS_* define, which picks the CPU-feature query (the NDK-compatible
+# cpu-features on Android, getauxval on Linux).
+selects.config_setting_group(
+    name = "arm_android",
+    match_all = [
+        "@platforms//os:android",
+        ":arm_any",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_elsewhere",
+    match_all = [
+        "@flutter//engine/src/flutter/build/bazel:not_android",
+        ":arm_any",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_any",
+    match_any = [
+        _AARCH64,
+        _ARMV7,
+    ],
+)
 
 # config("zlib_internal_config"): ZLIB_DEBUG in unoptimized builds.
 _INTERNAL_DEFINES = ["ZLIB_IMPLEMENTATION"] + select({
@@ -48,24 +80,29 @@ _ADLER32_SIMD_DEFINES = select({
         "X86_NOT_WINDOWS",
     ],
     _AARCH64: ["ADLER32_SIMD_NEON"],
+    _ARMV7: ["ADLER32_SIMD_NEON"],
     _WASM32: [],
 })
 
 _CRC32_SIMD_DEFINES = select({
     _X86_64: ["CRC32_SIMD_SSE42_PCLMUL"],
     _AARCH64: [],
+    _ARMV7: [],
     _WASM32: [],
 })
 
-# config("zlib_arm_crc32_config"): the ARMv8 CRC32 instructions, on Linux.
+# config("zlib_arm_crc32_config"): the ARMv8 CRC32 instructions, and the OS
+# whose CPU-feature query says whether the CPU has them.
 _ARM_CRC32_DEFINES = select({
-    _AARCH64: [
-        "CRC32_ARMV8_CRC32",
-        "ARMV8_OS_LINUX",
-    ],
+    ":arm_any": ["CRC32_ARMV8_CRC32"],
+    "//conditions:default": [],
+}) + select({
+    ":arm_android": ["ARMV8_OS_ANDROID"],
+    ":arm_elsewhere": ["ARMV8_OS_LINUX"],
     "//conditions:default": [],
 })
 
+# The 64-bit chunk reads and writes are the 64-bit CPUs' (GN: x64, arm64).
 _DATA_CHUNK_SIMD_DEFINES = select({
     _X86_64: [
         "INFLATE_CHUNK_SIMD_SSE2",
@@ -77,12 +114,14 @@ _DATA_CHUNK_SIMD_DEFINES = select({
         "INFLATE_CHUNK_READ_64LE",
         "DEFLATE_CHUNK_WRITE_64LE",
     ],
+    _ARMV7: ["INFLATE_CHUNK_SIMD_NEON"],
     _WASM32: [],
 })
 
 _SLIDE_HASH_SIMD_DEFINES = select({
     _X86_64: ["DEFLATE_SLIDE_HASH_SSE2"],
     _AARCH64: ["DEFLATE_SLIDE_HASH_NEON"],
+    _ARMV7: ["DEFLATE_SLIDE_HASH_NEON"],
     _WASM32: [],
 })
 
@@ -137,7 +176,7 @@ cc_library(
     deps = [":zlib_common_headers"],
 )
 
-# source_set("zlib_arm_crc32") -- the arm64 build's CRC32 (clang needs no
+# source_set("zlib_arm_crc32") -- the ARM builds' CRC32 (clang needs no
 # -march for the intrinsics; GN adds one for gcc alone).
 cc_library(
     name = "zlib_arm_crc32",
@@ -147,7 +186,10 @@ cc_library(
     includes = ["."],
     linkstatic = True,
     local_defines = FLUTTER_LOCAL_DEFINES + _INTERNAL_DEFINES + _ARM_CRC32_DEFINES,
-    target_compatible_with = [_AARCH64],
+    target_compatible_with = select({
+        ":arm_any": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     visibility = ["//visibility:private"],
     deps = [":zlib_common_headers"],
 )
@@ -215,6 +257,7 @@ cc_library(
     ] + select({
         _X86_64: [],
         _AARCH64: [],
+        _ARMV7: [],
         # Without the chunk-copying inflate of zlib_data_chunk_simd.
         _WASM32: ["inflate.c"],
     }),
@@ -232,6 +275,7 @@ cc_library(
                     select({
                         _X86_64: [],
                         _AARCH64: [],
+                        _ARMV7: [],
                         _WASM32: ["CPU_NO_SIMD"],
                     }),
     deps = [":zlib_common_headers"] + select({
@@ -247,7 +291,18 @@ cc_library(
             ":zlib_data_chunk_simd",
             ":zlib_slide_hash_simd",
         ],
+        _ARMV7: [
+            ":zlib_adler32_simd",
+            ":zlib_arm_crc32",
+            ":zlib_data_chunk_simd",
+            ":zlib_slide_hash_simd",
+        ],
         _WASM32: [],
+    }) + select({
+        # BUILD.gn: an Android build's CPU detection goes through the
+        # NDK-compatible cpu-features (//third_party/cpu_features:ndk_compat).
+        "@platforms//os:android": ["@cpu_features//:ndk_compat"],
+        "//conditions:default": [],
     }),
 )
 
