@@ -26,7 +26,7 @@ cc_library(
         "geometry/dl_path.h",
         "geometry/dl_path_builder.h",
     ],
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -353,7 +353,7 @@ cc_binary(
         "benchmarking/dl_benchmarks.cc",
         "benchmarking/dl_benchmarks.h",
     ],
-    copts = CHROMIUM_CODE_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :display_list_benchmarks_source
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
@@ -379,7 +379,7 @@ cc_binary(
         "benchmarking/dl_benchmarks.cc",
         "benchmarking/dl_benchmarks.h",
     ],
-    copts = CHROMIUM_CODE_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :display_list_benchmarks_source
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
