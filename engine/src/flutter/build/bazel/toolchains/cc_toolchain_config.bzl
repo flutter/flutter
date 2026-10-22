@@ -228,6 +228,15 @@ ANDROID_ARM_COMPILE_FLAGS = [
 ]
 ANDROID_ARM_LINK_FLAGS = ["--target=arm-linux-androideabi21"]
 
+# riscv64: API 35 (config.gni), and build/config/compiler's
+# allow_deprecated_api_calls, which is on for riscv64 alone
+# (flutter/flutter#173656): deprecated API calls are not errors there.
+ANDROID_RISCV64_COMPILE_FLAGS = [
+    "--target=riscv64-linux-androideabi35",
+    "-Wno-deprecated-declarations",
+]
+ANDROID_RISCV64_LINK_FLAGS = ["--target=riscv64-linux-androideabi35"]
+
 # Every link GN performs produces a complete artifact -- an executable, or a
 # shared library with all of its static dependencies linked in -- so GN can
 # reject unresolved symbols in all of them (//build/config/compiler:compiler).
