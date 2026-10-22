@@ -372,12 +372,68 @@ action("_generate_symlinks") {
   }
 }
 
+if (flutter_runtime_mode == "profile") {
+  _vmservice_framework_name = "VMService"
+  _vmservice_framework_filename = "$_vmservice_framework_name.framework"
+  _vmservice_framework_dir = "$root_out_dir/$_vmservice_framework_filename"
+
+  copy("copy_vmservice_dylib") {
+    visibility = [ ":*" ]
+    sources = [ "$root_out_dir/libvmservice_snapshot.dylib" ]
+    outputs =
+        [ "$_vmservice_framework_dir/Versions/A/$_vmservice_framework_name" ]
+    deps = [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  }
+
+  action("copy_vmservice_framework_info_plist") {
+    script = "//flutter/build/copy_info_plist.py"
+    visibility = [ ":*" ]
+    sources = [ "framework/VMServiceInfo.plist" ]
+    outputs = [ "$_vmservice_framework_dir/Versions/A/Resources/Info.plist" ]
+    args = [
+      "--source",
+      rebase_path(sources[0]),
+      "--destination",
+      rebase_path(outputs[0]),
+      "--buildmode",
+      flutter_runtime_mode,
+    ]
+  }
+
+  action("_generate_vmservice_symlinks") {
+    visibility = [ ":*" ]
+    script = "//build/config/mac/package_framework.py"
+    outputs = [
+      "$root_build_dir/$_vmservice_framework_name.stamp",
+      "$root_out_dir/$_vmservice_framework_filename",
+    ]
+    args = [
+      "--framework",
+      "$_vmservice_framework_filename",
+      "--version",
+      "A",
+      "--contents",
+      "$_vmservice_framework_name",
+      "Resources",
+      "--stamp",
+      "$_vmservice_framework_name.stamp",
+    ]
+    deps = [
+      ":copy_vmservice_dylib",
+      ":copy_vmservice_framework_info_plist",
+    ]
+  }
+}
+
 group("universal_flutter_framework") {
   visibility = [ ":*" ]
   deps = [
     ":_generate_symlinks",
     ":_generate_symlinks_and_verify_framework_module",
   ]
+  if (flutter_runtime_mode == "profile") {
+    deps += [ ":_generate_vmservice_symlinks" ]
+  }
 }
 
 action("flutter_framework") {
@@ -420,7 +476,10 @@ zip_bundle("zip_macos_flutter_framework") {
     },
   ]
   if (flutter_runtime_mode == "profile") {
-    deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+    # Per-arch CI builders only invoke `zip_macos_flutter_framework`, and
+    # `create_macos_framework.py` reads `VMService.framework` directly from the
+    # per-arch `out/` directories to build the fat framework.
+    deps += [ ":_generate_vmservice_symlinks" ]
   }
 }
 

@@ -165,7 +165,7 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.vmserviceSharedLibrary,
+          Artifact.vmserviceFramework,
           platform: TargetPlatform.ios,
           mode: BuildMode.profile,
         ),
@@ -176,12 +176,12 @@ void main() {
           'artifacts',
           'engine',
           'ios-profile',
-          'libvmservice_snapshot.dylib',
+          'VMService.framework',
         ),
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.vmserviceSharedLibrary,
+          Artifact.vmserviceFramework,
           platform: TargetPlatform.darwin,
           mode: BuildMode.profile,
         ),
@@ -192,7 +192,7 @@ void main() {
           'artifacts',
           'engine',
           'darwin-x64-profile',
-          'libvmservice_snapshot.dylib',
+          'VMService.framework',
         ),
       );
     });
@@ -550,19 +550,19 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.vmserviceSharedLibrary,
+          Artifact.vmserviceFramework,
           platform: TargetPlatform.ios,
           mode: BuildMode.profile,
         ),
-        fileSystem.path.join('/out', 'android_debug_unopt', 'libvmservice_snapshot.dylib'),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'VMService.framework'),
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.vmserviceSharedLibrary,
+          Artifact.vmserviceFramework,
           platform: TargetPlatform.darwin,
           mode: BuildMode.profile,
         ),
-        fileSystem.path.join('/out', 'android_debug_unopt', 'libvmservice_snapshot.dylib'),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'VMService.framework'),
       );
     });
 

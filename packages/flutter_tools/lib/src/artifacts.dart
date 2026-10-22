@@ -49,8 +49,8 @@ enum Artifact {
   platformKernelDill('platform_strong.dill'),
   platformLibrariesJson('libraries.json'),
 
-  /// The VM service snapshot as a shared library.
-  vmserviceSharedLibrary('libvmservice_snapshot', isSharedLibrary: true),
+  /// The framework directory of the VM service on iOS and macOS in profile mode.
+  vmserviceFramework('VMService.framework'),
   vmserviceKernelDill('vmservice_snapshot.dill'),
   flutterPatchedSdkPath('', isPatchedSdk: true),
 
@@ -95,23 +95,20 @@ enum Artifact {
     this.isExecutable = false,
     this.isPatchedSdk = false,
     this.isFuchsiaRunner = false,
-    this.isSharedLibrary = false,
   });
 
   const Artifact.directory()
     : _fileName = '',
       isExecutable = false,
       isPatchedSdk = false,
-      isFuchsiaRunner = false,
-      isSharedLibrary = false;
+      isFuchsiaRunner = false;
 
   final String _fileName;
   final bool isExecutable;
   final bool isPatchedSdk;
   final bool isFuchsiaRunner;
-  final bool isSharedLibrary;
 
-  String getFileName(Platform hostPlatform, [BuildMode? mode, TargetPlatform? targetPlatform]) {
+  String getFileName(Platform hostPlatform, [BuildMode? mode]) {
     if (isPatchedSdk) {
       throw StateError('No filename for sdk path, should not be invoked');
     }
@@ -122,25 +119,6 @@ enum Artifact {
       final jitOrAot = mode.isJit ? '_jit' : '_aot';
       final productOrNo = mode.isRelease ? '_product' : '';
       return 'flutter$jitOrAot${productOrNo}_runner-0.far';
-    }
-    if (isSharedLibrary) {
-      var dll = '.so';
-      if (targetPlatform != null) {
-        if (targetPlatform == TargetPlatform.windows_x64 ||
-            targetPlatform == TargetPlatform.windows_arm64) {
-          dll = '.dll';
-        } else if (targetPlatform == TargetPlatform.darwin ||
-            targetPlatform == TargetPlatform.ios) {
-          dll = '.dylib';
-        }
-      } else {
-        if (hostPlatform.isWindows) {
-          dll = '.dll';
-        } else if (hostPlatform.isMacOS) {
-          dll = '.dylib';
-        }
-      }
-      return '$_fileName$dll';
     }
     final exe = (isExecutable && hostPlatform.isWindows) ? '.exe' : '';
     return '$_fileName$exe';
@@ -539,8 +517,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
       case Artifact.vmserviceKernelDill:
-      case Artifact.vmserviceSharedLibrary:
-        return _fileSystem.path.join(engineDir, artifact.getFileName(_platform, mode, platform));
+      case Artifact.vmserviceFramework:
+        return _fileSystem.path.join(engineDir, artifact.getFileName(_platform));
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
@@ -619,9 +597,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
         return _getHostArtifactPath(artifact, platform, mode);
-      case Artifact.vmserviceSharedLibrary:
+      case Artifact.vmserviceFramework:
       case Artifact.vmserviceKernelDill:
-        return _fileSystem.path.join(engineDir, artifact.getFileName(_platform, mode, platform));
+        return _fileSystem.path.join(engineDir, artifact.getFileName(_platform));
     }
   }
 
@@ -637,9 +615,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
       case Artifact.flutterXcframework:
-      case Artifact.vmserviceSharedLibrary:
+      case Artifact.vmserviceFramework:
       case Artifact.vmserviceKernelDill:
-        final String artifactFileName = artifact.getFileName(_platform, mode, platform);
+        final String artifactFileName = artifact.getFileName(_platform);
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _fileSystem.path.join(engineDir, artifactFileName);
       case Artifact.flutterFramework:
@@ -725,7 +703,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
-      case Artifact.vmserviceSharedLibrary:
+      case Artifact.vmserviceFramework:
       case Artifact.vmserviceKernelDill:
         return _getHostArtifactPath(artifact, platform, mode);
     }
@@ -816,7 +794,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.vmserviceKernelDill:
-      case Artifact.vmserviceSharedLibrary:
+      case Artifact.vmserviceFramework:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -828,7 +806,7 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(
           engineArtifactsPath,
           platformDirName,
-          artifact.getFileName(_platform, mode, platform),
+          artifact.getFileName(_platform, mode),
         );
       case Artifact.windowsCppClientWrapper:
         final String platformDirName = _enginePlatformDirectoryName(platform);
@@ -1121,7 +1099,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
     final isDirectoryArtifact = artifact == Artifact.flutterPatchedSdkPath;
     final String? artifactFileName = isDirectoryArtifact
         ? null
-        : artifact.getFileName(hostPlatform, mode, platform);
+        : artifact.getFileName(hostPlatform, mode);
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.genSnapshotArm64:
@@ -1144,7 +1122,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.flutterXcframework:
       case Artifact.flutterMacOSXcframework:
       case Artifact.vmserviceKernelDill:
-      case Artifact.vmserviceSharedLibrary:
+      case Artifact.vmserviceFramework:
         return fs.path.join(localEngineInfo.targetOutPath, artifactFileName);
       case Artifact.platformKernelDill:
         if (platform?.os == .fuchsia) {
@@ -1360,7 +1338,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fuchsiaFlutterRunner:
         case Artifact.fontSubset:
         case Artifact.flutterToolsFileGenerators:
-        case Artifact.vmserviceSharedLibrary:
+        case Artifact.vmserviceFramework:
         case Artifact.vmserviceKernelDill:
           break;
       }

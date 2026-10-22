@@ -221,8 +221,12 @@ template("flutter_snapshot") {
         public_deps = [ ":$snapshot_target" ]
         sources = [ snapshot_assembly ]
         output_name = invoker_target_name
-        if (is_ios || is_mac) {
+        if (is_ios) {
           ldflags = [ "-Wl,-install_name,@rpath/VMService.framework/VMService" ]
+        } else if (is_mac) {
+          ldflags = [
+            "-Wl,-install_name,@rpath/VMService.framework/Versions/A/VMService",
+          ]
         }
       }
     }

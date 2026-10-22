@@ -754,58 +754,31 @@ abstract class IosAssetBundle extends Target {
     final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
       _kVmServiceFrameworkName,
     );
+    if (vmServiceFrameworkDir.existsSync()) {
+      vmServiceFrameworkDir.deleteSync(recursive: true);
+    }
     if (buildMode == BuildMode.profile) {
-      final String vmServiceDylibPath = environment.artifacts.getArtifactPath(
-        Artifact.vmserviceSharedLibrary,
+      final String vmServiceArtifactPath = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceFramework,
         platform: TargetPlatform.ios,
         mode: BuildMode.profile,
       );
-      final File vmServiceDylibFile = environment.fileSystem.file(vmServiceDylibPath);
-      vmServiceFrameworkDir.createSync(recursive: true);
-      final File vmServiceBinary = vmServiceFrameworkDir.childFile(_kVmServiceExecutableName);
-      vmServiceDylibFile.copySync(vmServiceBinary.path);
-
-      final File vmServiceInfoPlist = vmServiceFrameworkDir.childFile('Info.plist')
-        ..writeAsStringSync(_kIosVmServiceInfoPlist);
-      await _updateMinimumOSVersion(vmServiceInfoPlist, environment);
-      await _signFramework(environment, vmServiceBinary, buildMode);
-    } else if (vmServiceFrameworkDir.existsSync()) {
-      vmServiceFrameworkDir.deleteSync(recursive: true);
+      copyDirectory(
+        environment.fileSystem.directory(vmServiceArtifactPath),
+        vmServiceFrameworkDir,
+        followLinks: false,
+      );
+      await _signFramework(
+        environment,
+        vmServiceFrameworkDir.childFile(_kVmServiceExecutableName),
+        buildMode,
+      );
     }
   }
 }
 
 const _kVmServiceFrameworkName = 'VMService.framework';
 const _kVmServiceExecutableName = 'VMService';
-
-const _kIosVmServiceInfoPlist = r'''
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleDevelopmentRegion</key>
-  <string>en</string>
-  <key>CFBundleExecutable</key>
-  <string>VMService</string>
-  <key>CFBundleIdentifier</key>
-  <string>io.flutter.flutter.vmservice</string>
-  <key>CFBundleInfoDictionaryVersion</key>
-  <string>6.0</string>
-  <key>CFBundleName</key>
-  <string>VMService</string>
-  <key>CFBundlePackageType</key>
-  <string>FMWK</string>
-  <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
-  <key>CFBundleSignature</key>
-  <string>????</string>
-  <key>CFBundleVersion</key>
-  <string>1.0</string>
-  <key>MinimumOSVersion</key>
-  <string>13.0</string>
-</dict>
-</plist>
-''';
 
 /// Build a debug iOS application bundle.
 class DebugIosApplicationBundle extends IosAssetBundle {
@@ -868,7 +841,7 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.artifact(
-      Artifact.vmserviceSharedLibrary,
+      Artifact.vmserviceFramework,
       platform: TargetPlatform.ios,
       mode: BuildMode.profile,
     ),

@@ -724,14 +724,20 @@ void main() {
           .createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync();
 
-      final String vmServiceDylibPath = artifacts.getArtifactPath(
-        Artifact.vmserviceSharedLibrary,
+      final String vmServiceFrameworkArtifactPath = artifacts.getArtifactPath(
+        Artifact.vmserviceFramework,
         platform: TargetPlatform.ios,
         mode: BuildMode.profile,
       );
-      fileSystem.file(vmServiceDylibPath)
+      final Directory sourceVmServiceFramework = fileSystem.directory(
+        vmServiceFrameworkArtifactPath,
+      );
+      sourceVmServiceFramework.childFile('VMService')
         ..createSync(recursive: true)
         ..writeAsStringSync('vmservice_dylib_bytes');
+      sourceVmServiceFramework.childFile('Info.plist')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<string>io.flutter.flutter.vmservice</string>');
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
@@ -772,7 +778,6 @@ void main() {
             frameworkDirectoryBinary.path,
           ],
         ),
-        createPlutilFakeCommand(vmServiceInfoPlist),
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', vmServiceBinary.path],
         ),
@@ -806,7 +811,7 @@ void main() {
         target.inputs,
         contains(
           const Source.artifact(
-            Artifact.vmserviceSharedLibrary,
+            Artifact.vmserviceFramework,
             platform: TargetPlatform.ios,
             mode: BuildMode.profile,
           ),

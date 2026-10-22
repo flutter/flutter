@@ -619,9 +619,9 @@ void main() {
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
       fileSystem
-          .file(
+          .directory(
             artifacts.getArtifactPath(
-              Artifact.vmserviceSharedLibrary,
+              Artifact.vmserviceFramework,
               platform: TargetPlatform.darwin,
               mode: BuildMode.profile,
             ),
@@ -669,14 +669,27 @@ void main() {
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
 
-      final String vmServiceDylibPath = artifacts.getArtifactPath(
-        Artifact.vmserviceSharedLibrary,
+      final String vmServiceFrameworkArtifactPath = artifacts.getArtifactPath(
+        Artifact.vmserviceFramework,
         platform: TargetPlatform.darwin,
         mode: BuildMode.profile,
       );
-      fileSystem.file(vmServiceDylibPath)
+      final Directory sourceVmServiceFramework = fileSystem.directory(
+        vmServiceFrameworkArtifactPath,
+      );
+      sourceVmServiceFramework.childFile('Versions/A/VMService')
         ..createSync(recursive: true)
         ..writeAsStringSync('macos_vmservice_dylib_bytes');
+      sourceVmServiceFramework.childFile('Versions/A/Resources/Info.plist')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<string>io.flutter.flutter.vmservice</string>');
+      sourceVmServiceFramework.childLink('Versions/Current').createSync('A', recursive: true);
+      sourceVmServiceFramework
+          .childLink('Resources')
+          .createSync('Versions/Current/Resources', recursive: true);
+      sourceVmServiceFramework
+          .childLink('VMService')
+          .createSync('Versions/Current/VMService', recursive: true);
 
       const target = ProfileMacOSBundleFlutterAssets();
       await target.build(environment..defines[kBuildMode] = 'profile');
@@ -702,7 +715,7 @@ void main() {
         target.inputs,
         contains(
           const Source.artifact(
-            Artifact.vmserviceSharedLibrary,
+            Artifact.vmserviceFramework,
             platform: TargetPlatform.darwin,
             mode: BuildMode.profile,
           ),
@@ -769,9 +782,9 @@ void main() {
             ..writeAsStringSync('ABC');
       fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync();
       fileSystem
-          .file(
+          .directory(
             artifacts.getArtifactPath(
-              Artifact.vmserviceSharedLibrary,
+              Artifact.vmserviceFramework,
               platform: TargetPlatform.darwin,
               mode: BuildMode.profile,
             ),
