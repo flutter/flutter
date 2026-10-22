@@ -37,6 +37,7 @@ import '../device.dart';
 import '../doctor.dart';
 import '../emulator.dart';
 import '../experimental/extension_build_manager.dart';
+import '../experimental/extension_clean_manager.dart';
 import '../experimental/extension_discovery.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
@@ -99,6 +100,7 @@ class ToolDependencies {
     required this.featureFlags,
     required this.toolContext,
     this.extensionBuildManager,
+    this.extensionCleanManager,
     this.extensionManager,
   });
 
@@ -131,6 +133,9 @@ class ToolDependencies {
 
   /// Manager for querying custom build targets and executing builds via tool extensions.
   final ExtensionBuildManager? extensionBuildManager;
+
+  /// Manager for delegating project-specific clean operations to tool extensions.
+  final ExtensionCleanManager? extensionCleanManager;
 
   /// Manager for discovering and communicating with active tool extensions.
   final ExtensionManager? extensionManager;
@@ -638,6 +643,12 @@ class ToolDependencies {
       logger: finalLogger,
     );
 
+    final extensionCleanManager = ExtensionCleanManager(
+      extensionManager: extensionManager,
+      featureFlags: finalFeatureFlags,
+      logger: finalLogger,
+    );
+
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
@@ -645,6 +656,8 @@ class ToolDependencies {
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
           androidWorkflow: finalAndroidWorkflow,
           appleContext: appleContext,
+          buildSystem: finalBuildSystem,
+          buildTargets: finalBuildTargets,
           extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
@@ -666,6 +679,7 @@ class ToolDependencies {
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
       extensionBuildManager: extensionBuildManager,
+      extensionCleanManager: extensionCleanManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
       toolContext: finalToolContext,

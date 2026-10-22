@@ -1090,7 +1090,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        targetOverride: bundle.defaultMainPath,
+        targetOverride: bundle.defaultMainPath(parent.directory.fileSystem),
       );
     }
   }

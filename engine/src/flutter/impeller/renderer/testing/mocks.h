@@ -277,7 +277,7 @@ class MockCapabilities : public Capabilities {
 
 class MockCommandQueue : public CommandQueue {
  public:
-  MOCK_METHOD(fml::Status,
+  MOCK_METHOD(absl::Status,
               Submit,
               (const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
                const CompletionCallback& cb),
