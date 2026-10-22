@@ -711,5 +711,73 @@ The input testing/foo:foo matches no targets, configs or files.
         contains(contains('no configuration for macos/host_debug')),
       );
     });
+
+    // An Android build of a Linux builder file: named with its `ci/` prefix
+    // on the command line, as under GN; the configuration and the install
+    // target are the converter's (`android_debug_x64`).
+    Map<String, BuilderConfig> androidConfigs() {
+      final builder = TestBuilderConfig();
+      builder.addBuild(
+        name: 'ci/android_debug_x64',
+        dimension: TestDroneDimension.linux,
+        gnFlags: ['--target-dir', 'ci/android_debug_x64', '--android', '--android-cpu=x64'],
+        enableLto: false,
+        targetDir: 'ci/android_debug_x64',
+      );
+      return {
+        'linux_android_debug_engine': builder.buildConfig(
+          path: 'ci/builders/linux_android_debug_engine.json',
+        ),
+      };
+    }
+
+    test("builds an Android target under the CI build's configuration", () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: androidConfigs());
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'ci/android_debug_x64',
+        '--backend',
+        'bazel',
+        '//flutter/shell/platform/android:flutter_jar_zip',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'build',
+        '--config=android_debug_x64',
+        '//engine/src/flutter/shell/platform/android:flutter_jar_zip',
+      ]);
+    });
+
+    test("with no targets runs the Android builder's install into its target directory", () async {
+      final testEnv = TestEnvironment.withTestEngine();
+      addTearDown(testEnv.cleanup);
+
+      final runner = ToolCommandRunner(environment: testEnv.environment, configs: androidConfigs());
+      final int result = await runner.run([
+        'build',
+        '--config',
+        'ci/android_debug_x64',
+        '--backend',
+        'bazel',
+      ]);
+
+      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+      expect(result, equals(0));
+      expect(testEnv.processHistory.single.command, <String>[
+        'bazelisk',
+        'run',
+        '--config=android_debug_x64',
+        '//engine/src/flutter/ci/builders:android_debug_x64',
+        '--',
+        path.join(testEnv.environment.engine.outDir.path, 'ci', 'android_debug_x64'),
+      ]);
+    });
   });
 }
