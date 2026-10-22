@@ -25,7 +25,6 @@ import '../base/version_range.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
@@ -285,22 +284,11 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     createAndroidLanguage: stringArg('android-language'),
   );
 
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>
       toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
   Net get _netInstance => net ?? Net(logger: toolContext.logger, platform: toolContext.platform);
-  Pub get _pubInstance =>
-      pub ??
-      Pub(
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        processManager: toolContext.processManager,
-        platform: toolContext.platform,
-        botDetector: toolContext.botDetector,
-      );
+  Pub get _pubInstance => pub ?? Pub(toolContext: toolContext);
 
   /// Fetches the code for a sample from the Flutter docs website.
   Future<String?> _fetchSampleFromServer(String sampleId) async {
@@ -786,7 +774,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         throwToolExit('Unsupported template type: ${template.cliName}');
     }
 
-    _generatePubspecLock(relativeDir);
+    _generatePubspecLock(relativeDir, flutterRoot: flutterRoot);
 
     if (shouldCallPubGet) {
       projectFactory.invalidate(relativeDir);
@@ -812,6 +800,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         // It won't be if they do `flutter build --no-pub`, though.
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         await project.ensureReadyForPlatformSpecificTooling(
+          cache: cache,
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
           androidPlatform: includeAndroid,
           iosPlatform: includeIos || includeDarwin,
@@ -1027,7 +1016,11 @@ Your $application code is in $relativeAppMain.
     final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project,
+        requireAndroidSdk: false,
+        cache: toolContext.cache,
+      );
     }
 
     final organization =
@@ -1110,7 +1103,11 @@ Your $application code is in $relativeAppMain.
     final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project,
+        requireAndroidSdk: false,
+        cache: toolContext.cache,
+      );
     }
 
     final projectName = templateContext['projectName'] as String?;
@@ -1633,16 +1630,15 @@ List<String>? _getBuildGradleConfigurationFilePaths(
 /// This ensures that a breaking change accidentally published to one of these
 /// packages that the Flutter SDK depends on cannot break the `flutter create`
 /// command.
-void _generatePubspecLock(Directory directory) {
+void _generatePubspecLock(Directory directory, {required String flutterRoot}) {
   final FileSystem fs = directory.fileSystem;
-  final String flutterRoot = Cache.flutterRoot!;
   final flutterPubspecLock =
       loadYaml(fs.file(fs.path.join(flutterRoot, 'pubspec.lock')).readAsStringSync()) as YamlMap;
 
   final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
 
   final packages = <String, Object?>{
-    for (final package in gatherSdkPackageDependencies(directory))
+    for (final package in gatherSdkPackageDependencies(directory, flutterRoot: flutterRoot))
       package: flutterPackages[package],
   };
 
@@ -1654,7 +1650,7 @@ void _generatePubspecLock(Directory directory) {
 
 /// Find the package names of external dependencies from the SDK packages that
 /// the package in [directory] depends on.
-List<String> gatherSdkPackageDependencies(Directory directory) {
+List<String> gatherSdkPackageDependencies(Directory directory, {required String flutterRoot}) {
   final sdkPackages = <String>[];
   final FileSystem fs = directory.fileSystem;
   final File pubspecFile = directory.childFile('pubspec.yaml');
@@ -1690,9 +1686,6 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
   }
 
   final result = <String>{};
-  // Initialized by FlutterCommandRunner on startup.
-  // So it is safe to access it here.
-  final String flutterRoot = Cache.flutterRoot!;
   for (final sdkPackage in sdkPackages) {
     final Directory? packageDir = _resolveSdkPackageDir(fs, flutterRoot, sdkPackage);
     if (packageDir == null) {

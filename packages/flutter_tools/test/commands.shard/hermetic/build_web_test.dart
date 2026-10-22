@@ -33,7 +33,6 @@ void main() {
   late ProcessManager processManager;
 
   setUpAll(() {
-    Cache.flutterRoot = '';
     Cache.disableLocking();
   });
 

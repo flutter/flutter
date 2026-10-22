@@ -22,8 +22,9 @@ import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  Cache.disableLocking();
-  Cache.flutterRoot = '';
+  setUpAll(() {
+    Cache.disableLocking();
+  });
   final StackTrace stackTrace = StackTrace.current;
   late FakeAnalytics fakeAnalytics;
   late MemoryFileSystem fileSystem;

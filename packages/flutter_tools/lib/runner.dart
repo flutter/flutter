@@ -20,6 +20,7 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/cache.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
 import 'src/device.dart';
@@ -189,6 +190,7 @@ Future<int> run(
                 reportCrashes!,
                 getVersion,
                 shutdownHooks,
+                cache: toolDeps.toolContext.cache,
                 featureFlags: featureFlags,
                 usingLocalEngine: usingLocalEngine,
               );
@@ -208,6 +210,7 @@ Future<int> run(
               reportCrashes!,
               getVersion,
               shutdownHooks,
+              cache: toolDeps.toolContext.cache,
               featureFlags: featureFlags,
               usingLocalEngine: usingLocalEngine,
             );
@@ -233,6 +236,7 @@ Future<int> _handleToolError(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
+  required Cache cache,
   required bool usingLocalEngine,
   required FeatureFlags featureFlags,
 }) async {
@@ -244,6 +248,7 @@ Future<int> _handleToolError(
     reportCrashes,
     getFlutterVersion,
     shutdownHooks,
+    cache: cache,
     usingLocalEngine: usingLocalEngine,
     featureFlags: featureFlags,
   );
@@ -257,6 +262,7 @@ Future<int> _handleToolErrorImpl(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
+  required Cache cache,
   required bool usingLocalEngine,
   required FeatureFlags featureFlags,
 }) async {
@@ -345,7 +351,7 @@ Future<int> _handleToolErrorImpl(
         verbose: true /* Capture flutter doctor -v */,
       );
 
-      final doctorText = DoctorText(logger);
+      final doctorText = DoctorText(logger, cache: cache, clock: globals.systemClock);
 
       final details = CrashDetails(
         command: _crashCommand(args),
