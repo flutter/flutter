@@ -7438,7 +7438,7 @@ FlutterErrorDetails _reportException(
 ///  * [RenderObjectElement.updateChildren], which discusses why this class is
 ///    used as slot values for the children of a [MultiChildRenderObjectElement].
 @immutable
-final class IndexedSlot<T extends Element?> {
+class IndexedSlot<T extends Element?> {
   /// Creates an [IndexedSlot] with the provided [index] and slot [value].
   const IndexedSlot(this.index, this.value);
 
@@ -7451,6 +7451,9 @@ final class IndexedSlot<T extends Element?> {
 
   @override
   bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     return other is IndexedSlot && index == other.index && value == other.value;
   }
 
