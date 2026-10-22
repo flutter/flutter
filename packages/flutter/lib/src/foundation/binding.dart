@@ -258,7 +258,7 @@ abstract class BindingBase {
   /// [debugViewMetricsOverrides]; see [DebugViewMetricsOverride]. The views it
   /// reports are therefore not identical to the ones
   /// [ui.PlatformDispatcher.instance] reports; compare views by
-  /// [ui.FlutterView.viewId] when both are in hand. A subclass that overrides
+  /// [FlutterView.viewId] when both are in hand. A subclass that overrides
   /// this accessor should apply [debugApplyViewMetricsOverrides] to whatever it
   /// returns, the way [TestWidgetsFlutterBinding] does.
   ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
