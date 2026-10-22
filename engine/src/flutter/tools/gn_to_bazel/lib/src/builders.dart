@@ -46,10 +46,10 @@ enum GnFlagEffect {
 
   /// `--target-os <os>`, `--linux-cpu <cpu>`, `--android`,
   /// `--android-cpu <cpu>`: the target, from which [BuilderBuild.of] decides
-  /// the platform (the Linux arm64 cross build and Android arm64 are
-  /// platforms; an Android CPU without one is a flag the build cannot
-  /// express; another OS is out of scope; Linux on the host's CPU is the
-  /// host's own build).
+  /// the platform (the Linux arm64 cross build and the Android CPUs of
+  /// [androidPlatforms] are platforms; an Android CPU without one is a flag
+  /// the build cannot express; another OS is out of scope; Linux on the
+  /// host's CPU is the host's own build).
   target,
 
   /// `--lto`/`--no-lto`: whether the optimized build links with LTO, which
@@ -119,9 +119,12 @@ const String wasmPlatform =
     '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten';
 const String linuxArm64Platform = '//engine/src/flutter/build/bazel/toolchains:linux_arm64';
 
-/// The Android arm64 platform (`--android --android-cpu=arm64`), the one
-/// Android platform so far.
-const String androidArm64Platform = '//engine/src/flutter/build/bazel/toolchains:android_arm64';
+/// The Android platforms by tools/gn's `--android-cpu` (arm64 and x64 so
+/// far; the others of [androidCpus] have none yet).
+const Map<String, String> androidPlatforms = <String, String>{
+  'arm64': '//engine/src/flutter/build/bazel/toolchains:android_arm64',
+  'x64': '//engine/src/flutter/build/bazel/toolchains:android_x64',
+};
 
 /// tools/gn's `--android-cpu` choices, and its default.
 const List<String> androidCpus = <String>['arm', 'x64', 'x86', 'arm64', 'riscv64'];
@@ -390,12 +393,13 @@ final class BuilderBuild {
     // of scope.
     if (targetOs == 'android') {
       final String cpu = androidCpu ?? defaultAndroidCpu;
-      if (cpu == 'arm64') {
-        platform = '--platforms=$androidArm64Platform';
+      final String? androidPlatform = androidPlatforms[cpu];
+      if (androidPlatform != null) {
+        platform = '--platforms=$androidPlatform';
       } else {
         unsupported.add(
           '--android-cpu=$cpu${androidCpu == null ? " (tools/gn's default)" : ''} '
-          '(the Bazel build has an Android arm64 platform only)',
+          '(the Bazel build has Android ${androidPlatforms.keys.join(' and ')} platforms only)',
         );
       }
     } else if (targetOs != null && targetOs != 'linux') {
@@ -503,8 +507,8 @@ final class BuilderBuild {
 
   /// The `--platforms` of a build for another platform than the host's own
   /// (`--web`: [wasmPlatform]; `--target-os=linux --linux-cpu=arm64`:
-  /// [linuxArm64Platform]; `--android --android-cpu=arm64`:
-  /// [androidArm64Platform]); null for the host's own build.
+  /// [linuxArm64Platform]; `--android --android-cpu=<cpu>`:
+  /// [androidPlatforms]); null for the host's own build.
   final String? platform;
 
   /// The flags the Bazel build cannot express, with the reason each.

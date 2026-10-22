@@ -6350,7 +6350,7 @@ build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/co
 # linux_host_engine.json: ci/android_debug
 #   --android --no-lto
 # No configuration: the Bazel build cannot express
-#   --android-cpu=arm (tools/gn's default) (the Bazel build has an Android arm64 platform only)
+#   --android-cpu=arm (tools/gn's default) (the Bazel build has Android arm64 and x64 platforms only)
 
 # linux_host_engine.json: ci/android_debug_arm64
 #   --target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma
