@@ -1400,6 +1400,17 @@ and left its tree behind after `bazel shutdown`); use it knowingly, with
 `--experimental_sandbox_async_tree_delete_idle_threads=0` or a sweep of
 `/dev/shm/bazel-sandbox.*`. Both belong in `user.bazelrc`, not here.
 
+Compilation modes are output directories. The unoptimized configurations
+are `-c dbg` (GN's `-O0 -g2`); a bare `bazel test //engine/src/flutter/...`
+runs in Bazel's default fastbuild (`-O0 -g1`, no GN build). The two share
+nothing: the engine compiles once per mode, and so do the wrapped GN builds
+-- their GN arguments are the same for both, but an action's outputs live
+under the mode's directory, so the Dart SDK (~10 minutes) and the GPU
+backends (~40 minutes) build again the first time a tree built in one mode
+is built in the other (the first `--config=host_debug_unopt` run of a tree
+that had only seen the wildcard took 89 minutes). Pick one mode for a
+checkout; the disk cache holds both once built.
+
 ## Adding a dependency
 
 1. Make sure `deps.lock.bzl` is current (`gen_deps.dart --check`).
