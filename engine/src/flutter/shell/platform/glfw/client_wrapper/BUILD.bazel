@@ -5,7 +5,7 @@
 # Generated from //flutter/shell/platform/glfw/client_wrapper/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
@@ -32,7 +32,7 @@ cc_library(
         "include/flutter/flutter_window_controller.h",
         "include/flutter/plugin_registrar_glfw.h",
     ],
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     implementation_deps = ["//engine/src/flutter/shell/platform/common:desktop_library_implementation"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -139,7 +139,7 @@ cc_library(
     name = "client_wrapper_library_stubs_glfw",
     srcs = ["testing/stub_flutter_glfw_api.cc"],
     hdrs = ["testing/stub_flutter_glfw_api.h"],
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_DESKTOP_LIBRARY"],
     deps = [
         "//engine/src:include_root",

@@ -217,7 +217,7 @@ cc_binary(
     srcs = ["example_gl.c"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + CHROMIUM_CODE_COPTS + select({
+    ] + FLUTTER_COPTS + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
             "-Wno-c++98-compat-extra-semi",  # from :interop
@@ -276,7 +276,7 @@ cc_binary(
     srcs = ["example_vk.c"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + CHROMIUM_CODE_COPTS + select({
+    ] + FLUTTER_COPTS + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
             "-Wno-c++98-compat-extra-semi",  # from :interop
