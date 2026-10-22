@@ -192,6 +192,27 @@ config_setting(
     flag_values = {":asan": "True"},
 )
 
+# GN's embedder_for_target (shell/platform/embedder/embedder.gni; tools/gn
+# --embedder-for-target): the embedder API's shared library and header are
+# built for the target as well as for the host, for embedders of their own
+# on a platform the engine has an embedding for. ci/android_embedder_debug_unopt
+# is the one Linux builder that sets it (flutter_engine for Android arm,
+# unoptimized); every other build leaves it off, as tools/gn does.
+bool_flag(
+    name = "embedder_for_target",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "embedder_for_target_enabled",
+    flag_values = {":embedder_for_target": "True"},
+)
+
+config_setting(
+    name = "embedder_for_target_disabled",
+    flag_values = {":embedder_for_target": "False"},
+)
+
 # GN's enable_lto (tools/gn: on unless --no-lto, and never in an unoptimized
 # build): link-time optimization, -flto on every compile and link of an
 # optimized build (//build/config/compiler:optimize). The Android AOT

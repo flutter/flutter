@@ -611,6 +611,15 @@ test_suite(
     tests = ["//engine/src/flutter/impeller:impeller_unittests"],
 )
 
+# linux_unopt.json: ci/android_embedder_debug_unopt
+#   bazel run --config=android_embedder_debug_unopt :android_embedder_debug_unopt
+install(
+    name = "android_embedder_debug_unopt",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/embedder:flutter_engine"],
+    directory = "ci/android_embedder_debug_unopt",
+)
+
 # linux_unopt.json: ci/android_debug_arm64_validation_layers
 #   bazel run --config=android_debug_arm64_validation_layers :android_debug_arm64_validation_layers
 install(

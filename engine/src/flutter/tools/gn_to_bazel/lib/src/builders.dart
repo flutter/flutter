@@ -229,7 +229,12 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--windows': GnFlag(GnFlagEffect.otherPlatform),
   '--target-os': GnFlag(GnFlagEffect.target, takesValue: true),
   '--linux-cpu': GnFlag(GnFlagEffect.target, takesValue: true),
-  '--embedder-for-target': GnFlag(GnFlagEffect.otherPlatform),
+  // The embedder API's library for the target too (embedder.gni's
+  // embedder_for_target), a setting; ci/android_embedder_debug_unopt's flag.
+  '--embedder-for-target': GnFlag(
+    GnFlagEffect.setting,
+    bazelFlag: '--//engine/src/flutter/build/bazel:embedder_for_target',
+  ),
 };
 
 /// The `--gn-args=<name>=<value>` arguments the builder files pass, as the
