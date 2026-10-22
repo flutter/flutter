@@ -199,6 +199,22 @@ directories Bazel serves through `include_prefix`, and GN carrying a shader
 *tool*'s `all_dependent_configs` into `impeller/renderer`. Anything else is a
 converter gap or a GN oddity worth a look; `--full` lists every class.
 
+The same against a GN Android build directory (`out/android_debug_arm64`,
+made with `tools/gn --android --android-cpu=arm64` and `ninja`) and
+`bazel aquery --config=android_debug_arm64` of `libflutter.so`'s compiles:
+a cross build's `compile_commands.json` lists a source twice when the host
+tools compile it too, and the tool compares the default toolchain's entry
+(the target's, its object under `obj/`), not the host toolchain's under
+`clang_x64/`. The run found two divergences, both fixed: Skia's
+`SK_ASSUME_GL_ES=1`, which `tools/gn`'s `skia_gl_standard = "gles"` gives
+Android and the converter had left to skia.gni's default, and
+`-Wno-deprecated-literal-operator`, which GN adds for clang everywhere but
+Android. What remains on the 630 first-party files is GN's `-I` for abseil
+and the Vulkan headers and allocator (served through their repositories),
+`FLUTTER_ENGINE_VERSION`'s hash, and `-Wunreachable-code` on the two files
+of a `source_set` that lists no `//flutter:config` (every engine library
+gets the flag here).
+
 ### Artifact parity
 
 ```sh
