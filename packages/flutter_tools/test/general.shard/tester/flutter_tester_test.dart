@@ -8,13 +8,17 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -88,7 +92,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
       Artifacts: () => Artifacts.test(),
-      BuildSystem: () => buildSystem,
     };
 
     setUp(() {
@@ -97,13 +100,18 @@ void main() {
       device = FlutterTesterDevice(
         'flutter-tester',
         toolContext: FakeToolContext(
-          fs: fileSystem,
-          processManager: fakeProcessManager,
           artifacts: Artifacts.test(),
-          logger: BufferLogger.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          config: Config.test(),
           flutterVersion: FakeFlutterVersion(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
           platform: FakePlatform(),
+          processManager: fakeProcessManager,
         ),
+        analytics: const NoOpAnalytics(),
+        buildSystem: buildSystem,
+        buildTargets: const BuildTargetsImpl(),
       );
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -233,13 +241,18 @@ Hello!
 FlutterTesterDevices setUpFlutterTesterDevices() {
   return FlutterTesterDevices(
     toolContext: FakeToolContext(
-      logger: BufferLogger.test(),
       artifacts: Artifacts.test(),
-      processManager: FakeProcessManager.any(),
-      fs: MemoryFileSystem.test(),
+      cache: Cache.test(processManager: FakeProcessManager.any()),
+      config: Config.test(),
       flutterVersion: FakeFlutterVersion(),
+      fs: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       platform: FakePlatform(),
+      processManager: FakeProcessManager.any(),
     ),
+    analytics: const NoOpAnalytics(),
+    buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    buildTargets: const BuildTargetsImpl(),
   );
 }
 

@@ -12,6 +12,8 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
+import 'build_system/build_system.dart';
+import 'build_system/build_targets.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
 import 'device.dart';
@@ -37,6 +39,8 @@ class FlutterDeviceManager extends DeviceManager {
     required Analytics analytics,
     required AndroidSdk? Function() androidSdkBuilder,
     required AndroidWorkflow androidWorkflow,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
     required IOSSimulatorUtils iosSimulatorUtils,
     required IOSWorkflow iosWorkflow,
@@ -65,7 +69,12 @@ class FlutterDeviceManager extends DeviceManager {
       ),
       IOSDevices(platform: platform, xcdevice: xcDevice, iosWorkflow: iosWorkflow, logger: logger),
       IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
-      FlutterTesterDevices(toolContext: toolContext),
+      FlutterTesterDevices(
+        analytics: analytics,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        toolContext: toolContext,
+      ),
       MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
       MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),
       LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
@@ -81,7 +90,13 @@ class FlutterDeviceManager extends DeviceManager {
         processManager: processManager,
         logger: logger,
       ),
-      CustomDevices(featureFlags: featureFlags, toolContext: toolContext),
+      CustomDevices(
+        featureFlags: featureFlags,
+        analytics: analytics,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        toolContext: toolContext,
+      ),
       if (extensionManager != null)
         ExtensionDevices(extensionManager: extensionManager, logger: logger),
     ];

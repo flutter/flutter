@@ -1063,7 +1063,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
         project: parent,
         buildInfo: BuildInfo.dummy,
         toolContext: toolContext,
-        targetOverride: bundle.defaultMainPath,
+        targetOverride: bundle.defaultMainPath(parent.directory.fileSystem),
       );
     }
   }

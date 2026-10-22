@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -13,6 +14,8 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -44,8 +47,17 @@ class FlutterTesterApp extends ApplicationPackage {
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(super.id, {required ToolContext super.toolContext})
-    : super(platformType: null, category: null, ephemeral: false, logger: toolContext.logger);
+  FlutterTesterDevice(
+    super.id, {
+    required this._analytics,
+    required this._buildSystem,
+    required this._buildTargets,
+    required ToolContext super.toolContext,
+  }) : super(logger: toolContext.logger, platformType: null, category: null, ephemeral: false);
+
+  final Analytics _analytics;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -134,7 +146,12 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final FlutterProject project = FlutterProject.current();
-    await BundleBuilder().build(
+    await BundleBuilder(
+      analytics: _analytics,
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
+      toolContext: toolContext,
+    ).build(
       project: project,
       buildInfo: buildInfo,
       mainPath: mainPath,
@@ -225,9 +242,19 @@ class FlutterTesterDevice extends Device {
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
-  FlutterTesterDevices({required ToolContext super.toolContext})
-    : _testerDevice = FlutterTesterDevice(kTesterDeviceId, toolContext: toolContext),
-      super('Flutter tester');
+  FlutterTesterDevices({
+    required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required ToolContext super.toolContext,
+  }) : _testerDevice = FlutterTesterDevice(
+         kTesterDeviceId,
+         analytics: analytics,
+         buildSystem: buildSystem,
+         buildTargets: buildTargets,
+         toolContext: toolContext,
+       ),
+       super('Flutter tester');
 
   static const kTesterDeviceId = 'flutter-tester';
 
