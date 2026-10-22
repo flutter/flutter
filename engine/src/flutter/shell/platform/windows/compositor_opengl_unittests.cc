@@ -218,6 +218,9 @@ const impeller::ProcTableGLES::Resolver kRecordingResolverGLES3 =
   return kMockResolver(name);
 };
 
+// Tests the compositor against mocked EGL and OpenGL, unlike
+// CompositorOpenGLANGLETest in compositor_opengl_angle_unittests.cc, which uses
+// ANGLE.
 class CompositorOpenGLTest : public WindowsTest {
  public:
   CompositorOpenGLTest() = default;

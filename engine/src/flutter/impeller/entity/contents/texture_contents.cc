@@ -193,7 +193,7 @@ bool TextureContents::Render(const ContentContext& renderer,
             sampler_descriptor_));
 #if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   } else if (is_external_texture) {
-    FSExternal::FragInfo frag_info;
+    FSExternal::FragInfo frag_info{};
     frag_info.x_tile_mode =
         static_cast<Scalar>(sampler_descriptor_.width_address_mode);
     frag_info.y_tile_mode =
@@ -216,7 +216,7 @@ bool TextureContents::Render(const ContentContext& renderer,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
 #endif  //  IMPELLER_ENABLE_OPENGLES
   } else {
-    FS::FragInfo frag_info;
+    FS::FragInfo frag_info{};
     frag_info.alpha = GetOpacity();
     FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(

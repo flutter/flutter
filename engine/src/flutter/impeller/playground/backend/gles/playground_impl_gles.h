@@ -21,7 +21,7 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
 
   ~PlaygroundImplGLES();
 
-  fml::Status SetCapabilities(
+  absl::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
 
   static void OnTearDownTestEnvironment();
@@ -34,7 +34,7 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
       std::unique_ptr<GLFWwindow, decltype(&DestroyWindowHandle)>;
   UniqueHandle handle_;
   const bool use_angle_;
-  void* angle_glesv2_;
+  void* angle_glesv2_ = nullptr;
   std::shared_ptr<Context> context_;
   std::unique_ptr<ShareableContext> unique_context_;
 
