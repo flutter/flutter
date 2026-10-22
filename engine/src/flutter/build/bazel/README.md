@@ -1033,12 +1033,17 @@ The root package has `//engine/src/flutter:install`, the Linux host's build
 directory as above with all seven archives of the Linux host configurations
 -- and, under an Android platform, the Android developer's: the developer's
 `android_*` configurations have no ninja targets of their own (GN builds
-its default target, everything), so the install's attributes select on the
-OS, and on Android lay what that target lays for a consumer -- the root
-group's closure (libflutter.so with `lib.stripped/`, the jars and poms,
-`clang_x64/gen_snapshot`, the snapshots, the Impeller SDK, the embedder
-archive), the `dist` archives and the Maven tree (346 files for
-`android_debug_unopt_x64`):
+its default target, which is the root group `flutter`: `engine/src`'s
+`//:default` depends on `//flutter` alone), so the install's attributes
+select on the OS, and on Android lay that group -- libflutter.so with
+`lib.stripped/`, the jars and poms, `clang_x64/gen_snapshot`, the
+snapshots, the Impeller SDK, the embedder archive, the javadoc, ICU's data
+file for the target (334 files for `android_debug_arm64`). Against GN's own
+`out/android_debug_arm64`, `install_diff.py` finds nothing missing on
+either side over 19 paths: 305 files identical, the binaries expected
+different, and the poms, Maven metadata and javadoc pages differing by the
+version hash and the date alone. The Maven tree and the `dist` archives are
+not the default's under GN either; the builders name them as targets.
 
 ```sh
 bazel run //engine/src/flutter:install
