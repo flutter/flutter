@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
@@ -780,11 +781,104 @@ class TextSpan extends ParagraphSpan {
 
   @override
   List<TextCluster> extractClusters() {
-    final clusters = <TextCluster>[];
-    for (final DomTextCluster cluster in _metrics.getTextClusters()) {
-      clusters.add(TextCluster(this, cluster));
+    // In default start alignment, each cluster's x is its left edge in LTR (in [0, width]) and
+    // its right edge in RTL (in [-width, 0]), while the vertical selection bounds are the span's
+    // font box. Deriving cluster advances from neighboring x coordinates avoids one browser
+    // getSelectionRects query per cluster during the first layout.
+    final DomTextMetrics metrics = _metrics;
+    final List<DomTextCluster> domClusters = metrics.getTextClusters();
+    final int count = domClusters.length;
+    if (count == 0) {
+      return <TextCluster>[];
     }
-    return clusters;
+
+    final double top = -metrics.fontBoundingBoxAscent;
+    final double bottom = metrics.fontBoundingBoxDescent;
+    final double spanWidth = metrics.width!;
+    final isLtr = textDirection == ui.TextDirection.ltr;
+
+    // Read each cluster's x once across JS interop and check whether clusters are already in
+    // strictly monotonic visual order.
+    final xPositions = Float64List(count);
+    double lastX = domClusters.first.x;
+    xPositions[0] = lastX;
+    bool isStrictlyIncreasing = lastX >= 0.0;
+    bool isStrictlyDecreasing = lastX <= 0.0;
+    for (var i = 1; i < count; i++) {
+      final double x = domClusters[i].x;
+      xPositions[i] = x;
+      if (x <= lastX) {
+        isStrictlyIncreasing = false;
+      }
+      if (x >= lastX) {
+        isStrictlyDecreasing = false;
+      }
+      lastX = x;
+    }
+
+    if (isLtr && isStrictlyIncreasing && lastX <= spanWidth) {
+      return <TextCluster>[
+        for (var i = 0; i < count; i++)
+          TextCluster(
+            this,
+            domClusters[i],
+            advance: ui.Rect.fromLTRB(
+              xPositions[i],
+              top,
+              i + 1 < count ? xPositions[i + 1] : spanWidth,
+              bottom,
+            ),
+          ),
+      ];
+    }
+    if (!isLtr && isStrictlyDecreasing && lastX >= -spanWidth) {
+      return <TextCluster>[
+        for (var i = 0; i < count; i++)
+          TextCluster(
+            this,
+            domClusters[i],
+            advance: ui.Rect.fromLTRB(
+              i + 1 < count ? xPositions[i + 1] : -spanWidth,
+              top,
+              xPositions[i],
+              bottom,
+            ),
+          ),
+      ];
+    }
+
+    // Negative spacing can make a cluster's advance negative and invert visual x order, so keep
+    // per-cluster browser selection queries when the span is not monotonic.
+    if ((style.letterSpacing ?? 0.0) < 0.0 || (style.wordSpacing ?? 0.0) < 0.0) {
+      return <TextCluster>[
+        for (final DomTextCluster cluster in domClusters) TextCluster(this, cluster),
+      ];
+    }
+
+    // Multi-run RTL and mixed BiDi spans return clusters in run order, so sort by x to pair each
+    // cluster with its visual neighbor and fall back to getClusterSelection on tied x coordinates.
+    final visualOrder = List<int>.generate(count, (int i) => i)
+      ..sort((int a, int b) => xPositions[a].compareTo(xPositions[b]));
+    final advances = List<ui.Rect?>.filled(count, null);
+    final double minX = isLtr ? 0.0 : -spanWidth;
+    final maxX = isLtr ? spanWidth : 0.0;
+    for (var k = 0; k < count; k++) {
+      final int index = visualOrder[k];
+      final double x = xPositions[index];
+      final double prevX = k > 0 ? xPositions[visualOrder[k - 1]] : -spanWidth;
+      final double nextX = k + 1 < count ? xPositions[visualOrder[k + 1]] : spanWidth;
+      if ((k > 0 && prevX == x) || (k + 1 < count && nextX == x)) {
+        continue;
+      }
+      final left = isLtr ? x : prevX;
+      final right = isLtr ? nextX : x;
+      if (left >= minX && left <= right && right <= maxX) {
+        advances[index] = ui.Rect.fromLTRB(left, top, right, bottom);
+      }
+    }
+    return <TextCluster>[
+      for (var i = 0; i < count; i++) TextCluster(this, domClusters[i], advance: advances[i]),
+    ];
   }
 
   ui.Rect getClusterBounds(TextCluster cluster) {
