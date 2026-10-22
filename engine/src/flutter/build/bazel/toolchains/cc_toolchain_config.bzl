@@ -412,7 +412,16 @@ def _impl(ctx):
         # Capabilities Bazel asks about.
         feature(name = "supports_pic", enabled = True),
         feature(name = "supports_dynamic_linker", enabled = True),
-        feature(name = "supports_start_end_lib", enabled = False),
+        # With this, a link names the object files of the libraries it links
+        # instead of their archives: those of an alwayslink library (a GN
+        # source_set) directly, those of any other inside --start-lib
+        # ... --end-lib, which the linker treats as an archive's members. That
+        # is the link line GN produces -- a source_set's objects are on it, a
+        # static_library is an archive -- and the difference is visible: lld's
+        # --exclude-libs,ALL (Android's links) hides every symbol an archive
+        # defines, version script or not, so with archives for source_sets
+        # libflutter.so would export neither JNI_OnLoad nor the ICU data.
+        feature(name = "supports_start_end_lib", enabled = True),
         # Replaces Bazel's built-in include_paths feature, which passes the
         # `includes` of cc_library rules with -isystem. GN passes every include
         # directory with -I, and the difference matters: clang suppresses

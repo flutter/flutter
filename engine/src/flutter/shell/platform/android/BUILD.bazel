@@ -2,21 +2,689 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Hand-written until shell/platform/android/BUILD.gn converts (the Android
-# shell, its JAR and its artifact bundles: the Android phase's work). What
-# the sub-packages converted for the host suites (context,
-# external_view_embedder) need of this directory is one header no GN
-# target lists -- android_rendering_selector.h, an enum the shell and its
-# pieces share -- which GN's include path serves and a sandboxed compile
-# must be handed; their manifest entries depend on it (implicitDeps). When
-# the GN file converts, the header wants a target of its own there (it
-# cannot join flutter_shell_native_src, whose visibility excludes the
-# sub-packages that include it).
+# Generated from //flutter/shell/platform/android/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: gen_android_build_config_java, check_imports, flutter_shell_java, android_jar, pom_libflutter, pom_content_hash_libflutter, pom_embedding, pom_content_hash_embedding, flutter_jar_zip, gen_android_javadoc, android_javadoc, android_entitlement_config, gen_snapshot, analyze_snapshot, android, embedding_jars, abi_jars.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
+load("//engine/src/flutter/build/bazel/dart:snapshot.bzl", "bin_to_assembly")
 
 package(default_visibility = ["//visibility:public"])
 
+cc_library(
+    name = "android_gpu_configuration",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src/flutter/shell/gpu:gpu_surface_gl",  # invoker.enable_gl
+        "//engine/src/flutter/shell/gpu:gpu_surface_software",  # invoker.enable_software
+        "//engine/src/flutter/shell/gpu:gpu_surface_vulkan",  # invoker.enable_vulkan
+    ],
+)
+
+cc_library(
+    name = "android_gpu_configuration_config",
+    defines = [
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+    ],
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "image_generator",
+    srcs = ["android_image_generator.cc"],
+    hdrs = ["android_image_generator.h"],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/lib/ui
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = [
+        "-landroid",
+        "-ljnigraphics",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/ui",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "flutter_shell_native_unittests",
+    size = "small",
+    srcs = [
+        "android_context_dynamic_impeller_unittests.cc",
+        "android_context_gl_impeller_unittests.cc",
+        "android_image_generator_unittests.cc",
+        "android_shell_holder_unittests.cc",
+        "apk_asset_provider_unittests.cc",
+        "flutter_shell_native_unittests.cc",
+        "image_lru_unittests.cc",
+        "platform_view_android_jni_impl_unittests.cc",
+        "platform_view_android_unittests.cc",
+    ] + select({
+        "//engine/src/flutter/common:slimpeller_enabled": [],
+        "//conditions:default": [
+            "android_context_gl_unittests.cc",  # !slimpeller
+        ],
+    }),
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :flutter_shell_native_src
+        "-Wno-c++98-compat-extra-semi",  # from :flutter_shell_native_src
+        "-Wno-deprecated-copy",  # from :flutter_shell_native_src
+        "-Wno-implicit-fallthrough",  # from :flutter_shell_native_src
+        "-Wno-nullability-completeness",  # from :flutter_shell_native_src
+        "-Wno-suggest-destructor-override",  # from :flutter_shell_native_src
+        "-Wno-suggest-override",  # from :flutter_shell_native_src
+        "-Wno-unused-private-field",  # from :flutter_shell_native_src
+        "-Wno-unused-variable",  # from :flutter_shell_native_src
+        "-Wno-inconsistent-missing-override",  # from //flutter/third_party/googletest:gmock
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_shell_native_src",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/platform/android/jni:jni_mock",
+        "//engine/src/flutter/shell/platform/android/jni:mock_jni_env",
+        "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ],
+)
+
+cc_binary(
+    name = "libflutter.so",
+    additional_linker_inputs = [":android_exports.lst"],
+    linkopts = ["-Wl,--version-script=$(execpath :android_exports.lst)"],
+    linkshared = True,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_shell_native_src",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+    ],
+)
+
+alias(
+    name = "flutter_shell_native",
+    actual = ":libflutter.so",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+bin_to_assembly(
+    name = "icudtl_asm",
+    src = "@icu//:flutter/icudtl.dat",
+    executable = False,
+    size_symbol = "_binary_icudtl_dat_size",
+    symbol = "_binary_icudtl_dat_start",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "flutter_shell_native_src",
+    srcs = [
+        "android_context_dynamic_impeller.cc",
+        "android_context_gl_impeller.cc",
+        "android_context_vk_impeller.cc",
+        "android_display.cc",
+        "android_egl_surface.cc",
+        "android_environment_gl.cc",
+        "android_shell_holder.cc",
+        "android_surface_dynamic_impeller.cc",
+        "android_surface_gl_impeller.cc",
+        "android_surface_vk_impeller.cc",
+        "apk_asset_provider.cc",
+        "flutter_main.cc",
+        "image_external_texture.cc",
+        "image_external_texture_gl.cc",
+        "image_external_texture_gl_impeller.cc",
+        "image_external_texture_vk_impeller.cc",
+        "image_lru.cc",
+        "library_loader.cc",
+        "platform_message_handler_android.cc",
+        "platform_message_response_android.cc",
+        "platform_view_android.cc",
+        "platform_view_android_jni_impl.cc",
+        "surface_texture_external_texture.cc",
+        "surface_texture_external_texture_gl_impeller.cc",
+        "surface_texture_external_texture_vk_impeller.cc",
+        "vsync_waiter_android.cc",
+        ":icudtl_asm",
+    ] + select({
+        "//engine/src/flutter/common:slimpeller_enabled": [],
+        "//conditions:default": [
+            "android_context_gl_skia.cc",  # !slimpeller
+            "android_surface_gl_skia.cc",  # !slimpeller
+            "android_surface_software.cc",  # !slimpeller
+            "image_external_texture_gl_skia.cc",  # !slimpeller
+            "surface_texture_external_texture_gl_skia.cc",  # !slimpeller
+        ],
+    }),
+    hdrs = [
+        "android_context_dynamic_impeller.h",
+        "android_context_gl_impeller.h",
+        "android_context_vk_impeller.h",
+        "android_display.h",
+        "android_egl_surface.h",
+        "android_environment_gl.h",
+        "android_shell_holder.h",
+        "android_surface_dynamic_impeller.h",
+        "android_surface_gl_impeller.h",
+        "android_surface_vk_impeller.h",
+        "apk_asset_provider.h",
+        "flutter_main.h",
+        "image_external_texture.h",
+        "image_external_texture_gl.h",
+        "image_external_texture_gl_impeller.h",
+        "image_external_texture_vk_impeller.h",
+        "image_lru.h",
+        "platform_message_handler_android.h",
+        "platform_message_response_android.h",
+        "platform_view_android.h",
+        "platform_view_android_jni_impl.h",
+        "surface_texture_external_texture.h",
+        "surface_texture_external_texture_gl_impeller.h",
+        "surface_texture_external_texture_vk_impeller.h",
+        "vsync_waiter_android.h",
+    ] + select({
+        "//engine/src/flutter/common:slimpeller_enabled": [],
+        "//conditions:default": [
+            "android_context_gl_skia.h",  # !slimpeller
+            "android_surface_gl_skia.h",  # !slimpeller
+            "android_surface_software.h",  # !slimpeller
+            "image_external_texture_gl_skia.h",  # !slimpeller
+            "surface_texture_external_texture_gl_skia.h",  # !slimpeller
+        ],
+    }),
+    additional_compiler_inputs = ["@icu//:flutter/icudtl.dat"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :android_gpu_configuration
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/toolkit/glvk
+        "-Wno-deprecated-copy",  # from //flutter/impeller/toolkit/glvk
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller/toolkit/glvk
+        "-Wno-nullability-completeness",  # from //flutter/impeller/toolkit/glvk
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller/toolkit/glvk
+        "-Wno-suggest-override",  # from //flutter/impeller/toolkit/glvk
+        "-Wno-unused-private-field",  # from //flutter/impeller/toolkit/glvk
+        "-Wno-unused-variable",  # from //flutter/impeller/toolkit/glvk
+    ],
+    data = [":icudtl_asm"],
+    linkopts = [
+        "-landroid",
+        "-lEGL",
+        "-lGLESv2",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":android_gpu_configuration",
+        ":image_generator",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller",
+        "//engine/src/flutter/impeller/toolkit/android",
+        "//engine/src/flutter/impeller/toolkit/egl",
+        "//engine/src/flutter/impeller/toolkit/gles",
+        "//engine/src/flutter/impeller/toolkit/glvk",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/runtime:libdart",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/platform/android/context",
+        "//engine/src/flutter/shell/platform/android/external_view_embedder",
+        "//engine/src/flutter/shell/platform/android/jni",
+        "//engine/src/flutter/shell/platform/android/platform_view_android_delegate",
+        "//engine/src/flutter/shell/platform/android/surface",
+        "//engine/src/flutter/shell/platform/android/surface:native_window",
+        "//engine/src/flutter/txt",
+        "//engine/src/flutter/vulkan",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+# `flutter_runtime_mode == "jit_release" && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_jit_release_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `flutter_runtime_mode == "jit_release" && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_jit_release_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `flutter_runtime_mode == "jit_release" && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `flutter_runtime_mode == "jit_release" && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_jit_release_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `flutter_runtime_mode == "jit_release" && target_cpu == "x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_jit_release_and_target_cpu_x86",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+        "@platforms//cpu:x86_32",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && target_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && target_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x86",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//cpu:x86_32",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x86",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_32",
+    ],
+)
+
+zip_bundle(
+    name = "android_symbols",
+    files = {"libflutter.so": ":flutter_shell_native"},
+    output = select({
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm": "android-arm-jit-release/symbols.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/symbols.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/symbols.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/symbols.zip",
+        ":when_flutter_runtime_mode_jit_release_and_target_cpu_x86": "android-x86-jit-release/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm": "android-arm-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64": "android-x64-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x86": "android-x86-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm": "android-arm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "android-x64/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x86": "android-x86/symbols.zip",
+        "//conditions:default": None,
+    }),
+    sources = {"libflutter.so": "libflutter.so"},
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":flutter_shell_native"],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# android_rendering_selector.h, an enum the shell and its sub-packages share,
+# which no GN target lists (the shell's source set could not carry it for
+# them: its visibility excludes the sub-packages that include it) and which
+# the sub-packages converted for the host suites take as an implicit
+# dependency (the manifest).
 cc_library(
     name = "rendering_selector",
     hdrs = ["android_rendering_selector.h"],

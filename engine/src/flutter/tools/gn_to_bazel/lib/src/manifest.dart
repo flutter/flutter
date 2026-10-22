@@ -92,6 +92,31 @@ string_flag(
     ]
 ]
 
+# The complements, for `flutter_runtime_mode != "<mode>"` inside a
+# conjunction (the Android archives' directory, zip_bundle.gni's
+# android_zip_archive_dir): any of the other three.
+[
+    selects.config_setting_group(
+        name = "not_runtime_mode_" + mode,
+        match_any = [
+            ":runtime_mode_" + other
+            for other in [
+                "debug",
+                "profile",
+                "release",
+                "jit_release",
+            ]
+            if other != mode
+        ],
+    )
+    for mode in [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ]
+]
+
 # GN's `slimpeller` argument: build without the Skia-backed rendering paths.
 bool_flag(
     name = "slimpeller",
@@ -498,6 +523,14 @@ filegroup(
   ConvertedFile('//flutter/impeller/toolkit/interop/backend'),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/gles'),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/vulkan'),
+  // The EGL, GLES and GL-Vulkan interop toolkits, which the Android shell
+  // links (EGL's library under is_android).
+  ConvertedFile('//flutter/impeller/toolkit/egl'),
+  ConvertedFile('//flutter/impeller/toolkit/gles'),
+  // The GL-over-Vulkan trampoline: its header includes the Vulkan backend's
+  // hardware-buffer texture source, a file that exists under is_android only,
+  // and only the Android shell depends on it.
+  ConvertedFile('//flutter/impeller/toolkit/glvk', condition: 'is_android'),
   // The Android toolkit (NDK surface control, hardware buffers, the
   // choreographer), which the Vulkan backend and the Android shell reach
   // under is_android; its suite is an Android executable and an APK.
@@ -600,6 +633,60 @@ exports_files(["README"] + glob(
   // GN target lists (the shell's source set could not carry it for them:
   // its visibility excludes these packages), comes from the hand-written
   // parent package.
+  // The Android shell itself: libflutter.so (flutter_shell_native, under
+  // GN's output_name "flutter", with its export list), its sources, the
+  // symbols archive. GN reaches the file under is_android alone. The Java
+  // half -- the embedding's sources through javac and d8 (build/android/
+  // gyp), flutter.jar and the ABI jars, the Maven tree, the javadoc -- is
+  // the Android phase's second part (NEED_DECISION D10), as are the host
+  // tools' archives for the AOT builders (gen_snapshot, analyze_snapshot:
+  // get_label_info over the host toolchain) and the `android` group that
+  // gathers them. The header the sub-packages share and the Java enums
+  // tools/api_check reads are in the appendix, as the hand-written file had
+  // them.
+  ConvertedFile(
+    '//flutter/shell/platform/android',
+    condition: 'is_android',
+    skip: <String, String>{
+      'gen_android_build_config_java': 'Java: the Android phase (D10)',
+      'check_imports': 'Java: the Android phase (D10)',
+      'flutter_shell_java': 'Java: the Android phase (D10)',
+      'android_jar': 'Java: the Android phase (D10)',
+      'pom_libflutter': 'the Maven tree: the Android phase (D10)',
+      'pom_content_hash_libflutter': 'the Maven tree: the Android phase (D10)',
+      'pom_embedding': 'the Maven tree: the Android phase (D10)',
+      'pom_content_hash_embedding': 'the Maven tree: the Android phase (D10)',
+      'flutter_jar_zip': 'artifacts.zip holds flutter.jar: the Android phase (D10)',
+      'gen_android_javadoc': 'Java: the Android phase (D10)',
+      'android_javadoc': 'Java: the Android phase (D10)',
+      'android_entitlement_config': "generated_file over metadata: the Apple phase's",
+      'gen_snapshot':
+          "the host gen_snapshot's archive (get_label_info over the host toolchain): later",
+      'analyze_snapshot':
+          "the host analyze_snapshot's archive (get_label_info over the host toolchain): later",
+      'android': 'the group over the Java archives: the Android phase (D10)',
+      'embedding_jars': 'Java: the Android phase (D10)',
+      'abi_jars': 'Java: the Android phase (D10)',
+    },
+    appendix: '''
+# android_rendering_selector.h, an enum the shell and its sub-packages share,
+# which no GN target lists (the shell's source set could not carry it for
+# them: its visibility excludes the sub-packages that include it) and which
+# the sub-packages converted for the host suites take as an implicit
+# dependency (the manifest).
+cc_library(
+    name = "rendering_selector",
+    hdrs = ["android_rendering_selector.h"],
+)
+
+# The Java enums that mirror dart:ui's, which tools/api_check's tests parse
+# (run_tests.py --type dart-host).
+exports_files([
+    "io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
+    "io/flutter/view/AccessibilityBridge.java",
+])
+''',
+  ),
   ConvertedFile('//flutter/shell/platform/android/jni'),
   ConvertedFile(
     '//flutter/shell/platform/android/context',
@@ -1127,6 +1214,18 @@ cc_library(
         "src/ndk_compat/*.h",
     ]),
     textual_hdrs = glob(["src/src/*.inl"]),
+)
+
+# What a GN build reads of this tree (the Dart wrap's zlib, under Android).
+filegroup(
+    name = "build_tree",
+    srcs = ["BUILD.gn"] + glob(
+        ["src/**"],
+        exclude = [
+            "**/.git/**",
+            "**/BUILD.bazel",
+        ],
+    ),
 )
 ''',
   ),

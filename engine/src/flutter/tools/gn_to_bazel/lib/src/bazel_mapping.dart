@@ -1066,6 +1066,14 @@ final Map<String, Map<String, String>> comparisonSettings =
       'full_target_platform_name': _targetPlatformSettings,
     });
 
+/// The values a string around an enumerated variable is expanded over, where
+/// not every value with a setting is one the engine builds: the CPUs, less
+/// the ones third-party files merely test for (mips, ppc).
+const Map<String, List<String>> enumeratedValues = <String, List<String>>{
+  'target_cpu': <String>['arm', 'arm64', 'riscv64', 'wasm', 'x64', 'x86'],
+  'current_cpu': <String>['arm', 'arm64', 'riscv64', 'wasm', 'x64', 'x86'],
+};
+
 /// BUILDCONFIG.gn's CPU names, as `target_cpu` and `current_cpu` spell them,
 /// to the CPU constraints.
 const Map<String, String> _cpuNameSettings = <String, String>{
@@ -1121,6 +1129,14 @@ const Map<String, Map<String, String>> comparisonNegatedSettings = <String, Map<
   'current_os': _osNameNegatedSettings,
   'target_cpu': _cpuNameNegatedSettings,
   'current_cpu': _cpuNameNegatedSettings,
+  // zip_bundle.gni's android_zip_archive_dir, a scalar grown under
+  // `flutter_runtime_mode != "debug"` and read in a conjunction.
+  'flutter_runtime_mode': <String, String>{
+    'debug': '//engine/src/flutter/common:not_runtime_mode_debug',
+    'profile': '//engine/src/flutter/common:not_runtime_mode_profile',
+    'release': '//engine/src/flutter/common:not_runtime_mode_release',
+    'jit_release': '//engine/src/flutter/common:not_runtime_mode_jit_release',
+  },
 };
 
 /// The complements of the CPU constraints (//engine/src/flutter/build/bazel's
@@ -1294,6 +1310,11 @@ const Map<String, String> buildOutputLabels = <String, String>{
   // The Dart SDK's gen_snapshot, out of the wrapped GN build of the Dart
   // tree (build/bazel/dart_wrap).
   '//@out/gen_snapshot': '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot',
+  // The Android shell's assembly of icudtl.dat (bin_to_assembly, a template
+  // whose output the converter cannot enumerate), which the embedder's
+  // Android sources name by path.
+  '//@out/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S':
+      '//engine/src/flutter/shell/platform/android:icudtl_asm',
   // //flutter/lib/snapshot (hand-written): the core snapshot and the
   // platform kernels.
   '//@gen/flutter/lib/snapshot/isolate_snapshot.bin':
@@ -1764,6 +1785,23 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     _zipBundleArguments,
     files: true,
   ),
+  // build/bin_to_obj.gni's bin_to_assembly: a symbol over a file's bytes, as
+  // assembly (the Android shell's icudtl_asm; //flutter/lib/snapshot's
+  // linkables are hand-written over the same rule). The rule takes the
+  // target OS and CPU from the platform; `deps` orders nothing a label does
+  // not (the input is the dependency).
+  'bin_to_assembly': TemplateMapping(
+    '//engine/src/flutter/build/bazel/dart:snapshot.bzl',
+    'bin_to_assembly',
+    <String, TemplateArgument>{
+      'input': TemplateArgument('src', TemplateArgumentKind.file),
+      'symbol': TemplateArgument('symbol', TemplateArgumentKind.scalar),
+      'size_symbol': TemplateArgument('size_symbol', TemplateArgumentKind.scalar),
+      'executable': TemplateArgument('executable', TemplateArgumentKind.scalar),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+    },
+    files: true,
+  ),
   // zip_bundle.gni's other template: the same archive from a file listing
   // the entries (the web SDK's), without zip_bundle's license file.
   'zip_bundle_from_file': TemplateMapping(
@@ -1891,6 +1929,11 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // and a config of SHELL_ENABLE_* defines, chosen by the invoker's
     // booleans.
     '//flutter/shell/gpu/gpu.gni',
+    // android_zip_archive_dir, the Android archives' directory
+    // (`android-$target_cpu`, with the runtime mode and the Dart flags in
+    // its name), a scalar over the enumerated variables; the zip_bundle
+    // template it defines is mapped (templateMappings).
+    '//flutter/build/zip_bundle.gni',
     // Declares embedder_for_target (false: the embedder's shared library is
     // a host artifact), which the embedder's own file reads.
     '//flutter/shell/platform/embedder/embedder.gni',
@@ -1945,9 +1988,18 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // converted reads them (impeller/compiler imports it without use).
     '//flutter/shell/version/version.gni',
     '//flutter/testing/testing.gni',
-    // The zip_bundle template (artifact packaging); its one invocation in
-    // converted files, the interop toolkit's SDK bundle, is skipped.
-    '//flutter/build/zip_bundle.gni',
+    // The Dart runtime's arguments (dart_dynamic_modules, a setting;
+    // dart_disable_secure_socket, assumed off), which zip_bundle.gni reads.
+    '//flutter/third_party/dart/runtime/runtime_args.gni',
+    // The Android SDK and NDK arguments (android_api_level, android_sdk_root,
+    // ...), which the Android shell imports; the converted targets read none
+    // (the Java targets that do are skipped).
+    '//build/config/android/config.gni',
+    // The bin_to_assembly template (templateMappings).
+    '//flutter/build/bin_to_obj.gni',
+    // gen_snapshot.gni: the gen_snapshot templates of the AOT archives, whose
+    // invocations are skipped.
+    '//flutter/lib/snapshot/gen_snapshot.gni',
     // The compiled_action template, which lib/ui's shader fixture
     // directories import without invoking (impellerc() does).
     '//build/compiled_action.gni',
@@ -1997,6 +2049,9 @@ Assumptions generationAssumptions() {
     'is_mac': const GnBoolValue(false),
     'is_minimal_linux': const GnBoolValue(false),
     'is_official_build': const GnBoolValue(true),
+    // runtime_args.gni's dart_disable_secure_socket (tools/gn's
+    // --no-dart-secure-socket, the size-experiment builders' alone): off.
+    'dart_disable_secure_socket': const GnBoolValue(false),
     // tools/gn's --wasm-use-dwarf (DWARF rather than source maps for a
     // debug web build's symbols), off unless asked; the source map a debug
     // link writes without it (`<module>.wasm.map`) is the branch this
@@ -2106,6 +2161,7 @@ Assumptions linuxHostAssumptions() {
     // own configuration (the wrap's args).
     'is_minimal_linux': GnBoolValue(false),
     'is_official_build': GnBoolValue(true),
+    'dart_disable_secure_socket': GnBoolValue(false),
     'wasm_use_dwarf': GnBoolValue(false),
     'is_qnx': GnBoolValue(false),
     'is_wasm': GnBoolValue(false),

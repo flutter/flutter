@@ -148,7 +148,7 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:android": [
-            "//engine/src:@out/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S",  # is_android
+            "//engine/src/flutter/shell/platform/android:icudtl_asm",  # is_android
         ],
         "//conditions:default": [],
     }),
@@ -300,6 +300,12 @@ cc_library(
         "//engine/src/flutter/shell:enable_metal": FLUTTER_CFLAGS_OBJC + FLUTTER_CFLAGS_OBJCC,
         "//conditions:default": [],
     }),
+    data = select({
+        "@platforms//os:android": [
+            "//engine/src/flutter/shell/platform/android:icudtl_asm",  # is_android
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":embedder_gpu_configuration",
@@ -359,11 +365,6 @@ cc_library(
         "//engine/src/flutter/shell:enable_vulkan": [
             "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # embedder_enable_vulkan
             "//engine/src/flutter/vulkan/procs",  # embedder_enable_vulkan
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "@platforms//os:android": [
-            "//engine/src/flutter/shell/platform/android:icudtl_asm",  # is_android
         ],
         "//conditions:default": [],
     }),
@@ -439,7 +440,7 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:android": [
-            "//engine/src:@out/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S",  # is_android
+            "//engine/src/flutter/shell/platform/android:icudtl_asm",  # is_android
         ],
         "//conditions:default": [],
     }),
@@ -591,6 +592,12 @@ cc_library(
         "//engine/src/flutter/shell:enable_metal": FLUTTER_CFLAGS_OBJC + FLUTTER_CFLAGS_OBJCC,
         "//conditions:default": [],
     }),
+    data = select({
+        "@platforms//os:android": [
+            "//engine/src/flutter/shell/platform/android:icudtl_asm",  # is_android
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":embedder_gpu_configuration",
@@ -651,11 +658,6 @@ cc_library(
         "//engine/src/flutter/shell:enable_vulkan": [
             "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # embedder_enable_vulkan
             "//engine/src/flutter/vulkan/procs",  # embedder_enable_vulkan
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "@platforms//os:android": [
-            "//engine/src/flutter/shell/platform/android:icudtl_asm",  # is_android
         ],
         "//conditions:default": [],
     }),
