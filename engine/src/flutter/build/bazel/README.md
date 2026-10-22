@@ -183,6 +183,93 @@ parameter file or environment variable mentions a path outside the execution
 root, or if a C/C++ action runs anything but a `clang_<platform>` binary (see
 `tools/bazel_tools/README.md`).
 
+### The Android toolchains, and the Java half
+
+The Android builds (`tools/gn --android --android-cpu=<cpu>`) are four
+more platforms over the same clang:
+`//engine/src/flutter/build/bazel/toolchains:android_arm64` (API 24,
+`--target=aarch64-linux-android24`), `android_x64`
+(`x86_64-linux-androideabi24`, the triple as GN spells it), `android_arm`
+(armv7, API 21, GN's default CPU) and `android_riscv64` (API 35), plus
+`android_arm64_api26`, GN's `clang_arm64_apilevel26` toolchain, which exists
+for one target (below). Each toolchain is `flutter_cc_toolchain_config(os =
+"android")` over `@android_tools` -- the synced SDK/NDK package
+(`third_party/android_tools`) -- for the NDK sysroot's headers, the per-ABI
+API-level libraries and crt objects, and the NDK clang's
+`libclang_rt.builtins-<arch>-android.a`; the compiler is the engine's own
+`@clang_linux_x64`, as under GN. The link line is GN's
+(`build/toolchain/android/BUILD.gn`, `//build/config/android`): `-nostdlib
+-nostdlib++` with the crt objects around the inputs and `-lc -ldl -lm` and
+the builtins late, `--exclude-libs,ALL --icf=all -z max-page-size=65536`,
+`-z defs` on complete links; the optimized modes compile `-Oz
+-fomit-frame-pointer -g2`. Two things were needed to make `libflutter.so`
+export what GN's does: `@libcxxabi` builds without exception support on
+Android (`cxa_noexception.cpp`, as GN), since a `-nostdlib` link with no
+libunwind cannot provide `_Unwind_*`; and the toolchains enable
+`supports_start_end_lib`, so a link names object files (`--start-lib ...
+--end-lib`) rather than archives -- with archives, lld's `--exclude-libs,ALL`
+made every archive-defined symbol local regardless of the version script, and
+the library exported neither `JNI_OnLoad` nor the ICU data. LTO is a
+setting for the Android toolchains (`--//engine/src/flutter/build/bazel:lto`,
+which CI's AOT builds set: `ci_android_profile_arm64`,
+`ci_android_release_arm64`; the developer's configurations of the same names
+have none), and `--stripped` defaults off for them, as `tools/gn`'s
+`stripped_symbols = target_os != "android"` has it: the build root holds the
+unstripped library and the install's aspect writes GN's android toolchain's
+strip step beside it as `lib.stripped/<name>` (and `shipped/<name>` where
+`--stripped` holds, which the size-experiment builders' jars pack). The Dart
+wrap reads the platform: `target_os = "android"` and
+`dart_use_compressed_pointers` from the CPU, `gen_snapshot` built for the
+host targeting Android (`clang_x64/gen_snapshot`, the host toolchain's
+directory, as GN's build directory names it) and the VM for the target; one
+wrap build per Android CPU, 8 to 10 minutes each.
+
+The Java half -- `flutter.jar`, the embedding jar, `artifacts.zip`, the
+Maven tree under `zip_archives/download.flutter.io/` (`embedding_jars`,
+`abi_jars`, their poms and `maven-metadata.xml`), `android-javadoc.zip`, the
+profile jar's `libvmservice_snapshot.so` -- is built the way GN builds it:
+with `build/android/gyp/*.py` (javac, jar, zip) over the SDK's `android.jar`
+and `core-lambda-stubs.jar` (`@android_tools`), the `DEPS` JDK (`@openjdk`,
+`third_party/java/openjdk`) and the embedding's 43 dependency jars
+(`@android_embedding_dependencies`), each GN action a `gn_action` the
+converter emits -- no Gradle, no `rules_android`. The rule grew what those
+actions need and host actions never did: `build_outputs` and `build_inputs`
+(files at their paths under the build directory itself, `flutter.jar`,
+`libflutter.so`, placed and found through `BuildDirectoryInfo`), the
+`$(built PATH)` token for them, `tools` (programs in the exec configuration:
+`@openjdk//:runtime`'s `javac`, `jar`, `javadoc`), `output_dirs` (the javadoc
+tree, a directory output), and `platform_deps` with `platform` and
+`platform_build_dir`: GN's `label($apilevel26_toolchain)` on one dependency,
+a transition to `android_arm64_api26` for the Vulkan validation layer
+(`@vulkan_validation_layers`, converted from the secondary tree's GN, with
+`@vulkan-utility-libraries`), which GN's debug arm64 jar carries by default
+(`impeller_enable_vulkan_validation_layers`) under
+`clang_arm64_apilevel26/`. `shell/vmservice/BUILD.bazel` is hand-written
+(the VM-service kernel and its AOT snapshot per ABI). Against CI's artifacts
+of the base commit: the embedding jar byte-identical (456 classes), the
+arm64 debug and profile `flutter.jar` the same classes and libraries,
+`artifacts.zip`, the poms and javadoc the same modulo dates and hashes, every
+`libflutter.so` CI's exports and `NEEDED` entries. `et build --backend bazel
+-c ci/android_debug_x64 //flutter/shell/platform/android:flutter_jar_zip`
+builds `artifacts.zip` through it.
+
+The configurations (`configs.bazelrc`) cover every Android build of the
+Linux builder files: `android_{debug,profile,release}` (arm) and their
+`_arm64`, `_x64`, `_riscv64` twins, `_ddm`, the `_unopt` ones,
+`_size_exp` (`--no-dart-secure-socket`, a flag on the Dart wrap),
+`android_debug_arm64_validation_layers`
+(`--enable-vulkan-validation-layers`), `_clang_tidy`, `android_debug_test`
+and the emulator's `android_emulator_debug_x64`. `bazel run
+--config=android_debug_arm64 //engine/src/flutter/ci/builders:android_debug_arm64
+-- <directory>` lays what the builder builds: `flutter.jar` and the jars,
+poms and stamps at the root, `lib.stripped/`, `clang_arm64_apilevel26/`,
+the Maven tree, `zip_archives/android-arm64/{artifacts,symbols,embedder,impeller_sdk,linux-x64}.zip`
+and `android-javadoc.zip` (337 files). What is not here: *running* the
+three device suites the emulator builder's `run_tests.py --type android`
+pushes (they build for `android_x64`; an emulator is the next phase), the
+APK variants of two of them (GN's `native_activity_apk`), and x86, which no
+builder builds.
+
 ### The Emscripten toolchain (the spike)
 
 `toolchains/emscripten/` is GN's `build/toolchain/wasm:wasm` -- the
