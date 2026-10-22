@@ -157,6 +157,10 @@ final class _ListAttribute {
 
   bool get isEmpty => always.isEmpty && conditional.isEmpty;
 
+  /// Every item, under whatever condition.
+  Iterable<_Item> get items =>
+      always.followedBy(conditional.values.expand((List<_Item> items) => items));
+
   int get _count =>
       always.length + conditional.values.fold(0, (int n, List<_Item> items) => n + items.length);
 
@@ -1008,14 +1012,18 @@ final class _Emitter {
           if (items == null || items.length != 1 || items.single is! GnStringValue) {
             throw GnError(variable.assignments.first.location, 'script must be one plain string');
           }
-          rule.scalars['script'] =
-              '"${_filePath((items.single as GnStringValue).value, variable.assignments.first.location)}"';
+          final String script = (items.single as GnStringValue).value;
+          rule.scalars['script'] = '"${_filePath(script, variable.assignments.first.location)}"';
+          // What the script imports beside itself, for the sandbox.
+          for (final String label in scriptInputs[_gnPath(script)] ?? const <String>[]) {
+            rule.list('inputs').addUnique(Condition.always, _Item(_localLabel(label)));
+          }
         case 'sources':
-          _filesInto(rule.list('srcs'), variable);
+          _actionFilesInto(rule, 'srcs', variable);
         case 'inputs':
-          _filesInto(rule.list('inputs'), variable);
+          _actionFilesInto(rule, 'inputs', variable);
         case 'outputs':
-          _outputsInto(rule.list('outputs'), variable, target);
+          _outputsInto(rule, variable, target);
         case 'args':
           break; // After the inputs, which it may add to.
         case 'deps':
@@ -1045,46 +1053,139 @@ final class _Emitter {
     rules.add(rule);
   }
 
-  /// An action's outputs, as paths relative to the package: GN requires them
-  /// under the build directory, and the rule declares them under the
-  /// package's output directory, so they must be under `$target_gen_dir`.
-  void _outputsInto(_ListAttribute attribute, GnVariable variable, GnTarget target) {
-    final genDir = '$genDirRoot${gnPackage.substring(1)}/';
-    _forEachItem(variable, into: attribute, (_Element e) {
-      final String path = _string(e);
-      if (!path.startsWith(genDir)) {
-        throw GnError(
-          e.assignment.location,
-          'output $path of ${target.name} is not under its target_gen_dir; only such outputs are supported',
-        );
+  /// An action's `sources` or `inputs` into [attribute]: files, the outputs
+  /// of another target (`sources += get_target_outputs(":gen")`) as the
+  /// target itself, and a file of the build directory (`inputs = [
+  /// "$root_build_dir/libflutter.so" ]`) as its path under it in
+  /// `build_inputs`, for the rule to find among what the deps place there.
+  void _actionFilesInto(_Rule rule, String attribute, GnVariable variable) {
+    _forEachItem(variable, into: rule.list(attribute), (_Element e) {
+      if (e.value case GnTargetOutputsValue(:final String label, :final List<String> patterns)) {
+        if (patterns.isNotEmpty) {
+          throw GnError(e.assignment.location, 'filtered outputs of $label in ${variable.name}');
+        }
+        rule
+            .list(attribute)
+            .addUnique(
+              e.condition,
+              _item(
+                _localLabel(bazelLabel(label, package: gnPackage, location: e.assignment.location)),
+                e,
+              ),
+            );
+        return;
       }
-      attribute.addUnique(e.condition, _item(path.substring(genDir.length), e));
+      for (final _Element element in _enumeratedElements(e)) {
+        final String raw = _rawString(element);
+        final String path = raw.contains(rebasedPathMarker) ? _unmarked(raw) : _string(element);
+        if (path.contains(rebasedPathMarker)) {
+          throw GnError(e.assignment.location, 'a rebased path inside a file name: $raw');
+        }
+        if (path.startsWith('$buildDirRoot/')) {
+          rule
+              .list('build_inputs')
+              .addUnique(
+                element.condition,
+                _item(path.substring(buildDirRoot.length + 1), element),
+              );
+          continue;
+        }
+        rule
+            .list(attribute)
+            .addUnique(element.condition, _item(_filePath(path, e.assignment.location), element));
+      }
     });
   }
 
+  /// An action's outputs. GN requires them under the build directory: one
+  /// under `$target_gen_dir` is `outputs`, relative to the package, where
+  /// the rule declares it; one elsewhere under the build directory (the
+  /// embedding's jars at its root) is `build_outputs`, as its path under
+  /// the build directory. A name around an enumerated variable
+  /// (`flutter_embedding_$flutter_runtime_mode.jar`) is one per value.
+  void _outputsInto(
+    _Rule rule,
+    GnVariable variable,
+    GnTarget target, {
+    String attribute = 'outputs',
+  }) {
+    final genDir = '$genDirRoot${gnPackage.substring(1)}/';
+    _forEachItem(variable, into: rule.list(attribute), (_Element e) {
+      for (final _Element element in _enumeratedElements(e)) {
+        final String path = _string(element);
+        if (path.startsWith(genDir)) {
+          rule
+              .list(attribute)
+              .addUnique(element.condition, _item(path.substring(genDir.length), element));
+        } else if (path.startsWith('$buildDirRoot/')) {
+          rule
+              .list('build_outputs')
+              .addUnique(
+                element.condition,
+                _item(path.substring(buildDirRoot.length + 1), element),
+              );
+        } else {
+          throw GnError(
+            e.assignment.location,
+            'output $path of ${target.name} is neither under its target_gen_dir nor under the build directory',
+          );
+        }
+      }
+    });
+  }
+
+  /// [element] with a value around an enumerated variable spelled out, one
+  /// element per value under that value's condition ([_enumerated]); any
+  /// other element is itself.
+  List<_Element> _enumeratedElements(_Element element) {
+    return <_Element>[
+      for (final GnScalarCase scalarCase in _enumerated(<GnScalarCase>[
+        GnScalarCase(element.condition, element.value, element.assignment),
+      ], element.assignment.location))
+        _Element(scalarCase.condition, scalarCase.value, element.assignment, element.comments),
+    ];
+  }
+
   /// An action's `args`, with each rebased path replaced by the rule's token
-  /// for it.
+  /// for it, and an argument around an enumerated variable
+  /// (`flutter_runtime_mode`, or `"--mode=$flutter_runtime_mode"`) spelled
+  /// out as one argument per value under that value's condition
+  /// ([_enumeratedElements]).
   void _argsInto(_Rule rule, GnVariable variable, GnTarget target) {
     final _ListAttribute attribute = rule.list('args');
+    // The files named already, under any condition (the whole file's
+    // condition, which the target's platform carries, goes at the layout).
     final declared = <String>{
-      for (final String list in <String>['srcs', 'inputs'])
-        for (final _Item item in rule.list(list).always) item.text,
+      for (final String list in <String>['srcs', 'inputs', 'tools'])
+        for (final _Item item in rule.list(list).items) item.text,
     };
     _forEachItem(variable, into: attribute, (_Element e) {
-      final String text = _rawString(e);
-      final List<String> parts = text.split(rebasedPathMarker);
-      if (parts.length.isEven) {
-        throw GnError(e.assignment.location, 'unbalanced rebased path in argument $text');
+      // The outputs of a target (`args += rebase_path(sources,
+      // root_build_dir)` with the generated sources among them): the
+      // target's file, which must be one.
+      if (e.value case GnTargetOutputPathsValue(:final String label, base: '')) {
+        final String local = _localLabel(
+          bazelLabel(label, package: gnPackage, location: e.assignment.location),
+        );
+        attribute.add(e.condition, _item('\$(execpath $local)', e));
+        return;
       }
-      final out = StringBuffer();
-      for (var i = 0; i < parts.length; i++) {
-        if (i.isEven) {
-          out.write(parts[i]);
-          continue;
+      for (final _Element element in _enumeratedElements(e)) {
+        final String text = _rawString(element);
+        final List<String> parts = text.split(rebasedPathMarker);
+        if (parts.length.isEven) {
+          throw GnError(e.assignment.location, 'unbalanced rebased path in argument $text');
         }
-        out.write(_pathToken(parts[i], e.assignment.location, rule, declared, target));
+        final out = StringBuffer();
+        for (var i = 0; i < parts.length; i++) {
+          if (i.isEven) {
+            out.write(parts[i]);
+            continue;
+          }
+          out.write(_pathToken(parts[i], e.assignment.location, rule, declared, target));
+        }
+        attribute.add(element.condition, _item(out.toString(), element));
       }
-      attribute.add(e.condition, _item(out.toString(), e));
     });
   }
 
@@ -1104,11 +1205,11 @@ final class _Emitter {
       }
       return '\$(gen $relative)';
     }
-    if (path.startsWith(buildDirRoot)) {
-      throw GnError(
-        location,
-        'a path in the build directory ($path) cannot be expressed; convert by hand',
-      );
+    if (path.startsWith('$buildDirRoot/')) {
+      // A file of the build directory: one of the action's own build
+      // outputs, or one the deps place there, which the rule finds by the
+      // path.
+      return '\$(built ${path.substring(buildDirRoot.length + 1)})';
     }
     final String file = _filePath(path, location);
     final bool isDirectory = switch (tree) {
@@ -1123,7 +1224,13 @@ final class _Emitter {
       return '\$(src $relative)';
     }
     if (!declared.contains(file)) {
-      rule.list('inputs').addUnique(Condition.always, _Item(file));
+      // A program the script runs (javac) is a tool, with what it loads.
+      final List<String>? runtime = toolRuntimes[file];
+      final list = runtime == null ? 'inputs' : 'tools';
+      rule.list(list).addUnique(Condition.always, _Item(file));
+      for (final String label in runtime ?? const <String>[]) {
+        rule.list(list).addUnique(Condition.always, _Item(label));
+      }
       declared.add(file);
     }
     final label = file.startsWith('//') || file.startsWith('@') ? file : ':$file';
@@ -1630,7 +1737,13 @@ final class _Emitter {
   List<GnScalarCase> _enumerated(List<GnScalarCase> cases, GnLocation location) {
     final out = <GnScalarCase>[];
     for (final scalarCase in cases) {
-      final GnValue value = scalarCase.value;
+      // The bare variable (`flutter_runtime_mode` as an argument) is the
+      // string of just its expansion.
+      final GnValue value = switch (scalarCase.value) {
+        final GnReference reference when comparisonSettings.containsKey(reference.name) =>
+          GnExpandedString(<GnValue>[reference]),
+        final GnValue other => other,
+      };
       if (value is! GnExpandedString) {
         out.add(scalarCase);
         continue;
@@ -2067,7 +2180,7 @@ final class _Emitter {
             break;
           }
           if (items.every((GnValue v) => !(v as GnStringValue).value.contains('{{'))) {
-            _outputsInto(rule.list('outs'), variable, target);
+            _outputsInto(rule, variable, target, attribute: 'outs');
           } else {
             _expandedOutputsInto(rule, items.cast<GnStringValue>(), variable, target);
           }

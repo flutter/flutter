@@ -11,12 +11,18 @@ converter (tools/gn_to_bazel) emits one `gn_action` per GN action and writes
 the paths in the arguments as tokens this rule expands:
 
   $(execpath LABEL)   an input file, as Bazel's own expansion (the file must
-                      be among `srcs`, `inputs` or the outputs of `deps`);
+                      be among `srcs`, `inputs`, `tools` or the outputs of
+                      `deps`);
   $(src PATH)         a source directory (or file) of this repository, PATH
                       relative to the repository root;
   $(gen PATH)         a generated file or directory, PATH relative to the
                       repository root under the output directory -- where
-                      GN's `$target_gen_dir` and `$root_gen_dir` land.
+                      GN's `$target_gen_dir` and `$root_gen_dir` land;
+  $(built PATH)       the file at PATH under GN's build directory: one of the
+                      action's own `build_outputs`, or one that the closure
+                      of its `deps` places there (BuildDirectoryInfo: another
+                      action's build output, a linked shared library, its
+                      lib.stripped/ copy), which the script then reads.
 
 The script runs with the checkout's hermetic Python (`@cpython3`), from the
 execution root, in a sandbox that holds exactly the declared inputs: an
@@ -24,15 +30,23 @@ undeclared input GN would have tolerated is a failure here, by design.
 
 Each rule here says where GN's build directory holds its files
 (BuildDirectoryInfo, ../build_directory.bzl): an action's outputs under
-gen/<package>/, a copy's at its `outputs`, a generated file's at its
+gen/<package>/ (or, its `build_outputs`, at their paths under the build
+directory itself), a copy's at its `outputs`, a generated file's at its
 output; `install` (../install.bzl) lays them out there.
 """
 
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
-load("//engine/src/flutter/build/bazel:build_directory.bzl", "BuildDirectoryInfo", "build_directory_path", "copy_entries")
+load(
+    "//engine/src/flutter/build/bazel:build_directory.bzl",
+    "BuildDirectoryInfo",
+    "build_directory_aspect",
+    "build_directory_path",
+    "collected_build_directory_entries",
+    "copy_entries",
+)
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "module_platform_transition")
 
-def expand_gn_paths(ctx, arg, targets):
+def expand_gn_paths(ctx, arg, targets, placed = {}, used = None):
     """Expands the path tokens of one argument (see the module docstring).
 
     For rules besides gn_action whose arguments the converter writes with the
@@ -42,6 +56,9 @@ def expand_gn_paths(ctx, arg, targets):
       ctx: the rule context.
       arg: the argument.
       targets: the targets `$(execpath ...)` may name.
+      placed: the files of the build directory `$(built ...)` may name, by
+        their path under it.
+      used: a list the files `$(built ...)` named are appended to, if given.
 
     Returns:
       The argument with every token replaced.
@@ -61,6 +78,12 @@ def expand_gn_paths(ctx, arg, targets):
             value = _gen_path(ctx, path)
         elif kind == "src":
             value = _src_path(ctx, path)
+        elif kind == "built":
+            if path not in placed:
+                fail("%s: nothing among the deps places %s in the build directory (argument %r)" % (ctx.label, path, arg))
+            value = placed[path].path
+            if used != None:
+                used.append(placed[path])
         else:
             # Bazel's own: $(execpath ...), $(rootpath ...), $(location ...).
             value = ctx.expand_location("$(" + token + ")", targets)
@@ -77,7 +100,7 @@ def _src_path(ctx, path):
 def _gen_path(ctx, path):
     return ctx.bin_dir.path + "/" + _src_path(ctx, path)
 
-def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_message):
+def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_message, tools = []):
     """Runs a Python script with the checkout's hermetic interpreter.
 
     For rules whose attrs include PYTHON_ATTRS. The script runs from the
@@ -91,6 +114,8 @@ def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_messa
       outputs: the files it writes.
       mnemonic: the action's mnemonic.
       progress_message: the action's progress message.
+      tools: the programs the script runs, with the files they load (the
+        interpreter is added).
     """
     args = ctx.actions.args()
 
@@ -104,7 +129,7 @@ def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_messa
         # buildifier: disable=pass-args-to-actions
         arguments = [args] + arguments,
         inputs = depset([script] + inputs),
-        tools = ctx.attr._python_runtime[DefaultInfo].files,
+        tools = depset(tools, transitive = [ctx.attr._python_runtime[DefaultInfo].files]),
         outputs = outputs,
         mnemonic = mnemonic,
         progress_message = progress_message,
@@ -127,30 +152,57 @@ PYTHON_ATTRS = {
 
 def _gn_action_impl(ctx):
     outputs = [ctx.actions.declare_file(path) for path in ctx.attr.outputs]
+
+    # The files of the build directory the script may name ($(built PATH)):
+    # what the deps' closures place there, and the action's own build
+    # outputs, declared under this package at the same paths.
+    placed = {}
+    for dep in ctx.attr.deps:
+        for file, path in collected_build_directory_entries(dep):
+            placed[path] = file
+    built = [ctx.actions.declare_file(path) for path in ctx.attr.build_outputs]
+    for file, path in zip(built, ctx.attr.build_outputs):
+        placed[path] = file
+    read = []
+    for path in ctx.attr.build_inputs:
+        if path not in placed:
+            fail("%s: nothing among the deps places %s (of build_inputs) in the build directory" % (ctx.label, path))
+        read.append(placed[path])
     dep_files = [f for dep in ctx.attr.deps for f in dep[DefaultInfo].files.to_list()]
-    inputs = ctx.files.srcs + ctx.files.inputs + dep_files
-    targets = ctx.attr.srcs + ctx.attr.inputs + ctx.attr.deps
-    arguments = [expand_gn_paths(ctx, arg, targets) for arg in ctx.attr.args]
+
+    # A target among both srcs and deps (GN's `sources +=
+    # get_target_outputs(":gen")` beside the dep on it) is one target for
+    # the lookup.
+    targets = {}
+    for target in ctx.attr.srcs + ctx.attr.inputs + ctx.attr.deps + ctx.attr.tools:
+        if str(target.label) not in targets:
+            targets[str(target.label)] = target
+    arguments = [expand_gn_paths(ctx, arg, targets.values(), placed, read) for arg in ctx.attr.args]
+    own = {file: None for file in built}
+    inputs = ctx.files.srcs + ctx.files.inputs + dep_files + [file for file in read if file not in own]
     run_python(
         ctx,
         script = ctx.file.script,
         arguments = arguments,
         inputs = inputs,
-        outputs = outputs,
+        outputs = outputs + built,
         mnemonic = "GnAction",
         progress_message = "GN action %{label}",
+        tools = ctx.files.tools,
     )
 
     # The outputs are under GN's $target_gen_dir: gen/<GN package>/. An
     # action of another repository (a synced tree's overlay) has its GN
-    # directory elsewhere, which install does not reconstruct.
+    # directory elsewhere, which install does not reconstruct. The build
+    # outputs are at their paths under the build directory wherever the
+    # action is.
     package = gn_package(ctx)
     return [
-        DefaultInfo(files = depset(outputs)),
-        BuildDirectoryInfo(entries = depset([
+        DefaultInfo(files = depset(outputs + built)),
+        BuildDirectoryInfo(entries = depset(([
             (output, "gen/" + package + "/" + path)
             for output, path in zip(outputs, ctx.attr.outputs)
-        ] if package != None else [])),
+        ] if package != None else []) + list(zip(built, ctx.attr.build_outputs)))),
     ]
 
 def gn_package(ctx):
@@ -187,14 +239,30 @@ gn_action = rule(
             doc = "GN's `inputs`.",
         ),
         "deps": attr.label_list(
-            doc = "GN's `deps`: their outputs are inputs of the script, as GN's ordering made them available.",
+            aspects = [build_directory_aspect],
+            doc = "GN's `deps`: their outputs are inputs of the script, as GN's ordering made them available; " +
+                  "what their closures place in the build directory, `$(built PATH)` and `build_inputs` may name.",
+        ),
+        "tools": attr.label_list(
+            allow_files = True,
+            cfg = "exec",
+            doc = "Programs the script runs, named in `args` as $(execpath LABEL) like inputs, with the files they " +
+                  "load (a JDK's bin/javac with its lib/): built or taken for the execution platform.",
         ),
         "outputs": attr.string_list(
-            mandatory = True,
-            doc = "GN's `outputs`, as paths relative to this package (GN's `$target_gen_dir`).",
+            doc = "GN's `outputs` under `$target_gen_dir`, as paths relative to this package.",
+        ),
+        "build_outputs": attr.string_list(
+            doc = "GN's `outputs` under the build directory itself (`$root_out_dir/flutter.jar`, " +
+                  "`$root_out_dir/obj/...`), as paths under it: declared under this package at the same paths, " +
+                  "placed there by install.",
+        ),
+        "build_inputs": attr.string_list(
+            doc = "GN's `inputs` under the build directory (`$root_build_dir/libflutter.so`), as paths under it: " +
+                  "files the deps' closures place there, which the script reads.",
         ),
         "args": attr.string_list(
-            doc = "GN's `args`, with paths as $(execpath LABEL), $(src PATH) and $(gen PATH) tokens.",
+            doc = "GN's `args`, with paths as $(execpath LABEL), $(src PATH), $(gen PATH) and $(built PATH) tokens.",
         ),
     } | PYTHON_ATTRS,
 )
