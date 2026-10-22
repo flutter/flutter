@@ -33,39 +33,41 @@ filegroup(
 
 # linux_android_aot_engine.json: ci/android_profile
 #   bazel run --config=android_profile :android_profile
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
+        "//engine/src/flutter/shell/platform/android:embedding_jars",
     ],
     directory = "ci/android_profile",
 )
 
 # linux_android_aot_engine.json: ci/android_release
 #   bazel run --config=android_release :android_release
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
+        "//engine/src/flutter/shell/platform/android:embedding_jars",
     ],
     directory = "ci/android_release",
 )
 
 # linux_android_aot_engine.json: ci/android_release_arm64
 #   bazel run --config=ci_android_release_arm64 :ci_android_release_arm64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "ci_android_release_arm64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_arm64",
@@ -76,13 +78,13 @@ install(
 
 # linux_android_aot_engine.json: ci/android_profile_arm64
 #   bazel run --config=ci_android_profile_arm64 :ci_android_profile_arm64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "ci_android_profile_arm64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_profile_arm64",
@@ -90,13 +92,13 @@ install(
 
 # linux_android_aot_engine.json: ci/android_profile_x64
 #   bazel run --config=android_profile_x64 :android_profile_x64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile_x64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_profile_x64",
@@ -104,13 +106,13 @@ install(
 
 # linux_android_aot_engine.json: ci/android_release_x64
 #   bazel run --config=android_release_x64 :android_release_x64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release_x64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_x64",
@@ -118,13 +120,13 @@ install(
 
 # linux_android_aot_engine.json: ci/android_profile_riscv64
 #   bazel run --config=android_profile_riscv64 :android_profile_riscv64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile_riscv64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_profile_riscv64",
@@ -132,13 +134,13 @@ install(
 
 # linux_android_aot_engine.json: ci/android_release_riscv64
 #   bazel run --config=android_release_riscv64 :android_release_riscv64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release_riscv64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot_host",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_riscv64",
@@ -202,13 +204,15 @@ install(
 
 # linux_android_debug_engine.json: ci/android_debug
 #   bazel run --config=android_debug :android_debug
-# Not built, no Bazel counterpart yet: flutter/sky/dist:zip_old_location, flutter/lib/gpu/dist:zip_old_location, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
+# Not built, no Bazel counterpart yet: flutter/sky/dist:zip_old_location, flutter/lib/gpu/dist:zip_old_location.
 install(
     name = "android_debug",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
+        "//engine/src/flutter/shell/platform/android:embedding_jars",
         "//engine/src/flutter/shell/platform/embedder:embedder-archive",
     ],
     directory = "ci/android_debug",
@@ -216,13 +220,13 @@ install(
 
 # linux_android_debug_engine.json: ci/android_debug_arm64
 #   bazel run --config=android_debug_arm64 :android_debug_arm64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_debug_arm64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/embedder:embedder-archive",
     ],
     directory = "ci/android_debug_arm64",
@@ -230,13 +234,13 @@ install(
 
 # linux_android_debug_engine.json: ci/android_debug_x64
 #   bazel run --config=android_debug_x64 :android_debug_x64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_debug_x64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/embedder:embedder-archive",
     ],
     directory = "ci/android_debug_x64",
@@ -244,13 +248,13 @@ install(
 
 # linux_android_debug_engine.json: ci/android_debug_riscv64
 #   bazel run --config=android_debug_riscv64 :android_debug_riscv64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_debug_riscv64",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/embedder:embedder-archive",
     ],
     directory = "ci/android_debug_riscv64",
@@ -612,11 +616,13 @@ test_suite(
 # linux_unopt.json: ci/android_debug_arm64_validation_layers
 #   no configuration (configs.bazelrc); the flags would be:
 #   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
-# Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_debug_arm64_validation_layers",
     testonly = True,
-    contents = ["//engine/src/flutter:flutter"],
+    contents = [
+        "//engine/src/flutter:flutter",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
+    ],
     directory = "ci/android_debug_arm64_validation_layers",
 )
 
@@ -656,11 +662,15 @@ test_suite(
 
 # linux_unopt.json: ci/android_debug_test
 #   bazel run --config=android_debug_test :android_debug_test
-# Not built, no Bazel counterpart yet: flutter/sky/dist:zip_old_location, flutter/lib/gpu/dist:zip_old_location, flutter/shell/platform/android:embedding_jars, flutter/shell/platform/android:abi_jars.
+# Not built, no Bazel counterpart yet: flutter/sky/dist:zip_old_location, flutter/lib/gpu/dist:zip_old_location.
 install(
     name = "android_debug_test",
     testonly = True,
-    contents = ["//engine/src/flutter:flutter"],
+    contents = [
+        "//engine/src/flutter:flutter",
+        "//engine/src/flutter/shell/platform/android:abi_jars",
+        "//engine/src/flutter/shell/platform/android:embedding_jars",
+    ],
     directory = "ci/android_debug_test",
 )
 
