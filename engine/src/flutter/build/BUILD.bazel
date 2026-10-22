@@ -39,6 +39,9 @@ filegroup(
             "secondary/flutter/third_party/vulkan_memory_allocator/**",
             "secondary/testing/**",
             "secondary/third_party/boringssl/**",
+            # The forwarder zlib's Android branch names (cpu_features'
+            # NDK compatibility shim), for the Android Dart wrap.
+            "secondary/third_party/cpu_features/**",
             "secondary/third_party/dart/**",
             "secondary/third_party/icu/**",
             "secondary/third_party/jsoncpp/**",

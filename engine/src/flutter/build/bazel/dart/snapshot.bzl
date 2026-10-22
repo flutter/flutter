@@ -285,7 +285,7 @@ def _bin_to_assembly_impl(ctx):
     )
     return [DefaultInfo(files = depset([output]))]
 
-bin_to_assembly = rule(
+_bin_to_assembly = rule(
     implementation = _bin_to_assembly_impl,
     doc = "GN's bin_to_assembly(): a symbol over the bytes of a file, as assembly (`<file>.S`).",
     attrs = {
@@ -318,3 +318,39 @@ bin_to_assembly = rule(
         ),
     } | PYTHON_ATTRS,
 )
+
+def bin_to_assembly(name, target_os = None, target_cpu = None, **kwargs):
+    """GN's bin_to_assembly(), with the target OS and CPU of the platform.
+
+    The script writes the section directives of GN's current_os and sizes
+    the size symbol by current_cpu; unless given, both follow the target
+    platform (the Android shell's icudtl under --platforms=...:android_arm64,
+    the host's under the host).
+
+    Args:
+      name: the target's name.
+      target_os: GN's current_os, if not the platform's.
+      target_cpu: GN's current_cpu, if not the platform's.
+      **kwargs: the rule's attributes (`src`, `symbol`, `size_symbol`, `executable`, ...).
+    """
+    _bin_to_assembly(
+        name = name,
+        target_os = target_os or select({
+            "@platforms//os:android": "android",
+            "@platforms//os:emscripten": "wasm",
+            "@platforms//os:fuchsia": "fuchsia",
+            "@platforms//os:ios": "ios",
+            "@platforms//os:macos": "mac",
+            "@platforms//os:windows": "win",
+            "//conditions:default": "linux",
+        }),
+        target_cpu = target_cpu or select({
+            "@platforms//cpu:aarch64": "arm64",
+            "@platforms//cpu:armv7": "arm",
+            "@platforms//cpu:riscv64": "riscv64",
+            "@platforms//cpu:wasm32": "wasm",
+            "@platforms//cpu:x86_32": "x86",
+            "//conditions:default": "x64",
+        }),
+        **kwargs
+    )
