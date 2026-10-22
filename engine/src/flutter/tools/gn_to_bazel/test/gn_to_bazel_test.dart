@@ -6820,7 +6820,7 @@ build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runti
 
 # linux_host_engine.json: ci/host_debug_unopt
 #   --runtime-mode debug --unoptimized --asan --dart-debug
-build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:asan --test_timeout=240,1200,3600,14400 --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
+build:ci_host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:asan --test_timeout=240,1200,3600,14400 --//engine/src/flutter/build/bazel/dart_wrap:dart_debug
 
 # linux_host_engine.json: ci/host_profile_lto
 #   --runtime-mode profile --prebuilt-dart-sdk
@@ -6858,7 +6858,7 @@ build:host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mo
 
 # local_engine.json: linux/host_debug_unopt
 #   --runtime-mode debug --unopt --no-stripped --no-lto
-build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+build:host_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
 
 # local_engine.json: linux/wasm_release
 #   --web --runtime-mode=release --no-rbe --no-goma
@@ -6866,7 +6866,7 @@ build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
 
 # local_engine.json: linux/wasm_debug_unopt
 #   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
-build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
 
 # local_engine.json: linux/android_debug_arm64
 #   --runtime-mode debug --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma

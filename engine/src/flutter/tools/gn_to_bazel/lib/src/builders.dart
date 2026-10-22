@@ -34,7 +34,10 @@ enum GnFlagEffect {
   /// `--runtime-mode <mode>`: the runtime mode setting.
   runtimeMode,
 
-  /// `--unoptimized`: Bazel's default compilation mode; its absence is `-c opt`.
+  /// `--unoptimized`: `-c dbg`, GN's `is_debug` build (`-O0 -g2`); its
+  /// absence is `-c opt`. (Bazel's default mode, fastbuild, is -O0 with line
+  /// tables only, which no GN build is: a configuration names dbg so that
+  /// a developer's host_debug_unopt debugs as GN's does.)
   unoptimized,
 
   /// `--target-dir <dir>`: the build directory under engine/src/out.
@@ -479,7 +482,7 @@ final class BuilderBuild {
     if (!stripped && !wasm) {
       settings.add('--$strippedSetting=false');
     }
-    flags.add(unoptimized ? '--compilation_mode=fastbuild' : '--compilation_mode=opt');
+    flags.add(unoptimized ? '--compilation_mode=dbg' : '--compilation_mode=opt');
     flags.add('--$runtimeModeSetting=${runtimeMode ?? 'debug'}');
     if (platform != null) {
       flags.add(platform);
