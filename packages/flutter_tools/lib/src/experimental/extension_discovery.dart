@@ -81,10 +81,7 @@ class ExtensionConnection {
   /// closing active notification streams instead of hanging indefinitely.
   void _handleIsolateExit() {
     _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
-    _errorPort.close();
-    _exitPort.close();
-    _receivePort.close();
-    unawaited(_closeNotificationControllers());
+    unawaited(dispose());
   }
 
   /// Returns a broadcast stream of JSON-RPC 2.0 notifications sent by the
@@ -233,14 +230,6 @@ class ExtensionConnection {
     }
   }
 
-  Future<void> _closeNotificationControllers() async {
-    for (final StreamController<Map<String, Object?>> controller
-        in _notificationControllers.values) {
-      await controller.close();
-    }
-    _notificationControllers.clear();
-  }
-
   /// Disposes the extension isolate connection.
   Future<void> dispose() async {
     if (_isDisposed) {
@@ -251,7 +240,11 @@ class ExtensionConnection {
     _errorPort.close();
     _exitPort.close();
     _receivePort.close();
-    await _closeNotificationControllers();
+    for (final StreamController<Map<String, Object?>> controller
+        in _notificationControllers.values) {
+      await controller.close();
+    }
+    _notificationControllers.clear();
     try {
       await _peer.close();
     } on Object catch (error) {
