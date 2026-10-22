@@ -326,9 +326,8 @@ TEST(PipelineLibraryGLESMaxActiveCompileJobsTest,
   EXPECT_EQ(GetMaxActiveCompileJobsWithParallelCompile(2), 2u);
 }
 
-TEST(PipelineLibraryGLESMaxActiveCompileJobsTest, IsCappedAtDefault) {
-  EXPECT_EQ(GetMaxActiveCompileJobsWithParallelCompile(64),
-            PipelineCompileQueueGLES::kDefaultMaxActiveJobs);
+TEST(PipelineLibraryGLESMaxActiveCompileJobsTest, IsNotCappedAtDefault) {
+  EXPECT_EQ(GetMaxActiveCompileJobsWithParallelCompile(64), 64u);
 }
 
 TEST(PipelineLibraryGLESMaxActiveCompileJobsTest,

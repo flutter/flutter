@@ -51,8 +51,10 @@ class PipelineLibraryGLES final
   ///
   /// @param[in]  capabilities  The capabilities of the device.
   ///
-  /// @return     The maximum number of active compile jobs, at least 1 and at
-  ///             most `PipelineCompileQueueGLES::kDefaultMaxActiveJobs`.
+  /// @return     The maximum number of active compile jobs, at least 1. This
+  ///             is the driver's reported maximum number of shader compiler
+  ///             threads, or `PipelineCompileQueueGLES::kDefaultMaxActiveJobs`
+  ///             if the driver reports the implementation-dependent maximum.
   ///
   static size_t GetMaxActiveCompileJobs(const CapabilitiesGLES& capabilities);
 

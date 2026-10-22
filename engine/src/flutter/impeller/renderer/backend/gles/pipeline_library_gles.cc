@@ -40,8 +40,7 @@ size_t PipelineLibraryGLES::GetMaxActiveCompileJobs(
     // -1 means the implementation-dependent maximum.
     return PipelineCompileQueueGLES::kDefaultMaxActiveJobs;
   }
-  return std::clamp<size_t>(static_cast<size_t>(threads), 1,
-                            PipelineCompileQueueGLES::kDefaultMaxActiveJobs);
+  return std::max<size_t>(static_cast<size_t>(threads), 1);
 }
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
