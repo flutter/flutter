@@ -1493,12 +1493,31 @@ const Set<String> _predefinedTargetVariables = <String>{'configs'};
 const Set<String> _ignoredFunctions = <String>{'assert', 'not_needed', 'print', 'set_defaults'};
 
 final class _Scope {
-  _Scope(this.parent, {this.isTarget = false});
+  _Scope(this.parent, {this.isTarget = false, this.isPass = false});
 
   final _Scope? parent;
 
   /// Whether this is the scope of a target's block.
   final bool isTarget;
+
+  /// Whether this is one pass of a `foreach` body: GN runs the body in the
+  /// enclosing scope itself, and so do assignments here to variables of
+  /// an enclosing scope (`outputs += [...]`); only a variable the pass
+  /// defines afresh is its own, so that passes under different conditions
+  /// (elements of a list that hold under conditions) do not read each
+  /// other's values as cases.
+  final bool isPass;
+
+  /// The scope GN would run this one's statements in: the nearest
+  /// enclosing scope that is not a pass.
+  _Scope get owner {
+    var scope = this;
+    while (scope.isPass) {
+      scope = scope.parent!;
+    }
+    return scope;
+  }
+
   final Map<String, GnVariable> variables = <String, GnVariable>{};
   final Map<String, _Template> templates = <String, _Template>{};
 
@@ -1878,22 +1897,25 @@ final class _Evaluator {
     if (!list.isList) {
       throw GnError(call.location, 'foreach() over something other than a list');
     }
-    final GnVariable? previous = scope.variables[name];
     for (final _Value item in list.items) {
       final Condition when = condition.and(item.condition);
       if (when == Condition.never) {
         continue;
       }
-      scope.variables[name] = GnVariable(
+      // Each pass runs in a scope of its own, holding the loop variable and
+      // what the body defines (`extension = get_path_info(source, ...)`),
+      // which the next pass defines afresh: one pass's values are not
+      // cases of another's, as they would be in the enclosing scope when
+      // the elements hold under conditions (the ABI jars' names by CPU).
+      // Appends reach the enclosing variables through the parent, as GN's
+      // `outputs += [...]` in a foreach body does.
+      final pass = _Scope(scope, isPass: true);
+      pass.variables[name] = GnVariable(
         name,
         isList: false,
       )..assignments.add(GnAssignment(call.location, Condition.always, '=', <GnValue>[item.value]));
-      _evaluateBlock(body, scope, when, source, target: target);
-    }
-    if (previous == null) {
-      scope.variables.remove(name);
-    } else {
-      scope.variables[name] = previous;
+      _evaluateBlock(body, pass, when, source, target: target);
+      scope.readNames.addAll(pass.readNames);
     }
   }
 
@@ -2145,28 +2167,37 @@ final class _Evaluator {
 
   void _evaluateAssignment(
     GnBinary node,
-    _Scope scope,
+    _Scope assignedIn,
     Condition condition,
     List<String> source, {
     required List<String> comments,
   }) {
+    var scope = assignedIn;
     final GnNode left = node.left;
     if (left is! GnIdentifier) {
       throw GnError(left.location, 'assignment to something other than a variable');
     }
     final String name = left.name;
-    final GnVariable? existing = scope.find(name);
+    GnVariable? existing = scope.find(name);
+    // In a pass of a foreach body, a variable of an enclosing scope is
+    // written where GN writes it: that scope (see _Scope.isPass).
+    if (scope.isPass && existing != null && !scope.variables.containsKey(name)) {
+      scope = scope.owner;
+      existing = scope.find(name);
+    }
     final GnValue? assumed = !_declaringArgs || node.op != '='
         ? null
         : assumptions[name] ??
               (settings.externalVariables.contains(name)
                   ? GnConditionValue(ConditionVariable(name))
                   : null);
+    // The value is read in the scope of the statement itself (a pass's own
+    // variables are visible there), whatever scope the write goes to.
     final _Expression value = assumed != null
         ? _Expression.scalar(assumed)
         : _isBooleanExpression(node.right)
-        ? _booleanExpression(node.right, scope)
-        : _expression(node.right, scope);
+        ? _booleanExpression(node.right, assignedIn)
+        : _expression(node.right, assignedIn);
     final GnVariable variable;
     var reassignedEmpty = false;
     if (node.op == '=') {
@@ -2364,6 +2395,31 @@ final class _Evaluator {
         }
         return _Expression(<_Value>[
           _Value(_literal(node, scope: scope), _comments(node)),
+        ], isList: false);
+      case GnFunctionCall(name: 'get_path_info', :final List<GnNode> args)
+          when args.length == 2 &&
+              const <String>{
+                'extension',
+                'name',
+                'file',
+              }.contains(_stringExpression(args[1], scope)):
+        // The file name's parts, of each case of the path (the Android
+        // embedding's `get_path_info(source, "extension")` over the jar and
+        // pom names around the runtime mode): a string around a reference
+        // keeps the reference where the part spans it.
+        final String what = _stringExpression(args[1], scope);
+        final _Expression input = _expression(args[0], scope);
+        if (input.isList) {
+          throw GnError(node.location, 'get_path_info() of a list for $what');
+        }
+        return _Expression(<_Value>[
+          for (final _Value item in input.items)
+            _Value(
+              _pathInfo(item.value, what, node),
+              item.comments,
+              condition: item.condition,
+              sourceConditions: item.sourceConditions,
+            ),
         ], isList: false);
       case GnFunctionCall(name: 'get_path_info', :final List<GnNode> args):
         if (args.length != 2 || _stringExpression(args[1], scope) != 'abspath') {
@@ -2851,6 +2907,61 @@ final class _Evaluator {
       'root_out_dir' => buildDirRoot,
       _ => throw GnError(node.location, 'get_label_info(..., "$what") is not supported'),
     };
+  }
+
+  /// `get_path_info(path, what)` for "file" (the last component), "name"
+  /// (without the extension) and "extension": of a string, or of a string
+  /// around a reference, whose literal ends give the parts (the reference
+  /// stays inside the name).
+  GnValue _pathInfo(GnValue value, String what, GnNode node) {
+    final List<GnValue> parts = switch (value) {
+      GnStringValue() => <GnValue>[value],
+      GnExpandedString(:final List<GnValue> parts) => parts,
+      _ => throw GnError(node.location, 'get_path_info() of $value'),
+    };
+    // The last component: from the last '/' of a literal part on.
+    var start = 0;
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] case GnStringValue(value: final String text)) {
+        if (text.contains('/')) {
+          start = i;
+        }
+      }
+    }
+    final file = <GnValue>[];
+    for (var i = start; i < parts.length; i++) {
+      final GnValue part = parts[i];
+      if (i == start && part is GnStringValue) {
+        file.add(GnStringValue(part.value.substring(part.value.lastIndexOf('/') + 1)));
+      } else {
+        file.add(part);
+      }
+    }
+    GnValue joined(List<GnValue> p) => p.length == 1 && p.single is GnStringValue
+        ? p.single
+        : GnExpandedString(List<GnValue>.unmodifiable(p));
+    if (what == 'file') {
+      return joined(file);
+    }
+    final GnValue last = file.last;
+    final int dot = last is GnStringValue ? last.value.lastIndexOf('.') : -1;
+    if (dot < 0) {
+      // No extension in the literal tail: GN's "" for the extension, the
+      // file for the name.
+      return what == 'extension' ? const GnStringValue('') : joined(file);
+    }
+    final String tail = (last as GnStringValue).value;
+    if (what == 'extension') {
+      return GnStringValue(tail.substring(dot + 1));
+    }
+    final name = <GnValue>[
+      ...file.sublist(0, file.length - 1),
+      GnStringValue(tail.substring(0, dot)),
+    ];
+    if (name.last case GnStringValue(value: '')) {
+      name.removeLast();
+    }
+    return joined(name);
   }
 
   /// A list expression as one value, for an element of a list that is a

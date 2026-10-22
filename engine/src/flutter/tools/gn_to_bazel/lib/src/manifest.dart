@@ -1009,8 +1009,6 @@ exports_files(["README"] + glob(
       'gen_android_javadoc': 'Java: the Android phase (D10)',
       'android_javadoc': 'Java: the Android phase (D10)',
       'android_entitlement_config': "generated_file over metadata: the Apple phase's",
-      'embedding_jars': 'Java: the Android phase (D10)',
-      'abi_jars': 'Java: the Android phase (D10)',
     },
     appendix: '''
 # android_rendering_selector.h, an enum the shell and its sub-packages share,
@@ -1940,6 +1938,9 @@ const Set<String> handWrittenPackages = <String>{
   // build/android/gyp's scripts the Android embedding's actions.
   'engine/src/build',
   'engine/src/flutter',
+  // //flutter/build: the engine's GN additions (wrapped builds' inputs),
+  // zip_bundle.gni's script, and android_artifacts.py.
+  'engine/src/flutter/build',
   'engine/src/flutter/impeller/tools',
   'engine/src/flutter/lib/snapshot',
   'engine/src/flutter/shell/vmservice',

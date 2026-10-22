@@ -2408,6 +2408,96 @@ zip_bundle("jar_zip") {
         expect(output, contains('sources = {"flutter.jar": "flutter.jar"}'));
       });
 
+      test(
+        'lays a Maven tree out: foreach passes, get_path_info parts, constants in paths',
+        () async {
+          // The Android embedding's embedding_jars: a foreach over sources
+          // named by the runtime mode, each pass reading the name and
+          // extension of its own source, into outputs and arguments whose
+          // paths carry the engine version (a constant on the Bazel side).
+          final GnSourceTree tree = sourceTree(<String, String>{
+            'flutter/example/android_artifacts.py': '',
+            'flutter/example/BUILD.gn': r'''
+action("embedding_jars") {
+  script = "android_artifacts.py"
+  base_sources = [
+    "$root_out_dir/flutter_embedding_$flutter_runtime_mode.jar",
+    "$root_out_dir/flutter_embedding_$flutter_runtime_mode.pom",
+  ]
+  sources = base_sources
+  outputs = []
+  args = []
+  base_name = "$root_out_dir/zip_archives/download.flutter.io/io/flutter/" +
+              "flutter_embedding_$flutter_runtime_mode/1.0.0-$engine_version/" +
+              "flutter_embedding_$flutter_runtime_mode-1.0.0-${engine_version}"
+  foreach(source, base_sources) {
+    extension = get_path_info(source, "extension")
+    name = get_path_info(source, "name")
+    if (extension == "jar") {
+      outputs += [ "${base_name}.jar" ]
+      args += [
+        "-i",
+        rebase_path("$root_out_dir/${name}.jar", root_build_dir),
+        rebase_path("${base_name}.jar", root_build_dir),
+      ]
+    } else {
+      outputs += [ "${base_name}.${extension}" ]
+      args += [
+        "-i",
+        rebase_path(source, root_build_dir),
+        rebase_path("${base_name}.${extension}", root_build_dir),
+      ]
+    }
+  }
+}
+''',
+          });
+          final String output = emitBuildFile(
+            evaluateIn(tree, '//flutter/example/BUILD.gn'),
+            gnPackage: '//flutter/example',
+            tree: tree,
+          );
+          // The jar pass: the source by its name, the destination an
+          // expression around the version, under the mode.
+          expect(
+            output,
+            contains(r'''
+    args = [
+        "-i",  # extension == "jar"
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "$(built flutter_embedding_debug.jar)",  # extension == "jar"
+        ],
+        "//conditions:default": [],
+    }) + select({'''),
+          );
+          expect(
+            output,
+            contains(
+              r'"$(built zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + ENGINE_VERSION + ".jar)",  # extension == "jar"',
+            ),
+          );
+          // The pom pass: GN's else branch, the extension spelled out.
+          expect(
+            output,
+            contains(r'"$(built flutter_embedding_debug.pom)",  # !(extension == "jar")'),
+          );
+          expect(
+            output,
+            contains(
+              r'"zip_archives/download.flutter.io/io/flutter/flutter_embedding_debug/1.0.0-" + ENGINE_VERSION + "/flutter_embedding_debug-1.0.0-" + ENGINE_VERSION + ".pom",  # !(extension == "jar")',
+            ),
+          );
+          expect(output, contains('build_inputs = select({'));
+          expect(
+            output,
+            contains(
+              '"//engine/src/flutter/common:runtime_mode_debug": ["flutter_embedding_debug.jar"],',
+            ),
+          );
+        },
+      );
+
       test('rebases paths to absolute ones and to the current directory', () async {
         // sky_engine's way of naming the Dart SDK's sources: a base rebased
         // to an absolute path, a directory under it, a list under that; and
