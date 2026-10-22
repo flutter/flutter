@@ -118,5 +118,19 @@ Future<void> testMain() async {
         paragraph.dispose();
       });
     }
+
+    test('paint bounds follow the latest layout', () {
+      final WebParagraph paragraph = cases['latin with trailing spaces']!();
+      paragraph.layout(const ParagraphConstraints(width: 80));
+      final Rect narrowBounds = paragraph.paintBounds;
+      paragraph.layout(const ParagraphConstraints(width: 500));
+
+      final WebParagraph fresh = cases['latin with trailing spaces']!();
+      fresh.layout(const ParagraphConstraints(width: 500));
+      expect(paragraph.paintBounds, fresh.paintBounds);
+      expect(paragraph.paintBounds, isNot(narrowBounds));
+      paragraph.dispose();
+      fresh.dispose();
+    });
   });
 }
