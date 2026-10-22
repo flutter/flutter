@@ -589,6 +589,24 @@ const String genDirRoot = '//@gen';
 const String rebasedPathMarker = '\u0001';
 
 /// A value the converter cannot know: the result of `rebase_path()` to a
+/// An assumption with one string per case of another variable's value:
+/// build/config/android/config.gni's android_app_abi by `current_cpu`
+/// (`arm64-v8a` under `current_cpu == "arm64"`). Read, it is those cases,
+/// each under its comparison, as a variable the evaluator defined under
+/// `if (current_cpu == ...)` branches would be.
+final class GnCasedValue extends GnValue {
+  const GnCasedValue(this.variable, this.values);
+
+  /// The variable the cases compare (`current_cpu`).
+  final String variable;
+
+  /// The value under each of [variable]'s values.
+  final Map<String, String> values;
+
+  @override
+  String toString() => '{$variable: $values}';
+}
+
 /// directory other than the build directory, or of `exec_script()`. It may
 /// be stored (a `.gni` may compute arguments the engine never uses) but is
 /// an error wherever it would reach the output.
@@ -906,6 +924,9 @@ final class GnVariable {
     List<GnValue> parts(GnValue v) => switch (v) {
       GnStringValue() => <GnValue>[v],
       GnExpandedString(:final List<GnValue> parts) => parts,
+      // A bare variable the converter does not evaluate (`"_" +
+      // flutter_runtime_mode`): its expansion, as in a string.
+      GnReference() => <GnValue>[v],
       _ => throw GnError(location, '+ of $v to a string'),
     };
     final joined = <GnValue>[];
@@ -2231,10 +2252,22 @@ final class _Evaluator {
           for (final GnNode item in items) ..._expression(item, scope).items,
         ], isList: true);
       case GnBinary(op: '+', :final GnNode left, :final GnNode right):
-        final _Expression l = _expression(left, scope);
-        final _Expression r = _expression(right, scope);
+        _Expression l = _expression(left, scope);
+        _Expression r = _expression(right, scope);
         if (l.isList && r.isList) {
           return _Expression(<_Value>[...l.items, ...r.items], isList: true);
+        }
+        // A string and a bare variable the converter does not evaluate
+        // (`"_" + flutter_runtime_mode`): such a variable is read as a list
+        // of flags for want of knowing better, but GN adds a string to a
+        // string only, so here it is a string.
+        _Expression asString(_Expression e) =>
+            e.isList && e.items.length == 1 && e.items.single.value is GnReference
+            ? _Expression(e.items, isList: false)
+            : e;
+        if (l.isList != r.isList) {
+          l = asString(l);
+          r = asString(r);
         }
         final GnValue? a = l.scalar;
         final GnValue? b = r.scalar;
@@ -2311,6 +2344,32 @@ final class _Evaluator {
         return _Expression.scalar(
           GnStringValue(_absolutePath(_stringExpression(args[0], scope), node)),
         );
+      case GnFunctionCall(name: 'string_replace', :final List<GnNode> args):
+        // string_replace(str, old, new): each case of the string, replaced
+        // (the Android embedding's `string_replace(android_app_abi, "-",
+        // "_")`, where the ABI has one case per CPU). A string around a
+        // reference the converter does not evaluate cannot be replaced in.
+        if (args.length != 3) {
+          throw GnError(node.location, 'string_replace() takes a string, the old and the new text');
+        }
+        final String from = _stringExpression(args[1], scope);
+        final String to = _stringExpression(args[2], scope);
+        final _Expression input = _expression(args[0], scope);
+        if (input.isList) {
+          throw GnError(node.location, 'string_replace() of a list');
+        }
+        return _Expression(<_Value>[
+          for (final _Value item in input.items)
+            if (item.value case GnStringValue(:final String value))
+              _Value(
+                GnStringValue(value.replaceAll(from, to)),
+                item.comments,
+                condition: item.condition,
+                sourceConditions: item.sourceConditions,
+              )
+            else
+              throw GnError(node.location, 'string_replace() of ${item.value}'),
+        ], isList: false);
       case GnFunctionCall(name: 'rebase_path', :final List<GnNode> args):
         // rebase_path(x, root_build_dir): the path of x as the build runs
         // it. Kept as a marked absolute path inside the string, which the
@@ -2417,6 +2476,57 @@ final class _Evaluator {
             }
             return _Expression.scalar(rebased(single));
           }
+        }
+        // rebase_path(x, root_build_dir, root_build_dir): x, a path relative
+        // to the build directory, as the build runs it -- the same path
+        // (the Android embedding's `rebase_path("flutter.jar",
+        // root_build_dir, root_build_dir)`): the marked build-directory path,
+        // as rebase_path("$root_build_dir/x", root_build_dir) gives.
+        if (args.length == 3 &&
+            args[1] is GnIdentifier &&
+            (args[1] as GnIdentifier).name == 'root_build_dir' &&
+            args[2] is GnIdentifier &&
+            (args[2] as GnIdentifier).name == 'root_build_dir') {
+          final _Expression input = _expression(args[0], scope);
+          if (input.isList) {
+            throw GnError(node.location, 'rebase_path() of a list against the build directory');
+          }
+          GnValue rebased(GnValue value) {
+            switch (value) {
+              case GnStringValue(value: final String path):
+                final String absolute = path.startsWith('//')
+                    ? path
+                    : _normalizedPath('$buildDirRoot/$path', node);
+                return GnStringValue('$rebasedPathMarker$absolute$rebasedPathMarker');
+              case GnExpandedString(:final List<GnValue> parts):
+                // A name around a reference (`"$engine_artifact_id.jar"`
+                // with the runtime mode in it): the marked path around it.
+                final GnValue first = parts.first;
+                final String head = first is GnStringValue ? first.value : '';
+                final List<GnValue> rest = first is GnStringValue ? parts.sublist(1) : parts;
+                final start = head.startsWith('//') ? head : '$buildDirRoot/$head';
+                final out = <GnValue>[GnStringValue('$rebasedPathMarker$start'), ...rest];
+                final GnValue last = out.last;
+                if (last is GnStringValue) {
+                  out[out.length - 1] = GnStringValue(last.value + rebasedPathMarker);
+                } else {
+                  out.add(const GnStringValue(rebasedPathMarker));
+                }
+                return GnExpandedString(List<GnValue>.unmodifiable(out));
+              default:
+                throw GnError(node.location, 'rebase_path() of $value');
+            }
+          }
+
+          return _Expression(<_Value>[
+            for (final _Value item in input.items)
+              _Value(
+                rebased(item.value),
+                item.comments,
+                condition: item.condition,
+                sourceConditions: item.sourceConditions,
+              ),
+          ], isList: false);
         }
         // rebase_path(x, "", base): x, relative to base, as an absolute
         // path -- sky_engine's way of naming the Dart SDK's library sources
@@ -2702,6 +2812,16 @@ final class _Evaluator {
       return _variableItems(variable, node);
     }
     final GnValue? assumed = assumptions[name];
+    if (assumed is GnCasedValue) {
+      return _Expression(<_Value>[
+        for (final MapEntry<String, String> c in assumed.values.entries)
+          _Value(
+            GnStringValue(c.value),
+            _comments(node),
+            condition: ConditionComparison(assumed.variable, true, c.key),
+          ),
+      ], isList: false);
+    }
     if (assumed != null) {
       return _Expression.scalar(assumed);
     }

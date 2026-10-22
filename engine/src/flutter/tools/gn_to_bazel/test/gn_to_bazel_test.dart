@@ -2219,6 +2219,60 @@ source_set("x") {
         );
       });
 
+      test(
+        'evaluates string_replace(), cased assumptions and paths relative to the build directory',
+        () async {
+          // The Android embedding's jar names: the ABI (config.gni's table
+          // by current_cpu, a cased assumption) with its dashes replaced,
+          // joined to the runtime mode (a bare reference), as a path under
+          // the build directory (the three-argument rebase_path).
+          final GnFileEvaluation evaluation = await evaluate(r'''
+action("jar") {
+  script = "pack.py"
+  artifact_id = string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
+  jar_filename = "$artifact_id.jar"
+  outputs = [ "$root_build_dir/$jar_filename" ]
+  args = [
+    "--output",
+    rebase_path("flutter.jar", root_build_dir, root_build_dir),
+    "--native",
+    rebase_path(jar_filename, root_build_dir, root_build_dir),
+    "--abi",
+    android_app_abi,
+  ]
+}
+''');
+          final GnTarget jar = evaluation.targets.single;
+          final List<GnScalarCase> id = jar.variables['artifact_id']!.cases(jar.location);
+          expect(id.map((GnScalarCase c) => c.condition.toString()), <String>[
+            'current_cpu == "x86"',
+            'current_cpu == "arm"',
+            'current_cpu == "x64"',
+            'current_cpu == "arm64"',
+            'current_cpu == "riscv64"',
+          ]);
+          expect(id[1].value.toString(), r'"armeabi_v7a_$flutter_runtime_mode"');
+          final List<GnValue> args = jar.variables['args']!.liveItems
+              .map((GnListItem i) => i.value)
+              .toList();
+          expect(args[1], const GnStringValue('\u0001//@out/flutter.jar\u0001'));
+          final List<GnListItem> natives = jar.variables['args']!.liveItems
+              .where((GnListItem i) => i.value.toString().contains('v8a_'))
+              .toList();
+          expect(
+            natives.single.value.toString(),
+            '"\u0001//@out/arm64_v8a_\$flutter_runtime_mode.jar\u0001"',
+          );
+          expect(natives.single.condition.toString(), 'current_cpu == "arm64"');
+          // The bare ABI: its five cases, the last riscv64's.
+          expect(args.last, const GnStringValue('riscv64'));
+          expect(
+            jar.variables['args']!.liveItems.last.condition.toString(),
+            'current_cpu == "riscv64"',
+          );
+        },
+      );
+
       test('rebases paths to absolute ones and to the current directory', () async {
         // sky_engine's way of naming the Dart SDK's sources: a base rebased
         // to an absolute path, a directory under it, a list under that; and
