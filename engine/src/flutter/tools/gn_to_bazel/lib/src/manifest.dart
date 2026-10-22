@@ -24,6 +24,8 @@ final class ConvertedFile {
     this.appendix,
     this.implicitDeps = const <String>[],
     this.condition,
+    this.unconvertedDeps = const <String>[],
+    this.filesGroups = const <String>{},
   });
 
   /// The GN directory (`//flutter/fml`); the input is its `BUILD.gn`.
@@ -53,9 +55,335 @@ final class ConvertedFile {
   /// that block, so its targets are incompatible elsewhere and a wildcard
   /// build of the tree skips them.
   final String? condition;
+
+  /// GN labels (`//dir:name`) the file's groups depend on that have no Bazel
+  /// counterpart yet -- targets of files not converted, or skipped in theirs
+  /// -- left out of the generated groups and listed in the file's header. A
+  /// group stands for what the build reaches, so a member missing is a gap
+  /// on record, where a library's missing dependency would be a broken
+  /// build; the converter rejects an entry nothing depends on, so the list
+  /// shrinks with the migration.
+  final List<String> unconvertedDeps;
+
+  /// The file's groups that are groups of things to build, which nothing
+  /// links against -- the root group `flutter` (GN's default target), the
+  /// `unittests` group, and the groups between the root and the platform
+  /// shells -- which become filegroups, and which a C++ target that lists
+  /// one carries as data. Any other group is a cc_library forwarding its
+  /// dependencies to link, as GN's groups do, with its actions and copies
+  /// as sources and data.
+  final Set<String> filesGroups;
 }
 
 const List<ConvertedFile> convertedFiles = <ConvertedFile>[
+  // The root: GN's default target `flutter` (what `ninja` with no target
+  // builds, and the builders' `flutter` ninja target) and the `unittests`,
+  // `archives` and `dist` groups, over what is converted; the deps with no
+  // Bazel counterpart yet are on record below. The configs and everything
+  // else the hand-written file had are the appendix.
+  ConvertedFile(
+    '//flutter',
+    skip: <String, String>{
+      'config': 'hand-written in the appendix (an include root above the package)',
+      'export_dynamic_symbols': 'hand-written in the appendix (linker inputs)',
+      'export_dynamic_test_symbols': 'hand-written in the appendix (linker inputs)',
+      'dist': 'a group over //flutter/lib/gpu/dist and //flutter/sky/dist, neither converted',
+    },
+    filesGroups: <String>{'flutter', 'unittests', 'archives'},
+    unconvertedDeps: <String>[
+      // The Dart SDK copy (copy_tree) and the Dart test fixtures.
+      '//flutter/build/dart:dart_sdk',
+      '//flutter/build/dart/test:gen_dartcli_call',
+      '//flutter/build/dart/test:gen_executable_call',
+      // Suites not converted in their files: Flutter GPU's, and the Android
+      // executables and APKs (the Android test phase).
+      '//flutter/lib/gpu:gpu_unittests',
+      '//flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests',
+      '//flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests',
+      '//flutter/impeller/toolkit/android:apk_unittests',
+      '//flutter/impeller/toolkit/android:unittests',
+    ],
+    appendix: r'''
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:install.bzl", "install")
+
+# config("config"), config("export_dynamic_symbols") and
+# config("export_dynamic_test_symbols") of BUILD.gn, by hand: the first is the
+# two include roots engine code is written against (engine/src and this
+# directory), which the converter's `includes` cannot say for a directory
+# above the package; the other two carry linker inputs that the converter's
+# configs do not yet. Every engine library depends on :config.
+
+# config("config") in BUILD.gn: the two include roots engine code is written
+# against -- engine/src ("flutter/fml/...") and this directory
+# ("impeller/...", "fml/..."). Every engine library depends on it; the
+# accompanying -Wunreachable-code is in FLUTTER_COPTS (build/bazel/copts.bzl),
+# since compiler flags do not propagate through dependencies.
+cc_library(
+    name = "config",
+    includes = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["//engine/src:include_root"],
+)
+
+# The engine's Dart package configuration, which `gclient sync` writes (the
+# pub_get_offline hook) and GN's Dart compiles read (--packages). What the
+# frontend server resolves `package:` imports through; the fixtures compiled
+# so far import none, so nothing it points at is declared.
+filegroup(
+    name = "package_config",
+    srcs = [".dart_tool/package_config.json"],
+    visibility = ["//visibility:public"],
+)
+
+# config("export_dynamic_symbols") in BUILD.gn: the symbols a test binary
+# keeps in its dynamic symbol table, for the Dart VM to resolve at runtime
+# (the snapshot symbols, dart:ffi's lookups). GNU --dynamic-list on ELF, the
+# macOS linker's exported symbols list on a Mac; the files are
+# //flutter/common's.
+cc_library(
+    name = "export_dynamic_symbols",
+    additional_linker_inputs = select({
+        "@platforms//os:macos": ["//engine/src/flutter/common:exported_symbols_mac.sym"],
+        "//conditions:default": ["//engine/src/flutter/common:exported_symbols.sym"],
+    }),
+    linkopts = select({
+        "@platforms//os:macos": [
+            "-Xlinker",
+            "-exported_symbols_list",
+            "-Xlinker",
+            "$(execpath //engine/src/flutter/common:exported_symbols_mac.sym)",
+        ],
+        "//conditions:default": [
+            "-Wl,--dynamic-list=$(execpath //engine/src/flutter/common:exported_symbols.sym)",
+        ],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+# config("export_dynamic_test_symbols") in BUILD.gn: the list above plus the
+# symbol flutter_tester exposes to its Dart tests.
+cc_library(
+    name = "export_dynamic_test_symbols",
+    additional_linker_inputs = select({
+        "@platforms//os:macos": ["//engine/src/flutter/common:exported_test_symbols_mac.sym"],
+        "//conditions:default": ["//engine/src/flutter/common:exported_test_symbols.sym"],
+    }),
+    linkopts = select({
+        "@platforms//os:macos": [
+            "-Xlinker",
+            "-exported_symbols_list",
+            "-Xlinker",
+            "$(execpath //engine/src/flutter/common:exported_test_symbols_mac.sym)",
+        ],
+        "//conditions:default": [
+            "-Wl,--dynamic-list=$(execpath //engine/src/flutter/common:exported_test_symbols.sym)",
+        ],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+# What the tests of the engine's Dart tools read from directories of this
+# package (testing/run_tests.py --type dart-host; the tests themselves are
+# dart_package_test targets in the packages' own directories, see the suite
+# below): .ci.yaml (engine_build_configs, engine_tool; the builder
+# configurations are //engine/src/flutter/ci's), bin/et (engine_tool's
+# entry-point test), and for api_check the web engine's dart:ui sources
+# (lib/web_ui has no build file of its own yet; when it does, these move
+# there, as the iOS embedding's AccessibilityFeatures moved to
+# //engine/src/flutter/shell).
+exports_files([".ci.yaml"])
+
+filegroup(
+    name = "et_entry_points",
+    srcs = glob(["bin/et*"]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "web_ui_dart_sources",
+    srcs = glob(["lib/web_ui/lib/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
+
+# dart:ui_web's sources and API file, which web_sdk.gni's
+# web_ui_ui_web_with_output (web_sdk/web_sdk.bzl) rewrites into the
+# sky_engine package for sky/packages/sky_engine, and into the web SDK.
+filegroup(
+    name = "ui_web_sources",
+    srcs = glob(["lib/web_ui/lib/ui_web/src/ui_web/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
+
+exports_files(["lib/web_ui/lib/ui_web/src/ui_web.dart"])
+
+# The web engine's other source directories web_sdk/BUILD.gn's sdk_rewriter
+# invocations read (each `input_dir`, less its `exclude_pattern`; the
+# converter's directorySources names them): dart:ui's own sources without
+# the engine under src/, the engine without skwasm, and skwasm's two halves
+# with their API files.
+filegroup(
+    name = "web_ui_sources",
+    srcs = glob(
+        ["lib/web_ui/lib/**/*.dart"],
+        exclude = ["lib/web_ui/lib/src/**"],
+    ),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "web_engine_sources",
+    srcs = glob(
+        ["lib/web_ui/lib/src/engine/**/*.dart"],
+        exclude = ["lib/web_ui/lib/src/engine/skwasm/**"],
+    ),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "skwasm_stub_sources",
+    srcs = glob(["lib/web_ui/lib/src/engine/skwasm/skwasm_stub/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "skwasm_impl_sources",
+    srcs = glob(["lib/web_ui/lib/src/engine/skwasm/skwasm_impl/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
+
+exports_files([
+    "lib/web_ui/lib/src/engine.dart",
+    "lib/web_ui/lib/src/engine/skwasm/skwasm_impl.dart",
+    "lib/web_ui/lib/src/engine/skwasm/skwasm_stub.dart",
+])
+
+# run_tests.py --type dart-host: `dart test` in each Dart package of
+# build_dart_host_test_list, as dart_package_test runs it
+# (build/bazel/dart/package_test.bzl). Thirteen packages there, eleven here:
+# ci's tests format files they write into the checkout and add to the git
+# index (format_test.dart), and clang_tidy's read a GN build directory's
+# compile_commands.json; both run with `dart test` in the checkout, not from
+# a build (ci/BUILD.bazel and tools/clang_tidy/BUILD.bazel say so).
+test_suite(
+    name = "dart_host_tests",
+    tests = [
+        "//engine/src/flutter/flutter_frontend_server:tests",
+        "//engine/src/flutter/testing/skia_gold_client:tests",
+        "//engine/src/flutter/tools/api_check:tests",
+        "//engine/src/flutter/tools/bazel_tools:tests",
+        "//engine/src/flutter/tools/build_bucket_golden_scraper:tests",
+        "//engine/src/flutter/tools/engine_tool:tests",
+        "//engine/src/flutter/tools/githooks:tests",
+        "//engine/src/flutter/tools/header_guard_check:tests",
+        "//engine/src/flutter/tools/pkg/engine_build_configs:tests",
+        "//engine/src/flutter/tools/pkg/engine_repo_tools:tests",
+        "//engine/src/flutter/tools/pkg/git_repo_tools:tests",
+    ],
+)
+
+# run_tests.py --type benchmarks (run_engine_benchmarks; CI's host_release_test
+# alone asks for it): the six benchmark executables it runs, each with ICU's
+# data file (the converter's benchmarkRuns). They are tests tagged `manual`,
+# as is this suite, so a wildcard run leaves them out as every other builder
+# does; `bazel test //engine/src/flutter:benchmarks` is the type -- less its
+# Dart test (run_benchmark_tests: testing/benchmark/test/parse_and_send_test
+# .dart), which reads the checkout's git log and stays with `dart` there.
+test_suite(
+    name = "benchmarks",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter/display_list:display_list_builder_benchmarks",
+        "//engine/src/flutter/fml:fml_benchmarks",
+        "//engine/src/flutter/impeller/geometry:geometry_benchmarks",
+        "//engine/src/flutter/lib/ui:ui_benchmarks",
+        "//engine/src/flutter/shell/common:shell_benchmarks",
+        "//engine/src/flutter/txt:txt_benchmarks",
+    ],
+)
+
+# The benchmark executables host_release_test builds (its target list): the
+# six above and the four nobody runs. Through this filegroup a wildcard build
+# compiles them all, as GN's does, manual tags notwithstanding.
+filegroup(
+    name = "benchmark_binaries",
+    testonly = True,
+    srcs = [
+        "//engine/src/flutter/display_list:display_list_benchmarks",
+        "//engine/src/flutter/display_list:display_list_builder_benchmarks",
+        "//engine/src/flutter/display_list:display_list_region_benchmarks",
+        "//engine/src/flutter/display_list:display_list_transform_benchmarks",
+        "//engine/src/flutter/display_list:primitive_rendering_benchmarks",
+        "//engine/src/flutter/fml:fml_benchmarks",
+        "//engine/src/flutter/impeller/geometry:geometry_benchmarks",
+        "//engine/src/flutter/lib/ui:ui_benchmarks",
+        "//engine/src/flutter/shell/common:shell_benchmarks",
+        "//engine/src/flutter/txt:txt_benchmarks",
+    ],
+)
+
+# The build directory as GN lays it out for a Linux host build
+# (engine/src/out/<variant>/), from this build's outputs: what the flutter
+# tool reads from a `--local-engine` (flutter_tester, gen_snapshot,
+# icudtl.dat, impellerc and its libraries, font-subset, the GTK library and
+# headers, the Dart SDK, the patched SDK, the core snapshot under
+# gen/flutter/lib/snapshot/, the frontend server under gen/, the sky_engine
+# package under gen/dart-pkg/), the embedder library with its header, and
+# every archive the Linux host configurations define (the ones below),
+# under zip_archives/. `bazel run` copies them into
+# engine/src/out/<variant>/ -- host_debug_unopt for a plain build, host_debug
+# for -c opt, host_release with the mode flag -- or into a directory named
+# after `--`:
+#
+#   bazel run //engine/src/flutter:install
+#   bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
+#
+# Not here yet: the web SDK, and GN's own bookkeeping (args.gn,
+# compile_commands.json, the .d files). The builders' own targets -- what
+# each CI build of ci/builders/linux_*.json builds, into its --target-dir,
+# under its `--config` -- are generated into ci/builders/BUILD.bazel.
+install(
+    name = "install",
+    archives = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/build/archives:dart_sdk_archive",
+        "//engine/src/flutter/build/archives:flutter_patched_sdk",
+        "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/shell/platform/embedder:embedder-archive",
+        "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+    # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
+    # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
+    contents = ["//engine/src/flutter/sky/packages/sky_engine"],
+    files = {
+        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
+        "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
+        "//engine/src/flutter/impeller/compiler:impellerc": "",
+        "//engine/src/flutter/impeller/tessellator:libtessellator.so": "",
+        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
+        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
+        "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+        "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+        "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+        "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
+        "//engine/src/flutter/shell/platform/embedder:libflutter_engine.so": "",
+        "//engine/src/flutter/shell/platform/linux:flutter_linux_gtk": "",
+        "//engine/src/flutter/shell/testing:flutter_tester": "",
+        "//engine/src/flutter/tools/font_subset:font-subset": "",
+        "//engine/src/flutter/tools/path_ops:libpath_ops.so": "",
+        # copy("copy_icudata"): the full data file, where artifacts.zip
+        # carries the trimmed flutter/icudtl.dat.
+        "@icu//:icudata": "",
+    },
+    trees = [
+        "//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk",
+        "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
+    ],
+)
+''',
+  ),
   // GN's config("flutter_config") is feature_defines_list, which copts.bzl
   // keeps as FLUTTER_FEATURE_DEFINES over the flags below: the Bazel side
   // of config.gni's arguments, which no GN file declares as targets.
@@ -525,6 +853,21 @@ filegroup(
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/vulkan'),
   // The EGL, GLES and GL-Vulkan interop toolkits, which the Android shell
   // links (EGL's library under is_android).
+  // The platform shells, by OS: the Android group (its symbols archive; the
+  // Java targets are skipped in its file) and the Linux one. What the root
+  // group reaches through //flutter/sky.
+  ConvertedFile(
+    '//flutter/shell/platform',
+    filesGroups: <String>{'platform'},
+    appendix: '''
+# The iOS embedding's AccessibilityFeatures, which api_check's tests read
+# (the enum mirrors dart:ui's): a file of this package until
+# shell/platform/darwin has a build file of its own.
+exports_files(["darwin/ios/framework/Source/AccessibilityFeatures.swift"])
+''',
+  ),
+  ConvertedFile('//flutter/sky', filesGroups: <String>{'sky'}),
+  ConvertedFile('//flutter/sky/packages', filesGroups: <String>{'packages'}),
   ConvertedFile('//flutter/impeller/toolkit/egl'),
   ConvertedFile('//flutter/impeller/toolkit/gles'),
   // The GL-over-Vulkan trampoline: its header includes the Vulkan backend's
@@ -647,6 +990,7 @@ exports_files(["README"] + glob(
   ConvertedFile(
     '//flutter/shell/platform/android',
     condition: 'is_android',
+    filesGroups: <String>{'android'},
     skip: <String, String>{
       'gen_android_build_config_java': 'Java: the Android phase (D10)',
       'check_imports': 'Java: the Android phase (D10)',
@@ -664,7 +1008,6 @@ exports_files(["README"] + glob(
           "the host gen_snapshot's archive (get_label_info over the host toolchain): later",
       'analyze_snapshot':
           "the host analyze_snapshot's archive (get_label_info over the host toolchain): later",
-      'android': 'the group over the Java archives: the Android phase (D10)',
       'embedding_jars': 'Java: the Android phase (D10)',
       'abi_jars': 'Java: the Android phase (D10)',
     },
@@ -877,14 +1220,13 @@ filegroup(
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
-  // The shell's directory: its one group gathers the platform shells (not
-  // converted); the file is here for shell/config.gni's arguments, which
-  // the appendix defines as the settings their formulas and tools/gn give.
+  // The shell's directory: its one group gathers the platform shells
+  // (//flutter/shell/platform); the file is also here for shell/config.gni's
+  // arguments, which the appendix defines as the settings their formulas
+  // and tools/gn give.
   ConvertedFile(
     '//flutter/shell',
-    skip: <String, String>{
-      'shell': 'a group over //flutter/shell/platform, which has no Bazel build yet',
-    },
+    filesGroups: <String>{'shell'},
     appendix: '''
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
@@ -963,10 +1305,6 @@ _BACKEND_PLATFORMS = {
     for backend in _BACKEND_PLATFORMS.keys()
 ]
 
-# The iOS embedding's AccessibilityFeatures, which api_check's tests read
-# (the enum mirrors dart:ui's): a file of this package until
-# shell/platform/darwin has a build file of its own.
-exports_files(["platform/darwin/ios/framework/Source/AccessibilityFeatures.swift"])
 ''',
   ),
   ConvertedFile('//flutter/shell/common'),

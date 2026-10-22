@@ -1,0 +1,30 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/BUILD.gn by gn_to_bazel; do not edit.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "platform",
+    srcs = select({
+        "@platforms//os:android": [
+            "//engine/src/flutter/shell/platform/android",  # !(is_mac || is_ios) && is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": [
+            "//engine/src/flutter/shell/platform/linux",  # !(is_mac || is_ios) && !(is_android) && is_linux && enable_desktop_embeddings
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The iOS embedding's AccessibilityFeatures, which api_check's tests read
+# (the enum mirrors dart:ui's): a file of this package until
+# shell/platform/darwin has a build file of its own.
+exports_files(["darwin/ios/framework/Source/AccessibilityFeatures.swift"])

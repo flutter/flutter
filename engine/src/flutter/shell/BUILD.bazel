@@ -3,11 +3,15 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: shell.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
 package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "shell",
+    srcs = ["//engine/src/flutter/shell/platform"],
+)
 
 # What GN has no words for; maintained in the converter's manifest
 # (tools/gn_to_bazel/lib/src/manifest.dart).
@@ -86,8 +90,3 @@ _BACKEND_PLATFORMS = {
     )
     for backend in _BACKEND_PLATFORMS.keys()
 ]
-
-# The iOS embedding's AccessibilityFeatures, which api_check's tests read
-# (the enum mirrors dart:ui's): a file of this package until
-# shell/platform/darwin has a build file of its own.
-exports_files(["platform/darwin/ios/framework/Source/AccessibilityFeatures.swift"])
