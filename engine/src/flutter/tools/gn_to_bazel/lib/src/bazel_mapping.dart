@@ -1684,11 +1684,19 @@ final class TemplateMapping {
     this.arguments, {
     this.innerTargets = const <String>[],
     this.files = false,
+    this.compiles = false,
   });
 
   final String bzl;
   final String symbol;
   final Map<String, TemplateArgument> arguments;
+
+  /// Whether the macro compiles the target's sources itself (the wasm links:
+  /// wasm_module, wasm_executable), so that the rule gets the compiler
+  /// options a cc rule gets -- the copts constant GN's configs amount to and
+  /// what its dependencies' public configs hand it -- besides the cflags
+  /// the invocation names.
+  final bool compiles;
 
   /// The other targets an invocation expands to in GN, as patterns over the
   /// invocation's name (`flatc_{name}`) and, for the shader templates, the
@@ -1859,6 +1867,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     'wasm_module',
     _wasmLinkArguments,
     files: true,
+    compiles: true,
   ),
   // An executable() in a wasm toolchain with `output_extension = "js"`
   // (CanvasKit's, flutter/skia/modules/canvaskit): the same link without
@@ -1876,6 +1885,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
       'check_includes': TemplateArgument('check_includes', TemplateArgumentKind.ignored),
     },
     files: true,
+    compiles: true,
   ),
   'impeller_shaders': TemplateMapping(
     '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
