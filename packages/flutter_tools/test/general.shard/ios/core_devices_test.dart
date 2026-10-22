@@ -3041,6 +3041,54 @@ invalid JSON
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
+      testWithoutContext('Handles PathNotFoundException and ENOSPC FileSystemException creating temp file with ErrorHandlingFileSystem', () async {
+        final exceptionHandler = FileExceptionHandler();
+        final localFs = LocalFileSystemFake()
+          ..memoryFileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+        final fs = ErrorHandlingFileSystem(
+          delegate: localFs,
+          platform: FakePlatform(operatingSystem: 'macos'),
+        );
+        deviceControl = IOSCoreDeviceControl(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fs,
+        );
+        // Simulate the parent temp directory missing when creating the core_devices temp directory.
+        exceptionHandler.addError(
+          fs.systemTempDirectory.childDirectory('core_devices.rand0'),
+          FileSystemOp.create,
+          const io.PathNotFoundException(
+            '/var/folders/xx/flutter_tools.XXXXXX/core_devices.rand0',
+            OSError('No such file or directory', 2),
+          ),
+        );
+
+        await expectLater(deviceControl.getCoreDevices(), completion(isEmpty));
+        expect(logger.traceText, contains('Error reading devicectl output: FileSystemException'));
+        expect(logger.traceText, contains('PathNotFoundException'));
+        logger.clear();
+
+        // Simulate disk full (ENOSPC, errno = 28) when creating core_device_list.json.
+        exceptionHandler.addError(
+          fs.systemTempDirectory
+              .childDirectory('core_devices.rand1')
+              .childFile('core_device_list.json'),
+          FileSystemOp.create,
+          const FileSystemException(
+            'Creation failed',
+            '/var/folders/xx/flutter_tools.XXXXXX/core_devices.rand1/core_device_list.json',
+            OSError('No space left on device', 28),
+          ),
+        );
+
+        await expectLater(deviceControl.getCoreDevices(), completion(isEmpty));
+        expect(logger.traceText, contains('Error reading devicectl output: FileSystemException'));
+        expect(logger.traceText, contains('No space left on device'));
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
       testWithoutContext('Handles json file mysteriously disappearing', () async {
         final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
           'core_devices.rand0',
