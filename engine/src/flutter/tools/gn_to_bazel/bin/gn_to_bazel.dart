@@ -121,6 +121,9 @@ Future<int> run(List<String> arguments) async {
   // builder files' ninja targets.
   final convertedTargets = <String, Set<String>>{};
   final convertedTests = <String, Set<String>>{};
+  // The condition a file is read under (the manifest's), by package: a
+  // target of such a file exists in the builds the condition holds for.
+  final packageConditions = <String, String?>{};
   for (final input in inputs) {
     final String file = p.canonicalize(input);
     if (!p.isWithin(root, file)) {
@@ -169,6 +172,7 @@ Future<int> run(List<String> arguments) async {
         for (final GnTarget target in evaluation.targets)
           if (!skip.contains(target.name)) target.name,
       };
+      packageConditions[gnPackage] = manifest?.condition;
       convertedTests[gnPackage] = <String>{
         for (final GnTarget target in evaluation.targets)
           if (!skip.contains(target.name) && isBazelTest(target, gnPackage)) target.name,
@@ -234,6 +238,7 @@ Future<int> run(List<String> arguments) async {
       root,
       convertedTargets,
       convertedTests,
+      packageConditions,
       buildifier: buildifier,
       check: check,
     );
@@ -260,7 +265,8 @@ Future<int> run(List<String> arguments) async {
 Future<int> _builderOutputs(
   String root,
   Map<String, Set<String>> convertedTargets,
-  Map<String, Set<String>> convertedTests, {
+  Map<String, Set<String>> convertedTests,
+  Map<String, String?> packageConditions, {
   required String? buildifier,
   required bool check,
 }) async {
@@ -281,7 +287,12 @@ Future<int> _builderOutputs(
     stderr.writeln('error: ${e.message}');
     return 1;
   }
-  String buildFile = buildersBuildFile(builds, convertedTargets, convertedTests: convertedTests);
+  String buildFile = buildersBuildFile(
+    builds,
+    convertedTargets,
+    convertedTests: convertedTests,
+    packageConditions: packageConditions,
+  );
   if (buildifier != null) {
     buildFile = await _format(buildifier, buildFile);
   }

@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: config, export_dynamic_symbols, export_dynamic_test_symbols, dist.
+# Not converted: config, export_dynamic_symbols, export_dynamic_test_symbols.
 # Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart:dart_sdk, //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests, //flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests, //flutter/impeller/toolkit/android:apk_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
@@ -140,6 +140,15 @@ filegroup(
         "//engine/src/flutter/common:engine_artifacts": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+filegroup(
+    name = "dist",
+    testonly = True,
+    srcs = [
+        "//engine/src/flutter/lib/gpu/dist",
+        "//engine/src/flutter/sky/dist",
+    ],
 )
 
 # `is_android && flutter_runtime_mode == "debug"`, for the select()s of this file.

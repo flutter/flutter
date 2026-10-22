@@ -202,16 +202,17 @@ install(
 
 # linux_android_debug_engine.json: ci/android_debug
 #   bazel run --config=android_debug :android_debug
-# Not built, no Bazel counterpart yet: flutter/sky/dist:zip_old_location, flutter/lib/gpu/dist:zip_old_location.
 install(
     name = "android_debug",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
         "//engine/src/flutter/impeller/toolkit/interop:sdk",
+        "//engine/src/flutter/lib/gpu/dist:zip_old_location",
         "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/android:embedding_jars",
         "//engine/src/flutter/shell/platform/embedder:embedder-archive",
+        "//engine/src/flutter/sky/dist:zip_old_location",
     ],
     directory = "ci/android_debug",
 )
@@ -668,14 +669,15 @@ test_suite(
 
 # linux_unopt.json: ci/android_debug_test
 #   bazel run --config=android_debug_test :android_debug_test
-# Not built, no Bazel counterpart yet: flutter/sky/dist:zip_old_location, flutter/lib/gpu/dist:zip_old_location.
 install(
     name = "android_debug_test",
     testonly = True,
     contents = [
         "//engine/src/flutter:flutter",
+        "//engine/src/flutter/lib/gpu/dist:zip_old_location",
         "//engine/src/flutter/shell/platform/android:abi_jars",
         "//engine/src/flutter/shell/platform/android:embedding_jars",
+        "//engine/src/flutter/sky/dist:zip_old_location",
     ],
     directory = "ci/android_debug_test",
 )
