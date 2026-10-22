@@ -333,21 +333,30 @@ filegroup(
     ],
 )
 
-# The build directory as GN lays it out for a Linux host build
-# (engine/src/out/<variant>/), from this build's outputs: what the flutter
+# The build directory as GN lays it out (engine/src/out/<variant>/), from
+# this build's outputs. For a Linux host build: what the flutter
 # tool reads from a `--local-engine` (flutter_tester, gen_snapshot,
 # icudtl.dat, impellerc and its libraries, font-subset, the GTK library and
 # headers, the Dart SDK, the patched SDK, the core snapshot under
 # gen/flutter/lib/snapshot/, the frontend server under gen/, the sky_engine
 # package under gen/dart-pkg/), the embedder library with its header, and
 # every archive the Linux host configurations define (the ones below),
-# under zip_archives/. `bazel run` copies them into
-# engine/src/out/<variant>/ -- host_debug_unopt for a plain build, host_debug
-# for -c opt, host_release with the mode flag -- or into a directory named
-# after `--`:
+# under zip_archives/. For an Android build (the developer's android_*
+# configurations, whose GN build is ninja's default target, everything):
+# what the root group `flutter`, the dist archives and the Maven tree lay
+# -- libflutter.so and its lib.stripped/ copy, the host gen_snapshot under
+# clang_x64/, the embedding's jars and poms, the Android archives,
+# sky_engine.zip and flutter_gpu.zip and download.flutter.io under
+# zip_archives/ -- what the flutter tool reads from an Android
+# `--local-engine` and what the Android builders upload. `bazel run`
+# copies them into engine/src/out/<variant>/ -- host_debug_unopt for a
+# plain build, host_debug for -c opt, host_release with the mode flag,
+# android_debug_unopt_x64 under --config=android_debug_unopt_x64 -- or into
+# a directory named after `--`:
 #
 #   bazel run //engine/src/flutter:install
 #   bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
+#   bazel run --config=android_debug_unopt_x64 //engine/src/flutter:install
 #
 # Not here: GN's own bookkeeping -- args.gn (nothing in the tree reads it:
 # testing/run_tests.py defines an is_asan() over it that nothing calls; a
@@ -361,43 +370,71 @@ filegroup(
 # ci/builders/BUILD.bazel.
 install(
     name = "install",
-    archives = [
-        "//engine/src/flutter/build/archives:artifacts",
-        "//engine/src/flutter/build/archives:dart_sdk_archive",
-        "//engine/src/flutter/build/archives:flutter_patched_sdk",
-        "//engine/src/flutter/impeller/toolkit/interop:sdk",
-        "//engine/src/flutter/shell/platform/embedder:embedder-archive",
-        "//engine/src/flutter/shell/platform/linux:flutter_gtk",
-        "//engine/src/flutter/tools/font_subset:font_subset",
-    ],
-    # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
-    # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
-    contents = ["//engine/src/flutter/sky/packages/sky_engine"],
-    files = {
-        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
-        "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
-        "//engine/src/flutter/impeller/compiler:impellerc": "",
-        "//engine/src/flutter/impeller/tessellator:libtessellator.so": "",
-        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
-        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
-        "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
-        "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
-        "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
-        "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
-        "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
-        "//engine/src/flutter/shell/platform/embedder:libflutter_engine.so": "",
-        "//engine/src/flutter/shell/platform/linux:flutter_linux_gtk": "",
-        "//engine/src/flutter/shell/testing:flutter_tester": "",
-        "//engine/src/flutter/tools/font_subset:font-subset": "",
-        "//engine/src/flutter/tools/path_ops:libpath_ops.so": "",
-        # copy("copy_icudata"): the full data file, where artifacts.zip
-        # carries the trimmed flutter/icudtl.dat.
-        "@icu//:icudata": "",
-    },
-    trees = [
-        "//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk",
-        "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
-    ],
+    # The root group is testonly (GN's `testonly = true`), as the builders'
+    # installs over it are.
+    testonly = True,
+    archives = select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "//engine/src/flutter/build/archives:artifacts",
+            "//engine/src/flutter/build/archives:dart_sdk_archive",
+            "//engine/src/flutter/build/archives:flutter_patched_sdk",
+            "//engine/src/flutter/impeller/toolkit/interop:sdk",
+            "//engine/src/flutter/shell/platform/embedder:embedder-archive",
+            "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+            "//engine/src/flutter/tools/font_subset:font_subset",
+        ],
+    }),
+    contents = select({
+        # What GN's default target lays for Android that a consumer reads:
+        # the root group's closure (the Android shell with its jars and
+        # archives, the host gen_snapshot, the snapshots, the Impeller SDK,
+        # the embedder archive), the dist archives at both of their
+        # locations, and the Maven tree, which the Android builders name as
+        # targets of their own.
+        "@platforms//os:android": [
+            ":dist",
+            ":flutter",
+            "//engine/src/flutter/lib/gpu/dist:zip_old_location",
+            "//engine/src/flutter/shell/platform/android:abi_jars",
+            "//engine/src/flutter/shell/platform/android:embedding_jars",
+            "//engine/src/flutter/sky/dist:zip_old_location",
+        ],
+        # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
+        # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
+        "//conditions:default": ["//engine/src/flutter/sky/packages/sky_engine"],
+    }),
+    files = select({
+        "@platforms//os:android": {},
+        "//conditions:default": {
+            "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
+            "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
+            "//engine/src/flutter/impeller/compiler:impellerc": "",
+            "//engine/src/flutter/impeller/tessellator:libtessellator.so": "",
+            "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
+            "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
+            "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+            "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+            "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+            "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+            "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
+            "//engine/src/flutter/shell/platform/embedder:libflutter_engine.so": "",
+            "//engine/src/flutter/shell/platform/linux:flutter_linux_gtk": "",
+            "//engine/src/flutter/shell/testing:flutter_tester": "",
+            "//engine/src/flutter/tools/font_subset:font-subset": "",
+            "//engine/src/flutter/tools/path_ops:libpath_ops.so": "",
+            # copy("copy_icudata"): the full data file, where artifacts.zip
+            # carries the trimmed flutter/icudtl.dat.
+            "@icu//:icudata": "",
+        },
+    }),
+    trees = select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk",
+            "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
+        ],
+    }),
 )
 ''',
   ),
