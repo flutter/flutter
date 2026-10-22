@@ -20,8 +20,12 @@ class ExtensionConnection {
     required Isolate this._isolate,
     required this._peer,
     required this.capabilities,
+    required this.extensionName,
     required this._logger,
   });
+
+  /// Fallback extension name used when an extension does not report one in its capabilities.
+  static const defaultExtensionName = 'unknown_extension';
 
   Isolate? _isolate;
   final json_rpc.Peer _peer;
@@ -29,6 +33,9 @@ class ExtensionConnection {
 
   /// The capabilities and supported service namespaces of the extension.
   final ToolExtensionCapabilities capabilities;
+
+  /// The resolved package or extension name of the connected extension.
+  final String extensionName;
 
   bool _isDisposed = false;
 
@@ -100,7 +107,7 @@ class ExtensionConnection {
 
       logger.printTrace('ExtensionConnection querying extension.getCapabilities...');
       final Object? responseObj = await Future.any<Object?>([
-        peer.sendRequest('extension.getCapabilities'),
+        peer.sendRequest(ToolExtensionEntryPoint.getCapabilitiesMethod),
         errorCompleter.future,
       ]).timeout(timeout);
       if (responseObj is! Map<String, Object?>) {
@@ -117,6 +124,7 @@ class ExtensionConnection {
         isolate: isolate,
         peer: peer,
         capabilities: capabilities,
+        extensionName: capabilities.extensionName ?? defaultExtensionName,
         logger: logger,
       );
     } on TimeoutException {

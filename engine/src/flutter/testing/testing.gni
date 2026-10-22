@@ -174,6 +174,7 @@ template("dart_snapshot") {
            "The main Dart ELF filename must be specified.")
 
     dart_snapshot_aot_target_name = "_dsa_$target_name"
+
     dart_snapshot_aot(dart_snapshot_aot_target_name) {
       dart_kernel = dart_snapshot_kernel_path
       dart_elf_filename = invoker.dart_elf_filename
@@ -265,6 +266,7 @@ template("test_fixtures") {
   # Even if no fixtures are present, the location of the fixtures directory
   # must always be known to tests.
   fixtures_location_target_name = "_fl_$target_name"
+
   fixtures_location(fixtures_location_target_name) {
     if (is_fuchsia) {
       assets_dir = "/pkg/data/assets"
@@ -278,6 +280,7 @@ template("test_fixtures") {
   # If the fixtures are specified, copy them to the assets directory.
   if (defined(invoker.fixtures)) {
     copy_fixtures_target_name = "_cf_$target_name"
+
     copy_fixtures(copy_fixtures_target_name) {
       fixtures = invoker.fixtures
       dest = dest
@@ -296,6 +299,7 @@ template("test_fixtures") {
       artifact_prefix = ""
     }
     dart_snapshot_target_name = "_ds_$target_name"
+
     dart_snapshot(dart_snapshot_target_name) {
       dart_main = invoker.dart_main
       dart_kernel_filename = "${artifact_prefix}kernel_blob.bin"
