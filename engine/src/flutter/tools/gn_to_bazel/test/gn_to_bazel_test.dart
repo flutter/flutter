@@ -6686,6 +6686,8 @@ flutter_dart_tests(
           layout: mainRepositoryLayout,
           implicitDeps: file.implicitDeps,
           tree: tree,
+          unconvertedDeps: file.unconvertedDeps,
+          filesGroups: file.filesGroups,
         );
         expect(output, File(p.join(directory, 'BUILD.bazel')).readAsStringSync());
         // Every skip in the manifest names a target that exists.
