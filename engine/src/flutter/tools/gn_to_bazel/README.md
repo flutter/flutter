@@ -243,6 +243,20 @@ assembly intermediates left out), an archive compared entry by entry.
 Against `host_debug_unopt`: 16 of 16 paths agree, 1,098 files identical,
 the eight binaries expected different, nothing missing.
 
+The Android builders have no GN build directory on a developer's machine
+to diff against, so their archives were compared with what CI uploaded
+for the base commit (`download.flutter.io` and `flutter_infra_release`),
+entry by entry and, for the files a compiler did not make, byte by byte:
+the embedding jar byte-identical (456 classes), `flutter.jar` and
+`artifacts.zip` the same classes and libraries, the poms and
+`android-javadoc.zip` the same modulo dates and the version hash,
+`sky_engine.zip`'s 289 package files identical, `flutter_gpu.zip` CI's 48
+files identical, every `libflutter.so` CI's exports and `NEEDED` entries
+(the binaries themselves differ as the host's do). The install of each
+Android builder lays its archives where GN's `--target-dir` would hold
+them (`bazel run --config=<build> //engine/src/flutter/ci/builders:<build>
+-- <dir>`).
+
 ### compile_commands.json
 
 ```sh
