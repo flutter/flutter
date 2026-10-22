@@ -6,12 +6,14 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/extension.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
@@ -180,7 +182,7 @@ void main() {
     },
   );
 
-  testWithoutContext('ExtensionTarget throws ToolExit if assemble fails', () async {
+  testWithoutContext('ExtensionTarget throws Exception if assemble fails', () async {
     final buildManager = FakeExtensionBuildManager(
       buildResult: const ExtensionBuildResult(success: false, errorMessage: 'Build failed error'),
     );
@@ -188,8 +190,12 @@ void main() {
 
     await expectLater(
       () => target.build(environment),
-      throwsToolExit(
-        message: 'Extension assemble target "custom-target" failed: Build failed error',
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'toString',
+          contains('Extension assemble target "custom-target" failed: Build failed error'),
+        ),
       ),
     );
 
@@ -200,7 +206,13 @@ void main() {
     );
     await expectLater(
       () => emptyMessageTarget.build(environment),
-      throwsToolExit(message: 'Extension assemble target "custom-target" failed.'),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'toString',
+          contains('Extension assemble target "custom-target" failed.'),
+        ),
+      ),
     );
 
     final ExtensionTarget nullMessageTarget = _createTarget(
@@ -210,7 +222,13 @@ void main() {
     );
     await expectLater(
       () => nullMessageTarget.build(environment),
-      throwsToolExit(message: 'Extension assemble target "custom-target" failed.'),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'toString',
+          contains('Extension assemble target "custom-target" failed.'),
+        ),
+      ),
     );
   });
 
@@ -246,6 +264,85 @@ void main() {
     final ResolvedFiles resolvedOutputs = target.resolveOutputs(environment);
     expect(resolvedOutputs.sources, hasLength(1));
     expect(resolvedOutputs.sources.single.path, endsWith('bar.dart'));
+  });
+
+  testWithoutContext('ExtensionTarget.resolveInputs and resolveOutputs inherit BuildMode from environment when artifact mode is omitted', () {
+    environment.defines[kBuildMode] = BuildMode.release.cliName;
+    final ExtensionTarget target = _createTarget(
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+        ExtensionSource.artifact(BuiltInArtifacts.icuData, mode: .debug),
+      ],
+      outputs: const <ExtensionSource>[ExtensionSource.artifact(BuiltInArtifacts.genSnapshot)],
+    );
+
+    final ResolvedFiles resolvedInputs = target.resolveInputs(environment);
+    expect(
+      resolvedInputs.sources.map((File f) => f.path),
+      equals(<String>[
+        'Artifact.genSnapshot.TargetPlatform.linux_x64.release',
+        'Artifact.icuData.TargetPlatform.linux_x64.debug',
+      ]),
+    );
+
+    final ResolvedFiles resolvedOutputs = target.resolveOutputs(environment);
+    expect(
+      resolvedOutputs.sources.map((File f) => f.path),
+      equals(<String>['Artifact.genSnapshot.TargetPlatform.linux_x64.release']),
+    );
+  });
+
+  testWithoutContext('ExtensionTarget with mode-less genSnapshot artifact builds cleanly through FlutterBuildSystem with CachedArtifacts', () async {
+    final logger = BufferLogger.test();
+    final platform = FakePlatform();
+    final cache = Cache.test(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: FakeProcessManager.any(),
+    );
+    final cachedArtifacts = CachedArtifacts(
+      cache: cache,
+      fileSystem: fileSystem,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      platform: platform,
+    );
+    final cachedEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: cachedArtifacts,
+      defines: <String, String>{kBuildMode: BuildMode.release.cliName},
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: FakeProcessManager.any(),
+    );
+
+    final String expectedGenSnapshotPath = cachedArtifacts.getArtifactPath(
+      Artifact.genSnapshot,
+      mode: .release,
+      platform: .android_arm64,
+    );
+    fileSystem.file(expectedGenSnapshotPath).createSync(recursive: true);
+
+    final buildManager = FakeExtensionBuildManager();
+    final ExtensionTarget target = _createTarget(
+      buildManager: buildManager,
+      inputs: const <ExtensionSource>[ExtensionSource.artifact(BuiltInArtifacts.genSnapshot)],
+      targetPlatform: 'android-arm64',
+    );
+
+    final buildSystem = FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+    );
+    final BuildResult result = await buildSystem.build(target, cachedEnvironment);
+
+    expect(result.success, isTrue);
+    expect(
+      buildManager.invokedResolvedArtifacts,
+      equals(<String, String>{'genSnapshot': expectedGenSnapshotPath}),
+    );
+    expect(result.inputFiles.map((File f) => f.path), contains(expectedGenSnapshotPath));
   });
 
   testWithoutContext('ExtensionTarget resolves dependencies', () {
