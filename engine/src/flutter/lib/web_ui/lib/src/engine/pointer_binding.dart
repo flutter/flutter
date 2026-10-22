@@ -1250,8 +1250,13 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     // The browser can take the capture away without a `pointerup` or a
     // `pointercancel`, for example when the window loses focus (Alt-Tab, OS
     // dialogs) or the view root is removed. If buttons are still pressed, the
-    // press will never be released, so cancel it.
+    // press will never be released, so cancel it. The event bubbles, so ignore
+    // captures lost by descendants (such as platform view content); only the
+    // capture this adapter set on the view root matters.
     _addPointerEventListener(_viewTarget, 'lostpointercapture', (DomPointerEvent event) {
+      if (event.target != _viewTarget) {
+        return;
+      }
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
         final _ButtonSanitizer sanitizer = _getSanitizer(device);
