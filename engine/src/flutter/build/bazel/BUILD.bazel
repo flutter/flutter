@@ -221,3 +221,15 @@ bool_flag(
     name = "stripped",
     build_setting_default = True,
 )
+
+# For the select()s over stripped_symbols (the Android embedding's jar packs
+# lib.stripped/libflutter.so under it, libflutter.so otherwise).
+config_setting(
+    name = "stripped_enabled",
+    flag_values = {":stripped": "True"},
+)
+
+config_setting(
+    name = "stripped_disabled",
+    flag_values = {":stripped": "False"},
+)

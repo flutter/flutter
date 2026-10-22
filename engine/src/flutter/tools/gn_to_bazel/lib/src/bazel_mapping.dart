@@ -1047,6 +1047,10 @@ final Map<String, String> conditionSettings = Map<String, String>.unmodifiable(<
   'enable_backtrace': '//engine/src/flutter/common:backtrace_enabled',
   'build_engine_artifacts': '//engine/src/flutter/common:engine_artifacts',
   'use_flutter_cxx': '//engine/src/flutter/build/bazel:flutter_cxx',
+  // build/toolchain/clang.gni's stripped_symbols (tools/gn: on unless
+  // --no-stripped; off for Android): build/bazel's `stripped` flag, which
+  // the aspect that places binaries reads (D9).
+  'stripped_symbols': '//engine/src/flutter/build/bazel:stripped_enabled',
   // shell/config.gni's backend arguments, as its defaults and tools/gn set
   // them by platform: the groups in //flutter/shell's appendix.
   'shell_enable_gl': '//engine/src/flutter/shell:enable_gl',
@@ -1091,6 +1095,7 @@ final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<St
   // archives' names).
   'dart_dynamic_modules':
       '//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled',
+  'stripped_symbols': '//engine/src/flutter/build/bazel:stripped_disabled',
 });
 
 /// The Bazel config_setting for `variable == "value"`, by variable and value.
@@ -1281,6 +1286,9 @@ const Set<String> knownExternalVariables = <String>{
   'android_sdk',
   'android_sdk_jar',
   'android_sdk_build_tools',
+  'android_app_abi',
+  // //build/toolchain/clang.gni
+  'stripped_symbols',
   // //flutter/build/dart/dart.gni
   'dart_src',
   // //flutter/common/config.gni
@@ -2107,6 +2115,17 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
   },
 );
 
+/// build/config/android/config.gni's android_app_abi: the ABI name by
+/// `current_cpu`, which the Android embedding's artifact names and
+/// create_flutter_jar.py's `--android_abi` carry.
+const GnCasedValue _androidAppAbi = GnCasedValue('current_cpu', <String, String>{
+  'x86': 'x86',
+  'arm': 'armeabi-v7a',
+  'x64': 'x86_64',
+  'arm64': 'arm64-v8a',
+  'riscv64': 'riscv64',
+});
+
 /// The assumptions the checked-in files are generated under: the Linux x64
 /// host's ([linuxHostAssumptions]) less everything GN derives from the
 /// target -- the target OS and CPU, the toolchains, the names of the target,
@@ -2160,6 +2179,7 @@ Assumptions generationAssumptions() {
     'android_sdk_build_tools': const GnStringValue(
       '//flutter/third_party/android_tools/sdk/build-tools/37.0.0',
     ),
+    'android_app_abi': _androidAppAbi,
     'flutter_prebuilt_dart_sdk': const GnBoolValue(true),
     // The prebuilt Dart SDKs: the host's, which the tools that run at build
     // time come from, and the target's (config.gni's `prebuilt_dart_sdk`
@@ -2284,6 +2304,7 @@ Assumptions linuxHostAssumptions() {
     'android_sdk_build_tools': GnStringValue(
       '//flutter/third_party/android_tools/sdk/build-tools/37.0.0',
     ),
+    'android_app_abi': _androidAppAbi,
     'target_platform_name': GnStringValue('linux'),
     'full_target_platform_name': GnStringValue('linux-x64'),
     'build_engine_artifacts': GnBoolValue(true),
