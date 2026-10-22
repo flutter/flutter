@@ -346,7 +346,7 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
     CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
     // Single workgroup; see CanComputePrefixSum.
-    pass->Compute({1, 1, 1});
+    pass->Compute({1, 1, 1}).IgnoreError();
     pass->EncodeCommands();
     host_buffer->Reset();
     return context->GetCommandQueue()->Submit({cmd_buffer}).ok();
@@ -589,7 +589,7 @@ TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
   // tolerate this.
   auto status = pass->Compute({0, 1, 1});
   EXPECT_FALSE(status.ok());
-  EXPECT_EQ(status.code(), fml::StatusCode::kCancelled);
+  EXPECT_EQ(status.code(), absl::StatusCode::kCancelled);
   pass->EncodeCommands();
 }
 
