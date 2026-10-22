@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
@@ -32,6 +33,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 
@@ -916,6 +918,81 @@ void main() {}
     },
   );
 
+  testWithoutContext(
+    'ignores devices unsupported by the project when building from source',
+    () async {
+      final capturingDriverService = CapturingDriverService();
+      final toolContext = FakeToolContext(
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        fs: fileSystem,
+        logger: logger,
+        outputPreferences: outputPreferences,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+        projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
+        signals: signals,
+      );
+      final command = _ProjectFilteringDriveCommand(
+        devices: <Device>[FakeUnsupportedDevice()],
+        toolContext: toolContext,
+        flutterDriverFactory: CapturingFlutterDriverFactory(capturingDriverService),
+      );
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      await expectLater(
+        () => createTestCommandRunner(
+          command,
+          null,
+          toolContext,
+          TestFeatureFlags(),
+        ).run(<String>['drive', '--no-pub']),
+        throwsToolExit(),
+      );
+      expect(capturingDriverService.device, isNull);
+    },
+  );
+
+  testWithoutContext(
+    'includes devices unsupported by the project when using prebuilt application binary',
+    () async {
+      final capturingDriverService = CapturingDriverService();
+      final unsupportedDevice = FakeUnsupportedDevice();
+      final toolContext = FakeToolContext(
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        fs: fileSystem,
+        logger: logger,
+        outputPreferences: outputPreferences,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+        projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
+        signals: signals,
+      );
+      final command = _ProjectFilteringDriveCommand(
+        devices: <Device>[unsupportedDevice],
+        toolContext: toolContext,
+        flutterDriverFactory: CapturingFlutterDriverFactory(capturingDriverService),
+      );
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      final File appBinary = fileSystem.file('app.apk')..createSync();
+
+      await createTestCommandRunner(
+        command,
+        null,
+        toolContext,
+        TestFeatureFlags(),
+      ).run(<String>['drive', '--no-pub', '--use-application-binary', appBinary.path]);
+
+      expect(capturingDriverService.device, unsupportedDevice);
+      expect(capturingDriverService.applicationBinary?.path, appBinary.path);
+    },
+  );
+
   testUsingContext(
     'succeeds when --use-application-binary is provided with --release and engine config flags for iOS',
     () async {
@@ -1120,7 +1197,13 @@ class ScreenshotDevice extends Fake implements Device {
   final id = 'fake_device';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+
+  @override
+  Future<bool> isSupported() async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
   bool supportsScreenshot = true;
@@ -1217,6 +1300,8 @@ class FakeDriverService extends Fake implements DriverService {
 }
 
 class CapturingDriverService extends Fake implements DriverService {
+  Device? device;
+  File? applicationBinary;
   Map<String, Object>? platformArgs;
   Map<String, String>? webDefines;
   DriveTestSpecification? lastSpec;
@@ -1233,6 +1318,8 @@ class CapturingDriverService extends Fake implements DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
     Map<String, String> webDefines = const <String, String>{},
   }) async {
+    this.device = device;
+    this.applicationBinary = applicationBinary;
     this.platformArgs = platformArgs;
     this.webDefines = webDefines;
   }
@@ -1355,6 +1442,87 @@ class FakeSignals extends Fake implements Signals {
 
   @override
   Future<bool> removeHandler(ProcessSignal signal, Object token) async => true;
+}
+
+class _ProjectFilteringDriveCommand extends DriveCommand {
+  _ProjectFilteringDriveCommand({
+    required this._devices,
+    required super.toolContext,
+    super.flutterDriverFactory,
+  }) : super(
+         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+         buildTargets: const BuildTargetsImpl(),
+       );
+
+  final List<Device> _devices;
+
+  @override
+  bool get refreshWirelessDevices => false;
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
+  @override
+  Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async =>
+      DebuggingOptions.enabled(BuildInfo.debug);
+
+  @override
+  Future<List<Device>?> findAllTargetDevices({
+    bool? canPrompt,
+    bool includeDevicesUnsupportedByProject = false,
+  }) async {
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
+    final matchingDevices = <Device>[];
+    for (final Device device in _devices) {
+      if (includeDevicesUnsupportedByProject ||
+          await device.isSupportedForProject(flutterProject)) {
+        matchingDevices.add(device);
+      }
+    }
+    return matchingDevices.isEmpty ? null : matchingDevices;
+  }
+}
+
+class FakeUnsupportedDevice extends Fake implements Device {
+  @override
+  final String id = 'unsupported_device';
+
+  @override
+  final String name = 'Unsupported Device';
+
+  @override
+  String get displayName => name;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  Category get category => Category.mobile;
+
+  @override
+  PlatformType get platformType => PlatformType.android;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+
+  @override
+  Future<bool> isSupported() async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => false;
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+    String? userIdentifier,
+  }) async => LaunchResult.succeeded();
 }
 
 class FakeWindowsDevice extends Fake implements Device {
