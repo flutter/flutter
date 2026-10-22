@@ -396,6 +396,88 @@ void main() {
           }) async => fakeVmServiceHost.vmService,
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/192470.
+  testUsingContext(
+    'waits for the UI isolate to reach PauseStart when startPaused is true',
+    () async {
+      final vm_service.Isolate unpausedIsolate = vm_service.Isolate.parse(
+        isolate.toJson()
+          ..['pauseEvent'] = vm_service.Event(
+            kind: vm_service.EventKind.kNone,
+            timestamp: 0,
+          ).toJson(),
+      )!;
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Debug'},
+          ),
+          listViewsRequest,
+          FakeVmServiceRequest(
+            method: 'getIsolate',
+            jsonResponse: unpausedIsolate.toJson(),
+            args: <String, Object>{'isolateId': '1'},
+          ),
+          FakeVmServiceStreamResponse(
+            streamId: 'Debug',
+            event: vm_service.Event(
+              kind: vm_service.EventKind.kPauseStart,
+              isolate: isolate,
+              timestamp: 1,
+            ),
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Isolate'},
+          ),
+          listViewsRequest,
+          FakeVmServiceRequest(
+            method: 'getIsolate',
+            jsonResponse: isolate.toJson(),
+            args: <String, Object>{'isolateId': '1'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Extension'},
+          ),
+        ],
+      );
+      final TestDevice startPausedDevice = IntegrationTestTestDevice(
+        id: 1,
+        device: FakeDevice(
+          'ephemeral',
+          'ephemeral',
+          type: PlatformType.android,
+          launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
+        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
+        userIdentifier: '',
+        compileExpression: null,
+      );
+
+      await startPausedDevice.start('entrypointPath');
+
+      expect(await startPausedDevice.vmServiceUri, vmServiceUri);
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    },
+    overrides: <Type, Generator>{
+      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+            Logger? logger,
+          }) async => fakeVmServiceHost.vmService,
+    },
+  );
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {

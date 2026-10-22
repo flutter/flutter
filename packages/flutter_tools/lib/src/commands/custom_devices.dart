@@ -13,8 +13,11 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../custom_devices/custom_device.dart';
@@ -266,8 +269,17 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(CustomDeviceConfig config) async {
-    final ProcessManager pm = toolContext.processManager;
-    final device = CustomDevice(config: config, logger: logger, processManager: pm);
+    final device = CustomDevice(
+      config: config,
+      analytics: analytics,
+      buildSystem: FlutterBuildSystem(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: toolContext.platform,
+      ),
+      buildTargets: const NoOpBuildTargets(),
+      toolContext: toolContext,
+    );
 
     var result = true;
 
@@ -309,17 +321,19 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
 
     if (config.usesPortForwarding) {
+      final ToolContext(:Logger logger, :OperatingSystemUtils os, :ProcessManager processManager) =
+          toolContext;
       final portForwarder = CustomDevicePortForwarder(
         deviceName: device.displayName,
         forwardPortCommand: config.forwardPortCommand!,
         forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
-        processManager: pm,
+        processManager: processManager,
         logger: logger,
       );
 
       try {
         // find a random port we can forward
-        final int port = await toolContext.os.findFreePort();
+        final int port = await os.findFreePort();
 
         final ForwardedPort? forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {

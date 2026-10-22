@@ -10,13 +10,14 @@ import '../android/android_builder.dart';
 import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/extension.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
@@ -60,7 +61,6 @@ class BuildCommand extends FlutterCommand {
       :FlutterVersion flutterVersion,
       fs: FileSystem fileSystem,
       :Logger logger,
-      os: OperatingSystemUtils osUtils,
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
@@ -196,13 +196,7 @@ class BuildCommand extends FlutterCommand {
         featureFlags: featureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
-        visualStudio: VisualStudio(
-          fileSystem: fileSystem,
-          platform: platform,
-          logger: logger,
-          processManager: processManager,
-          osUtils: osUtils,
-        ),
+        visualStudio: VisualStudio(toolContext: toolContext),
       ),
     );
   }
@@ -268,7 +262,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     super.toolContext,
   }) {
     requiresPubspecYaml();
-    usesFatalWarningsOption(verboseHelp: verboseHelp);
+    CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
   }
 
   @protected
@@ -290,9 +284,11 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
        ) {
-    usesTargetOption();
-    usesPubOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
+    registerOptionBundle(const BuildModeOptionsBundle());
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.target,
+      CommonOptions.pub,
+    ], verboseHelp: verboseHelp);
   }
 
   final ExtensionBuildManager _buildManager;
@@ -311,12 +307,29 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
+    final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
+    final Directory outputDir = resolveExtensionOutputDir(
+      buildMode: buildInfo.mode,
+      buildOutputDir: projectDir.childDirectory(getBuildDirectory(config, fs)),
+      fileSystem: fs,
+      projectDir: projectDir,
+      target: target,
+    );
+    final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: buildInfo.mode,
+      target: target,
+    );
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildInfo.mode,
+      flutterRoot: fs.directory(Cache.flutterRoot).uri,
       mainPath: targetFile,
-      projectRoot: toolContext.fs.currentDirectory.uri,
+      outputDir: outputDir.uri,
+      projectRoot: projectDir.uri,
+      resolvedArtifacts: resolvedArtifacts,
       targetName: target.name,
     );
 
