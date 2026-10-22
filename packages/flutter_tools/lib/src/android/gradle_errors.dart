@@ -920,7 +920,11 @@ final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
         Java? java,
       }) async {
         final Logger logger = toolContext.logger;
-        final String buildFile = _kotlinAndroidPluginBuildFileRegex.firstMatch(line)!.group(1)!;
+        // Kotlin Gradle Plugin prints the path with the platform separator.
+        final String buildFile = _kotlinAndroidPluginBuildFileRegex
+            .firstMatch(line)!
+            .group(1)!
+            .replaceAll(r'\', '/');
         if (buildFile == 'app/build.gradle' || buildFile == 'app/build.gradle.kts') {
           logger.printBox('''
 ${logger.terminal.warningMark} android/$buildFile applies the kotlin-android plugin, which does not work with `android.builtInKotlin=true`.

@@ -1543,6 +1543,21 @@ An exception occurred applying plugin request [id: 'kotlin-android']
       expect(testLogger.statusText, isNot(contains('A plugin applies')));
     });
 
+    testWithoutContext('treats a Windows app build file path as the app', () async {
+      await applyingKotlinAndroidPluginErrorHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: matchedLine(
+          appErrorExample.replaceAll('app/build.gradle.kts', r'app\build.gradle.kts'),
+        ),
+        project: FakeFlutterProject(),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(testLogger.statusText, contains('android/app/build.gradle.kts applies the'));
+      expect(testLogger.statusText, isNot(contains('A plugin applies')));
+    });
+
     testWithoutContext('tells the developer to upgrade or report the plugin', () async {
       await applyingKotlinAndroidPluginErrorHandler.handler(
         gradleUtils: FakeGradleUtils(),
