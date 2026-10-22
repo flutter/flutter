@@ -50,34 +50,34 @@ TEST(MockPipelineLibrary, LogAndGetPipelineUsageMultiplePipelines) {
 #endif
 }
 
-TEST(MockPipelineLibrary, LogPipelineCreationMarksPipelineWarmed) {
+TEST(MockPipelineLibrary, LogPipelineCreationMarksPipelineEagerlyCreated) {
   MockPipelineLibrary pipeline_library;
 
-  PipelineDescriptor warmed_desc;
-  warmed_desc.SetLabel("warmed_pipeline");
+  PipelineDescriptor eager_desc;
+  eager_desc.SetLabel("eager_pipeline");
 
-  PipelineDescriptor unused_warmed_desc;
-  unused_warmed_desc.SetLabel("unused_warmed_pipeline");
+  PipelineDescriptor unused_eager_desc;
+  unused_eager_desc.SetLabel("unused_eager_pipeline");
 
   PipelineDescriptor lazy_desc;
   lazy_desc.SetLabel("lazy_pipeline");
 
-  pipeline_library.LogPipelineCreation(warmed_desc);
-  pipeline_library.LogPipelineUsage(warmed_desc);
-  pipeline_library.LogPipelineCreation(unused_warmed_desc);
+  pipeline_library.LogPipelineCreation(eager_desc);
+  pipeline_library.LogPipelineUsage(eager_desc);
+  pipeline_library.LogPipelineCreation(unused_eager_desc);
   pipeline_library.LogPipelineUsage(lazy_desc);
 
   auto usage = pipeline_library.GetPipelineUsage();
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || \
     FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE
   EXPECT_EQ(usage.size(), 3u);
-  EXPECT_EQ(usage[warmed_desc].count, 1);
-  EXPECT_TRUE(usage[warmed_desc].warmed);
-  // Warmed pipelines are reported even if they are never bound.
-  EXPECT_EQ(usage[unused_warmed_desc].count, 0);
-  EXPECT_TRUE(usage[unused_warmed_desc].warmed);
+  EXPECT_EQ(usage[eager_desc].count, 1);
+  EXPECT_TRUE(usage[eager_desc].eagerly_created);
+  // Eagerly created pipelines are reported even if they are never bound.
+  EXPECT_EQ(usage[unused_eager_desc].count, 0);
+  EXPECT_TRUE(usage[unused_eager_desc].eagerly_created);
   EXPECT_EQ(usage[lazy_desc].count, 1);
-  EXPECT_FALSE(usage[lazy_desc].warmed);
+  EXPECT_FALSE(usage[lazy_desc].eagerly_created);
 #else
   EXPECT_TRUE(usage.empty());
 #endif

@@ -90,6 +90,7 @@ impeller_component("renderer") {
     "../geometry",
     "../runtime_stage",
     "../tessellator",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
   ]
 
   if (impeller_enable_compute) {

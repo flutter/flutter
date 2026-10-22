@@ -48,7 +48,7 @@ class GenericVariants {
   }
 
   /// Defaults are created ahead of time rather than on first use, so they are
-  /// logged as warmed with the pipeline library.
+  /// logged as eagerly created with the pipeline library.
   void SetDefault(const Context& context,
                   const ContentContextOptions& options,
                   std::unique_ptr<GenericRenderPipelineHandle> pipeline) {

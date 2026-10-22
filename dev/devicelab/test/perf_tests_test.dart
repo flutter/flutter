@@ -152,7 +152,7 @@ void main() {
     },
   );
 
-  test('reports Impeller pipeline warmup metrics when they are in the data', () async {
+  test('reports Impeller shader warmup metrics when they are in the data', () async {
     final fakeData = <String, dynamic>{
       'frame_count': 5,
       'average_frame_build_time_millis': 0.1,
@@ -168,9 +168,9 @@ void main() {
       'average_vsync_transitions_missed': 1,
       '90th_percentile_vsync_transitions_missed': 1,
       '99th_percentile_vsync_transitions_missed': 1,
-      'warmed_draw_percent': 92.65,
-      'lazy_variants': 20,
-      'warmed_never_drawn_variants': 3,
+      'shader_warmed_draw_percent': 92.65,
+      'shader_lazy_variants': 20,
+      'shader_warmed_never_drawn_variants': 3,
     };
     const resultFileName = 'fake_result';
     void driveCallback(List<String> arguments) {
@@ -190,7 +190,11 @@ void main() {
     final TaskResult result = await perfTest.run();
     expect(
       result.benchmarkScoreKeys,
-      containsAll(<String>['warmed_draw_percent', 'lazy_variants', 'warmed_never_drawn_variants']),
+      containsAll(<String>[
+        'shader_warmed_draw_percent',
+        'shader_lazy_variants',
+        'shader_warmed_never_drawn_variants',
+      ]),
     );
   });
 }

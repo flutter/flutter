@@ -13,6 +13,7 @@
 #include "impeller/base/thread_safety.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 
@@ -36,16 +37,16 @@ using ComputePipelineMap =
 struct PipelineUsage {
   /// The number of times the pipeline was bound in a render pass.
   int count = 0;
-  /// Whether the pipeline was created eagerly (warmed), before it was first
+  /// Whether the pipeline was created eagerly (warmed up), before it was first
   /// needed. See `PipelineLibrary::LogPipelineCreation`.
-  bool warmed = false;
+  bool eagerly_created = false;
 };
 
 using PipelineUsageMap =
-    std::unordered_map<PipelineDescriptor,
-                       PipelineUsage,
-                       ComparableHash<PipelineDescriptor>,
-                       ComparableEqual<PipelineDescriptor>>;
+    absl::flat_hash_map<PipelineDescriptor,
+                        PipelineUsage,
+                        ComparableHash<PipelineDescriptor>,
+                        ComparableEqual<PipelineDescriptor>>;
 
 class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
  public:
@@ -102,8 +103,8 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
 
   //----------------------------------------------------------------------------
   /// @brief      Records that the pipeline for the descriptor was created
-  ///             eagerly (warmed), before it was first needed. The pipeline is
-  ///             reported by `GetPipelineUsage` even if it is never bound.
+  ///             eagerly (warmed up), before it was first needed. The pipeline
+  ///             is reported by `GetPipelineUsage` even if it is never bound.
   ///             Only recorded in debug and profile builds.
   ///
   void LogPipelineCreation(const PipelineDescriptor& p);

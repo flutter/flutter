@@ -235,18 +235,24 @@ Future<Map<String, Object?>> pipelineWarmupMetrics(FlutterDriver driver) async {
         '_flutter.getPipelineUsage',
         args: <String, Object?>{'viewId': viewId},
       )).json;
-      if (usage case {'Pipelines': final List<Object?> pipelines}) {
+      if (usage case {'pipelines': final List<Object?> pipelines}) {
         return _summarizePipelineUsage(pipelines);
       }
+      throw FormatException(
+        'Expected a "pipelines" list in the _flutter.getPipelineUsage response for view '
+        '$viewId, but got keys ${usage?.keys.toList()}.',
+      );
     }
-    throw const FormatException('Unexpected response from the Flutter view.');
+    throw FormatException(
+      'Expected at least one Flutter view in the _flutter.listViews response, but got $views.',
+    );
   } catch (error) {
     stdout.writeln('Not reporting pipeline warmup metrics: $error');
     return const <String, Object?>{};
   }
 }
 
-/// The warmup metrics for the `Pipelines` of a `_flutter.getPipelineUsage`
+/// The warmup metrics for the `pipelines` of a `_flutter.getPipelineUsage`
 /// response. Also logs the pipelines that were created lazily, to help track
 /// down regressions.
 Map<String, Object?> _summarizePipelineUsage(List<Object?> pipelines) {
@@ -259,10 +265,10 @@ Map<String, Object?> _summarizePipelineUsage(List<Object?> pipelines) {
       'label': final String label,
       'constants': final List<Object?> constants,
       'count': final int count,
-      'warmed': final bool warmed,
+      'eagerly_created': final bool eagerlyCreated,
     }) {
       totalDraws += count;
-      if (!warmed) {
+      if (!eagerlyCreated) {
         final name = constants.isEmpty ? label : '$label $constants';
         lazyPipelines.add('$name: $count draws');
       } else if (count == 0) {
@@ -271,14 +277,21 @@ Map<String, Object?> _summarizePipelineUsage(List<Object?> pipelines) {
         warmedDraws += count;
       }
     } else {
-      throw FormatException('Unexpected pipeline usage entry: $pipeline');
+      throw FormatException(
+        'Expected a label, constants, count and eagerly_created in each '
+        '_flutter.getPipelineUsage entry, but got $pipeline.',
+      );
     }
   }
   if (totalDraws == 0) {
-    throw const FormatException('No pipeline draws were recorded.');
+    throw FormatException(
+      '_flutter.getPipelineUsage reported ${pipelines.length} pipelines, but no draws.',
+    );
   }
 
-  final double warmedDrawPercent = warmedDraws * 100 / totalDraws;
+  final double warmedDrawPercent = double.parse(
+    (warmedDraws * 100 / totalDraws).toStringAsFixed(2),
+  );
   stdout.writeln(
     'Impeller pipeline warmup: ${warmedDrawPercent.toStringAsFixed(2)}% of $totalDraws draws '
     'used a warmed pipeline, $warmedNeverDrawn warmed pipelines were never drawn with, and '
@@ -289,9 +302,9 @@ Map<String, Object?> _summarizePipelineUsage(List<Object?> pipelines) {
     stdout.writeln('  $pipeline');
   }
   return <String, Object?>{
-    'warmed_draw_percent': warmedDrawPercent,
-    'lazy_variants': lazyPipelines.length,
-    'warmed_never_drawn_variants': warmedNeverDrawn,
+    'shader_warmed_draw_percent': warmedDrawPercent,
+    'shader_lazy_variants': lazyPipelines.length,
+    'shader_warmed_never_drawn_variants': warmedNeverDrawn,
   };
 }
 

@@ -1549,10 +1549,11 @@ class PerfTest {
                 if (data['99th_percentile_gpu_memory_mb'] != null) '99th_percentile_gpu_memory_mb',
                 if (data['worst_gpu_memory_mb'] != null) 'worst_gpu_memory_mb',
               ],
-              // Impeller pipeline warmup, reported by the new gallery's transition test.
-              if (data['warmed_draw_percent'] != null) 'warmed_draw_percent',
-              if (data['lazy_variants'] != null) 'lazy_variants',
-              if (data['warmed_never_drawn_variants'] != null) 'warmed_never_drawn_variants',
+              // Impeller shader warmup, reported by the new gallery's transition test.
+              if (data['shader_warmed_draw_percent'] != null) 'shader_warmed_draw_percent',
+              if (data['shader_lazy_variants'] != null) 'shader_lazy_variants',
+              if (data['shader_warmed_never_drawn_variants'] != null)
+                'shader_warmed_never_drawn_variants',
             ],
       );
     });

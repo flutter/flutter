@@ -139,7 +139,8 @@ TEST_P(PipelineVariantRecordingTest, ReportsEachContextSeparately) {
   EXPECT_EQ(count_lazy(observer.GetReports()[1]), 1u);
 }
 
-TEST_P(PipelineVariantRecordingTest, DefaultPipelinesAreLoggedAsWarmed) {
+TEST_P(PipelineVariantRecordingTest,
+       DefaultPipelinesAreLoggedAsEagerlyCreated) {
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \
     FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE
   GTEST_SKIP() << "Pipeline usage logging is only in debug and profile builds.";
@@ -162,13 +163,13 @@ TEST_P(PipelineVariantRecordingTest, DefaultPipelinesAreLoggedAsWarmed) {
 
   const PipelineUsageMap usage =
       GetContext()->GetPipelineLibrary()->GetPipelineUsage();
-  auto is_warmed = [&usage](const PipelineDescriptor& descriptor) {
+  auto is_eagerly_created = [&usage](const PipelineDescriptor& descriptor) {
     auto found = usage.find(descriptor);
-    return found != usage.end() && found->second.warmed;
+    return found != usage.end() && found->second.eagerly_created;
   };
-  EXPECT_TRUE(is_warmed(solid_fill->GetDescriptor()));
-  EXPECT_TRUE(is_warmed(clip->GetDescriptor()));
-  EXPECT_FALSE(is_warmed(lazy_solid_fill->GetDescriptor()));
+  EXPECT_TRUE(is_eagerly_created(solid_fill->GetDescriptor()));
+  EXPECT_TRUE(is_eagerly_created(clip->GetDescriptor()));
+  EXPECT_FALSE(is_eagerly_created(lazy_solid_fill->GetDescriptor()));
 }
 
 }  // namespace testing

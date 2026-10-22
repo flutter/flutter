@@ -2235,10 +2235,9 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
   return false;
 }
 
-void Shell::PopulatePipelineUsage(
-    rapidjson::Document* response,
-    const impeller::PipelineLibrary& pipeline_library) {
-  auto& allocator = response->GetAllocator();
+rapidjson::Value Shell::MakePipelineUsageJson(
+    const impeller::PipelineLibrary& pipeline_library,
+    rapidjson::Document::AllocatorType& allocator) {
   rapidjson::Value pipelines(rapidjson::kArrayType);
   for (const auto& [desc, usage] : pipeline_library.GetPipelineUsage()) {
     std::string_view label = desc.GetLabel();
@@ -2252,11 +2251,11 @@ void Shell::PopulatePipelineUsage(
     pipeline_json.AddMember("label", label_json, allocator);
     pipeline_json.AddMember("constants", constants_json, allocator);
     pipeline_json.AddMember("count", usage.count, allocator);
-    pipeline_json.AddMember("warmed", usage.warmed, allocator);
+    pipeline_json.AddMember("eagerly_created", usage.eagerly_created,
+                            allocator);
     pipelines.PushBack(pipeline_json, allocator);
   }
-
-  response->AddMember("Pipelines", pipelines, allocator);
+  return pipelines;
 }
 
 bool Shell::OnServiceProtocolGetPipelineUsage(
@@ -2275,7 +2274,9 @@ bool Shell::OnServiceProtocolGetPipelineUsage(
     return false;
   }
 
-  PopulatePipelineUsage(response, *context->GetPipelineLibrary());
+  rapidjson::Value pipelines = MakePipelineUsageJson(
+      *context->GetPipelineLibrary(), response->GetAllocator());
+  response->AddMember("pipelines", pipelines, response->GetAllocator());
   return true;
 }
 
