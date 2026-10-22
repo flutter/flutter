@@ -216,6 +216,10 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
+    additional_compiler_inputs = select({
+        "@platforms//os:android": ["@icu//:flutter/icudtl.dat"],
+        "//conditions:default": [],
+    }),
     copts = FLUTTER_COPTS + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
@@ -506,6 +510,10 @@ cc_library(
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan": [
             "embedder_surface_vulkan_impeller.h",  # embedder_enable_vulkan && impeller_supports_rendering
         ],
+        "//conditions:default": [],
+    }),
+    additional_compiler_inputs = select({
+        "@platforms//os:android": ["@icu//:flutter/icudtl.dat"],
         "//conditions:default": [],
     }),
     copts = FLUTTER_COPTS + select({

@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Linux builds of `ci/builders/*.json` -- the x64 host's own, the web's
-/// and the arm64 cross builds' -- as Bazel configurations and install targets.
+/// The Linux builds of `ci/builders/*.json` -- the x64 host's own, the web's,
+/// the Linux arm64 cross builds' and Android's -- as Bazel configurations and
+/// install targets.
 ///
 /// Each builder file describes builds: a `tools/gn` flag list, the ninja
 /// targets to build, the archives to upload, the tests to run. The Bazel
@@ -42,9 +43,11 @@ enum GnFlagEffect {
   /// configuration's `--platforms` names ([GnFlag.bazelFlag]).
   platform,
 
-  /// `--target-os <os>`, `--linux-cpu <cpu>`: the target, from which
-  /// [BuilderBuild.of] decides the platform (the Linux arm64 cross build is
-  /// a platform; another OS is out of scope; Linux on the host's CPU is the
+  /// `--target-os <os>`, `--linux-cpu <cpu>`, `--android`,
+  /// `--android-cpu <cpu>`: the target, from which [BuilderBuild.of] decides
+  /// the platform (the Linux arm64 cross build and Android arm64 are
+  /// platforms; an Android CPU without one is a flag the build cannot
+  /// express; another OS is out of scope; Linux on the host's CPU is the
   /// host's own build).
   target,
 
@@ -55,8 +58,9 @@ enum GnFlagEffect {
 
   /// `--stripped`/`--no-stripped`: tools/gn's stripped_symbols, whether the
   /// shared libraries a build ships are stripped (executables always are);
-  /// the `stripped` setting for the Linux platforms, nothing for the wasm
-  /// platform, whose toolchain strips nothing.
+  /// the `stripped` setting for the Linux and Android platforms (tools/gn's
+  /// default is on, except for Android), nothing for the wasm platform,
+  /// whose toolchain strips nothing.
   stripped,
 
   /// A flag the Bazel build has a setting for ([GnFlag.bazelFlag]).
@@ -113,6 +117,14 @@ final class GnFlag {
 const String wasmPlatform =
     '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten';
 const String linuxArm64Platform = '//engine/src/flutter/build/bazel/toolchains:linux_arm64';
+
+/// The Android arm64 platform (`--android --android-cpu=arm64`), the one
+/// Android platform so far.
+const String androidArm64Platform = '//engine/src/flutter/build/bazel/toolchains:android_arm64';
+
+/// tools/gn's `--android-cpu` choices, and its default.
+const List<String> androidCpus = <String>['arm', 'x64', 'x86', 'arm64', 'riscv64'];
+const String defaultAndroidCpu = 'arm';
 
 /// The `tools/gn` flags of the Linux builder files, as far as they appear.
 const Map<String, GnFlag> gnFlags = <String, GnFlag>{
@@ -182,8 +194,8 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   ),
   // An arbitrary GN argument; the ones the builders pass are in gnArguments.
   '--gn-args': GnFlag(GnFlagEffect.gnArgument, takesValue: true, note: 'an arbitrary GN argument'),
-  '--android': GnFlag(GnFlagEffect.otherPlatform),
-  '--android-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
+  '--android': GnFlag(GnFlagEffect.target),
+  '--android-cpu': GnFlag(GnFlagEffect.target, takesValue: true),
   '--fuchsia': GnFlag(GnFlagEffect.otherPlatform),
   '--fuchsia-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
   '--ios': GnFlag(GnFlagEffect.otherPlatform),
@@ -292,12 +304,13 @@ final class BuilderBuild {
     var otherPlatform = false;
     var unoptimized = false;
     var lto = true;
-    var stripped = true;
+    bool? stripped;
     String? runtimeMode;
     String? buildDirectory;
     String? platform;
     String? targetOs;
     String? linuxCpu;
+    String? androidCpu;
     final List<String> gn = build.gn;
     for (var i = 0; i < gn.length; i++) {
       String flag = gn[i];
@@ -329,10 +342,15 @@ final class BuilderBuild {
         case GnFlagEffect.platform:
           platform = known.bazelFlag;
         case GnFlagEffect.target:
-          if (flag == '--target-os') {
-            targetOs = value;
-          } else {
-            linuxCpu = value;
+          switch (flag) {
+            case '--target-os':
+              targetOs = value;
+            case '--android':
+              targetOs = 'android';
+            case '--android-cpu':
+              androidCpu = value;
+            default:
+              linuxCpu = value;
           }
         case GnFlagEffect.lto:
           lto = flag == '--lto';
@@ -364,9 +382,22 @@ final class BuilderBuild {
     // The target: --target-os=linux --linux-cpu=arm64 is the Linux arm64
     // cross build, a platform of the Bazel build (tools/gn counts it a host
     // build: the prebuilt Dart SDK is the target's); --target-os=linux on
-    // the host's CPU is the host's own build; any other OS, or CPU, is a
-    // platform the Bazel build has none for yet.
-    if (targetOs != null && targetOs != 'linux') {
+    // the host's CPU is the host's own build; --android --android-cpu=arm64
+    // is the Android arm64 platform, and another Android CPU (tools/gn's
+    // default is arm) a platform the Bazel build has not got yet, which
+    // costs the build its configuration; any other OS, or Linux CPU, is out
+    // of scope.
+    if (targetOs == 'android') {
+      final String cpu = androidCpu ?? defaultAndroidCpu;
+      if (cpu == 'arm64') {
+        platform = '--platforms=$androidArm64Platform';
+      } else {
+        unsupported.add(
+          '--android-cpu=$cpu${androidCpu == null ? " (tools/gn's default)" : ''} '
+          '(the Bazel build has an Android arm64 platform only)',
+        );
+      }
+    } else if (targetOs != null && targetOs != 'linux') {
       otherPlatform = true;
     } else if (linuxCpu == 'arm64') {
       platform = '--platforms=$linuxArm64Platform';
@@ -374,21 +405,26 @@ final class BuilderBuild {
       otherPlatform = true;
     }
     // tools/gn: LTO is on unless --no-lto, and off in unoptimized builds.
-    // The Linux toolchains have no LTO, so an optimized host or arm64 build
-    // has to say --no-lto; the wasm platform links the optimized build with
-    // LTO, as GN's web build does, and has no setting that turns it off.
+    // The Linux and Android toolchains have no LTO, so an optimized host,
+    // arm64 or Android build has to say --no-lto; the wasm platform links
+    // the optimized build with LTO, as GN's web build does, and has no
+    // setting that turns it off.
     final wasm = platform == '--platforms=$wasmPlatform';
     if (!unoptimized && lto && !wasm) {
       unsupported.add(
-        'LTO, which tools/gn enables without --no-lto (the Linux toolchains have no LTO)',
+        'LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)',
       );
     } else if (!unoptimized && !lto && wasm) {
       unsupported.add('--no-lto (the wasm platform links the optimized build with LTO)');
     }
-    // tools/gn: stripped_symbols is on unless --no-stripped. The Linux
-    // toolchains strip what they ship (executables always, shared libraries
-    // under it); the wasm toolchain strips nothing, so for the web the flag
+    // tools/gn: stripped_symbols is on unless --no-stripped, except for
+    // Android, where it is off unless --stripped (the build directory's
+    // libflutter.so is the unstripped one; the Android toolchain's strip step
+    // writes lib.stripped/ beside it). The Linux and Android toolchains strip
+    // what they ship (executables always, shared libraries under the
+    // setting); the wasm toolchain strips nothing, so for the web the flag
     // is nothing either way.
+    stripped ??= targetOs != 'android';
     if (!stripped && !wasm) {
       settings.add('--$strippedSetting=false');
     }
@@ -466,7 +502,8 @@ final class BuilderBuild {
 
   /// The `--platforms` of a build for another platform than the host's own
   /// (`--web`: [wasmPlatform]; `--target-os=linux --linux-cpu=arm64`:
-  /// [linuxArm64Platform]); null for the host's own build.
+  /// [linuxArm64Platform]; `--android --android-cpu=arm64`:
+  /// [androidArm64Platform]); null for the host's own build.
   final String? platform;
 
   /// The flags the Bazel build cannot express, with the reason each.
@@ -510,9 +547,9 @@ final class BuilderBuild {
 
 /// The Linux builds of [configs] (a builder file's name to its
 /// configuration), by file and build order: the `linux_*.json` files' builds
-/// that target the host, the web or Linux arm64, and local_engine.json's
-/// `linux/` builds -- the developer's configurations, which `et build
-/// --config <name>` runs.
+/// that target the host, the web, Linux arm64 or Android, and
+/// local_engine.json's `linux/` builds -- the developer's configurations,
+/// which `et build --config <name>` runs.
 List<BuilderBuild> linuxBuilds(Map<String, BuilderConfig> configs) {
   final builds = <BuilderBuild>[];
   final List<String> files =
@@ -554,13 +591,14 @@ String configsBazelrc(List<BuilderBuild> builds) {
     ..writeln()
     ..writeln('# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.')
     ..writeln('#')
-    ..writeln("# Each Linux build of the builder files -- the x64 host's own, the web's and")
-    ..writeln("# the arm64 cross builds' -- as a Bazel configuration: `bazel build")
-    ..writeln("# --config=<name> ...` sets what the build's tools/gn flags set, as far as the")
-    ..writeln('# Bazel build has settings for them (gnFlags in')
+    ..writeln("# Each Linux build of the builder files -- the x64 host's own, the web's, the")
+    ..writeln("# Linux arm64 cross builds' and Android's -- as a Bazel configuration: `bazel")
+    ..writeln("# build --config=<name> ...` sets what the build's tools/gn flags set, as far")
+    ..writeln('# as the Bazel build has settings for them (gnFlags in')
     ..writeln('# tools/gn_to_bazel/lib/src/builders.dart says what each flag amounts to;')
-    ..writeln('# --web is the wasm platform, --target-os=linux --linux-cpu=arm64 the arm64')
-    ..writeln('# one). A build with a flag the Bazel build cannot express yet is listed with')
+    ..writeln('# --web is the wasm platform, --target-os=linux --linux-cpu=arm64 the Linux')
+    ..writeln('# arm64 one, --android --android-cpu=arm64 the Android arm64 one). A build')
+    ..writeln('# with a flag the Bazel build cannot express yet is listed with')
     ..writeln('# the reason and gets no configuration; the install target of each build is')
     ..writeln('# in BUILD.bazel beside this file.');
   // A name may be two builds' (CI's ci/host_debug and the developer's
@@ -615,20 +653,20 @@ String buildersBuildFile(
     ..writeln('# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.')
     ..writeln('#')
     ..writeln("# An install target per Linux build of the builder files (the x64 host's own,")
-    ..writeln("# the web's and the arm64 cross builds'), over the Bazel counterparts of its")
-    ..writeln('# ninja targets: `bazel run --config=<name> :<name>` builds what the build')
-    ..writeln("# builds and lays it into GN's build directory for it (--target-dir, or the")
-    ..writeln("# directory tools/gn names for the flags), as the builder's recipe expects to")
-    ..writeln('# find it. A ninja target with no Bazel counterpart yet is listed; a build whose')
-    ..writeln('# configuration the Bazel build cannot express yet (configs.bazelrc) is built')
-    ..writeln('# with the flags of the nearest one; a test executable among the targets is')
-    ..writeln('# not installed, since `bazel test` runs tests from their own place. A build')
-    ..writeln('# with tests has a <name>_tests suite over the Bazel suites that stand for its')
-    ..writeln('# run_tests.py types (runTestsTypeSuites, runTestsEngineSuites in')
-    ..writeln('# builders.dart): `bazel test --config=<name> :<name>_tests` runs what the')
-    ..writeln('# build runs, with its other test steps (scripts of the checkout) listed. The')
-    ..writeln('# suites are manual: each stands for one builder, named; a wildcard run of')
-    ..writeln('# the tree has the tests themselves.')
+    ..writeln("# the web's, the Linux arm64 cross builds' and Android's), over the Bazel")
+    ..writeln('# counterparts of its ninja targets: `bazel run --config=<name> :<name>` builds')
+    ..writeln("# what the build builds and lays it into GN's build directory for it")
+    ..writeln('# (--target-dir, or the directory tools/gn names for the flags), as the')
+    ..writeln("# builder's recipe expects to find it. A ninja target with no Bazel")
+    ..writeln('# counterpart yet is listed; a build whose configuration the Bazel build')
+    ..writeln('# cannot express yet (configs.bazelrc) is built with the flags of the nearest')
+    ..writeln('# one; a test executable among the targets is not installed, since `bazel')
+    ..writeln('# test` runs tests from their own place. A build with tests has a <name>_tests')
+    ..writeln('# suite over the Bazel suites that stand for its run_tests.py types')
+    ..writeln('# (runTestsTypeSuites, runTestsEngineSuites in builders.dart): `bazel test')
+    ..writeln('# --config=<name> :<name>_tests` runs what the build runs, with its other test')
+    ..writeln('# steps (scripts of the checkout) listed. The suites are manual: each stands')
+    ..writeln('# for one builder, named; a wildcard run of the tree has the tests themselves.')
     ..writeln()
     ..writeln('load("//engine/src/flutter/build/bazel:install.bzl", "install")')
     ..writeln()

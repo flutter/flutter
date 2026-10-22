@@ -1312,7 +1312,8 @@ const Map<String, String> buildOutputLabels = <String, String>{
   '//@out/gen_snapshot': '//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot',
   // The Android shell's assembly of icudtl.dat (bin_to_assembly, a template
   // whose output the converter cannot enumerate), which the embedder's
-  // Android sources name by path.
+  // Android sources name by path ([buildOutputCompilerInputs] has what its
+  // compile reads).
   '//@out/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S':
       '//engine/src/flutter/shell/platform/android:icudtl_asm',
   // //flutter/lib/snapshot (hand-written): the core snapshot and the
@@ -1325,6 +1326,16 @@ const Map<String, String> buildOutputLabels = <String, String>{
       '//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill',
   '//@out/flutter_patched_sdk/vm_outline_strong.dill':
       '//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill',
+};
+
+/// What the compile of a generated source of [buildOutputLabels] reads
+/// besides the source, as `additional_compiler_inputs`: bin_to_assembly's
+/// output `.incbin`s its input by path (the embedder's Android sources list
+/// the Android shell's icudtl.dat.S; the shell's own `get_target_outputs()`
+/// route reads the input off the producer).
+const Map<String, List<String>> buildOutputCompilerInputs = <String, List<String>>{
+  '//@out/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S':
+      <String>['@icu//:flutter/icudtl.dat'],
 };
 
 /// A directory a zip_bundle entry names as its source (zip.py walks it):

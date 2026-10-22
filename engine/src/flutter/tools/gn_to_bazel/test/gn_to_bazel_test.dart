@@ -6238,7 +6238,8 @@ cc_library(
   ${build('ci/host_debug_test', '--target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --no-lto', <String>['flutter:unittests'], tests: '${runTests('Host Tests', 'dart,dart-host,engine,impeller-golden')}, {"name": "Lint", "language": "bash", "script": "flutter/ci/lint.sh", "parameters": [], "contexts": []}')},
   ${build('ci/host_debug_unopt', '--runtime-mode debug --unoptimized --asan --dart-debug', <String>['flutter/tools/font_subset', 'flutter/fml:fml_unittests'])},
   ${build('ci/host_profile_lto', '--runtime-mode profile --prebuilt-dart-sdk', <String>['flutter/tools/font_subset'])},
-  ${build('ci/android_debug', '--android --android-cpu=arm --no-lto', <String>['flutter'])},
+  ${build('ci/android_debug', '--android --no-lto', <String>['flutter'])},
+  ${build('ci/android_debug_arm64', '--target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma', <String>['flutter', 'flutter/shell/platform/android:abi_jars', 'flutter/shell/platform/embedder:embedder-archive'], archives: <String>['out/ci/android_debug_arm64/zip_archives/android-arm64/symbols.zip'])},
   ${build('ci/host_release_licenses', '--target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma', <String>['flutter/tools/licenses_cpp', 'flutter/tools/licenses_cpp:licenses_cpp_testrunner'], tests: '{"name": "Run license_cpp unittests", "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"}, {"name": "Run another runner", "script": "out/ci/host_release_licenses/other_testrunner"}')}
 ]}''',
         'mac_host_engine.json':
@@ -6271,6 +6272,7 @@ cc_library(
   ${build('linux/host_debug_unopt', '--runtime-mode debug --unopt --no-stripped --no-lto', <String>[])},
   ${build('linux/wasm_release', '--web --runtime-mode=release --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'])},
   ${build('linux/wasm_debug_unopt', '--web --runtime-mode=debug --unoptimized --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'])},
+  ${build('linux/android_debug_arm64', '--runtime-mode debug --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma', <String>[])},
   ${build('macos/host_debug', '--runtime-mode debug --no-stripped --no-lto --xcode-symlinks', <String>[])}
 ]}''',
       });
@@ -6284,6 +6286,8 @@ cc_library(
         'host_debug_test',
         'ci_host_debug_unopt',
         'host_profile_lto',
+        'android_debug',
+        'android_debug_arm64',
         'host_release_licenses',
         'wasm_release',
         'wasm_profile',
@@ -6291,6 +6295,7 @@ cc_library(
         'host_debug_unopt',
         'wasm_release',
         'wasm_debug_unopt',
+        'android_debug_arm64',
       ]);
       expect(
         configsBazelrc(builds),
@@ -6318,7 +6323,16 @@ build:ci_host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/co
 # linux_host_engine.json: ci/host_profile_lto
 #   --runtime-mode profile --prebuilt-dart-sdk
 # No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux toolchains have no LTO)
+#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+
+# linux_host_engine.json: ci/android_debug
+#   --android --no-lto
+# No configuration: the Bazel build cannot express
+#   --android-cpu=arm (tools/gn's default) (the Bazel build has an Android arm64 platform only)
+
+# linux_host_engine.json: ci/android_debug_arm64
+#   --target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma
+build:android_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_host_engine.json: ci/host_release_licenses
 #   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
@@ -6348,6 +6362,10 @@ build:host_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
 # local_engine.json: linux/wasm_debug_unopt
 #   --web --runtime-mode=debug --unoptimized --no-rbe --no-goma
 build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten
+
+# local_engine.json: linux/android_debug_arm64
+#   --runtime-mode debug --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma
+# The same configuration as linux_host_engine.json's ci/android_debug_arm64, above.
 '''),
       );
       // Two builds of one name with different flags cannot share it.
@@ -6379,6 +6397,7 @@ build:wasm_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/commo
           '//flutter/impeller/compiler/shader_lib/flutter': <String>{'flutter'},
           '//flutter/tools/licenses_cpp': <String>{'licenses_cpp', 'license_file_compare'},
           '//flutter/web_sdk': <String>{'flutter_web_sdk_archive'},
+          '//flutter/shell/platform/embedder': <String>{'embedder-archive'},
         },
         convertedTests: <String, Set<String>>{
           '//flutter/fml': <String>{'fml_unittests'},
@@ -6403,6 +6422,22 @@ install(
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
     directory = "ci/host_debug",
+)
+'''),
+      );
+      // The Android build: the root group and the Java half's targets have
+      // no counterpart yet; the embedder archive installs.
+      expect(
+        buildFile,
+        contains('''
+# linux_host_engine.json: ci/android_debug_arm64
+#   bazel run --config=android_debug_arm64 :android_debug_arm64
+# Not built, no Bazel counterpart yet: flutter, flutter/shell/platform/android:abi_jars.
+install(
+    name = "android_debug_arm64",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/embedder:embedder-archive"],
+    directory = "ci/android_debug_arm64",
 )
 '''),
       );
@@ -6450,7 +6485,19 @@ install(
 )
 '''),
       );
-      expect(buildFile, isNot(contains('ci/android_debug')));
+      // An Android build without a platform keeps its install (built with the
+      // flags of the nearest configuration, as any build without one).
+      expect(
+        buildFile,
+        contains('''
+# linux_host_engine.json: ci/android_debug
+#   no configuration (configs.bazelrc); the flags would be:
+#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+# Not built, no Bazel counterpart yet: flutter.
+# Nothing to install.
+'''),
+      );
+      expect(buildFile, isNot(contains('mac_host')));
       expect(buildFile, isNot(contains('fuchsia_debug_x64')));
       expect(
         buildFile,
