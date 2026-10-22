@@ -2035,302 +2035,662 @@ selects.config_setting_group(
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:armv7",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:armv7",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:aarch64",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:aarch64",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:riscv64",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:riscv64",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:x86_64",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:x86_64",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:x86_32",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `dart_dynamic_modules && target_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release",
     match_all = [
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:x86_32",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:armv7",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:armv7",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:aarch64",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:aarch64",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:riscv64",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:riscv64",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:x86_64",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:x86_64",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:x86_32",
         "//engine/src/flutter/common:runtime_mode_profile",
     ],
 )
 
-# `!dart_dynamic_modules && target_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+# `dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release",
+    name = "when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release",
     match_all = [
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:x86_32",
         "//engine/src/flutter/common:runtime_mode_release",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "arm"`, for the select()s of this file.
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm",
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x86" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `!dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x86" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_32",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:armv7",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "arm64"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:aarch64",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "riscv64"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:riscv64",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "x64"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:x86_64",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && dart_dynamic_modules && target_cpu == "x86"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x86"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x86",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
         "@platforms//cpu:x86_32",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "arm"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:armv7",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "arm64"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:aarch64",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "riscv64"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:riscv64",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "x64"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
-        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:x86_64",
     ],
 )
 
-# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "x86"`, for the select()s of this file.
+# `flutter_runtime_mode == "debug" && dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x86"`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x86",
+    name = "when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_32",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm",
     match_all = [
         "//engine/src/flutter/common:runtime_mode_debug",
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && dart_disable_secure_socket && target_cpu == "x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_enabled",
+        "@platforms//cpu:x86_32",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:armv7",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "riscv64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:riscv64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && !dart_dynamic_modules && !dart_disable_secure_socket && target_cpu == "x86"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket_disabled",
         "@platforms//cpu:x86_32",
     ],
 )
@@ -2344,36 +2704,66 @@ zip_bundle(
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/symbols.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/symbols.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_x86": "android-x86-jit-release/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm/symbols.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile/symbols.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm": "android-arm-ddm/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64-ddm/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64-ddm/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64": "android-x64-ddm/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x86": "android-x86-ddm/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm": "android-arm/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "android-x64/symbols.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x86": "android-x86/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm-size-exp/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm/symbols.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-size-exp/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile/symbols.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86": "android-x86-ddm-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86": "android-x86-ddm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86": "android-x86-size-exp/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/symbols.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86": "android-x86/symbols.zip",
         "//conditions:default": None,
     }),
     sources = {"libflutter.so": "libflutter.so"},
@@ -2393,36 +2783,66 @@ zip_bundle(
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/artifacts.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/artifacts.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_x86": "android-x86-jit-release/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm/artifacts.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile/artifacts.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm": "android-arm-ddm/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64-ddm/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64-ddm/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64": "android-x64-ddm/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x86": "android-x86-ddm/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm": "android-arm/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "android-x64/artifacts.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x86": "android-x86/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm-size-exp/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-ddm/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release-size-exp/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_profile": "android-x86-profile/artifacts.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86_and_flutter_runtime_mode_release": "android-x86-release/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86": "android-x86-ddm-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86": "android-x86-ddm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x86": "android-x86-size-exp/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/artifacts.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x86": "android-x86/artifacts.zip",
         "//conditions:default": None,
     }),
     sources = {"flutter.jar": "flutter.jar"},
@@ -2711,30 +3131,54 @@ zip_bundle(
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/linux-x64.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/linux-x64.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm": "android-arm-ddm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64-ddm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64-ddm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64": "android-x64-ddm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm": "android-arm/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64/linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "android-x64/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm-size-exp/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm-size-exp/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile-size-exp/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release-size-exp/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_profile": "android-arm-profile/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm_and_flutter_runtime_mode_release": "android-arm-release/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm-size-exp/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-ddm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm": "android-arm-size-exp/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm": "android-arm/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/linux-x64.zip",
         "//conditions:default": None,
     }),
     sources = {"gen_snapshot": "clang_x64/gen_snapshot"},
@@ -2761,24 +3205,42 @@ zip_bundle(
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_arm64": "android-arm64-jit-release/analyze-snapshot-linux-x64.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_riscv64": "android-riscv64-jit-release/analyze-snapshot-linux-x64.zip",
         ":when_flutter_runtime_mode_jit_release_and_target_cpu_x64": "android-x64-jit-release/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/analyze-snapshot-linux-x64.zip",
-        ":when_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_target_cpu_x64": "android-x64-ddm/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "android-arm64/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_riscv64": "android-riscv64/analyze-snapshot-linux-x64.zip",
-        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "android-x64/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64_and_flutter_runtime_mode_release": "android-arm64-release/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_profile": "android-x64-profile/analyze-snapshot-linux-x64.zip",
+        ":when_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64_and_flutter_runtime_mode_release": "android-x64-release/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-ddm/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_dart_disable_secure_socket_and_target_cpu_x64": "android-x64-size-exp/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_arm64": "android-arm64/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_riscv64": "android-riscv64/analyze-snapshot-linux-x64.zip",
+        ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_not_dart_disable_secure_socket_and_target_cpu_x64": "android-x64/analyze-snapshot-linux-x64.zip",
         "//conditions:default": None,
     }),
     sources = {"analyze_snapshot": "clang_x64/analyze_snapshot"},

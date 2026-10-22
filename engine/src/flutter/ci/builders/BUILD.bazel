@@ -176,8 +176,7 @@ install(
 )
 
 # linux_android_aot_engine_size_exp.json: ci/android_release_arm64_size_exp
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_release_arm64_size_exp :android_release_arm64_size_exp
 install(
     name = "android_release_arm64_size_exp",
     testonly = True,
@@ -193,8 +192,7 @@ install(
 # Nothing to run.
 
 # linux_android_aot_engine_size_exp.json: ci/android_debug_arm64_size_exp
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_debug_arm64_size_exp :android_debug_arm64_size_exp
 install(
     name = "android_debug_arm64_size_exp",
     testonly = True,
@@ -614,8 +612,7 @@ test_suite(
 )
 
 # linux_unopt.json: ci/android_debug_arm64_validation_layers
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_debug_arm64_validation_layers :android_debug_arm64_validation_layers
 install(
     name = "android_debug_arm64_validation_layers",
     testonly = True,

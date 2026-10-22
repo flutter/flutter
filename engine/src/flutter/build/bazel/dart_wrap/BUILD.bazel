@@ -58,6 +58,26 @@ config_setting(
     flag_values = {":dart_dynamic_modules": "False"},
 )
 
+# tools/gn's --no-dart-secure-socket: runtime_args.gni's
+# dart_disable_secure_socket, a VM without the secure socket (BoringSSL)
+# implementation in dart:io, which the size-experiment builders build and
+# the archives name with a -size-exp suffix (build/zip_bundle.gni). Off
+# everywhere else; both settings for the archives' conjunctions.
+bool_flag(
+    name = "dart_disable_secure_socket",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "dart_disable_secure_socket_enabled",
+    flag_values = {":dart_disable_secure_socket": "True"},
+)
+
+config_setting(
+    name = "dart_disable_secure_socket_disabled",
+    flag_values = {":dart_disable_secure_socket": "False"},
+)
+
 # GN's prebuilt_dart_sdk outside the host toolchain (common/config.gni): the
 # prebuilt SDK of the *target* -- the host's own for the host's build, and
 # linux-arm64's for the Linux arm64 cross build -- which build/dart lays
@@ -185,6 +205,9 @@ _GN_ARGS = {
     "//conditions:default": {},
 }) | select({
     ":dart_dynamic_modules_enabled": {"dart_dynamic_modules": "true"},
+    "//conditions:default": {},
+}) | select({
+    ":dart_disable_secure_socket_enabled": {"dart_disable_secure_socket": "true"},
     "//conditions:default": {},
 })
 

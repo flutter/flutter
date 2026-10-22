@@ -80,6 +80,15 @@ enum GnFlagEffect {
   /// Something the Bazel build has no setting for yet.
   unsupported,
 
+  /// `--enable-vulkan-validation-layers`: impeller_enable_vulkan_validation_layers
+  /// forced on, which GN's default formula (impeller/tools/args.gni) has on
+  /// for the debug runtime mode on arm64 already -- the Bazel build follows
+  /// the formula (a select() in the Android shell's file) and has no setting
+  /// to force it elsewhere: supported where the formula agrees, unsupported
+  /// otherwise. (vulkan/config.gni's enable_vulkan_validation_layers, which
+  /// the flag sets too, is read by Fuchsia's files alone.)
+  validationLayers,
+
   /// A platform the Bazel build has none for yet (Android, iOS, ...): the
   /// build is out of scope.
   otherPlatform,
@@ -198,6 +207,14 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
     GnFlagEffect.assumed,
     note: 'the Impeller suites always run on the wrapped SwiftShader and loader here',
   ),
+  // runtime_args.gni's dart_disable_secure_socket (the size-experiment
+  // builders): the Dart wrap's flag, which the archives' names read too
+  // (`-size-exp`).
+  '--no-dart-secure-socket': GnFlag(
+    GnFlagEffect.setting,
+    bazelFlag: '--//engine/src/flutter/build/bazel/dart_wrap:dart_disable_secure_socket',
+  ),
+  '--enable-vulkan-validation-layers': GnFlag(GnFlagEffect.validationLayers),
   // An arbitrary GN argument; the ones the builders pass are in gnArguments.
   '--gn-args': GnFlag(GnFlagEffect.gnArgument, takesValue: true, note: 'an arbitrary GN argument'),
   '--android': GnFlag(GnFlagEffect.target),
@@ -321,6 +338,7 @@ final class BuilderBuild {
     String? targetOs;
     String? linuxCpu;
     String? androidCpu;
+    var validationLayers = false;
     final List<String> gn = build.gn;
     for (var i = 0; i < gn.length; i++) {
       String flag = gn[i];
@@ -385,9 +403,24 @@ final class BuilderBuild {
           break;
         case GnFlagEffect.unsupported:
           unsupported.add('$flag${value == null ? '' : '=$value'} (${known.note})');
+        case GnFlagEffect.validationLayers:
+          validationLayers = true;
         case GnFlagEffect.otherPlatform:
           otherPlatform = true;
       }
+    }
+    // --enable-vulkan-validation-layers: where GN's default formula has the
+    // layer already (the debug runtime mode on Android arm64), the flag
+    // changes nothing the Bazel build reads; elsewhere it would force a
+    // value the build cannot (GnFlagEffect.validationLayers).
+    if (validationLayers &&
+        !(targetOs == 'android' &&
+            (androidCpu ?? defaultAndroidCpu) == 'arm64' &&
+            (runtimeMode ?? 'debug') == 'debug')) {
+      unsupported.add(
+        "--enable-vulkan-validation-layers (the Bazel build packs the layer where GN's default "
+        'formula has it, the debug runtime mode on arm64, and has no setting to force it elsewhere)',
+      );
     }
     // The target: --target-os=linux --linux-cpu=arm64 is the Linux arm64
     // cross build, a platform of the Bazel build (tools/gn counts it a host
