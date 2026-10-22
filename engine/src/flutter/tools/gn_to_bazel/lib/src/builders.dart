@@ -89,8 +89,8 @@ enum GnFlagEffect {
   /// the flag sets too, is read by Fuchsia's files alone.)
   validationLayers,
 
-  /// A platform the Bazel build has none for yet (Android, iOS, ...): the
-  /// build is out of scope.
+  /// A platform the Bazel build has none for yet (Fuchsia, iOS, macOS,
+  /// Windows): the build is out of scope.
   otherPlatform,
 }
 
