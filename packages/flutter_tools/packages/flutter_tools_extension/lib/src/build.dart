@@ -66,23 +66,18 @@ abstract base class BuildService extends ToolExtensionService {
   }
 
   Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
-    if (params[targetNameParam] is! String) {
-      throw RpcException.invalidParams('Missing or invalid "$targetNameParam" parameter.');
+    final String targetName;
+    final String projectRoot;
+    final String mainPath;
+    final String buildMode;
+    try {
+      targetName = params.requiredField<String>(targetNameParam);
+      projectRoot = params.requiredField<String>(projectRootParam);
+      mainPath = params.requiredField<String>(mainPathParam);
+      buildMode = params.requiredField<String>(buildModeParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
     }
-    if (params[projectRootParam] is! String) {
-      throw RpcException.invalidParams('Missing or invalid "$projectRootParam" parameter.');
-    }
-    if (params[mainPathParam] is! String) {
-      throw RpcException.invalidParams('Missing or invalid "$mainPathParam" parameter.');
-    }
-    if (params[buildModeParam] is! String) {
-      throw RpcException.invalidParams('Missing or invalid "$buildModeParam" parameter.');
-    }
-
-    final targetName = params[targetNameParam]! as String;
-    final projectRoot = params[projectRootParam]! as String;
-    final mainPath = params[mainPathParam]! as String;
-    final buildMode = params[buildModeParam]! as String;
 
     final Uri? projectRootUri = Uri.tryParse(projectRoot);
     if (projectRootUri == null || !projectRootUri.hasAbsolutePath) {

@@ -12,7 +12,6 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "fml/status.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
@@ -24,6 +23,7 @@
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/command.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -124,11 +124,11 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
   return true;
 }
 
-fml::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
+absl::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
   if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
       workgroup_count[2] == 0u) {
-    return fml::Status(fml::StatusCode::kCancelled,
-                       "Invalid workgroup count for compute command.");
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "Invalid workgroup count for compute command.");
   }
 
   const NSUInteger max_total =
@@ -160,9 +160,9 @@ fml::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
   if (threads_per_threadgroup.width * threads_per_threadgroup.height *
           threads_per_threadgroup.depth >
       max_total) {
-    return fml::Status(fml::StatusCode::kCancelled,
-                       "Compute shader workgroup size exceeds the device's "
-                       "maximum threads per threadgroup.");
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "Compute shader workgroup size exceeds the device's "
+                        "maximum threads per threadgroup.");
   }
 
   [encoder_
@@ -176,7 +176,7 @@ fml::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
   }
   has_label_ = false;
 #endif  // IMPELLER_DEBUG
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 bool ComputePassMTL::EncodeCommands() const {
