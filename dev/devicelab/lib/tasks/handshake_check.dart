@@ -17,8 +17,6 @@ const String _appName = 'handshake_check_app';
 
 TaskFunction createHandshakeCheckTask({
   String? deviceIdOverride,
-  bool checkAppRunningOnLocalDevice = true,
-  bool isIosSimulator = false,
 }) {
   return () async {
     if (deviceIdOverride == null) {
@@ -59,6 +57,8 @@ TaskFunction createHandshakeCheckTask({
           print('Flutter run returned non-zero exit code: $runFlutterResult.');
         }
       });
+
+      // Failure is a good outcome
       if (handshakeFailed) {
         return TaskResult.success(null);
       } else {
