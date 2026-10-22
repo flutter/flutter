@@ -68,14 +68,16 @@ typedef _PlatformViewHitTestGroup = ({int viewId, Rect platformViewRect, List<Re
 ///   pixels when [root] is a [RenderView]).
 /// * Subtrees that cannot receive pointer events are skipped: offstage
 ///   subtrees ([RenderOffstage]) are not visited at all, and render objects
-///   under an ignoring [RenderIgnorePointer] never claim a region. A platform
-///   view under an ignoring [RenderIgnorePointer] still starts a group, because
-///   the browser still delivers pointer events to it.
+///   under an ignoring [RenderIgnorePointer] or an absorbing
+///   [RenderAbsorbPointer] never claim a region. A platform view in such a
+///   subtree still starts a group, because the browser still delivers pointer
+///   events to it.
 /// * A render box claims its bounds if it is an absorbing
-///   [RenderAbsorbPointer] (its subtree is then skipped, since the absorber
-///   already covers it), or if [RenderBox.hitTestSelf] returns true at its
-///   center. Boxes that only forward hits to their children do not claim a
-///   region themselves; their children are visited instead.
+///   [RenderAbsorbPointer] (its subtree is still visited, as described above,
+///   so that platform views inside it start their own groups), or if
+///   [RenderBox.hitTestSelf] returns true at its center. Boxes that only
+///   forward hits to their children do not claim a region themselves; their
+///   children are visited instead.
 /// * A claimed rectangle is kept only if it is non-empty after clipping and
 ///   overlaps at least one platform view painted before it. It is attributed
 ///   to the most recently painted platform view (even if it only overlaps an
@@ -137,15 +139,23 @@ Float64List? computeHitTestRegions(RenderObject root) {
   // Visits [node] and its descendants in child order (see above). [transform] maps
   // [node]'s local coordinates to the root's, [clip] is the accumulated paint
   // clip in root coordinates (or null if unclipped), and [ignoringPointers] is
-  // true when an ancestor [RenderIgnorePointer] is ignoring pointer events.
+  // true when an ancestor [RenderIgnorePointer] is ignoring pointer events or an
+  // ancestor [RenderAbsorbPointer] is absorbing them.
   void visit(RenderObject node, Matrix4 transform, Rect? clip, {required bool ignoringPointers}) {
     // Offstage subtrees are neither painted nor hit tested.
     if (node is RenderOffstage && node.offstage) {
       return;
     }
 
-    final bool childIgnoringPointers =
+    // A render object under (or itself being) an ignoring IgnorePointer never
+    // claims a region.
+    final bool selfIgnoringPointers =
         ignoringPointers || (node is RenderIgnorePointer && node.ignoring);
+    // An absorbing AbsorbPointer swallows every pointer event within its
+    // bounds, so nothing in its subtree can receive pointer events either;
+    // its subtree is treated as if it were under an ignoring IgnorePointer.
+    final bool childIgnoringPointers =
+        selfIgnoringPointers || (node is RenderAbsorbPointer && node.absorbing);
 
     // A platform view starts a new group. Everything visited after this point
     // paints on top of it.
@@ -167,16 +177,16 @@ Float64List? computeHitTestRegions(RenderObject root) {
     // Nothing can cover a platform view until one has been painted, and
     // render objects that ignore pointers never claim a region.
     if (groups.isNotEmpty &&
-        !childIgnoringPointers &&
+        !selfIgnoringPointers &&
         node is RenderBox &&
         node.hasSize &&
         !node.size.isEmpty) {
       if (node is RenderAbsorbPointer) {
-        // An absorbing AbsorbPointer swallows every pointer event within its
-        // bounds, so its bounds cover its whole subtree; no need to descend.
+        // An absorbing AbsorbPointer claims its own bounds. Its subtree is
+        // still visited (with pointers ignored) so that platform views inside
+        // it start their own groups.
         if (node.absorbing) {
           addClaimedRect(node, transform, clip);
-          return;
         }
       } else {
         // hitTestSelf is protected, but asking whether a box would accept a

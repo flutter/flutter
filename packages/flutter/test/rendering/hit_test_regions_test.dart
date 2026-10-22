@@ -379,7 +379,7 @@ void main() {
       // 1. RenderIgnorePointer overlay -> no rect.
       final ignoredOverlay = RenderIgnorePointer(child: _createHitTarget(width: 100, height: 50));
 
-      // 2. RenderAbsorbPointer -> claims its own rect once and stops descending into children.
+      // 2. RenderAbsorbPointer -> claims its own rect once; nothing in its subtree claims.
       final absorbingOverlay = RenderAbsorbPointer(
         child: RenderStack(
           textDirection: TextDirection.ltr,
@@ -458,6 +458,53 @@ void main() {
     expect(
       binding.rootPipelineOwner.debugLastHitTestRegions,
       equals(Float64List.fromList(<double>[5.0, 1.0, 25.0, 35.0, 125.0, 95.0])),
+    );
+  });
+
+  test('discovers PlatformViewRenderBox inside absorbing RenderAbsorbPointer painted after another platform view', () {
+    debugEnableHitTestRegionsOnAllPlatforms = true;
+    binding.automaticPointerInterceptorsEnabled = true;
+
+    final PlatformViewRenderBox pv1 = _createPlatformView(1);
+    final PlatformViewRenderBox pv2 = _createPlatformView(2);
+    final RenderBox siblingInsideAbsorber = _createHitTarget(width: 40, height: 40);
+
+    final absorber = RenderAbsorbPointer(
+      child: RenderStack(
+        textDirection: TextDirection.ltr,
+        children: <RenderBox>[
+          _positioned(left: 0, top: 0, width: 200, height: 200, child: pv2),
+          // Painted over PV2, but inside the absorber, so it never claims.
+          _positioned(left: 10, top: 10, width: 40, height: 40, child: siblingInsideAbsorber),
+        ],
+      ),
+    );
+
+    final RenderBox barrier = _createHitTarget(width: 800, height: 600);
+
+    final stack = RenderStack(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[
+        _positioned(left: 0, top: 0, width: 400, height: 400, child: pv1),
+        _positioned(left: 100, top: 100, width: 200, height: 200, child: absorber),
+        // Painted last, over both platform views.
+        _positioned(left: 0, top: 0, width: 800, height: 600, child: barrier),
+      ],
+    );
+
+    layout(stack, phase: EnginePhase.composite);
+    binding.pumpCompleteFrame();
+
+    // PV1's group holds the absorber's own rect; PV2 still starts its own group,
+    // which holds the barrier painted on top of it.
+    expect(
+      binding.rootPipelineOwner.debugLastHitTestRegions,
+      equals(
+        Float64List.fromList(<double>[
+          1.0, 1.0, 100.0, 100.0, 300.0, 300.0, //
+          2.0, 1.0, 0.0, 0.0, 800.0, 600.0,
+        ]),
+      ),
     );
   });
 
@@ -674,7 +721,7 @@ void main() {
     );
 
     // Toggling absorbing to true claims the RenderAbsorbPointer bounds [20, 30, 220, 180]
-    // and stops descending into children.
+    // and its children no longer claim.
     absorbPointer.absorbing = true;
     binding.pumpCompleteFrame();
     expect(

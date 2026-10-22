@@ -471,7 +471,7 @@ void main() {
                 height: 50,
                 child: IgnorePointer(child: ColoredBox(color: Color(0xFFFF0000))),
               ),
-              // 2. AbsorbPointer -> claims its own rect and stops descending into children.
+              // 2. AbsorbPointer -> claims its own rect; nothing in its subtree claims.
               Positioned(
                 left: 40,
                 top: 50,
@@ -584,6 +584,63 @@ void main() {
         RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
         equals(Float64List.fromList(<double>[3.0, 1.0, 15.0, 25.0, 105.0, 70.0])),
       );
+    },
+  );
+
+  testWidgets(
+    'PlatformViewSurface inside AbsorbPointer painted after another platform view still starts its own group',
+    (WidgetTester tester) async {
+      configureTestView(tester);
+      debugEnableHitTestRegionsOnAllPlatforms = true;
+      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Positioned(left: 0, top: 0, width: 400, height: 400, child: _buildPlatformView(1)),
+              Positioned(
+                left: 100,
+                top: 100,
+                width: 200,
+                height: 200,
+                child: AbsorbPointer(
+                  child: Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        width: 200,
+                        height: 200,
+                        child: _buildPlatformView(2),
+                      ),
+                      const Positioned(
+                        left: 10,
+                        top: 10,
+                        width: 40,
+                        height: 40,
+                        child: ColoredBox(color: Color(0xFFFF0000)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // A barrier painted last, over both platform views.
+              const Positioned.fill(child: ColoredBox(color: Color(0x80000000))),
+            ],
+          ),
+        ),
+      );
+
+      final List<_HitTestRegionGroup> groups = _decodePayload(
+        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions!,
+      );
+      expect(groups, hasLength(2));
+      expect(groups[0].viewId, 1);
+      expect(groups[0].rects, <Rect>[const Rect.fromLTRB(100, 100, 300, 300)]);
+      expect(groups[1].viewId, 2);
+      expect(groups[1].rects, <Rect>[const Rect.fromLTRB(0, 0, 800, 600)]);
     },
   );
 
