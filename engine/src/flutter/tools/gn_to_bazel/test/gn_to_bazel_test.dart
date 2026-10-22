@@ -4355,7 +4355,7 @@ wasm_module(
         "canvas.cc",
         "helpers.h",
     ],
-    copts = ["-mreference-types"],
+    copts = ["-mreference-types"] + FLUTTER_COPTS,
     link_inputs = ["library_support.js"],
     linkopts = [
         "-lGL",
@@ -4491,6 +4491,7 @@ ck_lib("canvaskit") {
 wasm_executable(
     name = "canvaskit_js",
     srcs = ["bindings.cpp"],
+    copts = CHROMIUM_CODE_COPTS,
     link_inputs = [
         "release.js",
         "externs.js",
