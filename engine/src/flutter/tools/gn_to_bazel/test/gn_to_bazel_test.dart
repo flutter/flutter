@@ -6355,7 +6355,7 @@ build:android_debug --compilation_mode=opt --//engine/src/flutter/common:runtime
 # linux_host_engine.json: ci/android_debug_x86
 #   --android --android-cpu=x86 --no-lto
 # No configuration: the Bazel build cannot express
-#   --android-cpu=x86 (the Bazel build has Android arm and arm64 and x64 platforms only)
+#   --android-cpu=x86 (the Bazel build has Android arm and arm64 and riscv64 and x64 platforms only)
 
 # linux_host_engine.json: ci/android_debug_arm64
 #   --target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma

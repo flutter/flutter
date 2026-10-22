@@ -543,6 +543,42 @@ selects.config_setting_group(
     ],
 )
 
+# `full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_debug",
+    match_all = [
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `full_target_platform_name == "android-riscv64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_android_riscv64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
 # `full_target_platform_name == "android-x64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_full_target_platform_name_android_x64_and_flutter_runtime_mode_debug",
@@ -745,6 +781,10 @@ zip_bundle(
         ":when_full_target_platform_name_android_arm64_and_flutter_runtime_mode_profile": "android-arm64-profile/android-arm64-flutter-gtk.zip",
         ":when_full_target_platform_name_android_arm64_and_flutter_runtime_mode_release": "android-arm64-release/android-arm64-flutter-gtk.zip",
         ":when_full_target_platform_name_android_arm64_and_flutter_runtime_mode_jit_release": "android-arm64-jit_release/android-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_debug": "android-riscv64-debug/android-riscv64-flutter-gtk.zip",
+        ":when_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_profile": "android-riscv64-profile/android-riscv64-flutter-gtk.zip",
+        ":when_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_release": "android-riscv64-release/android-riscv64-flutter-gtk.zip",
+        ":when_full_target_platform_name_android_riscv64_and_flutter_runtime_mode_jit_release": "android-riscv64-jit_release/android-riscv64-flutter-gtk.zip",
         ":when_full_target_platform_name_android_x64_and_flutter_runtime_mode_debug": "android-x64-debug/android-x64-flutter-gtk.zip",
         ":when_full_target_platform_name_android_x64_and_flutter_runtime_mode_profile": "android-x64-profile/android-x64-flutter-gtk.zip",
         ":when_full_target_platform_name_android_x64_and_flutter_runtime_mode_release": "android-x64-release/android-x64-flutter-gtk.zip",

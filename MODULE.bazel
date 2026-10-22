@@ -117,6 +117,7 @@ register_toolchains(
     "//engine/src/flutter/build/bazel/toolchains:android_arm64_clang_toolchain",
     "//engine/src/flutter/build/bazel/toolchains:android_x64_clang_toolchain",
     "//engine/src/flutter/build/bazel/toolchains:android_arm_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:android_riscv64_clang_toolchain",
     # Emscripten (wasm32), selected through its platform by wasm_module.
     "//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_toolchain",
 )

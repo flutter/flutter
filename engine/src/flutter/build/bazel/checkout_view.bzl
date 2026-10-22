@@ -50,6 +50,7 @@ BUILD_DIRECTORY_MODES = {
 
 BUILD_DIRECTORY_CPUS = {
     "@platforms//cpu:aarch64": "_arm64",
+    "@platforms//cpu:riscv64": "_riscv64",
     "//engine/src/flutter/common:platform_android_x64": "_x64",
     "//engine/src/flutter/common:platform_android_x86": "_x86",
     "//conditions:default": "",

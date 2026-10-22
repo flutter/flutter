@@ -117,8 +117,7 @@ install(
 )
 
 # linux_android_aot_engine.json: ci/android_profile_riscv64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_profile_riscv64 :android_profile_riscv64
 # Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_profile_riscv64",
@@ -132,8 +131,7 @@ install(
 )
 
 # linux_android_aot_engine.json: ci/android_release_riscv64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_release_riscv64 :android_release_riscv64
 # Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_release_riscv64",
@@ -245,8 +243,7 @@ install(
 )
 
 # linux_android_debug_engine.json: ci/android_debug_riscv64
-#   no configuration (configs.bazelrc); the flags would be:
-#   --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --//engine/src/flutter/build/bazel:stripped=false
+#   bazel run --config=android_debug_riscv64 :android_debug_riscv64
 # Not built, no Bazel counterpart yet: flutter/shell/platform/android:abi_jars.
 install(
     name = "android_debug_riscv64",

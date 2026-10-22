@@ -41,13 +41,11 @@ build:android_release_x64 --compilation_mode=opt --//engine/src/flutter/common:r
 
 # linux_android_aot_engine.json: ci/android_profile_riscv64
 #   --target-dir ci/android_profile_riscv64 --runtime-mode profile --android --android-cpu riscv64 --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
+build:android_profile_riscv64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_riscv64 --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine.json: ci/android_release_riscv64
 #   --target-dir ci/android_release_riscv64 --runtime-mode release --android --android-cpu riscv64 --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
+build:android_release_riscv64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_riscv64 --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine_ddm.json: ci/android_release_arm64_ddm
 #   --target-dir ci/android_release_arm64_ddm --runtime-mode release --android --android-cpu arm64 --gn-args=dart_dynamic_modules=true --rbe --no-goma
@@ -81,8 +79,7 @@ build:android_debug_x64 --compilation_mode=opt --//engine/src/flutter/common:run
 
 # linux_android_debug_engine.json: ci/android_debug_riscv64
 #   --target-dir ci/android_debug_riscv64 --android --android-cpu=riscv64 --no-lto --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
+build:android_debug_riscv64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_riscv64 --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_debug_engine_ddm.json: ci/android_debug_arm64_ddm
 #   --target-dir ci/android_debug_arm64_ddm --android --android-cpu=arm64 --no-lto --gn-args=dart_dynamic_modules=true --rbe --no-goma
@@ -196,8 +193,7 @@ build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 
 # local_engine.json: linux/android_debug_riscv64
 #   --runtime-mode debug --android --android-cpu=riscv64 --no-stripped --no-lto --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
+# The same configuration as linux_android_debug_engine.json's ci/android_debug_riscv64, above.
 
 # local_engine.json: linux/android_debug_unopt_arm64
 #   --runtime-mode debug --unoptimized --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma
