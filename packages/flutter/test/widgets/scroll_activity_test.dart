@@ -339,7 +339,7 @@ void main() {
     expect(position.pixels, 2 * g);
   });
 
-  testWidgets('$DrivenScrollActivity follows a scroll offset correction', (
+  testWidgets('$DrivenScrollActivity follows scroll offset corrections', (
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/193338
@@ -404,10 +404,32 @@ void main() {
     );
     expect(controller.position.activity.toString(), endsWith(', correction: 200.0)'));
 
+    // Grow the spacer by another 100 px while it is still entirely above the
+    // viewport. In this frame the animation first moves to 720 + 200, then the
+    // spacer reports a correction of +100, which adds up with the first one, so
+    // the frame ends at 720 + 300 and the content keeps moving by 80 px.
+    setSpacerExtent(() => spacerExtent = 900.0);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.offset, moreOrLessEquals(720.0 + 300.0));
+    expect(
+      tester.getTopLeft(find.text('Item 3')).dy,
+      moreOrLessEquals(itemTopAfterCorrection + 160.0),
+    );
+
+    // Advance the animation by another 100 ms, which should again scroll up by
+    // 80 px.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(controller.offset, moreOrLessEquals(640.0 + 300.0));
+    expect(
+      tester.getTopLeft(find.text('Item 3')).dy,
+      moreOrLessEquals(itemTopAfterCorrection + 240.0),
+    );
+    expect(controller.position.activity.toString(), endsWith(', correction: 300.0)'));
+
     // Let the animation finish, which should end at its initial target of
-    // 400 px, moved partway through the animation by the 200 px correction.
+    // 400 px, moved partway through the animation by both corrections.
     await tester.pumpAndSettle();
-    expect(controller.offset, moreOrLessEquals(400.0 + 200.0));
+    expect(controller.offset, moreOrLessEquals(400.0 + 300.0));
   });
 
   test('$ScrollActivity dispatches memory events', () async {
