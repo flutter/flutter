@@ -2194,6 +2194,18 @@ const GnCasedValue _androidAppAbi = GnCasedValue('current_cpu', <String, String>
   'riscv64': 'riscv64',
 });
 
+/// skia.gni's skia_gl_standard as tools/gn passes it: "gles" for Android
+/// (and iOS), "webgl" for the web (to_gn_wasm_args), "" for a host -- the
+/// host runs its GLES tests under SwiftShader and must not assume GL. The
+/// Skia wrapper's config turns it into SK_ASSUME_GL_ES=1 / SK_ASSUME_WEBGL=1.
+/// (skia.gni's own default would give the web its value and "" to the rest,
+/// which is wrong for Android: the argument is tools/gn's, not a derivation.)
+const GnCasedValue _skiaGlStandard = GnCasedValue('target_os', <String, String>{
+  'android': 'gles',
+  'linux': '',
+  'wasm': 'webgl',
+});
+
 /// The assumptions the checked-in files are generated under: the Linux x64
 /// host's ([linuxHostAssumptions]) less everything GN derives from the
 /// target -- the target OS and CPU, the toolchains, the names of the target,
@@ -2262,8 +2274,10 @@ Assumptions generationAssumptions() {
     // give the web build its value (skia_use_webgpu).
     // The Skia tree is converted when its repository is fetched, under
     // these. Not here: the arguments whose skia.gni default already yields
-    // both builds' values (skia_gl_standard, skia_use_gl, skia_use_wuffs,
-    // the Rust PNG codecs), which stay derivations.
+    // both builds' values (skia_use_gl, skia_use_wuffs, the Rust PNG
+    // codecs), which stay derivations. skia_gl_standard is tools/gn's, per
+    // target OS (_skiaGlStandard).
+    'skia_gl_standard': _skiaGlStandard,
     'skia_enable_pdf': const GnBoolValue(false),
     'skia_use_dng_sdk': const GnBoolValue(false),
     'skia_use_vma': const GnBoolValue(false),

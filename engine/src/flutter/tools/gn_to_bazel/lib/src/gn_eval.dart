@@ -3604,16 +3604,46 @@ final class _Evaluator {
   /// string) is the one in force. Null for anything but such a variable.
   Condition? _casesComparison(String name, bool equals, String value, _Scope scope, GnNode node) {
     final GnVariable? variable = scope.lookup(name);
-    if (variable == null || variable.isList) {
+    if (variable == null) {
+      final GnValue? assumed = assumptions[name];
+      return assumed is GnCasedValue ? _casedComparison(assumed, equals, value) : null;
+    }
+    if (variable.isList) {
       return null;
     }
     final _Expression cases = _scalarItems(variable, node.location);
+    // A declared argument an assumption with cases stands in for
+    // (declare_args() assigns the assumption under each of its branches):
+    // the cases are the assumption's.
+    final cased = <GnCasedValue>{
+      for (final _Value i in cases.items)
+        if (i.value is GnCasedValue) i.value as GnCasedValue,
+    };
+    if (cased.isNotEmpty) {
+      if (cased.length != 1 || cases.items.any((_Value i) => i.value is! GnCasedValue)) {
+        throw GnError(node.location, '$name mixes an assumption with cases and other values');
+      }
+      return _casedComparison(cased.single, equals, value);
+    }
     if (cases.items.any((_Value i) => i.value is! GnStringValue)) {
       return null;
     }
     return Condition.disjunction(<Condition>[
       for (final _Value i in cases.items)
         if (((i.value as GnStringValue).value == value) == equals) i.condition,
+    ]);
+  }
+
+  /// `name == "value"` for an assumption with a case per value of another
+  /// variable (skia_gl_standard by target_os: "gles" on Android, "webgl" on
+  /// the web, "" on the host): the comparison holds under the cases whose
+  /// string matches (for `!=`, does not), each the comparison of that
+  /// variable -- `target_os == "android"`, which the emitter renders as the
+  /// OS's setting.
+  Condition _casedComparison(GnCasedValue cased, bool equals, String value) {
+    return Condition.disjunction(<Condition>[
+      for (final MapEntry<String, String> c in cased.values.entries)
+        if ((c.value == value) == equals) ConditionComparison(cased.variable, true, c.key),
     ]);
   }
 
