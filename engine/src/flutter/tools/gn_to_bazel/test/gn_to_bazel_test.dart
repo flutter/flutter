@@ -553,6 +553,12 @@ source_set("x") {
           );
           continue;
         }
+        if (value is GnCasedValue && value.variable == 'target_os') {
+          // An argument tools/gn passes per target OS (skia_gl_standard):
+          // the host's value is its linux case.
+          expect(host[name], GnStringValue(value.values['linux']!), reason: name);
+          continue;
+        }
         expect(value, host[name], reason: name);
       }
       expect(
@@ -582,8 +588,7 @@ source_set("x") {
         'shell_enable_metal',
         'shell_enable_software',
         'shell_enable_vulkan',
-        // skia.gni's defaults give both builds' values: derivations.
-        'skia_gl_standard',
+        // skia.gni's default gives both builds' values: a derivation.
         'skia_use_gl',
         // The wasm toolchains set these per variant: the web build's
         // settings (webVariantArguments).
