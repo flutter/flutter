@@ -212,7 +212,11 @@ exports_files(glob(["source/common/*.cpp"]))
 # list it in their `data`.
 filegroup(
     name = "icudata",
-    srcs = ["common/icudtl.dat"],
+    # BUILD.gn's data_dir: android/ for Android, common/ elsewhere.
+    srcs = select({
+        "@platforms//os:android": ["android/icudtl.dat"],
+        "//conditions:default": ["common/icudtl.dat"],
+    }),
 )
 
 # The two data files by name: the full one and the trimmed one Flutter ships

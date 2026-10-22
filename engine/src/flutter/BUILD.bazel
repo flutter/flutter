@@ -418,13 +418,15 @@ filegroup(
 # package under gen/dart-pkg/), the embedder library with its header, and
 # every archive the Linux host configurations define (the ones below),
 # under zip_archives/. For an Android build (the developer's android_*
-# configurations, whose GN build is ninja's default target, everything):
-# what the root group `flutter`, the dist archives and the Maven tree lay
-# -- libflutter.so and its lib.stripped/ copy, the host gen_snapshot under
-# clang_x64/, the embedding's jars and poms, the Android archives,
-# sky_engine.zip and flutter_gpu.zip and download.flutter.io under
-# zip_archives/ -- what the flutter tool reads from an Android
-# `--local-engine` and what the Android builders upload. `bazel run`
+# configurations, whose GN build is ninja's default target -- the root
+# group `flutter`, which engine/src's //:default depends on): what that
+# group lays -- libflutter.so and its lib.stripped/ copy, the host
+# gen_snapshot under clang_x64/, the embedding's jars and poms, the Android
+# archives and the javadoc under zip_archives/, ICU's data file -- which is
+# what the flutter tool reads from an Android `--local-engine`; the Maven
+# tree and the dist archives are the builders' targets, not the default's,
+# as under GN (install_diff.py against GN's out/android_debug_arm64 agrees
+# path by path). `bazel run`
 # copies them into engine/src/out/<variant>/ -- host_debug_unopt for a
 # plain build, host_debug for -c opt, host_release with the mode flag,
 # android_debug_unopt_x64 under --config=android_debug_unopt_x64 -- or into
@@ -462,26 +464,21 @@ install(
         ],
     }),
     contents = select({
-        # What GN's default target lays for Android that a consumer reads:
-        # the root group's closure (the Android shell with its jars and
-        # archives, the host gen_snapshot, the snapshots, the Impeller SDK,
-        # the embedder archive), the dist archives at both of their
-        # locations, and the Maven tree, which the Android builders name as
-        # targets of their own.
-        "@platforms//os:android": [
-            ":dist",
-            ":flutter",
-            "//engine/src/flutter/lib/gpu/dist:zip_old_location",
-            "//engine/src/flutter/shell/platform/android:abi_jars",
-            "//engine/src/flutter/shell/platform/android:embedding_jars",
-            "//engine/src/flutter/sky/dist:zip_old_location",
-        ],
+        # GN's default target is the root group `flutter` (engine/src's
+        # //:default depends on //flutter alone): the Android shell with its
+        # jars and archives, the host gen_snapshot, the snapshots, the
+        # Impeller SDK, the embedder archive. The Maven tree and the dist
+        # archives are not in it; the builders name them as targets.
+        "@platforms//os:android": [":flutter"],
         # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
         # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
         "//conditions:default": ["//engine/src/flutter/sky/packages/sky_engine"],
     }),
     files = select({
-        "@platforms//os:android": {},
+        # copy("copy_icudata"): ICU's data file for the target at the build
+        # root (android/icudtl.dat; @icu's filegroup selects it), as GN's
+        # icudata group lays it.
+        "@platforms//os:android": {"@icu//:icudata": ""},
         "//conditions:default": {
             "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
             "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
