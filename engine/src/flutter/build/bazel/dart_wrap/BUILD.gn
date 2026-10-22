@@ -9,7 +9,10 @@
 # the Dart targets below and their dependencies are loaded.
 #
 # The list is every //flutter/third_party/dart target the engine's GN build
-# files depend on, besides create_sdk. The tools that run at build time --
+# files depend on, besides create_sdk and kernel-service:frontend_server_aot
+# (the engine's flutter_frontend_server builds that one only without the
+# prebuilt SDK; with it, GN copies the SDK's snapshot, as the Bazel build
+# takes it from @dart_sdk_linux_x64). The tools that run at build time --
 # gen_snapshot, analyze_snapshot, bootstrap_compile_platform -- are the host
 # toolchain's, as //flutter/lib/snapshot names them: in a cross build (the
 # Linux arm64 one, target_cpu = "arm64") GN writes them under clang_x64/,
@@ -34,7 +37,6 @@ group("dart_wrap") {
     "//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion",
     "//flutter/third_party/dart/third_party/perfetto:libprotozero",
     "//flutter/third_party/dart/utils:bootstrap_compile_platform.exe($host_toolchain)",
-    "//flutter/third_party/dart/utils/kernel-service:frontend_server_aot",
   ]
 
   # The analyze_snapshot tool is a 64-bit target's (runtime_args.gni).
