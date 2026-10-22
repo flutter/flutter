@@ -17,61 +17,50 @@
 
 # linux_android_aot_engine.json: ci/android_profile
 #   --target-dir ci/android_profile --runtime-mode profile --android --android-cpu arm --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:android_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine.json: ci/android_release
 #   --target-dir ci/android_release --runtime-mode release --android --android-cpu arm --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:android_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine.json: ci/android_release_arm64
 #   --target-dir ci/android_release_arm64 --runtime-mode release --android --android-cpu arm64 --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:ci_android_release_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine.json: ci/android_profile_arm64
 #   --target-dir ci/android_profile_arm64 --android --runtime-mode profile --android-cpu arm64 --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:ci_android_profile_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine.json: ci/android_profile_x64
 #   --target-dir ci/android_profile_x64 --runtime-mode profile --android --android-cpu x64 --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:android_profile_x64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine.json: ci/android_release_x64
 #   --target-dir ci/android_release_x64 --runtime-mode release --android --android-cpu x64 --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:android_release_x64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine.json: ci/android_profile_riscv64
 #   --target-dir ci/android_profile_riscv64 --runtime-mode profile --android --android-cpu riscv64 --rbe --no-goma
 # No configuration: the Bazel build cannot express
 #   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
 
 # linux_android_aot_engine.json: ci/android_release_riscv64
 #   --target-dir ci/android_release_riscv64 --runtime-mode release --android --android-cpu riscv64 --rbe --no-goma
 # No configuration: the Bazel build cannot express
 #   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
 
 # linux_android_aot_engine_ddm.json: ci/android_release_arm64_ddm
 #   --target-dir ci/android_release_arm64_ddm --runtime-mode release --android --android-cpu arm64 --gn-args=dart_dynamic_modules=true --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:android_release_arm64_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm64 --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine_ddm.json: ci/android_release_x64_ddm
 #   --target-dir ci/android_release_x64_ddm --runtime-mode release --android --android-cpu x64 --gn-args=dart_dynamic_modules=true --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
+build:android_release_x64_ddm --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:android_x64 --//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_aot_engine_size_exp.json: ci/android_release_arm64_size_exp
 #   --target-dir ci/android_release_arm64_size_exp --runtime-mode release --android --android-cpu arm64 --no-dart-secure-socket --rbe --no-goma
 # No configuration: the Bazel build cannot express
 #   --no-dart-secure-socket (not in the converter's table of tools/gn flags)
-#   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
 
 # linux_android_aot_engine_size_exp.json: ci/android_debug_arm64_size_exp
 #   --target-dir ci/android_debug_arm64_size_exp --android --android-cpu=arm64 --no-lto --no-dart-secure-socket --rbe --no-goma

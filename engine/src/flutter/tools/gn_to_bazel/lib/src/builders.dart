@@ -52,9 +52,9 @@ enum GnFlagEffect {
   /// host's CPU is the host's own build).
   target,
 
-  /// `--lto`/`--no-lto`: whether the optimized build links with LTO, which
-  /// the target platform decides here: the host toolchain has no LTO, the
-  /// wasm platform's optimized build always has it.
+  /// `--lto`/`--no-lto`: whether the optimized build compiles and links
+  /// with LTO: the `lto` setting for the clang toolchains (Linux, Android);
+  /// the wasm platform's optimized build always has it.
   lto,
 
   /// `--stripped`/`--no-stripped`: tools/gn's stripped_symbols, whether the
@@ -228,6 +228,10 @@ const String runtimeModeSetting = '//engine/src/flutter/common:runtime_mode';
 /// The stripped setting of the Bazel build (build/bazel/BUILD.bazel): whether
 /// the shared libraries an install or an archive ships are stripped.
 const String strippedSetting = '//engine/src/flutter/build/bazel:stripped';
+
+/// The LTO setting of the Bazel build (build/bazel/BUILD.bazel): -flto on
+/// the compiles and links of an optimized build.
+const String ltoSetting = '//engine/src/flutter/build/bazel:lto';
 
 /// testing/run_tests.py's test types, as the Bazel suites that run the same
 /// tests: `dart` is the Dart tests under flutter_tester with the VM
@@ -411,15 +415,13 @@ final class BuilderBuild {
       otherPlatform = true;
     }
     // tools/gn: LTO is on unless --no-lto, and off in unoptimized builds.
-    // The Linux and Android toolchains have no LTO, so an optimized host,
-    // arm64 or Android build has to say --no-lto; the wasm platform links
-    // the optimized build with LTO, as GN's web build does, and has no
-    // setting that turns it off.
+    // An optimized build with it (the Android AOT builders) sets the `lto`
+    // setting of the clang toolchains; the wasm platform links the
+    // optimized build with LTO, as GN's web build does, and has no setting
+    // that turns it off.
     final wasm = platform == '--platforms=$wasmPlatform';
     if (!unoptimized && lto && !wasm) {
-      unsupported.add(
-        'LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)',
-      );
+      settings.add('--$ltoSetting');
     } else if (!unoptimized && !lto && wasm) {
       unsupported.add('--no-lto (the wasm platform links the optimized build with LTO)');
     }
@@ -891,10 +893,16 @@ void _testSuiteInto(
 /// `flutter/tools/font_subset`, `sky_engine`, `clang_x64/gen_snapshot`), or
 /// null when nothing converted answers to it. GN's ninja targets are labels
 /// without the leading `//`, a directory for its target of the same name, a
-/// bare target name when it is unique in the build, or an output's path
-/// under the build directory; a word is a directory before it is a name
-/// (`flutter` is `//flutter:flutter`).
+/// bare target name when it is unique in the build, an output's path under
+/// the build directory, or ninja's `default`; a word is a directory before
+/// it is a name (`flutter` is `//flutter:flutter`).
 String? _ninjaTargetLabel(String target, Map<String, Set<String>> convertedTargets) {
+  // ninja's `default` is every target of the GN build (the root BUILD.gn
+  // has no group of that name); the root group `flutter` -- what `ninja
+  // flutter` builds, and all the artifacts a build lays -- stands for it.
+  if (target == 'default') {
+    target = 'flutter';
+  }
   String gnPackage;
   String name;
   if (target.contains(':')) {
