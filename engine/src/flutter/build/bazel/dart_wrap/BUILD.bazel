@@ -150,6 +150,12 @@ _GN_ARGS = {
         "dart_target_arch": '"arm64"',
         "target_cpu": '"arm64"',
     },
+    # 32-bit arm (tools/gn --android, its default CPU): a 32-bit VM without
+    # compressed pointers.
+    "@platforms//cpu:armv7": {
+        "dart_target_arch": '"arm"',
+        "target_cpu": '"arm"',
+    },
     "//conditions:default": {
         "dart_target_arch": '"x64"',
         "target_cpu": '"x64"',
@@ -221,6 +227,11 @@ gn_build(
             "gen_snapshot_host": "clang_x64/gen_snapshot",
         },
         "//conditions:default": {"gen_snapshot_host": "gen_snapshot"},
+    }) | select({
+        # The analyze_snapshot tool is a 64-bit target's
+        # (runtime_args.gni's build_analyze_snapshot).
+        "@platforms//cpu:armv7": {"analyze_snapshot": ""},
+        "//conditions:default": {},
     }),
     root_target_dir = "flutter/build/bazel/dart_wrap",
     # The GN source root: the engine's build configuration, the trees GN

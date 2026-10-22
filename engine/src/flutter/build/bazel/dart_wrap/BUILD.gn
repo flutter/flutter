@@ -19,12 +19,13 @@
 # built for the target itself: artifacts.zip ships that one (build/archives:
 # "a target-platform-specific binary"), the arm64 build's for arm64 hosts.
 
+import("//flutter/third_party/dart/runtime/runtime_args.gni")
+
 group("dart_wrap") {
   deps = [
     "//flutter/third_party/dart/runtime:dart_api",
     "//flutter/third_party/dart/runtime:libdart_aotruntime",
     "//flutter/third_party/dart/runtime:libdart_jit",
-    "//flutter/third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)",
     "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",
     "//flutter/third_party/dart/runtime/bin:elf_loader",
     "//flutter/third_party/dart/runtime/bin:gen_snapshot",
@@ -35,4 +36,9 @@ group("dart_wrap") {
     "//flutter/third_party/dart/utils:bootstrap_compile_platform.exe($host_toolchain)",
     "//flutter/third_party/dart/utils/kernel-service:frontend_server_aot",
   ]
+
+  # The analyze_snapshot tool is a 64-bit target's (runtime_args.gni).
+  if (build_analyze_snapshot) {
+    deps += [ "//flutter/third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
+  }
 }

@@ -18,13 +18,11 @@
 # linux_android_aot_engine.json: ci/android_profile
 #   --target-dir ci/android_profile --runtime-mode profile --android --android-cpu arm --rbe --no-goma
 # No configuration: the Bazel build cannot express
-#   --android-cpu=arm (the Bazel build has Android arm64 and x64 platforms only)
 #   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
 
 # linux_android_aot_engine.json: ci/android_release
 #   --target-dir ci/android_release --runtime-mode release --android --android-cpu arm --rbe --no-goma
 # No configuration: the Bazel build cannot express
-#   --android-cpu=arm (the Bazel build has Android arm64 and x64 platforms only)
 #   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
 
 # linux_android_aot_engine.json: ci/android_release_arm64
@@ -50,13 +48,13 @@
 # linux_android_aot_engine.json: ci/android_profile_riscv64
 #   --target-dir ci/android_profile_riscv64 --runtime-mode profile --android --android-cpu riscv64 --rbe --no-goma
 # No configuration: the Bazel build cannot express
-#   --android-cpu=riscv64 (the Bazel build has Android arm64 and x64 platforms only)
+#   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
 #   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
 
 # linux_android_aot_engine.json: ci/android_release_riscv64
 #   --target-dir ci/android_release_riscv64 --runtime-mode release --android --android-cpu riscv64 --rbe --no-goma
 # No configuration: the Bazel build cannot express
-#   --android-cpu=riscv64 (the Bazel build has Android arm64 and x64 platforms only)
+#   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
 #   LTO, which tools/gn enables without --no-lto (the Linux and Android toolchains have no LTO)
 
 # linux_android_aot_engine_ddm.json: ci/android_release_arm64_ddm
@@ -82,8 +80,7 @@
 
 # linux_android_debug_engine.json: ci/android_debug
 #   --target-dir ci/android_debug --android --android-cpu=arm --no-lto --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --android-cpu=arm (the Bazel build has Android arm64 and x64 platforms only)
+build:android_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_android_debug_engine.json: ci/android_debug_arm64
 #   --target-dir ci/android_debug_arm64 --android --android-cpu=arm64 --no-lto --rbe --no-goma
@@ -96,7 +93,7 @@ build:android_debug_x64 --compilation_mode=opt --//engine/src/flutter/common:run
 # linux_android_debug_engine.json: ci/android_debug_riscv64
 #   --target-dir ci/android_debug_riscv64 --android --android-cpu=riscv64 --no-lto --rbe --no-goma
 # No configuration: the Bazel build cannot express
-#   --android-cpu=riscv64 (the Bazel build has Android arm64 and x64 platforms only)
+#   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
 
 # linux_android_debug_engine_ddm.json: ci/android_debug_arm64_ddm
 #   --target-dir ci/android_debug_arm64_ddm --android --android-cpu=arm64 --no-lto --gn-args=dart_dynamic_modules=true --rbe --no-goma
@@ -185,8 +182,7 @@ build:host_debug_unopt_impeller_tests --compilation_mode=fastbuild --//engine/sr
 
 # linux_unopt.json: ci/android_debug_unopt
 #   --target-dir ci/android_debug_unopt --android --unoptimized --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --android-cpu=arm (tools/gn's default) (the Bazel build has Android arm64 and x64 platforms only)
+build:android_debug_unopt --compilation_mode=fastbuild --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_unopt.json: ci/host_release_licenses
 #   --target-dir ci/host_release_licenses --runtime-mode release --no-lto --rbe --no-goma
@@ -194,8 +190,7 @@ build:host_release_licenses --compilation_mode=opt --//engine/src/flutter/common
 
 # linux_unopt.json: ci/android_debug_test
 #   --target-dir ci/android_debug_test --android --android-cpu=arm --no-lto --rbe --no-goma
-# No configuration: the Bazel build cannot express
-#   --android-cpu=arm (the Bazel build has Android arm64 and x64 platforms only)
+build:android_debug_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:stripped=false
 
 # linux_unopt.json: ci/host_debug_no_prebuilt_dart_sdk
 #   --target-dir ci/host_debug --runtime-mode debug --no-prebuilt-dart-sdk --build-embedder-examples --no-lto --rbe --no-goma
@@ -213,7 +208,7 @@ build:wasm_release --compilation_mode=opt --//engine/src/flutter/common:runtime_
 # local_engine.json: linux/android_debug_riscv64
 #   --runtime-mode debug --android --android-cpu=riscv64 --no-stripped --no-lto --rbe --no-goma
 # No configuration: the Bazel build cannot express
-#   --android-cpu=riscv64 (the Bazel build has Android arm64 and x64 platforms only)
+#   --android-cpu=riscv64 (the Bazel build has Android arm and arm64 and x64 platforms only)
 
 # local_engine.json: linux/android_debug_unopt_arm64
 #   --runtime-mode debug --unoptimized --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma

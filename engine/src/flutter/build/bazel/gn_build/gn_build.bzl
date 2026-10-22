@@ -71,6 +71,11 @@ def _gn_build_impl(ctx):
 
     outputs = {}
     for product, gn_path in ctx.attr.outs.items():
+        if not gn_path:
+            # A product the GN build does not make in this configuration
+            # (analyze_snapshot for a 32-bit target): no file, an empty
+            # output group.
+            continue
         f = ctx.actions.declare_file(paths.join(name, product))
         outputs[f] = gn_path
     archives = {}
@@ -133,6 +138,9 @@ def _gn_build_impl(ctx):
     )
 
     groups = {paths.basename(f.path): depset([f]) for f in all_outputs}
+    for product, gn_path in ctx.attr.outs.items():
+        if not gn_path:
+            groups[product] = depset()
 
     # Where each product sits in GN's build directory: an `outs` entry at
     # its path (out_paths), an archive where GN writes a static library
@@ -187,7 +195,9 @@ _gn_build = rule(
             doc = "Build products to export: the product's name (a file name under the target's " +
                   "directory, and its output group) to its path relative to the GN build directory. " +
                   "Two products may name one path (the host's gen_snapshot is the tool and the " +
-                  "shipped binary in the host's own build, two files in a cross build).",
+                  "shipped binary in the host's own build, two files in a cross build); an empty " +
+                  "path is a product the build does not make in this configuration (analyze_snapshot " +
+                  "for a 32-bit target), whose output group is empty.",
         ),
         "archives": attr.string_dict(
             doc = "Archives to produce: file name to the GN label of the library target whose " +
@@ -240,7 +250,8 @@ def gn_build(name, outs = [], out_paths = None, archives = {}, visibility = None
         name to path, or a select() over the platforms of such dicts: a
         cross build's host tools under clang_x64/, a manifest GN writes under
         vulkan-data/). A product `out_paths` does not name is at its own
-        name.
+        name; one it maps to the empty path is not made in that
+        configuration (its target is empty).
       archives: archive file name -> GN library label (see the module docstring).
       visibility: visibility of the build target and the product targets.
       **kwargs: the attributes of the underlying rule (`build_file`, `root_target_dir`,
