@@ -1113,11 +1113,22 @@ the build directory, `--web` the wasm platform
 (`--platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten`,
 whose flags carry what `tools/gn`'s `to_gn_wasm_args` sets, LTO on the
 optimized build among them -- so for the web `--no-lto` is the flag the
-Bazel build cannot express, where for the host, whose toolchain has no LTO,
-it is LTO itself), `--target-os=linux --linux-cpu=arm64` the arm64 platform
+Bazel build cannot express), `--target-os=linux --linux-cpu=arm64` the arm64 platform
 (`--platforms=//engine/src/flutter/build/bazel/toolchains:linux_arm64`; the
 two flags are read as one, since `--linux-cpu` means nothing without
-`--target-os=linux`), `--enable-fontconfig` the fontconfig flag
+`--target-os=linux`), `--android --android-cpu=<cpu>` the Android platform
+for the CPU (`toolchains:android_arm64`, `android_x64`, `android_arm` --
+`tools/gn`'s default when `--android-cpu` is absent -- and
+`android_riscv64`; x86 has none, and a build asking for it is listed with
+the reason), `--lto`/`--no-lto` the `lto` setting
+(`//engine/src/flutter/build/bazel:lto`: `-flto` on the compiles and links
+of the clang toolchains, Linux and Android; on in an optimized build
+without `--no-lto`, as `tools/gn` has it, which is CI's Android AOT builds),
+`--no-dart-secure-socket` the Dart wrap's `dart_disable_secure_socket` flag
+(the size-experiment builds; the archives take their `-size-exp` names from
+it), `--enable-vulkan-validation-layers` nothing where GN's default formula
+packs the layer already (the debug runtime mode on Android arm64) and a
+flag the build cannot express elsewhere, `--enable-fontconfig` the fontconfig flag
 (`//engine/src/flutter/txt:use_fontconfig`, which the three `*_desktop`
 builds set: txt links the sysroot's libfontconfig and Skia's fontconfig font
 manager is built and chosen, as in CI's Linux desktop artifact),
@@ -1136,34 +1147,53 @@ their sizes allow for and `run_tests.py` has no per-test timeout, four times
 Bazel's default timeouts), `--dart-debug`
 the Dart wrap's `dart_debug` flag (a Debug VM), `--gn-args=dart_dynamic_modules=true`
 the wrap's `dart_dynamic_modules` flag (a VM with dynamic modules; the
-archives take their `-ddm` names from it), `--prebuilt-dart-sdk`,
-`--no-lto` and `--use-glfw-swiftshader` what the generated files assume,
+archives take their `-ddm` names from it), `--prebuilt-dart-sdk` and
+`--use-glfw-swiftshader` what the generated files assume,
 `--rbe`/`--no-goma` where the build runs and `--build-embedder-examples` a
 target list, neither a flag -- and, for a build with a flag the Bazel build
 has no setting for yet, the reason and no configuration:
-`--no-prebuilt-dart-sdk`, LTO (which `tools/gn` enables without `--no-lto`). The developer's own configurations,
+`--no-prebuilt-dart-sdk`. The developer's own configurations,
 `local_engine.json`'s `linux/` builds (what `et build --config <name>` runs:
 `host_debug`, `host_debug_unopt`, `host_profile`, `host_release`,
-`wasm_release`, `wasm_debug_unopt`; the host ones with `--no-stripped`,
+`wasm_release`, `wasm_debug_unopt`, `android_debug_arm64`,
+`android_debug_riscv64`, `android_debug_unopt_arm64`,
+`android_debug_unopt_x64`, `android_profile_arm64`, `android_release_arm64`;
+the host ones with `--no-stripped`,
 the `stripped` flag off -- shared libraries as linked, where CI's are
 stripped), are read with the rest, and a name two builds share with the same
-flags -- CI's `ci/wasm_release` and the developer's `linux/wasm_release`
+flags -- CI's `ci/wasm_release` and the developer's `linux/wasm_release`,
+CI's `ci/android_debug_arm64` and the developer's `linux/android_debug_arm64`
 -- is one configuration; where CI's flags differ from the developer's under
 one bare name, the developer keeps the name `et` knows and CI's keeps its
 prefix as its build directory does: `ci_host_debug` and `ci_host_release`
 (`out/ci/host_debug`, `out/ci/host_release`: stripped libraries) beside
 `host_debug` and `host_release`, `ci_host_debug_unopt`
-(`out/ci/host_debug_unopt`, asan and a Debug VM) beside `host_debug_unopt`.
-Of the twenty-five builds, twenty-four have a configuration, twenty-three
-distinct: `host_debug`, `ci_host_debug`,
+(`out/ci/host_debug_unopt`, asan and a Debug VM) beside `host_debug_unopt`,
+`ci_android_profile_arm64` and `ci_android_release_arm64` (LTO) beside
+`android_profile_arm64` and `android_release_arm64`.
+Of the fifty-four Linux builds, fifty-three have a configuration, fifty
+distinct: the host's `host_debug`, `ci_host_debug`,
 `host_debug_unopt`, `host_profile`, `host_release`, `ci_host_release`,
 `host_debug_desktop`,
 `host_profile_desktop`, `host_release_desktop`, `host_debug_test`,
 `host_profile_test`, `host_release_test`, `ci_host_debug_unopt`,
 `host_debug_unopt_impeller_tests`, `host_debug_ddm`,
-`host_release_licenses`, `host_debug_clang_tidy`, `wasm_release`,
-`wasm_debug_unopt`, `linux_debug_arm64`, `linux_debug_arm64_desktop`,
-`linux_profile_arm64_desktop`, `linux_release_arm64_desktop`.
+`host_release_licenses`, `host_debug_clang_tidy`; the web's `wasm_release`,
+`wasm_debug_unopt`; the arm64 cross builds' `linux_debug_arm64`, `linux_debug_arm64_desktop`,
+`linux_profile_arm64_desktop`, `linux_release_arm64_desktop`; and
+Android's `android_debug`, `android_profile`, `android_release` (arm),
+`android_debug_arm64`, `android_profile_arm64`, `android_release_arm64`,
+`ci_android_profile_arm64`, `ci_android_release_arm64`,
+`android_debug_x64`, `android_profile_x64`, `android_release_x64`,
+`android_debug_riscv64`, `android_profile_riscv64`,
+`android_release_riscv64`, `android_debug_unopt`,
+`android_debug_unopt_arm64`, `android_debug_unopt_x64`,
+`android_debug_arm64_ddm`, `android_debug_x64_ddm`,
+`android_release_arm64_ddm`, `android_release_x64_ddm`,
+`android_debug_arm64_size_exp`, `android_release_arm64_size_exp`,
+`android_debug_arm64_validation_layers`, `android_debug_arm64_clang_tidy`,
+`android_debug_test`, `android_emulator_debug_x64`. The one without is
+`ci/host_debug_no_prebuilt_dart_sdk`.
 `ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a
 directory for its target of the same name, a bare unique name, as GN's
