@@ -59,10 +59,20 @@ stand for its `run_tests.py` types (`runTestsTypeSuites`;
 `runTestsEngineSuites` is the `engine` type's executables by name, resolved
 among the converted tests); both files are covered by `--check`.
 
-By default the converter assumes the Linux x64 host build: GN conditions on
-`is_linux`, `is_win`, `enable_backtrace` and so on are decided the way GN
-would decide them for that build, and the items they guard are emitted with
-the condition as a comment. `--assume name=value` replaces the defaults;
+By default the converter assumes the Linux x64 *host* and leaves the
+*target* open (`generationAssumptions` in `bazel_mapping.dart`): the host
+itself (`host_os`, `host_cpu`, its platform names, the prebuilt Dart SDK),
+the OSes the engine does not build for from this host (`is_win`, `is_mac`,
+`is_ios`, `is_fuchsia`, `is_qnx`) and the arguments `tools/gn` passes in,
+which GN derives from nothing (`is_official_build`, the Skia feature flags
+-- at the host's value where the web build passes the same, as a formula
+over the target OS where the two differ, `perTargetOsArguments`), are
+decided the way GN would decide them, and the items they guard are emitted
+with the condition as a comment; what GN derives from the target -- `is_linux`,
+`is_android`, `is_wasm`, `current_cpu`, the toolchains and their names, the
+`.gni` arguments computed from them -- stays a `select()` over the platform
+settings, so that one generated file serves the host, the web and the
+Android builds. `--assume name=value` replaces the defaults;
 `--assume=none` keeps every condition and renders it as a `select()`, which
 needs a `config_setting` for each variable involved (see `conditionSettings`).
 What the defaults leave open on purpose -- `is_debug`, the runtime mode,
