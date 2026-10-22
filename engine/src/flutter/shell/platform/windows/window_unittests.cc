@@ -56,6 +56,7 @@ TEST(MockWindow, OnImeCompositionCompose) {
           Return(std::optional<std::u16string>(std::u16string(u"`}"))));
   EXPECT_CALL(*text_input_manager, GetComposingCursorPosition()).Times(0);
 
+  EXPECT_CALL(window, OnComposeBegin()).Times(1);
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 5)).Times(1);
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"`}"), 0)).Times(0);
   EXPECT_CALL(window, OnComposeCommit()).Times(0);
@@ -63,7 +64,30 @@ TEST(MockWindow, OnImeCompositionCompose) {
       .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
-  // Send an IME_COMPOSITION event that contains just the composition string.
+  // Start composing, then send an IME_COMPOSITION event that contains just the
+  // composition string.
+  window.InjectWindowMessage(WM_IME_STARTCOMPOSITION, 0, 0);
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
+}
+
+// Outside of a composition, a composing string would be inserted as plain text.
+TEST(MockWindow, OnImeCompositionComposeWithoutCompositionIsIgnored) {
+  auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
+  auto* text_input_manager = new MockTextInputManager();
+  std::unique_ptr<TextInputManager> text_input_manager_ptr(text_input_manager);
+  MockWindow window(std::move(windows_proc_table),
+                    std::move(text_input_manager_ptr));
+  EXPECT_CALL(*text_input_manager, GetComposingString()).Times(0);
+  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition()).Times(0);
+
+  EXPECT_CALL(window, OnComposeBegin()).Times(0);
+  EXPECT_CALL(window, OnComposeChange(_, _)).Times(0);
+  EXPECT_CALL(window, OnComposeCommit()).Times(0);
+  EXPECT_CALL(window, OnText(_)).Times(0);
+  ON_CALL(window, OnImeComposition)
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
+  EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
+
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
 }
 
@@ -79,12 +103,14 @@ TEST(MockWindow, OnImeCompositionDefaultsKoreanCursorToCompositionEnd) {
           Return(std::optional<std::u16string>(std::u16string(u"다"))));
   EXPECT_CALL(*text_input_manager, GetComposingCursorPosition()).Times(0);
 
+  EXPECT_CALL(window, OnComposeBegin()).Times(1);
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"다"), 1)).Times(1);
   EXPECT_CALL(window, OnComposeCommit()).Times(0);
   ON_CALL(window, OnImeComposition)
       .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
+  window.InjectWindowMessage(WM_IME_STARTCOMPOSITION, 0, 0);
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
 }
 
@@ -300,12 +326,14 @@ TEST(MockWindow, OnImeCompositionUsesCursorPositionWhenProvided) {
   EXPECT_CALL(*text_input_manager, GetComposingCursorPosition())
       .WillOnce(Return(2));
 
+  EXPECT_CALL(window, OnComposeBegin()).Times(1);
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 2)).Times(1);
   EXPECT_CALL(window, OnComposeCommit()).Times(0);
   ON_CALL(window, OnImeComposition)
       .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
+  window.InjectWindowMessage(WM_IME_STARTCOMPOSITION, 0, 0);
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0,
                              GCS_COMPSTR | GCS_CURSORPOS);
 }
@@ -322,12 +350,14 @@ TEST(MockWindow, OnImeCompositionFallsBackToTextEndForInvalidCursorPosition) {
   EXPECT_CALL(*text_input_manager, GetComposingCursorPosition())
       .WillOnce(Return(-1));
 
+  EXPECT_CALL(window, OnComposeBegin()).Times(1);
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 5)).Times(1);
   EXPECT_CALL(window, OnComposeCommit()).Times(0);
   ON_CALL(window, OnImeComposition)
       .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
+  window.InjectWindowMessage(WM_IME_STARTCOMPOSITION, 0, 0);
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0,
                              GCS_COMPSTR | GCS_CURSORPOS);
 }

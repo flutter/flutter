@@ -1012,7 +1012,7 @@ void FlutterWindow::OnImeComposition(UINT const message,
       // composition. Ignore it so that the text is not inserted twice.
     }
   }
-  if (lparam & GCS_COMPSTR) {
+  if (ime_composing_ && (lparam & GCS_COMPSTR)) {
     // Read the in-progress composing string.
     std::optional<std::u16string> text =
         text_input_manager_->GetComposingString();
