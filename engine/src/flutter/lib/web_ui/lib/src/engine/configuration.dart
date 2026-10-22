@@ -297,7 +297,9 @@ class FlutterConfiguration {
   /// Uses direct transferred-canvas presentation for single-canvas Skwasm
   /// scenes, and bitmap presentation when multiple surfaces are needed.
   ///
-  /// Disabled unless explicitly enabled. JavaScript configuration takes
+  /// Enabled by default for desktop WebKit, Firefox, and single-threaded
+  /// Chromium. Mobile, multi-threaded Chromium, and Wimp require explicit opt-in.
+  /// JavaScript configuration takes
   /// precedence over the Dart define.
   bool? get skwasmUseHybridRasterizer =>
       _configuration?.skwasmUseHybridRasterizer ??

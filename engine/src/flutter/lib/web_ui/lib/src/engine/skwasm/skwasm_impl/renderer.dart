@@ -24,7 +24,14 @@ class SkwasmRenderer extends Renderer {
   Surface? _pictureToImageSurface;
 
   Rasterizer _createRasterizer() {
-    final bool useHybrid = configuration.skwasmUseHybridRasterizer ?? false;
+    // Measurements cover the Skia-backed runtime on desktop. Keep mobile,
+    // Wimp, and multi-threaded Chromium opt-in until separately qualified.
+    // Use the loaded runtime's mode, since worker support also affects it.
+    final bool useHybrid =
+        configuration.skwasmUseHybridRasterizer ??
+        (!isWimp &&
+            ui_web.browser.isDesktop &&
+            (ui_web.browser.browserEngine != ui_web.BrowserEngine.blink || !isMultiThreaded));
     if (useHybrid && browserSupportsTransferControlToOffscreen) {
       return HybridCanvasRasterizer(
         (OnscreenCanvasProvider provider) => SkwasmOnscreenSurface(provider),

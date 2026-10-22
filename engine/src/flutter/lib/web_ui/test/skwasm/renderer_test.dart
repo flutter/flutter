@@ -33,13 +33,32 @@ void testMain() {
     });
 
     for (final ui_web.BrowserEngine engine in ui_web.BrowserEngine.values) {
-      test('requires opt-in on every platform for $engine', () {
+      test('selects the measured desktop defaults for $engine', () {
         ui_web.browser.debugBrowserEngineOverride = engine;
         for (final ui_web.OperatingSystem os in ui_web.OperatingSystem.values) {
           ui_web.browser.debugOperatingSystemOverride = os;
           testRenderer.rasterizer.dispose();
           testRenderer.debugResetRasterizer();
-          expect(testRenderer.rasterizer, isA<OffscreenCanvasRasterizer>(), reason: '$os');
+          final desktopDefaults = <ui_web.BrowserEngine, bool>{
+            ui_web.BrowserEngine.blink: !testRenderer.isMultiThreaded,
+            ui_web.BrowserEngine.webkit: true,
+            ui_web.BrowserEngine.firefox: true,
+          };
+          final bool isDesktop = <ui_web.OperatingSystem>[
+            ui_web.OperatingSystem.linux,
+            ui_web.OperatingSystem.windows,
+            ui_web.OperatingSystem.macOs,
+          ].contains(os);
+          final bool expectedHybrid =
+              !testRenderer.isWimp &&
+              isDesktop &&
+              desktopDefaults[engine]! &&
+              browserSupportsTransferControlToOffscreen;
+          expect(
+            testRenderer.rasterizer,
+            expectedHybrid ? isA<HybridCanvasRasterizer>() : isA<OffscreenCanvasRasterizer>(),
+            reason: '$os',
+          );
         }
       });
     }
