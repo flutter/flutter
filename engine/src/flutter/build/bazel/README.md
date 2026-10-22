@@ -1030,11 +1030,20 @@ toolchain's `--strip-unneeded` copy as `lib.stripped/<name>` (see the
 Android section). The Dart wrap's `gen_snapshot` is already GN's stripped file.
 
 The root package has `//engine/src/flutter:install`, the Linux host's build
-directory as above with all seven archives of the Linux host configurations:
+directory as above with all seven archives of the Linux host configurations
+-- and, under an Android platform, the Android developer's: the developer's
+`android_*` configurations have no ninja targets of their own (GN builds
+its default target, everything), so the install's attributes select on the
+OS, and on Android lay what that target lays for a consumer -- the root
+group's closure (libflutter.so with `lib.stripped/`, the jars and poms,
+`clang_x64/gen_snapshot`, the snapshots, the Impeller SDK, the embedder
+archive), the `dist` archives and the Maven tree (346 files for
+`android_debug_unopt_x64`):
 
 ```sh
 bazel run //engine/src/flutter:install
 bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
+bazel run --config=android_debug_unopt_x64 //engine/src/flutter:install   # out/android_debug_unopt_x64
 ```
 
 installs 1,390 files; `tools/gn_to_bazel/tool/install_diff.py` compares such
