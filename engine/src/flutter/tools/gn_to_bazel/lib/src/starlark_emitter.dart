@@ -3122,65 +3122,102 @@ final class _Emitter {
     includes.conditional.removeWhere((Condition c, List<_Item> items) => items.isEmpty);
   }
 
-  /// Whether GN compiles [target] with //flutter:config: it lists the
-  /// config itself, or depends (directly, or through public_deps) on a
-  /// target of this file that exports it, or depends on another engine
-  /// package — engine libraries all export //flutter:config, which is the
-  /// convention the Bazel copts constants rest on.
-  bool _isEngineCode(GnTarget target, [Set<String>? visiting]) {
-    bool lists(GnTarget t, List<String> variables) {
-      for (final name in variables) {
-        for (final GnAssignment a in t.variables[name]?.assignments ?? const <GnAssignment>[]) {
-          for (final GnValue v in a.items) {
-            if (v is GnStringValue && v.value == flutterConfigLabel && a.op != '-=') {
-              return true;
-            }
-          }
-        }
-      }
-      return false;
-    }
-
-    if (lists(target, const <String>['configs', 'public_configs', 'all_dependent_configs'])) {
+  /// Whether GN compiles [target] with //flutter:config (-Wunreachable-code,
+  /// the FLUTTER_COPTS/CHROMIUM_CODE_COPTS difference): it lists the config
+  /// itself, privately or publicly, or depends -- over `deps` or
+  /// `public_deps` alike -- on a target that hands it on
+  /// ([_forwardsFlutterConfig]).
+  bool _isEngineCode(GnTarget target) {
+    if (_listsFlutterConfig(target, gnPackage, const <String>[
+      'configs',
+      'public_configs',
+      'all_dependent_configs',
+    ])) {
       return true;
     }
-    final Set<String> seen = visiting ?? <String>{};
-    if (!seen.add(target.name)) {
-      return false;
-    }
+    final visiting = <String>{};
     for (final name in const <String>['deps', 'public_deps']) {
-      for (final GnAssignment a in target.variables[name]?.assignments ?? const <GnAssignment>[]) {
-        for (final GnValue v in a.items) {
-          if (v is! GnStringValue || a.op == '-=') {
-            continue;
-          }
-          final GnTarget? local = v.value.startsWith(':')
-              ? localTargets[v.value.substring(1)]
-              : null;
-          if (local != null) {
-            if (lists(local, const <String>['public_configs', 'all_dependent_configs'])) {
-              return true;
-            }
-            // Public configs travel further only through public_deps.
-            if (name == 'public_deps' && _isEngineCode(local, seen)) {
-              return true;
-            }
-            continue;
-          }
-          // A target of another file: the engine's own (GN's //flutter/...,
-          // converted into the main repository) carry //flutter:config as a
-          // public config by convention; synced trees do not, nor does the
-          // secondary tree's //third_party:fontconfig, whose facade lives in
-          // the main repository too.
-          final String label = bazelLabel(v.value, package: gnPackage, location: a.location);
-          if (label.startsWith('$bazelRootPackage/flutter') &&
-              absoluteGnLabel(v.value, package: gnPackage).startsWith('//flutter/')) {
-            return true;
-          }
+      for (final String dep in _stringItems(target, name)) {
+        if (_forwardsFlutterConfig(
+          absoluteGnLabel(dep, package: gnPackage, implicitName: true),
+          visiting,
+        )) {
+          return true;
         }
       }
     }
     return false;
+  }
+
+  /// Whether the target [gnLabel] hands //flutter:config to its dependents:
+  /// lists it among its public configs, or depends publicly on a target
+  /// that does (GN applies a dependency's public configs to the dependent
+  /// and forwards them along the dependency's own public_deps; impellerc
+  /// gets fml's through compiler_lib's public_deps). A target of this file
+  /// is read from this conversion, one of another file from that file's
+  /// evaluation under the run's assumptions (dependency_resolver); a file
+  /// the resolver cannot read (a synced tree's, the secondary tree's
+  /// fontconfig facade) hands nothing. display_list's dl_path depends on
+  /// impeller/geometry, which lists the config privately, and GN compiles
+  /// it without -Wunreachable-code.
+  bool _forwardsFlutterConfig(String gnLabel, Set<String> visiting) {
+    if (!visiting.add(gnLabel)) {
+      return false;
+    }
+    final int colon = gnLabel.indexOf(':');
+    final String directory = gnLabel.substring(0, colon);
+    final GnTarget? target = directory == gnPackage
+        ? localTargets[gnLabel.substring(colon + 1)]
+        : forwarded.targetOf(gnLabel);
+    if (target == null) {
+      return false;
+    }
+    if (_listsFlutterConfig(target, directory, const <String>[
+      'public_configs',
+      'all_dependent_configs',
+    ])) {
+      return true;
+    }
+    for (final String dep in _stringItems(target, 'public_deps')) {
+      if (_forwardsFlutterConfig(
+        absoluteGnLabel(dep, package: directory, implicitName: true),
+        visiting,
+      )) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Whether [target], of GN directory [directory], names //flutter:config
+  /// in one of [variables].
+  static bool _listsFlutterConfig(GnTarget target, String directory, List<String> variables) {
+    for (final name in variables) {
+      for (final String item in _stringItems(target, name)) {
+        if (absoluteGnLabel(item, package: directory, implicitName: true) == flutterConfigLabel) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /// The strings [target]'s [variable] is assigned (`=`, `+=`), under any
+  /// condition. A `-=` is passed over rather than applied: GN's
+  /// `configs -= [ x ]` takes out an item BUILDCONFIG put there, which the
+  /// file's own list never held, and //flutter:config is never taken out.
+  static Iterable<String> _stringItems(GnTarget target, String variable) sync* {
+    for (final GnAssignment a
+        in target.variables[variable]?.assignments ?? const <GnAssignment>[]) {
+      if (a.op == '-=') {
+        continue;
+      }
+      for (final GnValue v in a.items) {
+        if (v is GnStringValue) {
+          yield v.value;
+        }
+      }
+    }
   }
 
   /// `cflags*` of a target or a config into the rule's flag attributes,
