@@ -196,8 +196,16 @@ void testMain() {
 
       final created = <ui.Picture>[];
       final disposed = <ui.Picture>[];
-      ui.Picture.onCreate = created.add;
-      ui.Picture.onDispose = disposed.add;
+      final ui.PictureEventCallback? oldOnCreate = ui.Picture.onCreate;
+      final ui.PictureEventCallback? oldOnDispose = ui.Picture.onDispose;
+      ui.Picture.onCreate = (ui.Picture createdPicture) {
+        created.add(createdPicture);
+        oldOnCreate?.call(createdPicture);
+      };
+      ui.Picture.onDispose = (ui.Picture disposedPicture) {
+        disposed.add(disposedPicture);
+        oldOnDispose?.call(disposedPicture);
+      };
       try {
         final ui.Image syncImage = scene.toImageSync(100, 100);
         expect(created, hasLength(1));
@@ -209,8 +217,8 @@ void testMain() {
         expect(disposed, equals(created));
         asyncImage.dispose();
       } finally {
-        ui.Picture.onCreate = null;
-        ui.Picture.onDispose = null;
+        ui.Picture.onCreate = oldOnCreate;
+        ui.Picture.onDispose = oldOnDispose;
       }
 
       scene.dispose();
