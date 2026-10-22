@@ -511,6 +511,34 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
 /// which sky/packages/sky_engine copies into the sky_engine package.
 const Map<String, String> fileRepositoryPrefixes = <String, String>{
   '//flutter/third_party/dart/': '@dart//',
+  // The Android SDK and NDK (the files the overlay exports: android.jar, the
+  // build tools' jars).
+  '//flutter/third_party/android_tools/': '@android_tools//',
+  // The JDK, whose javac and jar the Android embedding's actions run.
+  '//flutter/third_party/java/openjdk/': '@openjdk//',
+  // The embedding's compile-time dependencies (the AndroidX jars), its
+  // classpath.
+  '//flutter/third_party/android_embedding_dependencies/': '@android_embedding_dependencies//',
+};
+
+/// What an action's script imports beside itself (`from util import
+/// build_utils`, `import jar` in build/android/gyp's scripts), by the
+/// script's GN path: the action's inputs gain these, for the sandbox. A
+/// script that imports nothing of its own needs no entry.
+const Map<String, List<String>> scriptInputs = <String, List<String>>{
+  '//build/android/gyp/javac.py': <String>['//engine/src/build:android_gyp_scripts'],
+  '//build/android/gyp/create_flutter_jar.py': <String>['//engine/src/build:android_gyp_scripts'],
+};
+
+/// Programs an action runs, which GN names by their absolute paths
+/// (`rebase_path("//flutter/third_party/java/openjdk/bin/javac")`), each
+/// with the files it loads at run time: the program is a tool of the rule
+/// (gn_action's `tools`, built or taken for the execution platform), and so
+/// are these, rather than an input.
+const Map<String, List<String>> toolRuntimes = <String, List<String>>{
+  '@openjdk//:bin/javac': <String>['@openjdk//:runtime'],
+  '@openjdk//:bin/jar': <String>['@openjdk//:runtime'],
+  '@openjdk//:bin/javadoc': <String>['@openjdk//:runtime'],
 };
 
 /// Generated include directories (`$root_gen_dir/flutter`) that are an
@@ -1248,6 +1276,11 @@ const Set<String> knownExternalVariables = <String>{
   // (the archives' prefixes); the emitter enumerates their values
   // (comparisonSettings).
   'full_target_platform_name',
+  // //build/config/android/config.gni's SDK paths (assumed: the defaults).
+  'android_sdk_root',
+  'android_sdk',
+  'android_sdk_jar',
+  'android_sdk_build_tools',
   // //flutter/build/dart/dart.gni
   'dart_src',
   // //flutter/common/config.gni
@@ -2113,6 +2146,20 @@ Assumptions generationAssumptions() {
     'is_win': const GnBoolValue(false),
     'platform_name': const GnStringValue('linux'),
     'full_platform_name': const GnStringValue('linux-x64'),
+    // //build/config/android/config.gni: the SDK's paths, from its defaults
+    // (default_android_sdk_version 37.0, default_android_sdk_build_tools_version
+    // 37.0.0, the SDK under //flutter/third_party/android_tools/sdk); the
+    // NDK's version sits in @android_tools' overlay the same way.
+    'android_sdk_root': const GnStringValue('//flutter/third_party/android_tools/sdk'),
+    'android_sdk': const GnStringValue(
+      '//flutter/third_party/android_tools/sdk/platforms/android-37.0',
+    ),
+    'android_sdk_jar': const GnStringValue(
+      '//flutter/third_party/android_tools/sdk/platforms/android-37.0/android.jar',
+    ),
+    'android_sdk_build_tools': const GnStringValue(
+      '//flutter/third_party/android_tools/sdk/build-tools/37.0.0',
+    ),
     'flutter_prebuilt_dart_sdk': const GnBoolValue(true),
     // The prebuilt Dart SDKs: the host's, which the tools that run at build
     // time come from, and the target's (config.gni's `prebuilt_dart_sdk`
@@ -2229,6 +2276,14 @@ Assumptions linuxHostAssumptions() {
     // artifacts at all: on a Linux x64 host, yes.
     'platform_name': GnStringValue('linux'),
     'full_platform_name': GnStringValue('linux-x64'),
+    'android_sdk_root': GnStringValue('//flutter/third_party/android_tools/sdk'),
+    'android_sdk': GnStringValue('//flutter/third_party/android_tools/sdk/platforms/android-37.0'),
+    'android_sdk_jar': GnStringValue(
+      '//flutter/third_party/android_tools/sdk/platforms/android-37.0/android.jar',
+    ),
+    'android_sdk_build_tools': GnStringValue(
+      '//flutter/third_party/android_tools/sdk/build-tools/37.0.0',
+    ),
     'target_platform_name': GnStringValue('linux'),
     'full_target_platform_name': GnStringValue('linux-x64'),
     'build_engine_artifacts': GnBoolValue(true),

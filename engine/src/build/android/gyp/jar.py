@@ -15,6 +15,11 @@ from util import md5_check
 
 def Jar(class_files, classes_dir, jar_path, jar_bin, manifest_file=None, additional_jar_files=None):
   jar_path = os.path.abspath(jar_path)
+  # The jar binary too, when it is a path rather than a name looked up on
+  # PATH: the command runs in another directory (below), where a relative
+  # path would not resolve.
+  if os.sep in jar_bin:
+    jar_bin = os.path.abspath(jar_bin)
 
   # The paths of the files in the jar will be the same as they are passed in to
   # the command. Because of this, the command should be run in
