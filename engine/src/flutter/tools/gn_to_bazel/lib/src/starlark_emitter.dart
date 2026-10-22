@@ -1560,6 +1560,9 @@ final class _Emitter {
         _dropImplied(list, ConditionVariable(appliedUnder));
       }
     }
+    if (template.compiles) {
+      _templateCoptsInto(rule, target);
+    }
     // What GN discovers after the fact (templateAttributeOverrides).
     templateAttributeOverrides['$gnPackage:${target.name}']?.forEach((
       String attribute,
@@ -1568,6 +1571,36 @@ final class _Emitter {
       rule.scalars[attribute] = text;
     });
     rules.add(rule);
+  }
+
+  /// The compiler options a cc rule gets ([_convertCcTarget]), for a macro
+  /// that compiles the target's sources itself ([TemplateMapping.compiles]:
+  /// the wasm links): the invocation's own cflags ahead, as GN orders them;
+  /// then the copts constant its configs amount to -- the invocation writes
+  /// none (a wasm_lib's are the template's own), so chromium_code holds and
+  /// the question is //flutter:config, by [_isEngineCode]; then what its
+  /// dependencies' public configs hand it. GN's wasm compiles get no
+  /// chromium_code defines (FLUTTER_LOCAL_DEFINES is empty there), so the
+  /// defines attribute is left as the invocation wrote it.
+  void _templateCoptsInto(_Rule rule, GnTarget target) {
+    // The invocation's unconditional cflags come out of the ordered
+    // sequence (they lead, outside any select()) and go back in front once
+    // the constant and the forwarded flags are in, as _convertCcTarget lays
+    // a cc rule's own flags.
+    final _ListAttribute copts = rule.list('copts');
+    final own = List<_Item>.of(copts.always);
+    copts.always.clear();
+    copts.sequence.removeWhere(((Condition, _Item) entry) => entry.$1 == Condition.always);
+    final constant = _isEngineCode(target) ? 'FLUTTER_COPTS' : 'CHROMIUM_CODE_COPTS';
+    _use('//engine/src/flutter/build/bazel:copts.bzl', constant);
+    copts.always.add(_Item(constant, quoted: false));
+    for (final name in const <String>['deps', 'public_deps']) {
+      final GnVariable? deps = target.variables[name];
+      if (deps != null) {
+        _propagatedFlagsInto(rule, deps);
+      }
+    }
+    copts.always.insertAll(0, own);
   }
 
   /// A zip_bundle's `files` -- `{ source, destination }` scopes -- as the

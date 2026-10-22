@@ -4,6 +4,7 @@
 
 # Generated from //flutter/skwasm/BUILD.gn by gn_to_bazel; do not edit.
 
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_module")
 
 package(default_visibility = ["//visibility:public"])
@@ -48,7 +49,7 @@ wasm_module(
         "vertices.cc",
         "wrappers.h",
     ],
-    copts = ["-mreference-types"],
+    copts = ["-mreference-types"] + FLUTTER_COPTS,
     link_inputs = ["library_skwasm_support.js"],
     linkopts = [
         "-std=c++20",
@@ -126,7 +127,7 @@ wasm_module(
         "vertices.cc",
         "wrappers.h",
     ],
-    copts = ["-mreference-types"],
+    copts = ["-mreference-types"] + FLUTTER_COPTS,
     link_inputs = ["library_skwasm_support.js"],
     linkopts = [
         "-std=c++20",
@@ -206,7 +207,20 @@ wasm_module(
         "vertices.cc",
         "wrappers.h",
     ],
-    copts = ["-mreference-types"],
+    copts = ["-mreference-types"] + FLUTTER_COPTS + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
     link_inputs = ["library_skwasm_support.js"],
     linkopts = [
         "-std=c++20",
