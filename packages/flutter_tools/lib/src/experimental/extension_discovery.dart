@@ -25,27 +25,21 @@ class ExtensionConnection {
     required this._logger,
     required this._peer,
     required this._receivePort,
-  }) {
-    _errorPort.handler = (Object? error) {
-      final Object? message = error is List && error.isNotEmpty ? error[0] : error;
-      _logger.printError('Extension isolate "$extensionName" unhandled error: $message');
-    };
-
-    _exitPort.handler = (Object? _) {
-      _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
-      _errorPort.close();
-      _exitPort.close();
-      _receivePort.close();
-      unawaited(_closeNotificationControllers());
-    };
-  }
+  });
 
   /// Fallback extension name used when an extension does not report one in its capabilities.
   static const defaultExtensionName = 'unknown_extension';
 
   Isolate? _isolate;
-  final RawReceivePort _errorPort;
-  final RawReceivePort _exitPort;
+
+  /// Port receiving uncaught async errors (`[String error, String? stackTrace]`)
+  /// from the extension isolate.
+  final ReceivePort _errorPort;
+
+  /// Port notified when the extension isolate terminates so the host can close
+  /// [_receivePort] and fail any in-flight RPCs instead of hanging.
+  final ReceivePort _exitPort;
+
   final Logger _logger;
   final json_rpc.Peer _peer;
   final ReceivePort _receivePort;
@@ -58,6 +52,40 @@ class ExtensionConnection {
   final String extensionName;
 
   bool _isDisposed = false;
+
+  /// Handles uncaught async errors from the extension isolate after handshake.
+  ///
+  /// Per [Isolate.addErrorListener], `dart:isolate` delivers uncaught errors on
+  /// the `onError` port as a two-element `List<Object?>` containing
+  /// `[String errorDescription, String? stackTrace]`. Logging them here surfaces
+  /// uncaught extension isolate errors that occur outside an active JSON-RPC
+  /// request handler.
+  void _handleIsolateError(Object? error) {
+    if (error case [final Object? errorDescription, final Object? stackTrace]) {
+      _logger.printError('Extension isolate "$extensionName" unhandled error: $errorDescription');
+      if (stackTrace != null) {
+        _logger.printTrace('$stackTrace');
+      }
+    } else {
+      _logger.printError('Extension isolate "$extensionName" unhandled error: $error');
+    }
+  }
+
+  /// Handles unexpected extension isolate termination after handshake.
+  ///
+  /// `IsolateChannel` (backed by a `ReceivePort`/`SendPort` pair) does not
+  /// automatically close when the remote isolate exits. Closing [_receivePort]
+  /// when the `onExit` port fires causes the JSON-RPC [json_rpc.Peer] to close
+  /// immediately, failing any in-flight [sendRequest] calls (such as
+  /// long-running `timeout: null` build requests) with a [StateError] and
+  /// closing active notification streams instead of hanging indefinitely.
+  void _handleIsolateExit() {
+    _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
+    _errorPort.close();
+    _exitPort.close();
+    _receivePort.close();
+    unawaited(_closeNotificationControllers());
+  }
 
   /// Returns a broadcast stream of JSON-RPC 2.0 notifications sent by the
   /// extension isolate for [method].
@@ -115,27 +143,38 @@ class ExtensionConnection {
   }) async {
     logger.printTrace('ExtensionConnection spawning extension isolate...');
     final receivePort = ReceivePort();
-    final errorPort = RawReceivePort();
-    final exitPort = RawReceivePort();
+    final errorPort = ReceivePort();
+    final exitPort = ReceivePort();
     final errorCompleter = Completer<Never>();
+    ExtensionConnection? connection;
 
-    errorPort.handler = (Object? error) {
-      if (!errorCompleter.isCompleted) {
-        if (error is List && error.isNotEmpty) {
-          errorCompleter.completeError(StateError('Extension isolate error: ${error[0]}'));
-        } else {
-          errorCompleter.completeError(StateError('Extension isolate error: $error'));
-        }
+    // Isolate.spawn delivers uncaught isolate errors as a two-element list:
+    // `[String errorDescription, String? stackTrace]`.
+    errorPort.listen((Object? error) {
+      if (connection case final ExtensionConnection activeConnection) {
+        activeConnection._handleIsolateError(error);
+        return;
       }
-    };
+      if (!errorCompleter.isCompleted) {
+        final Object? errorDescription = switch (error) {
+          [final Object? description, _] => description,
+          _ => error,
+        };
+        errorCompleter.completeError(StateError('Extension isolate error: $errorDescription'));
+      }
+    });
 
-    exitPort.handler = (Object? _) {
+    exitPort.listen((Object? _) {
+      if (connection case final ExtensionConnection activeConnection) {
+        activeConnection._handleIsolateExit();
+        return;
+      }
       if (!errorCompleter.isCompleted) {
         errorCompleter.completeError(
           StateError('Extension isolate exited unexpectedly before handshake completed.'),
         );
       }
-    };
+    });
 
     Isolate? isolate;
 
@@ -167,7 +206,7 @@ class ExtensionConnection {
         'ExtensionConnection handshake complete. Capabilities: ${capabilities.services}',
       );
 
-      return ExtensionConnection._(
+      return connection = ExtensionConnection._(
         capabilities: capabilities,
         extensionName: capabilities.extensionName ?? defaultExtensionName,
         errorPort: errorPort,
