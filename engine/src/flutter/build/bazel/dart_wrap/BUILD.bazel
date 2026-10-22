@@ -156,6 +156,10 @@ _GN_ARGS = {
         "dart_target_arch": '"arm"',
         "target_cpu": '"arm"',
     },
+    "@platforms//cpu:riscv64": {
+        "dart_target_arch": '"riscv64"',
+        "target_cpu": '"riscv64"',
+    },
     "//conditions:default": {
         "dart_target_arch": '"x64"',
         "target_cpu": '"x64"',

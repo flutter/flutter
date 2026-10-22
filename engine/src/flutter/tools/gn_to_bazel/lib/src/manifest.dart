@@ -538,6 +538,10 @@ _TARGET_PLATFORMS = {
         "@platforms//os:android",
         "@platforms//cpu:aarch64",
     ],
+    "android-riscv64": [
+        "@platforms//os:android",
+        "@platforms//cpu:riscv64",
+    ],
     "android-x64": [
         "@platforms//os:android",
         "@platforms//cpu:x86_64",

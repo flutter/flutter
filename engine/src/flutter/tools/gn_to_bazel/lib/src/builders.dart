@@ -119,11 +119,12 @@ const String wasmPlatform =
     '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten';
 const String linuxArm64Platform = '//engine/src/flutter/build/bazel/toolchains:linux_arm64';
 
-/// The Android platforms by tools/gn's `--android-cpu` (arm, arm64 and x64
-/// so far; x86 and riscv64 have none yet).
+/// The Android platforms by tools/gn's `--android-cpu` (all but x86, which
+/// has none yet).
 const Map<String, String> androidPlatforms = <String, String>{
   'arm': '//engine/src/flutter/build/bazel/toolchains:android_arm',
   'arm64': '//engine/src/flutter/build/bazel/toolchains:android_arm64',
+  'riscv64': '//engine/src/flutter/build/bazel/toolchains:android_riscv64',
   'x64': '//engine/src/flutter/build/bazel/toolchains:android_x64',
 };
 
