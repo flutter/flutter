@@ -1204,9 +1204,13 @@ final class _Emitter {
         }
         final String path = _string(element);
         if (path.startsWith(genDir)) {
+          // A directory output (the javadoc tree) is declared as one.
+          final String under = path.substring(genDir.length);
+          final bool directory =
+              actionDirectoryOutputs['$gnPackage:${target.name}']?.contains(under) ?? false;
           rule
-              .list(attribute)
-              .addUnique(element.condition, _item(path.substring(genDir.length), element));
+              .list(directory ? 'output_dirs' : attribute)
+              .addUnique(element.condition, _item(under, element));
         } else if (path.startsWith('$buildDirRoot/')) {
           rule
               .list('build_outputs')
@@ -1378,6 +1382,12 @@ final class _Emitter {
       null => !declared.contains(file),
     };
     if (isDirectory) {
+      // A directory of another repository (the embedding's dependency jars
+      // in @android_embedding_dependencies): its label, which the rule
+      // resolves to the repository's place in the execution root.
+      if (file.startsWith('@')) {
+        return '\$(src $file)';
+      }
       // The directory relative to the output repository's root: as the
       // layout places it, or, for a synced tree's repository whose files
       // the label table names (`@vulkan_validation_layers//:layers`), as
@@ -1611,6 +1621,31 @@ final class _Emitter {
       final GnValue? sourceValue = value.variables['source']?.unconditionalItems?.singleOrNull;
       final GnValue? destinationValue =
           value.variables['destination']?.unconditionalItems?.singleOrNull;
+      // The one output of an action of this file at a destination of its
+      // own (the javadoc tree at the archive's root: `source =
+      // javadoc_dir[0]`, `destination = "/"`): the action, whose file it
+      // is; the file's build-directory path from the action's outputs. (A
+      // copy's outputs, one per source, are the tree below.)
+      if (sourceValue is GnTargetOutputsValue &&
+          sourceValue.patterns.isEmpty &&
+          destinationValue is GnStringValue &&
+          _singleActionOutput(sourceValue.label) != null) {
+        final String gnLabel = sourceValue.label;
+        final String output = _singleActionOutput(gnLabel)!;
+        final String at = destinationValue.value;
+        final Map<String, String> entries = item.condition == Condition.always
+            ? always
+            : conditional.putIfAbsent(item.condition, () => <String, String>{});
+        if (entries.containsKey(at)) {
+          throw GnError(location, 'two entries of ${variable.name} go to $at');
+        }
+        entries[at] = _localLabel(bazelLabel(gnLabel, package: gnPackage, location: location));
+        final Map<String, String> sources = item.condition == Condition.always
+            ? alwaysSources
+            : conditionalSources.putIfAbsent(item.condition, () => <String, String>{});
+        sources[at] = _buildDirectoryPath(output, location);
+        continue;
+      }
       if (sourceValue is GnTargetOutputsValue || destinationValue is GnTargetOutputPathsValue) {
         if (sourceValue is! GnTargetOutputsValue ||
             destinationValue is! GnTargetOutputPathsValue ||
@@ -2017,6 +2052,31 @@ final class _Emitter {
       }
     }
     return pieces.join(' + ');
+  }
+
+  /// The one plain output of an action of this file (`:gen_android_javadoc`'s
+  /// javadoc tree), or null for anything else: a target of another file, a
+  /// copy, an action of several outputs or of an output pattern.
+  String? _singleActionOutput(String label) {
+    final String gnLabel = _gnLabel(label);
+    final int colon = gnLabel.lastIndexOf(':');
+    if (gnLabel.substring(0, colon) != gnPackage) {
+      return null;
+    }
+    final GnTarget? producer = localTargets[gnLabel.substring(colon + 1)];
+    if (producer == null || producer.rule != 'action') {
+      return null;
+    }
+    final List<GnValue> outputs =
+        producer.variables['outputs']?.liveItems.map((GnListItem i) => i.value).toList() ??
+        const <GnValue>[];
+    if (outputs.length != 1) {
+      return null;
+    }
+    return switch (outputs.single) {
+      GnStringValue(:final String value) when !value.contains('{{') => value,
+      _ => null,
+    };
   }
 
   /// The label of the target that produces the build output [path]

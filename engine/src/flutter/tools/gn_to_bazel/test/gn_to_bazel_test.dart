@@ -2498,6 +2498,58 @@ action("embedding_jars") {
         },
       );
 
+      test('declares a directory output and archives it at the root', () async {
+        // The Android javadoc: an action whose output is a directory (the
+        // mapping says which), zipped by a bundle whose entry is the
+        // target's one output at "/".
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/shell/platform/android/gen_javadoc.py': '',
+          'flutter/third_party/android_embedding_dependencies/lib/a.jar': '',
+          'flutter/shell/platform/android/BUILD.gn': r'''
+import("//flutter/build/zip_bundle.gni")
+
+action("gen_android_javadoc") {
+  script = "gen_javadoc.py"
+  outputs = [ "$target_gen_dir/javadocs" ]
+  args = [
+    "--out-dir",
+    rebase_path(outputs[0], root_build_dir),
+    "--dependencies",
+    rebase_path("//flutter/third_party/android_embedding_dependencies/lib", root_build_dir),
+  ]
+}
+
+zip_bundle("android_javadoc") {
+  output = "android-javadoc.zip"
+  javadoc_dir = get_target_outputs(":gen_android_javadoc")
+  files = [
+    {
+      source = javadoc_dir[0]
+      destination = "/"
+    },
+  ]
+  deps = [ ":gen_android_javadoc" ]
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(
+            tree,
+            '//flutter/shell/platform/android/BUILD.gn',
+            templates: <String>{'zip_bundle'},
+          ),
+          gnPackage: '//flutter/shell/platform/android',
+          tree: tree,
+        );
+        expect(output, contains('output_dirs = ["javadocs"]'));
+        expect(output, isNot(contains('outputs = ["javadocs"]')));
+        // A directory of another repository: its label, for the rule to
+        // place.
+        expect(output, contains(r'"$(src @android_embedding_dependencies//:lib)"'));
+        expect(output, contains('files = {"/": ":gen_android_javadoc"}'));
+        expect(output, contains('sources = {"/": "gen/flutter/shell/platform/android/javadocs"}'));
+      });
+
       test('rebases paths to absolute ones and to the current directory', () async {
         // sky_engine's way of naming the Dart SDK's sources: a base rebased
         // to an absolute path, a directory under it, a list under that; and

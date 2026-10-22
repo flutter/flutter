@@ -8,24 +8,35 @@
 zip.py stores a symlink as a symlink entry (a macOS framework's), and every
 input of a sandboxed action is a symlink, where GN hands the script its build
 directory's real files. Each `-i` source is resolved to the file it names
-before zip.py sees it; everything else is zip.py's own command line.
+before zip.py sees it -- a directory (the javadoc tree, a tree artifact
+whose files the sandbox links one by one) to a copy with its files
+resolved, since zip.py keeps a directory's symlinks as symlinks; everything
+else is zip.py's own command line.
 
 Usage: zip_bundle.py <zip.py> -o <output> -i <source> <destination>...
 """
 
 import os
 import runpy
+import shutil
 import sys
+import tempfile
 
 
 def main(argv):
   script = argv[1]
   args = argv[2:]
-  for i, arg in enumerate(args):
-    if arg == '-i' and i + 1 < len(args):
-      args[i + 1] = os.path.realpath(args[i + 1])
-  sys.argv = [script] + args
-  runpy.run_path(script, run_name='__main__')
+  with tempfile.TemporaryDirectory() as resolved_trees:
+    for i, arg in enumerate(args):
+      if arg == '-i' and i + 1 < len(args):
+        source = os.path.realpath(args[i + 1])
+        if os.path.isdir(source):
+          copy = os.path.join(resolved_trees, str(i))
+          shutil.copytree(source, copy, symlinks=False)
+          source = copy
+        args[i + 1] = source
+    sys.argv = [script] + args
+    runpy.run_path(script, run_name='__main__')
 
 
 if __name__ == '__main__':
