@@ -132,5 +132,33 @@ Future<void> testMain() async {
       paragraph.dispose();
       fresh.dispose();
     });
+
+    test('a wider re-layout drops the ellipsis of an earlier narrow layout', () {
+      WebParagraph buildEllipsized() {
+        final builder = WebParagraphBuilder(
+          WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20, maxLines: 1, ellipsis: '...'),
+        );
+        builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+        builder.addText('Fits in a wide line');
+        return builder.build();
+      }
+
+      bool hasEllipsis(WebParagraph paragraph) => paragraph.lines.any(
+        (TextLine line) => line.visualBlocks.any((LineBlock block) => block is EllipsisBlock),
+      );
+
+      final WebParagraph paragraph = buildEllipsized();
+      paragraph.layout(const ParagraphConstraints(width: 80));
+      expect(hasEllipsis(paragraph), isTrue);
+      paragraph.layout(const ParagraphConstraints(width: 500));
+
+      final WebParagraph fresh = buildEllipsized();
+      fresh.layout(const ParagraphConstraints(width: 500));
+      expect(hasEllipsis(fresh), isFalse);
+      expect(hasEllipsis(paragraph), isFalse);
+      expect(paragraph.lines.single.advance, fresh.lines.single.advance);
+      paragraph.dispose();
+      fresh.dispose();
+    });
   });
 }

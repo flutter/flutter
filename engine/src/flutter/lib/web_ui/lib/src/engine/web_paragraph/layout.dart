@@ -193,6 +193,8 @@ class TextLayout {
 
   void wrapText(double width) {
     lines.clear();
+    // The ellipsis belongs to the layout that truncated the text; a wider layout may not need it.
+    ellipsisClusters = <WebCluster>[];
 
     // A paragraph that is empty or contains only characters without clusters has only the
     // trailing EmptyCluster and produces no lines.
