@@ -9,6 +9,7 @@
 /// @docImport 'scroll_position.dart';
 /// @docImport 'scroll_position_with_single_context.dart';
 /// @docImport 'scrollable.dart';
+/// @docImport 'single_child_scroll_view.dart';
 library;
 
 import 'dart:async';
