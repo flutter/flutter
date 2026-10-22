@@ -29,7 +29,9 @@ configurations, the command line's compile is compared (a transition's only
 when there is no other); actions of Bazel's exec configuration (host tools and
 their closure, built with -c opt by design) are left out.
 The report lists, per distinct difference, how many files have it and one
-example; `--full` prints every class including Bazel-only include
+example; `--gn-toolchain=canvaskit` compares one web variant (an aquery of
+the module's target, built for its platform) with the GN toolchain of that
+name; `--full` prints every class including Bazel-only include
 directories, which are mostly decision 14's (a dependency's public config
 reaching transitive dependents) and harmless unless header names collide.
 """
@@ -150,6 +152,15 @@ def normalize(args, side, out_dir):
         )
         flags.add('-I ' + directory)
       continue
+    # How each build points em++ at the emsdk: GN through `--em-config
+    # <file>` (the .emscripten of the prebuilt), Bazel through the SDK's
+    # sysroot and the resource directory of its clang. One mechanism each,
+    # equivalent by construction; neither is a flag of the compile.
+    if token == '--em-config':
+      next(it, None)
+      continue
+    if token.startswith(('--sysroot=', '-resource-dir=')) and 'emsdk' in token:
+      continue
     if token.startswith('--sysroot='):
       flags.add('--sysroot=<sysroot>')
       continue
@@ -211,8 +222,13 @@ def _compiler_family(compiler):
   return 'emscripten' if name.startswith(('em++', 'emcc')) else 'clang'
 
 
-def gn_commands(compile_commands_path, wanted):
-  """Source file -> flag set, from GN's compile_commands.json, for the files in `wanted`."""
+def gn_commands(compile_commands_path, wanted, toolchain=None):
+  """Source file -> flag set, from GN's compile_commands.json, for the files in `wanted`.
+
+  With `toolchain`, only that secondary toolchain's compiles (objects under
+  `<toolchain>/obj/`: canvaskit, skwasm, ...), for comparing one web
+  variant's Bazel platform with the GN toolchain it stands for.
+  """
   with open(compile_commands_path, encoding='utf-8') as f:
     entries = json.load(f)
   commands = {}
@@ -234,10 +250,14 @@ def gn_commands(compile_commands_path, wanted):
     # (the wasm toolchains', under wasm_*/obj/, with em++) and the host.
     # The entry to compare is the one compiled by the same family of
     # compiler as Bazel's (em++ against em++, clang against clang) and,
-    # among those, the default toolchain's -- whichever order they come in.
+    # among those, the default toolchain's -- whichever order they come in --
+    # or the named toolchain's alone.
     if _compiler_family(argv[0]) != COMPILER_FAMILIES.get(source, 'clang'):
       continue
-    if source in commands and not _default_toolchain(argv):
+    if toolchain is not None:
+      if _object_directory(argv) != toolchain + '/obj/':
+        continue
+    elif source in commands and not _default_toolchain(argv):
       continue
     commands[source] = normalize(argv[1:], 'gn', out_dir)
   return commands
@@ -245,10 +265,17 @@ def gn_commands(compile_commands_path, wanted):
 
 def _default_toolchain(argv):
   """Whether a GN compile command is the default toolchain's (its object under obj/)."""
+  return _object_directory(argv) in ('obj/', None)
+
+
+def _object_directory(argv):
+  """The directory of a GN compile command's object up to and including obj/ (`skwasm/obj/`), or None."""
   for i, arg in enumerate(argv):
     if arg == '-o' and i + 1 < len(argv):
-      return argv[i + 1].startswith('obj/')
-  return True
+      path = argv[i + 1]
+      marker = path.find('obj/')
+      return path[:marker + len('obj/')] if marker >= 0 else path
+  return None
 
 
 def main():
@@ -263,10 +290,16 @@ def main():
   parser.add_argument(
       '--full', action='store_true', help='every difference class, include directories included'
   )
+  parser.add_argument(
+      '--gn-toolchain',
+      help="compare against this GN secondary toolchain's compiles only (objects under "
+      '<name>/obj/): a web variant such as canvaskit or skwasm, with an aquery of the '
+      "module built for that variant's platform"
+  )
   options = parser.parse_args()
 
   bazel = bazel_commands(options.aquery)
-  gn = gn_commands(options.compile_commands, bazel)
+  gn = gn_commands(options.compile_commands, bazel, toolchain=options.gn_toolchain)
   common = sorted(set(bazel) & set(gn))
   if options.engine_only:
     common = [
