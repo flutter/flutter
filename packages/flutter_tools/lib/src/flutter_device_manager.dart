@@ -8,11 +8,12 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
-import 'artifacts.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
+import 'build_system/build_system.dart';
+import 'build_system/build_targets.dart';
 import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
@@ -30,7 +31,6 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
 import 'native_assets.dart';
 import 'tester/flutter_tester.dart';
-import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
@@ -42,6 +42,8 @@ class FlutterDeviceManager extends DeviceManager {
     required AndroidSdk? Function() androidSdkBuilder,
     required AndroidWorkflow androidWorkflow,
     required AppleContext appleContext,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
     required MacOSWorkflow macOSWorkflow,
     required ToolContext toolContext,
@@ -54,8 +56,6 @@ class FlutterDeviceManager extends DeviceManager {
       xcdevice: XCDevice xcDevice,
     ) = appleContext;
     final ToolContext(
-      :Artifacts artifacts,
-      :FlutterVersion flutterVersion,
       fs: FileSystem fileSystem,
       :Logger logger,
       :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
@@ -76,12 +76,10 @@ class FlutterDeviceManager extends DeviceManager {
       IOSDevices(platform: platform, xcdevice: xcDevice, iosWorkflow: iosWorkflow, logger: logger),
       IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
       FlutterTesterDevices(
-        fileSystem: fileSystem,
-        flutterVersion: flutterVersion,
-        processManager: processManager,
-        logger: logger,
-        artifacts: artifacts,
-        platform: platform,
+        toolContext: toolContext,
+        analytics: analytics,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         nativeAssetsBuilder: nativeAssetsBuilder,
       ),
       MacOSDevices(
@@ -105,7 +103,13 @@ class FlutterDeviceManager extends DeviceManager {
         processManager: processManager,
         logger: logger,
       ),
-      CustomDevices(featureFlags: featureFlags, toolContext: toolContext),
+      CustomDevices(
+        featureFlags: featureFlags,
+        analytics: analytics,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        toolContext: toolContext,
+      ),
       if (extensionManager != null)
         ExtensionDevices(extensionManager: extensionManager, logger: logger),
     ];

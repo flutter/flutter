@@ -5,9 +5,9 @@
 #include "impeller/renderer/render_pass.h"
 
 #include <utility>
-#include "fml/status.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/vertex_buffer.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -205,7 +205,7 @@ bool RenderPass::ValidateIndexBuffer(const BufferView& index_buffer,
   return true;
 }
 
-fml::Status RenderPass::Draw() {
+absl::Status RenderPass::Draw() {
   pending_.bound_buffers.offset = bound_buffers_start_.value_or(0u);
   pending_.bound_textures.offset = bound_textures_start_.value_or(0u);
   pending_.vertex_buffers.offset = vertex_buffers_start_.value_or(0u);
@@ -215,10 +215,10 @@ fml::Status RenderPass::Draw() {
   bound_buffers_start_ = std::nullopt;
   vertex_buffers_start_ = std::nullopt;
   if (result) {
-    return fml::Status();
+    return absl::OkStatus();
   }
-  return fml::Status(fml::StatusCode::kInvalidArgument,
-                     "Failed to encode command");
+  return absl::Status(absl::StatusCode::kInvalidArgument,
+                      "Failed to encode command");
 }
 
 // |ResourceBinder|
