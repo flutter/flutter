@@ -1131,7 +1131,7 @@ converter reads the Linux builder files (`tools/gn_to_bazel`'s
 `ci/builders/configs.bazelrc`, which the root `.bazelrc` imports, has a
 `build:<name>` configuration per Linux build -- the x64 host's own, the
 web's, the arm64 cross builds' and Android's -- whose flags the Bazel build can all express -- `--runtime-mode` is the runtime mode setting,
-`--unoptimized` the compilation mode (its absence `-c opt`), `--target-dir`
+`--unoptimized` `-c dbg`, GN's `-O0 -g2` (its absence `-c opt`; fastbuild, Bazel's default mode with line tables only, is no GN build and no configuration names it), `--target-dir`
 the build directory, `--web` the wasm platform
 (`--platforms=//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten`,
 whose flags carry what `tools/gn`'s `to_gn_wasm_args` sets, LTO on the
