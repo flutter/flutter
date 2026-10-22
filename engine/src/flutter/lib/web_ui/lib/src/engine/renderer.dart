@@ -340,70 +340,7 @@ abstract class Renderer {
 
   BackendPathConstructors get pathConstructors;
 
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  });
-
-  ui.TextStyle createTextStyle({
-    required ui.Color? color,
-    required ui.TextDecoration? decoration,
-    required ui.Color? decorationColor,
-    required ui.TextDecorationStyle? decorationStyle,
-    required double? decorationThickness,
-    required ui.FontWeight? fontWeight,
-    required ui.FontStyle? fontStyle,
-    required ui.TextBaseline? textBaseline,
-    required String? fontFamily,
-    required List<String>? fontFamilyFallback,
-    required double? fontSize,
-    required double? letterSpacing,
-    required double? wordSpacing,
-    required double? height,
-    required ui.TextLeadingDistribution? leadingDistribution,
-    required ui.Locale? locale,
-    required ui.Paint? background,
-    required ui.Paint? foreground,
-    required List<ui.Shadow>? shadows,
-    required List<ui.FontFeature>? fontFeatures,
-    required List<ui.FontVariation>? fontVariations,
-  });
-
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  });
-
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  });
-
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style);
 
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph);
 

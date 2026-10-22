@@ -1226,9 +1226,28 @@ class ErrorHandlingProcessManager extends ProcessManager {
     }
 
     // Propagate the unified analytics suppression flag.
-    if (analytics != null) {
-      environmentResult[DashEnvVar.suppressAnalytics.name] = (!analytics.telemetryEnabled)
-          .toString();
+    //
+    // If suppression was requested, either by this process's environment or by
+    // the caller-supplied environment, always propagate it so that sub-tools
+    // never report when a root tool has asked them not to.
+    //
+    // Otherwise (including an inherited or caller-supplied value other than
+    // `true`), suppress sub-tools whenever this tool would not send analytics
+    // itself. Unlike `telemetryEnabled`, `okToSend` is also false until this
+    // tool's consent message has been shown, including for the rest of the
+    // invocation that shows it (a first run, or a consent message version
+    // bump), and when analytics are suppressed for this invocation
+    // (`--suppress-analytics`).
+    //
+    // Like `package:unified_analytics`, only the exact (case-sensitive) string
+    // `true` is treated as a request to suppress analytics.
+    final String suppressKey = DashEnvVar.suppressAnalytics.name;
+    final bool suppressionRequested =
+        _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';
+    if (suppressionRequested) {
+      environmentResult[suppressKey] = 'true';
+    } else if (analytics != null) {
+      environmentResult[suppressKey] = (!analytics.okToSend).toString();
     }
 
     // Propagate the parent tool identifier down to the spawned process.
@@ -1455,6 +1474,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kSharingViolation = 32;
   const kLockViolation = 33;
   const kDeviceFull = 112;
+  const kFilenameExcedRange = 206;
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
   const kFatalDeviceHardwareError = 483;
@@ -1478,6 +1498,11 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
+    kFilenameExcedRange =>
+      '${message != null ? "$message. " : ""}The filename or extension is too long.\n'
+          '$e\n'
+          'Please consider moving the Flutter SDK and/or project to a shorter path, '
+          'or enabling long paths on Windows.',
     kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
       '$message. The file is being used by another program.'
           '\n$e\n'

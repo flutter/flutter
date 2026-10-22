@@ -35,12 +35,12 @@ class SnippetGenerator {
 
   static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('    ');
 
-  /// Interpolates the [injections] into an HTML skeleton file.
+  /// Interpolates the [CodeSample.parts] of [sample] into an HTML skeleton file.
   ///
   /// The order of the injections is important.
   ///
-  /// Takes into account the [type] and doesn't substitute in the id and the app
-  /// if not a [SnippetType.sample] snippet.
+  /// Takes into account the type of [sample] and doesn't substitute in the serial and the app
+  /// if it is not an [ApplicationSample].
   String interpolateSkeleton(CodeSample sample, String skeleton) {
     final codeParts = <String>[];
     const htmlEscape = HtmlEscape();
