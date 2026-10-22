@@ -257,6 +257,8 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(bool, SupportsPrimitiveRestart, (), (const override));
   MOCK_METHOD(bool, Supports32BitPrimitiveIndices, (), (const override));
   MOCK_METHOD(bool, SupportsManuallyMippedTextures, (), (const override));
+
+  MOCK_METHOD(bool, SupportsTextureArrays, (), (const override));
   MOCK_METHOD(bool, SupportsExtendedRangeFormats, (), (const override));
   MOCK_METHOD(bool, SupportsFramebufferRenderMipmap, (), (const override));
   MOCK_METHOD(bool,
@@ -275,7 +277,7 @@ class MockCapabilities : public Capabilities {
 
 class MockCommandQueue : public CommandQueue {
  public:
-  MOCK_METHOD(fml::Status,
+  MOCK_METHOD(absl::Status,
               Submit,
               (const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
                const CompletionCallback& cb),

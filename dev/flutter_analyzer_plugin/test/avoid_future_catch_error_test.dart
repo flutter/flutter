@@ -6,9 +6,8 @@ import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/avoid_future_catch_error.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class AvoidFutureCatchErrorTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -18,8 +17,9 @@ class AvoidFutureCatchErrorTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => AvoidFutureCatchError.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 import 'dart:async';
 
 // This extension isn't picked up from dart:async, so we just fake it.
@@ -39,14 +39,20 @@ void main() {
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_avoid_future_catch_error() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[lint(313, 48), lint(374, 45)]);
-  }
-}
-
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(AvoidFutureCatchErrorTest);
+  late AvoidFutureCatchErrorTest testSuite;
+
+  setUp(() {
+    testSuite = AvoidFutureCatchErrorTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('avoid future catch error', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(313, 48),
+      testSuite.lint(374, 45),
+    ]);
   });
 }

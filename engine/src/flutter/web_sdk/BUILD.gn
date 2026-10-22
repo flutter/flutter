@@ -39,7 +39,8 @@ sdk_rewriter("web_ui_library_sources") {
   input_dir = "//flutter/lib/web_ui/lib/"
   output_dir = "$root_out_dir/flutter_web_sdk/lib/ui/"
 
-  # exclude everything in the engine directory, it will be a separate internal library
+  # exclude everything in the engine directory, it will be a separate internal
+  # library
   exclude_pattern = rebase_path("//flutter/lib/web_ui/lib/src")
 }
 
@@ -203,6 +204,7 @@ template("_compile_platform") {
          "summary_only must be defined for $target_name")
   assert(defined(invoker.output_dill),
          "output_dill must be defined for $target_name")
+
   _kernel_worker(target_name) {
     inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
@@ -294,11 +296,7 @@ group("flutter_platform_dills") {
   ]
 }
 
-template("_compile_ddc_module") {
-  assert(defined(invoker.sdk_path_prefix),
-         "sdk_path_prefix must be defined for $target_name")
-  assert(defined(invoker.module_format),
-         "module_name must be defined for $target_name")
+template("_compile_ddc_sdk") {
   assert(defined(invoker.canary), "canary must be defined for $target_name")
 
   _dartdevc(target_name) {
@@ -306,9 +304,13 @@ template("_compile_ddc_module") {
 
     packages = dart_sdk_package_config
 
-    name_suffix = "-canvaskit"
+    if (invoker.canary) {
+      js_gen_dir = "$root_out_dir/flutter_web_sdk/kernel/ddc/canary"
+    } else {
+      js_gen_dir = "$root_out_dir/flutter_web_sdk/kernel/ddc/stable"
+    }
 
-    dart_sdk_js_path = "$root_out_dir/flutter_web_sdk/kernel/${invoker.sdk_path_prefix}${name_suffix}/dart_sdk.js"
+    dart_sdk_js_path = "$js_gen_dir/dart_sdk.js"
 
     outputs = [
       dart_sdk_js_path,
@@ -339,7 +341,7 @@ template("_compile_ddc_module") {
       "--inline-source-map",
       "-DFLUTTER_WEB_USE_SKIA=true",
       "--modules",
-      invoker.module_format,
+      "ddc",
       "-o",
       rebase_path(dart_sdk_js_path),
     ]
@@ -360,33 +362,19 @@ template("_compile_ddc_module") {
   }
 }
 
-template("_compile_ddc_modules") {
-  forward_variables_from(invoker, "*")
-
-  # We compile multiple times instead of passing multiple modules to a single
-  # compile as the DDC library bundle format cannot be used when passing
-  # multiple module formats as arguments.
-  _compile_ddc_module("${target_name}_amd") {
-    sdk_path_prefix = "amd"
-    module_format = "amd"
-    canary = false
-  }
-
-  _compile_ddc_module("${target_name}_ddcLibraryBundle") {
-    sdk_path_prefix = "ddcLibraryBundle"
-    module_format = "ddc"
-    canary = true
-  }
+# Compile the SDK with the stable and canary versions of DDC.
+_compile_ddc_sdk("flutter_ddc_stable_sdk") {
+  canary = false
 }
 
-# Compiles the canvaskit only renderer.
-_compile_ddc_modules("flutter_dartdevc_canvaskit_kernel_sdk") {
+_compile_ddc_sdk("flutter_ddc_canary_sdk") {
+  canary = true
 }
 
 group("flutter_ddc_modules") {
   public_deps = [
-    ":flutter_dartdevc_canvaskit_kernel_sdk_amd",
-    ":flutter_dartdevc_canvaskit_kernel_sdk_ddcLibraryBundle",
+    ":flutter_ddc_canary_sdk",
+    ":flutter_ddc_stable_sdk",
   ]
 }
 
@@ -413,9 +401,8 @@ if (!is_fuchsia) {
     deps += [ "//flutter/lib/web_ui/flutter_js" ]
 
     # flutter_ddc_modules
-    sources = get_target_outputs(":flutter_dartdevc_canvaskit_kernel_sdk_amd")
-    sources += get_target_outputs(
-            ":flutter_dartdevc_canvaskit_kernel_sdk_ddcLibraryBundle")
+    sources = get_target_outputs(":flutter_ddc_canary_sdk")
+    sources += get_target_outputs(":flutter_ddc_stable_sdk")
 
     # flutter_platform_dills
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline")

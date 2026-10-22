@@ -252,7 +252,10 @@ Future<void> _runIntegrationToolTests() async {
 
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'link_hook'));
-  await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'));
+  await runFlutterTest(
+    path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'),
+    environment: <String, String>{'FLUTTER_DART_DATA_ASSETS': 'true'},
+  );
 }
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {

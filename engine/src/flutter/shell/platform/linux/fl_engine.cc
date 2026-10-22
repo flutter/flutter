@@ -1182,6 +1182,18 @@ GBytes* fl_engine_send_platform_message_finish(FlEngine* self,
   return static_cast<GBytes*>(g_task_propagate_pointer(G_TASK(result), error));
 }
 
+void fl_engine_schedule_frame(FlEngine* self) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  if (self->embedder_api.ScheduleFrame(self->engine) != kSuccess) {
+    g_warning("Failed to schedule frame");
+  }
+}
+
 void fl_engine_send_window_metrics_event(FlEngine* self,
                                          FlutterEngineDisplayId display_id,
                                          FlutterViewId view_id,

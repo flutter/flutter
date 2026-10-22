@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -234,14 +236,18 @@ void main() {
     );
 
     var popCount = 0;
-    route.popped.whenComplete(() {
-      popCount += 1;
-    });
+    unawaited(
+      route.popped.whenComplete(() {
+        popCount += 1;
+      }),
+    );
 
     var completeCount = 0;
-    route.completed.whenComplete(() {
-      completeCount += 1;
-    });
+    unawaited(
+      route.completed.whenComplete(() {
+        completeCount += 1;
+      }),
+    );
 
     expect(popCount, 0);
     expect(completeCount, 0);
