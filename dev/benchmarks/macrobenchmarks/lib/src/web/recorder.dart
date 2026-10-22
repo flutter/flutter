@@ -41,7 +41,11 @@ const int _kDefaultMeasuredSampleCount = int.fromEnvironment(
 /// This value is used when [Profile.useCustomWarmUp] is set to false.
 const int kDefaultTotalSampleCount = _kDefaultWarmUpSampleCount + _kDefaultMeasuredSampleCount;
 
-/// Whether [Profile.toJson] includes the raw measured samples of each series.
+/// Whether [Profile.toJson] includes the raw samples of each series.
+///
+/// When enabled, each series reports its measured samples under
+/// `<series>.samples` and its warm-up samples under `<series>.warmUpSamples`,
+/// both as sample magnitudes in microseconds.
 ///
 /// Opt-in via `--dart-define=BENCHMARK_REPORT_SAMPLES=true`. When unset, the
 /// reported JSON is unchanged.
@@ -1052,10 +1056,14 @@ class Profile {
   /// Returns a JSON representation of the profile that will be sent to the
   /// server.
   ///
-  /// If [reportSamples] is true, each series also reports its measured
-  /// (non-warm-up) sample magnitudes, in recording order, under
-  /// `<series>.samples`. It defaults to the opt-in
-  /// `--dart-define=BENCHMARK_REPORT_SAMPLES=true` setting, which is off.
+  /// If [reportSamples] is true, each series also reports two flat lists of
+  /// raw sample magnitudes in microseconds, both in recording order:
+  ///
+  ///  * `<series>.samples`: the measured (non-warm-up) samples.
+  ///  * `<series>.warmUpSamples`: the warm-up samples.
+  ///
+  /// It defaults to the opt-in `--dart-define=BENCHMARK_REPORT_SAMPLES=true`
+  /// setting, which is off. When off, neither key is reported.
   Map<String, dynamic> toJson({bool reportSamples = _kReportSamples}) {
     final scoreKeys = <String>[];
     final json = <String, dynamic>{'name': name, 'scoreKeys': scoreKeys};
@@ -1080,6 +1088,10 @@ class Profile {
         json['$key.samples'] = <double>[
           for (final AnnotatedSample sample in stats.samples)
             if (!sample.isWarmUpValue) sample.magnitude,
+        ];
+        json['$key.warmUpSamples'] = <double>[
+          for (final AnnotatedSample sample in stats.samples)
+            if (sample.isWarmUpValue) sample.magnitude,
         ];
       }
     }

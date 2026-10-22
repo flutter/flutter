@@ -5,6 +5,8 @@
 @TestOn('browser')
 library;
 
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:macrobenchmarks/src/web/recorder.dart';
 
@@ -59,6 +61,11 @@ const Set<String> _legacyKeys = <String>{
   'sceneBuildDuration.noise',
 };
 
+/// The warm-up magnitudes recorded by [_autoProfile] for every series.
+final List<double> _expectedWarmUpSamples = <double>[
+  for (var i = 0; i < _warmUpCount; i += 1) i.toDouble(),
+];
+
 void main() {
   tearDown(() {
     Profile.phaseListener = null;
@@ -83,7 +90,7 @@ void main() {
     expect(json['sceneBuildDuration.average'], 9049.5);
   });
 
-  test('toJson(reportSamples: true) adds only measured samples in order', () {
+  test('toJson(reportSamples: true) adds measured and warm-up samples in order', () {
     final Profile profile = _autoProfile();
 
     final Map<String, dynamic> json = profile.toJson(reportSamples: true);
@@ -91,7 +98,9 @@ void main() {
     expect(json.keys.toSet(), <String>{
       ..._legacyKeys,
       'drawFrameDuration.samples',
+      'drawFrameDuration.warmUpSamples',
       'sceneBuildDuration.samples',
+      'sceneBuildDuration.warmUpSamples',
     });
     expect(json['scoreKeys'], <String>[
       'drawFrameDuration.average',
@@ -104,6 +113,11 @@ void main() {
     expect(json['sceneBuildDuration.samples'], <double>[
       for (var i = 0; i < _measuredCount; i += 1) 9000.0 + i,
     ]);
+    // Both the reported and the unreported series report their warm-up.
+    expect(json['drawFrameDuration.warmUpSamples'], isA<List<double>>());
+    expect(json['drawFrameDuration.warmUpSamples'], _expectedWarmUpSamples);
+    expect(json['sceneBuildDuration.warmUpSamples'], isA<List<double>>());
+    expect(json['sceneBuildDuration.warmUpSamples'], _expectedWarmUpSamples);
     // The aggregate statistics are unaffected by sample reporting.
     expect(json['drawFrameDuration.average'], 5049.5);
     expect(json['sceneBuildDuration.average'], 9049.5);
@@ -172,20 +186,26 @@ void main() {
     expect(json['layout.average'], 1000.0);
     expect(json['layout.samples'], layoutMeasured);
     expect(json['paint.samples'], <double>[9000.0, 9001.0]);
+    // Each series is split at its own warm-up boundary.
+    expect(json['layout.warmUpSamples'], <double>[0.0, 1.0, 2.0]);
+    expect(json['paint.warmUpSamples'], <double>[7.0]);
   });
 
   test('extraData is merged after samples and may override them', () {
     final Profile profile = _autoProfile();
     profile.extraData['drawFrameDuration.samples'] = 'overridden';
+    profile.extraData['drawFrameDuration.warmUpSamples'] = 'overridden warm-up';
     profile.extraData['totalUploadedBytes'] = 42;
 
     final Map<String, dynamic> json = profile.toJson(reportSamples: true);
 
     expect(json['drawFrameDuration.samples'], 'overridden');
+    expect(json['drawFrameDuration.warmUpSamples'], 'overridden warm-up');
     expect(json['totalUploadedBytes'], 42);
     expect(json['sceneBuildDuration.samples'], <double>[
       for (var i = 0; i < _measuredCount; i += 1) 9000.0 + i,
     ]);
+    expect(json['sceneBuildDuration.warmUpSamples'], _expectedWarmUpSamples);
   });
 
   test('toJson(reportSamples: true) returns fresh lists and does not change the profile', () {
@@ -194,11 +214,13 @@ void main() {
 
     final Map<String, dynamic> first = profile.toJson(reportSamples: true);
     (first['drawFrameDuration.samples'] as List<double>).clear();
+    (first['drawFrameDuration.warmUpSamples'] as List<double>).clear();
 
     expect(profile.extraData, isEmpty);
     expect(profile.toJson().keys.toSet(), _legacyKeys);
     final Map<String, dynamic> second = profile.toJson(reportSamples: true);
     expect(second['drawFrameDuration.samples'], expectedSamples);
+    expect(second['drawFrameDuration.warmUpSamples'], _expectedWarmUpSamples);
     expect(second['drawFrameDuration.average'], 5049.5);
   });
 
@@ -239,6 +261,61 @@ void main() {
       'frame.outlierAverage',
       'frame.outlierRatio',
       'frame.noise',
+    });
+  });
+
+  group('JSON round trip', () {
+    const scalarSuffixes = <String>['average', 'outlierAverage', 'outlierRatio', 'noise'];
+    const seriesNames = <String>['drawFrameDuration', 'sceneBuildDuration'];
+
+    // What consumers see is the JSON posted to the benchmark server, and the
+    // JS and Wasm encoders print doubles differently (`5000` vs `5000.0`), so
+    // values are compared numerically rather than by runtime type.
+    Map<String, dynamic> roundTrip(Map<String, dynamic> json) =>
+        jsonDecode(jsonEncode(json)) as Map<String, dynamic>;
+
+    List<double> decodedMagnitudes(Object? value) {
+      expect(value, isA<List<dynamic>>());
+      final list = value! as List<dynamic>;
+      expect(list, everyElement(isA<num>()));
+      return <double>[for (final Object? element in list) (element! as num).toDouble()];
+    }
+
+    test('preserves samples, warm-up samples, statistics and scoreKeys', () {
+      final Map<String, dynamic> json = _autoProfile().toJson(reportSamples: true);
+      final Map<String, dynamic> decoded = roundTrip(json);
+
+      expect(decoded.keys.toSet(), json.keys.toSet());
+      expect(decoded['name'], 'bench_test');
+      expect(decoded['scoreKeys'], json['scoreKeys']);
+      expect(decodedMagnitudes(decoded['drawFrameDuration.samples']), <double>[
+        for (var i = 0; i < _measuredCount; i += 1) 5000.0 + i,
+      ]);
+      expect(decodedMagnitudes(decoded['sceneBuildDuration.samples']), <double>[
+        for (var i = 0; i < _measuredCount; i += 1) 9000.0 + i,
+      ]);
+      for (final series in seriesNames) {
+        expect(decodedMagnitudes(decoded['$series.warmUpSamples']), _expectedWarmUpSamples);
+        for (final suffix in scalarSuffixes) {
+          final key = '$series.$suffix';
+          expect(decoded[key], isA<num>(), reason: key);
+          expect((decoded[key] as num).toDouble(), json[key], reason: key);
+        }
+      }
+    });
+
+    test('preserves exactly the legacy key set when samples are not reported', () {
+      final Map<String, dynamic> json = _autoProfile().toJson();
+      final Map<String, dynamic> decoded = roundTrip(json);
+
+      expect(decoded.keys.toSet(), _legacyKeys);
+      expect(decoded['scoreKeys'], json['scoreKeys']);
+      for (final series in seriesNames) {
+        for (final suffix in scalarSuffixes) {
+          final key = '$series.$suffix';
+          expect((decoded[key] as num).toDouble(), json[key], reason: key);
+        }
+      }
     });
   });
 }
