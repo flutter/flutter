@@ -1950,9 +1950,6 @@ const Set<String> handWrittenPackages = <String>{
   // templates, each an exec_script of pkg-config against the sysroot, whose
   // answers the file holds.
   'engine/src/flutter/shell/platform/linux/config',
-  // The Android shell, until its file converts: one header the converted
-  // sub-packages include.
-  'engine/src/flutter/shell/platform/android',
   'engine/src/flutter/third_party',
 };
 
