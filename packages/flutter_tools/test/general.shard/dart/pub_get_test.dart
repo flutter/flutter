@@ -1041,9 +1041,10 @@ exit code: 66
           '--suppress-analytics',
           'cache',
           'preload',
-          '.pub-preload-cache/a.tar.gz',
-          '.pub-preload-cache/b.tar.gz',
+          'a.tar.gz',
+          'b.tar.gz',
         ],
+        workingDirectory: '.pub-preload-cache',
       ),
       FakeCommand(
         command: const <String>[
