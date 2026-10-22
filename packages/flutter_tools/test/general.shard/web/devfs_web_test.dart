@@ -34,6 +34,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/fake_web_devfs.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 const kTransparentImage = <int>[
@@ -56,8 +57,6 @@ void main() {
   late Platform windows;
   late FakeHttpServer httpServer;
   late BufferLogger logger;
-  const usesDdcModuleSystem = true;
-  const canaryFeatures = true;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -78,12 +77,15 @@ void main() {
           InternetAddress.loopbackIPv4,
           <String, String>{},
           <String, String>{},
-          usesDdcModuleSystem,
-          canaryFeatures,
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            config: globals.config,
+            fs: globals.fs,
+            flutterVersion: globals.flutterVersion,
+            logger: logger,
+          ),
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
-          fileSystem: globals.fs,
-          logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -112,8 +114,6 @@ void main() {
       entrypoint: Uri.parse('org-dartlang-app:///main.dart'),
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     expect(() => webDevFS.assetPathsToEvict.clear(), returnsNormally);
@@ -341,12 +341,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -363,12 +366,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     // Defaults to "/" when there's no base element.
@@ -387,12 +393,15 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -410,12 +419,15 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -473,12 +485,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: true,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     final Response response = await webAssetServer.handleRequest(
@@ -725,6 +740,22 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{Platform: () => linux});
 
+  runInTestbed('does not serve non-Dart files from project root', () async {
+    final files = <String, String>{
+      '.env': 'env_secret',
+      'pubspec.yaml': 'pubspec_secret',
+      '.dart_tool/package_config.json': 'package_config_secret',
+    };
+
+    for (final MapEntry(:String key, :String value) in files.entries) {
+      globals.fs.file(key)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(value);
+
+      expect(await webAssetServer.dartSourceContents(key), isNull);
+    }
+  });
+
   runInTestbed('serves asset files from filesystem with known mime type', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'foo.png');
     final File source = globals.fs.file(path)
@@ -853,8 +884,6 @@ void main() {
       ),
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -929,12 +958,7 @@ void main() {
 
     final residentCompiler = FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      logger: logger,
-      platform: linux,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
+    final WebDevFS webDevFS = createWebDevFS(logger: logger, platform: linux);
 
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -1013,12 +1037,7 @@ void main() {
 
     final residentCompiler = FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      logger: logger,
-      platform: linux,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
+    final WebDevFS webDevFS = createWebDevFS(logger: logger, platform: linux);
 
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -1095,12 +1114,7 @@ void main() {
 
     final residentCompiler = FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      logger: logger,
-      platform: linux,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
+    final WebDevFS webDevFS = createWebDevFS(logger: logger, platform: linux);
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1169,12 +1183,7 @@ void main() {
 
     final residentCompiler = FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      logger: logger,
-      platform: linux,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
+    final WebDevFS webDevFS = createWebDevFS(logger: logger, platform: linux);
 
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -1270,8 +1279,6 @@ void main() {
       ),
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -1363,8 +1370,8 @@ void main() {
         enableDwds: true,
         ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
-        ddcModuleSystem: usesDdcModuleSystem,
-        canaryFeatures: canaryFeatures,
+        // If this is any other value, we will do a real IP lookup inside FakeAsync.
+        webDevServerConfig: const WebDevServerConfig(host: webDevAnyHostDefault),
       );
       final firstConnection = FakeAppConnection();
       final secondConnection = FakeAppConnection();
@@ -1399,6 +1406,27 @@ void main() {
     });
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
+  runInTestbed('Can start web server with default hostname', () async {
+    final String path = globals.fs.path.join('lib', 'main.dart');
+    final File outputFile = globals.fs.file(path)..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+
+    final WebDevFS webDevFS = createWebDevFS(
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
+      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
+      entrypoint: Uri.base,
+    );
+
+    final Uri uri = await webDevFS.create();
+    expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress.isLoopback, isTrue);
+    await webDevFS.destroy();
+  });
+
   runInTestbed('Can start web server with hostname any', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)..createSync(recursive: true);
@@ -1412,12 +1440,12 @@ void main() {
       useSseForInjectedClient: true,
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
+      webDevServerConfig: const WebDevServerConfig(host: webDevAnyHostDefault),
     );
 
     final Uri uri = await webDevFS.create();
     expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress, InternetAddress.anyIPv4);
     await webDevFS.destroy();
   });
 
@@ -1440,8 +1468,6 @@ void main() {
       ),
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     await webDevFS.create();
@@ -1473,8 +1499,6 @@ void main() {
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
       webDevServerConfig: webDevServerConfig,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
     final Uri uri = await webDevFS.create();
 
@@ -1502,22 +1526,25 @@ void main() {
       const DartDevelopmentServiceConfiguration(enable: false),
       Uri.base,
       null,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
       crossOriginIsolation: false,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  });
 
   runInTestbed('passes on extra headers', () async {
     const extraHeaderKey = 'hurray';
@@ -1541,23 +1568,26 @@ void main() {
       const DartDevelopmentServiceConfiguration(enable: false),
       Uri.base,
       null,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
       crossOriginIsolation: false,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
 
     await webAssetServer.dispose();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  });
 
   runInTestbed('WebAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await webAssetServer.handleRequest(
@@ -1639,12 +1669,15 @@ void main() {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1672,8 +1705,6 @@ void main() {
       useSseForInjectedClient: true,
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     final Uri uri = await webDevFS.create();
@@ -1705,12 +1736,15 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1754,13 +1788,16 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
         webDefines: <String, String>{}, // Empty webDefines
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1810,13 +1847,16 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
         webDefines: <String, String>{}, // Empty webDefines
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1862,13 +1902,16 @@ const config = {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
       webDefines: <String, String>{'API_URL': 'https://test.api.com', 'DEBUG_MODE': 'true'},
-      logger: logger,
     );
 
     final Response response = await webAssetServer.handleRequest(
@@ -1881,143 +1924,149 @@ const config = {
     expect(body, contains('debug: true'));
   });
 
-  runInTestbed('DDC library bundle reloaded sources are relative paths', () async {
-    // `reloadedSourcesUri` should itself be relative.
-    expect(WebAssetServer.reloadedSourcesUri.host, isEmpty);
+  for (final (String? baseHref, String expectedSrcPrefix) in <(String?, String)>[
+    (null, ''),
+    ('/f/', '/f'),
+  ]) {
+    runInTestbed('DDC library bundle reloaded sources are root-relative paths '
+        '(baseHref: $baseHref)', () async {
+      // `reloadedSourcesUri` should itself be relative.
+      expect(WebAssetServer.reloadedSourcesUri.host, isEmpty);
 
-    // Set up initial compile.
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
-      ..createSync(recursive: true);
-    outputFile.parent.childFile('a.lib.js.sources').writeAsStringSync('main() {}');
-    outputFile.parent.childFile('a.lib.js.json').writeAsStringSync('{}');
-    outputFile.parent.childFile('a.lib.js.map').writeAsStringSync('{}');
-    outputFile.parent.childFile('a.lib.js.metadata').writeAsStringSync('{}');
+      // Set up initial compile.
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.parent.childFile('a.lib.js.sources').writeAsStringSync('main() {}');
+      outputFile.parent.childFile('a.lib.js.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.lib.js.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.lib.js.metadata').writeAsStringSync('{}');
 
-    final residentCompiler = FakeResidentCompiler()
-      ..output = const CompilerOutput('a.lib.js', 0, <Uri>[]);
+      final residentCompiler = FakeResidentCompiler()
+        ..output = const CompilerOutput('a.lib.js', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      useSseForDebugProxy: true,
-      useSseForDebugBackend: true,
-      useSseForInjectedClient: true,
-      buildInfo: const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-      ),
-      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
-      entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
-    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
-    webDevFS.flutterJs.createSync(recursive: true);
-    webDevFS.stackTraceMapper.createSync(recursive: true);
+      final WebDevFS webDevFS = createWebDevFS(
+        useSseForDebugProxy: true,
+        useSseForDebugBackend: true,
+        useSseForInjectedClient: true,
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
+        entrypoint: Uri.base,
+        webDevServerConfig: WebDevServerConfig(baseHref: baseHref),
+      );
+      webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
+      webDevFS.flutterJs.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
 
-    await webDevFS.create();
+      await webDevFS.create();
 
-    webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
-    globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('GENERATED');
-    final String webPrecompiledCanvaskitSdk = globals.artifacts!
-        .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk)
-        .path;
-    final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
-        .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps)
-        .path;
-    final String flutterJs = globals.fs.path.join(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-      'flutter.js',
-    );
-    globals.fs.file(webPrecompiledCanvaskitSdk)
-      ..createSync(recursive: true)
-      ..writeAsStringSync('HELLO');
-    globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
-      ..createSync(recursive: true)
-      ..writeAsStringSync('THERE');
-    globals.fs.file(flutterJs)
-      ..createSync(recursive: true)
-      ..writeAsStringSync('(flutter.js content)');
+      webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
+      globals.fs.currentDirectory.childDirectory('lib').childFile('web_entrypoint.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('GENERATED');
+      final String webPrecompiledCanvaskitSdk = globals.artifacts!
+          .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk)
+          .path;
+      final String webPrecompiledCanvaskitSdkSourcemaps = globals.artifacts!
+          .getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps)
+          .path;
+      final String flutterJs = globals.fs.path.join(
+        globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+        'flutter.js',
+      );
+      globals.fs.file(webPrecompiledCanvaskitSdk)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('HELLO');
+      globals.fs.file(webPrecompiledCanvaskitSdkSourcemaps)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('THERE');
+      globals.fs.file(flutterJs)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('(flutter.js content)');
 
-    await webDevFS.update(
-      mainUri: outputFile.uri,
-      generator: residentCompiler,
-      trackWidgetCreation: true,
-      bundleFirstUpload: true,
-      invalidatedFiles: <Uri>[],
-      packageConfig: PackageConfig.empty,
-      pathToReload: '',
-      dillOutputPath: '',
-      shaderCompiler: const FakeShaderCompiler(),
-    );
+      await webDevFS.update(
+        mainUri: outputFile.uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        bundleFirstUpload: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: '',
+        shaderCompiler: const FakeShaderCompiler(),
+      );
 
-    // Recompile with modules in the top-level and in a subdirectory.
-    const aSource = 'void main() {}';
-    const bSource = 'void func() {}';
-    final File sources = outputFile.parent.childFile('a.lib.js.sources')
-      ..writeAsStringSync('$aSource$bSource');
-    outputFile.parent.childFile('a.lib.js.map').writeAsStringSync('{}{}');
-    final String aMetadata = json.encode(
-      ModuleMetadata('a.lib.js', 'closure', 'a.map', 'a.lib.js')
-        ..addLibrary(LibraryMetadata('lib_a', 'dart:lib_a', ['lib_a.dart']))
-        ..toJson(),
-    );
-    final String bMetadata = json.encode(
-      ModuleMetadata('b.lib.js', 'closure', 'b.map', 'b.lib.js')
-        ..addLibrary(LibraryMetadata('lib_b', 'dart:lib_b', ['lib_b.dart']))
-        ..toJson(),
-    );
-    final File metadata = outputFile.parent.childFile('a.lib.js.metadata')
-      ..writeAsStringSync('$aMetadata$bMetadata');
-    outputFile.parent
-        .childFile('a.lib.js.json')
-        .writeAsStringSync(
-          json.encode(<String, Object>{
-            'a.lib.js': <String, Object>{
-              'code': <int>[0, aSource.length],
-              'sourcemap': <int>[0, 2],
-              'metadata': <int>[0, aMetadata.length],
-            },
-            'sub/b.lib.js': <String, Object>{
-              'code': <int>[aSource.length, sources.lengthSync()],
-              'sourcemap': <int>[2, 4],
-              'metadata': <int>[aMetadata.length, metadata.lengthSync()],
-            },
-          }),
-        );
+      // Recompile with modules in the top-level and in a subdirectory.
+      const aSource = 'void main() {}';
+      const bSource = 'void func() {}';
+      final File sources = outputFile.parent.childFile('a.lib.js.sources')
+        ..writeAsStringSync('$aSource$bSource');
+      outputFile.parent.childFile('a.lib.js.map').writeAsStringSync('{}{}');
+      final String aMetadata = json.encode(
+        ModuleMetadata('a.lib.js', 'closure', 'a.map', 'a.lib.js')
+          ..addLibrary(LibraryMetadata('lib_a', 'dart:lib_a', ['lib_a.dart']))
+          ..toJson(),
+      );
+      final String bMetadata = json.encode(
+        ModuleMetadata('b.lib.js', 'closure', 'b.map', 'b.lib.js')
+          ..addLibrary(LibraryMetadata('lib_b', 'dart:lib_b', ['lib_b.dart']))
+          ..toJson(),
+      );
+      final File metadata = outputFile.parent.childFile('a.lib.js.metadata')
+        ..writeAsStringSync('$aMetadata$bMetadata');
+      outputFile.parent
+          .childFile('a.lib.js.json')
+          .writeAsStringSync(
+            json.encode(<String, Object>{
+              'a.lib.js': <String, Object>{
+                'code': <int>[0, aSource.length],
+                'sourcemap': <int>[0, 2],
+                'metadata': <int>[0, aMetadata.length],
+              },
+              'sub/b.lib.js': <String, Object>{
+                'code': <int>[aSource.length, sources.lengthSync()],
+                'sourcemap': <int>[2, 4],
+                'metadata': <int>[aMetadata.length, metadata.lengthSync()],
+              },
+            }),
+          );
 
-    await webDevFS.update(
-      mainUri: outputFile.uri,
-      generator: residentCompiler,
-      trackWidgetCreation: true,
-      invalidatedFiles: <Uri>[],
-      packageConfig: PackageConfig.empty,
-      pathToReload: '',
-      dillOutputPath: '',
-      shaderCompiler: const FakeShaderCompiler(),
-    );
+      await webDevFS.update(
+        mainUri: outputFile.uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: '',
+        shaderCompiler: const FakeShaderCompiler(),
+      );
 
-    final Uint8List? reloadedSources = webDevFS.webAssetServer.getFile(
-      WebAssetServer.reloadedSourcesUri.path,
-    );
-    expect(reloadedSources, isNotNull);
-    expect(json.decode(utf8.decode(reloadedSources!)), [
-      {
-        // The paths within `reloadedSources` should be relative with a root
-        // prefix.
-        'src': '/a.lib.js',
-        'module': 'a.lib.js',
-        'libraries': ['dart:lib_a'],
-      },
-      {
-        'src': '/sub/b.lib.js',
-        'module': 'b.lib.js',
-        'libraries': ['dart:lib_b'],
-      },
-    ]);
+      final Uint8List? reloadedSources = webDevFS.webAssetServer.getFile(
+        WebAssetServer.reloadedSourcesUri.path,
+      );
+      expect(reloadedSources, isNotNull);
+      expect(json.decode(utf8.decode(reloadedSources!)), [
+        {
+          // The paths within `reloadedSources` should be root-relative and
+          // include the base href so they resolve through the same prefix as
+          // the initial load (e.g. behind a reverse proxy).
+          'src': '$expectedSrcPrefix/a.lib.js',
+          'module': 'a.lib.js',
+          'libraries': ['dart:lib_a'],
+        },
+        {
+          'src': '$expectedSrcPrefix/sub/b.lib.js',
+          'module': 'b.lib.js',
+          'libraries': ['dart:lib_b'],
+        },
+      ]);
 
-    await webDevFS.destroy();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+      await webDevFS.destroy();
+    }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  }
 }
