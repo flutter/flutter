@@ -1434,7 +1434,7 @@ class FakeToolContext extends Fake implements ToolContext {
   late final UserMessages userMessages = _userMessages ?? UserMessages();
 
   @override
-  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+  late final fileSystemUtils = FileSystemUtils(fileSystem: fs, platform: platform);
 }
 
 /// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].

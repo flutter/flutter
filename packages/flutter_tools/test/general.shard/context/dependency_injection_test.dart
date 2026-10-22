@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
@@ -23,6 +24,43 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+
+class _TestToolContextMixinConsumer with ToolContextMixin {
+  _TestToolContextMixinConsumer(this.toolContext);
+
+  @override
+  final ToolContext toolContext;
+
+  void verifyAllGettersMatchContext(ToolContext expected) {
+    expect(artifacts, same(expected.artifacts));
+    expect(botDetector, same(expected.botDetector));
+    expect(cache, same(expected.cache));
+    expect(config, same(expected.config));
+    expect(customDevicesConfig, same(expected.customDevicesConfig));
+    expect(fileSystemUtils, same(expected.fileSystemUtils));
+    expect(flutterVersion, same(expected.flutterVersion));
+    expect(fs, same(expected.fs));
+    expect(git, same(expected.git));
+    expect(localEngineLocator, same(expected.localEngineLocator));
+    expect(logger, same(expected.logger));
+    expect(nativeAssetsBuilder, same(expected.nativeAssetsBuilder));
+    expect(os, same(expected.os));
+    expect(outputPreferences, same(expected.outputPreferences));
+    expect(persistentToolState, same(expected.persistentToolState));
+    expect(platform, same(expected.platform));
+    expect(preRunValidator, same(expected.preRunValidator));
+    expect(processInfo, same(expected.processInfo));
+    expect(processManager, same(expected.processManager));
+    expect(processUtils, same(expected.processUtils));
+    expect(projectFactory, same(expected.projectFactory));
+    expect(shutdownHooks, same(expected.shutdownHooks));
+    expect(signals, same(expected.signals));
+    expect(stdio, same(expected.stdio));
+    expect(systemClock, same(expected.systemClock));
+    expect(terminal, same(expected.terminal));
+    expect(userMessages, same(expected.userMessages));
+  }
+}
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {}
 
@@ -475,6 +513,14 @@ void main() {
       expect(context.java, isNull);
       expect(context.java, isNull);
       expect(javaEvaluations, 1);
+    });
+  });
+
+  group('ToolContextMixin', () {
+    testWithoutContext('forwards all 27 extension getters to toolContext', () {
+      final toolContext = FakeToolContext();
+      final consumer = _TestToolContextMixinConsumer(toolContext);
+      consumer.verifyAllGettersMatchContext(toolContext);
     });
   });
 }

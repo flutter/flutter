@@ -6,7 +6,6 @@ import 'package:completion/completion.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../context/tool_context.dart';
 import '../runner/flutter_command.dart';
 
@@ -48,9 +47,6 @@ class ShellCompletionCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Stdio stdio = toolContext.stdio;
-
     final List<String> rest = argResults?.rest ?? <String>[];
     if (rest.length > 1) {
       throwToolExit('Too many arguments given to bash-completion command.', exitCode: 1);

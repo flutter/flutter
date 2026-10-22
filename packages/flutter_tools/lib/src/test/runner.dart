@@ -12,10 +12,8 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
@@ -146,10 +144,12 @@ class TestExecutionSpecification {
 }
 
 /// Launching the `flutter_tester` process from the test runner.
-interface class FlutterTestRunner {
-  const FlutterTestRunner({required this._toolContext});
+interface class FlutterTestRunner with ToolContextMixin {
+  const FlutterTestRunner({required this.toolContext});
 
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
@@ -157,16 +157,6 @@ interface class FlutterTestRunner {
     List<Uri> testFiles,
     TestExecutionSpecification spec,
   ) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FileSystem fs,
-      :Logger logger,
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessManager processManager,
-      :AnsiTerminal terminal,
-    ) = _toolContext;
-
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = artifacts.getArtifactPath(Artifact.flutterTester);
 
@@ -190,7 +180,7 @@ interface class FlutterTestRunner {
           .absolute
           .uri
           .toFilePath();
-      final WebMemoryFS result = await WebTestCompiler(toolContext: _toolContext).initialize(
+      final WebMemoryFS result = await WebTestCompiler(toolContext: toolContext).initialize(
         projectDirectory: flutterProject!.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
@@ -218,7 +208,7 @@ interface class FlutterTestRunner {
           crossOriginIsolation: debuggingOptions.webConfig.crossOriginIsolation,
           flutterProject: flutterProject,
           flutterTesterBinPath: flutterTesterBinPath,
-          toolContext: _toolContext,
+          toolContext: toolContext,
           useWasm: debuggingOptions.webConfig.useWasm,
           webMemoryFS: result,
           webRenderer: debuggingOptions.webConfig.renderer,
@@ -243,7 +233,7 @@ interface class FlutterTestRunner {
       buildInfo: spec.buildInfo,
       debuggingOptions: debuggingOptions,
       flutterTesterBinPath: flutterTesterBinPath,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       enableVmService: spec.enableVmService,
       flutterProject: flutterProject,
       icudtlPath: spec.icudtlPath,
@@ -677,16 +667,6 @@ class SpawnPlugin extends PlatformPlugin {
     List<Uri> testFiles,
     TestExecutionSpecification spec,
   ) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-      :Stdio stdio,
-      :AnsiTerminal terminal,
-    ) = _toolContext;
-
     assert(testFiles.length > 1);
 
     final TestExecutionSpecification(
@@ -713,7 +693,7 @@ class SpawnPlugin extends PlatformPlugin {
     await _generateIsolateSpawningTesterPackageConfig(
       flutterProject: flutterProject,
       isolateSpawningTesterPackageConfigFile: isolateSpawningTesterPackageConfigFile,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
     final PackageConfig isolateSpawningTesterPackageConfig = PackageConfig.parseBytes(
       isolateSpawningTesterPackageConfigFile.readAsBytesSync(),
@@ -743,7 +723,7 @@ class SpawnPlugin extends PlatformPlugin {
       autoUpdateGoldenFiles: spec.updateGoldens,
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
       packageTestArgs: packageTestArgs,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
 
     _generateRootTestIsolateSpawnerSourceFile(
@@ -761,7 +741,7 @@ class SpawnPlugin extends PlatformPlugin {
       buildInfo: buildInfo,
       outputDillFile: childTestIsolateSpawnerDillFile,
       sourceFile: childTestIsolateSpawnerSourceFile,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       testTimeRecorder: testTimeRecorder,
     );
 
@@ -769,7 +749,7 @@ class SpawnPlugin extends PlatformPlugin {
       buildInfo: buildInfo,
       outputDillFile: rootTestIsolateSpawnerDillFile,
       sourceFile: rootTestIsolateSpawnerSourceFile,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       testTimeRecorder: testTimeRecorder,
     );
 

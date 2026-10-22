@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
@@ -23,7 +21,6 @@ import '../flutter_plugins.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../version.dart';
 import 'compiler_config.dart';
 import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
@@ -45,18 +42,20 @@ const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 /// Prefix for web-define variables stored in [Environment.defines].
 const kWebDefinePrefix = 'webDefine:';
 
-class WebBuilder {
+class WebBuilder with ToolContextMixin {
   WebBuilder({
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
-    required this._toolContext,
+    required this.toolContext,
   });
 
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// Builds the web application using the specified compiler configurations
   /// and generates the necessary web assets in the output directory.
@@ -71,17 +70,6 @@ class WebBuilder {
     String? outputDirectoryPath,
     Map<String, String> webDefines = const <String, String>{},
   }) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :Config config,
-      fs: FileSystem fileSystem,
-      :FlutterVersion flutterVersion,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-      :Terminal terminal,
-    ) = _toolContext;
     if (serviceWorkerStrategy != null) {
       logger.printWarning(
         'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.\n'
@@ -94,13 +82,13 @@ class WebBuilder {
       logger: logger,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
-        ? fileSystem.directory(
-            fileSystem.path.join(
+        ? fs.directory(
+            fs.path.join(
               flutterProject.directory.path,
-              getWebBuildDirectory(config: config, fileSystem: fileSystem),
+              getWebBuildDirectory(config: config, fileSystem: fs),
             ),
           )
-        : fileSystem.directory(outputDirectoryPath);
+        : fs.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
 
     // The migrators to apply to a Web project.
@@ -114,7 +102,7 @@ class WebBuilder {
     try {
       final BuildResult result = await _buildSystem.build(
         _buildTargets.webServiceWorker(
-          fileSystem,
+          fs,
           compilerConfigs,
           _analytics,
           artifacts,
@@ -138,14 +126,14 @@ class WebBuilder {
           },
           packageConfigPath: buildInfo.packageConfigPath,
           artifacts: artifacts,
-          fileSystem: fileSystem,
+          fileSystem: fs,
           logger: logger,
           processManager: processManager,
           platform: platform,
           analytics: _analytics,
           cacheDir: cache.getRoot(),
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
-          flutterRootDir: fileSystem.directory(Cache.flutterRoot),
+          flutterRootDir: fs.directory(Cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406
           generateDartPluginRegistry: false,
@@ -172,7 +160,7 @@ class WebBuilder {
     // optional files not needed by the user.
     logger.printStatus(
       '${terminal.successMark} '
-      'Built ${fileSystem.path.relative(outputDirectory.path)}',
+      'Built ${fs.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
 

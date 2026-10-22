@@ -12,9 +12,7 @@ import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -22,27 +20,28 @@ import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
-class WebDriverService extends DriverService {
+class WebDriverService extends DriverService with ToolContextMixin {
   WebDriverService({
     required this._analytics,
     required this.buildSystem,
     required this.buildTargets,
     required this._dartSdkPath,
-    required this._toolContext,
+    required this.toolContext,
   });
 
   final Analytics _analytics;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
   final String _dartSdkPath;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -71,12 +70,11 @@ class WebDriverService extends DriverService {
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       buildInfo: buildInfo,
       target: mainPath,
       userIdentifier: userIdentifier,
     );
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     final webConfig = WebDebugConfig(
       devServerConfig: debuggingOptions.webConfig.devServerConfig,
       renderer: debuggingOptions.webConfig.renderer,
@@ -99,7 +97,7 @@ class WebDriverService extends DriverService {
       analytics: _analytics,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
@@ -144,8 +142,6 @@ class WebDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, DriveTestSpecification spec) async {
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
-        _toolContext;
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(spec.browserName);
     final isAndroidChrome = browser == Browser.androidChrome;

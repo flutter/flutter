@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../context/tool_context.dart';
 import '../localizations/gen_l10n.dart';
 import '../localizations/localizations_utils.dart';
@@ -20,8 +16,7 @@ import '../runner/flutter_command.dart';
 /// For a more comprehensive tutorial on the tool, please see the
 /// [internationalization guide](https://flutter.dev/to/internationalization).
 class GenerateLocalizationsCommand extends FlutterCommand {
-  GenerateLocalizationsCommand({required ToolContext super.toolContext})
-    : _toolContext = toolContext {
+  GenerateLocalizationsCommand({required ToolContext super.toolContext}) {
     argParser.addOption(
       'arb-dir',
       help: 'The directory where the template and translated arb files are located.',
@@ -207,10 +202,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
-
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description => 'Generate localizations for the current project.';
@@ -227,10 +220,6 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     if (argResults!.rest.isNotEmpty) {
       throwToolExit('Unexpected positional argument "${argResults!.rest.first}".');
     }
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final ProcessManager processManager = _toolContext.processManager;
-    final Artifacts artifacts = _toolContext.artifacts;
 
     // Keep in mind that this is also defined in the following locations:
     // 1. flutter_tools/lib/src/build_system/targets/localizations.dart

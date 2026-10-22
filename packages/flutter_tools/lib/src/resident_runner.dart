@@ -47,14 +47,15 @@ import 'macos/xcode.dart';
 import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
-import 'version.dart';
 import 'vmservice.dart';
 
-class FlutterDevice {
+export 'context/tool_context.dart' show ToolContextMixinExtension;
+
+class FlutterDevice with ToolContextMixin {
   FlutterDevice(
     this.device, {
     required this.buildInfo,
-    required this._toolContext,
+    required this.toolContext,
     required this.developmentShaderCompiler,
     required this.generator,
     required this.targetPlatform,
@@ -125,7 +126,9 @@ class FlutterDevice {
   final Device? device;
   final ResidentCompiler? generator;
   final BuildInfo buildInfo;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
 
@@ -156,8 +159,6 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
     this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
     // FYI, this message is used as a sentinel in tests.
     logger.printTrace('Connecting to service protocol: $vmServiceUri');
@@ -318,13 +319,12 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       buildMode: buildInfo.mode,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
     return devFS!.create();
   }
 
   Future<void> startEchoingDeviceLog(DebuggingOptions debuggingOptions) async {
-    final Logger logger = _toolContext.logger;
     if (_loggingSubscription != null) {
       return;
     }
@@ -362,8 +362,6 @@ class FlutterDevice {
   }
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
     final prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.mode.friendlyName;
     logger.printStatus(
@@ -423,8 +421,6 @@ class FlutterDevice {
   }
 
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
     final TargetPlatform targetPlatform = await device!.targetPlatform;
     package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
       targetPlatform,
@@ -494,8 +490,6 @@ class FlutterDevice {
     required List<Uri> invalidatedFiles,
     required PackageConfig packageConfig,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device!.displayName}...',
       progressId: 'devFS.update',
@@ -924,7 +918,7 @@ abstract class ResidentHandlers {
 }
 
 // Shared code between different resident application runners.
-abstract class ResidentRunner extends ResidentHandlers {
+abstract class ResidentRunner extends ResidentHandlers with ToolContextMixin {
   ResidentRunner(
     this.flutterDevices, {
     required this.analytics,
@@ -963,31 +957,16 @@ abstract class ResidentRunner extends ResidentHandlers {
   Logger get logger => toolContext.logger;
 
   @override
-  FileSystem get fileSystem => toolContext.fs;
+  FileSystem get fileSystem => fs;
 
   @protected
-  Platform get platform => toolContext.platform;
-  @protected
-  Terminal get terminal => toolContext.terminal;
-  @protected
-  OutputPreferences get outputPreferences => toolContext.outputPreferences;
-  @protected
-  Artifacts get artifacts => toolContext.artifacts;
-  @protected
-  Config get config => toolContext.config;
-  @protected
-  Cache get cache => toolContext.cache;
-  @protected
-  FlutterVersion get flutterVersion => toolContext.flutterVersion;
-  @protected
-  ProcessManager get processManager => toolContext.processManager;
-  @protected
-  OperatingSystemUtils get osUtils => toolContext.os;
+  OperatingSystemUtils get osUtils => os;
 
   /// The Xcode installation, or null on platforms without Xcode support.
   final Xcode? xcode;
 
   /// The injected dependencies used by this runner.
+  @override
   final ToolContext toolContext;
   final Analytics analytics;
   final BuildTargets buildTargets;
@@ -1224,7 +1203,6 @@ abstract class ResidentRunner extends ResidentHandlers {
       return;
     }
     logger.printTrace('Caching compiled dill');
-    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final File outputDill = fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
       final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;

@@ -25,7 +25,7 @@ import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
 
-class FlutterDriverFactory {
+class FlutterDriverFactory with ToolContextMixin {
   FlutterDriverFactory({
     required this._analytics,
     required this._applicationPackageFactory,
@@ -33,7 +33,7 @@ class FlutterDriverFactory {
     required this._buildTargets,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
-    required this._toolContext,
+    required this.toolContext,
   });
 
   final Analytics _analytics;
@@ -42,7 +42,9 @@ class FlutterDriverFactory {
   final BuildTargets _buildTargets;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
@@ -52,11 +54,9 @@ class FlutterDriverFactory {
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         dartSdkPath: _dartSdkPath,
-        toolContext: _toolContext,
+        toolContext: toolContext,
       );
     }
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
-        _toolContext;
     return FlutterDriverService(
       applicationPackageFactory: _applicationPackageFactory,
       dartSdkPath: _dartSdkPath,

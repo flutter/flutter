@@ -6,14 +6,9 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
@@ -97,7 +92,7 @@ final class TestCompilerFailure extends TestCompilerResult {
 ///
 /// This class is a wrapper around compiler that allows multiple isolates to
 /// enqueue compilation requests, but ensures only one compilation at a time.
-class TestCompiler {
+class TestCompiler with ToolContextMixin {
   /// Creates a new [TestCompiler] which acts as a frontend_server proxy.
   ///
   /// [BuildInfo.trackWidgetCreation] configures whether
@@ -113,15 +108,13 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
-    required ToolContext toolContext,
+    required this.toolContext,
     String? precompiledDillPath,
     this.testTimeRecorder,
-  }) : _toolContext = toolContext,
-       testFilePath =
+  }) : testFilePath =
            precompiledDillPath ?? _computeTestFilePath(toolContext, flutterProject, buildInfo),
        shouldCopyDillFile = precompiledDillPath == null {
     this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -172,7 +165,9 @@ class TestCompiler {
   final TestTimeRecorder? testTimeRecorder;
   final ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory();
 
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   ResidentCompiler? compiler;
   late File outputDill;
@@ -211,15 +206,6 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Config config,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-      :ShutdownHooks shutdownHooks,
-    ) = _toolContext;
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
       artifacts: artifacts,
       logger: logger,
@@ -245,7 +231,6 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = _toolContext;
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       logger.printTrace('Compiling ${request.mainUri}');

@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -36,13 +35,13 @@ class WindowsDevice extends DesktopDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
-  TargetPlatform get _targetPlatform => switch (toolContext.os.hostPlatform) {
+  TargetPlatform get _targetPlatform => switch (os.hostPlatform) {
     HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
     _ => TargetPlatform.windows_x64,
   };
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(toolContext.os.hostPlatform);
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(os.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -55,7 +54,6 @@ class WindowsDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     await buildWindows(
       projectFactory.fromDirectory(fs.currentDirectory).windows,
       buildInfo,

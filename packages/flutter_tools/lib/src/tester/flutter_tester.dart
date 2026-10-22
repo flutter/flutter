@@ -4,15 +4,12 @@
 
 import 'dart:async';
 
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
@@ -26,7 +23,6 @@ import '../device_port_forwarder.dart';
 import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
   factory FlutterTesterApp.fromCurrentDirectory(FileSystem fileSystem) {
@@ -78,7 +74,6 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
-    final FlutterVersion flutterVersion = toolContext.flutterVersion;
     return 'Flutter ${flutterVersion.frameworkRevisionShort}';
   }
 
@@ -126,13 +121,6 @@ class FlutterTesterDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
       logger.printError('This device only supports debug mode.');
@@ -232,7 +220,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: toolContext.fs);
+    return LocalDevFSWriter(fileSystem: fs);
   }
 
   @override

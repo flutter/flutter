@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
@@ -1013,15 +1012,13 @@ String _getMacOSFrameworkDsymPath(
 }
 
 /// Manages the artifacts of a locally built engine.
-class CachedLocalEngineArtifacts implements Artifacts {
+class CachedLocalEngineArtifacts with ToolContextMixin implements Artifacts {
   CachedLocalEngineArtifacts(
     this._hostEngineOutPath, {
     required String engineOutPath,
-    required this._toolContext,
+    required this.toolContext,
     Artifacts? parent,
   }) {
-    final ToolContext(:Cache cache, :FileSystem fs, :OperatingSystemUtils os, :Platform platform) =
-        _toolContext;
     localEngineInfo = LocalEngineInfo(
       fileSystem: fs,
       hostOutPath: _hostEngineOutPath,
@@ -1036,12 +1033,13 @@ class CachedLocalEngineArtifacts implements Artifacts {
   late final LocalEngineInfo localEngineInfo;
 
   final String _hostEngineOutPath;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
   late final Artifacts _backupCache;
 
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
-    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
     switch (artifact) {
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
@@ -1077,8 +1075,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
     BuildMode? mode,
     EnvironmentType? environmentType,
   }) {
-    final ToolContext(:FileSystem fs, :OperatingSystemUtils os, platform: Platform hostPlatform) =
-        _toolContext;
+    final Platform hostPlatform = this.platform;
     platform ??= _currentHostPlatform(hostPlatform, os);
     platform = _mapTargetPlatform(platform);
     final isDirectoryArtifact = artifact == Artifact.flutterPatchedSdkPath;
@@ -1185,18 +1182,17 @@ class CachedLocalEngineArtifacts implements Artifacts {
 
   @override
   String getEngineType(TargetPlatform platform, [BuildMode? mode]) {
-    return _toolContext.fs.path.basename(localEngineInfo.targetOutPath);
+    return fs.path.basename(localEngineInfo.targetOutPath);
   }
 
   String _getFlutterPatchedSdkPath(BuildMode? buildMode) {
-    return _toolContext.fs.path.join(
+    return fs.path.join(
       localEngineInfo.targetOutPath,
       buildMode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk',
     );
   }
 
   String _getDartSdkPath() {
-    final ToolContext(:FileSystem fs, :OperatingSystemUtils os, :Platform platform) = _toolContext;
     final String builtPath = fs.path.join(_hostEngineOutPath, 'dart-sdk');
     if (fs.isDirectorySync(fs.path.join(builtPath, 'bin'))) {
       return builtPath;
@@ -1227,8 +1223,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
       'clang_arm64',
       'clang_riscv64',
     ];
-    final ToolContext(:FileSystem fs, :Platform platform, :ProcessManager processManager) =
-        _toolContext;
     final String genSnapshotName = artifact.getFileName(platform);
     for (final clangDir in clangDirs) {
       final String genSnapshotPath = fs.path.join(
@@ -1244,10 +1238,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }
 
   String _flutterTesterPath(TargetPlatform platform) {
-    final ToolContext(:FileSystem fs, platform: Platform hostPlatform) = _toolContext;
     return fs.path.join(
       localEngineInfo.hostOutPath,
-      Artifact.flutterTester.getFileName(hostPlatform),
+      Artifact.flutterTester.getFileName(this.platform),
     );
   }
 

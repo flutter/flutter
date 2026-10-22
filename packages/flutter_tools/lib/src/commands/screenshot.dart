@@ -7,7 +7,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -57,8 +56,6 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   final VMServiceConnector _vmServiceConnector;
-
-  FileSystem get fs => toolContext.fs;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -111,7 +108,6 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
     File? outputFile;
     if (argResults?.wasParsed(_kOut) ?? false) {
       outputFile = fs.file(stringArg(_kOut));
@@ -129,8 +125,6 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<void> runScreenshot(File? outputFile) async {
-    final FileSystem fs = toolContext.fs;
-    final FileSystemUtils fileSystemUtils = toolContext.fileSystemUtils;
     outputFile ??= fileSystemUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'png');
 
     try {
@@ -154,9 +148,6 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<bool> runSkia(File? outputFile) async {
-    final FileSystem fs = toolContext.fs;
-    final FileSystemUtils fileSystemUtils = toolContext.fileSystemUtils;
-    final Logger logger = toolContext.logger;
     final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
     final FlutterVmService vmService = await _vmServiceConnector(vmServiceUrl, logger: logger);
     final vm_service.Response? skp = await vmService.screenshotSkp();
@@ -199,8 +190,6 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   void _showOutputFileInfo(File outputFile) {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
     final int sizeKB = outputFile.lengthSync() ~/ 1024;
     logger.printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }

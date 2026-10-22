@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart';
@@ -17,8 +16,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
@@ -297,12 +294,12 @@ void main() {
 typedef Finalizer = Future<void> Function();
 
 /// The flutter test platform used to integrate with package:test.
-class FlutterPlatform extends PlatformPlugin {
+class FlutterPlatform extends PlatformPlugin with ToolContextMixin {
   FlutterPlatform({
     required this.buildInfo,
     required this.debuggingOptions,
     required this.flutterTesterBinPath,
-    required this._toolContext,
+    required this.toolContext,
     this.enableVmService,
     this.flutterProject,
     this.host,
@@ -325,15 +322,17 @@ class FlutterPlatform extends PlatformPlugin {
           TestCompiler(
             buildInfo,
             flutterProject,
-            toolContext: _toolContext,
+            toolContext: toolContext,
             testTimeRecorder: testTimeRecorder,
           ),
       flutterTesterBinPath: flutterTesterBinPath,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
   }
 
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
@@ -486,12 +485,6 @@ class FlutterPlatform extends PlatformPlugin {
         compileExpression: _compileExpressionService,
       );
     }
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = _toolContext;
     return FlutterTesterTestDevice(
       id: ourTestCount,
       platform: platform,
@@ -513,7 +506,6 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   void _handleStartedDevice({required Uri? uri, required int testCount, required String testPath}) {
-    final Logger logger = _toolContext.logger;
     if (uri != null) {
       logger.printTrace('test $testCount: VM Service uri is available at $uri');
       if (_isIntegrationTest) {
@@ -529,7 +521,6 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
-    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
     final goldensBaseUri = Uri.file(testPath, windows: platform.isWindows);
     final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
@@ -577,7 +568,6 @@ class FlutterPlatform extends PlatformPlugin {
     StreamChannel<dynamic> testHarnessChannel,
     int ourTestCount,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :ShutdownHooks shutdownHooks) = _toolContext;
     logger.printTrace('test $ourTestCount: starting test $testPath');
 
     _AsyncError? outOfBandError; // error that we couldn't send to the harness that we need to send via our future
@@ -630,7 +620,7 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
-            toolContext: _toolContext,
+            toolContext: toolContext,
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
           );
@@ -658,7 +648,7 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
-            toolContext: _toolContext,
+            toolContext: toolContext,
             testTimeRecorder: testTimeRecorder,
           );
           switch (await compiler!.compile(fs.file(mainDart).uri)) {
@@ -787,7 +777,6 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kListenerBuildDirectoryName = 'test';
 
   String _createListenerDart(List<Finalizer> finalizers, int ourTestCount, String testPath) {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final Uri testUrl = fs.path.toUri(fs.path.absolute(testPath));
     // When running integration tests on a target device, the listener path is
     // supplied as TargetFile to the build system, which includes TargetFile in
@@ -836,7 +825,6 @@ class FlutterPlatform extends PlatformPlugin {
 
   String _generateTestMain({required Uri testUrl}) {
     assert(testUrl.scheme == 'file');
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final File file = fs.file(testUrl);
     final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
 

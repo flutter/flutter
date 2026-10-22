@@ -90,8 +90,6 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   ToolContext get toolContext => super.toolContext!;
 
-  FileSystem get _fileSystem => toolContext.fs;
-
   @override
   final name = 'aar';
 
@@ -160,7 +158,7 @@ class BuildAarCommand extends BuildSubCommand {
         ? buildNumberArg
         : '1.0';
 
-    final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
+    final File targetFile = fs.file(fs.path.join('lib', 'main.dart'));
     for (final FlagOptionDescriptor descriptor in const [_debugMode, _profileMode, _releaseMode]) {
       if (getValue(descriptor)) {
         androidBuildInfo.add(
@@ -203,10 +201,10 @@ class BuildAarCommand extends BuildSubCommand {
     if (remainingArguments.isEmpty) {
       return super.project;
     }
-    final File mainFile = _fileSystem.file(remainingArguments.first);
+    final File mainFile = fs.file(remainingArguments.first);
     final String path;
     if (!mainFile.existsSync()) {
-      final Directory pathProject = _fileSystem.directory(remainingArguments.first);
+      final Directory pathProject = fs.directory(remainingArguments.first);
       if (!pathProject.existsSync()) {
         throwToolExit('${remainingArguments.first} does not exist');
       }
@@ -214,10 +212,10 @@ class BuildAarCommand extends BuildSubCommand {
     } else {
       path = mainFile.parent.path;
     }
-    final String? projectRoot = findProjectRoot(_fileSystem, path);
+    final String? projectRoot = findProjectRoot(fs, path);
     if (projectRoot == null) {
       throwToolExit('${mainFile.parent.path} is not a valid flutter project');
     }
-    return toolContext.projectFactory.fromDirectory(_fileSystem.directory(projectRoot));
+    return projectFactory.fromDirectory(fs.directory(projectRoot));
   }
 }

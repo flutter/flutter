@@ -18,7 +18,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -431,7 +430,6 @@ class ResidentWebRunner extends ResidentRunner {
       return OperationResult(1, 'A restart is already in progress.');
     }
     _isRestarting = true;
-    final SystemClock systemClock = toolContext.systemClock;
     final DateTime start = systemClock.now();
     final Status status;
     if (fullRestart) {

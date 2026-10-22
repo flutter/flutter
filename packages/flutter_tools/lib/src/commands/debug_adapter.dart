@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import '../base/io.dart';
-import '../base/logger.dart';
 import '../context/tool_context.dart';
 import '../debug_adapters/server.dart';
 import '../runner/flutter_command.dart';
@@ -57,13 +55,11 @@ class DebugAdapterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = toolContext.logger;
-    final Stdio stdio = toolContext.stdio;
     final server = DapServer(
       stdio.stdin,
       stdio.stdout.nonBlocking,
-      fileSystem: toolContext.fs,
-      platform: toolContext.platform,
+      fileSystem: fs,
+      platform: platform,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
       test: boolArg('test'),

@@ -403,7 +403,7 @@ class HotRunner extends ResidentRunner {
                 // should only be displayed once.
                 suppressErrors: applicationBinary == null,
                 checkDartPluginRegistry: true,
-                dartPluginRegistrant: toolContext.projectFactory
+                dartPluginRegistrant: projectFactory
                     .fromDirectory(fileSystem.currentDirectory)
                     .dartPluginRegistrant,
                 outputPath: dillOutputPath,

@@ -24,6 +24,8 @@ import 'vmservice.dart';
 import 'web/compile.dart';
 import 'web/devfs_config.dart';
 
+export 'context/tool_context.dart' show ToolContextMixinExtension;
+
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
 /// The user-visible category of a [Device].
@@ -456,7 +458,7 @@ abstract class DeviceDiscovery {
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
 /// and removals.
-abstract class PollingDeviceDiscovery extends DeviceDiscovery {
+abstract class PollingDeviceDiscovery extends DeviceDiscovery with ToolContextMixin {
   PollingDeviceDiscovery(this.name, {this._toolContext});
 
   static const _pollingInterval = Duration(seconds: 4);
@@ -465,6 +467,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   final String name;
   final ToolContext? _toolContext;
 
+  @override
   @protected
   ToolContext get toolContext => _toolContext!;
 
@@ -600,7 +603,7 @@ String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionI
 ///
 /// This may correspond to a connected iOS or Android device, or represent
 /// the host operating system in the case of Flutter Desktop.
-abstract class Device {
+abstract class Device with ToolContextMixin {
   Device(
     this.id, {
     required Logger logger,
@@ -613,6 +616,7 @@ abstract class Device {
   final String id;
   final ToolContext? _toolContext;
 
+  @override
   @protected
   ToolContext get toolContext => _toolContext!;
 

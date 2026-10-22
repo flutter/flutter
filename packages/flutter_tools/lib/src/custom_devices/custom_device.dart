@@ -11,7 +11,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -28,7 +27,6 @@ import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-import '../version.dart';
 import '../vmservice.dart';
 import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
@@ -456,7 +454,6 @@ class CustomDevice extends Device {
     if (!_config.usesPortForwarding) {
       return const NoOpDevicePortForwarder();
     }
-    final ToolContext(:Logger logger, :ProcessManager processManager) = toolContext;
     return CustomDevicePortForwarder(
       deviceName: _config.label,
       forwardPortCommand: _config.forwardPortCommand!,
@@ -468,8 +465,6 @@ class CustomDevice extends Device {
 
   CustomDeviceAppSession _getOrCreateAppSession(ApplicationPackage app) {
     return _sessions.putIfAbsent(app, () {
-      final ToolContext(:Logger logger, :ProcessManager processManager) = toolContext;
-
       /// create a new session and add its logging to the global log reader.
       /// (needed bc it's possible the infra requests a global log in [getLogReader]
       final session = CustomDeviceAppSession(
@@ -503,7 +498,6 @@ class CustomDevice extends Device {
     Map<String, String> replacementValues = const <String, String>{},
   }) async {
     final List<String> interpolated = interpolateCommand(_config.pingCommand, replacementValues);
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
 
     final RunResult result;
     try {
@@ -551,7 +545,6 @@ class CustomDevice extends Device {
       <String, String>{'appName': appName, 'localPath': localPath},
       additionalReplacementValues: additionalReplacementValues,
     );
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
 
     try {
       await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
@@ -578,7 +571,6 @@ class CustomDevice extends Device {
     final List<String> interpolated = interpolateCommand(_config.uninstallCommand, <String, String>{
       'appName': appName,
     }, additionalReplacementValues: additionalReplacementValues);
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
 
     try {
       await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
@@ -607,7 +599,6 @@ class CustomDevice extends Device {
       'localPath': localPath,
       'appName': appName,
     }, additionalReplacementValues: additionalReplacementValues);
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
 
     try {
       await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
@@ -645,7 +636,7 @@ class CustomDevice extends Device {
 
     if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
       // launch the readLogs command
-      _globalLogReaderProcess = await toolContext.processUtils.start(_config.readLogsCommand!);
+      _globalLogReaderProcess = await processUtils.start(_config.readLogsCommand!);
       _globalLogReader.listenToProcessOutput(_globalLogReaderProcess!);
     }
 
@@ -659,7 +650,6 @@ class CustomDevice extends Device {
       return false;
     }
 
-    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final bool result = await tryInstall(
       localPath: getAssetBuildDirectory(config, fs),
       appName: appName,
@@ -695,7 +685,7 @@ class CustomDevice extends Device {
       <String, String>{},
     );
 
-    final RunResult result = await toolContext.processUtils.run(interpolated, throwOnError: true);
+    final RunResult result = await processUtils.run(interpolated, throwOnError: true);
     await outputFile.writeAsBytes(base64Decode(result.stdout));
   }
 
@@ -733,12 +723,6 @@ class CustomDevice extends Device {
     BundleBuilder? bundleBuilder,
   }) async {
     final TargetPlatform platform = await targetPlatform;
-    final ToolContext(
-      :Artifacts artifacts,
-      :Config config,
-      :FlutterVersion flutterVersion,
-      :FileSystem fs,
-    ) = toolContext;
 
     final additionalReplacementValues = <String, String>{
       'buildMode': debuggingOptions.buildInfo.modeName,
@@ -852,7 +836,7 @@ class CustomDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _customDeviceWorkflow.canListDevices;
 
   List<CustomDevice> get _enabledCustomDevices {
-    return toolContext.customDevicesConfig
+    return customDevicesConfig
         .tryGetDevices()
         .where((CustomDeviceConfig element) => element.enabled)
         .map(

@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -34,11 +31,11 @@ class MacOSDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(toolContext.os.hostPlatform);
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(os.hostPlatform);
 
   @override
   Future<String> get targetPlatformDisplayName async {
-    if (toolContext.os.hostPlatform == HostPlatform.darwin_arm64) {
+    if (os.hostPlatform == HostPlatform.darwin_arm64) {
       return 'darwin-arm64';
     }
     return 'darwin-x64';
@@ -59,7 +56,7 @@ class MacOSDevice extends DesktopDevice {
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
       targetOverride: mainPath,
-      verboseLogging: toolContext.logger.isVerbose,
+      verboseLogging: logger.isVerbose,
       usingCISystem: usingCISystem,
     );
   }
@@ -71,7 +68,6 @@ class MacOSDevice extends DesktopDevice {
 
   @override
   void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
-    final ToolContext(:Logger logger, :ProcessManager processManager) = toolContext;
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enough along in
@@ -96,7 +92,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final MacOSWorkflow _macOSWorkflow;
 
   @override
-  bool get supportsPlatform => toolContext.platform.isMacOS;
+  bool get supportsPlatform => platform.isMacOS;
 
   @override
   bool get canListAnything => _macOSWorkflow.canListDevices;
