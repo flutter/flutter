@@ -134,12 +134,35 @@ Future<AssetBundle?> buildAssets({
   required String manifestPath,
   required String packageConfigPath,
   required TargetPlatform targetPlatform,
+  required ToolContext toolContext,
   String? flavor,
 }) async {
+  final ToolContext(
+    :Cache cache,
+    :FileSystem fs,
+    :Logger logger,
+    :Platform platform,
+    :FlutterProjectFactory projectFactory,
+  ) = toolContext;
+  final FlutterProject flutterProject;
+  try {
+    flutterProject = projectFactory.fromDirectory(fs.file(manifestPath).parent);
+  } on Exception catch (e) {
+    logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+    logger.printError('$e');
+    return null;
+  }
+
   // Build the asset bundle.
-  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+  final assetBundle = ManifestAssetBundle(
+    logger: logger,
+    fileSystem: fs,
+    platform: platform,
+    flutterRoot: cache.flutterRoot,
+  );
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
+    flutterProject: flutterProject,
     packageConfigPath: packageConfigPath,
     targetPlatform: targetPlatform,
     flavor: flavor,
