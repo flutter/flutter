@@ -2,12 +2,47 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# package:flutter_devicelab's sources, for the dev/bots tests Bazel compiles
-# and runs (engine/src/flutter/build/bazel/dart/dart_test.bzl).
+# package:flutter_devicelab's sources (dev/bots' tests reach them) and its
+# own tests under Bazel: each test compiled by the frontend server for the
+# VM and run by package:test's precompiled runner from this directory, as
+# `dart test` runs them (dev/bots' runDartTest;
+# engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+#
+#   bazel test //dev/devicelab:tests
+
+load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "sources",
-    srcs = glob(["lib/**"]) + ["pubspec.yaml"],
+    srcs = glob([
+        "bin/**",
+        "lib/**",
+    ]) + ["pubspec.yaml"],
+)
+
+dart_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["test/**/*.dart"],
+        allow_empty = True,
+        exclude = ["test/**/*_test.dart"],
+    ),
+    # The Dart SDK, which run_test, runner_test and build_test_task_test run
+    # on the package's scripts as ../../bin/cache/dart-sdk/bin/dart.
+    cache = {"@dart_sdk_linux_x64//:dart": "dart-sdk"},
+    package = "flutter_devicelab",
+    # adb_test needs an Android SDK's platform-tools/adb at ANDROID_HOME
+    # (devices.dart checks it can run), which CI's machines have; run_test and
+    # build_test_task_test run devicelab tasks that run `bin/flutter` itself
+    # and read the machine's reboot bookkeeping -- the integration kind.
+    tests = glob(
+        ["test/**/*_test.dart"],
+        exclude = [
+            "test/adb_test.dart",
+            "test/run_test.dart",
+            "test/tasks/build_test_task_test.dart",
+        ],
+    ),
 )
