@@ -1104,15 +1104,32 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   /// While a pointer is captured, the browser sends all of its events to
   /// [_viewTarget], even when the pointer moves over an `<iframe>` platform
   /// view, so drags that start on Flutter content keep receiving move events.
+  /// The browser automatically releases the capture on `pointerup` and
+  /// `pointercancel` (W3C Pointer Events §10.3), so `releasePointerCapture`
+  /// does not need to be called manually.
   /// See https://github.com/flutter/flutter/issues/141307
   ///
   /// Presses on platform view content, the text editing host and the semantics
   /// host are not captured, so those elements keep receiving their own pointer
   /// events.
   void _capturePointerIfFlutterContent(DomPointerEvent event) {
-    // Events from the scene inside the glass pane's shadow root are retargeted
-    // to the glass pane, so a press on Flutter content targets either the view
-    // root or the glass pane.
+    // Only capture when `event.target` is the view root (`<flutter-view>`) or
+    // the glass pane (`_view.dom.platformViewsHost`, i.e. `<flt-glass-pane>`).
+    //
+    // Despite its field name, `platformViewsHost` (`<flt-glass-pane>`) is also
+    // the shadow host for the scene's `#shadow-root` (`renderingHost`). Events
+    // from Flutter content inside that shadow root (such as hit-test proxies in
+    // `<flt-scene-host>`) are retargeted by the browser across the shadow
+    // boundary to `<flt-glass-pane>`.
+    //
+    // By contrast, platform views (`<flt-platform-view>` and their inner DOM
+    // elements) are light-DOM children of `<flt-glass-pane>` projected via
+    // `<slot>`, so the browser does not retarget their events to
+    // `<flt-glass-pane>`—`event.target` remains the platform view element
+    // itself. Likewise, presses on text fields or semantics nodes have an
+    // `event.target` inside `textEditingHost` or `semanticsHost`. All of those
+    // satisfy `target != _viewTarget && target != _view.dom.platformViewsHost`
+    // and return early without capturing.
     final DomEventTarget? target = event.target;
     if (target != _viewTarget && target != _view.dom.platformViewsHost) {
       return;
@@ -1252,13 +1269,16 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     }, checkModifiers: false);
 
-    // The capture can be taken away without a `pointerup` or a `pointercancel`,
-    // for example when the page calls `releasePointerCapture` or captures the
-    // pointer to another element, or, in some browsers, when the window loses
-    // focus. If buttons are still pressed, the
-    // press will never be released, so cancel it. The event bubbles, so ignore
-    // captures lost by descendants (such as platform view content); only the
-    // capture this adapter set on the view root matters.
+    // The browser automatically releases pointer capture on `pointerup` and
+    // `pointercancel` (W3C Pointer Events §10.3), so `releasePointerCapture`
+    // never needs to be called explicitly. However, capture can also be taken
+    // away without a `pointerup` or a `pointercancel`, for example when the
+    // page calls `releasePointerCapture` or captures the pointer to another
+    // element, or, in some browsers, when the window loses focus. If buttons
+    // are still pressed, the press will never be released, so cancel it. The
+    // event bubbles, so ignore captures lost by descendants (such as platform
+    // view content); only the capture this adapter set on the view root
+    // matters.
     _addPointerEventListener(_viewTarget, 'lostpointercapture', (DomPointerEvent event) {
       if (event.target != _viewTarget) {
         return;

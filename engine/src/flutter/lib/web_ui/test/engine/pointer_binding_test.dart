@@ -3070,20 +3070,7 @@ void testMain() {
   Set<int> pointerDevices(List<ui.PointerDataPacket> packets) =>
       _allPointerData(packets).map((ui.PointerData d) => d.device).toSet();
 
-  /// Presses and releases the primary mouse button on [target] with
-  /// [pointerId], and returns the number of `down` changes reported for it.
-  int pressAndRelease(_PointerEventContext context, DomElement target, int pointerId) {
-    final List<ui.PointerDataPacket> packets = recordPackets();
-    target.dispatchEvent(
-      context.mouseDown(pointerId: pointerId, button: 0, buttons: 1, clientX: 10, clientY: 10),
-    );
-    rootElement.dispatchEvent(
-      context.mouseUp(pointerId: pointerId, button: 0, buttons: 0, clientX: 10, clientY: 10),
-    );
-    return pointerChanges(packets).where((ui.PointerChange c) => c == ui.PointerChange.down).length;
-  }
-
-  /// Builds a cancelable pointer event of [type], such as the
+  /// Builds a composed, cancelable pointer event of [type], such as the
   /// `lostpointercapture` the browser fires when [pointerId] stops being
   /// captured.
   DomEvent pointerEvent(
@@ -3097,6 +3084,7 @@ void testMain() {
     return createDomPointerEvent(type, <String, dynamic>{
       'bubbles': true,
       'cancelable': true,
+      'composed': true,
       'pointerId': pointerId,
       'pointerType': pointerType,
       'button': 0,
@@ -3106,39 +3094,77 @@ void testMain() {
     });
   }
 
+  /// Presses and releases the primary mouse button on [target] with
+  /// [pointerId], and returns the number of `down` changes reported for it.
+  int pressAndRelease(_PointerEventContext context, DomElement target, int pointerId) {
+    final List<ui.PointerDataPacket> packets = recordPackets();
+    target.dispatchEvent(pointerEvent('pointerdown', pointerId: pointerId, buttons: 1));
+    rootElement.dispatchEvent(
+      context.mouseUp(pointerId: pointerId, button: 0, buttons: 0, clientX: 10, clientY: 10),
+    );
+    return pointerChanges(packets).where((ui.PointerChange c) => c == ui.PointerChange.down).length;
+  }
+
   test('captures the pointer to the view root on presses on Flutter content only', () {
     final context = _PointerEventContext();
     final List<int> captured = stubSetPointerCapture();
 
-    final DomElement platformViewContent = createDomHTMLDivElement();
-    view.dom.platformViewsHost.append(platformViewContent);
-    addTearDown(() => platformViewContent.remove());
+    final DomElement sceneProxy = createDomHTMLDivElement();
+    view.dom.sceneHost.append(sceneProxy);
+    addTearDown(() => sceneProxy.remove());
 
-    // Presses on the view root and on the glass pane hit Flutter content.
+    final DomElement slot = createPlatformViewSlot(1);
+    view.dom.sceneHost.append(slot);
+    addTearDown(() => slot.remove());
+
+    final DomElement platformViewWrapper = createDomElement('flt-platform-view')
+      ..setAttribute('slot', getPlatformViewSlotName(1));
+    final DomElement platformViewContent = createDomHTMLDivElement();
+    platformViewWrapper.append(platformViewContent);
+    view.dom.platformViewsHost.append(platformViewWrapper);
+    addTearDown(() => platformViewWrapper.remove());
+
+    // Presses on the view root, the glass pane, and elements inside the glass
+    // pane's shadow root (which the browser retargets to `platformViewsHost`)
+    // hit Flutter content.
     expect(pressAndRelease(context, rootElement, 1), 1);
     expect(captured, <int>[1]);
     expect(pressAndRelease(context, view.dom.platformViewsHost, 2), 1);
     expect(captured, <int>[1, 2]);
+    expect(pressAndRelease(context, sceneProxy, 3), 1);
+    expect(captured, <int>[1, 2, 3]);
 
-    // Platform view content lives in the light DOM of the glass pane. A press
-    // on it belongs to the platform view, which must keep receiving its own
-    // pointer events, so it is not captured.
-    expect(pressAndRelease(context, platformViewContent, 3), 1);
-    expect(captured, <int>[1, 2]);
+    // Platform view content lives in the light DOM of the glass pane (slotted
+    // into the shadow root). A press on the platform view wrapper or its inner
+    // DOM element is not retargeted to `platformViewsHost`—its `event.target`
+    // is the platform view element itself—so it is not captured.
+    expect(pressAndRelease(context, platformViewWrapper, 4), 1);
+    expect(pressAndRelease(context, platformViewContent, 5), 1);
+    expect(captured, <int>[1, 2, 3]);
   });
 
   test('does not capture presses on the text editing and semantics hosts', () {
     final context = _PointerEventContext();
     final List<int> captured = stubSetPointerCapture();
 
+    final DomElement textInput = createDomHTMLInputElement();
+    view.dom.textEditingHost.append(textInput);
+    addTearDown(() => textInput.remove());
+
+    final DomElement semanticsNode = createDomElement('flt-semantics');
+    view.dom.semanticsHost.append(semanticsNode);
+    addTearDown(() => semanticsNode.remove());
+
     // Capturing would retarget the pointer events of the text field to the view
     // root and break caret placement and selection in it.
     expect(pressAndRelease(context, view.dom.textEditingHost, 1), 1);
+    expect(pressAndRelease(context, textInput, 2), 1);
     // Accessibility trade-off: presses on semantics nodes are not captured, so
     // a drag starting on one can still stall over an `<iframe>`. Capturing
     // them would retarget the resulting `click` to the view root, and the
     // semantics node would never see the click that activates it.
-    expect(pressAndRelease(context, view.dom.semanticsHost, 2), 1);
+    expect(pressAndRelease(context, view.dom.semanticsHost, 3), 1);
+    expect(pressAndRelease(context, semanticsNode, 4), 1);
 
     expect(captured, isEmpty);
   });
