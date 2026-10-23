@@ -26,6 +26,13 @@ filegroup(
 
 framework_tests(
     name = "material",
+    # Minutes under a full run's load: text_field_test's 412 cases took 128–221 s
+    # over three full runs and timed out at 300 s with the Impeller runs doubling
+    # the load; predictive_back_page_transitions_builder_test 192 s.
+    large = [
+        "predictive_back_page_transitions_builder_test.dart",
+        "text_field_test.dart",
+    ],
     tests = glob([
         "*_test.dart",
         "cupertino/*_test.dart",
