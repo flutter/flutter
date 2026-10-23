@@ -33,6 +33,7 @@ final class _FakeArtifactService extends ArtifactService {
 
   @override
   Future<List<ArtifactDependency>> downloadArtifacts({
+    required String engineVersion,
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
   }) async {
@@ -232,14 +233,22 @@ void main() {
         ),
       );
 
-      await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
+      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
+        targetPlatforms: const <String>{'linux-x64'},
+      );
 
       expect(downloadCount, 1);
       final File artifactFile = fs.file(
-        '/dart_data/flutter_tool_extensions/artifacts/custom_ext/$contentSha256/my_custom_bin',
+        '/dart_data/flutter_tool_extensions/artifacts/custom_ext/fake_engine_revision/my_custom_bin',
       );
+      expect(resolved, <String, String>{'my_custom_bin': artifactFile.path});
       expect(artifactFile.existsSync(), isTrue);
       expect(artifactFile.readAsBytesSync(), equals(content));
+      final File stampFile = fs.file(
+        '/dart_data/flutter_tool_extensions/artifacts/custom_ext/fake_engine_revision/.my_custom_bin.sha256',
+      );
+      expect(stampFile.existsSync(), isTrue);
+      expect(stampFile.readAsStringSync(), contentSha256);
 
       // Second call should verify SHA-256 and skip downloading.
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
@@ -259,81 +268,183 @@ void main() {
       expect(artifactFile.readAsBytesSync(), equals(content));
     });
 
-    test('unzips .zip artifacts into content-addressed directory and writes stamp file', () async {
-      final List<int> zipContent = utf8.encode('fake zip archive bytes');
-      final zipSha256 = sha256.convert(zipContent).toString();
+    test(
+      'unzips .zip artifacts into engineVersion-keyed directory and writes stamp file',
+      () async {
+        final List<int> zipContent = utf8.encode('fake zip archive bytes');
+        final zipSha256 = sha256.convert(zipContent).toString();
 
-      void entryPoint(SendPort sendPort) {
-        ToolExtensionEntryPoint.run(
-          sendPort,
-          <ToolExtensionService>[
-            _FakeArtifactService(<ArtifactDependency>[
-              ArtifactDependency(
-                name: 'engine_bundle',
-                sha256: zipSha256,
-                url: Uri.parse('https://example.com/engine_bundle.zip'),
-                hostPlatform: HostPlatform.linux_x64,
-                targetPlatform: 'custom-embedder-arm64',
-              ),
-            ]),
-          ],
-          extensionName: 'embedder_ext',
-          supportedPlatforms: const <String>{'linux'},
-        );
-      }
+        void entryPoint(SendPort sendPort) {
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _FakeArtifactService(<ArtifactDependency>[
+                ArtifactDependency(
+                  name: 'engine_bundle',
+                  sha256: zipSha256,
+                  url: Uri.parse('https://example.com/engine_bundle.zip'),
+                  hostPlatform: HostPlatform.linux_x64,
+                  targetPlatform: 'custom-embedder-arm64',
+                ),
+              ]),
+            ],
+            extensionName: 'embedder_ext',
+            supportedPlatforms: const <String>{'linux'},
+          );
+        }
 
-      final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        entryPoints: <ExtensionEntryPoint>[entryPoint],
-      );
-      addTearDown(manager.dispose);
-
-      var downloadCount = 0;
-      final httpClient = _FakeHttpClient((Uri url) async {
-        downloadCount++;
-        return _FakeHttpClientResponse(HttpStatus.ok, zipContent);
-      });
-      final unzipOsUtils = _UnzipTrackingOsUtils();
-
-      final Directory customCacheDir = fs.directory('/custom/cache');
-      final artifactManager = ExtensionArtifactManager(
-        cacheDir: customCacheDir,
-        extensionManager: manager,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        httpClient: httpClient,
-        toolContext: FakeToolContext(
-          fs: fs,
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
           logger: logger,
-          os: unzipOsUtils,
-          platform: FakePlatform(),
-        ),
-      );
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          entryPoints: <ExtensionEntryPoint>[entryPoint],
+        );
+        addTearDown(manager.dispose);
 
-      await artifactManager.ensureArtifactsDownloaded(
-        targetPlatforms: const <String>{'custom-embedder-arm64'},
-      );
+        var downloadCount = 0;
+        final httpClient = _FakeHttpClient((Uri url) async {
+          downloadCount++;
+          return _FakeHttpClientResponse(HttpStatus.ok, zipContent);
+        });
+        final unzipOsUtils = _UnzipTrackingOsUtils();
 
-      expect(downloadCount, 1);
-      expect(unzipOsUtils.unzipCount, 1);
-      final Directory shaDir = customCacheDir
-          .childDirectory('embedder_ext')
-          .childDirectory(zipSha256);
-      final Directory extractedDir = shaDir.childDirectory('engine_bundle');
-      final File stampFile = shaDir.childFile('.engine_bundle.sha256');
-      expect(extractedDir.existsSync(), isTrue);
-      expect(extractedDir.childFile('extracted.txt').existsSync(), isTrue);
-      expect(stampFile.existsSync(), isTrue);
-      expect(stampFile.readAsStringSync(), zipSha256);
+        final Directory customCacheDir = fs.directory('/custom/cache');
+        final artifactManager = ExtensionArtifactManager(
+          cacheDir: customCacheDir,
+          extensionManager: manager,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          httpClient: httpClient,
+          toolContext: FakeToolContext(
+            cache: FakeCache(engineRevision: 'engine_rev_123', fileSystem: fs),
+            fs: fs,
+            logger: logger,
+            os: unzipOsUtils,
+            platform: FakePlatform(),
+          ),
+        );
 
-      // Subsequent call hits verified stamp and does not re-download.
-      await artifactManager.ensureArtifactsDownloaded(
-        targetPlatforms: const <String>{'custom-embedder-arm64'},
-      );
-      expect(downloadCount, 1);
-      expect(unzipOsUtils.unzipCount, 1);
-    });
+        final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded(
+          targetPlatforms: const <String>{'custom-embedder-arm64'},
+        );
+
+        expect(downloadCount, 1);
+        expect(unzipOsUtils.unzipCount, 1);
+        final Directory engineDir = customCacheDir
+            .childDirectory('embedder_ext')
+            .childDirectory('engine_rev_123');
+        final Directory extractedDir = engineDir.childDirectory('engine_bundle');
+        final File stampFile = engineDir.childFile('.engine_bundle.sha256');
+        expect(resolved, <String, String>{'engine_bundle': extractedDir.path});
+        expect(extractedDir.existsSync(), isTrue);
+        expect(extractedDir.childFile('extracted.txt').existsSync(), isTrue);
+        expect(stampFile.existsSync(), isTrue);
+        expect(stampFile.readAsStringSync(), zipSha256);
+
+        // Subsequent call hits verified stamp and does not re-download.
+        await artifactManager.ensureArtifactsDownloaded(
+          targetPlatforms: const <String>{'custom-embedder-arm64'},
+        );
+        expect(downloadCount, 1);
+        expect(unzipOsUtils.unzipCount, 1);
+      },
+    );
+
+    test(
+      'fetches sha256Url on cache miss and verifies offline via stamp file on cache hit',
+      () async {
+        final List<int> content = utf8.encode('remote checksummed binary');
+        final contentSha256 = sha256.convert(content).toString();
+        final Uri artifactUri = Uri.parse('https://example.com/remote_bin');
+        final Uri sha256Uri = Uri.parse('https://example.com/remote_bin.sha256sum');
+
+        void entryPoint(SendPort sendPort) {
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _FakeArtifactService(<ArtifactDependency>[
+                ArtifactDependency(
+                  name: 'remote_bin',
+                  sha256Url: sha256Uri,
+                  url: artifactUri,
+                  hostPlatform: HostPlatform.linux_x64,
+                ),
+              ]),
+            ],
+            extensionName: 'sha_url_ext',
+            supportedPlatforms: const <String>{'linux'},
+          );
+        }
+
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          entryPoints: <ExtensionEntryPoint>[entryPoint],
+        );
+        addTearDown(manager.dispose);
+
+        var shaFetchCount = 0;
+        var artifactFetchCount = 0;
+        var failNetwork = false;
+        final httpClient = _FakeHttpClient((Uri url) async {
+          if (failNetwork) {
+            throw const SocketException('Offline');
+          }
+          if (url == sha256Uri) {
+            shaFetchCount++;
+            return _FakeHttpClientResponse(
+              HttpStatus.ok,
+              utf8.encode('${contentSha256.toUpperCase()}  remote_bin\n'),
+            );
+          }
+          if (url == artifactUri) {
+            artifactFetchCount++;
+            return _FakeHttpClientResponse(HttpStatus.ok, content);
+          }
+          return _FakeHttpClientResponse(HttpStatus.notFound, const <int>[]);
+        });
+
+        final Directory cacheDir = fs.directory('/sha_url_cache');
+        final artifactManager = ExtensionArtifactManager(
+          cacheDir: cacheDir,
+          extensionManager: manager,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          httpClient: httpClient,
+          toolContext: FakeToolContext(
+            fs: fs,
+            logger: logger,
+            os: osUtils,
+            platform: FakePlatform(),
+          ),
+        );
+
+        final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded();
+        expect(shaFetchCount, 1);
+        expect(artifactFetchCount, 1);
+        final File cachedFile = cacheDir
+            .childDirectory('sha_url_ext')
+            .childDirectory('fake_engine_revision')
+            .childFile('remote_bin');
+        expect(resolved, <String, String>{'remote_bin': cachedFile.path});
+        expect(cachedFile.existsSync(), isTrue);
+
+        // Subsequent call while offline should verify against local .sha256 stamp without fetching sha256Url.
+        failNetwork = true;
+        final Map<String, String> cachedResolved = await artifactManager
+            .ensureArtifactsDownloaded();
+        expect(cachedResolved, <String, String>{'remote_bin': cachedFile.path});
+        expect(shaFetchCount, 1);
+        expect(artifactFetchCount, 1);
+
+        // Corrupting the file triggers re-fetching sha256Url and artifact when online.
+        failNetwork = false;
+        cachedFile.writeAsStringSync('tampered');
+        await artifactManager.ensureArtifactsDownloaded();
+        expect(shaFetchCount, 2);
+        expect(artifactFetchCount, 2);
+        expect(cachedFile.readAsBytesSync(), equals(content));
+      },
+    );
 
     test(
       'concurrent ensureArtifactsDownloaded calls for same artifact are safe and deduplicated',
@@ -395,18 +506,18 @@ void main() {
           ),
         );
 
-        final Future<void> call1 = artifactManager.ensureArtifactsDownloaded();
+        final Future<Map<String, String>> call1 = artifactManager.ensureArtifactsDownloaded();
         await downloadStarted.future;
-        final Future<void> call2 = artifactManager.ensureArtifactsDownloaded();
-        final Future<void> call3 = artifactManager.ensureArtifactsDownloaded();
+        final Future<Map<String, String>> call2 = artifactManager.ensureArtifactsDownloaded();
+        final Future<Map<String, String>> call3 = artifactManager.ensureArtifactsDownloaded();
         releaseDownload.complete();
 
-        await Future.wait(<Future<void>>[call1, call2, call3]);
+        await Future.wait(<Future<Map<String, String>>>[call1, call2, call3]);
 
         expect(downloadCount, 1);
         final File cachedFile = cacheDir
             .childDirectory('concurrent_ext')
-            .childDirectory(contentSha256)
+            .childDirectory('fake_engine_revision')
             .childFile('concurrent_bin');
         expect(cachedFile.existsSync(), isTrue);
         expect(cachedFile.readAsBytesSync(), equals(content));
@@ -522,10 +633,10 @@ void main() {
       addTearDown(manager.dispose);
 
       final Directory cacheDir = fs.directory('/shared_cache');
-      final Directory shaDir = cacheDir
+      final Directory engineDir = cacheDir
           .childDirectory('flutter_tools_extension_linux_prototype')
-          .childDirectory(expectedSha);
-      shaDir.childFile('linux-x64-custom-artifact')
+          .childDirectory('fake_engine_revision');
+      engineDir.childFile('linux-x64-custom-artifact')
         ..createSync(recursive: true)
         ..writeAsBytesSync(content);
 

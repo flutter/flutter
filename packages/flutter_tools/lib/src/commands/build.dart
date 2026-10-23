@@ -309,7 +309,11 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await _artifactManager?.ensureArtifactsDownloaded();
+    final Map<String, String> extensionArtifacts =
+        await _artifactManager?.ensureArtifactsDownloaded(
+          targetPlatforms: <String>{target.targetPlatform},
+        ) ??
+        const <String, String>{};
     final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
@@ -323,6 +327,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
       artifacts: artifacts,
       buildMode: buildInfo.mode,
+      extensionArtifacts: extensionArtifacts,
       target: target,
     );
 

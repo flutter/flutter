@@ -541,7 +541,13 @@ void main() {
       'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
       () async {
         final fakeBuildManager = _RecordingExtensionBuildManager();
+        final fakeArtifactManager = _FakeExtensionArtifactManager(
+          downloadedArtifacts: const <String, String>{
+            'custom-ext-artifact': '/cache/custom-ext-artifact',
+          },
+        );
         const target = ExtensionBuildTarget(
+          artifacts: <ExtensionArtifact>{ExtensionArtifact('custom-ext-artifact')},
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir:
@@ -550,6 +556,7 @@ void main() {
         );
 
         final subCommand = ExtensionBuildSubCommand(
+          artifactManager: fakeArtifactManager,
           buildManager: fakeBuildManager,
           target: target,
           toolContext: FakeToolContext(fs: fs, logger: testLogger),
@@ -558,6 +565,8 @@ void main() {
 
         final FlutterCommandResult result = await subCommand.runCommand();
         expect(result.exitStatus, ExitStatus.success);
+        expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+        expect(fakeArtifactManager.requestedTargetPlatforms, equals(const <String>{'linux-x64'}));
 
         expect(fakeBuildManager.lastBuildArgs, isNotNull);
         expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
@@ -569,7 +578,10 @@ void main() {
           fakeBuildManager.lastBuildArgs!['outputDir'],
           equals(fs.directory('/build/custom/linux-x64/release').uri),
         );
-        expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
+        expect(
+          fakeBuildManager.lastBuildArgs!['resolvedArtifacts'],
+          equals(const <String, String>{'custom-ext-artifact': '/cache/custom-ext-artifact'}),
+        );
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
@@ -724,12 +736,19 @@ void main() {
 }
 
 class _FakeExtensionArtifactManager extends Fake implements ExtensionArtifactManager {
+  _FakeExtensionArtifactManager({this.downloadedArtifacts = const <String, String>{}});
+
+  final Map<String, String> downloadedArtifacts;
   bool ensureArtifactsDownloadedCalled = false;
   Set<String>? requestedTargetPlatforms;
 
   @override
-  Future<void> ensureArtifactsDownloaded({Set<String>? targetPlatforms, bool force = false}) async {
+  Future<Map<String, String>> ensureArtifactsDownloaded({
+    bool force = false,
+    Set<String>? targetPlatforms,
+  }) async {
     ensureArtifactsDownloadedCalled = true;
     requestedTargetPlatforms = targetPlatforms;
+    return downloadedArtifacts;
   }
 }

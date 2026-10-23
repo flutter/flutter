@@ -1094,9 +1094,13 @@ class FakeArtifacts extends Fake implements Artifacts {
 }
 
 class FakeCache extends Fake implements Cache {
-  FakeCache({FileSystem? fileSystem}) : _fileSystem = fileSystem ?? MemoryFileSystem.test();
+  FakeCache({this.engineRevision = 'fake_engine_revision', FileSystem? fileSystem})
+    : _fileSystem = fileSystem ?? MemoryFileSystem.test();
 
   final FileSystem _fileSystem;
+
+  @override
+  final String engineRevision;
 
   @override
   Future<void> lock() async {}

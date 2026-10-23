@@ -21,6 +21,9 @@ abstract base class ArtifactService extends ToolExtensionService {
   /// RPC method identifier to query contributed artifact dependencies.
   static const String downloadArtifactsMethod = '$serviceNamespace.$_downloadArtifactsRpcMethod';
 
+  /// RPC parameter key for the Flutter engine version (revision).
+  static const String engineVersionParam = 'engineVersion';
+
   /// RPC parameter key for the host platform.
   static const String hostPlatformParam = 'hostPlatform';
 
@@ -31,7 +34,8 @@ abstract base class ArtifactService extends ToolExtensionService {
   String get namespace => serviceNamespace;
 
   /// Returns the list of [ArtifactDependency] objects required by this
-  /// extension for the given [hostPlatform] and optional [targetPlatforms].
+  /// extension for the given [engineVersion], [hostPlatform], and optional
+  /// [targetPlatforms].
   ///
   /// [targetPlatforms] contains [String] identifiers rather than `TargetPlatform`
   /// values so extensions can match custom out-of-tree embedder identifiers
@@ -39,6 +43,7 @@ abstract base class ArtifactService extends ToolExtensionService {
   /// (e.g. `'linux'`). When `null`, artifacts for all target platforms supported
   /// on [hostPlatform] should be returned.
   Future<List<ArtifactDependency>> downloadArtifacts({
+    required String engineVersion,
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
   });
@@ -54,9 +59,14 @@ abstract base class ArtifactService extends ToolExtensionService {
   Future<void> shutdown() async {}
 
   Future<List<Map<String, Object?>>> _downloadArtifactsRpc(Map<String, Object?> params) async {
+    final String engineVersion;
     final HostPlatform hostPlatform;
     final Set<String>? targetPlatforms;
     try {
+      engineVersion = params.requiredField<String>(engineVersionParam);
+      if (engineVersion.trim().isEmpty) {
+        throw const FormatException('Missing or empty engineVersion');
+      }
       final String hp = params.requiredField<String>(hostPlatformParam);
       hostPlatform = HostPlatform.fromName(hp);
       targetPlatforms = params[targetPlatformsParam] != null
@@ -66,6 +76,7 @@ abstract base class ArtifactService extends ToolExtensionService {
       throw RpcException.invalidParams(e.message);
     }
     final List<ArtifactDependency> deps = await downloadArtifacts(
+      engineVersion: engineVersion,
       hostPlatform: hostPlatform,
       targetPlatforms: targetPlatforms,
     );

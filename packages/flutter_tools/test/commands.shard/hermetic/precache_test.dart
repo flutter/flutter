@@ -558,10 +558,14 @@ class FakeExtensionArtifactManager extends Fake implements ExtensionArtifactMana
   Set<String>? requestedTargetPlatforms;
 
   @override
-  Future<void> ensureArtifactsDownloaded({Set<String>? targetPlatforms, bool force = false}) async {
+  Future<Map<String, String>> ensureArtifactsDownloaded({
+    bool force = false,
+    Set<String>? targetPlatforms,
+  }) async {
     ensureArtifactsDownloadedCalled = true;
     requestedTargetPlatforms = targetPlatforms;
     requestedForce = force;
+    return const <String, String>{};
   }
 }
 

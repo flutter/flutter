@@ -14,11 +14,13 @@ import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:test/test.dart';
 
+const String _testEngineVersion = '0123456789abcdef0123456789abcdef01234567';
 const String _testSha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
 final class _TestArtifactService extends ArtifactService {
   @override
   Future<List<ArtifactDependency>> downloadArtifacts({
+    required String engineVersion,
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
   }) async {
@@ -27,7 +29,9 @@ final class _TestArtifactService extends ArtifactService {
         ArtifactDependency(
           name: 'test-artifact-${hostPlatform.cliName}-$targetPlatform',
           sha256: _testSha256,
-          url: Uri.parse('https://example.com/${hostPlatform.cliName}/$targetPlatform.zip'),
+          url: Uri.parse(
+            'https://example.com/$engineVersion/${hostPlatform.cliName}/$targetPlatform.zip',
+          ),
           hostPlatform: hostPlatform,
           targetPlatform: targetPlatform,
         ),
@@ -62,6 +66,7 @@ void main() {
       final Object? response = await conn.sendRequest(
         ArtifactService.downloadArtifactsMethod,
         params: <String, Object?>{
+          ArtifactService.engineVersionParam: _testEngineVersion,
           ArtifactService.hostPlatformParam: HostPlatform.linux_x64.cliName,
           ArtifactService.targetPlatformsParam: const <String>['linux-x64', 'linux-arm64'],
         },
@@ -70,14 +75,17 @@ void main() {
 
       expect(deps, hasLength(2));
       expect(deps.first.name, 'test-artifact-linux-x64-linux-x64');
-      expect(deps.first.url, Uri.parse('https://example.com/linux-x64/linux-x64.zip'));
+      expect(
+        deps.first.url,
+        Uri.parse('https://example.com/$_testEngineVersion/linux-x64/linux-x64.zip'),
+      );
       expect(deps.first.sha256, _testSha256);
       expect(deps.first.hostPlatform, HostPlatform.linux_x64);
       expect(deps.first.targetPlatform, 'linux-x64');
       expect(deps.last.targetPlatform, 'linux-arm64');
     });
 
-    test('throws RpcException on missing or invalid hostPlatform', () async {
+    test('throws RpcException on missing or invalid engineVersion or hostPlatform', () async {
       void entryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_TestArtifactService()]);
       }
@@ -102,7 +110,10 @@ void main() {
       await expectLater(
         conn.sendRequest(
           ArtifactService.downloadArtifactsMethod,
-          params: const <String, Object?>{ArtifactService.hostPlatformParam: 'invalid-host'},
+          params: const <String, Object?>{
+            ArtifactService.engineVersionParam: '   ',
+            ArtifactService.hostPlatformParam: 'linux-x64',
+          },
         ),
         throwsA(
           isA<json_rpc.RpcException>().having(
@@ -117,6 +128,24 @@ void main() {
         conn.sendRequest(
           ArtifactService.downloadArtifactsMethod,
           params: const <String, Object?>{
+            ArtifactService.engineVersionParam: _testEngineVersion,
+            ArtifactService.hostPlatformParam: 'invalid-host',
+          },
+        ),
+        throwsA(
+          isA<json_rpc.RpcException>().having(
+            (json_rpc.RpcException e) => e.code,
+            'code',
+            error_code.INVALID_PARAMS,
+          ),
+        ),
+      );
+
+      await expectLater(
+        conn.sendRequest(
+          ArtifactService.downloadArtifactsMethod,
+          params: const <String, Object?>{
+            ArtifactService.engineVersionParam: _testEngineVersion,
             ArtifactService.hostPlatformParam: 'linux-x64',
             ArtifactService.targetPlatformsParam: 123,
           },
@@ -159,6 +188,7 @@ void main() {
       final Object? linuxResponse = await conn.sendRequest(
         ArtifactService.downloadArtifactsMethod,
         params: <String, Object?>{
+          ArtifactService.engineVersionParam: _testEngineVersion,
           ArtifactService.hostPlatformParam: HostPlatform.linux_x64.cliName,
           ArtifactService.targetPlatformsParam: const <String>['linux-x64'],
         },
@@ -172,6 +202,7 @@ void main() {
       final Object? macosResponse = await conn.sendRequest(
         ArtifactService.downloadArtifactsMethod,
         params: <String, Object?>{
+          ArtifactService.engineVersionParam: _testEngineVersion,
           ArtifactService.hostPlatformParam: HostPlatform.darwin_x64.cliName,
         },
       );

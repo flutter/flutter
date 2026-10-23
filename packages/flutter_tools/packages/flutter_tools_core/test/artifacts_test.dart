@@ -50,7 +50,49 @@ void main() {
         'ArtifactDependency(name: custom-engine-bin, '
         'url: https://example.com/artifacts/engine.zip, '
         'sha256: $validSha256, '
+        'sha256Url: null, '
         'hostPlatform: HostPlatform.linux_x64, targetPlatform: linux-x64)',
+      );
+    });
+
+    test('serializes and deserializes correctly with sha256Url instead of sha256', () {
+      final dep = ArtifactDependency(
+        name: 'custom-engine-bin',
+        sha256Url: Uri.parse('https://example.com/artifacts/engine.zip.sha256sum'),
+        url: Uri.parse('https://example.com/artifacts/engine.zip'),
+        hostPlatform: HostPlatform.linux_x64,
+        targetPlatform: 'linux-x64',
+      );
+
+      final Map<String, Object?> json = dep.toMap();
+      expect(json, <String, Object?>{
+        'name': 'custom-engine-bin',
+        'url': 'https://example.com/artifacts/engine.zip',
+        'sha256Url': 'https://example.com/artifacts/engine.zip.sha256sum',
+        'hostPlatform': 'linux-x64',
+        'targetPlatform': 'linux-x64',
+      });
+
+      final deserialized = ArtifactDependency.fromJson(json);
+      expect(deserialized, equals(dep));
+      expect(deserialized.sha256, isNull);
+      expect(
+        deserialized.sha256Url,
+        Uri.parse('https://example.com/artifacts/engine.zip.sha256sum'),
+      );
+      expect(deserialized.hashCode, equals(dep.hashCode));
+    });
+
+    test('isValidSha256 validates 64-character hex strings', () {
+      expect(ArtifactDependency.isValidSha256(validSha256), isTrue);
+      expect(ArtifactDependency.isValidSha256(validSha256.toUpperCase()), isTrue);
+      expect(ArtifactDependency.isValidSha256('deadbeef'), isFalse);
+      expect(ArtifactDependency.isValidSha256(''), isFalse);
+      expect(
+        ArtifactDependency.isValidSha256(
+          'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+        ),
+        isFalse,
       );
     });
 
@@ -200,6 +242,21 @@ void main() {
           'name': 'test',
           'url': 'https://example.com/a.zip',
           'sha256': 'deadbeef',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': 'test',
+          'url': 'https://example.com/a.zip',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': 'test',
+          'url': 'https://example.com/a.zip',
+          'sha256Url': 'file:///etc/passwd',
         }),
         throwsFormatException,
       );

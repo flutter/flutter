@@ -38,10 +38,12 @@ class ExtensionArtifactManager {
   static const String _extensionsCacheDirName = 'flutter_tool_extensions';
   static const String _hiddenExtensionsCacheDirName = '.flutter_tool_extensions';
   static const String _artifactsCacheSubdirName = 'artifacts';
+  static const String _defaultEngineVersion = 'unknown';
   static const String _zipExtension = '.zip';
   static const String _extractedDirName = 'extracted';
   static const String _sha256StampSuffix = '.sha256';
   static const String _lockFileSuffix = '.lock';
+  static final RegExp _whitespaceRegExp = RegExp(r'\s+');
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
@@ -49,7 +51,12 @@ class ExtensionArtifactManager {
   final Directory? _cacheDir;
   final HttpClient _httpClient;
 
-  final _inFlightDownloads = <String, Future<void>>{};
+  final _inFlightDownloads = <String, Future<String>>{};
+
+  String get _engineVersion {
+    final String revision = _toolContext.cache.engineRevision.trim();
+    return revision.isNotEmpty ? revision : _defaultEngineVersion;
+  }
 
   /// Returns the root shared content-addressed cache directory for tool extension artifacts.
   ///
@@ -101,12 +108,12 @@ class ExtensionArtifactManager {
         .childDirectory(_artifactsCacheSubdirName);
   }
 
-  /// Returns the content-addressed directory `<cacheDir>/<extensionName>/<sha256>`
-  /// for the given [extensionName] and [sha256].
+  /// Returns the cache directory `<cacheDir>/<extensionName>/<engineVersion>`
+  /// for the given [extensionName] and [engineVersion].
   ///
-  /// Throws an [ArgumentError] if [extensionName] or [sha256] is not a valid
-  /// single path segment.
-  Directory artifactShaDirectory({required String extensionName, required String sha256}) {
+  /// Throws an [ArgumentError] if [extensionName] or [engineVersion] is not a
+  /// valid single path segment.
+  Directory artifactDirectory({required String engineVersion, required String extensionName}) {
     if (!ArtifactDependency.isValidSinglePathSegment(extensionName)) {
       throw ArgumentError.value(
         extensionName,
@@ -114,22 +121,30 @@ class ExtensionArtifactManager {
         'Must be a valid single path segment.',
       );
     }
-    if (!ArtifactDependency.isValidSinglePathSegment(sha256)) {
-      throw ArgumentError.value(sha256, 'sha256', 'Must be a valid single path segment.');
+    if (!ArtifactDependency.isValidSinglePathSegment(engineVersion)) {
+      throw ArgumentError.value(
+        engineVersion,
+        'engineVersion',
+        'Must be a valid single path segment.',
+      );
     }
-    return artifactsCacheDirectory
-        .childDirectory(extensionName)
-        .childDirectory(sha256.toLowerCase());
+    return artifactsCacheDirectory.childDirectory(extensionName).childDirectory(engineVersion);
   }
 
   /// Queries all active extensions implementing [ArtifactService] and ensures
-  /// required artifacts for the current host platform and optional [targetPlatforms]
-  /// are downloaded and verified in the shared content-addressed cache.
+  /// required artifacts for the current engine version, host platform, and
+  /// optional [targetPlatforms] are downloaded and verified in the shared cache.
+  ///
+  /// Returns a map from each downloaded artifact's [ArtifactDependency.name] to
+  /// its local filesystem path.
   ///
   /// When [force] is `true`, existing cached artifacts are re-downloaded.
-  Future<void> ensureArtifactsDownloaded({Set<String>? targetPlatforms, bool force = false}) async {
+  Future<Map<String, String>> ensureArtifactsDownloaded({
+    bool force = false,
+    Set<String>? targetPlatforms,
+  }) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
-      return;
+      return const <String, String>{};
     }
     final ToolContext(:Logger logger, :OperatingSystemUtils os) = _toolContext;
 
@@ -137,7 +152,7 @@ class ExtensionArtifactManager {
       await _extensionManager.ensureInitialized();
     } on Object catch (e) {
       logger.printTrace('Failed to initialize extension manager for artifacts: $e');
-      return;
+      return const <String, String>{};
     }
 
     final artifactExtensions = <ExtensionConnection>[
@@ -146,11 +161,19 @@ class ExtensionArtifactManager {
     ];
 
     if (artifactExtensions.isEmpty) {
-      return;
+      return const <String, String>{};
     }
 
     final HostPlatform currentHostPlatform = os.hostPlatform;
+    final String engineVersion = _engineVersion;
+    if (!ArtifactDependency.isValidSinglePathSegment(engineVersion)) {
+      logger.printWarning(
+        'Skipping extension artifacts due to invalid engine version "$engineVersion".',
+      );
+      return const <String, String>{};
+    }
 
+    final resolvedArtifacts = <String, String>{};
     for (final ext in artifactExtensions) {
       if (!ArtifactDependency.isValidSinglePathSegment(ext.extensionName)) {
         logger.printWarning(
@@ -161,6 +184,7 @@ class ExtensionArtifactManager {
       final List<ArtifactDependency> dependencies = await _queryExtensionArtifacts(
         ext,
         currentHostPlatform: currentHostPlatform,
+        engineVersion: engineVersion,
         logger: logger,
         targetPlatforms: targetPlatforms,
       );
@@ -175,14 +199,21 @@ class ExtensionArtifactManager {
       ];
 
       for (final dep in filteredDeps) {
-        await _ensureArtifactCached(ext.extensionName, dep, force: force);
+        resolvedArtifacts[dep.name] = await _ensureArtifactCached(
+          ext.extensionName,
+          engineVersion,
+          dep,
+          force: force,
+        );
       }
     }
+    return resolvedArtifacts;
   }
 
   Future<List<ArtifactDependency>> _queryExtensionArtifacts(
     ExtensionConnection ext, {
     required HostPlatform currentHostPlatform,
+    required String engineVersion,
     required Logger logger,
     required Set<String>? targetPlatforms,
   }) async {
@@ -190,6 +221,7 @@ class ExtensionArtifactManager {
       final Object? result = await ext.sendRequest(
         ArtifactService.downloadArtifactsMethod,
         params: <String, Object?>{
+          ArtifactService.engineVersionParam: engineVersion,
           ArtifactService.hostPlatformParam: currentHostPlatform.cliName,
           if (targetPlatforms != null)
             ArtifactService.targetPlatformsParam: targetPlatforms.toList(),
@@ -202,62 +234,63 @@ class ExtensionArtifactManager {
     }
   }
 
-  Future<void> _ensureArtifactCached(
+  Future<String> _ensureArtifactCached(
     String extensionName,
+    String engineVersion,
     ArtifactDependency dep, {
     required bool force,
   }) async {
-    final String expectedSha = dep.sha256.toLowerCase();
-    final cacheKey = '$extensionName/$expectedSha/${dep.name}';
-    if (_inFlightDownloads[cacheKey] case final Future<void> existing) {
-      await existing;
-      return;
+    final cacheKey = '$extensionName/$engineVersion/${dep.name}';
+    if (_inFlightDownloads[cacheKey] case final Future<String> existing) {
+      return existing;
     }
 
-    final Future<void> downloadFuture = _downloadAndVerifyArtifact(
+    final Future<String> downloadFuture = _downloadAndVerifyArtifact(
       extensionName,
+      engineVersion,
       dep,
-      expectedSha,
       force: force,
     );
     _inFlightDownloads[cacheKey] = downloadFuture;
     try {
-      await downloadFuture;
+      return await downloadFuture;
     } finally {
       unawaited(_inFlightDownloads.remove(cacheKey));
     }
   }
 
-  Future<void> _downloadAndVerifyArtifact(
+  Future<String> _downloadAndVerifyArtifact(
     String extensionName,
-    ArtifactDependency dep,
-    String expectedSha, {
+    String engineVersion,
+    ArtifactDependency dep, {
     required bool force,
   }) async {
     final ToolContext(:FileSystem fs, :Logger logger, :OperatingSystemUtils os) = _toolContext;
-    final Directory shaDir = artifactShaDirectory(
+    final Directory engineDir = artifactDirectory(
+      engineVersion: engineVersion,
       extensionName: extensionName,
-      sha256: expectedSha,
     );
-    final File artifactFile = shaDir.childFile(dep.name);
-    final Directory artifactDir = shaDir.childDirectory(dep.name);
-    final File stampFile = shaDir.childFile('.${dep.name}$_sha256StampSuffix');
-    final File lockFile = shaDir.childFile('.${dep.name}$_lockFileSuffix');
+    final File artifactFile = engineDir.childFile(dep.name);
+    final Directory artifactDir = engineDir.childDirectory(dep.name);
+    final File stampFile = engineDir.childFile('.${dep.name}$_sha256StampSuffix');
+    final File lockFile = engineDir.childFile('.${dep.name}$_lockFileSuffix');
+    final bool isZip = dep.url.path.endsWith(_zipExtension);
+    final String resolvedPath = isZip ? artifactDir.path : artifactFile.path;
 
     if (!force &&
         await _isArtifactCachedAndVerified(
           artifactDir: artifactDir,
           artifactFile: artifactFile,
           dep: dep,
-          expectedSha: expectedSha,
           extensionName: extensionName,
+          isZip: isZip,
           logger: logger,
           stampFile: stampFile,
         )) {
-      return;
+      return resolvedPath;
     }
 
-    shaDir.createSync(recursive: true);
+    engineDir.createSync(recursive: true);
     await fs.runLocked<void>(
       lockPath: lockFile.path,
       logger: logger,
@@ -267,21 +300,22 @@ class ExtensionArtifactManager {
               artifactDir: artifactDir,
               artifactFile: artifactFile,
               dep: dep,
-              expectedSha: expectedSha,
               extensionName: extensionName,
+              isZip: isZip,
               logger: logger,
               stampFile: stampFile,
             )) {
           return;
         }
 
-        final Directory stagingDir = shaDir.createTempSync('.tmp_${dep.name}_');
+        final Directory stagingDir = engineDir.createTempSync('.tmp_${dep.name}_');
         final File stagingFile = stagingDir.childFile(dep.name);
 
         final Status status = logger.startProgress(
           'Downloading artifact "${dep.name}" for extension "$extensionName"...',
         );
         try {
+          final String expectedSha = dep.sha256?.toLowerCase() ?? await _fetchRemoteSha256(dep);
           await _downloadAndVerifyToStagingFile(
             dep: dep,
             expectedSha: expectedSha,
@@ -292,6 +326,7 @@ class ExtensionArtifactManager {
             artifactFile: artifactFile,
             dep: dep,
             expectedSha: expectedSha,
+            isZip: isZip,
             os: os,
             stagingDir: stagingDir,
             stagingFile: stagingFile,
@@ -305,35 +340,63 @@ class ExtensionArtifactManager {
         }
       },
     );
+    return resolvedPath;
   }
 
   Future<bool> _isArtifactCachedAndVerified({
     required Directory artifactDir,
     required File artifactFile,
     required ArtifactDependency dep,
-    required String expectedSha,
     required String extensionName,
+    required bool isZip,
     required Logger logger,
     required File stampFile,
   }) async {
-    if (artifactFile.existsSync()) {
-      return _verifyCachedFile(
-        artifactFile: artifactFile,
-        dep: dep,
-        expectedSha: expectedSha,
-        extensionName: extensionName,
-        logger: logger,
-      );
+    if (dep.sha256 case final String sha) {
+      final String expectedSha = sha.toLowerCase();
+      if (!isZip && artifactFile.existsSync()) {
+        return _verifyCachedFile(
+          artifactFile: artifactFile,
+          dep: dep,
+          expectedSha: expectedSha,
+          extensionName: extensionName,
+          logger: logger,
+          stampFile: stampFile,
+        );
+      }
+      if (isZip && stampFile.existsSync() && artifactDir.existsSync()) {
+        return _verifyCachedDirectory(
+          artifactDir: artifactDir,
+          dep: dep,
+          expectedSha: expectedSha,
+          extensionName: extensionName,
+          logger: logger,
+          stampFile: stampFile,
+        );
+      }
+      return false;
     }
-    if (stampFile.existsSync() && artifactDir.existsSync()) {
-      return _verifyCachedDirectory(
-        artifactDir: artifactDir,
-        dep: dep,
-        expectedSha: expectedSha,
-        extensionName: extensionName,
-        logger: logger,
-        stampFile: stampFile,
-      );
+
+    if (stampFile.existsSync()) {
+      final String recordedSha = stampFile.readAsStringSync().trim().toLowerCase();
+      if (ArtifactDependency.isValidSha256(recordedSha)) {
+        if (isZip && artifactDir.existsSync()) {
+          logger.printTrace(
+            'Unzipped artifact "${dep.name}" for extension "$extensionName" already cached and verified.',
+          );
+          return true;
+        }
+        if (!isZip && artifactFile.existsSync()) {
+          return _verifyCachedFile(
+            artifactFile: artifactFile,
+            dep: dep,
+            expectedSha: recordedSha,
+            extensionName: extensionName,
+            logger: logger,
+            stampFile: stampFile,
+          );
+        }
+      }
     }
     return false;
   }
@@ -344,6 +407,7 @@ class ExtensionArtifactManager {
     required String expectedSha,
     required String extensionName,
     required Logger logger,
+    required File stampFile,
   }) async {
     final Digest existingDigest = await sha256.bind(artifactFile.openRead()).first;
     if (existingDigest.toString().toLowerCase() == expectedSha) {
@@ -354,6 +418,9 @@ class ExtensionArtifactManager {
     }
     logger.printTrace('Cached artifact "${dep.name}" failed SHA-256 verification; re-downloading.');
     artifactFile.deleteSync();
+    if (stampFile.existsSync()) {
+      stampFile.deleteSync();
+    }
     return false;
   }
 
@@ -378,6 +445,41 @@ class ExtensionArtifactManager {
     artifactDir.deleteSync(recursive: true);
     stampFile.deleteSync();
     return false;
+  }
+
+  Future<String> _fetchRemoteSha256(ArtifactDependency dep) async {
+    final Uri sha256Url = dep.sha256Url!;
+    final String body;
+    try {
+      final HttpClientRequest request = await _httpClient.getUrl(sha256Url);
+      final HttpClientResponse response = await request.close();
+      if (response.statusCode != HttpStatus.ok) {
+        await response.drain<void>();
+        throwToolExit(
+          'Failed to download SHA-256 checksum for artifact "${dep.name}" from $sha256Url: '
+          'HTTP ${response.statusCode}',
+        );
+      }
+      body = await utf8.decodeStream(response);
+    } on IOException catch (e) {
+      throwToolExit(
+        'Failed to download SHA-256 checksum for artifact "${dep.name}" from $sha256Url: $e',
+      );
+    } on OSError catch (e) {
+      throwToolExit(
+        'Failed to download SHA-256 checksum for artifact "${dep.name}" from $sha256Url: $e',
+      );
+    }
+    final String trimmed = body.trim();
+    final String token = trimmed.isEmpty
+        ? ''
+        : trimmed.split(_whitespaceRegExp).first.toLowerCase();
+    if (!ArtifactDependency.isValidSha256(token)) {
+      throwToolExit(
+        'Invalid SHA-256 checksum for artifact "${dep.name}" from $sha256Url: "$trimmed"',
+      );
+    }
+    return token;
   }
 
   Future<void> _downloadAndVerifyToStagingFile({
@@ -419,7 +521,7 @@ class ExtensionArtifactManager {
     if (actualDigest.toString().toLowerCase() != expectedSha) {
       throwToolExit('''
 SHA-256 checksum mismatch for artifact "${dep.name}" from ${dep.url}.
-Expected: ${dep.sha256}
+Expected: $expectedSha
 Actual:   $actualDigest''');
     }
   }
@@ -429,15 +531,16 @@ Actual:   $actualDigest''');
     required File artifactFile,
     required ArtifactDependency dep,
     required String expectedSha,
+    required bool isZip,
     required OperatingSystemUtils os,
     required Directory stagingDir,
     required File stagingFile,
     required File stampFile,
   }) {
-    if (dep.url.path.endsWith(_zipExtension)) {
-      if (stampFile.existsSync()) {
-        stampFile.deleteSync();
-      }
+    if (stampFile.existsSync()) {
+      stampFile.deleteSync();
+    }
+    if (isZip) {
       final Directory extractedDir = stagingDir.childDirectory(_extractedDirName)
         ..createSync(recursive: true);
       try {
@@ -449,15 +552,15 @@ Actual:   $actualDigest''');
         artifactDir.deleteSync(recursive: true);
       }
       extractedDir.renameSync(artifactDir.path);
-      final File stagingStamp = stagingDir.childFile(_sha256StampSuffix)
-        ..writeAsStringSync(expectedSha);
-      stagingStamp.renameSync(stampFile.path);
     } else {
       if (artifactFile.existsSync()) {
         artifactFile.deleteSync();
       }
       stagingFile.renameSync(artifactFile.path);
     }
+    final File stagingStamp = stagingDir.childFile(_sha256StampSuffix)
+      ..writeAsStringSync(expectedSha);
+    stagingStamp.renameSync(stampFile.path);
   }
 }
 

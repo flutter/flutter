@@ -68,11 +68,12 @@ enum HostPlatform {
 class ArtifactDependency {
   const ArtifactDependency({
     required this.name,
-    required this.sha256,
     required this.url,
     this.hostPlatform,
+    this.sha256,
+    this.sha256Url,
     this.targetPlatform,
-  });
+  }) : assert(sha256 != null || sha256Url != null, 'Either sha256 or sha256Url must be provided.');
 
   /// Deserializes an [ArtifactDependency] from a JSON-serializable map.
   ///
@@ -82,10 +83,26 @@ class ArtifactDependency {
     if (!isValidSinglePathSegment(name)) {
       throw FormatException('Invalid artifact dependency name: "$name"');
     }
-    final String sha256 = json.requiredField<String>(sha256Key);
-    if (!_sha256RegExp.hasMatch(sha256)) {
+    final String? sha256 = json.nullableField<String>(sha256Key);
+    if (sha256 != null && !isValidSha256(sha256)) {
       throw FormatException(
         'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
+      );
+    }
+    final String? sha256UrlStr = json.nullableField<String>(sha256UrlKey);
+    Uri? sha256Uri;
+    if (sha256UrlStr != null) {
+      sha256Uri = Uri.tryParse(sha256UrlStr);
+      if (sha256Uri == null ||
+          (!sha256Uri.isScheme(_httpScheme) && !sha256Uri.isScheme(_httpsScheme))) {
+        throw FormatException(
+          'Invalid artifact dependency sha256Url (expected http/https): "$sha256UrlStr"',
+        );
+      }
+    }
+    if (sha256 == null && sha256Uri == null) {
+      throw const FormatException(
+        'ArtifactDependency requires either "$sha256Key" or "$sha256UrlKey".',
       );
     }
     final String urlStr = json.requiredField<String>(urlKey);
@@ -96,9 +113,10 @@ class ArtifactDependency {
     final String? hostPlatformName = json.nullableField<String>(hostPlatformKey);
     return ArtifactDependency(
       name: name,
-      sha256: sha256,
       url: uri,
       hostPlatform: hostPlatformName != null ? HostPlatform.fromName(hostPlatformName) : null,
+      sha256: sha256,
+      sha256Url: sha256Uri,
       targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
   }
@@ -106,6 +124,9 @@ class ArtifactDependency {
   static const String _httpScheme = 'http';
   static const String _httpsScheme = 'https';
   static final RegExp _sha256RegExp = RegExp(r'^[a-fA-F0-9]{64}$');
+
+  /// Returns whether [value] is a valid 64-character hexadecimal SHA-256 string.
+  static bool isValidSha256(String value) => _sha256RegExp.hasMatch(value);
 
   /// Returns whether [value] is a non-empty single path segment without
   /// directory traversal or path separators.
@@ -127,6 +148,9 @@ class ArtifactDependency {
 
   /// Map key for [sha256].
   static const String sha256Key = 'sha256';
+
+  /// Map key for [sha256Url].
+  static const String sha256UrlKey = 'sha256Url';
 
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
@@ -151,8 +175,15 @@ class ArtifactDependency {
   /// The download URL for the artifact.
   final Uri url;
 
-  /// The SHA-256 checksum of the artifact.
-  final String sha256;
+  /// Optional inline SHA-256 checksum of the artifact.
+  ///
+  /// Either [sha256] or [sha256Url] must be non-null.
+  final String? sha256;
+
+  /// Optional download URL for the file containing the SHA-256 checksum of the artifact.
+  ///
+  /// Either [sha256] or [sha256Url] must be non-null.
+  final Uri? sha256Url;
 
   /// Optional host platform this artifact is intended for.
   final HostPlatform? hostPlatform;
@@ -188,7 +219,8 @@ class ArtifactDependency {
   Map<String, Object?> toMap() => <String, Object?>{
     nameKey: name,
     urlKey: url.toString(),
-    sha256Key: sha256,
+    sha256Key: ?sha256,
+    sha256UrlKey: ?sha256Url?.toString(),
     hostPlatformKey: ?hostPlatform?.cliName,
     targetPlatformKey: ?targetPlatform,
   };
@@ -200,15 +232,17 @@ class ArtifactDependency {
             other.name == name &&
             other.url == url &&
             other.sha256 == sha256 &&
+            other.sha256Url == sha256Url &&
             other.hostPlatform == hostPlatform &&
             other.targetPlatform == targetPlatform);
   }
 
   @override
-  int get hashCode => Object.hash(name, url, sha256, hostPlatform, targetPlatform);
+  int get hashCode => Object.hash(name, url, sha256, sha256Url, hostPlatform, targetPlatform);
 
   @override
   String toString() =>
       'ArtifactDependency(name: $name, url: $url, sha256: $sha256, '
-      'hostPlatform: $hostPlatform, targetPlatform: $targetPlatform)';
+      'sha256Url: $sha256Url, hostPlatform: $hostPlatform, '
+      'targetPlatform: $targetPlatform)';
 }
