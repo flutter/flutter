@@ -117,7 +117,7 @@ use_repo(engine_version, "engine_version")
 # reaches it -- what the framework's tests compile against under Bazel
 # (build/bazel/dart/pub.bzl, flutter_test.bzl).
 pub = use_extension("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub")
-use_repo(pub, "pub")
+use_repo(pub, "pub", "pub_workspace")
 
 # The Flutter SDK's cache artifacts the framework's tests read through
 # FLUTTER_ROOT (the Material fonts; build/bazel/dart/flutter_sdk_cache.bzl).

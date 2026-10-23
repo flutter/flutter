@@ -11,7 +11,7 @@
 
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
-load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_cache", "pub_package_config")
+load("//engine/src/flutter/build/bazel/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -91,6 +91,7 @@ _SDK_PACKAGES = [
     "//:pubspec.yaml",
     "//packages/flutter:sources",
     "//packages/flutter_driver:sources",
+    "//packages/flutter_goldens:sources",
     "//packages/flutter_localizations:sources",
     "//packages/flutter_test:sources",
     "//packages/flutter_web_plugins:sources",
@@ -110,6 +111,7 @@ pub_cache(
         "dtd",
         "flutter",
         "flutter_driver",
+        "flutter_goldens",
         "flutter_lints",
         "flutter_localizations",
         "flutter_test",
@@ -157,9 +159,10 @@ write_file(
         "#!/bin/bash",
         "# bin/flutter of the tests' SDK facsimile: the tool as Bazel compiled it",
         "# (packages/flutter_tools/BUILD.bazel), run as bin/internal/shared.sh runs",
-        "# the snapshot it builds.",
+        "# the snapshot it builds -- after the bootstrap hook shared.sh honours.",
         "set -e",
         "root=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"",
+        "if [ -f \"$root/bin/internal/bootstrap.sh\" ]; then source \"$root/bin/internal/bootstrap.sh\"; fi",
         "exec \"$root/bin/cache/dart-sdk/bin/dart\" --disable-dart-dev " +
         "--packages=\"$root/packages/flutter_tools/.dart_tool/package_config.json\" " +
         "\"$root/bin/cache/flutter_tools.snapshot\" \"$@\"",
@@ -183,16 +186,20 @@ write_file(
 )
 
 # What the tool, run from the facsimile, reads of the cache beyond pub's
-# view of it: the host's engine artifacts as `flutter precache` unpacks them
-# (bundle_directory over the archives a host build uploads), the stamps
-# Cache.updateAll checks before it would download, the Material fonts and
-# the flutter_gpu package (the tool checks the directories exist).
+# view of it: the host's engine artifacts as `flutter precache --linux`
+# unpacks them (bundle_directory over the archives a host build uploads, in
+# the three runtime modes), the stamps Cache.updateAll checks before it
+# would download, the Material fonts and the flutter_gpu package (the tool
+# checks the directories exist).
 _TOOL_CACHE_FILES = _PUB_CACHE_FILES | {
     ":flutter_tools_snapshot": "flutter_tools.snapshot",
     "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/linux-x64",
+    "//engine/src/flutter/build/archives:host_engine_profile_directory": "artifacts/engine/linux-x64-profile",
+    "//engine/src/flutter/build/archives:host_engine_release_directory": "artifacts/engine/linux-x64-release",
     "//engine/src/flutter/build/archives:common_engine_directory": "artifacts/engine/common",
     "//bin/internal:flutter_sdk_stamp": "flutter_sdk.stamp",
     "//bin/internal:font_subset_stamp": "font-subset.stamp",
+    "//bin/internal:linux_sdk_stamp": "linux-sdk.stamp",
     "//bin/internal:material_fonts_stamp": "material_fonts.stamp",
     "//bin/internal:gradle_wrapper_stamp": "gradle_wrapper.stamp",
 }
@@ -301,15 +308,136 @@ dart_package_tests(
     tests = glob(
         ["test/commands.shard/permeable/**/*_test.dart"],
         exclude = [
-            # Builds a release Linux bundle through tool_backend.dart: the
-            # release engine (gen_snapshot, the product platform kernel) and
-            # the desktop embedding in its three modes, which the host
-            # build's facsimile lacks.
-            "test/commands.shard/permeable/icon_tree_shaker_test.dart",
             # Does not compile at this checkout: #192831 and #193447 crossed
             # (WidgetPreviewCommand's constructor); upstream reverted the
             # latter in #193968. Restore it on the next rebase.
             "test/commands.shard/permeable/widget_preview/widget_preview_test.dart",
         ],
     ),
+)
+
+# The projects the integration shard's tests run the tool in or copy:
+# dev/automated_tests and dev/missing_dependency_tests (test_test), the
+# gallery (analyze_suggestions_integration_test), hello_world
+# (command_output_test, tool_backend_test), data_asset_app with its
+# package (the isolated data-asset tests).
+_INTEGRATION_PROJECTS = [
+    "//dev/automated_tests:project",
+    "//dev/integration_tests/data_asset_app:project",
+    "//dev/integration_tests/data_asset_package:project",
+    "//dev/integration_tests/flutter_gallery:project",
+    "//dev/missing_dependency_tests:project",
+    "//examples/hello_world:sources",
+    "//examples/hello_world/test:files",
+]
+
+# The integration shard's files a Linux host cannot run from the facsimile.
+_INTEGRATION_EXCLUDED = [
+    # Android: an SDK, Gradle and its downloads.
+    "test/integration.shard/analyze_size_test.dart",
+    "test/integration.shard/android_e2e_api_test.dart",
+    "test/integration.shard/android_gradle_asset_merging_test.dart",
+    "test/integration.shard/android_gradle_daemon_cache_test.dart",
+    "test/integration.shard/android_gradle_flutter_source_path_test.dart",
+    "test/integration.shard/android_gradle_java_version_test.dart",
+    "test/integration.shard/android_gradle_legacy_flutter_plugins_strings_in_comments_test.dart",
+    "test/integration.shard/android_gradle_outputs_app_link_settings_test.dart",
+    "test/integration.shard/android_gradle_print_build_variants_test.dart",
+    "test/integration.shard/android_gradle_print_ndk_version_test.dart",
+    "test/integration.shard/android_obfuscate_test.dart",
+    "test/integration.shard/android_plugin_compilesdkversion_mismatch_test.dart",
+    "test/integration.shard/android_plugin_example_app_build_test.dart",
+    "test/integration.shard/android_plugin_ndkversion_mismatch_test.dart",
+    "test/integration.shard/android_plugin_new_output_dir_test.dart",
+    "test/integration.shard/android_run_flutter_gradle_plugin_tests_test.dart",
+    "test/integration.shard/deferred_components_assets_reproduce_test.dart",
+    "test/integration.shard/deferred_components_test.dart",
+    "test/integration.shard/flutter_build_apk_split_per_abi_test.dart",
+    "test/integration.shard/flutter_build_apk_verbose_test.dart",
+    "test/integration.shard/flutter_build_config_only_test.dart",
+    "test/integration.shard/flutter_build_with_compilation_error_test.dart",
+    "test/integration.shard/gradle_jni_packaging_test.dart",
+    "test/integration.shard/gradle_libapp_so_packaging_test.dart",
+    "test/integration.shard/gradle_non_android_plugin_test.dart",
+    # The web SDK (flutter_web_sdk, the web engine's build), which the
+    # facsimile does not hold yet: web builds and the widget previewer.
+    "test/integration.shard/asset_transformation_test.dart",
+    "test/integration.shard/flutter_build_wasm_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_conflicting_assets_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_flutter_build_test.dart",
+    "test/integration.shard/isolated/record_use_flutter_build_test.dart",
+    "test/integration.shard/web_define_build_test.dart",
+    "test/integration.shard/web_plugin_registrant_test.dart",
+    "test/integration.shard/widget_preview_detection_test.dart",
+    "test/integration.shard/widget_preview_legacy_test.dart",
+    "test/integration.shard/widget_preview_machine_test.dart",
+    "test/integration.shard/widget_preview_pubspec_test.dart",
+    "test/integration.shard/widget_preview_smoke_test.dart",
+    # The host's C toolchain and CMake (native assets; `flutter build linux
+    # --config-only` runs CMake; the record_use tests and the data assets'
+    # `flutter run` build for the Linux desktop).
+    "test/integration.shard/build_linux_config_only_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_flutter_run_test.dart",
+    "test/integration.shard/isolated/record_use_caching_test.dart",
+    "test/integration.shard/isolated/record_use_flutter_run_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_build_framework_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_build_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_run_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_test_integration_test_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_test_test.dart",
+    "test/integration.shard/isolated/native_assets_without_cbuild_assemble_test.dart",
+    # The host's xvfb-run.
+    "test/integration.shard/overall_experience_test.dart",
+    # Tests of the repository's own scripts and resolution: bin/dart's
+    # bootstrap (the facsimile's launcher has none), the pub workspace's
+    # package_graph.json at the root.
+    "test/integration.shard/bash_entrypoint_test.dart",
+    "test/integration.shard/batch_entrypoint_test.dart",
+    "test/integration.shard/dependencies_test.dart",
+]
+
+# The integration shard's tests run pub in workspace members (hello_world,
+# dev/automated_tests), and pub resolves a member against the whole
+# workspace: every member's pubspec is in the facsimile (@pub_workspace),
+# and the cache holds every hosted package the workspace reaches.
+pub_cache(
+    name = "workspace_pub_cache",
+    dev_roots = PUB_WORKSPACE_PACKAGES,
+    roots = PUB_WORKSPACE_PACKAGES,
+)
+
+# The integration shard: the tool run as a process on projects of its own --
+# hot reload and restart on flutter_tester, the daemon, the debug adapter,
+# `flutter test`, `flutter analyze`, gen-l10n -- from the facsimile with the
+# tool in it (dev/bots runs it on one core from a bootstrapped checkout).
+dart_package_tests(
+    name = "integration_shard",
+    size = "large",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
+    # Waits a minute of its own for `flutter run` to report the VM service,
+    # which a loaded machine overruns (a fresh project's resolution and
+    # compile come first).
+    flaky = ["test/integration.shard/disable_service_origin_check_test.dart"],
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The longest: many hot reloads, or the debug adapter's whole protocol.
+    sizes = {
+        "test/integration.shard/break_on_framework_exceptions_test.dart": "enormous",
+        "test/integration.shard/debug_adapter/flutter_adapter_test.dart": "enormous",
+        "test/integration.shard/expression_evaluation_test.dart": "enormous",
+    },
+    tests = glob(
+        ["test/integration.shard/**/*_test.dart"],
+        exclude = _INTEGRATION_EXCLUDED,
+    ),
+    # pub touches the workspace's lock when it resolves a member.
+    writable = ["pubspec.lock"],
 )
