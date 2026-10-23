@@ -362,3 +362,72 @@ def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without 
         visibility = kwargs.get("visibility"),
         tags = kwargs.get("tags", []),
     )
+
+PubCacheInfo = provider(
+    doc = "A pub cache's contents, for a test that runs pub (pub_cache).",
+    fields = {
+        "entries": "dict of path under the cache to File: each hosted package's files under " +
+                   "hosted/pub.dev/<name>-<version>/ and its hash under hosted-hashes/pub.dev/.",
+    },
+)
+
+def _pub_cache_impl(ctx):
+    entries = {}
+    for target, name in ctx.attr.packages.items():
+        if name not in PUB_HOSTED:
+            fail("%s: %s is not a hosted package of the lock" % (ctx.label, name))
+        package = PUB_HOSTED[name]
+        directory = "hosted/pub.dev/%s-%s" % (name, package.version)
+        for file in target[DefaultInfo].files.to_list():
+            # An external repository's file: ../<repository>/<path>.
+            path = file.short_path
+            if path.startswith("../"):
+                path = path.split("/", 2)[2]
+            entries[directory + "/" + path] = file
+
+        # The archive's hash beside the package, as `pub get` writes it when
+        # it downloads one; pub compares it with the server's and, finding
+        # them equal, leaves the package alone.
+        digest = ctx.actions.declare_file("%s/%s-%s.sha256" % (ctx.label.name, name, package.version))
+        ctx.actions.write(digest, package.sha256)
+        entries["hosted-hashes/pub.dev/%s-%s.sha256" % (name, package.version)] = digest
+    return [
+        DefaultInfo(files = depset(entries.values())),
+        PubCacheInfo(entries = entries),
+    ]
+
+_pub_cache = rule(
+    implementation = _pub_cache_impl,
+    doc = "The hosted packages of a closure as a pub cache's hosted/ and hosted-hashes/ trees.",
+    attrs = {
+        "packages": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "The hosted packages: each one's files (@pub//<name>:sources) to its name.",
+        ),
+    },
+)
+
+def pub_cache(name, roots, dev_roots = [], without = [], **kwargs):
+    """A pub cache holding the hosted packages some roots reach, for a test that runs `pub get`.
+
+    A test that resolves a project of its own with the real pub (flutter_tools'
+    widget_preview tests, `flutter create`'s) needs the packages the project
+    reaches in a pub cache; dart_test lays this one in the runfiles tree as
+    `.pub-cache` and points PUB_CACHE at it. pub still asks the server for
+    the versions that exist unless it runs `--offline`, so such a test needs
+    the network; it downloads nothing it finds here.
+
+    Args:
+      name: the target's name.
+      roots: the package names whose `dependencies` the cache covers,
+        transitively (pub_closure).
+      dev_roots: the workspace packages whose `dev_dependencies` it covers too.
+      without: packages of the closure left out.
+      **kwargs: the rule's other attributes (visibility, tags).
+    """
+    closure = pub_closure(roots, dev_roots, without)
+    _pub_cache(
+        name = name,
+        packages = {"@pub//%s:sources" % package: package for package in closure.hosted},
+        **kwargs
+    )

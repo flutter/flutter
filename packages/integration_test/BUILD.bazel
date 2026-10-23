@@ -9,7 +9,13 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "sources",
-    srcs = glob(["lib/**"]) + ["pubspec.yaml"],
+    srcs = glob([
+        "lib/**",
+        # The package is a plugin: when a project that depends on it resolves,
+        # flutter_tools reads the Android embedding's main class
+        # (platform_plugins.dart) to write the plugin registrant.
+        "android/**",
+    ]) + ["pubspec.yaml"],
 )
 
 # The tests run from the package's directory (test/BUILD.bazel).

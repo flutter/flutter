@@ -57,13 +57,15 @@ filegroup(
     srcs = ["lib/_internal/vm_platform_strong.dill"],
 )
 
-# The command-line SDK: `dart` (and `dartvm`, the VM it runs) and the
-# libraries and snapshots it loads.
+# The command-line SDK: `dart` (and `dartvm`, the VM it runs), the
+# libraries and snapshots it loads, and the version file the analyzer reads
+# (FolderBasedDartSdk.languageVersion) when it analyzes against this SDK.
 filegroup(
     name = "dart",
     srcs = [
         "bin/dart",
         "bin/dartvm",
+        "version",
     ] + glob(
         [
             "bin/snapshots/**",
