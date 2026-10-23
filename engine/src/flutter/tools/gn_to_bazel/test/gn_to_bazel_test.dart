@@ -6883,7 +6883,7 @@ cc_library(
 {"builds": [
   ${build('ci/host_debug', '--target-dir ci/host_debug --runtime-mode debug --prebuilt-dart-sdk --no-lto --rbe --no-goma', <String>['flutter/build/archives:artifacts', 'flutter/tools/font_subset', 'sky_engine', 'flutter', 'flutter:unittests'], archives: <String>['out/ci/host_debug/zip_archives/linux-x64/artifacts.zip'])},
   ${build('ci/host_release', '--target-dir ci/host_release --runtime-mode=release --prebuilt-dart-sdk --no-lto', <String>['flutter/build/archives:flutter_patched_sdk'])},
-  ${build('ci/host_debug_test', '--target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --no-lto', <String>['flutter:unittests'], tests: '${runTests('Host Tests', 'dart,dart-host,engine,impeller-golden')}, {"name": "Lint", "language": "bash", "script": "flutter/ci/lint.sh", "parameters": [], "contexts": []}')},
+  ${build('ci/host_debug_test', '--target-dir ci/host_debug_test --runtime-mode debug --prebuilt-dart-sdk --no-lto', <String>['flutter:unittests'], tests: '${runTests('Host Tests', 'dart,dart-host,engine,impeller-golden')}, {"name": "Lint", "language": "bash", "script": "flutter/ci/lint.sh", "parameters": [], "contexts": []}, {"name": "Tests of tools/gn", "language": "python3", "script": "flutter/tools/gn_test.py", "parameters": [], "contexts": []}')},
   ${build('ci/host_debug_unopt', '--runtime-mode debug --unoptimized --asan --dart-debug', <String>['flutter/tools/font_subset', 'flutter/fml:fml_unittests'])},
   ${build('ci/host_profile_lto', '--runtime-mode profile --prebuilt-dart-sdk', <String>['flutter/tools/font_subset'])},
   ${build('ci/android_debug', '--android --no-lto', <String>['flutter'])},
@@ -7244,9 +7244,16 @@ install(
 # Not run, no Bazel test yet: assets_unittests (engine), client_wrapper_glfw_unittests (engine), ''',
         ),
       );
+      // A step that runs a script of the checkout with a Bazel test of its
+      // own (checkoutScriptTests) joins the suite; one without is on record.
       expect(
         buildFile,
-        contains('the impeller-golden type.\n# Other steps, scripts of the checkout: Lint.\n'),
+        contains(
+          'the impeller-golden type.\n'
+          "# ci/host_debug_test's steps that run a script of the checkout, as Bazel tests: "
+          '//engine/src/flutter:gn_test.\n'
+          '# Other steps, scripts of the checkout: Lint.\n',
+        ),
       );
       expect(
         buildFile,
@@ -7256,6 +7263,7 @@ test_suite(
     tags = ["manual"],
     tests = [
         "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter:gn_test",
         "//engine/src/flutter/fml:fml_unittests",
         "//engine/src/flutter/testing/dart:dart",
         "//engine/src/flutter/testing/dart/vm_service:vm_service",

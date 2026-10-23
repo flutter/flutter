@@ -8,6 +8,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
 load("//engine/src/flutter/build/bazel:install.bzl", "install")
 
 package(default_visibility = ["//visibility:public"])
@@ -303,6 +304,26 @@ exports_files([
     "tools/javadoc/android_reference",
     "tools/javadoc/gen_javadoc.py",
 ])
+
+# ci/host_debug_unopt's "Tests of tools/gn" (linux_unopt.json): `python3
+# flutter/tools/gn_test.py`, the unit tests of tools/gn -- its argument
+# parsing and the GN arguments it writes -- run from tools/ as the step runs
+# them (the script loads `gn` from its own directory). In the checkout
+# itself: to_gn_args() asks git for the engine's, Skia's and Dart's
+# revisions and runs the content-aware hash, which no view has. tools/ has
+# no package of its own: the root package's files, a test of this file.
+checkout_script_test(
+    name = "gn_test",
+    srcs = [
+        "tools/gn",
+        "tools/gn_test.py",
+    ],
+    # tools/gn looks the Apple SDKs up under prebuilts/SDKs unless it runs
+    # on a LUCI bot, where the step runs; a Linux checkout has none.
+    env = {"LUCI_CONTEXT": "bazel"},
+    in_checkout = True,
+    script = "tools/gn_test.py",
+)
 
 # The web engine's other source directories web_sdk/BUILD.gn's sdk_rewriter
 # invocations read (each `input_dir`, less its `exclude_pattern`; the

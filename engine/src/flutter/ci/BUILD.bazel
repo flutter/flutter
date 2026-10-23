@@ -15,7 +15,34 @@
 # directory. The other packages of that list are dart_package_test targets
 # (//engine/src/flutter:dart_host_tests).
 
+load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
+
 package(default_visibility = ["//visibility:public"])
+
+# ci/host_debug_unopt's "ban GeneratedPluginRegistrant.java" and its
+# "ban_test" (linux_unopt.json): the first walks the checkout for files of
+# that name outside third_party and the one expected place, the second plants
+# one, runs the first and expects it to fail, and removes it. Both in the
+# checkout itself (the walk and the planted file are the source tree's), and
+# exclusive: the test's planted file must not be there while the check runs.
+checkout_script_test(
+    name = "ban_generated_plugin_registrant_java",
+    srcs = ["ban_generated_plugin_registrant_java.sh"],
+    in_checkout = True,
+    script = "ban_generated_plugin_registrant_java.sh",
+    tags = ["exclusive"],
+)
+
+checkout_script_test(
+    name = "ban_generated_plugin_registrant_java_test",
+    srcs = [
+        "ban_generated_plugin_registrant_java.sh",
+        "test/ban_generated_plugin_registrant_java_test.sh",
+    ],
+    in_checkout = True,
+    script = "test/ban_generated_plugin_registrant_java_test.sh",
+    tags = ["exclusive"],
+)
 
 # The builder configurations, for the tests of the packages that read them
 # (builders/ is a package of its own: the generated install targets and
