@@ -26,5 +26,10 @@ filegroup(
 
 framework_tests(
     name = "painting",
+    # Minutes under a full run's load (187 s with the Impeller runs doubling it;
+    # the medium timeout is 300 s).
+    large = [
+        "star_border_test.dart",
+    ],
     tests = glob(["*_test.dart"]),
 )
