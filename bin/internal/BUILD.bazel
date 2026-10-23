@@ -6,6 +6,40 @@
 # the fonts the framework's tests load
 # (engine/src/flutter/build/bazel/dart/flutter_sdk_cache.bzl).
 
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+
 package(default_visibility = ["//visibility:public"])
 
 exports_files(["material_fonts.version"])
+
+# The engine revision the tool's bootstrap writes to bin/cache/engine.stamp
+# (update_engine_version.sh, from git). Under Bazel the engine is the tree
+# itself, and the stamp is a fixed word, as the SDK version's defines are
+# in the tests' compiles (flutter_test.bzl): flutter_tools' tests read that
+# the stamp exists (Cache.engineRevision), not what it says.
+write_file(
+    name = "engine_stamp",
+    out = "engine.stamp",
+    content = ["bazel"],
+)
+
+# The stamp's details beside it (bin/cache/engine_stamp.json), which the
+# tool otherwise downloads for the revision the stamp names, and the
+# bookkeeping stamp that says the download is current.
+write_file(
+    name = "engine_stamp_stamp",
+    out = "engine_stamp.stamp",
+    content = ["bazel"],
+)
+
+write_file(
+    name = "engine_stamp_json",
+    out = "engine_stamp.json",
+    content = [json.encode({
+        "build_date": "1970-01-01T00:00:00.000000",
+        "build_time_ms": 0,
+        "git_revision": "bazel",
+        "git_revision_date": "1970-01-01T00:00:00Z",
+        "content_hash": "bazel",
+    })],
+)

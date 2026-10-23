@@ -8,8 +8,7 @@
 #
 #   bazel test //dev/snippets:tests
 
-load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_tests")
-load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_package_config")
+load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,31 +20,7 @@ filegroup(
     ]) + ["pubspec.yaml"],
 )
 
-_ROOTS = [
-    "snippets",
-    "test",
-]
-
-_PACKAGES = {":sources": "snippets"}
-
-pub_package_config(
-    name = "package_config",
-    out = "package_config.json",
-    dev_roots = ["snippets"],
-    packages = _PACKAGES,
-    roots = _ROOTS,
-)
-
-pub_package_config(
-    name = "runtime_package_config",
-    out = "runtime_package_config.json",
-    dev_roots = ["snippets"],
-    layout = "runfiles",
-    packages = _PACKAGES,
-    roots = _ROOTS,
-)
-
-dart_tests(
+dart_package_tests(
     name = "tests",
     size = "small",
     # The helpers beside the tests (fake_process_manager.dart, ...).
@@ -53,7 +28,6 @@ dart_tests(
         ["test/*.dart"],
         exclude = ["test/*_test.dart"],
     ),
-    package_config = ":package_config",
-    runtime_package_config = ":runtime_package_config",
+    package = "snippets",
     tests = glob(["test/*_test.dart"]),
 )
