@@ -123,7 +123,7 @@ dependencies:
   typed_data: 1.4.0
   vm_service_interface: 2.0.1
   watcher: 1.2.1
-  web: 1.1.1
+  web: 1.1.2
   web_socket: 1.0.1
   yaml_edit: 2.2.4
 
@@ -139,4 +139,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 362mgf
+# PUBSPEC CHECKSUM: u9fuba
