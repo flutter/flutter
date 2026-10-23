@@ -699,7 +699,17 @@ runs pub first) in `--precompiled` mode from the package's directory, with
 `FLUTTER_ROOT` the runfiles root, the runtime package configuration at the
 package's `.dart_tool/`, and what a tool under test reads of the SDK's
 cache laid under `bin/cache` (`cache`, `cache_files`: the Dart SDK, the
-engine stamps as fixed words).
+engine stamps as fixed words). A test that runs the real pub on a project
+of its own (flutter_tools' widget_preview tests, `flutter create`'s) gets
+the rest of pub's view of the SDK -- `bin/cache/flutter.version.json`
+with a version every `flutter:` constraint allows, the SDK packages under
+`packages/`, the engine's `sky_engine` under `bin/cache/pkg/` (an
+`assembled_directory`), the Gradle wrapper `flutter create` copies -- and
+a `pub_cache` of the hosted packages the project reaches, laid in the
+runfiles tree as `.pub-cache` with `PUB_CACHE` pointing at it; pub still
+asks pub.dev which versions exist, so such a test has the network (`network`),
+and downloads nothing it finds there. `large` names the files that run the
+real pub or the analyzer over whole projects (a 15-minute timeout).
 
 ```sh
 bazel test //:framework_tests //:tool_tests //:dart_tests   # everything below, the root's suites
@@ -710,6 +720,7 @@ bazel build //packages/flutter/test/widgets:text_test_kernel   # compile only
 bazel test //packages/flutter/examples/api/test:tests //packages/flutter_test/test:tests
 bazel test //packages/flutter/test_release:tests    # -Ddart.vm.product=true
 bazel test //packages/flutter_tools:general_shard   # dart_test: the tool's unit tests
+bazel test //packages/flutter_tools:commands_shard_hermetic //packages/flutter_tools:commands_shard_permeable
 bazel test //dev/bots:tests //dev/tools/gen_keycodes:tests
 ```
 
@@ -719,12 +730,14 @@ API samples' 580, flutter_test's, flutter_localizations', flutter_goldens',
 flutter_driver's, integration_test's, the example apps', manual_tests',
 tracing_tests', stocks', vitool's, integration_ui's -- 1,627 files and 22,522
 cases -- plus the Impeller, no-tracking and release/profile runs,
-flutter_tools' general shard (271 files) and hermetic commands shard (58),
+flutter_tools' general shard (271 files) and commands shard (the hermetic
+half whole, 67; the permeable half but for the files that run the built
+tool, 8),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
 fuchsia_remote_debug_protocol). Left out by name: web-only and macOS-only
 files (`@TestOn`, which a BUILD file cannot read), and tests that run the
-built tool, the real pub or git on the checkout -- the integration kind. The compile's defines for
+built tool or git on the checkout -- the integration kind. The compile's defines for
 the SDK version are fixed words (`-DFLUTTER_VERSION=bazel`...), so a kernel
 is the same on every commit and the cache holds across them.
 
@@ -1225,7 +1238,12 @@ hands the frontend server as `--sdk-root`). Two things the tool reads as
 directories are assembled as one under `local_engine/`: the sky_engine
 package (`gen/dart-pkg/sky_engine`, dart_pkg's directory and the copied
 libraries) and impellerc's `shader_lib` (GN copies the GLSL files beside
-the compiler; the tool passes the directory as `--include`).
+the compiler; the tool passes the directory as `--include`). The same
+assembly is a rule of its own, `assembled_directory(contents, prefix)`,
+for a GN directory something else reads whole:
+`//engine/src/flutter/sky/packages/sky_engine:package` is the sky_engine
+package as pub finds it under the SDK cache's `pkg/` (the tests' SDK
+facsimile, above).
 
 flutter_tools reads the manifest (`LocalEngineLayout` in
 `packages/flutter_tools/lib/src/artifacts.dart`): `--local-engine` and

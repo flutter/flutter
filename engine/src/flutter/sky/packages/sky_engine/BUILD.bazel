@@ -5,6 +5,7 @@
 # Generated from //flutter/sky/packages/sky_engine/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:local_engine.bzl", "assembled_directory")
 load("//engine/src/flutter/build/bazel/dart:dart_pkg.bzl", "dart_pkg")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy", "gn_generated_file")
 load("//engine/src/flutter/web_sdk:web_sdk.bzl", "web_ui_ui_web_with_output")
@@ -547,4 +548,18 @@ dart_pkg(
         ":copy_dart_ui_web",
         ":copy_sky_engine_authors",  # !is_fuchsia
     ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The package as the SDK cache holds it (bin/cache/pkg/sky_engine): one
+# directory of what the targets above place under gen/dart-pkg/sky_engine,
+# for a test that runs the real pub or the analyzer on a project of its own
+# (a dart_test's cache_files lays it there, where pub looks for the SDK's
+# packages and the analyzer for dart:ui).
+assembled_directory(
+    name = "package",
+    contents = [":sky_engine"],
+    prefix = "gen/dart-pkg/sky_engine",
 )

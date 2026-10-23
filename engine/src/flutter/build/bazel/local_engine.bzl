@@ -194,6 +194,27 @@ _local_engine = rule(
     },
 )
 
+def _assembled_directory_impl(ctx):
+    entries = install_entries(ctx, ctx.attr.contents, ctx.attr.files, ctx.attr.trees, ctx.attr.archives)
+    return [DefaultInfo(files = depset([_assemble(ctx, ctx.attr.prefix, entries)]))]
+
+assembled_directory = rule(
+    implementation = _assembled_directory_impl,
+    doc = "One directory of GN's build directory as a directory artifact, assembled from what some " +
+          "targets place under it (install's content attributes): the sky_engine package for a test " +
+          "that lays it under bin/cache/pkg, as local_engine assembles it for the manifest.",
+    attrs = INSTALL_CONTENT_ATTRS | PYTHON_ATTRS | {
+        "prefix": attr.string(
+            mandatory = True,
+            doc = "The GN path assembled (`gen/dart-pkg/sky_engine`).",
+        ),
+        "_assemble": attr.label(
+            default = "//engine/src/flutter/build/bazel:assemble_directory.py",
+            allow_single_file = True,
+        ),
+    },
+)
+
 def local_engine(name, contents = [], files = {}, trees = [], assemble = [], **kwargs):
     """The manifest `local_engine.json` over a build's files, for `flutter --local-engine`.
 

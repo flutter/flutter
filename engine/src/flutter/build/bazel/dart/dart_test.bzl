@@ -39,7 +39,7 @@ load(
     "SOURCE_URI_SCHEME",
     "compile_to_kernel",
 )
-load("//engine/src/flutter/build/bazel/dart:pub.bzl", "PubPackageConfigInfo", "pub_package_config")
+load("//engine/src/flutter/build/bazel/dart:pub.bzl", "PubCacheInfo", "PubPackageConfigInfo", "pub_package_config")
 
 # Where test_core's precompiled mode looks for the package configuration.
 _PACKAGE_CONFIG = ".dart_tool/package_config.json"
@@ -236,10 +236,14 @@ export FLUTTER_ROOT="$root"
 # (Cache.lock opens bin/cache/lockfile); what tests read of it is laid
 # in by `cache` and `cache_files`.
 mkdir -p "$root/bin/cache"
-cd "{package}"
+{pub_cache_env}cd "{package}"
 exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} "{test}" "$@"
 """.format(
             package = ctx.label.package or ".",
+            # A pub cache of the rule's own for a test that runs pub (pub_cache),
+            # in the runfiles tree; pub writes nothing to it that is already
+            # there.
+            pub_cache_env = "export PUB_CACHE=\"$root/.pub-cache\"\n" if ctx.attr.pub_cache else "",
             dart = dart[0].short_path,
             runner_config = runner.package_config.short_path,
             runner = runner.kernel.short_path,
@@ -264,6 +268,9 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
         if len(files) != 1:
             fail("%s: cache_files: %s should be one file" % (ctx.label, target.label))
         cache[paths.join("bin/cache", path)] = files[0]
+    if ctx.attr.pub_cache:
+        for path, file in ctx.attr.pub_cache[PubCacheInfo].entries.items():
+            cache[paths.join(".pub-cache", path)] = file
     runtime = ctx.attr.runtime_package_config
     runfiles = ctx.runfiles(
         files = [kernel, test, runner.kernel, runner.package_config] + ctx.files.data + ctx.files._sdk,
@@ -312,6 +319,11 @@ dart_test = rule(
                   "target's files, at their paths within their repository, under the directory " +
                   "named (`dart-sdk`); flutter_sdk_cache.bzl.",
         ),
+        "pub_cache": attr.label(
+            providers = [PubCacheInfo],
+            doc = "A pub cache (pub_cache) laid in the runfiles tree as .pub-cache, PUB_CACHE for the " +
+                  "test: for a test that resolves a project of its own with the real pub.",
+        ),
         "cache_files": attr.label_keyed_string_dict(
             allow_files = True,
             doc = "Single files of the SDK's cache, each at the path named under bin/cache " +
@@ -354,7 +366,7 @@ dart_test = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def dart_tests(name, tests, size = "medium", tags = [], network = False, **kwargs):
+def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], **kwargs):
     """One dart_test per test file, and a test_suite of them.
 
     Args:
@@ -363,6 +375,9 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, **kwarg
       size: each test's size.
       tags: each test's tags.
       network: whether the tests may reach the network; `block-network` otherwise.
+      large: test files given the large size (a 15-minute timeout rather
+        than medium's 5) whatever `size` says: the few that run the real
+        pub or the analyzer over whole projects.
       **kwargs: dart_test's attributes, the same for every file.
     """
     test_tags = list(tags) + ([] if network else ["block-network"])
@@ -372,7 +387,7 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, **kwarg
         dart_test(
             name = test_name,
             test = test,
-            size = size,
+            size = "large" if test in large else size,
             tags = test_tags,
             **kwargs
         )
@@ -414,8 +429,8 @@ def dart_package_tests(
         none compiles each test from scratch.
       compile_args: further frontend server arguments, for the prelude and
         the tests alike.
-      **kwargs: dart_tests' other arguments (size, tags, network,
-        runner_args, deps, cache, cache_files).
+      **kwargs: dart_tests' other arguments (size, large, tags, network,
+        runner_args, deps, cache, cache_files, pub_cache).
     """
     workspace_packages = {":sources": package} | packages
     config_roots = [package, "test"] + roots

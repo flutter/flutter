@@ -10,6 +10,7 @@
 #   bazel test //packages/flutter_tools:general_shard
 
 load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_cache")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -70,6 +71,64 @@ _CACHE_FILES = {
     "//bin/internal:engine_stamp_stamp": "engine_stamp.stamp",
 }
 
+# For the tests that run the real pub on a project of their own (the
+# widget_preview tests' projects depend on `flutter`, `flutter_localizations`
+# and `flutter_test` from the SDK): pub's view of the SDK -- its version file,
+# the packages under FLUTTER_ROOT/packages, the engine's sky_engine package
+# under bin/cache/pkg (the analyzer reads dart:ui from it) -- and a pub cache
+# of the hosted packages they reach.
+_PUB_CACHE_FILES = _CACHE_FILES | {
+    "//bin/internal:flutter_version_json": "flutter.version.json",
+    "//engine/src/flutter/sky/packages/sky_engine:package": "pkg/sky_engine",
+}
+
+# The Gradle wrapper `flutter create` copies into an Android project.
+_PUB_CACHE = _CACHE | {"@gradle_wrapper//:wrapper": "artifacts/gradle_wrapper"}
+
+_SDK_PACKAGES = [
+    "//:pubspec.lock",
+    "//:pubspec.yaml",
+    "//packages/flutter:sources",
+    "//packages/flutter_driver:sources",
+    "//packages/flutter_localizations:sources",
+    "//packages/flutter_test:sources",
+    "//packages/flutter_web_plugins:sources",
+    "//packages/fuchsia_remote_debug_protocol:sources",
+    "//packages/integration_test:sources",
+]
+
+# The hosted packages those projects reach: the SDK packages' dependencies
+# and what `flutter create`'s templates (a plugin's example depends on
+# integration_test and plugin_platform_interface) and the widget preview
+# scaffold add (pub asks pub.dev for the versions that exist and downloads
+# what the cache lacks -- webview_flutter_web is not in the workspace's lock).
+pub_cache(
+    name = "framework_pub_cache",
+    roots = [
+        "cupertino_icons",
+        "dtd",
+        "flutter",
+        "flutter_driver",
+        "flutter_lints",
+        "flutter_localizations",
+        "flutter_test",
+        "flutter_web_plugins",
+        "integration_test",
+        "plugin_platform_interface",
+        "stack_trace",
+        "url_launcher",
+        "webview_flutter",
+    ],
+)
+
+# The tests that run the analyzer over whole projects take minutes on a
+# loaded machine.
+_LARGE_HERMETIC = [
+    "test/commands.shard/hermetic/widget_preview/preview_code_generator_test.dart",
+    "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_test.dart",
+    "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_workspace_test.dart",
+]
+
 # The tool's whole library, compiled once into each shard's prelude: a test's
 # compile starts from it instead of compiling the tool again.
 _IMPORTS = [
@@ -102,30 +161,54 @@ dart_package_tests(
 dart_package_tests(
     name = "commands_shard_hermetic",
     srcs = _HARNESS,
-    cache = _CACHE,
-    cache_files = _CACHE_FILES,
-    # daemon_test asks the daemon for the gallery project's platforms.
-    data = glob(["test/data/**"]) + ["//dev/integration_tests/flutter_gallery:project"],
+    cache = _PUB_CACHE,
+    cache_files = _PUB_CACHE_FILES,
+    # daemon_test asks the daemon for the gallery project's platforms; the
+    # widget_preview tests analyze projects that depend on the SDK's packages
+    # and two of them resolve such a project with the real pub.
+    data = glob(["test/data/**"]) + ["//dev/integration_tests/flutter_gallery:project"] + _SDK_PACKAGES,
     imports = _IMPORTS,
-    # update_packages_test fetches the coverage data from storage.googleapis.com.
+    large = _LARGE_HERMETIC,
+    # update_packages_test fetches the coverage data from storage.googleapis.com;
+    # pub asks pub.dev which versions exist (the packages themselves are in the
+    # cache).
     network = True,
     package = "flutter_tools",
     packages = _PACKAGES,
-    # Nine widget_preview tests create projects on the real file system and
-    # resolve them with the real pub (`sdk: flutter` dependencies: the SDK's
-    # version file, pub.dev); they are the integration kind.
+    pub_cache = ":framework_pub_cache",
+    tests = glob(["test/commands.shard/hermetic/**/*_test.dart"]),
+)
+
+# The commands shard's permeable half: commands against the real file
+# system and the real pub, on the same SDK facsimile.
+dart_package_tests(
+    name = "commands_shard_permeable",
+    srcs = _HARNESS,
+    cache = _PUB_CACHE,
+    cache_files = _PUB_CACHE_FILES,
+    # script_test reads the SDK's Windows entrypoint scripts.
+    data = glob(["test/data/**"]) + _SDK_PACKAGES + [
+        "//bin:dart.bat",
+        "//bin:flutter.bat",
+        "//bin/internal:shared.bat",
+    ],
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":framework_pub_cache",
     tests = glob(
-        ["test/commands.shard/hermetic/**/*_test.dart"],
+        ["test/commands.shard/permeable/**/*_test.dart"],
         exclude = [
-            "test/commands.shard/hermetic/widget_preview/preview_code_generator_test.dart",
-            "test/commands.shard/hermetic/widget_preview/preview_detector_graph_test.dart",
-            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_invalid_preview_applications_test.dart",
-            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_previews_non_const_params_test.dart",
-            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_regression_178317_test.dart",
-            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_test.dart",
-            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_workspace_test.dart",
-            "test/commands.shard/hermetic/widget_preview/preview_manifest/preview_manifest_workspace_test.dart",
-            "test/commands.shard/hermetic/widget_preview/regress_176018_test.dart",
+            # Run the built tool: create_test analyzes, resolves and tests
+            # the projects it creates with bin/cache/flutter_tools.snapshot,
+            # icon_tree_shaker_test spawns bin/flutter.
+            "test/commands.shard/permeable/create_test.dart",
+            "test/commands.shard/permeable/icon_tree_shaker_test.dart",
+            # Does not compile at this checkout: #192831 and #193447 crossed
+            # (WidgetPreviewCommand's constructor); upstream reverted the
+            # latter in #193968. Restore it on the next rebase.
+            "test/commands.shard/permeable/widget_preview/widget_preview_test.dart",
         ],
     ),
 )

@@ -14,6 +14,10 @@ exports_files([
     ".bazelignore",
     ".gclient",
     "DEPS",
+    # The pub workspace's resolution, which `flutter create` reads to pin a new
+    # project's dependencies (flutter_tools' tests run it).
+    "pubspec.lock",
+    "pubspec.yaml",
 ])
 
 # The repository's Dart and framework tests that Bazel compiles and runs
@@ -57,11 +61,13 @@ test_suite(
     tests = ["//packages/flutter/test:all_impeller"],
 )
 
-# flutter_tools' unit tests and hermetic command tests.
+# flutter_tools' unit tests and command tests (the integration shard drives
+# the built tool).
 test_suite(
     name = "tool_tests",
     tests = [
         "//packages/flutter_tools:commands_shard_hermetic",
+        "//packages/flutter_tools:commands_shard_permeable",
         "//packages/flutter_tools:general_shard",
     ],
 )

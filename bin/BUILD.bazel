@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The SDK's entrypoint scripts, as text: flutter_tools' script_test reads the
+# Windows ones for what they must not do (enable delayed expansion). The Unix
+# ones stay out of the tests' SDK facsimile on purpose -- a test that finds
+# bin/flutter spawns it, and the script bootstraps the tool from the network.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "dart.bat",
+    "flutter.bat",
+])

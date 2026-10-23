@@ -62,12 +62,54 @@ material_fonts = repository_rule(
     doc = "The Material fonts archive the flutter tool caches as bin/cache/artifacts/material_fonts.",
 )
 
+# The Gradle wrapper archive bin/internal/gradle_wrapper.version names
+# (flutter_cache.dart's GradleWrapper; the tool lays it as
+# bin/cache/artifacts/gradle_wrapper and `flutter create` copies it into an
+# Android project), and its sha256, pinned the same way.
+_GRADLE_WRAPPER_PATH = "flutter_infra_release/gradle-wrapper/fd5c1f2c013565a3bea56ada6df9d2b8e96d56aa/gradle-wrapper.tgz"
+_GRADLE_WRAPPER_SHA256 = "31e9428baf1a2b2f485f1110c5899f852649b33d46a2e9b07f9d17752d50190a"
+
+def _gradle_wrapper_impl(rctx):
+    version_file = rctx.path(Label("//bin/internal:gradle_wrapper.version"))
+    rctx.watch(version_file)
+    named = rctx.read(version_file).strip()
+    if named != _GRADLE_WRAPPER_PATH:
+        fail(("bin/internal/gradle_wrapper.version names %s, but %s pins %s: update _GRADLE_WRAPPER_PATH " +
+              "and _GRADLE_WRAPPER_SHA256 (sha256sum of %s%s).") % (
+            named,
+            "engine/src/flutter/build/bazel/dart/flutter_sdk_cache.bzl",
+            _GRADLE_WRAPPER_PATH,
+            _STORAGE,
+            named,
+        ))
+    rctx.download_and_extract(
+        url = _STORAGE + named,
+        sha256 = _GRADLE_WRAPPER_SHA256,
+        type = "tgz",
+    )
+    rctx.file("BUILD.bazel", """# The Gradle wrapper of bin/internal/gradle_wrapper.version (flutter_sdk_cache.bzl).
+package(default_visibility = ["//visibility:public"])
+filegroup(
+    name = "wrapper",
+    srcs = glob(["**"], exclude = ["BUILD.bazel", "REPO.bazel"]),
+)
+""")
+
+gradle_wrapper = repository_rule(
+    implementation = _gradle_wrapper_impl,
+    doc = "The Gradle wrapper archive the flutter tool caches as bin/cache/artifacts/gradle_wrapper.",
+)
+
 def _flutter_sdk_cache_impl(mctx):
     material_fonts(name = "material_fonts")
+    gradle_wrapper(name = "gradle_wrapper")
     root = mctx.modules[0] if mctx.modules else None
     if root != None and root.is_root:
         return mctx.extension_metadata(
-            root_module_direct_deps = ["material_fonts"],
+            root_module_direct_deps = [
+                "gradle_wrapper",
+                "material_fonts",
+            ],
             root_module_direct_dev_deps = [],
             reproducible = True,
         )
@@ -75,5 +117,5 @@ def _flutter_sdk_cache_impl(mctx):
 
 flutter_sdk_cache = module_extension(
     implementation = _flutter_sdk_cache_impl,
-    doc = "The Flutter SDK's cache artifacts the framework's tests read (@material_fonts).",
+    doc = "The Flutter SDK's cache artifacts the framework's and the tool's tests read (@material_fonts, @gradle_wrapper).",
 )
