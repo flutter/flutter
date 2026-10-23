@@ -249,7 +249,7 @@ def _pub_package_config_impl(ctx):
         args.add("--package", "%s=%s=%s" % (name, pubspec.path, location(pubspec)))
         inputs.append(pubspec)
         sources.append(target[DefaultInfo].files)
-    args.add("--output-location", location(ctx.outputs.out))
+    args.add("--output-location", ctx.attr.location or location(ctx.outputs.out))
     ctx.actions.run(
         executable = ctx.executable._python,
         arguments = [args],
@@ -290,6 +290,11 @@ _pub_package_config = rule(
             doc = "Whose paths the root URIs are relative to: an action's execroot (the compile) " +
                   "or a test's runfiles tree (the run).",
         ),
+        "location": attr.string(
+            doc = "Where in the layout the configuration is read from, when not at its own output " +
+                  "path: a test's runfiles place it at the package's .dart_tool/package_config.json " +
+                  "(dart_test), and the root URIs are relative to that.",
+        ),
         "_script": attr.label(
             default = "//engine/src/flutter/build/bazel/dart:package_config.py",
             allow_single_file = True,
@@ -304,7 +309,7 @@ _pub_package_config = rule(
     },
 )
 
-def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without = [], layout = EXECROOT, **kwargs):
+def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without = [], layout = EXECROOT, location = None, **kwargs):
     """A package_config.json over the closure of some packages' dependencies.
 
     Args:
@@ -319,6 +324,9 @@ def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without 
       without: packages of the closure left out, with what only they reach
         (sky_engine: dart:ui is the platform's; nothing imports it).
       layout: `execroot` (a compile's) or `runfiles` (a test's run).
+      location: the path in the layout the configuration is read from, when
+        a rule places it elsewhere than its output (dart_test: the package's
+        `.dart_tool/package_config.json`).
       **kwargs: the rule's other attributes (visibility, tags).
 
     Also declares `<name>_sources`, a filegroup of the packages' files.
@@ -342,6 +350,7 @@ def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without 
         hosted = hosted,
         packages = packages,
         layout = layout,
+        location = location,
         **kwargs
     )
 
