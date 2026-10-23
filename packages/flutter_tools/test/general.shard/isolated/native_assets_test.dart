@@ -781,8 +781,17 @@ environment:
           packageConfig: packageConfig,
         );
 
-        final (:Uri? nativeAssetsManifest, flutterHookResult: _) =
-            await testCompilerBuildNativeAssets(buildInfo);
+        final (
+          :Uri? nativeAssetsManifest,
+          flutterHookResult: _,
+        ) = await testCompilerBuildNativeAssets(
+          buildInfo,
+          toolContext: FakeToolContext(
+            fs: hostFileSystem,
+            logger: logger,
+            processManager: processManager,
+          ),
+        );
         expect(nativeAssetsManifest, isNotNull);
         expect(hostFileSystem.file(nativeAssetsManifest).existsSync(), isTrue);
       },
@@ -828,8 +837,17 @@ environment:
           packageConfig: packageConfig,
         );
 
-        final (:Uri? nativeAssetsManifest, flutterHookResult: _) =
-            await testCompilerBuildNativeAssets(buildInfo);
+        final (
+          :Uri? nativeAssetsManifest,
+          flutterHookResult: _,
+        ) = await testCompilerBuildNativeAssets(
+          buildInfo,
+          toolContext: FakeToolContext(
+            fs: hostFileSystem,
+            logger: logger,
+            processManager: processManager,
+          ),
+        );
         expect(nativeAssetsManifest, isNull);
         expect(
           logger.warningText,

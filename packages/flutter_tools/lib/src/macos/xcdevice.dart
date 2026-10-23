@@ -663,6 +663,7 @@ class XCDevice {
             processUtils: processUtils,
             xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
             deviceVersion: Version.parse(sdkVersionString),
+            toolContext: _toolContext,
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,

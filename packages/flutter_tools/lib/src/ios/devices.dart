@@ -837,6 +837,7 @@ class IOSDevice extends Device {
           project: FlutterProject.current(),
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
+          toolContext: toolContext,
         );
       }
     }
@@ -1211,6 +1212,7 @@ class IOSDevice extends Device {
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: toolContext,
       );
 
       final IosProject project = package.project;

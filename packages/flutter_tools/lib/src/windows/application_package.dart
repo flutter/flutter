@@ -5,18 +5,23 @@
 import 'package:archive/archive.dart';
 
 import '../application_package.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
+import '../context/tool_context.dart';
 import '../globals.dart' as globals;
 
 abstract class WindowsApp extends ApplicationPackage {
   WindowsApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [WindowsApp] from a windows sub project.
-  factory WindowsApp.fromWindowsProject(WindowsProject project) {
-    return BuildableWindowsApp(project: project);
+  factory WindowsApp.fromWindowsProject(
+    WindowsProject project, {
+    required ToolContext toolContext,
+  }) {
+    return BuildableWindowsApp(project: project, toolContext: toolContext);
   }
 
   /// Creates a new [WindowsApp] from an existing executable or a zip archive.
@@ -95,21 +100,18 @@ class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackag
 }
 
 class BuildableWindowsApp extends WindowsApp {
-  BuildableWindowsApp({required this.project})
+  BuildableWindowsApp({required this.project, required this._toolContext})
     : super(projectBundleId: project.parent.manifest.appName);
 
   final WindowsProject project;
+  final ToolContext _toolContext;
 
   @override
   String executable(BuildMode buildMode, TargetPlatform targetPlatform, [String? flavor]) {
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
     final String? binaryName = getCmakeExecutableName(project);
-    return globals.fs.path.join(
-      getWindowsBuildDirectory(
-        targetPlatform,
-        config: globals.config,
-        fileSystem: globals.fs,
-        flavor: flavor,
-      ),
+    return fs.path.join(
+      getWindowsBuildDirectory(targetPlatform, config: config, fileSystem: fs, flavor: flavor),
       'runner',
       buildMode.uppercaseName,
       '$binaryName.exe',

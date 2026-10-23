@@ -21,6 +21,7 @@ import 'base/version.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 import 'features.dart';
@@ -242,10 +243,11 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
+    final FileSystem fileSystem = parent.directory.fileSystem;
     return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
       this,
-      buildDirectory: globals.fs.directory(
-        darwinPlatform.buildDirectory(config: globals.config, fileSystem: globals.fs),
+      buildDirectory: fileSystem.directory(
+        fileSystem.path.join(parent.buildDirectory.basename, darwinPlatform.name),
       ),
     );
   }
@@ -962,13 +964,13 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return productName ?? XcodeBasedProject._defaultHostAppName;
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({required ToolContext toolContext}) async {
     await _regenerateModuleFromTemplateIfNeeded();
     await _updateLLDBIfNeeded();
     if (!_flutterLibRoot.existsSync()) {
       return;
     }
-    await _updateGeneratedXcodeConfigIfNeeded();
+    await _updateGeneratedXcodeConfigIfNeeded(toolContext: toolContext);
   }
 
   /// Check if one the [XcodeProjectInfo.targets] of the project is
@@ -1058,12 +1060,13 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return false;
   }
 
-  Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+  Future<void> _updateGeneratedXcodeConfigIfNeeded({required ToolContext toolContext}) async {
+    if (toolContext.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
         targetOverride: bundle.defaultMainPath(parent.directory.fileSystem),
+        toolContext: toolContext,
       );
     }
   }
@@ -1260,17 +1263,18 @@ class MacOSProject extends XcodeBasedProject {
   /// scheme's target.
   File get nameFile => ephemeralDirectory.childFile('.app_filename');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({required ToolContext toolContext}) async {
     // TODO(stuartmorgan): Add create-from-template logic here.
-    await _updateGeneratedXcodeConfigIfNeeded();
+    await _updateGeneratedXcodeConfigIfNeeded(toolContext: toolContext);
   }
 
-  Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+  Future<void> _updateGeneratedXcodeConfigIfNeeded({required ToolContext toolContext}) async {
+    if (toolContext.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
         useMacOSConfig: true,
+        toolContext: toolContext,
       );
     }
   }
