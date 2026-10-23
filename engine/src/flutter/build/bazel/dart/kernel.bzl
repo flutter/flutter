@@ -83,11 +83,20 @@ dart_package_root = rule(
     },
 )
 
-def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [], product = False, roots = ["."], extra_inputs = []):
+# The frontend server's targets and the platform kernel each reads from
+# --sdk-root: Flutter's (the engine's flutter_patched_sdk) and the VM's (the
+# Dart SDK's lib/_internal).
+PLATFORM_DILLS = {
+    "flutter": "platform_strong.dill",
+    "vm": "vm_platform_strong.dill",
+}
+
+def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [], product = False, roots = ["."], extra_inputs = [], target = "flutter"):
     """The frontend server's compile of `main` to the kernel `out`, as dart_kernel runs it.
 
     For rules with dart_kernel's tool attributes (KERNEL_TOOL_ATTRS): the
-    engine's own Dart tests, and flutter_test's bootstrap of a framework test.
+    engine's own Dart tests, flutter_test's bootstrap of a framework test,
+    dart_test's of a VM test.
 
     Args:
       ctx: the rule context.
@@ -97,15 +106,19 @@ def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [],
         package files beside them).
       package_config: the package configuration File (--packages), read
         under the virtual scheme.
-      platform: the files of the platform kernel's directory, platform_strong.dill among them.
+      platform: the files of the platform kernel's directory, the target's
+        dill (PLATFORM_DILLS) among them.
       args: further frontend server arguments.
       product: -Ddart.vm.product=true.
       roots: the filesystem roots (--filesystem-root), the execution root by default.
       extra_inputs: further input Files.
+      target: the frontend server's --target: `flutter` or `vm`.
     """
-    dill = [f for f in platform if f.basename == "platform_strong.dill"]
+    if target not in PLATFORM_DILLS:
+        fail("%s: target must be one of %s, not %s" % (ctx.label, PLATFORM_DILLS.keys(), target))
+    dill = [f for f in platform if f.basename == PLATFORM_DILLS[target]]
     if len(dill) != 1:
-        fail("%s: platform must provide platform_strong.dill" % ctx.label)
+        fail("%s: platform must provide %s" % (ctx.label, PLATFORM_DILLS[target]))
     arguments = ctx.actions.args()
     arguments.add(ctx.file._frontend_server)
     if product:
@@ -116,7 +129,11 @@ def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [],
     # packages' roots resolve against every filesystem root.
     arguments.add(package_config, format = "--packages=" + SOURCE_URI_SCHEME + ":///%s")
     arguments.add("--sdk-root", dill[0].dirname)
-    arguments.add("--target=flutter")
+    arguments.add("--target=" + target)
+    if PLATFORM_DILLS[target] != "platform_strong.dill":
+        # The frontend server reads <sdk-root>/platform_strong.dill unless
+        # told the platform kernel's name (resolved under --sdk-root).
+        arguments.add("--platform", PLATFORM_DILLS[target])
     for root in roots:
         arguments.add("--filesystem-root", root)
     arguments.add("--filesystem-scheme", SOURCE_URI_SCHEME)

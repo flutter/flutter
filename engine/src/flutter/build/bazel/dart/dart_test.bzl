@@ -1,0 +1,255 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""A pure-Dart package's test, compiled by Bazel and run by the stock `dart test` (dart_test).
+
+`dart test` compiles each test file at run time, in the VM. package:test's
+runner has a mode that takes the compile as done -- `--precompiled=<dir>`:
+for the test file `<dir>/<path>` it loads the kernel
+`<dir>/<path>.vm_test.vm.app.dill`, compiled from a bootstrap that hands
+the test's main to test_core's `internalBootstrapVmTest`, with the package
+configuration `<dir>/.dart_tool/package_config.json` (test_core's
+vm/platform.dart). dart_test writes that bootstrap, compiles it with the
+frontend server against the Dart SDK's VM platform kernel (kernel.bzl's
+compile_to_kernel, `--target=vm`) and a package configuration over the
+package's dependency closure (pub.bzl), and runs the stock runner on it
+-- its reporters, `--name`, `--plain-name`, tags, shards.
+
+The runner is package:test's own `bin/test.dart`, compiled once to a
+kernel by dart_test_runner (//engine/src/flutter/build/bazel/dart:test_runner)
+and run as `dart --packages=<its configuration> <runner.dill>
+--precompiled=<the runfiles tree> <path>`, not the `dart test` command:
+that command is dartdev's, which wants a pubspec.yaml in the working
+directory and resolves it with pub -- rewriting .dart_tool/package_config.json
+-- before it runs the runner. So nothing is compiled at test time, the
+runner included.
+
+The test's package configuration (pub_package_config, runfiles layout)
+sits at the runfiles tree's `.dart_tool/package_config.json`, where
+precompiled mode reads it for the test's isolate. One dart_test per test
+file (dart_tests() declares them over a glob); the test runs from the
+runfiles tree's root, so a file the test reads is at its repository path.
+"""
+
+load(
+    "//engine/src/flutter/build/bazel/dart:kernel.bzl",
+    "KERNEL_TOOL_ATTRS",
+    "SOURCE_URI_SCHEME",
+    "compile_to_kernel",
+)
+load("//engine/src/flutter/build/bazel/dart:pub.bzl", "PubPackageConfigInfo")
+
+# Where test_core's precompiled mode looks for the package configuration.
+_PACKAGE_CONFIG = ".dart_tool/package_config.json"
+
+DartTestRunnerInfo = provider(
+    doc = "package:test's runner, compiled to a kernel.",
+    fields = {
+        "kernel": "File: the runner's kernel.",
+        "package_config": "File: the runner's package configuration, runfiles layout.",
+    },
+)
+
+def _dart_test_runner_impl(ctx):
+    mains = [f for f in ctx.files.srcs if f.short_path.endswith("/" + ctx.attr.main)]
+    if len(mains) != 1:
+        fail("%s: srcs should hold one %s, has %d" % (ctx.label, ctx.attr.main, len(mains)))
+    kernel = ctx.actions.declare_file(ctx.label.name + ".dill")
+    compile_to_kernel(
+        ctx,
+        main = mains[0],
+        out = kernel,
+        srcs = depset(ctx.files.srcs, transitive = [ctx.attr.package_config[PubPackageConfigInfo].sources]),
+        package_config = ctx.file.package_config,
+        platform = ctx.files._vm_platform,
+        target = "vm",
+    )
+    return [
+        DefaultInfo(files = depset([kernel])),
+        DartTestRunnerInfo(kernel = kernel, package_config = ctx.file.runtime_package_config),
+    ]
+
+dart_test_runner = rule(
+    implementation = _dart_test_runner_impl,
+    doc = "package:test's runner (bin/test.dart) compiled to a kernel, for dart_test to run tests with.",
+    attrs = {
+        "srcs": attr.label_list(
+            allow_files = True,
+            mandatory = True,
+            doc = "package:test's files (@pub//test:sources).",
+        ),
+        "main": attr.string(
+            default = "bin/test.dart",
+            doc = "The runner's entry point among srcs, by its path under the package.",
+        ),
+        "package_config": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            providers = [PubPackageConfigInfo],
+            doc = "The package configuration for the compile (pub_package_config over `test`, execroot layout).",
+        ),
+        "runtime_package_config": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            providers = [PubPackageConfigInfo],
+            doc = "The same for the run (runfiles layout).",
+        ),
+        "_vm_platform": attr.label(
+            default = "@dart_sdk_linux_x64//:vm_platform",
+            allow_files = True,
+        ),
+    } | KERNEL_TOOL_ATTRS,
+)
+
+def _dart_test_impl(ctx):
+    test = ctx.file.test
+    if test.dirname != ctx.label.package and not test.dirname.startswith(ctx.label.package + "/"):
+        fail("%s: the test %s must be in this package: the kernel is written beside it" % (ctx.label, test.short_path))
+
+    # test_core's names: `<test>.vm_test.dart` beside the test, its kernel
+    # `<test>.vm_test.vm.app.dill` (the `.dart` of the test's name kept).
+    relative = test.short_path[len(ctx.label.package) + 1:] if ctx.label.package else test.short_path
+    bootstrap = ctx.actions.declare_file(relative + ".vm_test.dart")
+    ctx.actions.write(bootstrap, "\n".join([
+        "// Generated by dart_test (engine/src/flutter/build/bazel/dart/dart_test.bzl):",
+        "// %s under `dart test --precompiled`." % test.short_path,
+        "import 'dart:isolate';",
+        "",
+        "import 'package:test_core/src/bootstrap/vm.dart';",
+        "",
+        "import '%s:///%s' as test;" % (SOURCE_URI_SCHEME, test.path),
+        "",
+        "void main(List<String> _, SendPort sendPort) {",
+        "  internalBootstrapVmTest(() => test.main, sendPort);",
+        "}",
+        "",
+    ]))
+    kernel = ctx.actions.declare_file(relative + ".vm_test.vm.app.dill")
+    compile_to_kernel(
+        ctx,
+        main = bootstrap,
+        out = kernel,
+        srcs = depset(
+            [test] + ctx.files.srcs,
+            transitive = [ctx.attr.package_config[PubPackageConfigInfo].sources] +
+                         [dep[DefaultInfo].files for dep in ctx.attr.deps],
+        ),
+        package_config = ctx.file.package_config,
+        platform = ctx.files._vm_platform,
+        args = ctx.attr.compile_args,
+        target = "vm",
+    )
+
+    dart = [f for f in ctx.files._sdk if f.short_path.endswith("/bin/dart")]
+    if len(dart) != 1:
+        fail("%s: the SDK should hold one bin/dart" % ctx.label)
+    runner = ctx.attr._runner[DartTestRunnerInfo]
+    launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
+    ctx.actions.write(
+        output = launcher,
+        content = """#!/bin/bash
+set -euo pipefail
+exec "{dart}" --packages="{runner_config}" "{runner}" --precompiled="$PWD" {args} "{test}" "$@"
+""".format(
+            dart = dart[0].short_path,
+            runner_config = runner.package_config.short_path,
+            runner = runner.kernel.short_path,
+            args = " ".join(ctx.attr.runner_args),
+            test = test.short_path,
+        ),
+        is_executable = True,
+    )
+    runtime = ctx.attr.runtime_package_config
+    runfiles = ctx.runfiles(
+        files = [kernel, test, runner.kernel, runner.package_config] + ctx.files.data + ctx.files._sdk,
+        symlinks = {_PACKAGE_CONFIG: ctx.file.runtime_package_config},
+        # The test's packages, for what it reads of them at run time.
+        transitive_files = runtime[PubPackageConfigInfo].sources,
+    )
+    for dep in ctx.attr.data:
+        runfiles = runfiles.merge(dep[DefaultInfo].default_runfiles)
+    return [DefaultInfo(executable = launcher, runfiles = runfiles)]
+
+dart_test = rule(
+    implementation = _dart_test_impl,
+    test = True,
+    doc = "A test file of a pure-Dart package, compiled by the frontend server and run by `dart test --precompiled`.",
+    attrs = {
+        "test": attr.label(
+            allow_single_file = [".dart"],
+            mandatory = True,
+            doc = "The test file, in this package.",
+        ),
+        "srcs": attr.label_list(
+            allow_files = True,
+            doc = "Other files of the test directory it imports (helpers beside it).",
+        ),
+        "deps": attr.label_list(
+            allow_files = True,
+            doc = "Other files the compile may read besides the configuration's packages.",
+        ),
+        "data": attr.label_list(
+            allow_files = True,
+            doc = "What the test reads at run time, at its repository path under the runfiles root.",
+        ),
+        "compile_args": attr.string_list(
+            doc = "Further frontend server arguments for the compile.",
+        ),
+        "runner_args": attr.string_list(
+            doc = "Further runner arguments (`--reporter=expanded`), before the test's path; " +
+                  "the test's own `args` follow it.",
+        ),
+        "package_config": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            providers = [PubPackageConfigInfo],
+            doc = "The package configuration for the compile (pub_package_config, execroot layout).",
+        ),
+        "runtime_package_config": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            providers = [PubPackageConfigInfo],
+            doc = "The package configuration for the run (pub_package_config, runfiles layout): " +
+                  "the test's packages and package:test's.",
+        ),
+        "_vm_platform": attr.label(
+            default = "@dart_sdk_linux_x64//:vm_platform",
+            allow_files = True,
+        ),
+        # The command-line SDK: `dart` with the snapshots and libraries it loads.
+        "_sdk": attr.label(
+            default = "@dart_sdk_linux_x64//:dart",
+            allow_files = True,
+        ),
+        "_runner": attr.label(
+            default = "//engine/src/flutter/build/bazel/dart:test_runner",
+            providers = [DartTestRunnerInfo],
+        ),
+    } | KERNEL_TOOL_ATTRS,
+)
+
+def dart_tests(name, tests, size = "medium", tags = [], network = False, **kwargs):
+    """One dart_test per test file, and a test_suite of them.
+
+    Args:
+      name: the suite's name.
+      tests: the test files (a glob of `*_test.dart`).
+      size: each test's size.
+      tags: each test's tags.
+      network: whether the tests may reach the network; `block-network` otherwise.
+      **kwargs: dart_test's attributes, the same for every file.
+    """
+    test_tags = list(tags) + ([] if network else ["block-network"])
+    targets = []
+    for test in tests:
+        test_name = test.removesuffix(".dart").replace("/", "_")
+        dart_test(
+            name = test_name,
+            test = test,
+            size = size,
+            tags = test_tags,
+            **kwargs
+        )
+        targets.append(":" + test_name)
+    native.test_suite(name = name, tests = targets, tags = tags)
