@@ -7,6 +7,7 @@ import 'localizations_utils.dart';
 // See http://en.wikipedia.org/wiki/Right-to-left
 const List<String> _rtlLanguages = <String>[
   'ar', // Arabic
+  'ckb', // Central Kurdish
   'fa', // Farsi
   'he', // Hebrew
   'ps', // Pashto

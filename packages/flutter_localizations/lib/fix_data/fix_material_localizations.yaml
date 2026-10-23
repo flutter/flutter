@@ -177,6 +177,17 @@ transforms:
     date: 2026-09-17
     element:
       uris: ['flutter_localizations.dart']
+      class: 'MaterialLocalizationCkb'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['package:material_ui/material_ui.dart']
+          class: 'MaterialLocalizationCkb'
+
+  - title: "Migrate to 'package:material_ui/material_ui.dart'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
       class: 'MaterialLocalizationCs'
     changes:
       - kind: 'replacedBy'

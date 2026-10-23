@@ -177,6 +177,17 @@ transforms:
     date: 2026-09-17
     element:
       uris: ['flutter_localizations.dart']
+      class: 'CupertinoLocalizationCkb'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['package:cupertino_ui/cupertino_ui.dart']
+          class: 'CupertinoLocalizationCkb'
+
+  - title: "Migrate to 'package:cupertino_ui/cupertino_ui.dart'"
+    date: 2026-09-17
+    element:
+      uris: ['flutter_localizations.dart']
       class: 'CupertinoLocalizationCs'
     changes:
       - kind: 'replacedBy'

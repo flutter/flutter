@@ -1,0 +1,18 @@
+{
+  "reorderItemToStart": "گواستنەوە بۆ سەرەتا",
+  "reorderItemToEnd": "گواستنەوە بۆ کۆتایی",
+  "reorderItemUp": "گواستنەوە بۆ سەرەوە",
+  "reorderItemDown": "گواستنەوە بۆ خوارەوە",
+  "reorderItemLeft": "گواستنەوە بۆ چەپ",
+  "reorderItemRight": "گواستنەوە بۆ ڕاست",
+  "searchResultsFound": "ئەنجامی گەڕان دۆزرایەوە",
+  "noResultsFound": "هیچ ئەنجامێک نەدۆزرایەوە",
+  "copyButtonLabel": "لەبەرگرتنەوە",
+  "cutButtonLabel": "بڕین",
+  "lookUpButtonLabel": "گەڕان",
+  "searchWebButtonLabel": "گەڕان لە وێب",
+  "shareButtonLabel": "هاوبەشکردن",
+  "pasteButtonLabel": "لکاندن",
+  "selectAllButtonLabel": "هەموو هەڵبژێرە",
+  "radioButtonUnselectedLabel": "هەڵنەبژێردراو"
+}
