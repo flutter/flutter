@@ -27,13 +27,16 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_plugins.dart' show PubspecCache;
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/package_graph.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/web_options.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -153,6 +156,81 @@ void main() {
         Pub: () => lockCheckingPub,
       },
     );
+
+    group('--no-pub', () {
+      late FakeRegeneratingFlutterProject project;
+
+      setUp(() {
+        project = FakeRegeneratingFlutterProject(fileSystem.currentDirectory);
+      });
+
+      void writePluginsDependenciesFile({required bool hasDevDependency}) {
+        project.flutterPluginsDependenciesFile.writeAsStringSync('''
+{
+  "plugins": {
+    "android": [
+      {"name": "integration_test", "dev_dependency": $hasDevDependency}
+    ]
+  }
+}
+''');
+      }
+
+      Future<void> runCommand(List<String> args) async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          DummyRegeneratingFlutterCommand(),
+        );
+        await runner.run(<String>['dummyregen', '--no-pub', ...args]);
+      }
+
+      testUsingContext(
+        'regenerates platform tooling for release builds with dev dependency plugins',
+        () async {
+          writePluginsDependenciesFile(hasDevDependency: true);
+          await runCommand(<String>['--release']);
+
+          expect(project.regeneratedWithReleaseMode, <bool>[true]);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Cache: () => lockTrackingCache,
+          FlutterProjectFactory: () => FakeFlutterProjectFactory(project),
+        },
+      );
+
+      testUsingContext(
+        'does not regenerate platform tooling for release builds without dev dependency plugins',
+        () async {
+          writePluginsDependenciesFile(hasDevDependency: false);
+          await runCommand(<String>['--release']);
+
+          expect(project.regeneratedWithReleaseMode, isEmpty);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Cache: () => lockTrackingCache,
+          FlutterProjectFactory: () => FakeFlutterProjectFactory(project),
+        },
+      );
+
+      testUsingContext(
+        'does not regenerate platform tooling for debug builds',
+        () async {
+          writePluginsDependenciesFile(hasDevDependency: true);
+          await runCommand(<String>['--debug']);
+
+          expect(project.regeneratedWithReleaseMode, isEmpty);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Cache: () => lockTrackingCache,
+          FlutterProjectFactory: () => FakeFlutterProjectFactory(project),
+        },
+      );
+    });
 
     testUsingContext(
       "throws toolExit if flutter_tools source dir doesn't exist",
@@ -2414,6 +2492,59 @@ class DummyFlutterCommandWithPub extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
+  }
+}
+
+class DummyRegeneratingFlutterCommand extends FlutterCommand {
+  DummyRegeneratingFlutterCommand() {
+    usesPubOption();
+    addBuildModeFlags(verboseHelp: false);
+  }
+
+  @override
+  String get description => 'does nothing, regenerates platform tooling';
+
+  @override
+  String get name => 'dummyregen';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
+
+class FakeFlutterProjectFactory extends Fake implements FlutterProjectFactory {
+  FakeFlutterProjectFactory(this.project);
+
+  final FlutterProject project;
+
+  @override
+  FlutterProject fromDirectory(Directory directory) => project;
+}
+
+class FakeRegeneratingFlutterProject extends Fake implements FlutterProject {
+  FakeRegeneratingFlutterProject(this.directory);
+
+  @override
+  final Directory directory;
+
+  final regeneratedWithReleaseMode = <bool>[];
+
+  @override
+  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+
+  @override
+  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {}
+
+  @override
+  Future<void> regeneratePlatformSpecificTooling({
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    required bool releaseMode,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
+  }) async {
+    regeneratedWithReleaseMode.add(releaseMode);
   }
 }
 
