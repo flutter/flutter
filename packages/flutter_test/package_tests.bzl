@@ -58,6 +58,7 @@ def flutter_package_tests(
         dev_roots = None,
         without = [],
         imports = None,
+        compile_args = [],
         assets = [],
         shaders = FRAMEWORK_SHADERS,
         cache = SDK_CACHE,
@@ -90,6 +91,9 @@ def flutter_package_tests(
         default; a package with a library of its own adds it
         (`FRAMEWORK_IMPORTS + ["package:<package>/<package>.dart"]`), an
         application's tests import its programs file by file.
+      compile_args: further frontend server arguments for the prelude and
+        the tests alike (`-Ddart.vm.product=true` for a tree run with
+        `flutter test --dart-define`; a later define overrides the default).
       assets: the package's own asset files, as its pubspec declares them
         (labels in the package's BUILD file; keyed by their paths under
         the package's directory).
@@ -98,7 +102,7 @@ def flutter_package_tests(
       test_configs: the tree's `flutter_test_config.dart` and `pubspec.yaml`
         files; a glob of both by default (flutter_tests' test_configs).
       **kwargs: flutter_tests' other arguments (flaky, size, tags, network,
-        compile_args, vm_service).
+        vm_service).
     """
     package_label = "//" + (directory if directory != None else "packages/" + package)
     workspace_packages = {
@@ -134,6 +138,7 @@ def flutter_package_tests(
     flutter_test_prelude(
         name = name + "_prelude",
         imports = FRAMEWORK_IMPORTS if imports == None else imports,
+        compile_args = compile_args,
         package_config = ":" + name + "_package_config",
     )
     if test_configs == None:
@@ -167,5 +172,6 @@ def flutter_package_tests(
         prelude = ":" + name + "_prelude",
         runtime_package_config = ":" + name + "_runtime_package_config",
         test_configs = test_configs,
+        compile_args = compile_args,
         **kwargs
     )
