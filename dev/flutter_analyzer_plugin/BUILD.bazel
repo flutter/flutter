@@ -1,0 +1,36 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# flutter_analyzer_plugin's sources and its tests under Bazel: each test compiled by the
+# frontend server for the VM and run by package:test's precompiled runner
+# from this directory, as `dart test` runs them
+# (engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+#
+#   bazel test //dev/flutter_analyzer_plugin:tests
+
+load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob(
+        [
+            "bin/**",
+            "lib/**",
+        ],
+        allow_empty = True,
+    ) + ["pubspec.yaml"],
+)
+
+dart_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["test/**/*.dart"],
+        allow_empty = True,
+        exclude = ["test/**/*_test.dart"],
+    ),
+    package = "flutter_analyzer_plugin",
+    tests = glob(["test/**/*_test.dart"]),
+)
