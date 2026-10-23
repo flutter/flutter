@@ -18,6 +18,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
@@ -149,7 +150,7 @@ void main() {
     expect(devices, hasLength(1));
   });
 
-  testWithoutContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
+  testUsingContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.directory('linux').createSync();
@@ -169,7 +170,7 @@ void main() {
     );
   });
 
-  testWithoutContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
+  testUsingContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
@@ -236,6 +237,7 @@ void main() {
               'Ninja',
               '-DCMAKE_BUILD_TYPE=Debug',
               '-DFLUTTER_TARGET_PLATFORM=linux-x64',
+              '-DLINUX_GTK_VARIANT=gtk3',
               '/linux',
             ],
             workingDirectory: '/build/linux/x64/debug',
@@ -290,11 +292,11 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeLinuxApp extends Fake implements LinuxApp {
   @override
-  String executable(BuildMode buildMode, [String? flavor]) => switch (buildMode) {
+  String executable(BuildInfo buildInfo) => switch (buildInfo.mode) {
     BuildMode.debug => 'debug/executable',
     BuildMode.profile => 'profile/executable',
     BuildMode.release => 'release/executable',
-    _ => throw StateError('Invalid mode: $buildMode'),
+    _ => throw StateError('Invalid mode: ${buildInfo.mode}'),
   };
 }
 

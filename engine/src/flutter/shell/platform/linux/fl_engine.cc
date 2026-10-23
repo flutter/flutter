@@ -466,7 +466,10 @@ static bool fl_engine_gl_external_texture_frame_callback(
   }
 
   if (!result) {
-    g_warning("%s", error->message);
+    g_warning("External texture callback failed for texture %" G_GINT64_FORMAT
+              ": %s",
+              texture_id,
+              error != nullptr ? error->message : "no error detail supplied");
     return false;
   }
 

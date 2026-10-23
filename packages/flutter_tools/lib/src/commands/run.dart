@@ -359,6 +359,19 @@ class RunCommand extends RunCommandBase {
       DebuggingOptionDescriptors.reportReady,
       _benchmark,
     ], verboseHelp: verboseHelp);
+    argParser.addOption(
+      'linux-dir',
+      help:
+          'Override the Linux runner directory (relative to the project root). '
+          'Use this to run from an alternate Linux runner such as linux-gtk4.',
+    );
+    argParser.addOption(
+      'linux-gtk',
+      allowed: <String>['gtk3', 'gtk4'],
+      help:
+          'Select the GTK variant for unified Linux runners. '
+          'GTK4 runs use build/linux-gtk4 to avoid contaminating GTK3 builds.',
+    );
   }
 
   static const _awaitFirstFrameWhenTracing = FlagOptionDescriptor(

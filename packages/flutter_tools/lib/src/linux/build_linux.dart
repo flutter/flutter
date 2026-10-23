@@ -76,6 +76,8 @@ Future<void> buildLinux(
   // step.
   final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
   environmentConfig['FLUTTER_TARGET'] = target;
+  final String linuxGtkVersion = buildInfo.linuxGtkVersion ?? 'gtk3';
+  environmentConfig['FLUTTER_LINUX_GTK'] = linuxGtkVersion;
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
     final String targetOutPath = localEngineInfo.targetOutPath;
@@ -92,7 +94,7 @@ Future<void> buildLinux(
   final String buildModeName = buildInfo.mode.cliName;
   final Directory platformBuildDirectory = fs
       .directory(linuxProject.parent.directory.path)
-      .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor));
+      .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor, linuxGtkVersion));
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(
@@ -102,6 +104,7 @@ Future<void> buildLinux(
       needCrossBuild,
       targetPlatform,
       targetSysroot,
+      linuxGtkVersion,
       analytics: analytics,
       toolContext: toolContext,
     );
@@ -140,7 +143,11 @@ Future<void> buildLinux(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: fs.directory(
-        fs.path.join(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor), 'release', 'bundle'),
+        fs.path.join(
+          getLinuxBuildDirectory(targetPlatform, buildInfo.flavor, linuxGtkVersion),
+          'release',
+          'bundle',
+        ),
       ),
       precompilerTrace: precompilerTrace,
       type: 'linux',
@@ -168,7 +175,8 @@ Future<void> _runCmake(
   Directory buildDir,
   bool needCrossBuild,
   TargetPlatform targetPlatform,
-  String targetSysroot, {
+  String targetSysroot,
+  String? linuxGtkVersion, {
   required Analytics analytics,
   required ToolContext toolContext,
 }) async {
@@ -205,6 +213,7 @@ Future<void> _runCmake(
       // Support cross-building for riscv64 targets on x64 hosts.
       if (needCrossBuildOptionsForRiscv64) '-DCMAKE_C_COMPILER_TARGET=riscv64-linux-gnu',
       if (needCrossBuildOptionsForRiscv64) '-DCMAKE_CXX_COMPILER_TARGET=riscv64-linux-gnu',
+      if (linuxGtkVersion != null) '-DLINUX_GTK_VARIANT=$linuxGtkVersion',
       sourceDir.path,
     ],
     workingDirectory: buildDir.path,
