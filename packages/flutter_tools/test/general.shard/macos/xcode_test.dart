@@ -895,6 +895,188 @@ void main() {
           expect(logger.traceText, contains('xcdevice observe --usb exited with code 0'));
           expect(logger.traceText, contains('xcdevice observe --wifi exited with code 0'));
         });
+
+        testWithoutContext(
+          'can restart observing before previous observe processes finish exiting',
+          () async {
+            final firstObserveCompleter = Completer<void>();
+            final secondObserveCompleter = Completer<void>();
+            addTearDown(() {
+              if (!firstObserveCompleter.isCompleted) {
+                firstObserveCompleter.complete();
+              }
+              if (!secondObserveCompleter.isCompleted) {
+                secondObserveCompleter.complete();
+              }
+            });
+            final firstWifiEventReceived = Completer<XCDeviceEventNotification>();
+            fakeProcessManager.addCommands(<FakeCommand>[
+              FakeCommand(
+                command: const <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'observe',
+                  '--usb',
+                ],
+                completer: firstObserveCompleter,
+              ),
+              FakeCommand(
+                command: const <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'observe',
+                  '--wifi',
+                ],
+                stdout: 'Attach: 00008027-00192736010F802E\n',
+                completer: firstObserveCompleter,
+              ),
+              FakeCommand(
+                command: const <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'observe',
+                  '--usb',
+                ],
+                stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n',
+                completer: secondObserveCompleter,
+              ),
+              FakeCommand(
+                command: const <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'observe',
+                  '--wifi',
+                ],
+                completer: secondObserveCompleter,
+              ),
+            ]);
+
+            final StreamSubscription<XCDeviceEventNotification> firstSubscription = xcdevice
+                .observedDeviceEvents()!
+                .listen(firstWifiEventReceived.complete);
+            // Wait until both USB and Wi-Fi observe processes are fully started and emitting.
+            final XCDeviceEventNotification firstEvent = await firstWifiEventReceived.future;
+            expect(firstEvent.deviceIdentifier, '00008027-00192736010F802E');
+            expect(firstEvent.eventInterface, XCDeviceEventInterface.wifi);
+
+            // Cancel first subscription while the first processes have only received
+            // SIGHUP and have not yet exited, then immediately subscribe again.
+            await firstSubscription.cancel();
+
+            final attachCompleter = Completer<XCDeviceEventNotification>();
+            var secondSubscriptionDone = false;
+            final StreamSubscription<XCDeviceEventNotification> secondSubscription = xcdevice
+                .observedDeviceEvents()!
+                .listen(
+                  attachCompleter.complete,
+                  onDone: () {
+                    secondSubscriptionDone = true;
+                  },
+                );
+
+            final XCDeviceEventNotification notification = await attachCompleter.future;
+            expect(notification.deviceIdentifier, 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
+            expect(notification.eventType, XCDeviceEvent.attach);
+            expect(notification.eventInterface, XCDeviceEventInterface.usb);
+
+            // Completing the first session's processes must not close the active second session.
+            firstObserveCompleter.complete();
+            await pumpEventQueue();
+            expect(secondSubscriptionDone, isFalse);
+
+            secondObserveCompleter.complete();
+            await secondSubscription.cancel();
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          },
+        );
+
+        testWithoutContext(
+          'can cancel and immediately re-listen while initial observe startup is still in flight',
+          () async {
+            final firstObserveCompleter = Completer<void>();
+            addTearDown(() {
+              if (!firstObserveCompleter.isCompleted) {
+                firstObserveCompleter.complete();
+              }
+            });
+            fakeProcessManager.addCommands(<FakeCommand>[
+              FakeCommand(
+                command: const <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'observe',
+                  '--usb',
+                ],
+                completer: firstObserveCompleter,
+              ),
+              const FakeCommand(
+                command: <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'observe',
+                  '--usb',
+                ],
+                stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n',
+              ),
+              const FakeCommand(
+                command: <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'observe',
+                  '--wifi',
+                ],
+              ),
+            ]);
+
+            final StreamSubscription<XCDeviceEventNotification> firstSubscription = xcdevice
+                .observedDeviceEvents()!
+                .listen((_) {});
+            // Cancel and immediately re-subscribe synchronously before the first --usb start completes.
+            unawaited(firstSubscription.cancel());
+
+            final attachCompleter = Completer<XCDeviceEventNotification>();
+            final StreamSubscription<XCDeviceEventNotification> secondSubscription = xcdevice
+                .observedDeviceEvents()!
+                .listen(attachCompleter.complete);
+
+            final XCDeviceEventNotification notification = await attachCompleter.future;
+            expect(notification.deviceIdentifier, 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
+            expect(notification.eventType, XCDeviceEvent.attach);
+            expect(notification.eventInterface, XCDeviceEventInterface.usb);
+
+            firstObserveCompleter.complete();
+            await secondSubscription.cancel();
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          },
+        );
       });
 
       group('wait device events', () {
@@ -1035,6 +1217,94 @@ void main() {
           expect(logger.traceText, contains('xcdevice wait --wifi exited with code 0'));
           expect(xcdevice.waitStreamController?.isClosed, isTrue);
         });
+
+        testWithoutContext(
+          'cleans up USB wait process when Wi-Fi wait throws ProcessException and allows retry',
+          () async {
+            const deviceId = '00000001-0000000000000000';
+            final usbCompleter = Completer<void>();
+            addTearDown(() {
+              if (!usbCompleter.isCompleted) {
+                usbCompleter.complete();
+              }
+            });
+
+            fakeProcessManager.addCommands(<FakeCommand>[
+              FakeCommand(
+                command: const <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'wait',
+                  '--usb',
+                  deviceId,
+                ],
+                completer: usbCompleter,
+              ),
+              const FakeCommand(
+                command: <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'wait',
+                  '--wifi',
+                  deviceId,
+                ],
+                exception: ProcessException('script', <String>[]),
+              ),
+              const FakeCommand(
+                command: <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'wait',
+                  '--usb',
+                  deviceId,
+                ],
+              ),
+              const FakeCommand(
+                command: <String>[
+                  'script',
+                  '-t',
+                  '0',
+                  '/dev/null',
+                  'xcrun',
+                  'xcdevice',
+                  'wait',
+                  '--wifi',
+                  deviceId,
+                ],
+                stdout: 'Attach: $deviceId\n',
+              ),
+            ]);
+
+            final XCDeviceEventNotification? firstResult = await xcdevice.waitForDeviceToConnect(
+              deviceId,
+            );
+            expect(firstResult, isNull);
+            expect(logger.traceText, contains('Process exception running xcdevice wait:'));
+
+            // Subsequent waitForDeviceToConnect must not throw 'xcdevice wait restart failed'.
+            final XCDeviceEventNotification? secondResult = await xcdevice.waitForDeviceToConnect(
+              deviceId,
+            );
+            expect(secondResult?.deviceIdentifier, deviceId);
+            expect(secondResult?.eventInterface, XCDeviceEventInterface.wifi);
+            expect(secondResult?.eventType, XCDeviceEvent.attach);
+
+            usbCompleter.complete();
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          },
+        );
       });
 
       group('available devices', () {

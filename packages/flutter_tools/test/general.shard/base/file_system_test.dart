@@ -380,6 +380,32 @@ void main() {
       expect(logger.traceText, contains('Running 1 shutdown hook'));
     });
 
+    testWithoutContext('recreates system temp directory if deleted while running', () async {
+      final signals = Signals.test();
+      final localFileSystem = LocalFileSystem.test(signals: signals);
+      final Directory firstTemp = localFileSystem.systemTempDirectory;
+
+      expect(firstTemp.existsSync(), isTrue);
+      expect(localFileSystem.shutdownHooks.registeredHooks, hasLength(1));
+
+      // Simulate the OS (e.g. macOS periodically purging stale $TMPDIR entries)
+      // deleting the cached flutter_tools.XXXXXX directory while a long-lived
+      // process like flutter daemon is running.
+      firstTemp.deleteSync(recursive: true);
+      expect(firstTemp.existsSync(), isFalse);
+
+      final Directory recreatedTemp = localFileSystem.systemTempDirectory;
+      expect(recreatedTemp.existsSync(), isTrue);
+      expect(localFileSystem.shutdownHooks.registeredHooks, hasLength(1));
+
+      final Directory childTemp = recreatedTemp.createTempSync('core_devices.');
+      expect(childTemp.existsSync(), isTrue);
+
+      final logger = BufferLogger.test();
+      await localFileSystem.shutdownHooks.runShutdownHooks(logger);
+      expect(recreatedTemp.existsSync(), isFalse);
+    });
+
     testWithoutContext('deletes system temp entry on a fatal signal', () async {
       final completer = Completer<void>();
       final signals = Signals.test();

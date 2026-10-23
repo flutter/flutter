@@ -177,8 +177,9 @@ class SimControl {
       return <String, Map<String, Object?>>{};
     }
     try {
-      final Object? decodeResult = (json.decode(results.stdout) as Map<String, Object?>)['devices'];
-      if (decodeResult is Map<String, Object?>) {
+      if (json.decode(results.stdout) case <String, Object?>{
+        'devices': final Map<String, Object?> decodeResult,
+      }) {
         return decodeResult;
       }
       _logger.printError('simctl returned unexpected JSON response: ${results.stdout}');

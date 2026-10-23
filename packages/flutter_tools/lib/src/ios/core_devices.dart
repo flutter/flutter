@@ -432,7 +432,7 @@ class IOSCoreDeviceControl {
       process = await _processUtils.start(command);
 
       final Future<void> cancelFuture = cancelCompleter?.future ?? Completer<void>().future;
-      final Future<dynamic> firstCompleted = Future.any<dynamic>(<Future<dynamic>>[
+      final Future<Object?> firstCompleted = Future.any<Object?>(<Future<Object?>>[
         process.exitCode,
         cancelFuture,
       ]);
@@ -478,12 +478,10 @@ class IOSCoreDeviceControl {
       final String stringOutput = output.readAsStringSync();
       _logger.printTrace(stringOutput);
 
-      final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
-      if (decodeResult is Map<String, Object?>) {
-        final Object? decodeDevices = decodeResult['devices'];
-        if (decodeDevices is List<Object?>) {
-          return decodeDevices;
-        }
+      if (json.decode(stringOutput) case <String, Object?>{
+        'result': <String, Object?>{'devices': final List<Object?> decodeDevices},
+      }) {
+        return decodeDevices;
       }
       _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
       return const <Object?>[];
