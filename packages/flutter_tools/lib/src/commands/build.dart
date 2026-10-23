@@ -7,11 +7,16 @@ import 'package:meta/meta.dart';
 
 import '../android/android_builder.dart';
 import '../android/gradle.dart';
+import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
+import '../base/config.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/extension.dart';
+import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
@@ -287,12 +292,29 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
+    final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
+    final Directory outputDir = resolveExtensionOutputDir(
+      buildMode: buildInfo.mode,
+      buildOutputDir: projectDir.childDirectory(getBuildDirectory(config, fs)),
+      fileSystem: fs,
+      projectDir: projectDir,
+      target: target,
+    );
+    final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: buildInfo.mode,
+      target: target,
+    );
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildInfo.mode,
+      flutterRoot: fs.directory(Cache.flutterRoot).uri,
       mainPath: targetFile,
-      projectRoot: toolContext.fs.currentDirectory.uri,
+      outputDir: outputDir.uri,
+      projectRoot: projectDir.uri,
+      resolvedArtifacts: resolvedArtifacts,
       targetName: target.name,
     );
 

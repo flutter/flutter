@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/native_assets.dart';
@@ -66,21 +68,20 @@ void main() {
     vmServiceHost: vmServiceHost,
   );
 
-  testUsingContext(
-    'Missing dir error caught for FontConfigManger.dispose',
-    () async {
-      final fontConfigManager = FontConfigManager();
+  testWithoutContext('Missing dir error caught for FontConfigManger.dispose', () async {
+    final fontConfigManager = FontConfigManager(
+      toolContext: FakeToolContext(
+        cache: Cache.test(processManager: processManager),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+      ),
+    );
 
-      final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
-      fontsDirectory.deleteSync(recursive: true);
+    final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
+    fontsDirectory.deleteSync(recursive: true);
 
-      await fontConfigManager.dispose();
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    await fontConfigManager.dispose();
+  });
 
   testUsingContext(
     'Flutter tester passes through impeller config and environment variables.',
@@ -158,7 +159,7 @@ void main() {
             'APP_NAME': '',
             'FLUTTER_TEST_IMPELLER': 'true',
             'PATH':
-                '${device.nativeAssetsBuilder!.windowsBuildDirectory(project, toolContext: device.toolContext)};${platform.environment['PATH']}',
+                '${device.nativeAssetsBuilder!.windowsBuildDirectory(project, toolContext: FakeToolContext())};${platform.environment['PATH']}',
           },
         ),
       );
@@ -442,13 +443,15 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     this.vmServiceHost,
   }) : super(
          id: 999,
-         flutterTesterBinPath: '/',
          toolContext: FakeToolContext(
+           artifacts: Artifacts.test(),
+           flutterVersion: FakeFlutterVersion(),
            fs: fileSystem,
            logger: BufferLogger.test(),
            platform: platform,
            processManager: processManager,
          ),
+         flutterTesterBinPath: '/',
          debuggingOptions: DebuggingOptions.enabled(
            const BuildInfo(
              BuildMode.debug,
@@ -468,7 +471,15 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
          testAssetDirectory: null,
          icudtlPath: null,
          compileExpression: null,
-         fontConfigManager: fontConfigManager ?? FontConfigManager(),
+         fontConfigManager:
+             fontConfigManager ??
+             FontConfigManager(
+               toolContext: FakeToolContext(
+                 cache: Cache.test(processManager: FakeProcessManager.any()),
+                 fs: fileSystem,
+                 logger: BufferLogger.test(),
+               ),
+             ),
          nativeAssetsBuilder: FakeNativeAssetsBuilder(),
        );
 
