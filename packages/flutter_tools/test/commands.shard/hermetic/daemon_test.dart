@@ -1686,6 +1686,7 @@ void main() {
       expect(command.name, 'daemon');
       expect(command.category, FlutterCommandCategory.tools);
       expect(command.hidden, false);
+      expect(command.shouldUpdateCache, false);
 
       final hiddenCommand = DaemonCommand(
         androidContext: FakeAndroidContext(),

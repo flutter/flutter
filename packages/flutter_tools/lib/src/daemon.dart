@@ -132,7 +132,7 @@ class DaemonInputStreamConverter {
 
     // Process chunk here
     final Uint8List combinedChunk = bytesBuilder.takeBytes();
-    String jsonString = utf8.decode(combinedChunk).trim();
+    String jsonString = utf8AllowMalformed.decode(combinedChunk).trim();
     if (jsonString.startsWith('[{') && jsonString.endsWith('}]')) {
       jsonString = jsonString.substring(1, jsonString.length - 1);
       final Map<String, Object?>? value = castStringKeyedMap(json.decode(jsonString));

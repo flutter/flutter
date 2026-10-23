@@ -172,6 +172,16 @@ void main() {
     }
   });
 
+  (String executable, List<String> args) updateEngineVersionCommand() {
+    if (const LocalPlatform().isWindows) {
+      return ('powershell', <String>[testRoot.binInternalUpdateEngineVersion.path]);
+    }
+    if (usePowershellOnPosix) {
+      return ('pwsh', <String>[testRoot.binInternalUpdateEngineVersion.path]);
+    }
+    return (testRoot.binInternalUpdateEngineVersion.path, <String>[]);
+  }
+
   /// Runs `bin/internal/update_engine_version.{sh|ps1}` and returns the process result.
   ///
   /// If the exit code is 0, it is considered a success, and files should exist as a side-effect.
@@ -180,18 +190,7 @@ void main() {
   /// - On POSIX, if [usePowershellOnPosix] is set, `pwsh` is used (to run `update_engine_version.ps1`);
   /// - Otherwise, `update_engine_version.sh` is used.
   io.ProcessResult runUpdateEngineVersion() {
-    final String executable;
-    final List<String> args;
-    if (const LocalPlatform().isWindows) {
-      executable = 'powershell';
-      args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-    } else if (usePowershellOnPosix) {
-      executable = 'pwsh';
-      args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-    } else {
-      executable = testRoot.binInternalUpdateEngineVersion.path;
-      args = <String>[];
-    }
+    final (String executable, List<String> args) = updateEngineVersionCommand();
     return run(executable, args);
   }
 
@@ -380,6 +379,35 @@ void main() {
 
       expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v2'));
     });
+
+    test(
+      'preserves existing engine.stamp and engine.realm when unchanged and updates when changed',
+      () async {
+        environment['FLUTTER_REALM'] = 'flutter_archives_v2';
+        runUpdateEngineVersion();
+
+        expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('123abc'));
+        expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v2'));
+
+        final oldTime = DateTime(2020);
+        testRoot.binCacheEngineStamp.setLastModifiedSync(oldTime);
+        testRoot.binCacheEngineRealm.setLastModifiedSync(oldTime);
+
+        runUpdateEngineVersion();
+
+        expect(testRoot.binCacheEngineStamp.lastModifiedSync(), oldTime);
+        expect(testRoot.binCacheEngineRealm.lastModifiedSync(), oldTime);
+
+        environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '456def';
+        environment['FLUTTER_REALM'] = 'flutter_archives_v3';
+        runUpdateEngineVersion();
+
+        expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching('456def'));
+        expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v3'));
+        expect(testRoot.binCacheEngineStamp.lastModifiedSync(), isNot(oldTime));
+        expect(testRoot.binCacheEngineRealm.lastModifiedSync(), isNot(oldTime));
+      },
+    );
   });
 
   group('concurrent execution', () {
@@ -424,26 +452,17 @@ void main() {
         // Spawn multiple writers in parallel
         const numWriters = 20;
         final writers = <Future<io.ProcessResult>>[];
+        final (String executable, List<String> args) = updateEngineVersionCommand();
 
         for (var i = 0; i < numWriters; i++) {
-          final String executable;
-          final List<String> args;
-          if (const LocalPlatform().isWindows) {
-            executable = 'powershell';
-            args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-          } else if (usePowershellOnPosix) {
-            executable = 'pwsh';
-            args = <String>[testRoot.binInternalUpdateEngineVersion.path];
-          } else {
-            executable = testRoot.binInternalUpdateEngineVersion.path;
-            args = <String>[];
-          }
-
           writers.add(
             io.Process.run(
               executable,
               args,
-              environment: environment,
+              environment: <String, String>{
+                ...environment,
+                'FLUTTER_PREBUILT_ENGINE_VERSION': i.isEven ? '123abc' : '456def',
+              },
               workingDirectory: testRoot.root.absolute.path,
               includeParentEnvironment: false,
             ),
@@ -473,6 +492,92 @@ void main() {
           0,
           reason:
               'Race condition detected: engine.stamp was empty $emptyReads times out of $totalReads reads',
+        );
+      },
+      // [intended] Windows-specific file locking limitation
+      skip: const LocalPlatform().isWindows
+          ? 'Windows file locking makes concurrent file operations unreliable'
+          : null,
+    );
+
+    test(
+      'writes to engine.realm atomically without truncation',
+      () async {
+        environment['FLUTTER_REALM'] = 'flutter_archives_v2';
+        runUpdateEngineVersion();
+
+        final File realmFile = testRoot.binCacheEngineRealm;
+        expect(realmFile.readAsStringSync().trim(), 'flutter_archives_v2');
+
+        // Verify replacement happens via atomic rename rather than in-place truncation:
+        // a hard link to the original inode must retain the old value after an update.
+        final File hardLink = tmpDir.childFile('engine.realm.hardlink');
+        run('ln', <String>[realmFile.path, hardLink.path]);
+        environment['FLUTTER_REALM'] = 'flutter_archives_v3';
+        runUpdateEngineVersion();
+        expect(hardLink, _hasFileContentsMatching('flutter_archives_v2'));
+        expect(realmFile, _hasFileContentsMatching('flutter_archives_v3'));
+        hardLink.deleteSync();
+
+        var isRunning = true;
+        var emptyReads = 0;
+        var totalReads = 0;
+
+        final readFuture = Future<void>(() async {
+          while (isRunning) {
+            try {
+              final String content = realmFile.readAsStringSync();
+              totalReads++;
+              if (content.trim().isEmpty) {
+                emptyReads++;
+              }
+            } on io.FileSystemException {
+              // Ignore FileSystemExceptions during concurrent atomic replacements.
+            }
+            await Future<void>.delayed(Duration.zero);
+          }
+        });
+
+        const numWriters = 20;
+        final writers = <Future<io.ProcessResult>>[];
+        final (String executable, List<String> args) = updateEngineVersionCommand();
+
+        for (var i = 0; i < numWriters; i++) {
+          writers.add(
+            io.Process.run(
+              executable,
+              args,
+              environment: <String, String>{
+                ...environment,
+                'FLUTTER_REALM': i.isEven ? 'flutter_archives_v2' : 'flutter_archives_v3',
+              },
+              workingDirectory: testRoot.root.absolute.path,
+              includeParentEnvironment: false,
+            ),
+          );
+        }
+
+        final List<io.ProcessResult> results = await Future.wait<io.ProcessResult>(writers);
+
+        isRunning = false;
+        await readFuture;
+
+        for (final result in results) {
+          expect(
+            result.exitCode,
+            0,
+            reason:
+                'Writer process failed with exit code ${result.exitCode}:\n'
+                'STDOUT:\n${result.stdout}\n'
+                'STDERR:\n${result.stderr}',
+          );
+        }
+
+        expect(
+          emptyReads,
+          0,
+          reason:
+              'Race condition detected: engine.realm was empty $emptyReads times out of $totalReads reads',
         );
       },
       // [intended] Windows-specific file locking limitation

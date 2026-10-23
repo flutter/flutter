@@ -64,16 +64,21 @@ else
 fi
 
 # Write the engine version out so downstream tools know what to look for.
-# Use a temporary file and atomic mv to prevent race conditions during parallel flutter executions.
+# Only write when the file does not exist or its contents have changed, using a
+# temporary file and atomic mv to prevent race conditions during parallel flutter executions.
 pid=$$
-es_tmp="$FLUTTER_ROOT/bin/cache/engine.stamp.tmp.$pid"
-trap 'rm -f "$es_tmp"' EXIT
-echo "$ENGINE_VERSION" >"$es_tmp" && mv "$es_tmp" "$FLUTTER_ROOT/bin/cache/engine.stamp"
-trap - EXIT
+if [ ! -f "$FLUTTER_ROOT/bin/cache/engine.stamp" ] || [ "$(< "$FLUTTER_ROOT/bin/cache/engine.stamp")" != "$ENGINE_VERSION" ]; then
+  es_tmp="$FLUTTER_ROOT/bin/cache/engine.stamp.tmp.$pid"
+  trap 'rm -f "$es_tmp"' EXIT
+  echo "$ENGINE_VERSION" >"$es_tmp" && mv "$es_tmp" "$FLUTTER_ROOT/bin/cache/engine.stamp"
+  trap - EXIT
+fi
 
 # The realm on CI is passed in.
-if [ -n "${FLUTTER_REALM}" ]; then
-  echo "$FLUTTER_REALM" >"$FLUTTER_ROOT/bin/cache/engine.realm"
-else
-  echo "" >"$FLUTTER_ROOT/bin/cache/engine.realm"
+ENGINE_REALM="${FLUTTER_REALM:-}"
+if [ ! -f "$FLUTTER_ROOT/bin/cache/engine.realm" ] || [ "$(< "$FLUTTER_ROOT/bin/cache/engine.realm")" != "$ENGINE_REALM" ]; then
+  er_tmp="$FLUTTER_ROOT/bin/cache/engine.realm.tmp.$pid"
+  trap 'rm -f "$er_tmp"' EXIT
+  echo "$ENGINE_REALM" >"$er_tmp" && mv "$er_tmp" "$FLUTTER_ROOT/bin/cache/engine.realm"
+  trap - EXIT
 fi
