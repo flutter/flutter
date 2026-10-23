@@ -129,7 +129,7 @@ Future<void> main(List<String> args) async {
     // The listener is called synchronously from `Profile.stopWarmingUp`, which
     // may run in the middle of a timed frame. Defer the request to a new task
     // so that its setup cost is not attributed to the first measured frame.
-    Profile.phaseListener = (String name, String phase) =>
+    Profile.phaseListener = (String name, BenchmarkPhase phase) =>
         Timer.run(() => unawaited(_client.reportPhase(name, phase)));
   }
   await _runBenchmark(nextBenchmark);
@@ -424,24 +424,26 @@ class LocalBenchmarkServerClient {
   }
 
   /// Tells the local benchmark server that the benchmark [name] entered
-  /// [phase] (currently only `'measure'`, sent when warm-up ends).
+  /// [phase] (currently only [BenchmarkPhase.measure], sent when warm-up
+  /// ends). The phase is sent as its `name`.
   ///
   /// Only used when `--dart-define=BENCHMARK_REPORT_PHASES=true` is set. The
-  /// server's response (including a 404 from servers that do not handle this
-  /// request) is ignored. Unlike the other requests this does not check for
-  /// manual mode: the phase listener is only installed when a benchmark server
-  /// is driving the run.
-  Future<void> reportPhase(String name, String phase) async {
+  /// response status is not checked, so a 404 from servers that do not handle
+  /// this request is ignored, and network errors are caught and ignored too.
+  /// Unlike the other requests this does not check for manual mode: the phase
+  /// listener is only installed when a benchmark server is driving the run.
+  Future<void> reportPhase(String name, BenchmarkPhase phase) async {
     try {
       await _requestXhr(
         serverOrigin.resolve('benchmark-phase'),
         requestHeaders: headers,
         method: 'POST',
         mimeType: 'application/json',
-        sendData: json.encode(<String, String>{'name': name, 'phase': phase}),
+        sendData: json.encode(<String, String>{'name': name, 'phase': phase.name}),
       );
     } catch (_) {
-      // The server's response (including a 404 or network error) is ignored.
+      // `_requestXhr` completes normally on non-200 responses, so this only
+      // catches network errors, which are ignored.
     }
   }
 

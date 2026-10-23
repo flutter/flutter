@@ -30,7 +30,8 @@ const int _kDefaultWarmUpSampleCount = 200;
 ///
 /// Defaults to 100 and can be overridden at compile time with
 /// `--dart-define=BENCHMARK_MEASURED_SAMPLES=<n>`, where `<n>` must be a
-/// positive integer.
+/// positive integer no greater than 800 (`dynamic_clip_on_static_picture`
+/// scrolls out of its picture beyond that).
 const int _kDefaultMeasuredSampleCount = int.fromEnvironment(
   'BENCHMARK_MEASURED_SAMPLES',
   defaultValue: 100,
@@ -51,11 +52,17 @@ const int kDefaultTotalSampleCount = _kDefaultWarmUpSampleCount + _kDefaultMeasu
 /// reported JSON is unchanged.
 const bool _kReportSamples = bool.fromEnvironment('BENCHMARK_REPORT_SAMPLES');
 
+/// A phase of a benchmark run reported to a [BenchmarkPhaseListener].
+enum BenchmarkPhase {
+  /// Warm-up has ended and measured samples start being recorded.
+  measure,
+}
+
 /// Called when a benchmark named [benchmarkName] enters a new [phase].
 ///
-/// Currently the only reported phase is `'measure'`, which is reported when
-/// warm-up ends and measured samples start being recorded.
-typedef BenchmarkPhaseListener = void Function(String benchmarkName, String phase);
+/// Currently the only reported phase is [BenchmarkPhase.measure], which is
+/// reported when warm-up ends and measured samples start being recorded.
+typedef BenchmarkPhaseListener = void Function(String benchmarkName, BenchmarkPhase phase);
 
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as
@@ -894,7 +901,7 @@ class Profile {
   /// An optional listener notified when any profile changes phase.
   ///
   /// Null by default, in which case no notifications are sent. It is invoked
-  /// synchronously from [stopWarmingUp] with the phase `'measure'`, so it
+  /// synchronously from [stopWarmingUp] with [BenchmarkPhase.measure], so it
   /// must not block.
   static BenchmarkPhaseListener? phaseListener;
 
@@ -924,7 +931,7 @@ class Profile {
       throw StateError('Warm-up already stopped.');
     } else {
       _isWarmingUp = false;
-      Profile.phaseListener?.call(name, 'measure');
+      Profile.phaseListener?.call(name, BenchmarkPhase.measure);
     }
   }
 

@@ -124,9 +124,9 @@ void main() {
   });
 
   test('phaseListener fires once with measure at the automatic warm-up switch', () {
-    final calls = <(String, String, bool)>[];
+    final calls = <(String, BenchmarkPhase, bool)>[];
     late Profile profile;
-    Profile.phaseListener = (String benchmarkName, String phase) {
+    Profile.phaseListener = (String benchmarkName, BenchmarkPhase phase) {
       calls.add((benchmarkName, phase, profile.isWarmingUp));
     };
     final callsAfterSample = <int, int>{};
@@ -140,12 +140,12 @@ void main() {
     expect(callsAfterSample[_warmUpCount - 2], 0);
     expect(callsAfterSample[_warmUpCount - 1], 1);
     expect(callsAfterSample[_warmUpCount + _measuredCount - 1], 1);
-    expect(calls, <(String, String, bool)>[('bench_test', 'measure', false)]);
+    expect(calls, <(String, BenchmarkPhase, bool)>[('bench_test', BenchmarkPhase.measure, false)]);
   });
 
   test('phaseListener fires once when stopWarmingUp is called manually', () {
-    final calls = <(String, String)>[];
-    Profile.phaseListener = (String benchmarkName, String phase) {
+    final calls = <(String, BenchmarkPhase)>[];
+    Profile.phaseListener = (String benchmarkName, BenchmarkPhase phase) {
       calls.add((benchmarkName, phase));
     };
     final profile = Profile(name: 'custom_warm_up', useCustomWarmUp: true);
@@ -154,10 +154,10 @@ void main() {
 
     profile.stopWarmingUp();
     expect(profile.isWarmingUp, isFalse);
-    expect(calls, <(String, String)>[('custom_warm_up', 'measure')]);
+    expect(calls, <(String, BenchmarkPhase)>[('custom_warm_up', BenchmarkPhase.measure)]);
 
     expect(profile.stopWarmingUp, throwsStateError);
-    expect(calls, <(String, String)>[('custom_warm_up', 'measure')]);
+    expect(calls, <(String, BenchmarkPhase)>[('custom_warm_up', BenchmarkPhase.measure)]);
   });
 
   test('toJson(reportSamples: true) splits each series at its own warm-up and keeps outliers', () {
@@ -225,13 +225,13 @@ void main() {
   });
 
   test('phaseListener is read at each warm-up switch, not when the profile is created', () {
-    final replaced = <(String, String)>[];
-    final current = <(String, String)>[];
-    Profile.phaseListener = (String benchmarkName, String phase) {
+    final replaced = <(String, BenchmarkPhase)>[];
+    final current = <(String, BenchmarkPhase)>[];
+    Profile.phaseListener = (String benchmarkName, BenchmarkPhase phase) {
       replaced.add((benchmarkName, phase));
     };
     final early = Profile(name: 'created_before_swap', useCustomWarmUp: true);
-    Profile.phaseListener = (String benchmarkName, String phase) {
+    Profile.phaseListener = (String benchmarkName, BenchmarkPhase phase) {
       current.add((benchmarkName, phase));
     };
 
@@ -239,9 +239,9 @@ void main() {
     _autoProfile();
 
     expect(replaced, isEmpty);
-    expect(current, <(String, String)>[
-      ('created_before_swap', 'measure'),
-      ('bench_test', 'measure'),
+    expect(current, <(String, BenchmarkPhase)>[
+      ('created_before_swap', BenchmarkPhase.measure),
+      ('bench_test', BenchmarkPhase.measure),
     ]);
   });
 
