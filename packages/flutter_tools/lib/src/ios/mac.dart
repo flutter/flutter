@@ -47,6 +47,7 @@ import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_bitcode_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
+import 'migrations/status_bar_appearance_migration.dart';
 import 'migrations/uiapplicationmain_deprecation_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcode_build_settings.dart';
@@ -300,6 +301,31 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
     return XcodeBuildResult(success: false);
   }
+
+  // These migrations need the resolved build settings to select files for the
+  // current build configuration.
+  final buildSettingsMigrators = <ProjectMigrator>[];
+  final String? infoPlistBuildSetting = buildSettings['INFOPLIST_FILE'];
+  if (infoPlistBuildSetting != null && infoPlistBuildSetting.isNotEmpty) {
+    final String infoPlistPath = substituteXcodeVariables(infoPlistBuildSetting, buildSettings);
+    final String? sourceRoot = buildSettings['SRCROOT'];
+    if (globals.fs.path.isAbsolute(infoPlistPath) || sourceRoot != null) {
+      buildSettingsMigrators.add(
+        StatusBarAppearanceMigrator(
+          globals.fs.file(
+            globals.fs.path.isAbsolute(infoPlistPath)
+                ? infoPlistPath
+                : globals.fs.path.join(sourceRoot!, infoPlistPath),
+          ),
+          globals.logger,
+          xcode: globals.xcode!,
+          environmentType: environmentType,
+          plistParser: globals.plistParser,
+        ),
+      );
+    }
+  }
+  await ProjectMigration(buildSettingsMigrators).run();
 
   final String? targetBuildDirPath = buildSettings['TARGET_BUILD_DIR'];
   final Directory? targetBuildDir = targetBuildDirPath != null
