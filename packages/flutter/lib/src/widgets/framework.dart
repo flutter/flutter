@@ -1160,8 +1160,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// close to the widgets that actually change as possible, rather than at the
   /// top of a large subtree. When the changing state lives in a [Listenable]
   /// (such as a [ChangeNotifier], a [ValueNotifier], or an [Animation]), a
-  /// [ListenableBuilder], [AnimatedBuilder], or [ValueListenableBuilder] can
-  /// rebuild only the part of the subtree that depends on it, without
+  /// [ListenableBuilder], an [AnimatedBuilder], or a [ValueListenableBuilder]
+  /// can rebuild only the part of the subtree that depends on it, without
   /// requiring a listener that calls [setState] in a higher-level [State].
   ///
   /// See also:
