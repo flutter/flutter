@@ -33,6 +33,13 @@ filegroup(
     ],
 )
 
+# The test harness (test/src), which dev/bots' tests import too
+# (fake_process_manager.dart).
+filegroup(
+    name = "test_harness",
+    srcs = glob(["test/src/**/*.dart"]),
+)
+
 # The tool's own packages beside it.
 _PACKAGES = {
     "//packages/flutter_tools/packages/flutter_tools_core:sources": "flutter_tools_core",
