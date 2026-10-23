@@ -412,27 +412,23 @@ class IOSCoreDeviceControl {
       validTimeout = const Duration(seconds: _minimumTimeoutInSeconds);
     }
 
-    Directory? tempDirectory;
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final File output = tempDirectory.childFile('core_device_list.json');
+    output.createSync();
+
+    final command = <String>[
+      ..._xcode.xcrunCommand(),
+      'devicectl',
+      'list',
+      'devices',
+      '--timeout',
+      validTimeout.inSeconds.toString(),
+      '--json-output',
+      output.path,
+    ];
+
     Process? process;
     try {
-      final Directory createdTempDirectory = ErrorHandlingFileSystem.noExitOnFailure(
-        () => _fileSystem.systemTempDirectory.createTempSync('core_devices.'),
-      );
-      tempDirectory = createdTempDirectory;
-      final File output = createdTempDirectory.childFile('core_device_list.json');
-      ErrorHandlingFileSystem.noExitOnFailure(output.createSync);
-
-      final command = <String>[
-        ..._xcode.xcrunCommand(),
-        'devicectl',
-        'list',
-        'devices',
-        '--timeout',
-        validTimeout.inSeconds.toString(),
-        '--json-output',
-        output.path,
-      ];
-
       process = await _processUtils.start(command);
 
       final Future<void> cancelFuture = cancelCompleter?.future ?? Completer<void>().future;
@@ -500,15 +496,7 @@ class IOSCoreDeviceControl {
       return const <Object?>[];
     } finally {
       process?.kill();
-      if (tempDirectory != null) {
-        try {
-          ErrorHandlingFileSystem.noExitOnFailure(
-            () => ErrorHandlingFileSystem.deleteIfExists(tempDirectory!, recursive: true),
-          );
-        } on FileSystemException {
-          // Ignore cleanup failures.
-        }
-      }
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 

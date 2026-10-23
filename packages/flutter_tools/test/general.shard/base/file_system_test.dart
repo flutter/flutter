@@ -388,8 +388,9 @@ void main() {
       expect(firstTemp.existsSync(), isTrue);
       expect(localFileSystem.shutdownHooks.registeredHooks, hasLength(1));
 
-      // Simulate the OS (e.g. macOS CacheDelete) purging the cached flutter_tools.XXXXXX
-      // directory while a long-lived process like flutter daemon is running.
+      // Simulate the OS (e.g. macOS periodically purging stale $TMPDIR entries)
+      // deleting the cached flutter_tools.XXXXXX directory while a long-lived
+      // process like flutter daemon is running.
       firstTemp.deleteSync(recursive: true);
       expect(firstTemp.existsSync(), isFalse);
 

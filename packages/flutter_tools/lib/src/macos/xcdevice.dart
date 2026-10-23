@@ -174,7 +174,7 @@ class XCDevice {
             _cachedListResults = listResults;
             return listResults;
           }
-          _logger.printError('xcdevice returned unexpected JSON response: $listOutput');
+          _logger.printTrace('xcdevice returned unexpected JSON response: $listOutput');
           return null;
         } on FormatException {
           // xcdevice logs errors and crashes to stdout.
@@ -260,7 +260,7 @@ class XCDevice {
           }
         }),
       );
-    } on Exception catch (exception, stackTrace) {
+    } on ProcessException catch (exception, stackTrace) {
       if (_observeAttemptId == attemptId) {
         _stopObservingTetheredIOSDevices();
         _observeStreamController?.addError(exception, stackTrace);
