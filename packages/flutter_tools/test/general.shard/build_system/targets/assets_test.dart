@@ -17,8 +17,11 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:flutter_tools/src/build_system/tools/asset_transformer.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:record_use/record_use.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -1053,4 +1056,173 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
+
+  group('recorded uses for transformers', () {
+    String recordingOf(String argument) => json.encode(<String, Object?>{
+      'constants': <Object?>[
+        <String, Object?>{'type': 'string', 'value': argument},
+      ],
+      'definitions': <Object?>[
+        <String, Object?>{
+          'path': <Object?>[
+            <String, Object?>{
+              'kind': 'method',
+              'name': 'asset',
+              'disambiguators': <String>['static'],
+            },
+          ],
+          'uri': 'package:example/assets.dart',
+        },
+      ],
+      'loading_units': <Object?>[
+        <String, Object?>{'name': 'main'},
+      ],
+      'uses': <String, Object?>{
+        'static_calls': <Object?>[
+          <String, Object?>{
+            'definition_index': 0,
+            'uses': <Object?>[
+              <String, Object?>{
+                'loading_unit_index': 0,
+                'positional': <int>[0],
+                'type': 'with_arguments',
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    List<String> recordedArguments(File recordedUses) {
+      final recordings = Recordings.fromJson(
+        json.decode(recordedUses.readAsStringSync()) as Map<String, Object?>,
+      );
+      return <String>[
+        for (final CallReference call in recordings.calls.values.expand(
+          (List<CallReference> calls) => calls,
+        ))
+          if (call case CallWithArguments(
+            positionalArguments: [StringConstant(:final String value)],
+          ))
+            value,
+      ];
+    }
+
+    late FakeProcessManager processManager;
+    List<String>? argumentsSeenByTransformer;
+
+    setUp(() {
+      processManager = FakeProcessManager.empty();
+      argumentsSeenByTransformer = null;
+    });
+
+    /// Copies the assets of a project with one transformed asset, expecting
+    /// the transformer to run with the environment [expectedEnvironment]
+    /// returns for the build.
+    Future<void> buildAssets(
+      BuildMode buildMode, {
+      required Map<String, String> Function(Environment) expectedEnvironment,
+    }) async {
+      Cache.flutterRoot = Cache.defaultFlutterRoot(
+        platform: globals.platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: globals.platform,
+        defines: <String, String>{kBuildMode: buildMode.cliName},
+      );
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - path: input.txt
+      transformers:
+        - package: my_transformer
+''');
+      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      fileSystem.file('input.txt').writeAsStringSync('abc');
+      environment.buildDir.childFile('recorded_uses_js.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(recordingOf('from_js'));
+      environment.buildDir
+          .childFile('recorded_uses_wasm.json')
+          .writeAsStringSync(recordingOf('from_wasm'));
+      final Map<String, String> expected = expectedEnvironment(environment);
+      processManager.addCommand(
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+          ],
+          environment: expected,
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs =
+                (ArgParser()
+                      ..addOption('input')
+                      ..addOption('output'))
+                    .parse(args);
+            if (expected[AssetTransformer.recordedUsesEnvVar] case final String path) {
+              argumentsSeenByTransformer = recordedArguments(fileSystem.file(path));
+            }
+            fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
+          },
+        ),
+      );
+
+      await const CopyAssets().build(environment);
+
+      expect(logger.errorText, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    }
+
+    testUsingContext(
+      'merge the JavaScript and WebAssembly recordings of a release build',
+      () async {
+        await buildAssets(
+          BuildMode.release,
+          expectedEnvironment: (Environment environment) => <String, String>{
+            AssetTransformer.buildModeEnvVar: 'release',
+            AssetTransformer.recordedUsesEnvVar: environment.buildDir
+                .childFile('recorded_uses_for_transformers.json')
+                .path,
+          },
+        );
+
+        expect(argumentsSeenByTransformer, unorderedEquals(<String>['from_js', 'from_wasm']));
+      },
+      overrides: <Type, Generator>{
+        Logger: () => logger,
+        FileSystem: () => fileSystem,
+        Platform: () => FakePlatform(),
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'are not given to transformers in a debug build',
+      () async {
+        await buildAssets(
+          BuildMode.debug,
+          expectedEnvironment: (_) => <String, String>{AssetTransformer.buildModeEnvVar: 'debug'},
+        );
+
+        expect(argumentsSeenByTransformer, isNull);
+      },
+      overrides: <Type, Generator>{
+        Logger: () => logger,
+        FileSystem: () => fileSystem,
+        Platform: () => FakePlatform(),
+        ProcessManager: () => processManager,
+      },
+    );
+  });
 }
