@@ -37,6 +37,12 @@ ZipTreeInfo = provider(
     fields = {"entries": "A list of (file, path in the archive) pairs."},
 )
 
+ZipBundleInfo = provider(
+    doc = "What a zip_bundle's archive holds, for a rule that lays the files out instead " +
+          "(the tool's SDK cache unpacks the archives: local_engine.bzl's bundle_directory).",
+    fields = {"entries": "A list of (file, path in the archive) pairs, the license readme first; a directory file is a directory entry."},
+)
+
 def _zip_tree_impl(ctx):
     root = ctx.attr.root
     entries = []
@@ -159,6 +165,7 @@ def _zip_bundle_impl(ctx):
     args.add_all([ctx.file._wrapper, ctx.file._script])
     args.add("-o", output)
     inputs = []
+    entries = []
     if ctx.attr.license:
         readme_name = "LICENSE.%s.md" % ctx.label.name
         readme = ctx.actions.declare_file(readme_name)
@@ -177,6 +184,7 @@ def _zip_bundle_impl(ctx):
         )
         args.add_all(["-i", readme, readme_name])
         inputs.append(readme)
+        entries.append((readme, readme_name))
 
     # The archive's own place, and its entries' places: ninja building GN's
     # archive target writes each input that is an output of the build into
@@ -209,6 +217,7 @@ def _zip_bundle_impl(ctx):
         # walks it, not as its files.
         args.add_all(["-i", file, destination], expand_directories = False)
         inputs.append(file)
+        entries.append((file, destination))
         if destination in ctx.attr.sources:
             placed.append((file, ctx.attr.sources[destination]))
     for tree in ctx.attr.trees:
@@ -218,6 +227,7 @@ def _zip_bundle_impl(ctx):
             # copied for release) goes to zip.py as itself, as above.
             args.add_all(["-i", file, destination], expand_directories = False)
             inputs.append(file)
+            entries.append((file, destination))
 
     ctx.actions.run(
         executable = ctx.executable._python,
@@ -234,6 +244,7 @@ def _zip_bundle_impl(ctx):
     return [
         DefaultInfo(files = depset([output])),
         BuildDirectoryInfo(entries = depset(placed)),
+        ZipBundleInfo(entries = entries),
     ]
 
 zip_bundle = rule(

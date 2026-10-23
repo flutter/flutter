@@ -195,6 +195,11 @@ cc_library(
 # //engine/src/flutter/shell).
 exports_files([".ci.yaml"])
 
+# The embedder examples' directory, which flutter_tools' create_test creates a
+# project in (the SDK facsimile its tests run from needs the directory to
+# exist; packages/flutter_tools/BUILD.bazel).
+exports_files(["examples/glfw/README.md"])
+
 filegroup(
     name = "et_entry_points",
     srcs = glob(["bin/et*"]),
@@ -814,12 +819,31 @@ web_sdk_root(
           'generated_file: the entitlements list of the macOS bundle',
     },
     appendix: '''
+load("//engine/src/flutter/build/bazel:local_engine.bzl", "bundle_directory")
+
 # The GN file, for the wrapped GN builds that read //flutter/build
 # (//engine/src/flutter/build:gn_files; a glob does not enter a package).
 filegroup(
     name = "gn_files",
     srcs = ["BUILD.gn"],
     visibility = ["//engine/src/flutter/build:__pkg__"],
+)
+
+# The host's development artifacts unpacked as the flutter tool's cache lays
+# them, for the tests' SDK facsimile (a dart_test's cache_files):
+# bin/cache/artifacts/engine/<host> is artifacts.zip and font-subset.zip
+# unpacked together, bin/cache/artifacts/engine/common flutter_patched_sdk.zip.
+bundle_directory(
+    name = "host_engine_directory",
+    bundles = [
+        ":artifacts",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+)
+
+bundle_directory(
+    name = "common_engine_directory",
+    bundles = [":flutter_patched_sdk"],
 )
 ''',
   ),

@@ -9,8 +9,9 @@
 #
 #   bazel test //packages/flutter_tools:general_shard
 
-load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
-load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_cache")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
+load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_cache", "pub_package_config")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -129,6 +130,95 @@ _LARGE_HERMETIC = [
     "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_workspace_test.dart",
 ]
 
+# The tool itself, for the tests that run it (create_test analyzes, resolves
+# and tests the projects it creates through bin/cache/flutter_tools.snapshot;
+# icon_tree_shaker_test spawns bin/flutter): its entry point compiled for the
+# VM, as the SDK's shell script compiles it on the first run, and launchers
+# in place of bin/flutter and bin/dart -- the repository's scripts would
+# bootstrap the tool from git and the network before running it.
+pub_package_config(
+    name = "tool_package_config",
+    out = "tool_package_config.json",
+    packages = {":sources": "flutter_tools"} | _PACKAGES,
+    roots = ["flutter_tools"],
+)
+
+dart_vm_kernel(
+    name = "flutter_tools_snapshot",
+    out = "flutter_tools.snapshot",
+    main = "bin/flutter_tools.dart",
+    package_config = ":tool_package_config",
+)
+
+write_file(
+    name = "flutter_launcher",
+    out = "flutter_launcher.sh",
+    content = [
+        "#!/bin/bash",
+        "# bin/flutter of the tests' SDK facsimile: the tool as Bazel compiled it",
+        "# (packages/flutter_tools/BUILD.bazel), run as bin/internal/shared.sh runs",
+        "# the snapshot it builds.",
+        "set -e",
+        "root=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"",
+        "exec \"$root/bin/cache/dart-sdk/bin/dart\" --disable-dart-dev " +
+        "--packages=\"$root/packages/flutter_tools/.dart_tool/package_config.json\" " +
+        "\"$root/bin/cache/flutter_tools.snapshot\" \"$@\"",
+        "",
+    ],
+    is_executable = True,
+)
+
+write_file(
+    name = "dart_launcher",
+    out = "dart_launcher.sh",
+    content = [
+        "#!/bin/bash",
+        "# bin/dart of the tests' SDK facsimile: the cache's Dart SDK, no bootstrap.",
+        "set -e",
+        "root=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\"",
+        "exec \"$root/bin/cache/dart-sdk/bin/dart\" \"$@\"",
+        "",
+    ],
+    is_executable = True,
+)
+
+# What the tool, run from the facsimile, reads of the cache beyond pub's
+# view of it: the host's engine artifacts as `flutter precache` unpacks them
+# (bundle_directory over the archives a host build uploads), the stamps
+# Cache.updateAll checks before it would download, the Material fonts and
+# the flutter_gpu package (the tool checks the directories exist).
+_TOOL_CACHE_FILES = _PUB_CACHE_FILES | {
+    ":flutter_tools_snapshot": "flutter_tools.snapshot",
+    "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/linux-x64",
+    "//engine/src/flutter/build/archives:common_engine_directory": "artifacts/engine/common",
+    "//bin/internal:flutter_sdk_stamp": "flutter_sdk.stamp",
+    "//bin/internal:font_subset_stamp": "font-subset.stamp",
+    "//bin/internal:material_fonts_stamp": "material_fonts.stamp",
+    "//bin/internal:gradle_wrapper_stamp": "gradle_wrapper.stamp",
+}
+
+_TOOL_CACHE = _PUB_CACHE | {
+    "@material_fonts//:fonts": "artifacts/material_fonts",
+    "//engine/src/flutter/lib/gpu:dart_sources": "pkg/flutter_gpu",
+}
+
+_TOOL_SDK_FILES = {
+    ":flutter_launcher": "bin/flutter",
+    ":dart_launcher": "bin/dart",
+}
+
+# The version pins the tool compares the stamps against (and the iOS USB
+# artifacts' it looks up before it skips them on Linux), and the directories
+# create_test creates a project in -- examples/, dev/, the engine's and
+# packages/flutter's examples -- one file each so that they exist.
+_TOOL_DATA = [
+    "//bin/internal:all_files",
+    "//:dev/README.md",
+    "//:examples/README.md",
+    "//engine/src/flutter:examples/glfw/README.md",
+    "//packages/flutter/examples/api:pubspec.yaml",
+]
+
 # The tool's whole library, compiled once into each shard's prelude: a test's
 # compile starts from it instead of compiling the tool again.
 _IMPORTS = [
@@ -180,14 +270,19 @@ dart_package_tests(
 )
 
 # The commands shard's permeable half: commands against the real file
-# system and the real pub, on the same SDK facsimile.
+# system and the real pub, on the same SDK facsimile with the tool itself in
+# it (create_test and icon_tree_shaker_test run it).
 dart_package_tests(
     name = "commands_shard_permeable",
     srcs = _HARNESS,
-    cache = _PUB_CACHE,
-    cache_files = _PUB_CACHE_FILES,
-    # script_test reads the SDK's Windows entrypoint scripts.
-    data = glob(["test/data/**"]) + _SDK_PACKAGES + [
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    # script_test reads the SDK's Windows entrypoint scripts; create_test
+    # copies its data/ fixture into a project.
+    data = glob([
+        "test/data/**",
+        "test/commands.shard/permeable/data/**",
+    ]) + _SDK_PACKAGES + _TOOL_DATA + [
         "//bin:dart.bat",
         "//bin:flutter.bat",
         "//bin/internal:shared.bat",
@@ -197,13 +292,19 @@ dart_package_tests(
     package = "flutter_tools",
     packages = _PACKAGES,
     pub_cache = ":framework_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    # create_test compiles the tool's snapshot itself first (the test
+    # renames the facsimile's aside and builds its own with the SDK's
+    # dart), then creates, analyzes and tests some hundred projects: 20
+    # minutes on a loaded machine.
+    sizes = {"test/commands.shard/permeable/create_test.dart": "enormous"},
     tests = glob(
         ["test/commands.shard/permeable/**/*_test.dart"],
         exclude = [
-            # Run the built tool: create_test analyzes, resolves and tests
-            # the projects it creates with bin/cache/flutter_tools.snapshot,
-            # icon_tree_shaker_test spawns bin/flutter.
-            "test/commands.shard/permeable/create_test.dart",
+            # Builds a release Linux bundle through tool_backend.dart: the
+            # release engine (gen_snapshot, the product platform kernel) and
+            # the desktop embedding in its three modes, which the host
+            # build's facsimile lacks.
             "test/commands.shard/permeable/icon_tree_shaker_test.dart",
             # Does not compile at this checkout: #192831 and #193447 crossed
             # (WidgetPreviewCommand's constructor); upstream reverted the

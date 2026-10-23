@@ -18,6 +18,10 @@ exports_files([
     # project's dependencies (flutter_tools' tests run it).
     "pubspec.lock",
     "pubspec.yaml",
+    # The directories flutter_tools' create_test creates a project in, which
+    # the SDK facsimile its tests run from must hold (one file each).
+    "dev/README.md",
+    "examples/README.md",
 ])
 
 # The repository's Dart and framework tests that Bazel compiles and runs

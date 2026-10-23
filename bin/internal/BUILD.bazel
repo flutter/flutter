@@ -6,6 +6,7 @@
 # Gradle wrapper's to fetch what the framework's and the tool's tests read of
 # the SDK cache (engine/src/flutter/build/bazel/dart/flutter_sdk_cache.bzl).
 
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 
 package(default_visibility = ["//visibility:public"])
@@ -85,4 +86,34 @@ write_file(
         "git_revision_date": "1970-01-01T00:00:00Z",
         "content_hash": "bazel",
     })],
+)
+
+# The cache's bookkeeping for the artifacts the tests' SDK facsimile lays
+# from the build instead of a download (packages/flutter_tools/BUILD.bazel):
+# the tool's Cache.updateAll downloads whatever its stamp does not vouch
+# for. An engine artifact's stamp is the engine revision -- the fixed word
+# above -- the fonts' and the Gradle wrapper's the archive path their pin
+# names.
+write_file(
+    name = "flutter_sdk_stamp",
+    out = "flutter_sdk.stamp",
+    content = ["bazel"],
+)
+
+write_file(
+    name = "font_subset_stamp",
+    out = "font-subset.stamp",
+    content = ["bazel"],
+)
+
+copy_file(
+    name = "material_fonts_stamp",
+    src = "material_fonts.version",
+    out = "material_fonts.stamp",
+)
+
+copy_file(
+    name = "gradle_wrapper_stamp",
+    src = "gradle_wrapper.version",
+    out = "gradle_wrapper.stamp",
 )
