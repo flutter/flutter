@@ -219,12 +219,20 @@ https://docs.flutter.dev/testing/integration-tests
   /// before calling this method, and [WidgetTester.pump] afterwards to process
   /// the resulting frame.
   ///
+  /// When semantics are enabled, the browser may hit test the semantics DOM
+  /// node of a widget instead of the Flutter view, and the widget may then
+  /// react through a semantics action regardless of
+  /// [shouldPropagateDevicePointerEvents]. To test raw pointer delivery, run
+  /// the test with semantics disabled (for example, `semanticsEnabled: false`
+  /// in [testWidgets]).
+  ///
   /// Only works on the web when tests are run via the `flutter drive` command
   /// with a driver that uses [integrationDriver] from
-  /// `integration_test_driver_extended.dart`. Throws an [UnsupportedError]
-  /// on other platforms, a [StateError] if [view] is null and there is no
-  /// implicit view, and completes with an error if the driver fails to
-  /// perform the click.
+  /// `integration_test_driver_extended.dart`. Completes with an
+  /// [UnsupportedError] on other platforms, an [ArgumentError] if the
+  /// resulting viewport position is not finite, a [StateError] if [view] is
+  /// null and there is no implicit view, and with an error if the driver fails
+  /// to perform the click.
   Future<void> webDriverClick(Offset position, {FlutterView? view}) async {
     final FlutterView? targetView = view ?? platformDispatcher.implicitView;
     if (targetView == null) {
@@ -233,6 +241,11 @@ https://docs.flutter.dev/testing/integration-tests
       );
     }
     final Offset viewportPosition = viewportOrigin(targetView) + position;
+    // Non-finite coordinates cannot be encoded for the driver and would leave
+    // the click waiting for a reply forever.
+    if (!viewportPosition.isFinite) {
+      throw ArgumentError.value(position, 'position', 'must be a finite position in the view');
+    }
     await callbackManager.click(viewportPosition.dx, viewportPosition.dy);
   }
 

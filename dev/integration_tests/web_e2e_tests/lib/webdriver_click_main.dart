@@ -61,6 +61,7 @@ web.HTMLIFrameElement _createIframe(int viewId) {
   return iframe;
 }
 
+/// A button above a full-width iframe platform view, each counting clicks.
 class WebDriverClickApp extends StatelessWidget {
   const WebDriverClickApp({super.key});
 

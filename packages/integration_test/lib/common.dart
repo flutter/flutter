@@ -299,7 +299,7 @@ abstract class CallbackManager {
   /// Completes once the driver has performed the click, and completes with an
   /// error if the driver failed to perform it.
   ///
-  /// The default implementation throws an [UnsupportedError].
+  /// The default implementation completes with an [UnsupportedError].
   Future<void> click(double x, double y) async {
     throw UnsupportedError('click is not supported by $runtimeType');
   }

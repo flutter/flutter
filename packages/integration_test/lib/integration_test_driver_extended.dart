@@ -129,7 +129,11 @@ Future<void> integrationDriver({
       if (driver is! WebFlutterDriver) {
         // Fail the in-browser `webDriverClick` call instead of leaving it
         // waiting for a reply.
-        await driver.requestData(DriverTestMessage.error().toString());
+        try {
+          await driver.requestData(DriverTestMessage.error().toString());
+        } catch (_) {
+          // Report the StateError below even if the app disconnected.
+        }
         throw StateError(
           'webDriverClick requires a WebFlutterDriver, but received ${driver.runtimeType}',
         );
@@ -142,7 +146,7 @@ Future<void> integrationDriver({
         );
         await driver.webDriver.mouse.click();
         jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
-      } catch (exception) {
+      } catch (_) {
         try {
           await driver.requestData(DriverTestMessage.error().toString());
         } catch (_) {

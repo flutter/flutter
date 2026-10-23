@@ -8,8 +8,8 @@ import 'package:integration_test/common.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:integration_test/src/callback.dart' as driver_actions;
 
-/// A [CallbackManager] written before `click` existed, implementing only the
-/// members that were abstract at that time.
+/// A [CallbackManager] subclass written before `click` existed, overriding only
+/// the members that were abstract at that time.
 class _PreexistingCallbackManager extends CallbackManager {
   @override
   Future<Map<String, dynamic>> callback(
@@ -99,5 +99,24 @@ void main() {
       ),
     );
     expect(binding.shouldPropagateDevicePointerEvents, isFalse);
+  });
+
+  testWidgets('webDriverClick rejects positions that are not finite', (WidgetTester tester) async {
+    await tester.pumpWidget(const SizedBox.expand());
+
+    for (final position in <Offset>[
+      Offset.infinite,
+      const Offset(double.nan, 0),
+      const Offset(0, double.negativeInfinity),
+    ]) {
+      await expectLater(
+        () => binding.webDriverClick(position),
+        throwsA(
+          isArgumentError
+              .having((ArgumentError error) => error.name, 'name', 'position')
+              .having((ArgumentError error) => error.invalidValue, 'invalidValue', same(position)),
+        ),
+      );
+    }
   });
 }
