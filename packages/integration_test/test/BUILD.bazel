@@ -1,0 +1,42 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# integration_test's tests under Bazel: each *_test.dart compiled by the
+# frontend server from a prelude kernel and run on the Bazel-built
+# flutter_tester, as `flutter test --enable-vmservice --exclude-tags=web`
+# runs it (//packages/flutter_test:package_tests.bzl; research/15).
+#
+#   bazel test //packages/integration_test/test:tests
+
+load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_package_tests(
+    name = "tests",
+    # The test configuration, the golden setup it imports and the VM-service
+    # check; not data/, whose scripts binding_fail_test runs.
+    srcs = glob(
+        ["*.dart"],
+        exclude = ["*_test.dart"],
+    ),
+    package = "integration_test",
+    packages = {
+        "//packages/flutter_driver:sources": "flutter_driver",
+        "//packages/flutter_goldens:sources": "flutter_goldens",
+        "//packages/fuchsia_remote_debug_protocol:sources": "fuchsia_remote_debug_protocol",
+    },
+    # binding_fail_test runs `bin/flutter test` on the scripts in data/,
+    # which compiles them with flutter_tools (not here: Bazel compiles).
+    # web_extension_test is web-only (`@Tags(['web'])`, dart:js_interop).
+    tests = glob(
+        ["*_test.dart"],
+        exclude = [
+            "binding_fail_test.dart",
+            "web_extension_test.dart",
+        ],
+    ),
+    # vm_service_golden_client_test asks dart:developer for the service URI.
+    vm_service = True,
+)
