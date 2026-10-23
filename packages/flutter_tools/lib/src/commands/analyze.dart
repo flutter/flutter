@@ -340,10 +340,7 @@ class AnalyzeCommand extends FlutterCommand {
       }
       return ValidateProject(
         allProjectValidators: _allProjectValidators,
-        fileSystem: fs,
-        logger: logger,
-        processManager: processManager,
-        projectFactory: projectFactory,
+        toolContext: toolContext,
         userPath: directoryPath,
         machine: outputMachineFormat,
       ).run();
@@ -351,26 +348,16 @@ class AnalyzeCommand extends FlutterCommand {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoPackages(),
-        artifacts: artifacts,
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        shutdownHooks: shutdownHooks,
+        analytics: analytics,
         suppressAnalytics: _suppressAnalytics,
-        terminal: terminal,
+        toolContext: toolContext,
       ).analyze();
     } else {
       await AnalyzeOnce(
         argResults!,
         runner!.getRepoPackages(),
-        artifacts: artifacts,
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
         suppressAnalytics: _suppressAnalytics,
-        terminal: terminal,
+        toolContext: toolContext,
         workingDirectory: workingDirectory,
       ).analyze();
     }

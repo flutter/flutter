@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../context/tool_context.dart';
 import '../dart/analysis.dart';
 import 'analyze_base.dart';
 
@@ -13,17 +16,12 @@ class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
     List<Directory> repoPackages, {
-    required super.artifacts,
-    required super.fileSystem,
-    required super.logger,
-    required super.platform,
-    required super.processManager,
-    required this.shutdownHooks,
+    required this._analytics,
     required super.suppressAnalytics,
-    required super.terminal,
+    required super.toolContext,
   }) : super(repoPackages: repoPackages);
 
-  final ShutdownHooks shutdownHooks;
+  final Analytics _analytics;
 
   String? analysisTarget;
   bool firstAnalysis = true;
@@ -39,27 +37,23 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     if (isFlutterRepo) {
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
+      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fs);
 
       directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';
 
       logger.printTrace('Analyzing Flutter repository:');
     } else {
-      directories = <String>[fileSystem.currentDirectory.path];
-      analysisTarget = fileSystem.currentDirectory.path;
+      directories = <String>[fs.currentDirectory.path];
+      analysisTarget = fs.currentDirectory.path;
     }
 
     final server = AnalysisServer(
       sdkPath,
       directories,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      terminal: terminal,
-      protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
+      toolContext: toolContext,
+      protocolTrafficLog: protocolTrafficLog,
       usePlugins: usePlugins,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
@@ -99,7 +93,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       final sortedErrors = <AnalysisError>[];
       final pathsToRemove = <String>[];
       analysisErrors.forEach((String path, List<AnalysisError> errors) {
-        if (fileSystem.isFileSync(path)) {
+        if (fs.isFileSync(path)) {
           sortedErrors.addAll(errors);
         } else {
           pathsToRemove.add(path);
@@ -132,7 +126,12 @@ class AnalyzeContinuously extends AnalyzeBase {
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
         server.dispose().whenComplete(() {
-          exitWithHooks(issueCount > 0 ? 1 : 0, shutdownHooks: shutdownHooks);
+          exitWithHooks(
+            issueCount > 0 ? 1 : 0,
+            analytics: _analytics,
+            logger: logger,
+            shutdownHooks: shutdownHooks,
+          );
         });
       }
 

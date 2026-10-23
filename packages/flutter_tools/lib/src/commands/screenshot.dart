@@ -149,7 +149,11 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<bool> runSkia(File? outputFile) async {
     final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
-    final FlutterVmService vmService = await _vmServiceConnector(vmServiceUrl, logger: logger);
+    final FlutterVmService vmService = await _vmServiceConnector(
+      vmServiceUrl,
+      flutterVersion: flutterVersion,
+      logger: logger,
+    );
     final vm_service.Response? skp = await vmService.screenshotSkp();
     if (skp == null) {
       logger.printError(

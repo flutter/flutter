@@ -6,14 +6,11 @@ import 'dart:async';
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 import '../base/dds.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/utils.dart';
 import '../device.dart';
 import '../native_assets.dart';
@@ -27,10 +24,7 @@ import 'test_device.dart';
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
     required this.id,
-    required this.platform,
-    required this.fileSystem,
-    required this.processManager,
-    required this.logger,
+    required super.toolContext,
     required this.flutterTesterBinPath,
     required this.debuggingOptions,
     required this.enableVmService,
@@ -49,10 +43,6 @@ class FlutterTesterTestDevice extends TestDevice {
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
-  final Platform platform;
-  final FileSystem fileSystem;
-  final ProcessManager processManager;
-  final Logger logger;
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
   final bool enableVmService;
@@ -179,6 +169,7 @@ class FlutterTesterTestDevice extends TestDevice {
           logger.printTrace('test $id: Starting Dart Development Service');
           await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
             detectedUri,
+            artifacts: artifacts,
             appName:
                 'Kind: Flutter - Device: flutter tester - '
                 'Package: ${flutterProject?.manifest.appName ?? 'unknown'}',
@@ -265,7 +256,12 @@ class FlutterTesterTestDevice extends TestDevice {
     CompileExpression? compileExpression,
     required Logger logger,
   }) {
-    return connectToVmService(httpUri, compileExpression: compileExpression, logger: logger);
+    return connectToVmService(
+      httpUri,
+      compileExpression: compileExpression,
+      flutterVersion: flutterVersion,
+      logger: logger,
+    );
   }
 
   /// Binds an [HttpServer] serving from `host` on `port`.

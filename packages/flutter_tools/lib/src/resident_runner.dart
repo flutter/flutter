@@ -171,7 +171,11 @@ class FlutterDevice with ToolContextMixin {
         // this may not be the case when scraping logcat for URIs. If this URI is
         // from an old application instance, we shouldn't try and start DDS.
         try {
-          service = await connectToVmService(vmServiceUri, logger: logger);
+          service = await connectToVmService(
+            vmServiceUri,
+            flutterVersion: flutterVersion,
+            logger: logger,
+          );
           await service.dispose();
           break;
         } on vm_service.RPCError catch (e) {
@@ -216,6 +220,7 @@ class FlutterDevice with ToolContextMixin {
         try {
           await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
             vmServiceUri,
+            artifacts: artifacts,
             debuggingOptions: debuggingOptions,
             appName:
                 'Kind: Flutter - Device: ${device!.displayName} - '
@@ -269,6 +274,7 @@ class FlutterDevice with ToolContextMixin {
           restart: restart,
           compileExpression: compileExpression,
           flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
+          flutterVersion: flutterVersion,
           printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
           logger: logger,

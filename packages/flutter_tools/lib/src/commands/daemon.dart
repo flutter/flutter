@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:uuid/uuid.dart';
 
@@ -252,14 +251,14 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
   Stream<List<int>>? binary,
 );
 
-class Daemon {
+class Daemon with ToolContextMixin {
   Daemon(
     this.connection, {
     required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
-    required ToolContext toolContext,
+    required this.toolContext,
     required Xcode? xcode,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
@@ -268,60 +267,33 @@ class Daemon {
     Java? java,
     this.logToStdout = false,
     this.notifyingLogger,
-  }) : _logger = notifyingLogger ?? toolContext.logger,
-       _fs = toolContext.fs,
-       _stdio = toolContext.stdio {
-    final ToolContext(:ProcessManager processManager, :FlutterProjectFactory projectFactory) =
-        toolContext;
+  }) {
     final AndroidWorkflow workflow =
         androidWorkflow ??
         AndroidWorkflow(androidSdkBuilder: () => androidSdk, featureFlags: featureFlags);
 
     // Set up domains.
-    registerDomain(
-      daemonDomain = DaemonDomain(
-        this,
-        featureFlags: featureFlags,
-        fileSystem: _fs,
-        logger: _logger,
-        projectFactory: projectFactory,
-        stdio: _stdio,
-      ),
-    );
+    registerDomain(daemonDomain = DaemonDomain(this, featureFlags: featureFlags));
     registerDomain(
       appDomain = AppDomain(
         this,
         analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: toolContext,
         xcode: xcode,
       ),
     );
-    registerDomain(
-      deviceDomain = DeviceDomain(
-        this,
-        fileSystem: _fs,
-        logger: _logger,
-        projectFactory: projectFactory,
-        deviceManager: deviceManager,
-      ),
-    );
+    registerDomain(deviceDomain = DeviceDomain(this, deviceManager: deviceManager));
     registerDomain(
       emulatorDomain = EmulatorDomain(
         this,
         androidWorkflow: workflow,
-        fileSystem: _fs,
-        logger: _logger,
-        processManager: processManager,
         androidSdk: androidSdk,
         java: java,
       ),
     );
     registerDomain(devToolsDomain = DevToolsDomain(this));
-    registerDomain(
-      proxyDomain = ProxyDomain(this, fileSystem: _fs, fileTransfer: fileTransfer, logger: _logger),
-    );
+    registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -372,9 +344,9 @@ class Daemon {
   }
 
   final DaemonConnection connection;
-  final Stdio _stdio;
-  final Logger _logger;
-  final FileSystem _fs;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   late DaemonDomain daemonDomain;
   late AppDomain appDomain;
@@ -404,7 +376,7 @@ class Daemon {
     final Object? id = request.data['id'];
 
     if (id == null) {
-      _stdio.stderrWrite('no id for request: $request\n');
+      stdio.stderrWrite('no id for request: $request\n');
       return;
     }
 
@@ -448,11 +420,16 @@ class Daemon {
   }
 }
 
-abstract class Domain {
+abstract class Domain with ToolContextMixin {
   Domain(this.daemon, this.name);
 
   final Daemon daemon;
   final String name;
+
+  @override
+  @protected
+  ToolContext get toolContext => daemon.toolContext;
+
   final _handlers = <String, CommandHandler>{};
   final _handlersWithBinary = <String, CommandHandlerWithBinary>{};
 
@@ -540,15 +517,7 @@ abstract class Domain {
 ///
 /// This domain fires the `daemon.logMessage` event.
 class DaemonDomain extends Domain {
-  DaemonDomain(
-    Daemon daemon, {
-    required this._featureFlags,
-    required FileSystem fileSystem,
-    required this._logger,
-    required this._projectFactory,
-    required this._stdio,
-  }) : _fs = fileSystem,
-       super(daemon, 'daemon') {
+  DaemonDomain(Daemon daemon, {required this._featureFlags}) : super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
@@ -564,9 +533,9 @@ class DaemonDomain extends Domain {
           // ignore: avoid_print
           print(message.message);
         } else if (message.level == 'error' || message.level == 'warning') {
-          _stdio.stderrWrite('${message.message}\n');
+          stdio.stderrWrite('${message.message}\n');
           if (message.stackTrace != null) {
-            _stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
+            stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
           }
         }
       } else {
@@ -586,11 +555,9 @@ class DaemonDomain extends Domain {
     });
   }
 
-  final FileSystem _fs;
   final FeatureFlags _featureFlags;
-  final Logger _logger;
-  final FlutterProjectFactory _projectFactory;
-  final Stdio _stdio;
+
+  Logger get _logger => daemon.notifyingLogger ?? logger;
 
   StreamSubscription<LogMessage>? _subscription;
 
@@ -637,9 +604,7 @@ class DaemonDomain extends Domain {
     final platformTypes = <String>[];
     final platformTypesMap = <String, Object>{};
     try {
-      final FlutterProject flutterProject = _projectFactory.fromDirectory(
-        _fs.directory(projectRoot),
-      );
+      final FlutterProject flutterProject = projectFactory.fromDirectory(fs.directory(projectRoot));
       final Set<SupportedPlatform> supportedPlatforms = flutterProject
           .getSupportedPlatforms()
           .toSet();
@@ -820,13 +785,12 @@ typedef RunOrAttach = Future<void> Function({
 /// This domain responds to methods like [startApp] and [stop].
 ///
 /// It fires events for application start, stop, and stdout and stderr.
-class AppDomain extends Domain with ToolContextMixin {
+class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
-    required this.toolContext,
     required this._xcode,
   }) : super(daemon, 'app') {
     registerHandler('restart', restart);
@@ -836,9 +800,6 @@ class AppDomain extends Domain with ToolContextMixin {
   }
 
   final Analytics _analytics;
-  @override
-  @protected
-  final ToolContext toolContext;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
   final Xcode? _xcode;
@@ -1228,14 +1189,7 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(
-    Daemon daemon, {
-    required FileSystem fileSystem,
-    required this._logger,
-    required this._projectFactory,
-    this._deviceManager,
-  }) : _fs = fileSystem,
-       super(daemon, 'device') {
+  DeviceDomain(Daemon daemon, {this._deviceManager}) : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1261,9 +1215,8 @@ class DeviceDomain extends Domain {
   }
 
   final DeviceManager? _deviceManager;
-  final FileSystem _fs;
-  final Logger _logger;
-  final FlutterProjectFactory _projectFactory;
+
+  Logger get _logger => daemon.notifyingLogger ?? logger;
 
   /// An incrementing number used to generate unique ids.
   var _id = 0;
@@ -1516,13 +1469,14 @@ class DeviceDomain extends Domain {
 
     FlutterProject? project;
     try {
-      project = _projectFactory.fromDirectory(_fs.currentDirectory);
+      project = projectFactory.fromDirectory(fs.currentDirectory);
     } on ToolExit {
       // In daemon mode the cwd may not be a Flutter project, so we just ignore
       // these errors and use 'Unknown' as the package name below.
     }
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
+      artifacts: artifacts,
       appName:
           'Kind: Flutter - Device: ${device.displayName} - '
           'Package: ${project?.manifest.appName ?? 'Unknown'}',
@@ -1865,29 +1819,26 @@ class EmulatorDomain extends Domain {
   EmulatorDomain(
     Daemon daemon, {
     required AndroidWorkflow androidWorkflow,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required ProcessManager processManager,
     AndroidSdk? androidSdk,
     EmulatorManager? emulatorManager,
     Java? java,
-  }) : emulators =
-           emulatorManager ??
-           EmulatorManager(
-             fileSystem: fileSystem,
-             logger: logger,
-             javaBuilder: () => java,
-             androidSdkBuilder: () => androidSdk,
-             processManager: processManager,
-             androidWorkflow: androidWorkflow,
-           ),
-       super(daemon, 'emulator') {
+  }) : super(daemon, 'emulator') {
+    emulators =
+        emulatorManager ??
+        EmulatorManager(
+          fileSystem: fs,
+          logger: daemon.notifyingLogger ?? logger,
+          javaBuilder: () => java,
+          androidSdkBuilder: () => androidSdk,
+          processManager: processManager,
+          androidWorkflow: androidWorkflow,
+        );
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
     registerHandler('create', create);
   }
 
-  final EmulatorManager emulators;
+  late final EmulatorManager emulators;
 
   Future<List<Map<String, Object?>>> getEmulators([Map<String, Object?>? args]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
@@ -1919,13 +1870,7 @@ class EmulatorDomain extends Domain {
 }
 
 class ProxyDomain extends Domain {
-  ProxyDomain(
-    Daemon daemon, {
-    required FileSystem fileSystem,
-    required this._fileTransfer,
-    required this._logger,
-  }) : _fs = fileSystem,
-       super(daemon, 'proxy') {
+  ProxyDomain(Daemon daemon, {required this._fileTransfer}) : super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);
     registerHandlerWithBinary('updateFile', updateFile);
@@ -1935,8 +1880,8 @@ class ProxyDomain extends Domain {
   }
 
   final FileTransfer _fileTransfer;
-  final FileSystem _fs;
-  final Logger _logger;
+
+  Logger get _logger => daemon.notifyingLogger ?? logger;
 
   final _forwardedConnections = <String, Socket>{};
   var _id = 0;
@@ -2074,8 +2019,7 @@ class ProxyDomain extends Domain {
 
   Directory? _tempDirectory;
   Directory get tempDirectory =>
-      _tempDirectory ??= _fs.systemTempDirectory.childDirectory('flutter_tool_daemon')
-        ..createSync();
+      _tempDirectory ??= fs.systemTempDirectory.childDirectory('flutter_tool_daemon')..createSync();
 }
 
 /// A [Logger] which omits log messages to avoid breaking `--machine` formatting.

@@ -5,42 +5,36 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:process/process.dart';
+import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../vmservice.dart';
 
 /// An interface to the Dart analysis server.
-class AnalysisServer {
+class AnalysisServer with ToolContextMixin {
   AnalysisServer(
     this.sdkPath,
     this.directories, {
-    required this._fileSystem,
-    required this._processManager,
-    required this._logger,
-    required this._platform,
-    required this._terminal,
     required this.suppressAnalytics,
-    this.withFineDependencies = true,
-    this.usePlugins = true,
+    required this.toolContext,
     this._protocolTrafficLog,
+    this.usePlugins = true,
+    this.withFineDependencies = true,
   });
 
   final bool withFineDependencies;
   final bool usePlugins;
   final String sdkPath;
   final List<String> directories;
-  final FileSystem _fileSystem;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final Platform _platform;
-  final Terminal _terminal;
+  @override
+  @protected
+  final ToolContext toolContext;
   final String? _protocolTrafficLog;
   final bool suppressAnalytics;
 
@@ -70,7 +64,7 @@ class AnalysisServer {
 
   Future<void> start() async {
     final command = <String>[
-      _fileSystem.path.join(sdkPath, 'bin', 'dart'),
+      fs.path.join(sdkPath, 'bin', 'dart'),
       'language-server',
       '--dart-sdk',
       sdkPath,
@@ -82,8 +76,8 @@ class AnalysisServer {
       if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',
     ];
 
-    _logger.printTrace('dart ${command.skip(1).join(' ')}');
-    final Process process = _process = await _processManager.start(command);
+    logger.printTrace('dart ${command.skip(1).join(' ')}');
+    final Process process = _process = await processManager.start(command);
     _onExit = process.exitCode;
     // This callback hookup can't throw.
     unawaited(process.exitCode.whenComplete(() => _process = null));
@@ -96,10 +90,9 @@ class AnalysisServer {
     await Future.any<void>([
       sendRequest('initialize', <String, Object?>{
         'processId': pid,
-        'rootUri': _fileSystem.directory(directories.first).uri.toString(),
+        'rootUri': fs.directory(directories.first).uri.toString(),
         'workspaceFolders': [
-          for (final dir in directories)
-            {'name': dir, 'uri': _fileSystem.directory(dir).uri.toString()},
+          for (final dir in directories) {'name': dir, 'uri': fs.directory(dir).uri.toString()},
         ],
         'capabilities': <String, Object?>{
           'window': <String, Object?>{'workDoneProgress': true},
@@ -128,7 +121,7 @@ class AnalysisServer {
 
   void _handleError(String message) {
     _logs.add('[stderr] $message');
-    _logger.printError(message);
+    logger.printError(message);
   }
 
   bool get didServerErrorOccur => _didServerErrorOccur;
@@ -162,7 +155,7 @@ class AnalysisServer {
       'params': params,
     });
     _writeMessage(message: message);
-    _logger.printTrace('==> $message');
+    logger.printTrace('==> $message');
     return completer.future;
   }
 
@@ -177,7 +170,7 @@ class AnalysisServer {
       'params': params,
     });
     _writeMessage(message: message);
-    _logger.printTrace('==> $message');
+    logger.printTrace('==> $message');
   }
 
   void _sendResponse(Object? id, Object? result) {
@@ -187,7 +180,7 @@ class AnalysisServer {
       'result': result,
     });
     _writeMessage(message: message);
-    _logger.printTrace('==> $message');
+    logger.printTrace('==> $message');
   }
 
   final List<int> _byteBuffer = <int>[];
@@ -212,7 +205,7 @@ class AnalysisServer {
       final String headers = utf8.decode(_byteBuffer.sublist(0, byteHeaderEnd));
       final int contentLength = _parseContentLength(headers);
       if (contentLength == -1) {
-        _logger.printTrace('No Content-Length found in headers:\n$headers');
+        logger.printTrace('No Content-Length found in headers:\n$headers');
         _byteBuffer.removeRange(0, byteHeaderEnd + 4);
         continue;
       }
@@ -244,7 +237,7 @@ class AnalysisServer {
 
   void _handleServerResponse(String line) {
     _logs.add('[stdout] $line');
-    _logger.printTrace('<== $line');
+    logger.printTrace('<== $line');
     if (line.startsWith(kVMServiceMessageRegExp)) {
       return;
     }
@@ -316,15 +309,15 @@ class AnalysisServer {
     switch (type) {
       case _ShowMessageType.error:
         _didServerErrorOccur = true;
-        _logger.printError('Error from the analysis server: $message');
+        logger.printError('Error from the analysis server: $message');
       case _ShowMessageType.warning:
-        _logger.printWarning('Warning from the analysis server: $message');
+        logger.printWarning('Warning from the analysis server: $message');
       case _ShowMessageType.info:
-        _logger.printStatus('Info from the analysis server: $message');
+        logger.printStatus('Info from the analysis server: $message');
       case _ShowMessageType.log:
-        _logger.printTrace('Log from the analysis server: $message');
+        logger.printTrace('Log from the analysis server: $message');
       case null:
-        _logger.printStatus('Message from the analysis server: $message');
+        logger.printStatus('Message from the analysis server: $message');
     }
   }
 
@@ -335,7 +328,7 @@ class AnalysisServer {
     try {
       file = uri.toFilePath();
     } on UnsupportedError {
-      _logger.printTrace(
+      logger.printTrace(
         'URI in analysis issues message is not a valid file URI: ${params['uri']}. Ignoring.',
       );
       return;
@@ -347,9 +340,9 @@ class AnalysisServer {
         .map<AnalysisError>((Map<String, Object?> json) {
           return AnalysisError(
             WrittenError.fromLsp(json, file),
-            fileSystem: _fileSystem,
-            platform: _platform,
-            terminal: _terminal,
+            fileSystem: fs,
+            platform: platform,
+            terminal: terminal,
           );
         })
         .toList();

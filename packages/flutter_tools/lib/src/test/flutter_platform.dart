@@ -361,7 +361,7 @@ class FlutterPlatform extends PlatformPlugin with ToolContextMixin {
 
   final String? integrationTestUserIdentifier;
 
-  final _fontConfigManager = FontConfigManager();
+  late final _fontConfigManager = FontConfigManager(toolContext: toolContext);
 
   /// The test compiler produces dill files for each test main.
   ///
@@ -479,18 +479,16 @@ class FlutterPlatform extends PlatformPlugin with ToolContextMixin {
     if (_isIntegrationTest) {
       return IntegrationTestTestDevice(
         id: ourTestCount,
-        debuggingOptions: debuggingOptions,
         device: integrationTestDevice!,
+        debuggingOptions: debuggingOptions,
         userIdentifier: integrationTestUserIdentifier,
         compileExpression: _compileExpressionService,
+        toolContext: toolContext,
       );
     }
     return FlutterTesterTestDevice(
       id: ourTestCount,
-      platform: platform,
-      fileSystem: fs,
-      processManager: processManager,
-      logger: logger,
+      toolContext: toolContext,
       flutterTesterBinPath: flutterTesterBinPath,
       enableVmService: enableVmService!,
       machine: machine,
@@ -522,7 +520,11 @@ class FlutterPlatform extends PlatformPlugin with ToolContextMixin {
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
     final goldensBaseUri = Uri.file(testPath, windows: platform.isWindows);
-    final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
+    final FlutterVmService vmService = await connectToVmService(
+      uri,
+      flutterVersion: flutterVersion,
+      logger: logger,
+    );
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
     vmService.service.onEvent(_kEventName).listen((Event e) async {

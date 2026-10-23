@@ -9,30 +9,22 @@ library;
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
-abstract class AnalyzeBase {
+abstract class AnalyzeBase with ToolContextMixin {
   AnalyzeBase(
     this.argResults, {
-    required this.artifacts,
-    required this.fileSystem,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
     required this.repoPackages,
     required this.suppressAnalytics,
-    required this.terminal,
+    required this.toolContext,
   });
 
   /// The parsed argument results for execution.
@@ -40,22 +32,13 @@ abstract class AnalyzeBase {
   @protected
   final List<Directory> repoPackages;
   @protected
-  final FileSystem fileSystem;
-  @protected
-  final Logger logger;
-  @protected
-  final ProcessManager processManager;
-  @protected
-  final Platform platform;
-  @protected
-  final Terminal terminal;
-  @protected
-  final Artifacts artifacts;
-  @protected
   final bool suppressAnalytics;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   @protected
-  String get flutterRoot => fileSystem.path.absolute(Cache.flutterRoot!);
+  String get flutterRoot => fs.path.absolute(Cache.flutterRoot!);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -63,7 +46,7 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = fileSystem
+        final RandomAccessFile resultsFile = fs
             .file(argResults['write'])
             .openSync(mode: FileMode.write);
         try {
@@ -80,11 +63,11 @@ abstract class AnalyzeBase {
 
   void writeBenchmark(Stopwatch stopwatch, int errorCount) {
     const benchmarkOut = 'analysis_benchmark.json';
-    final data = <String, dynamic>{
+    final data = <String, Object>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
       'issues': errorCount,
     };
-    fileSystem.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
+    fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     logger.printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 

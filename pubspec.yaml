@@ -199,7 +199,7 @@ dependencies:
   vm_service: 15.4.0
   vm_snapshot_analysis: 0.7.6
   watcher: 1.2.1
-  web: 1.1.1
+  web: 1.1.2
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
   webdriver: 3.2.0
@@ -222,4 +222,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 1g9u37
+# PUBSPEC CHECKSUM: stimic

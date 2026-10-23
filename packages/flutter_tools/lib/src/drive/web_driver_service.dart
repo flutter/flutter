@@ -17,7 +17,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../resident_runner.dart';
@@ -26,22 +25,19 @@ import '../web/web_runner.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
-class WebDriverService extends DriverService with ToolContextMixin {
+class WebDriverService extends DriverService {
   WebDriverService({
     required this._analytics,
     required this.buildSystem,
     required this.buildTargets,
     required this._dartSdkPath,
-    required this.toolContext,
+    required super.toolContext,
   });
 
   final Analytics _analytics;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
   final String _dartSdkPath;
-  @override
-  @protected
-  final ToolContext toolContext;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
