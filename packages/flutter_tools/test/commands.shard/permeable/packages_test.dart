@@ -79,7 +79,7 @@ void main() {
     }) async {
       final command = PackagesCommand(
         buildSystem: globals.buildSystem,
-        toolContext: DelegatingToolContext(),
+        toolContext: const DelegatingToolContext(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
@@ -850,7 +850,7 @@ flutter:
         await createTestCommandRunner(
           PackagesCommand(
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           ),
         ).run(<String>['packages', 'test']);
 
@@ -893,7 +893,7 @@ flutter:
         await createTestCommandRunner(
           PackagesCommand(
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           ),
         ).run(<String>['packages', 'test']);
 
@@ -938,7 +938,7 @@ flutter:
         await createTestCommandRunner(
           PackagesCommand(
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           ),
         ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
@@ -981,7 +981,7 @@ flutter:
         await createTestCommandRunner(
           PackagesCommand(
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           ),
         ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
@@ -1022,7 +1022,7 @@ flutter:
         await createTestCommandRunner(
           PackagesCommand(
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
           ),
         ).run(<String>['pub', 'upgrade', '-h']);
 

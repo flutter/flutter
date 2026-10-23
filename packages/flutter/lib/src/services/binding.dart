@@ -594,6 +594,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// menu calls from the engine.
   ///
   /// To unregister, set to null.
+  // ignore: avoid_setters_without_getters
   static set systemContextMenuClient(SystemContextMenuClient? client) {
     instance._systemContextMenuClient = client;
   }

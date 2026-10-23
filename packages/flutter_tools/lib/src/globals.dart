@@ -81,13 +81,7 @@ LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
-final _defaultBotDetector = BotDetector(
-  httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
-  platform: platform,
-  persistentToolState:
-      persistentToolState ??
-      PersistentToolState(fileSystem: fs, logger: logger, platform: platform),
-);
+final _defaultBotDetector = BotDetector(platform: platform);
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 // Analytics instance for package:unified_analytics for analytics
@@ -260,7 +254,7 @@ TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 ///
 /// This is depended on by [localFileSystem] which is called before any
 /// [AppContext] is set up, and thus this cannot be a Context getter.
-final shutdownHooks = ShutdownHooks();
+ShutdownHooks get shutdownHooks => LocalSignals.instance.shutdownHooks;
 
 // Unless we're in a test of this class's signal handling features, we must
 // have only one instance created with the singleton LocalSignals instance
@@ -283,11 +277,6 @@ CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>(
 
 PreRunValidator get preRunValidator =>
     context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
-
-// Used to build RegExp instances which can detect the VM service message.
-final kVMServiceMessageRegExp = RegExp(
-  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
-);
 
 /// Contains information about the JRE/JDK to use for Java-dependent operations.
 ///

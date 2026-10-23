@@ -44,10 +44,16 @@ class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateRepor
   // Visible for testing.
   double GetMaxRefreshRateForTesting() const { return max_refresh_rate_; }
 
+  // The FlutterEngine sets this flag to true while an event is being dispatched
+  // to the framework.
+  void SetDispatchingEvent(bool dispatching_event) { dispatching_event_ = dispatching_event; }
+
  private:
   FlutterVSyncClient* client_;
   FlutterDisplayLinkManager* display_link_manager_;
   double max_refresh_rate_;
+  bool waiting_for_vsync_ = false;
+  bool dispatching_event_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
 };
