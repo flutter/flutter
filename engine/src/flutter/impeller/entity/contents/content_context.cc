@@ -269,21 +269,7 @@ struct ContentContext::Pipelines {
   Variants<LinearGradientUniformFillPipeline> linear_gradient_uniform_fill;
   Variants<LinearToSrgbFilterPipeline> linear_to_srgb_filter;
   Variants<MorphologyFilterPipeline> morphology_filter;
-  Variants<PorterDuffBlendPipeline> clear_blend;
-  Variants<PorterDuffBlendPipeline> destination_a_top_blend;
-  Variants<PorterDuffBlendPipeline> destination_blend;
-  Variants<PorterDuffBlendPipeline> destination_in_blend;
-  Variants<PorterDuffBlendPipeline> destination_out_blend;
-  Variants<PorterDuffBlendPipeline> destination_over_blend;
-  Variants<PorterDuffBlendPipeline> modulate_blend;
-  Variants<PorterDuffBlendPipeline> plus_blend;
-  Variants<PorterDuffBlendPipeline> screen_blend;
-  Variants<PorterDuffBlendPipeline> source_a_top_blend;
-  Variants<PorterDuffBlendPipeline> source_blend;
-  Variants<PorterDuffBlendPipeline> source_in_blend;
-  Variants<PorterDuffBlendPipeline> source_out_blend;
-  Variants<PorterDuffBlendPipeline> source_over_blend;
-  Variants<PorterDuffBlendPipeline> xor_blend;
+  Variants<PorterDuffBlendPipeline> porter_duff_blend;
   Variants<RadialGradientFillPipeline> radial_gradient_fill;
   Variants<RadialGradientSSBOFillPipeline> radial_gradient_ssbo_fill;
   Variants<RadialGradientUniformFillPipeline> radial_gradient_uniform_fill;
@@ -514,28 +500,6 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
 
   desc.SetPrimitiveType(primitive_type);
   desc.SetPolygonMode(PolygonMode::kFill);
-}
-
-std::array<std::vector<Scalar>, 15> GetPorterDuffSpecConstants(
-    bool supports_decal) {
-  Scalar x = supports_decal ? 1 : 0;
-  return {{
-      {x, 0, 0, 0, 0, 0},    // Clear
-      {x, 1, 0, 0, 0, 0},    // Source
-      {x, 0, 0, 1, 0, 0},    // Destination
-      {x, 1, 0, 1, -1, 0},   // SourceOver
-      {x, 1, -1, 1, 0, 0},   // DestinationOver
-      {x, 0, 1, 0, 0, 0},    // SourceIn
-      {x, 0, 0, 0, 1, 0},    // DestinationIn
-      {x, 1, -1, 0, 0, 0},   // SourceOut
-      {x, 0, 0, 1, -1, 0},   // DestinationOut
-      {x, 0, 1, 1, -1, 0},   // SourceATop
-      {x, 1, -1, 0, 1, 0},   // DestinationATop
-      {x, 1, -1, 1, -1, 0},  // Xor
-      {x, 1, 0, 1, 0, 0},    // Plus
-      {x, 0, 0, 0, 0, 1},    // Modulate
-      {x, 0, 0, 1, 0, -1},   // Screen
-  }};
 }
 
 template <typename PipelineT>
@@ -800,39 +764,10 @@ ContentContext::ContentContext(
                                                {supports_decal});
     pipelines_->vertices_uber_2_.CreateDefault(*context_, options_triangle,
                                                {supports_decal});
-
-    const std::array<std::vector<Scalar>, 15> porter_duff_constants =
-        GetPorterDuffSpecConstants(supports_decal);
-    pipelines_->clear_blend.CreateDefault(*context_, options_trianglestrip,
-                                          porter_duff_constants[0]);
-    pipelines_->source_blend.CreateDefault(*context_, options_trianglestrip,
-                                           porter_duff_constants[1]);
-    pipelines_->destination_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[2]);
-    pipelines_->source_over_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[3]);
-    pipelines_->destination_over_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[4]);
-    pipelines_->source_in_blend.CreateDefault(*context_, options_trianglestrip,
-                                              porter_duff_constants[5]);
-    pipelines_->destination_in_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[6]);
-    pipelines_->source_out_blend.CreateDefault(*context_, options_trianglestrip,
-                                               porter_duff_constants[7]);
-    pipelines_->destination_out_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[8]);
-    pipelines_->source_a_top_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[9]);
-    pipelines_->destination_a_top_blend.CreateDefault(
-        *context_, options_trianglestrip, porter_duff_constants[10]);
-    pipelines_->xor_blend.CreateDefault(*context_, options_trianglestrip,
-                                        porter_duff_constants[11]);
-    pipelines_->plus_blend.CreateDefault(*context_, options_trianglestrip,
-                                         porter_duff_constants[12]);
-    pipelines_->modulate_blend.CreateDefault(*context_, options_trianglestrip,
-                                             porter_duff_constants[13]);
-    pipelines_->screen_blend.CreateDefault(*context_, options_trianglestrip,
-                                           porter_duff_constants[14]);
+    // Every porter-duff blend mode draws with this one pipeline. The blend
+    // mode is selected with uniforms, see `SetPorterDuffCoefficients`.
+    pipelines_->porter_duff_blend.CreateDefault(
+        *context_, options_trianglestrip, {supports_decal});
   }
 
   if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
@@ -1297,134 +1232,9 @@ PipelineRef ContentContext::GetComplexRSEPipeline(
   return GetPipeline(this, pipelines_->complex_rse, opts);
 }
 
-PipelineRef ContentContext::GetPorterDuffPipeline(
-    BlendMode mode,
+PipelineRef ContentContext::GetPorterDuffBlendPipeline(
     ContentContextOptions opts) const {
-  switch (mode) {
-    case BlendMode::kClear:
-      return GetClearBlendPipeline(opts);
-    case BlendMode::kSrc:
-      return GetSourceBlendPipeline(opts);
-    case BlendMode::kDst:
-      return GetDestinationBlendPipeline(opts);
-    case BlendMode::kSrcOver:
-      return GetSourceOverBlendPipeline(opts);
-    case BlendMode::kDstOver:
-      return GetDestinationOverBlendPipeline(opts);
-    case BlendMode::kSrcIn:
-      return GetSourceInBlendPipeline(opts);
-    case BlendMode::kDstIn:
-      return GetDestinationInBlendPipeline(opts);
-    case BlendMode::kSrcOut:
-      return GetSourceOutBlendPipeline(opts);
-    case BlendMode::kDstOut:
-      return GetDestinationOutBlendPipeline(opts);
-    case BlendMode::kSrcATop:
-      return GetSourceATopBlendPipeline(opts);
-    case BlendMode::kDstATop:
-      return GetDestinationATopBlendPipeline(opts);
-    case BlendMode::kXor:
-      return GetXorBlendPipeline(opts);
-    case BlendMode::kPlus:
-      return GetPlusBlendPipeline(opts);
-    case BlendMode::kModulate:
-      return GetModulateBlendPipeline(opts);
-    case BlendMode::kScreen:
-      return GetScreenBlendPipeline(opts);
-    case BlendMode::kOverlay:
-    case BlendMode::kDarken:
-    case BlendMode::kLighten:
-    case BlendMode::kColorDodge:
-    case BlendMode::kColorBurn:
-    case BlendMode::kHardLight:
-    case BlendMode::kSoftLight:
-    case BlendMode::kDifference:
-    case BlendMode::kExclusion:
-    case BlendMode::kMultiply:
-    case BlendMode::kHue:
-    case BlendMode::kSaturation:
-    case BlendMode::kColor:
-    case BlendMode::kLuminosity:
-      VALIDATION_LOG << "Invalid porter duff blend mode "
-                     << BlendModeToString(mode);
-      return GetClearBlendPipeline(opts);
-      break;
-  }
-}
-
-PipelineRef ContentContext::GetClearBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->clear_blend, opts);
-}
-
-PipelineRef ContentContext::GetSourceBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->source_blend, opts);
-}
-
-PipelineRef ContentContext::GetDestinationBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->destination_blend, opts);
-}
-
-PipelineRef ContentContext::GetSourceOverBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->source_over_blend, opts);
-}
-
-PipelineRef ContentContext::GetDestinationOverBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->destination_over_blend, opts);
-}
-
-PipelineRef ContentContext::GetSourceInBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->source_in_blend, opts);
-}
-
-PipelineRef ContentContext::GetDestinationInBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->destination_in_blend, opts);
-}
-
-PipelineRef ContentContext::GetSourceOutBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->source_out_blend, opts);
-}
-
-PipelineRef ContentContext::GetDestinationOutBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->destination_out_blend, opts);
-}
-
-PipelineRef ContentContext::GetSourceATopBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->source_a_top_blend, opts);
-}
-
-PipelineRef ContentContext::GetDestinationATopBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->destination_a_top_blend, opts);
-}
-
-PipelineRef ContentContext::GetXorBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->xor_blend, opts);
-}
-
-PipelineRef ContentContext::GetPlusBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->plus_blend, opts);
-}
-
-PipelineRef ContentContext::GetModulateBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->modulate_blend, opts);
-}
-
-PipelineRef ContentContext::GetScreenBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->screen_blend, opts);
+  return GetPipeline(this, pipelines_->porter_duff_blend, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorPipeline(
