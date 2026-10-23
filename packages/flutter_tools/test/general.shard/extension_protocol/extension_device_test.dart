@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
@@ -19,7 +18,6 @@ import '../../src/common.dart';
 
 const _primaryDeviceId = 'custom_device_1';
 const _secondaryDeviceId = 'custom_device_2';
-const _testAppId = 'com.example.custom_app';
 const _startEventType = 'start';
 const _stopEventType = 'stop';
 const _eventTypeKey = 'type';
@@ -27,11 +25,13 @@ const _eventTypeKey = 'type';
 final class _StreamingTestDeviceService extends DeviceService {
   _StreamingTestDeviceService({
     required this.eventSendPort,
+    this.exitAfterEmitting = false,
     this.linesByDevice = const <String, List<String>>{},
     this.throwOnStart = false,
   });
 
   final SendPort eventSendPort;
+  final bool exitAfterEmitting;
   final Map<String, List<String>> linesByDevice;
   final bool throwOnStart;
 
@@ -58,20 +58,22 @@ final class _StreamingTestDeviceService extends DeviceService {
   }) async => true;
 
   @override
-  Future<void> startLogStream({required String deviceId, String? appId}) async {
+  Future<void> startLogStream({required String deviceId}) async {
     if (throwOnStart) {
       throw StateError('Simulated startLogStream failure');
     }
     eventSendPort.send(<String, Object?>{
       _eventTypeKey: _startEventType,
       DeviceService.deviceIdParam: deviceId,
-      DeviceService.appIdParam: appId,
     });
     for (final MapEntry(key: String sourceDeviceId, value: List<String> lines)
         in linesByDevice.entries) {
       for (final line in lines) {
         emitLogLine(deviceId: sourceDeviceId, line: line);
       }
+    }
+    if (exitAfterEmitting) {
+      Timer.run(Isolate.exit);
     }
   }
 
@@ -82,23 +84,6 @@ final class _StreamingTestDeviceService extends DeviceService {
       DeviceService.deviceIdParam: deviceId,
     });
   }
-}
-
-final class _ReservedLogEntryService extends ToolExtensionService {
-  @override
-  String get namespace => DeviceService.serviceNamespace;
-
-  @override
-  Future<Map<String, ExtensionRpcHandler>> initialize() async {
-    return <String, ExtensionRpcHandler>{'logEntry': (Map<String, Object?> _) => null};
-  }
-}
-
-final class _FakeApplicationPackage extends ApplicationPackage {
-  _FakeApplicationPackage(String id) : super(id: id);
-
-  @override
-  String get name => id;
 }
 
 void main() {
@@ -113,8 +98,7 @@ void main() {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
-          .cast<Map<Object?, Object?>>()
-          .map((Map<Object?, Object?> map) => map.cast<String, Object?>())
+          .cast<Map<String, Object?>>()
           .asBroadcastStream();
       final SendPort eventSendPort = eventPort.sendPort;
 
@@ -144,13 +128,12 @@ void main() {
         logger: logger,
         targetDevice: targetDevices.first,
       );
-      final app = _FakeApplicationPackage(_testAppId);
 
       final Future<Map<String, Object?>> startEventFuture = events.firstWhere(
         (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
       );
-      final DeviceLogReader reader = await device.getLogReader(app: app);
-      expect(identical(await device.getLogReader(app: app), reader), isTrue);
+      final DeviceLogReader reader = await device.getLogReader();
+      expect(await device.getLogReader(), same(reader));
 
       final Future<List<String>> receivedLinesFuture = reader.logLines.take(2).toList();
 
@@ -162,7 +145,6 @@ void main() {
 
       final Map<String, Object?> startEvent = await startEventFuture;
       expect(startEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
-      expect(startEvent[DeviceService.appIdParam], equals(_testAppId));
 
       final Future<Map<String, Object?>> stopEventFuture = events.firstWhere(
         (Map<String, Object?> event) => event[_eventTypeKey] == _stopEventType,
@@ -222,8 +204,7 @@ void main() {
         final eventPort = ReceivePort();
         addTearDown(eventPort.close);
         final Stream<Map<String, Object?>> events = eventPort
-            .cast<Map<Object?, Object?>>()
-            .map((Map<Object?, Object?> map) => map.cast<String, Object?>())
+            .cast<Map<String, Object?>>()
             .asBroadcastStream();
         final SendPort eventSendPort = eventPort.sendPort;
 
@@ -266,37 +247,85 @@ void main() {
       },
     );
 
-    testWithoutContext('ExtensionDeviceLogReader logs warning when startLogStream fails', () async {
-      final eventPort = ReceivePort();
-      addTearDown(eventPort.close);
-      final SendPort eventSendPort = eventPort.sendPort;
+    testWithoutContext(
+      'ExtensionDeviceLogReader logs warning and closes stream when startLogStream fails',
+      () async {
+        final eventPort = ReceivePort();
+        addTearDown(eventPort.close);
+        final SendPort eventSendPort = eventPort.sendPort;
 
-      void entryPoint(SendPort sendPort) {
-        unawaited(
-          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-            _StreamingTestDeviceService(eventSendPort: eventSendPort, throwOnStart: true),
-          ]),
+        void entryPoint(SendPort sendPort) {
+          unawaited(
+            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+              _StreamingTestDeviceService(eventSendPort: eventSendPort, throwOnStart: true),
+            ]),
+          );
+        }
+
+        final ExtensionConnection conn = await ExtensionConnection.spawn(
+          entryPoint,
+          logger: logger,
         );
-      }
+        addTearDown(conn.dispose);
 
-      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
-      addTearDown(conn.dispose);
+        final client = ExtensionDeviceClient(conn, logger: logger);
+        final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
+          connection: conn,
+          deviceId: _primaryDeviceId,
+          deviceService: client,
+          logger: logger,
+          name: 'Primary Extension Device',
+        );
+        addTearDown(reader.dispose);
 
-      final client = ExtensionDeviceClient(conn, logger: logger);
-      final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
-        connection: conn,
-        deviceId: _primaryDeviceId,
-        deviceService: client,
-        logger: logger,
-        name: 'Primary Extension Device',
-      );
-      addTearDown(reader.dispose);
+        expect(
+          logger.warningText,
+          contains('Failed to start log stream for extension device "$_primaryDeviceId"'),
+        );
+        await expectLater(reader.logLines, emitsDone);
+      },
+    );
 
-      expect(
-        logger.warningText,
-        contains('Failed to start log stream for extension device "$_primaryDeviceId"'),
-      );
-    });
+    testWithoutContext(
+      'ExtensionDeviceLogReader closes logLines when extension isolate exits',
+      () async {
+        final eventPort = ReceivePort();
+        addTearDown(eventPort.close);
+        final SendPort eventSendPort = eventPort.sendPort;
+
+        void entryPoint(SendPort sendPort) {
+          unawaited(
+            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+              _StreamingTestDeviceService(
+                eventSendPort: eventSendPort,
+                exitAfterEmitting: true,
+                linesByDevice: const <String, List<String>>{
+                  _primaryDeviceId: <String>['line before exit'],
+                },
+              ),
+            ]),
+          );
+        }
+
+        final ExtensionConnection conn = await ExtensionConnection.spawn(
+          entryPoint,
+          logger: logger,
+        );
+        addTearDown(conn.dispose);
+
+        final client = ExtensionDeviceClient(conn, logger: logger);
+        final ExtensionDeviceLogReader reader = await ExtensionDeviceLogReader.create(
+          connection: conn,
+          deviceId: _primaryDeviceId,
+          deviceService: client,
+          logger: logger,
+          name: 'Primary Extension Device',
+        );
+        addTearDown(reader.dispose);
+
+        await expectLater(reader.logLines, emitsInOrder(<Object>['line before exit', emitsDone]));
+      },
+    );
 
     testWithoutContext('startLogStream and stopLogStream throw INVALID_PARAMS on missing, empty, or invalid parameters', () async {
       final eventPort = ReceivePort();
@@ -357,41 +386,6 @@ void main() {
           ),
         );
       }
-
-      await expectLater(
-        conn.sendRequest(
-          DeviceService.startLogStreamMethod,
-          params: const <String, Object?>{
-            DeviceService.deviceIdParam: _primaryDeviceId,
-            DeviceService.appIdParam: 123,
-          },
-        ),
-        throwsA(
-          isA<json_rpc.RpcException>().having(
-            (json_rpc.RpcException e) => e.code,
-            'code',
-            error_code.INVALID_PARAMS,
-          ),
-        ),
-      );
-    });
-
-    testWithoutContext('ToolExtensionEntryPoint.run rejects registering reserved device.logEntry notification method', () async {
-      final receivePort = ReceivePort();
-      addTearDown(receivePort.close);
-
-      await expectLater(
-        ToolExtensionEntryPoint.run(receivePort.sendPort, <ToolExtensionService>[
-          _ReservedLogEntryService(),
-        ]),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('Reserved RPC method registered: "device.logEntry"'),
-          ),
-        ),
-      );
     });
   });
 }
