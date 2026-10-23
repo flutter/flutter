@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device_discovery.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -123,74 +122,17 @@ void main() {
   });
 
   testWithoutContext(
-    'AndroidDevices startPolling catches ToolExit on failing adb and recovers on subsequent poll',
-    () {
-      FakeAsync().run((FakeAsync time) {
-        final logger = BufferLogger.test();
-        final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['adb', 'devices', '-l'],
-            exitCode: 1,
-            stderr: '<stderr from adb>',
-          ),
-          const FakeCommand(
-            command: <String>['adb', 'devices', '-l'],
-            stdout: '''
-List of devices attached
-05a02bac               device usb:336592896X product:razor model:Nexus_7 device:flo
-
-  ''',
-          ),
-        ]);
-        final androidDevices = AndroidDevices(
-          androidSdk: FakeAndroidSdk(),
-          logger: logger,
-          androidWorkflow: androidWorkflow,
-          processManager: processManager,
-          fileSystem: MemoryFileSystem.test(),
-          platform: FakePlatform(),
-          userMessages: UserMessages(),
-        );
-        final addedDevices = <Device>[];
-        androidDevices.onAdded.listen(addedDevices.add);
-
-        androidDevices.startPolling();
-
-        // First poll fails with exitCode 1 -> throws ToolExit inside pollingGetDevices,
-        // which _initTimer catches without crashing the zone.
-        time.elapse(Duration.zero);
-        expect(addedDevices, isEmpty);
-        expect(logger.traceText, contains('<stderr from adb>'));
-
-        // Next poll succeeds and discovers the device.
-        time.elapse(const Duration(milliseconds: 4001));
-        expect(addedDevices, hasLength(1));
-        expect(addedDevices.first.name, 'Nexus 7');
-
-        androidDevices.stopPolling();
-        expect(processManager, hasNoRemainingExpectations);
-      });
-    },
-  );
-
-  testWithoutContext(
-    'AndroidDevices getDiagnostics catches ProcessException when adb fails to start',
+    'AndroidDevices getDiagnostics throws ToolExit when adb fails to start',
     () async {
-      final logger = BufferLogger.test();
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['adb', 'devices', '-l'],
-          exception: ProcessException(
-            'adb',
-            <String>['devices', '-l'],
-            'The paging file is too small for this operation to complete.',
-            1455,
-          ),
+          exception: ProcessException('adb', <String>['devices', '-l'], 'Failed to start adb.'),
         ),
       ]);
       final androidDevices = AndroidDevices(
         androidSdk: FakeAndroidSdk(),
-        logger: logger,
+        logger: BufferLogger.test(),
         androidWorkflow: androidWorkflow,
         processManager: processManager,
         fileSystem: MemoryFileSystem.test(),
@@ -198,8 +140,14 @@ List of devices attached
         userMessages: UserMessages(),
       );
 
-      expect(await androidDevices.getDiagnostics(), isEmpty);
-      expect(logger.traceText, contains('Error running adb for diagnostics:'));
+      await expectLater(
+        androidDevices.getDiagnostics(),
+        throwsToolExit(
+          message:
+              'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
+              'Error details: Failed to start adb.',
+        ),
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
   );

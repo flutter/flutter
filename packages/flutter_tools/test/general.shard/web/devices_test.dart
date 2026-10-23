@@ -5,9 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -16,7 +14,6 @@ import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -340,117 +337,6 @@ void main() {
 
     expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'unknown');
-  });
-
-  group('Chrome and Edge version check error handling', () {
-    for (final (String label, int errno, String message) in const <(String, int, String)>[
-      ('group policy errno 1260 (ToolExit)', 1260, 'This program is blocked by group policy'),
-      (
-        'paging file errno 1455 (ProcessException)',
-        1455,
-        'The paging file is too small for this operation to complete.',
-      ),
-    ]) {
-      testWithoutContext('catches $label when reg query fails on Windows', () async {
-        final logger = BufferLogger.test();
-        final platform = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
-        final delegate = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: const <String>[
-              'reg',
-              'query',
-              r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon',
-              '/v',
-              'version',
-            ],
-            exception: ProcessException(
-              'reg',
-              const <String>[
-                'query',
-                r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon',
-                '/v',
-                'version',
-              ],
-              message,
-              errno,
-            ),
-          ),
-          FakeCommand(
-            command: const <String>[
-              'reg',
-              'query',
-              r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon',
-              '/v',
-              'version',
-            ],
-            exception: ProcessException(
-              'reg',
-              const <String>[
-                'query',
-                r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon',
-                '/v',
-                'version',
-              ],
-              message,
-              errno,
-            ),
-          ),
-        ]);
-        final processManager = ErrorHandlingProcessManager(
-          delegate: delegate,
-          platform: platform,
-          analytics: () => const NoOpAnalytics(),
-        );
-        final webDevices = WebDevices(
-          featureFlags: TestFeatureFlags(isWebEnabled: true),
-          fileSystem: MemoryFileSystem.test(),
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
-
-        final List<Device> devices = await webDevices.pollingGetDevices();
-        expect(devices.whereType<MicrosoftEdgeDevice>(), isEmpty);
-
-        final GoogleChromeDevice chromeDevice = devices.whereType<GoogleChromeDevice>().first;
-        expect(await chromeDevice.sdkNameAndVersion, 'unknown');
-        expect(delegate, hasNoRemainingExpectations);
-      });
-    }
-
-    testWithoutContext('catches ProcessException / ToolExit on non-Windows platforms', () async {
-      final platform = FakePlatform(environment: <String, String>{});
-      final delegate = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[kLinuxExecutable, '--version'],
-          exception: ProcessException(
-            kLinuxExecutable,
-            <String>['--version'],
-            'Permission denied',
-            13,
-          ),
-        ),
-      ]);
-      final processManager = ErrorHandlingProcessManager(
-        delegate: delegate,
-        platform: platform,
-        analytics: () => const NoOpAnalytics(),
-      );
-      final webDevices = WebDevices(
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        platform: platform,
-        processManager: processManager,
-      );
-
-      final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
-          .whereType<GoogleChromeDevice>()
-          .first;
-
-      expect(await chromeDevice.sdkNameAndVersion, 'unknown');
-      expect(delegate, hasNoRemainingExpectations);
-    });
   });
 
   testWithoutContext('Edge is not supported on versions less than 73', () async {

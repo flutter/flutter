@@ -68,20 +68,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
     if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
-    String text;
-    try {
-      text = (await _processUtils.run(<String>[
-        _androidSdk!.adbPath!,
-        'devices',
-        '-l',
-      ], throwOnError: true)).stdout.trim();
-    } on ProcessException catch (exception) {
-      throwToolExit(
-        'Unable to run "adb", check your Android SDK installation and '
-        '$kAndroidHome environment variable: ${exception.executable}\n'
-        'Error details: ${exception.message}',
-      );
-    }
+    final String text = (await _runAdbDevices(throwOnError: true)).stdout.trim();
     final devices = <AndroidDevice>[];
     _parseADBDeviceOutput(text, devices: devices);
     return devices;
@@ -93,19 +80,29 @@ class AndroidDevices extends PollingDeviceDiscovery {
       return <String>[];
     }
 
-    final RunResult result;
-    try {
-      result = await _processUtils.run(<String>[_androidSdk!.adbPath!, 'devices', '-l']);
-    } on ProcessException catch (error) {
-      _logger.printTrace('Error running adb for diagnostics: $error');
-      return <String>[];
-    }
+    final RunResult result = await _runAdbDevices();
     if (result.exitCode != 0) {
       return <String>[];
     }
     final diagnostics = <String>[];
     _parseADBDeviceOutput(result.stdout, diagnostics: diagnostics);
     return diagnostics;
+  }
+
+  Future<RunResult> _runAdbDevices({bool throwOnError = false}) async {
+    try {
+      return await _processUtils.run(<String>[
+        _androidSdk!.adbPath!,
+        'devices',
+        '-l',
+      ], throwOnError: throwOnError);
+    } on ProcessException catch (exception) {
+      throwToolExit(
+        'Unable to run "adb", check your Android SDK installation and '
+        '$kAndroidHome environment variable: ${exception.executable}\n'
+        'Error details: ${exception.message}',
+      );
+    }
   }
 
   bool _doesNotHaveAdb() {
