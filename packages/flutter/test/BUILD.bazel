@@ -106,6 +106,26 @@ flutter_test_prelude(
     deps = [":helpers"],
 )
 
+# The same prelude without creation-location tracking, for the widgets
+# suite's second run (widgets/BUILD.bazel): dev/bots runs test/widgets with
+# --track-widget-creation and again with --no-track-widget-creation.
+flutter_test_prelude(
+    name = "prelude_without_creation_locations",
+    compile_args = ["--no-track-creation-locations"],
+    imports = [
+        "package:flutter/cupertino.dart",
+        "package:flutter/material.dart",
+        "package:flutter/rendering.dart",
+        "package:flutter/services.dart",
+        "package:flutter/widgets.dart",
+        "package:flutter_test/flutter_test.dart",
+        "package:test_core/src/direct_run.dart",
+    ],
+    package_config = ":package_config",
+    test_config = "flutter_test_config.dart",
+    deps = [":helpers"],
+)
+
 # The files a test's compile may read besides its package's: the test
 # configuration's imports (_goldens_io.dart, ...) and the helpers of every
 # test directory, since tests import their neighbours' (widgets tests
