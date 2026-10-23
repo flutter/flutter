@@ -1270,7 +1270,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ## Using a ListView inside a Column
 ///
-/// A [ListView] that does not shrink wrap expands to fill the available space
+/// A [ListView] that does not [shrinkWrap] expands to fill the available space
 /// in its [scrollDirection]. A [Column] gives its non-flex children unbounded
 /// height constraints, so a vertical [ListView] placed directly inside a
 /// [Column] has no maximum height to expand to, and throws an error about
@@ -1288,7 +1288,9 @@ abstract class BoxScrollView extends ScrollView {
 ///    contents. Because all of the children must be laid out, this gives up
 ///    lazy building and is expensive for long lists. If the contents are
 ///    taller than the [Column], the [Column] overflows instead of the list
-///    scrolling, unless the [ListView] is also wrapped in a [Flexible].
+///    scrolling, unless the [ListView] is also wrapped in a [Flexible]. Even
+///    then lazy building is still lost, so this is best reserved for short
+///    lists that need to shrink to fit when there are few items.
 ///
 /// The same applies to a horizontal [ListView] inside a [Row], which needs a
 /// bounded width. To make a [ListView] scroll together with other widgets,
