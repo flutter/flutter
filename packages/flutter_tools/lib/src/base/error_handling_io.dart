@@ -1445,6 +1445,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kDeviceFull = 112;
   const kSharingViolation = 32;
   const kLockViolation = 33;
+  const kFilenameExcedRange = 206;
   const kUserMappedSectionOpened = 1224;
   const kAccessDenied = 5;
   const kFatalDeviceHardwareError = 483;
@@ -1468,6 +1469,11 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
+    kFilenameExcedRange =>
+      '${message != null ? "$message. " : ""}The filename or extension is too long.\n'
+          '$e\n'
+          'Please consider moving the Flutter SDK and/or project to a shorter path, '
+          'or enabling long paths on Windows.',
     kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
       '$message. The file is being used by another program.'
           '\n$e\n'
