@@ -142,6 +142,8 @@ FLUTTER_DARWIN_EXPORT
 
 // UITextInput
 @property(nonatomic, readonly) NSMutableString* text;
+// Replaces the complete text value supplied by UIKit autofill.
+- (void)setText:(nullable NSString*)text;
 @property(readwrite, copy) UITextRange* selectedTextRange;
 @property(nonatomic, strong) UITextRange* markedTextRange;
 @property(nonatomic, copy) NSDictionary* markedTextStyle;

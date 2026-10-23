@@ -613,6 +613,126 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqualObjects(substring, @"Á");
 }
 
+- (void)testAutofillSetTextReplacesCommittedMarkedTextForDifferentLengths {
+  for (NSNumber* enableDeltaModel in @[ @NO, @YES ]) {
+    NSDictionary* config = self.mutableTemplateCopy;
+    [config setValue:enableDeltaModel forKey:@"enableDeltaModel"];
+    [self setClientId:123 configuration:config];
+    FlutterTextInputView* inputView = textInputPlugin.activeView;
+
+    for (NSString* code in @[ @"1234", @"123456", @"12345678" ]) {
+      [inputView setText:@""];
+      [inputView setMarkedText:code selectedRange:NSMakeRange(code.length, 0)];
+      [inputView unmarkText];
+
+      // UIKit's whole-value autofill output follows the marked-text commit.
+      [inputView setText:code];
+
+      XCTAssertEqualObjects(inputView.text, code);
+      XCTAssertNil(inputView.markedTextRange);
+      XCTAssertTrue(NSEqualRanges(((FlutterTextRange*)inputView.selectedTextRange).range,
+                                  NSMakeRange(code.length, 0)));
+    }
+  }
+}
+
+- (void)testSetTextReplacesEntireDocumentRegardlessOfSelection {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView insertText:@"previous"];
+  [inputView setSelectedTextRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(2, 3)]];
+
+  [inputView setText:@"1234"];
+
+  XCTAssertEqualObjects(inputView.text, @"1234");
+  XCTAssertTrue(
+      NSEqualRanges(((FlutterTextRange*)inputView.selectedTextRange).range, NSMakeRange(4, 0)));
+}
+
+- (void)testSetTextSendsWholeValueToFramework {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView insertText:@"previous"];
+  [inputView setSelectedTextRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(2, 3)]];
+
+  OCMExpect([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withState:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 return [state[@"text"] isEqualToString:@"1234"] &&
+                                        [state[@"selectionBase"] intValue] == 4 &&
+                                        [state[@"selectionExtent"] intValue] == 4 &&
+                                        [state[@"composingBase"] intValue] == -1 &&
+                                        [state[@"composingExtent"] intValue] == -1;
+                               }]]);
+
+  [inputView setText:@"1234"];
+
+  OCMVerifyAll(engine);
+}
+
+- (void)testAutofillSetTextSendsReplacementDeltaAfterMarkedTextCommit {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  inputView.enableDeltaModel = YES;
+  [inputView setMarkedText:@"123456" selectedRange:NSMakeRange(6, 0)];
+  [inputView unmarkText];
+  [self flushScheduledAsyncBlocks];
+
+  OCMExpect([engine flutterTextInputView:inputView
+                     updateEditingClient:0
+                               withDelta:[OCMArg checkWithBlock:^BOOL(NSDictionary* state) {
+                                 NSArray* deltas = state[@"deltas"];
+                                 if (deltas.count != 1) {
+                                   return NO;
+                                 }
+                                 NSDictionary* delta = deltas[0];
+                                 return [delta[@"oldText"] isEqualToString:@"123456"] &&
+                                        [delta[@"deltaText"] isEqualToString:@"123456"] &&
+                                        [delta[@"deltaStart"] intValue] == 0 &&
+                                        [delta[@"deltaEnd"] intValue] == 6 &&
+                                        [delta[@"selectionBase"] intValue] == 6 &&
+                                        [delta[@"selectionExtent"] intValue] == 6 &&
+                                        [delta[@"composingBase"] intValue] == -1 &&
+                                        [delta[@"composingExtent"] intValue] == -1;
+                               }]]);
+
+  [inputView setText:@"123456"];
+  [self flushScheduledAsyncBlocks];
+
+  XCTAssertEqualObjects(inputView.text, @"123456");
+  OCMVerifyAll(engine);
+}
+
+- (void)testSetTextClearsTheDocumentForNil {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setMarkedText:@"123456" selectedRange:NSMakeRange(6, 0)];
+
+  [inputView setText:nil];
+
+  XCTAssertEqualObjects(inputView.text, @"");
+  XCTAssertNil(inputView.markedTextRange);
+  XCTAssertTrue(
+      NSEqualRanges(((FlutterTextRange*)inputView.selectedTextRange).range, NSMakeRange(0, 0)));
+}
+
+- (void)testSetTextPreservesComposedCharacters {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSString* replacement = @"中文👨‍👩‍👧‍👦é";
+  [inputView insertText:@"previous"];
+
+  [inputView setText:replacement];
+
+  XCTAssertEqualObjects(inputView.text, replacement);
+  XCTAssertTrue(NSEqualRanges(((FlutterTextRange*)inputView.selectedTextRange).range,
+                              NSMakeRange(replacement.length, 0)));
+}
+
+- (void)testRepeatedInsertTextStillAppendsAfterSetText {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setText:@""];
+  [inputView insertText:@"1234"];
+  [inputView insertText:@"1234"];
+
+  XCTAssertEqualObjects(inputView.text, @"12341234");
+}
+
 - (void)testTextInRangeAcceptsNSNotFoundLocationGracefully {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
