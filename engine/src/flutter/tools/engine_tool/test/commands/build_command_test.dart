@@ -647,8 +647,61 @@ The input testing/foo:foo matches no targets, configs or files.
       ]);
     });
 
-    test('with no targets runs the install target into the build directory', () async {
-      final testEnv = TestEnvironment.withTestEngine();
+    test(
+      "with no targets builds the host's local engine manifest and names its directory",
+      () async {
+        // What Bazel answers: the output directory, and the target's files.
+        final testEnv = TestEnvironment.withTestEngine(
+          cannedProcesses: <CannedProcess>[
+            CannedProcess(
+              (command) => command.length > 1 && command[1] == 'info',
+              stdout: '/cache/execroot/_main/bazel-out\n',
+            ),
+            CannedProcess(
+              (command) => command.length > 1 && command[1] == 'cquery',
+              stdout:
+                  'bazel-out/k8-dbg/bin/engine/src/flutter/shell/testing/shipped/flutter_tester\n'
+                  'bazel-out/k8-dbg/bin/engine/src/flutter/local_engine.json\n',
+            ),
+          ],
+        );
+        addTearDown(testEnv.cleanup);
+
+        final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
+        final int result = await runner.run([
+          'build',
+          '--config',
+          'host_debug',
+          '--backend',
+          'bazel',
+        ]);
+
+        printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+        expect(result, equals(0));
+        expect(testEnv.processHistory.map((p) => p.command), <List<String>>[
+          <String>['bazelisk', 'build', '--config=host_debug', '//engine/src/flutter:local_engine'],
+          <String>['bazelisk', 'info', '--config=host_debug', 'output_path'],
+          <String>[
+            'bazelisk',
+            'cquery',
+            '--config=host_debug',
+            '--output=files',
+            '//engine/src/flutter:local_engine',
+          ],
+        ]);
+        expect(
+          testEnv.testLogs.map((r) => r.message).join('\n'),
+          contains('--local-engine=/cache/execroot/_main/bazel-out/k8-dbg/bin/engine/src/flutter'),
+        );
+      },
+    );
+
+    test('with no targets fails when the local engine build fails', () async {
+      final testEnv = TestEnvironment.withTestEngine(
+        cannedProcesses: <CannedProcess>[
+          CannedProcess((command) => command.length > 1 && command[1] == 'build', exitCode: 1),
+        ],
+      );
       addTearDown(testEnv.cleanup);
 
       final runner = ToolCommandRunner(environment: testEnv.environment, configs: linuxConfigs());
@@ -660,16 +713,8 @@ The input testing/foo:foo matches no targets, configs or files.
         'bazel',
       ]);
 
-      printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
-      expect(result, equals(0));
-      expect(testEnv.processHistory.single.command, <String>[
-        'bazelisk',
-        'run',
-        '--config=host_debug',
-        '//engine/src/flutter:install',
-        '--',
-        path.join(testEnv.environment.engine.outDir.path, 'host_debug'),
-      ]);
+      expect(result, equals(1));
+      expect(testEnv.processHistory, hasLength(1));
     });
 
     test('ET_BACKEND selects the backend', () async {
