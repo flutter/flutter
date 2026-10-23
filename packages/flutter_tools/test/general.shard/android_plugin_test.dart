@@ -21,7 +21,7 @@ void main() {
       );
 
       expect(
-        () => androidPlugin.toMap(fileSystem),
+        () => androidPlugin.toMap(fileSystem: fileSystem),
         throwsToolExit(
           message:
               "The plugin `pluginA` doesn't have a main class defined in "
@@ -40,7 +40,7 @@ void main() {
       pluginPath: '.pub_cache/plugin_a',
     );
 
-    expect(androidPlugin.toMap(fileSystem), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem: fileSystem), <String, Object>{
       'name': 'pluginA',
       'dartPluginClass': 'PluginA',
       'supportsEmbeddingV1': false,
@@ -61,7 +61,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('io.flutter.embedding.engine.plugins.FlutterPlugin');
 
-    expect(androidPlugin.toMap(fileSystem), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem: fileSystem), <String, Object>{
       'name': 'pluginA',
       'package': 'com.company',
       'class': 'PluginA',
@@ -83,7 +83,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('some.other.string');
 
-    expect(androidPlugin.toMap(fileSystem), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem: fileSystem), <String, Object>{
       'name': 'pluginA',
       'package': 'com.company',
       'class': 'PluginA',
@@ -105,7 +105,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('io.flutter.embedding.engine.plugins.FlutterPlugin');
 
-    expect(androidPlugin.toMap(fileSystem), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem: fileSystem), <String, Object>{
       'name': 'pluginA',
       'package': 'com.company',
       'class': 'PluginA',
@@ -127,7 +127,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('some.other.string');
 
-    expect(androidPlugin.toMap(fileSystem), <String, Object>{
+    expect(androidPlugin.toMap(fileSystem: fileSystem), <String, Object>{
       'name': 'pluginA',
       'package': 'com.company',
       'class': 'PluginA',

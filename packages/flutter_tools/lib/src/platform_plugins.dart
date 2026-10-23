@@ -34,6 +34,8 @@ enum PluginPlatformVariant {
 /// Marker interface for all platform specific plugin config implementations.
 abstract class PluginPlatform {
   const PluginPlatform();
+
+  Map<String, dynamic> toMap({required FileSystem fileSystem});
 }
 
 /// A plugin that has platform variants.
@@ -150,7 +152,8 @@ class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
   /// The absolute path to the plugin in the pub cache.
   final String pluginPath;
 
-  Map<String, dynamic> toMap(FileSystem fileSystem) {
+  @override
+  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
     final Set<String> supportedEmbeddings = _getSupportedEmbeddings(fileSystem);
     return <String, dynamic>{
       'name': name,
@@ -302,7 +305,8 @@ class IOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, Darw
   @override
   bool hasFfi() => ffiPlugin;
 
-  Map<String, dynamic> toMap() {
+  @override
+  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
     return <String, dynamic>{
       'name': name,
       'prefix': classPrefix,
@@ -387,7 +391,8 @@ class MacOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, Da
   @override
   bool hasFfi() => ffiPlugin;
 
-  Map<String, dynamic> toMap() {
+  @override
+  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
     return <String, dynamic>{
       'name': name,
       'class': ?pluginClass,
@@ -489,7 +494,8 @@ class WindowsPlugin extends PluginPlatform
   @override
   bool hasFfi() => ffiPlugin;
 
-  Map<String, dynamic> toMap() {
+  @override
+  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
     return <String, dynamic>{
       'name': name,
       'class': ?pluginClass,
@@ -562,7 +568,8 @@ class LinuxPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
   @override
   bool hasFfi() => ffiPlugin;
 
-  Map<String, dynamic> toMap() {
+  @override
+  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
     return <String, dynamic>{
       'name': name,
       'class': ?pluginClass,
@@ -604,7 +611,8 @@ class WebPlugin extends PluginPlatform {
   /// The name of the file containing the class implementation above.
   final String fileName;
 
-  Map<String, dynamic> toMap() {
+  @override
+  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
     return <String, dynamic>{'name': name, 'class': pluginClass, 'file': fileName};
   }
 }

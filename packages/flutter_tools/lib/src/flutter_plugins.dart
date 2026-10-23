@@ -559,15 +559,7 @@ List<Map<String, Object?>> _extractPlatformMaps(
   return <Map<String, Object?>>[
     for (final Plugin plugin in plugins)
       if (plugin.platforms[type] case final PluginPlatform platformPlugin)
-        switch (platformPlugin) {
-          AndroidPlugin() => platformPlugin.toMap(fileSystem),
-          IOSPlugin() => platformPlugin.toMap(),
-          LinuxPlugin() => platformPlugin.toMap(),
-          MacOSPlugin() => platformPlugin.toMap(),
-          WebPlugin() => platformPlugin.toMap(),
-          WindowsPlugin() => platformPlugin.toMap(),
-          _ => throw StateError('Unexpected PluginPlatform type: ${platformPlugin.runtimeType}'),
-        },
+        platformPlugin.toMap(fileSystem: fileSystem),
   ];
 }
 
