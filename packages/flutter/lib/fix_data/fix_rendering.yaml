@@ -18,6 +18,7 @@
 # * Fixes in this file are from the Rendering library. *
 version: 1
 transforms:
+  # Change made in https://github.com/flutter/flutter/pull/195129
   - title: "Remove 'reverseDuration'"
     date: 2026-10-22
     element:

@@ -24,6 +24,7 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Change made in https://github.com/flutter/flutter/pull/195129
   - title: "Remove 'reverseDuration'"
     date: 2026-10-22
     element:
