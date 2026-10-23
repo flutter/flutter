@@ -153,6 +153,7 @@ void main() {
 
       final Map<String, Object?> stopEvent = await stopEventFuture;
       expect(stopEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
+      expect(await device.getLogReader(), isA<NoOpDeviceLogReader>());
     });
 
     testWithoutContext(
