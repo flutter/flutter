@@ -4,7 +4,6 @@
 
 import 'dart:ffi' show Abi;
 
-import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -531,58 +530,78 @@ class _WindowsUtils extends OperatingSystemUtils {
     return <File>[_fileSystem.file(lines.first.trim())];
   }
 
+  late final String _tarPath = _fileSystem.path.join(
+    _platform.environment['SystemRoot'] ??
+        _platform.environment['SYSTEMROOT'] ??
+        _platform.environment['windir'] ??
+        _platform.environment['WINDIR'] ??
+        r'C:\Windows',
+    'System32',
+    'tar.exe',
+  );
+
+  // bsdtar rejects entries with '..' components or absolute paths unless -P is
+  // passed (zip-slip protection, see https://github.com/flutter/flutter/issues/185794).
+  // Never add -P.
+  void _unpackWithTar(File file, Directory targetDirectory) {
+    _processUtils.runSync(
+      <String>[_tarPath, '-xf', file.path, '-C', targetDirectory.path],
+      throwOnError: true,
+      verboseExceptions: true,
+    );
+  }
+
   @override
   void unzip(File file, Directory targetDirectory) {
-    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
-    _unpackArchive(archive, targetDirectory);
+    // Windows 10 build 17063+ includes bsdtar in System32, which can unpack both
+    // zip and tar archives significantly faster than starting a PowerShell host.
+    // Resolve the System32 binary explicitly to avoid invoking GNU tar from
+    // Git for Windows or MSYS2 if present earlier on the PATH.
+    if (_processManager.canRun(_tarPath)) {
+      if (!targetDirectory.existsSync()) {
+        targetDirectory.createSync(recursive: true);
+      }
+      _unpackWithTar(file, targetDirectory);
+      return;
+    }
+    // Fall back to PowerShell's Expand-Archive on older Windows versions.
+    // Check for both Windows PowerShell ('powershell') and PowerShell Core ('pwsh').
+    final String? powershellExec = switch (true) {
+      _ when _processManager.canRun('powershell') => 'powershell',
+      _ when _processManager.canRun('pwsh') => 'pwsh',
+      _ => null,
+    };
+    if (powershellExec != null) {
+      if (!targetDirectory.existsSync()) {
+        targetDirectory.createSync(recursive: true);
+      }
+      final String escapedFilePath = file.path.replaceAll("'", "''");
+      final String escapedTargetPath = targetDirectory.path.replaceAll("'", "''");
+      final script =
+          r"$ErrorActionPreference = 'Stop'; "
+          "Expand-Archive -LiteralPath '$escapedFilePath' -DestinationPath '$escapedTargetPath' -Force";
+      _processUtils.runSync(
+        <String>[powershellExec, '-NoProfile', '-NonInteractive', '-Command', script],
+        throwOnError: true,
+        verboseExceptions: true,
+      );
+      return;
+    }
+    throwToolExit(
+      'Unable to find "$_tarPath" or PowerShell ("powershell"/"pwsh"). '
+      'Unable to extract ${file.path}.',
+    );
   }
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    final Archive archive = TarDecoder().decodeBytes(
-      GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
-    );
-    _unpackArchive(archive, targetDirectory);
-  }
-
-  void _unpackArchive(Archive archive, Directory targetDirectory) {
-    // The target directory does not change across entries, so compute its
-    // canonical form once instead of per file.
-    final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(targetDirectory.path);
-    for (final ArchiveFile archiveFile in archive.files) {
-      // The archive package doesn't correctly set isFile.
-      if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
-        continue;
-      }
-
-      final File destFile = _fileSystem.file(
-        _fileSystem.path.canonicalize(
-          _fileSystem.path.join(targetDirectory.path, archiveFile.name),
-        ),
-      );
-
-      // Validate that the destFile is within the targetDirectory we want to
-      // extract to.
-      //
-      // See https://snyk.io/research/zip-slip-vulnerability for more context.
-      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(destFile.path);
-      final bool isAtRoot = _fileSystem.path.equals(
-        targetDirectoryCanonicalPath,
-        destinationFileCanonicalPath,
-      );
-      if (!isAtRoot &&
-          !_fileSystem.path.isWithin(targetDirectoryCanonicalPath, destinationFileCanonicalPath)) {
-        throw StateError(
-          'Tried to extract the file $destinationFileCanonicalPath outside of the '
-          'target directory $targetDirectoryCanonicalPath',
-        );
-      }
-
-      if (!destFile.parent.existsSync()) {
-        destFile.parent.createSync(recursive: true);
-      }
-      destFile.writeAsBytesSync(archiveFile.content as List<int>);
+    if (!_processManager.canRun(_tarPath)) {
+      throwToolExit('Unable to find "$_tarPath". Unable to extract ${gzippedTarFile.path}.');
     }
+    if (!targetDirectory.existsSync()) {
+      targetDirectory.createSync(recursive: true);
+    }
+    _unpackWithTar(gzippedTarFile, targetDirectory);
   }
 
   @override
