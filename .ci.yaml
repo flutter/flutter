@@ -3930,7 +3930,6 @@ targets:
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -3953,7 +3952,6 @@ targets:
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -3976,7 +3974,6 @@ targets:
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -3999,7 +3996,6 @@ targets:
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -4022,7 +4018,6 @@ targets:
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -4332,7 +4327,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
@@ -4649,7 +4643,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
@@ -4792,7 +4785,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
@@ -5108,7 +5100,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       add_recipes_cq: "true"
@@ -5254,7 +5245,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -5287,7 +5277,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -5340,7 +5329,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     runIf:
       - .ci.yaml
@@ -5373,7 +5361,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     runIf:
       - .ci.yaml
@@ -5583,7 +5570,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
@@ -5621,7 +5607,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -5696,7 +5681,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -5758,7 +5742,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -5976,7 +5959,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
@@ -6076,7 +6058,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     enabled_branches:
-      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
       - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
