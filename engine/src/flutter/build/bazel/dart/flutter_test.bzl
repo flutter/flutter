@@ -309,7 +309,7 @@ export APP_NAME="{app_name}"
 cd "{package_directory}"
 mkdir -p fontconfig-cache
 exec "$root/{flutter_tester}" \\
-  --disable-vm-service \\
+  {vm_service_flag} \\
   --icu-data-file-path="$root/{icudtl}" \\
   --enable-checked-mode \\
   --verify-entry-points \\
@@ -323,6 +323,9 @@ exec "$root/{flutter_tester}" \\
 """.format(
             app_name = ctx.attr.app_name,
             assets_env = assets_env,
+            # `flutter test --enable-vmservice` asks for a port (any); the
+            # default disables the service.
+            vm_service_flag = "--vm-service-port=0" if ctx.attr.vm_service else "--disable-vm-service",
             fonts_conf = fonts_conf.short_path,
             package_directory = package_directory,
             flutter_tester = ctx.executable.flutter_tester.short_path,
@@ -402,6 +405,10 @@ flutter_test = rule(
             doc = "The package's test asset directory (flutter_test_assets), flutter_tester's " +
                   "--flutter-assets-dir; none when the package's tests load no asset.",
         ),
+        "vm_service": attr.bool(
+            doc = "Whether flutter_tester serves the VM service, as `flutter test --enable-vmservice` " +
+                  "(integration_test's tests ask dart:developer for its URI); off by default.",
+        ),
         "compile_args": attr.string_list(
             doc = "Further frontend server arguments for the compile (`args` and `env` are the test's own, " +
                   "as on every test rule: flutter_tester's further arguments and the run's environment).",
@@ -442,7 +449,32 @@ flutter_test = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], **kwargs):
+def nearest_test_config(test, test_configs):
+    """The flutter_test_config.dart `flutter test` applies to a test file.
+
+    Args:
+      test: the test file's path, relative to the package.
+      test_configs: the paths of the test tree's `flutter_test_config.dart`
+        and `pubspec.yaml` files, relative to the package.
+
+    Returns:
+      The nearest `flutter_test_config.dart` in the test's directory or
+      above it, or None when there is none or a `pubspec.yaml` (a project's
+      root) comes first -- flutter_tools' findTestConfigFile, which looks
+      for the configuration before the pubspec in each directory.
+    """
+    present = {path: True for path in test_configs}
+    directory = paths.dirname(test)
+    for _ in range(test.count("/") + 1):
+        config = paths.join(directory, "flutter_test_config.dart")
+        if config in present:
+            return config
+        if paths.join(directory, "pubspec.yaml") in present:
+            return None
+        directory = paths.dirname(directory)
+    return None
+
+def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], test_configs = [], **kwargs):
     """One flutter_test per test file, and a test_suite of them.
 
     Args:
@@ -460,14 +492,25 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
         does wherever Gold is unreachable -- `flutter test` on a developer
         machine compares against Gold, and one query in 390 files failed
         with Gold's "Could not complete query" (NEED_DECISION D14, 7).
+      test_configs: the test tree's `flutter_test_config.dart` and
+        `pubspec.yaml` files (a glob of both), when the configuration
+        differs by directory: each test takes the nearest configuration in
+        its directory or above, none past a pubspec.yaml, as `flutter test`
+        finds it (nearest_test_config). Otherwise `test_config` names the
+        one configuration of every test.
       **kwargs: flutter_test's attributes, the same for every file (app_name,
         pubspec, test_config, deps, data, assets, cache, prelude,
-        package_config, runtime_package_config).
+        package_config, runtime_package_config, compile_args, vm_service).
     """
+    if test_configs and "test_config" in kwargs:
+        fail("%s: give test_config (one configuration for every test) or test_configs (the tree's, by directory), not both" % name)
     test_tags = list(tags) + ([] if network else ["block-network"])
     targets = []
     for test in tests:
         test_name = test.removesuffix(".dart").replace("/", "_")
+        attrs = dict(kwargs)
+        if test_configs:
+            attrs["test_config"] = nearest_test_config(test, test_configs)
         flutter_test(
             name = test_name,
             test = test,
@@ -475,7 +518,7 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
             tags = test_tags,
             flaky = test in flaky,
             timeout = "short" if test in flaky else None,
-            **kwargs
+            **attrs
         )
         targets.append(":" + test_name)
     native.test_suite(name = name, tests = targets, tags = tags)

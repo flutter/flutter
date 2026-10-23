@@ -11,3 +11,6 @@ filegroup(
     name = "sources",
     srcs = glob(["lib/**"]) + ["pubspec.yaml"],
 )
+
+# The tests run from the package's directory (test/BUILD.bazel).
+exports_files(["pubspec.yaml"])
