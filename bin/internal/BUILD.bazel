@@ -12,6 +12,17 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files(["material_fonts.version"])
 
+# The scripts and version pins, whole: dev/tools' tests copy the
+# engine-version scripts into a temporary checkout and run them with a mock
+# git.
+filegroup(
+    name = "all_files",
+    srcs = glob(
+        ["**"],
+        exclude = ["BUILD.bazel"],
+    ),
+)
+
 # The engine revision the tool's bootstrap writes to bin/cache/engine.stamp
 # (update_engine_version.sh, from git). Under Bazel the engine is the tree
 # itself, and the stamp is a fixed word, as the SDK version's defines are

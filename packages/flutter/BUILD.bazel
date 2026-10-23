@@ -21,4 +21,7 @@ exports_files([
     "lib/src/widgets/shaders/stretch_effect.frag",
     # The tests run from the package's directory (framework_tests.bzl).
     "pubspec.yaml",
+    # dev/tools' tests of the engine-version scripts copy it into a temporary
+    # checkout.
+    "README.md",
 ])
