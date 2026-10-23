@@ -4447,6 +4447,68 @@ gn_copy(
       );
     });
 
+    test("a wasm link compiles with the engine's copts: the constant and the flags its "
+        'dependencies hand it, after its own cflags', () {
+      // wimp's shape: a wasm_lib over impeller, whose public config turns
+      // warnings off for whoever includes it; and CanvasKit's executable,
+      // which lists no //flutter:config and depends on nothing that does.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/quiet/BUILD.gn': '''
+config("quiet_public") {
+  cflags = [ "-Wno-shadow" ]
+}
+
+source_set("quiet") {
+  sources = [ "q.cc" ]
+  public_configs = [ ":quiet_public" ]
+}
+''',
+        'flutter/mod/BUILD.gn': '''
+wasm_lib("mod") {
+  sources = [ "m.cc" ]
+  cflags = [ "-mreference-types" ]
+  public_configs = [ "//flutter:config" ]
+  deps = [ "//flutter/quiet" ]
+}
+
+executable("ck_js") {
+  output_extension = "js"
+  output_name = "ck"
+  sources = [ "ck.cpp" ]
+  deps = [ "//flutter/quiet" ]
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/mod/BUILD.gn', templates: <String>{'wasm_lib'}),
+        gnPackage: '//flutter/mod',
+        tree: tree,
+        forwardedFlags: DependencyResolver(tree: tree, assumptions: linuxHostAssumptions()),
+      );
+      expect(
+        output,
+        contains('''
+wasm_module(
+    name = "mod",
+    srcs = ["m.cc"],
+    copts = ["-mreference-types"] + FLUTTER_COPTS + [
+        "-Wno-shadow",  # from //flutter/quiet
+    ],
+'''),
+      );
+      expect(
+        output,
+        contains('''
+wasm_executable(
+    name = "ck_js",
+    srcs = ["ck.cpp"],
+    copts = CHROMIUM_CODE_COPTS + [
+        "-Wno-shadow",  # from //flutter/quiet
+    ],
+'''),
+      );
+    });
+
     test(
       'an executable with output_extension "js" is a wasm_executable; its group is a filegroup',
       () {
