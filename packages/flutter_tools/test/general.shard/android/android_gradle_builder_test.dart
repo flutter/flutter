@@ -60,7 +60,6 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -104,6 +103,11 @@ void main() {
             fs: fileSystem ?? globals.fs,
             artifacts: artifacts,
             platform: platform,
+            cache: Cache.test(
+              flutterRoot: '/',
+              fileSystem: fileSystem,
+              processManager: processManager ?? FakeProcessManager.any(),
+            ),
           );
       return AndroidGradleBuilder.fromContexts(
         toolContext: resolvedToolContext,
@@ -134,6 +138,7 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(processManager: processManager, flutterRoot: ''),
           AndroidSdk: () => AndroidSdk(
             fileSystem.directory(missingSdkPath()),
             java: FakeJava(),

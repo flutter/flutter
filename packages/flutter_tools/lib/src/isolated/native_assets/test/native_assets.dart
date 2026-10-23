@@ -11,6 +11,7 @@ import 'package:package_config/package_config_types.dart';
 import '../../../base/file_system.dart';
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
+import '../../../cache.dart';
 import '../../../globals.dart' as globals;
 import '../../../native_assets.dart';
 import '../../../project.dart';
@@ -23,7 +24,9 @@ const _pubspecYamlFileName = 'pubspec.yaml';
 
 /// Builds native assets for `flutter test` targets on the host platform.
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
-  const TestCompilerNativeAssetsBuilderImpl();
+  const TestCompilerNativeAssetsBuilderImpl({required this.cache});
+
+  final Cache cache;
 
   @override
   Future<Uri?> build(BuildInfo buildInfo) async =>
@@ -31,7 +34,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
-      testCompilerBuildNativeAssets(buildInfo);
+      testCompilerBuildNativeAssets(buildInfo, flutterRoot: cache.flutterRoot);
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
@@ -51,8 +54,9 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 /// native assets are disabled, unsupported on the host OS, or no package can
 /// be resolved.
 Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
-  BuildInfo buildInfo,
-) async {
+  BuildInfo buildInfo, {
+  required String flutterRoot,
+}) async {
   final BuildInfo(
     :bool buildNativeAssets,
     :BuildMode mode,
@@ -89,6 +93,7 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     runPackageName,
     pubspecPath,
     includeDevDependencies: true,
+    flutterRoot: flutterRoot,
   );
 
   if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {

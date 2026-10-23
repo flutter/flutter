@@ -21,6 +21,7 @@ import 'base/version.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
+import 'cache.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 import 'features.dart';
@@ -960,13 +961,13 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return productName ?? XcodeBasedProject._defaultHostAppName;
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    await _regenerateModuleFromTemplateIfNeeded();
-    await _updateLLDBIfNeeded();
+  Future<void> ensureReadyForPlatformSpecificTooling({required Cache cache}) async {
+    await _regenerateModuleFromTemplateIfNeeded(cache);
+    await _updateLLDBIfNeeded(cache);
     if (!_flutterLibRoot.existsSync()) {
       return;
     }
-    await _updateGeneratedXcodeConfigIfNeeded();
+    await _updateGeneratedXcodeConfigIfNeeded(cache);
   }
 
   /// Check if one the [XcodeProjectInfo.targets] of the project is
@@ -1056,19 +1057,20 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return false;
   }
 
-  Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+  Future<void> _updateGeneratedXcodeConfigIfNeeded(Cache cache) async {
+    if (cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
+        flutterRoot: cache.flutterRoot,
         targetOverride: bundle.defaultMainPath(parent.directory.fileSystem),
       );
     }
   }
 
-  Future<void> _updateLLDBIfNeeded() async {
-    if (globals.cache.isOlderThanToolsStamp(lldbInitFile) ||
-        globals.cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
+  Future<void> _updateLLDBIfNeeded(Cache cache) async {
+    if (cache.isOlderThanToolsStamp(lldbInitFile) ||
+        cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
       await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, globals.templateRenderer);
       await _renderTemplateToFile(
         _lldbPythonHelperTemplate,
@@ -1090,7 +1092,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     await file.writeAsString(renderedTemplate);
   }
 
-  Future<void> _regenerateModuleFromTemplateIfNeeded() async {
+  Future<void> _regenerateModuleFromTemplateIfNeeded(Cache cache) async {
     if (!isModule) {
       return;
     }
@@ -1098,7 +1100,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       entity: ephemeralModuleDirectory,
       referenceFile: parent.pubspecFile,
     );
-    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralModuleDirectory);
+    final bool toolingChanged = cache.isOlderThanToolsStamp(ephemeralModuleDirectory);
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
@@ -1258,16 +1260,17 @@ class MacOSProject extends XcodeBasedProject {
   /// scheme's target.
   File get nameFile => ephemeralDirectory.childFile('.app_filename');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({required Cache cache}) async {
     // TODO(stuartmorgan): Add create-from-template logic here.
-    await _updateGeneratedXcodeConfigIfNeeded();
+    await _updateGeneratedXcodeConfigIfNeeded(cache);
   }
 
-  Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+  Future<void> _updateGeneratedXcodeConfigIfNeeded(Cache cache) async {
+    if (cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
+        flutterRoot: cache.flutterRoot,
         useMacOSConfig: true,
       );
     }

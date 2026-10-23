@@ -112,6 +112,7 @@ class IMobileDevice {
 Future<XcodeBuildResult> buildXcodeProject({
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
+  required String flutterRoot,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
   CpuArch? activeArch,
@@ -355,6 +356,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    flutterRoot: flutterRoot,
     printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
@@ -367,7 +369,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       );
     }
   }
-  await processPodsIfNeeded(project.ios, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(
+    project.ios,
+    buildDirectoryPath,
+    buildInfo.mode,
+    flutterRoot: flutterRoot,
+  );
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }

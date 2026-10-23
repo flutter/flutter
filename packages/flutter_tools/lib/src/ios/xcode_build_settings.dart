@@ -6,7 +6,6 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -22,6 +21,7 @@ import 'xcodeproj.dart';
 Future<void> updateGeneratedXcodeProperties({
   required FlutterProject project,
   required BuildInfo buildInfo,
+  required String flutterRoot,
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
@@ -31,6 +31,7 @@ Future<void> updateGeneratedXcodeProperties({
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
     buildInfo: buildInfo,
+    flutterRoot: flutterRoot,
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
@@ -148,16 +149,17 @@ String? parsedBuildNumber({required FlutterManifest manifest, BuildInfo? buildIn
 Future<List<String>> _xcodeBuildSettingsLines({
   required FlutterProject project,
   required BuildInfo buildInfo,
+  required String flutterRoot,
+  required bool printWarnings,
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
-  required bool printWarnings,
 }) async {
   final xcodeBuildSettings = <String>[];
 
-  final String flutterRoot = globals.fs.path.normalize(Cache.flutterRoot!);
-  xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
+  final String normalizedFlutterRoot = project.directory.fileSystem.path.normalize(flutterRoot);
+  xcodeBuildSettings.add('FLUTTER_ROOT=$normalizedFlutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
   xcodeBuildSettings.add(

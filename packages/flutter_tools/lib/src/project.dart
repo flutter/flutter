@@ -23,6 +23,7 @@ import 'base/version.dart';
 import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'cache.dart';
 import 'cmake_project.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -579,13 +580,15 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> regeneratePlatformSpecificTooling({
-    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    required Cache cache,
     required bool releaseMode,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     PubspecCache? pubspecCache,
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
+      cache: cache,
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
       // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
@@ -609,6 +612,7 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required Cache cache,
     required bool releaseMode,
     bool androidPlatform = false,
     bool iosPlatform = false,
@@ -651,16 +655,19 @@ class FlutterProject {
       packageConfig: packageConfig,
     );
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
+      await android.ensureReadyForPlatformSpecificTooling(
+        cache: cache,
+        deprecationBehavior: deprecationBehavior,
+      );
     }
     if (iosPlatform) {
-      await ios.ensureReadyForPlatformSpecificTooling();
+      await ios.ensureReadyForPlatformSpecificTooling(cache: cache);
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
     }
     if (macOSPlatform) {
-      await macos.ensureReadyForPlatformSpecificTooling();
+      await macos.ensureReadyForPlatformSpecificTooling(cache: cache);
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();
@@ -1124,9 +1131,10 @@ See the link below for more information:
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required Cache cache,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
-    if (isModule && _shouldRegenerateFromTemplate()) {
+    if (isModule && _shouldRegenerateFromTemplate(cache)) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
@@ -1143,15 +1151,15 @@ See the link below for more information:
     if (!hostAppGradleRoot.existsSync()) {
       return;
     }
-    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false, cache: cache);
   }
 
-  bool _shouldRegenerateFromTemplate() {
+  bool _shouldRegenerateFromTemplate(Cache cache) {
     return globals.fsUtils.isOlderThanReference(
           entity: ephemeralDirectory,
           referenceFile: parent.pubspecFile,
         ) ||
-        globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
+        cache.isOlderThanToolsStamp(ephemeralDirectory);
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');

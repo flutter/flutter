@@ -21,10 +21,6 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
 void main() {
-  setUpAll(() {
-    Cache.flutterRoot = '';
-  });
-
   testWithoutContext('Throws a tool exit if pub cannot be run', () async {
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();
@@ -34,6 +30,7 @@ void main() {
     fileSystem.file('pubspec.yaml').createSync();
 
     final pub = Pub.test(
+      flutterRoot: '',
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -104,6 +101,7 @@ void main() {
   ''');
 
       final pub = Pub.test(
+        flutterRoot: '',
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -172,6 +170,7 @@ void main() {
           ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
         final pub = Pub.test(
+          flutterRoot: '',
           fileSystem: fileSystem,
           logger: logger,
           processManager: processManager,
@@ -240,6 +239,7 @@ void main() {
           ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
         final pub = Pub.test(
+          flutterRoot: '',
           fileSystem: fileSystem,
           logger: logger,
           processManager: processManager,
@@ -275,6 +275,7 @@ void main() {
         ..writeAsStringSync('{"generator": "third-party"}');
 
       final pub = Pub.test(
+        flutterRoot: '',
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -318,6 +319,7 @@ void main() {
       ..writeAsStringSync(_generateFlutterVersionJson('a'));
 
     final pub = Pub.test(
+      flutterRoot: '',
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -361,6 +363,7 @@ void main() {
       ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
     final pub = Pub.test(
+      flutterRoot: '',
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -406,6 +409,7 @@ void main() {
         ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
       final pub = Pub.test(
+        flutterRoot: '',
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -462,6 +466,7 @@ void main() {
       ..writeAsStringSync(_generateFlutterVersionJson('a'));
 
     final pub = Pub.test(
+      flutterRoot: '',
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -509,6 +514,7 @@ void main() {
         ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
       final pub = Pub.test(
+        flutterRoot: '',
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -566,6 +572,7 @@ void main() {
       fileSystem.file('.dart_tool/version').writeAsStringSync('b');
 
       final pub = Pub.test(
+        flutterRoot: '',
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -626,6 +633,7 @@ void main() {
         ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
       final pub = Pub.test(
+        flutterRoot: '',
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -686,6 +694,7 @@ void main() {
       fileSystem.file('.dart_tool/version').writeAsStringSync('b');
 
       final pub = Pub.test(
+        flutterRoot: '',
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -731,6 +740,7 @@ void main() {
     ]);
     final mockStdio = FakeStdio();
     final pub = Pub.test(
+      flutterRoot: '',
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
@@ -795,11 +805,14 @@ exit code: 66
     // Intentionally not using pub.test to simulate a real environment, but
     // we are using non-inherited I/O to avoid printing to the console.
     final pub = Pub(
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      logger: logger,
-      botDetector: const FakeBotDetector(false),
-      processManager: processManager,
+      toolContext: FakeToolContext(
+        botDetector: const FakeBotDetector(false),
+        cache: Cache.test(flutterRoot: '', processManager: processManager),
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     await expectLater(
@@ -854,6 +867,7 @@ exit code: 66
     ]);
 
     final pub = Pub.test(
+      flutterRoot: '',
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
@@ -910,6 +924,7 @@ exit code: 66
     ]);
 
     final pub = Pub.test(
+      flutterRoot: '',
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
@@ -955,6 +970,7 @@ exit code: 66
 
     final mockStdio = FakeStdio();
     final pub = Pub.test(
+      flutterRoot: '',
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
@@ -1001,6 +1017,7 @@ exit code: 66
 
     final mockStdio = FakeStdio();
     final pub = Pub.test(
+      flutterRoot: '',
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -1067,6 +1084,7 @@ exit code: 66
     final Platform platform = FakePlatform(environment: <String, String>{'HOME': '/global'});
     final logger = BufferLogger.test();
     final pub = Pub.test(
+      flutterRoot: '',
       platform: platform,
       fileSystem: fileSystem,
       logger: logger,
@@ -1110,6 +1128,7 @@ exit code: 66
 
     final mockStdio = FakeStdio();
     final pub = Pub.test(
+      flutterRoot: '',
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
@@ -1138,6 +1157,7 @@ exit code: 66
   testUsingContext('can use generate: true within a workspace', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final pub = Pub.test(
+      flutterRoot: '',
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -1233,6 +1253,7 @@ exit code: 66
       ),
     ]);
     final pub = Pub.test(
+      flutterRoot: '',
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -1313,6 +1334,7 @@ exit code: 66
       fileSystem.file('.dart_tool/version').writeAsStringSync('a');
 
       final pub = Pub.test(
+        flutterRoot: '',
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
