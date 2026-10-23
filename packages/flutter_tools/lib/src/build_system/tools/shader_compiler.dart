@@ -220,7 +220,7 @@ class ShaderCompiler {
       );
     }
 
-    final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
+    final String shaderLibPath = _artifacts.getHostArtifact(HostArtifact.shaderLib).path;
     List<String> makeImpellercCommand(List<String> targets) => <String>[
       impellerc.path,
       ...targets,

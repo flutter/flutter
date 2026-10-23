@@ -19,7 +19,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
 const fragDir = '/shaders';
-const shaderLibDir = '/./shader_lib';
+const shaderLibDir = 'HostArtifact.shaderLib';
 const fragPath = '/shaders/my_shader.frag';
 const notFragPath = '/shaders/not_a_frag.file';
 const outputSpirvPath = '/output/shaders/my_shader.frag.spirv';
