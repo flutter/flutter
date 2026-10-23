@@ -121,7 +121,7 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
               if (params[DeviceService.lineKey] case final String line) {
                 if (_logLinesController.hasListener) {
                   _logLinesController.add(line);
-                } else {
+                } else if (_pendingLines.length < _maxPendingLines) {
                   _pendingLines.add(line);
                 }
               }
@@ -160,6 +160,8 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
     return reader;
   }
 
+  static const _maxPendingLines = 1000;
+
   final String _deviceId;
   final DeviceService _deviceService;
   final Logger _logger;
@@ -194,8 +196,13 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
       await _deviceService.startLogStream(deviceId: _deviceId);
     } on Object catch (error) {
       _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
-      if (!_isDisposed && !_logLinesController.isClosed) {
-        await _logLinesController.close();
+      if (!_isDisposed) {
+        _isDisposed = true;
+        await _notificationSubscription?.cancel();
+        _notificationSubscription = null;
+        if (!_logLinesController.isClosed) {
+          await _logLinesController.close();
+        }
       }
     }
   }
@@ -304,6 +311,7 @@ class ExtensionBackedDevice extends Device {
   final TargetDevice _targetDevice;
   final ExtensionConnection connection;
   Future<ExtensionDeviceLogReader>? _logReader;
+  bool _disposed = false;
 
   @override
   String get name => _targetDevice.name;
@@ -349,6 +357,9 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+    if (_disposed) {
+      return Future<DeviceLogReader>.value(NoOpDeviceLogReader(name));
+    }
     return _logReader ??= ExtensionDeviceLogReader.create(
       connection: connection,
       deviceId: id,
@@ -363,6 +374,7 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<void> dispose() async {
+    _disposed = true;
     final ExtensionDeviceLogReader? reader = await _logReader;
     _logReader = null;
     await reader?.dispose();
