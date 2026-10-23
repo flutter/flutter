@@ -83,6 +83,16 @@ void main() {
     expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
   });
 
+  testWithoutContext(
+    'VM Service does not register flutterVersion service when flutterVersion is null',
+    () async {
+      final mockVMService = FakeVMService();
+      await setUpVmService(vmService: mockVMService);
+
+      expect(mockVMService.services, isNot(contains(kFlutterVersionServiceName)));
+    },
+  );
+
   testUsingContext('VM Service prints messages for connection failures', () {
     final logger = BufferLogger.test();
     FakeAsync().run((FakeAsync time) {
@@ -195,7 +205,7 @@ void main() {
     expect(call.args, <String, String>{'isolateId': 'def'});
   });
 
-  testUsingContext('runInView forwards arguments correctly', () async {
+  testWithoutContext('runInView forwards arguments correctly', () async {
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
         const FakeVmServiceRequest(

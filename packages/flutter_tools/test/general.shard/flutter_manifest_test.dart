@@ -1092,6 +1092,30 @@ flutter:
     );
   });
 
+  testWithoutContext('FlutterManifest validates web plugin section and reports package name', () {
+    const manifest = '''
+name: my_web_plugin
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: MyWebPlugin
+''';
+
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, isNull);
+    expect(
+      logger.errorText,
+      contains(
+        'The plugin `my_web_plugin` is missing the required field `fileName` in pubspec.yaml',
+      ),
+    );
+  });
+
   testWithoutContext('FlutterManifest handles empty licenses list', () async {
     const manifest = '''
 name: test

@@ -350,6 +350,7 @@ class ToolDependencies {
           config: finalConfig,
         );
     finalAnalyticsInitialized = true;
+    LocalSignals.instance.configureExit(analytics: finalAnalytics, logger: finalLogger);
 
     // 9. Remaining ToolContext Dependencies
     final BuildSystem finalBuildSystem =

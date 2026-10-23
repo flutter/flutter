@@ -157,6 +157,7 @@ class FlutterDevice {
     required DebuggingOptions debuggingOptions,
   }) async {
     final ToolContext(
+      :Artifacts artifacts,
       :FlutterVersion flutterVersion,
       :FileSystem fs,
       :Logger logger,
@@ -223,6 +224,7 @@ class FlutterDevice {
         try {
           await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
             vmServiceUri,
+            artifacts: artifacts,
             debuggingOptions: debuggingOptions,
             appName:
                 'Kind: Flutter - Device: ${device!.displayName} - '

@@ -9,14 +9,12 @@ library;
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -47,10 +45,6 @@ abstract class AnalyzeBase {
   FileSystem get fileSystem => toolContext.fs;
   @protected
   Logger get logger => toolContext.logger;
-  @protected
-  ProcessManager get processManager => toolContext.processManager;
-  @protected
-  Platform get platform => toolContext.platform;
   @protected
   Terminal get terminal => toolContext.terminal;
 

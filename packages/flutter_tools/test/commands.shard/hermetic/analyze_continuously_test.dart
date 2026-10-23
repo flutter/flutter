@@ -97,12 +97,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -145,12 +147,14 @@ void main() {
       final server = AnalysisServer(
         'Artifact.engineDartSdkPath',
         <String>[tempDir.path],
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-        processManager: processManager,
-        logger: logger,
-        terminal: terminal,
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          terminal: terminal,
+        ),
       );
 
       await server.start();
@@ -215,12 +219,14 @@ void main() {
       final server = AnalysisServer(
         'Artifact.engineDartSdkPath',
         <String>[tempDir.path],
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-        processManager: processManager,
-        logger: logger,
-        terminal: terminal,
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          terminal: terminal,
+        ),
       );
 
       final analyzingEvents = <bool>[];
@@ -265,12 +271,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -311,12 +319,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;
@@ -357,12 +367,14 @@ void main() {
     final server = AnalysisServer(
       'Artifact.engineDartSdkPath',
       <String>[tempDir.path],
-      fileSystem: fileSystem,
-      platform: FakePlatform(),
-      processManager: processManager,
-      logger: logger,
-      terminal: terminal,
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        terminal: terminal,
+      ),
     );
 
     var errorCount = 0;

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:dds/dds_launcher.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -72,6 +73,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       userIdentifier: '',
       compileExpression: null,
+      toolContext: FakeToolContext(artifacts: Artifacts.test()),
     );
 
     fakeVmServiceHost = FakeVmServiceHost(
@@ -197,6 +199,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
         ddsShutdownTimeout: const Duration(milliseconds: 10),
       );
 
@@ -255,6 +258,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
@@ -289,6 +293,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
@@ -319,6 +324,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       await testDeviceWithUninstall.start('entrypointPath');
@@ -355,6 +361,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, uninstallApp: false),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       await testDeviceWithoutUninstall.start('entrypointPath');
@@ -464,6 +471,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       await startPausedDevice.start('entrypointPath');
@@ -480,6 +488,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,
