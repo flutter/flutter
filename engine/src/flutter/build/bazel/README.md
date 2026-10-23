@@ -22,6 +22,8 @@ Nothing in this directory is used by the GN build.
 | `zip_bundle.bzl` | GN's `zip_bundle` template (the archives CI uploads) as a rule running `build/zip.py`, with `zip_tree` for a directory's files; see below. |
 | `build_directory.bzl` | `BuildDirectoryInfo`: where GN's build directory holds a rule's files, which `gn_copy`, `gn_action`, `gn_generated_file`, `zip_bundle`, `dart_pkg` and `sdk_rewriter` provide and `install` collects over a closure; see below. |
 | `install.bzl` | `install`: a `bazel run` target laying a build's files into GN's build directory (`engine/src/out/<variant>/`, or a named directory) for the consumers that read it; the root package's `install` and the generated per-builder targets in `ci/builders`; see below. |
+| `local_engine.bzl` | `local_engine`: the manifest `local_engine.json` over a build's files for `flutter --local-engine` without an install; `assembled_directory` (one GN directory as a directory artifact) and `bundle_directory` (zip_bundles unpacked as the flutter tool's cache lays them), for the tests' SDK facsimile; see below. |
+| `configuration.bzl` | `in_configuration`: a target built under another configuration -- a runtime mode (`-c opt` and the engine's `runtime_mode` flag, what `--config=host_release` sets) and/or a platform (the web engine's) -- for a consumer gathering the builds as the SDK cache does. |
 
 ## How dependencies reach Bazel during the transition
 
@@ -722,7 +724,24 @@ and `font-subset.zip` unpacked, `common/` the patched SDK's archive -- as
 `bundle_directory` lays a zip_bundle's entries (`ZipBundleInfo`), with the
 stamps the tool's `Cache.updateAll` checks before it would download
 (`bin/internal`: the engine revision's fixed word, the fonts' and the Gradle
-wrapper's pins).
+wrapper's pins). The other runtime modes' artifacts -- `linux-x64-profile`
+and `linux-x64-release`: gen_snapshot and the desktop embedding, the
+product platform kernel under `common/` -- come from the same bundles
+built under those modes' configurations through `in_configuration`
+(`configuration.bzl`: a transition to `-c opt` and the engine's
+`runtime_mode` flag, what `--config=host_release` sets; a platform too,
+for the web SDK), so a test that
+builds a release app (icon_tree_shaker_test's tree-shaken bundle, the
+integration shard's) has them; the first build of a mode is a build of the
+engine, cached afterwards. The integration shard runs the tool as a
+process on projects of its own -- hot reload on flutter_tester, the
+daemon, the debug adapter, `flutter test` -- and some of its tests run pub
+*in a workspace member* (hello_world, dev/automated_tests), which pub
+resolves against the whole workspace: `@pub_workspace` (a repository the
+pub extension makes: every member's pubspec at its path) is laid at the
+root (`sdk_trees`) with a workspace-wide `pub_cache`, the lock is copied
+over its symlink first (`writable`: pub touches it), the SDK's bin is on
+PATH and the tool gets a HOME of the test's own for its settings.
 
 ```sh
 bazel test //:framework_tests //:tool_tests //:dart_tests   # everything below, the root's suites
@@ -744,7 +763,9 @@ flutter_driver's, integration_test's, the example apps', manual_tests',
 tracing_tests', stocks', vitool's, integration_ui's -- 1,627 files and 22,522
 cases -- plus the Impeller, no-tracking and release/profile runs,
 flutter_tools' general shard (271 files) and commands shard (the hermetic
-half whole, 67; the permeable half but for two files, 9),
+half whole, 67; the permeable half but for the one file that does not
+compile at this checkout, 10) and its integration shard where a Linux host
+can run it (66 of 117 files: not Android, the web SDK, CMake or xvfb),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
 fuchsia_remote_debug_protocol). Left out by name: web-only and macOS-only

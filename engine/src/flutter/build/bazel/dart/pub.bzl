@@ -45,6 +45,11 @@ load(
     "PUB_WORKSPACE",
 )
 
+# The workspace's members by name, for a closure over the whole workspace
+# (a pub cache for a test that resolves a member in place: pub resolves the
+# workspace as one).
+PUB_WORKSPACE_PACKAGES = sorted(PUB_WORKSPACE.keys())
+
 PubPackageConfigInfo = provider(
     doc = "A package_config.json and the files of the packages it names.",
     fields = {
@@ -136,6 +141,36 @@ _pub_hub = repository_rule(
     doc = "The hub @pub: an alias package per hosted package, over the pub__<name> repositories.",
 )
 
+def _pub_workspace_impl(rctx):
+    # The members' pubspecs, read from the tree (not labels: most members
+    # have no BUILD file of their own, so their files belong to whatever
+    # package is above them).
+    root = rctx.path(Label("//:pubspec.yaml")).dirname
+    for name in PUB_WORKSPACE:
+        path = PUB_WORKSPACE[name].path
+        if path == ".":
+            continue
+        pubspec = root.get_child(path).get_child("pubspec.yaml")
+        rctx.watch(pubspec)
+        rctx.file(path + "/pubspec.yaml", rctx.read(pubspec))
+    rctx.file("BUILD.bazel", """# The pub workspace's shape (pub.bzl): every member's pubspec.yaml at its path.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "pubspecs",
+    srcs = glob(["**/pubspec.yaml"]),
+)
+""")
+
+_pub_workspace = repository_rule(
+    implementation = _pub_workspace_impl,
+    doc = "@pub_workspace: the workspace members' pubspec.yaml files at their paths. pub resolves a " +
+          "member against the whole workspace (the root pubspec's `workspace:` list), so a test that " +
+          "runs `flutter pub get` or `flutter test` in a member from the tests' SDK facsimile needs " +
+          "every member's pubspec there (dart_test's sdk_trees).",
+)
+
 def _pub_impl(mctx):
     for name in PUB_HOSTED:
         package = PUB_HOSTED[name]
@@ -147,10 +182,11 @@ def _pub_impl(mctx):
             sha256 = package.sha256,
         )
     _pub_hub(name = "pub")
+    _pub_workspace(name = "pub_workspace")
     root = mctx.modules[0] if mctx.modules else None
     if root != None and root.is_root:
         return mctx.extension_metadata(
-            root_module_direct_deps = ["pub"],
+            root_module_direct_deps = ["pub", "pub_workspace"],
             root_module_direct_dev_deps = [],
             reproducible = True,
         )

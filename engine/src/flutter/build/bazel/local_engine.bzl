@@ -231,9 +231,13 @@ def _bundle_directory_impl(ctx):
     for bundle in ctx.attr.bundles:
         for file, path in bundle[ZipBundleInfo].entries:
             # The same file in two archives (gen_snapshot is in a mode's
-            # artifacts.zip and its desktop embedding's) lands once.
+            # artifacts.zip and its desktop embedding's) lands once, as does
+            # a bundle's license readme from two of its configurations (the
+            # patched SDK's debug and product archives: the same text).
             if path in placed and placed[path] != file:
-                fail("%s: %s places %s at %s, where %s already is" % (ctx.label, bundle.label, file.path, path, placed[path].path))
+                if not (path.startswith("LICENSE.") and path.endswith(".md")):
+                    fail("%s: %s places %s at %s, where %s already is" % (ctx.label, bundle.label, file.path, path, placed[path].path))
+                continue
             placed[path] = file
     placements = [(file, file.path, path) for path, file in placed.items()]
     return [DefaultInfo(files = depset([_assemble_directory(ctx, ctx.label.name, placements)]))]

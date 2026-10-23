@@ -26,3 +26,10 @@ flutter_package_tests(
     # flutter_driver, a dev dependency, is not imported by the test.
     without = ["flutter_driver"],
 )
+
+# The test files as files, for flutter_tools' command_output_test, which
+# runs `flutter test test/hello_test.dart` here from its SDK facsimile.
+filegroup(
+    name = "files",
+    srcs = glob(["**/*.dart"]),
+)

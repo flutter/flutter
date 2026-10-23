@@ -820,6 +820,7 @@ web_sdk_root(
     },
     appendix: '''
 load("//engine/src/flutter/build/bazel:local_engine.bzl", "bundle_directory")
+load("//engine/src/flutter/build/bazel:configuration.bzl", "in_configuration")
 
 # The GN file, for the wrapped GN builds that read //flutter/build
 # (//engine/src/flutter/build:gn_files; a glob does not enter a package).
@@ -830,20 +831,73 @@ filegroup(
 )
 
 # The host's development artifacts unpacked as the flutter tool's cache lays
-# them, for the tests' SDK facsimile (a dart_test's cache_files):
-# bin/cache/artifacts/engine/<host> is artifacts.zip and font-subset.zip
-# unpacked together, bin/cache/artifacts/engine/common flutter_patched_sdk.zip.
+# them, for the tests' SDK facsimile (a dart_test's cache_files; what
+# `flutter precache --linux` downloads): bin/cache/artifacts/engine/<host> is
+# artifacts.zip, font-subset.zip and the debug desktop embedding's archive
+# unpacked together, <host>-profile and <host>-release the other modes'
+# (gen_snapshot and the embedding, built under that mode's configuration:
+# in_configuration), common/ the patched SDK's debug and product archives.
 bundle_directory(
     name = "host_engine_directory",
     bundles = [
         ":artifacts",
+        "//engine/src/flutter/shell/platform/linux:flutter_gtk",
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
 )
 
+in_configuration(
+    name = "artifacts_profile",
+    runtime_mode = "profile",
+    target = ":artifacts",
+)
+
+in_configuration(
+    name = "flutter_gtk_profile",
+    runtime_mode = "profile",
+    target = "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+)
+
+bundle_directory(
+    name = "host_engine_profile_directory",
+    bundles = [
+        ":artifacts_profile",
+        ":flutter_gtk_profile",
+    ],
+)
+
+in_configuration(
+    name = "artifacts_release",
+    runtime_mode = "release",
+    target = ":artifacts",
+)
+
+in_configuration(
+    name = "flutter_gtk_release",
+    runtime_mode = "release",
+    target = "//engine/src/flutter/shell/platform/linux:flutter_gtk",
+)
+
+bundle_directory(
+    name = "host_engine_release_directory",
+    bundles = [
+        ":artifacts_release",
+        ":flutter_gtk_release",
+    ],
+)
+
+in_configuration(
+    name = "flutter_patched_sdk_release",
+    runtime_mode = "release",
+    target = ":flutter_patched_sdk",
+)
+
 bundle_directory(
     name = "common_engine_directory",
-    bundles = [":flutter_patched_sdk"],
+    bundles = [
+        ":flutter_patched_sdk",
+        ":flutter_patched_sdk_release",
+    ],
 )
 ''',
   ),
