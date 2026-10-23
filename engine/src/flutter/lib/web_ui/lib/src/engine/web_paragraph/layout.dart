@@ -546,6 +546,8 @@ class TextLayout {
   /// The union of the span-relative selection rects of the clusters in [range], which all
   /// belong to one span; equals the span metrics' selection of the same text.
   ui.Rect _clusterSelection(ClusterRange range) {
+    // Callers guard empty text ranges before mapping, so an empty or inverted range is a bug.
+    assert(range.start >= 0 && range.start < range.end && range.end <= allClusters.length);
     final ui.Rect first = allClusters[range.start].advance;
     double left = first.left;
     double top = first.top;
