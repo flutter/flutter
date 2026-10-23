@@ -244,6 +244,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
               required Logger logger,
             }) async {
               expect(uri.toString(), 'http://localhost:8181');
+              expect(flutterVersion, same(toolContext.flutterVersion));
               return fakeVmService;
             },
       );

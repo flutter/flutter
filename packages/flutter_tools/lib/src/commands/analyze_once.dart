@@ -54,15 +54,11 @@ class AnalyzeOnce extends AnalyzeBase {
     final server = AnalysisServer(
       sdkPath,
       items.toList(),
-      fileSystem: fileSystem,
-      platform: platform,
-      logger: logger,
-      processManager: processManager,
-      terminal: terminal,
-      protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
-      withFineDependencies: false,
+      toolContext: toolContext,
+      protocolTrafficLog: protocolTrafficLog,
       usePlugins: usePlugins,
+      withFineDependencies: false,
     );
 
     Stopwatch? timer;

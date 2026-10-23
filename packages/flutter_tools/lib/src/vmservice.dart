@@ -17,7 +17,6 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'project.dart';
 import 'version.dart';
 
@@ -529,12 +528,12 @@ class FlutterVmService {
   /// Calls [vm_service.VmService.getVM]. However, in the case that an [vm_service.RPCError]
   /// is thrown due to the service being disconnected, the error is discarded
   /// and null is returned.
-  Future<vm_service.VM?> getVmGuarded() async {
+  Future<vm_service.VM?> getVmGuarded({required Logger logger}) async {
     try {
       return await service.getVM();
     } on vm_service.RPCError catch (err) {
       if (err.isConnectionDisposedException) {
-        globals.printTrace('VmService.getVm call failed: $err');
+        logger.printTrace('VmService.getVm call failed: $err');
         return null;
       }
       rethrow;
@@ -560,7 +559,7 @@ class FlutterVmService {
     }
   }
 
-  /// Set the asset directory for the an attached Flutter view.
+  /// Set the asset directory for an attached Flutter view.
   Future<void> setAssetDirectory({
     required Uri assetsDirectory,
     required String? viewId,

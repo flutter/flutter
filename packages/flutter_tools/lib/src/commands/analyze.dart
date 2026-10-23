@@ -3,16 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/terminal.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../project.dart';
 import '../project_validator.dart';
@@ -242,17 +236,8 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-      :FlutterProjectFactory projectFactory,
-      :ShutdownHooks shutdownHooks,
-      :Terminal terminal,
-    ) = toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        toolContext;
 
     if (boolArg('android')) {
       final AndroidAnalyzeOption option;
@@ -368,6 +353,7 @@ class AnalyzeCommand extends FlutterCommand {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoPackages(),
+        analytics: analytics,
         suppressAnalytics: _suppressAnalytics,
         toolContext: toolContext,
       ).analyze();
