@@ -155,3 +155,25 @@ test_suite(
         "//packages/flutter/test/widgets",
     ],
 )
+
+# The same files rendering with Impeller (flutter_test's `impeller`), as
+# dev/bots runs `flutter test --enable-impeller` over the package.
+test_suite(
+    name = "all_impeller",
+    tests = [
+        "//packages/flutter/test/animation:animation_impeller",
+        "//packages/flutter/test/cupertino:cupertino_impeller",
+        "//packages/flutter/test/examples:examples_impeller",
+        "//packages/flutter/test/foundation:foundation_impeller",
+        "//packages/flutter/test/gestures:gestures_impeller",
+        "//packages/flutter/test/harness:harness_impeller",
+        "//packages/flutter/test/material:material_impeller",
+        "//packages/flutter/test/painting:painting_impeller",
+        "//packages/flutter/test/physics:physics_impeller",
+        "//packages/flutter/test/rendering:rendering_impeller",
+        "//packages/flutter/test/scheduler:scheduler_impeller",
+        "//packages/flutter/test/semantics:semantics_impeller",
+        "//packages/flutter/test/services:services_impeller",
+        "//packages/flutter/test/widgets:widgets_impeller",
+    ],
+)

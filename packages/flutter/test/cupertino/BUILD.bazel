@@ -26,5 +26,12 @@ filegroup(
 
 framework_tests(
     name = "cupertino",
+    # Minutes under a full run's load (226, 212 and 207 s with the Impeller runs
+    # doubling it; the medium timeout is 300 s).
+    large = [
+        "action_sheet_test.dart",
+        "popup_surface_test.dart",
+        "text_field_test.dart",
+    ],
     tests = glob(["*_test.dart"]),
 )

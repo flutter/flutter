@@ -6,12 +6,16 @@
 
 `flutter test` compiles each test file with the frontend server behind a
 generated bootstrap and runs it on flutter_tester, hosting package:test's
-runner itself (packages/flutter_tools/lib/src/test/). flutter_test does
-the same without flutter_tools: the bootstrap is written here, the compile
-is a Bazel action (kernel.bzl's, against the engine's platform kernel and a
-package configuration over the repository's pub packages -- pub.bzl), and
-the run is the Bazel-built flutter_tester with `flutter test`'s flags and
-environment, the package's asset directory among them (flutter_assets.bzl).
+runner itself (packages/flutter_tools/lib/src/test/). flutter_test_kernel
+and flutter_test do the same without flutter_tools: the bootstrap is
+written here, the compile is a Bazel action (kernel.bzl's, against the
+engine's platform kernel and a package configuration over the repository's
+pub packages -- pub.bzl) that flutter_test_kernel owns, and the run is
+flutter_test: the Bazel-built flutter_tester with `flutter test`'s flags
+and environment, the package's asset directory among them
+(flutter_assets.bzl). One kernel serves every run of the file -- the
+default one and, where a tree asks for it, the Impeller one, as dev/bots
+runs the framework's tests under `flutter test --enable-impeller` too.
 
 The bootstrap imports the test file and the directory's
 flutter_test_config.dart (as `flutter test` does: the framework's configures
@@ -249,10 +253,18 @@ flutter_test_prelude = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def _flutter_test_impl(ctx):
-    # The working directory: the package's, as `flutter test` runs tests from
-    # the project directory (tests read `pubspec.yaml`, `test/...` relative
-    # to it); FLUTTER_ROOT stays the runfiles tree's root.
+FlutterTestKernelInfo = provider(
+    doc = "A test file's compiled kernel (flutter_test_kernel), for flutter_test to run.",
+    fields = {
+        "kernel": "File: the kernel, the bootstrap's main importing the test.",
+        "test": "File: the test file.",
+        "pubspec": "File: the package's pubspec.yaml; the test runs from its directory.",
+    },
+)
+
+def _flutter_test_kernel_impl(ctx):
+    # The test's path within the package: `flutter test` runs tests from the
+    # project directory, and the test's goldens are found relative to it.
     package_directory = ctx.file.pubspec.dirname
     test_path = ctx.file.test.short_path
     if not test_path.startswith(package_directory + "/"):
@@ -280,7 +292,71 @@ def _flutter_test_impl(ctx):
         ),
         extra_inputs = [prelude] if prelude else [],
     )
+    return [
+        DefaultInfo(files = depset([kernel])),
+        FlutterTestKernelInfo(kernel = kernel, test = ctx.file.test, pubspec = ctx.file.pubspec),
+    ]
 
+flutter_test_kernel = rule(
+    implementation = _flutter_test_kernel_impl,
+    doc = "A framework test file compiled by the frontend server as `flutter test` compiles it: one kernel, however many runs (flutter_test).",
+    attrs = {
+        "test": attr.label(
+            allow_single_file = [".dart"],
+            mandatory = True,
+            doc = "The test file.",
+        ),
+        "test_config": attr.label(
+            allow_single_file = [".dart"],
+            doc = "The flutter_test_config.dart whose testExecutable() wraps the test (the nearest one " +
+                  "above the test file, as flutter test finds it).",
+        ),
+        "srcs": attr.label_list(
+            allow_files = True,
+            doc = "Other files of the test's directory it imports (helpers beside it).",
+        ),
+        "deps": attr.label_list(
+            allow_files = True,
+            doc = "Other files the compile may read besides the configuration's packages: the " +
+                  "test directory tree's shared helpers (the test configuration's imports).",
+        ),
+        "pubspec": attr.label(
+            allow_single_file = ["pubspec.yaml"],
+            mandatory = True,
+            doc = "The package's pubspec.yaml; the test runs from its directory, as `flutter test` " +
+                  "runs from the project's, and finds its goldens relative to it.",
+        ),
+        "compile_args": attr.string_list(
+            doc = "Further frontend server arguments for the compile.",
+        ),
+        "prelude": attr.label(
+            providers = [FlutterTestPreludeInfo],
+            doc = "The kernel the compile starts from (flutter_test_prelude), compiled with the same " +
+                  "configuration and arguments; none compiles the test from scratch.",
+        ),
+        "package_config": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            providers = [PubPackageConfigInfo],
+            doc = "The package configuration for the compile (pub_package_config, execroot layout), " +
+                  "whose packages' files the compile reads.",
+        ),
+        "platform": attr.label(
+            default = "//engine/src/flutter/lib/snapshot:strong_platform",
+            allow_files = True,
+            doc = "The platform kernel's directory contents (flutter_patched_sdk).",
+        ),
+    } | KERNEL_TOOL_ATTRS,
+)
+
+def _flutter_test_impl(ctx):
+    compiled = ctx.attr.kernel[FlutterTestKernelInfo]
+    kernel = compiled.kernel
+
+    # The working directory: the package's, as `flutter test` runs tests from
+    # the project directory (tests read `pubspec.yaml`, `test/...` relative
+    # to it); FLUTTER_ROOT stays the runfiles tree's root.
+    package_directory = compiled.pubspec.dirname
     fonts_conf = ctx.actions.declare_file(ctx.label.name + ".fonts.conf")
     ctx.actions.write(fonts_conf, _FONTS_CONF)
 
@@ -310,7 +386,7 @@ def _flutter_test_impl(ctx):
 set -euo pipefail
 root="$PWD"
 export FLUTTER_TEST=true
-export FLUTTER_ROOT="$root"
+{impeller_env}export FLUTTER_ROOT="$root"
 export APP_NAME="{app_name}"
 {assets_env}export FONTCONFIG_FILE="$root/{fonts_conf}"
 cd "{package_directory}"
@@ -320,8 +396,7 @@ exec "$root/{flutter_tester}" \\
   --icu-data-file-path="$root/{icudtl}" \\
   --enable-checked-mode \\
   --verify-entry-points \\
-  --enable-software-rendering \\
-  --skia-deterministic-rendering \\
+  {renderer_flags} \\
   --non-interactive \\
   --use-test-fonts \\
   --disable-asset-fonts \\
@@ -333,6 +408,12 @@ exec "$root/{flutter_tester}" \\
             # `flutter test --enable-vmservice` asks for a port (any); the
             # default disables the service.
             vm_service_flag = "--vm-service-port=0" if ctx.attr.vm_service else "--disable-vm-service",
+            # `flutter test --enable-impeller`: flutter_tester renders with
+            # Impeller (its Vulkan backend on SwiftShader, linked in) and
+            # the tests see FLUTTER_TEST_IMPELLER; otherwise Skia's software
+            # renderer, deterministic.
+            renderer_flags = "--enable-impeller" if ctx.attr.impeller else "--enable-software-rendering --skia-deterministic-rendering",
+            impeller_env = "export FLUTTER_TEST_IMPELLER=true\n" if ctx.attr.impeller else "",
             fonts_conf = fonts_conf.short_path,
             package_directory = package_directory,
             flutter_tester = ctx.executable.flutter_tester.short_path,
@@ -354,7 +435,7 @@ exec "$root/{flutter_tester}" \\
                 path = path.split("/", 2)[2]
             cache[paths.join("bin/cache", directory, path)] = file
     runfiles = ctx.runfiles(
-        files = [kernel, fonts_conf, ctx.file.icudtl, ctx.file.runtime_package_config, ctx.file.test, ctx.file.pubspec] + ctx.files.data,
+        files = [kernel, fonts_conf, ctx.file.icudtl, ctx.file.runtime_package_config, compiled.test, compiled.pubspec] + ctx.files.data,
         transitive_files = assets[DefaultInfo].files if assets != None else None,
         symlinks = cache,
     ).merge(ctx.attr.flutter_tester[DefaultInfo].default_runfiles)
@@ -365,26 +446,12 @@ exec "$root/{flutter_tester}" \\
 flutter_test = rule(
     implementation = _flutter_test_impl,
     test = True,
-    doc = "A framework test file compiled by the frontend server and run on flutter_tester, as `flutter test` runs it.",
+    doc = "A framework test's kernel (flutter_test_kernel) run on flutter_tester, as `flutter test` runs it.",
     attrs = {
-        "test": attr.label(
-            allow_single_file = [".dart"],
+        "kernel": attr.label(
             mandatory = True,
-            doc = "The test file.",
-        ),
-        "test_config": attr.label(
-            allow_single_file = [".dart"],
-            doc = "The flutter_test_config.dart whose testExecutable() wraps the test (the nearest one " +
-                  "above the test file, as flutter test finds it).",
-        ),
-        "srcs": attr.label_list(
-            allow_files = True,
-            doc = "Other files of the test's directory it imports (helpers beside it).",
-        ),
-        "deps": attr.label_list(
-            allow_files = True,
-            doc = "Other files the compile may read besides the configuration's packages: the " +
-                  "test directory tree's shared helpers (the test configuration's imports).",
+            providers = [FlutterTestKernelInfo],
+            doc = "The test's compiled kernel (flutter_test_kernel).",
         ),
         "data": attr.label_list(
             allow_files = True,
@@ -394,12 +461,6 @@ flutter_test = rule(
             mandatory = True,
             doc = "The name of the package under test (its pubspec's), APP_NAME in the test's " +
                   "environment: the `packages/<name>/` prefix flutter_test strips from an asset key.",
-        ),
-        "pubspec": attr.label(
-            allow_single_file = ["pubspec.yaml"],
-            mandatory = True,
-            doc = "The package's pubspec.yaml; the test runs from its directory, as `flutter test` " +
-                  "runs from the project's.",
         ),
         "cache": attr.label_keyed_string_dict(
             allow_files = True,
@@ -416,31 +477,16 @@ flutter_test = rule(
             doc = "Whether flutter_tester serves the VM service, as `flutter test --enable-vmservice` " +
                   "(integration_test's tests ask dart:developer for its URI); off by default.",
         ),
-        "compile_args": attr.string_list(
-            doc = "Further frontend server arguments for the compile (`args` and `env` are the test's own, " +
-                  "as on every test rule: flutter_tester's further arguments and the run's environment).",
-        ),
-        "prelude": attr.label(
-            providers = [FlutterTestPreludeInfo],
-            doc = "The kernel the compile starts from (flutter_test_prelude), compiled with the same " +
-                  "configuration and arguments; none compiles the test from scratch.",
-        ),
-        "package_config": attr.label(
-            allow_single_file = True,
-            mandatory = True,
-            providers = [PubPackageConfigInfo],
-            doc = "The package configuration for the compile (pub_package_config, execroot layout), " +
-                  "whose packages' files the compile reads.",
+        "impeller": attr.bool(
+            doc = "Whether flutter_tester renders with Impeller, as `flutter test --enable-impeller` " +
+                  "(FLUTTER_TEST_IMPELLER set for the test); Skia's software renderer by default. " +
+                  "`args` and `env`, as on every test rule, are flutter_tester's further arguments " +
+                  "and the run's environment.",
         ),
         "runtime_package_config": attr.label(
             allow_single_file = True,
             mandatory = True,
             doc = "The package configuration for the run (pub_package_config, runfiles layout).",
-        ),
-        "platform": attr.label(
-            default = "//engine/src/flutter/lib/snapshot:strong_platform",
-            allow_files = True,
-            doc = "The platform kernel's directory contents (flutter_patched_sdk).",
         ),
         "flutter_tester": attr.label(
             default = "//engine/src/flutter/shell/testing:flutter_tester",
@@ -453,8 +499,21 @@ flutter_test = rule(
             allow_single_file = True,
             doc = "ICU's data file.",
         ),
-    } | KERNEL_TOOL_ATTRS,
+    },
 )
+
+# flutter_tests' arguments that are the compile's (flutter_test_kernel); the
+# rest are the run's (flutter_test).
+_KERNEL_ATTRS = [
+    "test_config",
+    "srcs",
+    "deps",
+    "pubspec",
+    "compile_args",
+    "prelude",
+    "package_config",
+    "platform",
+]
 
 def nearest_test_config(test, test_configs):
     """The flutter_test_config.dart `flutter test` applies to a test file.
@@ -481,7 +540,7 @@ def nearest_test_config(test, test_configs):
         directory = paths.dirname(directory)
     return None
 
-def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], test_configs = [], **kwargs):
+def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], large = [], test_configs = [], impeller = False, **kwargs):
     """One flutter_test per test file, and a test_suite of them.
 
     Args:
@@ -493,6 +552,10 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
       flaky: test files marked flaky (Bazel reruns a failure up to three
         times) and given the short timeout, so a hang costs a minute rather
         than the size's five: for a test known to hang under load.
+      large: test files given the large size (a 15-minute timeout rather
+        than the medium's 5): the few that take minutes under a full run's
+        load (material/text_field_test's 412 cases: 128–221 s, and over
+        300 s when the Impeller runs double the load).
       network: whether the tests may reach the network. Off by default
         (`block-network`): flutter_goldens then skips the golden
         comparisons instead of fetching Skia Gold's expectations, as it
@@ -505,27 +568,45 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
         its directory or above, none past a pubspec.yaml, as `flutter test`
         finds it (nearest_test_config). Otherwise `test_config` names the
         one configuration of every test.
-      **kwargs: flutter_test's attributes, the same for every file (app_name,
-        pubspec, test_config, deps, data, assets, cache, prelude,
-        package_config, runtime_package_config, compile_args, vm_service).
+      impeller: whether to declare a second run of every file with Impeller
+        rendering (`<test>_impeller`, in the suite `<name>_impeller`), as
+        dev/bots runs packages/flutter's tests once more under `flutter
+        test --enable-impeller`; the kernel is the same, only the run
+        differs.
+      **kwargs: the compile's attributes (flutter_test_kernel: test_config,
+        srcs, deps, pubspec, compile_args, prelude, package_config,
+        platform) and the run's (flutter_test: app_name, data, assets,
+        cache, runtime_package_config, vm_service), the same for every file.
     """
     if test_configs and "test_config" in kwargs:
         fail("%s: give test_config (one configuration for every test) or test_configs (the tree's, by directory), not both" % name)
     test_tags = list(tags) + ([] if network else ["block-network"])
-    targets = []
+    variants = [("", {})] + ([("_impeller", {"impeller": True})] if impeller else [])
+    targets = {suffix: [] for suffix, _ in variants}
+    compile_attrs = {key: value for key, value in kwargs.items() if key in _KERNEL_ATTRS}
+    run_attrs = {key: value for key, value in kwargs.items() if key not in _KERNEL_ATTRS}
     for test in tests:
         test_name = test.removesuffix(".dart").replace("/", "_")
-        attrs = dict(kwargs)
-        if test_configs:
-            attrs["test_config"] = nearest_test_config(test, test_configs)
-        flutter_test(
-            name = test_name,
+
+        # The compile, once; built on its own as `<test>_kernel`.
+        flutter_test_kernel(
+            name = test_name + "_kernel",
             test = test,
-            size = size,
-            tags = test_tags,
-            flaky = test in flaky,
-            timeout = "short" if test in flaky else None,
-            **attrs
+            test_config = nearest_test_config(test, test_configs) if test_configs else compile_attrs.get("test_config"),
+            tags = tags,
+            visibility = ["//visibility:private"],
+            **{key: value for key, value in compile_attrs.items() if key != "test_config"}
         )
-        targets.append(":" + test_name)
-    native.test_suite(name = name, tests = targets, tags = tags)
+        for suffix, variant in variants:
+            flutter_test(
+                name = test_name + suffix,
+                kernel = ":" + test_name + "_kernel",
+                size = "large" if test in large else size,
+                tags = test_tags,
+                flaky = test in flaky,
+                timeout = "short" if test in flaky else None,
+                **(run_attrs | variant)
+            )
+            targets[suffix].append(":" + test_name + suffix)
+    for suffix, _ in variants:
+        native.test_suite(name = name + suffix, tests = targets[suffix], tags = tags)
