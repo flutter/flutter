@@ -243,6 +243,7 @@ class MagnifierController {
     final OverlayState overlayState = Overlay.of(
       context,
       rootOverlay: true,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugRequiredFor: debugRequiredFor,
     );
 

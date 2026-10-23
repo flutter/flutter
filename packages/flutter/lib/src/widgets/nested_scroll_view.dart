@@ -1169,6 +1169,7 @@ class _NestedScrollController extends ScrollController {
       context: context,
       initialPixels: initialScrollOffset,
       oldPosition: oldPosition,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: debugLabel,
     );
   }

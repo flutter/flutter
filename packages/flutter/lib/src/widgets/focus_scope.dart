@@ -590,6 +590,7 @@ class _FocusState extends State<Focus> {
 
   FocusNode _createNode() {
     return FocusNode(
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: widget.debugLabel,
       canRequestFocus: widget.canRequestFocus,
       descendantsAreFocusable: widget.descendantsAreFocusable,
@@ -884,6 +885,7 @@ class _FocusScopeState extends _FocusState {
   @override
   FocusScopeNode _createNode() {
     return FocusScopeNode(
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: widget.debugLabel,
       canRequestFocus: widget.canRequestFocus,
       skipTraversal: widget.skipTraversal,

@@ -71,6 +71,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   }
 
   @override
+  // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 

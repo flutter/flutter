@@ -230,7 +230,10 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
       try {
         assert(layoutInfo == renderObject.layoutInfo);
         built = (widget as AbstractLayoutBuilder<LayoutInfoType>).builder(this, layoutInfo);
-        debugWidgetBuilderValue(widget, built);
+        assert(() {
+          debugWidgetBuilderValue(widget, built);
+          return true;
+        }());
       } catch (e, stack) {
         built = ErrorWidget.builder(
           _reportException(
@@ -238,6 +241,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             e,
             stack,
             informationCollector: () => <DiagnosticsNode>[
+              // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
               if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
             ],
           ),
@@ -253,6 +257,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             e,
             stack,
             informationCollector: () => <DiagnosticsNode>[
+              // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
               if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
             ],
           ),

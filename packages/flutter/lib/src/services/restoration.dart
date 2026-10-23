@@ -756,6 +756,7 @@ class RestorationBucket {
 
     // Case 1+2: Adopt and return an empty bucket.
     if (_claimedChildren.containsKey(restorationId) || !_rawChildren.containsKey(restorationId)) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       final child = RestorationBucket.empty(debugOwner: debugOwner, restorationId: restorationId);
       adoptChild(child);
       return child;
@@ -766,6 +767,7 @@ class RestorationBucket {
     final child = RestorationBucket.child(
       restorationId: restorationId,
       parent: this,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugOwner: debugOwner,
     );
     _claimedChildren[restorationId] = child;
@@ -971,7 +973,10 @@ class RestorationBucket {
     _parent?._removeChildData(this);
     _parent = null;
     _updateManager(null);
-    _debugDisposed = true;
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
   }
 
   @override

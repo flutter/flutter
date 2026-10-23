@@ -413,6 +413,7 @@ class RenderFlex extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, FlexParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         DebugOverflowIndicatorMixin {
   /// Creates a flex render object.
   ///

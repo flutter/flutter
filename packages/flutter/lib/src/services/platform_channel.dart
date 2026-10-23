@@ -34,6 +34,7 @@ export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 /// bytes per invocation in the last quantum. "Up" means in the direction of
 /// Flutter to the host platform, "down" is the host platform to flutter.
 bool get shouldProfilePlatformChannels =>
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     kProfilePlatformChannels || (!kReleaseMode && debugProfilePlatformChannels);
 
 /// Controls whether platform channel usage can be debugged in release mode.
@@ -51,8 +52,8 @@ bool _profilePlatformChannelsIsRunning = false;
 const Duration _profilePlatformChannelsRate = Duration(seconds: 1);
 final Expando<BinaryMessenger> _profiledBinaryMessengers = Expando<BinaryMessenger>();
 
-class _ProfiledBinaryMessenger implements BinaryMessenger {
-  const _ProfiledBinaryMessenger(this.proxy, this.channelTypeName, this.codecTypeName);
+class _DebugProfiledBinaryMessenger implements BinaryMessenger {
+  const _DebugProfiledBinaryMessenger(this.proxy, this.channelTypeName, this.codecTypeName);
   final BinaryMessenger proxy;
   final String channelTypeName;
   final String codecTypeName;
@@ -222,7 +223,8 @@ class BasicMessageChannel<T> {
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return shouldProfilePlatformChannels
-        ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
+        ? _profiledBinaryMessengers[this] ??= _DebugProfiledBinaryMessenger(
             result,
             runtimeType.toString(), // ignore: no_runtimetype_tostring
             codec.runtimeType.toString(),
@@ -317,7 +319,8 @@ class MethodChannel {
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return shouldProfilePlatformChannels
-        ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
+        ? _profiledBinaryMessengers[this] ??= _DebugProfiledBinaryMessenger(
             result,
             runtimeType.toString(), // ignore: no_runtimetype_tostring
             codec.runtimeType.toString(),
@@ -350,7 +353,8 @@ class MethodChannel {
   Future<T?> _invokeMethod<T>(String method, {required bool missingOk, dynamic arguments}) async {
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result = shouldProfilePlatformChannels
-        ? await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
+        ? await (binaryMessenger as _DebugProfiledBinaryMessenger).sendWithPostfix(
             name,
             '#$method',
             input,

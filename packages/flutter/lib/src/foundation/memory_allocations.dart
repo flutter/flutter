@@ -118,9 +118,11 @@ typedef MemoryAllocations = FlutterMemoryAllocations;
 class FlutterMemoryAllocations {
   FlutterMemoryAllocations._() {
     if (kFlutterMemoryAllocationsEnabled) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       Listenable.debugMaybeDispatchCreated = (String className, Object object) {
         dispatchObjectCreated(library: 'foundation', className: className, object: object);
       };
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       Listenable.debugMaybeDispatchDisposed = (Object object) {
         dispatchObjectDisposed(object: object);
       };

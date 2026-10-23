@@ -2493,7 +2493,9 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     // with the debugBrightnessOverride in non-release mode.
     if (!kReleaseMode &&
         _parentData == null &&
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         effectiveData.platformBrightness != debugBrightnessOverride) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }
     return MediaQuery(data: effectiveData, child: widget.child);

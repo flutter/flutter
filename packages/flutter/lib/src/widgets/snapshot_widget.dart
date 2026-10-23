@@ -136,7 +136,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    debugCheckHasMediaQuery(context);
+    assert(debugCheckHasMediaQuery(context));
     return _RenderSnapshotWidget(
       controller: controller,
       mode: mode,
@@ -148,7 +148,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
-    debugCheckHasMediaQuery(context);
+    assert(debugCheckHasMediaQuery(context));
     (renderObject as _RenderSnapshotWidget)
       ..controller = controller
       ..mode = mode

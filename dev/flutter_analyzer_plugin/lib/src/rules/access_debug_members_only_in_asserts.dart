@@ -8,6 +8,8 @@ import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart' show Token;
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 
 import '../flutter_analysis_rule.dart';
@@ -159,7 +161,7 @@ class _DebugMemberVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    if (node.name._isDebugOnlySymbol) {
+    if (node.name._isDebugOnlySymbol || node._isUnkeptToString) {
       return;
     }
     super.visitMethodDeclaration(node);
@@ -169,6 +171,11 @@ class _DebugMemberVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitVariableDeclarationList(VariableDeclarationList node) {
     if (node.variables.every((VariableDeclaration v) => v.name._isDebugOnlySymbol)) {
+      // For local variables with a debug prefix, still visit their initializers
+      // so debug-only accesses outside of an assert are caught at declaration time.
+      if (node.parent is VariableDeclarationStatement) {
+        node.variables.accept(this);
+      }
       return;
     }
     super.visitVariableDeclarationList(node);
@@ -176,7 +183,7 @@ class _DebugMemberVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitVariableDeclaration(VariableDeclaration node) {
-    if (node.name._isDebugOnlySymbol) {
+    if (node.name._isDebugOnlySymbol && node.parent?.parent is! VariableDeclarationStatement) {
       return;
     }
     super.visitVariableDeclaration(node);
@@ -202,9 +209,43 @@ class _DebugMemberVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (node.token._isDebugOnlySymbol) {
+    // Skip local variables: they are commonly assigned inside an `assert` block
+    // and read in the surrounding scope, and their initializers are already
+    // checked when declared.
+    if (node.token._isDebugOnlySymbol && node.element is! LocalVariableElement) {
       rule.reportAtNode(node, arguments: <Object>[node.name]);
     }
     super.visitSimpleIdentifier(node);
+  }
+}
+
+extension on Element {
+  bool _hasPragma(String name) => metadata.annotations.any(
+    (ElementAnnotation a) => a.computeConstantValue()?.getField('name')?.toStringValue() == name,
+  );
+}
+
+extension on MethodDeclaration {
+  // Flutter strips `Object.toString` overrides in profile and release builds via
+  // `--delete-tostring-package-uri=package:flutter`, unless opted out with a
+  // `flutter:keep-to-string` or `flutter:keep-to-string-in-subtypes` pragma.
+  bool get _isUnkeptToString {
+    if (isStatic || name.lexeme != 'toString') {
+      return false;
+    }
+    final ExecutableElement? element = declaredFragment?.element;
+    if (element == null || element._hasPragma('flutter:keep-to-string')) {
+      return false;
+    }
+    final Element? enclosing = element.enclosingElement;
+    if (enclosing == null ||
+        enclosing._hasPragma('flutter:keep-to-string') ||
+        enclosing._hasPragma('flutter:keep-to-string-in-subtypes')) {
+      return false;
+    }
+    return enclosing is! InterfaceElement ||
+        !enclosing.allSupertypes.any(
+          (InterfaceType t) => t.element._hasPragma('flutter:keep-to-string-in-subtypes'),
+        );
   }
 }

@@ -72,8 +72,14 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   // Keeps track if this widget has already registered its view factories or not.
   static String? _registeredViewType;
 
-  static RegisterViewFactory get _registerViewFactory =>
-      debugOverrideRegisterViewFactory ?? ui_web.platformViewRegistry.registerViewFactory;
+  static RegisterViewFactory get _registerViewFactory {
+    RegisterViewFactory? result;
+    assert(() {
+      result = debugOverrideRegisterViewFactory;
+      return true;
+    }());
+    return result ?? ui_web.platformViewRegistry.registerViewFactory;
+  }
 
   /// Override this to provide a custom implementation of
   /// [ui_web.PlatformViewRegistry.registerViewFactory].

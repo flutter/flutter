@@ -163,6 +163,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   ///
   /// The label is purely for debugging and not used for comparing the identity
   /// of the key.
+  // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   factory GlobalKey({String? debugLabel}) => LabeledGlobalKey<T>(debugLabel);
 
   /// Creates a global key without a label.
@@ -212,6 +213,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 
   @override
   String toString() {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     final label = _debugLabel != null ? ' $_debugLabel' : '';
     if (runtimeType == LabeledGlobalKey) {
       return '[GlobalKey#${shortHash(this)}$label]';
@@ -2774,6 +2776,7 @@ final class BuildScope {
         e,
         stack,
         informationCollector: () => <DiagnosticsNode>[
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(element)),
           element.describeElement('The element being rebuilt at the time was'),
         ],
@@ -3520,7 +3523,9 @@ class _NotificationNode {
 }
 
 bool _isProfileBuildsEnabledFor(Widget widget) {
+  // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   return debugProfileBuildsEnabled ||
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       (debugProfileBuildsEnabledUserWidgets && debugIsWidgetLocalCreation(widget));
 }
 
@@ -3893,6 +3898,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // TODO(jacobr): make this structured so clients can support clicks on
     // individual entries. For example, is this an iterable with arrows as
     // separators?
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     return StringProperty(name, debugGetCreatorChain(10));
   }
 
@@ -5583,11 +5589,14 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
-    final element = value as Element;
-    if (!element.debugIsDefunct) {
-      json['widgetRuntimeType'] = element.widget.runtimeType.toString();
-    }
-    json['stateful'] = stateful;
+    assert(() {
+      final element = value as Element;
+      if (!element.debugIsDefunct) {
+        json['widgetRuntimeType'] = element.widget.runtimeType.toString();
+      }
+      json['stateful'] = stateful;
+      return true;
+    }());
     return json;
   }
 }
@@ -5837,17 +5846,21 @@ abstract class ComponentElement extends Element {
       built = build();
       assert(() {
         _debugDoingBuild = false;
+        debugWidgetBuilderValue(widget, built);
         return true;
       }());
-      debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
-      _debugDoingBuild = false;
+      assert(() {
+        _debugDoingBuild = false;
+        return true;
+      }());
       built = ErrorWidget.builder(
         _reportException(
           ErrorDescription('building $this'),
           e,
           stack,
           informationCollector: () => <DiagnosticsNode>[
+            // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
             if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
           ],
         ),
@@ -5867,6 +5880,7 @@ abstract class ComponentElement extends Element {
           e,
           stack,
           informationCollector: () => <DiagnosticsNode>[
+            // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
             if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
           ],
         ),

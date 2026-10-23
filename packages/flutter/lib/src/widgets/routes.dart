@@ -236,6 +236,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     return AnimationController(
       duration: duration,
       reverseDuration: reverseDuration,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: debugLabel,
       vsync: navigator!,
     );
