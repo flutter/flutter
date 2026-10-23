@@ -128,6 +128,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
 
 - (void)onStatusBarTap;
+
+/**
+ * Sends the current display information (e.g. the size of the screen that the view controller's
+ * view is on) to the framework.
+ */
+- (void)updateDisplays;
 @end
 
 @interface FlutterImplicitEngineBridgeImpl : NSObject <FlutterImplicitEngineBridge>
