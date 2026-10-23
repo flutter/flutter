@@ -288,12 +288,12 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
-        javaBuilder: () => globals.java,
-        androidSdkBuilder: () => globals.androidSdk,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
         androidWorkflow: androidWorkflow!,
+        iosWorkflow: globals.iosWorkflow,
+        javaBuilder: () => globals.java,
+        toolContext: const GlobalToolContext(),
+        xcode: globals.xcode,
+        androidSdkBuilder: () => globals.androidSdk,
       ),
       FeatureFlags: () => FlutterFeatureFlags(
         flutterVersion: globals.flutterVersion,
@@ -322,10 +322,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
-        logger: globals.logger,
-        processManager: globals.processManager,
+        analytics: globals.analytics,
+        plistParser: globals.plistParser,
+        toolContext: const GlobalToolContext(),
         xcode: globals.xcode!,
-        operatingSystemUtils: globals.os,
       ),
       IOSWorkflow: () => IOSWorkflow(
         featureFlags: featureFlags,
@@ -414,11 +414,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
-        processManager: globals.processManager,
-        logger: globals.logger,
-        artifacts: globals.artifacts!,
-        cache: globals.cache,
-        platform: globals.platform,
         xcode: globals.xcode!,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
@@ -426,9 +421,9 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
-        fileSystem: globals.fs,
         analytics: globals.analytics,
-        shutdownHooks: globals.shutdownHooks,
+        templateRenderer: globals.templateRenderer,
+        toolContext: const GlobalToolContext(),
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
