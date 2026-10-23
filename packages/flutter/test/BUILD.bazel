@@ -61,6 +61,20 @@ pub_package_config(
     without = _WITHOUT,
 )
 
+# The same, where the Dart VM finds it from a script under this directory
+# (foundation/isolates_test runs the SDK's dartvm on _compute_caller.dart,
+# which imports the framework from source): the nearest
+# .dart_tool/package_config.json above the script.
+pub_package_config(
+    name = "dart_tool_package_config",
+    out = ".dart_tool/package_config.json",
+    dev_roots = _DEV_ROOTS,
+    layout = "runfiles",
+    packages = _WORKSPACE_PACKAGES,
+    roots = _ROOTS,
+    without = _WITHOUT,
+)
+
 # The asset directory `flutter test` builds for this package's tests: no
 # assets or fonts of its own (pubspec.yaml has no flutter: section); the
 # framework's two shaders, which flutter_tools compiles into every bundle
@@ -104,6 +118,40 @@ filegroup(
         ["**/*.dart"],
         exclude = ["**/*_test.dart"],
     ) + [
+        "//packages/flutter/test/animation:helpers",
+        "//packages/flutter/test/cupertino:helpers",
+        "//packages/flutter/test/examples:helpers",
+        "//packages/flutter/test/foundation:helpers",
+        "//packages/flutter/test/gestures:helpers",
+        "//packages/flutter/test/harness:helpers",
+        "//packages/flutter/test/material:helpers",
+        "//packages/flutter/test/painting:helpers",
+        "//packages/flutter/test/physics:helpers",
+        "//packages/flutter/test/rendering:helpers",
+        "//packages/flutter/test/scheduler:helpers",
+        "//packages/flutter/test/semantics:helpers",
+        "//packages/flutter/test/services:helpers",
         "//packages/flutter/test/widgets:helpers",
+    ],
+)
+
+# Every directory's suite (dart/ has one test, web-only).
+test_suite(
+    name = "all",
+    tests = [
+        "//packages/flutter/test/animation",
+        "//packages/flutter/test/cupertino",
+        "//packages/flutter/test/examples",
+        "//packages/flutter/test/foundation",
+        "//packages/flutter/test/gestures",
+        "//packages/flutter/test/harness",
+        "//packages/flutter/test/material",
+        "//packages/flutter/test/painting",
+        "//packages/flutter/test/physics",
+        "//packages/flutter/test/rendering",
+        "//packages/flutter/test/scheduler",
+        "//packages/flutter/test/semantics",
+        "//packages/flutter/test/services",
+        "//packages/flutter/test/widgets",
     ],
 )

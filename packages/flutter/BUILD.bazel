@@ -19,4 +19,6 @@ filegroup(
 exports_files([
     "lib/src/material/shaders/ink_sparkle.frag",
     "lib/src/widgets/shaders/stretch_effect.frag",
+    # The tests run from the package's directory (framework_tests.bzl).
+    "pubspec.yaml",
 ])
