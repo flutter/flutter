@@ -168,6 +168,9 @@ enum HostArtifact {
 
   // The Impeller shader compiler.
   impellerc('impellerc', isExecutable: true),
+  // The GLSL library impellerc includes from (`flutter/runtime_effect.glsl`),
+  // a directory the engine build lays beside the compiler.
+  shaderLib('shader_lib'),
   // Impeller's tessellation library.
   libtessellator('libtessellator', isDll: true);
 
@@ -588,6 +591,13 @@ class CachedArtifacts implements Artifacts {
           _currentHostPlatform(_platform, _operatingSystemUtils),
         )!;
         return _fileSystem.file(_fileSystem.path.join(engineDir, artifactFileName));
+      case HostArtifact.shaderLib:
+        final String engineDir = _getEngineArtifactsPath(
+          _currentHostPlatform(_platform, _operatingSystemUtils),
+        )!;
+        return _fileSystem.directory(
+          _fileSystem.path.join(engineDir, artifact.getFileName(_platform)),
+        );
     }
   }
 
@@ -1185,6 +1195,14 @@ class CachedLocalEngineArtifacts implements Artifacts {
           return _backupCache.getHostArtifact(artifact);
         }
         return file;
+      case HostArtifact.shaderLib:
+        final Directory directory = _fileSystem.directory(
+          _host.resolve(<String>[artifact.getFileName(_platform)]),
+        );
+        if (!directory.existsSync()) {
+          return _backupCache.getHostArtifact(artifact);
+        }
+        return directory;
       case HostArtifact.flutterWebSdk:
       case HostArtifact.flutterWebLibrariesJson:
       case HostArtifact.flutterJsDirectory:
@@ -1480,6 +1498,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.iproxy:
       case HostArtifact.skyEnginePath:
       case HostArtifact.impellerc:
+      case HostArtifact.shaderLib:
       case HostArtifact.libtessellator:
         return _parent.getHostArtifact(artifact);
     }
@@ -1636,6 +1655,7 @@ FileSystemEntity _resolveWebArtifact(
     case HostArtifact.iproxy:
     case HostArtifact.skyEnginePath:
     case HostArtifact.impellerc:
+    case HostArtifact.shaderLib:
     case HostArtifact.libtessellator:
       throw ArgumentError('Not a web artifact: $artifact');
   }

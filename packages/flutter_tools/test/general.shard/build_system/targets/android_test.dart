@@ -654,11 +654,60 @@ void main() {
     );
     expect(
       fileSystem
-          .file(fileSystem.path.join('out', 'flutter_assets', 'kernel_blob.bin'))
-          .existsSync(),
-      true,
-    );
-  });
+          .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync(recursive: true);
+      fileSystem
+          .file('pubspec.yaml')
+          .writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'hello');
+      fileSystem.file('shader.glsl').writeAsStringSync('test');
+
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'HostArtifact.impellerc',
+            '--sksl',
+            '--runtime-stage-gles',
+            '--runtime-stage-gles3',
+            '--runtime-stage-vulkan',
+            '--iplr',
+            '--sl=out/flutter_assets/shader.glsl',
+            '--spirv=out/flutter_assets/shader.glsl.spirv',
+            '--input=/shader.glsl',
+            '--input-type=frag',
+            '--include=/',
+            '--include=HostArtifact.shaderLib',
+          ],
+        ),
+      ]);
+
+      await const DebugAndroidApplication().build(environment);
+      expect(processManager, hasNoRemainingExpectations);
+
+      expect(
+        fileSystem
+            .file(fileSystem.path.join('out', 'flutter_assets', 'isolate_snapshot_data'))
+            .existsSync(),
+        true,
+      );
+      expect(
+        fileSystem
+            .file(fileSystem.path.join('out', 'flutter_assets', 'vm_snapshot_data'))
+            .existsSync(),
+        true,
+      );
+      expect(
+        fileSystem
+            .file(fileSystem.path.join('out', 'flutter_assets', 'kernel_blob.bin'))
+            .existsSync(),
+        true,
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
 }
 
 /// Places the Android gen_snapshot in a `linux-arm64` host directory, as the

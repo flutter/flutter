@@ -476,53 +476,53 @@ void main() {
         .childFile('App')
         .createSync(recursive: true);
 
-    final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
-    final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    final File infoPlist = frameworkDirectory.childFile('Info.plist');
-    processManager.addCommands(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          'HostArtifact.impellerc',
-          '--runtime-stage-metal',
-          '--iplr',
-          '--sl=/App.framework/flutter_assets/shader.glsl',
-          '--spirv=/App.framework/flutter_assets/shader.glsl.spirv',
-          '--input=/shader.glsl',
-          '--input-type=frag',
-          '--include=/',
-          '--include=/./shader_lib',
-        ],
-      ),
-      createPlutilFakeCommand(infoPlist),
-      FakeCommand(
-        command: <String>[
-          'xattr',
-          '-r',
-          '-d',
-          'com.apple.FinderInfo',
-          frameworkDirectoryBinary.path,
-        ],
-      ),
-      FakeCommand(
-        command: <String>[
-          'xattr',
-          '-r',
-          '-d',
-          'com.apple.provenance',
-          frameworkDirectoryBinary.path,
-        ],
-      ),
-      FakeCommand(
-        command: <String>[
-          'codesign',
-          '--force',
-          '--sign',
-          'ABC123',
-          '--timestamp=none',
-          frameworkDirectoryBinary.path,
-        ],
-      ),
-    ]);
+      final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+      final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'HostArtifact.impellerc',
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=/App.framework/flutter_assets/shader.glsl',
+            '--spirv=/App.framework/flutter_assets/shader.glsl.spirv',
+            '--input=/shader.glsl',
+            '--input-type=frag',
+            '--include=/',
+            '--include=HostArtifact.shaderLib',
+          ],
+        ),
+        createPlutilFakeCommand(infoPlist),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+      ]);
 
     await const DebugIosApplicationBundle().build(environment);
     expect(processManager, hasNoRemainingExpectations);
