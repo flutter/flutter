@@ -20,6 +20,7 @@ import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
+import 'src/commands/capture.dart';
 import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
 import 'src/commands/config.dart';
@@ -230,6 +231,7 @@ List<FlutterCommand> generateCommands({
       toolContext: toolContext,
       verboseHelp: verboseHelp,
     ),
+    CaptureCommand(toolContext: toolContext),
     ChannelCommand(verboseHelp: verboseHelp, toolContext: toolContext),
     CleanCommand(
       extensionCleanManager: toolDependencies.extensionCleanManager,
