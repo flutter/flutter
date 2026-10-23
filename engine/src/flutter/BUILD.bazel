@@ -480,7 +480,15 @@ _LOCAL_ENGINE_CONTENTS = select({
     "@platforms//os:android": [":flutter"],
     # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
     # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
-    "//conditions:default": ["//engine/src/flutter/sky/packages/sky_engine"],
+    # impellerc's GLSL library, which GN's shader_lib group copies beside
+    # the compiler (shader_lib/flutter/runtime_effect.glsl,
+    # shader_lib/impeller/*.glsl): the flutter tool hands the directory to
+    # impellerc as --include when it compiles a package's shaders.
+    "//conditions:default": [
+        "//engine/src/flutter/impeller/compiler/shader_lib/flutter",
+        "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
+        "//engine/src/flutter/sky/packages/sky_engine",
+    ],
 })
 
 _LOCAL_ENGINE_FILES = select({
@@ -544,7 +552,8 @@ install(
 # The same files without the copy: `local_engine.json` beside them, which
 # the flutter tool reads (local_engine.bzl; NEED_DECISION D15). The
 # sky_engine package is assembled as one directory, as package:sky_engine's
-# root; everything else is mapped where it is.
+# root, and so is the shader library (the tool passes `shader_lib` whole to
+# impellerc); everything else is mapped where it is.
 #
 #   bazel build //engine/src/flutter:local_engine
 #   flutter test --local-engine=$PWD/engine/src/out/bazel-bin/engine/src/flutter \
@@ -552,7 +561,10 @@ install(
 local_engine(
     name = "local_engine",
     testonly = True,
-    assemble = ["gen/dart-pkg/sky_engine"],
+    assemble = [
+        "gen/dart-pkg/sky_engine",
+        "shader_lib",
+    ],
     contents = _LOCAL_ENGINE_CONTENTS,
     files = _LOCAL_ENGINE_FILES,
     trees = _LOCAL_ENGINE_TREES,

@@ -503,10 +503,17 @@ void main() {
       fileSystem
           .file(fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'))
           .createSync(recursive: true);
+      fileSystem
+          .directory(fileSystem.path.join('/out', 'host_debug_unopt', 'shader_lib'))
+          .createSync(recursive: true);
 
       expect(
         artifacts.getHostArtifact(HostArtifact.impellerc).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.shaderLib).path,
+        fileSystem.path.join('/out', 'host_debug_unopt', 'shader_lib'),
       );
       expect(
         artifacts.getHostArtifact(HostArtifact.libtessellator).path,
@@ -545,6 +552,18 @@ void main() {
             'engine',
             'linux-x64',
             'libtessellator.so',
+          ),
+        );
+        expect(
+          artifacts.getHostArtifact(HostArtifact.shaderLib).path,
+          fileSystem.path.join(
+            'root',
+            'bin',
+            'cache',
+            'artifacts',
+            'engine',
+            'linux-x64',
+            'shader_lib',
           ),
         );
       },
@@ -969,6 +988,8 @@ void main() {
                 'font-subset': 'tools/font_subset/shipped/font-subset',
                 'libflutter_linux_gtk.so': 'shell/platform/linux/shipped/libflutter_linux_gtk.so',
                 'flutter_linux': '../../../../../../engine/src/flutter/shell/platform/linux/public/flutter_linux',
+                'impellerc': 'impeller/compiler/shipped/impellerc',
+                'shader_lib': 'local_engine/shader_lib',
               },
             }),
           );
@@ -1104,6 +1125,22 @@ void main() {
           'public',
           'flutter_linux',
         ),
+      );
+      // The shader compiler, and the GLSL library it includes from: assembled
+      // as one directory by local_engine, not beside the compiler as GN lays it.
+      fileSystem
+          .file(fileSystem.path.join(bazelBin, 'impeller', 'compiler', 'shipped', 'impellerc'))
+          .createSync(recursive: true);
+      fileSystem
+          .directory(fileSystem.path.join(bazelBin, 'local_engine', 'shader_lib'))
+          .createSync(recursive: true);
+      expect(
+        artifacts.getHostArtifact(HostArtifact.impellerc).path,
+        fileSystem.path.join(bazelBin, 'impeller', 'compiler', 'shipped', 'impellerc'),
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.shaderLib).path,
+        fileSystem.path.join(bazelBin, 'local_engine', 'shader_lib'),
       );
       // The Dart SDK: the repository the manifest names, since it has a bin/.
       final String dartSdk = fileSystem.path.join(execroot, 'external', 'dart_sdk');
