@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The layers examples' sources: the programs under lib/, raw/, services/ and
+# widgets/ (rendering/ is a Bazel package of its own), for the tests Bazel
+# compiles and runs on flutter_tester
+# (engine/src/flutter/build/bazel/dart/flutter_test.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob([
+        "lib/**",
+        "raw/**",
+        "services/**",
+        "widgets/**",
+    ]) + [
+        "pubspec.yaml",
+        "//examples/layers/rendering:sources",
+    ],
+)
+
+# The asset the pubspec declares (the isolate example loads it), for the
+# tests' asset directory.
+filegroup(
+    name = "assets",
+    srcs = ["services/data.json"],
+)
+
+# The tests run from the package's directory (test/BUILD.bazel).
+exports_files(["pubspec.yaml"])
