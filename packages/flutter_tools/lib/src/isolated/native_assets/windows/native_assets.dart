@@ -5,7 +5,7 @@
 import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
-import '../../../context_runner.dart';
+import '../../../context/tool_context.dart';
 import '../../../windows/visual_studio.dart';
 
 /// Returns the [CCompilerConfig] for Windows by locating the active Visual Studio toolchain.
@@ -13,8 +13,11 @@ import '../../../windows/visual_studio.dart';
 /// If a suitable Visual Studio installation is not found:
 /// * Throws a [ToolExit] if [throwIfNotFound] is true.
 /// * Returns null if [throwIfNotFound] is false.
-Future<CCompilerConfig?> cCompilerConfigWindows({required bool throwIfNotFound}) async {
-  final visualStudio = VisualStudio(toolContext: const GlobalToolContext());
+Future<CCompilerConfig?> cCompilerConfigWindows({
+  required bool throwIfNotFound,
+  required ToolContext toolContext,
+}) async {
+  final visualStudio = VisualStudio(toolContext: toolContext);
 
   final Uri? compiler = _toOptionalFileUri(visualStudio.clPath);
   final Uri? archiver = _toOptionalFileUri(visualStudio.libPath);

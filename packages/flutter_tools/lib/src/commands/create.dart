@@ -813,6 +813,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         await project.ensureReadyForPlatformSpecificTooling(
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          toolContext: toolContext,
           androidPlatform: includeAndroid,
           iosPlatform: includeIos || includeDarwin,
           linuxPlatform: includeLinux,

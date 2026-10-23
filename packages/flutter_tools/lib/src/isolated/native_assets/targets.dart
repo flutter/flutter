@@ -20,6 +20,7 @@ import '../../build_info.dart'
         kIosArchs,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../context/tool_context.dart';
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
@@ -227,7 +228,10 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   /// could not be found. For `flutter test` setups where no app is compiled, we _prefer_ to use the
   /// same toolchain but would allow not passing a [CCompilerConfig] if that fails. This allows
   /// hooks that only download code assets instead of compiling them to still function.
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true});
+  Future<void> setCCompilerConfig({
+    required ToolContext toolContext,
+    bool mustMatchAppBuild = true,
+  });
 
   List<CodeAssetExtension> get codeAssetExtensions {
     return <CodeAssetExtension>[
@@ -256,8 +260,15 @@ class WindowsAssetTarget extends CodeAssetTarget {
   ];
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required ToolContext toolContext,
+    bool mustMatchAppBuild = true,
+  }) async {
+    cCompilerConfigSync = await cCompilerConfigWindows(
+      throwIfNotFound: mustMatchAppBuild,
+      toolContext: toolContext,
+    );
+  }
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
@@ -272,7 +283,10 @@ final class LinuxAssetTarget extends CodeAssetTarget {
   final Directory? cmakeBuildDirectory;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
+  Future<void> setCCompilerConfig({
+    required ToolContext toolContext,
+    bool mustMatchAppBuild = true,
+  }) async {
     final bool isNativeAppBuild = cmakeBuildDirectory != null && cmakeBuildDirectory!.existsSync();
 
     cCompilerConfigSync = await cCompilerConfigLinux(
@@ -300,8 +314,13 @@ final class IOSAssetTarget extends CodeAssetTarget {
   final FileSystem fileSystem;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required ToolContext toolContext,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigMacOS(
+    processUtils: toolContext.processUtils,
+    throwIfNotFound: mustMatchAppBuild,
+  );
 
   IOSCodeConfig _getIOSConfig(Map<String, String> environmentDefines, FileSystem fileSystem) {
     final String? sdkRoot = environmentDefines[kSdkRoot];
@@ -348,8 +367,13 @@ final class MacOSAssetTarget extends CodeAssetTarget {
   }
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required ToolContext toolContext,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigMacOS(
+    processUtils: toolContext.processUtils,
+    throwIfNotFound: mustMatchAppBuild,
+  );
 }
 
 final class AndroidAssetTarget extends CodeAssetTarget {
@@ -365,8 +389,10 @@ final class AndroidAssetTarget extends CodeAssetTarget {
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigAndroid();
+  Future<void> setCCompilerConfig({
+    required ToolContext toolContext,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigAndroid(toolContext: toolContext);
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -414,8 +440,10 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
   CCompilerConfig? get cCompilerConfigSync => subtarget.cCompilerConfigSync;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) =>
-      subtarget.setCCompilerConfig(mustMatchAppBuild: false);
+  Future<void> setCCompilerConfig({
+    required ToolContext toolContext,
+    bool mustMatchAppBuild = true,
+  }) => subtarget.setCCompilerConfig(toolContext: toolContext, mustMatchAppBuild: false);
 }
 
 List<CpuArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {

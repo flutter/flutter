@@ -16,6 +16,7 @@ import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -38,28 +39,27 @@ import 'xcodeproj.dart';
 class IOSCoreDeviceLauncher {
   IOSCoreDeviceLauncher({
     required this._coreDeviceControl,
-    required Logger logger,
     required this._xcodeDebug,
-    required this._fileSystem,
-    required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     required Version? deviceVersion,
+    required this._toolContext,
     @visibleForTesting LLDB? lldb,
-  }) : _logger = logger,
-       _lldb =
-           lldb ??
-           LLDB(
-             logger: logger,
-             processUtils: processUtils,
-             xcodeProjectInterpreter: xcodeProjectInterpreter,
-             deviceVersion: deviceVersion,
-           );
+  }) {
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    _lldb =
+        lldb ??
+        LLDB(
+          logger: logger,
+          processUtils: processUtils,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+          deviceVersion: deviceVersion,
+        );
+  }
 
   final IOSCoreDeviceControl _coreDeviceControl;
-  final Logger _logger;
   final XcodeDebug _xcodeDebug;
-  final FileSystem _fileSystem;
-  final LLDB _lldb;
+  final ToolContext _toolContext;
+  late final LLDB _lldb;
 
   /// Contains a stream that devicectl sends logs to.
   final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
@@ -215,25 +215,26 @@ class IOSCoreDeviceLauncher {
     String? mainPath,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     XcodeDebugProject? debugProject;
 
     if (package is PrebuiltIOSApp) {
       debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
         package.deviceBundlePath,
         templateRenderer: templateRenderer,
-        verboseLogging: _logger.isVerbose,
+        verboseLogging: logger.isVerbose,
       );
     } else if (package is BuildableIOSApp) {
       final IosProject project = package.project;
-      final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
+      final Directory bundle = fs.directory(package.deviceBundlePath);
       final Directory? xcodeWorkspace = project.xcodeWorkspace;
       if (xcodeWorkspace == null) {
-        _logger.printTrace('Unable to get Xcode workspace.');
+        logger.printTrace('Unable to get Xcode workspace.');
         return false;
       }
       final String? scheme = await project.schemeForBuildInfo(
         debuggingOptions.buildInfo,
-        logger: _logger,
+        logger: logger,
       );
       if (scheme == null) {
         return false;
@@ -247,6 +248,7 @@ class IOSCoreDeviceLauncher {
         project: project.parent,
         buildInfo: debuggingOptions.buildInfo,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: _toolContext,
       );
 
       debugProject = XcodeDebugProject(
@@ -255,12 +257,12 @@ class IOSCoreDeviceLauncher {
         xcodeWorkspace: xcodeWorkspace,
         hostAppProjectName: project.hostAppProjectName,
         expectedConfigurationBuildDir: bundle.parent.absolute.path,
-        verboseLogging: _logger.isVerbose,
+        verboseLogging: logger.isVerbose,
       );
     } else {
       // This should not happen. Currently, only PrebuiltIOSApp and
       // BuildableIOSApp extend from IOSApp.
-      _logger.printTrace('IOSApp type ${package.runtimeType} is not recognized.');
+      logger.printTrace('IOSApp type ${package.runtimeType} is not recognized.');
       return false;
     }
 

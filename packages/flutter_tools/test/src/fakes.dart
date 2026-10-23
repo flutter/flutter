@@ -1342,7 +1342,11 @@ class FakeToolContext extends Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  late final Artifacts artifacts = _artifacts ?? FakeArtifacts(fileSystem: fs);
+  late final Artifacts artifacts = switch (_artifacts) {
+    final DeferredArtifacts deferredArtifacts => deferredArtifacts,
+    final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
+    null => DeferredArtifacts(FakeArtifacts(fileSystem: fs)),
+  };
 
   @override
   late final BotDetector botDetector = _botDetector ?? const FakeBotDetector(false);

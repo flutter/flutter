@@ -49,17 +49,15 @@ class FlutterTesterApp extends ApplicationPackage {
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(
     super.id, {
-    required ToolContext super.toolContext,
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
-    this._nativeAssetsBuilder,
+    required ToolContext super.toolContext,
   }) : super(logger: toolContext.logger, platformType: null, category: null, ephemeral: false);
 
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
-  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -130,6 +128,7 @@ class FlutterTesterDevice extends Device {
       :Artifacts artifacts,
       :FileSystem fs,
       :Logger logger,
+      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
@@ -183,9 +182,9 @@ class FlutterTesterDevice extends Device {
         command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
-          if (platform.isWindows && _nativeAssetsBuilder != null)
+          if (platform.isWindows && nativeAssetsBuilder != null)
             'PATH':
-                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${platform.environment['PATH']}',
+                '${nativeAssetsBuilder.windowsBuildDirectory(project, toolContext: toolContext)};${platform.environment['PATH']}',
         },
       );
       if (!debuggingOptions.debuggingEnabled) {
@@ -244,18 +243,16 @@ class FlutterTesterDevice extends Device {
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
-    required ToolContext super.toolContext,
     required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required ToolContext super.toolContext,
   }) : _testerDevice = FlutterTesterDevice(
          kTesterDeviceId,
-         toolContext: toolContext,
          analytics: analytics,
          buildSystem: buildSystem,
          buildTargets: buildTargets,
-         nativeAssetsBuilder: nativeAssetsBuilder,
+         toolContext: toolContext,
        ),
        super('Flutter tester');
 

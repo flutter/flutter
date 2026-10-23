@@ -248,48 +248,49 @@ abstract class Logger {
 class DelegatingLogger implements Logger {
   @visibleForTesting
   @protected
-  DelegatingLogger(this._delegate);
+  DelegatingLogger(this.delegate);
 
-  final Logger _delegate;
-
-  @override
-  bool get quiet => _delegate.quiet;
+  /// The wrapped [Logger] to which this logger delegates.
+  final Logger delegate;
 
   @override
-  set quiet(bool value) => _delegate.quiet = value;
+  bool get quiet => delegate.quiet;
 
   @override
-  bool get hasTerminal => _delegate.hasTerminal;
+  set quiet(bool value) => delegate.quiet = value;
 
   @override
-  Terminal get terminal => _delegate.terminal;
+  bool get hasTerminal => delegate.hasTerminal;
 
   @override
-  OutputPreferences get _outputPreferences => _delegate._outputPreferences;
+  Terminal get terminal => delegate.terminal;
 
   @override
-  bool get isVerbose => _delegate.isVerbose;
+  OutputPreferences get _outputPreferences => delegate._outputPreferences;
 
   @override
-  bool get isMachine => _delegate.isMachine;
+  bool get isVerbose => delegate.isVerbose;
 
   @override
-  bool get hadErrorOutput => _delegate.hadErrorOutput;
+  bool get isMachine => delegate.isMachine;
 
   @override
-  set hadErrorOutput(bool value) => _delegate.hadErrorOutput = value;
+  bool get hadErrorOutput => delegate.hadErrorOutput;
 
   @override
-  bool get hadWarningOutput => _delegate.hadWarningOutput;
+  set hadErrorOutput(bool value) => delegate.hadErrorOutput = value;
 
   @override
-  set hadWarningOutput(bool value) => _delegate.hadWarningOutput = value;
+  bool get hadWarningOutput => delegate.hadWarningOutput;
 
   @override
-  bool get fatalWarnings => _delegate.fatalWarnings;
+  set hadWarningOutput(bool value) => delegate.hadWarningOutput = value;
 
   @override
-  set fatalWarnings(bool value) => _delegate.fatalWarnings = value;
+  bool get fatalWarnings => delegate.fatalWarnings;
+
+  @override
+  set fatalWarnings(bool value) => delegate.fatalWarnings = value;
 
   @override
   void printError(
@@ -301,7 +302,7 @@ class DelegatingLogger implements Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    _delegate.printError(
+    delegate.printError(
       message,
       stackTrace: stackTrace,
       emphasis: emphasis,
@@ -322,7 +323,7 @@ class DelegatingLogger implements Logger {
     bool? wrap,
     bool fatal = true,
   }) {
-    _delegate.printWarning(
+    delegate.printWarning(
       message,
       emphasis: emphasis,
       color: color,
@@ -343,7 +344,7 @@ class DelegatingLogger implements Logger {
     int? hangingIndent,
     bool? wrap,
   }) {
-    _delegate.printStatus(
+    delegate.printStatus(
       message,
       emphasis: emphasis,
       color: color,
@@ -356,17 +357,17 @@ class DelegatingLogger implements Logger {
 
   @override
   void printBox(String message, {String? title}) {
-    _delegate.printBox(message, title: title);
+    delegate.printBox(message, title: title);
   }
 
   @override
   void printTrace(String message) {
-    _delegate.printTrace(message);
+    delegate.printTrace(message);
   }
 
   @override
   void sendEvent(String name, [Map<String, dynamic>? args]) {
-    _delegate.sendEvent(name, args);
+    delegate.sendEvent(name, args);
   }
 
   @override
@@ -375,7 +376,7 @@ class DelegatingLogger implements Logger {
     String? progressId,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    return _delegate.startProgress(
+    return delegate.startProgress(
       message,
       progressId: progressId,
       progressIndicatorPadding: progressIndicatorPadding,
@@ -389,7 +390,7 @@ class DelegatingLogger implements Logger {
     SlowWarningCallback? slowWarningCallback,
     TerminalColor? warningColor,
   }) {
-    return _delegate.startSpinner(
+    return delegate.startSpinner(
       onFinish: onFinish,
       timeout: timeout,
       slowWarningCallback: slowWarningCallback,
@@ -398,13 +399,13 @@ class DelegatingLogger implements Logger {
   }
 
   @override
-  bool get supportsColor => _delegate.supportsColor;
+  bool get supportsColor => delegate.supportsColor;
 
   @override
-  void clear() => _delegate.clear();
+  void clear() => delegate.clear();
 
   @override
-  void checkForFatalLogs() => _delegate.checkForFatalLogs();
+  void checkForFatalLogs() => delegate.checkForFatalLogs();
 }
 
 /// If [logger] is a [DelegatingLogger], walks the delegate chain and returns
@@ -417,7 +418,7 @@ T asLogger<T extends Logger>(Logger logger) {
     if (logger is T) {
       return logger;
     } else if (logger is DelegatingLogger) {
-      logger = logger._delegate;
+      logger = logger.delegate;
     } else {
       throw StateError('$original has no ancestor delegate of type $T');
     }

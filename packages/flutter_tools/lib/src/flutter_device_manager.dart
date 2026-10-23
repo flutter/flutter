@@ -28,7 +28,6 @@ import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
-import 'native_assets.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
@@ -54,7 +53,6 @@ class FlutterDeviceManager extends DeviceManager {
     final ToolContext(
       fs: FileSystem fileSystem,
       :Logger logger,
-      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
       :Platform platform,
       :ProcessManager processManager,
       :UserMessages userMessages,
@@ -72,11 +70,10 @@ class FlutterDeviceManager extends DeviceManager {
       IOSDevices(platform: platform, xcdevice: xcDevice, iosWorkflow: iosWorkflow, logger: logger),
       IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
       FlutterTesterDevices(
-        toolContext: toolContext,
         analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        nativeAssetsBuilder: nativeAssetsBuilder,
+        toolContext: toolContext,
       ),
       MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
       MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),

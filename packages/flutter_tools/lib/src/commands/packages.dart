@@ -494,6 +494,7 @@ class PackagesGetCommand extends FlutterCommand {
         if (_dependsOnFlutter(graph, workspaceRootName)) {
           await project.regeneratePlatformSpecificTooling(
             releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+            toolContext: _toolContext,
             pubspecCache: pubspecCache,
             packageGraph: graph,
             packageConfig: packageConfig,
@@ -507,6 +508,7 @@ class PackagesGetCommand extends FlutterCommand {
           if (!graph.roots.contains(exampleProject.manifest.appName)) {
             await exampleProject.regeneratePlatformSpecificTooling(
               releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+              toolContext: _toolContext,
               pubspecCache: pubspecCache,
               packageGraph: graph,
               packageConfig: packageConfig,

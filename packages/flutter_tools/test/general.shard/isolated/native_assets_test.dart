@@ -7,6 +7,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 
@@ -80,6 +82,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
@@ -95,6 +98,8 @@ void main() {
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
+        processManager: processManager,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
         targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/test/'),
       );
@@ -119,6 +124,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
@@ -148,6 +154,7 @@ void main() {
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
         ),
@@ -162,6 +169,8 @@ void main() {
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
+        processManager: processManager,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
         targetUri: targetDirectory.uri,
       );
@@ -186,6 +195,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: null,
@@ -225,6 +235,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
@@ -280,6 +291,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
@@ -311,6 +323,8 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
+        processManager: processManager,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
         targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/linux/'),
       );
@@ -350,6 +364,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
@@ -368,70 +383,58 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'unit tests does not require compiler toolchain',
-    overrides: <Type, Generator>{
-      ProcessManager: () {
-        const Platform platform = LocalPlatform();
-        return FakeProcessManager.list([
-          if (platform.isMacOS) ...[
-            for (final binary in <String>['clang', 'ar', 'ld'])
-              FakeCommand(
-                command: <Pattern>['xcrun', '--find', binary],
-                exitCode: 1,
-                stderr: 'not found',
-              ),
-            for (final binary in <String>['clang', 'ar', 'ld'])
-              FakeCommand(
-                command: <Pattern>['xcrun', '--find', binary],
-                exitCode: 1,
-                stderr: 'not found',
-              ),
-          ],
-          if (platform.isLinux) ...[
-            const FakeCommand(
-              command: <Pattern>['which', 'clang++'],
-              exitCode: 1,
-              stderr: 'not found',
-            ),
-            const FakeCommand(
-              command: <Pattern>['which', 'clang++'],
-              exitCode: 1,
-              stderr: 'not found',
-            ),
-          ],
-        ]);
-      },
-    },
-    () async {
-      // This calls setCCompilerConfig() on a test target, which must not throw despite the
-      // toolchain not being available.
-      const Platform platform = LocalPlatform();
-      if (!platform.isLinux && !platform.isMacOS) {
-        return false;
-      }
+  testUsingContext('unit tests does not require compiler toolchain', () async {
+    // This calls setCCompilerConfig() on a test target, which must not throw despite the
+    // toolchain not being available.
+    const Platform platform = LocalPlatform();
+    if (!platform.isLinux && !platform.isMacOS) {
+      return false;
+    }
 
-      final target = _SetCCompilerConfigTarget(
-        packagesWithNativeAssetsResult: <String>['bar'],
-        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
-      );
+    final testProcessManager = FakeProcessManager.list(<FakeCommand>[
+      if (platform.isMacOS) ...<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            exitCode: 1,
+            stderr: 'not found',
+          ),
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            exitCode: 1,
+            stderr: 'not found',
+          ),
+      ],
+      if (platform.isLinux) ...<FakeCommand>[
+        const FakeCommand(command: <Pattern>['which', 'clang++'], exitCode: 1, stderr: 'not found'),
+        const FakeCommand(command: <Pattern>['which', 'clang++'], exitCode: 1, stderr: 'not found'),
+      ],
+    ]);
 
-      await runFlutterSpecificHooks(
-        environmentDefines: {},
-        targetPlatform: TargetPlatform.tester,
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        buildRunner: target,
-        buildCodeAssets: BuildCodeAssetsOptions(
-          appBuildDirectory: fileSystem.directory(projectUri),
-        ),
-        buildDataAssets: true,
-        recordedUsesFile: null,
-      );
+    final target = _SetCCompilerConfigTarget(
+      packagesWithNativeAssetsResult: <String>['bar'],
+      buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
+      fileSystem: fileSystem,
+      logger: testLogger,
+      platform: platform,
+      processManager: testProcessManager,
+    );
 
-      expect(target.didSetCCompilerConfig, isTrue);
-    },
-  );
+    await runFlutterSpecificHooks(
+      environmentDefines: <String, String>{},
+      targetPlatform: TargetPlatform.tester,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      logger: testLogger,
+      buildRunner: target,
+      buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: fileSystem.directory(projectUri)),
+      buildDataAssets: true,
+      recordedUsesFile: null,
+    );
+
+    expect(target.didSetCCompilerConfig, isTrue);
+  });
 
   testUsingContext(
     'linux build reads compilers from CMakeCache.txt',
@@ -443,6 +446,10 @@ void main() {
       final target = _SetCCompilerConfigTarget(
         packagesWithNativeAssetsResult: <String>['bar'],
         buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
+        fileSystem: fileSystem,
+        logger: testLogger,
+        platform: const LocalPlatform(),
+        processManager: processManager,
       );
 
       await fileSystem.directory('/usr/bin/').create(recursive: true);
@@ -464,6 +471,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.linux_arm64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
         buildRunner: target,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: project.childDirectory('build')),
         buildDataAssets: false,
@@ -492,6 +500,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
         ),
@@ -510,6 +519,8 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        logger: testLogger,
+        processManager: processManager,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
         targetUri: targetDirectory.uri,
       );
@@ -776,8 +787,20 @@ environment:
           packageConfig: packageConfig,
         );
 
-        final (:Uri? nativeAssetsManifest, flutterHookResult: _) =
-            await testCompilerBuildNativeAssets(buildInfo);
+        final (
+          :Uri? nativeAssetsManifest,
+          flutterHookResult: _,
+        ) = await testCompilerBuildNativeAssets(
+          buildInfo,
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: hostFileSystem,
+            logger: logger,
+            platform: const LocalPlatform(),
+            processManager: processManager,
+            projectFactory: FlutterProjectFactory(fileSystem: hostFileSystem, logger: logger),
+          ),
+        );
         expect(nativeAssetsManifest, isNotNull);
         expect(hostFileSystem.file(nativeAssetsManifest).existsSync(), isTrue);
       },
@@ -823,8 +846,20 @@ environment:
           packageConfig: packageConfig,
         );
 
-        final (:Uri? nativeAssetsManifest, flutterHookResult: _) =
-            await testCompilerBuildNativeAssets(buildInfo);
+        final (
+          :Uri? nativeAssetsManifest,
+          flutterHookResult: _,
+        ) = await testCompilerBuildNativeAssets(
+          buildInfo,
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: hostFileSystem,
+            logger: logger,
+            platform: const LocalPlatform(),
+            processManager: processManager,
+            projectFactory: FlutterProjectFactory(fileSystem: hostFileSystem, logger: logger),
+          ),
+        );
         expect(nativeAssetsManifest, isNull);
         expect(
           logger.warningText,
@@ -836,13 +871,32 @@ environment:
 }
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
-  _SetCCompilerConfigTarget({super.buildResult, super.packagesWithNativeAssetsResult});
+  _SetCCompilerConfigTarget({
+    required this.fileSystem,
+    required this.logger,
+    required this.platform,
+    required this.processManager,
+    super.buildResult,
+    super.packagesWithNativeAssetsResult,
+  });
+
+  final FileSystem fileSystem;
+  final Logger logger;
+  final Platform platform;
+  final FakeProcessManager processManager;
 
   bool didSetCCompilerConfig = false;
 
   @override
   Future<void> setCCompilerConfig(CodeAssetTarget target) async {
-    await target.setCCompilerConfig();
+    await target.setCCompilerConfig(
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+    );
     didSetCCompilerConfig = true;
   }
 }

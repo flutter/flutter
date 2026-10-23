@@ -396,6 +396,49 @@ class ToolDependencies {
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
+    // Artifacts will be updated later if a local engine is used.
+    final Artifacts finalArtifacts = switch (artifacts) {
+      final DeferredArtifacts deferredArtifacts => deferredArtifacts,
+      final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
+      null => DeferredArtifacts(
+        CachedArtifacts(
+          fileSystem: finalFS,
+          cache: finalCache,
+          platform: finalPlatform,
+          operatingSystemUtils: finalOS,
+        ),
+      ),
+    };
+
+    final finalToolContext = ToolContext(
+      artifacts: finalArtifacts,
+      botDetector: finalBotDetector,
+      cache: finalCache,
+      config: finalConfig,
+      customDevicesConfig: finalCustomDevicesConfig,
+      flutterVersion: finalFlutterVersion,
+      fs: finalFS,
+      git: finalGit,
+      localEngineLocator: finalLocalEngineLocator,
+      logger: finalLogger,
+      nativeAssetsBuilder: finalNativeAssetsBuilder,
+      os: finalOS,
+      outputPreferences: finalOutputPreferences,
+      persistentToolState: finalPersistentToolState,
+      platform: finalPlatform,
+      preRunValidator: finalPreRunValidator,
+      processInfo: finalProcessInfo,
+      processManager: finalProcessManager,
+      processUtils: finalProcessUtils,
+      projectFactory: finalProjectFactory,
+      shutdownHooks: finalShutdownHooks,
+      signals: LocalSignals.instance,
+      stdio: finalStdio,
+      systemClock: finalSystemClock,
+      terminal: finalTerminal,
+      userMessages: finalUserMessages,
+    );
+
     // 11. AppleContext Dependencies
     final XcodeProjectInterpreter finalXcodeProjectInterpreter =
         xcodeProjectInterpreter ??
@@ -432,28 +475,9 @@ class ToolDependencies {
     final CocoaPodsValidator finalCocoapodsValidator =
         cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
-    // Artifacts will be updated later if a local engine is used.
-    final Artifacts finalArtifacts = switch (artifacts) {
-      final DeferredArtifacts deferredArtifacts => deferredArtifacts,
-      final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
-      null => DeferredArtifacts(
-        CachedArtifacts(
-          fileSystem: finalFS,
-          cache: finalCache,
-          platform: finalPlatform,
-          operatingSystemUtils: finalOS,
-        ),
-      ),
-    };
-
     final XCDevice finalXCDevice =
         xcdevice ??
         XCDevice(
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          artifacts: finalArtifacts,
-          cache: finalCache,
-          platform: finalPlatform,
           xcode: finalXcode,
           iproxy: IProxy(
             artifacts: finalArtifacts,
@@ -461,9 +485,8 @@ class ToolDependencies {
             processManager: finalProcessManager,
             dyLdLibEntry: finalCache.dyLdLibEntry,
           ),
-          fileSystem: finalFS,
           analytics: finalAnalytics,
-          shutdownHooks: finalShutdownHooks,
+          toolContext: finalToolContext,
         );
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
@@ -490,46 +513,11 @@ class ToolDependencies {
         IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
 
     final IOSSimulatorUtils finalIOSSimulatorUtils =
-        iosSimulatorUtils ??
-        IOSSimulatorUtils(
-          logger: finalLogger,
-          operatingSystemUtils: finalOS,
-          processManager: finalProcessManager,
-          xcode: finalXcode,
-        );
+        iosSimulatorUtils ?? IOSSimulatorUtils(xcode: finalXcode, toolContext: finalToolContext);
 
     final PlistParser finalPlistParser =
         plistParser ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
-
-    final finalToolContext = ToolContext(
-      artifacts: finalArtifacts,
-      botDetector: finalBotDetector,
-      cache: finalCache,
-      config: finalConfig,
-      customDevicesConfig: finalCustomDevicesConfig,
-      flutterVersion: finalFlutterVersion,
-      fs: finalFS,
-      git: finalGit,
-      localEngineLocator: finalLocalEngineLocator,
-      logger: finalLogger,
-      nativeAssetsBuilder: finalNativeAssetsBuilder,
-      os: finalOS,
-      outputPreferences: finalOutputPreferences,
-      persistentToolState: finalPersistentToolState,
-      platform: finalPlatform,
-      preRunValidator: finalPreRunValidator,
-      processInfo: finalProcessInfo,
-      processManager: finalProcessManager,
-      processUtils: finalProcessUtils,
-      projectFactory: finalProjectFactory,
-      shutdownHooks: finalShutdownHooks,
-      signals: LocalSignals.instance,
-      stdio: finalStdio,
-      systemClock: finalSystemClock,
-      terminal: finalTerminal,
-      userMessages: finalUserMessages,
-    );
 
     // 12. AndroidContext Dependencies
     final AndroidSdk? Function() finalAndroidSdkBuilder =
