@@ -153,10 +153,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
 
     auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = geometry_result.type;
-    auto inverted_blend_mode =
-        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc);
-    pass.SetPipeline(
-        renderer.GetPorterDuffPipeline(inverted_blend_mode, options));
+    pass.SetPipeline(renderer.GetPorterDuffBlendPipeline(options));
 
     FS::BindTextureSamplerDst(pass, texture, dst_sampler);
 
@@ -169,6 +166,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
         Vector4(1, alpha_, static_cast<int>(tile_mode_x_),
                 static_cast<int>(tile_mode_y_));
     frag_info.use_strict_source_rect = 0.0;
+    SetPorterDuffCoefficients(
+        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc), frag_info);
 
     auto& host_buffer = renderer.GetTransientsDataBuffer();
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
