@@ -31,7 +31,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show FakeLogger, FakePlistParser;
+import '../../src/fakes.dart' show FakeLogger, FakePlistParser, FakeToolContext;
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -636,7 +636,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -681,7 +685,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -739,7 +747,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -824,7 +836,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -886,7 +902,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+            ),
           );
 
           final completer = Completer<void>();
@@ -953,7 +973,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();

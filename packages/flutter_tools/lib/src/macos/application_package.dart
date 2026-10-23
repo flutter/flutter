@@ -5,8 +5,10 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../context/tool_context.dart';
 import '../ios/plist_parser.dart';
 import '../xcode_project.dart';
 
@@ -18,9 +20,18 @@ abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [MacOSApp] from a macOS project directory.
-  factory MacOSApp.fromMacOSProject(MacOSProject project) {
+  factory MacOSApp.fromMacOSProject(
+    MacOSProject project, {
+    required PlistParser plistParser,
+    required ToolContext toolContext,
+  }) {
     // projectBundleId is unused for macOS apps. Use a placeholder bundle ID.
-    return BuildableMacOSApp(project, 'com.example.placeholder');
+    return BuildableMacOSApp(
+      project,
+      'com.example.placeholder',
+      plistParser: plistParser,
+      toolContext: toolContext,
+    );
   }
 
   /// Creates a new [MacOSApp] from an existing app bundle.
@@ -30,8 +41,16 @@ abstract class MacOSApp extends ApplicationPackage {
   /// "~/Library/Developer/Xcode/DerivedData/" and contains an executable
   /// which is expected to start the application and send the vmService
   /// port over stdout.
-  static MacOSApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final _BundleInfo? bundleInfo = _executableFromBundle(applicationBinary);
+  static MacOSApp? fromPrebuiltApp(
+    FileSystemEntity applicationBinary, {
+    required PlistParser plistParser,
+    required ToolContext toolContext,
+  }) {
+    final _BundleInfo? bundleInfo = _executableFromBundle(
+      applicationBinary,
+      plistParser: plistParser,
+      toolContext: toolContext,
+    );
     if (bundleInfo == null) {
       return null;
     }
@@ -46,27 +65,32 @@ abstract class MacOSApp extends ApplicationPackage {
   }
 
   /// Look up the executable name for a macOS application bundle.
-  static _BundleInfo? _executableFromBundle(FileSystemEntity applicationBundle) {
-    final FileSystemEntityType entityType = globals.fs.typeSync(applicationBundle.path);
+  static _BundleInfo? _executableFromBundle(
+    FileSystemEntity applicationBundle, {
+    required PlistParser plistParser,
+    required ToolContext toolContext,
+  }) {
+    final ToolContext(:FileSystem fs, :Logger logger, :OperatingSystemUtils os) = toolContext;
+    final FileSystemEntityType entityType = fs.typeSync(applicationBundle.path);
     if (entityType == FileSystemEntityType.notFound) {
-      globals.printError('File "${applicationBundle.path}" does not exist.');
+      logger.printError('File "${applicationBundle.path}" does not exist.');
       return null;
     }
     Directory uncompressedBundle;
     if (entityType == FileSystemEntityType.directory) {
-      final Directory directory = globals.fs.directory(applicationBundle);
+      final Directory directory = fs.directory(applicationBundle);
       if (!_isBundleDirectory(directory)) {
-        globals.printError('Folder "${applicationBundle.path}" is not an app bundle.');
+        logger.printError('Folder "${applicationBundle.path}" is not an app bundle.');
         return null;
       }
-      uncompressedBundle = globals.fs.directory(applicationBundle);
+      uncompressedBundle = fs.directory(applicationBundle);
     } else {
       // Try to unpack as a zip.
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app.');
       try {
-        globals.os.unzip(globals.fs.file(applicationBundle), tempDir);
+        os.unzip(fs.file(applicationBundle), tempDir);
       } on ProcessException {
-        globals.printError('Invalid prebuilt macOS app. Unable to extract bundle from archive.');
+        logger.printError('Invalid prebuilt macOS app. Unable to extract bundle from archive.');
         return null;
       }
       try {
@@ -74,44 +98,40 @@ abstract class MacOSApp extends ApplicationPackage {
           _isBundleDirectory,
         );
       } on StateError {
-        globals.printError(
+        logger.printError(
           'Archive "${applicationBundle.path}" does not contain a single app bundle.',
         );
         return null;
       }
     }
-    final String plistPath = globals.fs.path.join(
-      uncompressedBundle.path,
-      'Contents',
-      'Info.plist',
-    );
-    if (!globals.fs.file(plistPath).existsSync()) {
-      globals.printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
+    final String plistPath = fs.path.join(uncompressedBundle.path, 'Contents', 'Info.plist');
+    if (!fs.file(plistPath).existsSync()) {
+      logger.printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
       return null;
     }
-    final Map<String, dynamic> propertyValues = globals.plistParser.parseFile(plistPath);
+    final Map<String, Object> propertyValues = plistParser.parseFile(plistPath);
     final id = propertyValues[PlistParser.kCFBundleIdentifierKey] as String?;
     final executableName = propertyValues[PlistParser.kCFBundleExecutableKey] as String?;
     if (id == null) {
-      globals.printError(
+      logger.printError(
         'Invalid prebuilt macOS app. Info.plist does not contain bundle identifier',
       );
       return null;
     }
     if (executableName == null) {
-      globals.printError(
+      logger.printError(
         'Invalid prebuilt macOS app. Info.plist does not contain bundle executable',
       );
       return null;
     }
-    final String executable = globals.fs.path.join(
+    final String executable = fs.path.join(
       uncompressedBundle.path,
       'Contents',
       'MacOS',
       executableName,
     );
-    if (!globals.fs.file(executable).existsSync()) {
-      globals.printError('Could not find macOS binary at $executable');
+    if (!fs.file(executable).existsSync()) {
+      logger.printError('Could not find macOS binary at $executable');
     }
     return _BundleInfo(executable, id, uncompressedBundle);
   }
@@ -160,22 +180,30 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
 }
 
 class BuildableMacOSApp extends MacOSApp {
-  BuildableMacOSApp(this.project, String projectBundleId) : super(projectBundleId: projectBundleId);
+  BuildableMacOSApp(
+    this.project,
+    String projectBundleId, {
+    required this._plistParser,
+    required this._toolContext,
+  }) : super(projectBundleId: projectBundleId);
 
   final MacOSProject project;
+  final PlistParser _plistParser;
+  final ToolContext _toolContext;
 
   @override
   String get name => 'macOS';
 
   @override
   String? applicationBundle(BuildInfo buildInfo) {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final File appBundleNameFile = project.nameFile;
     if (!appBundleNameFile.existsSync()) {
-      globals.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
+      logger.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
       return null;
     }
 
-    return globals.fs.path.join(
+    return fs.path.join(
       project.parent.directory.path,
       getMacOSBuildDirectory(),
       'Build',
@@ -195,7 +223,12 @@ class BuildableMacOSApp extends MacOSApp {
     if (directory == null) {
       return null;
     }
-    final _BundleInfo? bundleInfo = MacOSApp._executableFromBundle(globals.fs.directory(directory));
+    final FileSystem fs = _toolContext.fs;
+    final _BundleInfo? bundleInfo = MacOSApp._executableFromBundle(
+      fs.directory(directory),
+      plistParser: _plistParser,
+      toolContext: _toolContext,
+    );
     return bundleInfo?.executable;
   }
 }

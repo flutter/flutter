@@ -137,6 +137,8 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          fileSystem: fileSystem,
+          logger: logger,
         );
 
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
@@ -199,6 +201,8 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          fileSystem: fileSystem,
+          logger: logger,
         );
 
         final LaunchResult launchResult = await iosDevice.startApp(
@@ -240,6 +244,8 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          fileSystem: fileSystem,
+          logger: logger,
         );
         fileSystem
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -327,6 +333,8 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          fileSystem: fileSystem,
+          logger: logger,
         );
         fileSystem
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -459,6 +467,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -565,6 +575,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
 
           fileSystem.directory('build/ios/iphoneos').deleteSync(recursive: true);
@@ -647,6 +659,8 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          fileSystem: fileSystem,
+          logger: logger,
         );
 
         // The first xcrun call should fail with a
@@ -774,6 +788,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -831,6 +847,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -885,6 +903,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -935,6 +955,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1004,6 +1026,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1083,6 +1107,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1183,6 +1209,8 @@ void main() {
               flutterProject.ios,
               'flutter',
               'My Super Awesome App',
+              fileSystem: fileSystem,
+              logger: logger,
             );
             fileSystem
                 .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1268,6 +1296,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1348,6 +1378,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1403,6 +1435,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1459,6 +1493,8 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            fileSystem: fileSystem,
+            logger: logger,
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')

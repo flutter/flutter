@@ -3650,6 +3650,8 @@ flutter:
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
+  Logger get logger => BufferLogger.test();
+  @override
   late Set<String> dependencies = <String>{};
   @override
   late String appName;
