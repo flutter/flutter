@@ -26,11 +26,13 @@ Offset viewportOrigin(FlutterView view) {
 }
 
 /// A DOM `Element`.
+@JS()
 extension type _Element._(JSObject _) implements JSObject {
   external _DOMRect getBoundingClientRect();
 }
 
 /// A DOM `DOMRect`.
+@JS()
 extension type _DOMRect._(JSObject _) implements JSObject {
   external double get left;
   external double get top;
