@@ -64,6 +64,8 @@ filegroup(
     name = "dart",
     srcs = [
         "bin/dart",
+        # The tool runs the frontend server's AOT snapshot on it.
+        "bin/dartaotruntime",
         "bin/dartvm",
         "version",
     ] + glob(
