@@ -890,7 +890,7 @@ std::shared_ptr<Texture> ContentContext::GetEmptyTexture() const {
   return empty_texture_;
 }
 
-fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
+absl::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     std::string_view label,
     ISize texture_size,
     const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -927,7 +927,7 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
   return MakeSubpass(label, subpass_target, command_buffer, subpass_callback);
 }
 
-fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
+absl::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     std::string_view label,
     const RenderTarget& subpass_target,
     const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -936,27 +936,27 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
 
   auto subpass_texture = subpass_target.GetRenderTargetTexture();
   if (!subpass_texture) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   auto sub_renderpass = command_buffer->CreateRenderPass(subpass_target);
   if (!sub_renderpass) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
   sub_renderpass->SetLabel(label);
 
   if (!subpass_callback(*this, *sub_renderpass)) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   if (!sub_renderpass->EncodeCommands()) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   const std::shared_ptr<Texture>& target_texture =
       subpass_target.GetRenderTargetTexture();
   if (target_texture->GetMipCount() > 1) {
-    fml::Status mipmap_status =
+    absl::Status mipmap_status =
         AddMipmapGeneration(command_buffer, context, target_texture);
     if (!mipmap_status.ok()) {
       return mipmap_status;
