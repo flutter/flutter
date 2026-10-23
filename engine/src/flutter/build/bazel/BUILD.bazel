@@ -12,6 +12,8 @@ load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
+    # local_engine.bzl's `assemble`.
+    "assemble_directory.py",
     "deps.lock.bzl",
     # zip_bundle.bzl's wrapper of build/zip.py.
     "zip_bundle.py",
