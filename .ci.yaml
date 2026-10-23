@@ -7820,7 +7820,6 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos
 
-
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -7913,3 +7912,97 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     drone_dimensions:
       - os=Windows
+
+  - name: Linux_pixel_7pro handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: handshake_check_test_android
+
+  - name: Linux_mokey handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "mokey"]
+      task_name: handshake_check_test_android
+
+  - name: Linux_galaxy_s24 handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s24"]
+      task_name: handshake_check_test_android
+
+  - name: Mac_mokey handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac", "mokey"]
+      task_name: handshake_check_test_android
+
+  - name: Mac_arm64_mokey handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac", "arm64", "mokey"]
+      task_name: handshake_check_test_android
+
+  - name: Windows_mokey handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "windows", "mokey"]
+      task_name: handshake_check_test_android
+
+  - name: Mac_ios handshake_check_test_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: handshake_check_test_ios
+
+  - name: Linux handshake_check_test_linux
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: handshake_check_test_linux
+
+  - name: Mac handshake_check_test_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: handshake_check_test_macos
+
+  - name: Windows handshake_check_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: handshake_check_test_windows
