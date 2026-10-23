@@ -144,6 +144,41 @@ void main() {
     },
   );
 
+  test('clicks with integer coordinates, as JSON-encoded by dart2js, run in order', () async {
+    // dart2js encodes integral doubles such as 30.0 as `30`, which the host
+    // decodes as an int rather than a double.
+    final events = <String>[];
+    final commands = <String>[
+      _command(WebDriverCommandType.click, <String, dynamic>{'x': 30, 'y': 0}),
+      _click(7.5, 8.25),
+      noop,
+    ];
+    final driver = _ScriptedWebFlutterDriver(events, <String?, Future<String> Function()>{
+      'pending': () async => commands.removeAt(0),
+      'complete': () async => ack,
+      null: () async => allTestsPassed,
+    }, _FakeWebDriver(_RecordingMouse(events)));
+
+    await expectLater(
+      integrationDriver(driver: driver, responseDataCallback: null),
+      throwsA(isA<_ExitPrevented>()),
+    );
+
+    expect(events, <String>[
+      'requestData(pending)',
+      'moveTo(element: null, xOffset: 30, yOffset: 0, absolute: true)',
+      'click(MouseButton.primary)',
+      'requestData(complete)',
+      'requestData(pending)',
+      'moveTo(element: null, xOffset: 8, yOffset: 8, absolute: true)',
+      'click(MouseButton.primary)',
+      'requestData(complete)',
+      'requestData(pending)',
+      'requestData(null)',
+      'close',
+    ]);
+  });
+
   test(
     'click on a driver that is not a WebFlutterDriver replies error and throws StateError',
     () async {
