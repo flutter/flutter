@@ -85,7 +85,15 @@ class ReleaseAssetServer {
     if (request.url.toString() == 'main.dart') {
       fileUri = entrypoint;
     } else {
+      final String requestExtension = _fileSystem.path.extension(requestPath);
       for (final (Uri uri, Set<String> allowedExtensions) in _searchPaths()) {
+        if (allowedExtensions.isNotEmpty && !allowedExtensions.contains(requestExtension)) {
+          // This root only serves source-map related files; skip anything else
+          // so unrelated project or SDK files are not exposed. A dot segment
+          // cannot change the extension: resolution keeps the last segment
+          // unless it is `.` or `..`, which have no extension.
+          continue;
+        }
         final Uri? potential = resolveRequestPathUnder(
           uri,
           requestPath,
@@ -97,12 +105,6 @@ class ReleaseAssetServer {
           continue;
         }
         final String potentialPath = potential.toFilePath(windows: _platform.isWindows);
-        if (allowedExtensions.isNotEmpty &&
-            !allowedExtensions.contains(_fileSystem.path.extension(potentialPath))) {
-          // This root only serves source-map related files; skip anything else
-          // so unrelated project or SDK files are not exposed.
-          continue;
-        }
         if (_fileSystem.isFileSync(potentialPath)) {
           fileUri = potential;
           break;

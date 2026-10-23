@@ -744,20 +744,23 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       }
 
       // The file might have been a package file which is signaled by a
-      // `/packages/<package>/<path>` request.
-      // A dot segment that climbs past the package name makes
-      // `PackageConfig.resolve` throw.
-      final bool hasDotSegment = segments.any(
-        (String segment) => segment == '.' || segment == '..',
-      );
-      if (segments.first == 'packages' && !hasDotSegment) {
-        final Uri? filePath = _packages.resolve(
-          Uri(scheme: 'package', pathSegments: segments.skip(1)),
-        );
-        if (filePath != null) {
-          final File packageFile = fs.file(filePath);
-          if (packageFile.existsSync()) {
-            return packageFile;
+      // `/packages/<package>/<path>` request. The rest of the path is resolved
+      // below the package's root like any other search root, rather than
+      // through a `package:` URI built from the request segments.
+      if (segments.length >= 3 && segments.first == 'packages') {
+        final Package? package = _packages[segments[1]];
+        if (package != null) {
+          final Uri? packageFileUri = resolveRequestPathUnder(
+            package.packageUriRoot,
+            segments.skip(2).join('/'),
+            fileSystem: fs,
+            windows: platform.isWindows,
+          );
+          if (packageFileUri != null) {
+            final File packageFile = fs.file(packageFileUri);
+            if (packageFile.existsSync()) {
+              return packageFile;
+            }
           }
         }
       }

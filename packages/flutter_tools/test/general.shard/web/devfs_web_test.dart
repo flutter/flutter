@@ -853,6 +853,12 @@ void main() {
         ),
       );
       expect((await response.read().toList()).first, source.readAsBytesSync());
+
+      // A dot segment that stays inside the package root still resolves.
+      expect(
+        await webAssetServer.dartSourceContents('packages/flutter_tools/src/../foo.dart'),
+        source.readAsStringSync(),
+      );
     },
   );
 
@@ -1752,6 +1758,11 @@ void main() {
       // Encoded separators, which do not name a file path once decoded.
       '..%2F..%2Fsecret.txt',
       'assets/..%2F..%2F..%2Fhome%2Fuser%2Fsecret.txt',
+      // An absolute path after the package name, which a package URI resolves
+      // against the package root as a root-relative reference.
+      'packages/flutter_tools//home/user/secret.dart',
+      // No path after the package name, which is not a valid package URI.
+      'packages/secret.dart',
     ];
 
     for (final path in requestPaths) {
@@ -1777,6 +1788,11 @@ void main() {
       await webAssetServer.dartSourceContents('packages/flutter_tools/../../secret.dart'),
       isNull,
     );
+    expect(
+      await webAssetServer.dartSourceContents('packages/flutter_tools//home/user/secret.dart'),
+      isNull,
+    );
+    expect(await webAssetServer.dartSourceContents('packages/secret.dart'), isNull);
 
     // Again behind a base path, which leaves a colon in a later segment
     // unencoded on its way to the handler.
