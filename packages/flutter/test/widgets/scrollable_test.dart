@@ -1838,11 +1838,14 @@ void main() {
   ) async {
     final inner = ScrollController();
     addTearDown(inner.dispose);
+    final pageController = PageController();
+    addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
+          controller: pageController,
           children: <Widget>[
             ListView.builder(
               controller: inner,
@@ -1855,14 +1858,14 @@ void main() {
       ),
     );
 
-    // User code that snaps the list whenever it stops scrolling. This runs
+    // User code that jumps the list whenever it stops scrolling. This runs
     // synchronously from within beginActivity, including the beginActivity
     // that starts the hold below.
     var jumps = 0;
     inner.position.isScrollingNotifier.addListener(() {
-      if (!inner.position.isScrollingNotifier.value && jumps < 5) {
+      if (!inner.position.isScrollingNotifier.value) {
         jumps += 1;
-        inner.jumpTo(inner.offset.roundToDouble() + 1.0);
+        inner.jumpTo(inner.offset);
       }
     });
 
@@ -1875,12 +1878,15 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
     await tester.pump();
 
+    expect(jumps, 1);
+
     // Dragging horizontally hands the gesture to the PageView, so the list's
     // vertical recognizer is rejected and the list gets a drag cancel.
     await gesture.moveBy(const Offset(-80.0, 0.0));
     await tester.pump();
     await gesture.moveBy(const Offset(-80.0, 0.0));
     await tester.pump();
+    expect(pageController.page, greaterThan(0.0));
     await gesture.up();
     await tester.pumpAndSettle();
 
