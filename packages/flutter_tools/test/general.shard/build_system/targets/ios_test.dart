@@ -533,7 +533,7 @@ void main() {
             '--input=/shader.glsl',
             '--input-type=frag',
             '--include=/',
-            '--include=/./shader_lib',
+            '--include=HostArtifact.shaderLib',
           ],
         ),
         createPlutilFakeCommand(infoPlist),
