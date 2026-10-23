@@ -2373,7 +2373,7 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
   }
 }
 
-class TestTestDevice extends TestDevice {
+class TestTestDevice extends Fake implements TestDevice {
   @override
   Future<void> get finished => Future<void>.delayed(const Duration(seconds: 1));
 

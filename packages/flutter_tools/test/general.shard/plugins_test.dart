@@ -30,6 +30,7 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
+import 'package:flutter_tools/src/plugin_yaml_parser.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -2842,7 +2843,9 @@ platforms:
             fileSystem: fs,
             isDevDependency: false,
           ),
-          throwsToolExit(message: 'Invalid "android" plugin specification.'),
+          throwsToolExit(
+            message: 'Invalid "android" plugin specification: the "default_package" field must be a string.',
+          ),
         );
       });
 
@@ -2863,7 +2866,9 @@ platforms:
             fileSystem: fs,
             isDevDependency: false,
           ),
-          throwsToolExit(message: 'Invalid "linux" plugin specification.'),
+          throwsToolExit(
+            message: 'Invalid "linux" plugin specification: the "dartPluginClass" field must be a string.',
+          ),
         );
       });
 
@@ -2888,7 +2893,9 @@ platforms:
             fileSystem: fs,
             isDevDependency: false,
           ),
-          throwsToolExit(message: 'Invalid "windows" plugin specification.'),
+          throwsToolExit(
+            message: 'Invalid "windows" plugin specification: the "dartFileName" field must be a string.',
+          ),
         );
       });
 
@@ -2983,27 +2990,25 @@ iosPrefix: FLT
         expect(map.isEmpty, true);
       });
 
-      testUsingContext('Platform plugin fromYaml factories perform validation', () async {
+      testWithoutContext('Platform plugin parseFromYaml methods perform validation', () {
+        final invalidYaml = YamlMap.wrap(<String, Object?>{'pluginClass': 123});
         expect(
-          () => AndroidPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{}), '', fs),
-          throwsToolExit(message: 'Invalid "android" plugin specification for plugin "foo".'),
+          AndroidPlugin.parseFromYaml(
+            'foo',
+            invalidYaml,
+            pluginPath: '',
+            fileSystem: MemoryFileSystem.test(),
+          ),
+          isA<ParseResultFail<AndroidPlugin?>>(),
         );
+        expect(IOSPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<IOSPlugin?>>());
+        expect(MacOSPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<MacOSPlugin?>>());
         expect(
-          () => IOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(message: 'Invalid "ios" plugin specification for plugin "foo".'),
+          WindowsPlugin.parseFromYaml('foo', invalidYaml),
+          isA<ParseResultFail<WindowsPlugin?>>(),
         );
-        expect(
-          () => MacOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(message: 'Invalid "macos" plugin specification for plugin "foo".'),
-        );
-        expect(
-          () => WindowsPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(message: 'Invalid "windows" plugin specification for plugin "foo".'),
-        );
-        expect(
-          () => LinuxPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(message: 'Invalid "linux" plugin specification for plugin "foo".'),
-        );
+        expect(LinuxPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<LinuxPlugin?>>());
+        expect(WebPlugin.parseFromYaml('foo', invalidYaml), isA<ParseResultFail<WebPlugin>>());
       });
     });
 
