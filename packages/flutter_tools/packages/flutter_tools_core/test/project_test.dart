@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -71,7 +72,6 @@ void main() {
     });
 
     test('constructor validates file:// directory URIs ending with slash', () {
-      expect((null as Uri?).isValidDirectoryUri, isFalse);
       expect(Uri.directory('/path/to/my_app').isValidDirectoryUri, isTrue);
       expect(
         () => ExtensionFlutterProject(

@@ -23,8 +23,8 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
     show
+        BuiltInPlaceholders,
         ExtensionBuildResult,
-        ExtensionBuildTarget,
         ExtensionDebuggingOptions,
         ExtensionFlutterProject,
         TargetDevice;
@@ -36,30 +36,47 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-final class _FakeTestBuildService extends BuildService {
-  @override
-  Future<List<ExtensionBuildTarget>> getBuildTargets() async {
-    return const <ExtensionBuildTarget>[
-      ExtensionBuildTarget(description: 'Fake test build target', name: 'fake-test-build'),
-      ExtensionBuildTarget(description: 'Fake failing build target', name: 'fake-failing-build'),
-    ];
-  }
+final class _TestBuildTarget extends BuildTarget {
+  const _TestBuildTarget({
+    required super.description,
+    required this.name,
+    this.errorMessage,
+    this.executableUri,
+    super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
+    this.shouldSucceed = true,
+    super.targetPlatform = 'linux-x64',
+  });
 
   @override
-  Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required String mainPath,
-    required Uri projectRoot,
-    required String targetName,
-  }) async {
-    if (targetName == 'fake-test-build') {
-      return ExtensionBuildResult(success: true, executableUri: Uri.file('/tmp/fake_bundle/app'));
-    }
-    if (targetName == 'fake-failing-build') {
-      return const ExtensionBuildResult(success: false, errorMessage: 'Simulated build error');
-    }
-    return ExtensionBuildResult(success: false, errorMessage: 'Unknown target: $targetName');
+  final String name;
+
+  final String? errorMessage;
+  final Uri? executableUri;
+  final bool shouldSucceed;
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return shouldSucceed
+        ? ExtensionBuildResult(success: true, executableUri: executableUri)
+        : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
   }
+}
+
+final class _FakeTestBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => <BuildTarget>[
+    _TestBuildTarget(
+      description: 'Fake test build target',
+      name: 'fake-test-build',
+      executableUri: Uri.parse('file:///tmp/fake_bundle/app'),
+    ),
+    const _TestBuildTarget(
+      description: 'Fake failing build target',
+      name: 'fake-failing-build',
+      shouldSucceed: false,
+      errorMessage: 'Simulated build error',
+    ),
+  ];
 }
 
 final class _FakeTestDeviceService extends DeviceService {

@@ -5,12 +5,17 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
+import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../build_system/targets/extension.dart';
+import '../cache.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
@@ -179,8 +184,12 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     required this._extensionManager,
     required this._fileSystem,
     required this._logger,
+    this._artifacts,
+    this._config,
   }) : super('tool_extension');
 
+  final Artifacts? _artifacts;
+  final Config? _config;
   final ExtensionBuildManager _extensionBuildManager;
   final ExtensionManager _extensionManager;
   final FileSystem _fileSystem;
@@ -215,7 +224,9 @@ class ExtensionDevices extends PollingDeviceDiscovery {
           return devices
               .map(
                 (TargetDevice targetDevice) => ExtensionBackedDevice(
+                  artifacts: _artifacts,
                   buildManager: _extensionBuildManager,
+                  config: _config,
                   deviceService: service,
                   fileSystem: _fileSystem,
                   logger: _logger,
@@ -248,6 +259,8 @@ class ExtensionBackedDevice extends Device {
     required this._fileSystem,
     required super.logger,
     required this._targetDevice,
+    this._artifacts,
+    this._config,
   }) : super(
          _targetDevice.id,
          category: _targetDevice.category,
@@ -255,7 +268,9 @@ class ExtensionBackedDevice extends Device {
          ephemeral: _targetDevice.ephemeral,
        );
 
+  final Artifacts? _artifacts;
   final ExtensionBuildManager _buildManager;
+  final Config? _config;
   final DeviceService _deviceService;
   final FileSystem _fileSystem;
   final TargetDevice _targetDevice;
@@ -348,10 +363,53 @@ class ExtensionBackedDevice extends Device {
 
     final String targetMainPath = mainPath ?? 'lib/main.dart';
     logger.printTrace('Building application using extension target "$buildTargetName"...');
+
+    final List<ExtensionBuildTarget> targets = await _buildManager.getBuildTargets();
+    final ExtensionBuildTarget? target = targets
+        .where((ExtensionBuildTarget t) => t.name == buildTargetName)
+        .firstOrNull;
+
+    final Directory projectDir = _fileSystem.currentDirectory;
+    final Directory outputDir;
+    final Map<String, String> resolvedArtifacts;
+    if (target != null) {
+      final Directory buildOutputDir = projectDir.childDirectory(
+        _config != null ? getBuildDirectory(_config, _fileSystem) : 'build',
+      );
+      outputDir = target.outputDir.contains('{')
+          ? resolveExtensionOutputDir(
+              buildMode: buildMode,
+              buildOutputDir: buildOutputDir,
+              fileSystem: _fileSystem,
+              projectDir: projectDir,
+              target: target,
+            )
+          : _fileSystem.directory(
+              _fileSystem.path.isRelative(target.outputDir)
+                  ? _fileSystem.path.join(projectDir.path, target.outputDir)
+                  : target.outputDir,
+            );
+      resolvedArtifacts = _artifacts != null
+          ? resolveExtensionBuildTargetArtifacts(
+              artifacts: _artifacts,
+              buildMode: buildMode,
+              target: target,
+            )
+          : const <String, String>{};
+    } else {
+      outputDir = projectDir.childDirectory('build');
+      resolvedArtifacts = const <String, String>{};
+    }
+
+    final String flutterRootPath = Cache.flutterRoot ?? projectDir.path;
+
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildMode,
+      flutterRoot: _fileSystem.directory(flutterRootPath).uri,
       mainPath: targetMainPath,
-      projectRoot: _fileSystem.currentDirectory.uri,
+      outputDir: outputDir.uri,
+      projectRoot: projectDir.uri,
+      resolvedArtifacts: resolvedArtifacts,
       targetName: buildTargetName,
     );
     if (!result.success) {

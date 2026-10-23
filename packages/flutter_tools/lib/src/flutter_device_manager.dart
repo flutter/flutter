@@ -8,6 +8,8 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
+import 'artifacts.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -54,6 +56,8 @@ class FlutterDeviceManager extends DeviceManager {
     required XCDevice xcDevice,
   }) : super(logger: toolContext.logger) {
     final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
       fs: FileSystem fileSystem,
       :Logger logger,
       :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
@@ -107,6 +111,8 @@ class FlutterDeviceManager extends DeviceManager {
         extensionManager: extensionManager,
         fileSystem: fileSystem,
         logger: logger,
+        artifacts: artifacts,
+        config: config,
       ),
     ];
   }
