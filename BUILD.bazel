@@ -75,6 +75,7 @@ test_suite(
         "//dev/flutter_analyzer_plugin:tests",
         "//dev/packages_autoroller:tests",
         "//dev/snippets:tests",
+        "//dev/tools:tests",
         "//dev/tools/gen_defaults:tests",
         "//dev/tools/gen_keycodes:tests",
         "//packages/fuchsia_remote_debug_protocol:tests",
