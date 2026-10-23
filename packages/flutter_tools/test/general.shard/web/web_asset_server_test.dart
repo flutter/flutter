@@ -739,6 +739,46 @@ void main() {
       },
     );
 
+    testWithoutContext('serves assets from configured build-dir', () async {
+      final config = Config.test()..setValue('build-dir', 'out');
+      fileSystem.file('out/flutter_assets/assets/custom_dir_asset.txt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('custom dir asset');
+
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: config,
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+      );
+
+      final Response response = await server.handleRequest(
+        Request('GET', Uri.parse('http://localhost:8080/assets/assets/custom_dir_asset.txt')),
+      );
+      expect(response.statusCode, HttpStatus.ok);
+      expect(await response.readAsString(), 'custom dir asset');
+    });
+
     group('on Windows', () {
       late FileSystem windowsFileSystem;
       late Platform windowsPlatform;
