@@ -1927,6 +1927,20 @@ void main() {
         expect(wrapperDir.existsSync(), isFalse);
       },
     );
+
+    testWithoutContext(
+      'CachedArtifact.update creates bin/cache/artifacts with 755 permissions',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['chmod', '755', '/bin/cache/artifacts']),
+        ]);
+        final testCache = Cache.test(fileSystem: fs, processManager: processManager);
+        await FakeSimpleArtifact(testCache)
+            .update(FakeArtifactUpdater(), BufferLogger.test(), fs, FakeOperatingSystemUtils());
+        expect(processManager.hasRemainingExpectations, isFalse);
+      },
+    );
   });
 }
 

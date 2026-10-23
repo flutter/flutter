@@ -963,6 +963,8 @@ abstract class CachedArtifact extends ArtifactSet {
   }) async {
     if (!location.existsSync()) {
       try {
+        // Creates bin/cache/artifacts with 755 permissions; getCacheArtifacts() no longer does.
+        cache.getCacheDir('artifacts');
         location.createSync(recursive: true);
       } on FileSystemException catch (err) {
         logger.printError(err.toString());

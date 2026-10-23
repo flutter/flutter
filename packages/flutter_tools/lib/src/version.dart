@@ -5,9 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
-import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
@@ -113,10 +111,12 @@ abstract class FlutterVersion {
     }
 
     // if we are fetching tags, ignore cached versionFile
-    if (fetchTags) {
-      ErrorHandlingFileSystem.deleteIfExists(versionFile);
+    if (fetchTags && versionFile.existsSync()) {
+      versionFile.deleteSync();
       final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));
-      ErrorHandlingFileSystem.deleteIfExists(legacyVersionFile);
+      if (legacyVersionFile.existsSync()) {
+        legacyVersionFile.deleteSync();
+      }
     }
 
     final String frameworkRevision = git
@@ -204,14 +204,11 @@ abstract class FlutterVersion {
       return this;
     }
     return FlutterVersion(
-      cache: _cache,
       clock: clock,
       flutterRoot: flutterRoot,
       fs: fs,
       fetchTags: true,
       git: _git,
-      logger: _logger,
-      platform: _platform,
     );
   }
 
@@ -281,7 +278,10 @@ abstract class FlutterVersion {
   /// Deletes bin/cache/flutter.version.json so it can be regenerated on the next invocation of the
   /// tool.
   void deleteVersionFile() {
-    ErrorHandlingFileSystem.deleteIfExists(getVersionFile(fs, flutterRoot));
+    final File versionFile = getVersionFile(fs, flutterRoot);
+    if (versionFile.existsSync()) {
+      versionFile.deleteSync();
+    }
   }
 
   @override
@@ -517,24 +517,21 @@ String _gitCommitDate({
   required Git git,
   required String? workingDirectory,
 }) {
-  final args = <String>[gitRef, '-n', '1', '--pretty=format:%ad', '--date=iso'];
-  VersionCheckError error;
-  try {
-    final RunResult result = git.logSync(args, workingDirectory: workingDirectory);
-    if (result.exitCode == 0) {
-      return result.stdout.trim();
-    }
-    error = VersionCheckError(
-      'Command exited with code ${result.exitCode}: ${result.command.join(' ')}\n'
-      'Standard out: ${result.stdout}\n'
-      'Standard error: ${result.stderr}',
-    );
-  } on ProcessException catch (e) {
-    error = VersionCheckError(
-      'Command failed: git ${args.join(' ')}\n'
-      'Exception: $e',
-    );
+  final RunResult result = git.logSync([
+    gitRef,
+    '-n',
+    '1',
+    '--pretty=format:%ad',
+    '--date=iso',
+  ], workingDirectory: workingDirectory);
+  if (result.exitCode == 0) {
+    return result.stdout.trim();
   }
+  final error = VersionCheckError(
+    'Command exited with code ${result.exitCode}: ${result.command.join(' ')}\n'
+    'Standard out: ${result.stdout}\n'
+    'Standard error: ${result.stderr}',
+  );
   if (lenient) {
     final dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
     globals.printError(
@@ -610,9 +607,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
         logger.printTrace('Failed to parse ${jsonFile.path} with $err');
       }
       try {
-        ErrorHandlingFileSystem.noExitOnFailure(
-          () => ErrorHandlingFileSystem.deleteIfExists(jsonFile),
-        );
+        jsonFile.deleteSync();
       } on FileSystemException {
         if (logger != null) {
           logger.printTrace('Failed to delete ${jsonFile.path}');
@@ -664,12 +659,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    _ensureLegacyVersionFile(
-      fs: fs,
-      flutterRoot: flutterRoot,
-      frameworkVersion: frameworkVersion,
-      logger: _logger,
-    );
+    _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
   }
 }
 
@@ -781,22 +771,10 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    _ensureLegacyVersionFile(
-      fs: fs,
-      flutterRoot: flutterRoot,
-      frameworkVersion: frameworkVersion,
-      logger: _logger,
-    );
+    _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
     const encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
-    final String contents = encoder.convert(toJson());
-    try {
-      ErrorHandlingFileSystem.noExitOnFailure(() {
-        newVersionFile.writeAsStringSync(contents);
-      });
-    } on FileSystemException catch (err) {
-      _logger?.printTrace('Failed to write ${newVersionFile.path} with $err');
-    }
+    newVersionFile.writeAsStringSync(encoder.convert(toJson()));
   }
 
   @override
@@ -810,21 +788,14 @@ void _ensureLegacyVersionFile({
   required FileSystem fs,
   required String flutterRoot,
   required String frameworkVersion,
-  required Logger? logger,
 }) {
   // TODO(matanlurey): https://github.com/flutter/flutter/issues/171900.
   if (featureFlags.isOmitLegacyVersionFileEnabled) {
     return;
   }
   final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));
-  try {
-    ErrorHandlingFileSystem.noExitOnFailure(() {
-      if (!legacyVersionFile.existsSync()) {
-        legacyVersionFile.writeAsStringSync(frameworkVersion);
-      }
-    });
-  } on FileSystemException catch (err) {
-    logger?.printTrace('Failed to write ${legacyVersionFile.path} with $err');
+  if (!legacyVersionFile.existsSync()) {
+    legacyVersionFile.writeAsStringSync(frameworkVersion);
   }
 }
 
@@ -1044,26 +1015,19 @@ class VersionCheckError implements Exception {
 /// If the command fails, throws a [ToolExit] exception.
 Future<String> _run(Git git, List<String> command, {String? workingDirectory}) async {
   // TODO(matanlurey): Inline this in the single place it's called in this file.
-  try {
-    final RunResult results = await git.run(
-      command,
-      workingDirectory: workingDirectory ?? Cache.flutterRoot,
-    );
+  final RunResult results = await git.run(
+    command,
+    workingDirectory: workingDirectory ?? Cache.flutterRoot,
+  );
 
-    if (results.exitCode == 0) {
-      return results.stdout.trim();
-    }
-
-    throw VersionCheckError(
-      'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
-      'Standard error: ${results.stderr}',
-    );
-  } on ProcessException catch (e) {
-    throw VersionCheckError(
-      'Command failed: git ${command.join(' ')}\n'
-      'Exception: $e',
-    );
+  if (results.exitCode == 0) {
+    return results.stdout.trim();
   }
+
+  throw VersionCheckError(
+    'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
+    'Standard error: ${results.stderr}',
+  );
 }
 
 String _shortGitRevision(String? revision) {

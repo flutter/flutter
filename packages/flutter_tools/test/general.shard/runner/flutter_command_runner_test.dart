@@ -865,7 +865,7 @@ void main() {
         );
 
         testWithoutContext('does not update artifacts, write version file, or check version freshness for daemon command by default', () async {
-          final cache = _RecordingCache();
+          final cache = _RecordingCache(fileSystem);
           final version = FakeFlutterVersion();
           final toolContext = FakeToolContext(
             botDetector: const FakeBotDetector(false),
@@ -893,7 +893,7 @@ void main() {
         testWithoutContext(
           'checks version freshness for daemon command when --version-check is explicitly passed',
           () async {
-            final cache = _RecordingCache();
+            final cache = _RecordingCache(fileSystem);
             final version = FakeFlutterVersion();
             final toolContext = FakeToolContext(
               botDetector: const FakeBotDetector(false),
@@ -924,11 +924,14 @@ void main() {
 }
 
 class _RecordingCache extends Fake implements Cache {
+  _RecordingCache(this._fileSystem);
+
+  final FileSystem _fileSystem;
   bool didLock = false;
   bool didUpdateAll = false;
 
   @override
-  Directory getRoot() => MemoryFileSystem.test().directory('/cache');
+  Directory getRoot() => _fileSystem.directory('/cache');
 
   @override
   Future<void> lock() async {
