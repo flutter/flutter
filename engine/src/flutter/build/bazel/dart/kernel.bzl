@@ -83,11 +83,73 @@ dart_package_root = rule(
     },
 )
 
-def _dart_kernel_impl(ctx):
-    platform = [f for f in ctx.files.platform if f.basename == "platform_strong.dill"]
-    if len(platform) != 1:
-        fail("%s: platform must provide platform_strong.dill" % ctx.label)
+def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [], product = False, roots = ["."], extra_inputs = []):
+    """The frontend server's compile of `main` to the kernel `out`, as dart_kernel runs it.
 
+    For rules with dart_kernel's tool attributes (KERNEL_TOOL_ATTRS): the
+    engine's own Dart tests, and flutter_test's bootstrap of a framework test.
+
+    Args:
+      ctx: the rule context.
+      main: the entry point File.
+      out: the kernel File to write.
+      srcs: a depset of the files the entry point reaches (sources and the
+        package files beside them).
+      package_config: the package configuration File (--packages), read
+        under the virtual scheme.
+      platform: the files of the platform kernel's directory, platform_strong.dill among them.
+      args: further frontend server arguments.
+      product: -Ddart.vm.product=true.
+      roots: the filesystem roots (--filesystem-root), the execution root by default.
+      extra_inputs: further input Files.
+    """
+    dill = [f for f in platform if f.basename == "platform_strong.dill"]
+    if len(dill) != 1:
+        fail("%s: platform must provide platform_strong.dill" % ctx.label)
+    arguments = ctx.actions.args()
+    arguments.add(ctx.file._frontend_server)
+    if product:
+        arguments.add("-Ddart.vm.product=true")
+    arguments.add_all(args)
+
+    # The package configuration under the virtual scheme, so that the
+    # packages' roots resolve against every filesystem root.
+    arguments.add(package_config, format = "--packages=" + SOURCE_URI_SCHEME + ":///%s")
+    arguments.add("--sdk-root", dill[0].dirname)
+    arguments.add("--target=flutter")
+    for root in roots:
+        arguments.add("--filesystem-root", root)
+    arguments.add("--filesystem-scheme", SOURCE_URI_SCHEME)
+    arguments.add("--output-dill", out)
+    arguments.add(main, format = SOURCE_URI_SCHEME + ":///%s")
+    ctx.actions.run(
+        executable = ctx.executable._dartaotruntime,
+        arguments = [arguments],
+        inputs = depset(
+            [main, package_config, ctx.file._frontend_server] + platform + extra_inputs,
+            transitive = [srcs],
+        ),
+        outputs = [out],
+        mnemonic = "DartKernel",
+        # %{input} would be the first input in depset order, not the entry point.
+        progress_message = "Compiling %s to kernel" % main.short_path,
+    )
+
+# The frontend server and its runtime, for a rule that calls compile_to_kernel.
+KERNEL_TOOL_ATTRS = {
+    "_dartaotruntime": attr.label(
+        default = "@dart_sdk_linux_x64//:dartaotruntime",
+        allow_single_file = True,
+        executable = True,
+        cfg = "exec",
+    ),
+    "_frontend_server": attr.label(
+        default = "@dart_sdk_linux_x64//:frontend_server",
+        allow_single_file = True,
+    ),
+}
+
+def _dart_kernel_impl(ctx):
     # Packages from other repositories (the trees gclient syncs, which the
     # package configuration names by their paths under the source root):
     # a second virtual root of symlinks, each file at that path -- staged
@@ -101,33 +163,16 @@ def _dart_kernel_impl(ctx):
     shared = [root[DartPackageRootInfo] for root in ctx.attr.package_roots]
     for info in shared:
         roots.append(info.root)
-
-    args = ctx.actions.args()
-    args.add(ctx.file._frontend_server)
-    if ctx.attr.product:
-        args.add("-Ddart.vm.product=true")
-    args.add_all(ctx.attr.args)
-
-    # The package configuration under the virtual scheme, so that the
-    # packages' roots resolve against every filesystem root.
-    args.add(ctx.file.package_config, format = "--packages=" + SOURCE_URI_SCHEME + ":///%s")
-    args.add("--sdk-root", platform[0].dirname)
-    args.add("--target=flutter")
-    for root in roots:
-        args.add("--filesystem-root", root)
-    args.add("--filesystem-scheme", SOURCE_URI_SCHEME)
-    args.add("--output-dill", ctx.outputs.out)
-    args.add(ctx.file.main, format = SOURCE_URI_SCHEME + ":///%s")
-    ctx.actions.run(
-        executable = ctx.executable._dartaotruntime,
-        arguments = [args],
-        inputs = depset(
-            [ctx.file.main, ctx.file.package_config, ctx.file._frontend_server] + ctx.files.platform + staged,
-            transitive = [depset(ctx.files.srcs)] + [info.files for info in shared],
-        ),
-        outputs = [ctx.outputs.out],
-        mnemonic = "DartKernel",
-        progress_message = "Compiling %{input} to kernel",
+    compile_to_kernel(
+        ctx,
+        main = ctx.file.main,
+        out = ctx.outputs.out,
+        srcs = depset(ctx.files.srcs + staged, transitive = [info.files for info in shared]),
+        package_config = ctx.file.package_config,
+        platform = ctx.files.platform,
+        args = ctx.attr.args,
+        product = ctx.attr.product,
+        roots = roots,
     )
     return [DefaultInfo(files = depset([ctx.outputs.out]))]
 
@@ -174,15 +219,5 @@ dart_kernel = rule(
         "args": attr.string_list(
             doc = "Further frontend server arguments (GN's extra_args: --aot --tfa for an AOT test).",
         ),
-        "_dartaotruntime": attr.label(
-            default = "@dart_sdk_linux_x64//:dartaotruntime",
-            allow_single_file = True,
-            executable = True,
-            cfg = "exec",
-        ),
-        "_frontend_server": attr.label(
-            default = "@dart_sdk_linux_x64//:frontend_server",
-            allow_single_file = True,
-        ),
-    },
+    } | KERNEL_TOOL_ATTRS,
 )

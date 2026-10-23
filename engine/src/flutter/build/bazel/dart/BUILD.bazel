@@ -5,8 +5,16 @@
 # The Dart rules: snapshot.bzl, the snapshot pipeline of //flutter/lib/snapshot
 # (compile_platform, gen_snapshot, bin_to_assembly); kernel.bzl, GN's
 # flutter_frontend_server (dart_kernel, dart_package_root); package_test.bzl,
-# run_tests.py's --type dart-host (dart_package_test).
+# run_tests.py's --type dart-host (dart_package_test); pub.bzl, the
+# repository's pub packages from pubspec.lock (the `pub` module extension,
+# pub_package_config); flutter_test.bzl and flutter_assets.bzl, a framework
+# test as `flutter test` runs it (flutter_test, flutter_test_assets).
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["snapshot.bzl"])
+exports_files([
+    "extract_archive.py",
+    "package_config.py",
+    "snapshot.bzl",
+    "test_assets.py",
+])

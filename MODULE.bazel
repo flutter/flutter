@@ -111,6 +111,14 @@ use_repo(
 engine_version = use_extension("//engine/src/flutter/build/bazel:extensions.bzl", "engine_version")
 use_repo(engine_version, "engine_version")
 
+# The repository's pub packages, as pubspec.lock pins them: a repository per
+# hosted package behind the hub @pub (@pub//<name>:sources), each fetched
+# from pub.dev and verified against the lock's sha256 when a target first
+# reaches it -- what the framework's tests compile against under Bazel
+# (build/bazel/dart/pub.bzl, flutter_test.bzl).
+pub = use_extension("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub")
+use_repo(pub, "pub")
+
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
 # found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
 register_toolchains(

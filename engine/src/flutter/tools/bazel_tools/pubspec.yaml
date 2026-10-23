@@ -19,6 +19,7 @@ dependencies:
   args: any
   meta: any
   path: any
+  yaml: any
 
 dev_dependencies:
   test: any
