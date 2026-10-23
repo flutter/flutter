@@ -5,9 +5,11 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -123,6 +125,51 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
+  bool get supportsScreenshot => true;
+
+  @override
+  bool get supportsScreenRecording => true;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    final ProcessResult result = await toolContext.processManager.run(<String>[
+      'screencapture',
+      '-x',
+      outputFile.path,
+    ]);
+    if (result.exitCode != 0) {
+      throwToolExit('screencapture failed: ${result.stderr}');
+    }
+  }
+
+  @override
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async {
+    final args = <String>[
+      'screencapture',
+      '-v',
+      if (duration != null) ...['-V', '${duration.inSeconds}'],
+      outputFile.path,
+    ];
+    final Process process = await toolContext.processManager.start(args);
+    unawaited(process.stdout.drain<void>());
+    final stderrBuf = StringBuffer();
+
+    Future<void> runRecording() async {
+      final (int exitCode, _) = await (
+        process.exitCode,
+        process.stderr.transform(utf8AllowMalformed.decoder).forEach(stderrBuf.write),
+      ).wait;
+
+      const allowedExitCodes = <int>{0, 130, 143, -2, -15};
+      if (!allowedExitCodes.contains(exitCode)) {
+        throwToolExit('screencapture failed (exit $exitCode): $stderrBuf');
+      }
+    }
+
+    return _MacOSScreenRecording(process, runRecording());
+  }
+
+  @override
   void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
     final ToolContext(:Logger logger, :ProcessManager processManager) = toolContext;
     // Bring app to foreground. Ideally this would be done post-launch rather
@@ -227,6 +274,21 @@ Workaround:
 See https://github.com/flutter/flutter/issues/70374 for more details.
 ════════════════════════════════════════════════════════════════════════════════
 ''');
+  }
+}
+
+class _MacOSScreenRecording implements ScreenRecording {
+  _MacOSScreenRecording(this._process, this.done);
+
+  final Process _process;
+
+  @override
+  final Future<void> done;
+
+  @override
+  Future<void> stop() async {
+    ProcessSignal.sigint.kill(_process);
+    await done;
   }
 }
 
