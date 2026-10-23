@@ -5273,6 +5273,35 @@ class SemanticsOwner extends ChangeNotifier {
           }
         }
       }
+      if (!kIsWeb && _dirtyNodes.isEmpty && _traversalParentNodes.isNotEmpty) {
+        // Any traversal parent inside a skipped traversal child subtree (even
+        // if not dirty itself, e.g. when an outer portal's anchor detaches) is
+        // dropped from the tree in this update. Remove it from
+        // _traversalParentNodes so it will re-mark its traversal children and
+        // their descendants dirty when un-skipped later, and mark its traversal
+        // children's hit-test parents dirty so they drop those nested traversal
+        // children from childrenInHitTestOrder.
+        final skippedParents = <SemanticsNode>[];
+        _traversalParentNodes.removeWhere((Object key, SemanticsNode parentNode) {
+          if (parentNode._isSkippedInHitTestTree()) {
+            skippedParents.add(parentNode);
+            return true;
+          }
+          return false;
+        });
+        for (final parentNode in skippedParents) {
+          if (_traversalChildNodes[parentNode.traversalParentIdentifier]
+              case final Set<SemanticsNode> childNodes?) {
+            for (final childNode in childNodes) {
+              if (childNode.attached &&
+                  childNode.parent != null &&
+                  !visitedNodes.contains(childNode.parent)) {
+                childNode.parent!._markDirty();
+              }
+            }
+          }
+        }
+      }
     }
 
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
@@ -5300,9 +5329,6 @@ class SemanticsOwner extends ChangeNotifier {
           // Do not serialize nodes that are dropped from the tree due to a
           // missing traversal parent, as they would be orphans in the update.
           node._dirty = false;
-          if (node._isTraversalParent) {
-            _traversalParentNodes.remove(node.traversalParentIdentifier);
-          }
         } else {
           node._addToUpdate(builder, customSemanticsActionIds);
         }

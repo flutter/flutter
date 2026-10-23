@@ -418,6 +418,158 @@ void main() {
     skip: kIsWeb, // [intended] the web engine handles the tree grafting itself.
   );
 
+  testWidgets(
+    'Semantics update skips and restores nested OverlayPortal subtree when outer anchor is hidden and shown again',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+      SemanticsUpdateBuilderSpy.observations.clear();
+
+      final activeTree = <int, SemanticsNodeUpdateObservation>{};
+
+      void verifyAndCommitUpdate() {
+        expect(SemanticsUpdateBuilderSpy.observations, isNotEmpty);
+        activeTree.addAll(SemanticsUpdateBuilderSpy.observations);
+
+        final reachableInTraversal = <int>{};
+        void walkTraversal(int id) {
+          expect(
+            activeTree.containsKey(id),
+            isTrue,
+            reason: 'Node $id referenced in childrenInTraversalOrder was never sent in an update',
+          );
+          if (!reachableInTraversal.add(id)) {
+            return;
+          }
+          activeTree[id]!.childrenInTraversalOrder.forEach(walkTraversal);
+        }
+
+        final reachableInHitTest = <int>{};
+        void walkHitTest(int id) {
+          expect(
+            activeTree.containsKey(id),
+            isTrue,
+            reason: 'Node $id referenced in childrenInHitTestOrder was never sent in an update',
+          );
+          if (!reachableInHitTest.add(id)) {
+            return;
+          }
+          activeTree[id]!.childrenInHitTestOrder.forEach(walkHitTest);
+        }
+
+        walkTraversal(0);
+        walkHitTest(0);
+
+        for (final int updatedId in SemanticsUpdateBuilderSpy.observations.keys) {
+          expect(
+            reachableInTraversal,
+            contains(updatedId),
+            reason: 'Updated node $updatedId is an orphan in traversal order',
+          );
+          expect(
+            reachableInHitTest,
+            contains(updatedId),
+            reason: 'Updated node $updatedId is an orphan in hit-test order',
+          );
+        }
+        expect(reachableInTraversal, equals(reachableInHitTest));
+
+        activeTree.removeWhere((int id, _) => !reachableInTraversal.contains(id));
+        SemanticsUpdateBuilderSpy.observations.clear();
+      }
+
+      final outerController = OverlayPortalController()..show();
+      final middleController = OverlayPortalController()..show();
+      final innerController = OverlayPortalController()..show();
+      final opacity = ValueNotifier<double>(1.0);
+      addTearDown(opacity.dispose);
+
+      final entry = OverlayEntry(
+        builder: (BuildContext context) {
+          return ValueListenableBuilder<double>(
+            valueListenable: opacity,
+            builder: (BuildContext context, double value, Widget? child) {
+              return Opacity(
+                opacity: value,
+                child: OverlayPortal(
+                  controller: outerController,
+                  overlayChildBuilder: (BuildContext context) {
+                    return OverlayPortal(
+                      controller: middleController,
+                      overlayChildBuilder: (BuildContext context) {
+                        return OverlayPortal(
+                          controller: innerController,
+                          overlayChildBuilder: (BuildContext context) {
+                            return TestButton(
+                              onPressed: () {},
+                              child: const Text('inner portal child'),
+                            );
+                          },
+                          child: TestButton(onPressed: () {}, child: const Text('inner anchor')),
+                        );
+                      },
+                      child: TestButton(onPressed: () {}, child: const Text('middle anchor')),
+                    );
+                  },
+                  child: TestButton(onPressed: () {}, child: const Text('outer anchor')),
+                ),
+              );
+            },
+          );
+        },
+      );
+      addTearDown(() {
+        entry
+          ..remove()
+          ..dispose();
+      });
+
+      // Frame 1: opacity is 1.0; outer, middle, and inner portals are all active.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(initialEntries: <OverlayEntry>[entry]),
+        ),
+      );
+      verifyAndCommitUpdate();
+      expect(
+        activeTree.values.map((SemanticsNodeUpdateObservation obs) => obs.label),
+        containsAll(<String>[
+          'outer anchor',
+          'middle anchor',
+          'inner anchor',
+          'inner portal child',
+        ]),
+      );
+
+      // Frame 2: opacity becomes 0.0; outer anchor detaches while all overlay children
+      // remain attached to the Overlay. Only the root node should remain in the active tree.
+      opacity.value = 0.0;
+      await tester.pump();
+      expect(SemanticsUpdateBuilderSpy.observations.keys, equals(<int>[0]));
+      verifyAndCommitUpdate();
+      expect(activeTree.keys, equals(<int>[0]));
+
+      // Frame 3: opacity becomes 1.0 again; outer, middle, and inner anchors and the
+      // innermost portal child must all be re-serialized and connected.
+      opacity.value = 1.0;
+      await tester.pump();
+      verifyAndCommitUpdate();
+      expect(
+        activeTree.values.map((SemanticsNodeUpdateObservation obs) => obs.label),
+        containsAll(<String>[
+          'outer anchor',
+          'middle anchor',
+          'inner anchor',
+          'inner portal child',
+        ]),
+      );
+
+      handle.dispose();
+    },
+    skip: kIsWeb, // [intended] the web engine handles the tree grafting itself.
+  );
+
   testWidgets('Semantics update removes detached OverlayPortal traversal child', (
     WidgetTester tester,
   ) async {
