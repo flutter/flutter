@@ -1,0 +1,56 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# dev/tools' scripts (package dev_tools) and their tests under Bazel: each
+# test compiled by the frontend server for the VM and run by package:test's
+# precompiled runner from this directory, as `dart test` runs them
+# (engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+# gen_defaults, gen_keycodes and vitool beside them are packages of their
+# own.
+#
+#   bazel test //dev/tools:tests
+
+load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob([
+        "*.dart",
+        "bin/**",
+        "lib/**",
+    ]) + [
+        "pubspec.yaml",
+        "skills_lint.yaml",
+    ],
+)
+
+dart_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["test/*.dart"],
+        exclude = ["test/*_test.dart"],
+    ),
+    # The mock git beside the tests; what the engine-version script tests
+    # copy into a temporary checkout (DEPS, bin/internal, the two READMEs
+    # that mark the engine and the framework).
+    data = glob(["test/*.sh"]) + [
+        "//:DEPS",
+        "//bin/internal:all_files",
+        "//engine:README.md",
+        "//packages/flutter:README.md",
+    ],
+    package = "dev_tools",
+    # validate_skills_test lints the checkout's agent skills (.agents), whose
+    # links reach anywhere in the repository (.github, docs): a test of the
+    # repository, not of the scripts.
+    tests = glob(
+        ["test/*_test.dart"],
+        exclude = ["test/validate_skills_test.dart"],
+    ),
+    # flutter_tools' test harness: create_api_docs_test imports its
+    # fake_process_manager.dart.
+    deps = ["//packages/flutter_tools:test_harness"],
+)
