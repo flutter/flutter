@@ -520,6 +520,102 @@ void testMain() {
       }
     });
 
+    test('Restores the editing state into a re-created field while the connection is open', () {
+      // Open the connection the way the framework does, so `isEditing` is true
+      // while the semantics node leaves the tree and comes back.
+      testTextEditing.acceptCommand(
+        TextInputSetClient(clientId: 123, configuration: singlelineConfig),
+        () {},
+      );
+      testTextEditing.acceptCommand(const TextInputShow(), () {});
+      testTextEditing.acceptCommand(
+        TextInputSetEditingState(
+          state: EditingState(text: 'hello world', baseOffset: 11, extentOffset: 11),
+        ),
+        () {},
+      );
+
+      void applyTree(SemanticsTester tester, {required bool withTextField}) {
+        tester.updateNode(
+          id: 0,
+          children: <SemanticsNodeUpdate>[
+            if (withTextField)
+              tester.updateNode(
+                id: 1,
+                flags: const ui.SemanticsFlags(
+                  isEnabled: ui.Tristate.isTrue,
+                  isTextField: true,
+                  isFocused: ui.Tristate.isTrue,
+                ),
+                value: 'hello world',
+                textSelectionBase: 11,
+                textSelectionExtent: 11,
+                rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
+              ),
+          ],
+        );
+        tester.apply();
+      }
+
+      final spy = PlatformMessagesSpy()..setUp();
+      try {
+        final tester = SemanticsTester(owner());
+        applyTree(tester, withTextField: true);
+        final firstInput = tester.getTextField(1).editableElement as DomHTMLInputElement;
+        expect(strategy.domElement, firstInput);
+        expect(firstInput.value, 'hello world');
+
+        // The focused field scrolls out of view: its node is removed and the
+        // element is disposed, but the framework never closes the connection.
+        applyTree(tester, withTextField: false);
+        expect(strategy.isEnabled, isFalse);
+        expect(testTextEditing.isEditing, isTrue);
+
+        // The node comes back under the same id with a brand new element.
+        applyTree(tester, withTextField: true);
+        final secondInput = tester.getTextField(1).editableElement as DomHTMLInputElement;
+        expect(secondInput, isNot(same(firstInput)));
+        expect(strategy.domElement, secondInput);
+        expect(secondInput.value, 'hello world');
+        expect(secondInput.selectionStart, 11);
+        expect(secondInput.selectionEnd, 11);
+
+        // The browser reports a selection change for the newly focused element.
+        // The restored state matches the element, so nothing is sent back to
+        // the framework as an edit.
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+        final Iterable<PlatformMessage> updates = spy.messages.where(
+          (m) =>
+              m.channel == 'flutter/textinput' &&
+              m.methodName == 'TextInputClient.updateEditingState',
+        );
+        expect(updates, isEmpty);
+      } finally {
+        spy.tearDown();
+        testTextEditing.acceptCommand(const TextInputClearClient(), () {});
+      }
+    });
+
+    test('Drops the editing state when the framework closes the connection', () {
+      testTextEditing.acceptCommand(
+        TextInputSetClient(clientId: 123, configuration: singlelineConfig),
+        () {},
+      );
+      testTextEditing.acceptCommand(const TextInputShow(), () {});
+      testTextEditing.acceptCommand(
+        TextInputSetEditingState(
+          state: EditingState(text: 'hello world', baseOffset: 11, extentOffset: 11),
+        ),
+        () {},
+      );
+      createTextFieldSemantics(value: 'hello world', isFocused: true);
+      expect(strategy.lastEditingState, isNotNull);
+
+      testTextEditing.acceptCommand(const TextInputClearClient(), () {});
+      expect(testTextEditing.isEditing, isFalse);
+      expect(strategy.lastEditingState, isNull);
+    });
+
     test('renders a required text field', () {
       createTextFieldSemantics(isRequired: true, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input aria-required="true" /></sem>''');

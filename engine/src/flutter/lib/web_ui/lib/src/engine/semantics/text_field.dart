@@ -146,6 +146,20 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void disable() {
+    // The framework owns the editing state while its connection is open. When
+    // it closes the connection, [HybridTextEditing.stopEditing] clears
+    // `isEditing` before calling this, and the state goes with it. When only
+    // the DOM element goes away, for example because the focused field's
+    // semantics node left the tree for one update and is about to come back
+    // with a fresh, empty element, the framework still considers the
+    // connection open and does not send the state again. Keep it so [activate]
+    // restores it into the replacement element, instead of letting the first
+    // `selectionchange` on that element report an empty value as a user edit.
+    // See https://github.com/flutter/flutter/issues/194636.
+    if (!owner.isEditing) {
+      lastEditingState = null;
+    }
+
     // We don't want to remove the DOM element because the caller is responsible
     // for that. However we still want to stop editing, cleanup the handlers.
     if (!isEnabled) {
@@ -160,7 +174,6 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
       subscriptions[i].cancel();
     }
     subscriptions.clear();
-    lastEditingState = null;
 
     // The focused field is linked to the autofill form by the `form`
     // attribute. On blur, detach it and leave a synthetic placeholder holding
