@@ -235,6 +235,56 @@ Hello!
       },
       overrides: startOverrides,
     );
+
+    testUsingContext("names a local engine's icudtl.dat to flutter_tester", () async {
+      final artifacts = Artifacts.testLocalEngine(
+        localEngine: 'out/android_debug_unopt',
+        localEngineHost: 'out/host_debug_unopt',
+        fileSystem: fileSystem,
+      );
+      device = FlutterTesterDevice(
+        'flutter-tester',
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        artifacts: artifacts,
+        logger: BufferLogger.test(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      final app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+      final completer = Completer<void>();
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(Artifact.flutterTester),
+            '--run-forever',
+            '--non-interactive',
+            // A Bazel build directory keeps the file away from flutter_tester.
+            '--icu-data-file-path=${artifacts.getArtifactPath(Artifact.icuData)}',
+            '--enable-dart-profiling',
+            '--packages=.dart_tool/package_config.json',
+            '--flutter-assets-dir=/.tmp_rand0/flutter_tester.rand0',
+            '/.tmp_rand0/flutter_tester.rand0/flutter-tester-app.dill',
+          ],
+          completer: completer,
+          stdout: 'The Dart VM service is listening on http://127.0.0.1:6666/\n',
+        ),
+      );
+
+      final LaunchResult result = await device.startApp(
+        app,
+        mainPath: mainPath,
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+        ),
+      );
+      expect(result.started, isTrue);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{...startOverrides, Artifacts: () => Artifacts.test()});
   });
 }
 

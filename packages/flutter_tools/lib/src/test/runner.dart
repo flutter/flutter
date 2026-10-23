@@ -176,6 +176,13 @@ interface class FlutterTestRunner {
       :FlutterProject? flutterProject,
     ) = spec;
 
+    // flutter_tester finds icudtl.dat beside itself unless told; a local
+    // engine's directory may keep the file elsewhere (a Bazel build leaves it
+    // in ICU's repository and maps it), so name the artifact.
+    final String? icudtlPath =
+        spec.icudtlPath ??
+        (artifacts.localEngineInfo == null ? null : artifacts.getArtifactPath(Artifact.icuData));
+
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = spec.toPackageTestArgs(
       supportsColor: terminal.supportsColor,
@@ -249,7 +256,7 @@ interface class FlutterTestRunner {
       toolContext: _toolContext,
       enableVmService: spec.enableVmService,
       flutterProject: flutterProject,
-      icudtlPath: spec.icudtlPath,
+      icudtlPath: icudtlPath,
       integrationTestDevice: spec.integrationTestDevice,
       integrationTestUserIdentifier: spec.integrationTestUserIdentifier,
       machine: spec.machine,
@@ -702,6 +709,11 @@ class SpawnPlugin extends PlatformPlugin {
       :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     ) = spec;
 
+    // As in runTests: a local engine's icudtl.dat may not sit beside flutter_tester.
+    final String? icuDataFilePath =
+        icudtlPath ??
+        (artifacts.localEngineInfo == null ? null : artifacts.getArtifactPath(Artifact.icuData));
+
     final Directory buildDirectory = fs.directory(
       fs.path.join(flutterProject.directory.path, getBuildDirectory(config, fs)),
     );
@@ -780,7 +792,7 @@ class SpawnPlugin extends PlatformPlugin {
     final command = <String>[
       artifacts.getArtifactPath(Artifact.flutterTester),
       '--disable-vm-service',
-      if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
+      if (icuDataFilePath != null) '--icu-data-file-path=$icuDataFilePath',
       '--enable-checked-mode',
       '--verify-entry-points',
       '--enable-software-rendering',
