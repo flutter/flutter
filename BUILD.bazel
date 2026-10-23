@@ -28,7 +28,7 @@ exports_files([
 # (engine/src/flutter/build/bazel/dart/flutter_test.bzl, dart_test.bzl; the
 # README in build/bazel), gathered as dev/bots' framework_tests and
 # flutter_tools_tests shards run them: every tree that runs on a Linux host
-# without a device, a browser, the network or the built tool.
+# without a device, a browser, Android's or the desktop's toolchains.
 #
 #   bazel test //:framework_tests //:tool_tests //:dart_tests
 #   bazel test //:framework_tests_impeller
@@ -65,14 +65,16 @@ test_suite(
     tests = ["//packages/flutter/test:all_impeller"],
 )
 
-# flutter_tools' unit tests and command tests (the integration shard drives
-# the built tool).
+# flutter_tools' unit tests, command tests and integration tests (the last
+# run the tool itself from the tests' SDK facsimile, which holds the engine
+# in its three runtime modes: the first build is three builds of the engine).
 test_suite(
     name = "tool_tests",
     tests = [
         "//packages/flutter_tools:commands_shard_hermetic",
         "//packages/flutter_tools:commands_shard_permeable",
         "//packages/flutter_tools:general_shard",
+        "//packages/flutter_tools:integration_shard",
     ],
 )
 
