@@ -320,6 +320,8 @@ def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without 
         (sky_engine: dart:ui is the platform's; nothing imports it).
       layout: `execroot` (a compile's) or `runfiles` (a test's run).
       **kwargs: the rule's other attributes (visibility, tags).
+
+    Also declares `<name>_sources`, a filegroup of the packages' files.
     """
     closure = pub_closure(roots, dev_roots, without)
     given = {package: label for label, package in packages.items()}
@@ -333,11 +335,21 @@ def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without 
     unreached = [package for package in without if package in given]
     if unreached:
         fail("%s: `without` and `packages` both name %s" % (name, ", ".join(unreached)))
+    hosted = {"@pub//%s:sources" % package: package for package in closure.hosted}
     _pub_package_config(
         name = name,
         out = out,
-        hosted = {"@pub//%s:sources" % package: package for package in closure.hosted},
+        hosted = hosted,
         packages = packages,
         layout = layout,
         **kwargs
+    )
+
+    # The packages' files, for a run that loads them from source (a test
+    # that spawns the Dart VM on a script).
+    native.filegroup(
+        name = name + "_sources",
+        srcs = hosted.keys() + packages.keys(),
+        visibility = kwargs.get("visibility"),
+        tags = kwargs.get("tags", []),
     )

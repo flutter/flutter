@@ -49,10 +49,14 @@ filegroup(
     srcs = ["lib/_internal/vm_platform_strong.dill"],
 )
 
-# The command-line SDK: `dart` and the libraries and snapshots it loads.
+# The command-line SDK: `dart` (and `dartvm`, the VM it runs) and the
+# libraries and snapshots it loads.
 filegroup(
     name = "dart",
-    srcs = ["bin/dart"] + glob(
+    srcs = [
+        "bin/dart",
+        "bin/dartvm",
+    ] + glob(
         [
             "bin/snapshots/**",
             "lib/**",
