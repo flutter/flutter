@@ -80,6 +80,10 @@ class ToolExtensionEntryPoint {
     final channel = IsolateChannel<Object?>.connectSend(sendPort);
     final peer = json_rpc.Peer.withoutJson(channel);
 
+    for (final service in services) {
+      service.notificationSender = peer.sendNotification;
+    }
+
     peer.registerMethod(getCapabilitiesMethod, () {
       logger?.call('[ToolExtensionIsolate] Handling extension.getCapabilities query.');
       return capabilities.toMap();

@@ -872,6 +872,7 @@ class ResidentWebRunner extends ResidentRunner {
             },
             device: device,
             flutterProject: flutterProject,
+            flutterVersion: toolContext.flutterVersion,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
           );
