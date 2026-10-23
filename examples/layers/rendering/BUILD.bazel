@@ -1,0 +1,14 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The rendering-layer examples; packages/flutter/test/examples imports one of
+# them (sector_layout_test.dart: custom_coordinate_systems.dart and the
+# src/ files it imports).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob(["**/*.dart"]),
+)
