@@ -108,8 +108,8 @@ void main() {
       fs.directory('sub_dir').createSync();
       fs.file('sub_dir/test.png').createSync();
 
-      expect(() => ScreenshotCommand.checkOutput(fs.file('test.png')), returnsNormally);
-      expect(() => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png')), returnsNormally);
+      expect(() => ScreenshotCommand.checkOutput(fs.file('test.png'), fs), returnsNormally);
+      expect(() => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs), returnsNormally);
     });
 
     testWithoutContext('failed in pwd', () async {
@@ -117,32 +117,48 @@ void main() {
       fs.directory('sub_dir').createSync();
 
       expect(
-        () => ScreenshotCommand.checkOutput(fs.file('test.png')),
+        () => ScreenshotCommand.checkOutput(fs.file('test.png'), fs),
         throwsToolExit(message: 'File was not created, ensure path is valid'),
       );
       expect(
-        () => ScreenshotCommand.checkOutput(fs.file('non-existent-file.png')),
+        () => ScreenshotCommand.checkOutput(fs.file('../'), fs),
         throwsToolExit(message: 'File was not created, ensure path is valid'),
       );
       expect(
-        () => ScreenshotCommand.checkOutput(fs.file('sub_dir/non-existent-file.png')),
+        () => ScreenshotCommand.checkOutput(fs.file('.'), fs),
         throwsToolExit(message: 'File was not created, ensure path is valid'),
       );
       expect(
-        () => ScreenshotCommand.checkOutput(fs.file('sub_dir')),
+        () => ScreenshotCommand.checkOutput(fs.file('/'), fs),
         throwsToolExit(message: 'File was not created, ensure path is valid'),
       );
       expect(
-        () => ScreenshotCommand.checkOutput(fs.file('.')),
+        () => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs),
         throwsToolExit(message: 'File was not created, ensure path is valid'),
       );
+    });
+  });
+
+  group('Screenshot output validation', () {
+    testWithoutContext('successful', () async {
+      final fs = MemoryFileSystem.test();
+      fs.file('test.png').createSync();
+
       expect(
-        () => ScreenshotCommand.checkOutput(fs.file('/')),
-        throwsToolExit(message: 'File was not created, ensure path is valid'),
+        () => ScreenshotCommand.ensureOutputIsNotJsonRpcError(fs.file('test.png')),
+        returnsNormally,
       );
+    });
+
+    testWithoutContext('failed', () async {
+      final fs = MemoryFileSystem.test();
+      fs.file('test.png').writeAsStringSync('{"jsonrpc":"2.0", "error":"something"}');
+
       expect(
-        () => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png')),
-        throwsToolExit(message: 'File was not created, ensure path is valid'),
+        () => ScreenshotCommand.ensureOutputIsNotJsonRpcError(fs.file('test.png')),
+        throwsToolExit(
+          message: 'It appears the output file contains an error message, not valid output.',
+        ),
       );
     });
   });

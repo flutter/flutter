@@ -42,8 +42,10 @@ class CaptureCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
 }
 
-/// The `flutter capture screenshot` command, which captures a screenshot from a
-/// connected device or VM Service.
+/// The `flutter capture screenshot` subcommand.
+///
+/// Extends [ScreenshotCommand] (which is kept as a hidden alias for backward
+/// compatibility) and only overrides visibility and aliases.
 class CaptureScreenshotCommand extends ScreenshotCommand {
   CaptureScreenshotCommand({required super.toolContext, super.vmServiceConnector});
 
@@ -58,21 +60,21 @@ class CaptureScreenshotCommand extends ScreenshotCommand {
 /// connected device.
 class CaptureRecordingCommand extends FlutterCommand {
   CaptureRecordingCommand({required super.toolContext}) {
-    argParser.addOption(
-      _kOut,
-      abbr: 'o',
-      valueHelp: 'path/to/file',
-      help: 'Location to write the recording.',
-    );
-    argParser.addOption(
-      _kDuration,
-      valueHelp: 'seconds',
-      help:
-          'Maximum recording duration in seconds. '
-          'If not specified, recording continues until Ctrl-C is pressed. '
-          'On Android, duration is limited to a maximum of 180 seconds. '
-          'On macOS, the entire screen is recorded.',
-    );
+    argParser
+      ..addOption(
+        _kOut,
+        abbr: 'o',
+        valueHelp: 'path/to/file',
+        help: 'Location to write the recording.',
+      )
+      ..addOption(
+        _kDuration,
+        valueHelp: 'seconds',
+        help:
+            'Maximum recording duration in seconds. '
+            'If not specified, recording continues until Ctrl-C is pressed. '
+            'On Android, duration is limited to a maximum of 180 seconds.',
+      );
     registerOptionBundle(const DeviceDiscoveryOptionsBundle());
   }
 

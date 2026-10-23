@@ -877,9 +877,10 @@ class AndroidDevice extends Device {
       try {
         final int recordExitCode = await process.exitCode;
         final String stderr = await stderrFuture;
-        const allowedExitCodes = <int>{0, 130, 143, -2, -15};
         final bool isAllowedExitCode =
-            allowedExitCodes.contains(recordExitCode) ||
+            ScreenRecording.stoppedExitCodes.contains(recordExitCode) ||
+            // Process.kill() on Windows yields -1; heap corruption occasionally
+            // produces large negative exit codes there as well.
             (_platform.isWindows && recordExitCode == -1) ||
             _allowHeapCorruptionOnWindows(recordExitCode, _platform);
         if (!isAllowedExitCode) {
@@ -908,12 +909,20 @@ class AndroidDevice extends Device {
       }
     }
 
-    return _AndroidScreenRecording(
+    return ScreenRecording(
       process,
       runRecording(),
-      processUtils: _processUtils,
-      adbCommandForDevice: adbCommandForDevice,
-      platform: _platform,
+      signalStop: () async {
+        // adb does not forward SIGINT to the device; send it directly to the
+        // on-device screenrecord process so the MP4 moov atom is finalized.
+        try {
+          await _processUtils.run(
+            adbCommandForDevice(<String>['shell', 'pkill', '-2', 'screenrecord']),
+          );
+        } on Exception {
+          // Best effort: screenrecord may have already exited.
+        }
+      },
     );
   }
 
@@ -926,49 +935,6 @@ class AndroidDevice extends Device {
   Future<void> dispose() async {
     _logReader?._stop();
     _pastLogReader?._stop();
-  }
-}
-
-class _AndroidScreenRecording implements ScreenRecording {
-  _AndroidScreenRecording(
-    this._process,
-    this.done, {
-    required this._processUtils,
-    required this._adbCommandForDevice,
-    required this._platform,
-  });
-
-  final Process _process;
-  final ProcessUtils _processUtils;
-  final List<String> Function(List<String>) _adbCommandForDevice;
-  final Platform _platform;
-
-  @override
-  final Future<void> done;
-
-  @override
-  Future<void> stop() async {
-    if (_platform.isWindows) {
-      // adb on Windows cannot forward SIGINT via process signal. Send SIGINT directly
-      // to the on-device screenrecord process to ensure the MP4 moov atom is finalized.
-      try {
-        await _processUtils.run(
-          _adbCommandForDevice(<String>['shell', 'pkill', '-2', 'screenrecord']),
-        );
-      } on Exception {
-        // Best effort: if pkill fails or is unavailable, fallback to process kill below.
-      }
-      await _process.exitCode.timeout(
-        const Duration(seconds: 2),
-        onTimeout: () {
-          _process.kill();
-          return -1;
-        },
-      );
-    } else {
-      ProcessSignal.sigint.kill(_process);
-    }
-    await done;
   }
 }
 

@@ -801,13 +801,12 @@ class IOSSimulator extends Device {
         }
       }
       final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
-      const allowedExitCodes = <int>{0, 130, 143, -2, -15};
-      if (!allowedExitCodes.contains(exitCode)) {
+      if (!ScreenRecording.stoppedExitCodes.contains(exitCode)) {
         throwToolExit('Screen recording failed (exit $exitCode): ${stderrBuf.toString().trim()}');
       }
     }
 
-    return _IOSSimulatorScreenRecording(process, runRecording());
+    return ScreenRecording(process, runRecording());
   }
 
   @override
@@ -879,21 +878,6 @@ class IOSSimulator extends Device {
 
     // For iOS 11 and later, all relevant detail is in the device log.
     return null;
-  }
-}
-
-class _IOSSimulatorScreenRecording implements ScreenRecording {
-  _IOSSimulatorScreenRecording(this._process, this.done);
-
-  final Process _process;
-
-  @override
-  final Future<void> done;
-
-  @override
-  Future<void> stop() async {
-    ProcessSignal.sigint.kill(_process);
-    await done;
   }
 }
 

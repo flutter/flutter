@@ -725,7 +725,9 @@ void main() {
 
         await expectLater(
           () => device.takeScreenshot(outputFile),
-          throwsToolExit(message: 'Screenshots on physical iOS devices require Xcode 27 or higher.'),
+          throwsToolExit(
+            message: 'Screenshots on physical iOS devices require Xcode 27 or higher.',
+          ),
         );
       });
 
@@ -803,7 +805,62 @@ void main() {
 
           await expectLater(
             () => device.startScreenRecording(outputFile),
-            throwsToolExit(message: 'Screen recording on physical iOS devices requires Xcode 27 or higher.'),
+            throwsToolExit(
+              message: 'Screen recording on physical iOS devices requires Xcode 27 or higher.',
+            ),
+          );
+        },
+      );
+
+      testWithoutContext(
+        'startScreenRecording throws ToolExit when JSON outcome is not success',
+        () async {
+          final IOSDevice device = createCoreDevice(
+            xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
+          );
+
+          fakeCoreDeviceControl.jsonOutputContent = '{"info":{"outcome":"failed"}}';
+          fakeCoreDeviceControl.startScreenRecordingProcess = FakeProcess();
+          final ScreenRecording recording = await device.startScreenRecording(outputFile);
+          await expectLater(
+            () => recording.done,
+            throwsToolExit(message: 'devicectl returned unexpected JSON response'),
+          );
+        },
+      );
+
+      testWithoutContext(
+        'startScreenRecording throws ToolExit when devicectl returns malformed JSON',
+        () async {
+          final IOSDevice device = createCoreDevice(
+            xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
+          );
+
+          fakeCoreDeviceControl.jsonOutputContent = 'not valid json';
+          fakeCoreDeviceControl.startScreenRecordingProcess = FakeProcess();
+          final ScreenRecording recording = await device.startScreenRecording(outputFile);
+          await expectLater(
+            () => recording.done,
+            throwsToolExit(message: 'devicectl returned non-JSON response'),
+          );
+        },
+      );
+
+      testWithoutContext(
+        'startScreenRecording throws ToolExit when devicectl process fails to start',
+        () async {
+          final IOSDevice device = createCoreDevice(
+            xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
+          );
+
+          fakeCoreDeviceControl.startScreenRecordingException = const ProcessException(
+            'xcrun',
+            <String>['devicectl'],
+            'devicectl not found',
+          );
+          await expectLater(
+            () => device.startScreenRecording(outputFile),
+            throwsToolExit(message: 'devicectl not found'),
           );
         },
       );
@@ -1431,6 +1488,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   Exception? startScreenRecordingException;
   Duration? lastScreenRecordingDuration;
   File? lastScreenRecordingJsonOutput;
+  String jsonOutputContent = '{"info":{"outcome":"success"}}';
 
   @override
   Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
@@ -1450,7 +1508,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     lastScreenRecordingDuration = duration;
     lastScreenRecordingJsonOutput = jsonOutput;
     if (jsonOutput != null) {
-      jsonOutput.writeAsStringSync('{"info":{"outcome":"success"}}');
+      jsonOutput.writeAsStringSync(jsonOutputContent);
     }
     if (startScreenRecordingException != null) {
       throw startScreenRecordingException!;
