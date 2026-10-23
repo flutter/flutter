@@ -692,28 +692,39 @@ prelude, assets and helpers) and `flutter_package_tests`
 dependencies' closure to its own assets; `directory` for a package outside
 `packages/`, `compile_args` for a `--dart-define` tree). `dart_test` and
 `dart_package_tests` are the pure-Dart counterparts: test_core's own
-`.vm_test.dart` bootstrap compiled for the VM, run by package:test's runner
-precompiled to a kernel (`dart test` is dartdev's and runs pub first) in
-`--precompiled` mode from the package's directory.
+`.vm_test.dart` bootstrap compiled for the VM (from a `dart_test_prelude`
+of the package's libraries when the package gives `imports`), run by
+package:test's runner precompiled to a kernel (`dart test` is dartdev's and
+runs pub first) in `--precompiled` mode from the package's directory, with
+`FLUTTER_ROOT` the runfiles root, the runtime package configuration at the
+package's `.dart_tool/`, and what a tool under test reads of the SDK's
+cache laid under `bin/cache` (`cache`, `cache_files`: the Dart SDK, the
+engine stamps as fixed words).
 
 ```sh
+bazel test //:framework_tests //:tool_tests //:dart_tests   # everything below, the root's suites
 bazel test //packages/flutter/test:all              # 919 files, 20,163 cases: flutter test's
-bazel test //packages/flutter/test:all_impeller     # the same under --enable-impeller
+bazel test //packages/flutter/test:all_impeller     # the same under --enable-impeller (//:framework_tests_impeller)
 bazel test //packages/flutter/test/widgets:text_test
 bazel build //packages/flutter/test/widgets:text_test_kernel   # compile only
 bazel test //packages/flutter/examples/api/test:tests //packages/flutter_test/test:tests
 bazel test //packages/flutter/test_release:tests    # -Ddart.vm.product=true
-bazel test //dev/tools/gen_keycodes:tests           # dart_test
+bazel test //packages/flutter_tools:general_shard   # dart_test: the tool's unit tests
+bazel test //dev/bots:tests //dev/tools/gen_keycodes:tests
 ```
 
-Every tree counts what `flutter test` counts on the same engine (the
-migration notes record each): packages/flutter's 919 files, the API
-samples' 580, flutter_test's, flutter_localizations', flutter_goldens',
+Every tree counts what `flutter test` or `dart test` counts on the same
+engine (the migration notes record each): packages/flutter's 919 files, the
+API samples' 580, flutter_test's, flutter_localizations', flutter_goldens',
 flutter_driver's, integration_test's, the example apps', manual_tests',
 tracing_tests', stocks', vitool's, integration_ui's -- 1,627 files and 22,522
-cases, plus the Impeller runs and the release/profile trees. Left out by
-name: web-only files (`@TestOn('browser')`, which a BUILD file cannot read)
-and a test that spawns `bin/flutter test` itself. The compile's defines for
+cases -- plus the Impeller, no-tracking and release/profile runs,
+flutter_tools' general shard (271 files) and hermetic commands shard (58),
+and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
+flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
+fuchsia_remote_debug_protocol). Left out by name: web-only and macOS-only
+files (`@TestOn`, which a BUILD file cannot read), and tests that run the
+built tool, the real pub or git on the checkout -- the integration kind. The compile's defines for
 the SDK version are fixed words (`-DFLUTTER_VERSION=bazel`...), so a kernel
 is the same on every commit and the cache holds across them.
 
