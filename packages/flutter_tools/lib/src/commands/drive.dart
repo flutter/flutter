@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -16,8 +15,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/signals.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
-import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
@@ -54,26 +51,26 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required this._buildSystem,
-    required this._buildTargets,
-    required this._toolContext,
+    required super.buildSystem,
+    required super.buildTargets,
+    required super.toolContext,
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
-    addEnableExperimentation(hide: !verboseHelp);
 
-    // By default, the drive app should not publish the VM service port over mDNS
-    // to prevent a local network permission dialog on iOS 14+,
-    // which cannot be accepted or dismissed in a CI environment.
-    addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      CommonOptions.enableExperiment,
+      // By default, the drive app should not publish the VM service port over mDNS
+      // to prevent a local network permission dialog on iOS 14+,
+      // which cannot be accepted or dismissed in a CI environment.
+      _publishPort,
       _keepAppRunning,
       _useExistingApp,
       _driver,
-      _build,
+      DebuggingOptionDescriptors.build,
       _screenshot,
       _driverPort,
       _headless,
@@ -86,6 +83,10 @@ class DriveCommand extends RunCommandBase {
       _timeout,
     ], verboseHelp: verboseHelp);
   }
+
+  static final FlagOptionDescriptor _publishPort = DebuggingOptionDescriptors.publishPortOption(
+    enabledByDefault: false,
+  );
 
   static const _kKeepAppRunning = 'keep-app-running';
   static const _kUseExistingApp = 'use-existing-app';
@@ -119,14 +120,6 @@ class DriveCommand extends RunCommandBase {
         'extension, so e.g. if the target is "lib/main.dart", the driver will be '
         '"test_driver/main_test.dart".',
     valueHelp: 'path',
-  );
-
-  static const _build = FlagOptionDescriptor(
-    name: 'build',
-    defaultsTo: true,
-    help:
-        '(deprecated) Build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
-        'flag with an existing APK.',
   );
 
   static const _screenshot = StringOptionDescriptor(
@@ -221,13 +214,7 @@ class DriveCommand extends RunCommandBase {
     return true;
   }
 
-  final BuildSystem _buildSystem;
-  final BuildTargets _buildTargets;
   FlutterDriverFactory? _flutterDriverFactory;
-  final ToolContext _toolContext;
-
-  @override
-  ToolContext get toolContext => _toolContext;
 
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
@@ -249,7 +236,7 @@ class DriveCommand extends RunCommandBase {
   @override
   final aliases = <String>['driver'];
 
-  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  String? get userIdentifier => getValue(CommonOptions.deviceUser);
 
   String? get screenshot => getValue(_screenshot);
 
@@ -259,7 +246,7 @@ class DriveCommand extends RunCommandBase {
   @override
   bool get cachePubGet => false;
 
-  String? get applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
+  String? get applicationBinaryPath => getValue(CommonOptions.useApplicationBinary);
 
   Future<Device?> get targetedDevice async {
     return findTargetDevice(includeDevicesUnsupportedByProject: applicationBinaryPath == null);
@@ -270,18 +257,15 @@ class DriveCommand extends RunCommandBase {
   // change it to be enabled.
   @override
   Future<bool> get disablePortPublication async {
-    final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
     final bool isWirelessIOSDevice = device is IOSDevice && device.isWirelesslyConnected;
-    if (isWirelessIOSDevice &&
-        localArgResults != null &&
-        !localArgResults.wasParsed('publish-port')) {
-      _toolContext.logger.printTrace(
+    if (isWirelessIOSDevice && argResults != null && !wasParsed(_publishPort)) {
+      toolContext.logger.printTrace(
         'A wireless iOS device is being used. Changing `publish-port` to be enabled.',
       );
       return false;
     }
-    return !boolArg('publish-port');
+    return !getValue(_publishPort);
   }
 
   @override
@@ -290,8 +274,7 @@ class DriveCommand extends RunCommandBase {
     // are not passed.
     validatePrebuiltAndroidApplicationFlags();
 
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
-
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     if (userIdentifier != null) {
       final Device? device = await findTargetDevice();
       if (device is! AndroidDevice) {
@@ -337,7 +320,7 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
@@ -373,11 +356,11 @@ class DriveCommand extends RunCommandBase {
     _flutterDriverFactory ??= FlutterDriverFactory(
       analytics: analytics,
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      buildSystem: _buildSystem,
-      buildTargets: _buildTargets,
-      dartSdkPath: _toolContext.artifacts.getArtifactPath(.engineDartBinary),
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
+      dartSdkPath: toolContext.artifacts.getArtifactPath(.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 
@@ -507,7 +490,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
-    final ToolContext(:Logger logger, :Signals signals) = _toolContext;
+    final ToolContext(:Logger logger, :Signals signals) = toolContext;
     logger.printTrace('Registering signal handlers...');
     final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
@@ -531,7 +514,7 @@ class DriveCommand extends RunCommandBase {
 
   void _unregisterScreenshotCallbacks() {
     if (screenshotTokens != null) {
-      final ToolContext(:Logger logger, :Signals signals) = _toolContext;
+      final ToolContext(:Logger logger, :Signals signals) = toolContext;
       logger.printTrace('Unregistering signal handlers...');
       for (final MapEntry<ProcessSignal, Object> entry in screenshotTokens!.entries) {
         signals.removeHandler(entry.key, entry.value);
@@ -541,7 +524,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   String? _getTestFile() {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final String? driver = getValue(_driver);
     if (driver != null) {
       return driver;
@@ -588,7 +571,7 @@ class DriveCommand extends RunCommandBase {
     if (!device.supportsScreenshot) {
       return;
     }
-    final ToolContext(:FileSystemUtils fileSystemUtils, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystemUtils fileSystemUtils, :Logger logger) = toolContext;
     try {
       outputDirectory.createSync(recursive: true);
       final File outputFile = fileSystemUtils.getUniqueFile(outputDirectory, 'drive', 'png');

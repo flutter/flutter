@@ -161,8 +161,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
     _analysisServerFactoryOverride = analysisServerFactoryOverride;
     addPubOptions();
-    addMachineOutputFlag(verboseHelp: verbose);
-    addDevToolsOptions(verboseHelp: verbose);
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      CommonOptions.machine,
+      DebuggingOptionDescriptors.enableDevTools,
+      DebuggingOptionDescriptors.devToolsServerAddress(),
+    ], verboseHelp: verbose);
     argParser
       ..addFlag(
         kWebServer,
@@ -274,23 +277,19 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     fs: fs,
     onChangeDetected: onLegacyChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
+    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
   );
 
   late final _lspPreviewDetector = LspPreviewDetector(
-    platform: platform,
-    previewAnalytics: previewAnalytics,
-    project: rootProject,
-    logger: logger,
-    fs: fs,
+    dtd: _dtdService,
     onChangeDetected: onChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
-    shutdownHooks: shutdownHooks,
-    dtd: _dtdService,
-    processManager: processManager,
-    terminal: terminal,
+    previewAnalytics: previewAnalytics,
+    project: rootProject,
     suppressAnalytics: !analytics.okToSend,
+    toolContext: toolContext,
     analysisServerFactory: _analysisServerFactoryOverride,
-    artifacts: artifacts,
+    onNonDartFileChangeDetected: _onNonDartFileChangeDetected,
   );
 
   late final Future<AnalysisServer> Function()? _analysisServerFactoryOverride;
@@ -547,6 +546,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     unawaited(_triggerReload(.hotReload));
   }
 
+  void _onNonDartFileChangeDetected(String path) {
+    if (_widgetPreviewApp?.assetBundle.needsBuild() ?? false) {
+      logger.printStatus('Triggering reload based on update to asset: $path');
+      unawaited(_triggerReload(.hotReload));
+    }
+  }
+
   /// Configures the Dart Tooling Daemon connection.
   ///
   /// If --dtd-uri is provided, the existing DTD instance will be used. If the tool fails to
@@ -642,12 +648,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             trackWidgetCreation: true,
             // Don't try and download canvaskit from the CDN.
             useLocalCanvasKit: true,
-            webEnableHotReload: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
-          webEnableExposeUrl: false,
-          webEnableExpressionEvaluation: true,
-          webRunHeadless: boolArg(kHeadless),
+          webConfig: WebDebugConfig(
+            enableExpressionEvaluation: true,
+            runHeadless: boolArg(kHeadless),
+          ),
           devToolsServerAddress: devToolsServerAddress,
         );
         final String target = widgetPreviewScaffoldProject.directory
