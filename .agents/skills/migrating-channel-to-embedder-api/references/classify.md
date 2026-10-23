@@ -82,6 +82,11 @@ settings as a JSON string all the way into Dart), choose one and record it:
   lowest new hop, then convert to the existing representation and reuse the lower
   hops. Smaller change; list a typed follow-up in the PR.
 - **B. Typed throughout.** Replace the lower hops too. Only if the user asks.
+- **C. Keep and add.** The lower path has different semantics (for example
+  `SetInitialLifecycleState` only feeds the one-shot
+  `PlatformDispatcher.initialLifecycleState`). Keep feeding it unchanged for
+  compatibility and add the new path alongside. This is what
+  flutter/flutter#194837 did.
 
 ## 6. Users
 
@@ -109,7 +114,7 @@ Direction:   inbound | outbound
 Kind:        state | event
 Payload:     <C type> / <C++ type> / <Dart type>
 Intercepted: yes (Engine::Handle...) | no
-Internal:    A (convert at <hop>) | B
+Internal:    A (convert at <hop>) | B | C (keep <hop> and add)
 Users:       linux, windows, macos, ios, android, web, fuchsia
 Names:       {Name}=..., {name}=..., {name_snake}=..., {Api}=...
 Reused hops: <hop ids, or none>

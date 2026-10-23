@@ -22,6 +22,12 @@ Replaces a string or JSON platform channel between the embedders and the framewo
 with a typed API that runs through the engine. The reference implementation is
 flutter/flutter#194837 (`flutter/lifecycle`).
 
+If you cannot ask the user (for example in an unattended run), wherever this skill
+says to ask or confirm: make the most conservative choice, record it in the
+classification and the PR description, and continue.
+
+Run the scripts in `scripts/`; you do not need to read their source.
+
 ## Path conventions
 
 All paths in this skill use these prefixes. Never write them out as repo-root paths.
@@ -55,9 +61,15 @@ Verb rules: use `Set` for inbound state, `Send` for inbound events, and `Set` or
    Structs passed across the ABI start with `size_t struct_size`.
 2. **Never remove the old channel.** Third-party embedders and apps still use it.
    Follow the deprecation pattern in step 6.
-3. **One source of truth per enum.** Reuse an existing C++ enum before adding one
-   (search `$ENGINE/shell/platform/common/` and `$ENGINE/lib/ui/`). Every enum that
-   mirrors a dart:ui enum must be added to `$ENGINE/tools/api_check/test/apicheck_test.dart`.
+3. **One source of truth per enum, in the right layer.** Core code (`$ENGINE/lib/ui/`,
+   `$ENGINE/runtime/`, `$ENGINE/shell/common/`) must not depend on
+   `$ENGINE/shell/platform/`. Reuse an existing core C++ enum if there is one;
+   otherwise define it in `$ENGINE/lib/ui/window/platform_configuration.h`, as
+   flutter/flutter#194837 did with `LifecycleState`. Enums in
+   `$ENGINE/shell/platform/common/` are converted at the platform boundary, never
+   included from core. Every enum that mirrors a dart:ui enum must be compared in
+   `$ENGINE/tools/api_check/test/apicheck_test.dart`, with an `isNotEmpty` check
+   (two empty lists compare equal, so a broken parser passes silently).
 4. **Threading.** Inbound calls enter `PlatformView` on the platform thread and `Shell`
    moves them to the UI thread. Outbound calls leave dart:ui on the UI thread and
    `Shell` moves them to the platform thread. Never call across threads any other way.
@@ -75,7 +87,9 @@ Verb rules: use `Set` for inbound state, `Send` for inbound events, and `Set` or
 dart .agents/skills/migrating-channel-to-embedder-api/scripts/find_channel_usages.dart flutter/<channel>
 ```
 
-Read every result. Then open the engine's intercept for the channel (if any) in
+Read every result, including the "Users of wrappers" section: classes and properties
+that wrap the channel (for example iOS `lifecycleChannel`) are used by files that
+never mention the channel name. Then open the engine's intercept for the channel (if any) in
 `$ENGINE/shell/common/engine.cc` (`Engine::DispatchPlatformMessage`).
 
 ### 2. Classify
@@ -91,6 +105,13 @@ For every hop in the checklist, search for an existing method that already does 
 job (for example `RuntimeController::SetUserSettingsData`). Reuse it rather than
 adding a parallel path. Record each reused hop; it is passed to the check script
 with `--skip`.
+
+Run the check script (step 9) now as well. Its `delegate-implementors` line lists
+every mock and real implementor that will need the new method, including iOS and
+Fuchsia files you cannot build.
+
+If you will run framework tests (step 10), start the full `host_debug` build now in
+the background; see [testing.md](references/testing.md).
 
 ### 4. Core hops
 
@@ -118,11 +139,17 @@ Switch `$FRAMEWORK` to the dart:ui API, keep the channel as a fallback, and upda
 `TestPlatformDispatcher` in `$FLUTTER_TEST/lib/src/window.dart`. See the framework
 section of the hop checklist.
 
+Once the engine consumes the channel, Dart code that listened to it directly with
+`channelBuffers.setListener` or `setMessageHandler` and has no framework binding only
+sees it if something re-pushes it. Find these in the inventory (engine fixtures, the
+iOS scenario app, web tests) and switch them to the new dart:ui callback.
+
 ### 9. Check every hop
 
 ```bash
 dart .agents/skills/migrating-channel-to-embedder-api/scripts/check_hops.dart \
-  --direction in|out --name {Name} --api {Api} [--kind state|event] [--skip hop,hop]
+  --direction in|out --name {Name} --api {Api} [--kind state|event] \
+  [--channel <SystemChannels getter>] [--skip hop,hop]
 ```
 
 It finds every implementor of each delegate interface (including iOS, Fuchsia and

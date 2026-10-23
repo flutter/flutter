@@ -109,6 +109,10 @@ bool EmbedderEngine::{Api}({T} value) {
 
 `$ENGINE/shell/common/platform_view.h` and `.cc`. Add a pure virtual to
 `PlatformView::Delegate` and a non-virtual forwarding method to `PlatformView`.
+Non-virtual is deliberate (it is what flutter/flutter#194837 did): platforms call it,
+they never need to override it. Some older neighbours such as
+`SetSemanticsEnabled` are virtual because platforms intercept them; do not copy that
+unless a platform needs to.
 
 ```cpp
 // PlatformView::Delegate
@@ -319,7 +323,10 @@ getter and name the callback `on{Name}`.
 
 `$ENGINE/lib/web_ui/lib/platform_dispatcher.dart` (abstract members) and
 `$ENGINE/lib/web_ui/lib/src/engine/platform_dispatcher.dart`
-(`EnginePlatformDispatcher`). The web engine has no embedder API: where it used to
+(`EnginePlatformDispatcher`). Check for existing members with the same name first:
+`EnginePlatformDispatcher` already has unrelated private fields (for example
+`_appLifecycleState`, which drives browser visibility); suffix yours
+(`_{name}Value`) on a clash. The web engine has no embedder API: where it used to
 call `invokeOnPlatformMessage('flutter/<channel>', ...)`, set the field and invoke
 the callback directly.
 
@@ -347,6 +354,8 @@ Update web test helpers that spied on the channel (for example
 `TestPlatformDispatcher` in `$FLUTTER_TEST/lib/src/window.dart`: forward the getter
 and callback to the real dispatcher, add a `{name}TestValue` setter that also calls
 the callback, a `clear{Name}TestValue()`, and call it from `clearAllTestValues()`.
+Setting a test value invokes `on{Name}Changed`; clearing invokes it only if a test
+value was set.
 
 ## Deprecated channel
 
@@ -383,6 +392,14 @@ bool Engine::Handle<Channel>PlatformMessage(PlatformMessage* message) {
 
 Ask the user for the `TODO` username if it is not obvious from git config.
 
+The `static std::once_flag` is process-wide, as in flutter/flutter#194837: in a gtest
+binary only the first test to use the channel sees the warning. Test it as "the
+value still arrives through dart:ui" and, if you assert the log, do it in a test that
+cannot run after another channel user (or skip the log assertion).
+
+If engine-side code (not just the framework) listened on the old channel, it no
+longer receives the message once this returns `true`. See SKILL.md step 8.
+
 ## Framework
 
 ### `framework`
@@ -396,6 +413,10 @@ In `$FRAMEWORK/lib/src/`:
    it.
 3. If `SystemChannels.<channel>` is public, apps may listen to it. Keep delivering
    each change to listeners:
+
+   The push reaches every handler on the channel, including the framework's own
+   handler from step 2. Check that handler ignores a repeated value (or skip the push
+   when the value came from the channel), and add a test for it.
 
    ```dart
    ui.channelBuffers.push(

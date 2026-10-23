@@ -6,7 +6,8 @@
 //
 // Usage:
 //   dart check_hops.dart --direction in|out --name <Name> [--api <Api>]
-//       [--kind state|event] [--skip id,id] [--base <git ref>]
+//       [--kind state|event] [--channel <SystemChannels getter>] [--skip id,id]
+//       [--base <git ref>]
 //
 // Read-only. Prints one line per hop: OK, MISSING, WARN or SKIP. Exits 1 if any
 // hop is MISSING. Hop IDs match the headings in references/inbound-hops.md,
@@ -46,7 +47,9 @@ void main(List<String> argv) {
   );
   stdout.writeln();
 
-  final List<_Hop> hops = direction == 'in' ? _inboundHops(n, kind == 'state') : _outboundHops(n);
+  final List<_Hop> hops = direction == 'in'
+      ? _inboundHops(n, kind == 'state', args['channel'])
+      : _outboundHops(n);
   hops.addAll(_commonHops(n, args['base']));
 
   var missing = 0;
@@ -77,7 +80,7 @@ void main(List<String> argv) {
 // ---------------------------------------------------------------------------
 // Hop definitions.
 
-List<_Hop> _inboundHops(_Names n, bool state) {
+List<_Hop> _inboundHops(_Names n, bool state, String? channelGetter) {
   final String update = state ? 'Update${n.name}' : n.api;
   final hook = state ? '_update${n.name}' : '_${n.apiLower}';
   final callback = state ? 'on${n.name}Changed' : 'on${n.name}';
@@ -213,13 +216,30 @@ List<_Hop> _inboundHops(_Names n, bool state) {
     if (state)
       _Hop(
         'framework-fallback',
-        () => _anyUnder('$_root/packages/flutter/lib', r'channelBuffers\.push\(', warnOnly: true),
+        () => _anyUnder(
+          '$_root/packages/flutter/lib',
+          r'channelBuffers\.push\(\s*SystemChannels\.' + (channelGetter ?? r'\w+') + r'\b',
+          warnOnly: true,
+        ),
       ),
     // Platform adoption.
     _Hop(
       'platform-linux',
       () => _anyUnder('$_engine/shell/platform/linux', r'embedder_api\.' + n.api + r'\s*\('),
     ),
+    _Hop('platform-linux-mock-engine', () {
+      final _Result r = _has(
+        'shell/platform/linux/testing/mock_engine.cc',
+        r'table->' + n.api + r'\s*=',
+      );
+      return r.status == 'OK'
+          ? r
+          : _Result(
+              'WARN',
+              '${r.detail}. Add the proc if a Linux test reaches the new call without '
+                  'overriding it with MOCK_ENGINE_PROC (it would call a null pointer).',
+            );
+    }),
     _Hop(
       'platform-windows',
       () => _anyUnder('$_engine/shell/platform/windows', r'embedder_api_\.' + n.api + r'\s*\('),
@@ -555,6 +575,22 @@ _Result _apiCheck(_Names n) {
   final String? test = _read('$_engine/tools/api_check/test/apicheck_test.dart');
   final List<String> unchecked = newTypes.where((t) => test == null || !test.contains(t)).toList();
   if (unchecked.isEmpty) {
+    // A comparison of two empty lists passes, so require a guard against that.
+    final unguarded = <String>[
+      for (final t in newTypes)
+        if (!RegExp(r"test\('[^']*'", dotAll: true)
+            .allMatches(test!)
+            .map((m) => _testBody(test, m.start))
+            .any((body) => body.contains(t) && _nonEmptyGuard.hasMatch(body)))
+          t,
+    ];
+    if (unguarded.isNotEmpty) {
+      return _Result(
+        'WARN',
+        'the api_check test for ${unguarded.join(', ')} has no isNotEmpty assertion; '
+            'empty lists compare equal, so check each parser really finds the values',
+      );
+    }
     return _Result('OK', '${newTypes.join(', ')} covered by apicheck_test.dart');
   }
   return _Result(
@@ -562,6 +598,15 @@ _Result _apiCheck(_Names n) {
     '${unchecked.join(', ')} not checked against the dart:ui enum in '
         r'$ENGINE/tools/api_check/test/apicheck_test.dart',
   );
+}
+
+final RegExp _nonEmptyGuard = RegExp(r'expect\([^;]*\bisNotEmpty\b');
+
+/// The text of the `test(...)` call starting at [start], up to its closing `});`.
+String _testBody(String text, int start) {
+  final int indent = start - text.lastIndexOf('\n', start) - 1;
+  final int end = text.indexOf(RegExp('\\n {$indent}\\}\\);'), start);
+  return text.substring(start, end < 0 ? text.length : end);
 }
 
 _Result _abiAppendOnly(String? base) {
@@ -700,11 +745,12 @@ Map<String, String> _parseArgs(List<String> argv) {
 Never _usage() {
   stderr.writeln(
     'Usage: dart check_hops.dart --direction in|out --name <PascalName> [--api <Api>]\n'
-    '           [--kind state|event] [--skip id,id] [--base <git ref>]\n'
+    '           [--kind state|event] [--channel <getter>] [--skip id,id] [--base <git ref>]\n'
     '\n'
     '  --name   PascalCase concept, e.g. AppLifecycleState.\n'
     '  --api    C++ method name. Default: Set<Name> (Send<Name> for inbound events).\n'
     '  --kind   Inbound only. state (default) or event.\n'
+    '  --channel  Inbound only. SystemChannels getter (e.g. lifecycle) for framework-fallback.\n'
     '  --skip   Hop IDs that were reused or do not apply (explain each in the PR).\n'
     '  --base   Git ref for the embedder.h ABI check. Default: merge-base with main.',
   );

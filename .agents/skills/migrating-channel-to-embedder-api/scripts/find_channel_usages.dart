@@ -61,6 +61,9 @@ void main(List<String> args) {
   final nativeIds = <String, Set<File>>{};
   final privateIds = <String>{};
   final dartIds = <String>{};
+  // Classes, files and properties that wrap the channel. Their users send or
+  // handle the channel without mentioning its name.
+  final owners = <String>{};
   final hits = <_Hit>[];
   final contents = <File, List<String>>{};
 
@@ -87,6 +90,18 @@ void main(List<String> args) {
           }
         }
       } else {
+        // Objective-C properties holding the channel: `self.fooChannel = [... initWithName:@"..."`.
+        for (var j = i; j >= 0 && j >= i - 2; j--) {
+          final RegExpMatch? m = RegExp(r'(?:self\.|\b_)(\w+Channel)\s*=').firstMatch(lines[j]);
+          if (m != null) {
+            owners.add(m.group(1)!);
+            break;
+          }
+        }
+        final String? owner = _owner(file);
+        if (owner != null) {
+          owners.add(owner);
+        }
         final RegExpMatch? m = nativeConstant.firstMatch(lines[i]);
         if (m != null) {
           nativeIds.putIfAbsent(m.group(1)!, () => <File>{}).add(file);
@@ -158,12 +173,50 @@ void main(List<String> args) {
     stdout.writeln('No usages found.');
     exit(1);
   }
+  if (owners.isNotEmpty) {
+    final ownerPattern = RegExp('\\b(${owners.join('|')})');
+    final String names = owners
+        .map((o) => o.replaceAll(r'\b', '').replaceAll('|', ', '))
+        .join(', ');
+    stdout.writeln('== Users of wrappers around the channel ($names)');
+    stdout.writeln('   These send or handle the channel without naming it. Check each one.');
+    final List<File> sorted = contents.keys.toList()..sort((a, b) => a.path.compareTo(b.path));
+    for (final file in sorted) {
+      final int count = contents[file]!.where(ownerPattern.hasMatch).length;
+      if (count > 0) {
+        final String rel = file.path.substring(root.path.length + 1);
+        stdout.writeln('  $rel ($count lines)');
+      }
+    }
+    stdout.writeln();
+  }
   if (!groups.containsKey('framework')) {
     stdout.writeln(
       'Note: the framework does not reference this channel. If shell/common '
       'handles it, the engine intercepts it and only dart:ui needs a new API.',
     );
   }
+}
+
+/// The identifier of the class or C prefix defined by [file], if the file
+/// looks like a wrapper dedicated to one channel (for example
+/// `LifecycleChannel.java`, `fl_settings_channel.cc`, `settings_plugin.cc`).
+String? _owner(File file) {
+  final String base = file.uri.pathSegments.last.split('.').first;
+  if (RegExp(r'engine|jni|test', caseSensitive: false).hasMatch(base) ||
+      !RegExp(r'(channel|plugin|handler|monitor|manager)$', caseSensitive: false).hasMatch(base)) {
+    return null;
+  }
+  if (!base.contains('_')) {
+    return base;
+  }
+  // `fl_settings_channel` -> users call `fl_settings_channel_new` or use
+  // `FlSettingsChannel`; `settings_plugin` -> `SettingsPlugin`.
+  final String pascal = base
+      .split('_')
+      .map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1))
+      .join();
+  return base.startsWith('fl_') ? '${base}_|$pascal\\b' : '$pascal\\b';
 }
 
 const List<String> _layerOrder = <String>[

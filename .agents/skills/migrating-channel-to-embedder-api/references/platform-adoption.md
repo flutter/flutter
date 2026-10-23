@@ -48,7 +48,10 @@ its test and remove them from `BUILD.gn`.
 function that recovers `FlEngine*` from `user_data` and emits a signal or calls the
 owner.
 
-**Tests.** Mock the proc in the `*_test.cc` file:
+**Tests.** `testing/mock_engine.cc` has its own proc table with only the procs
+Linux tests need. If a test reaches the new call without overriding it, add a stub
+there (`table->{Api} = &FlutterEngine{Api};`), or the test calls a null pointer.
+Otherwise mock the proc in the `*_test.cc` file:
 
 ```cpp
 fl_engine_get_embedder_api(engine)->{Api} = MOCK_ENGINE_PROC(
@@ -66,7 +69,11 @@ Uses the embedder API through `embedder_api_` and `engine_` in
 **Inbound.** Add `void {Api}(<platform type> value);` to `flutter_windows_engine.h`
 and implement it with `embedder_api_.{Api}(engine_, converted_value);`. Point the old
 sender (for example `windows_lifecycle_manager.cc` or `settings_plugin.cc`) at it.
-Remove any "is the framework listening yet" gating that only existed for the channel.
+Remove any "is the framework listening yet" gating that only existed for the channel
+(the engine now caches state until the isolate starts). Grep tests and
+`windows/fixtures/main.dart` for the gating method: mocks that override it, tests
+that enable it, and tests that only test it need updating or removing. Note the
+behaviour change in the PR.
 
 **Outbound.** In `FlutterWindowsEngine::Run`, set `args.{name_snake}_callback` next
 to `args.view_focus_change_request_callback`, casting `user_data` to
@@ -118,7 +125,10 @@ Does **not** use the embedder C API. It calls `flutter::PlatformView` directly.
 ```
 
 Replace `[self.<channel>Channel sendMessage:...]` calls (in `FlutterEngine.mm`,
-`FlutterViewController.mm` and others) with it. Keep the public channel property on
+`FlutterViewController.mm` and others; see the "Users of wrappers" inventory
+section) with it. Internal helpers that take the old string payload (for example
+`goToApplicationLifecycle:(NSString*)`, used by `performSelector` and many OCMock
+tests) can keep their signature and convert to the new type inside. Keep the public channel property on
 `FlutterEngine` (public API), but stop sending on it.
 
 **Outbound.** Override `{Api}` in `$ENGINE/shell/platform/darwin/ios/platform_view_ios.h`
