@@ -16,6 +16,8 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../custom_devices/custom_device.dart';
@@ -267,7 +269,17 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(CustomDeviceConfig config) async {
-    final device = CustomDevice(config: config, toolContext: toolContext);
+    final device = CustomDevice(
+      config: config,
+      analytics: analytics,
+      buildSystem: FlutterBuildSystem(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: toolContext.platform,
+      ),
+      buildTargets: const NoOpBuildTargets(),
+      toolContext: toolContext,
+    );
 
     var result = true;
 
