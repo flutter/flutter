@@ -191,7 +191,10 @@ class _TextEditingValueAccumulator {
   bool debugFinalized = false;
 
   TextEditingValue finalize() {
-    debugFinalized = true;
+    assert(() {
+      debugFinalized = true;
+      return true;
+    }());
     final _MutableTextRange? selection = this.selection;
     final _MutableTextRange? composingRegion = this.composingRegion;
     return TextEditingValue(

@@ -1674,8 +1674,8 @@ class SemanticsData with Diagnosticable {
   }
 }
 
-class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
-  _SemanticsDiagnosticableNode({
+class _DebugSemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
+  _DebugSemanticsDiagnosticableNode({
     super.name,
     required super.value,
     required super.style,
@@ -4677,7 +4677,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
   String toStringDeep({
     String prefixLineOne = '',
     String? prefixOtherLines,
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
     int wrapWidth = 65,
   }) {
@@ -4693,9 +4695,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   DiagnosticsNode toDiagnosticsNode({
     String? name,
     DiagnosticsTreeStyle? style = DiagnosticsTreeStyle.sparse,
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
   }) {
-    return _SemanticsDiagnosticableNode(
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
+    return _DebugSemanticsDiagnosticableNode(
       name: name,
       value: this,
       style: style,
@@ -4732,21 +4736,28 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Used by debugging tools and VM service extensions such as
   /// `ext.flutter.accessibility.getSemanticsTree`.
   Map<String, Object?> toJson() {
-    final SemanticsData data = getSemanticsData();
-    final List<SemanticsNode> traversalChildren = debugListChildrenInOrder(
-      DebugSemanticsDumpOrder.traversalOrder,
-    );
-    final List<SemanticsNode> hitTestChildren = debugListChildrenInOrder(
-      DebugSemanticsDumpOrder.inverseHitTest,
-    );
-    return <String, Object?>{
-      'id': id,
-      ...data.toJson(),
-      'childrenInTraversalOrder': <int>[
-        for (final SemanticsNode child in traversalChildren) child.id,
-      ],
-      'childrenInHitTestOrder': <int>[for (final SemanticsNode child in hitTestChildren) child.id],
-    };
+    var result = <String, Object?>{};
+    assert(() {
+      final SemanticsData data = getSemanticsData();
+      final List<SemanticsNode> traversalChildren = debugListChildrenInOrder(
+        DebugSemanticsDumpOrder.traversalOrder,
+      );
+      final List<SemanticsNode> hitTestChildren = debugListChildrenInOrder(
+        DebugSemanticsDumpOrder.inverseHitTest,
+      );
+      result = <String, Object?>{
+        'id': id,
+        ...data.toJson(),
+        'childrenInTraversalOrder': <int>[
+          for (final SemanticsNode child in traversalChildren) child.id,
+        ],
+        'childrenInHitTestOrder': <int>[
+          for (final SemanticsNode child in hitTestChildren) child.id,
+        ],
+      };
+      return true;
+    }());
+    return result;
   }
 }
 

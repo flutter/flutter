@@ -1633,7 +1633,10 @@ abstract class DarwinPlatformViewController {
   /// The `id` of the platform view cannot be reused after the view is
   /// disposed.
   Future<void> dispose() async {
-    _debugDisposed = true;
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     PlatformViewsService._instance._focusCallbacks.remove(id);
   }

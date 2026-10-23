@@ -394,6 +394,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     return '{${value.keys.map<String>((ShortcutActivator keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
   }
 }
@@ -1129,6 +1130,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: widget.debugLabel != null ? '$Shortcuts: ${widget.debugLabel}' : '$Shortcuts',
       canRequestFocus: false,
       onKeyEvent: _handleOnKeyEvent,

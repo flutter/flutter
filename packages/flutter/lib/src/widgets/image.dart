@@ -1420,6 +1420,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         return widget.errorBuilder!(context, _lastException!, _lastStack);
       }
       if (kDebugMode) {
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         return _debugBuildErrorWidget(context, _lastException!);
       }
     }
@@ -1432,6 +1433,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       // how they can be implemented, https://github.com/flutter/flutter/issues/159565.
       result = RawWebImage(
         image: webImage,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         debugImageLabel: _imageInfo?.debugLabel,
         width: widget.width,
         height: widget.height,
@@ -1446,6 +1448,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         // anymore, such as when it is unmounted or when the image stream pushes
         // a new image.
         image: _imageInfo?.image,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         debugImageLabel: _imageInfo?.debugLabel,
         width: widget.width,
         height: widget.height,

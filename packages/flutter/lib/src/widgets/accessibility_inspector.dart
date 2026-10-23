@@ -51,22 +51,25 @@ class AccessibilityInspector {
     void Function({required String name, required ServiceExtensionCallback callback})
     registerServiceExtension,
   ) {
-    registerServiceExtension(
-      name: AccessibilityServiceExtensions.getSemanticsTree.extensionName,
-      callback: _getSemanticsTree,
-    );
-    registerServiceExtension(
-      name: AccessibilityServiceExtensions.getIssuesAndSemanticsTree.extensionName,
-      callback: _getIssuesAndSemanticsTree,
-    );
-    registerServiceExtension(
-      name: AccessibilityServiceExtensions.enableSemantics.extensionName,
-      callback: _enableSemantics,
-    );
-    registerServiceExtension(
-      name: AccessibilityServiceExtensions.disposeSemantics.extensionName,
-      callback: _disposeSemantics,
-    );
+    assert(() {
+      registerServiceExtension(
+        name: AccessibilityServiceExtensions.getSemanticsTree.extensionName,
+        callback: _debugGetSemanticsTree,
+      );
+      registerServiceExtension(
+        name: AccessibilityServiceExtensions.getIssuesAndSemanticsTree.extensionName,
+        callback: _debugGetIssuesAndSemanticsTree,
+      );
+      registerServiceExtension(
+        name: AccessibilityServiceExtensions.enableSemantics.extensionName,
+        callback: _enableSemantics,
+      );
+      registerServiceExtension(
+        name: AccessibilityServiceExtensions.disposeSemantics.extensionName,
+        callback: _disposeSemantics,
+      );
+      return true;
+    }());
   }
 
   /// Reset the helper state (primarily used in tests).
@@ -114,7 +117,7 @@ class AccessibilityInspector {
     return (semanticsOwner, root);
   }
 
-  Map<String, Object?> _buildSemanticsNodes(SemanticsNode root) {
+  Map<String, Object?> _debugBuildSemanticsNodes(SemanticsNode root) {
     final nodes = <String, Object?>{};
     final visited = <int>{};
     final queue = <SemanticsNode>[root];
@@ -145,7 +148,7 @@ class AccessibilityInspector {
   }
 
   /// Returns the semantics tree hierarchy of the application.
-  Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
+  Future<Map<String, Object?>> _debugGetSemanticsTree(Map<String, String> parameters) async {
     final errorMap = <String, Object?>{};
     final (SemanticsOwner, SemanticsNode)? result = _getSemanticsOwnerAndRoot(errorMap);
     if (result == null) {
@@ -153,12 +156,14 @@ class AccessibilityInspector {
     }
     final (SemanticsOwner _, SemanticsNode root) = result;
 
-    return <String, Object?>{AccessibilityInspectorKeys.data: _buildSemanticsNodes(root)};
+    return <String, Object?>{AccessibilityInspectorKeys.data: _debugBuildSemanticsNodes(root)};
   }
 
   /// Evaluates accessibility rules and returns detected issues along with the
   /// semantics tree hierarchy from the same frame.
-  Future<Map<String, Object?>> _getIssuesAndSemanticsTree(Map<String, String> parameters) async {
+  Future<Map<String, Object?>> _debugGetIssuesAndSemanticsTree(
+    Map<String, String> parameters,
+  ) async {
     final errorMap = <String, Object?>{};
     final (SemanticsOwner, SemanticsNode)? ownerAndRoot = _getSemanticsOwnerAndRoot(errorMap);
     if (ownerAndRoot == null) {
@@ -198,7 +203,7 @@ class AccessibilityInspector {
     }
 
     return <String, Object?>{
-      AccessibilityInspectorKeys.data: _buildSemanticsNodes(root),
+      AccessibilityInspectorKeys.data: _debugBuildSemanticsNodes(root),
       AccessibilityInspectorKeys.issues: issues,
     };
   }

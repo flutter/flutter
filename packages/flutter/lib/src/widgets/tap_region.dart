@@ -22,7 +22,7 @@ import 'routes.dart';
 // Enable if you want verbose logging about tap region changes.
 const bool _kDebugTapRegion = false;
 
-bool _tapRegionDebug(String message, [Iterable<String>? details]) {
+bool _debugTapRegion(String message, [Iterable<String>? details]) {
   if (_kDebugTapRegion) {
     debugPrint('TAP REGION: $message');
     if (details != null && details.isNotEmpty) {
@@ -265,18 +265,18 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
 
     final syntheticEvent = PointerDownEvent(viewId: event.viewId, position: globalCenter);
     for (final region in outside) {
-      assert(_tapRegionDebug('Calling onTapOutside for $region (from semantics action)'));
+      assert(_debugTapRegion('Calling onTapOutside for $region (from semantics action)'));
       region.onTapOutside?.call(syntheticEvent);
     }
     for (final region in inside) {
-      assert(_tapRegionDebug('Calling onTapInside for $region (from semantics action)'));
+      assert(_debugTapRegion('Calling onTapInside for $region (from semantics action)'));
       region.onTapInside?.call(syntheticEvent);
     }
   }
 
   @override
   void registerTapRegion(RenderTapRegion region) {
-    assert(_tapRegionDebug('Region $region registered.'));
+    assert(_debugTapRegion('Region $region registered.'));
     assert(!_registeredRegions.contains(region));
     _registeredRegions.add(region);
     if (region.groupId != null) {
@@ -287,7 +287,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
 
   @override
   void unregisterTapRegion(RenderTapRegion region) {
-    assert(_tapRegionDebug('Region $region unregistered.'));
+    assert(_debugTapRegion('Region $region unregistered.'));
     assert(_registeredRegions.contains(region));
     _registeredRegions.remove(region);
     if (region.groupId != null) {
@@ -325,7 +325,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       _registeredRegions,
       result.path,
     ).cast<RenderTapRegion>();
-    assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
+    assert(_debugTapRegion('Tap event hit ${hitRegions.length} descendants.'));
 
     final insideRegions = <RenderTapRegion>{
       for (final RenderTapRegion region in hitRegions)
@@ -356,14 +356,14 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
     }
 
     if (_registeredRegions.isEmpty) {
-      assert(_tapRegionDebug('Ignored tap event because no regions are registered.'));
+      assert(_debugTapRegion('Ignored tap event because no regions are registered.'));
       return;
     }
 
     final BoxHitTestResult? result = _cachedResults[entry];
 
     if (result == null) {
-      assert(_tapRegionDebug('Ignored tap event because no surface descendants were hit.'));
+      assert(_debugTapRegion('Ignored tap event because no surface descendants were hit.'));
       return;
     }
 
@@ -373,26 +373,26 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
     var consumeOutsideTaps = false;
     for (final region in outside) {
       if (event is PointerDownEvent) {
-        assert(_tapRegionDebug('Calling onTapOutside for $region'));
+        assert(_debugTapRegion('Calling onTapOutside for $region'));
         region.onTapOutside?.call(event);
       } else if (event is PointerUpEvent) {
-        assert(_tapRegionDebug('Calling onTapUpOutside for $region'));
+        assert(_debugTapRegion('Calling onTapUpOutside for $region'));
         region.onTapUpOutside?.call(event);
       }
 
       if (region.consumeOutsideTaps) {
         assert(
-          _tapRegionDebug('Stopping tap propagation for $region (and all of ${region.groupId})'),
+          _debugTapRegion('Stopping tap propagation for $region (and all of ${region.groupId})'),
         );
         consumeOutsideTaps = true;
       }
     }
     for (final region in inside) {
       if (event is PointerDownEvent) {
-        assert(_tapRegionDebug('Calling onTapInside for $region'));
+        assert(_debugTapRegion('Calling onTapInside for $region'));
         region.onTapInside?.call(event);
       } else if (event is PointerUpEvent) {
-        assert(_tapRegionDebug('Calling onTapUpInside for $region'));
+        assert(_debugTapRegion('Calling onTapUpInside for $region'));
         region.onTapUpInside?.call(event);
       }
     }
@@ -479,6 +479,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     this.groupId,
     this.consumeOutsideTaps = false,
     String? debugLabel,
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   }) : debugLabel = kReleaseMode ? null : debugLabel;
 
   /// Whether or not this [TapRegion] is enabled as part of the composite region.
@@ -585,6 +586,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
       onTapUpOutside: isCurrent ? onTapUpOutside : null,
       onTapUpInside: onTapUpInside,
       groupId: groupId,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: debugLabel,
     );
   }
@@ -604,6 +606,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
       ..onTapUpOutside = isCurrent ? onTapUpOutside : null
       ..onTapUpInside = onTapUpInside;
     if (!kReleaseMode) {
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       renderObject.debugLabel = debugLabel;
     }
   }
@@ -664,6 +667,7 @@ class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
     super.behavior = HitTestBehavior.deferToChild,
     this._groupId,
     String? debugLabel,
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   }) : debugLabel = kReleaseMode ? null : debugLabel;
 
   bool _isRegistered = false;

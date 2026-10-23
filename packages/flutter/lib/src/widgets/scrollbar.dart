@@ -493,7 +493,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return scrollbarOrientation!;
   }
 
-  void _debugAssertIsValidOrientation(ScrollbarOrientation orientation) {
+  bool _debugAssertIsValidOrientation(ScrollbarOrientation orientation) {
     assert(
       () {
         bool isVerticalOrientation(ScrollbarOrientation orientation) =>
@@ -504,6 +504,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       'The given ScrollbarOrientation: $orientation is incompatible with the '
       'current AxisDirection: $_lastAxisDirection.',
     );
+    return true;
   }
 
   // - Updating
@@ -569,7 +570,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double x, y;
     final Size thumbSize, trackSize;
     final Offset trackOffset, borderStart, borderEnd;
-    _debugAssertIsValidOrientation(_resolvedOrientation);
+    assert(_debugAssertIsValidOrientation(_resolvedOrientation));
     switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, _thumbExtent);

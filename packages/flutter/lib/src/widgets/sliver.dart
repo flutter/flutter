@@ -1033,8 +1033,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
         }
       }
 
-      renderObject.debugChildIntegrityEnabled =
-          false; // Moving children will temporary violate the integrity.
+      assert(() {
+        renderObject.debugChildIntegrityEnabled =
+            false; // Moving children will temporary violate the integrity.
+        return true;
+      }());
       newChildren.keys.forEach(processElement);
       // An element rebuild only updates existing children. The underflow check
       // is here to make sure we look ahead one more child if we were at the end
@@ -1053,7 +1056,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
       }
     } finally {
       _currentlyUpdatingChildIndex = null;
-      renderObject.debugChildIntegrityEnabled = true;
+      assert(() {
+        renderObject.debugChildIntegrityEnabled = true;
+        return true;
+      }());
     }
   }
 

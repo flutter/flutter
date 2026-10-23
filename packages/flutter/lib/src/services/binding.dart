@@ -261,8 +261,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (!kReleaseMode) {
       registerBoolServiceExtension(
         name: ServicesServiceExtensions.profilePlatformChannels.name,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         getter: () async => debugProfilePlatformChannels,
         setter: (bool value) async {
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           debugProfilePlatformChannels = value;
         },
       );

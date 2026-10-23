@@ -358,6 +358,7 @@ class StrutStyle with Diagnosticable {
          fontWeight: fontWeight ?? textStyle.fontWeight,
          fontStyle: fontStyle ?? textStyle.fontStyle,
          forceStrutHeight: forceStrutHeight,
+         // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
          debugLabel: debugLabel ?? textStyle.debugLabel,
          package: package, // the textStyle._package data is embedded in the
          // fontFamily names, so we no longer need it.
@@ -559,6 +560,7 @@ class StrutStyle with Diagnosticable {
       fontWeight: fontWeight ?? other.fontWeight,
       fontStyle: fontStyle ?? other.fontStyle,
       forceStrutHeight: forceStrutHeight, // StrutStyle-unique property.
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: debugLabel ?? other.debugLabel,
       leadingDistribution: effectiveHeight != null
           ? (leadingDistribution ?? other.leadingDistribution)
@@ -588,6 +590,7 @@ class StrutStyle with Diagnosticable {
       fontWeight: other.fontWeight ?? fontWeight,
       fontStyle: other.fontStyle ?? fontStyle,
       forceStrutHeight: other.forceStrutHeight ?? forceStrutHeight,
+      // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       debugLabel: other.debugLabel ?? debugLabel,
       package: other._package ?? _package,
     );

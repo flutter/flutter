@@ -2019,7 +2019,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
       return cachedLocation;
     }
     // Otherwise invalidate the cache and create a new location.
-    cachedLocation?._debugMarkLocationInvalid();
+    assert(cachedLocation?._debugMarkLocationInvalid() ?? true);
     final newLocation = _OverlayEntryLocation(
       zOrderIndex,
       marker.overlayEntryWidgetState,
@@ -2077,7 +2077,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   void dispose() {
     widget.controller._attachTarget = null;
-    _locationCache?._debugMarkLocationInvalid();
+    assert(_locationCache?._debugMarkLocationInvalid() ?? true);
     _locationCache = null;
     super.dispose();
   }
@@ -2090,7 +2090,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
     setState(() {
       _zOrderIndex = zOrderIndex;
     });
-    _locationCache?._debugMarkLocationInvalid();
+    assert(_locationCache?._debugMarkLocationInvalid() ?? true);
     _locationCache = null;
   }
 
@@ -2099,7 +2099,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
     setState(() {
       _zOrderIndex = null;
     });
-    _locationCache?._debugMarkLocationInvalid();
+    assert(_locationCache?._debugMarkLocationInvalid() ?? true);
     _locationCache = null;
   }
 
@@ -2285,17 +2285,24 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   // object can't be marked as valid again.
   StackTrace? _debugMarkLocationInvalidStackTrace;
   @mustCallSuper
-  void _debugMarkLocationInvalid() {
+  bool _debugMarkLocationInvalid() {
     assert(_debugIsLocationValid());
     assert(() {
       _debugMarkLocationInvalidStackTrace = StackTrace.current;
       return true;
     }());
+    return true;
   }
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, '_OverlayEntryLocation')}[${shortHash(this)}] ${_debugMarkLocationInvalidStackTrace != null ? "(INVALID)" : ""}';
+  String toString() {
+    var isInvalid = false;
+    assert(() {
+      isInvalid = _debugMarkLocationInvalidStackTrace != null;
+      return true;
+    }());
+    return '${objectRuntimeType(this, '_OverlayEntryLocation')}[${shortHash(this)}] ${isInvalid ? "(INVALID)" : ""}';
+  }
 }
 
 class _RenderTheaterMarker extends InheritedWidget {

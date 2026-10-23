@@ -553,10 +553,13 @@ mixin WidgetsBinding
   void resetInternalState() {
     // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
     super.resetInternalState();
-    _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
-    _debugShowWidgetInspectorOverrideNotifierObject = null;
-    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject?.dispose();
-    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject = null;
+    assert(() {
+      _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
+      _debugShowWidgetInspectorOverrideNotifierObject = null;
+      _debugWidgetInspectorSelectionOnTapEnabledNotifierObject?.dispose();
+      _debugWidgetInspectorSelectionOnTapEnabledNotifierObject = null;
+      return true;
+    }());
   }
 
   void _debugAddStackFilters() {
@@ -687,14 +690,17 @@ mixin WidgetsBinding
 
     if (!kReleaseMode) {
       registerServiceExtension(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         name: WidgetsServiceExtensions.debugDumpApp.name,
         callback: (Map<String, String> parameters) async {
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           final String data = _debugDumpAppString();
           return <String, Object>{'data': data};
         },
       );
 
       registerServiceExtension(
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         name: WidgetsServiceExtensions.debugDumpFocusTree.name,
         callback: (Map<String, String> parameters) async {
           final String data = focusManager.toStringDeep();
@@ -743,15 +749,19 @@ mixin WidgetsBinding
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.profileWidgetBuilds.name,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         getter: () async => debugProfileBuildsEnabled,
         setter: (bool value) async {
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           debugProfileBuildsEnabled = value;
         },
       );
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.profileUserWidgetBuilds.name,
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
         getter: () async => debugProfileBuildsEnabledUserWidgets,
         setter: (bool value) async {
+          // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
           debugProfileBuildsEnabledUserWidgets = value;
         },
       );
@@ -2051,6 +2061,7 @@ class RootWidget extends Widget {
   }
 
   @override
+  // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 

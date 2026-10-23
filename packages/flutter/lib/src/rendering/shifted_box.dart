@@ -823,7 +823,9 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 ///    arbitrary transform to its constraints before sizing its child using
 ///    the new constraints, treating any overflow as error.
 class RenderConstraintsTransformBox extends RenderAligningShiftedBox
-    with DebugOverflowIndicatorMixin {
+    with
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
+        DebugOverflowIndicatorMixin {
   /// Creates a [RenderBox] that sizes itself to the child and modifies the
   /// [constraints] before passing it down to that child.
   RenderConstraintsTransformBox({

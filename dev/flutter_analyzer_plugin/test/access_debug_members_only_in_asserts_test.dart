@@ -115,6 +115,12 @@ class ProductionClass extends BaseClass {
   _DebugOnlyClass debugField3 = _DebugOnlyClass(), nonDebugField = _DebugOnlyClass();
 }
 
+class KeptToStringClass extends ProductionClass {
+  @pragma('flutter:keep-to-string')
+  @override
+  String toString() => debugGetSet.toString();
+}
+
 extension DebugOnly on ProductionClass {
   void debugOnlyExtensionMethod() { }
 }
@@ -127,6 +133,20 @@ enum RegularEnum {
   foo;
 
   void debugOnlyMethod() {}
+}
+
+void localVariablesTest() {
+  bool debugAllowAnyway = false;
+  _DebugOnlyClass? debugNullableObject;
+  assert(() {
+    debugAllowAnyway = true;
+    debugNullableObject = _DebugOnlyClass();
+    return true;
+  }());
+  if (debugAllowAnyway && debugNullableObject != null) {
+    x.run();
+  }
+  final _DebugOnlyClass debugBadInit = _DebugOnlyClass(); // ignore: unused_local_variable
 }
 ''';
 
@@ -206,9 +226,10 @@ void testConstructors() {
       lint(1295, 13, messageContains: 'DebugOnlyEnum accessed outside of an assert.'),
       lint(1350, 13, messageContains: 'DebugOnlyEnum accessed outside of an assert.'),
       lint(1424, 15, messageContains: 'debugOnlyMethod accessed outside of an assert.'),
-      lint(2364, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
       lint(2475, 15, messageContains: '_DebugOnlyClass accessed outside of an assert.'),
       lint(2540, 15, messageContains: '_DebugOnlyClass accessed outside of an assert.'),
+      lint(2683, 11, messageContains: 'debugGetSet accessed outside of an assert.'),
+      lint(3222, 15, messageContains: '_DebugOnlyClass accessed outside of an assert.'),
     ]);
   }
 

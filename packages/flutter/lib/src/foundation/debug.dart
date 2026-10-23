@@ -935,11 +935,12 @@ class DebugViewMetricsOverride with Diagnosticable {
 ///
 /// This map is always empty outside of debug mode (in profile or release mode).
 Map<int, DebugViewMetricsOverride> get debugViewMetricsOverrides =>
-    _unmodifiableViewMetricsOverrides;
+    _debugUnmodifiableViewMetricsOverrides;
 
-final Map<int, DebugViewMetricsOverride> _viewMetricsOverrides = <int, DebugViewMetricsOverride>{};
-final Map<int, DebugViewMetricsOverride> _unmodifiableViewMetricsOverrides =
-    UnmodifiableMapView<int, DebugViewMetricsOverride>(_viewMetricsOverrides);
+final Map<int, DebugViewMetricsOverride> _debugViewMetricsOverridesMap =
+    <int, DebugViewMetricsOverride>{};
+final Map<int, DebugViewMetricsOverride> _debugUnmodifiableViewMetricsOverrides =
+    UnmodifiableMapView<int, DebugViewMetricsOverride>(_debugViewMetricsOverridesMap);
 
 /// Registers [override] for the view with the given [viewId], replacing any
 /// override already registered for it.
@@ -958,15 +959,15 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
   assert(() {
     assert(viewId >= 0, 'viewId must be non-negative, got $viewId.');
     assert(override?._debugAssertIsValid() ?? true);
-    final DebugViewMetricsOverride? previous = _viewMetricsOverrides[viewId];
+    final DebugViewMetricsOverride? previous = _debugViewMetricsOverridesMap[viewId];
     final DebugViewMetricsOverride? next = override == null || override.isEmpty ? null : override;
     if (previous == next) {
       return true;
     }
     if (next == null) {
-      _viewMetricsOverrides.remove(viewId);
+      _debugViewMetricsOverridesMap.remove(viewId);
     } else {
-      _viewMetricsOverrides[viewId] = next;
+      _debugViewMetricsOverridesMap[viewId] = next;
     }
     changed = true;
     return true;
@@ -981,10 +982,10 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
 bool debugClearViewMetricsOverrides() {
   var changed = false;
   assert(() {
-    if (_viewMetricsOverrides.isEmpty) {
+    if (_debugViewMetricsOverridesMap.isEmpty) {
       return true;
     }
-    _viewMetricsOverrides.clear();
+    _debugViewMetricsOverridesMap.clear();
     changed = true;
     return true;
   }());

@@ -151,6 +151,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       return OneFrameImageStreamCompleter(
         Future<ImageInfo>.value(WebImageInfo(imageElement, debugLabel: key.url)),
         informationCollector: _imageStreamInformationCollector(key),
+        // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
       )..debugLabel = key.url;
     }
 
@@ -273,6 +274,7 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
     InformationCollector? informationCollector,
     String? debugLabel,
   }) {
+    // ignore: flutter_analyzer_plugin/access_debug_members_only_in_asserts
     this.debugLabel = debugLabel;
     task.then(
       (ImageStreamCompleter value) {
