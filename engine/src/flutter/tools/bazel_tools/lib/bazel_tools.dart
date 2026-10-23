@@ -10,4 +10,6 @@ export 'src/check_hermeticity_command.dart';
 export 'src/deps_file.dart';
 export 'src/deps_outputs.dart';
 export 'src/gen_deps_command.dart';
+export 'src/gen_pub_lock_command.dart';
 export 'src/hermeticity_check.dart';
+export 'src/pub_lock.dart';

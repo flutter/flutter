@@ -1,0 +1,89 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The framework's tests under Bazel (NEED_DECISION D14, research/15): the
+# package configurations the tests compile and run with, and the test
+# configuration every test of this directory tree is wrapped in. The tests
+# themselves are declared per directory (widgets/BUILD.bazel, ...).
+
+load("//engine/src/flutter/build/bazel/dart:flutter_assets.bzl", "flutter_test_assets")
+load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_package_config")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["flutter_test_config.dart"])
+
+# The packages a test of the framework reaches: package:flutter's
+# dependencies and dev dependencies (pubspec.yaml), followed through the
+# hosted packages' own -- 49 of the lock's 174 -- and test_core, whose direct
+# runner the generated bootstrap runs the test through (flutter_test.bzl).
+_ROOTS = [
+    "flutter",
+    "test_core",
+]
+
+_DEV_ROOTS = ["flutter"]
+
+# The workspace's own packages among them, as the tree's files.
+_WORKSPACE_PACKAGES = {
+    "//packages/flutter:sources": "flutter",
+    "//packages/flutter_driver:sources": "flutter_driver",
+    "//packages/flutter_goldens:sources": "flutter_goldens",
+    "//packages/flutter_localizations:sources": "flutter_localizations",
+    "//packages/flutter_test:sources": "flutter_test",
+    "//packages/fuchsia_remote_debug_protocol:sources": "fuchsia_remote_debug_protocol",
+}
+
+# sky_engine is dart:ui's package: its libraries are the engine's platform
+# kernel, and nothing imports package:sky_engine.
+_WITHOUT = ["sky_engine"]
+
+# For the compile: root URIs for an action's execution root.
+pub_package_config(
+    name = "package_config",
+    out = "package_config.json",
+    dev_roots = _DEV_ROOTS,
+    packages = _WORKSPACE_PACKAGES,
+    roots = _ROOTS,
+    without = _WITHOUT,
+)
+
+# For the run: root URIs for a test's runfiles tree.
+pub_package_config(
+    name = "runtime_package_config",
+    out = "runtime_package_config.json",
+    dev_roots = _DEV_ROOTS,
+    layout = "runfiles",
+    packages = _WORKSPACE_PACKAGES,
+    roots = _ROOTS,
+    without = _WITHOUT,
+)
+
+# The asset directory `flutter test` builds for this package's tests: no
+# assets or fonts of its own (pubspec.yaml has no flutter: section); the
+# framework's two shaders, which flutter_tools compiles into every bundle
+# and a MaterialApp's ink sparkle and stretch overscroll load.
+flutter_test_assets(
+    name = "test_assets",
+    shaders = {
+        "//packages/flutter:lib/src/material/shaders/ink_sparkle.frag": "shaders/ink_sparkle.frag",
+        "//packages/flutter:lib/src/widgets/shaders/stretch_effect.frag": "shaders/stretch_effect.frag",
+    },
+)
+
+# The files a test's compile may read besides its package's: the test
+# configuration's imports (_goldens_io.dart, ...) and the helpers of every
+# test directory, since tests import their neighbours' (widgets tests
+# import ../rendering/rendering_tester.dart, ../services/restoration.dart,
+# ../painting/image_test_utils.dart, ...). A directory with a BUILD file of
+# its own contributes its helpers through its own filegroup.
+filegroup(
+    name = "helpers",
+    srcs = glob(
+        ["**/*.dart"],
+        exclude = ["**/*_test.dart"],
+    ) + [
+        "//packages/flutter/test/widgets:helpers",
+    ],
+)
