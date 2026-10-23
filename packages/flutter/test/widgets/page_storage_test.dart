@@ -35,6 +35,51 @@ void main() {
     expect(PageStorage.of(builderElement).readState(builderElement), equals(storedValue));
   });
 
+  testWidgets('PageStorage read and write by namespace', (WidgetTester tester) async {
+    const Key builderKey = PageStorageKey<String>('builderKey');
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          key: builderKey,
+          builder: (BuildContext context, StateSetter setter) {
+            final PageStorageBucket bucket = PageStorage.of(context);
+            bucket.writeState(context, 'default');
+            bucket.writeState(context, 'one', namespace: 1);
+            bucket.writeState(context, 'two', namespace: 2);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final Element builderElement = tester.element(find.byKey(builderKey));
+    final PageStorageBucket bucket = PageStorage.of(builderElement);
+    expect(bucket.readState(builderElement), 'default');
+    expect(bucket.readState(builderElement, namespace: 1), 'one');
+    expect(bucket.readState(builderElement, namespace: 2), 'two');
+    expect(bucket.readState(builderElement, namespace: 3), isNull);
+  });
+
+  testWidgets('PageStorage does not save by namespace without a PageStorageKey', (
+    WidgetTester tester,
+  ) async {
+    const builderKey = Key('builderKey');
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          key: builderKey,
+          builder: (BuildContext context, StateSetter setter) {
+            PageStorage.of(context).writeState(context, 'one', namespace: 1);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final Element builderElement = tester.element(find.byKey(builderKey));
+    expect(PageStorage.of(builderElement).readState(builderElement, namespace: 1), isNull);
+  });
+
   testWidgets('PageStorage read and write by identifier', (WidgetTester tester) async {
     late StateSetter setState;
     var storedValue = 0;
@@ -82,39 +127,5 @@ void main() {
       PageStorage.of(builderElement).readState(builderElement, identifier: 123),
       equals(storedValue),
     );
-  });
-
-  testWidgets('PageStorage.computeStorageKeys returns the keys up to the closest PageStorage', (
-    WidgetTester tester,
-  ) async {
-    late BuildContext context;
-    await tester.pumpWidget(
-      KeyedSubtree(
-        key: const PageStorageKey<String>('outside'),
-        child: PageStorage(
-          key: const PageStorageKey<String>('storage'),
-          bucket: PageStorageBucket(),
-          child: KeyedSubtree(
-            key: const PageStorageKey<String>('outer'),
-            child: KeyedSubtree(
-              key: const ValueKey<String>('not a PageStorageKey'),
-              child: Builder(
-                key: const PageStorageKey<String>('inner'),
-                builder: (BuildContext builderContext) {
-                  context = builderContext;
-                  return const SizedBox();
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(PageStorage.computeStorageKeys(context), const <PageStorageKey<String>>[
-      PageStorageKey<String>('inner'),
-      PageStorageKey<String>('outer'),
-      PageStorageKey<String>('storage'),
-    ]);
   });
 }

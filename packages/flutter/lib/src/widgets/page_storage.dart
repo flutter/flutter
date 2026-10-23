@@ -4,7 +4,6 @@
 
 /// @docImport 'package:flutter/material.dart';
 ///
-/// @docImport 'expansible.dart';
 /// @docImport 'routes.dart';
 /// @docImport 'scroll_controller.dart';
 /// @docImport 'scroll_position.dart';
@@ -40,9 +39,11 @@ class PageStorageKey<T> extends ValueKey<T> {
 
 @immutable
 class _StorageEntryIdentifier {
-  const _StorageEntryIdentifier(this.keys);
+  const _StorageEntryIdentifier(this.keys, this.namespace);
 
   final List<PageStorageKey<dynamic>> keys;
+
+  final Object? namespace;
 
   bool get isNotEmpty => keys.isNotEmpty;
 
@@ -52,15 +53,16 @@ class _StorageEntryIdentifier {
       return false;
     }
     return other is _StorageEntryIdentifier &&
+        other.namespace == namespace &&
         listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
 
   @override
-  int get hashCode => Object.hashAll(keys);
+  int get hashCode => Object.hash(namespace, Object.hashAll(keys));
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier(${keys.join(":")})';
+    return 'StorageEntryIdentifier(${keys.join(":")}, namespace: $namespace)';
   }
 }
 
@@ -69,8 +71,27 @@ class _StorageEntryIdentifier {
 /// Useful for storing per-page state that persists across navigations from one
 /// page to another.
 class PageStorageBucket {
-  _StorageEntryIdentifier _computeIdentifier(BuildContext context) {
-    return _StorageEntryIdentifier(PageStorage.computeStorageKeys(context));
+  static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
+    final Widget widget = context.widget;
+    final Key? key = widget.key;
+    if (key is PageStorageKey) {
+      keys.add(key);
+    }
+    return widget is! PageStorage;
+  }
+
+  List<PageStorageKey<dynamic>> _allKeys(BuildContext context) {
+    final keys = <PageStorageKey<dynamic>>[];
+    if (_maybeAddKey(context, keys)) {
+      context.visitAncestorElements((Element element) {
+        return _maybeAddKey(element, keys);
+      });
+    }
+    return keys;
+  }
+
+  _StorageEntryIdentifier _computeIdentifier(BuildContext context, Object? namespace) {
+    return _StorageEntryIdentifier(_allKeys(context), namespace);
   }
 
   Map<Object, dynamic>? _storage;
@@ -83,12 +104,16 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, {Object? identifier}) {
+  ///
+  /// The `namespace` keeps the data apart from data saved by other widgets
+  /// under the same [PageStorageKey]s with a different namespace. It is only
+  /// used when no identifier is provided.
+  void writeState(BuildContext context, dynamic data, {Object? identifier, Object? namespace}) {
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
       _storage![identifier] = data;
     } else {
-      final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
+      final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context, namespace);
       if (contextIdentifier.isNotEmpty) {
         _storage![contextIdentifier] = data;
       }
@@ -103,14 +128,17 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, {Object? identifier}) {
+  ///
+  /// The `namespace` must match the one used to write the data. It is only
+  /// used when no identifier is provided.
+  dynamic readState(BuildContext context, {Object? identifier, Object? namespace}) {
     if (_storage == null) {
       return null;
     }
     if (identifier != null) {
       return _storage![identifier];
     }
-    final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
+    final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context, namespace);
     return contextIdentifier.isNotEmpty ? _storage![contextIdentifier] : null;
   }
 }
@@ -219,32 +247,6 @@ class PageStorage extends StatelessWidget {
       return true;
     }());
     return bucket!;
-  }
-
-  /// The [PageStorageKey]s of the widget at the given context and its
-  /// ancestors, up to and including the closest [PageStorage] widget.
-  ///
-  /// [PageStorageBucket.readState] and [PageStorageBucket.writeState] use these
-  /// keys to find the state for a context when no `identifier` is given. A
-  /// widget that saves its state under an identifier of its own, such as
-  /// [Expansible], can build that identifier from these keys.
-  ///
-  /// This method can be expensive (it walks the element tree).
-  static List<PageStorageKey<dynamic>> computeStorageKeys(BuildContext context) {
-    final keys = <PageStorageKey<dynamic>>[];
-    bool addKey(BuildContext current) {
-      final Widget widget = current.widget;
-      final Key? key = widget.key;
-      if (key is PageStorageKey) {
-        keys.add(key);
-      }
-      return widget is! PageStorage;
-    }
-
-    if (addKey(context)) {
-      context.visitAncestorElements(addKey);
-    }
-    return keys;
   }
 
   @override
