@@ -15,3 +15,68 @@ exports_files([
     ".gclient",
     "DEPS",
 ])
+
+# The repository's Dart and framework tests that Bazel compiles and runs
+# (engine/src/flutter/build/bazel/dart/flutter_test.bzl, dart_test.bzl; the
+# README in build/bazel), gathered as dev/bots' framework_tests and
+# flutter_tools_tests shards run them: every tree that runs on a Linux host
+# without a device, a browser, the network or the built tool.
+#
+#   bazel test //:framework_tests //:tool_tests //:dart_tests
+#   bazel test //:framework_tests_impeller
+test_suite(
+    name = "framework_tests",
+    tests = [
+        "//dev/benchmarks/test_apps/stocks/test:tests",
+        "//dev/integration_tests/ui/test:tests",
+        "//dev/manual_tests/test:tests",
+        "//dev/tools/vitool/test:tests",
+        "//dev/tracing_tests/test:tests",
+        "//examples/hello_world/test:tests",
+        "//examples/layers/test:tests",
+        "//examples/platform_channel/test:tests",
+        "//examples/splash/test:tests",
+        "//examples/texture/test:tests",
+        "//packages/flutter/examples/api/test:tests",
+        "//packages/flutter/test:all",
+        "//packages/flutter/test/widgets:widgets_without_creation_locations",
+        "//packages/flutter/test_profile:tests",
+        "//packages/flutter/test_release:tests",
+        "//packages/flutter_driver/test:tests",
+        "//packages/flutter_goldens/test:tests",
+        "//packages/flutter_localizations/test:tests",
+        "//packages/flutter_test/test:tests",
+        "//packages/integration_test/test:tests",
+    ],
+)
+
+# packages/flutter's tests once more rendering with Impeller
+# (`flutter test --enable-impeller`).
+test_suite(
+    name = "framework_tests_impeller",
+    tests = ["//packages/flutter/test:all_impeller"],
+)
+
+# flutter_tools' unit tests and hermetic command tests.
+test_suite(
+    name = "tool_tests",
+    tests = [
+        "//packages/flutter_tools:commands_shard_hermetic",
+        "//packages/flutter_tools:general_shard",
+    ],
+)
+
+# The pure-Dart packages' tests (package:test's runner on the VM).
+test_suite(
+    name = "dart_tests",
+    tests = [
+        "//dev/bots:tests",
+        "//dev/devicelab:tests",
+        "//dev/flutter_analyzer_plugin:tests",
+        "//dev/packages_autoroller:tests",
+        "//dev/snippets:tests",
+        "//dev/tools/gen_defaults:tests",
+        "//dev/tools/gen_keycodes:tests",
+        "//packages/fuchsia_remote_debug_protocol:tests",
+    ],
+)
