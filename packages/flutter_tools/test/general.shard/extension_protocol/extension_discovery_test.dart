@@ -273,6 +273,57 @@ void main() {
       expect(messages, isEmpty);
     });
 
+    test('ToolExtensionEntryPoint.runMain validates SendPort message and runs', () async {
+      await expectLater(
+        ToolExtensionEntryPoint.runMain(
+          const <String>[],
+          'not-a-send-port',
+          _dummyExtensionEntryPoint,
+        ),
+        throwsArgumentError,
+      );
+
+      SendPort? receivedPort;
+      final receivePort = ReceivePort();
+      addTearDown(receivePort.close);
+
+      await ToolExtensionEntryPoint.runMain(const <String>[], receivePort.sendPort, (
+        SendPort sendPort,
+      ) {
+        receivedPort = sendPort;
+      });
+      expect(receivedPort, equals(receivePort.sendPort));
+    });
+
+    test('ExtensionConnection.spawnUri spawns extension script and completes handshake', () async {
+      final logger = BufferLogger.test();
+      final Uri? libUri = await Isolate.resolvePackageUri(
+        Uri.parse(
+          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
+        ),
+      );
+      expect(libUri, isNotNull);
+      final Uri entrypointUri = libUri!.resolve(
+        '../bin/flutter_tools_extension_linux_prototype.dart',
+      );
+      final Uri? packageConfigUri = await Isolate.packageConfig;
+      expect(packageConfigUri, isNotNull);
+
+      final ExtensionConnection connection = await ExtensionConnection.spawnUri(
+        entrypointUri,
+        logger: logger,
+        packageConfigUri: packageConfigUri!,
+        extensionName: 'flutter_tools_extension_linux_prototype',
+      );
+      addTearDown(connection.dispose);
+
+      expect(connection.extensionName, 'flutter_tools_extension_linux_prototype');
+      expect(
+        connection.capabilities.services,
+        containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
+      );
+    });
+
     test('ToolExtensionService.sendNotification throws StateError before peer attachment', () {
       final service = _DummyService('test', 'ping');
       expect(

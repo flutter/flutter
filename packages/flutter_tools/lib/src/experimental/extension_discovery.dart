@@ -7,21 +7,27 @@ import 'dart:isolate';
 
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../base/logger.dart';
 
-/// Typedef for an extension isolate entrypoint function.
+/// Typedef for an in-process extension isolate entrypoint function.
+///
+/// Used by unit tests to spawn lightweight in-process extension isolates via
+/// [ExtensionConnection.spawn] without compiling a `.dill` kernel file, and
+/// during transitional bootstrap before dynamic project discovery is wired via
+/// [ExtensionConnection.spawnUri].
 typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
     required this.capabilities,
-    required this.extensionName,
     required this._errorPort,
     required this._exitPort,
-    required Isolate this._isolate,
+    required this.extensionName,
+    required this._isolate,
     required this._logger,
     required this._peer,
     required this._receivePort,
@@ -52,6 +58,9 @@ class ExtensionConnection {
   final String extensionName;
 
   bool _isDisposed = false;
+
+  /// Whether this connection has been disposed.
+  bool get isDisposed => _isDisposed;
 
   /// Handles uncaught async errors from the extension isolate after handshake.
   ///
@@ -132,13 +141,68 @@ class ExtensionConnection {
     }
   }
 
-  /// Spawns an extension isolate from [entryPoint] and completes handshake.
+  /// Spawns an in-process extension isolate from [entryPoint] and completes the
+  /// capability handshake.
+  ///
+  /// Used by unit tests to exercise extension protocol behavior in-process
+  /// without compiling a `.dill` kernel file, and during transitional bootstrap
+  /// before dynamic project discovery is wired via [spawnUri].
+  @visibleForTesting
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
     required Logger logger,
+    String? extensionName,
+    Duration timeout = const Duration(seconds: 5),
+  }) {
+    logger.printTrace('ExtensionConnection spawning extension isolate...');
+    return _spawnAndHandshake(
+      logger: logger,
+      extensionName: extensionName,
+      timeout: timeout,
+      isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
+        return Isolate.spawn(entryPoint, sendPort, onError: onError, onExit: onExit);
+      },
+    );
+  }
+
+  /// Spawns an extension isolate dynamically from [entrypointUri] (a compiled
+  /// `.dill` Kernel URI or `.dart` script URI) using [packageConfigUri] and
+  /// completes the capability handshake.
+  static Future<ExtensionConnection> spawnUri(
+    Uri entrypointUri, {
+    required Logger logger,
+    required Uri packageConfigUri,
+    List<String> args = const <String>[],
+    String? extensionName,
+    Duration timeout = const Duration(seconds: 5),
+  }) {
+    logger.printTrace(
+      'ExtensionConnection spawning extension isolate from URI "$entrypointUri"...',
+    );
+    return _spawnAndHandshake(
+      logger: logger,
+      extensionName: extensionName,
+      timeout: timeout,
+      isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
+        return Isolate.spawnUri(
+          entrypointUri,
+          args,
+          sendPort,
+          packageConfig: packageConfigUri,
+          onError: onError,
+          onExit: onExit,
+        );
+      },
+    );
+  }
+
+  static Future<ExtensionConnection> _spawnAndHandshake({
+    required Future<Isolate> Function(SendPort sendPort, SendPort onError, SendPort onExit)
+    isolateLauncher,
+    required Logger logger,
+    String? extensionName,
     Duration timeout = const Duration(seconds: 5),
   }) async {
-    logger.printTrace('ExtensionConnection spawning extension isolate...');
     final receivePort = ReceivePort();
     final errorPort = ReceivePort();
     final exitPort = ReceivePort();
@@ -176,12 +240,7 @@ class ExtensionConnection {
     Isolate? isolate;
 
     try {
-      isolate = await Isolate.spawn(
-        entryPoint,
-        receivePort.sendPort,
-        onError: errorPort.sendPort,
-        onExit: exitPort.sendPort,
-      );
+      isolate = await isolateLauncher(receivePort.sendPort, errorPort.sendPort, exitPort.sendPort);
       logger.printTrace('ExtensionConnection isolate spawned; connecting IsolateChannel...');
       final channel = IsolateChannel<Object?>.connectReceive(receivePort);
       final peer = json_rpc.Peer.withoutJson(channel);
@@ -205,9 +264,9 @@ class ExtensionConnection {
 
       return connection = ExtensionConnection._(
         capabilities: capabilities,
-        extensionName: capabilities.extensionName ?? defaultExtensionName,
         errorPort: errorPort,
         exitPort: exitPort,
+        extensionName: extensionName ?? capabilities.extensionName ?? defaultExtensionName,
         isolate: isolate,
         logger: logger,
         peer: peer,
