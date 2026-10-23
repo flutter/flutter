@@ -1695,9 +1695,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   /// The [State] of the current [EditableText] client of the onscreen keyboard.
   ///
-  /// Setting this property to a new value causes the given [EditableTextState]
+  /// Every assignment of a non-null value causes the given [EditableTextState]
   /// to focus itself and request the keyboard to establish a
-  /// [TextInputConnection].
+  /// [TextInputConnection], even if the value is the same as the current one.
   ///
   /// Callers must pump an additional frame after setting this property to
   /// complete the focus change.
@@ -1710,10 +1710,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   EditableTextState? get focusedEditable => _focusedEditable;
   EditableTextState? _focusedEditable;
   set focusedEditable(EditableTextState? value) {
-    if (_focusedEditable != value) {
-      _focusedEditable = value;
-      value?.requestKeyboard();
-    }
+    _focusedEditable = value;
+    value?.requestKeyboard();
   }
 
   void _resetFocusedEditable() {

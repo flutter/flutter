@@ -560,6 +560,39 @@ void main() {
         await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
       },
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/90345.
+    testWidgets('reconnects after the field is disabled and enabled again', (
+      WidgetTester tester,
+    ) async {
+      var enabled = true;
+      late StateSetter setState;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return TextFormField(enabled: enabled);
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextFormField), 'one');
+      expect(find.text('one'), findsOneWidget);
+
+      setState(() => enabled = false);
+      await tester.pump();
+      await tester.enterText(find.byType(TextFormField), 'x');
+      expect(find.text('x'), findsNothing);
+
+      setState(() => enabled = true);
+      await tester.pump();
+      await tester.enterText(find.byType(TextFormField), 'two');
+      expect(find.text('two'), findsOneWidget);
+    });
   });
 
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
