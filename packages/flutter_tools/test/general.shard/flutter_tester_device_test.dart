@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -19,7 +21,9 @@ import 'package:flutter_tools/src/test/font_config_manager.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
@@ -41,35 +45,42 @@ void main() {
   FlutterTesterTestDevice createDevice({
     List<String> dartEntrypointArgs = const <String>[],
     bool enableVmService = false,
+    bool enableDds = true,
     bool enableImpeller = false,
     bool enableFlutterGpu = false,
+    bool startPaused = false,
     FlutterProject? flutterProject,
+    FontConfigManager? fontConfigManager,
+    FakeVmServiceHost? vmServiceHost,
   }) => TestFlutterTesterDevice(
     platform: platform,
     fileSystem: fileSystem,
     processManager: processManager,
     enableVmService: enableVmService,
+    enableDds: enableDds,
     dartEntrypointArgs: dartEntrypointArgs,
     enableImpeller: enableImpeller,
     enableFlutterGpu: enableFlutterGpu,
+    startPaused: startPaused,
     flutterProject: flutterProject,
+    fontConfigManager: fontConfigManager,
+    vmServiceHost: vmServiceHost,
   );
 
-  testUsingContext(
-    'Missing dir error caught for FontConfigManger.dispose',
-    () async {
-      final fontConfigManager = FontConfigManager();
+  testWithoutContext('Missing dir error caught for FontConfigManger.dispose', () async {
+    final fontConfigManager = FontConfigManager(
+      toolContext: FakeToolContext(
+        cache: Cache.test(processManager: processManager),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+      ),
+    );
 
-      final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
-      fontsDirectory.deleteSync(recursive: true);
+    final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
+    fontsDirectory.deleteSync(recursive: true);
 
-      await fontConfigManager.dispose();
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    await fontConfigManager.dispose();
+  });
 
   testUsingContext(
     'Flutter tester passes through impeller config and environment variables.',
@@ -325,6 +336,91 @@ void main() {
       },
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192470.
+  testWithoutContext(
+    'waits for the UI isolate to reach PauseStart when startPaused is true',
+    () async {
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/',
+            '--vm-service-port=1234',
+            '--start-paused',
+            '--ipv6',
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--enable-dart-profiling',
+            '--non-interactive',
+            '--use-test-fonts',
+            '--disable-asset-fonts',
+            '--packages=.dart_tool/package_config.json',
+            'example.dill',
+          ],
+          stdout: 'The Dart VM service is listening on http://localhost:1234',
+          stderr: 'failure',
+        ),
+      ]);
+      final isolate = vm_service.Isolate(
+        id: '1',
+        pauseEvent: vm_service.Event(kind: vm_service.EventKind.kNone, timestamp: 0),
+        breakpoints: <vm_service.Breakpoint>[],
+        libraries: <vm_service.LibraryRef>[],
+        livePorts: 0,
+        name: 'main',
+        number: '1',
+        pauseOnExit: false,
+        runnable: true,
+        startTime: 0,
+        isSystemIsolate: false,
+        isolateFlags: <vm_service.IsolateFlag>[],
+      );
+      final fakeFlutterView = FlutterView(id: 'a', uiIsolate: isolate);
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Debug'},
+          ),
+          FakeVmServiceRequest(
+            method: kListViewsMethod,
+            jsonResponse: <String, Object>{
+              'views': <Object>[fakeFlutterView.toJson()],
+            },
+          ),
+          FakeVmServiceRequest(
+            method: 'getIsolate',
+            jsonResponse: isolate.toJson(),
+            args: <String, Object>{'isolateId': '1'},
+          ),
+          FakeVmServiceStreamResponse(
+            streamId: 'Debug',
+            event: vm_service.Event(
+              kind: vm_service.EventKind.kPauseStart,
+              isolate: isolate,
+              timestamp: 1,
+            ),
+          ),
+        ],
+      );
+      device = createDevice(
+        enableVmService: true,
+        enableDds: false,
+        startPaused: true,
+        fontConfigManager: FakeFontConfigManager(fileSystem),
+        vmServiceHost: fakeVmServiceHost,
+      );
+
+      await device.start('example.dill');
+      final Uri? uri = await device.vmServiceUri;
+
+      expect(uri!.port, 1234);
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 }
 
 /// A Flutter Tester device.
@@ -332,18 +428,29 @@ void main() {
 /// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   TestFlutterTesterDevice({
-    required super.platform,
-    required super.fileSystem,
-    required super.processManager,
+    required Platform platform,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
     required super.enableVmService,
     required List<String> dartEntrypointArgs,
     required bool enableImpeller,
     required bool enableFlutterGpu,
+    bool enableDds = true,
+    bool startPaused = false,
     super.flutterProject,
+    FontConfigManager? fontConfigManager,
+    this.vmServiceHost,
   }) : super(
          id: 999,
+         toolContext: FakeToolContext(
+           artifacts: Artifacts.test(),
+           flutterVersion: FakeFlutterVersion(),
+           fs: fileSystem,
+           logger: BufferLogger.test(),
+           platform: platform,
+           processManager: processManager,
+         ),
          flutterTesterBinPath: '/',
-         logger: BufferLogger.test(),
          debuggingOptions: DebuggingOptions.enabled(
            const BuildInfo(
              BuildMode.debug,
@@ -351,6 +458,8 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
              treeShakeIcons: false,
              packageConfigPath: '.dart_tool/package_config.json',
            ),
+           enableDds: enableDds,
+           startPaused: startPaused,
            hostVmServicePort: 1234,
            dartEntrypointArgs: dartEntrypointArgs,
            enableImpeller: enableImpeller ? ImpellerStatus.enabled : ImpellerStatus.platformDefault,
@@ -361,9 +470,19 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
          testAssetDirectory: null,
          icudtlPath: null,
          compileExpression: null,
-         fontConfigManager: FontConfigManager(),
+         fontConfigManager:
+             fontConfigManager ??
+             FontConfigManager(
+               toolContext: FakeToolContext(
+                 cache: Cache.test(processManager: FakeProcessManager.any()),
+                 fs: fileSystem,
+                 logger: BufferLogger.test(),
+               ),
+             ),
          nativeAssetsBuilder: FakeNativeAssetsBuilder(),
        );
+
+  final FakeVmServiceHost? vmServiceHost;
 
   @override
   Future<FlutterVmService> connectToVmServiceImpl(
@@ -371,7 +490,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     CompileExpression? compileExpression,
     required Logger logger,
   }) async {
-    return FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService;
+    return (vmServiceHost ?? FakeVmServiceHost(requests: <VmServiceExpectation>[])).vmService;
   }
 
   @override
@@ -385,6 +504,15 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 class FakeHttpServer extends Fake implements HttpServer {
   @override
   int get port => 0;
+}
+
+class FakeFontConfigManager extends Fake implements FontConfigManager {
+  FakeFontConfigManager(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
+  @override
+  late final File fontConfigFile = _fileSystem.file('fonts.conf');
 }
 
 class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {

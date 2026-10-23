@@ -35,14 +35,13 @@ class WebDriverService extends DriverService {
     required this.buildSystem,
     required this.buildTargets,
     required this._dartSdkPath,
-    required this._toolContext,
+    required super.toolContext,
   });
 
   final Analytics _analytics;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
   final String _dartSdkPath;
-  final ToolContext _toolContext;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -71,28 +70,26 @@ class WebDriverService extends DriverService {
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       buildInfo: buildInfo,
       target: mainPath,
       userIdentifier: userIdentifier,
     );
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final webConfig = WebDebugConfig(
+      devServerConfig: debuggingOptions.webConfig.devServerConfig,
+      renderer: debuggingOptions.webConfig.renderer,
+      useWasm: debuggingOptions.webConfig.useWasm,
+    );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
       debuggingOptions: buildInfo.isRelease
-          ? DebuggingOptions.disabled(
-              buildInfo,
-              webDevServerConfig: debuggingOptions.webDevServerConfig,
-              webRenderer: debuggingOptions.webRenderer,
-              webUseWasm: debuggingOptions.webUseWasm,
-            )
+          ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
           : DebuggingOptions.enabled(
               buildInfo,
-              webDevServerConfig: debuggingOptions.webDevServerConfig,
               disablePortPublication: debuggingOptions.disablePortPublication,
-              webRenderer: debuggingOptions.webRenderer,
-              webUseWasm: debuggingOptions.webUseWasm,
+              webConfig: webConfig,
             ),
       platformArgs: platformArgs,
       stayResident: true,
@@ -101,7 +98,7 @@ class WebDriverService extends DriverService {
       analytics: _analytics,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
@@ -136,9 +133,9 @@ class WebDriverService extends DriverService {
       throwToolExit('Unable to connect to the app. URL not available.');
     }
 
-    if (debuggingOptions.webLaunchUrl != null) {
+    if (debuggingOptions.webConfig.launchUrl case final String launchUrl) {
       // It should throw an error if the provided url is invalid so no tryParse
-      _webUri = Uri.parse(debuggingOptions.webLaunchUrl!);
+      _webUri = Uri.parse(launchUrl);
     } else {
       _webUri = _residentRunner.uri;
     }
@@ -146,8 +143,7 @@ class WebDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, DriveTestSpecification spec) async {
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
-        _toolContext;
+    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) = toolContext;
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(spec.browserName);
     final isAndroidChrome = browser == Browser.androidChrome;
@@ -200,6 +196,21 @@ class WebDriverService extends DriverService {
       throwToolExit(
         'Unable to start a WebDriver session for web testing.\n'
         'Make sure you have the correct WebDriver server (e.g. chromedriver) running at ${spec.driverPort}.\n'
+        'For instructions on how to obtain and run a WebDriver server, see:\n'
+        'https://flutter.dev/to/integration-test-on-web\n',
+      );
+    } on async_io.WebDriverException catch (error) {
+      // The WebDriver server is reachable, but it could not create a browser
+      // session. This typically happens when the browser fails to launch, when
+      // the browser and WebDriver server versions do not match, or when the
+      // session request times out.
+      throwToolExit(
+        'Unable to start a WebDriver session for web testing.\n'
+        'The WebDriver server running at ${spec.driverPort} could not create a browser session:\n'
+        '$error\n'
+        'Make sure the WebDriver server matches --browser-name=${spec.browserName}, '
+        'the browser is installed, and its version is compatible with the WebDriver server '
+        '(e.g. chromedriver must match the installed Chrome version).\n'
         'For instructions on how to obtain and run a WebDriver server, see:\n'
         'https://flutter.dev/to/integration-test-on-web\n',
       );
