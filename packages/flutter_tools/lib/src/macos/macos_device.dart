@@ -110,13 +110,12 @@ class MacOSDevice extends DesktopDevice {
         process.stderr.transform(utf8AllowMalformed.decoder).forEach(stderrBuf.write),
       ).wait;
 
-      const allowedExitCodes = <int>{0, 130, 143, -2, -15};
-      if (!allowedExitCodes.contains(exitCode)) {
+      if (!ScreenRecording.stoppedExitCodes.contains(exitCode)) {
         throwToolExit('screencapture failed (exit $exitCode): $stderrBuf');
       }
     }
 
-    return _MacOSScreenRecording(process, runRecording());
+    return ScreenRecording(process, runRecording());
   }
 
   @override
@@ -136,21 +135,6 @@ class MacOSDevice extends DesktopDevice {
         logger.printError('Failed to foreground app; open returned ${result.exitCode}');
       }
     });
-  }
-}
-
-class _MacOSScreenRecording implements ScreenRecording {
-  _MacOSScreenRecording(this._process, this.done);
-
-  final Process _process;
-
-  @override
-  final Future<void> done;
-
-  @override
-  Future<void> stop() async {
-    ProcessSignal.sigint.kill(_process);
-    await done;
   }
 }
 

@@ -1413,7 +1413,7 @@ class IOSDevice extends Device {
         duration: duration,
         jsonOutput: jsonOutputFile,
       );
-    } on Exception catch (error) {
+    } on ProcessException catch (error) {
       try {
         tempDirectory.deleteSync(recursive: true);
       } on FileSystemException {
@@ -1430,8 +1430,7 @@ class IOSDevice extends Device {
     Future<void> runRecording() async {
       try {
         final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
-        const allowedExitCodes = <int>{0, 130, 143, -2, -15};
-        if (!allowedExitCodes.contains(exitCode)) {
+        if (!ScreenRecording.stoppedExitCodes.contains(exitCode)) {
           _handleDevicectlError(stderrBuf.toString(), 'record screen');
         }
         if (jsonOutputFile.existsSync()) {
@@ -1455,7 +1454,7 @@ class IOSDevice extends Device {
       }
     }
 
-    return _IOSScreenRecording(process, runRecording());
+    return ScreenRecording(process, runRecording());
   }
 
   Never _handleDevicectlError(String errorMessage, String operation) {
@@ -1485,21 +1484,6 @@ class IOSDevice extends Device {
     }
     _logReaders.clear();
     await _portForwarder?.dispose();
-  }
-}
-
-class _IOSScreenRecording implements ScreenRecording {
-  _IOSScreenRecording(this._process, this.done);
-
-  final Process _process;
-
-  @override
-  final Future<void> done;
-
-  @override
-  Future<void> stop() async {
-    ProcessSignal.sigint.kill(_process);
-    await done;
   }
 }
 

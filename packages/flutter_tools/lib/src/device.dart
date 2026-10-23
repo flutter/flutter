@@ -12,6 +12,7 @@ import 'application_package.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -915,12 +916,29 @@ abstract class Device {
 }
 
 /// A screen recording started by [Device.startScreenRecording].
-abstract interface class ScreenRecording {
-  /// Completes once the recording has been written to the output file.
-  Future<void> get done;
+///
+/// Platforms return `ScreenRecording(process, runRecording())`, optionally
+/// passing a custom `signalStop` (e.g. Android sends `pkill -2 screenrecord`
+/// instead of signalling the local `adb` process).
+class ScreenRecording {
+  ScreenRecording(Process process, this.done, {Future<void> Function()? signalStop})
+    : _signalStop = signalStop ?? (() async => ProcessSignal.sigint.kill(process));
 
-  /// Stops the recording. [done] completes once the output has been written.
-  Future<void> stop();
+  /// Exit codes produced when a recording is stopped normally: exited on its
+  /// own (0), stopped by SIGINT or SIGTERM as reported by a shell
+  /// (128 + signal number: 130, 143) or by `dart:io` (negative: -2, -15).
+  static const stoppedExitCodes = <int>{0, 130, 143, -2, -15};
+
+  final Future<void> Function() _signalStop;
+
+  /// Completes once the recording has been written to the output file.
+  final Future<void> done;
+
+  /// Stops the recording. Completes once [done] completes.
+  Future<void> stop() async {
+    await _signalStop();
+    await done;
+  }
 }
 
 /// Information about an application's memory usage.
