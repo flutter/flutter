@@ -1,0 +1,29 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# stocks's tests under Bazel: each *_test.dart compiled by the frontend server
+# from a prelude kernel and run on the Bazel-built flutter_tester, as
+# `flutter test` runs it (//packages/flutter_test:package_tests.bzl;
+# research/15).
+#
+#   bazel test //dev/benchmarks/test_apps/stocks/test:tests
+
+load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["**/*.dart"],
+        allow_empty = True,
+        exclude = ["**/*_test.dart"],
+    ),
+    directory = "dev/benchmarks/test_apps/stocks",
+    package = "stocks",
+    packages = {"//packages/flutter_localizations:sources": "flutter_localizations"},
+    tests = glob(["**/*_test.dart"]),
+    # flutter_driver, a dev dependency, is not imported by the tests.
+    without = ["flutter_driver"],
+)

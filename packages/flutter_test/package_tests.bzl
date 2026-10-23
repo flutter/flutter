@@ -34,8 +34,10 @@ SDK_CACHE = {
     "@material_fonts//:fonts": "artifacts/material_fonts",
 }
 
-# The libraries every package's tests reach, compiled once into the prelude.
-_FRAMEWORK_IMPORTS = [
+# The libraries every package's tests reach, compiled once into the prelude;
+# a package whose tests reach more gives `imports` (FRAMEWORK_IMPORTS + its
+# own library).
+FRAMEWORK_IMPORTS = [
     "package:flutter/cupertino.dart",
     "package:flutter/material.dart",
     "package:flutter/widgets.dart",
@@ -56,6 +58,7 @@ def flutter_package_tests(
         dev_roots = None,
         without = [],
         imports = None,
+        assets = [],
         shaders = FRAMEWORK_SHADERS,
         cache = SDK_CACHE,
         test_configs = None,
@@ -83,8 +86,13 @@ def flutter_package_tests(
         itself by default.
       without: packages of the closure left out (a dev dependency no test
         imports, with what only it reaches); sky_engine always is.
-      imports: the libraries compiled into the prelude; by default the
-        framework's and `package:<package>/<package>.dart`.
+      imports: the libraries compiled into the prelude: FRAMEWORK_IMPORTS by
+        default; a package with a library of its own adds it
+        (`FRAMEWORK_IMPORTS + ["package:<package>/<package>.dart"]`), an
+        application's tests import its programs file by file.
+      assets: the package's own asset files, as its pubspec declares them
+        (labels in the package's BUILD file; keyed by their paths under
+        the package's directory).
       shaders: the asset directory's shaders; the framework's by default.
       cache: the SDK-cache paths; the Dart SDK and the fonts by default.
       test_configs: the tree's `flutter_test_config.dart` and `pubspec.yaml`
@@ -119,14 +127,13 @@ def flutter_package_tests(
     )
     flutter_test_assets(
         name = name + "_assets",
+        assets = assets,
+        assets_root = package_label[2:],
         shaders = shaders,
     )
-    if imports == None:
-        library = "package:%s/%s.dart" % (package, package)
-        imports = _FRAMEWORK_IMPORTS + ([] if library in _FRAMEWORK_IMPORTS else [library])
     flutter_test_prelude(
         name = name + "_prelude",
-        imports = imports,
+        imports = FRAMEWORK_IMPORTS if imports == None else imports,
         package_config = ":" + name + "_package_config",
     )
     if test_configs == None:

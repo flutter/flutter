@@ -1,0 +1,16 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The platform_channel example's sources, for the tests Bazel compiles and runs on
+# flutter_tester (engine/src/flutter/build/bazel/dart/flutter_test.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob(["lib/**"]) + ["pubspec.yaml"],
+)
+
+# The tests run from the package's directory (test/BUILD.bazel).
+exports_files(["pubspec.yaml"])

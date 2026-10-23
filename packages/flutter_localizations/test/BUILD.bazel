@@ -9,7 +9,7 @@
 #
 #   bazel test //packages/flutter_localizations/test:tests
 
-load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+load("//packages/flutter_test:package_tests.bzl", "FRAMEWORK_IMPORTS", "flutter_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,6 +21,7 @@ flutter_package_tests(
     ),
     # The translation tests read the package's .arb files.
     data = ["//packages/flutter_localizations:sources"],
+    imports = FRAMEWORK_IMPORTS + ["package:flutter_localizations/flutter_localizations.dart"],
     package = "flutter_localizations",
     tests = glob(["**/*_test.dart"]),
 )

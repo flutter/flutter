@@ -9,7 +9,7 @@
 #
 #   bazel test //packages/flutter_driver/test:tests
 
-load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+load("//packages/flutter_test:package_tests.bzl", "FRAMEWORK_IMPORTS", "flutter_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -19,6 +19,7 @@ flutter_package_tests(
         ["**/*.dart"],
         exclude = ["**/*_test.dart"],
     ),
+    imports = FRAMEWORK_IMPORTS + ["package:flutter_driver/flutter_driver.dart"],
     package = "flutter_driver",
     packages = {
         "//packages/fuchsia_remote_debug_protocol:sources": "fuchsia_remote_debug_protocol",
