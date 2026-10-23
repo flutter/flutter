@@ -1232,7 +1232,7 @@ end''');
               logger: logger,
               platform: FakePlatform(operatingSystem: 'macos'),
               xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-                processManager: fakeProcessManager,
+                toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
               ),
               analytics: fakeAnalytics,
               currentAbi: Abi.macosArm64,
@@ -1290,7 +1290,9 @@ end''');
         processManager: fakeProcessManager,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
+        ),
         analytics: fakeAnalytics,
         currentAbi: Abi.macosX64,
       );
@@ -1493,7 +1495,9 @@ end''');
         processManager: fakeProcessManager,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
+        ),
         analytics: fakeAnalytics,
       );
 

@@ -138,6 +138,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
 
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
@@ -201,6 +202,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
 
         final LaunchResult launchResult = await iosDevice.startApp(
@@ -243,6 +245,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
         fileSystem
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -321,6 +324,7 @@ void main() {
           logger: logger,
           artifacts: artifacts,
           analytics: fakeExactAnalytics,
+          os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
         );
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -331,6 +335,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
         fileSystem
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -453,7 +458,8 @@ void main() {
             fileSystem: fileSystem,
             processManager: processManager,
             logger: logger,
-            artifacts: artifacts,
+            artifacts: fakeArtifacts,
+            os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -464,6 +470,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -560,7 +567,8 @@ void main() {
             fileSystem: fileSystem,
             processManager: processManager,
             logger: logger,
-            artifacts: artifacts,
+            artifacts: fakeArtifacts,
+            os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -571,6 +579,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
 
           fileSystem.directory('build/ios/iphoneos').deleteSync(recursive: true);
@@ -654,6 +663,7 @@ void main() {
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          toolContext: FakeToolContext(fs: fileSystem),
         );
 
         // The first xcrun call should fail with a
@@ -782,6 +792,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -840,6 +851,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -895,6 +907,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -946,6 +959,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1016,6 +1030,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1096,6 +1111,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1197,6 +1213,7 @@ void main() {
               flutterProject.ios,
               'flutter',
               'My Super Awesome App',
+              toolContext: FakeToolContext(fs: fileSystem),
             );
             fileSystem
                 .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1283,6 +1300,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1364,6 +1382,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1420,6 +1439,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1477,6 +1497,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
@@ -1565,6 +1586,7 @@ IOSDevice setUpIOSDevice({
   FakeXcodeDebug? xcodeDebug,
   CpuArch cpuArchitecture = CpuArch.arm64,
   FakeExactAnalytics? analytics,
+  OperatingSystemUtils? os,
 }) {
   artifacts ??= Artifacts.test();
   final cache = Cache.test(
@@ -1593,6 +1615,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
       fs: testFileSystem,
       logger: logger,
+      os: os ?? FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
       platform: macPlatform,
       processManager: processManager ?? FakeProcessManager.any(),
     ),
@@ -1887,6 +1910,11 @@ class FakeArtifacts extends Fake implements Artifacts {
     EnvironmentType? environmentType,
   }) {
     return frameworkPath;
+  }
+
+  @override
+  FileSystemEntity getHostArtifact(HostArtifact artifact) {
+    return Artifacts.test().getHostArtifact(artifact);
   }
 
   @override

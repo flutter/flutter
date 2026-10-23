@@ -965,7 +965,7 @@ dependencies {
       setUp(() {
         fs = MemoryFileSystem.test();
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         );
         flutterProjectFactory = FlutterProjectFactory(
           logger: logger,

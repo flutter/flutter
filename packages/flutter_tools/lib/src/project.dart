@@ -729,13 +729,13 @@ class FlutterProject {
       );
     }
     if (iosPlatform) {
-      await ios.ensureReadyForPlatformSpecificTooling();
+      await ios.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
     }
     if (macOSPlatform) {
-      await macos.ensureReadyForPlatformSpecificTooling();
+      await macos.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();

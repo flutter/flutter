@@ -4,9 +4,7 @@
 
 import 'dart:async';
 
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
@@ -48,10 +46,9 @@ class XcodeProjectInterpreter {
   XcodeProjectInterpreter._({
     required this._analytics,
     required this._toolContext,
-    Version? version,
+    this._version,
     this._build,
-  }) : _version = version,
-       _versionText = version?.toString();
+  }) : _versionText = _version?.toString();
 
   /// Create an [XcodeProjectInterpreter] for testing.
   ///
@@ -60,24 +57,15 @@ class XcodeProjectInterpreter {
   /// test [Analytics], and test [Terminal].
   /// Set [version] to null to simulate Xcode not being installed.
   factory XcodeProjectInterpreter.test({
-    required ProcessManager processManager,
+    required ToolContext toolContext,
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
     String? build = '13C100',
     Analytics? analytics,
-    Config? config,
   }) {
-    final Platform platform = FakePlatform(
-      operatingSystem: 'macos',
-      environment: <String, String>{},
-    );
     return XcodeProjectInterpreter._(
       analytics: analytics ?? const NoOpAnalytics(),
       build: build,
-      toolContext: _XcodeTestToolContext(
-        config: config,
-        platform: platform,
-        processManager: processManager,
-      ),
+      toolContext: toolContext,
       version: version,
     );
   }
@@ -559,45 +547,6 @@ class XcodeProjectInterpreter {
     }
     return schemes;
   }
-}
-
-class _XcodeTestToolContext implements ToolContext {
-  _XcodeTestToolContext({Config? config, required this.platform, required this.processManager})
-    : config = config ?? Config.test(),
-      fs = MemoryFileSystem.test(),
-      logger = BufferLogger.test() {
-    os = OperatingSystemUtils(
-      fileSystem: fs,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    );
-    processUtils = ProcessUtils(logger: logger, processManager: processManager);
-  }
-
-  @override
-  final Config config;
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Logger logger;
-
-  @override
-  late final OperatingSystemUtils os;
-
-  @override
-  final Platform platform;
-
-  @override
-  final ProcessManager processManager;
-
-  @override
-  late final ProcessUtils processUtils;
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Environment variables prefixed by FLUTTER_XCODE_ will be passed as build configurations to xcodebuild.

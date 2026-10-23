@@ -10,7 +10,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
@@ -210,7 +209,6 @@ abstract class FlutterCommand extends Command<void> {
   Cache get _cache => toolContext?.cache ?? globals.cache;
   FlutterVersion get _flutterVersion => toolContext?.flutterVersion ?? globals.flutterVersion;
   FileSystemUtils get _fsUtils => toolContext?.fileSystemUtils ?? globals.fsUtils;
-  Config get _config => toolContext?.config ?? globals.config;
 
   /// The currently executing command (or sub-command).
 
@@ -650,7 +648,7 @@ abstract class FlutterCommand extends Command<void> {
       final Directory directory = (customDir != null)
           ? _fs.directory(customDir)
           : _fsUtils.getUniqueDirectory(
-              _fs.directory(getBuildDirectory(_config, _fs)),
+              _fs.directory(getBuildDirectory(toolContext!.config, _fs)),
               'flutter_size',
             );
       directory.createSync(recursive: true);
