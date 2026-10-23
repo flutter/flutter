@@ -39,6 +39,12 @@ place for a build directory, named as GN names one for the mode
 reads the mode off the name -- holding `build_directory`'s files; empty for
 every other package, as the variable is set for every run.
 
+With `script`, the same tree and launcher run a script of the package on
+the VM instead of the test runner -- a CI step of the form `dart <script>
+<args>` (ci/check_build_configs.sh's check.dart over the builder files,
+shell/testing/vm_service/test.dart over flutter_tester) -- with its
+arguments, whose placeholders are checkout_script_test's.
+
 A test runs in a writable view of the runfiles tree under TEST_TMPDIR
 (checkout_view.bzl): the directories down to the package are real,
 everything beside that path a symlink into the runfiles, and the package
@@ -49,11 +55,16 @@ does in the checkout (where they are ignored by git).
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
+    "//engine/src/flutter/build/bazel:checkout_script_test.bzl",
+    "script_argument",
+)
+load(
     "//engine/src/flutter/build/bazel:checkout_view.bzl",
     "BUILD_DIRECTORY_ATTRS",
     "ENGINE_SRC",
     "build_directory_attrs",
     "build_directory_symlinks",
+    "build_directory_variant",
     "checkout_view_prologue",
 )
 
@@ -107,21 +118,35 @@ def _dart_package_test_impl(ctx):
     if len(dart) != 1:
         fail("%s: the SDK should hold one bin/dart" % ctx.label)
 
+    # The entry point: package:test's runner over the package's tests, or
+    # a script of the package (a CI step's `dart <script> <args>`:
+    # check_build_configs.sh's check.dart, the service protocol test) with
+    # its arguments, the placeholders expanded as checkout_script_test's.
+    script = ctx.file.script
+    if script == None:
+        entry = '"$tree/%s" --reporter=expanded' % runner
+    else:
+        if not script.short_path.startswith(package + "/"):
+            fail("%s: the script %s should be a file of this package" % (ctx.label, script.short_path))
+        variant = build_directory_variant(ctx)
+        entry = " ".join(['"$tree/%s"' % script.short_path] + [script_argument(arg, variant) for arg in ctx.attr.script_args])
+
     launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
     ctx.actions.write(
         output = launcher,
         content = checkout_view_prologue(package, build_directory) + """
-exec "$root/{dart}" "--packages=$tree/{package_config}" "$tree/{runner}" --reporter=expanded "$@"
+exec "$root/{dart}" "--packages=$tree/{package_config}" {entry} "$@"
 """.format(
             dart = dart[0].short_path,
             package_config = package_config.short_path,
-            runner = runner,
+            entry = entry,
         ),
         is_executable = True,
     )
 
     runfiles = ctx.runfiles(
-        files = ctx.files.srcs + ctx.files.deps + ctx.files.data + ctx.files._sdk + [package_config],
+        files = ctx.files.srcs + ctx.files.deps + ctx.files.data + ctx.files._sdk + [package_config] +
+                ([script] if script != None else []),
         symlinks = symlinks,
     )
     for target in ctx.attr.data + ctx.attr.build_directory.keys():
@@ -156,6 +181,15 @@ _dart_package_test = rule(
         ),
         "env": attr.string_dict(
             doc = "Further environment variables for the run.",
+        ),
+        "script": attr.label(
+            allow_single_file = [".dart"],
+            doc = "A script of the package to run on the VM instead of the package's tests (a CI step's " +
+                  "`dart <script> <args>`), with script_args.",
+        ),
+        "script_args": attr.string_list(
+            doc = "The script's arguments; `{variant}` stands for the build directory's name, " +
+                  "`{build_directory}` for its path in the view, `{engine_src}` for the view's engine/src.",
         ),
         "package_config": attr.label(
             default = "//engine/src/flutter:package_config",
@@ -192,7 +226,10 @@ def dart_package_test(name, srcs = None, package_trees = WORKSPACE_PACKAGE_TREES
       package_trees: the workspace packages of other repositories to stage;
         all of them by default.
       size: medium by default (the suites take up to a minute).
-      **kwargs: deps, data, build_directory, env, args and the test attributes.
+      **kwargs: deps, data, build_directory, env, args, script and
+        script_args (a script of the package run on the VM in place of the
+        package's tests: a CI step's `dart <script> <args>`), and the test
+        attributes.
     """
     if srcs == None:
         srcs = native.glob(["**"], exclude = [".dart_tool/**"])

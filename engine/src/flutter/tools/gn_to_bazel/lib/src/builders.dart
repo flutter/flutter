@@ -278,6 +278,25 @@ const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'impeller': <String>['//engine/src/flutter/impeller:impeller_unittests'],
 };
 
+/// The test steps that run a script of the checkout (not run_tests.py, not
+/// an executable of the build directory), by the step's script path as the
+/// builder file writes it, each as the Bazel test that runs the same thing:
+/// tools/gn's unit tests, the GeneratedPluginRegistrant.java ban and its
+/// test, the builder files' check, the VM service protocol test over
+/// flutter_tester. A step whose script is not here is listed in the
+/// generated file as a step the Bazel build has no test for.
+const Map<String, String> checkoutScriptTests = <String, String>{
+  'flutter/tools/gn_test.py': '//engine/src/flutter:gn_test',
+  'flutter/ci/ban_generated_plugin_registrant_java.sh':
+      '//engine/src/flutter/ci:ban_generated_plugin_registrant_java',
+  'flutter/ci/test/ban_generated_plugin_registrant_java_test.sh':
+      '//engine/src/flutter/ci:ban_generated_plugin_registrant_java_test',
+  'flutter/ci/check_build_configs.sh':
+      '//engine/src/flutter/tools/pkg/engine_build_configs:check_build_configs',
+  'flutter/shell/testing/vm_service/test.dart':
+      '//engine/src/flutter/shell/testing/vm_service:service_protocol_test',
+};
+
 /// The executables run_tests.py's `engine` type runs on Linux
 /// (run_cc_tests: the common list, the non-Windows additions, the Linux
 /// ones), by the executable's name, which is the GN target's; each is the
@@ -328,6 +347,7 @@ final class BuilderBuild {
     required this.otherPlatform,
     required this.testTypes,
     required this.binaryTests,
+    required this.scriptTests,
     required this.otherTests,
   }) : configName = bareName(name);
 
@@ -492,11 +512,19 @@ final class BuilderBuild {
     // from the build directory, and every other step by name.
     final testTypes = <String>[];
     final binaryTests = <String>[];
+    final scriptTests = <String>[];
     final otherTests = <String>[];
     final String? outPrefix = buildDirectory == null ? null : 'out/$buildDirectory/';
     for (final BuildTest test in build.tests) {
       if (outPrefix != null && test.script.startsWith(outPrefix)) {
         binaryTests.add(test.script.substring(outPrefix.length));
+        continue;
+      }
+      final String? scriptTest = checkoutScriptTests[test.script];
+      if (scriptTest != null) {
+        if (!scriptTests.contains(scriptTest)) {
+          scriptTests.add(scriptTest);
+        }
         continue;
       }
       if (!test.script.endsWith('testing/run_tests.py')) {
@@ -529,6 +557,7 @@ final class BuilderBuild {
       otherPlatform: otherPlatform,
       testTypes: testTypes,
       binaryTests: binaryTests,
+      scriptTests: scriptTests,
       otherTests: otherTests,
     );
   }
@@ -574,6 +603,10 @@ final class BuilderBuild {
   /// The test executables its steps run directly from the build directory
   /// (`out/<dir>/licenses_cpp_testrunner`), by name: each a Bazel test.
   final List<String> binaryTests;
+
+  /// The Bazel tests of its steps that run a script of the checkout
+  /// ([checkoutScriptTests]), by label.
+  final List<String> scriptTests;
 
   /// Its other test steps, by name (scripts a Bazel test does not stand for).
   final List<String> otherTests;
@@ -898,10 +931,13 @@ void _testSuiteInto(
   Map<String, (BuilderBuild, String)> written, {
   Map<String, String?> packageConditions = const <String, String?>{},
 }) {
-  if (build.testTypes.isEmpty && build.binaryTests.isEmpty && build.otherTests.isEmpty) {
+  if (build.testTypes.isEmpty &&
+      build.binaryTests.isEmpty &&
+      build.scriptTests.isEmpty &&
+      build.otherTests.isEmpty) {
     return;
   }
-  final suites = <String>[];
+  final suites = <String>[...build.scriptTests];
   final missing = <String>[];
   for (final String name in build.binaryTests) {
     final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
@@ -945,6 +981,12 @@ void _testSuiteInto(
   }
   if (missing.isNotEmpty) {
     out.writeln('# Not run, no Bazel test yet: ${missing.join(', ')}.');
+  }
+  if (build.scriptTests.isNotEmpty) {
+    out.writeln(
+      "# ${build.name}'s steps that run a script of the checkout, as Bazel tests: "
+      '${build.scriptTests.join(', ')}.',
+    );
   }
   if (build.otherTests.isNotEmpty) {
     out.writeln('# Other steps, scripts of the checkout: ${build.otherTests.join('; ')}.');
