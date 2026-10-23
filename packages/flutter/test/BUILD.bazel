@@ -8,6 +8,7 @@
 # themselves are declared per directory (widgets/BUILD.bazel, ...).
 
 load("//engine/src/flutter/build/bazel/dart:flutter_assets.bzl", "flutter_test_assets")
+load("//engine/src/flutter/build/bazel/dart:flutter_test.bzl", "flutter_test_prelude")
 load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_package_config")
 
 package(default_visibility = ["//visibility:public"])
@@ -70,6 +71,25 @@ flutter_test_assets(
         "//packages/flutter:lib/src/material/shaders/ink_sparkle.frag": "shaders/ink_sparkle.frag",
         "//packages/flutter:lib/src/widgets/shaders/stretch_effect.frag": "shaders/stretch_effect.frag",
     },
+)
+
+# The libraries the tests share, compiled once; a test's compile starts
+# from this kernel instead of compiling the framework again (13 s alone,
+# 50 s under load, against 3 s).
+flutter_test_prelude(
+    name = "prelude",
+    imports = [
+        "package:flutter/cupertino.dart",
+        "package:flutter/material.dart",
+        "package:flutter/rendering.dart",
+        "package:flutter/services.dart",
+        "package:flutter/widgets.dart",
+        "package:flutter_test/flutter_test.dart",
+        "package:test_core/src/direct_run.dart",
+    ],
+    package_config = ":package_config",
+    test_config = "flutter_test_config.dart",
+    deps = [":helpers"],
 )
 
 # The files a test's compile may read besides its package's: the test

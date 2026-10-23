@@ -38,7 +38,13 @@ flutter_tests(
             "BUILD.bazel",
         ],
     ),
+    # binding_live_test's one test (LiveTestWidgetsFlutterBinding, awaiting a
+    # real frame) hung to its timeout in two of three full runs under 24
+    # parallel compiles and passes 8 of 8 alone; rerun on failure, a minute
+    # per attempt.
+    flaky = ["binding_live_test.dart"],
     package_config = "//packages/flutter/test:package_config",
+    prelude = "//packages/flutter/test:prelude",
     runtime_package_config = "//packages/flutter/test:runtime_package_config",
     test_config = "//packages/flutter/test:flutter_test_config.dart",
     # Every test file but the web-only ones: `@TestOn('chrome')` and
