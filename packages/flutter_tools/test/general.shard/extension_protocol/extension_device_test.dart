@@ -52,8 +52,10 @@ final class _StreamingTestDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async =>
-      true;
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => true;
 
   @override
   Future<void> startLogStream({required String deviceId, String? appId}) async {

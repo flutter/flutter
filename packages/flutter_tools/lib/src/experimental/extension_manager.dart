@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
-import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../features.dart';
@@ -19,14 +18,13 @@ import 'extension_discovery.dart';
 class ExtensionManager {
   /// Creates an [ExtensionManager] targeting the active [hostPlatform].
   ExtensionManager({
+    required this._featureFlags,
     required this.hostPlatform,
     required Logger logger,
     this._entryPoints = const <ExtensionEntryPoint>[],
     ExtensionDiscovery? discovery,
-    FeatureFlags? featureFlags,
   }) : _logger = logger,
-       _discovery = discovery ?? ExtensionDiscovery(logger: logger),
-       _featureFlags = featureFlags ?? context.get<FeatureFlags>()!;
+       _discovery = discovery ?? ExtensionDiscovery(logger: logger);
 
   /// The active [HostPlatform].
   final HostPlatform hostPlatform;
@@ -36,10 +34,18 @@ class ExtensionManager {
   final FeatureFlags _featureFlags;
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
+  bool _isDisabled = false;
   Future<void>? _initFuture;
-  final List<DiagnosticsExtension> _diagnosticsExtensions = <DiagnosticsExtension>[];
-  final List<ConfigurationExtension> _configurationExtensions = <ConfigurationExtension>[];
-  final List<DeviceService> _deviceExtensions = <DeviceService>[];
+  final _diagnosticsExtensions = <DiagnosticsExtension>[];
+  final _configurationExtensions = <ConfigurationExtension>[];
+  final _deviceExtensions = <DeviceService>[];
+
+  /// Disables tool extension initialization for the current CLI invocation
+  /// (for example, when `--no-extensions` is passed).
+  void disable() {
+    assert(_initFuture == null, 'disable() cannot be called after initialization has started.');
+    _isDisabled = true;
+  }
 
   /// Ensures entrypoints are initialized; idempotent.
   Future<void> ensureInitialized() {
@@ -47,7 +53,7 @@ class ExtensionManager {
   }
 
   Future<void> _doInitialize() async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
+    if (_isDisabled || !_featureFlags.isToolExtensionsEnabled) {
       _isInitialized = true;
       return;
     }
