@@ -265,10 +265,6 @@ class TextLayout {
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
     paragraph.ideographicBaseline = lines.first.height;
-    // We only know now which line is the last and we need this information for later
-    if (lines.isNotEmpty) {
-      lines.last.lastLine = true;
-    }
   }
 
   double addLine(
@@ -277,6 +273,7 @@ class TextLayout {
     ClusterRange hardlineClusterRange,
     double top, {
     required bool isSyntheticEmptyLine,
+    required bool isLastLine,
   }) {
     assert(contentClusterRange.end == whitespaceClusterRange.start);
     assert(whitespaceClusterRange.end == hardlineClusterRange.start);
@@ -340,16 +337,18 @@ class TextLayout {
     );
 
     if (isSyntheticEmptyLine) {
+      // A synthetic line after a trailing newline has no text blocks of its own
+      // and inherits the preceding line's vertical metrics (like SkParagraph's fEndLine).
       if (lines.isNotEmpty) {
-        line.fontBoundingBoxAscent = lines.last.fontBoundingBoxAscent;
-        line.fontBoundingBoxDescent = lines.last.fontBoundingBoxDescent;
-        line.paintBoundsAscent = lines.last.paintBoundsAscent;
-        line.paintBoundsDescent = lines.last.paintBoundsDescent;
+        line.inheritMetricsFrom(lines.last);
       }
-      line.advance = ui.Rect.fromLTWH(0, top, 0, line.height);
-      line.trailingSpacesWidth = 0.0;
-      lines.add(line);
-      return line.advance.height;
+      return _finishLine(
+        line,
+        top: top,
+        width: 0.0,
+        trailingSpacesWidth: 0.0,
+        isLastLine: isLastLine,
+      );
     }
 
     // Get logical bidi levels belonging to the line.
@@ -546,24 +545,45 @@ class TextLayout {
       line.updateBoundingBox(block);
     }
 
-    // Position each placeholder only after all placeholders have folded their ascent into the line
+    return _finishLine(
+      line,
+      top: top,
+      // Line advance.width should not include trailing spaces (that are counted as a part of a block)
+      width: blockShiftFromLineStart - trailingSpacesWidth,
+      trailingSpacesWidth: trailingSpacesWidth,
+      isLastLine: isLastLine,
+    );
+  }
+
+  /// Finalizes [line] vertical metrics and horizontal advance, appends it to
+  /// [lines], and returns the resulting line height.
+  double _finishLine(
+    TextLine line, {
+    required double top,
+    required double width,
+    required double trailingSpacesWidth,
+    required bool isLastLine,
+  }) {
+    // Apply TextHeightBehavior before computing the advance rect so line.height
+    // already reflects any first-ascent or last-descent override.
+    line.applyTextHeightBehavior(
+      paragraph.paragraphStyle.textHeightBehavior,
+      // Check lines.isEmpty before appending line below.
+      isFirstLine: lines.isEmpty,
+      isLastLine: isLastLine,
+    );
+    // Position each placeholder only after all placeholders have folded their
+    // ascent into the line and TextHeightBehavior has potentially reverted the
+    // first line's ascent.
     for (final LineBlock block in line.visualBlocks) {
       if (block is PlaceholderBlock) {
         block.calculatePlaceholderTop(line.fontBoundingBoxAscent);
       }
     }
-
-    line.advance = ui.Rect.fromLTWH(
-      0,
-      top,
-      // Line advance.width should not include trailing spaces (that are counted as a part of a block)
-      blockShiftFromLineStart - trailingSpacesWidth,
-      // At the end this shift is equal to the entire line width
-      line.height,
-    );
+    line.advance = ui.Rect.fromLTWH(0, top, width, line.height);
     line.trailingSpacesWidth = trailingSpacesWidth;
+    line.lastLine = isLastLine;
     lines.add(line);
-
     return line.advance.height;
   }
 
@@ -1464,6 +1484,8 @@ class PlaceholderBlock extends LineBlock {
     }
   }
 
+  /// Positions the placeholder vertically within the line once the final
+  /// [lineAscent] is known.
   void calculatePlaceholderTop(double lineAscent) {
     final double top = lineAscent - ascent;
     // The advance needs to be calculated relative to the line. In order to do that, we need to start
@@ -1561,6 +1583,22 @@ class TextLine {
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
+
+  /// Unscaled font ascent (without height multipliers) so [ui.TextHeightBehavior]
+  /// can revert the first line's ascent.
+  double rawFontBoundingBoxAscent = 0.0;
+
+  /// Unscaled font descent (without height multipliers) so [ui.TextHeightBehavior]
+  /// can revert the last line's descent.
+  double rawFontBoundingBoxDescent = 0.0;
+
+  /// True when [ui.TextHeightBehavior.applyHeightToFirstAscent] is false on the
+  /// first line, causing the line and its backgrounds to use unscaled ascent.
+  bool usesRawAscent = false;
+
+  /// True when [ui.TextHeightBehavior.applyHeightToLastDescent] is false on the
+  /// last line, causing the line and its backgrounds to use unscaled descent.
+  bool usesRawDescent = false;
   bool _hasLineMetrics = false;
 
   double paintBoundsAscent = 0.0;
@@ -1575,33 +1613,76 @@ class TextLine {
 
   List<LineBlock> visualBlocks = <LineBlock>[];
 
+  /// Copies vertical font and paint metrics from [other].
+  ///
+  /// Used for the synthetic empty line after a trailing newline, which inherits
+  /// the preceding line's metrics just like SkParagraph's fEndLine.
+  void inheritMetricsFrom(TextLine other) {
+    fontBoundingBoxAscent = other.fontBoundingBoxAscent;
+    fontBoundingBoxDescent = other.fontBoundingBoxDescent;
+    rawFontBoundingBoxAscent = other.rawFontBoundingBoxAscent;
+    rawFontBoundingBoxDescent = other.rawFontBoundingBoxDescent;
+    paintBoundsAscent = other.paintBoundsAscent;
+    paintBoundsDescent = other.paintBoundsDescent;
+    _hasLineMetrics = other._hasLineMetrics;
+  }
+
+  /// Applies [textHeightBehavior] overrides to the first line's ascent and the
+  /// last line's descent.
+  void applyTextHeightBehavior(
+    ui.TextHeightBehavior? textHeightBehavior, {
+    required bool isFirstLine,
+    required bool isLastLine,
+  }) {
+    if (textHeightBehavior == null) {
+      return;
+    }
+    usesRawAscent = isFirstLine && !textHeightBehavior.applyHeightToFirstAscent;
+    usesRawDescent = isLastLine && !textHeightBehavior.applyHeightToLastDescent;
+    // Strip the height multiplier from the first line's ascent when disabled.
+    if (usesRawAscent) {
+      fontBoundingBoxAscent = rawFontBoundingBoxAscent;
+    }
+    // Strip the height multiplier from the last line's descent when disabled.
+    // A single-line paragraph is both first and last, so both branches apply.
+    if (usesRawDescent) {
+      fontBoundingBoxDescent = rawFontBoundingBoxDescent;
+    }
+  }
+
   void updateBoundingBox(LineBlock block) {
-    final double blockAscent;
-    final double blockDescent;
+    // Only text blocks have painted glyphs; placeholders are not painted by the paragraph.
     if (block is TextBlock) {
-      // Line always counts multiplied metrics.
-      blockAscent = block.multipliedFontBoundingBoxAscent;
-      blockDescent = block.multipliedFontBoundingBoxDescent;
       paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
       paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
       paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
       paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
-    } else if (block is PlaceholderBlock) {
-      blockAscent = block.ascent;
-      blockDescent = block.descent;
-      // There's no need to update paint bounds because placeholders aren't painted by the
-      // paragraph.
-    } else {
-      throw UnsupportedError('Unknown block type: $block');
     }
 
+    final (double ascent, double descent, double rawAscent, double rawDescent) = switch (block) {
+      // Text blocks carry both height-scaled and unscaled font metrics.
+      TextBlock() => (
+        block.multipliedFontBoundingBoxAscent,
+        block.multipliedFontBoundingBoxDescent,
+        block.rawFontBoundingBoxAscent,
+        block.rawFontBoundingBoxDescent,
+      ),
+      // Placeholders have no height multiplier, so their raw and scaled metrics match.
+      PlaceholderBlock() => (block.ascent, block.descent, block.ascent, block.descent),
+      _ => throw UnsupportedError('Unknown block type: $block'),
+    };
+
     if (!_hasLineMetrics) {
-      fontBoundingBoxAscent = blockAscent;
-      fontBoundingBoxDescent = blockDescent;
+      fontBoundingBoxAscent = ascent;
+      fontBoundingBoxDescent = descent;
+      rawFontBoundingBoxAscent = rawAscent;
+      rawFontBoundingBoxDescent = rawDescent;
       _hasLineMetrics = true;
     } else {
-      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, blockAscent);
-      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, blockDescent);
+      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, ascent);
+      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, descent);
+      rawFontBoundingBoxAscent = math.max(rawFontBoundingBoxAscent, rawAscent);
+      rawFontBoundingBoxDescent = math.max(rawFontBoundingBoxDescent, rawDescent);
     }
   }
 }
