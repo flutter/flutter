@@ -796,6 +796,9 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
+  /// Whether the device supports recording the screen.
+  bool get supportsScreenRecording => false;
+
   /// Whether the Flavors feature ('--flavor') is supported for this device.
   bool get supportsFlavors => false;
 
@@ -813,6 +816,16 @@ abstract class Device {
   }
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
+
+  /// Starts recording the device screen to [outputFile].
+  ///
+  /// Returns a [ScreenRecording] handle that can be used to stop the recording
+  /// and await completion.
+  ///
+  /// [duration] caps the recording length. When null, recording runs until
+  /// stopped via [ScreenRecording.stop].
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async =>
+      throw UnimplementedError();
 
   @nonVirtual
   @override
@@ -887,6 +900,7 @@ abstract class Device {
         'hotReload': supportsHotReload,
         'hotRestart': supportsHotRestart,
         'screenshot': supportsScreenshot,
+        'screenRecording': supportsScreenRecording,
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
@@ -898,6 +912,15 @@ abstract class Device {
   ///
   /// For example log readers or port forwarders.
   Future<void> dispose();
+}
+
+/// A screen recording started by [Device.startScreenRecording].
+abstract interface class ScreenRecording {
+  /// Completes once the recording has been written to the output file.
+  Future<void> get done;
+
+  /// Stops the recording. [done] completes once the output has been written.
+  Future<void> stop();
 }
 
 /// Information about an application's memory usage.
