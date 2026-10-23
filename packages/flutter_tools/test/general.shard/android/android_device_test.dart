@@ -622,6 +622,33 @@ Uptime: 441088659 Realtime: 521464097
       outputFile = fileSystem.file('output.file');
     });
 
+    const recordingPath = '/data/local/tmp/flutter_recording.mp4';
+
+    FakeCommand adb(
+      List<String> args, {
+      int exitCode = 0,
+      String stderr = '',
+      Completer<void>? completer,
+    }) => FakeCommand(
+      command: <String>['adb', '-s', '1234', ...args],
+      exitCode: exitCode,
+      stderr: stderr,
+      completer: completer,
+    );
+
+    List<FakeCommand> recordingCommands({String timeLimit = '180', int exitCode = 0}) =>
+        <FakeCommand>[
+          adb(<String>[
+            'shell',
+            'screenrecord',
+            '--time-limit',
+            timeLimit,
+            recordingPath,
+          ], exitCode: exitCode),
+          adb(<String>['pull', recordingPath, outputFile.path]),
+          adb(<String>['shell', 'rm', recordingPath]),
+        ];
+
     testWithoutContext('takeScreenshot succeeds and cleans up remote file', () async {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -758,41 +785,7 @@ Uptime: 441088659 Realtime: 521464097
     testWithoutContext(
       'startScreenRecording defaults to 180 seconds and pulls recording',
       () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'screenrecord',
-              '--time-limit',
-              '180',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'pull',
-              '/data/local/tmp/flutter_recording.mp4',
-              outputFile.path,
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
-
+        final fakeProcessManager = FakeProcessManager.list(recordingCommands());
         final AndroidDevice device = setUpAndroidDevice(
           processManager: fakeProcessManager,
           fileSystem: fileSystem,
@@ -807,41 +800,7 @@ Uptime: 441088659 Realtime: 521464097
     testWithoutContext(
       'startScreenRecording clamps duration to 180 seconds when greater than 180',
       () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'screenrecord',
-              '--time-limit',
-              '180',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'pull',
-              '/data/local/tmp/flutter_recording.mp4',
-              outputFile.path,
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
-
+        final fakeProcessManager = FakeProcessManager.list(recordingCommands());
         final logger = BufferLogger.test();
         final AndroidDevice device = setUpAndroidDevice(
           processManager: fakeProcessManager,
@@ -865,41 +824,7 @@ Uptime: 441088659 Realtime: 521464097
     testWithoutContext(
       'startScreenRecording clamps duration to 1 second when less than 1',
       () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'screenrecord',
-              '--time-limit',
-              '1',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'pull',
-              '/data/local/tmp/flutter_recording.mp4',
-              outputFile.path,
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
-
+        final fakeProcessManager = FakeProcessManager.list(recordingCommands(timeLimit: '1'));
         final AndroidDevice device = setUpAndroidDevice(
           processManager: fakeProcessManager,
           fileSystem: fileSystem,
@@ -917,41 +842,7 @@ Uptime: 441088659 Realtime: 521464097
     testWithoutContext(
       'startScreenRecording uses specified duration within 1..180 seconds',
       () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'screenrecord',
-              '--time-limit',
-              '45',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'pull',
-              '/data/local/tmp/flutter_recording.mp4',
-              outputFile.path,
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
-
+        final fakeProcessManager = FakeProcessManager.list(recordingCommands(timeLimit: '45'));
         final AndroidDevice device = setUpAndroidDevice(
           processManager: fakeProcessManager,
           fileSystem: fileSystem,
@@ -966,365 +857,95 @@ Uptime: 441088659 Realtime: 521464097
       },
     );
 
-    testWithoutContext(
-      'startScreenRecording handles screenrecord failure and cleans up without pulling',
-      () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'screenrecord',
-              '--time-limit',
-              '180',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-            exitCode: 1,
-            stderr: 'screenrecord failed: unsupported resolution',
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
-
-        final AndroidDevice device = setUpAndroidDevice(
-          processManager: fakeProcessManager,
-          fileSystem: fileSystem,
-        );
-
-        final ScreenRecording recording = await device.startScreenRecording(outputFile);
-        await expectLater(
-          () => recording.done,
-          throwsToolExit(
-            message:
-                'screenrecord failed with exit code 1: screenrecord failed: unsupported resolution',
-          ),
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-    );
-
-    testWithoutContext(
-      'startScreenRecording stop sends SIGINT to adb screenrecord process',
-      () async {
-        final completer = Completer<void>();
-        final fakeCommand = FakeCommand(
-          command: const <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'screenrecord',
-            '--time-limit',
-            '180',
-            '/data/local/tmp/flutter_recording.mp4',
-          ],
-          completer: completer,
-        );
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          fakeCommand,
-          FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'pull',
-              '/data/local/tmp/flutter_recording.mp4',
-              outputFile.path,
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
-
-        final AndroidDevice device = setUpAndroidDevice(
-          processManager: fakeProcessManager,
-          fileSystem: fileSystem,
-        );
-
-        final ScreenRecording recording = await device.startScreenRecording(outputFile);
-        final Future<void> stopFuture = recording.stop();
-        completer.complete();
-        await stopFuture;
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-    );
-
-    testWithoutContext('startScreenRecording accepts exit code 130 (SIGINT) as success', () async {
+    testWithoutContext('startScreenRecording handles screenrecord failure', () async {
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'screenrecord',
-            '--time-limit',
-            '180',
-            '/data/local/tmp/flutter_recording.mp4',
-          ],
-          exitCode: 130,
+        adb(
+          <String>['shell', 'screenrecord', '--time-limit', '180', recordingPath],
+          exitCode: 1,
+          stderr: 'screenrecord failed: unsupported resolution',
         ),
-        FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'pull',
-            '/data/local/tmp/flutter_recording.mp4',
-            outputFile.path,
-          ],
-        ),
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'rm',
-            '/data/local/tmp/flutter_recording.mp4',
-          ],
-        ),
+        adb(<String>['shell', 'rm', recordingPath]),
       ]);
-
       final AndroidDevice device = setUpAndroidDevice(
         processManager: fakeProcessManager,
         fileSystem: fileSystem,
       );
 
       final ScreenRecording recording = await device.startScreenRecording(outputFile);
-      await recording.done;
-
+      await expectLater(
+        () => recording.done,
+        throwsToolExit(
+          message:
+              'screenrecord failed with exit code 1: screenrecord failed: unsupported resolution',
+        ),
+      );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
-      'startScreenRecording accepts exit code -2 (SIGINT on POSIX) as success',
-      () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'screenrecord',
-              '--time-limit',
-              '180',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-            exitCode: -2,
-          ),
-          FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'pull',
-              '/data/local/tmp/flutter_recording.mp4',
-              outputFile.path,
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
-
-        final AndroidDevice device = setUpAndroidDevice(
-          processManager: fakeProcessManager,
-          fileSystem: fileSystem,
-        );
-
-        final ScreenRecording recording = await device.startScreenRecording(outputFile);
-        await recording.done;
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-    );
-
-    testWithoutContext('startScreenRecording accepts exit code 143 (SIGTERM) as success', () async {
+    testWithoutContext('startScreenRecording stop() sends pkill -2 to device', () async {
+      final completer = Completer<void>();
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'screenrecord',
-            '--time-limit',
-            '180',
-            '/data/local/tmp/flutter_recording.mp4',
-          ],
-          exitCode: 143,
-        ),
-        FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'pull',
-            '/data/local/tmp/flutter_recording.mp4',
-            outputFile.path,
-          ],
-        ),
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'rm',
-            '/data/local/tmp/flutter_recording.mp4',
-          ],
-        ),
+        adb(<String>[
+          'shell',
+          'screenrecord',
+          '--time-limit',
+          '180',
+          recordingPath,
+        ], completer: completer),
+        adb(<String>['shell', 'pkill', '-2', 'screenrecord']),
+        adb(<String>['pull', recordingPath, outputFile.path]),
+        adb(<String>['shell', 'rm', recordingPath]),
       ]);
-
       final AndroidDevice device = setUpAndroidDevice(
         processManager: fakeProcessManager,
         fileSystem: fileSystem,
       );
 
       final ScreenRecording recording = await device.startScreenRecording(outputFile);
-      await recording.done;
+      final Future<void> stopFuture = recording.stop();
+      completer.complete();
+      await stopFuture;
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext(
-      'startScreenRecording accepts exit code -15 (SIGTERM on POSIX) as success',
-      () async {
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'screenrecord',
-              '--time-limit',
-              '180',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-            exitCode: -15,
-          ),
-          FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'pull',
-              '/data/local/tmp/flutter_recording.mp4',
-              outputFile.path,
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
-
-        final AndroidDevice device = setUpAndroidDevice(
+    for (final exitCode in <int>[130, -2, 143, -15]) {
+      testWithoutContext('startScreenRecording treats exit code $exitCode as stopped', () async {
+        final fakeProcessManager = FakeProcessManager.list(recordingCommands(exitCode: exitCode));
+        final ScreenRecording recording = await setUpAndroidDevice(
           processManager: fakeProcessManager,
           fileSystem: fileSystem,
-        );
-
-        final ScreenRecording recording = await device.startScreenRecording(outputFile);
+        ).startScreenRecording(outputFile);
         await recording.done;
-
         expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-    );
+      });
+    }
 
-    testWithoutContext(
-      'startScreenRecording stop() on Windows sends pkill -2 to device and accepts -1 exit code',
-      () async {
-        final completer = Completer<void>();
-        final fakeCommand = FakeCommand(
-          command: const <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'screenrecord',
-            '--time-limit',
-            '180',
-            '/data/local/tmp/flutter_recording.mp4',
-          ],
-          completer: completer,
+    testWithoutContext('startScreenRecording on Windows accepts -1 exit code from pkill', () async {
+      final completer = Completer<void>();
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        adb(
+          <String>['shell', 'screenrecord', '--time-limit', '180', recordingPath],
           exitCode: -1,
-        );
-        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          fakeCommand,
-          const FakeCommand(
-            command: <String>['adb', '-s', '1234', 'shell', 'pkill', '-2', 'screenrecord'],
-          ),
-          FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'pull',
-              '/data/local/tmp/flutter_recording.mp4',
-              outputFile.path,
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'shell',
-              'rm',
-              '/data/local/tmp/flutter_recording.mp4',
-            ],
-          ),
-        ]);
+          completer: completer,
+        ),
+        adb(<String>['shell', 'pkill', '-2', 'screenrecord']),
+        adb(<String>['pull', recordingPath, outputFile.path]),
+        adb(<String>['shell', 'rm', recordingPath]),
+      ]);
+      final AndroidDevice device = setUpAndroidDevice(
+        processManager: fakeProcessManager,
+        fileSystem: fileSystem,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
 
-        final AndroidDevice device = setUpAndroidDevice(
-          processManager: fakeProcessManager,
-          fileSystem: fileSystem,
-          platform: FakePlatform(operatingSystem: 'windows'),
-        );
+      final ScreenRecording recording = await device.startScreenRecording(outputFile);
+      final Future<void> stopFuture = recording.stop();
+      completer.complete();
+      await stopFuture;
 
-        final ScreenRecording recording = await device.startScreenRecording(outputFile);
-        final Future<void> stopFuture = recording.stop();
-        completer.complete();
-        await stopFuture;
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-    );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
   });
 }
 
