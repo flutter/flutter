@@ -1143,7 +1143,7 @@ mixin _RenderTheaterMixin on RenderBox {
     var isHit = false;
     while (!isHit && iterator.moveNext()) {
       final RenderBox child = iterator.current;
-      if (child is _RenderDeferredLayoutBox && child._isPendingLayout) {
+      if (child is _RenderDeferredLayoutBox && !child.hasSize) {
         continue;
       }
       final childParentData = child.parentData! as StackParentData;
@@ -2619,8 +2619,10 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
   // A deferred child can remain attached when its layout surrogate is moved to
   // a sliver keep-alive bucket before the surrogate is laid out.
-  // Geometry-dependent operations must ignore the child until the surrogate can
-  // schedule its layout.
+  // Baseline and semantics require up-to-date layout, while hit testing can use
+  // a stale size but must skip a child with no size. Painting needs no special
+  // handling because RenderObject._paintWithContext skips children that need
+  // layout.
   bool get _isPendingLayout => needsLayout;
 
   bool _needsLayout = true;

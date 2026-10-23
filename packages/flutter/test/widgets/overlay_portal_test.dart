@@ -3125,6 +3125,8 @@ void main() {
       await gesture.moveTo(const Offset(25.0, 25.0));
       await tester.pump();
       expect(tester.takeException(), isNull);
+      await tester.tapAt(const Offset(25.0, 25.0));
+      expect(tester.takeException(), isNull);
       expect(overlayHitCount, 0);
 
       // Laying out the surrogate again lets the deferred child catch up and
@@ -3134,6 +3136,10 @@ void main() {
       await tester.pump();
       expect(tester.takeException(), isNull);
       expect(_PaintOrder.paintOrder, isNotEmpty);
+      expect(
+        tester.getCenter(find.byKey(_KeepAliveOverlayPortalItem.overlayKey)),
+        const Offset(25.0, 25.0),
+      );
       if (semantics != null) {
         expect(semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel), isNotEmpty);
       }
@@ -3142,6 +3148,62 @@ void main() {
       semantics?.dispose();
     }, semanticsEnabled: semanticsEnabled);
   }
+
+  testWidgets('dirty deferred overlay child remains hit-testable', (WidgetTester tester) async {
+    final controller = OverlayPortalController();
+    const Key overlayKey = ValueKey<String>('overlay-child');
+    var overlayHitCount = 0;
+    late final OverlayEntry entry;
+    addTearDown(() {
+      entry.remove();
+      entry.dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) => OverlayPortal(
+                controller: controller,
+                overlayChildBuilder: (BuildContext context) => Positioned(
+                  left: 0.0,
+                  top: 0.0,
+                  width: 50.0,
+                  height: 50.0,
+                  child: Listener(
+                    key: overlayKey,
+                    behavior: HitTestBehavior.opaque,
+                    onPointerDown: (PointerDownEvent event) {
+                      overlayHitCount += 1;
+                    },
+                  ),
+                ),
+                child: const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.show();
+    await tester.pump();
+
+    final Offset overlayCenter = tester.getCenter(find.byKey(overlayKey));
+    await tester.tapAt(overlayCenter);
+    expect(overlayHitCount, 1);
+
+    // A dirty box retains its previous geometry and must remain hit-testable
+    // until the next layout updates it.
+    final RenderBox overlayChild = tester.renderObject(find.byKey(overlayKey));
+    final deferredChild = overlayChild.parent! as RenderBox;
+    expect(deferredChild.hasSize, isTrue);
+    deferredChild.markNeedsLayout();
+    expect(deferredChild.debugNeedsLayout, isTrue);
+    await tester.tapAt(overlayCenter);
+    expect(overlayHitCount, 2);
+  });
 
   group('Semantics', () {
     testWidgets('ordering and transform', (WidgetTester tester) async {
@@ -3661,6 +3723,7 @@ class _KeepAliveOverlayPortalItem extends StatefulWidget {
   const _KeepAliveOverlayPortalItem({required this.onOverlayHit});
 
   static const Key targetKey = ValueKey<String>('keep-alive-overlay-portal-target');
+  static const Key overlayKey = ValueKey<String>('keep-alive-overlay-portal-child');
   static const String overlayLabel = 'overlay child';
 
   final VoidCallback onOverlayHit;
@@ -3702,6 +3765,7 @@ class _KeepAliveOverlayPortalItemState extends State<_KeepAliveOverlayPortalItem
                 child: Semantics(
                   label: _KeepAliveOverlayPortalItem.overlayLabel,
                   child: Listener(
+                    key: _KeepAliveOverlayPortalItem.overlayKey,
                     behavior: HitTestBehavior.opaque,
                     onPointerDown: (PointerDownEvent event) => widget.onOverlayHit(),
                     child: const _PaintOrder(),
