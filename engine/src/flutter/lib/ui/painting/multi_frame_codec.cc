@@ -39,8 +39,7 @@ MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator,
                            ? -1
                            : generator_->GetPlayCount() - 1),
       is_impeller_enabled_(UIDartState::Current()->IsImpellerEnabled()),
-      target_size_(target_size.isEmpty() ? generator_->GetInfo().dimensions()
-                                         : target_size) {}
+      target_size_(target_size) {}
 
 static void InvokeNextFrameCallback(
     const fml::RefPtr<CanvasImage>& image,
@@ -176,18 +175,30 @@ MultiFrameCodec::State::GetNextFrameImage(
   // `cacheWidth`/`cacheHeight` or `ResizeImage` in the framework).
   //
   // See https://github.com/flutter/flutter/issues/90804.
-  SkBitmap output = bitmap;
-  if (output.dimensions() != target_size_) {
-    std::optional<SkBitmap> resized = ResizeFrame(bitmap, target_size_);
+  SkISize target_size = target_size_;
+#if IMPELLER_SUPPORTS_RENDERING
+  if (is_impeller_enabled_ && impeller_context) {
+    // Like single-frame images (see ImageDecoderImpeller::DecompressTexture),
+    // never upload a frame larger than the maximum texture size. The Skia
+    // backend below limits the size when it creates the texture instead.
+    target_size = ImageDecoderImpeller::ClampToMaxTextureSize(
+        target_size,
+        impeller_context->GetResourceAllocator()->GetMaxTextureSizeSupported());
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+  if (bitmap.dimensions() != target_size) {
+    std::optional<SkBitmap> resized = ResizeFrame(bitmap, target_size);
     if (!resized.has_value()) {
       std::ostringstream ostr;
       ostr << "Could not resize frame " << nextFrameIndex_ << " to "
-           << target_size_.width() << "x" << target_size_.height();
+           << target_size.width() << "x" << target_size.height();
       std::string decode_error = ostr.str();
       FML_LOG(ERROR) << decode_error;
       return std::make_pair(nullptr, decode_error);
     }
-    output = std::move(resized.value());
+    // `lastRequiredFrame_` keeps sharing the full-size pixels.
+    bitmap = std::move(resized.value());
+    info = bitmap.info();
   }
 
 #if IMPELLER_SUPPORTS_RENDERING
@@ -196,15 +207,14 @@ MultiFrameCodec::State::GetNextFrameImage(
     // This is safe regardless of whether the GPU is available or not because
     // without mipmap creation there is no command buffer encoding done.
     return ImageDecoderImpeller::UploadTextureToStorage(
-        impeller_context, std::make_shared<SkBitmap>(output));
+        impeller_context, std::make_shared<SkBitmap>(bitmap));
 #else
     sk_sp<DlImage> dl_image;
     std::string error_message;
-    const SkImageInfo& output_info = output.info();
     auto mapping = std::make_unique<fml::NonOwnedMapping>(
-        reinterpret_cast<const uint8_t*>(output.getAddr(0, 0)),    // data
-        output.dimensions().area() * output_info.bytesPerPixel(),  // size
-        [output](auto, auto) mutable { output.reset(); }           // proc
+        reinterpret_cast<const uint8_t*>(bitmap.getAddr(0, 0)),  // data
+        bitmap.dimensions().area() * info.bytesPerPixel(),       // size
+        [bitmap](auto, auto) mutable { bitmap.reset(); }         // proc
     );
     std::shared_ptr<impeller::DeviceBuffer> device_buffer =
         impeller_context->GetResourceAllocator()->CreateBufferWithCopy(
@@ -214,16 +224,16 @@ MultiFrameCodec::State::GetNextFrameImage(
     }
 
     const auto pixel_format =
-        ImageDecoderImpeller::ToPixelFormat(output_info.colorType());
+        ImageDecoderImpeller::ToPixelFormat(info.colorType());
     if (!pixel_format.has_value()) {
       std::string decode_error(
           std::format("Unsupported pixel format (SkColorType={})",
-                      static_cast<int>(output_info.colorType())));
+                      static_cast<int>(info.colorType())));
       FML_DLOG(ERROR) << decode_error;
       return std::make_pair(nullptr, decode_error);
     }
     ImageDecoderImpeller::ImageInfo image_info = {
-        .size = impeller::ISize(output_info.width(), output_info.height()),
+        .size = impeller::ISize(info.width(), info.height()),
         .format = pixel_format.value()};
 
     ImageDecoderImpeller::UploadTextureToPrivate(
@@ -242,23 +252,30 @@ MultiFrameCodec::State::GetNextFrameImage(
   sk_sp<SkImage> skImage;
   gpu_disable_sync_switch->Execute(
       fml::SyncSwitch::Handlers()
-          .SetIfTrue([&skImage, &output] {
+          .SetIfTrue([&skImage, &bitmap] {
             // Defer decoding until time of draw later on the raster thread.
             // Can happen when GL operations are currently forbidden such as
             // in the background on iOS.
-            skImage = SkImages::RasterFromBitmap(output);
+            skImage = SkImages::RasterFromBitmap(bitmap);
           })
-          .SetIfFalse([&skImage, &resourceContext, &output] {
+          .SetIfFalse([&skImage, &resourceContext, &bitmap] {
             if (resourceContext) {
-              SkPixmap pixmap(output.info(), output.pixelRef()->pixels(),
-                              output.pixelRef()->rowBytes());
+              SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
+                              bitmap.pixelRef()->rowBytes());
+              // Like single-frame images (see UploadRasterImage in
+              // image_decoder_skia.cc), limit the texture to the maximum
+              // texture size.
               skImage = SkImages::CrossContextTextureFromPixmap(
-                  resourceContext.get(), pixmap, true);
+                  resourceContext.get(),  // context
+                  pixmap,                 // pixmap
+                  true,                   // buildMips
+                  true                    // limitToMaxTextureSize
+              );
             } else {
               // Defer decoding until time of draw later on the raster thread.
               // Can happen when GL operations are currently forbidden such as
               // in the background on iOS.
-              skImage = SkImages::RasterFromBitmap(output);
+              skImage = SkImages::RasterFromBitmap(bitmap);
             }
           }));
 

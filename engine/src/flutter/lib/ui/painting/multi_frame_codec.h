@@ -24,10 +24,9 @@ class MultiFrameCodec : public Codec {
   ///                         `targetHeight`. Frames are always decoded and
   ///                         composited at the intrinsic size of the image,
   ///                         so that blending and disposal stay exact, and
-  ///                         only the finished frame is resized. An empty
-  ///                         size means the intrinsic size.
-  explicit MultiFrameCodec(std::shared_ptr<ImageGenerator> generator,
-                           SkISize target_size = SkISize::MakeEmpty());
+  ///                         only the finished frame is resized.
+  MultiFrameCodec(std::shared_ptr<ImageGenerator> generator,
+                  SkISize target_size);
 
   ~MultiFrameCodec() override;
 
@@ -57,8 +56,8 @@ class MultiFrameCodec : public Codec {
     const int frameCount_;
     const int repetitionCount_;
     bool is_impeller_enabled_ = false;
-    // The size of the frames delivered to Dart. Equal to the intrinsic size of
-    // the image unless a different size was requested.
+    // The size of the frames delivered to Dart, as requested through
+    // `targetWidth` and `targetHeight`.
     const SkISize target_size_;
 
     // The non-const members and functions below here are only read or written
