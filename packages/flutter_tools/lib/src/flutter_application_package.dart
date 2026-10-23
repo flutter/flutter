@@ -46,13 +46,17 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         );
       case .ios:
         return applicationBinary == null
-            ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
+            ? await IOSApp.fromIosProject(
+                FlutterProject.current().ios,
+                buildInfo,
+                toolContext: _toolContext,
+              )
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case .tester:
         return FlutterTesterApp.fromCurrentDirectory(_toolContext.fs);
       case .macos:
         return applicationBinary == null
-            ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
+            ? MacOSApp.fromMacOSProject(FlutterProject.current().macos, toolContext: _toolContext)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
       case .web:
         if (!FlutterProject.current().web.existsSync()) {
@@ -65,7 +69,10 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case .windows:
         return applicationBinary == null
-            ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
+            ? WindowsApp.fromWindowsProject(
+                FlutterProject.current().windows,
+                toolContext: _toolContext,
+              )
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();

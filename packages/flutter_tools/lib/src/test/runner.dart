@@ -807,7 +807,7 @@ class SpawnPlugin extends PlatformPlugin {
       'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (nativeAssetsBuilder != null && platform.isWindows)
         'PATH':
-            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${platform.environment['PATH']}',
+            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject, toolContext: _toolContext)};${platform.environment['PATH']}',
     };
 
     logger.printTrace(
