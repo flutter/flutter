@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -72,18 +73,20 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
+        toolContext: FakeToolContext(
+          artifacts: FakeArtifacts(fileSystem: fileSystem),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -145,18 +148,20 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
+        toolContext: FakeToolContext(
+          artifacts: FakeArtifacts(fileSystem: fileSystem),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -196,18 +201,20 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
+        toolContext: FakeToolContext(
+          artifacts: FakeArtifacts(fileSystem: fileSystem),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -244,18 +251,20 @@ environement:
       );
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
+        toolContext: FakeToolContext(
+          artifacts: FakeArtifacts(fileSystem: fileSystem),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
       );
       await expectLater(
         () async => webBuilder.buildWeb(
@@ -307,6 +316,58 @@ environement:
 
       computed = WebRendererMode.fromDartDefines(<String>{}, useWasm: true);
       expect(computed, WebRendererMode.getDefault(useWasm: true));
+    },
+  );
+
+  testUsingContext(
+    'WebBuilder passes flutterVersion.engineRevision to WebServiceWorker on local engine builds',
+    () async {
+      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        expect(environment.engineVersion, isNull);
+        expect(
+          target,
+          isA<WebServiceWorker>().having(
+            (WebServiceWorker t) => t.engineRevision,
+            'engineRevision',
+            '9.8.7',
+          ),
+        );
+      });
+
+      final webBuilder = WebBuilder(
+        analytics: fakeAnalytics,
+        buildSystem: buildSystem,
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.testLocalEngine(
+            localEngine: 'out/host_debug_unopt',
+            localEngineHost: 'out/host_debug_unopt',
+            fileSystem: fileSystem,
+          ),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
+      );
+      await webBuilder.buildWeb(
+        flutterProject,
+        'target',
+        BuildInfo.debug,
+        ServiceWorkerStrategy.offlineFirst,
+        compilerConfigs: const <WebCompilerConfig>[],
+      );
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: ThrowingPub.new,
     },
   );
 }

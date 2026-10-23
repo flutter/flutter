@@ -41,42 +41,47 @@ import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 import '../isolated/fake_native_assets_build_runner.dart';
 
+final class _PluginCapturingBuildTarget extends BuildTarget {
+  const _PluginCapturingBuildTarget(this._pluginsPort)
+    : super(
+        description: 'Custom package build target.',
+        outputDir: '{OUTPUT_DIR}/custom_pkg',
+        targetPlatform: 'custom-arm64',
+      );
+
+  final SendPort _pluginsPort;
+
+  @override
+  String get name => 'custom-pkg';
+
+  @override
+  ExtensionNativeAssetsConfig? get nativeAssetsConfig => ExtensionNativeAssetsConfig(
+    targetArchitecture: 'arm64',
+    targetOs: 'custom_os',
+    cCompilerConfig: ExtensionCCompilerConfig(
+      ar: Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
+      cc: Uri.file('/opt/custom-sdk/llvm/bin/clang'),
+      ld: Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'),
+    ),
+  );
+
+  @override
+  String? get pluginPlatformKey => 'custom_os';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    _pluginsPort.send(context.plugins);
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
 final class _PluginCapturingBuildService extends BuildService {
   _PluginCapturingBuildService(this._pluginsPort);
 
   final SendPort _pluginsPort;
 
   @override
-  Future<List<ExtensionBuildTarget>> getBuildTargets() async {
-    return <ExtensionBuildTarget>[
-      ExtensionBuildTarget(
-        description: 'Custom package build target.',
-        name: 'custom-pkg',
-        nativeAssetsConfig: ExtensionNativeAssetsConfig(
-          targetArchitecture: 'arm64',
-          targetOs: 'custom_os',
-          cCompilerConfig: ExtensionCCompilerConfig(
-            ar: Uri.file('/opt/custom-sdk/llvm/bin/llvm-ar'),
-            cc: Uri.file('/opt/custom-sdk/llvm/bin/clang'),
-            ld: Uri.file('/opt/custom-sdk/llvm/bin/ld.lld'),
-          ),
-        ),
-        pluginPlatformKey: 'custom_os',
-      ),
-    ];
-  }
-
-  @override
-  Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required String mainPath,
-    required Uri projectRoot,
-    required String targetName,
-    List<ExtensionPlugin> plugins = const <ExtensionPlugin>[],
-  }) async {
-    _pluginsPort.send(plugins);
-    return const ExtensionBuildResult(success: true);
-  }
+  List<BuildTarget> get buildTargets => <BuildTarget>[_PluginCapturingBuildTarget(_pluginsPort)];
 }
 
 void _pluginCapturingExtensionEntryPoint(SendPort sendPort, SendPort pluginsPort) {
@@ -265,7 +270,11 @@ platforms:
             fileSystem: fileSystem,
             isDevDependency: false,
           ),
-          throwsToolExit(message: 'Invalid "custom_embedder" plugin specification.'),
+          throwsToolExit(
+            message:
+                'Invalid "custom_embedder" plugin specification: '
+                'the "pluginClass" field must be a valid identifier',
+          ),
         );
 
         expect(
@@ -469,8 +478,11 @@ environment:
 
       final ExtensionBuildResult result = await buildManager.build(
         buildMode: BuildMode.release,
+        flutterRoot: fileSystem.directory('/flutter').uri,
         mainPath: 'lib/main.dart',
+        outputDir: fileSystem.directory('/project/build/custom_pkg').uri,
         projectRoot: projectDir.uri,
+        resolvedArtifacts: const <String, String>{},
         targetName: 'custom-pkg',
       );
       expect(result.success, isTrue);

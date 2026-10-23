@@ -41,7 +41,7 @@ class ComputePassMTL final : public ComputePass {
   bool IsValid() const override;
 
   // |ComputePass|
-  fml::Status Compute(std::array<uint32_t, 3> workgroup_count) override;
+  absl::Status Compute(std::array<uint32_t, 3> workgroup_count) override;
 
   // |ComputePass|
   void SetCommandLabel(std::string_view label) override;
