@@ -33,10 +33,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ## Flutter 3.47 Changes
 
 ### [3.47.8](https://github.com/flutter/flutter/releases/tag/3.47.8)
-#### Security advisory [GHSA-frr6-h895-5pxp](https://github.com/dart-lang/sdk/security/advisories/GHSA-frr6-h895-5pxp):  
-- [dart/568000](https://dart-review.googlesource.com/c/sdk/+/568000) Updates BoringSSL in the Dart runtime (3.13.7) to block compromised eMudhra intermediate CA certificates.  
+#### Security advisory [GHSA-frr6-h895-5pxp](https://github.com/dart-lang/sdk/security/advisories/GHSA-frr6-h895-5pxp):
+- [dart/568000](https://dart-review.googlesource.com/c/sdk/+/568000) Updates BoringSSL in the Dart runtime (3.13.7) to block compromised eMudhra intermediate CA certificates.
 - [dart/64696](https://github.com/dart-lang/sdk/pull/64696) Updates `dart:io` on Android 14+ to use the updatable Conscrypt APEX root certificate store.
-- Developers shipping Android, Windows, or Linux applications should upgrade to Flutter 3.47.8 and rebuild their apps. 
+- Developers shipping Android, Windows, or Linux applications should upgrade to Flutter 3.47.8 and rebuild their apps.
 ---
 - [flutter/190235](https://github.com/flutter/flutter/issues/190235) When running flutter pub get or building desktop apps with existing or broken plugin symlink entries, flutter_tools no longer crashes with a PathExistsException.
 - [flutter/192934](https://github.com/flutter/flutter/issues/192934) When dumping the focus tree or layer tree from flutter run on any platform before the UI isolate finishes initializing or after teardown, flutter_tools crashed with a null check operator exception.
