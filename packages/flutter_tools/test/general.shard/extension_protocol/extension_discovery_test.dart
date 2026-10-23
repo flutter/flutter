@@ -55,6 +55,66 @@ class _FailingInitService extends ToolExtensionService {
   }
 }
 
+class _NotificationTestService extends ToolExtensionService {
+  @override
+  String get namespace => 'notify';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'emitCustom': (Map<String, Object?> params) {
+        sendNotification('notify.customEvent', <String, Object?>{'payload': params['payload']});
+        return 'emitted';
+      },
+    };
+  }
+}
+
+void _notificationExtensionEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_NotificationTestService()]),
+  );
+}
+
+class _ExitingService extends ToolExtensionService {
+  @override
+  String get namespace => 'exit';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'triggerExit': (Map<String, Object?> _) {
+        Isolate.exit();
+      },
+    };
+  }
+}
+
+void _exitingExtensionEntryPoint(SendPort sendPort) {
+  unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ExitingService()]));
+}
+
+class _AsyncErrorService extends ToolExtensionService {
+  @override
+  String get namespace => 'error';
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'triggerUnhandledError': (Map<String, Object?> _) {
+        Timer.run(() {
+          throw StateError('Simulated unhandled async error');
+        });
+        return Completer<Object?>().future;
+      },
+    };
+  }
+}
+
+void _asyncErrorExtensionEntryPoint(SendPort sendPort) {
+  unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_AsyncErrorService()]));
+}
+
 void main() {
   group('ExtensionDiscovery & Connection Base', () {
     test('ExtensionConnection completes isolate handshake and retrieves capabilities', () async {
@@ -211,6 +271,147 @@ void main() {
       );
       await pumpEventQueue();
       expect(messages, isEmpty);
+    });
+
+    test('ToolExtensionService.sendNotification throws StateError before peer attachment', () {
+      final service = _DummyService('test', 'ping');
+      expect(
+        () => service.sendNotification('test.event', const <String, Object?>{}),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('is not attached to an active peer'),
+          ),
+        ),
+      );
+    });
+
+    test('sendNotification and onNotification deliver notifications round-trip', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _notificationExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      final receivedEvents = <Map<String, Object?>>[];
+      final StreamSubscription<Map<String, Object?>> subscription = connection
+          .onNotification('notify.customEvent')
+          .listen(receivedEvents.add);
+      addTearDown(subscription.cancel);
+
+      final Object? response = await connection.sendRequest(
+        'notify.emitCustom',
+        params: const <String, Object?>{'payload': 'hello-host'},
+      );
+      expect(response, 'emitted');
+
+      await pumpEventQueue();
+      expect(receivedEvents, <Map<String, Object?>>[
+        const <String, Object?>{'payload': 'hello-host'},
+      ]);
+    });
+
+    test('onNotification supports multiple listeners on broadcast stream', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _notificationExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      final listener1Events = <Map<String, Object?>>[];
+      final listener2Events = <Map<String, Object?>>[];
+
+      final Stream<Map<String, Object?>> stream = connection.onNotification('notify.customEvent');
+      final StreamSubscription<Map<String, Object?>> sub1 = stream.listen(listener1Events.add);
+      final StreamSubscription<Map<String, Object?>> sub2 = stream.listen(listener2Events.add);
+      addTearDown(sub1.cancel);
+      addTearDown(sub2.cancel);
+
+      await connection.sendRequest(
+        'notify.emitCustom',
+        params: const <String, Object?>{'payload': 'broadcast'},
+      );
+
+      await pumpEventQueue();
+      expect(listener1Events, <Map<String, Object?>>[
+        const <String, Object?>{'payload': 'broadcast'},
+      ]);
+      expect(listener2Events, <Map<String, Object?>>[
+        const <String, Object?>{'payload': 'broadcast'},
+      ]);
+    });
+
+    test('onNotification throws StateError after dispose', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _dummyExtensionEntryPoint,
+        logger: logger,
+      );
+      await connection.dispose();
+
+      expect(
+        () => connection.onNotification('notify.customEvent'),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('ExtensionConnection has been disposed.'),
+          ),
+        ),
+      );
+    });
+
+    test(
+      'sendRequest with timeout: null completes with StateError when isolate exits unexpectedly',
+      () async {
+        final logger = BufferLogger.test();
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _exitingExtensionEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        final Stream<Map<String, Object?>> notificationStream = connection.onNotification(
+          'notify.customEvent',
+        );
+        final Future<void> streamDone = expectLater(notificationStream, emitsDone);
+
+        await expectLater(
+          connection.sendRequest('exit.triggerExit', timeout: null),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('The client closed with pending request "exit.triggerExit"'),
+            ),
+          ),
+        );
+        await streamDone;
+      },
+    );
+
+    test('sendRequest with timeout: null completes with StateError when isolate throws unhandled async error', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _asyncErrorExtensionEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      await expectLater(
+        connection.sendRequest('error.triggerUnhandledError', timeout: null),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('The client closed with pending request "error.triggerUnhandledError"'),
+          ),
+        ),
+      );
+      expect(logger.errorText, contains('Simulated unhandled async error'));
     });
   });
 }

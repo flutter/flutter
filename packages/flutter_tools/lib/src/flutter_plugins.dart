@@ -508,10 +508,10 @@ List<Map<String, Object>> _createPluginMapOfPlatform(
       _kFlutterPluginsPathKey: fileSystemUtils.escapePath(plugin.path),
       if (platformPlugin is DarwinPlugin && (platformPlugin as DarwinPlugin).sharedDarwinSource)
         _kFlutterPluginsSharedDarwinSource: (platformPlugin as DarwinPlugin).sharedDarwinSource,
-      if (platformPlugin is NativeOrDartPlugin)
+      if (platformPlugin is NativePlugin)
         _kFlutterPluginsHasNativeBuildKey:
-            (platformPlugin as NativeOrDartPlugin).hasMethodChannel() ||
-            (platformPlugin as NativeOrDartPlugin).hasFfi(),
+            (platformPlugin as NativePlugin).hasMethodChannel() ||
+            (platformPlugin as NativePlugin).hasFfi(),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
       _kFlutterPluginsDevDependencyKey: plugin.isDevDependency,
     });
@@ -1155,11 +1155,11 @@ List<Plugin> _filterMethodChannelPlugins(List<Plugin> plugins, String platformKe
     if (plugin == null) {
       return false;
     }
-    if (plugin is NativeOrDartPlugin) {
-      return (plugin as NativeOrDartPlugin).hasMethodChannel();
+    if (plugin is NativePlugin) {
+      return (plugin as NativePlugin).hasMethodChannel();
     }
     // Not all platforms have the ability to create Dart-only plugins. Therefore, any plugin that doesn't
-    // implement NativeOrDartPlugin is always native.
+    // implement NativePlugin is always native.
     return true;
   }).toList();
 }
@@ -1173,8 +1173,8 @@ List<Plugin> _filterFfiPlugins(List<Plugin> plugins, String platformKey) {
     if (plugin == null) {
       return false;
     }
-    if (plugin is NativeOrDartPlugin) {
-      final plugin_ = plugin as NativeOrDartPlugin;
+    if (plugin is NativePlugin) {
+      final plugin_ = plugin as NativePlugin;
       return plugin_.hasFfi();
     }
     return false;

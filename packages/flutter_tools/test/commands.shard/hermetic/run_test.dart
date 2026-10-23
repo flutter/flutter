@@ -2737,7 +2737,6 @@ class CapturingAppDomain extends AppDomain {
         analytics: const analytics.NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
-        toolContext: const DelegatingToolContext(),
         xcode: null,
       );
 
