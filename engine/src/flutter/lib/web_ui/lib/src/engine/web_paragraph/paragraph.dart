@@ -802,8 +802,9 @@ class TextSpan extends ParagraphSpan {
     final xPositions = Float64List(count);
     double lastX = domClusters.first.x;
     xPositions[0] = lastX;
-    bool isStrictlyIncreasing = lastX >= 0.0;
-    bool isStrictlyDecreasing = lastX <= 0.0;
+    // Canvas2D start alignment anchors the first visual cluster at 0.0 in both LTR and RTL.
+    var isStrictlyIncreasing = lastX == 0.0;
+    var isStrictlyDecreasing = lastX == 0.0;
     for (var i = 1; i < count; i++) {
       final double x = domClusters[i].x;
       xPositions[i] = x;

@@ -1252,11 +1252,13 @@ abstract class WebCluster {
 }
 
 class TextCluster extends WebCluster {
-  // Optional precomputed advance lets span extraction populate cluster geometry without browser queries.
+  // Optional precomputed advance lets span extraction populate cluster geometry without
+  // browser queries.
   TextCluster(this.span, this._cluster, {ui.Rect? advance})
     : startInSpan = _cluster.start,
       endInSpan = _cluster.end,
-      // Cache paragraph-wide UTF-16 bounds so sorting, mapping, and line wrapping avoid span.start additions.
+      // Cache paragraph-wide UTF-16 bounds so sorting, mapping, and line wrapping avoid
+      // span.start additions.
       start = span.start + _cluster.start,
       end = span.start + _cluster.end,
       _advance = advance;
@@ -1281,7 +1283,8 @@ class TextCluster extends WebCluster {
   final ui.Rect? _advance;
 
   @override
-  // Fall back to a browser selection query when x coordinates are tied or non-monotonic with negative spacing.
+  // Fall back to a browser selection query when x coordinates are tied or non-monotonic with
+  // negative spacing.
   late final ui.Rect advance = _advance ?? span.getClusterSelection(this);
 
   final DomTextCluster _cluster;
