@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
@@ -317,13 +318,22 @@ final class ExtensionBuildClient {
     required String mainPath,
     required Uri projectRoot,
     required String targetName,
+    Uri? flutterRoot,
+    Uri? outputDir,
+    Map<String, String> resolvedArtifacts = const <String, String>{},
   }) async {
+    final Uri rootDir = projectRoot.path.endsWith('/')
+        ? projectRoot
+        : projectRoot.replace(path: '${projectRoot.path}/');
     final Object? response = await _harness.sendRawRequest(
       BuildService.buildMethod,
       params: <String, Object?>{
         BuildService.buildModeParam: buildMode.cliName,
+        BuildService.flutterRootParam: (flutterRoot ?? rootDir).toString(),
         BuildService.mainPathParam: mainPath,
-        BuildService.projectRootParam: projectRoot.toString(),
+        BuildService.outputDirParam: (outputDir ?? rootDir.resolve('build/')).toString(),
+        BuildService.projectRootParam: rootDir.toString(),
+        BuildService.resolvedArtifactsParam: resolvedArtifacts,
         BuildService.targetNameParam: targetName,
       },
     );

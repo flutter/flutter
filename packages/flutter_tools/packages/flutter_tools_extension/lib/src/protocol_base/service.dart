@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
 
 /// Typedef for an extension RPC handler function.

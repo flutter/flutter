@@ -106,23 +106,26 @@ final class _TestDeviceService extends DeviceService {
   }
 }
 
-final class _TestBuildService extends BuildService {
-  @override
-  Future<List<ExtensionBuildTarget>> getBuildTargets() async {
-    return const <ExtensionBuildTarget>[
-      ExtensionBuildTarget(name: 'custom-target', description: 'Builds custom-target'),
-    ];
-  }
+final class _TestBuildTarget extends BuildTarget {
+  const _TestBuildTarget()
+    : super(
+        description: 'Builds custom-target',
+        outputDir: '${BuiltInPlaceholders.outputDir}/custom',
+        targetPlatform: 'linux-x64',
+      );
 
   @override
-  Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required String mainPath,
-    required Uri projectRoot,
-    required String targetName,
-  }) async {
-    return ExtensionBuildResult(success: targetName == 'custom-target');
+  String get name => 'custom-target';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return const ExtensionBuildResult(success: true);
   }
+}
+
+final class _TestBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[_TestBuildTarget()];
 }
 
 final class _TestCleanService extends CleanService {

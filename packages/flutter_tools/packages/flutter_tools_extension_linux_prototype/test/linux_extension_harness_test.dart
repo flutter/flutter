@@ -31,82 +31,73 @@ void main() {
   const methodNotFoundErrorCode = -32601;
 
   group('Linux Prototype ExtensionTestHarness', () {
-    test(
-      'spawn exercises typed protocol clients and build graceful-skip path over JSON-RPC 2.0',
-      () async {
-        final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
-          linuxExtensionEntryPoint,
-        );
-        addTearDown(harness.dispose);
+    test('spawn exercises typed protocol clients and build validation over JSON-RPC 2.0', () async {
+      final ExtensionTestHarness harness = await ExtensionTestHarness.spawn(
+        linuxExtensionEntryPoint,
+      );
+      addTearDown(harness.dispose);
 
-        expect(harness.capabilities.extensionName, 'flutter_tools_extension_linux_prototype');
-        expect(
-          harness.capabilities.protocolVersion,
-          ToolExtensionCapabilities.currentProtocolVersion,
-        );
-        expect(harness.capabilities.supportedPlatforms, <String>{'linux'});
-        expect(
-          harness.capabilities.services,
-          unorderedEquals(<String>[
-            'diagnostics',
-            'config',
-            'template',
-            'device',
-            'build',
-            'clean',
-          ]),
-        );
+      expect(harness.capabilities.extensionName, 'flutter_tools_extension_linux_prototype');
+      expect(
+        harness.capabilities.protocolVersion,
+        ToolExtensionCapabilities.currentProtocolVersion,
+      );
+      expect(harness.capabilities.supportedPlatforms, <String>{'linux'});
+      expect(
+        harness.capabilities.services,
+        unorderedEquals(<String>['diagnostics', 'config', 'template', 'device', 'build', 'clean']),
+      );
 
-        expect(await harness.diagnosticsClient.getTitle(), 'Linux Custom Extension Prototype');
-        final List<ValidationResult> diagnostics = await harness.diagnosticsClient.runDiagnostics();
-        expect(diagnostics, hasLength(1));
-        expect(diagnostics.first.type, ValidationType.success);
-        expect(diagnostics.first.statusInfo, 'Linux Prototype Extension OK');
+      expect(await harness.diagnosticsClient.getTitle(), 'Linux Custom Extension Prototype');
+      final List<ValidationResult> diagnostics = await harness.diagnosticsClient.runDiagnostics();
+      expect(diagnostics, hasLength(1));
+      expect(diagnostics.first.type, ValidationType.success);
+      expect(diagnostics.first.statusInfo, 'Linux Prototype Extension OK');
 
-        expect(await harness.configClient.getTitle(), 'Linux Custom Extension Prototype');
-        final List<FeatureFlag> flags = await harness.configClient.getFeatureFlags();
-        expect(flags, hasLength(1));
-        expect(flags.first.name, LinuxConfigurationExtension.kEnableLinuxCustomPrototype);
-        final List<ConfigOption> configs = await harness.configClient.getConfigurations();
-        expect(configs, hasLength(1));
-        expect(configs.first.name, LinuxConfigurationExtension.kLinuxGtkVersion);
+      expect(await harness.configClient.getTitle(), 'Linux Custom Extension Prototype');
+      final List<FeatureFlag> flags = await harness.configClient.getFeatureFlags();
+      expect(flags, hasLength(1));
+      expect(flags.first.name, LinuxConfigurationExtension.kEnableLinuxCustomPrototype);
+      final List<ConfigOption> configs = await harness.configClient.getConfigurations();
+      expect(configs, hasLength(1));
+      expect(configs.first.name, LinuxConfigurationExtension.kLinuxGtkVersion);
 
-        expect(await harness.templateClient.getAppTemplates(), isEmpty);
-        expect(await harness.templateClient.getPluginTemplates(), isEmpty);
-        final List<ExtensionProjectTemplate> templates = await harness.templateClient
-            .getProjectTemplates();
-        expect(templates, hasLength(1));
-        expect(templates.first.name, 'custom-linux-app');
-        final Map<String, Object?> params = await harness.templateClient.generateTemplateParameters(
-          'custom-linux-app',
-          const <String, Object?>{'projectName': 'demo_app'},
-        );
-        expect(params, const <String, Object?>{'projectName': 'demo_app'});
+      expect(await harness.templateClient.getAppTemplates(), isEmpty);
+      expect(await harness.templateClient.getPluginTemplates(), isEmpty);
+      final List<ExtensionProjectTemplate> templates = await harness.templateClient
+          .getProjectTemplates();
+      expect(templates, hasLength(1));
+      expect(templates.first.name, 'custom-linux-app');
+      final Map<String, Object?> params = await harness.templateClient.generateTemplateParameters(
+        'custom-linux-app',
+        const <String, Object?>{'projectName': 'demo_app'},
+      );
+      expect(params, const <String, Object?>{'projectName': 'demo_app'});
 
-        final List<TargetDevice> devices = await harness.deviceClient.getDevices();
-        expect(devices, hasLength(1));
-        expect(devices.first.id, LinuxDeviceService.customLinuxDeviceId);
+      final List<TargetDevice> devices = await harness.deviceClient.getDevices();
+      expect(devices, hasLength(1));
+      expect(devices.first.id, LinuxDeviceService.customLinuxDeviceId);
 
-        final List<ExtensionBuildTarget> buildTargets = await harness.buildClient.getBuildTargets();
-        expect(buildTargets, hasLength(1));
-        expect(buildTargets.first.name, LinuxBuildService.customLinuxBuildTargetName);
+      final List<ExtensionBuildTarget> buildTargets = await harness.buildClient.getBuildTargets();
+      expect(buildTargets, hasLength(1));
+      expect(buildTargets.first.name, LinuxBuildService.customLinuxBuildTargetName);
 
-        final ExtensionBuildResult buildResult = await harness.buildClient.build(
-          buildMode: .debug,
-          mainPath: 'lib/main.dart',
-          projectRoot: Uri.parse('file:///nonexistent_project_root/'),
-          targetName: LinuxBuildService.customLinuxBuildTargetName,
-        );
-        expect(buildResult.success, isTrue);
+      final ExtensionBuildResult buildResult = await harness.buildClient.build(
+        buildMode: .debug,
+        mainPath: 'lib/main.dart',
+        projectRoot: Uri.parse('file:///nonexistent_project_root/'),
+        targetName: LinuxBuildService.customLinuxBuildTargetName,
+      );
+      expect(buildResult.success, isFalse);
+      expect(buildResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
 
-        await expectLater(
-          harness.sendRawRequest('unknown.method'),
-          throwsA(
-            isA<RpcException>().having((RpcException e) => e.code, 'code', methodNotFoundErrorCode),
-          ),
-        );
-      },
-    );
+      await expectLater(
+        harness.sendRawRequest('unknown.method'),
+        throwsA(
+          isA<RpcException>().having((RpcException e) => e.code, 'code', methodNotFoundErrorCode),
+        ),
+      );
+    });
 
     test(
       'deviceClient and cleanClient work with injected hermetic ExtensionDependencies',

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:flutter_tools_core/json.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
@@ -15,8 +16,8 @@ abstract base class DeviceService extends ToolExtensionService {
 
   static const String _getDevicesRpcMethod = 'getDevices';
   static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
-  static const String _startLogStreamRpcMethod = 'startLogStream';
-  static const String _stopLogStreamRpcMethod = 'stopLogStream';
+  static const _startLogStreamRpcMethod = 'startLogStream';
+  static const _stopLogStreamRpcMethod = 'stopLogStream';
 
   /// RPC method identifier to query contributed target devices.
   static const String getDevicesMethod = '$serviceNamespace.$_getDevicesRpcMethod';
@@ -26,14 +27,14 @@ abstract base class DeviceService extends ToolExtensionService {
       '$serviceNamespace.$_isSupportedForProjectRpcMethod';
 
   /// RPC method identifier to start streaming log output for a target device.
-  static const String startLogStreamMethod = '$serviceNamespace.$_startLogStreamRpcMethod';
+  static const startLogStreamMethod = '$serviceNamespace.$_startLogStreamRpcMethod';
 
   /// RPC method identifier to stop streaming log output for a target device.
-  static const String stopLogStreamMethod = '$serviceNamespace.$_stopLogStreamRpcMethod';
+  static const stopLogStreamMethod = '$serviceNamespace.$_stopLogStreamRpcMethod';
 
   /// JSON-RPC 2.0 notification method emitted by the extension for each device
   /// log line.
-  static const String logEntryNotificationMethod = '$serviceNamespace.logEntry';
+  static const logEntryNotificationMethod = '$serviceNamespace.logEntry';
 
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
@@ -43,11 +44,11 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// RPC parameter key for the optional application identifier when starting a
   /// device log stream.
-  static const String appIdParam = 'appId';
+  static const appIdParam = 'appId';
 
   /// JSON key for the log line text in [logEntryNotificationMethod]
   /// notifications.
-  static const String lineKey = 'line';
+  static const lineKey = 'line';
 
   @override
   String get namespace => serviceNamespace;
@@ -108,7 +109,7 @@ abstract base class DeviceService extends ToolExtensionService {
       );
       project = ExtensionFlutterProject.fromJson(projectMap);
     } on FormatException catch (e) {
-      throw json_rpc.RpcException.invalidParams(e.message);
+      throw RpcException.invalidParams(e.message);
     }
     return isSupportedForProject(deviceId: deviceId, project: project);
   }
@@ -120,10 +121,10 @@ abstract base class DeviceService extends ToolExtensionService {
       deviceId = params.requiredField<String>(deviceIdParam);
       appId = params.nullableField<String>(appIdParam);
     } on FormatException catch (e) {
-      throw json_rpc.RpcException.invalidParams(e.message);
+      throw RpcException.invalidParams(e.message);
     }
     if (deviceId.isEmpty) {
-      throw json_rpc.RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
+      throw RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
     }
     await startLogStream(deviceId: deviceId, appId: appId);
     return null;
@@ -134,10 +135,10 @@ abstract base class DeviceService extends ToolExtensionService {
     try {
       deviceId = params.requiredField<String>(deviceIdParam);
     } on FormatException catch (e) {
-      throw json_rpc.RpcException.invalidParams(e.message);
+      throw RpcException.invalidParams(e.message);
     }
     if (deviceId.isEmpty) {
-      throw json_rpc.RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
+      throw RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
     }
     await stopLogStream(deviceId: deviceId);
     return null;
