@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMMAND_BUFFER_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMMAND_BUFFER_VK_H_
 
-#include "fml/status_or.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
@@ -13,6 +12,7 @@
 #include "impeller/renderer/backend/vulkan/tracked_objects_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/command_buffer.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -71,7 +71,7 @@ class CommandBufferVK final
   bool EndCommandBuffer() const;
 
   /// @brief Allocate a new descriptor set for the given [layout].
-  fml::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
+  absl::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
       const vk::DescriptorSetLayout& layout,
       PipelineKey pipeline_key,
       const ContextVK& context);
