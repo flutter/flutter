@@ -3,54 +3,38 @@
 # found in the LICENSE file.
 
 # packages/flutter/test/widgets under Bazel: each *_test.dart compiled by the
-# frontend server and run on the Bazel-built flutter_tester, as `flutter test`
-# runs it (engine/src/flutter/build/bazel/dart/flutter_test.bzl; research/15).
-# The pilot directory of NEED_DECISION D14.
+# frontend server from the test tree's prelude kernel and run on the
+# Bazel-built flutter_tester, as `flutter test` runs it (../framework_tests.bzl;
+# engine/src/flutter/build/bazel/dart/flutter_test.bzl; research/15).
 #
-#   bazel test //packages/flutter/test/widgets:text_test
-#   bazel test //packages/flutter/test/widgets:all
+#   bazel test //packages/flutter/test/widgets:widgets
 
-load("//engine/src/flutter/build/bazel/dart:flutter_test.bzl", "flutter_tests")
+load("//packages/flutter/test:framework_tests.bzl", "framework_tests")
 
 package(default_visibility = ["//visibility:public"])
 
-# The helpers beside the tests (semantics_tester.dart, ...): everything of
-# the directory that is not a test, for these tests and the other
-# directories' (//packages/flutter/test:helpers).
+# The helpers beside the tests, for these tests and the other directories'
+# (//packages/flutter/test:helpers).
 filegroup(
     name = "helpers",
     srcs = glob(
         ["**/*.dart"],
-        exclude = ["*_test.dart"],
+        allow_empty = True,
+        exclude = ["**/*_test.dart"],
     ),
 )
 
-flutter_tests(
+framework_tests(
     name = "widgets",
-    app_name = "flutter",
-    assets = "//packages/flutter/test:test_assets",
-    # What a test reads at run time: the directory's files that are not Dart.
-    data = glob(
-        ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/*.dart",
-            "BUILD.bazel",
-        ],
-    ),
     # binding_live_test's one test (LiveTestWidgetsFlutterBinding, awaiting a
     # real frame) hung to its timeout in two of three full runs under 24
     # parallel compiles and passes 8 of 8 alone; rerun on failure, a minute
     # per attempt.
     flaky = ["binding_live_test.dart"],
-    package_config = "//packages/flutter/test:package_config",
-    prelude = "//packages/flutter/test:prelude",
-    runtime_package_config = "//packages/flutter/test:runtime_package_config",
-    test_config = "//packages/flutter/test:flutter_test_config.dart",
-    # Every test file but the web-only ones: `@TestOn('chrome')` and
-    # `@TestOn('browser')` import dart:ui_web and dart:js_interop, which the
-    # VM's compile has no libraries for; `flutter test` skips such a file by
-    # its annotation, which a BUILD file cannot read.
+    # html_element_view_test.dart and selectable_region_context_menu_test.dart
+    # are web-only (`@TestOn('chrome')`, `@TestOn('browser')`: dart:ui_web and
+    # dart:js_interop have no VM compile; `flutter test` skips such a file by
+    # its annotation, which a BUILD file cannot read).
     tests = glob(
         ["*_test.dart"],
         exclude = [
@@ -58,6 +42,4 @@ flutter_tests(
             "selectable_region_context_menu_test.dart",
         ],
     ),
-    # The test tree's helpers, this directory's among them.
-    deps = ["//packages/flutter/test:helpers"],
 )

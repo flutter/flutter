@@ -1,0 +1,30 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# packages/flutter/test/scheduler under Bazel: each *_test.dart compiled by the
+# frontend server from the test tree's prelude kernel and run on the
+# Bazel-built flutter_tester, as `flutter test` runs it (../framework_tests.bzl;
+# engine/src/flutter/build/bazel/dart/flutter_test.bzl; research/15).
+#
+#   bazel test //packages/flutter/test/scheduler:scheduler
+
+load("//packages/flutter/test:framework_tests.bzl", "framework_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+# The helpers beside the tests, for these tests and the other directories'
+# (//packages/flutter/test:helpers).
+filegroup(
+    name = "helpers",
+    srcs = glob(
+        ["**/*.dart"],
+        allow_empty = True,
+        exclude = ["**/*_test.dart"],
+    ),
+)
+
+framework_tests(
+    name = "scheduler",
+    tests = glob(["*_test.dart"]),
+)

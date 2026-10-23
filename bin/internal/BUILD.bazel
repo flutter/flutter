@@ -1,0 +1,11 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The SDK's version pins; the Bazel build reads the Material fonts' to fetch
+# the fonts the framework's tests load
+# (engine/src/flutter/build/bazel/dart/flutter_sdk_cache.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["material_fonts.version"])

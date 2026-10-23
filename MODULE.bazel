@@ -119,6 +119,11 @@ use_repo(engine_version, "engine_version")
 pub = use_extension("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub")
 use_repo(pub, "pub")
 
+# The Flutter SDK's cache artifacts the framework's tests read through
+# FLUTTER_ROOT (the Material fonts; build/bazel/dart/flutter_sdk_cache.bzl).
+flutter_sdk_cache = use_extension("//engine/src/flutter/build/bazel/dart:flutter_sdk_cache.bzl", "flutter_sdk_cache")
+use_repo(flutter_sdk_cache, "material_fonts")
+
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
 # found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
 register_toolchains(
