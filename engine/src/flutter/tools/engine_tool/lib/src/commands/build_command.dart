@@ -88,9 +88,12 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
   }
 
   /// The Bazel build of the same configuration: `bazel build --config=<name>`
-  /// of the targets' Bazel counterparts, or -- with no targets, GN's default
-  /// of everything -- the build's install target run into its build
-  /// directory, which is what a GN build leaves behind.
+  /// of the targets' Bazel counterparts, or, with no targets (GN's default of
+  /// everything), the whole build: for the host's own, the local engine
+  /// target, whose manifest the flutter tool reads where the outputs are
+  /// (the directory to name is printed); for a CI build or another
+  /// platform's, the build's install target run into its build directory,
+  /// which is what a GN build leaves behind.
   Future<int> _runBazel(BuildPlan plan, List<String> commandLineTargets) async {
     final bazel = Bazel(environment, _configs);
     final String? config = bazel.configFor(plan.build);
@@ -104,6 +107,17 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       return 1;
     }
     if (commandLineTargets.isEmpty) {
+      if (bazel.usesLocalEngineManifest(plan.build)) {
+        final String? localEngine = await bazel.buildLocalEngine(config);
+        if (localEngine == null) {
+          return 1;
+        }
+        environment.logger.status(
+          'Local engine: $localEngine\n'
+          '  flutter <command> --local-engine=$localEngine --local-engine-host=$localEngine',
+        );
+        return 0;
+      }
       return bazel.run(<String>[
         'run',
         '--config=$config',
