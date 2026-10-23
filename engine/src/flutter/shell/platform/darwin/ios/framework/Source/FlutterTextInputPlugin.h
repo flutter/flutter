@@ -142,7 +142,12 @@ FLUTTER_DARWIN_EXPORT
 
 // UITextInput
 @property(nonatomic, readonly) NSMutableString* text;
-// Replaces the complete text value supplied by UIKit autofill.
+/**
+ * Replaces the entire document with the value supplied by UIKit autofill.
+ *
+ * Clears marked text and collapses the selection to the end of the replacement.
+ * Passing nil clears the document.
+ */
 - (void)setText:(nullable NSString*)text;
 @property(readwrite, copy) UITextRange* selectedTextRange;
 @property(nonatomic, strong) UITextRange* markedTextRange;
