@@ -142,16 +142,31 @@ See `flutter run --help` for a listing
 
     final List<Label> buildTargetsForShell = target?.buildTargetsForShell ?? [];
 
+    // What `flutter run --local-engine[-host]` is given below: GN's build
+    // directory names, or, for a build the flutter tool reads where Bazel
+    // built it, that directory.
+    final localEngines = <String, String>{};
     if (plan.backend == BuildBackend.bazel) {
-      // The host build, and the target build when it is another one: each
-      // its install target run into its build directory, which is where
-      // `flutter run --local-engine` reads below (the whole of the build,
-      // as GN's default target; the shell's targets are among it).
+      // The host build, and the target build when it is another one: the
+      // host's own through its local engine manifest, which `flutter run
+      // --local-engine` reads in place; another platform's (Android's,
+      // whose Gradle plugin reads GN's layout) through its install target
+      // run into its build directory (the whole of the build, as GN's
+      // default target; the shell's targets are among it).
       final bazel = Bazel(environment, _configs);
       for (final build in <Build>[hostBuild, if (hostBuild.name != plan.build.name) plan.build]) {
         final String? config = bazel.configFor(build);
         if (config == null) {
           return 1;
+        }
+        if (bazel.usesLocalEngineManifest(build)) {
+          final String? localEngine = await bazel.buildLocalEngine(config);
+          if (localEngine == null) {
+            environment.logger.error('Failed to build ${build.name}');
+            return 1;
+          }
+          localEngines[build.name] = localEngine;
+          continue;
         }
         final int exitCode = await bazel.run(<String>[
           'run',
@@ -196,8 +211,10 @@ See `flutter run --help` for a listing
       }
     }
 
-    final String mangledBuildName = mangleConfigName(environment, plan.build.name);
-    final String mangledHostBuildName = mangleConfigName(environment, hostBuild.name);
+    final String mangledBuildName =
+        localEngines[plan.build.name] ?? mangleConfigName(environment, plan.build.name);
+    final String mangledHostBuildName =
+        localEngines[hostBuild.name] ?? mangleConfigName(environment, hostBuild.name);
     final command = <String>[
       'flutter',
       'run',

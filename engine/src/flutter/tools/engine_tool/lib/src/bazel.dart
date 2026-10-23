@@ -72,6 +72,14 @@ final class Bazel {
   /// The install target of the whole tree (GN's default target).
   static const String installTarget = '$rootPackage/flutter:install';
 
+  /// The local engine target of the whole tree: the build's artifacts where
+  /// Bazel builds them and `local_engine.json` beside them, which the flutter
+  /// tool reads through `--local-engine` (build/bazel/local_engine.bzl).
+  static const String localEngineTarget = '$rootPackage/flutter:local_engine';
+
+  /// The manifest [localEngineTarget] writes.
+  static const String localEngineManifest = 'local_engine.json';
+
   /// What the converter made of [build]: its configuration name, or null
   /// with the reasons it has none.
   gn_to_bazel.BuilderBuild? _builderBuild(Build build) {
@@ -116,6 +124,64 @@ final class Bazel {
       return installTarget;
     }
     return '$rootPackage/flutter/ci/builders:${builderBuild.configName}';
+  }
+
+  /// Whether the flutter tool reads [build]'s outputs where Bazel builds
+  /// them, through `local_engine.json`: a developer's build of the host's own
+  /// platform (no ninja targets, no `--platforms`). A CI build's install lays
+  /// what its recipe uploads, and another platform's build is read by that
+  /// platform's tooling -- Android's Gradle plugin takes `-Plocal-engine-out`
+  /// as GN's layout -- so those keep their install targets.
+  bool usesLocalEngineManifest(Build build) {
+    final gn_to_bazel.BuilderBuild? builderBuild = _builderBuild(build);
+    return builderBuild != null &&
+        builderBuild.ninjaTargets.isEmpty &&
+        builderBuild.platform == null;
+  }
+
+  /// Builds [localEngineTarget] under [config] and returns the directory
+  /// holding its manifest -- the value for `--local-engine` and
+  /// `--local-engine-host` -- or null, the error logged, when a step fails.
+  ///
+  /// The directory is the configuration's own under `bazel-out`
+  /// (`<execroot>/bazel-out/k8-dbg/bin/engine/src/flutter`), found from
+  /// `bazel info output_path` and the manifest's path among the target's
+  /// outputs (`bazel cquery --output=files`), rather than the `bazel-bin`
+  /// convenience symlink, which follows the last build of any configuration.
+  Future<String?> buildLocalEngine(String config) async {
+    final int exitCode = await run(<String>['build', '--config=$config', localEngineTarget]);
+    if (exitCode != 0) {
+      return null;
+    }
+    final List<String>? outputPath = await _lines(<String>[
+      'info',
+      '--config=$config',
+      'output_path',
+    ]);
+    if (outputPath == null || outputPath.length != 1) {
+      _environment.logger.error('bazel info output_path did not name the output directory.');
+      return null;
+    }
+    final List<String>? files = await _lines(<String>[
+      'cquery',
+      '--config=$config',
+      '--output=files',
+      localEngineTarget,
+    ]);
+    if (files == null) {
+      return null;
+    }
+    const manifestSuffix = '/$localEngineManifest';
+    for (final String file in files) {
+      if (file.endsWith(manifestSuffix)) {
+        // `bazel-out/<configuration>/bin/...`, relative to the execution
+        // root, which output_path is `bazel-out` of.
+        final String executionRoot = p.dirname(outputPath.single);
+        return p.normalize(p.join(executionRoot, p.dirname(file)));
+      }
+    }
+    _environment.logger.error('$localEngineTarget has no $localEngineManifest among its outputs.');
+    return null;
   }
 
   /// The test suite of [build] (`//engine/src/flutter/ci/builders:<name>_tests`,
@@ -195,13 +261,20 @@ final class Bazel {
 
   /// Runs `bazel query <expression>` from `engine/src` and returns the
   /// labels it prints, or null (the error logged) when the query fails.
-  Future<List<String>?> query(String expression) async {
+  Future<List<String>?> query(String expression) {
+    return _lines(<String>['query', '--output=label', expression]);
+  }
+
+  /// Runs `bazel <arguments>` from `engine/src`, capturing its output, and
+  /// returns the non-empty lines it prints, or null (the error logged) when
+  /// it fails.
+  Future<List<String>?> _lines(List<String> arguments) async {
     final String? executable = _executable();
     if (executable == null) {
       _environment.logger.error(_noBazel);
       return null;
     }
-    final command = <String>[executable, 'query', '--output=label', expression];
+    final command = <String>[executable, ...arguments];
     _environment.logger.info('Running: ${command.join(' ')}');
     final ProcessRunnerResult result = await _environment.processRunner.runProcess(
       command,
@@ -209,7 +282,7 @@ final class Bazel {
       failOk: true,
     );
     if (result.exitCode != 0) {
-      _environment.logger.error('bazel query failed:\n${result.stderr}');
+      _environment.logger.error('bazel ${arguments.first} failed:\n${result.stderr}');
       return null;
     }
     return <String>[
