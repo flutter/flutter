@@ -1,0 +1,32 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# ci/host_debug_unopt's "test: service protocol" (linux_unopt.json): `dart
+# flutter/shell/testing/vm_service/test.dart out/<build>/flutter_tester
+# flutter/shell/testing/vm_service/empty_main.dart` -- test.dart launches
+# flutter_tester on empty_main.dart with the VM service on a free port,
+# connects (service_client.dart) and exercises the protocol. Hand-written:
+# the directory has no BUILD.gn; the step is the builder file's. flutter_tester
+# runs the Dart source through the VM's kernel service, which reads the
+# patched SDK beside the binary, as in GN's build directory.
+load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+dart_package_test(
+    name = "service_protocol_test",
+    size = "medium",
+    srcs = glob(["*.dart"]),
+    build_directory = {
+        "//engine/src/flutter/shell/testing:flutter_tester": "",
+        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
+        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
+        "@icu//:icudata": "",
+    },
+    script = "test.dart",
+    script_args = [
+        "{build_directory}/flutter_tester",
+        "empty_main.dart",
+    ],
+)

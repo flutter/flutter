@@ -30,3 +30,21 @@ dart_package_test(
         "//engine/src/flutter/tools/pkg/process_fakes:dart_sources",
     ],
 )
+
+# ci/host_debug_unopt's "Check build configs" (linux_unopt.json):
+# ci/check_build_configs.sh runs bin/check.dart over the builder files of the
+# checkout (`--engine-src-path=<engine/src>`), the same package's check that
+# `tests` above exercises on fixtures.
+dart_package_test(
+    name = "check_build_configs",
+    data = [
+        "//engine/src/flutter:.ci.yaml",
+        "//engine/src/flutter/ci:builder_configs",
+    ],
+    script = "bin/check.dart",
+    script_args = ["--engine-src-path={engine_src}"],
+    deps = [
+        ":dart_sources",
+        "//engine/src/flutter/tools/pkg/process_fakes:dart_sources",
+    ],
+)
