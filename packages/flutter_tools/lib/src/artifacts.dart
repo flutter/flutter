@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -17,6 +15,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'context/tool_context.dart';
+import 'convert.dart';
 
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
@@ -1196,8 +1195,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
         }
         return file;
       case HostArtifact.shaderLib:
-        final Directory directory = _fileSystem.directory(
-          _host.resolve(<String>[artifact.getFileName(_platform)]),
+        final Directory directory = fs.directory(
+          _host.resolve(<String>[artifact.getFileName(platform)]),
         );
         if (!directory.existsSync()) {
           return _backupCache.getHostArtifact(artifact);
