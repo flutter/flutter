@@ -187,6 +187,48 @@ abstract class ChromiumDevice extends WebDevice {
     _logReader?.dispose();
     await portForwarder?.dispose();
   }
+
+  /// Attempts to read the Chromium browser version from the versioned
+  /// subdirectory alongside the browser executable on Windows
+  /// (e.g. `...\Application\131.0.2903.70\`), avoiding spawning `reg.exe`.
+  String? _readVersionFromApplicationDirectory() {
+    final Directory applicationDir = _fileSystem.file(chromeLauncher.findExecutable()).parent;
+    if (!applicationDir.existsSync()) {
+      return null;
+    }
+    String? highestVersionString;
+    for (final FileSystemEntity entity in applicationDir.listSync()) {
+      if (entity is Directory) {
+        final String basename = _fileSystem.path.basename(entity.path);
+        if (Version.parse(basename) != null &&
+            (highestVersionString == null ||
+                _compareVersionStrings(basename, highestVersionString) > 0)) {
+          highestVersionString = basename;
+        }
+      }
+    }
+    return highestVersionString;
+  }
+
+  // [Version] only compares `major.minor.patch`, whereas Chromium version
+  // directories have 4 components (`<major>.<minor>.<build>.<patch>`).
+  static int _compareVersionStrings(String a, String b) {
+    final List<int?> aParts = a.split('.').map(int.tryParse).toList();
+    final List<int?> bParts = b.split('.').map(int.tryParse).toList();
+    final int length = aParts.length < bParts.length ? aParts.length : bParts.length;
+    for (var i = 0; i < length; i++) {
+      final int? aPart = aParts[i];
+      final int? bPart = bParts[i];
+      if (aPart == null || bPart == null) {
+        return a.compareTo(b);
+      }
+      final int comparison = aPart.compareTo(bPart);
+      if (comparison != 0) {
+        return comparison;
+      }
+    }
+    return aParts.length.compareTo(bParts.length);
+  }
 }
 
 /// The Google Chrome browser based on Chromium.
@@ -218,6 +260,10 @@ class GoogleChromeDevice extends ChromiumDevice {
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
     var version = 'unknown';
     if (_platform.isWindows) {
+      final String? directoryVersion = _readVersionFromApplicationDirectory();
+      if (directoryVersion != null) {
+        return 'Google Chrome $directoryVersion';
+      }
       if (_processManager.canRun('reg')) {
         final ProcessResult result = await _processManager.run(<String>[
           r'reg',
@@ -277,6 +323,13 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   late final Future<String> sdkNameAndVersion = _getSdkNameAndVersion();
 
   Future<String> _getSdkNameAndVersion() async {
+    if (!await isSupported()) {
+      return '';
+    }
+    final String? directoryVersion = _readVersionFromApplicationDirectory();
+    if (directoryVersion != null) {
+      return 'Microsoft Edge $directoryVersion';
+    }
     if (_processManager.canRun('reg')) {
       final ProcessResult result = await _processManager.run(<String>[
         r'reg',
@@ -364,7 +417,10 @@ class WebDevices extends PollingDeviceDiscovery {
     return <Device>[
       if (WebServerDevice.showWebServerDevice) _webServerDevice,
       if (await _chromeDevice.isSupported()) _chromeDevice,
-      if (edgeDevice != null && await edgeDevice._meetsVersionConstraint()) edgeDevice,
+      if (edgeDevice != null &&
+          await edgeDevice.isSupported() &&
+          await edgeDevice._meetsVersionConstraint())
+        edgeDevice,
     ];
   }
 

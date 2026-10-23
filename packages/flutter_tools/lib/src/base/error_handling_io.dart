@@ -1481,6 +1481,8 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kUserMappedSectionOpened = 1224;
   const kAccessDisabledByPolicy = 1260;
   const kPrivilegeNotHeld = 1314;
+  const kInsufficientSystemResources = 1450;
+  const kPagingFileTooSmall = 1455;
   const kApplicationControlPolicyBlocked = 4551;
 
   // Catch errors and bail when:
@@ -1515,6 +1517,10 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The device was not found.'
           '\n$e\n'
           'Verify the device is mounted and try again.',
+    kInsufficientSystemResources || kPagingFileTooSmall =>
+      '${message != null ? "$message. " : ""}Your system is running low on available memory or paging file space.\n'
+          '$e\n'
+          'Consider closing unused applications or increasing the Windows virtual memory paging file size and trying again.',
     kApplicationControlPolicyBlocked ||
     kAccessDisabledByPolicy ||
     kSystemIntegrityPolicyViolation =>
