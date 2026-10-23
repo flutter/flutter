@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
+import 'android/java.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'flutter_manifest.dart';
 import 'git.dart';
 import 'project.dart';
@@ -33,17 +37,9 @@ abstract class MachineProjectValidator extends ProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class VariableDumpMachineProjectValidator extends MachineProjectValidator {
-  VariableDumpMachineProjectValidator({
-    required this.logger,
-    required this.fileSystem,
-    required this.platform,
-    required this.git,
-  });
+  const VariableDumpMachineProjectValidator({required this.toolContext});
 
-  final Logger logger;
-  final FileSystem fileSystem;
-  final Platform platform;
-  final Git git;
+  final ToolContext toolContext;
 
   String _toJsonValue(Object? obj) {
     var value = obj.toString();
@@ -56,6 +52,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+    final ToolContext(fs: FileSystem fileSystem, :Git git, :Platform platform) = toolContext;
     final version = FlutterVersion(flutterRoot: Cache.flutterRoot!, fs: fileSystem, git: git);
     final result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,
@@ -116,6 +113,16 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class GeneralInfoProjectValidator extends ProjectValidator {
+  const GeneralInfoProjectValidator({
+    required this.java,
+    required this.logger,
+    required this.processManager,
+  });
+
+  final Java? java;
+  final Logger logger;
+  final ProcessManager processManager;
+
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final FlutterManifest flutterManifest = project.manifest;
@@ -139,7 +146,13 @@ class GeneralInfoProjectValidator extends ProjectValidator {
       result.add(_materialDesignResult(flutterManifest));
       result.add(_pluginValidatorResult(flutterManifest));
     }
-    result.add(await project.android.validateJavaAndGradleAgpVersions());
+    result.add(
+      await project.android.validateJavaAndGradleAgpVersions(
+        java: java,
+        logger: logger,
+        processManager: processManager,
+      ),
+    );
     return result;
   }
 

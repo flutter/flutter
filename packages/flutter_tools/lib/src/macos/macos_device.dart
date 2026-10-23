@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -55,12 +56,14 @@ class MacOSDevice extends DesktopDevice {
     String? mainPath,
     bool usingCISystem = false,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     await buildMacOS(
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.current(fs, logger: logger),
       buildInfo: buildInfo,
       targetOverride: mainPath,
-      verboseLogging: toolContext.logger.isVerbose,
+      verboseLogging: logger.isVerbose,
       usingCISystem: usingCISystem,
+      toolContext: toolContext,
     );
   }
 

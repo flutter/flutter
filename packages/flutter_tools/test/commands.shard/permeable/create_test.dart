@@ -1104,7 +1104,7 @@ void main() {
 
     await runner.run(<String>['create', '--template=module', '--no-pub', projectDir.path]);
 
-    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir, logger: globals.logger);
     expect(project.usesAndroidX, true);
   });
 
@@ -2019,7 +2019,10 @@ void main() {
         'com.example',
         tmpProjectDir,
       ]);
-      FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
+      FlutterProject project = FlutterProject.fromDirectory(
+        globals.fs.directory(tmpProjectDir),
+        logger: globals.logger,
+      );
       expect(
         await project.ios.productBundleIdentifier(BuildInfo.debug),
         'com.example.helloFlutter',
@@ -2045,7 +2048,10 @@ void main() {
         'abc^*.1#@',
         tmpProjectDir,
       ]);
-      project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
+      project = FlutterProject.fromDirectory(
+        globals.fs.directory(tmpProjectDir),
+        logger: globals.logger,
+      );
       expect(await project.ios.productBundleIdentifier(BuildInfo.debug), 'abc.1.testAbc');
       expect(project.android.applicationId, 'abc.u1.test_abc');
 
@@ -2058,7 +2064,10 @@ void main() {
         '#+^%',
         tmpProjectDir,
       ]);
-      project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
+      project = FlutterProject.fromDirectory(
+        globals.fs.directory(tmpProjectDir),
+        logger: globals.logger,
+      );
       expect(await project.ios.productBundleIdentifier(BuildInfo.debug), 'flutterProject.untitled');
       expect(project.android.applicationId, 'flutter_project.untitled');
       expect(project.linux.applicationId, 'flutter_project.untitled');
@@ -2207,7 +2216,10 @@ void main() {
       ], <String>[]);
       projectDir.childDirectory('.ios').deleteSync(recursive: true);
       await _createProject(projectDir, <String>[], <String>[]);
-      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+      final FlutterProject project = FlutterProject.fromDirectory(
+        projectDir,
+        logger: globals.logger,
+      );
       expect(
         await project.ios.productBundleIdentifier(BuildInfo.debug),
         'com.bar.foo.flutterProject',
@@ -2254,7 +2266,7 @@ void main() {
     ], <String>[]);
     projectDir.childDirectory('ios').deleteSync(recursive: true);
     await _createProject(projectDir, <String>['--no-pub'], <String>[]);
-    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir, logger: globals.logger);
     expect(
       await project.ios.productBundleIdentifier(BuildInfo.debug),
       'com.bar.foo.flutterProject',
@@ -2291,7 +2303,10 @@ void main() {
           'ios/Classes/FlutterProjectPlugin.swift',
         ],
       );
-      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+      final FlutterProject project = FlutterProject.fromDirectory(
+        projectDir,
+        logger: globals.logger,
+      );
       expect(
         await project.example.ios.productBundleIdentifier(BuildInfo.debug),
         'com.bar.foo.flutterProjectExample',
@@ -2333,7 +2348,10 @@ void main() {
           'ios/Classes/FlutterProjectPlugin.swift',
         ],
       );
-      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+      final FlutterProject project = FlutterProject.fromDirectory(
+        projectDir,
+        logger: globals.logger,
+      );
       expect(
         await project.example.ios.productBundleIdentifier(BuildInfo.debug),
         'com.bar.foo.flutterProjectExample',
@@ -5364,7 +5382,11 @@ CreateCommand createCreateCommand({
           processManager: globals.processManager,
           cache: globals.cache,
           flutterVersion: globals.flutterVersion,
-          projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
+          projectFactory: FlutterProjectFactory(
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            config: globals.config,
+          ),
         ),
     extensionTemplateManager: extensionTemplateManager,
     net:

@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -158,7 +159,7 @@ void main() {
             'APP_NAME': '',
             'FLUTTER_TEST_IMPELLER': 'true',
             'PATH':
-                '${device.nativeAssetsBuilder!.windowsBuildDirectory(project)};${platform.environment['PATH']}',
+                '${device.nativeAssetsBuilder!.windowsBuildDirectory(project, toolContext: FakeToolContext(fs: fileSystem))};${platform.environment['PATH']}',
           },
         ),
       );
@@ -517,5 +518,6 @@ class FakeFontConfigManager extends Fake implements FontConfigManager {
 
 class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {
   @override
-  String windowsBuildDirectory(FlutterProject project) => r'C:\native_assets\path';
+  String windowsBuildDirectory(FlutterProject project, {required ToolContext toolContext}) =>
+      r'C:\native_assets\path';
 }

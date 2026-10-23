@@ -66,7 +66,7 @@ class BundleBuilder {
       platform: Platform hostPlatform,
       :ProcessManager processManager,
     ) = _toolContext;
-    project ??= FlutterProject.current();
+    project ??= FlutterProject.current(fs, logger: logger);
     mainPath ??= defaultMainPath(fs);
     depfilePath ??= defaultDepfilePath(config: config, fileSystem: fs);
     assetDirPath ??= getAssetBuildDirectory(config, fs);

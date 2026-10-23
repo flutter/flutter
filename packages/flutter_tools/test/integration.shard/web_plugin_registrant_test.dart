@@ -287,7 +287,11 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
       processManager: globals.processManager,
       cache: globals.cache,
       flutterVersion: FakeFlutterVersion(),
-      projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        config: globals.config,
+      ),
     ),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);

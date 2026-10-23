@@ -323,7 +323,10 @@ class ManifestAssetBundle implements AssetBundle {
   }) async {
     if (flutterProject == null) {
       try {
-        flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
+        flutterProject = FlutterProject.fromDirectory(
+          _fileSystem.file(manifestPath).parent,
+          logger: _logger,
+        );
       } on Exception catch (e) {
         _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         _logger.printError('$e');

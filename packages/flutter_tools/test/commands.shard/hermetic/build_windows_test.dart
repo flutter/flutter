@@ -102,7 +102,11 @@ void main() {
       os: osUtils ?? FakeOperatingSystemUtils(),
       platform: platform ?? windowsPlatform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildWindowsCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

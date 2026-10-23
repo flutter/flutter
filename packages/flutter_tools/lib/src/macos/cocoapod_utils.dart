@@ -5,7 +5,9 @@
 import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
@@ -20,6 +22,7 @@ Future<void> processPodsIfNeeded(
   BuildMode buildMode, {
   bool forceCocoaPodsOnly = false,
   bool forceSwiftPM = false,
+  required ToolContext toolContext,
 }) async {
   final FlutterProject project = xcodeProject.parent;
 
@@ -33,6 +36,9 @@ Future<void> processPodsIfNeeded(
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(
     project,
+    cocoaPods: globals.cocoaPods,
+    featureFlags: featureFlags,
+    toolContext: toolContext,
     iosPlatform: project.ios.existsSync(),
     macOSPlatform: project.macos.existsSync(),
     forceCocoaPodsOnly: forceCocoaPodsOnly,
@@ -60,11 +66,8 @@ Future<void> processPodsIfNeeded(
 
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
     final swiftPackageManager = SwiftPackageManager(
-      fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
-      processUtils: globals.processUtils,
-      config: globals.config,
-      logger: globals.logger,
+      toolContext: toolContext,
     );
     final FlutterDarwinPlatform platform = xcodeProject is IosProject
         ? FlutterDarwinPlatform.ios

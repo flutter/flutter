@@ -50,7 +50,7 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required XCDevice xcDevice,
     ExtensionManager? extensionManager,
-  }) : super(logger: toolContext.logger) {
+  }) : super(fileSystem: toolContext.fs, logger: toolContext.logger) {
     final ToolContext(
       fs: FileSystem fileSystem,
       :Logger logger,
@@ -104,7 +104,6 @@ class FlutterDeviceManager extends DeviceManager {
         ExtensionDevices(extensionManager: extensionManager, logger: logger),
     ];
   }
-
   @override
   late final List<DeviceDiscovery> deviceDiscoverers;
 }

@@ -855,8 +855,11 @@ void main() {
         Platform: () => macosPlatform,
         FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
-        FlutterProjectFactory: () =>
-            FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
+        FlutterProjectFactory: () => FlutterProjectFactory(
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          config: FakeConfig(),
+        ),
         PlistParser: () => PlistParser(
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
@@ -1616,4 +1619,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   int? getDirectorySize(Directory directory) => 1024;
+
+  @override
+  void chmod(FileSystemEntity file, String mode) {}
 }

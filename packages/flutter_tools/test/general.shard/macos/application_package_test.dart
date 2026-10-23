@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -19,6 +18,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('PrebuiltMacOSApp', () {
@@ -166,7 +166,8 @@ void main() {
 
     testUsingContext('Success with project', () {
       final macosApp = MacOSApp.fromMacOSProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).macos,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: logger).macos,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, os: os),
       );
 
       expect(logger.errorText, isEmpty);
@@ -175,8 +176,14 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('Chooses the correct directory for application.', () {
-      final MacOSProject project = FlutterProject.fromDirectory(globals.fs.currentDirectory).macos;
-      final macosApp = MacOSApp.fromMacOSProject(project) as BuildableMacOSApp;
+      final MacOSProject project = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+        logger: logger,
+      ).macos;
+      final macosApp = MacOSApp.fromMacOSProject(
+        project,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, os: os),
+      ) as BuildableMacOSApp;
 
       const vanillaApp = BuildInfo(
         BuildMode.debug,

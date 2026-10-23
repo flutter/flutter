@@ -135,6 +135,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
           getMacOSBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           forceCocoaPodsOnly: true,
+          toolContext: toolContext,
         );
         if (hasPlugins(project)) {
           await _producePlugins(

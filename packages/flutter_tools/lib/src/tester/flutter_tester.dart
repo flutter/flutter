@@ -146,7 +146,7 @@ class FlutterTesterDevice extends Device {
     );
 
     // Build assets and perform initial compilation.
-    final FlutterProject project = FlutterProject.current();
+    final FlutterProject project = FlutterProject.current(fs, logger: logger);
     await BundleBuilder(
       analytics: _analytics,
       buildSystem: _buildSystem,
@@ -185,7 +185,7 @@ class FlutterTesterDevice extends Device {
           'FLUTTER_TEST': 'true',
           if (platform.isWindows && _nativeAssetsBuilder != null)
             'PATH':
-                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${platform.environment['PATH']}',
+                '${_nativeAssetsBuilder.windowsBuildDirectory(project, toolContext: toolContext)};${platform.environment['PATH']}',
         },
       );
       if (!debuggingOptions.debuggingEnabled) {
