@@ -9,7 +9,7 @@
 #
 #   bazel test //packages/integration_test/test:tests
 
-load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+load("//packages/flutter_test:package_tests.bzl", "FRAMEWORK_IMPORTS", "flutter_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,6 +21,7 @@ flutter_package_tests(
         ["*.dart"],
         exclude = ["*_test.dart"],
     ),
+    imports = FRAMEWORK_IMPORTS + ["package:integration_test/integration_test.dart"],
     package = "integration_test",
     packages = {
         "//packages/flutter_driver:sources": "flutter_driver",

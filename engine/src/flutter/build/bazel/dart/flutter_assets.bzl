@@ -16,13 +16,15 @@ stretch overscroll widgets load; a test that pumps a MaterialApp reaches
 them.
 
 flutter_test_assets lays the directory out under the target's name:
-test_assets.py's manifests (an empty asset map, no fonts, no native
-assets -- what packages/flutter's bundle holds), and each shader compiled
-by the Bazel-built impellerc as flutter_tools compiles it for
+test_assets.py's manifests (the asset map, no fonts, no native assets),
+the package's own assets at their keys (`assets`, each file's path under
+`assets_root` -- the package's directory -- as flutter_tools keys it, with
+resolution variants beside their main asset in the map), and each shader
+compiled by the Bazel-built impellerc as flutter_tools compiles it for
 flutter_tester (`--sksl --runtime-stage-vulkan --iplr`, the shader_lib
-include; shader_compiler.dart). A package's own assets and fonts, and
-NOTICES.Z (the packages' licenses, which LicenseRegistry reads) are not
-built yet; see research/15.
+include; shader_compiler.dart). Fonts (flutter_tester runs tests with
+--disable-asset-fonts) and NOTICES.Z (the packages' licenses, which
+LicenseRegistry reads) are not built; see research/15.
 """
 
 FlutterTestAssetsInfo = provider(
@@ -42,6 +44,19 @@ def _flutter_test_assets_impl(ctx):
     args.add("--asset-manifest", asset_manifest)
     args.add("--font-manifest", font_manifest)
     args.add("--native-assets-manifest", native_assets_manifest)
+    outputs = [asset_manifest, font_manifest, native_assets_manifest]
+
+    # The package's assets, each at its key: the path under the package's
+    # directory, as flutter_tools keys an asset of the application.
+    root = ctx.attr.assets_root
+    for file in ctx.files.assets:
+        if root and not file.short_path.startswith(root + "/"):
+            fail("%s: assets: %s is not under %s" % (ctx.label, file.short_path, root))
+        key = file.short_path[len(root) + 1:] if root else file.short_path
+        placed = ctx.actions.declare_file(prefix + "/" + key)
+        ctx.actions.symlink(output = placed, target_file = file)
+        outputs.append(placed)
+        args.add("--asset", key)
     ctx.actions.run(
         executable = ctx.executable._python,
         arguments = [args],
@@ -51,7 +66,6 @@ def _flutter_test_assets_impl(ctx):
         mnemonic = "FlutterTestAssets",
         progress_message = "Writing the asset manifests of %s" % ctx.label,
     )
-    outputs = [asset_manifest, font_manifest, native_assets_manifest]
 
     # The shader_lib include directory: the package's source directory.
     shader_lib = ctx.attr._shader_lib.label.package
@@ -93,6 +107,15 @@ flutter_test_assets = rule(
     implementation = _flutter_test_assets_impl,
     doc = "The asset directory of a package's tests, as `flutter test` builds it: the manifests and the compiled shaders.",
     attrs = {
+        "assets": attr.label_list(
+            allow_files = True,
+            doc = "The package's own asset files, as its pubspec declares them; each is placed at " +
+                  "its path under `assets_root` and listed in the manifest.",
+        ),
+        "assets_root": attr.string(
+            doc = "The package's directory, relative to the repository (`dev/integration_tests/ui`): " +
+                  "the assets' keys are their paths under it.",
+        ),
         "shaders": attr.label_keyed_string_dict(
             allow_files = [".frag"],
             doc = "Each shader source to its path in the directory (`shaders/ink_sparkle.frag`).",
