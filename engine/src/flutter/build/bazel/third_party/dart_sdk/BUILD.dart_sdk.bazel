@@ -42,6 +42,13 @@ filegroup(
     ),
 )
 
+# The VM's platform kernel, which the frontend server compiles a VM program
+# against (--target=vm; build/bazel/dart/dart_test.bzl).
+filegroup(
+    name = "vm_platform",
+    srcs = ["lib/_internal/vm_platform_strong.dill"],
+)
+
 # The command-line SDK: `dart` and the libraries and snapshots it loads.
 filegroup(
     name = "dart",
