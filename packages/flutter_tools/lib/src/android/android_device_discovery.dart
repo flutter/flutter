@@ -4,7 +4,6 @@
 
 import 'package:process/process.dart';
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -68,7 +67,17 @@ class AndroidDevices extends PollingDeviceDiscovery {
     if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
-    final String text = (await _runAdbDevices(throwOnError: true)).stdout.trim();
+    final String text;
+    try {
+      text = (await _processUtils.run(<String>[
+        _androidSdk!.adbPath!,
+        'devices',
+        '-l',
+      ], throwOnError: true)).stdout.trim();
+    } on ProcessException catch (exception) {
+      _logger.printTrace(_adbDiagnosticMessage(exception));
+      return <AndroidDevice>[];
+    }
     final devices = <AndroidDevice>[];
     _parseADBDeviceOutput(text, devices: devices);
     return devices;
@@ -80,30 +89,25 @@ class AndroidDevices extends PollingDeviceDiscovery {
       return <String>[];
     }
 
-    final RunResult result = await _runAdbDevices();
-    if (result.exitCode != 0) {
-      return <String>[];
+    final RunResult result;
+    try {
+      result = await _processUtils.run(<String>[
+        _androidSdk!.adbPath!,
+        'devices',
+        '-l',
+      ], throwOnError: true);
+    } on ProcessException catch (exception) {
+      return <String>[_adbDiagnosticMessage(exception)];
     }
     final diagnostics = <String>[];
     _parseADBDeviceOutput(result.stdout, diagnostics: diagnostics);
     return diagnostics;
   }
 
-  Future<RunResult> _runAdbDevices({bool throwOnError = false}) async {
-    try {
-      return await _processUtils.run(<String>[
-        _androidSdk!.adbPath!,
-        'devices',
-        '-l',
-      ], throwOnError: throwOnError);
-    } on ProcessException catch (exception) {
-      throwToolExit(
-        'Unable to run "adb", check your Android SDK installation and '
-        '$kAndroidHome environment variable: ${exception.executable}\n'
-        'Error details: ${exception.message}',
-      );
-    }
-  }
+  String _adbDiagnosticMessage(ProcessException exception) =>
+      'Unable to run "adb", check your Android SDK installation and '
+      '$kAndroidHome environment variable: ${exception.executable}\n'
+      'Error details: ${exception.message}';
 
   bool _doesNotHaveAdb() {
     return _androidSdk == null ||
