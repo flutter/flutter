@@ -5,8 +5,6 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'framework.dart';
 import 'page_storage.dart';
@@ -390,39 +388,15 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     return widget.animationStyle?.reverseCurve ?? widget.reverseCurve;
   }
 
-  // The state is saved under an identifier of its own, built from the
-  // PageStorageKeys above this widget, so it never shares a slot with other
-  // widgets under the same keys, such as a Scrollable in the body.
-  //
-  // This collects the keys the same way as PageStorageBucket._allKeys and must
-  // be kept in sync with it.
-  // TODO(omar-alshyokh): Remove this once PageStorageBucket supports namespaces, https://github.com/flutter/flutter/issues/193699
-  Object? _computeStorageIdentifier() {
-    final keys = <PageStorageKey<dynamic>>[];
-    void addKey(Widget widget) {
-      final Key? key = widget.key;
-      if (key is PageStorageKey) {
-        keys.add(key);
-      }
-    }
-
-    addKey(widget);
-    context.visitAncestorElements((Element element) {
-      addKey(element.widget);
-      return element.widget is! PageStorage;
-    });
-    return keys.isEmpty ? null : _ExpansibleStorageIdentifier(keys);
-  }
-
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: _duration, vsync: this);
-    final Object? identifier = _computeStorageIdentifier();
-    final bool? storedExpansionState = identifier == null
-        ? null
-        : PageStorage.maybeOf(context)?.readState(context, identifier: identifier) as bool?;
-    final bool initiallyExpanded = storedExpansionState ?? widget.controller.isExpanded;
+    // The namespace keeps the expansion state apart from state saved by other
+    // widgets under the same PageStorageKeys, such as a Scrollable in the body.
+    final bool initiallyExpanded =
+        PageStorage.maybeOf(context)?.readState(context, namespace: Expansible) as bool? ??
+        widget.controller.isExpanded;
     if (initiallyExpanded) {
       _animationController.value = 1.0;
       widget.controller.expand();
@@ -486,11 +460,8 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
           });
         });
       }
-      final Object? identifier = _computeStorageIdentifier();
-      if (identifier != null) {
-        PageStorage.maybeOf(context)
-            ?.writeState(context, widget.controller.isExpanded, identifier: identifier);
-      }
+      PageStorage.maybeOf(context)
+          ?.writeState(context, widget.controller.isExpanded, namespace: Expansible);
     });
   }
 
@@ -516,30 +487,5 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       },
       child: shouldRemoveBody ? null : result,
     );
-  }
-}
-
-// Keeps the Expansible state apart from other state saved under the same
-// PageStorageKeys.
-@immutable
-class _ExpansibleStorageIdentifier {
-  const _ExpansibleStorageIdentifier(this.keys);
-
-  final List<PageStorageKey<dynamic>> keys;
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is _ExpansibleStorageIdentifier && listEquals(other.keys, keys);
-  }
-
-  @override
-  int get hashCode => Object.hash(_ExpansibleStorageIdentifier, Object.hashAll(keys));
-
-  @override
-  String toString() {
-    return 'ExpansibleStorageIdentifier(${keys.join(":")})';
   }
 }
