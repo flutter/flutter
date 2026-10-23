@@ -280,11 +280,10 @@ void main() {
       hookUserDefinesIntegrationTest.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(kNonWorkspacePubspecYaml);
-      Cache.flutterRoot = flutterSdk.absolute.path;
       pub = _FakePub(flutterTools: flutterTools);
       processManager = FakeProcessManager.empty();
       toolContext = FakeToolContext(
-        cache: Cache.test(processManager: processManager),
+        cache: Cache.test(rootOverride: flutterSdk, processManager: processManager),
         fs: fileSystem,
         logger: logger,
         processManager: processManager,

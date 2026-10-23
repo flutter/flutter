@@ -64,6 +64,7 @@ class DebugAdapterCommand extends FlutterCommand {
       stdio.stdout.nonBlocking,
       fileSystem: toolContext.fs,
       platform: toolContext.platform,
+      cache: toolContext.cache,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
       test: boolArg('test'),

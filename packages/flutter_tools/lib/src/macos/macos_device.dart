@@ -8,6 +8,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
@@ -55,11 +56,13 @@ class MacOSDevice extends DesktopDevice {
     String? mainPath,
     bool usingCISystem = false,
   }) async {
+    final ToolContext(:Cache cache, :Logger logger) = toolContext;
     await buildMacOS(
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
+      flutterRoot: cache.flutterRoot,
       targetOverride: mainPath,
-      verboseLogging: toolContext.logger.isVerbose,
+      verboseLogging: logger.isVerbose,
       usingCISystem: usingCISystem,
     );
   }

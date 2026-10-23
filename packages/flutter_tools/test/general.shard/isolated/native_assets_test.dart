@@ -777,7 +777,7 @@ environment:
         );
 
         final (:Uri? nativeAssetsManifest, flutterHookResult: _) =
-            await testCompilerBuildNativeAssets(buildInfo);
+            await testCompilerBuildNativeAssets(buildInfo, flutterRoot: getFlutterRoot());
         expect(nativeAssetsManifest, isNotNull);
         expect(hostFileSystem.file(nativeAssetsManifest).existsSync(), isTrue);
       },
@@ -824,7 +824,7 @@ environment:
         );
 
         final (:Uri? nativeAssetsManifest, flutterHookResult: _) =
-            await testCompilerBuildNativeAssets(buildInfo);
+            await testCompilerBuildNativeAssets(buildInfo, flutterRoot: getFlutterRoot());
         expect(nativeAssetsManifest, isNull);
         expect(
           logger.warningText,

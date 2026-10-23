@@ -6,7 +6,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../isolated/mustache_template.dart';
 import '../runner/flutter_command.dart';
@@ -73,8 +72,7 @@ class IdeConfigCommand extends FlutterCommand {
     final FileSystem fs = toolContext.fs;
     return fs.directory(
       fs.path.join(
-        // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
-        Cache.flutterRoot!,
+        toolContext.cache.flutterRoot,
         'packages',
         'flutter_tools',
         'ide_templates',
@@ -85,14 +83,14 @@ class IdeConfigCommand extends FlutterCommand {
 
   Directory get _createTemplatesDirectory {
     final FileSystem fs = toolContext.fs;
-    // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
-    return fs.directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates'));
+    return fs.directory(
+      fs.path.join(toolContext.cache.flutterRoot, 'packages', 'flutter_tools', 'templates'),
+    );
   }
 
   Directory get _flutterRoot {
     final FileSystem fs = toolContext.fs;
-    // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
-    return fs.directory(fs.path.absolute(Cache.flutterRoot!));
+    return fs.directory(fs.path.absolute(toolContext.cache.flutterRoot));
   }
 
   // Returns true if any entire path element is equal to dir.
@@ -251,11 +249,10 @@ class IdeConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
-    final String flutterRoot = fs.path.absolute(Cache.flutterRoot!);
+    final String flutterRoot = fs.path.absolute(toolContext.cache.flutterRoot);
     final String dirPath = fs.path.normalize(fs.directory(flutterRoot).absolute.path);
 
-    final String? error = _validateFlutterDir(dirPath, fileSystem: fs, flutterRoot: flutterRoot);
+    final String? error = _validateFlutterDir(dirPath, fileSystem: fs);
     if (error != null) {
       throwToolExit(error);
     }
@@ -293,7 +290,7 @@ class IdeConfigCommand extends FlutterCommand {
 
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
-String? _validateFlutterDir(String dirPath, {required FileSystem fileSystem, String? flutterRoot}) {
+String? _validateFlutterDir(String dirPath, {required FileSystem fileSystem}) {
   final FileSystemEntityType type = fileSystem.typeSync(dirPath);
 
   // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017

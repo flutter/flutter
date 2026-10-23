@@ -26,7 +26,6 @@ import '../device_port_forwarder.dart';
 import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
   factory FlutterTesterApp.fromCurrentDirectory(FileSystem fileSystem) {
@@ -49,17 +48,15 @@ class FlutterTesterApp extends ApplicationPackage {
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(
     super.id, {
-    required ToolContext super.toolContext,
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
-    this._nativeAssetsBuilder,
+    required ToolContext super.toolContext,
   }) : super(logger: toolContext.logger, platformType: null, category: null, ephemeral: false);
 
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
-  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -77,10 +74,8 @@ class FlutterTesterDevice extends Device {
   DevicePortForwarder get portForwarder => _portForwarder;
 
   @override
-  Future<String> get sdkNameAndVersion async {
-    final FlutterVersion flutterVersion = toolContext.flutterVersion;
-    return 'Flutter ${flutterVersion.frameworkRevisionShort}';
-  }
+  Future<String> get sdkNameAndVersion async =>
+      'Flutter ${toolContext.flutterVersion.frameworkRevisionShort}';
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
@@ -130,6 +125,7 @@ class FlutterTesterDevice extends Device {
       :Artifacts artifacts,
       :FileSystem fs,
       :Logger logger,
+      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
@@ -183,9 +179,9 @@ class FlutterTesterDevice extends Device {
         command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
-          if (platform.isWindows && _nativeAssetsBuilder != null)
+          if (platform.isWindows && nativeAssetsBuilder != null)
             'PATH':
-                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${platform.environment['PATH']}',
+                '${nativeAssetsBuilder.windowsBuildDirectory(project)};${platform.environment['PATH']}',
         },
       );
       if (!debuggingOptions.debuggingEnabled) {
@@ -231,9 +227,8 @@ class FlutterTesterDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: toolContext.fs);
-  }
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) =>
+      LocalDevFSWriter(fileSystem: toolContext.fs);
 
   @override
   Future<void> dispose() async {
@@ -244,18 +239,16 @@ class FlutterTesterDevice extends Device {
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
-    required ToolContext super.toolContext,
     required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required ToolContext super.toolContext,
   }) : _testerDevice = FlutterTesterDevice(
          kTesterDeviceId,
-         toolContext: toolContext,
          analytics: analytics,
          buildSystem: buildSystem,
          buildTargets: buildTargets,
-         nativeAssetsBuilder: nativeAssetsBuilder,
+         toolContext: toolContext,
        ),
        super('Flutter tester');
 

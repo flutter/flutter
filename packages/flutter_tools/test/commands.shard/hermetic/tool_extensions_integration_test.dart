@@ -87,7 +87,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final doctor = Doctor(logger: testLogger, clock: const SystemClock());
+        final doctor = Doctor(cache: FakeCache(), logger: testLogger, clock: const SystemClock());
 
         await doctor.diagnose(extensionManager: manager);
         expect(testLogger.statusText, isNot(contains('Linux Custom Extension Prototype')));
@@ -157,7 +157,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final doctor = Doctor(logger: testLogger, clock: const SystemClock());
+        final doctor = Doctor(cache: FakeCache(), logger: testLogger, clock: const SystemClock());
 
         await doctor.diagnose(extensionManager: manager);
         expect(testLogger.statusText, contains('[✓] Linux Custom Extension Prototype'));

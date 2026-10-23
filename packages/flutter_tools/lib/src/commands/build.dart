@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
 import '../android/gradle.dart';
@@ -13,7 +12,6 @@ import '../base/common.dart' show throwToolExit;
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -26,7 +24,6 @@ import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
-import '../version.dart';
 import '../windows/visual_studio.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -55,15 +52,6 @@ class BuildCommand extends FlutterCommand {
     bool verboseHelp = false,
   }) : _appleContext = appleContext,
        super(toolContext: toolContext, verboseHelp: verboseHelp) {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :FlutterVersion flutterVersion,
-      fs: FileSystem fileSystem,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
     final Xcode xcode = appleContext.xcode;
 
     final codesign = DarwinAddToAppCodesigning.fromContexts(
@@ -134,17 +122,11 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildSwiftPackage(
         analytics: analytics,
-        artifacts: artifacts,
         buildSystem: buildSystem,
-        cache: cache,
         codesign: codesign,
         featureFlags: featureFlags,
-        fileSystem: fileSystem,
-        flutterVersion: flutterVersion,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
         templateRenderer: templateRenderer,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
         xcode: xcode,
       ),
@@ -307,7 +289,8 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
+    final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
+        toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
     final Directory outputDir = resolveExtensionOutputDir(
@@ -325,7 +308,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildInfo.mode,
-      flutterRoot: fs.directory(Cache.flutterRoot).uri,
+      flutterRoot: fs.directory(cache.flutterRoot).uri,
       mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
