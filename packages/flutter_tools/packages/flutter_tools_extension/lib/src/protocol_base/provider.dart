@@ -8,7 +8,6 @@ import 'dart:isolate';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:stream_channel/isolate_channel.dart';
 
-import '../device.dart';
 import 'service.dart';
 
 /// Entrypoint runner for a Flutter Tool Extension running in an Isolate.
@@ -19,11 +18,6 @@ import 'service.dart';
 class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
-
-  static const _reservedMethods = <String>{
-    getCapabilitiesMethod,
-    DeviceService.logEntryNotificationMethod,
-  };
 
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
@@ -46,7 +40,7 @@ class ToolExtensionEntryPoint {
       final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
       handlers.forEach((String method, ExtensionRpcHandler handler) {
         final fullMethod = '${service.namespace}.$method';
-        if (_reservedMethods.contains(fullMethod)) {
+        if (fullMethod == getCapabilitiesMethod) {
           throw StateError('Reserved RPC method registered: "$fullMethod"');
         }
         if (rpcHandlers.containsKey(fullMethod)) {

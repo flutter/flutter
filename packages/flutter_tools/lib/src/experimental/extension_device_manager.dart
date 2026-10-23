@@ -75,17 +75,14 @@ final class ExtensionDeviceClient extends DeviceService {
   }
 
   @override
-  Future<void> startLogStream({required String deviceId, String? appId}) async {
+  Future<void> startLogStream({required String deviceId}) async {
     _logger.printTrace(
       'ExtensionDeviceClient starting log stream for "$deviceId" via RPC '
       '("${DeviceService.startLogStreamMethod}")...',
     );
     await connection.sendRequest(
       DeviceService.startLogStreamMethod,
-      params: <String, Object?>{
-        DeviceService.deviceIdParam: deviceId,
-        DeviceService.appIdParam: ?appId,
-      },
+      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
     );
   }
 
@@ -115,20 +112,32 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
     _logLinesController = StreamController<String>.broadcast(onListen: _flushPendingLines);
     _notificationSubscription = connection
         .onNotification(DeviceService.logEntryNotificationMethod)
-        .listen((Map<String, Object?> params) {
-          if (_isDisposed || _logLinesController.isClosed) {
-            return;
-          }
-          if (params[DeviceService.deviceIdParam] == _deviceId) {
-            if (params[DeviceService.lineKey] case final String line) {
-              if (_logLinesController.hasListener) {
-                _logLinesController.add(line);
-              } else {
-                _pendingLines.add(line);
+        .listen(
+          (Map<String, Object?> params) {
+            if (_isDisposed || _logLinesController.isClosed) {
+              return;
+            }
+            if (params[DeviceService.deviceIdParam] == _deviceId) {
+              if (params[DeviceService.lineKey] case final String line) {
+                if (_logLinesController.hasListener) {
+                  _logLinesController.add(line);
+                } else {
+                  _pendingLines.add(line);
+                }
               }
             }
-          }
-        });
+          },
+          onDone: () {
+            if (_isDisposed || _logLinesController.isClosed) {
+              return;
+            }
+            if (_pendingLines.isEmpty) {
+              unawaited(_logLinesController.close());
+            } else {
+              _closeAfterFlush = true;
+            }
+          },
+        );
   }
 
   /// Creates an [ExtensionDeviceLogReader] and starts the device log stream on
@@ -139,7 +148,6 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
     required DeviceService deviceService,
     required Logger logger,
     required String name,
-    String? appId,
   }) async {
     final reader = ExtensionDeviceLogReader._(
       connection: connection,
@@ -148,7 +156,7 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
       logger: logger,
       name: name,
     );
-    await reader._startLogStream(appId: appId);
+    await reader._startLogStream();
     return reader;
   }
 
@@ -162,24 +170,33 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
 
   late final StreamController<String> _logLinesController;
   StreamSubscription<Map<String, Object?>>? _notificationSubscription;
+  bool _closeAfterFlush = false;
   bool _isDisposed = false;
 
   @override
   Stream<String> get logLines => _logLinesController.stream;
 
   void _flushPendingLines() {
-    if (_isDisposed || _logLinesController.isClosed || _pendingLines.isEmpty) {
+    if (_isDisposed || _logLinesController.isClosed) {
       return;
     }
-    _pendingLines.forEach(_logLinesController.add);
-    _pendingLines.clear();
+    if (_pendingLines.isNotEmpty) {
+      _pendingLines.forEach(_logLinesController.add);
+      _pendingLines.clear();
+    }
+    if (_closeAfterFlush) {
+      unawaited(_logLinesController.close());
+    }
   }
 
-  Future<void> _startLogStream({String? appId}) async {
+  Future<void> _startLogStream() async {
     try {
-      await _deviceService.startLogStream(deviceId: _deviceId, appId: appId);
+      await _deviceService.startLogStream(deviceId: _deviceId);
     } on Object catch (error) {
       _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
+      if (!_isDisposed && !_logLinesController.isClosed) {
+        await _logLinesController.close();
+      }
     }
   }
 
@@ -272,22 +289,21 @@ class ExtensionBackedDevice extends Device {
   ExtensionBackedDevice({
     required this.connection,
     required this._deviceService,
-    required super.logger,
-    required TargetDevice targetDevice,
-  }) : _logger = logger,
-       _targetDevice = targetDevice,
-       super(
-         targetDevice.id,
-         category: targetDevice.category,
+    required this._logger,
+    required this._targetDevice,
+  }) : super(
+         _targetDevice.id,
+         category: _targetDevice.category,
+         ephemeral: _targetDevice.ephemeral,
+         logger: _logger,
          platformType: PlatformType.custom,
-         ephemeral: targetDevice.ephemeral,
        );
 
   final DeviceService _deviceService;
   final Logger _logger;
   final TargetDevice _targetDevice;
   final ExtensionConnection connection;
-  final _logReaders = <String?, Future<ExtensionDeviceLogReader>>{};
+  Future<ExtensionDeviceLogReader>? _logReader;
 
   @override
   String get name => _targetDevice.name;
@@ -333,16 +349,12 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
-    return _logReaders.putIfAbsent(
-      app?.id,
-      () => ExtensionDeviceLogReader.create(
-        appId: app?.id,
-        connection: connection,
-        deviceId: id,
-        deviceService: _deviceService,
-        logger: _logger,
-        name: name,
-      ),
+    return _logReader ??= ExtensionDeviceLogReader.create(
+      connection: connection,
+      deviceId: id,
+      deviceService: _deviceService,
+      logger: _logger,
+      name: name,
     );
   }
 
@@ -351,11 +363,9 @@ class ExtensionBackedDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    for (final Future<ExtensionDeviceLogReader> readerFuture in _logReaders.values) {
-      final ExtensionDeviceLogReader reader = await readerFuture;
-      await reader.dispose();
-    }
-    _logReaders.clear();
+    final ExtensionDeviceLogReader? reader = await _logReader;
+    _logReader = null;
+    await reader?.dispose();
   }
 
   @override

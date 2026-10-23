@@ -16,8 +16,8 @@ abstract base class DeviceService extends ToolExtensionService {
 
   static const String _getDevicesRpcMethod = 'getDevices';
   static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
-  static const _startLogStreamRpcMethod = 'startLogStream';
-  static const _stopLogStreamRpcMethod = 'stopLogStream';
+  static const String _startLogStreamRpcMethod = 'startLogStream';
+  static const String _stopLogStreamRpcMethod = 'stopLogStream';
 
   /// RPC method identifier to query contributed target devices.
   static const String getDevicesMethod = '$serviceNamespace.$_getDevicesRpcMethod';
@@ -27,14 +27,14 @@ abstract base class DeviceService extends ToolExtensionService {
       '$serviceNamespace.$_isSupportedForProjectRpcMethod';
 
   /// RPC method identifier to start streaming log output for a target device.
-  static const startLogStreamMethod = '$serviceNamespace.$_startLogStreamRpcMethod';
+  static const String startLogStreamMethod = '$serviceNamespace.$_startLogStreamRpcMethod';
 
   /// RPC method identifier to stop streaming log output for a target device.
-  static const stopLogStreamMethod = '$serviceNamespace.$_stopLogStreamRpcMethod';
+  static const String stopLogStreamMethod = '$serviceNamespace.$_stopLogStreamRpcMethod';
 
   /// JSON-RPC 2.0 notification method emitted by the extension for each device
   /// log line.
-  static const logEntryNotificationMethod = '$serviceNamespace.logEntry';
+  static const String logEntryNotificationMethod = '$serviceNamespace.logEntry';
 
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
@@ -42,13 +42,9 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for the serialized [ExtensionFlutterProject].
   static const String projectParam = 'project';
 
-  /// RPC parameter key for the optional application identifier when starting a
-  /// device log stream.
-  static const appIdParam = 'appId';
-
   /// JSON key for the log line text in [logEntryNotificationMethod]
   /// notifications.
-  static const lineKey = 'line';
+  static const String lineKey = 'line';
 
   @override
   String get namespace => serviceNamespace;
@@ -64,16 +60,21 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// Starts streaming log output for the device identified by [deviceId].
   ///
-  /// If [appId] is provided, the extension may filter log output to the
-  /// specified application. Extension implementations should forward each log
-  /// line to the host by calling [emitLogLine].
-  Future<void> startLogStream({required String deviceId, String? appId}) async {}
+  /// Invoked by the host tool when a log consumer (such as `flutter logs` or
+  /// `flutter run`) begins reading logs from [deviceId]. Implementations should
+  /// return once log streaming has been initiated rather than awaiting the
+  /// lifetime of the stream, and forward each log line (without a trailing
+  /// newline) to the host by calling [emitLogLine].
+  Future<void> startLogStream({required String deviceId}) async {}
 
   /// Stops streaming log output for the device identified by [deviceId].
+  ///
+  /// Invoked by the host tool when the device log reader is disposed.
   Future<void> stopLogStream({required String deviceId}) async {}
 
   /// Sends a [logEntryNotificationMethod] JSON-RPC notification containing a
-  /// single log [line] from [deviceId] to the host tool.
+  /// single log [line] (excluding any trailing newline) from [deviceId] to the
+  /// host tool.
   void emitLogLine({required String deviceId, required String line}) {
     sendNotification(logEntryNotificationMethod, <String, Object?>{
       deviceIdParam: deviceId,
@@ -114,33 +115,26 @@ abstract base class DeviceService extends ToolExtensionService {
     return isSupportedForProject(deviceId: deviceId, project: project);
   }
 
-  Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {
+  String _parseDeviceId(Map<String, Object?> params) {
     final String deviceId;
-    final String? appId;
     try {
       deviceId = params.requiredField<String>(deviceIdParam);
-      appId = params.nullableField<String>(appIdParam);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
     if (deviceId.isEmpty) {
       throw RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
     }
-    await startLogStream(deviceId: deviceId, appId: appId);
+    return deviceId;
+  }
+
+  Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {
+    await startLogStream(deviceId: _parseDeviceId(params));
     return null;
   }
 
   Future<Object?> _stopLogStreamRpc(Map<String, Object?> params) async {
-    final String deviceId;
-    try {
-      deviceId = params.requiredField<String>(deviceIdParam);
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
-    if (deviceId.isEmpty) {
-      throw RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
-    }
-    await stopLogStream(deviceId: deviceId);
+    await stopLogStream(deviceId: _parseDeviceId(params));
     return null;
   }
 }
