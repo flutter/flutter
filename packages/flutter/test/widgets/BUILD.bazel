@@ -43,3 +43,30 @@ framework_tests(
         ],
     ),
 )
+
+framework_tests(
+    name = "widgets_without_creation_locations",
+    # The widgets suite once more as `flutter test --no-track-widget-creation`
+    # runs it (dev/bots), from a prelude compiled the same way; no Impeller
+    # runs (dev/bots runs that variant with the default renderer only).
+    compile_args = ["--no-track-creation-locations"],
+    # binding_live_test's one test (LiveTestWidgetsFlutterBinding, awaiting a
+    # real frame) hung to its timeout in two of three full runs under 24
+    # parallel compiles and passes 8 of 8 alone; rerun on failure, a minute
+    # per attempt.
+    flaky = ["binding_live_test.dart"],
+    impeller = False,
+    prelude = "//packages/flutter/test:prelude_without_creation_locations",
+    suffix = "_without_creation_locations",
+    # html_element_view_test.dart and selectable_region_context_menu_test.dart
+    # are web-only (`@TestOn('chrome')`, `@TestOn('browser')`: dart:ui_web and
+    # dart:js_interop have no VM compile; `flutter test` skips such a file by
+    # its annotation, which a BUILD file cannot read).
+    tests = glob(
+        ["*_test.dart"],
+        exclude = [
+            "html_element_view_test.dart",
+            "selectable_region_context_menu_test.dart",
+        ],
+    ),
+)

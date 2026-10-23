@@ -540,7 +540,7 @@ def nearest_test_config(test, test_configs):
         directory = paths.dirname(directory)
     return None
 
-def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], large = [], test_configs = [], impeller = False, **kwargs):
+def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], large = [], test_configs = [], impeller = False, suffix = "", **kwargs):
     """One flutter_test per test file, and a test_suite of them.
 
     Args:
@@ -568,6 +568,10 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
         its directory or above, none past a pubspec.yaml, as `flutter test`
         finds it (nearest_test_config). Otherwise `test_config` names the
         one configuration of every test.
+      suffix: appended to every target's name (`<test><suffix>`,
+        `<test><suffix>_kernel`), for a second suite over the same files in
+        the package (the widgets suite compiled without creation-location
+        tracking).
       impeller: whether to declare a second run of every file with Impeller
         rendering (`<test>_impeller`, in the suite `<name>_impeller`), as
         dev/bots runs packages/flutter's tests once more under `flutter
@@ -582,11 +586,11 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
         fail("%s: give test_config (one configuration for every test) or test_configs (the tree's, by directory), not both" % name)
     test_tags = list(tags) + ([] if network else ["block-network"])
     variants = [("", {})] + ([("_impeller", {"impeller": True})] if impeller else [])
-    targets = {suffix: [] for suffix, _ in variants}
+    targets = {variant_suffix: [] for variant_suffix, _ in variants}
     compile_attrs = {key: value for key, value in kwargs.items() if key in _KERNEL_ATTRS}
     run_attrs = {key: value for key, value in kwargs.items() if key not in _KERNEL_ATTRS}
     for test in tests:
-        test_name = test.removesuffix(".dart").replace("/", "_")
+        test_name = test.removesuffix(".dart").replace("/", "_") + suffix
 
         # The compile, once; built on its own as `<test>_kernel`.
         flutter_test_kernel(
@@ -597,9 +601,9 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
             visibility = ["//visibility:private"],
             **{key: value for key, value in compile_attrs.items() if key != "test_config"}
         )
-        for suffix, variant in variants:
+        for variant_suffix, variant in variants:
             flutter_test(
-                name = test_name + suffix,
+                name = test_name + variant_suffix,
                 kernel = ":" + test_name + "_kernel",
                 size = "large" if test in large else size,
                 tags = test_tags,
@@ -607,6 +611,6 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
                 timeout = "short" if test in flaky else None,
                 **(run_attrs | variant)
             )
-            targets[suffix].append(":" + test_name + suffix)
-    for suffix, _ in variants:
-        native.test_suite(name = name + suffix, tests = targets[suffix], tags = tags)
+            targets[variant_suffix].append(":" + test_name + variant_suffix)
+    for variant_suffix, _ in variants:
+        native.test_suite(name = name + variant_suffix, tests = targets[variant_suffix], tags = tags)

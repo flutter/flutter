@@ -14,7 +14,7 @@ anything of its own.
 
 load("//engine/src/flutter/build/bazel/dart:flutter_test.bzl", "flutter_tests")
 
-def framework_tests(name, tests, data = [], deps = [], **kwargs):
+def framework_tests(name, tests, data = [], deps = [], impeller = True, prelude = "//packages/flutter/test:prelude", compile_args = [], **kwargs):
     """One flutter_test per file of `tests`, as `flutter test` runs packages/flutter's, and a suite.
 
     Args:
@@ -23,16 +23,21 @@ def framework_tests(name, tests, data = [], deps = [], **kwargs):
       tests: the test files (a glob of `*_test.dart`).
       data: what the tests read at run time besides the directory's non-Dart files.
       deps: other files the compiles may read besides the test tree's helpers.
+      impeller: whether to declare the Impeller runs too (`<name>_impeller`;
+        //packages/flutter/test:all_impeller), as dev/bots' framework_tests
+        shard runs `flutter test --enable-impeller` over the package.
+      prelude: the kernel the compiles start from; the tree's, or one
+        compiled with other arguments for a variant.
+      compile_args: further frontend server arguments, the prelude's too
+        (the widgets suite without creation-location tracking).
       **kwargs: flutter_tests' other arguments (flaky, large, size, tags, network).
     """
     flutter_tests(
         name = name,
         tests = tests,
-        # The directory's tests once more with Impeller rendering
-        # (`<name>_impeller`; //packages/flutter/test:all_impeller), as
-        # dev/bots' framework_tests shard runs `flutter test --enable-impeller`
-        # over the package.
-        impeller = True,
+        impeller = impeller,
+        prelude = prelude,
+        compile_args = compile_args,
         app_name = "flutter",
         pubspec = "//packages/flutter:pubspec.yaml",
         assets = "//packages/flutter/test:test_assets",
@@ -52,7 +57,6 @@ def framework_tests(name, tests, data = [], deps = [], **kwargs):
             "@material_fonts//:fonts": "artifacts/material_fonts",
         },
         package_config = "//packages/flutter/test:package_config",
-        prelude = "//packages/flutter/test:prelude",
         runtime_package_config = "//packages/flutter/test:runtime_package_config",
         test_config = "//packages/flutter/test:flutter_test_config.dart",
         # The test tree's helpers, this directory's among them.
