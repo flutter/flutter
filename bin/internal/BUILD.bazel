@@ -106,6 +106,12 @@ write_file(
     content = ["bazel"],
 )
 
+write_file(
+    name = "linux_sdk_stamp",
+    out = "linux-sdk.stamp",
+    content = ["bazel"],
+)
+
 copy_file(
     name = "material_fonts_stamp",
     src = "material_fonts.version",

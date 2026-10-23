@@ -292,7 +292,7 @@ export FLUTTER_ROOT="$root"
 # (Cache.lock opens bin/cache/lockfile); what tests read of it is laid
 # in by `cache` and `cache_files`.
 mkdir -p "$root/bin/cache"
-{pub_cache_env}cd "{package}"
+{pub_cache_env}{tool_env}{writable}cd "{package}"
 exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} "{test}" "$@"
 """.format(
             package = ctx.label.package or ".",
@@ -300,6 +300,21 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
             # in the runfiles tree; pub writes nothing to it that is already
             # there.
             pub_cache_env = "export PUB_CACHE=\"$root/.pub-cache\"\n" if ctx.attr.pub_cache else "",
+            # When the facsimile holds the tool (sdk_files): the SDK's bin on
+            # PATH, as a developer's shell has it (integration tests run
+            # `flutter` by name), and a home of the test's own for the tool's
+            # settings and analytics (`flutter config --enable-...` writes
+            # them there; the developer's are not read).
+            tool_env = ("export PATH=\"$root/bin:$PATH\"\n" +
+                        "export HOME=\"${TEST_TMPDIR:-$(mktemp -d)}/home\"\n" +
+                        "mkdir -p \"$HOME\"\n") if [p for p in ctx.attr.sdk_files.values() if p.startswith("bin/")] else "",
+            # Files the tool rewrites in place (pub touches the workspace's
+            # lock), copied over their symlinks into the writable runfiles
+            # tree so that the source stays as it is.
+            writable = "".join([
+                ("if [ -L \"$root/{f}\" ]; then cp --remove-destination \"$(readlink -f \"$root/{f}\")\" \"$root/{f}\" && chmod u+w \"$root/{f}\"; fi\n").format(f = f)
+                for f in ctx.attr.writable
+            ]),
             dart = dart[0].short_path,
             runner_config = runner.package_config.short_path,
             runner = runner.kernel.short_path,
@@ -312,16 +327,36 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
     # The SDK cache's paths under FLUTTER_ROOT/bin/cache (as flutter_test lays
     # them): each tree's files at their paths within their repository -- or,
     # for this repository's, within their package -- under the directory
-    # named; each file at the path named.
+    # named; each file at the path named. sdk_trees the same under
+    # FLUTTER_ROOT itself, where the runfiles tree's own files win (a
+    # workspace member's pubspec among the data, and again in
+    # @pub_workspace).
+    runtime = ctx.attr.runtime_package_config
+    regular = [kernel, test, runner.kernel, runner.package_config] + ctx.files.data + ctx.files._sdk
+    present = {}
+    if ctx.attr.sdk_trees:
+        present = {file.short_path: True for file in regular + runtime[PubPackageConfigInfo].sources.to_list()}
+        for dep in ctx.attr.data:
+            for file in dep[DefaultInfo].default_runfiles.files.to_list():
+                present[file.short_path] = True
     cache = {}
-    for target, directory in ctx.attr.cache.items():
+
+    def lay(target, directory, unless_present = False):
         for file in target[DefaultInfo].files.to_list():
             path = file.short_path
             if path.startswith("../"):
                 path = path.split("/", 2)[2]
             elif target.label.package:
                 path = paths.relativize(path, target.label.package)
-            cache[paths.join("bin/cache", directory, path)] = file
+            path = paths.join(directory, path) if directory else path
+            if unless_present and path in present:
+                continue
+            cache[path] = file
+
+    for target, directory in ctx.attr.cache.items():
+        lay(target, paths.join("bin/cache", directory))
+    for target, directory in ctx.attr.sdk_trees.items():
+        lay(target, directory, unless_present = True)
     for target, path in ctx.attr.cache_files.items():
         files = target[DefaultInfo].files.to_list()
         if len(files) != 1:
@@ -335,9 +370,8 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
     if ctx.attr.pub_cache:
         for path, file in ctx.attr.pub_cache[PubCacheInfo].entries.items():
             cache[paths.join(".pub-cache", path)] = file
-    runtime = ctx.attr.runtime_package_config
     runfiles = ctx.runfiles(
-        files = [kernel, test, runner.kernel, runner.package_config] + ctx.files.data + ctx.files._sdk,
+        files = regular,
         # The runtime configuration at the package's .dart_tool/, where `dart
         # test --precompiled` reads it from the working directory and a tool
         # under test looks for its own (flutter_tools' template images);
@@ -400,6 +434,18 @@ dart_test = rule(
                   "repository's own (`bin/flutter`: a launcher of the tool Bazel compiled, where the " +
                   "repository's script would bootstrap from the network).",
         ),
+        "sdk_trees": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "Trees of the SDK laid under the directory named of FLUTTER_ROOT, each target's files " +
+                  "at their paths within their repository, as `cache` lays them under bin/cache " +
+                  "(`@pub_workspace//:pubspecs` at the root: every workspace member's pubspec, for a " +
+                  "test that runs pub in a member).",
+        ),
+        "writable": attr.string_list(
+            doc = "Paths under FLUTTER_ROOT the tool under test rewrites in place (`pubspec.lock`: pub " +
+                  "touches the workspace's lock when it resolves a member), copied over their runfiles " +
+                  "symlinks when the test starts so that the sources stay as they are.",
+        ),
         "compile_args": attr.string_list(
             doc = "Further frontend server arguments for the compile.",
         ),
@@ -437,7 +483,7 @@ dart_test = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, **kwargs):
+def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], **kwargs):
     """One dart_test per test file, and a test_suite of them.
 
     Args:
@@ -452,6 +498,8 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
       sizes: test files given a size of their own (`enormous`, an hour:
         create_test, which creates, analyzes and tests some hundred
         projects through the tool).
+      flaky: test files Bazel retries (a test with a timeout of its own
+        inside, which a loaded machine overruns).
       **kwargs: dart_test's attributes, the same for every file.
     """
     test_tags = list(tags) + ([] if network else ["block-network"])
@@ -463,6 +511,7 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
             test = test,
             size = sizes.get(test, "large" if test in large else size),
             tags = test_tags,
+            flaky = test in flaky,
             **kwargs
         )
         targets.append(":" + test_name)
@@ -503,8 +552,8 @@ def dart_package_tests(
         none compiles each test from scratch.
       compile_args: further frontend server arguments, for the prelude and
         the tests alike.
-      **kwargs: dart_tests' other arguments (size, large, sizes, tags, network,
-        runner_args, deps, cache, cache_files, sdk_files, pub_cache).
+      **kwargs: dart_tests' other arguments (size, large, sizes, flaky, tags, network,
+        runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable, pub_cache).
     """
     workspace_packages = {":sources": package} | packages
     config_roots = [package, "test"] + roots

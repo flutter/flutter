@@ -3,7 +3,9 @@
 # found in the LICENSE file.
 
 # The gallery's project files, which flutter_tools' daemon_test reads as a
-# project with a known set of platforms (daemon.getSupportedPlatforms).
+# project with a known set of platforms (daemon.getSupportedPlatforms) and
+# its integration shard analyzes (analyze_suggestions_integration_test) and
+# configures a Linux build of (build_linux_config_only_test).
 
 package(default_visibility = ["//visibility:public"])
 
@@ -12,6 +14,7 @@ filegroup(
     srcs = glob([
         "android/**",
         "ios/**",
+        "lib/**",
         "linux/**",
         "macos/**",
         "web/**",
