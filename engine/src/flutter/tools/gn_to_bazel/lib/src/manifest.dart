@@ -756,7 +756,23 @@ exports_files([
   // dart:ui and the core libraries from): copies of the Dart SDK's library
   // sources and dart:ui's, dart:ui_web rewritten by web_sdk's sdk_rewriter,
   // the embedder specification, and the package assembled by dart_pkg.py.
-  ConvertedFile('//flutter/sky/packages/sky_engine'),
+  ConvertedFile(
+    '//flutter/sky/packages/sky_engine',
+    appendix: '''
+load("//engine/src/flutter/build/bazel:local_engine.bzl", "assembled_directory")
+
+# The package as the SDK cache holds it (bin/cache/pkg/sky_engine): one
+# directory of what the targets above place under gen/dart-pkg/sky_engine,
+# for a test that runs the real pub or the analyzer on a project of its own
+# (a dart_test's cache_files lays it there, where pub looks for the SDK's
+# packages and the analyzer for dart:ui).
+assembled_directory(
+    name = "package",
+    contents = [":sky_engine"],
+    prefix = "gen/dart-pkg/sky_engine",
+)
+''',
+  ),
   // The web SDK's Dart side (web_sdk/web_sdk.bzl): the seven libraries
   // sdk_rewriter rewrites into flutter_web_sdk/lib, libraries.json beside
   // them, the three platform kernels and the two DDC compilations of the
