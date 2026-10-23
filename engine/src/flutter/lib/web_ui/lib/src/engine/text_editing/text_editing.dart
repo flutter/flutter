@@ -589,18 +589,39 @@ class EngineAutofillForm {
   /// Whether the fields are held still for a fill. See [beginFillWindow].
   bool get fillWindowActive => _fillWindowActive;
 
+  /// The focused field's latest placement, received while the fill window held
+  /// the fields still. See [holdPlacement].
+  EditableTextGeometry? _heldPlacement;
+
   /// Holds the fields still while focus is away from the form, as when a
   /// password manager's menu takes it to fill the form.
   ///
-  /// Ended by [endFillWindow] when focus returns to the field or the page, or
-  /// when the form goes dormant: an event boundary, not a timeout.
+  /// Ended by [endFillWindow] when any field of the form or the page gets the
+  /// focus, or when the form goes dormant: an event boundary, not a timeout.
   void beginFillWindow() {
     _fillWindowActive = true;
   }
 
+  /// Defers [geometry] for the focused field until the fill window ends, so a
+  /// resize or scroll during a fill is applied late instead of lost.
+  void holdPlacement(EditableTextGeometry geometry) {
+    _heldPlacement = geometry;
+  }
+
   /// Ends the window opened by [beginFillWindow], so placement resumes.
+  ///
+  /// A placement held during the window is applied now, to the focused field
+  /// and the fields clustered under it. It moves them but not the focus: the
+  /// manager may have just focused another field to fill it.
   void endFillWindow() {
     _fillWindowActive = false;
+    final EditableTextGeometry? held = _heldPlacement;
+    _heldPlacement = null;
+    final DomHTMLElement? focused = elements[focusedElementId];
+    if (held != null && focused != null) {
+      held.applyToDomElement(focused);
+      clusterNonFocusedFieldsAt(focused);
+    }
   }
 
   /// Positions the non-focused proxies right next to the focused field.
@@ -685,7 +706,9 @@ class EngineAutofillForm {
 
     // Read before the window is ended below.
     final bool fillInProgress = _fillWindowActive;
-    // The form is deactivated; end any open fill window so it never stays frozen.
+    // The form is deactivated; end any open fill window so it never stays
+    // frozen. Its connection is closing, so a held placement is dropped.
+    _heldPlacement = null;
     endFillWindow();
     _isDormant = true;
     dormantForms[formIdentifier] = this;
@@ -979,6 +1002,7 @@ class EngineAutofillForm {
   /// each time the form wakes. The focused field is observed only after its
   /// connection has closed (see the guard in the listener); while it is live its
   /// edits and autofills are delivered by [DefaultTextEditingStrategy.handleChange].
+  /// Every field also ends the fill window when it gets the focus.
   void attachPersistentFormListeners() {
     _ensureAutofillStyleInjected();
     _cancelFormSubscriptions();
@@ -1015,6 +1039,13 @@ class EngineAutofillForm {
           ),
         );
       }
+      // A password manager does not always hand the focus back to the field it
+      // was invoked from; it can focus another field of the form to fill it.
+      // Any field gaining the focus ends the fill window, so placement does not
+      // stay frozen at stale coordinates. See [beginFillWindow].
+      _formSubscriptions.add(
+        DomSubscription(element, 'focus', createDomEventListener((DomEvent _) => endFillWindow())),
+      );
     }
   }
 
@@ -2258,9 +2289,11 @@ abstract class DefaultTextEditingStrategy
       // Hold the field where it is during a fill (see
       // EngineAutofillForm.beginFillWindow). Re-applying the transform as the
       // browser scrolls the field under the opening menu churns the DOM under
-      // the manager's overlay, which can break its fill. The stored geometry is
-      // applied by the next placement once the window ends.
-      if (inputConfiguration.autofillGroup?.fillWindowActive ?? false) {
+      // the manager's overlay, which can break its fill. The form applies the
+      // held placement when the window ends.
+      final EngineAutofillForm? group = inputConfiguration.autofillGroup;
+      if (group != null && group.fillWindowActive) {
+        group.holdPlacement(textGeometry);
         return;
       }
       // On updates, we shouldn't go through the entire placeElement() flow if

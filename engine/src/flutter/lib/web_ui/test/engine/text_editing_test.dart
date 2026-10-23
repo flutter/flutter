@@ -3952,6 +3952,92 @@ Future<void> testMain() async {
       expectFormParked(form.group);
     });
 
+    // A focus event as the browser dispatches it. Unlike createDomEvent it does
+    // not bubble; one that did would reach the window's focus listener, which
+    // ends the fill window by itself and would hide what these tests check.
+    DomEvent focusEvent() => domDocument.createEvent('Event')..initEvent('focus', false);
+
+    // The field of a clustered form that is not the focused one.
+    DomHTMLElement otherField(EngineAutofillForm group, DomHTMLElement active) =>
+        group.elements.values.firstWhere((DomHTMLElement element) => !identical(element, active));
+
+    // Lays the focused field out 280 px to the right of where openClusteredForm
+    // put it, as a resize of the browser window does.
+    void moveField(void Function(MethodCall) send) => send(
+      configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(290.0, 20.0, 30.0).storage.toList(),
+      ),
+    );
+
+    test('a manager focusing another field of the form ends the fill window', () {
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      final ({EngineAutofillForm group, DomHTMLElement active}) form = openClusteredForm(send);
+      final EngineAutofillForm group = form.group;
+      final DomHTMLElement active = form.active;
+      final DomHTMLElement other = otherField(group, active);
+
+      // A password manager's menu taking the focus from the field it was
+      // invoked on opens the fill window. The manager then focuses the other
+      // field to fill it, instead of handing the focus back.
+      group.beginFillWindow();
+      other.dispatchEvent(focusEvent());
+
+      // The app is laid out again: both proxies follow the field instead of
+      // staying at stale coordinates.
+      final double activeLeft = active.getBoundingClientRect().left;
+      final double otherLeft = other.getBoundingClientRect().left;
+      moveField(send);
+      expect(active.getBoundingClientRect().left - activeLeft, 280);
+      expect(other.getBoundingClientRect().left - otherLeft, 280);
+
+      send(const MethodCall('TextInput.clearClient'));
+    });
+
+    for (final (String trigger, void Function(DomHTMLElement, DomHTMLElement) endFill)
+        in <(String, void Function(DomHTMLElement, DomHTMLElement))>[
+          (
+            'another field of the form gets the focus',
+            (_, DomHTMLElement other) => other.dispatchEvent(focusEvent()),
+          ),
+          (
+            'the field gets the focus back',
+            (DomHTMLElement active, _) => active.dispatchEvent(focusEvent()),
+          ),
+          (
+            'the window gets the focus back',
+            (_, _) => domWindow.dispatchEvent(createDomEvent('Event', 'focus')),
+          ),
+        ]) {
+      test('a placement held during the fill window is applied when $trigger', () {
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+        final ({EngineAutofillForm group, DomHTMLElement active}) form = openClusteredForm(send);
+        final EngineAutofillForm group = form.group;
+        final DomHTMLElement active = form.active;
+        final DomHTMLElement other = otherField(group, active);
+        final double activeLeft = active.getBoundingClientRect().left;
+        final double otherLeft = other.getBoundingClientRect().left;
+
+        // The app is laid out again while a manager fills, as when the browser
+        // window is resized with its menu open: the fields hold still.
+        group.beginFillWindow();
+        moveField(send);
+        expect(active.getBoundingClientRect().left, activeLeft);
+        expect(other.getBoundingClientRect().left, otherLeft);
+
+        // Once the fill window ends, the held placement is applied rather than
+        // waiting for a layout change that may never come.
+        endFill(active, other);
+        expect(active.getBoundingClientRect().left - activeLeft, 280);
+        expect(other.getBoundingClientRect().left - otherLeft, 280);
+
+        send(const MethodCall('TextInput.clearClient'));
+      });
+    }
+
     // A password manager fills a login form by focusing each field in turn and
     // writing into it, and the field it starts from is whichever one the user
     // invoked it on. Whatever it writes has to reach the framework in every
