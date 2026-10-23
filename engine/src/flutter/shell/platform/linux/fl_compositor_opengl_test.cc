@@ -80,6 +80,78 @@ TEST_F(FlCompositorOpenGLTest, Render) {
   cairo_destroy(cr);
 }
 
+TEST_F(FlCompositorOpenGLTest, RenderSharedFramebufferRestoresContext) {
+  g_clear_object(&compositor);
+  compositor = fl_compositor_opengl_new(task_runner, opengl_manager, TRUE);
+
+  constexpr size_t width = 100;
+  constexpr size_t height = 100;
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new(GL_RGB, width, height, FALSE);
+  FlutterBackingStore backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.framebuffer = {.user_data = framebuffer}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &backing_store,
+                        .offset = {0, 0},
+                        .size = {width, height}};
+  const FlutterLayer* layers[1] = {&layer};
+  ASSERT_TRUE(
+      fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1));
+
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+  g_autoptr(GdkGLContext) owner_context =
+      GDK_GL_CONTEXT(g_object_new(GDK_TYPE_GL_CONTEXT, nullptr));
+  g_autoptr(GdkGLContext) paint_context =
+      GDK_GL_CONTEXT(g_object_new(GDK_TYPE_GL_CONTEXT, nullptr));
+  GdkGLContext* current_context = nullptr;
+  ON_CALL(gtk, gdk_gl_context_get_current()).WillByDefault([&]() {
+    return current_context;
+  });
+
+  // Without a current context, no sibling should be created. The subsequent
+  // render also checks that this failure path releases the frame mutex.
+  EXPECT_CALL(epoxy, glGenFramebuffers).Times(0);
+  EXPECT_CALL(gtk, gdk_cairo_draw_from_gl).Times(0);
+  EXPECT_FALSE(
+      fl_compositor_render(FL_COMPOSITOR(compositor), nullptr, nullptr, FALSE));
+  ::testing::Mock::VerifyAndClearExpectations(&epoxy);
+  ::testing::Mock::VerifyAndClearExpectations(&gtk);
+
+  current_context = owner_context;
+  constexpr GLuint sibling_id = 123;
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(epoxy, glGenFramebuffers(1, ::testing::_))
+        .WillOnce([&](GLsizei n, GLuint* framebuffers) {
+          EXPECT_EQ(current_context, owner_context);
+          *framebuffers = sibling_id;
+        });
+    EXPECT_CALL(gtk, gdk_cairo_draw_from_gl)
+        .WillOnce([&](cairo_t*, GdkWindow*, int, int, int, int, int, int, int) {
+          EXPECT_EQ(current_context, owner_context);
+          current_context = paint_context;
+        });
+    EXPECT_CALL(epoxy, glFlush()).WillOnce([&]() {
+      EXPECT_EQ(current_context, paint_context);
+    });
+    EXPECT_CALL(gtk, gdk_gl_context_make_current(owner_context))
+        .WillOnce([&](GdkGLContext* context) { current_context = context; });
+    EXPECT_CALL(epoxy, glDeleteFramebuffers(1, ::testing::Pointee(sibling_id)))
+        .WillOnce([&](GLsizei, const GLuint*) {
+          EXPECT_EQ(current_context, owner_context);
+        });
+    EXPECT_CALL(epoxy, glFlush()).WillOnce([&]() {
+      EXPECT_EQ(current_context, owner_context);
+    });
+  }
+  EXPECT_TRUE(
+      fl_compositor_render(FL_COMPOSITOR(compositor), nullptr, nullptr, FALSE));
+  EXPECT_EQ(current_context, owner_context);
+  ::testing::Mock::VerifyAndClearExpectations(&epoxy);
+  ::testing::Mock::VerifyAndClearExpectations(&gtk);
+}
+
 TEST_F(FlCompositorOpenGLTest, Resize) {
   // Present a layer that is the old size.
   constexpr size_t width1 = 90;
