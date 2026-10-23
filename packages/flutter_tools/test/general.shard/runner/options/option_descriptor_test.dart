@@ -28,6 +28,11 @@ class _FakeCommand extends FlutterCommand {
   @override
   final String description;
 
+  // The fake builds nothing; with the default (true) the runner would update
+  // the real artifact cache before running it.
+  @override
+  bool get shouldUpdateCache => false;
+
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.success();
 }

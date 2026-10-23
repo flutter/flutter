@@ -32,6 +32,7 @@ file (dart_tests() declares them over a glob); the test runs from the
 runfiles tree's root, so a file the test reads is at its repository path.
 """
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
     "//engine/src/flutter/build/bazel/dart:kernel.bzl",
     "KERNEL_TOOL_ATTRS",
@@ -157,6 +158,14 @@ def _dart_test_impl(ctx):
         content = """#!/bin/bash
 set -euo pipefail
 root="$PWD"
+# The repository's root, for tests that find it there (flutter_tools' read
+# FLUTTER_ROOT before deriving it from the script's path): the runfiles
+# tree, whose layout is the repository's.
+export FLUTTER_ROOT="$root"
+# The SDK cache's directory, for a tool under test that writes there
+# (Cache.lock opens bin/cache/lockfile); what tests read of it is laid
+# in by `cache` and `cache_files`.
+mkdir -p "$root/bin/cache"
 cd "{package}"
 exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} "{test}" "$@"
 """.format(
@@ -169,10 +178,30 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
         ),
         is_executable = True,
     )
+
+    # The SDK cache's paths under FLUTTER_ROOT/bin/cache (as flutter_test lays
+    # them): each tree's files at their paths within their repository under
+    # the directory named; each file at the path named.
+    cache = {}
+    for target, directory in ctx.attr.cache.items():
+        for file in target[DefaultInfo].files.to_list():
+            path = file.short_path
+            if path.startswith("../"):
+                path = path.split("/", 2)[2]
+            cache[paths.join("bin/cache", directory, path)] = file
+    for target, path in ctx.attr.cache_files.items():
+        files = target[DefaultInfo].files.to_list()
+        if len(files) != 1:
+            fail("%s: cache_files: %s should be one file" % (ctx.label, target.label))
+        cache[paths.join("bin/cache", path)] = files[0]
     runtime = ctx.attr.runtime_package_config
     runfiles = ctx.runfiles(
         files = [kernel, test, runner.kernel, runner.package_config] + ctx.files.data + ctx.files._sdk,
-        symlinks = {_PACKAGE_CONFIG: ctx.file.runtime_package_config},
+        # The runtime configuration at the package's .dart_tool/, where `dart
+        # test --precompiled` reads it from the working directory and a tool
+        # under test looks for its own (flutter_tools' template images);
+        # pub_package_config writes its root URIs for that location.
+        symlinks = {paths.join(ctx.label.package, _PACKAGE_CONFIG): ctx.file.runtime_package_config} | cache,
         # The test's packages, for what it reads of them at run time.
         transitive_files = runtime[PubPackageConfigInfo].sources,
     )
@@ -202,6 +231,17 @@ dart_test = rule(
             allow_files = True,
             doc = "What the test reads at run time, at its repository path under the runfiles root.",
         ),
+        "cache": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "What the test reads of the Flutter SDK's cache (FLUTTER_ROOT/bin/cache): each " +
+                  "target's files, at their paths within their repository, under the directory " +
+                  "named (`dart-sdk`); flutter_sdk_cache.bzl.",
+        ),
+        "cache_files": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "Single files of the SDK's cache, each at the path named under bin/cache " +
+                  "(`engine.stamp`, which the tool's bootstrap writes).",
+        ),
         "compile_args": attr.string_list(
             doc = "Further frontend server arguments for the compile.",
         ),
@@ -219,8 +259,9 @@ dart_test = rule(
             allow_single_file = True,
             mandatory = True,
             providers = [PubPackageConfigInfo],
-            doc = "The package configuration for the run (pub_package_config, runfiles layout): " +
-                  "the test's packages and package:test's.",
+            doc = "The package configuration for the run (pub_package_config, runfiles layout, " +
+                  "written for `<this package>/.dart_tool/package_config.json`, where the run " +
+                  "places it): the test's packages and package:test's.",
         ),
         "_vm_platform": attr.label(
             default = "@dart_sdk_linux_x64//:vm_platform",
@@ -310,6 +351,7 @@ def dart_package_tests(
         out = name + "_runtime_package_config.json",
         dev_roots = config_dev_roots,
         layout = "runfiles",
+        location = paths.join(native.package_name(), ".dart_tool/package_config.json"),
         packages = workspace_packages,
         roots = config_roots,
         without = without,

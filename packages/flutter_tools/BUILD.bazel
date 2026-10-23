@@ -1,0 +1,82 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# flutter_tools' sources and its tests under Bazel: each test compiled by
+# the frontend server for the VM and run by package:test's precompiled
+# runner from this directory, as `dart test` runs them
+# (engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+#
+#   bazel test //packages/flutter_tools:general_shard
+
+load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+# The tool: its libraries and entry points, and what it reads of its own
+# tree at run time (the templates it copies, the Gradle scripts, the
+# analysis options it ships, package:test's configuration for its tests).
+filegroup(
+    name = "sources",
+    srcs = glob([
+        "bin/**",
+        "gradle/**",
+        "ide_templates/**",
+        "lib/**",
+        "static/**",
+        "templates/**",
+        "tool/**",
+    ]) + [
+        "analysis_options.yaml",
+        "dart_test.yaml",
+        "pubspec.yaml",
+    ],
+)
+
+# The tool's own packages beside it.
+_PACKAGES = {
+    "//packages/flutter_tools/packages/flutter_tools_core:sources": "flutter_tools_core",
+    "//packages/flutter_tools/packages/flutter_tools_extension:sources": "flutter_tools_extension",
+    "//packages/flutter_tools/packages/flutter_tools_extension_linux_prototype:sources": "flutter_tools_extension_linux_prototype",
+}
+
+# The general shard: the unit tests dev/bots runs with `dart test
+# test/general.shard` (`flutter_tools_tests` is its own CI shard). The
+# commands and integration shards drive the built tool and the repository;
+# later.
+dart_package_tests(
+    name = "general_shard",
+    # The test harness (test/src), the helpers beside the tests, and the
+    # integration shard's test_utils.dart, which the harness imports.
+    srcs = glob(
+        [
+            "test/src/**/*.dart",
+            "test/general.shard/**/*.dart",
+        ],
+        exclude = ["test/general.shard/**/*_test.dart"],
+    ) + glob(
+        ["test/integration.shard/*.dart"],
+        exclude = ["test/integration.shard/*_test.dart"],
+    ),
+    # What the tests read of the SDK's cache under FLUTTER_ROOT: the Dart SDK
+    # (cache_test reads DevTools' version from its resources) and the engine
+    # stamp the tool's bootstrap writes (version_test).
+    cache = {
+        "@dart_sdk_linux_x64//:dart": "dart-sdk",
+        "@dart_sdk_linux_x64//:devtools": "dart-sdk",
+    },
+    cache_files = {
+        "//bin/internal:engine_stamp": "engine.stamp",
+        "//bin/internal:engine_stamp_json": "engine_stamp.json",
+        "//bin/internal:engine_stamp_stamp": "engine_stamp.stamp",
+    },
+    # Fixtures the tests read relative to this directory.
+    data = glob(["test/data/**"]),
+    # Two tests reach the network: cache_test's China warning looks up
+    # storage.googleapis.com, ios_device_start_prebuilt_test's mDNS client
+    # sends to the multicast group.
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    tests = glob(["test/general.shard/**/*_test.dart"]),
+)

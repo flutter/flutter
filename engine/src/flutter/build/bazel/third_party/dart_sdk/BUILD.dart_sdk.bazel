@@ -42,6 +42,14 @@ filegroup(
     ),
 )
 
+# DevTools as the SDK ships it under bin/resources; the flutter tool reads
+# its version from there (flutter_tools' cache_test, under a test's
+# FLUTTER_ROOT/bin/cache/dart-sdk).
+filegroup(
+    name = "devtools",
+    srcs = glob(["bin/resources/devtools/**"]),
+)
+
 # The VM's platform kernel, which the frontend server compiles a VM program
 # against (--target=vm; build/bazel/dart/dart_test.bzl).
 filegroup(
