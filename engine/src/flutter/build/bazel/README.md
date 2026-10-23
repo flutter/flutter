@@ -709,7 +709,20 @@ a `pub_cache` of the hosted packages the project reaches, laid in the
 runfiles tree as `.pub-cache` with `PUB_CACHE` pointing at it; pub still
 asks pub.dev which versions exist, so such a test has the network (`network`),
 and downloads nothing it finds there. `large` names the files that run the
-real pub or the analyzer over whole projects (a 15-minute timeout).
+real pub or the analyzer over whole projects (a 15-minute timeout); `sizes`
+gives a file a size of its own. A test that runs *the tool itself*
+(create_test spawns `bin/flutter` and `dart bin/cache/flutter_tools.snapshot
+analyze|test` on the projects it creates) gets the tool from the build too:
+`dart_vm_kernel` compiles `bin/flutter_tools.dart` for the VM and the
+kernel sits at `bin/cache/flutter_tools.snapshot`, `sdk_files` puts a
+launcher at `bin/flutter` (the repository's script would bootstrap from
+git and the network), and the engine artifacts lie in the cache's own
+layout -- `bin/cache/artifacts/engine/linux-x64` is `linux-x64/artifacts.zip`
+and `font-subset.zip` unpacked, `common/` the patched SDK's archive -- as
+`bundle_directory` lays a zip_bundle's entries (`ZipBundleInfo`), with the
+stamps the tool's `Cache.updateAll` checks before it would download
+(`bin/internal`: the engine revision's fixed word, the fonts' and the Gradle
+wrapper's pins).
 
 ```sh
 bazel test //:framework_tests //:tool_tests //:dart_tests   # everything below, the root's suites
@@ -731,13 +744,13 @@ flutter_driver's, integration_test's, the example apps', manual_tests',
 tracing_tests', stocks', vitool's, integration_ui's -- 1,627 files and 22,522
 cases -- plus the Impeller, no-tracking and release/profile runs,
 flutter_tools' general shard (271 files) and commands shard (the hermetic
-half whole, 67; the permeable half but for the files that run the built
-tool, 8),
+half whole, 67; the permeable half but for two files, 9),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
 fuchsia_remote_debug_protocol). Left out by name: web-only and macOS-only
-files (`@TestOn`, which a BUILD file cannot read), and tests that run the
-built tool or git on the checkout -- the integration kind. The compile's defines for
+files (`@TestOn`, which a BUILD file cannot read), tests of the repository
+itself (git on the checkout), and what needs the engine in its other
+runtime modes or a device. The compile's defines for
 the SDK version are fixed words (`-DFLUTTER_VERSION=bazel`...), so a kernel
 is the same on every commit and the cache holds across them.
 

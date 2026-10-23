@@ -45,7 +45,7 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "PYTHON_ATTRS", "run_python")
 load(":checkout_view.bzl", "build_directory_attrs", "build_directory_variant")
 load(":install.bzl", "INSTALL_CONTENT_ATTRS", "install_entries")
-load(":zip_bundle.bzl", "ZipTreeInfo")
+load(":zip_bundle.bzl", "ZipBundleInfo", "ZipTreeInfo")
 
 MANIFEST = "local_engine.json"
 
@@ -87,28 +87,21 @@ def _tree_directory(entries):
             return None
     return destination, directory
 
-def _assemble(ctx, prefix, entries):
-    """A directory artifact holding what `entries` place under the GN path `prefix`."""
-    output = ctx.actions.declare_directory(paths.join(ctx.label.name, paths.basename(prefix)))
+def _assemble_directory(ctx, name, placements):
+    """A directory artifact `name` from `placements`: (file, source path, path under the directory) triples.
+
+    A directory file's contents go under its path (`.` for the directory
+    itself); assemble_directory.py copies.
+    """
+    output = ctx.actions.declare_directory(name)
     args = ctx.actions.args()
     args.add("--output", output.path)
     inputs = []
-    for file, path in entries:
-        if path == prefix:
-            if not file.is_directory:
-                fail("%s: %s is a file, not a directory to assemble" % (ctx.label, prefix))
-            args.add("--directory", "%s=." % file.path)
-        elif path.startswith(prefix + "/"):
-            args.add("--%s" % ("directory" if file.is_directory else "file"), "%s=%s" % (file.path, path[len(prefix) + 1:]))
-        elif file.is_directory and prefix.startswith(path + "/"):
-            # A directory artifact holding the prefix as a subdirectory
-            # (dart_pkg's gen/dart-pkg holds sky_engine/).
-            args.add("--directory", "%s=." % paths.join(file.path, prefix[len(path) + 1:]))
-        else:
-            continue
+    for file, source, path in placements:
+        args.add("--%s" % ("directory" if file.is_directory else "file"), "%s=%s" % (source, path))
         inputs.append(file)
     if not inputs:
-        fail("%s: nothing places files under %s" % (ctx.label, prefix))
+        fail("%s: nothing to assemble into %s" % (ctx.label, name))
     args.set_param_file_format("multiline")
     args.use_param_file("@%s", use_always = True)
     run_python(
@@ -118,9 +111,27 @@ def _assemble(ctx, prefix, entries):
         inputs = inputs,
         outputs = [output],
         mnemonic = "AssembleDirectory",
-        progress_message = "Assembling %s of %s" % (prefix, ctx.label),
+        progress_message = "Assembling %s of %s" % (name, ctx.label),
     )
     return output
+
+def _assemble(ctx, prefix, entries):
+    """A directory artifact holding what `entries` place under the GN path `prefix`."""
+    placements = []
+    for file, path in entries:
+        if path == prefix:
+            if not file.is_directory:
+                fail("%s: %s is a file, not a directory to assemble" % (ctx.label, prefix))
+            placements.append((file, file.path, "."))
+        elif path.startswith(prefix + "/"):
+            placements.append((file, file.path, path[len(prefix) + 1:]))
+        elif file.is_directory and prefix.startswith(path + "/"):
+            # A directory artifact holding the prefix as a subdirectory
+            # (dart_pkg's gen/dart-pkg holds sky_engine/).
+            placements.append((file, paths.join(file.path, prefix[len(path) + 1:]), "."))
+    if not placements:
+        fail("%s: nothing places files under %s" % (ctx.label, prefix))
+    return _assemble_directory(ctx, paths.join(ctx.label.name, paths.basename(prefix)), placements)
 
 def _covered(path, prefixes):
     """Whether a GN path is one of `prefixes`, under one, or (a directory artifact's) above one."""
@@ -207,6 +218,37 @@ assembled_directory = rule(
         "prefix": attr.string(
             mandatory = True,
             doc = "The GN path assembled (`gen/dart-pkg/sky_engine`).",
+        ),
+        "_assemble": attr.label(
+            default = "//engine/src/flutter/build/bazel:assemble_directory.py",
+            allow_single_file = True,
+        ),
+    },
+)
+
+def _bundle_directory_impl(ctx):
+    placed = {}
+    for bundle in ctx.attr.bundles:
+        for file, path in bundle[ZipBundleInfo].entries:
+            # The same file in two archives (gen_snapshot is in a mode's
+            # artifacts.zip and its desktop embedding's) lands once.
+            if path in placed and placed[path] != file:
+                fail("%s: %s places %s at %s, where %s already is" % (ctx.label, bundle.label, file.path, path, placed[path].path))
+            placed[path] = file
+    placements = [(file, file.path, path) for path, file in placed.items()]
+    return [DefaultInfo(files = depset([_assemble_directory(ctx, ctx.label.name, placements)]))]
+
+bundle_directory = rule(
+    implementation = _bundle_directory_impl,
+    doc = "The files of some zip_bundles laid as one directory, each at its path in its archive, as " +
+          "the flutter tool's cache unpacks the archives it downloads (`bin/cache/artifacts/engine/linux-x64` " +
+          "is linux-x64/artifacts.zip and font-subset.zip unpacked together): the SDK cache the tests' " +
+          "facsimile lays from the build instead of a download (dart_test's `cache_files`).",
+    attrs = PYTHON_ATTRS | {
+        "bundles": attr.label_list(
+            mandatory = True,
+            providers = [ZipBundleInfo],
+            doc = "The zip_bundles; an entry path two of them place different files at is an error.",
         ),
         "_assemble": attr.label(
             default = "//engine/src/flutter/build/bazel:assemble_directory.py",

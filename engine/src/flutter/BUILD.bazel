@@ -271,6 +271,11 @@ cc_library(
 # //engine/src/flutter/shell).
 exports_files([".ci.yaml"])
 
+# The embedder examples' directory, which flutter_tools' create_test creates a
+# project in (the SDK facsimile its tests run from needs the directory to
+# exist; packages/flutter_tools/BUILD.bazel).
+exports_files(["examples/glfw/README.md"])
+
 filegroup(
     name = "et_entry_points",
     srcs = glob(["bin/et*"]),

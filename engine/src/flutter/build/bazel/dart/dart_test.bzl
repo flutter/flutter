@@ -167,6 +167,62 @@ dart_test_prelude = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
+def _dart_vm_kernel_impl(ctx):
+    kernel = ctx.actions.declare_file(ctx.attr.out or ctx.label.name + ".dill")
+    compile_to_kernel(
+        ctx,
+        main = ctx.file.main,
+        out = kernel,
+        srcs = depset(
+            ctx.files.srcs,
+            transitive = [ctx.attr.package_config[PubPackageConfigInfo].sources] +
+                         [dep[DefaultInfo].files for dep in ctx.attr.deps],
+        ),
+        package_config = ctx.file.package_config,
+        platform = ctx.files._vm_platform,
+        args = ctx.attr.compile_args,
+        target = "vm",
+    )
+    return [DefaultInfo(files = depset([kernel]))]
+
+dart_vm_kernel = rule(
+    implementation = _dart_vm_kernel_impl,
+    doc = "A Dart program compiled for the VM against a pub package configuration: a kernel `dart` runs " +
+          "(flutter_tools' entry point as bin/cache/flutter_tools.snapshot in the tests' SDK facsimile; the " +
+          "SDK's shell script compiles the same entry point with `dart --snapshot` on the first run).",
+    attrs = {
+        "main": attr.label(
+            allow_single_file = [".dart"],
+            mandatory = True,
+            doc = "The entry point.",
+        ),
+        "out": attr.string(
+            doc = "The kernel's file name; `<name>.dill` by default.",
+        ),
+        "srcs": attr.label_list(
+            allow_files = True,
+            doc = "Other files the entry point reaches.",
+        ),
+        "deps": attr.label_list(
+            allow_files = True,
+            doc = "Other files the compile may read besides the configuration's packages.",
+        ),
+        "compile_args": attr.string_list(
+            doc = "Further frontend server arguments.",
+        ),
+        "package_config": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            providers = [PubPackageConfigInfo],
+            doc = "The package configuration for the compile (pub_package_config, execroot layout).",
+        ),
+        "_vm_platform": attr.label(
+            default = "@dart_sdk_linux_x64//:vm_platform",
+            allow_files = True,
+        ),
+    } | KERNEL_TOOL_ATTRS,
+)
+
 def _dart_test_impl(ctx):
     test = ctx.file.test
     if test.dirname != ctx.label.package and not test.dirname.startswith(ctx.label.package + "/"):
@@ -254,20 +310,28 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
     )
 
     # The SDK cache's paths under FLUTTER_ROOT/bin/cache (as flutter_test lays
-    # them): each tree's files at their paths within their repository under
-    # the directory named; each file at the path named.
+    # them): each tree's files at their paths within their repository -- or,
+    # for this repository's, within their package -- under the directory
+    # named; each file at the path named.
     cache = {}
     for target, directory in ctx.attr.cache.items():
         for file in target[DefaultInfo].files.to_list():
             path = file.short_path
             if path.startswith("../"):
                 path = path.split("/", 2)[2]
+            elif target.label.package:
+                path = paths.relativize(path, target.label.package)
             cache[paths.join("bin/cache", directory, path)] = file
     for target, path in ctx.attr.cache_files.items():
         files = target[DefaultInfo].files.to_list()
         if len(files) != 1:
             fail("%s: cache_files: %s should be one file" % (ctx.label, target.label))
         cache[paths.join("bin/cache", path)] = files[0]
+    for target, path in ctx.attr.sdk_files.items():
+        files = target[DefaultInfo].files.to_list()
+        if len(files) != 1:
+            fail("%s: sdk_files: %s should be one file" % (ctx.label, target.label))
+        cache[path] = files[0]
     if ctx.attr.pub_cache:
         for path, file in ctx.attr.pub_cache[PubCacheInfo].entries.items():
             cache[paths.join(".pub-cache", path)] = file
@@ -316,8 +380,8 @@ dart_test = rule(
         "cache": attr.label_keyed_string_dict(
             allow_files = True,
             doc = "What the test reads of the Flutter SDK's cache (FLUTTER_ROOT/bin/cache): each " +
-                  "target's files, at their paths within their repository, under the directory " +
-                  "named (`dart-sdk`); flutter_sdk_cache.bzl.",
+                  "target's files, at their paths within their repository (this repository's: within " +
+                  "their package), under the directory named (`dart-sdk`); flutter_sdk_cache.bzl.",
         ),
         "pub_cache": attr.label(
             providers = [PubCacheInfo],
@@ -326,8 +390,15 @@ dart_test = rule(
         ),
         "cache_files": attr.label_keyed_string_dict(
             allow_files = True,
-            doc = "Single files of the SDK's cache, each at the path named under bin/cache " +
-                  "(`engine.stamp`, which the tool's bootstrap writes).",
+            doc = "Single files (or directory artifacts) of the SDK's cache, each at the path named under " +
+                  "bin/cache (`engine.stamp`, which the tool's bootstrap writes; `artifacts/engine/linux-x64`, " +
+                  "a bundle_directory).",
+        ),
+        "sdk_files": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "Single files of the SDK laid at the path named under FLUTTER_ROOT in place of the " +
+                  "repository's own (`bin/flutter`: a launcher of the tool Bazel compiled, where the " +
+                  "repository's script would bootstrap from the network).",
         ),
         "compile_args": attr.string_list(
             doc = "Further frontend server arguments for the compile.",
@@ -366,7 +437,7 @@ dart_test = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], **kwargs):
+def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, **kwargs):
     """One dart_test per test file, and a test_suite of them.
 
     Args:
@@ -378,6 +449,9 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
       large: test files given the large size (a 15-minute timeout rather
         than medium's 5) whatever `size` says: the few that run the real
         pub or the analyzer over whole projects.
+      sizes: test files given a size of their own (`enormous`, an hour:
+        create_test, which creates, analyzes and tests some hundred
+        projects through the tool).
       **kwargs: dart_test's attributes, the same for every file.
     """
     test_tags = list(tags) + ([] if network else ["block-network"])
@@ -387,7 +461,7 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
         dart_test(
             name = test_name,
             test = test,
-            size = "large" if test in large else size,
+            size = sizes.get(test, "large" if test in large else size),
             tags = test_tags,
             **kwargs
         )
@@ -429,8 +503,8 @@ def dart_package_tests(
         none compiles each test from scratch.
       compile_args: further frontend server arguments, for the prelude and
         the tests alike.
-      **kwargs: dart_tests' other arguments (size, large, tags, network,
-        runner_args, deps, cache, cache_files, pub_cache).
+      **kwargs: dart_tests' other arguments (size, large, sizes, tags, network,
+        runner_args, deps, cache, cache_files, sdk_files, pub_cache).
     """
     workspace_packages = {":sources": package} | packages
     config_roots = [package, "test"] + roots
