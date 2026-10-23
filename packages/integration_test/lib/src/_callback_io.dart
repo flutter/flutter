@@ -98,6 +98,11 @@ class _IOCallbackManager implements CallbackManager {
     return <String, dynamic>{'screenshotName': screenshot, 'bytes': rawBytes};
   }
 
+  @override
+  Future<void> click(double x, double y) async {
+    throw UnsupportedError('webDriverClick is only supported on the web');
+  }
+
   Future<dynamic> _onMethodChannelCall(MethodCall call) async {
     switch (call.method) {
       case 'scheduleFrame':

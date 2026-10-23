@@ -36,14 +36,14 @@ void main() {
 
   group('WebDriverCommand.click', () {
     test('carries the click type and viewport coordinates', () {
-      final WebDriverCommand command = WebDriverCommand.click(12.5, 34.25);
+      final command = WebDriverCommand.click(12.5, 34.25);
 
       expect(command.type, WebDriverCommandType.click);
       expect(command.values, <String, dynamic>{'x': 12.5, 'y': 34.25});
     });
 
     test('serializes to the web_driver_command message the host driver reads', () {
-      final WebDriverCommand command = WebDriverCommand.click(12.5, 34.25);
+      final command = WebDriverCommand.click(12.5, 34.25);
       final data = Map<String, dynamic>.of(command.values)
         ..addAll(WebDriverCommand.typeToMap(command.type));
 

@@ -24,6 +24,7 @@ import 'common.dart';
 import 'src/callback.dart' as driver_actions;
 import 'src/channel.dart';
 import 'src/extension.dart';
+import 'src/view_utils.dart';
 
 export 'src/vm_service_golden_client.dart';
 
@@ -193,6 +194,46 @@ https://docs.flutter.dev/testing/integration-tests
 
     (reportData!['screenshots']! as List<dynamic>).add(data);
     return data['bytes']! as List<int>;
+  }
+
+  /// Web only. Performs a real browser pointer click at [position] using
+  /// WebDriver, and completes once the browser has dispatched the click.
+  ///
+  /// [position] is a logical position in [view], such as the one returned by
+  /// [WidgetTester.getCenter]. If [view] is null, the implicit view is used.
+  ///
+  /// Unlike [WidgetTester.tap], which dispatches synthetic pointer events
+  /// directly to Flutter's gesture system, the click goes through the
+  /// browser's own hit testing and event dispatch. This makes it possible to
+  /// test interactions with platform views such as [HtmlElementView], for
+  /// example an `<iframe>`'s click listeners, which synthetic Flutter pointer
+  /// events never reach. DOM listeners run before the returned future
+  /// completes, so their effects can be asserted immediately after awaiting
+  /// this method.
+  ///
+  /// This method does not modify [shouldPropagateDevicePointerEvents].
+  /// Browser pointer events arrive in the test binding as
+  /// [TestBindingEventSource.device] events, which the binding ignores by
+  /// default. To assert on Flutter widgets reacting to the click (for example
+  /// a button's `onPressed`), set [shouldPropagateDevicePointerEvents] to true
+  /// before calling this method, and [WidgetTester.pump] afterwards to process
+  /// the resulting frame.
+  ///
+  /// Only works on the web when tests are run via the `flutter drive` command
+  /// with a driver that uses [integrationDriver] from
+  /// `integration_test_driver_extended.dart`. Throws an [UnsupportedError]
+  /// on other platforms, a [StateError] if [view] is null and there is no
+  /// implicit view, and completes with an error if the driver fails to
+  /// perform the click.
+  Future<void> webDriverClick(Offset position, {FlutterView? view}) async {
+    final FlutterView? targetView = view ?? platformDispatcher.implicitView;
+    if (targetView == null) {
+      throw StateError(
+        'webDriverClick requires a view, but no view was provided and there is no implicit view.',
+      );
+    }
+    final Offset viewportPosition = viewportOrigin(targetView) + position;
+    await callbackManager.click(viewportPosition.dx, viewportPosition.dy);
   }
 
   /// Android only. Converts the Flutter surface to an image view.

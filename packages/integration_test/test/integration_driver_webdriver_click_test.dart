@@ -100,7 +100,11 @@ class _RecordingMouse extends Fake implements Mouse {
 
   @override
   Future<void> click([MouseButton button = MouseButton.primary]) async {
-    events.add('click($button)');
+    // MouseButton is a class without a toString, so name the button here.
+    final buttonName = button == MouseButton.primary
+        ? 'MouseButton.primary'
+        : 'MouseButton(${button.value})';
+    events.add('click($buttonName)');
     if (clickError != null) {
       throw clickError!;
     }

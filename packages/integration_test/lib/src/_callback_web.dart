@@ -21,7 +21,7 @@ final _WebCallbackManager _singletonWebDriverCommandManager = _WebCallbackManage
 /// Along with responding to callbacks from the driver side this calls enables
 /// usage of Web Driver commands by sending [WebDriverCommand]s to driver side.
 ///
-/// Tests can execute an Web Driver commands such as `screenshot` using browsers'
+/// Tests can execute an Web Driver commands such as `screenshot` or `click` using browsers'
 /// WebDriver APIs.
 ///
 /// See: https://www.w3.org/TR/webdriver/
@@ -52,6 +52,17 @@ class _WebCallbackManager implements CallbackManager {
       // Flutter Web doesn't provide the bytes.
       'bytes': <int>[],
     };
+  }
+
+  /// Performs a real pointer click at ([x], [y]) in the browser viewport using
+  /// the WebDriver actions API.
+  ///
+  /// Only works on Web when tests are run via `flutter driver` command.
+  ///
+  /// See: https://www.w3.org/TR/webdriver/#actions.
+  @override
+  Future<void> click(double x, double y) async {
+    await _sendWebDriverCommand(WebDriverCommand.click(x, y));
   }
 
   @override
@@ -116,6 +127,10 @@ class _WebCallbackManager implements CallbackManager {
         case WebDriverCommandType.screenshot:
           final data = Map<String, dynamic>.from(command.values);
           data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.screenshot));
+          response = <String, String>{'message': Response.webDriverCommand(data: data).toJson()};
+        case WebDriverCommandType.click:
+          final data = Map<String, dynamic>.from(command.values);
+          data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.click));
           response = <String, String>{'message': Response.webDriverCommand(data: data).toJson()};
         case WebDriverCommandType.noop:
           final data = <String, dynamic>{};

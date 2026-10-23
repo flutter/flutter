@@ -224,6 +224,12 @@ enum WebDriverCommandType {
 
   /// Asking WebDriver to take a screenshot of the Web page.
   screenshot,
+
+  /// Asking WebDriver to perform a real pointer click at a position in the
+  /// browser viewport.
+  ///
+  /// See [IntegrationTestWidgetsFlutterBinding.webDriverClick].
+  click,
 }
 
 /// Command for WebDriver to execute.
@@ -240,16 +246,24 @@ class WebDriverCommand {
     : type = WebDriverCommandType.screenshot,
       values = <String, dynamic>{'screenshot_name': screenshotName, 'args': ?args};
 
+  /// Constructor for [WebDriverCommandType.click] command.
+  ///
+  /// [x] and [y] are the position to click, in CSS pixels relative to the
+  /// top-left corner of the browser viewport.
+  WebDriverCommand.click(double x, double y)
+    : type = WebDriverCommandType.click,
+      values = <String, dynamic>{'x': x, 'y': y};
+
   /// Type of the [WebDriverCommand].
   ///
-  /// Currently the only command that triggers a WebDriver API is `screenshot`.
+  /// The commands that trigger a WebDriver API are `screenshot` and `click`.
   ///
   /// There are also `ack` and `noop` commands defined to manage the handshake
   /// during the communication.
   final WebDriverCommandType type;
 
   /// Used for adding extra values to the commands such as file name for
-  /// `screenshot`.
+  /// `screenshot` or the viewport coordinates for `click`.
   final Map<String, dynamic> values;
 
   /// Util method for converting [WebDriverCommandType] to a map entry.
@@ -278,6 +292,17 @@ abstract class CallbackManager {
 
   /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();
+
+  /// Web only. Asks the driver to perform a real pointer click at ([x], [y]),
+  /// in CSS pixels relative to the top-left corner of the browser viewport.
+  ///
+  /// Completes once the driver has performed the click, and completes with an
+  /// error if the driver failed to perform it.
+  ///
+  /// The default implementation throws an [UnsupportedError].
+  Future<void> click(double x, double y) async {
+    throw UnsupportedError('click is not supported by $runtimeType');
+  }
 
   /// Cleanup and completers or locks used during the communication.
   void cleanup();
