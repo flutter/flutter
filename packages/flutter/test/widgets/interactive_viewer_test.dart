@@ -1216,6 +1216,9 @@ void main() {
         Center(
           child: InteractiveViewer(
             transformationController: transformationController,
+            // With an infinite boundary, minScale is the only floor on the scale.
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            minScale: 0.1,
             child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
@@ -1236,12 +1239,13 @@ void main() {
         transformationController.value.storage.every((double value) => value.isFinite),
         isTrue,
       );
-      expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(0.0));
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(0.1));
 
       await gesture.up();
       await gesture2.up();
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(0.1));
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/82115
@@ -1252,6 +1256,9 @@ void main() {
         Center(
           child: InteractiveViewer(
             transformationController: transformationController,
+            // With an infinite boundary, minScale is the only floor on the scale.
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            minScale: 0.1,
             child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
@@ -1268,7 +1275,7 @@ void main() {
         transformationController.value.storage.every((double value) => value.isFinite),
         isTrue,
       );
-      expect(transformationController.value.getMaxScaleOnAxis(), greaterThan(0.0));
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(0.1));
     });
 
     testWidgets('scale does not jump when wrapped in GestureDetector', (WidgetTester tester) async {
