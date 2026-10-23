@@ -40,38 +40,46 @@ _PACKAGES = {
     "//packages/flutter_tools/packages/flutter_tools_extension_linux_prototype:sources": "flutter_tools_extension_linux_prototype",
 }
 
+# The test harness (test/src) and every helper beside a test, whichever
+# shard's: the shards import each other's (the harness imports the
+# integration shard's test_utils.dart, the commands shard's build_ipa_test
+# the general shard's xcresult_test_data.dart).
+_HARNESS = glob(
+    ["test/**/*.dart"],
+    exclude = ["test/**/*_test.dart"],
+)
+
+# What the tests read of the SDK's cache under FLUTTER_ROOT: the Dart SDK
+# (cache_test reads DevTools' version from its resources) and the engine
+# stamp the tool's bootstrap writes (version_test).
+_CACHE = {
+    "@dart_sdk_linux_x64//:dart": "dart-sdk",
+    "@dart_sdk_linux_x64//:devtools": "dart-sdk",
+}
+
+_CACHE_FILES = {
+    "//bin/internal:engine_stamp": "engine.stamp",
+    "//bin/internal:engine_stamp_json": "engine_stamp.json",
+    "//bin/internal:engine_stamp_stamp": "engine_stamp.stamp",
+}
+
+# The tool's whole library, compiled once into each shard's prelude: a test's
+# compile starts from it instead of compiling the tool again.
+_IMPORTS = [
+    "package:flutter_tools/executable.dart",
+    "package:test/test.dart",
+]
+
 # The general shard: the unit tests dev/bots runs with `dart test
-# test/general.shard` (`flutter_tools_tests` is its own CI shard). The
-# commands and integration shards drive the built tool and the repository;
-# later.
+# test/general.shard` (`flutter_tools_tests` is its own CI shard).
 dart_package_tests(
     name = "general_shard",
-    # The test harness (test/src), the helpers beside the tests, and the
-    # integration shard's test_utils.dart, which the harness imports.
-    srcs = glob(
-        [
-            "test/src/**/*.dart",
-            "test/general.shard/**/*.dart",
-        ],
-        exclude = ["test/general.shard/**/*_test.dart"],
-    ) + glob(
-        ["test/integration.shard/*.dart"],
-        exclude = ["test/integration.shard/*_test.dart"],
-    ),
-    # What the tests read of the SDK's cache under FLUTTER_ROOT: the Dart SDK
-    # (cache_test reads DevTools' version from its resources) and the engine
-    # stamp the tool's bootstrap writes (version_test).
-    cache = {
-        "@dart_sdk_linux_x64//:dart": "dart-sdk",
-        "@dart_sdk_linux_x64//:devtools": "dart-sdk",
-    },
-    cache_files = {
-        "//bin/internal:engine_stamp": "engine.stamp",
-        "//bin/internal:engine_stamp_json": "engine_stamp.json",
-        "//bin/internal:engine_stamp_stamp": "engine_stamp.stamp",
-    },
+    srcs = _HARNESS,
+    cache = _CACHE,
+    cache_files = _CACHE_FILES,
     # Fixtures the tests read relative to this directory.
     data = glob(["test/data/**"]),
+    imports = _IMPORTS,
     # Two tests reach the network: cache_test's China warning looks up
     # storage.googleapis.com, ios_device_start_prebuilt_test's mDNS client
     # sends to the multicast group.
@@ -79,4 +87,38 @@ dart_package_tests(
     package = "flutter_tools",
     packages = _PACKAGES,
     tests = glob(["test/general.shard/**/*_test.dart"]),
+)
+
+# The commands shard's hermetic half: the commands against fakes (dev/bots
+# runs test/commands.shard on one core). The permeable half drives the real
+# file system, pub and git; the integration shard the built tool.
+dart_package_tests(
+    name = "commands_shard_hermetic",
+    srcs = _HARNESS,
+    cache = _CACHE,
+    cache_files = _CACHE_FILES,
+    # daemon_test asks the daemon for the gallery project's platforms.
+    data = glob(["test/data/**"]) + ["//dev/integration_tests/flutter_gallery:project"],
+    imports = _IMPORTS,
+    # update_packages_test fetches the coverage data from storage.googleapis.com.
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    # Nine widget_preview tests create projects on the real file system and
+    # resolve them with the real pub (`sdk: flutter` dependencies: the SDK's
+    # version file, pub.dev); they are the integration kind.
+    tests = glob(
+        ["test/commands.shard/hermetic/**/*_test.dart"],
+        exclude = [
+            "test/commands.shard/hermetic/widget_preview/preview_code_generator_test.dart",
+            "test/commands.shard/hermetic/widget_preview/preview_detector_graph_test.dart",
+            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_invalid_preview_applications_test.dart",
+            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_previews_non_const_params_test.dart",
+            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_regression_178317_test.dart",
+            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_test.dart",
+            "test/commands.shard/hermetic/widget_preview/preview_detector/preview_detector_workspace_test.dart",
+            "test/commands.shard/hermetic/widget_preview/preview_manifest/preview_manifest_workspace_test.dart",
+            "test/commands.shard/hermetic/widget_preview/regress_176018_test.dart",
+        ],
+    ),
 )

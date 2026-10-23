@@ -1,0 +1,20 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The gallery's project files, which flutter_tools' daemon_test reads as a
+# project with a known set of platforms (daemon.getSupportedPlatforms).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "project",
+    srcs = glob([
+        "android/**",
+        "ios/**",
+        "linux/**",
+        "macos/**",
+        "web/**",
+        "windows/**",
+    ]) + ["pubspec.yaml"],
+)
