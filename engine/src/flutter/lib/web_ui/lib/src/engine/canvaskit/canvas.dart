@@ -257,15 +257,19 @@ class CkCanvas implements LayerCanvas {
 
   /// Draws a text [paragraph] at [offset].
   ///
-  /// Note: When [paragraph] is a [CkParagraph], its layout and shaders are
+  /// Note: When [paragraph] is an [EngineParagraph], its layout and shaders are
   /// encapsulated natively by SkParagraph. When [paragraph] is a [WebParagraph],
   /// painting is dispatched back to this canvas where paints with image shaders
   /// are automatically tracked.
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
     assert(offsetIsValid(offset));
-    if (paragraph is CkParagraph) {
-      skCanvas.drawParagraph(paragraph.skiaObject, offset.dx, offset.dy);
+    if (paragraph is EngineParagraph) {
+      skCanvas.drawParagraph(
+        (paragraph.backendParagraph as CkParagraph).skiaObject,
+        offset.dx,
+        offset.dy,
+      );
     } else if (paragraph is WebParagraph) {
       paragraph.paint(this, offset);
     } else {

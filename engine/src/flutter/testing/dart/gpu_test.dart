@@ -63,6 +63,22 @@ Future<ByteData> readTextureBytes(gpu.Texture texture) async {
   return bytes!;
 }
 
+/// The RGBA8 pixel at ([x], [y]) of [bytes] read from [texture], as 0xRRGGBBAA.
+int pixelAt(ByteData bytes, gpu.Texture texture, int x, int y) {
+  return bytes.getUint32((y * texture.width + x) * 4);
+}
+
+/// Matches a [StateError] saying that a RenderPass was ended by [endedBy].
+Matcher throwsPassEndedBy(String endedBy) {
+  return throwsA(
+    isA<StateError>().having(
+      (StateError e) => e.message,
+      'message',
+      'This RenderPass was ended by $endedBy.',
+    ),
+  );
+}
+
 Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
   final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
@@ -1310,6 +1326,201 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // Performs no draw calls. Just clears the render target to a solid green color.
+  test('Two RenderPasses in one CommandBuffer both render', () async {
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.Texture textureA = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      100,
+      100,
+    );
+    final gpu.Texture textureB = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      100,
+      100,
+    );
+
+    final gpu.RenderPass passA = commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: textureA, clearValue: Colors.red)),
+    );
+    await drawTriangle(RenderPassState(textureA, commandBuffer, passA), Colors.lime);
+    final gpu.RenderPass passB = commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: textureB, clearValue: Colors.blue)),
+    );
+    await drawTriangle(RenderPassState(textureB, commandBuffer, passB), Colors.yellow);
+    await submitAndWait(commandBuffer);
+
+    final ByteData bytesA = await readTextureBytes(textureA);
+    expect(pixelAt(bytesA, textureA, 50, 50), 0x00FF00FF);
+    expect(pixelAt(bytesA, textureA, 2, 2), 0xFF0000FF);
+    final ByteData bytesB = await readTextureBytes(textureB);
+    expect(pixelAt(bytesB, textureB, 50, 50), 0xFFFF00FF);
+    expect(pixelAt(bytesB, textureB, 2, 2), 0x0000FFFF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('A RenderPass after a copy in one CommandBuffer loads its output', () async {
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      100,
+      100,
+    );
+    final red = Uint8List(100 * 100 * 4);
+    for (var i = 0; i < red.length; i += 4) {
+      red[i] = 0xFF;
+      red[i + 3] = 0xFF;
+    }
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(
+      red.buffer.asByteData(),
+    );
+
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: red.length),
+      gpu.TextureRegion(texture),
+    );
+    final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(
+        gpu.ColorAttachment(texture: texture, loadAction: gpu.LoadAction.load),
+      ),
+    );
+    await drawTriangle(RenderPassState(texture, commandBuffer, renderPass), Colors.lime);
+    await submitAndWait(commandBuffer);
+
+    final ByteData bytes = await readTextureBytes(texture);
+    expect(pixelAt(bytes, texture, 50, 50), 0x00FF00FF);
+    expect(pixelAt(bytes, texture, 2, 2), 0xFF0000FF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('A copy after a RenderPass in one CommandBuffer reads its output', () async {
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.Texture rendered = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 4, 4);
+    final gpu.Texture copied = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 4, 4);
+
+    commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: rendered, clearValue: Colors.lime)),
+    );
+    commandBuffer.copyTextureToTexture(
+      gpu.TextureRegion(rendered),
+      gpu.TextureDestinationRegion(copied),
+    );
+    await submitAndWait(commandBuffer);
+
+    final ByteData bytes = await readTextureBytes(copied);
+    expect(pixelAt(bytes, copied, 0, 0), 0x00FF00FF);
+    expect(pixelAt(bytes, copied, 3, 3), 0x00FF00FF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass throws once the next RenderPass is created', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    state.commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: state.renderTexture)),
+    );
+    expect(
+      () => state.renderPass.setCullMode(gpu.CullMode.none),
+      throwsPassEndedBy('CommandBuffer.createRenderPass()'),
+    );
+    expect(() => state.renderPass.draw(3), throwsPassEndedBy('CommandBuffer.createRenderPass()'));
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass throws once a copy is recorded', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 1, 1);
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(
+      Uint8List.fromList(<int>[0xFF, 0x00, 0x00, 0xFF]).buffer.asByteData(),
+    );
+    state.commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
+      gpu.TextureRegion(texture),
+    );
+    expect(
+      () => state.renderPass.setCullMode(gpu.CullMode.none),
+      throwsPassEndedBy('CommandBuffer.copyBufferToTexture()'),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass throws once its CommandBuffer is submitted', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    await submitAndWait(state.commandBuffer);
+    expect(
+      () => state.renderPass.setCullMode(gpu.CullMode.none),
+      throwsPassEndedBy('CommandBuffer.submit()'),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.createRenderPass throws after submit', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    await submitAndWait(state.commandBuffer);
+    expect(
+      () => state.commandBuffer.createRenderPass(
+        gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: state.renderTexture)),
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          'CommandBuffer.createRenderPass() was called after the CommandBuffer was submitted.',
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyBufferToTexture throws after submit', () async {
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 1, 1);
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(
+      Uint8List.fromList(<int>[0xFF, 0x00, 0x00, 0xFF]).buffer.asByteData(),
+    );
+    await submitAndWait(commandBuffer);
+    expect(
+      () => commandBuffer.copyBufferToTexture(
+        gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
+        gpu.TextureRegion(texture),
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          'CommandBuffer.copyBufferToTexture() was called after the CommandBuffer was submitted.',
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass throws once ended', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    state.renderPass.end();
+    expect(
+      () => state.renderPass.setCullMode(gpu.CullMode.none),
+      throwsPassEndedBy('RenderPass.end()'),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.end can be called more than once', () async {
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 4, 4);
+    final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture, clearValue: Colors.lime)),
+    );
+    renderPass.end();
+    renderPass.end();
+    await submitAndWait(commandBuffer);
+    // Ending it again after submit does nothing either.
+    renderPass.end();
+    expect(() => renderPass.setCullMode(gpu.CullMode.none), throwsPassEndedBy('RenderPass.end()'));
+
+    final ByteData bytes = await readTextureBytes(texture);
+    expect(pixelAt(bytes, texture, 0, 0), 0x00FF00FF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.end does nothing on a pass ended by the next command', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    await submitAndWait(state.commandBuffer);
+    state.renderPass.end();
+    expect(
+      () => state.renderPass.setCullMode(gpu.CullMode.none),
+      throwsPassEndedBy('CommandBuffer.submit()'),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('Can render clear color', () async {
     final RenderPassState state = createSimpleRenderPass(clearColor: Colors.lime);
 
