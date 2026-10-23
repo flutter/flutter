@@ -40,11 +40,26 @@ load(":build_directory.bzl", "binary_entries", "build_directory_aspect", "collec
 load(":checkout_view.bzl", "ENGINE_SRC", "build_directory_attrs", "build_directory_variant")
 load(":zip_bundle.bzl", "ZipTreeInfo")
 
-def _install_impl(ctx):
+def install_entries(ctx, contents, files, trees, archives):
+    """The (file, path under the build directory) pairs an install's attributes name, each path once.
+
+    Args:
+      ctx: the rule context (for messages).
+      contents: targets whose dependency closure places its files itself
+        (BuildDirectoryInfo, collected by build_directory_aspect).
+      files: targets mapped to the directory under the build directory that
+        holds their files by base name.
+      trees: zip_tree targets.
+      archives: zip_bundle targets, under zip_archives/.
+
+    Returns:
+      A list of (File, path) pairs, in order, with no path twice; two files
+      at one path fail.
+    """
     entries = []
-    for target in ctx.attr.contents:
+    for target in contents:
         entries.extend(collected_build_directory_entries(target))
-    for target, directory in ctx.attr.files.items():
+    for target, directory in files.items():
         directory = directory.strip("/")
 
         # An executable or shared library lands as GN's link tool leaves it:
@@ -57,9 +72,9 @@ def _install_impl(ctx):
             continue
         for file in target[DefaultInfo].files.to_list():
             entries.append((file, paths.join(directory, file.basename) if directory else file.basename))
-    for target in ctx.attr.trees:
+    for target in trees:
         entries.extend(target[ZipTreeInfo].entries)
-    for target in ctx.attr.archives:
+    for target in archives:
         for file in target[DefaultInfo].files.to_list():
             marker = "/zip_archives/"
             if marker not in file.short_path:
@@ -74,6 +89,10 @@ def _install_impl(ctx):
             continue
         seen[path] = file
         unique.append((file, path))
+    return unique
+
+def _install_impl(ctx):
+    unique = install_entries(ctx, ctx.attr.contents, ctx.attr.files, ctx.attr.trees, ctx.attr.archives)
 
     lines = [
         "#!/bin/sh",
@@ -130,29 +149,33 @@ def _install_impl(ctx):
         runfiles = ctx.runfiles(symlinks = {"%s/%d" % (staging, index): file for index, (file, _) in enumerate(unique)}),
     )]
 
+# The attributes naming an install's files, shared with local_engine.bzl.
+INSTALL_CONTENT_ATTRS = {
+    "contents": attr.label_list(
+        aspects = [build_directory_aspect],
+        doc = "Targets whose dependency closure places its files itself (BuildDirectoryInfo).",
+    ),
+    "files": attr.label_keyed_string_dict(
+        allow_files = True,
+        aspects = [build_directory_aspect],
+        doc = "Targets mapped to the directory under the build directory that holds their " +
+              "files by base name (``, `gen`, `flutter_patched_sdk`); an executable or shared library " +
+              "stripped, with the binary as linked under exe.unstripped/ or lib.unstripped/ there.",
+    ),
+    "trees": attr.label_list(
+        providers = [ZipTreeInfo],
+        doc = "zip_tree targets whose files go at their paths under the tree's destination.",
+    ),
+    "archives": attr.label_list(
+        allow_files = [".zip"],
+        doc = "zip_bundle targets whose archives go under zip_archives/.",
+    ),
+}
+
 _install = rule(
     implementation = _install_impl,
     executable = True,
-    attrs = {
-        "contents": attr.label_list(
-            aspects = [build_directory_aspect],
-            doc = "Targets whose dependency closure places its files itself (BuildDirectoryInfo).",
-        ),
-        "files": attr.label_keyed_string_dict(
-            allow_files = True,
-            aspects = [build_directory_aspect],
-            doc = "Targets mapped to the directory under the build directory that holds their " +
-                  "files by base name (``, `gen`, `flutter_patched_sdk`); an executable or shared library " +
-                  "stripped, with the binary as linked under exe.unstripped/ or lib.unstripped/ there.",
-        ),
-        "trees": attr.label_list(
-            providers = [ZipTreeInfo],
-            doc = "zip_tree targets whose files go at their paths under the tree's destination.",
-        ),
-        "archives": attr.label_list(
-            allow_files = [".zip"],
-            doc = "zip_bundle targets whose archives go under zip_archives/.",
-        ),
+    attrs = INSTALL_CONTENT_ATTRS | {
         "directory": attr.string(
             doc = "The build directory under engine/src/out to install into (GN's --target-dir, " +
                   "`ci/host_debug`), instead of the configuration's variant name.",
