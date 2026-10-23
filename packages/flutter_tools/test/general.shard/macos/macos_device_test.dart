@@ -262,6 +262,136 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
+
+  testWithoutContext('supports screenshot and screen recording', () async {
+    final device = MacOSDevice(
+      toolContext: FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.any(),
+      ),
+    );
+
+    expect(device.supportsScreenshot, isTrue);
+    expect(device.supportsScreenRecording, isTrue);
+  });
+
+  testWithoutContext('takeScreenshot runs screencapture successfully', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final File outputFile = fileSystem.file('screenshot.png');
+    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>['screencapture', '-x', outputFile.path]),
+    ]);
+    final device = MacOSDevice(
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: fakeProcessManager,
+      ),
+    );
+
+    await device.takeScreenshot(outputFile);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('takeScreenshot throws ToolExit when screencapture fails', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final File outputFile = fileSystem.file('screenshot.png');
+    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>['screencapture', '-x', outputFile.path],
+        exitCode: 1,
+        stderr: 'screencapture failed to write file',
+      ),
+    ]);
+    final device = MacOSDevice(
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: fakeProcessManager,
+      ),
+    );
+
+    await expectLater(
+      () => device.takeScreenshot(outputFile),
+      throwsToolExit(message: 'screencapture failed: screencapture failed to write file'),
+    );
+  });
+
+  testWithoutContext(
+    'startScreenRecording runs screencapture successfully without duration',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      final File outputFile = fileSystem.file('recording.mp4');
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>['screencapture', '-v', outputFile.path]),
+      ]);
+      final device = MacOSDevice(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: fakeProcessManager,
+        ),
+      );
+
+      final ScreenRecording recording = await device.startScreenRecording(outputFile);
+      await recording.done;
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext('startScreenRecording runs screencapture with duration', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final File outputFile = fileSystem.file('recording.mp4');
+    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>['screencapture', '-v', '-V', '10', outputFile.path]),
+    ]);
+    final device = MacOSDevice(
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: fakeProcessManager,
+      ),
+    );
+
+    final ScreenRecording recording = await device.startScreenRecording(
+      outputFile,
+      duration: const Duration(seconds: 10),
+    );
+    await recording.done;
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('startScreenRecording throws ToolExit when screencapture fails', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final File outputFile = fileSystem.file('recording.mp4');
+    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>['screencapture', '-v', outputFile.path],
+        exitCode: 1,
+        stderr: 'screencapture recording failed',
+      ),
+    ]);
+    final device = MacOSDevice(
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: fakeProcessManager,
+      ),
+    );
+
+    final ScreenRecording recording = await device.startScreenRecording(outputFile);
+    await expectLater(
+      () => recording.done,
+      throwsToolExit(message: 'screencapture failed (exit 1): screencapture recording failed'),
+    );
+  });
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {

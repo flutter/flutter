@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -12,19 +14,20 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
-import '../version.dart';
 import '../vmservice.dart';
 
-const _kOut = 'out';
-const _kType = 'type';
-const _kVmServiceUrl = 'vm-service-url';
-const _kDeviceType = 'device';
-const _kSkiaType = 'skia';
+const String _kOut = 'out';
+const String _kType = 'type';
+const String _kVmServiceUrl = 'vm-service-url';
+const String _kDeviceType = 'device';
+const String _kSkiaType = 'skia';
 
-/// The `flutter screenshot` command, which captures a screenshot from a connected device.
+/// Standalone `flutter screenshot` command, kept for backward compatibility.
 class ScreenshotCommand extends FlutterCommand {
-  ScreenshotCommand({required super.toolContext, VMServiceConnector? vmServiceConnector})
-    : _vmServiceConnector = vmServiceConnector ?? connectToVmService {
+  ScreenshotCommand({
+    required super.toolContext,
+    @visibleForTesting this.vmServiceConnector = connectToVmService,
+  }) {
     argParser.addOption(
       _kOut,
       abbr: 'o',
@@ -57,12 +60,15 @@ class ScreenshotCommand extends FlutterCommand {
     registerOptionBundle(const DeviceDiscoveryOptionsBundle());
   }
 
-  final VMServiceConnector _vmServiceConnector;
-
-  FileSystem get fs => toolContext.fs;
+  @visibleForTesting
+  final VMServiceConnector vmServiceConnector;
 
   @override
   ToolContext get toolContext => super.toolContext!;
+
+  FileSystem get fs => toolContext.fs;
+  Logger get logger => toolContext.logger;
+  FileSystemUtils get fsUtils => toolContext.fileSystemUtils;
 
   @override
   String get name => 'screenshot';
@@ -74,25 +80,30 @@ class ScreenshotCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.tools;
 
   @override
-  bool get refreshWirelessDevices => argResults == null || stringArg(_kType) == _kDeviceType;
+  bool get hidden => true;
 
   @override
-  final aliases = <String>['pic'];
+  final aliases = const <String>['pic'];
 
-  Device? device;
+  @override
+  bool get refreshWirelessDevices => argResults == null || stringArg(_kType) == _kDeviceType;
 
-  Future<void> _validateOptions(String? screenshotType, String? vmServiceUrl) async {
+  Device? _screenshotDevice;
+
+  Future<void> _validateScreenshotOptions() async {
+    final String? screenshotType = stringArg(_kType);
+    final String? vmServiceUrl = stringArg(_kVmServiceUrl);
     switch (screenshotType) {
       case _kDeviceType:
         if (vmServiceUrl != null) {
           throwToolExit('VM Service URI cannot be provided for screenshot type $screenshotType');
         }
-        device = await findTargetDevice(includeDevicesUnsupportedByProject: true);
-        if (device == null) {
+        _screenshotDevice = await findTargetDevice(includeDevicesUnsupportedByProject: true);
+        if (_screenshotDevice == null) {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');
         }
-        if (!device!.supportsScreenshot) {
-          throwToolExit('Screenshot not supported for ${device!.displayName}.');
+        if (!_screenshotDevice!.supportsScreenshot) {
+          throwToolExit('Screenshot not supported for ${_screenshotDevice!.displayName}.');
         }
       default:
         if (vmServiceUrl == null) {
@@ -106,13 +117,12 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    await _validateOptions(stringArg(_kType), stringArg(_kVmServiceUrl));
+    await _validateScreenshotOptions();
     return super.verifyThenRunCommand(commandPath);
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
     File? outputFile;
     if (argResults?.wasParsed(_kOut) ?? false) {
       outputFile = fs.file(stringArg(_kOut));
@@ -121,28 +131,20 @@ class ScreenshotCommand extends FlutterCommand {
     var success = true;
     switch (stringArg(_kType)) {
       case _kDeviceType:
-        await runScreenshot(outputFile);
+        await _runDeviceScreenshot(outputFile);
       case _kSkiaType:
-        success = await runSkia(outputFile);
+        success = await _runSkiaScreenshot(outputFile);
     }
 
     return success ? FlutterCommandResult.success() : FlutterCommandResult.fail();
   }
 
-  Future<void> runScreenshot(File? outputFile) async {
-    final FileSystem fs = toolContext.fs;
-    final FileSystemUtils fileSystemUtils = toolContext.fileSystemUtils;
-    outputFile ??= fileSystemUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'png');
+  Future<void> _runDeviceScreenshot(File? outputFile) async {
+    outputFile ??= fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'png');
 
-    try {
-      await device!.takeScreenshot(outputFile);
-    } on ToolExit {
-      rethrow;
-    } on Exception catch (error) {
-      throwToolExit('Error taking screenshot: $error');
-    }
+    await _screenshotDevice!.takeScreenshot(outputFile);
 
-    checkOutput(outputFile, fs);
+    checkOutput(outputFile);
 
     try {
       _showOutputFileInfo(outputFile);
@@ -154,17 +156,12 @@ class ScreenshotCommand extends FlutterCommand {
     }
   }
 
-  Future<bool> runSkia(File? outputFile) async {
-    final ToolContext(
-      :FileSystem fs,
-      :FileSystemUtils fileSystemUtils,
-      :FlutterVersion flutterVersion,
-      :Logger logger,
-    ) = toolContext;
+  Future<bool> _runSkiaScreenshot(File? outputFile) async {
     final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
-    final FlutterVmService vmService = await _vmServiceConnector(
+    final FlutterVmService vmService = await vmServiceConnector(
       vmServiceUrl,
-      flutterVersion: flutterVersion,
+      device: _screenshotDevice,
+      flutterVersion: toolContext.flutterVersion,
       logger: logger,
     );
     final vm_service.Response? skp = await vmService.screenshotSkp();
@@ -175,41 +172,26 @@ class ScreenshotCommand extends FlutterCommand {
       );
       return false;
     }
-    outputFile ??= fileSystemUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
+    outputFile ??= fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(skp.json?['skp'] as String));
     await sink.close();
     _showOutputFileInfo(outputFile);
-    ensureOutputIsNotJsonRpcError(outputFile);
     return true;
   }
 
-  static void checkOutput(File outputFile, FileSystem fs) {
-    if (!fs.file(outputFile.path).existsSync()) {
+  void _showOutputFileInfo(File outputFile) {
+    final int sizeKB = outputFile.lengthSync() ~/ 1024;
+    logger.printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
+  }
+
+  @visibleForTesting
+  static void checkOutput(File outputFile) {
+    if (!outputFile.existsSync()) {
       throwToolExit(
         'File was not created, ensure path is valid\n'
         'Path provided: "${outputFile.path}"',
       );
     }
-  }
-
-  @visibleForTesting
-  static void ensureOutputIsNotJsonRpcError(File outputFile) {
-    if (outputFile.lengthSync() >= 1000) {
-      return;
-    }
-    final String content = outputFile.readAsStringSync(
-      encoding: const AsciiCodec(allowInvalid: true),
-    );
-    if (content.startsWith('{"jsonrpc":"2.0", "error"')) {
-      throwToolExit('It appears the output file contains an error message, not valid output.');
-    }
-  }
-
-  void _showOutputFileInfo(File outputFile) {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-    final int sizeKB = outputFile.lengthSync() ~/ 1024;
-    logger.printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }

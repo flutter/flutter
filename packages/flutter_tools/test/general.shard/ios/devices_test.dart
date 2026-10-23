@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
@@ -635,18 +636,17 @@ void main() {
       });
     });
 
-    group('screenshot', () {
+    group('screenshot and recording', () {
       late FakeIOSCoreDeviceControl fakeCoreDeviceControl;
-      late IOSDevice device;
       late File outputFile;
 
       setUp(() {
         fakeCoreDeviceControl = coreDeviceControl as FakeIOSCoreDeviceControl;
-        outputFile = fileSystem.file('screenshot.png');
+        outputFile = fileSystem.file('output_file');
       });
 
-      testWithoutContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
-        device = IOSDevice(
+      IOSDevice createCoreDevice({required Xcode xcode}) {
+        return IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
@@ -665,9 +665,14 @@ void main() {
           devModeEnabled: true,
           isCoreDevice: true,
           templateRenderer: FakeTemplateRenderer(),
+          xcode: xcode,
+        );
+      }
+
+      testWithoutContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
+        final IOSDevice device = createCoreDevice(
           xcode: FakeXcode(currentVersion: Version(15, 0, 0)),
         );
-
         expect(device.supportsScreenshot, isFalse);
       });
 
@@ -675,27 +680,7 @@ void main() {
         'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
         () async {
           final fakeXcode = FakeXcode(currentVersion: Version(27, 0, 0));
-          device = IOSDevice(
-            'device-123',
-            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
-            iosDeploy: iosDeploy,
-            analytics: FakeAnalytics(),
-            iMobileDevice: iMobileDevice,
-            coreDeviceControl: fakeCoreDeviceControl,
-            coreDeviceLauncher: coreDeviceLauncher,
-            xcodeDebug: xcodeDebug,
-            name: 'iPhone 1',
-            sdkVersion: '17.0',
-            cpuArch: CpuArch.arm64,
-            connectionInterface: DeviceConnectionInterface.attached,
-            isConnected: true,
-            isPaired: true,
-            devModeEnabled: true,
-            isCoreDevice: true,
-            templateRenderer: FakeTemplateRenderer(),
-            xcode: fakeXcode,
-          );
+          final IOSDevice device = createCoreDevice(xcode: fakeXcode);
 
           fakeXcode.isDevicectlInstalled = true;
           expect(device.supportsScreenshot, isTrue);
@@ -706,25 +691,7 @@ void main() {
       );
 
       testWithoutContext('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
-        device = IOSDevice(
-          'device-123',
-          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
-          iosDeploy: iosDeploy,
-          analytics: FakeAnalytics(),
-          iMobileDevice: iMobileDevice,
-          coreDeviceControl: fakeCoreDeviceControl,
-          coreDeviceLauncher: coreDeviceLauncher,
-          xcodeDebug: xcodeDebug,
-          name: 'iPhone 1',
-          sdkVersion: '17.0',
-          cpuArch: CpuArch.arm64,
-          connectionInterface: DeviceConnectionInterface.attached,
-          isConnected: true,
-          isPaired: true,
-          devModeEnabled: true,
-          isCoreDevice: true,
-          templateRenderer: FakeTemplateRenderer(),
+        final IOSDevice device = createCoreDevice(
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
@@ -732,36 +699,18 @@ void main() {
         await device.takeScreenshot(outputFile);
 
         fakeCoreDeviceControl.takeScreenshotSuccess = false;
-        expect(() => device.takeScreenshot(outputFile), throwsToolExit());
+        await expectLater(() => device.takeScreenshot(outputFile), throwsToolExit());
       });
 
       testWithoutContext('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
-        device = IOSDevice(
-          'device-123',
-          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
-          iosDeploy: iosDeploy,
-          analytics: FakeAnalytics(),
-          iMobileDevice: iMobileDevice,
-          coreDeviceControl: fakeCoreDeviceControl,
-          coreDeviceLauncher: coreDeviceLauncher,
-          xcodeDebug: xcodeDebug,
-          name: 'iPhone 1',
-          sdkVersion: '17.0',
-          cpuArch: CpuArch.arm64,
-          connectionInterface: DeviceConnectionInterface.attached,
-          isConnected: true,
-          isPaired: true,
-          devModeEnabled: true,
-          isCoreDevice: true,
-          templateRenderer: FakeTemplateRenderer(),
+        final IOSDevice device = createCoreDevice(
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
 
         fakeCoreDeviceControl.takeScreenshotException = Exception(
           'ERROR: A connection to this device could not be established. (com.apple.dt.CoreDeviceError error 4000 (0xFA0))',
         );
-        expect(
+        await expectLater(
           () => device.takeScreenshot(outputFile),
           throwsToolExit(
             message: 'Failed to establish a connection to the device. Please make sure the device is available and try again.',
@@ -770,33 +719,94 @@ void main() {
       });
 
       testWithoutContext('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
-        device = IOSDevice(
-          'device-123',
-          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
-          iosDeploy: iosDeploy,
-          analytics: FakeAnalytics(),
-          iMobileDevice: iMobileDevice,
-          coreDeviceControl: fakeCoreDeviceControl,
-          coreDeviceLauncher: coreDeviceLauncher,
-          xcodeDebug: xcodeDebug,
-          name: 'iPhone 1',
-          sdkVersion: '17.0',
-          cpuArch: CpuArch.arm64,
-          connectionInterface: DeviceConnectionInterface.attached,
-          isConnected: true,
-          isPaired: true,
-          devModeEnabled: true,
-          isCoreDevice: true,
-          templateRenderer: FakeTemplateRenderer(),
+        final IOSDevice device = createCoreDevice(
           xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
         );
 
-        expect(
+        await expectLater(
           () => device.takeScreenshot(outputFile),
-          throwsToolExit(message: 'flutter screenshot requires Xcode 27 or higher.'),
+          throwsToolExit(message: 'Screenshots on physical iOS devices require Xcode 27 or higher.'),
         );
       });
+
+      testWithoutContext('supportsScreenRecording is true on CoreDevice with Xcode 27+', () async {
+        final fakeXcode = FakeXcode(currentVersion: Version(27, 0, 0));
+        final IOSDevice device = createCoreDevice(xcode: fakeXcode);
+
+        fakeXcode.isDevicectlInstalled = true;
+        expect(device.supportsScreenRecording, isTrue);
+
+        fakeXcode.isDevicectlInstalled = false;
+        expect(device.supportsScreenRecording, isFalse);
+      });
+
+      testWithoutContext(
+        'startScreenRecording uses devicectl on CoreDevice with Xcode 27+',
+        () async {
+          final IOSDevice device = createCoreDevice(
+            xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
+          );
+
+          fakeCoreDeviceControl.startScreenRecordingProcess = FakeProcess();
+          final ScreenRecording recording = await device.startScreenRecording(outputFile);
+          await recording.done;
+          expect(fakeCoreDeviceControl.lastScreenRecordingDuration, isNull);
+          expect(fakeCoreDeviceControl.lastScreenRecordingJsonOutput, isNotNull);
+
+          final ScreenRecording recordingWithDuration = await device.startScreenRecording(
+            outputFile,
+            duration: const Duration(seconds: 45),
+          );
+          await recordingWithDuration.done;
+          expect(fakeCoreDeviceControl.lastScreenRecordingDuration, const Duration(seconds: 45));
+
+          fakeCoreDeviceControl.startScreenRecordingProcess = FakeProcess(
+            exitCode: Future<int>.value(1),
+            stderr: Stream<List<int>>.value(utf8.encode('Recording error')),
+          );
+          final ScreenRecording failedRecording = await device.startScreenRecording(outputFile);
+          await expectLater(
+            () => failedRecording.done,
+            throwsToolExit(message: 'Failed to record screen with devicectl: Recording error'),
+          );
+        },
+      );
+
+      testWithoutContext('startScreenRecording throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
+        final IOSDevice device = createCoreDevice(
+          xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
+        );
+
+        fakeCoreDeviceControl.startScreenRecordingProcess = FakeProcess(
+          exitCode: Future<int>.value(1),
+          stderr: Stream<List<int>>.value(
+            utf8.encode(
+              'ERROR: A connection to this device could not be established. (com.apple.dt.CoreDeviceError error 4000 (0xFA0))',
+            ),
+          ),
+        );
+        final ScreenRecording recording = await device.startScreenRecording(outputFile);
+        await expectLater(
+          () => recording.done,
+          throwsToolExit(
+            message: 'Failed to establish a connection to the device. Please make sure the device is available and try again.',
+          ),
+        );
+      });
+
+      testWithoutContext(
+        'startScreenRecording throws ToolExit on CoreDevice with Xcode < 27',
+        () async {
+          final IOSDevice device = createCoreDevice(
+            xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
+          );
+
+          await expectLater(
+            () => device.startScreenRecording(outputFile),
+            throwsToolExit(message: 'Screen recording on physical iOS devices requires Xcode 27 or higher.'),
+          );
+        },
+      );
     });
   });
 
@@ -1385,7 +1395,22 @@ class FakeXcdevice extends Fake implements XCDevice {
 }
 
 class FakeProcess extends Fake implements Process {
+  FakeProcess({
+    Future<int>? exitCode,
+    this.stderr = const Stream<List<int>>.empty(),
+    this.stdout = const Stream<List<int>>.empty(),
+  }) : exitCode = exitCode ?? Future<int>.value(0);
+
   bool killed = false;
+
+  @override
+  final Future<int> exitCode;
+
+  @override
+  final Stream<List<int>> stderr;
+
+  @override
+  final Stream<List<int>> stdout;
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
@@ -1402,6 +1427,10 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   bool takeScreenshotSuccess = true;
   Exception? takeScreenshotException;
+  Process? startScreenRecordingProcess;
+  Exception? startScreenRecordingException;
+  Duration? lastScreenRecordingDuration;
+  File? lastScreenRecordingJsonOutput;
 
   @override
   Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
@@ -1409,6 +1438,24 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
       throw takeScreenshotException!;
     }
     return takeScreenshotSuccess;
+  }
+
+  @override
+  Future<Process> startScreenRecording({
+    required String deviceId,
+    required String destination,
+    Duration? duration,
+    File? jsonOutput,
+  }) async {
+    lastScreenRecordingDuration = duration;
+    lastScreenRecordingJsonOutput = jsonOutput;
+    if (jsonOutput != null) {
+      jsonOutput.writeAsStringSync('{"info":{"outcome":"success"}}');
+    }
+    if (startScreenRecordingException != null) {
+      throw startScreenRecordingException!;
+    }
+    return startScreenRecordingProcess ?? FakeProcess();
   }
 }
 
