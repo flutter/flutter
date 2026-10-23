@@ -279,7 +279,7 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
         render_pass.SetVertexBuffer(std::move(vertex_buffer));
         render_pass.SetBaseVertex(pcmd->VtxOffset);
 
-        render_pass.Draw().ok();
+        render_pass.Draw().IgnoreError();
       }
     }
 
