@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 
 import 'protocol_base/service.dart';
