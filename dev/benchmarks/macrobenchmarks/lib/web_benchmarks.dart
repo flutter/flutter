@@ -432,13 +432,17 @@ class LocalBenchmarkServerClient {
   /// manual mode: the phase listener is only installed when a benchmark server
   /// is driving the run.
   Future<void> reportPhase(String name, String phase) async {
-    await _requestXhr(
-      serverOrigin.resolve('benchmark-phase'),
-      requestHeaders: headers,
-      method: 'POST',
-      mimeType: 'application/json',
-      sendData: json.encode(<String, String>{'name': name, 'phase': phase}),
-    );
+    try {
+      await _requestXhr(
+        serverOrigin.resolve('benchmark-phase'),
+        requestHeaders: headers,
+        method: 'POST',
+        mimeType: 'application/json',
+        sendData: json.encode(<String, String>{'name': name, 'phase': phase}),
+      );
+    } catch (_) {
+      // The server's response (including a 404 or network error) is ignored.
+    }
   }
 
   /// Sends the profile data collected by the benchmark to the local benchmark
