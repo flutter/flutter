@@ -64,6 +64,13 @@ static const constexpr char* kAppleTextureMaxLevelExt =
 static const constexpr char* kTextureFilterAnisotropicExt =
     "GL_EXT_texture_filter_anisotropic";
 
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_parallel_shader_compile.txt
+static const constexpr char* kParallelShaderCompileKHRExt =
+    "GL_KHR_parallel_shader_compile";
+// https://registry.khronos.org/OpenGL/extensions/ARB/ARB_parallel_shader_compile.txt
+static const constexpr char* kParallelShaderCompileARBExt =
+    "GL_ARB_parallel_shader_compile";
+
 static bool MaliDriverNeedsTextureUploadRebind(const std::string& version) {
   // Arm's version string includes a driver release, for example:
   // "OpenGL ES 3.2 v1.r18p0-01rel0...". If it is unavailable, retain the
@@ -264,6 +271,15 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     // but is always an integer in practice, so floor it.
     max_sampler_anisotropy_ = static_cast<uint32_t>(std::max(value, 2.0f));
   }
+
+  // The KHR and ARB parallel shader compile extensions share the same enum for
+  // the maximum number of compiler threads.
+  if (desc->HasExtension(kParallelShaderCompileKHRExt) ||
+      desc->HasExtension(kParallelShaderCompileARBExt)) {
+    GLint value = 0;
+    gl.GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, &value);
+    max_shader_compiler_threads_ = value;
+  }
 }
 
 bool CapabilitiesGLES::NeedsTextureUploadRebind() const {
@@ -272,6 +288,10 @@ bool CapabilitiesGLES::NeedsTextureUploadRebind() const {
 
 bool CapabilitiesGLES::IsES() const {
   return is_es_;
+}
+
+int32_t CapabilitiesGLES::GetMaxShaderCompilerThreads() const {
+  return max_shader_compiler_threads_;
 }
 
 bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {

@@ -28,8 +28,10 @@ final class _DefaultDeviceService extends DeviceService {
   Future<List<TargetDevice>> getDevices() async => const <TargetDevice>[];
 
   @override
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async =>
-      false;
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => false;
 }
 
 final class _TestEmulatorDeviceService extends DeviceService {
@@ -42,8 +44,10 @@ final class _TestEmulatorDeviceService extends DeviceService {
   Future<List<TargetDevice>> getDevices() async => const <TargetDevice>[];
 
   @override
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async =>
-      false;
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => false;
 
   @override
   Future<List<TargetEmulator>> getEmulators() async => emulators;
@@ -59,8 +63,10 @@ final class _ThrowingEmulatorDeviceService extends DeviceService {
   Future<List<TargetDevice>> getDevices() async => const <TargetDevice>[];
 
   @override
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot}) async =>
-      false;
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => false;
 
   @override
   Future<List<TargetEmulator>> getEmulators() async {

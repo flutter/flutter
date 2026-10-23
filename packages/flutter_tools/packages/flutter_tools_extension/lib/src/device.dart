@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:flutter_tools_core/json.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
@@ -12,23 +13,29 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Service namespace identifier for device services.
   static const String serviceNamespace = 'device';
 
+  static const String _getDevicesRpcMethod = 'getDevices';
+  static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
+  static const String _getEmulatorsRpcMethod = 'getEmulators';
+  static const String _launchEmulatorRpcMethod = 'launchEmulator';
+
   /// RPC method identifier to query contributed target devices.
-  static const String getDevicesMethod = 'device.getDevices';
+  static const String getDevicesMethod = '$serviceNamespace.$_getDevicesRpcMethod';
 
   /// RPC method identifier to query whether a target device is supported for a project.
-  static const String isSupportedForProjectMethod = 'device.isSupportedForProject';
+  static const String isSupportedForProjectMethod =
+      '$serviceNamespace.$_isSupportedForProjectRpcMethod';
 
   /// RPC method identifier to query contributed target emulators.
-  static const String getEmulatorsMethod = 'device.getEmulators';
+  static const String getEmulatorsMethod = '$serviceNamespace.$_getEmulatorsRpcMethod';
 
   /// RPC method identifier to launch a contributed target emulator.
-  static const String launchEmulatorMethod = 'device.launchEmulator';
+  static const String launchEmulatorMethod = '$serviceNamespace.$_launchEmulatorRpcMethod';
 
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
 
-  /// RPC parameter key for the project root URI.
-  static const String projectRootParam = 'projectRoot';
+  /// RPC parameter key for the serialized [ExtensionFlutterProject].
+  static const String projectParam = 'project';
 
   /// RPC parameter key for the target emulator ID.
   static const String emulatorIdParam = 'emulatorId';
@@ -42,9 +49,11 @@ abstract base class DeviceService extends ToolExtensionService {
   /// Returns the target devices contributed by this extension.
   Future<List<TargetDevice>> getDevices();
 
-  /// Returns whether the target device with [deviceId] is supported for the
-  /// Flutter project at [projectRoot].
-  Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot});
+  /// Returns whether the target device with [deviceId] is supported for [project].
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  });
 
   /// Returns the target emulators contributed by this extension.
   ///
@@ -62,10 +71,10 @@ abstract base class DeviceService extends ToolExtensionService {
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
-      'getDevices': _getDevicesRpc,
-      'isSupportedForProject': _isSupportedForProjectRpc,
-      'getEmulators': _getEmulatorsRpc,
-      'launchEmulator': _launchEmulatorRpc,
+      _getDevicesRpcMethod: _getDevicesRpc,
+      _isSupportedForProjectRpcMethod: _isSupportedForProjectRpc,
+      _getEmulatorsRpcMethod: _getEmulatorsRpc,
+      _launchEmulatorRpcMethod: _launchEmulatorRpc,
     };
   }
 
@@ -78,9 +87,18 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
-    final String deviceId = params[deviceIdParam] as String? ?? '';
-    final String projectRootStr = params[projectRootParam] as String? ?? '';
-    return isSupportedForProject(deviceId: deviceId, projectRoot: Uri.parse(projectRootStr));
+    final String deviceId;
+    final ExtensionFlutterProject project;
+    try {
+      deviceId = params.requiredField<String>(deviceIdParam);
+      final Map<String, Object?> projectMap = params.requiredField<Map<String, Object?>>(
+        projectParam,
+      );
+      project = ExtensionFlutterProject.fromJson(projectMap);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    return isSupportedForProject(deviceId: deviceId, project: project);
   }
 
   Future<List<Map<String, Object?>>> _getEmulatorsRpc(Map<String, Object?> _) async {
@@ -98,7 +116,7 @@ abstract base class DeviceService extends ToolExtensionService {
       }
       coldBoot = params.optionalField<bool>(coldBootParam, defaultValue: false);
     } on FormatException catch (e) {
-      throw json_rpc.RpcException.invalidParams(e.message);
+      throw RpcException.invalidParams(e.message);
     }
     return launchEmulator(emulatorId: emulatorId, coldBoot: coldBoot);
   }
