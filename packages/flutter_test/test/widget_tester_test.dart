@@ -565,15 +565,15 @@ void main() {
     testWidgets('reconnects after the field is disabled and enabled again', (
       WidgetTester tester,
     ) async {
-      var enabled = true;
-      late StateSetter setState;
+      final enabled = ValueNotifier<bool>(true);
+      addTearDown(enabled.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setter) {
-                setState = setter;
-                return TextFormField(enabled: enabled);
+            child: ValueListenableBuilder<bool>(
+              valueListenable: enabled,
+              builder: (BuildContext context, bool value, Widget? child) {
+                return TextFormField(enabled: value);
               },
             ),
           ),
@@ -583,12 +583,13 @@ void main() {
       await tester.enterText(find.byType(TextFormField), 'one');
       expect(find.text('one'), findsOneWidget);
 
-      setState(() => enabled = false);
+      enabled.value = false;
       await tester.pump();
       await tester.enterText(find.byType(TextFormField), 'x');
       expect(find.text('x'), findsNothing);
+      expect(find.text('one'), findsOneWidget);
 
-      setState(() => enabled = true);
+      enabled.value = true;
       await tester.pump();
       await tester.enterText(find.byType(TextFormField), 'two');
       expect(find.text('two'), findsOneWidget);
