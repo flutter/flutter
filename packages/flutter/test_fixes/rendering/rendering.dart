@@ -60,4 +60,11 @@ void main() {
     cacheExtent: 1.0,
     cacheExtentStyle: cacheExtentStyle,
   );
+
+  final TickerProvider vsync;
+  RenderAnimatedSize(
+    vsync: vsync,
+    duration: Duration.zero,
+    reverseDuration: Duration.zero,
+  );
 }

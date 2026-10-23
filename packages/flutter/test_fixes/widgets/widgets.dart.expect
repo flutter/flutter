@@ -46,6 +46,7 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067
   AnimatedSize(duration: Duration.zero);
+  AnimatedSize(duration: Duration.zero);
 
   // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
   final WidgetsBinding binding = WidgetsBinding.instance;

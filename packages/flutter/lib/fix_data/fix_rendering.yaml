@@ -18,6 +18,16 @@
 # * Fixes in this file are from the Rendering library. *
 version: 1
 transforms:
+  - title: "Remove 'reverseDuration'"
+    date: 2026-10-22
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderAnimatedSize'
+    changes:
+      - kind: 'removeParameter'
+        name: 'reverseDuration'
+
   # Change made in https://github.com/flutter/flutter/pull/135218
   - title: "Migrate to 'scrollCacheExtent'"
     date: 2026-02-09

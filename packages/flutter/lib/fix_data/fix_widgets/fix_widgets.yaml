@@ -24,6 +24,16 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  - title: "Remove 'reverseDuration'"
+    date: 2026-10-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'AnimatedSize'
+    changes:
+      - kind: 'removeParameter'
+        name: 'reverseDuration'
+
   # Change made in https://github.com/flutter/flutter/pull/135218
   - title: "Migrate to 'scrollCacheExtent'"
     date: 2026-02-09
