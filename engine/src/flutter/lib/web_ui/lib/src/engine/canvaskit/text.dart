@@ -803,11 +803,13 @@ SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
 
 /// The CanvasKit implementation of [ui.Paragraph].
 class CkParagraph implements ui.Paragraph {
-  CkParagraph(SkParagraph skParagraph, this._paragraphStyle) {
+  CkParagraph(SkParagraph skParagraph, this._paragraphStyle, [this._segmentationResult]) {
     _ref = CkUniqueRef<SkParagraph>(this, skParagraph, 'Paragraph');
   }
 
   late final CkUniqueRef<SkParagraph> _ref;
+
+  final SegmentationResult? _segmentationResult;
 
   SkParagraph get skiaObject => _ref.nativeObject;
 
@@ -934,6 +936,11 @@ class CkParagraph implements ui.Paragraph {
       ui.TextAffinity.upstream => position.offset - 1,
       ui.TextAffinity.downstream => position.offset,
     };
+    // In the Client ICU variant, word segmentation is deferred until
+    // getWordBoundary is actually queried.
+    if (_segmentationResult case final SegmentationResult segmentationResult) {
+      return segmentationResult.getWordBoundary(characterPosition);
+    }
     final SkTextRange skRange = skiaObject.getWordBoundary(characterPosition.toDouble());
     return ui.TextRange(start: skRange.start.toInt(), end: skRange.end.toInt());
   }
@@ -1184,16 +1191,10 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   CkParagraph build() {
-    final SkParagraph builtParagraph = _buildSkParagraph();
-    return CkParagraph(builtParagraph, _style);
-  }
-
-  /// Builds the CkParagraph with the builder and deletes the builder.
-  SkParagraph _buildSkParagraph() {
-    _paragraphBuilder.injectClientICUIfNeeded();
-    final SkParagraph result = _paragraphBuilder.build();
+    final SegmentationResult? segmentationResult = _paragraphBuilder.injectClientICUIfNeeded();
+    final SkParagraph builtParagraph = _paragraphBuilder.build();
     _paragraphBuilder.delete();
-    return result;
+    return CkParagraph(builtParagraph, _style, segmentationResult);
   }
 
   @override

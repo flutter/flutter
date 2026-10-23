@@ -1413,19 +1413,32 @@ void _canvasTests() {
   });
 
   test('Paragraph converts caret position to character position', () {
+    segmentationCache.clear();
     final builder = CkParagraphBuilder(CkParagraphStyle());
     builder.addText('Hello there');
     final CkParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));
+    if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
+      expect(segmentationCache.medium['Hello there']!.hasWords, isFalse);
+    }
     ui.TextRange range = paragraph.getWordBoundary(
       const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream),
     );
     expect(range.start, 0);
     expect(range.end, 5);
+    if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
+      expect(segmentationCache.medium['Hello there']!.hasWords, isTrue);
+    }
 
     range = paragraph.getWordBoundary(const ui.TextPosition(offset: 5));
     expect(range.start, 5);
     expect(range.end, 6);
+
+    // Upstream affinity at offset 0 maps to characterPosition -1 (out-of-bounds).
+    range = paragraph.getWordBoundary(
+      const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream),
+    );
+    expect(range, const ui.TextRange(start: 11, end: 11));
   });
 
   test('Paragraph dispose', () {
@@ -1600,7 +1613,10 @@ void _paragraphTests() {
     builder.pop();
     builder.pushStyle(canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
     builder.pop();
-    builder.injectClientICUIfNeeded();
+    final SegmentationResult? segmentation = builder.injectClientICUIfNeeded();
+    if (segmentation != null) {
+      builder.setWordsUtf16(segmentation.words);
+    }
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 

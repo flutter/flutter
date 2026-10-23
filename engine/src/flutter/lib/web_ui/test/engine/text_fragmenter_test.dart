@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -100,15 +101,68 @@ void testMain() {
       segmentationCache.clear();
     });
 
-    test('segments correctly', () {
+    test('segments correctly and computes words lazily', () {
       const text = 'Lorem-ipsum 你好🙂\nDolor sit';
       final SegmentationResult segmentation = segmentText(text);
-      expect(segmentation.words, fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word));
+      expect(segmentation.hasWords, isFalse);
       expect(
         segmentation.graphemes,
         fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.grapheme),
       );
       expect(segmentation.breaks, fragmentUsingV8LineBreaker(text));
+      expect(segmentation.hasWords, isFalse);
+
+      expect(segmentation.words, fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word));
+      expect(segmentation.hasWords, isTrue);
+
+      // Subsequent lookups reuse the cached SegmentationResult with its computed words.
+      expect(segmentText(text).hasWords, isTrue);
+    });
+
+    test('getWordBoundary returns word range and handles out-of-bounds offsets', () {
+      const text = 'Hello world';
+      final SegmentationResult segmentation = segmentText(text);
+      expect(segmentation.hasWords, isFalse);
+
+      expect(segmentation.getWordBoundary(0), const ui.TextRange(start: 0, end: 5));
+      expect(segmentation.hasWords, isTrue);
+      expect(segmentation.getWordBoundary(4), const ui.TextRange(start: 0, end: 5));
+      expect(segmentation.getWordBoundary(5), const ui.TextRange(start: 5, end: 6));
+      expect(segmentation.getWordBoundary(6), const ui.TextRange(start: 6, end: 11));
+      expect(segmentation.getWordBoundary(10), const ui.TextRange(start: 6, end: 11));
+
+      expect(
+        segmentation.getWordBoundary(-1),
+        const ui.TextRange(start: text.length, end: text.length),
+      );
+      expect(
+        segmentation.getWordBoundary(text.length),
+        const ui.TextRange(start: text.length, end: text.length),
+      );
+    });
+
+    test('getWordBoundary handles empty text, whitespace-only text, and surrogate pairs', () {
+      final SegmentationResult empty = segmentText('');
+      expect(empty.getWordBoundary(0), const ui.TextRange(start: 0, end: 0));
+      expect(empty.getWordBoundary(-1), const ui.TextRange(start: 0, end: 0));
+      expect(empty.hasWords, isFalse);
+
+      const spaces = '   ';
+      final SegmentationResult whitespaceOnly = segmentText(spaces);
+      expect(whitespaceOnly.getWordBoundary(0), const ui.TextRange(start: 0, end: 3));
+      expect(whitespaceOnly.getWordBoundary(2), const ui.TextRange(start: 0, end: 3));
+      expect(whitespaceOnly.getWordBoundary(3), const ui.TextRange(start: 3, end: 3));
+
+      // 'Hi 🙂 there': 'Hi' [0..2], ' ' [2..3], '🙂' [3..5] (UTF-16 surrogate pair),
+      // ' ' [5..6], 'there' [6..11].
+      const emojiText = 'Hi 🙂 there';
+      final SegmentationResult emoji = segmentText(emojiText);
+      expect(emoji.getWordBoundary(0), const ui.TextRange(start: 0, end: 2));
+      expect(emoji.getWordBoundary(2), const ui.TextRange(start: 2, end: 3));
+      expect(emoji.getWordBoundary(3), const ui.TextRange(start: 3, end: 5));
+      expect(emoji.getWordBoundary(4), const ui.TextRange(start: 3, end: 5));
+      expect(emoji.getWordBoundary(5), const ui.TextRange(start: 5, end: 6));
+      expect(emoji.getWordBoundary(6), const ui.TextRange(start: 6, end: 11));
     });
 
     test('caches segmentation results in LRU fashion', () {

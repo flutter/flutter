@@ -1875,16 +1875,18 @@ extension type SkParagraphBuilder(JSObject _) implements JSObject {
   /// Injects required ICU data into the [SkParagraphBuilder] instance if needed.
   ///
   /// This only works in the CanvasKit Chromium variant that's compiled
-  /// without ICU data. In other variants, it's a no-op.
-  void injectClientICUIfNeeded() {
+  /// without ICU data. In other variants, it's a no-op and returns `null`.
+  SegmentationResult? injectClientICUIfNeeded() {
     if (!_ckRequiresClientICU) {
-      return;
+      return null;
     }
 
+    // Only grapheme and line breaks are consumed by SkParagraph during layout.
+    // Word breaks are computed lazily in Dart if getWordBoundary() is called.
     final SegmentationResult result = segmentText(getText());
-    setWordsUtf16(result.words);
     setGraphemeBreaksUtf16(result.graphemes);
     setLineBreaksUtf16(result.breaks);
+    return result;
   }
 
   @JS('setWordsUtf8')

@@ -5,11 +5,58 @@
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+import 'package:ui/ui.dart' as ui;
+
 import 'dom.dart';
 import 'text/line_breaker.dart';
 import 'util.dart';
 
-typedef SegmentationResult = ({Uint32List words, Uint32List graphemes, Uint32List breaks});
+/// Holds grapheme, line break, and lazy word segmentation boundaries for [text].
+class SegmentationResult {
+  SegmentationResult({required this.text, required this.graphemes, required this.breaks});
+
+  final String text;
+  final Uint32List graphemes;
+  final Uint32List breaks;
+
+  Uint32List? _words;
+
+  /// Returns whether word boundaries have been computed for [text].
+  @visibleForTesting
+  bool get hasWords => _words != null;
+
+  /// Word boundaries in UTF-16 code unit offsets, computed lazily on first access.
+  Uint32List get words =>
+      _words ??= fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word);
+
+  /// Finds the word boundary containing [offset] in UTF-16 code units, matching
+  /// SkParagraph's `ParagraphImpl::getWordBoundary(unsigned offset)` contract.
+  ui.TextRange getWordBoundary(int offset) {
+    // Out-of-bounds or negative offsets return an empty range at text.length,
+    // matching C++ ParagraphImpl::getWordBoundary(unsigned offset).
+    if (offset < 0 || offset >= text.length) {
+      return ui.TextRange(start: text.length, end: text.length);
+    }
+
+    // Binary search for the first break strictly greater than offset.
+    // Because fragmentUsingIntlSegmenter starts at 0 and ends at text.length,
+    // and 0 <= offset < text.length, wordBreaks[0] <= offset < wordBreaks.last
+    // is guaranteed.
+    final Uint32List wordBreaks = words;
+    var low = 0;
+    int high = wordBreaks.length - 1;
+    while (low + 1 < high) {
+      final int mid = (low + high) >>> 1;
+      if (wordBreaks[mid] <= offset) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+    return ui.TextRange(start: wordBreaks[low], end: wordBreaks[high]);
+  }
+}
 
 // The cache numbers below were picked based on the following logic.
 //
@@ -84,8 +131,10 @@ SegmentationResult segmentText(String text) {
   if (cachedResult != null) {
     result = cachedResult;
   } else {
-    result = (
-      words: fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word),
+    // Word boundaries are only needed when getWordBoundary() is queried, so
+    // SegmentationResult.words computes them lazily on demand.
+    result = SegmentationResult(
+      text: text,
       graphemes: fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.grapheme),
       breaks: fragmentUsingV8LineBreaker(text),
     );
