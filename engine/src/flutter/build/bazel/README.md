@@ -10,7 +10,7 @@ Nothing in this directory is used by the GN build.
 | `extensions.bzl` | The `synced_deps` module extension: the table of repositories the root `MODULE.bazel` imports with `use_repo`, backed by the pins in `deps.lock.bzl` and `build/linux/sysroot_scripts/sysroots.json`; and `engine_version`, which declares `@engine_version`. |
 | `third_party/<name>/BUILD.<name>.bazel` | Overlay root `BUILD` files for dependencies that ship no usable Bazel build files. Deliberately not named `BUILD.bazel`, so Bazel does not treat them as packages of this repository. |
 | `toolchains/` | The hermetic C/C++ toolchains (`cc_toolchain_config.bzl` holds the flag tables, `BUILD.bazel` the `cc_toolchain`/`toolchain` targets per platform, `tests/` a smoke test). |
-| `copts.bzl` | What GN adds per target rather than per toolchain, for `BUILD` files to spell out: `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES` for first-party code (`chromium_code`, `//flutter:config`) and `FLUTTER_THIRD_PARTY_COPTS` for overlays (`no_chromium_code`). |
+| `copts.bzl` | What GN adds per target rather than per toolchain, for `BUILD` files to spell out: `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES` for first-party code (`chromium_code`, `//flutter:config`; the defines select by platform -- none on wasm, where GN's `chromium_code` is empty, `_FORTIFY_SOURCE=2` besides the C99 macros on Android) and `FLUTTER_THIRD_PARTY_COPTS` for overlays (`no_chromium_code`). |
 | `gn_build/` | The `gn_build` rule (`gn_build.bzl`, action script `gn_build.py`): a GN build of part of the tree as one Bazel action, for the subtrees that keep their GN rules during the migration. |
 | `gn_action/` | The `gn_action` rule: GN's `action()` -- one run of a Python script under the hermetic `@cpython3` -- as the generated `BUILD` files emit it, with the path tokens (`$(execpath ...)`, `$(src ...)`, `$(gen ...)`, `$(built ...)`) the converter writes for `rebase_path()` results, and the build-directory outputs, tools and platform-transitioned dependencies the Android embedding's actions need, and a directory of the build directory assembled from the deps' placements for a script that reads one (`stage_build_directory.py`: sky/dist's copy of the sky_engine package); `gn_copy` for `copy()`; `run_python` for other rules that run the engine's scripts. |
 | `flatbuffers/` | The engine's `flatbuffers()` GN template as a macro: `flatc` per schema, the generated headers as a library. |
@@ -320,7 +320,15 @@ module has a fourth output, `<name>.wasm.map`, which emcc writes beside the
 `.wasm` under the toolchain's `source_map` feature (`-gsource-map`) and
 GN's web SDK copies under `is_debug` without declaring (ninja finds it on
 disk). `wasm_objects` is the
-compile alone.
+compile alone. The converter gives these rules the compiler options a
+cc rule gets besides the invocation's `cflags`: the copts constant
+(`FLUTTER_COPTS` for skwasm, which lists `//flutter:config`;
+`CHROMIUM_CODE_COPTS` for CanvasKit's executable) and the flags their
+dependencies' public configs hand them, so a module's own sources
+compile with `-Werror` and `-Wunreachable-code` as GN's do. The
+optimization level is the toolchain's `wasm_optimize` feature: `-O3`
+under `opt`, `-Oz` where a variant's platform turns on
+`wasm_prioritize_size` (GN passes one or the other).
 
 `toolchains/emscripten/spike/` is Phase 0's metric 0.6: an embind module
 (`spike_module`) and one Skia translation unit (`skia_unit`,
