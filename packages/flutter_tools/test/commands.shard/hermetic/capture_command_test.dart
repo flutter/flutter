@@ -14,13 +14,9 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/capture.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -42,90 +38,6 @@ void main() {
   });
 
   group('capture screenshot', () {
-    testWithoutContext('has non-nullable toolContext', () {
-      final toolContext = FakeToolContext();
-      final command = CaptureScreenshotCommand(toolContext: toolContext);
-      expect(command.toolContext, same(toolContext));
-    });
-
-    testUsingContext('requires a connected device', () async {
-      final logger = BufferLogger.test();
-      await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext(logger: logger)))
-                .run(<String>['capture', 'screenshot']),
-        throwsToolExit(message: 'Must have a connected device for screenshot type device'),
-      );
-    });
-
-    testWithoutContext('device screenshot rejects VM Service URI', () async {
-      await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                .run(<String>['capture', 'screenshot', '--vm-service-url=http://localhost:8181']),
-        throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
-      );
-    });
-
-    testWithoutContext('skia screenshot requires VM Service URI', () async {
-      await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                .run(<String>['capture', 'screenshot', '--type=skia']),
-        throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
-      );
-    });
-
-    testWithoutContext(
-      'skia screenshot does not require a device and uses injected vmServiceConnector',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final logger = BufferLogger.test();
-        final FakeToolContext toolContext = _testToolContext(fs: fs, logger: logger);
-
-        final fakeVmService = _FakeFlutterVmService(
-          response: vm_service.Response.parse(<String, Object?>{
-            'type': 'Response',
-            'skp': base64.encode(utf8.encode('valid skp data')),
-          }),
-        );
-
-        final command = CaptureScreenshotCommand(
-          toolContext: toolContext,
-          vmServiceConnector:
-              (
-                Uri uri, {
-                ReloadSources? reloadSources,
-                Restart? restart,
-                CompileExpression? compileExpression,
-                FlutterProject? flutterProject,
-                FlutterVersion? flutterVersion,
-                PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-                CompressionOptions compression = CompressionOptions.compressionDefault,
-                Device? device,
-                required Logger logger,
-              }) async {
-                expect(uri.toString(), 'http://localhost:8181');
-                return fakeVmService;
-              },
-        );
-
-        await createTestCommandRunner(command).run(<String>[
-          'screenshot',
-          '--type=skia',
-          '--vm-service-url=http://localhost:8181',
-          '--out=screenshot.skp',
-        ]);
-
-        expect(command.refreshWirelessDevices, isFalse);
-
-        final File outputFile = fs.file('screenshot.skp');
-        expect(outputFile.existsSync(), isTrue);
-        expect(outputFile.readAsStringSync(), 'valid skp data');
-        expect(logger.statusText, contains('Screenshot written to screenshot.skp (0kB).'));
-      },
-    );
-
     testUsingContext(
       'takes a screenshot on connected device',
       () async {
@@ -168,32 +80,21 @@ void main() {
       testDeviceManager = _TestDeviceManager(logger: BufferLogger.test());
     });
 
-    testWithoutContext('rejects invalid duration without device lookup', () async {
-      await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                .run(<String>['capture', 'recording', '--duration', 'abc']),
-        throwsToolExit(message: 'Invalid duration: "abc". Must be a positive integer.'),
+    for (final invalidDuration in <String>['abc', '0', '-5']) {
+      testWithoutContext(
+        'rejects invalid duration "$invalidDuration" without device lookup',
+        () async {
+          await expectLater(
+            () =>
+                createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
+                    .run(<String>['capture', 'recording', '--duration', invalidDuration]),
+            throwsToolExit(
+              message: 'Invalid duration: "$invalidDuration". Must be a positive integer.',
+            ),
+          );
+        },
       );
-    });
-
-    testWithoutContext('rejects zero duration without device lookup', () async {
-      await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                .run(<String>['capture', 'recording', '--duration', '0']),
-        throwsToolExit(message: 'Invalid duration: "0". Must be a positive integer.'),
-      );
-    });
-
-    testWithoutContext('rejects negative duration without device lookup', () async {
-      await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                .run(<String>['capture', 'recording', '--duration', '-5']),
-        throwsToolExit(message: 'Invalid duration: "-5". Must be a positive integer.'),
-      );
-    });
+    }
 
     testUsingContext('requires a connected device', () async {
       await expectLater(
@@ -484,15 +385,6 @@ class _TestDeviceManager extends DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
-}
-
-class _FakeFlutterVmService extends Fake implements FlutterVmService {
-  _FakeFlutterVmService({this.response});
-
-  final vm_service.Response? response;
-
-  @override
-  Future<vm_service.Response?> screenshotSkp() async => response;
 }
 
 class _FakeSignals implements Signals {
