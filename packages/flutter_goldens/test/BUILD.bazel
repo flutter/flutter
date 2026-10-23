@@ -9,7 +9,7 @@
 #
 #   bazel test //packages/flutter_goldens/test:tests
 
-load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+load("//packages/flutter_test:package_tests.bzl", "FRAMEWORK_IMPORTS", "flutter_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -19,6 +19,7 @@ flutter_package_tests(
         ["**/*.dart"],
         exclude = ["**/*_test.dart"],
     ),
+    imports = FRAMEWORK_IMPORTS + ["package:flutter_goldens/flutter_goldens.dart"],
     package = "flutter_goldens",
     tests = glob(["**/*_test.dart"]),
 )
