@@ -2,38 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../context/tool_context.dart';
 import '../project.dart';
 import '../project_validator.dart';
 import '../project_validator_result.dart';
 import '../runner/flutter_command.dart';
 
-class ValidateProject {
+class ValidateProject with ToolContextMixin {
   ValidateProject({
     required this.allProjectValidators,
-    required this._toolContext,
+    required this.toolContext,
     required this.userPath,
     this.machine = false,
     this.verbose = false,
   });
 
   final List<ProjectValidator> allProjectValidators;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
   final String userPath;
   final bool machine;
   final bool verbose;
 
   Future<FlutterCommandResult> run() async {
-    final ToolContext(
-      fs: FileSystem fileSystem,
-      :Logger logger,
-      :FlutterProjectFactory projectFactory,
-    ) = _toolContext;
     final Directory workingDirectory = userPath.isEmpty
-        ? fileSystem.currentDirectory
-        : fileSystem.directory(userPath);
+        ? fs.currentDirectory
+        : fs.directory(userPath);
 
     final FlutterProject project = projectFactory.fromDirectory(workingDirectory);
     final results = <ProjectValidator, Future<List<ProjectValidatorResult>>>{};

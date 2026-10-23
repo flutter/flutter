@@ -13,9 +13,7 @@ import 'package:yaml_edit/yaml_edit.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/platform.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/pub.dart';
@@ -115,21 +113,16 @@ class UpdatePackagesCommand extends FlutterCommand {
   late final Pub _pub =
       _injectedPub ??
       Pub(
-        botDetector: toolContext.botDetector,
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        platform: toolContext.platform,
-        processManager: toolContext.processManager,
+        botDetector: botDetector,
+        fileSystem: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
       );
 
-  late final _net = Net(
-    httpClientFactory: _httpClientFactory,
-    logger: toolContext.logger,
-    platform: toolContext.platform,
-  );
+  late final _net = Net(httpClientFactory: _httpClientFactory, logger: logger, platform: platform);
 
   Future<void> _downloadCoverageData() async {
-    final ToolContext(:FileSystem fs, :Platform platform) = toolContext;
     final String urlBase =
         platform.environment[kFlutterStorageBaseUrl] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
@@ -148,8 +141,6 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        toolContext;
     // Add the root directory to the list of packages, to capture the workspace
     // `pubspec.yaml`.
     final Directory rootDirectory = fs.directory(fs.path.absolute(Cache.flutterRoot!));
@@ -279,8 +270,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     required List<FlutterProject> projects,
     List<PackageVersion>? pinned,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        toolContext;
     final Map<String, String> pinnedDeps;
     if (forceUpgrade) {
       logger.printStatus('Upgrading packages versions...');
@@ -461,7 +450,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   void _verifyPubspecs(List<Directory> packages) {
-    final Logger logger = toolContext.logger;
     logger.printStatus('Verifying pubspecs...');
     for (final directory in packages) {
       logger.printTrace('Reading pubspec.yaml from ${directory.path}');
@@ -532,7 +520,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   void _writeHashesToPubspecs(List<Directory> packages) {
-    final Logger logger = toolContext.logger;
     logger.printStatus('Writing hashes to pubspecs...');
     for (final directory in packages) {
       logger.printTrace('Reading pubspec.yaml from ${directory.path}');

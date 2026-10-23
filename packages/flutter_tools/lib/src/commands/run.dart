@@ -14,10 +14,6 @@ import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/signals.dart';
-import '../base/terminal.dart';
-import '../base/time.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
@@ -266,7 +262,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   }
 
   Future<WebDevServerConfig> webDevServerConfigCore() async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
       fileSystem: fs,
       logger: logger,
@@ -516,7 +511,6 @@ class RunCommand extends RunCommandBase {
 
     String? androidEmbeddingVersion;
     final hostLanguage = <String>[];
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     if (anyAndroidDevices) {
       final AndroidProject androidProject = projectFactory
           .fromDirectory(fs.currentDirectory)
@@ -618,7 +612,6 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
-    final Logger logger = toolContext.logger;
     final String? flavor = getValue(BuildInfoOptions.flavor);
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
@@ -653,8 +646,6 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
-    final FileSystem fs = toolContext.fs;
-
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
     final webMode = webDevServerConfig != null;
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(
@@ -728,15 +719,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :Signals signals,
-      :SystemClock systemClock,
-      :Terminal terminal,
-    ) = toolContext;
-    final ProcessInfo processInfo = this.processInfo;
-
     final BuildInfo buildInfo = await getBuildInfo();
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.

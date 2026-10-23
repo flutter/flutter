@@ -9,8 +9,6 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
-import '../base/logger.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../context/android_context.dart';
@@ -93,8 +91,7 @@ class BuildApkCommand extends BuildSubCommand {
   ToolContext get toolContext => super.toolContext!;
 
   @override
-  FlutterProject get project =>
-      toolContext.projectFactory.fromDirectory(toolContext.fs.currentDirectory);
+  FlutterProject get project => projectFactory.fromDirectory(fs.currentDirectory);
 
   @override
   String get targetFile {
@@ -105,7 +102,7 @@ class BuildApkCommand extends BuildSubCommand {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return toolContext.fs.path.join('lib', 'main.dart');
+    return fs.path.join('lib', 'main.dart');
   }
 
   @override
@@ -148,7 +145,6 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Logger logger, :Terminal terminal) = toolContext;
     if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }

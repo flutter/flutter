@@ -51,11 +51,11 @@ const _androidStudioPreviewId = 'AndroidStudioPreview';
 // and < 4.1 (.AndroidStudio*.*)
 final _dotHomeStudioVersionMatcher = RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
-class AndroidStudio {
+class AndroidStudio with ToolContextMixin {
   /// A [version] value of null represents an unknown version.
   AndroidStudio(
     this.directory, {
-    required this._toolContext,
+    required this.toolContext,
     this.configuredPath,
     this.presetPluginsPath,
     this.studioAppName = _androidStudioId,
@@ -179,7 +179,9 @@ class AndroidStudio {
   final String? configuredPath;
   final String? presetPluginsPath;
 
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   String? _javaPath;
   bool _isValid = false;
@@ -214,9 +216,6 @@ class AndroidStudio {
     if (presetPluginsPath != null) {
       return presetPluginsPath!;
     }
-
-    final ToolContext(:FileSystem fs, :FileSystemUtils fileSystemUtils, :Platform platform) =
-        _toolContext;
 
     // JetBrains Toolbox writes plugins to a sibling directory with a ".plugins" suffix.
     if (!platform.isMacOS) {
@@ -633,12 +632,6 @@ the configured path by running this command: flutter config --android-studio-dir
   }
 
   void _initAndValidate() {
-    final ToolContext(
-      :FileSystem fs,
-      :Platform platform,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
-    ) = _toolContext;
     _isValid = false;
     _validationMessages.clear();
 

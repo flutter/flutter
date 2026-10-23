@@ -6,10 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../context/tool_context.dart';
@@ -44,7 +41,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   final name = 'windows';
 
   @override
-  bool get hidden => !_featureFlags.isWindowsEnabled || !toolContext.platform.isWindows;
+  bool get hidden => !_featureFlags.isWindowsEnabled || !platform.isWindows;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -60,13 +57,6 @@ class BuildWindowsCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :OperatingSystemUtils os,
-      :Platform platform,
-    ) = toolContext;
-
     final BuildInfo buildInfo = await getBuildInfo();
     if (!_featureFlags.isWindowsEnabled) {
       throwToolExit(

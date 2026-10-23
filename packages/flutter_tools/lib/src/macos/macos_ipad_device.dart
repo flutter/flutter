@@ -33,15 +33,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   Future<CpuArch> get cpuArch async => CpuArch.arm64;
 
   @override
-  Future<bool> isSupported() async => toolContext.os.hostPlatform == HostPlatform.darwin_arm64;
+  Future<bool> isSupported() async => os.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   bool get supportsFlavors => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
-    return flutterProject.ios.existsSync() &&
-        toolContext.os.hostPlatform == HostPlatform.darwin_arm64;
+    return flutterProject.ios.existsSync() && os.hostPlatform == HostPlatform.darwin_arm64;
   }
 
   @override
@@ -116,15 +115,13 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   final IOSWorkflow _iosWorkflow;
 
   @override
-  bool get supportsPlatform => toolContext.platform.isMacOS;
+  bool get supportsPlatform => platform.isMacOS;
 
   /// iOS (not desktop macOS) development is enabled, the host is an ARM Mac,
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
-      _iosWorkflow.canListDevices &&
-      toolContext.os.hostPlatform == HostPlatform.darwin_arm64 &&
-      allowDiscovery;
+      _iosWorkflow.canListDevices && os.hostPlatform == HostPlatform.darwin_arm64 && allowDiscovery;
 
   /// Set to show ARM macOS as an iOS device target.
   static bool allowDiscovery = false;

@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'artifacts.dart';
 import 'asset.dart';
-import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -421,7 +421,7 @@ class UpdateFSReport {
   }
 }
 
-class DevFS {
+class DevFS with ToolContextMixin {
   /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
   ///
   /// Failed uploads are retried after [uploadRetryThrottle] duration, defaults to 500ms.
@@ -430,12 +430,11 @@ class DevFS {
     this.fsName,
     this.rootDirectory, {
     required BuildMode buildMode,
-    required ToolContext toolContext,
+    required this.toolContext,
     HttpClient? httpClient,
     this._stopwatchFactory = const StopwatchFactory(),
     Duration? uploadRetryThrottle,
-  }) : _toolContext = toolContext,
-       _vmService = serviceProtocol,
+  }) : _vmService = serviceProtocol,
        _httpWriter = _DevFSHttpWriter(
          fsName,
          serviceProtocol,
@@ -455,7 +454,9 @@ class DevFS {
          logger: toolContext.logger,
        );
 
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
   final FlutterVmService _vmService;
   final _DevFSHttpWriter _httpWriter;
   final StopwatchFactory _stopwatchFactory;
@@ -491,7 +492,6 @@ class DevFS {
   }
 
   Future<Uri> create() async {
-    final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
@@ -520,7 +520,6 @@ class DevFS {
   }
 
   Future<void> destroy() async {
-    final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _vmService.deleteDevFS(fsName);
     logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
@@ -563,7 +562,6 @@ class DevFS {
     bool resetCompiler = false,
     File? dartPluginRegistrant,
   }) async {
-    final ToolContext(:Config config, :FileSystem fs, :Logger logger) = _toolContext;
     final candidateCompileTime = DateTime.now();
     lastPackageConfig = packageConfig;
 

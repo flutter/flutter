@@ -45,6 +45,7 @@ import 'options/safe_arg_results.dart';
 import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
+export '../context/tool_context.dart' show ToolContextMixinExtension;
 export 'options/common_options.dart';
 export 'options/option_bundle.dart';
 export 'options/option_descriptor.dart';
@@ -178,7 +179,7 @@ abstract final class FlutterCommandCategory {
   static const tools = 'Tools & Devices';
 }
 
-abstract class FlutterCommand extends Command<void> {
+abstract class FlutterCommand extends Command<void> with ToolContextMixin {
   FlutterCommand({this.verboseHelp = false, ToolContext? toolContext, this._outputPreferences})
     : _explicitToolContext = toolContext;
 
@@ -189,6 +190,7 @@ abstract class FlutterCommand extends Command<void> {
   final OutputPreferences? _outputPreferences;
 
   /// The [ToolContext] providing explicit dependency injection for this command.
+  @override
   ToolContext? get toolContext => _explicitToolContext ?? runner?.toolContext;
 
   SystemClock get _clock => toolContext?.systemClock ?? globals.systemClock;

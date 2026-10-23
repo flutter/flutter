@@ -7,19 +7,19 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
-import '../base/platform.dart';
+import '../base/os.dart' show HostPlatform;
 import '../base/process.dart';
 import '../base/version.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
-class VisualStudio {
-  VisualStudio({required this._toolContext});
+class VisualStudio with ToolContextMixin {
+  VisualStudio({required this.toolContext});
 
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// Matches the description property from the vswhere.exe JSON output.
   final _vswhereDescriptionProperty = RegExp(r'\s*"description"\s*:\s*".*"\s*,?');
@@ -102,9 +102,7 @@ class VisualStudio {
     if (sdkLocation == null) {
       return null;
     }
-    final Directory sdkIncludeDirectory = _toolContext.fs
-        .directory(sdkLocation)
-        .childDirectory('Include');
+    final Directory sdkIncludeDirectory = fs.directory(sdkLocation).childDirectory('Include');
     if (!sdkIncludeDirectory.existsSync()) {
       return null;
     }
@@ -150,7 +148,7 @@ class VisualStudio {
       return null;
     }
 
-    return _toolContext.fs.path.joinAll(<String>[
+    return fs.path.joinAll(<String>[
       details.installationPath!,
       'Common7',
       'IDE',
@@ -201,7 +199,6 @@ class VisualStudio {
       return null;
     }
 
-    final ToolContext(:FileSystem fs, :OperatingSystemUtils os) = _toolContext;
     final arch = os.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : 'x64';
 
     return fs.path.joinAll(<String>[
@@ -225,7 +222,6 @@ class VisualStudio {
       return null;
     }
 
-    final ToolContext(:FileSystem fs, :OperatingSystemUtils os) = _toolContext;
     final arch = os.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : '64';
 
     return fs.path.joinAll(<String>[
@@ -248,7 +244,6 @@ class VisualStudio {
   /// itself.
   String get _vswherePath {
     const programFilesEnv = 'PROGRAMFILES(X86)';
-    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
     if (!platform.environment.containsKey(programFilesEnv)) {
       throwToolExit('%$programFilesEnv% environment variable not found.');
     }
@@ -340,7 +335,7 @@ class VisualStudio {
       // Ignore replacement characters as vswhere.exe is known to output them.
       // See: https://github.com/flutter/flutter/issues/102451
       const Encoding encoding = Utf8Codec(reportErrors: false);
-      final RunResult whereResult = _toolContext.processUtils.runSync(<String>[
+      final RunResult whereResult = processUtils.runSync(<String>[
         _vswherePath,
         ...defaultArguments,
         ...?additionalArguments,
@@ -365,7 +360,7 @@ class VisualStudio {
     final installationPath = installations[0]['installationPath'] as String?;
     String? msvcVersion;
     if (installationPath != null) {
-      final Directory installationDir = _toolContext.fs.directory(installationPath);
+      final Directory installationDir = fs.directory(installationPath);
       final Directory msvcDir = installationDir
           .childDirectory('VC')
           .childDirectory('Tools')
@@ -384,7 +379,6 @@ class VisualStudio {
   List<Map<String, dynamic>>? _tryDecodeVswhereJson(String vswhereJson) {
     List<dynamic>? result;
     FormatException? originalError;
-    final Logger logger = _toolContext.logger;
     try {
       // Some versions of vswhere.exe are known to encode their output incorrectly,
       // resulting in invalid JSON in the 'description' property when interpreted
@@ -455,7 +449,7 @@ class VisualStudio {
   /// registry doesn't contain that information.
   String? _getWindows10SdkLocation() {
     try {
-      final RunResult result = _toolContext.processUtils.runSync(<String>[
+      final RunResult result = processUtils.runSync(<String>[
         'reg',
         'query',
         _windows10SdkRegistryPath,

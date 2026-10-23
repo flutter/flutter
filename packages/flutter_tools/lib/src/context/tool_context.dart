@@ -9,6 +9,7 @@
 /// @docImport 'tool_dependencies.dart';
 library;
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -157,5 +158,75 @@ class ToolContext {
   final UserMessages userMessages;
 
   /// Common file system utilities.
-  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+  late final fileSystemUtils = FileSystemUtils(fileSystem: fs, platform: platform);
+}
+
+/// Mixin for classes that hold a [ToolContext].
+mixin ToolContextMixin {
+  /// The [ToolContext] held by this instance.
+  ///
+  /// Nullable only while legacy `FlutterCommand` test subclasses do not pass a
+  /// [ToolContext] to `super(...)`.
+  @protected
+  ToolContext? get toolContext;
+}
+
+/// Provides convenience getters for the services in [ToolContextMixin.toolContext].
+///
+/// These getters are intended for use inside a [ToolContextMixin] class's own
+/// members and throw if [ToolContextMixin.toolContext] is `null`.
+extension ToolContextMixinExtension on ToolContextMixin {
+  Artifacts get artifacts => toolContext!.artifacts;
+
+  BotDetector get botDetector => toolContext!.botDetector;
+
+  Cache get cache => toolContext!.cache;
+
+  Config get config => toolContext!.config;
+
+  CustomDevicesConfig get customDevicesConfig => toolContext!.customDevicesConfig;
+
+  FileSystemUtils get fileSystemUtils => toolContext!.fileSystemUtils;
+
+  FlutterVersion get flutterVersion => toolContext!.flutterVersion;
+
+  FileSystem get fs => toolContext!.fs;
+
+  Git get git => toolContext!.git;
+
+  LocalEngineLocator get localEngineLocator => toolContext!.localEngineLocator;
+
+  Logger get logger => toolContext!.logger;
+
+  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => toolContext!.nativeAssetsBuilder;
+
+  OperatingSystemUtils get os => toolContext!.os;
+
+  OutputPreferences get outputPreferences => toolContext!.outputPreferences;
+
+  PersistentToolState get persistentToolState => toolContext!.persistentToolState;
+
+  Platform get platform => toolContext!.platform;
+
+  PreRunValidator get preRunValidator => toolContext!.preRunValidator;
+
+  ProcessInfo get processInfo => toolContext!.processInfo;
+
+  ProcessManager get processManager => toolContext!.processManager;
+
+  ProcessUtils get processUtils => toolContext!.processUtils;
+
+  FlutterProjectFactory get projectFactory => toolContext!.projectFactory;
+
+  ShutdownHooks get shutdownHooks => toolContext!.shutdownHooks;
+
+  Signals get signals => toolContext!.signals;
+
+  Stdio get stdio => toolContext!.stdio;
+
+  SystemClock get systemClock => toolContext!.systemClock;
+
+  AnsiTerminal get terminal => toolContext!.terminal;
+
+  UserMessages get userMessages => toolContext!.userMessages;
 }

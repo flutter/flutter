@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 
 import '../base/deferred_component.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/template.dart';
 import '../context/tool_context.dart';
 import '../project.dart';
@@ -20,7 +20,8 @@ import 'deferred_components_validator.dart';
 /// Once constructed, checks and tasks can be executed by calling the respective
 /// methods. The results of the checks are stored internally and can be
 /// displayed to the user by calling [displayResults].
-class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
+class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator
+    with ToolContextMixin {
   /// Constructs a validator instance.
   ///
   /// The [_templatesDir] parameter is optional. If null, the tool's default
@@ -32,16 +33,19 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   DeferredComponentsPrebuildValidator(
     Directory projectDir, {
     required this._templateRenderer,
-    required this._toolContext,
+    required this.toolContext,
     super.exitOnFail,
     super.outputDir,
     this._templatesDir,
     super.title,
-  }) : super(projectDir, _toolContext.logger, _toolContext.platform);
+  }) : super(projectDir, toolContext.logger, toolContext.platform);
 
   final Directory? _templatesDir;
   final TemplateRenderer _templateRenderer;
-  final ToolContext _toolContext;
+
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// Checks if an android dynamic feature module exists for each deferred
   /// component.
@@ -68,7 +72,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
         projectDir: projectDir,
         templateRenderer: _templateRenderer,
         templatesDir: _templatesDir,
-        toolContext: _toolContext,
+        toolContext: toolContext,
       );
       if (!androidFiles.verifyFilesExist()) {
         // generate into temp directory
@@ -212,7 +216,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
 
 // Handles a single deferred component's android dynamic feature module
 // directory.
-class _DeferredComponentAndroidFiles {
+class _DeferredComponentAndroidFiles with ToolContextMixin {
   _DeferredComponentAndroidFiles({
     required this.name,
     required this.projectDir,
@@ -226,6 +230,7 @@ class _DeferredComponentAndroidFiles {
   final Directory projectDir;
   final TemplateRenderer templateRenderer;
   final Directory? _templatesDir;
+  @override
   final ToolContext toolContext;
 
   Directory get androidDir => projectDir.childDirectory('android');
@@ -265,8 +270,6 @@ class _DeferredComponentAndroidFiles {
 
   // generates default build.gradle and AndroidManifest.xml for the deferred component.
   Future<List<File>> _setupComponentFiles(Directory outputDir) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        toolContext;
     Template template;
     if (_templatesDir != null) {
       final Directory templateComponentDir = _templatesDir.childDirectory(

@@ -4,7 +4,6 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
@@ -34,7 +33,7 @@ class LinuxDevice extends DesktopDevice {
 
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
-    final HostPlatform hostPlatform = toolContext.os.hostPlatform;
+    final HostPlatform hostPlatform = os.hostPlatform;
     if (hostPlatform == HostPlatform.linux_x64) {
       return TargetPlatform.linux_x64;
     } else if (hostPlatform == HostPlatform.linux_riscv64) {
@@ -44,7 +43,7 @@ class LinuxDevice extends DesktopDevice {
   }();
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(toolContext.os.hostPlatform);
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(os.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -57,7 +56,6 @@ class LinuxDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     await buildLinux(
       projectFactory.fromDirectory(fs.currentDirectory).linux,
       buildInfo,
@@ -86,7 +84,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   final LinuxWorkflow _linuxWorkflow;
 
   @override
-  bool get supportsPlatform => toolContext.platform.isLinux;
+  bool get supportsPlatform => platform.isLinux;
 
   @override
   bool get canListAnything => _linuxWorkflow.canListDevices;

@@ -8,16 +8,11 @@ import 'package:args/args.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -99,10 +94,6 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 
   @override
   ToolContext get toolContext => super.toolContext!;
-
-  FileSystem get fs => toolContext.fs;
-  Logger get logger => toolContext.logger;
-  FlutterProjectFactory get projectFactory => toolContext.projectFactory;
 
   FlutterProject getRootProject() {
     final ArgResults results = argResults!;
@@ -238,23 +229,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
 
-  @override
   WidgetPreviewMachineAwareLogger get logger =>
       toolContext.logger as WidgetPreviewMachineAwareLogger;
-
-  Cache get cache => toolContext.cache;
-
-  Platform get platform => toolContext.platform;
-
-  ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
-
-  OperatingSystemUtils get os => toolContext.os;
-
-  ProcessManager get processManager => toolContext.processManager;
-
-  Artifacts get artifacts => toolContext.artifacts;
-
-  Terminal get terminal => toolContext.terminal;
 
   late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
 

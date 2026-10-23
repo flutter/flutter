@@ -14,14 +14,12 @@ import 'package:yaml/yaml.dart' as yaml;
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
-abstract class AnalyzeBase {
+abstract class AnalyzeBase with ToolContextMixin {
   AnalyzeBase(
     this.argResults, {
     required this.repoPackages,
@@ -35,20 +33,12 @@ abstract class AnalyzeBase {
   final List<Directory> repoPackages;
   @protected
   final bool suppressAnalytics;
+  @override
   @protected
   final ToolContext toolContext;
 
   @protected
-  FileSystem get fileSystem => toolContext.fs;
-  @protected
-  Logger get logger => toolContext.logger;
-  @protected
-  Terminal get terminal => toolContext.terminal;
-  @protected
-  Artifacts get artifacts => toolContext.artifacts;
-
-  @protected
-  String get flutterRoot => fileSystem.path.absolute(Cache.flutterRoot!);
+  String get flutterRoot => fs.path.absolute(Cache.flutterRoot!);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -56,7 +46,7 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = fileSystem
+        final RandomAccessFile resultsFile = fs
             .file(argResults['write'])
             .openSync(mode: FileMode.write);
         try {
@@ -73,11 +63,11 @@ abstract class AnalyzeBase {
 
   void writeBenchmark(Stopwatch stopwatch, int errorCount) {
     const benchmarkOut = 'analysis_benchmark.json';
-    final data = <String, dynamic>{
+    final data = <String, Object>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
       'issues': errorCount,
     };
-    fileSystem.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
+    fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     logger.printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 

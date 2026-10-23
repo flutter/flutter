@@ -7,9 +7,6 @@ import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../context/tool_context.dart';
 import '../vmservice.dart';
@@ -18,10 +15,10 @@ import 'test_time_recorder.dart';
 import 'watcher.dart';
 
 /// A class that collects code coverage data during test runs.
-class CoverageCollector extends TestWatcher {
+class CoverageCollector extends TestWatcher with ToolContextMixin {
   CoverageCollector({
     required this.packagesPath,
-    required this._toolContext,
+    required this.toolContext,
     this.branchCoverage = false,
     this.libraryNames,
     this.resolver,
@@ -29,7 +26,9 @@ class CoverageCollector extends TestWatcher {
     this.verbose = true,
   });
 
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -74,7 +73,6 @@ class CoverageCollector extends TestWatcher {
     if (!verbose) {
       return;
     }
-    final Logger logger = _toolContext.logger;
     if (error) {
       logger.printError(line);
     } else {
@@ -103,7 +101,6 @@ class CoverageCollector extends TestWatcher {
     // This may not be a safe assumption in non-standard environments, such as
     // when building under build systems such as Bazel. In those cases, this
     // getter should be overridden.
-    final FileSystem fs = _toolContext.fs;
     return fs.directory(fs.file(packagesPath).dirname).dirname;
   }
 
@@ -217,7 +214,7 @@ class CoverageCollector extends TestWatcher {
     if (formatter == null) {
       final coverage.Resolver usedResolver =
           resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
-      final String packagePath = _toolContext.fs.currentDirectory.path;
+      final String packagePath = fs.currentDirectory.path;
       // find paths for libraryNames so we can include them to report
       final List<String>? libraryPaths = libraryNames
           ?.map((String e) => usedResolver.resolve('package:$e'))
@@ -245,12 +242,6 @@ class CoverageCollector extends TestWatcher {
       return false;
     }
 
-    final ToolContext(
-      :FileSystem fs,
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessUtils processUtils,
-    ) = _toolContext;
     final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);

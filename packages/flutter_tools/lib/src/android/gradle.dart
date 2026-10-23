@@ -163,7 +163,7 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
 const kMaxRetryTime = Duration(seconds: 10);
 
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
-class AndroidGradleBuilder implements AndroidBuilder {
+class AndroidGradleBuilder with ToolContextMixin implements AndroidBuilder {
   AndroidGradleBuilder({
     required this._analytics,
     required AndroidStudio? androidStudio,
@@ -174,7 +174,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    required this._toolContext,
+    required this.toolContext,
     AndroidSdk? androidSdk,
   }) : _androidContext = AndroidContext(
          androidSdkBuilder: () => androidSdk,
@@ -190,13 +190,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder.fromContexts({
     required this._analytics,
     required this._androidContext,
-    required ToolContext toolContext,
+    required this.toolContext,
   }) : _artifacts = toolContext.artifacts,
        _fileSystem = toolContext.fs,
        _logger = toolContext.logger,
        _fileSystemUtils = toolContext.fileSystemUtils,
-       _processUtils = toolContext.processUtils,
-       _toolContext = toolContext;
+       _processUtils = toolContext.processUtils;
 
   final Analytics _analytics;
   final AndroidContext _androidContext;
@@ -209,7 +208,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
   late final AndroidSdk? _androidSdk = _androidContext.androidSdk;
   final FileSystemUtils _fileSystemUtils;
   final ProcessUtils _processUtils;
-  final ToolContext _toolContext;
+
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -395,7 +397,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         java: _java,
         line: detectedGradleErrorLine!,
         project: project,
-        toolContext: _toolContext,
+        toolContext: toolContext,
         usesAndroidX: usesAndroidX,
       );
 

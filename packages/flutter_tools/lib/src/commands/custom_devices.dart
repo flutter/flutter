@@ -6,23 +6,17 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../custom_devices/custom_device.dart';
 import '../custom_devices/custom_device_config.dart';
-import '../custom_devices/custom_devices_config.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../runner/flutter_command.dart';
@@ -48,7 +42,7 @@ class CustomDevicesCommand extends FlutterCommand {
     String configFileLine;
     if (_featureFlags.areCustomDevicesEnabled) {
       configFileLine =
-          '\nMakes changes to the config file at "${toolContext.customDevicesConfig.configPath}".\n';
+          '\nMakes changes to the config file at "${customDevicesConfig.configPath}".\n';
     } else {
       configFileLine = '';
     }
@@ -87,14 +81,7 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   ToolContext get toolContext => super.toolContext!;
 
   @protected
-  CustomDevicesConfig get customDevicesConfig => toolContext.customDevicesConfig;
-  @protected
   final FeatureFlags featureFlags;
-
-  @protected
-  FileSystem get fileSystem => toolContext.fs;
-  @protected
-  Logger get logger => toolContext.logger;
 
   /// The path to the (potentially non-existing) backup of the config file.
   @protected
@@ -105,7 +92,7 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   /// doesn't exist. (True otherwise)
   @protected
   bool backup() {
-    final File configFile = fileSystem.file(customDevicesConfig.configPath);
+    final File configFile = fs.file(customDevicesConfig.configPath);
     if (configFile.existsSync()) {
       configFile.copySync(configBackupPath);
       return true;
@@ -187,7 +174,7 @@ If a file already exists at the backup location, it will be overwritten.
 
     final bool wasBackedUp = backup();
 
-    ErrorHandlingFileSystem.deleteIfExists(fileSystem.file(customDevicesConfig.configPath));
+    ErrorHandlingFileSystem.deleteIfExists(fs.file(customDevicesConfig.configPath));
     customDevicesConfig.ensureFileExists();
 
     logger.printStatus(
@@ -272,11 +259,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     final device = CustomDevice(
       config: config,
       analytics: analytics,
-      buildSystem: FlutterBuildSystem(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: toolContext.platform,
-      ),
+      buildSystem: FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform),
       buildTargets: const NoOpBuildTargets(),
       toolContext: toolContext,
     );
@@ -294,7 +277,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       result = false;
     }
 
-    final Directory temp = await fileSystem.systemTempDirectory.createTemp();
+    final Directory temp = await fs.systemTempDirectory.createTemp();
 
     try {
       final bool ok = await device.tryInstall(localPath: temp.path, appName: temp.basename);
@@ -321,8 +304,6 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
 
     if (config.usesPortForwarding) {
-      final ToolContext(:Logger logger, :OperatingSystemUtils os, :ProcessManager processManager) =
-          toolContext;
       final portForwarder = CustomDevicePortForwarder(
         deviceName: device.displayName,
         forwardPortCommand: config.forwardPortCommand!,
@@ -481,7 +462,6 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     // So instead, we add the keystrokes stream events to a new single-subscription
     // stream and listen to that instead.
     final nonClosingKeystrokes = StreamController<String>();
-    final Terminal terminal = toolContext.terminal;
     final StreamSubscription<String> keystrokesSubscription = terminal.keystrokes.listen(
       (String s) => nonClosingKeystrokes.add(s.trim()),
       cancelOnError: true,
@@ -627,7 +607,6 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           : null,
     );
 
-    final Platform platform = toolContext.platform;
     if (platform.isWindows) {
       config = config.copyWith(
         pingCommand: <String>['ping', if (ipv6) '-6', '-n', '1', '-w', '500', targetStr],

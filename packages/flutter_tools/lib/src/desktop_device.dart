@@ -4,12 +4,8 @@
 
 import 'dart:async';
 
-import 'package:process/process.dart';
-
 import 'application_package.dart';
-import 'base/bot_detector.dart';
 import 'base/io.dart';
-import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'context/tool_context.dart';
@@ -35,7 +31,7 @@ abstract class DesktopDevice extends Device {
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: toolContext.fs);
+    return LocalDevFSWriter(fileSystem: fs);
   }
 
   // Since the host and target devices are the same, no work needs to be done
@@ -68,7 +64,7 @@ abstract class DesktopDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => toolContext.os.name;
+  Future<String> get sdkNameAndVersion async => os.name;
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
@@ -92,8 +88,6 @@ abstract class DesktopDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    final ToolContext(:BotDetector botDetector, :Logger logger, :ProcessManager processManager) =
-        toolContext;
     if (!prebuiltApplication) {
       await buildForDevice(
         buildInfo: debuggingOptions.buildInfo,
@@ -190,7 +184,6 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
-    final ProcessManager processManager = toolContext.processManager;
     var succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.

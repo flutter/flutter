@@ -179,7 +179,7 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    final File indexHtmlFile = toolContext.fs.file(project.web.indexFile.path);
+    final File indexHtmlFile = fs.file(project.web.indexFile.path);
     if (indexHtmlFile.existsSync()) {
       final String indexHtmlContent = indexHtmlFile.readAsStringSync();
       if (!indexHtmlContent.contains(kBaseHrefPlaceholder) && baseHref != null) {

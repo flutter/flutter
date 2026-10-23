@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../context/tool_context.dart';
 import '../dart/analysis.dart';
 import 'analyze_base.dart';
 
@@ -36,15 +37,15 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     if (isFlutterRepo) {
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
+      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fs);
 
       directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';
 
       logger.printTrace('Analyzing Flutter repository:');
     } else {
-      directories = <String>[fileSystem.currentDirectory.path];
-      analysisTarget = fileSystem.currentDirectory.path;
+      directories = <String>[fs.currentDirectory.path];
+      analysisTarget = fs.currentDirectory.path;
     }
 
     final server = AnalysisServer(
@@ -92,7 +93,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       final sortedErrors = <AnalysisError>[];
       final pathsToRemove = <String>[];
       analysisErrors.forEach((String path, List<AnalysisError> errors) {
-        if (fileSystem.isFileSync(path)) {
+        if (fs.isFileSync(path)) {
           sortedErrors.addAll(errors);
         } else {
           pathsToRemove.add(path);
@@ -129,7 +130,7 @@ class AnalyzeContinuously extends AnalyzeBase {
             issueCount > 0 ? 1 : 0,
             analytics: _analytics,
             logger: logger,
-            shutdownHooks: toolContext.shutdownHooks,
+            shutdownHooks: shutdownHooks,
           );
         });
       }

@@ -7,18 +7,15 @@ import 'dart:async';
 import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/tools/asset_transformer.dart';
 import '../build_system/tools/shader_compiler.dart';
@@ -54,7 +51,7 @@ typedef VmServiceFactory = Future<vm_service.VmService> Function(
 });
 
 /// The web specific DevFS implementation.
-class WebDevFS implements DevFS {
+class WebDevFS with ToolContextMixin implements DevFS {
   /// Create a new [WebDevFS] instance.
   ///
   /// [testMode] is true, do not actually initialize dwds or the shelf static
@@ -79,16 +76,10 @@ class WebDevFS implements DevFS {
     required this.rootDirectory,
     this.useDwdsWebSocketConnection = false,
     required this.webCrossOriginIsolation,
-    required this._toolContext,
+    required this.toolContext,
     this.testMode = false,
     this._webDefines = const <String, String>{},
   }) {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-    ) = _toolContext;
     _assetTransformer = DevelopmentAssetTransformer(
       transformer: AssetTransformer(
         processManager: processManager,
@@ -121,7 +112,9 @@ class WebDevFS implements DevFS {
   final WebDevServerConfig webDevServerConfig;
   final bool useDwdsWebSocketConnection;
   final bool webCrossOriginIsolation;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
   final Map<String, String> _webDefines;
 
   late WebAssetServer webAssetServer;
@@ -150,7 +143,6 @@ class WebDevFS implements DevFS {
     bool useDebugExtension, {
     @visibleForTesting VmServiceFactory vmServiceFactory = createVmServiceDelegate,
   }) {
-    final Logger logger = _toolContext.logger;
     final firstConnection = Completer<ConnectionResult>();
     // Note there is an asynchronous gap between this being set to true and
     // [firstConnection] completing; thus test the boolean to determine if
@@ -222,7 +214,7 @@ class WebDevFS implements DevFS {
       testMode: testMode,
       webDevServerConfig: webDevServerConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       crossOriginIsolation: webCrossOriginIsolation,
       webDefines: _webDefines,
     );
@@ -257,16 +249,14 @@ class WebDevFS implements DevFS {
   final Directory rootDirectory;
 
   Future<void> _validateTemplateFile(String filename) async {
-    final File file = _toolContext.fs.currentDirectory.childDirectory('web').childFile(filename);
+    final File file = fs.currentDirectory.childDirectory('web').childFile(filename);
     if (!file.existsSync()) {
       return;
     }
 
     final template = WebTemplate(await file.readAsString());
     for (final WebTemplateWarning warning in template.getWarnings()) {
-      _toolContext.logger.printWarning(
-        'Warning: In $filename:${warning.lineNumber}: ${warning.warningText}',
-      );
+      logger.printWarning('Warning: In $filename:${warning.lineNumber}: ${warning.warningText}');
     }
   }
 
@@ -289,8 +279,6 @@ class WebDevFS implements DevFS {
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
-    final ToolContext(:Config config, :FileSystem fs, :Logger logger, :Platform platform) =
-        _toolContext;
     _shaderPathsToEvict.clear();
     _assetPathsToEvict.clear();
     lastPackageConfig = packageConfig;
@@ -456,7 +444,6 @@ class WebDevFS implements DevFS {
 
   @visibleForTesting
   File get ddcModuleLoaderJS {
-    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
     return fs.file(
       fs.path.join(
         artifacts.getArtifactPath(
@@ -473,7 +460,6 @@ class WebDevFS implements DevFS {
 
   @visibleForTesting
   File get flutterJs {
-    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
     return fs.file(
       fs.path.join(artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path, 'flutter.js'),
     );
@@ -481,7 +467,6 @@ class WebDevFS implements DevFS {
 
   @visibleForTesting
   File get stackTraceMapper {
-    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
     return fs.file(
       fs.path.join(
         artifacts.getArtifactPath(

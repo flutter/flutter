@@ -10,9 +10,6 @@ import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../android/java.dart';
 import '../base/common.dart';
-import '../base/config.dart';
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -32,16 +29,15 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     required this.featureFlags,
     this._verboseHelp = false,
     this._extensionManager,
-  }) : _toolContext = toolContext;
+  });
 
   final AndroidContext _androidContext;
-  final ToolContext _toolContext;
   final FeatureFlags featureFlags;
   final ExtensionManager? _extensionManager;
   final bool _verboseHelp;
 
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
 
@@ -98,7 +94,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       if (configSetting == null) {
         continue;
       }
-      final String channel = _toolContext.flutterVersion.channel;
+      final String channel = flutterVersion.channel;
       parser.addFlag(
         configSetting,
         help: feature.generateHelpMessage(),
@@ -121,7 +117,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       await extensionManager.ensureInitialized();
       final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
       if (extensions.isNotEmpty) {
-        return ExtensionConfiguration(extensions: extensions, logger: _toolContext.logger);
+        return ExtensionConfiguration(extensions: extensions, logger: logger);
       }
     }
     return null;
@@ -144,7 +140,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         if (!dynamicParser.options.containsKey(name)) {
           dynamicParser.addFlag(name, help: help, defaultsTo: enabledByDefault);
         } else {
-          _toolContext.logger.printTrace(
+          logger.printTrace(
             'Extension feature flag "$name" conflicts with an existing option and was skipped.',
           );
         }
@@ -153,7 +149,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         if (!dynamicParser.options.containsKey(name)) {
           dynamicParser.addOption(name, help: help, defaultsTo: value);
         } else {
-          _toolContext.logger.printTrace(
+          logger.printTrace(
             'Extension config option "$name" conflicts with an existing option and was skipped.',
           );
         }
@@ -190,10 +186,6 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = _toolContext.logger;
-    final Config config = _toolContext.config;
-    final FileSystem fs = _toolContext.fs;
-
     final List<String> rest = argResults!.rest;
     if (rest.isNotEmpty) {
       throwToolExit(
@@ -261,12 +253,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
     if (argResults!.wasParsed('select-ios-signing-settings')) {
       final settings = XcodeCodeSigningSettings(
-        plistParser: PlistParser(
-          fileSystem: fs,
-          logger: logger,
-          processManager: _toolContext.processManager,
-        ),
-        toolContext: _toolContext,
+        plistParser: PlistParser(fileSystem: fs, logger: logger, processManager: processManager),
+        toolContext: toolContext,
       );
 
       await settings.selectSettings();
@@ -320,8 +308,6 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   }
 
   Future<void> handleMachine() async {
-    final Config config = _toolContext.config;
-    final Logger logger = _toolContext.logger;
     // Get all the current values.
     final results = <String, Object?>{
       for (final String key in config.keys) key: config.getValue(key),
@@ -345,8 +331,6 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   }
 
   void _updateConfig(String keyName, String? keyValue) {
-    final Config config = _toolContext.config;
-    final Logger logger = _toolContext.logger;
     if (keyValue == null || keyValue.isEmpty) {
       config.removeValue(keyName);
       logger.printStatus('Removing "$keyName" value.');
@@ -358,11 +342,10 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   /// List all config settings. for feature flags, include whether they are available.
   Future<String> get settingsText async {
-    final Config config = _toolContext.config;
     final featuresByName = <String, Feature>{
       for (final feature in featureFlags.allFeatures) ?feature.configSetting: feature,
     };
-    final String channel = _toolContext.flutterVersion.channel;
+    final String channel = flutterVersion.channel;
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       ...config.keys,

@@ -7,11 +7,9 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -39,8 +37,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this.codesign,
     required ToolContext super.toolContext,
     required super.verboseHelp,
-  }) : _toolContext = toolContext,
-       super(logger: toolContext.logger) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       debugMode,
@@ -110,7 +107,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-  final ToolContext _toolContext;
 
   AppleContext get appleContext => _appleContext;
 
@@ -119,16 +115,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   @protected
   @override
-  ToolContext get toolContext => _toolContext;
-
-  @protected
-  Cache get cache => _toolContext.cache;
-
-  @protected
-  Platform get platform => _toolContext.platform;
-
-  @protected
-  FlutterVersion get flutterVersion => _toolContext.flutterVersion;
+  ToolContext get toolContext => super.toolContext!;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -294,8 +281,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory hostAppRoot,
     PlistParser plistParser,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
-
     final File projectFile = hostAppRoot
         .childDirectory('Pods')
         .childDirectory('Pods.xcodeproj')
@@ -518,13 +503,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :Config config,
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-    ) = toolContext;
-
     final String outputArgument =
         getValue(BuildFrameworkCommand.output) ??
         fs.path.join(fs.currentDirectory.path, getBuildDirectory(config, fs), 'ios', 'framework');
@@ -770,13 +748,6 @@ end
     Directory modeDirectory,
     String? codesignIdentity,
   ) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-    ) = toolContext;
-
     final Status status = logger.startProgress(' ├─Copying Flutter.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = artifacts.getArtifactPath(
       Artifact.flutterXcframework,
@@ -809,14 +780,6 @@ end
     Directory simulatorBuildOutput,
     String? codesignIdentity,
   ) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
     final AppleContext(:Xcode xcode) = appleContext;
 
     const appFrameworkName = 'App.framework';
@@ -895,12 +858,6 @@ end
     Directory modeDirectory,
     String? codesignIdentity,
   ) async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
-    ) = toolContext;
     final AppleContext(:PlistParser plistParser, :Xcode xcode) = appleContext;
 
     final Status status = logger.startProgress(' ├─Building plugins...');
@@ -971,7 +928,7 @@ end
           if (fs.path.extension(podFrameworkName) != '.framework') {
             continue;
           }
-          final String binaryName = toolContext.fs.path.basenameWithoutExtension(podFrameworkName);
+          final String binaryName = fs.path.basenameWithoutExtension(podFrameworkName);
 
           final frameworks = <Directory>[
             podProduct as Directory,

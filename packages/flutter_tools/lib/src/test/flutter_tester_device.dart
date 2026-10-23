@@ -6,16 +6,12 @@ import 'dart:async';
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 
-import '../artifacts.dart';
 import '../base/dds.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/utils.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
@@ -59,7 +55,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final FontConfigManager fontConfigManager;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
-  late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
+  late final _ddsLauncher = DartDevelopmentService(logger: logger);
   final Completer<Uri?> _gotProcessVmServiceUri;
   final _exitCode = Completer<int>();
 
@@ -76,13 +72,6 @@ class FlutterTesterTestDevice extends TestDevice {
     assert(!_exitCode.isCompleted);
     assert(_process == null);
     assert(_server == null);
-
-    final ToolContext(
-      :Artifacts artifacts,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
 
     // Prepare our WebSocket server to talk to the engine subprocess.
     // Let the server choose an unused port.
@@ -231,7 +220,6 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   Future<void> kill() async {
-    final Logger logger = toolContext.logger;
     logger.printTrace('test $id: Terminating flutter_tester process');
     _process?.kill(io.ProcessSignal.sigkill);
 
@@ -248,7 +236,7 @@ class FlutterTesterTestDevice extends TestDevice {
     final int exitCode = await _exitCode.future;
 
     // On Windows, the [exitCode] and the terminating signal have no correlation.
-    if (toolContext.platform.isWindows) {
+    if (platform.isWindows) {
       return;
     }
 
@@ -271,7 +259,7 @@ class FlutterTesterTestDevice extends TestDevice {
     return connectToVmService(
       httpUri,
       compileExpression: compileExpression,
-      flutterVersion: toolContext.flutterVersion,
+      flutterVersion: flutterVersion,
       logger: logger,
     );
   }
@@ -309,7 +297,6 @@ class FlutterTesterTestDevice extends TestDevice {
     required Process process,
     required Future<void> Function(Uri uri) reportVmServiceUri,
   }) {
-    final Logger logger = toolContext.logger;
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream
           .transform(utf8LineDecoder)

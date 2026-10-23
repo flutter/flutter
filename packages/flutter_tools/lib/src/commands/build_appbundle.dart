@@ -13,9 +13,7 @@ import '../android/deferred_components_validator.dart';
 import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/template.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../context/android_context.dart';
@@ -144,7 +142,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Logger logger, :Terminal terminal) = toolContext;
     if (_androidContext.androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }

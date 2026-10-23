@@ -8,7 +8,6 @@ import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
@@ -67,7 +66,6 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = toolContext.logger;
     final Device cachedDevice = device!;
     if (boolArg('clear')) {
       cachedDevice.clearLogs();

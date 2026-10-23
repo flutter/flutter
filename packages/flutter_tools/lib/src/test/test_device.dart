@@ -15,9 +15,10 @@ import '../context/tool_context.dart';
 /// implementations.
 ///
 /// Methods may throw [TestDeviceException] if a problem is encountered.
-abstract class TestDevice {
+abstract class TestDevice with ToolContextMixin {
   TestDevice({required this.toolContext});
 
+  @override
   @protected
   final ToolContext toolContext;
 

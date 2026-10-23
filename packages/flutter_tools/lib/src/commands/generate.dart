@@ -6,14 +6,12 @@ import '../context/tool_context.dart';
 import '../runner/flutter_command.dart';
 
 class GenerateCommand extends FlutterCommand {
-  GenerateCommand({required ToolContext super.toolContext}) : _toolContext = toolContext {
+  GenerateCommand({required ToolContext super.toolContext}) {
     CommonOptions.target.addTo(argParser);
   }
 
-  final ToolContext _toolContext;
-
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description => 'run code generators.';
@@ -26,7 +24,7 @@ class GenerateCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    _toolContext.logger.printError(
+    logger.printError(
       '"flutter generate" is deprecated, use "dart run build_runner" instead. '
       'The following dependencies must be added to dev_dependencies in pubspec.yaml:\n'
       'build_runner: ^1.10.0\n'

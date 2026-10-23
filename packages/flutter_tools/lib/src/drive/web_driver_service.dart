@@ -12,17 +12,13 @@ import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
@@ -75,7 +71,6 @@ class WebDriverService extends DriverService {
       target: mainPath,
       userIdentifier: userIdentifier,
     );
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final webConfig = WebDebugConfig(
       devServerConfig: debuggingOptions.webConfig.devServerConfig,
       renderer: debuggingOptions.webConfig.renderer,
@@ -143,7 +138,6 @@ class WebDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, DriveTestSpecification spec) async {
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) = toolContext;
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(spec.browserName);
     final isAndroidChrome = browser == Browser.androidChrome;

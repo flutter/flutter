@@ -5,11 +5,10 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:process/process.dart';
+import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -18,12 +17,12 @@ import '../convert.dart';
 import '../vmservice.dart';
 
 /// An interface to the Dart analysis server.
-class AnalysisServer {
+class AnalysisServer with ToolContextMixin {
   AnalysisServer(
     this.sdkPath,
     this.directories, {
     required this.suppressAnalytics,
-    required this._toolContext,
+    required this.toolContext,
     this._protocolTrafficLog,
     this.usePlugins = true,
     this.withFineDependencies = true,
@@ -33,11 +32,11 @@ class AnalysisServer {
   final bool usePlugins;
   final String sdkPath;
   final List<String> directories;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
   final String? _protocolTrafficLog;
   final bool suppressAnalytics;
-
-  Logger get _logger => _toolContext.logger;
 
   Process? _process;
   StreamSubscription<String>? _errorStreamSubscription;
@@ -64,8 +63,6 @@ class AnalysisServer {
   final _outstandingRequests = <int, Completer<Map<String, Object?>?>>{};
 
   Future<void> start() async {
-    final ToolContext(:FileSystem fs, :Logger logger, :ProcessManager processManager) =
-        _toolContext;
     final command = <String>[
       fs.path.join(sdkPath, 'bin', 'dart'),
       'language-server',
@@ -124,7 +121,7 @@ class AnalysisServer {
 
   void _handleError(String message) {
     _logs.add('[stderr] $message');
-    _logger.printError(message);
+    logger.printError(message);
   }
 
   bool get didServerErrorOccur => _didServerErrorOccur;
@@ -158,7 +155,7 @@ class AnalysisServer {
       'params': params,
     });
     _writeMessage(message: message);
-    _logger.printTrace('==> $message');
+    logger.printTrace('==> $message');
     return completer.future;
   }
 
@@ -173,7 +170,7 @@ class AnalysisServer {
       'params': params,
     });
     _writeMessage(message: message);
-    _logger.printTrace('==> $message');
+    logger.printTrace('==> $message');
   }
 
   void _sendResponse(Object? id, Object? result) {
@@ -183,7 +180,7 @@ class AnalysisServer {
       'result': result,
     });
     _writeMessage(message: message);
-    _logger.printTrace('==> $message');
+    logger.printTrace('==> $message');
   }
 
   final List<int> _byteBuffer = <int>[];
@@ -208,7 +205,7 @@ class AnalysisServer {
       final String headers = utf8.decode(_byteBuffer.sublist(0, byteHeaderEnd));
       final int contentLength = _parseContentLength(headers);
       if (contentLength == -1) {
-        _logger.printTrace('No Content-Length found in headers:\n$headers');
+        logger.printTrace('No Content-Length found in headers:\n$headers');
         _byteBuffer.removeRange(0, byteHeaderEnd + 4);
         continue;
       }
@@ -240,7 +237,7 @@ class AnalysisServer {
 
   void _handleServerResponse(String line) {
     _logs.add('[stdout] $line');
-    _logger.printTrace('<== $line');
+    logger.printTrace('<== $line');
     if (line.startsWith(kVMServiceMessageRegExp)) {
       return;
     }
@@ -312,15 +309,15 @@ class AnalysisServer {
     switch (type) {
       case _ShowMessageType.error:
         _didServerErrorOccur = true;
-        _logger.printError('Error from the analysis server: $message');
+        logger.printError('Error from the analysis server: $message');
       case _ShowMessageType.warning:
-        _logger.printWarning('Warning from the analysis server: $message');
+        logger.printWarning('Warning from the analysis server: $message');
       case _ShowMessageType.info:
-        _logger.printStatus('Info from the analysis server: $message');
+        logger.printStatus('Info from the analysis server: $message');
       case _ShowMessageType.log:
-        _logger.printTrace('Log from the analysis server: $message');
+        logger.printTrace('Log from the analysis server: $message');
       case null:
-        _logger.printStatus('Message from the analysis server: $message');
+        logger.printStatus('Message from the analysis server: $message');
     }
   }
 
@@ -331,14 +328,13 @@ class AnalysisServer {
     try {
       file = uri.toFilePath();
     } on UnsupportedError {
-      _logger.printTrace(
+      logger.printTrace(
         'URI in analysis issues message is not a valid file URI: ${params['uri']}. Ignoring.',
       );
       return;
     }
     final diagnosticsList = params['diagnostics']! as List<Object?>;
 
-    final ToolContext(:FileSystem fs, :Platform platform, :Terminal terminal) = _toolContext;
     final List<AnalysisError> errors = diagnosticsList
         .map<Map<String, Object?>>((Object? e) => castStringKeyedMap(e) ?? <String, Object?>{})
         .map<AnalysisError>((Map<String, Object?> json) {

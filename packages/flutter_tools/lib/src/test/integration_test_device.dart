@@ -8,13 +8,9 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/dds.dart';
-import '../base/logger.dart';
 import '../build_info.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
-import '../version.dart';
 import '../vmservice.dart';
 import 'test_device.dart';
 
@@ -39,7 +35,7 @@ class IntegrationTestTestDevice extends TestDevice {
   final String? userIdentifier;
   final CompileExpression? compileExpression;
   final Duration ddsShutdownTimeout;
-  late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
+  late final _ddsLauncher = DartDevelopmentService(logger: logger);
 
   ApplicationPackage? _applicationPackage;
   final _finished = Completer<void>();
@@ -50,8 +46,6 @@ class IntegrationTestTestDevice extends TestDevice {
   /// [entrypointPath] must be a path to an un-compiled source file.
   @override
   Future<StreamChannel<String>> start(String entrypointPath) async {
-    final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
-        toolContext;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     _applicationPackage = await ApplicationPackageFactory.instance?.getPackageForPlatform(
       targetPlatform,
@@ -152,7 +146,6 @@ class IntegrationTestTestDevice extends TestDevice {
 
   @override
   Future<void> kill() async {
-    final Logger logger = toolContext.logger;
     final ApplicationPackage? applicationPackage = _applicationPackage;
     if (applicationPackage != null) {
       if (!await device.stopApp(applicationPackage, userIdentifier: userIdentifier)) {

@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,7 +13,6 @@ import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../android/java.dart';
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -97,13 +95,6 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :Logger logger,
-      :Stdio stdio,
-      :AnsiTerminal terminal,
-      :OutputPreferences outputPreferences,
-    ) = toolContext;
-
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
       try {
@@ -260,14 +251,14 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(
   Stream<List<int>>? binary,
 );
 
-class Daemon {
+class Daemon with ToolContextMixin {
   Daemon(
     this.connection, {
     required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
-    required this._toolContext,
+    required this.toolContext,
     required Xcode? xcode,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
@@ -353,7 +344,9 @@ class Daemon {
   }
 
   final DaemonConnection connection;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   late DaemonDomain daemonDomain;
   late AppDomain appDomain;
@@ -383,7 +376,7 @@ class Daemon {
     final Object? id = request.data['id'];
 
     if (id == null) {
-      _toolContext.stdio.stderrWrite('no id for request: $request\n');
+      stdio.stderrWrite('no id for request: $request\n');
       return;
     }
 
@@ -427,14 +420,15 @@ class Daemon {
   }
 }
 
-abstract class Domain {
+abstract class Domain with ToolContextMixin {
   Domain(this.daemon, this.name);
 
   final Daemon daemon;
   final String name;
 
+  @override
   @protected
-  ToolContext get toolContext => daemon._toolContext;
+  ToolContext get toolContext => daemon.toolContext;
 
   final _handlers = <String, CommandHandler>{};
   final _handlersWithBinary = <String, CommandHandlerWithBinary>{};
@@ -539,7 +533,6 @@ class DaemonDomain extends Domain {
           // ignore: avoid_print
           print(message.message);
         } else if (message.level == 'error' || message.level == 'warning') {
-          final Stdio stdio = toolContext.stdio;
           stdio.stderrWrite('${message.message}\n');
           if (message.stackTrace != null) {
             stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
@@ -564,7 +557,7 @@ class DaemonDomain extends Domain {
 
   final FeatureFlags _featureFlags;
 
-  Logger get _logger => daemon.notifyingLogger ?? toolContext.logger;
+  Logger get _logger => daemon.notifyingLogger ?? logger;
 
   StreamSubscription<LogMessage>? _subscription;
 
@@ -611,7 +604,6 @@ class DaemonDomain extends Domain {
     final platformTypes = <String>[];
     final platformTypesMap = <String, Object>{};
     try {
-      final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
       final FlutterProject flutterProject = projectFactory.fromDirectory(fs.directory(projectRoot));
       final Set<SupportedPlatform> supportedPlatforms = flutterProject
           .getSupportedPlatforms()
@@ -844,9 +836,6 @@ class AppDomain extends Domain {
       );
     }
 
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        toolContext;
-
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
@@ -1005,7 +994,7 @@ class AppDomain extends Domain {
       } finally {
         // If the full directory is used instead of the path then this causes
         // a TypeError with the ErrorHandlingFileSystem.
-        toolContext.fs.currentDirectory = cwd.path;
+        fs.currentDirectory = cwd.path;
         _apps.remove(app);
       }
     });
@@ -1227,7 +1216,7 @@ class DeviceDomain extends Domain {
 
   final DeviceManager? _deviceManager;
 
-  Logger get _logger => daemon.notifyingLogger ?? toolContext.logger;
+  Logger get _logger => daemon.notifyingLogger ?? logger;
 
   /// An incrementing number used to generate unique ids.
   var _id = 0;
@@ -1478,8 +1467,6 @@ class DeviceDomain extends Domain {
       devToolsServerAddress = Uri.parse(devToolsServerAddressStr);
     }
 
-    final ToolContext(:Artifacts artifacts, :FileSystem fs, :FlutterProjectFactory projectFactory) =
-        toolContext;
     FlutterProject? project;
     try {
       project = projectFactory.fromDirectory(fs.currentDirectory);
@@ -1836,7 +1823,6 @@ class EmulatorDomain extends Domain {
     EmulatorManager? emulatorManager,
     Java? java,
   }) : super(daemon, 'emulator') {
-    final ToolContext(:FileSystem fs, :Logger logger, :ProcessManager processManager) = toolContext;
     emulators =
         emulatorManager ??
         EmulatorManager(
@@ -1895,7 +1881,7 @@ class ProxyDomain extends Domain {
 
   final FileTransfer _fileTransfer;
 
-  Logger get _logger => daemon.notifyingLogger ?? toolContext.logger;
+  Logger get _logger => daemon.notifyingLogger ?? logger;
 
   final _forwardedConnections = <String, Socket>{};
   var _id = 0;
@@ -2033,8 +2019,7 @@ class ProxyDomain extends Domain {
 
   Directory? _tempDirectory;
   Directory get tempDirectory =>
-      _tempDirectory ??= toolContext.fs.systemTempDirectory.childDirectory('flutter_tool_daemon')
-        ..createSync();
+      _tempDirectory ??= fs.systemTempDirectory.childDirectory('flutter_tool_daemon')..createSync();
 }
 
 /// A [Logger] which omits log messages to avoid breaking `--machine` formatting.

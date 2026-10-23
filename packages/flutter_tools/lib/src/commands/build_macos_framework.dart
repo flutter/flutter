@@ -3,21 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
 import '../context/apple_context.dart';
-import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../ios/plist_parser.dart';
@@ -61,13 +57,6 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :Config config,
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-    ) = toolContext;
-
     final String outputArgument =
         getValue(BuildFrameworkCommand.output) ??
         fs.path.join(fs.currentDirectory.path, getBuildDirectory(config, fs), 'macos', 'framework');
@@ -261,15 +250,6 @@ end
     Directory macosBuildOutput,
     String? codesignIdentity,
   ) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
-
     final Status status = logger.startProgress(' ├─Building App.xcframework...');
     try {
       final environment = Environment(
@@ -334,13 +314,6 @@ end
     Directory modeDirectory,
     String? codesignIdentity,
   ) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-    ) = toolContext;
-
     final Status status = logger.startProgress(' ├─Copying FlutterMacOS.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = artifacts.getArtifactPath(
       Artifact.flutterMacOSXcframework,
@@ -377,12 +350,6 @@ end
     BuildMode mode,
     String? codesignIdentity,
   ) async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
-    ) = toolContext;
     final AppleContext(:PlistParser plistParser, :Xcode xcode) = appleContext;
 
     final Status status = logger.startProgress(' ├─Building plugins...');

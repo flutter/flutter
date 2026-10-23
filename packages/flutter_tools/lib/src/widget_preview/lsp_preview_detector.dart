@@ -9,9 +9,6 @@ import 'package:watcher/watcher.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
 import '../context/tool_context.dart';
 import '../dart/analysis.dart';
 import '../project.dart';
@@ -27,7 +24,7 @@ Watcher _defaultWatcherBuilder(String path) {
   return Watcher(path);
 }
 
-class LspPreviewDetector {
+class LspPreviewDetector with ToolContextMixin {
   LspPreviewDetector({
     required this.dtd,
     required this.onChangeDetected,
@@ -42,6 +39,8 @@ class LspPreviewDetector {
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
   }) : projectRoot = project.directory;
 
+  @override
+  @protected
   final ToolContext toolContext;
   final WidgetPreviewAnalytics previewAnalytics;
   final FlutterProject project;
@@ -55,12 +54,6 @@ class LspPreviewDetector {
   final WidgetPreviewDtdServices dtd;
   final bool suppressAnalytics;
   final Future<AnalysisServer> Function()? analysisServerFactory;
-
-  Artifacts get artifacts => toolContext.artifacts;
-  FileSystem get fs => toolContext.fs;
-  Logger get logger => toolContext.logger;
-  Platform get platform => toolContext.platform;
-  ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
   AnalysisServer? get analysisServer => _analysisServer;
   AnalysisServer? _analysisServer;

@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -25,10 +22,12 @@ import '../web/memory_fs.dart';
 import 'test_config.dart';
 
 /// A web compiler for the test runner.
-class WebTestCompiler {
-  WebTestCompiler({required this._toolContext});
+class WebTestCompiler with ToolContextMixin {
+  WebTestCompiler({required this.toolContext});
 
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   Future<File> _generateTestEntrypoint({
     required List<String> testFiles,
@@ -36,7 +35,6 @@ class WebTestCompiler {
     required Directory outputDirectory,
     required LanguageVersion languageVersion,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final List<WebTestInfo> testInfos = testFiles.map((String testFilePath) {
       final List<String> relativeTestSegments = fs.path.split(
         fs.path.relative(testFilePath, from: projectDirectory.childDirectory('test').path),
@@ -99,15 +97,6 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
     required WebRendererMode webRenderer,
   }) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Config config,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-      :ShutdownHooks shutdownHooks,
-    ) = _toolContext;
     final LanguageVersion languageVersion = currentLanguageVersion(fs, Cache.flutterRoot!);
 
     final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
@@ -172,12 +161,6 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
     required WebRendererMode webRenderer,
   }) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FileSystem fs,
-      :Logger logger,
-      :ProcessManager processManager,
-    ) = _toolContext;
     final Directory outputDirectory = fs.directory(testOutputDir)..createSync(recursive: true);
     final File testFile = await _generateTestEntrypoint(
       testFiles: testFiles,

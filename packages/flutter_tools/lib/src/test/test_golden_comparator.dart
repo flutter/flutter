@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -38,20 +37,22 @@ import 'test_config.dart';
 ///
 /// final result = await comparator.compare(testUri, bytes, goldenKey);
 /// ```
-final class TestGoldenComparator {
+final class TestGoldenComparator with ToolContextMixin {
   /// Creates a [TestGoldenComparator] instance.
   TestGoldenComparator({
     required this._compilerFactory,
     required this._flutterTesterBinPath,
-    required this._toolContext,
+    required this.toolContext,
     this._environment = const <String, String>{},
   }) {
-    _tempDir = _toolContext.fs.systemTempDirectory.createTempSync('flutter_web_platform.');
+    _tempDir = fs.systemTempDirectory.createTempSync('flutter_web_platform.');
   }
 
   final String _flutterTesterBinPath;
   late final Directory _tempDir;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
   final Map<String, String> _environment;
   final TestCompiler Function() _compilerFactory;
   late final TestCompiler _compiler = _compilerFactory();
@@ -75,7 +76,6 @@ final class TestGoldenComparator {
       return _previousComparator!;
     }
 
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(
       fs.file(testUri),
       testUri,
@@ -97,7 +97,6 @@ final class TestGoldenComparator {
     final File listenerFile = (await _tempDir.createTemp('listener')).childFile('listener.dart');
     await listenerFile.writeAsString(testBootstrap);
 
-    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
     final TestCompilerResult result = await _compiler.compile(listenerFile.uri);
     switch (result) {
       case TestCompilerFailure(:final String error):

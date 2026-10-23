@@ -61,8 +61,6 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (argResults?['timeout'] != null) {
-      final Logger logger = toolContext.logger;
-      final Terminal terminal = toolContext.terminal;
       logger.printWarning(
         '${terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.',
       );
@@ -81,8 +79,8 @@ class DevicesCommand extends FlutterCommand {
     }
 
     final output = DevicesCommandOutput(
-      platform: toolContext.platform,
-      logger: toolContext.logger,
+      platform: platform,
+      logger: logger,
       deviceManager: _deviceManager,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       deviceConnectionInterface: deviceConnectionInterface,

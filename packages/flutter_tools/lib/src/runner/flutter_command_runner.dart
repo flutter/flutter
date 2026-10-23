@@ -9,17 +9,11 @@ import 'package:file/file.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
-import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
-import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
@@ -32,7 +26,6 @@ import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
 import 'flutter_command.dart';
-import 'local_engine.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
@@ -62,15 +55,14 @@ abstract final class FlutterGlobalOptions {
   static const kExtensionsFlag = 'extensions';
 }
 
-class FlutterCommandRunner extends CommandRunner<void> {
+class FlutterCommandRunner extends CommandRunner<void> with ToolContextMixin {
   FlutterCommandRunner({
-    required ToolContext toolContext,
+    required this.toolContext,
     this._analytics = const NoOpAnalytics(),
     this._extensionManager,
     bool verboseHelp = false,
     this._featureFlags,
-  }) : _toolContext = toolContext,
-       _verboseHelp = verboseHelp,
+  }) : _verboseHelp = verboseHelp,
        _argParser = ArgParser(
          allowTrailingOptions: false,
          usageLineLength: toolContext.outputPreferences.wrapText
@@ -261,7 +253,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   String get usageFooter {
-    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
     return wrapText(
       'Run "flutter help -v" for verbose help output, including less commonly used options.',
       columnWidth: outputPreferences.wrapColumn,
@@ -272,7 +263,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
   @override
   String get usage {
     final String usageWithoutDescription = super.usage.substring(description.length + 2);
-    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
     final String prefix = wrapText(
       description,
       shouldWrap: outputPreferences.wrapText,
@@ -306,13 +296,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
   final Analytics _analytics;
   final ExtensionManager? _extensionManager;
   final FeatureFlags? _featureFlags;
-  final ToolContext _toolContext;
 
   /// The [Analytics] instance.
   Analytics get analytics => _analytics;
 
   /// The [ToolContext] instance.
-  ToolContext get toolContext => _toolContext;
+  @override
+  final ToolContext toolContext;
 
   /// The [FeatureFlags] instance, if provided.
   FeatureFlags? get featureFlags => _featureFlags;
@@ -343,7 +333,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     await super.run(args);
     if (exitWithCodeOne) {
       // No need to print anything because the help was already printed.
-      final ToolContext(:Logger logger, :ShutdownHooks shutdownHooks) = _toolContext;
       await exitWithHooks(1, analytics: _analytics, logger: logger, shutdownHooks: shutdownHooks);
     }
   }
@@ -452,8 +441,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// }
   /// ```
   Future<bool> _shouldCheckForUpdates(ArgResults topLevelResults) async {
-    final Stdio stdio = _toolContext.stdio;
-    final BotDetector botDetector = _toolContext.botDetector;
     // Check if the user has explicitly requested a version check.
     final bool versionCheckFlag =
         topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
@@ -492,18 +479,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :FlutterVersion flutterVersion,
-      :LocalEngineLocator localEngineLocator,
-      :Logger logger,
-      :Platform platform,
-      :Stdio stdio,
-      :SystemClock systemClock,
-      :UserMessages userMessages,
-    ) = _toolContext;
-
     final contextOverrides = <Type, Object?>{};
 
     // If the flag for enabling or disabling telemetry is passed in,
@@ -571,12 +546,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (engineBuildPaths != null) {
       final Artifacts localArtifacts = Artifacts.getLocalEngine(
         engineBuildPaths,
-        toolContext: _toolContext,
+        toolContext: toolContext,
       );
       contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
       // Update the artifacts the commands were created with.
-      if (artifacts is DeferredArtifacts) {
-        artifacts.resolve(localArtifacts);
+      if (artifacts case final DeferredArtifacts deferredArtifacts) {
+        deferredArtifacts.resolve(localArtifacts);
       }
     }
 
@@ -621,7 +596,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
               commandPath: 'version',
               result: 'success',
               commandHasTerminal: stdio.hasTerminal,
-              hostArch: _toolContext.os.hostPlatform.cliName,
+              hostArch: os.hostPlatform.cliName,
             ),
           );
           final FlutterVersion version = flutterVersion.fetchTagsAndGetVersion(clock: systemClock);
@@ -657,7 +632,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
-    final FileSystem fs = _toolContext.fs;
     final String root = fs.path.absolute(Cache.flutterRoot!);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
@@ -667,7 +641,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// Get all pub packages in the Flutter repo.
   List<Directory> getRepoPackages() {
-    final FileSystem fs = _toolContext.fs;
     return getRepoRoots()
         .expand<String>((String root) => _gatherProjectPaths(fs, root))
         .map<Directory>((String dir) => fs.directory(dir))

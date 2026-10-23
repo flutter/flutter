@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
@@ -71,7 +72,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
 ///
 /// This is only used by the Flutter Framework tests.
 /// See: https://github.com/flutter/flutter/pull/65984.
-class FlutterWebPlatform extends PlatformPlugin {
+class FlutterWebPlatform extends PlatformPlugin with ToolContextMixin {
   FlutterWebPlatform._(
     this._server,
     this._config,
@@ -88,16 +89,14 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
-    required this._toolContext,
+    required this.toolContext,
     TestTimeRecorder? testTimeRecorder,
   }) {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
           createDirectoryHandler(
-            _fileSystem.directory(
-              _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
-            ),
+            fs.directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools')),
             crossOriginIsolated: crossOriginIsolation,
           ),
         )
@@ -108,7 +107,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_handleTestRequest)
         .add(
           createDirectoryHandler(
-            _fileSystem.directory(_fileSystem.path.join(_fileSystem.currentDirectory.path, 'test')),
+            fs.directory(fs.path.join(fs.currentDirectory.path, 'test')),
             crossOriginIsolated: crossOriginIsolation,
           ),
         )
@@ -118,11 +117,11 @@ class FlutterWebPlatform extends PlatformPlugin {
       compilerFactory: () => TestCompiler(
         buildInfo,
         flutterProject,
-        toolContext: _toolContext,
+        toolContext: toolContext,
         testTimeRecorder: testTimeRecorder,
       ),
       flutterTesterBinPath: flutterTesterBinPath,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       environment: <String, String>{
         // Chrome is the only supported browser currently.
         'FLUTTER_TEST_BROWSER': 'chrome',
@@ -135,14 +134,13 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   final WebMemoryFS webMemoryFS;
   final BuildInfo buildInfo;
-  FileSystem get _fileSystem => _toolContext.fs;
   final Directory _buildDirectory;
   final File _testDartJs;
   final File _testHostDartJs;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
   final ChromiumLauncher _chromiumLauncher;
-  Logger get _logger => _toolContext.logger;
-  Artifacts get _artifacts => _toolContext.artifacts;
   final bool updateGoldens;
   final _webSocketHandler = OneOffHandler();
   final _closeMemo = AsyncMemoizer<void>();
@@ -226,14 +224,13 @@ class FlutterWebPlatform extends PlatformPlugin {
   Uri get url => _server.url;
 
   /// The ahem text file.
-  File get _ahem => _fileSystem.file(
-    _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'static', 'Ahem.ttf'),
-  );
+  File get _ahem =>
+      fs.file(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'static', 'Ahem.ttf'));
 
   /// The ddc module loader js binary.
-  File get _ddcModuleLoaderJs => _fileSystem.file(
-    _fileSystem.path.join(
-      _artifacts.getArtifactPath(
+  File get _ddcModuleLoaderJs => fs.file(
+    fs.path.join(
+      artifacts.getArtifactPath(
         Artifact.engineDartSdkPath,
         platform: TargetPlatform.web_javascript,
       ),
@@ -245,9 +242,9 @@ class FlutterWebPlatform extends PlatformPlugin {
   );
 
   /// The ddc to dart stack trace mapper.
-  File get _stackTraceMapper => _fileSystem.file(
-    _fileSystem.path.join(
-      _artifacts.getArtifactPath(
+  File get _stackTraceMapper => fs.file(
+    fs.path.join(
+      artifacts.getArtifactPath(
         Artifact.engineDartSdkPath,
         platform: TargetPlatform.web_javascript,
       ),
@@ -258,25 +255,21 @@ class FlutterWebPlatform extends PlatformPlugin {
     ),
   );
 
-  File get _flutterJs => _fileSystem.file(
-    _fileSystem.path.join(
-      _artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-      'flutter.js',
-    ),
+  File get _flutterJs => fs.file(
+    fs.path.join(artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path, 'flutter.js'),
   );
 
-  File get _dartSdk =>
-      _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!));
+  File get _dartSdk => fs.file(artifacts.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!));
 
   File get _dartSdkSourcemaps =>
-      _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!));
+      fs.file(artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!));
 
   File _canvasKitFile(String relativePath) {
-    final String canvasKitPath = _fileSystem.path.join(
-      _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
+    final String canvasKitPath = fs.path.join(
+      artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       'canvaskit',
     );
-    final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(canvasKitPath, relativePath));
+    final File canvasKitFile = fs.file(fs.path.join(canvasKitPath, relativePath));
     return canvasKitFile;
   }
 
@@ -287,7 +280,7 @@ class FlutterWebPlatform extends PlatformPlugin {
           ddcModuleLoaderUrl: 'ddc_module_loader.js',
           mapperUrl: 'dart_stack_trace_mapper.js',
           generateLoadingIndicator: false,
-          isWindows: _toolContext.platform.isWindows,
+          isWindows: platform.isWindows,
         ),
         headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
       );
@@ -298,7 +291,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         final error =
             'Failed to generate ${request.url.path}. '
             'Missing a merged metadata file needed to construct the scripts to load.';
-        _logger.printError(error);
+        logger.printError(error);
         return shelf.Response.internalServerError(body: error);
       }
       final scripts = <Map<String, String>>[];
@@ -315,7 +308,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         entrypoint: 'main.dart',
         nativeNullAssertions: true,
         onLoadEndBootstrap: 'on_load_end_bootstrap.js',
-        isCi: await _toolContext.botDetector.isRunningOnBot,
+        isCi: await botDetector.isRunningOnBot,
       );
 
       mainModuleSrc +=
@@ -417,10 +410,10 @@ window.\$dartLoader.loader.nextAttempt();
         Uri(scheme: 'package', pathSegments: request.requestedUri.pathSegments.skip(1)),
       );
       if (fileUri != null) {
-        final String dirname = _fileSystem.path.dirname(fileUri.toFilePath());
-        final String basename = _fileSystem.path.basename(fileUri.toFilePath());
+        final String dirname = fs.path.dirname(fileUri.toFilePath());
+        final String basename = fs.path.basename(fileUri.toFilePath());
         final shelf.Handler handler = createDirectoryHandler(
-          _fileSystem.directory(dirname),
+          fs.directory(dirname),
           crossOriginIsolated: crossOriginIsolation,
         );
         final modifiedRequest = shelf.Request(
@@ -470,13 +463,13 @@ window.\$dartLoader.loader.nextAttempt();
   /// Serves a local build of CanvasKit, replacing the CDN build, which can
   /// cause test flakiness due to reliance on network.
   shelf.Response _localCanvasKitHandler(shelf.Request request) {
-    final String fullPath = _fileSystem.path.fromUri(request.url);
+    final String fullPath = fs.path.fromUri(request.url);
     if (!fullPath.startsWith('canvaskit/')) {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
     final String relativePath = fullPath.replaceFirst('canvaskit/', '');
-    final String extension = _fileSystem.path.extension(relativePath);
+    final String extension = fs.path.extension(relativePath);
     String contentType;
     switch (extension) {
       case '.js':
@@ -485,7 +478,7 @@ window.\$dartLoader.loader.nextAttempt();
         contentType = 'application/wasm';
       default:
         final error = 'Failed to determine Content-Type for "${request.url.path}".';
-        _logger.printError(error);
+        logger.printError(error);
         return shelf.Response.internalServerError(body: error);
     }
 
@@ -521,9 +514,9 @@ window.\$dartLoader.loader.nextAttempt();
 
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
-    final String path = _fileSystem.path.fromUri(request.url);
+    final String path = fs.path.fromUri(request.url);
     if (path.endsWith('.html')) {
-      final test = '${_fileSystem.path.withoutExtension(path)}.dart';
+      final test = '${fs.path.withoutExtension(path)}.dart';
       // TODO(vegorov): this should probably be part of Wasm bootstrapping
       // script when compiling for testing (just like it is part of DDC runtime)
       final bumpStackTraceLimit = useWasm ? 'Error.stackTraceLimit = Infinity;' : '';
@@ -572,19 +565,16 @@ window.\$dartLoader.loader.nextAttempt();
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
-    final String pathFromTest = _fileSystem.path.relative(
-      path,
-      from: _fileSystem.path.join(_root, 'test'),
-    );
+    final String pathFromTest = fs.path.relative(path, from: fs.path.join(_root, 'test'));
     final Uri suiteUrl = url.resolveUri(
-      _fileSystem.path.toUri('${_fileSystem.path.withoutExtension(pathFromTest)}.html'),
+      fs.path.toUri('${fs.path.withoutExtension(pathFromTest)}.html'),
     );
-    final String relativePath = _fileSystem.path.relative(
-      _fileSystem.path.normalize(path),
-      from: _fileSystem.currentDirectory.path,
+    final String relativePath = fs.path.relative(
+      fs.path.normalize(path),
+      from: fs.currentDirectory.path,
     );
-    if (_logger.isVerbose) {
-      _logger.printTrace('Loading test suite $relativePath.');
+    if (logger.isVerbose) {
+      logger.printTrace('Loading test suite $relativePath.');
     }
     final PoolResource lockResource = await _suiteLock.request();
 
@@ -600,8 +590,8 @@ window.\$dartLoader.loader.nextAttempt();
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
-    if (_logger.isVerbose) {
-      _logger.printTrace('Running test suite $relativePath.');
+    if (logger.isVerbose) {
+      logger.printTrace('Running test suite $relativePath.');
     }
 
     Timer? watchdogTimer45s;
@@ -615,10 +605,10 @@ window.\$dartLoader.loader.nextAttempt();
         try {
           if (_browserManager != null) {
             final String diagnostic = await _browserManager!.diagnoseHang();
-            _logger.printStatus(diagnostic);
+            logger.printStatus(diagnostic);
           }
         } on Object catch (e, st) {
-          _logger.printTrace('Failed to diagnose hang during 45s warning: $e\n$st');
+          logger.printTrace('Failed to diagnose hang during 45s warning: $e\n$st');
         }
       });
 
@@ -626,13 +616,13 @@ window.\$dartLoader.loader.nextAttempt();
         try {
           if (_browserManager != null) {
             final String diagnostic = await _browserManager!.diagnoseHang();
-            _logger.printError(
+            logger.printError(
               '[flutter_tools] Hard timeout of 3 minutes reached for test suite $relativePath.\n'
               '$diagnostic',
             );
           }
         } on Object catch (e, st) {
-          _logger.printError('[flutter_tools] Failed to diagnose hang: $e\n$st');
+          logger.printError('[flutter_tools] Failed to diagnose hang: $e\n$st');
         } finally {
           if (timeoutCompleter != null && !timeoutCompleter.isCompleted) {
             timeoutCompleter.completeWithToolExit(
@@ -658,8 +648,8 @@ window.\$dartLoader.loader.nextAttempt();
         message,
         onDone: () async {
           lockResource.release();
-          if (_logger.isVerbose) {
-            _logger.printTrace('Test suite $relativePath finished.');
+          if (logger.isVerbose) {
+            logger.printTrace('Test suite $relativePath finished.');
           }
         },
       );
@@ -707,7 +697,7 @@ window.\$dartLoader.loader.nextAttempt();
           },
         );
 
-    _logger.printTrace('Serving tests at $hostUrl');
+    logger.printTrace('Serving tests at $hostUrl');
 
     return BrowserManager.start(
       _chromiumLauncher,
@@ -715,8 +705,8 @@ window.\$dartLoader.loader.nextAttempt();
       hostUrl,
       completer.future,
       headless: !_config.pauseAfterLoad,
-      logger: _logger,
-      systemClock: _toolContext.systemClock,
+      logger: logger,
+      systemClock: systemClock,
       webBrowserFlags: const <String>[
         // Enforce high-DPI (3x) device scale factor and standard window size
         // to standardize rendering across platforms and match CI golden baselines.

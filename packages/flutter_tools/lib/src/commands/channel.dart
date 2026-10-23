@@ -15,8 +15,7 @@ import '../version.dart';
 import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({required ToolContext super.toolContext, super.verboseHelp = false})
-    : _toolContext = toolContext {
+  ChannelCommand({required ToolContext super.toolContext, super.verboseHelp = false}) {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -38,10 +37,8 @@ class ChannelCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
-
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'channel';
@@ -86,10 +83,6 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<void> _listChannels({required bool showAll, required bool verbose}) async {
-    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
-    final Logger logger = _toolContext.logger;
-    final Git git = _toolContext.git;
-
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = flutterVersion.channel; // limited to known branch names
     assert(
@@ -171,10 +164,6 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<void> _switchChannel(String branchName) async {
-    final Logger logger = _toolContext.logger;
-    final Git git = _toolContext.git;
-    final Cache cache = _toolContext.cache;
-
     logger.printStatus("Switching to flutter channel '$branchName'...");
     if (kObsoleteBranches.containsKey(branchName)) {
       final String alternative = kObsoleteBranches[branchName]!;
@@ -191,9 +180,9 @@ class ChannelCommand extends FlutterCommand {
       await precacheArtifacts(
         workingDirectory: Cache.flutterRoot,
         logger: logger,
-        processUtils: _toolContext.processUtils,
-        fileSystem: _toolContext.fs,
-        platform: _toolContext.platform,
+        processUtils: processUtils,
+        fileSystem: fs,
+        platform: platform,
       );
     }
     logger.printStatus("Successfully switched to flutter channel '$branchName'.");

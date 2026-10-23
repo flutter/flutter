@@ -5,11 +5,9 @@
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../experimental/extension_clean_manager.dart';
@@ -25,7 +23,7 @@ class CleanCommand extends FlutterCommand {
     required this._xcodeProjectInterpreter,
     this._extensionCleanManager,
     this._verbose = false,
-  }) : _toolContext = toolContext {
+  }) {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',
@@ -55,7 +53,6 @@ class CleanCommand extends FlutterCommand {
   }
 
   final ExtensionCleanManager? _extensionCleanManager;
-  final ToolContext _toolContext;
   final Xcode _xcode;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final bool _verbose;
@@ -74,10 +71,7 @@ class CleanCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final FlutterProject flutterProject = _toolContext.projectFactory.fromDirectory(
-      fs.currentDirectory,
-    );
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
     final Xcode xcode = _xcode;
     final bool userWantsXcodeClean =
         boolArg('include-xcode-workspace') || (argResults?.wasParsed('scheme') ?? false);
@@ -88,7 +82,7 @@ class CleanCommand extends FlutterCommand {
       if (flutterProject.hasExampleApp) {
         await _cleanProject(flutterProject.example, cleanXcode: cleanXcode);
       } else {
-        _toolContext.logger.printStatus('No example app found, skipping example cleaning.');
+        logger.printStatus('No example app found, skipping example cleaning.');
       }
     }
 
@@ -106,8 +100,6 @@ class CleanCommand extends FlutterCommand {
       await _cleanXcode(flutterProject.macos);
     }
 
-    final Config config = _toolContext.config;
-    final FileSystem fs = _toolContext.fs;
     final Directory buildDir = flutterProject.directory.childDirectory(
       getBuildDirectory(config, fs),
     );
@@ -138,9 +130,6 @@ class CleanCommand extends FlutterCommand {
     if (xcodeWorkspace == null) {
       return;
     }
-    final Logger logger = _toolContext.logger;
-    final FileSystem fs = _toolContext.fs;
-    final Config config = _toolContext.config;
     final Status xcodeStatus = logger.startProgress('Cleaning Xcode workspace...');
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = _xcodeProjectInterpreter;
@@ -194,12 +183,11 @@ class CleanCommand extends FlutterCommand {
     try {
       await ErrorHandlingFileSystem.noExitOnFailure(() => _deleteFile(file, project));
     } on Exception catch (e) {
-      _toolContext.logger.printError('Failed to remove ${file.path}: $e');
+      logger.printError('Failed to remove ${file.path}: $e');
     }
   }
 
   Future<void> _deleteFile(FileSystemEntity file, FlutterProject? project) async {
-    final Logger logger = _toolContext.logger;
     // This will throw a FileSystemException if the directory is missing permissions.
     try {
       if (!file.existsSync()) {
@@ -214,7 +202,7 @@ class CleanCommand extends FlutterCommand {
       file.deleteSync(recursive: true);
     } on FileSystemException catch (error) {
       final String path = file.path;
-      if (_toolContext.platform.isWindows) {
+      if (platform.isWindows) {
         if (await _tryStopGradleAndRetryDelete(file, project)) {
           return;
         }
@@ -240,8 +228,6 @@ class CleanCommand extends FlutterCommand {
   ///
   /// Retries file deletion after stopping Gradle daemons and returns `true` if deletion succeeds.
   Future<bool> _tryStopGradleAndRetryDelete(FileSystemEntity file, FlutterProject? project) async {
-    final AnsiTerminal terminal = _toolContext.terminal;
-    final Logger logger = _toolContext.logger;
     final bool stopGradleFlag =
         (argResults?.wasParsed('stop-gradle') ?? false) && boolArg('stop-gradle');
     final bool isInteractive = terminal.stdinHasTerminal && terminal.usesTerminalUi;
@@ -268,7 +254,7 @@ class CleanCommand extends FlutterCommand {
     }
 
     final FlutterProject flutterProject =
-        project ?? _toolContext.projectFactory.fromDirectory(_toolContext.fs.currentDirectory);
+        project ?? projectFactory.fromDirectory(fs.currentDirectory);
     final File gradlewFile = flutterProject.android.hostAppGradleRoot.childFile('gradlew.bat');
     if (!gradlewFile.existsSync()) {
       return false;
@@ -276,7 +262,7 @@ class CleanCommand extends FlutterCommand {
 
     final Status stopStatus = logger.startProgress('Stopping Gradle daemons...');
     try {
-      await _toolContext.processUtils.run(<String>[
+      await processUtils.run(<String>[
         gradlewFile.path,
         '--stop',
       ], workingDirectory: gradlewFile.parent.path);

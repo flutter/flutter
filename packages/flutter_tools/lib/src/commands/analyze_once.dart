@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../context/tool_context.dart';
 import '../dart/analysis.dart';
 import 'analyze_base.dart';
 
@@ -24,13 +25,13 @@ class AnalyzeOnce extends AnalyzeBase {
 
   @override
   Future<void> analyze() async {
-    final String currentDirectory = (workingDirectory ?? fileSystem.currentDirectory).path;
-    final Set<String> items = findDirectories(argResults, fileSystem);
+    final String currentDirectory = (workingDirectory ?? fs.currentDirectory).path;
+    final Set<String> items = findDirectories(argResults, fs);
 
     if (isFlutterRepo) {
       // check for conflicting dependencies
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
+      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fs);
       items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
         items.add(currentDirectory);
@@ -86,7 +87,7 @@ class AnalyzeOnce extends AnalyzeBase {
       timer = Stopwatch()..start();
       final String message = items.length > 1
           ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
-          : fileSystem.path.basename(items.first);
+          : fs.path.basename(items.first);
       progress = argResults['preamble'] == true
           ? logger.startProgress('Analyzing $message...')
           : null;

@@ -6,10 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../context/tool_context.dart';
@@ -26,7 +23,6 @@ class BuildLinuxCommand extends BuildSubCommand {
     required super.verboseHelp,
     required this._featureFlags,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
-    final OperatingSystemUtils os = toolContext.os;
     final TargetPlatform defaultTargetPlatform = switch (os.hostPlatform) {
       HostPlatform.linux_arm64 => TargetPlatform.linux_arm64,
       HostPlatform.linux_riscv64 => TargetPlatform.linux_riscv64,
@@ -75,7 +71,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   final name = 'linux';
 
   @override
-  bool get hidden => !_featureFlags.isLinuxEnabled || !toolContext.platform.isLinux;
+  bool get hidden => !_featureFlags.isLinuxEnabled || !platform.isLinux;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -89,13 +85,6 @@ class BuildLinuxCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :OperatingSystemUtils os,
-      :Platform platform,
-    ) = toolContext;
-
     final BuildInfo buildInfo = await getBuildInfo();
     final TargetPlatform targetPlatform = getValue(_targetPlatformOption);
     final needCrossBuild = os.hostPlatform.platformName != targetPlatform.simpleName;

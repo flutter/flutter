@@ -5,8 +5,6 @@
 import 'package:args/args.dart';
 
 import '../base/common.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/utils.dart';
 import '../context/tool_context.dart';
 import '../doctor.dart';
@@ -59,8 +57,6 @@ class EmulatorsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Platform platform = toolContext.platform;
-
     if (_doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(
         'Unable to find any emulator sources. Please ensure you have some\n'
@@ -83,7 +79,6 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   Future<void> _launchEmulator(String id, {required bool coldBoot}) async {
-    final Logger logger = toolContext.logger;
     final List<Emulator> emulators = await _emulatorManager.getEmulatorsMatching(id);
 
     if (emulators.isEmpty) {
@@ -96,7 +91,6 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   Future<void> _createEmulator({String? name}) async {
-    final Logger logger = toolContext.logger;
     final CreateEmulatorResult createResult = await _emulatorManager.createEmulator(name: name);
 
     if (createResult.success) {
@@ -112,7 +106,6 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   Future<void> _listEmulators(String? searchText) async {
-    final Logger logger = toolContext.logger;
     final List<Emulator> emulators = searchText == null
         ? await _emulatorManager.getAllAvailableEmulators()
         : await _emulatorManager.getEmulatorsMatching(searchText);
@@ -129,14 +122,12 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   void _printEmulatorList(List<Emulator> emulators, String message) {
-    final Logger logger = toolContext.logger;
     logger.printStatus('$message\n');
     Emulator.printEmulators(emulators, logger);
     _printAdditionalInfo(showCreateInstruction: true, showRunInstruction: true);
   }
 
   void _printAdditionalInfo({bool showRunInstruction = false, bool showCreateInstruction = false}) {
-    final Logger logger = toolContext.logger;
     logger.printStatus('');
     if (showRunInstruction) {
       logger.printStatus("To run an emulator, run 'flutter emulators --launch <emulator id>'.");

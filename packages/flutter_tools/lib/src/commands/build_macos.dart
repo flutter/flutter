@@ -6,8 +6,6 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../context/tool_context.dart';
@@ -51,7 +49,7 @@ class BuildMacosCommand extends BuildSubCommand {
   final name = 'macos';
 
   @override
-  bool get hidden => !featureFlags.isMacOSEnabled || !toolContext.platform.isMacOS;
+  bool get hidden => !featureFlags.isMacOSEnabled || !platform.isMacOS;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -62,15 +60,12 @@ class BuildMacosCommand extends BuildSubCommand {
   String get description => 'Build a macOS desktop application.';
 
   @override
-  bool get supported => toolContext.platform.isMacOS;
+  bool get supported => platform.isMacOS;
 
   bool get configOnly => getValue(AppleBuildOptionsBundle.configOnly);
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit(

@@ -13,7 +13,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -70,8 +69,7 @@ class AttachCommand extends FlutterCommand {
     required this._xcode,
     HotRunnerFactory? hotRunnerFactory,
     super.verboseHelp = false,
-  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
-       _toolContext = toolContext {
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false, excludeRelease: true),
       VmServicePortOptionsBundle(),
@@ -127,13 +125,12 @@ class AttachCommand extends FlutterCommand {
   );
 
   final HotRunnerFactory _hotRunnerFactory;
-  final ToolContext _toolContext;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
   final Xcode? _xcode;
 
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'attach';
@@ -257,7 +254,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
-        toolContext.terminal.singleCharMode = false;
+        terminal.singleCharMode = false;
       } on StdinException {
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
@@ -267,12 +264,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attach({required Device device}) async {
-    final ToolContext(
-      :Logger logger,
-      :ProcessInfo processInfo,
-      :Signals signals,
-      :Terminal terminal,
-    ) = toolContext;
     terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
     final onAppStart = Completer<void>.sync();
@@ -301,7 +292,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
@@ -312,9 +302,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       buildTargets: _buildTargets,
       toolContext: toolContext,
       xcode: _xcode,
-      notifyingLogger: (logger is NotifyingLogger)
-          ? logger
-          : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
+      notifyingLogger: switch (logger) {
+        final NotifyingLogger notifyingLogger => notifyingLogger,
+        final Logger logger => NotifyingLogger(verbose: logger.isVerbose, parent: logger),
+      },
       logToStdout: true,
       featureFlags: featureFlags,
     );
@@ -405,7 +396,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<Uri> _discoverVmService({required Device device}) async {
-    final Logger logger = toolContext.logger;
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;

@@ -10,7 +10,6 @@ import 'package:native_stack_traces/native_stack_traces.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/utils.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -28,7 +27,7 @@ class SymbolizeCommand extends FlutterCommand {
   SymbolizeCommand({
     required ToolContext super.toolContext,
     this._dwarfSymbolizationService = const DwarfSymbolizationService(),
-  }) : _toolContext = toolContext {
+  }) {
     argParser.addOption(
       'debug-info',
       abbr: 'd',
@@ -56,11 +55,10 @@ class SymbolizeCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
   final DwarfSymbolizationService _dwarfSymbolizationService;
 
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description => 'Symbolize a stack trace from an AOT-compiled Flutter app.';
@@ -75,7 +73,6 @@ class SymbolizeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   File _handleDSYM(String fileName) {
-    final FileSystem fs = _toolContext.fs;
     final FileSystemEntityType type = fs.typeSync(fileName);
     final bool isDSYM = fileName.endsWith('.dSYM');
     if (type == FileSystemEntityType.notFound) {
@@ -158,8 +155,7 @@ class SymbolizeCommand extends FlutterCommand {
         ' (id $rootLoadingUnitId).',
       );
     }
-    if ((argResults?.wasParsed('input') ?? false) &&
-        !await _toolContext.fs.isFile(stringArg('input')!)) {
+    if ((argResults?.wasParsed('input') ?? false) && !await fs.isFile(stringArg('input')!)) {
       throwToolExit('${stringArg('input')} does not exist.');
     }
     return super.validateCommand();
@@ -167,9 +163,6 @@ class SymbolizeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Stdio stdio = _toolContext.stdio;
-
     // Configure output to either specified file or stdout.
     late final IOSink output;
     if (argResults?.wasParsed('output') ?? false) {

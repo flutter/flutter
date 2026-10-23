@@ -5,8 +5,6 @@
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
-import '../base/config.dart';
-import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../bundle_builder.dart';
@@ -25,7 +23,6 @@ class BuildBundleCommand extends BuildSubCommand {
     required super.verboseHelp,
     this._bundleBuilder,
   }) : super(logger: toolContext.logger) {
-    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     registerOptionBundles(const <OptionBundle>[
       FilesystemOptionsBundle(),
       BuildModeOptionsBundle(defaultToRelease: false),
@@ -100,7 +97,6 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final String projectDir = fs.file(targetFile).parent.parent.path;
     final FlutterProject flutterProject = projectFactory.fromDirectory(fs.directory(projectDir));
     return Event.commandUsageValues(

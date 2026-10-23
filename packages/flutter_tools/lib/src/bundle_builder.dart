@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -9,7 +10,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'artifacts.dart';
 import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
-import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -25,21 +25,22 @@ import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'project.dart';
-import 'version.dart';
 
 /// Provides a `build` method that builds the bundle.
-class BundleBuilder {
+class BundleBuilder with ToolContextMixin {
   BundleBuilder({
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
-    required this._toolContext,
+    required this.toolContext,
   });
 
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
-  final ToolContext _toolContext;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// Builds the bundle for the given target platform.
   ///
@@ -56,16 +57,6 @@ class BundleBuilder {
     String? assetDirPath,
     BuildSystem? buildSystem,
   }) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :Config config,
-      :FileSystem fs,
-      :FlutterVersion flutterVersion,
-      :Logger logger,
-      platform: Platform hostPlatform,
-      :ProcessManager processManager,
-    ) = _toolContext;
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath(fs);
     depfilePath ??= defaultDepfilePath(config: config, fileSystem: fs);
@@ -93,7 +84,7 @@ class BundleBuilder {
       logger: logger,
       processManager: processManager,
       analytics: _analytics,
-      platform: hostPlatform,
+      platform: this.platform,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug

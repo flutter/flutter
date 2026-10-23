@@ -4,7 +4,6 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/template.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
@@ -70,7 +69,6 @@ class IdeConfigCommand extends FlutterCommand {
 
   static const _ideName = 'intellij';
   Directory get _templateDirectory {
-    final FileSystem fs = toolContext.fs;
     return fs.directory(
       fs.path.join(
         // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
@@ -84,13 +82,11 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   Directory get _createTemplatesDirectory {
-    final FileSystem fs = toolContext.fs;
     // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
     return fs.directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates'));
   }
 
   Directory get _flutterRoot {
-    final FileSystem fs = toolContext.fs;
     // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
     return fs.directory(fs.path.absolute(Cache.flutterRoot!));
   }
@@ -98,11 +94,11 @@ class IdeConfigCommand extends FlutterCommand {
   // Returns true if any entire path element is equal to dir.
   bool _hasDirectoryInPath(FileSystemEntity entity, String dir) {
     String pathStr = entity.absolute.path;
-    while (pathStr.isNotEmpty && toolContext.fs.path.dirname(pathStr) != pathStr) {
-      if (toolContext.fs.path.basename(pathStr) == dir) {
+    while (pathStr.isNotEmpty && fs.path.dirname(pathStr) != pathStr) {
+      if (fs.path.basename(pathStr) == dir) {
         return true;
       }
-      pathStr = toolContext.fs.path.dirname(pathStr);
+      pathStr = fs.path.dirname(pathStr);
     }
     return false;
   }
@@ -131,9 +127,6 @@ class IdeConfigCommand extends FlutterCommand {
 
   // Discovers and syncs with existing configuration files in the Flutter tree.
   void _handleTemplateUpdate() {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-
     if (!_flutterRoot.existsSync()) {
       return;
     }
@@ -238,9 +231,6 @@ class IdeConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-
     final List<String> rest = argResults?.rest ?? <String>[];
     if (rest.isNotEmpty) {
       throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
@@ -278,8 +268,6 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   int _renderTemplate(String dirPath, Map<String, Object> context) {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
     final template = Template(
       _templateDirectory,
       null,
