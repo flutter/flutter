@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
@@ -22,6 +21,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 // FlutterProject still depends on context.
 void main() {
@@ -97,26 +97,27 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   final Platform platform = FakePlatform(operatingSystem: 'macos');
   final Logger logger = BufferLogger.test();
   final ProcessManager processManager = FakeProcessManager.any();
+  final toolContext = FakeToolContext(
+    artifacts: Artifacts.test(),
+    cache: Cache.test(processManager: processManager),
+    fs: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
   return IOSDevice(
     'test',
-    fileSystem: fileSystem,
-    fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: platform),
-    logger: logger,
-    processUtils: ProcessUtils(processManager: processManager, logger: logger),
-    xcode: null,
-    iosDeploy: IOSDeploy(
-      platform: platform,
-      logger: logger,
-      processManager: processManager,
-      artifacts: Artifacts.test(),
-      cache: Cache.test(processManager: processManager),
-    ),
+    toolContext: toolContext,
+    xcode: FakeXcode(),
+    iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     iMobileDevice: IMobileDevice.test(processManager: processManager),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: FakeXcodeDebug(),
-    platform: platform,
+    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     name: 'iPhone 1',
     sdkVersion: '13.3',
     cpuArch: .arm64,
@@ -126,6 +127,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: false,
+    templateRenderer: FakeTemplateRenderer(),
   );
 }
 
