@@ -1,0 +1,60 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# gen_defaults under Bazel: its tests compiled by the frontend server and
+# run by `dart test --precompiled` (engine/src/flutter/build/bazel/dart/
+# dart_test.bzl); the first pure-Dart package of NEED_DECISION D14.
+#
+#   bazel test //dev/tools/gen_defaults:tests
+
+load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_tests")
+load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_package_config")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob([
+        "bin/**",
+        "lib/**",
+    ]) + ["pubspec.yaml"],
+)
+
+# The package's dependencies and dev dependencies (pubspec.yaml), and
+# package:test, whose runner `dart test` loads from the configuration.
+_ROOTS = [
+    "gen_defaults",
+    "test",
+]
+
+_PACKAGES = {":sources": "gen_defaults"}
+
+pub_package_config(
+    name = "package_config",
+    out = "package_config.json",
+    dev_roots = ["gen_defaults"],
+    packages = _PACKAGES,
+    roots = _ROOTS,
+)
+
+pub_package_config(
+    name = "runtime_package_config",
+    out = "runtime_package_config.json",
+    dev_roots = ["gen_defaults"],
+    layout = "runfiles",
+    packages = _PACKAGES,
+    roots = _ROOTS,
+)
+
+dart_tests(
+    name = "tests",
+    size = "small",
+    data = glob(
+        ["data/**"],
+        allow_empty = True,
+    ),
+    package_config = ":package_config",
+    runtime_package_config = ":runtime_package_config",
+    tests = glob(["test/*_test.dart"]),
+)
