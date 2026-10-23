@@ -244,8 +244,7 @@ void main() {
         '-scheme',
         'Runner',
         'BUILD_DIR=/build/ios',
-        '-sdk',
-        if (simulator) ...<String>['iphonesimulator'] else ...<String>['iphoneos'],
+        if (!simulator) ...<String>['-sdk', 'iphoneos'],
         if (deviceId != null) ...<String>[
           '-destination',
           'id=$deviceId',
@@ -672,6 +671,37 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
+    'ios simulator build with device ID does not pass -sdk to xcode build',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      processManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          simulator: true,
+          deviceId: '1234',
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Debug-iphonesimulator/Runner.app')
+                .createSync(recursive: true);
+          },
+        ),
+        ...postBuildCommands(),
+      ]);
+      createMinimalMockProjectFiles();
+
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'ios', '--simulator', '--no-pub', '--device-id', '1234']);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
