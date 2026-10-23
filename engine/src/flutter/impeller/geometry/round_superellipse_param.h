@@ -31,16 +31,16 @@ struct RoundSuperellipseParam {
     Point offset;
 
     // The semi-axis length of the superellipse.
-    Scalar se_a;
+    Scalar se_a = 0.0f;
     // The degree of the superellipse.
     //
     // If this value is 0, then this octant is a square of size `se_a`.
-    Scalar se_n;
+    Scalar se_n = 0.0f;
     // The range of the parameter "theta" used to define the superellipse curve.
     //
     // The "theta" is not the angle of the curve but the implicit parameter
     // used in the curve's parametric equation.
-    Scalar se_max_theta;
+    Scalar se_max_theta = 0.0f;
 
     // The coordinate of the top left end of the circular arc, relative to the
     // `offset` point.
@@ -50,7 +50,7 @@ struct RoundSuperellipseParam {
     // The angular span of the circular arc, measured in radians.
     Radians circle_max_angle;
 
-    Scalar circle_radius;
+    Scalar circle_radius = 0.0f;
   };
 
   // Parameters for drawing a rounded superellipse with equal radius size for
@@ -94,12 +94,12 @@ struct RoundSuperellipseParam {
   Quadrant top_left;
 
   // If true, all corners are the same and only `top_right` is popularized.
-  bool all_corners_same;
+  bool all_corners_same = false;
 
-  Scalar top_split;
-  Scalar bottom_split;
-  Scalar left_split;
-  Scalar right_split;
+  Scalar top_split = 0.0f;
+  Scalar bottom_split = 0.0f;
+  Scalar left_split = 0.0f;
+  Scalar right_split = 0.0f;
 
   // Create a param for a rounded superellipse with the specific bounds and
   // radii.

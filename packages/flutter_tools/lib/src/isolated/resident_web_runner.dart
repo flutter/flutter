@@ -266,11 +266,8 @@ class ResidentWebRunner extends ResidentRunner {
           :bool crossOriginIsolation,
         ) = debuggingOptions.webConfig;
 
-        final WebDevServerConfig originalConfig = devServerConfig ?? const WebDevServerConfig();
-
-        final int resolvedPort = await resolvePort(originalConfig.port, osUtils);
-
-        final WebDevServerConfig updatedConfig = originalConfig.copyWith(port: resolvedPort);
+        final WebDevServerConfig serverConfig = devServerConfig ?? const WebDevServerConfig();
+        validatePort(serverConfig.port);
         final ExpressionCompiler? expressionCompiler = enableExpressionEvaluation
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: fileSystem)
             : null;
@@ -278,7 +275,7 @@ class ResidentWebRunner extends ResidentRunner {
         flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
 
         flutterDevice!.devFS = WebDevFS(
-          webDevServerConfig: updatedConfig,
+          webDevServerConfig: serverConfig,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: useSseForDebugProxy,
@@ -302,13 +299,11 @@ class ResidentWebRunner extends ResidentRunner {
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
           webCrossOriginIsolation: crossOriginIsolation,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
+          toolContext: toolContext,
           webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();
-        if (updatedConfig.https?.certKeyPath != null && updatedConfig.https?.certPath != null) {
+        if (serverConfig.https?.certKeyPath != null && serverConfig.https?.certPath != null) {
           url = url.replace(scheme: 'https');
         }
         if (debuggingOptions.buildInfo.isDebug && !useWasm) {
@@ -323,18 +318,10 @@ class ResidentWebRunner extends ResidentRunner {
           cacheInitialDillCompilation();
         } else {
           final webBuilder = WebBuilder(
-            logger: logger,
-            processManager: processManager,
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            flutterVersion: flutterVersion,
             analytics: analytics,
-            artifacts: artifacts,
+            buildSystem: buildSystem,
             buildTargets: buildTargets,
-            cache: cache,
-            config: config,
-            platform: platform,
-            terminal: terminal,
+            toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -491,18 +478,10 @@ class ResidentWebRunner extends ResidentRunner {
         report = null;
         try {
           final webBuilder = WebBuilder(
-            logger: logger,
-            processManager: processManager,
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            flutterVersion: flutterVersion,
             analytics: analytics,
-            artifacts: artifacts,
+            buildSystem: buildSystem,
             buildTargets: buildTargets,
-            cache: cache,
-            config: config,
-            platform: platform,
-            terminal: terminal,
+            toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -893,6 +872,7 @@ class ResidentWebRunner extends ResidentRunner {
             },
             device: device,
             flutterProject: flutterProject,
+            flutterVersion: toolContext.flutterVersion,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
           );

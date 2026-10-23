@@ -104,7 +104,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
           {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -4224,6 +4224,9 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      # Pin to macOS 26 due to benchmark differing while fleet is split between macOS 15 and 26.
+      # See https://github.com/flutter/flutter/issues/194809.
+      os: Mac-26.6 # TODO(flutter/flutter#192579): Delete this after all bots are upgraded to macOS 26.
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -4446,6 +4449,9 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      # Pin to macOS 26 due to benchmark differing while fleet is split between macOS 15 and 26.
+      # See https://github.com/flutter/flutter/issues/194809.
+      os: Mac-26.6 # TODO(flutter/flutter#192579): Delete this after all bots are upgraded to macOS 26.
       task_name: hello_world_macos__compile
 
   - name: Mac hello_world_impeller_macos_sdfs
@@ -7462,7 +7468,6 @@ targets:
 
   - name: Windows windows_engine_integration_golden_test_feature_level_10_0
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: true
     timeout: 60
     properties:
@@ -7815,7 +7820,6 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos
 
-
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -7908,3 +7912,97 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     drone_dimensions:
       - os=Windows
+
+  - name: Linux_pixel_7pro handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: handshake_check_test_android
+
+  - name: Linux_mokey handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "mokey"]
+      task_name: handshake_check_test_android
+
+  - name: Linux_galaxy_s24 handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s24"]
+      task_name: handshake_check_test_android
+
+  - name: Mac_mokey handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac", "mokey"]
+      task_name: handshake_check_test_android
+
+  - name: Mac_arm64_mokey handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac", "arm64", "mokey"]
+      task_name: handshake_check_test_android
+
+  - name: Windows_mokey handshake_check_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "windows", "mokey"]
+      task_name: handshake_check_test_android
+
+  - name: Mac_ios handshake_check_test_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: handshake_check_test_ios
+
+  - name: Linux handshake_check_test_linux
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: handshake_check_test_linux
+
+  - name: Mac handshake_check_test_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: handshake_check_test_macos
+
+  - name: Windows handshake_check_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: handshake_check_test_windows

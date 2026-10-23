@@ -17,20 +17,99 @@ typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
-    required Isolate this._isolate,
-    required this._peer,
     required this.capabilities,
+    required this.extensionName,
+    required this._errorPort,
+    required this._exitPort,
+    required Isolate this._isolate,
     required this._logger,
+    required this._peer,
+    required this._receivePort,
   });
 
+  /// Fallback extension name used when an extension does not report one in its capabilities.
+  static const defaultExtensionName = 'unknown_extension';
+
   Isolate? _isolate;
-  final json_rpc.Peer _peer;
+
+  /// Port receiving uncaught async errors (`[String error, String? stackTrace]`)
+  /// from the extension isolate.
+  final ReceivePort _errorPort;
+
+  /// Port notified when the extension isolate terminates so the host can close
+  /// [_receivePort] and fail any in-flight RPCs instead of hanging.
+  final ReceivePort _exitPort;
+
   final Logger _logger;
+  final json_rpc.Peer _peer;
+  final ReceivePort _receivePort;
+  final _notificationControllers = <String, StreamController<Map<String, Object?>>>{};
 
   /// The capabilities and supported service namespaces of the extension.
   final ToolExtensionCapabilities capabilities;
 
+  /// The resolved package or extension name of the connected extension.
+  final String extensionName;
+
   bool _isDisposed = false;
+
+  /// Handles uncaught async errors from the extension isolate after handshake.
+  ///
+  /// Per [Isolate.addErrorListener], `dart:isolate` delivers uncaught errors on
+  /// the `onError` port as a two-element `List<Object?>` containing
+  /// `[String errorDescription, String? stackTrace]`. Logging them here surfaces
+  /// uncaught extension isolate errors that occur outside an active JSON-RPC
+  /// request handler.
+  void _handleIsolateError(Object? error) {
+    if (error case [final Object? errorDescription, final Object? stackTrace]) {
+      _logger.printError('Extension isolate "$extensionName" unhandled error: $errorDescription');
+      if (stackTrace != null) {
+        _logger.printTrace('$stackTrace');
+      }
+    } else {
+      _logger.printError('Extension isolate "$extensionName" unhandled error: $error');
+    }
+  }
+
+  /// Handles unexpected extension isolate termination after handshake.
+  ///
+  /// `IsolateChannel` (backed by a `ReceivePort`/`SendPort` pair) does not
+  /// automatically close when the remote isolate exits. Closing [_receivePort]
+  /// when the `onExit` port fires causes the JSON-RPC [json_rpc.Peer] to close
+  /// immediately, failing any in-flight [sendRequest] calls (such as
+  /// long-running `timeout: null` build requests) with a [StateError] and
+  /// closing active notification streams instead of hanging indefinitely.
+  void _handleIsolateExit() {
+    _logger.printTrace('Extension isolate "$extensionName" exited unexpectedly.');
+    unawaited(dispose());
+  }
+
+  /// Returns a broadcast stream of JSON-RPC 2.0 notifications sent by the
+  /// extension isolate for [method].
+  Stream<Map<String, Object?>> onNotification(String method) {
+    if (_isDisposed) {
+      throw StateError('ExtensionConnection has been disposed.');
+    }
+    final StreamController<Map<String, Object?>>
+    controller = _notificationControllers.putIfAbsent(method, () {
+      final newController = StreamController<Map<String, Object?>>.broadcast();
+      _peer.registerMethod(method, (json_rpc.Parameters params) {
+        if (newController.isClosed) {
+          return;
+        }
+        final Object? rawValue = params.value;
+        if (rawValue is! Map<String, Object?>) {
+          _logger.printWarning(
+            'Extension "$extensionName" sent malformed notification for "$method": expected Map<String, Object?>.',
+          );
+          return;
+        }
+        newController.add(rawValue);
+      });
+      return newController;
+    });
+    return controller.stream;
+  }
 
   /// Sends an RPC request to the extension isolate.
   Future<Object?> sendRequest(
@@ -61,27 +140,38 @@ class ExtensionConnection {
   }) async {
     logger.printTrace('ExtensionConnection spawning extension isolate...');
     final receivePort = ReceivePort();
-    final errorPort = RawReceivePort();
-    final exitPort = RawReceivePort();
+    final errorPort = ReceivePort();
+    final exitPort = ReceivePort();
     final errorCompleter = Completer<Never>();
+    ExtensionConnection? connection;
 
-    errorPort.handler = (Object? error) {
-      if (!errorCompleter.isCompleted) {
-        if (error is List && error.isNotEmpty) {
-          errorCompleter.completeError(StateError('Extension isolate error: ${error[0]}'));
-        } else {
-          errorCompleter.completeError(StateError('Extension isolate error: $error'));
-        }
+    // Isolate.spawn delivers uncaught isolate errors as a two-element list:
+    // `[String errorDescription, String? stackTrace]`.
+    errorPort.listen((Object? error) {
+      if (connection case final ExtensionConnection activeConnection) {
+        activeConnection._handleIsolateError(error);
+        return;
       }
-    };
+      if (!errorCompleter.isCompleted) {
+        final Object? errorDescription = switch (error) {
+          [final Object? description, _] => description,
+          _ => error,
+        };
+        errorCompleter.completeError(StateError('Extension isolate error: $errorDescription'));
+      }
+    });
 
-    exitPort.handler = (Object? _) {
+    exitPort.listen((Object? _) {
+      if (connection case final ExtensionConnection activeConnection) {
+        activeConnection._handleIsolateExit();
+        return;
+      }
       if (!errorCompleter.isCompleted) {
         errorCompleter.completeError(
           StateError('Extension isolate exited unexpectedly before handshake completed.'),
         );
       }
-    };
+    });
 
     Isolate? isolate;
 
@@ -100,7 +190,7 @@ class ExtensionConnection {
 
       logger.printTrace('ExtensionConnection querying extension.getCapabilities...');
       final Object? responseObj = await Future.any<Object?>([
-        peer.sendRequest('extension.getCapabilities'),
+        peer.sendRequest(ToolExtensionEntryPoint.getCapabilitiesMethod),
         errorCompleter.future,
       ]).timeout(timeout);
       if (responseObj is! Map<String, Object?>) {
@@ -113,25 +203,30 @@ class ExtensionConnection {
         'ExtensionConnection handshake complete. Capabilities: ${capabilities.services}',
       );
 
-      return ExtensionConnection._(
-        isolate: isolate,
-        peer: peer,
+      return connection = ExtensionConnection._(
         capabilities: capabilities,
+        extensionName: capabilities.extensionName ?? defaultExtensionName,
+        errorPort: errorPort,
+        exitPort: exitPort,
+        isolate: isolate,
         logger: logger,
+        peer: peer,
+        receivePort: receivePort,
       );
     } on TimeoutException {
       logger.printTrace('ExtensionConnection handshake timed out.');
       receivePort.close();
+      errorPort.close();
+      exitPort.close();
       isolate?.kill(priority: Isolate.immediate);
       throw TimeoutException('Handshake with tool extension isolate timed out.');
     } on Object catch (error) {
       logger.printTrace('ExtensionConnection spawn failed with error: $error');
       receivePort.close();
-      isolate?.kill(priority: Isolate.immediate);
-      rethrow;
-    } finally {
       errorPort.close();
       exitPort.close();
+      isolate?.kill(priority: Isolate.immediate);
+      rethrow;
     }
   }
 
@@ -142,6 +237,14 @@ class ExtensionConnection {
     }
     _isDisposed = true;
     _logger.printTrace('ExtensionConnection disposing isolate connection.');
+    _errorPort.close();
+    _exitPort.close();
+    _receivePort.close();
+    for (final StreamController<Map<String, Object?>> controller
+        in _notificationControllers.values) {
+      await controller.close();
+    }
+    _notificationControllers.clear();
     try {
       await _peer.close();
     } on Object catch (error) {
@@ -158,7 +261,7 @@ class ExtensionDiscovery {
   /// Creates an [ExtensionDiscovery] instance with required [_logger].
   ExtensionDiscovery({required this._logger});
 
-  final List<ExtensionConnection> _connections = <ExtensionConnection>[];
+  final _connections = <ExtensionConnection>[];
   final Logger _logger;
 
   /// Active extension connections.
