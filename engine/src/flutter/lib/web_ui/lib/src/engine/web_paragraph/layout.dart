@@ -28,6 +28,13 @@ class TextLayout {
   bool _isFirstLayout = true;
 
   late final AllCodeUnitFlags codeUnitFlags;
+  // Paragraph-level UAX #9 regions shared between span splitting and BiDi run extraction.
+  late final List<BidiRegion> _bidiRegions = canvasKit.Bidi.getBidiRegions(
+    paragraph.text,
+    paragraph.paragraphStyle.textDirection,
+  );
+  // Spans split at paragraph-level BiDi region boundaries without mutating paragraph.spans.
+  late final List<ParagraphSpan> _spans = _resolveSpans();
   final bidiRuns = <BidiRun>[];
   final lines = <TextLine>[];
 
@@ -93,10 +100,70 @@ class TextLayout {
     }
   }
 
+  // Splits text spans at paragraph-level UAX #9 region boundaries so each returned
+  // sub-span has a single resolved textDirection without mutating paragraph.spans.
+  List<ParagraphSpan> _resolveSpans() {
+    // Empty or placeholder-only paragraphs have no UAX #9 text regions to split across.
+    if (paragraph.spans.isEmpty || _bidiRegions.isEmpty) {
+      return paragraph.spans;
+    }
+    final resolvedSpans = <ParagraphSpan>[];
+    var regionIndex = 0;
+    for (final ParagraphSpan span in paragraph.spans) {
+      assert(span.isNotEmpty);
+      // Placeholders occupy a single U+FFFC code unit and do not measure text via Canvas2D.
+      if (span is PlaceholderSpan) {
+        resolvedSpans.add(span);
+        continue;
+      }
+      final textSpan = span as TextSpan;
+      // Both spans and BiDi regions are sorted by UTF-16 offset, so skip regions that end
+      // before this span (including regions consumed by preceding spans or placeholders).
+      while (regionIndex < _bidiRegions.length && _bidiRegions[regionIndex].end <= textSpan.start) {
+        regionIndex++;
+      }
+      // Keep regionIndex anchored at the first overlapping region because that region may
+      // extend past textSpan.end into the next span.
+      var i = regionIndex;
+      while (i < _bidiRegions.length && _bidiRegions[i].start < textSpan.end) {
+        final BidiRegion region = _bidiRegions[i];
+        final int start = math.max(textSpan.start, region.start);
+        final int end = math.min(textSpan.end, region.end);
+        // UAX #9 even embedding levels resolve to LTR and odd levels to RTL. Assigning the
+        // paragraph-resolved direction per sub-span prevents Canvas2D from re-running BiDi in
+        // isolation and flipping neutral characters (such as spaces or punctuation) between
+        // same-direction spans.
+        final ui.TextDirection regionDirection = region.level.isEven
+            ? ui.TextDirection.ltr
+            : ui.TextDirection.rtl;
+        // Reuse the existing TextSpan when it already lies within a single matching BiDi region.
+        if (start == textSpan.start &&
+            end == textSpan.end &&
+            textSpan.textDirection == regionDirection) {
+          resolvedSpans.add(textSpan);
+        } else {
+          resolvedSpans.add(
+            TextSpan(
+              start: start,
+              end: end,
+              style: textSpan.style,
+              text: paragraph.text.substring(start, end),
+              textDirection: regionDirection,
+            ),
+          );
+        }
+        i++;
+      }
+    }
+    return resolvedSpans;
+  }
+
   void extractTextClusters() {
     assert(allClusters.isEmpty);
 
-    for (final ParagraphSpan span in paragraph.spans) {
+    // Measure clusters on BiDi-resolved sub-spans so each Canvas2D measureText call uses a
+    // single UAX #9 direction instead of the paragraph's default direction.
+    for (final ParagraphSpan span in _spans) {
       assert(span.isNotEmpty);
       allClusters.addAll(span.extractClusters());
     }
@@ -148,12 +215,8 @@ class TextLayout {
   void extractBidiRuns() {
     assert(bidiRuns.isEmpty);
 
-    final List<BidiRegion> regions = canvasKit.Bidi.getBidiRegions(
-      paragraph.text,
-      paragraph.paragraphStyle.textDirection,
-    );
-
-    for (final region in regions) {
+    // Reuse the paragraph-level BiDi regions already computed for cluster extraction.
+    for (final BidiRegion region in _bidiRegions) {
       // Regions operate in text indexes, not cluster indexes (one cluster can contain several text points)
       // We need to convert one into another
       final ClusterRange clusterRange = _mapping.toClusterRange(region.start, region.end);
@@ -368,7 +431,9 @@ class TextLayout {
         );
       }
 
-      for (final ParagraphSpan span in paragraph.spans) {
+      // Within an RTL BiDi run, logical spans progress from right to left, so iterate
+      // in reverse logical order to append visual blocks from left to right.
+      for (final ParagraphSpan span in bidiRun.isLtr ? _spans : _spans.reversed) {
         final bool isOverlapping = bidiLineTextRange.overlapsWith(span.start, span.end);
 
         if (!isOverlapping) {
