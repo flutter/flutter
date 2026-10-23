@@ -38,7 +38,7 @@ load(
     "SOURCE_URI_SCHEME",
     "compile_to_kernel",
 )
-load("//engine/src/flutter/build/bazel/dart:pub.bzl", "PubPackageConfigInfo")
+load("//engine/src/flutter/build/bazel/dart:pub.bzl", "PubPackageConfigInfo", "pub_package_config")
 
 # Where test_core's precompiled mode looks for the package configuration.
 _PACKAGE_CONFIG = ".dart_tool/package_config.json"
@@ -145,18 +145,27 @@ def _dart_test_impl(ctx):
     if len(dart) != 1:
         fail("%s: the SDK should hold one bin/dart" % ctx.label)
     runner = ctx.attr._runner[DartTestRunnerInfo]
+
+    # The working directory: the BUILD file's package, which is the pub
+    # package's root when the file sits there (dev/snippets) -- `dart test`
+    # runs from the package, and tests read `data/`, `test/fixtures/` relative
+    # to it. The kernel sits beside the test, so --precompiled is the same
+    # directory.
     launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
     ctx.actions.write(
         output = launcher,
         content = """#!/bin/bash
 set -euo pipefail
-exec "{dart}" --packages="{runner_config}" "{runner}" --precompiled="$PWD" {args} "{test}" "$@"
+root="$PWD"
+cd "{package}"
+exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} "{test}" "$@"
 """.format(
+            package = ctx.label.package or ".",
             dart = dart[0].short_path,
             runner_config = runner.package_config.short_path,
             runner = runner.kernel.short_path,
             args = " ".join(ctx.attr.runner_args),
-            test = test.short_path,
+            test = relative,
         ),
         is_executable = True,
     )
@@ -253,3 +262,64 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, **kwarg
         )
         targets.append(":" + test_name)
     native.test_suite(name = name, tests = targets, tags = tags)
+
+def dart_package_tests(
+        name,
+        package,
+        tests,
+        srcs = [],
+        data = [],
+        packages = {},
+        roots = [],
+        dev_roots = None,
+        without = [],
+        **kwargs):
+    """A pure-Dart package's tests, from the BUILD file of the package itself: the configurations and one dart_test per file.
+
+    Args:
+      name: the suite's name.
+      package: the package's name (its pubspec's); its files are this
+        package's `sources` filegroup.
+      tests: the test files (a glob of `test/**/*_test.dart`).
+      srcs: the test tree's other Dart files, which tests import.
+      data: what the tests read at run time.
+      packages: workspace packages the tests reach besides the package
+        itself: each one's files to its name, as pub_package_config takes
+        them.
+      roots: packages whose dependencies the configurations cover besides
+        the package and `test` (whose runner runs the tests).
+      dev_roots: packages whose dev dependencies they cover; the package
+        itself by default.
+      without: packages of the closure left out.
+      **kwargs: dart_tests' other arguments (size, tags, network,
+        compile_args, runner_args, deps).
+    """
+    workspace_packages = {":sources": package} | packages
+    config_roots = [package, "test"] + roots
+    config_dev_roots = [package] if dev_roots == None else dev_roots
+    pub_package_config(
+        name = name + "_package_config",
+        out = name + "_package_config.json",
+        dev_roots = config_dev_roots,
+        packages = workspace_packages,
+        roots = config_roots,
+        without = without,
+    )
+    pub_package_config(
+        name = name + "_runtime_package_config",
+        out = name + "_runtime_package_config.json",
+        dev_roots = config_dev_roots,
+        layout = "runfiles",
+        packages = workspace_packages,
+        roots = config_roots,
+        without = without,
+    )
+    dart_tests(
+        name = name,
+        tests = tests,
+        srcs = srcs,
+        data = data,
+        package_config = ":" + name + "_package_config",
+        runtime_package_config = ":" + name + "_runtime_package_config",
+        **kwargs
+    )
