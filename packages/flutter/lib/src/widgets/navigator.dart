@@ -436,6 +436,66 @@ abstract class Route<T> extends _RoutePlaceholder {
 
   final Completer<T?> _disposeCompleter = Completer<T?>();
 
+  /// Pop this route off the [navigator] that it is in.
+  ///
+  /// The route must be currently present in a [Navigator]. If it is not in a
+  /// navigator or is already being popped or removed, calling this method does
+  /// nothing.
+  ///
+  /// If non-null, `result` will be used as the result of the route that is
+  /// popped; the future that had been returned from pushing the popped route
+  /// will complete with `result`. Routes such as dialogs or popup menus
+  /// typically use this mechanism to return the value selected by the user to
+  /// the widget that created their route.
+  ///
+  /// This method is equivalent to calling `navigator?.popRoute<T>(this, result)`.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical usage from within a modal route (such as a dialog) is as follows:
+  ///
+  /// ```dart
+  /// void _close(BuildContext context) {
+  ///   ModalRoute.of(context)?.pop();
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [maybePop], which checks [popDisposition] and [willPop] before
+  ///    popping the route.
+  ///  * [Navigator.popRoute], which is the static method that pops a specific
+  ///    route given a [BuildContext].
+  ///  * [Navigator.pop], which pops the top-most route on the navigator regardless
+  ///    of which route initiated the request.
+  void pop([T? result]) {
+    navigator?.popRoute<T>(this, result);
+  }
+
+  /// Consults the route's [popDisposition] and [willPop] methods, and then
+  /// pops this route from the [navigator] if allowed.
+  ///
+  /// If the pop is allowed, this route is popped from the [navigator] with the
+  /// given `result`.
+  ///
+  /// Returns a [Future] that resolves to true if the pop was handled (either by
+  /// popping the route or because the route or a [PopScope] within it prevented
+  /// popping), and false if the pop disposition bubbled.
+  ///
+  /// This method is equivalent to calling
+  /// `navigator?.maybePopRoute<T>(this, result) ?? Future<bool>.value(false)`.
+  ///
+  /// See also:
+  ///
+  ///  * [pop], which pops this route unconditionally.
+  ///  * [Navigator.maybePopRoute], which is the static method that consults
+  ///    [popDisposition] before popping a specific route.
+  @awaitNotRequired
+  Future<bool> maybePop([T? result]) {
+    return navigator?.maybePopRoute<T>(this, result) ?? Future<bool>.value(false);
+  }
+
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
   /// return false, otherwise return true (by returning the value of calling
@@ -2798,6 +2858,78 @@ class Navigator extends StatefulWidget {
   @optionalTypeArgs
   static void pop<T extends Object?>(BuildContext context, [T? result]) {
     Navigator.of(context).pop<T>(result);
+  }
+
+  /// Pop the given `route` off the navigator that most tightly encloses the
+  /// given context.
+  ///
+  /// Unlike [pop], which always pops the top-most route on the navigator, this
+  /// method pops the specific `route` given, even if it is not currently at the
+  /// top of the navigation stack.
+  ///
+  /// The popped route will animate off screen according to its transition.
+  ///
+  /// {@template flutter.widgets.navigator.popRoute}
+  /// The route's [Route.didPop] method is called first. If that method
+  /// returns false, then the route remains in the [Navigator]'s history (the
+  /// route is expected to have popped some internal state; see e.g.
+  /// [LocalHistoryRoute]). Otherwise, the rest of this description applies.
+  ///
+  /// If non-null, `result` will be used as the result of the route that is
+  /// popped; the future that had been returned from pushing the popped route
+  /// will complete with `result`. Routes such as dialogs or popup menus
+  /// typically use this mechanism to return the value selected by the user to
+  /// the widget that created their route.
+  ///
+  /// The popped route is notified (see [Route.didPop] and [Route.didComplete]).
+  /// If the popped route was the top-most route, the route below it is notified
+  /// as well (see [Route.didPopNext]). Otherwise, adjacent routes receive
+  /// [Route.didChangeNext] and [Route.didChangePrevious]. If the [Navigator] has
+  /// any [Navigator.observers], they will be notified as well (see
+  /// [NavigatorObserver.didPop]).
+  ///
+  /// The `T` type argument is the type of the return value of the popped route.
+  ///
+  /// The type of `result`, if provided, must match the type argument of the
+  /// class of the popped route (`T`).
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [pop], which pops the top-most route on the navigator.
+  ///  * [maybePopRoute], which consults the route's [Route.popDisposition] and
+  ///    [Route.willPop] methods before popping.
+  ///  * [removeRoute], which removes a route immediately without running any
+  ///    animations.
+  @optionalTypeArgs
+  static void popRoute<T extends Object?>(BuildContext context, Route<dynamic> route, [T? result]) {
+    Navigator.of(context).popRoute<T>(route, result);
+  }
+
+  /// Consults the given `route`'s [Route.popDisposition] and [Route.willPop]
+  /// methods, and then pops that route from the navigator that most tightly
+  /// encloses the given context if allowed.
+  ///
+  /// Unlike [maybePop], which always targets the top-most route on the
+  /// navigator, this method targets the specific `route` given, even if it is
+  /// not currently at the top of the navigation stack.
+  ///
+  /// Returns a [Future] that resolves to true if the pop was handled (either by
+  /// popping the route or because the route or a [PopScope] within it prevented
+  /// popping), and false if the pop disposition bubbled.
+  ///
+  /// See also:
+  ///
+  ///  * [maybePop], which targets the top-most route.
+  ///  * [popRoute], which pops the given route unconditionally.
+  @optionalTypeArgs
+  @awaitNotRequired
+  static Future<bool> maybePopRoute<T extends Object?>(
+    BuildContext context,
+    Route<dynamic> route, [
+    T? result,
+  ]) {
+    return Navigator.of(context).maybePopRoute<T>(route, result);
   }
 
   /// Calls [pop] repeatedly on the navigator that most tightly encloses the
@@ -5576,9 +5708,44 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
     assert(lastEntry.route._isInstalledIn(this));
     assert(lastEntry.route._debugCheckCanConsumeResult(result, methodName: 'maybePop'));
+    return _maybePopEntry<T>(lastEntry, result, mustRemainCurrent: true);
+  }
+
+  /// Consults the given `route`'s [Route.popDisposition] and [Route.willPop]
+  /// methods, and then pops that route from this navigator if allowed.
+  ///
+  /// Unlike [maybePop], which targets the top-most route on the navigator, this
+  /// method targets the specific `route` given, even if it is not currently at
+  /// the top of the navigation stack.
+  ///
+  /// Returns a [Future] that resolves to true if the pop was handled (either by
+  /// popping the route or because the route or a [PopScope] within it prevented
+  /// popping), and false if the pop disposition bubbled.
+  ///
+  /// See also:
+  ///
+  ///  * [maybePop], which targets the top-most route on the navigator.
+  ///  * [popRoute], which pops the given route unconditionally.
+  @optionalTypeArgs
+  @awaitNotRequired
+  Future<bool> maybePopRoute<T extends Object?>(Route<dynamic> route, [T? result]) async {
+    assert(route._isInstalledIn(this));
+    final _RouteEntry? entry = _firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(route));
+    if (entry == null || !entry.isPresent) {
+      return false;
+    }
+    assert(entry.route._debugCheckCanConsumeResult(result, methodName: 'maybePopRoute'));
+    return _maybePopEntry<T>(entry, result, mustRemainCurrent: false);
+  }
+
+  Future<bool> _maybePopEntry<T extends Object?>(
+    _RouteEntry entry,
+    T? result, {
+    required bool mustRemainCurrent,
+  }) async {
     // TODO(justinmc): When the deprecated willPop method is removed, delete
     // this code and use only popDisposition, below.
-    if (await lastEntry.route.willPop() == RoutePopDisposition.doNotPop) {
+    if (await entry.route.willPop() == RoutePopDisposition.doNotPop) {
       return true;
     }
     if (!mounted) {
@@ -5586,20 +5753,30 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return true;
     }
 
-    final _RouteEntry? newLastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
-    if (lastEntry != newLastEntry) {
-      // Forget about this pop, something happened to our history in the meantime.
-      return true;
+    if (mustRemainCurrent) {
+      final _RouteEntry? newLastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      if (entry != newLastEntry) {
+        // Forget about this pop, something happened to our history in the meantime.
+        return true;
+      }
+    } else {
+      final _RouteEntry? currentEntry = _firstRouteEntryWhereOrNull(
+        _RouteEntry.isRoutePredicate(entry.route),
+      );
+      if (currentEntry == null || !currentEntry.isPresent) {
+        // Forget about this pop, something happened to our history in the meantime.
+        return true;
+      }
     }
 
-    switch (lastEntry.route.popDisposition) {
+    switch (entry.route.popDisposition) {
       case RoutePopDisposition.bubble:
         return false;
       case RoutePopDisposition.pop:
-        pop(result);
+        popRoute<T>(entry.route, result);
         return true;
       case RoutePopDisposition.doNotPop:
-        lastEntry.route.onPopInvokedWithResult(false, result);
+        entry.route.onPopInvokedWithResult(false, result);
         return true;
     }
   }
@@ -5635,11 +5812,49 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       final _RouteEntry? entry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       return entry?.route._debugCheckCanConsumeResult(result, methodName: 'pop') ?? true;
     }());
+    final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
+    popRoute<T>(entry.route, result);
+  }
+
+  /// Pop the given `route` off the navigator.
+  ///
+  /// Unlike [pop], which pops the top-most route on the navigator, this method
+  /// pops the specific `route` given, even if it is not currently at the top of
+  /// the navigation stack.
+  ///
+  /// The popped route will animate off screen according to its transition.
+  ///
+  /// The given `route` must be installed in this navigator and present in its
+  /// history; this method will throw an exception in assert mode if it is not.
+  /// If the route is currently undergoing an exit transition (e.g. it is
+  /// already being popped or removed), calling this method does nothing.
+  ///
+  /// {@macro flutter.widgets.navigator.popRoute}
+  ///
+  /// See also:
+  ///
+  ///  * [maybePopRoute], which consults the route's [Route.popDisposition] and
+  ///    [Route.willPop] methods before popping.
+  ///  * [pop], which pops the top-most route off the navigator.
+  ///  * [removeRoute], which immediately removes a route without running any
+  ///    transitions.
+  @optionalTypeArgs
+  void popRoute<T extends Object?>(Route<dynamic> route, [T? result]) {
+    assert(!_debugLocked);
+    assert(route._isInstalledIn(this));
+    final _RouteEntry? entry = _firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(route));
+    assert(entry != null, 'The route $route is not in the history of this Navigator.');
+    assert(() {
+      return entry?.route._debugCheckCanConsumeResult(result, methodName: 'popRoute') ?? true;
+    }());
+    if (entry == null || !entry.isPresent) {
+      return;
+    }
     assert(() {
       _debugLocked = true;
       return true;
     }());
-    final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
+    final bool wasCurrent = entry.route.isCurrent;
     if (entry.pageBased && widget.onPopPage != null) {
       if (widget.onPopPage!(entry.route, result)) {
         if (entry.currentState.index <= _RouteLifecycle.idle.index) {
@@ -5661,7 +5876,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = false;
       return true;
     }());
-    _afterNavigation(entry.route);
+    if (wasCurrent) {
+      _afterNavigation(entry.route);
+    }
   }
 
   /// Calls [pop] repeatedly until the predicate returns true.
