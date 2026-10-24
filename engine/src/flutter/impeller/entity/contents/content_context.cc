@@ -47,10 +47,16 @@ class GenericVariants {
     pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
   }
 
-  void SetDefault(const ContentContextOptions& options,
+  /// Defaults are created ahead of time rather than on first use, so they are
+  /// logged as eagerly created with the pipeline library.
+  void SetDefault(const Context& context,
+                  const ContentContextOptions& options,
                   std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
     default_options_ = options;
     if (pipeline) {
+      if (std::optional<PipelineDescriptor> desc = pipeline->GetDescriptor()) {
+        context.GetPipelineLibrary()->LogPipelineCreation(*desc);
+      }
       Set(options, std::move(pipeline));
     }
   }
@@ -113,9 +119,10 @@ class Variants : public GenericVariants {
     GenericVariants::Set(options, std::move(pipeline));
   }
 
-  void SetDefault(const ContentContextOptions& options,
+  void SetDefault(const Context& context,
+                  const ContentContextOptions& options,
                   std::unique_ptr<PipelineHandleT> pipeline) {
-    GenericVariants::SetDefault(options, std::move(pipeline));
+    GenericVariants::SetDefault(context, options, std::move(pipeline));
   }
 
   void CreateDefault(const Context& context,
@@ -128,11 +135,11 @@ class Variants : public GenericVariants {
       VALIDATION_LOG << "Failed to create default pipeline.";
       return;
     }
-    context.GetPipelineLibrary()->LogPipelineCreation(*desc);
     options.ApplyToPipelineDescriptor(*desc);
     desc_ = desc;
-    SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
-                                                          /*async=*/true));
+    SetDefault(context, options,
+               std::make_unique<PipelineHandleT>(context, desc_,
+                                                 /*async=*/true));
   }
 
   PipelineHandleT* Get(const ContentContextOptions& options) const {
@@ -147,8 +154,8 @@ class Variants : public GenericVariants {
     if (result != nullptr) {
       return result;
     }
-    SetDefault(default_options_.value(), std::make_unique<PipelineHandleT>(
-                                             context, desc_, /*async=*/false));
+    Set(default_options_.value(),
+        std::make_unique<PipelineHandleT>(context, desc_, /*async=*/false));
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return Get(default_options_.value());
   }
@@ -704,7 +711,7 @@ ContentContext::ContentContext(
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
     pipelines_->clip.SetDefault(
-        options,
+        *context_, options,
         std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
