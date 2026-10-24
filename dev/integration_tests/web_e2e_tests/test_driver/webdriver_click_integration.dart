@@ -42,6 +42,15 @@ bool _isOnHostElement(Offset viewportPosition) {
   return hit != null && _hostElement.contains(hit);
 }
 
+/// Defines a [testWidgets] test that clicks with real WebDriver clicks.
+///
+/// Semantics are disabled: otherwise a real click on the button lands on its
+/// semantics DOM node and taps it via a semantics action, bypassing pointer
+/// events entirely.
+void _testWebDriverClick(String description, WidgetTesterCallback callback) {
+  testWidgets(description, callback, semanticsEnabled: false);
+}
+
 void main() {
   final IntegrationTestWidgetsFlutterBinding binding =
       IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -52,11 +61,7 @@ void main() {
     await app.iframeLoaded.future.timeout(const Duration(seconds: 10));
   }
 
-  // Each test passes `semanticsEnabled: false`: otherwise a real click on the
-  // button lands on its semantics DOM node and taps it via a semantics action,
-  // bypassing pointer events entirely.
-
-  testWidgets('webDriverClick delivers a real browser click to an iframe platform view', (
+  _testWebDriverClick('webDriverClick delivers a real browser click to an iframe platform view', (
     WidgetTester tester,
   ) async {
     await startApp(tester);
@@ -65,60 +70,62 @@ void main() {
     await binding.webDriverClick(tester.getCenter(find.byType(HtmlElementView)));
 
     expect(app.iframeClicks, 1);
-  }, semanticsEnabled: false);
+  });
 
-  testWidgets('webDriverClick reaches Flutter widgets only when device pointer events propagate', (
-    WidgetTester tester,
-  ) async {
-    await startApp(tester);
-    final Finder button = find.byKey(app.buttonKey);
-    expect(binding.shouldPropagateDevicePointerEvents, isFalse);
+  _testWebDriverClick(
+    'webDriverClick reaches Flutter widgets only when device pointer events propagate',
+    (WidgetTester tester) async {
+      await startApp(tester);
+      final Finder button = find.byKey(app.buttonKey);
+      expect(binding.shouldPropagateDevicePointerEvents, isFalse);
 
-    // The button sits above the iframe, so the browser delivers the click to
-    // the Flutter view, not the iframe. The engine forwards the pointer events
-    // to the framework, but the binding drops them because device pointer
-    // events do not propagate by default.
-    await binding.webDriverClick(tester.getCenter(button));
-    await tester.pump();
-    expect(app.buttonClicks.value, 0);
-    expect(app.iframeClicks, 0);
-
-    // With device pointer events propagating, the same click presses the
-    // button.
-    binding.shouldPropagateDevicePointerEvents = true;
-    try {
+      // The button sits above the iframe, so the browser delivers the click to
+      // the Flutter view, not the iframe. The engine forwards the pointer events
+      // to the framework, but the binding drops them because device pointer
+      // events do not propagate by default.
       await binding.webDriverClick(tester.getCenter(button));
       await tester.pump();
-    } finally {
-      binding.shouldPropagateDevicePointerEvents = false;
-    }
+      expect(app.buttonClicks.value, 0);
+      expect(app.iframeClicks, 0);
 
-    expect(app.buttonClicks.value, 1);
-    expect(find.text('Button clicks: 1'), findsOneWidget);
-    expect(app.iframeClicks, 0);
-  }, semanticsEnabled: false);
+      // With device pointer events propagating, the same click presses the
+      // button.
+      binding.shouldPropagateDevicePointerEvents = true;
+      try {
+        await binding.webDriverClick(tester.getCenter(button));
+        await tester.pump();
+      } finally {
+        binding.shouldPropagateDevicePointerEvents = false;
+      }
 
-  testWidgets('webDriverClick converts view positions when the view is offset in the page', (
-    WidgetTester tester,
-  ) async {
-    await startApp(tester);
-    addTearDown(_resetHostElement);
-    expect(_offsetHostElement(const Offset(300, 200)), const Offset(300, 200));
-    await tester.pumpAndSettle();
-    final Offset buttonCenter = tester.getCenter(find.byKey(app.buttonKey));
-    // Interpreted as a viewport position, the view position misses the view.
-    expect(_isOnHostElement(buttonCenter), isFalse);
-    expect(_isOnHostElement(buttonCenter + const Offset(300, 200)), isTrue);
+      expect(app.buttonClicks.value, 1);
+      expect(find.text('Button clicks: 1'), findsOneWidget);
+      expect(app.iframeClicks, 0);
+    },
+  );
 
-    binding.shouldPropagateDevicePointerEvents = true;
-    try {
-      await binding.webDriverClick(buttonCenter);
-      await tester.pump();
-    } finally {
-      binding.shouldPropagateDevicePointerEvents = false;
-    }
+  _testWebDriverClick(
+    'webDriverClick converts view positions when the view is offset in the page',
+    (WidgetTester tester) async {
+      await startApp(tester);
+      addTearDown(_resetHostElement);
+      expect(_offsetHostElement(const Offset(300, 200)), const Offset(300, 200));
+      await tester.pumpAndSettle();
+      final Offset buttonCenter = tester.getCenter(find.byKey(app.buttonKey));
+      // Interpreted as a viewport position, the view position misses the view.
+      expect(_isOnHostElement(buttonCenter), isFalse);
+      expect(_isOnHostElement(buttonCenter + const Offset(300, 200)), isTrue);
 
-    expect(app.buttonClicks.value, 1);
-    expect(find.text('Button clicks: 1'), findsOneWidget);
-  }, semanticsEnabled: false);
+      binding.shouldPropagateDevicePointerEvents = true;
+      try {
+        await binding.webDriverClick(buttonCenter);
+        await tester.pump();
+      } finally {
+        binding.shouldPropagateDevicePointerEvents = false;
+      }
+
+      expect(app.buttonClicks.value, 1);
+      expect(find.text('Button clicks: 1'), findsOneWidget);
+    },
+  );
 }

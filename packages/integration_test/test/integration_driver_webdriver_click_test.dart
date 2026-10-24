@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Tests how `integrationDriver`, running on the host, performs the clicks
-// that an in-browser test requests with `webDriverClick`.
-
 import 'dart:collection';
 import 'dart:io';
 
@@ -20,90 +17,92 @@ import 'package:webdriver/async_io.dart'
     show Mouse, MouseButton, MoveTargetOutOfBoundsException, WebDriver, WebElement;
 
 void main() {
-  test('performs a WebDriver click at the position the app asked for', () async {
-    final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
-    final mouse = _FakeMouse();
-
-    await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
-
-    expect(mouse.clicks, <(int, int)>[(10, 20)]);
-    expect(app.replies, <String>['complete']);
-  });
-
-  test('performs each click at its own position, in the order the app asked', () async {
-    final app = _FakeApp(clicks: <(num, num)>[(10, 20), (300, 400)]);
-    // The fake mouse, like WebDriver, moves relative to the pointer unless
-    // asked for an absolute move, so this also checks that each click moves
-    // the pointer to an absolute position.
-    final mouse = _FakeMouse();
-
-    await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
-
-    expect(mouse.clicks, <(int, int)>[(10, 20), (300, 400)]);
-    expect(app.replies, <String>['complete', 'complete']);
-  });
-
-  test(
-    'rounds positions to whole CSS pixels, since WebDriver only moves by whole pixels',
-    () async {
-      final app = _FakeApp(clicks: <(num, num)>[(10.4, 20.6)]);
+  group('integrationDriver handling webDriverClick', () {
+    test('performs a WebDriver click at the position the app asked for', () async {
+      final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
       final mouse = _FakeMouse();
 
       await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
 
-      expect(mouse.clicks, <(int, int)>[(10, 21)]);
-    },
-  );
+      expect(mouse.clicks, <(int, int)>[(10, 20)]);
+      expect(app.replies, <String>['complete']);
+    });
 
-  test('accepts positions sent as JSON integers or as JSON doubles', () async {
-    // Apps compiled with dart2js encode a double such as 30.0 as `30`, which
-    // the host decodes as an int.
-    final app = _FakeApp(clicks: <(num, num)>[(30, 0), (30.0, 0.0)]);
-    final mouse = _FakeMouse();
+    test('performs each click at its own position, in the order the app asked', () async {
+      final app = _FakeApp(clicks: <(num, num)>[(10, 20), (300, 400)]);
+      // The fake mouse, like WebDriver, moves relative to the pointer unless
+      // asked for an absolute move, so this also checks that each click moves
+      // the pointer to an absolute position.
+      final mouse = _FakeMouse();
 
-    await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
+      await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
 
-    expect(mouse.clicks, <(int, int)>[(30, 0), (30, 0)]);
-  });
+      expect(mouse.clicks, <(int, int)>[(10, 20), (300, 400)]);
+      expect(app.replies, <String>['complete', 'complete']);
+    });
 
-  test('fails the click in the app and throws if the driver is not a WebFlutterDriver', () async {
-    final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
+    test(
+      'rounds positions to whole CSS pixels, since WebDriver only moves by whole pixels',
+      () async {
+        final app = _FakeApp(clicks: <(num, num)>[(10.4, 20.6)]);
+        final mouse = _FakeMouse();
 
-    await expectLater(
-      integrationDriver(driver: _FakeFlutterDriver(app), responseDataCallback: null),
-      throwsA(
-        isStateError.having(
-          (StateError error) => error.message,
-          'message',
-          'webDriverClick requires a WebFlutterDriver, but received _FakeFlutterDriver',
+        await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
+
+        expect(mouse.clicks, <(int, int)>[(10, 21)]);
+      },
+    );
+
+    test('accepts positions sent as JSON integers or as JSON doubles', () async {
+      // Apps compiled with dart2js encode a double such as 30.0 as `30`, which
+      // the host decodes as an int.
+      final app = _FakeApp(clicks: <(num, num)>[(30, 0), (30.0, 0.0)]);
+      final mouse = _FakeMouse();
+
+      await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
+
+      expect(mouse.clicks, <(int, int)>[(30, 0), (30, 0)]);
+    });
+
+    test('fails the click in the app and throws if the driver is not a WebFlutterDriver', () async {
+      final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
+
+      await expectLater(
+        integrationDriver(driver: _FakeFlutterDriver(app), responseDataCallback: null),
+        throwsA(
+          isStateError.having(
+            (StateError error) => error.message,
+            'message',
+            'webDriverClick requires a WebFlutterDriver, but received _FakeFlutterDriver',
+          ),
         ),
-      ),
-    );
-    expect(app.replies, <String>['error']);
-  });
+      );
+      expect(app.replies, <String>['error']);
+    });
 
-  test('fails the click in the app and rethrows if WebDriver cannot click', () async {
-    final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
-    const error = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
-    final mouse = _FakeMouse(moveToError: error);
+    test('fails the click in the app and rethrows if WebDriver cannot click', () async {
+      final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
+      const error = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
+      final mouse = _FakeMouse(moveToError: error);
 
-    await expectLater(
-      integrationDriver(driver: _FakeWebFlutterDriver(app, mouse), responseDataCallback: null),
-      throwsA(same(error)),
-    );
-    expect(mouse.clicks, isEmpty);
-    expect(app.replies, <String>['error']);
-  });
+      await expectLater(
+        integrationDriver(driver: _FakeWebFlutterDriver(app, mouse), responseDataCallback: null),
+        throwsA(same(error)),
+      );
+      expect(mouse.clicks, isEmpty);
+      expect(app.replies, <String>['error']);
+    });
 
-  test('rethrows the WebDriver error even if the app disconnected before it was told', () async {
-    final app = _FakeApp(clicks: <(num, num)>[(10, 20)], disconnectsOnError: true);
-    const error = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
-    final mouse = _FakeMouse(moveToError: error);
+    test('rethrows the WebDriver error even if the app disconnected before it was told', () async {
+      final app = _FakeApp(clicks: <(num, num)>[(10, 20)], disconnectsOnError: true);
+      const error = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
+      final mouse = _FakeMouse(moveToError: error);
 
-    await expectLater(
-      integrationDriver(driver: _FakeWebFlutterDriver(app, mouse), responseDataCallback: null),
-      throwsA(same(error)),
-    );
+      await expectLater(
+        integrationDriver(driver: _FakeWebFlutterDriver(app, mouse), responseDataCallback: null),
+        throwsA(same(error)),
+      );
+    });
   });
 }
 
