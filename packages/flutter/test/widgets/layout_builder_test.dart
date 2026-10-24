@@ -1057,6 +1057,208 @@ void main() {
       ),
     );
   });
+
+  testWidgets('a rebuild requested during a LayoutBuilder layout is not lost', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/192945.
+    final harness = _MidLayoutRebuildHarness();
+    addTearDown(harness.dispose);
+    final width = ValueNotifier<double>(300);
+    addTearDown(width.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ValueListenableBuilder<double>(
+            valueListenable: width,
+            builder: (BuildContext context, double value, Widget? child) {
+              return SizedBox(width: value, height: 300, child: child);
+            },
+            child: harness.buildLayoutBuilder(tester),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('0'), findsOneWidget);
+
+    await harness.requestRebuildDuringLayoutBuilderLayout(tester);
+    // The request is honored in the next frame, which must have been scheduled.
+    expect(find.text('0'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(find.text('1'), findsOneWidget);
+
+    // Later rebuilds, inside and outside the LayoutBuilder, still go through.
+    harness.counter.bump();
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(find.text('2'), findsOneWidget);
+
+    width.value = 280;
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(tester.getSize(find.byType(LayoutBuilder)).width, 280);
+  });
+
+  testWidgets(
+    'a rebuild requested during a LayoutBuilder layout resizes a parent that reads its size',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/192945,
+      // where the LayoutBuilder is not a relayout boundary.
+      final harness = _MidLayoutRebuildHarness();
+      addTearDown(harness.dispose);
+      const siblingKey = Key('sibling');
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              harness.buildLayoutBuilder(tester),
+              const SizedBox(key: siblingKey, width: 10, height: 10),
+            ],
+          ),
+        ),
+      );
+      final RenderBox layoutBuilderBox = tester.renderObject(find.byType(LayoutBuilder));
+      expect(layoutBuilderBox.debugCanParentUseSize, isTrue);
+      expect(layoutBuilderBox.constraints.isTight, isFalse);
+      final double siblingTop = tester.getTopLeft(find.byKey(siblingKey)).dy;
+
+      await harness.requestRebuildDuringLayoutBuilderLayout(tester);
+      await tester.pump();
+
+      expect(find.text('1'), findsOneWidget);
+      // The counter grew by 20 pixels, so the Column must move the sibling down by 20.
+      expect(tester.getTopLeft(find.byKey(siblingKey)).dy, siblingTop + 20);
+    },
+  );
+}
+
+/// Builds a [LayoutBuilder] whose subtree can ask for a rebuild of its own
+/// content while that [LayoutBuilder] is still laying out.
+class _MidLayoutRebuildHarness {
+  final GlobalKey<_CounterState> _counterKey = GlobalKey<_CounterState>();
+  final ValueNotifier<int> _generation = ValueNotifier<int>(0);
+  bool _armed = false;
+
+  _CounterState get counter => _counterKey.currentState!;
+
+  Widget buildLayoutBuilder(WidgetTester tester) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _Counter(key: _counterKey),
+            ValueListenableBuilder<int>(
+              valueListenable: _generation,
+              builder: (BuildContext context, int value, Widget? child) {
+                return _LayoutHook(
+                  generation: value,
+                  onLayout: () {
+                    if (_armed) {
+                      _armed = false;
+                      _requestRebuildDuringLayout(tester, counter);
+                    }
+                  },
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Re-lays-out the hook, which bumps the counter from inside the
+  /// [LayoutBuilder]'s own layout.
+  Future<void> requestRebuildDuringLayoutBuilderLayout(WidgetTester tester) async {
+    _armed = true;
+    _generation.value += 1;
+    await tester.pump();
+  }
+
+  void dispose() => _generation.dispose();
+}
+
+/// Bumps [state] from inside layout, as framework code such as
+/// [ScrollPosition.applyNewDimensions] legitimately can, bypassing the
+/// debug-only "Build scheduled during frame." check.
+void _requestRebuildDuringLayout(WidgetTester tester, _CounterState state) {
+  final WidgetsBinding binding = tester.binding;
+  // ignore: invalid_use_of_protected_member
+  final bool wasBuildingDirtyElements = binding.debugBuildingDirtyElements;
+  // ignore: invalid_use_of_protected_member
+  binding.debugBuildingDirtyElements = false;
+  try {
+    state.bump();
+  } finally {
+    // ignore: invalid_use_of_protected_member
+    binding.debugBuildingDirtyElements = wasBuildingDirtyElements;
+  }
+}
+
+class _Counter extends StatefulWidget {
+  const _Counter({super.key});
+
+  @override
+  State<_Counter> createState() => _CounterState();
+}
+
+class _CounterState extends State<_Counter> {
+  int _value = 0;
+
+  void bump() => setState(() => _value += 1);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 20.0 + _value * 20.0,
+      child: Text('$_value', textDirection: TextDirection.ltr),
+    );
+  }
+}
+
+/// A single-child render object that invokes [onLayout] from inside its own
+/// [performLayout], standing in for framework code that notifies listeners
+/// mid-layout.
+class _LayoutHook extends SingleChildRenderObjectWidget {
+  const _LayoutHook({required this.onLayout, required this.generation})
+    : super(child: const SizedBox(width: 10, height: 10));
+
+  final VoidCallback onLayout;
+  final int generation;
+
+  @override
+  _RenderLayoutHook createRenderObject(BuildContext context) =>
+      _RenderLayoutHook(onLayout, generation);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderLayoutHook renderObject) {
+    renderObject.onLayout = onLayout;
+    if (renderObject.generation != generation) {
+      renderObject
+        ..generation = generation
+        ..markNeedsLayout();
+    }
+  }
+}
+
+class _RenderLayoutHook extends RenderProxyBox {
+  _RenderLayoutHook(this.onLayout, this.generation);
+
+  VoidCallback onLayout;
+  int generation;
+
+  @override
+  void performLayout() {
+    onLayout();
+    super.performLayout();
+  }
 }
 
 class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
