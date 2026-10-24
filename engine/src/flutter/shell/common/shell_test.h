@@ -105,6 +105,11 @@ class ShellTest : public FixtureTest {
   static void PlatformViewNotifyDestroyed(
       Shell* shell);  // This destroys the surface
   static void RunEngine(Shell* shell, RunConfiguration configuration);
+  // Joins startup without running the queued platform ownership transfer.
+  static Engine::RunStatus WaitForUIThreadLaunch(Shell* shell);
+  // Invokes callback inside the first wait for an existing UI launch result.
+  static void SetUIThreadLaunchWaitCallback(Shell* shell,
+                                            const fml::closure& callback);
   static void RestartEngine(Shell* shell, RunConfiguration configuration);
 
   /// Issue as many VSYNC as needed to flush the UI tasks so far, and reset

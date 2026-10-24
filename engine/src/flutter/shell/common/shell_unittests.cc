@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <algorithm>
+#include <atomic>
 #include <ctime>
 #include <future>
 #include <memory>
@@ -30,6 +31,7 @@
 #include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/runtime/dart_vm.h"
@@ -52,6 +54,7 @@
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h"
 #include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/tonic/dart_state.h"
 
 #ifdef SHELL_ENABLE_VULKAN
 #include "flutter/vulkan/vulkan_application.h"  // nogncheck
@@ -5102,6 +5105,478 @@ TEST_F(ShellTest, MergeUIAndPlatformThreadsAfterLaunch) {
       task_runners.GetPlatformTaskRunner()->GetTaskQueueId()));
 
   DestroyShell(std::move(shell), task_runners);
+}
+
+class MergeAfterLaunchShellTest : public ShellTest {
+ protected:
+  MergeAfterLaunchShellTest() : task_runners_(GetTaskRunnersForFixture()) {}
+
+  Settings CreateSettingsForFixture() override {
+    auto settings = ShellTest::CreateSettingsForFixture();
+    settings.merged_platform_ui_thread =
+        Settings::MergedPlatformUIThread::kMergeAfterLaunch;
+    return settings;
+  }
+
+  RunConfiguration Configuration(const Settings& settings,
+                                 const char* entrypoint = "emptyMain") {
+    auto configuration = RunConfiguration::InferFromSettings(settings);
+    EXPECT_TRUE(configuration.IsValid());
+    configuration.SetEntrypoint(entrypoint);
+    return configuration;
+  }
+
+  std::unique_ptr<Shell> SpawnShell(Shell& parent, const Settings& settings) {
+    return parent.Spawn(
+        Configuration(settings), "", ShellTestPlatformViewBuilder({}),
+        [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+  }
+
+  void ExpectSharedResources(Shell& parent, Shell& child) {
+    EXPECT_EQ(child.GetSettings().merged_platform_ui_thread,
+              Settings::MergedPlatformUIThread::kEnabled);
+    EXPECT_EQ(child.GetTaskRunners().GetPlatformTaskRunner(),
+              task_runners_.GetPlatformTaskRunner());
+    EXPECT_EQ(child.GetTaskRunners().GetUITaskRunner(),
+              task_runners_.GetPlatformTaskRunner());
+    EXPECT_EQ(child.GetTaskRunners().GetRasterTaskRunner(),
+              parent.GetTaskRunners().GetRasterTaskRunner());
+    EXPECT_EQ(child.GetTaskRunners().GetIOTaskRunner(),
+              parent.GetTaskRunners().GetIOTaskRunner());
+    EXPECT_EQ(child.GetDartVM(), parent.GetDartVM());
+    EXPECT_TRUE(Dart_GetCurrentThreadOwnsIsolate(
+        parent.GetEngine()->GetUIIsolateMainPort()));
+    EXPECT_TRUE(Dart_GetCurrentThreadOwnsIsolate(
+        child.GetEngine()->GetUIIsolateMainPort()));
+
+    auto* parent_runtime = parent.GetEngine()->GetRuntimeController();
+    auto* child_runtime = child.GetEngine()->GetRuntimeController();
+    EXPECT_NE(parent_runtime->GetRootIsolateGroup(), 0u);
+    EXPECT_EQ(child_runtime->GetRootIsolateGroup(),
+              parent_runtime->GetRootIsolateGroup());
+    EXPECT_EQ(GetFontCollection(&child), GetFontCollection(&parent));
+
+    auto child_isolate = child_runtime->GetRootIsolate().lock();
+    ASSERT_TRUE(child_isolate);
+    // Check the RuntimeController's context, as well as the Shell's runners.
+    EXPECT_EQ(child_isolate->GetTaskRunners().GetUITaskRunner(),
+              task_runners_.GetPlatformTaskRunner());
+
+    PostSync(task_runners_.GetIOTaskRunner(), [&parent, &child] {
+      EXPECT_NE(parent.GetIOManager().get(), nullptr);
+      EXPECT_EQ(child.GetIOManager().get(), parent.GetIOManager().get());
+    });
+  }
+
+  void InvokePlatformMessageRoundTrip(Shell& shell) {
+    EXPECT_TRUE(
+        task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+    auto isolate =
+        shell.GetEngine()->GetRuntimeController()->GetRootIsolate().lock();
+    ASSERT_TRUE(isolate);
+    tonic::DartState::Scope scope(isolate);
+    // This Dart fixture sends a platform message and calls NotifyNative when
+    // its response has reached Dart again.
+    auto result = Dart_Invoke(
+        Dart_RootLibrary(),
+        Dart_NewStringFromCString("testSkiaResourceCacheSendsResponse"), 0,
+        nullptr);
+    EXPECT_FALSE(Dart_IsError(result));
+  }
+
+  TaskRunners task_runners_;
+};
+
+TEST_F(MergeAfterLaunchShellTest,
+       MultipleSpawnRequestsWaitForMainEngineStartupAndRunOnPlatformThread) {
+  constexpr size_t kChildCount = 3;
+  auto settings = CreateSettingsForFixture();
+  fml::AutoResetWaitableEvent startup_entered;
+  fml::AutoResetWaitableEvent release_startup;
+  fml::AutoResetWaitableEvent first_spawn_waiting;
+  fml::CountDownLatch spawns_completed(kChildCount);
+  fml::CountDownLatch dart_callbacks(kChildCount + 1);
+  std::atomic_bool startup_released{false};
+  std::atomic_size_t isolate_create_count{0};
+  std::atomic_size_t spawn_entered_count{0};
+  std::atomic_size_t spawn_completed_count{0};
+  settings.root_isolate_create_callback = [&](const DartIsolate& isolate) {
+    if (isolate_create_count.fetch_add(1) == 0) {
+      EXPECT_EQ(isolate.GetTaskRunners().GetUITaskRunner(),
+                task_runners_.GetUITaskRunner());
+      EXPECT_TRUE(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+      EXPECT_FALSE(
+          task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+      EXPECT_FALSE(Dart_GetCurrentThreadOwnsIsolate(Dart_GetMainPortId()));
+      startup_entered.Signal();
+      release_startup.Wait();
+    } else {
+      EXPECT_TRUE(startup_released.load());
+      EXPECT_EQ(isolate.GetTaskRunners().GetUITaskRunner(),
+                task_runners_.GetPlatformTaskRunner());
+      EXPECT_TRUE(
+          task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+      EXPECT_TRUE(Dart_GetCurrentThreadOwnsIsolate(Dart_GetMainPortId()));
+    }
+  };
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() {
+        EXPECT_TRUE(
+            task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+        EXPECT_TRUE(Dart_GetCurrentThreadOwnsIsolate(Dart_GetMainPortId()));
+        dart_callbacks.CountDown();
+      }));
+
+  auto main_engine = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(main_engine);
+  task_runners_.GetPlatformTaskRunner()->PostTask([&] {
+    main_engine->RunEngine(Configuration(settings, "mainNotifyNative"));
+    SetUIThreadLaunchWaitCallback(main_engine.get(),
+                                  [&] { first_spawn_waiting.Signal(); });
+  });
+  startup_entered.Wait();
+
+  // Android serializes creation on P: the first request waits for startup,
+  // while the remaining requests stay queued on P.
+  std::vector<std::unique_ptr<Shell>> children(kChildCount);
+  for (size_t i = 0; i < kChildCount; ++i) {
+    task_runners_.GetPlatformTaskRunner()->PostTask([&, i] {
+      auto configuration = Configuration(settings, "mainNotifyNative");
+      spawn_entered_count.fetch_add(1);
+      children[i] = main_engine->Spawn(
+          std::move(configuration), "", ShellTestPlatformViewBuilder({}),
+          [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+      EXPECT_TRUE(children[i]);
+      if (children[i]) {
+        ExpectSharedResources(*main_engine, *children[i]);
+      }
+      spawn_completed_count.fetch_add(1);
+      spawns_completed.CountDown();
+    });
+  }
+  // Observe Spawn's launch wait before allowing U to finish startup.
+  first_spawn_waiting.Wait();
+  EXPECT_EQ(spawn_entered_count.load(), 1u);
+  EXPECT_EQ(spawn_completed_count.load(), 0u);
+  EXPECT_EQ(isolate_create_count.load(), 1u);
+  startup_released.store(true);
+  release_startup.Signal();
+
+  spawns_completed.Wait();
+  for (const auto& child : children) {
+    ASSERT_TRUE(child);
+  }
+  dart_callbacks.Wait();
+  EXPECT_EQ(spawn_entered_count.load(), kChildCount);
+  EXPECT_EQ(spawn_completed_count.load(), kChildCount);
+  EXPECT_EQ(isolate_create_count.load(), kChildCount + 1);
+
+  for (auto& child : children) {
+    DestroyShell(std::move(child), task_runners_);
+  }
+  DestroyShell(std::move(main_engine), task_runners_);
+}
+
+TEST_F(MergeAfterLaunchShellTest, SpawnedEngineSurvivesParentDestruction) {
+  auto settings = CreateSettingsForFixture();
+  fml::AutoResetWaitableEvent dart_callback;
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() {
+        EXPECT_TRUE(
+            task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+        dart_callback.Signal();
+      }));
+
+  auto parent = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(parent);
+  RunEngine(parent.get(), Configuration(settings, "mainNotifyNative"));
+  dart_callback.Wait();
+
+  std::unique_ptr<Shell> child;
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    child = SpawnShell(*parent, settings);
+    ASSERT_TRUE(child);
+    ExpectSharedResources(*parent, *child);
+  });
+  ASSERT_TRUE(child);
+
+  DestroyShell(std::move(parent), task_runners_);
+  EXPECT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
+      task_runners_.GetUITaskRunner()->GetTaskQueueId(),
+      task_runners_.GetPlatformTaskRunner()->GetTaskQueueId()));
+
+  std::unique_ptr<Shell> grandchild;
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    // The surviving child must not retain its parent's unmerged UI queue.
+    grandchild = SpawnShell(*child, settings);
+    ASSERT_TRUE(grandchild);
+    ExpectSharedResources(*child, *grandchild);
+    InvokePlatformMessageRoundTrip(*child);
+  });
+  ASSERT_TRUE(grandchild);
+  dart_callback.Wait();
+
+  DestroyShell(std::move(child), task_runners_);
+  PostSync(task_runners_.GetPlatformTaskRunner(),
+           [&] { InvokePlatformMessageRoundTrip(*grandchild); });
+  dart_callback.Wait();
+  DestroyShell(std::move(grandchild), task_runners_);
+  EXPECT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(MergeAfterLaunchShellTest,
+       SpawnAfterOwnerTransferAndChildDestructionPreserveParentQueue) {
+  auto settings = CreateSettingsForFixture();
+  auto parent = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(parent);
+  fml::AutoResetWaitableEvent dart_callback;
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() {
+        EXPECT_TRUE(
+            task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+        dart_callback.Signal();
+      }));
+  RunEngine(parent.get(), Configuration(settings, "mainNotifyNative"));
+  dart_callback.Wait();
+
+  std::unique_ptr<Shell> child;
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    child = SpawnShell(*parent, settings);
+    ASSERT_TRUE(child);
+    ExpectSharedResources(*parent, *child);
+  });
+  ASSERT_TRUE(child);
+  DestroyShell(std::move(child), task_runners_);
+  EXPECT_TRUE(fml::TaskRunnerChecker::RunsOnTheSameThread(
+      task_runners_.GetUITaskRunner()->GetTaskQueueId(),
+      task_runners_.GetPlatformTaskRunner()->GetTaskQueueId()));
+  PostSync(task_runners_.GetPlatformTaskRunner(),
+           [&] { InvokePlatformMessageRoundTrip(*parent); });
+  dart_callback.Wait();
+  DestroyShell(std::move(parent), task_runners_);
+}
+
+TEST_F(MergeAfterLaunchShellTest, DestroyDuringStartup) {
+  auto settings = CreateSettingsForFixture();
+  fml::AutoResetWaitableEvent startup_entered;
+  fml::AutoResetWaitableEvent release_startup;
+  settings.root_isolate_create_callback = [&](const DartIsolate& isolate) {
+    EXPECT_TRUE(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+    EXPECT_FALSE(
+        task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+    startup_entered.Signal();
+    release_startup.Wait();
+  };
+  bool shutdown_called = false;
+  settings.root_isolate_shutdown_callback = [&] {
+    EXPECT_TRUE(
+        task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+    EXPECT_TRUE(Dart_GetCurrentThreadOwnsIsolate(Dart_GetMainPortId()));
+    shutdown_called = true;
+  };
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    shell->RunEngine(Configuration(settings));
+    startup_entered.Wait();
+    // Releasing startup before DestroyShell could miss the migration race.
+    // Use the wait callback to ensure destruction has begun before U resumes.
+    SetUIThreadLaunchWaitCallback(shell.get(),
+                                  [&] { release_startup.Signal(); });
+    DestroyShell(std::move(shell), task_runners_);
+  });
+  EXPECT_FALSE(shell);
+  EXPECT_TRUE(shutdown_called);
+  EXPECT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
+      task_runners_.GetUITaskRunner()->GetTaskQueueId(),
+      task_runners_.GetPlatformTaskRunner()->GetTaskQueueId()));
+  EXPECT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(MergeAfterLaunchShellTest, SpawnBeforeRunFails) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  PostSync(task_runners_.GetPlatformTaskRunner(),
+           [&] { EXPECT_FALSE(SpawnShell(*shell, settings)); });
+  DestroyShell(std::move(shell), task_runners_);
+  EXPECT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(MergeAfterLaunchShellTest, DiscardedStartupTaskReportsFailure) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  fml::AutoResetWaitableEvent ui_blocked;
+  fml::AutoResetWaitableEvent discard_startup;
+  task_runners_.GetUITaskRunner()->PostTask([&] {
+    ui_blocked.Signal();
+    discard_startup.Wait();
+    // Keep the runner alive so Shell can still shut down normally.
+    auto launch_task =
+        fml::MessageLoopTaskQueues::GetInstance()->GetNextTaskToRun(
+            task_runners_.GetUITaskRunner()->GetTaskQueueId(),
+            fml::TimePoint::Now());
+    EXPECT_TRUE(launch_task);
+    launch_task = nullptr;
+  });
+  ui_blocked.Wait();
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    shell->RunEngine(Configuration(settings));
+    discard_startup.Signal();
+    EXPECT_EQ(WaitForUIThreadLaunch(shell.get()), Engine::RunStatus::Failure);
+  });
+  DestroyShell(std::move(shell), task_runners_);
+}
+
+TEST_F(MergeAfterLaunchShellTest, FailedStartupCanRetryAndSpawn) {
+  auto settings = CreateSettingsForFixture();
+  size_t isolate_create_count = 0;
+  settings.root_isolate_create_callback = [&](const DartIsolate& isolate) {
+    if (isolate_create_count++ < 2) {
+      // Both the failed attempt and the successful retry initialize on U.
+      EXPECT_TRUE(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+      EXPECT_FALSE(
+          task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+    } else {
+      EXPECT_TRUE(
+          task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+    }
+  };
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  fml::AutoResetWaitableEvent dart_callback;
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() {
+        EXPECT_TRUE(
+            task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+        dart_callback.Signal();
+      }));
+
+  std::unique_ptr<Shell> child;
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    shell->RunEngine(Configuration(settings, "missingEntrypoint"));
+    EXPECT_FALSE(SpawnShell(*shell, settings));
+    // A new startup attempt must replace the failed attempt's completion
+    // state, without waiting for its platform result callback.
+    shell->RunEngine(Configuration(settings, "mainNotifyNative"));
+    child = SpawnShell(*shell, settings);
+    ASSERT_TRUE(child);
+    ExpectSharedResources(*shell, *child);
+  });
+  ASSERT_TRUE(child);
+  dart_callback.Wait();
+  EXPECT_EQ(isolate_create_count, 3u);
+  DestroyShell(std::move(shell), task_runners_);
+  DestroyShell(std::move(child), task_runners_);
+}
+
+TEST_F(MergeAfterLaunchShellTest, FailedMergeRejectsSpawn) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  auto other_runner = CreateNewThread();
+  auto* queues = fml::MessageLoopTaskQueues::GetInstance();
+  auto ui_queue = task_runners_.GetUITaskRunner()->GetTaskQueueId();
+  auto other_queue = other_runner->GetTaskQueueId();
+  // A queue that already owns another queue cannot itself be subsumed.
+  ASSERT_TRUE(queues->Merge(ui_queue, other_queue));
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    shell->RunEngine(Configuration(settings));
+    EXPECT_FALSE(SpawnShell(*shell, settings));
+  });
+  EXPECT_FALSE(queues->Owns(
+      task_runners_.GetPlatformTaskRunner()->GetTaskQueueId(), ui_queue));
+  EXPECT_TRUE(queues->Unmerge(ui_queue, other_queue));
+  DestroyShell(std::move(shell), task_runners_);
+}
+
+TEST_F(MergeAfterLaunchShellTest, RunAgainBeforeQueuedOwnerTransfer) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  std::promise<Engine::RunStatus> repeat_result;
+  auto repeat_result_future = repeat_result.get_future();
+  std::unique_ptr<Shell> child;
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    shell->RunEngine(Configuration(settings));
+    EXPECT_EQ(WaitForUIThreadLaunch(shell.get()), Engine::RunStatus::Success);
+    // The startup invocation has finished, but its queued owner transfer
+    // cannot run until this platform task returns.
+    const auto main_port = shell->GetEngine()->GetUIIsolateMainPort();
+    EXPECT_NE(main_port, ILLEGAL_PORT);
+    EXPECT_FALSE(Dart_GetCurrentThreadOwnsIsolate(main_port));
+    shell->RunEngine(Configuration(settings), [&](auto result) {
+      EXPECT_TRUE(
+          task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+      repeat_result.set_value(result);
+    });
+    child = SpawnShell(*shell, settings);
+    ASSERT_TRUE(child);
+    ExpectSharedResources(*shell, *child);
+  });
+  // The result callback is posted to P, so wait after the platform task exits.
+  EXPECT_EQ(repeat_result_future.get(),
+            Engine::RunStatus::FailureAlreadyRunning);
+  DestroyShell(std::move(shell), task_runners_);
+  DestroyShell(std::move(child), task_runners_);
+}
+
+TEST_F(MergeAfterLaunchShellTest, RestartBeforeQueuedOwnerTransfer) {
+  auto settings = CreateSettingsForFixture();
+  size_t shutdown_count = 0;
+  settings.root_isolate_shutdown_callback = [&] {
+    EXPECT_TRUE(
+        task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+    EXPECT_TRUE(Dart_GetCurrentThreadOwnsIsolate(Dart_GetMainPortId()));
+    ++shutdown_count;
+  };
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  fml::AutoResetWaitableEvent dart_callback;
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() {
+        EXPECT_TRUE(
+            task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+        dart_callback.Signal();
+      }));
+  std::unique_ptr<Shell> child;
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    shell->RunEngine(Configuration(settings));
+    ASSERT_EQ(WaitForUIThreadLaunch(shell.get()), Engine::RunStatus::Success);
+    EXPECT_FALSE(Dart_GetCurrentThreadOwnsIsolate(
+        shell->GetEngine()->GetUIIsolateMainPort()));
+    auto old_root =
+        shell->GetEngine()->GetRuntimeController()->GetRootIsolate();
+    // Restart must confirm the old root's ownership before shutting it down.
+    // Delayed owner transfers must be safe after the runtime is replaced.
+    RestartEngine(shell.get(), Configuration(settings, "mainNotifyNative"));
+    EXPECT_TRUE(old_root.expired());
+    EXPECT_EQ(shutdown_count, 1u);
+    child = SpawnShell(*shell, settings);
+    ASSERT_TRUE(child);
+    ExpectSharedResources(*shell, *child);
+  });
+  ASSERT_TRUE(child);
+  dart_callback.Wait();
+  DestroyShell(std::move(shell), task_runners_);
+  DestroyShell(std::move(child), task_runners_);
+  EXPECT_EQ(shutdown_count, 3u);
+}
+
+TEST_F(MergeAfterLaunchShellTest, FailedRestartRejectsSpawn) {
+  auto settings = CreateSettingsForFixture();
+  auto shell = CreateShell(settings, task_runners_);
+  ASSERT_TRUE(shell);
+  RunEngine(shell.get(), Configuration(settings));
+  PostSync(task_runners_.GetPlatformTaskRunner(), [&] {
+    EXPECT_FALSE(shell->GetEngine()->Restart(
+        Configuration(settings, "missingEntrypoint")));
+    // The successful initial launch result does not describe the new runtime
+    // after a failed restart. There is no parent root isolate to spawn from.
+    EXPECT_FALSE(SpawnShell(*shell, settings));
+  });
+  DestroyShell(std::move(shell), task_runners_);
 }
 
 TEST_F(ShellTest, ReleaseResourceContextWhenIOManagerIsDeleted) {

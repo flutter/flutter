@@ -124,6 +124,30 @@ void ShellTest::RunEngine(Shell* shell, RunConfiguration configuration) {
   latch.Wait();
 }
 
+Engine::RunStatus ShellTest::WaitForUIThreadLaunch(Shell* shell) {
+  FML_DCHECK(shell->GetTaskRunners()
+                 .GetPlatformTaskRunner()
+                 ->RunsTasksOnCurrentThread());
+  FML_DCHECK(shell->ui_thread_launch_result_.valid());
+  return shell->ui_thread_launch_result_.get();
+}
+
+void ShellTest::SetUIThreadLaunchWaitCallback(Shell* shell,
+                                              const fml::closure& callback) {
+  FML_DCHECK(shell->GetTaskRunners()
+                 .GetPlatformTaskRunner()
+                 ->RunsTasksOnCurrentThread());
+  FML_DCHECK(shell->ui_thread_launch_result_.valid());
+  auto launch_result = shell->ui_thread_launch_result_;
+  // A deferred future invokes the callback only when the result is consumed,
+  // then still waits for the original startup invocation to finish.
+  shell->ui_thread_launch_result_ =
+      std::async(std::launch::deferred, [launch_result, callback] {
+        callback();
+        return launch_result.get();
+      }).share();
+}
+
 void ShellTest::RestartEngine(Shell* shell, RunConfiguration configuration) {
   std::promise<bool> restarted;
   fml::TaskRunner::RunNowOrPostTask(

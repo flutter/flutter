@@ -58,10 +58,11 @@ class AndroidShellHolder {
   ///             The new Shell is returned in a new AndroidShellHolder
   ///             instance.
   ///
-  ///             The new Shell's flutter::Settings cannot be changed from that
-  ///             of the initial Shell. The RunConfiguration subcomponent can
-  ///             be changed however in the spawned Shell to run a different
-  ///             entrypoint than the existing shell.
+  ///             The new Shell inherits the initial Shell's flutter::Settings,
+  ///             except that kMergeAfterLaunch becomes kEnabled: spawned
+  ///             engines use the platform thread as their UI thread from the
+  ///             start. The RunConfiguration subcomponent can be changed to
+  ///             run a different entrypoint than the existing shell.
   ///
   ///             Since the AndroidShellHolder both binds downwards to a Shell
   ///             and also upwards to JNI callbacks that the PlatformViewAndroid

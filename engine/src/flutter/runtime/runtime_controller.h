@@ -116,6 +116,7 @@ class RuntimeController : public PlatformConfigurationClient,
   ///
   std::unique_ptr<RuntimeController> Spawn(
       RuntimeDelegate& p_client,
+      const TaskRunners& task_runners,
       const std::string& advisory_script_uri,
       const std::string& advisory_script_entrypoint,
       const std::function<void(int64_t)>& idle_notification_callback,

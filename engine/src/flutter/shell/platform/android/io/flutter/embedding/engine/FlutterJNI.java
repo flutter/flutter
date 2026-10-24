@@ -481,7 +481,9 @@ public class FlutterJNI {
             entrypointArgs,
             engineId);
     Preconditions.checkState(
-        spawnedJNI.nativeShellHolderId != null && spawnedJNI.nativeShellHolderId != 0,
+        spawnedJNI != null
+            && spawnedJNI.nativeShellHolderId != null
+            && spawnedJNI.nativeShellHolderId != 0,
         "Failed to spawn new JNI connected shell from existing shell.");
 
     return spawnedJNI;

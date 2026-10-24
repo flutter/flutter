@@ -18,6 +18,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/base32.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/log_settings.h"
@@ -605,6 +606,13 @@ Shell::Shell(DartVMRef vm,
 }
 
 Shell::~Shell() {
+  if (ui_thread_launch_result_.valid()) {
+    // Startup may move a queued destruction task to the platform thread while
+    // that thread is waiting for it, causing a deadlock. The original UI
+    // startup invocation resolves this future directly, without needing a
+    // platform task.
+    ui_thread_launch_result_.wait();
+  }
 #if !SLIMPELLER
   PersistentCache::GetCacheForProcess()->RemoveWorkerTaskRunner(
       task_runners_.GetIOTaskRunner());
@@ -692,14 +700,33 @@ std::unique_ptr<Shell> Shell::Spawn(
     const CreateCallback<Rasterizer>& on_create_rasterizer) const {
   FML_DCHECK(task_runners_.IsValid());
 
+  Settings child_settings = settings_;
+
   if (settings_.merged_platform_ui_thread ==
       Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
-    // Spawning engines that share the same task runners can result in
-    // deadlocks when the UI task runner is moved to the platform thread.
-    FML_LOG(ERROR) << "MergedPlatformUIThread::kMergeAfterLaunch does not "
-                      "support spawning";
-    return nullptr;
+    FML_LOG(WARNING)
+        << "Engines spawned from a kMergeAfterLaunch engine initialize and run "
+           "on the platform task runner.";
+    if (!WaitForUIThreadMigration()) {
+      FML_LOG(ERROR)
+          << "Cannot spawn before the parent engine has successfully "
+             "moved its UI queue to the platform thread";
+      return nullptr;
+    }
+    child_settings.merged_platform_ui_thread =
+        Settings::MergedPlatformUIThread::kEnabled;
   }
+
+  // With kMergeAfterLaunch, destroying this Shell moves its original UI queue
+  // back to the startup thread, so children must use the platform runner.
+  const TaskRunners child_task_runners(
+      task_runners_.GetLabel(), task_runners_.GetPlatformTaskRunner(),
+      task_runners_.GetRasterTaskRunner(),
+      settings_.merged_platform_ui_thread ==
+              Settings::MergedPlatformUIThread::kMergeAfterLaunch
+          ? task_runners_.GetPlatformTaskRunner()
+          : task_runners_.GetUITaskRunner(),
+      task_runners_.GetIOTaskRunner());
 
   // It's safe to store this value since it is set on the platform thread.
   bool is_gpu_disabled = false;
@@ -708,8 +735,8 @@ std::unique_ptr<Shell> Shell::Spawn(
           .SetIfFalse([&is_gpu_disabled] { is_gpu_disabled = false; })
           .SetIfTrue([&is_gpu_disabled] { is_gpu_disabled = true; }));
   std::unique_ptr<Shell> result = CreateWithSnapshot(
-      PlatformData{}, task_runners_, rasterizer_->GetRasterThreadMerger(),
-      io_manager_, resource_cache_limit_calculator_, GetSettings(), vm_,
+      PlatformData{}, child_task_runners, rasterizer_->GetRasterThreadMerger(),
+      io_manager_, resource_cache_limit_calculator_, child_settings, vm_,
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
       on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
@@ -726,6 +753,7 @@ std::unique_ptr<Shell> Shell::Spawn(
         return engine->Spawn(
             /*delegate=*/delegate,
             /*settings=*/settings,
+            /*task_runners=*/task_runners,
             /*animator=*/std::move(animator),
             /*initial_route=*/initial_route,
             /*io_manager=*/io_manager,
@@ -792,15 +820,38 @@ void Shell::RunEngine(
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
+  std::shared_ptr<std::promise<Engine::RunStatus>> launch_completion;
+  fml::ScopedCleanupClosure launch_cancellation;
+  if (settings_.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+    if (ui_thread_launch_result_.valid()) {
+      WaitForUIThreadMigration();
+    }
+    if (!ui_thread_launch_result_.valid() ||
+        !task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread()) {
+      launch_completion = std::make_shared<std::promise<Engine::RunStatus>>();
+      ui_thread_launch_result_ = launch_completion->get_future().share();
+      // Resolve discarded startup tasks without creating a broken promise.
+      launch_cancellation.SetClosure([launch_completion] {
+        launch_completion->set_value(Engine::RunStatus::Failure);
+      });
+    }
+  }
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
       fml::MakeCopyable(
           [run_configuration = std::move(run_configuration),
-           weak_engine = weak_engine_, result]() mutable {
+           weak_engine = weak_engine_, result,
+           launch_completion = std::move(launch_completion),
+           launch_cancellation = std::move(launch_cancellation)]() mutable {
             if (!weak_engine) {
               FML_LOG(ERROR)
                   << "Could not launch engine with configuration - no engine.";
               result(Engine::RunStatus::Failure);
+              if (launch_completion) {
+                launch_completion->set_value(Engine::RunStatus::Failure);
+                launch_cancellation.Release();
+              }
               return;
             }
             auto run_result = weak_engine->Run(std::move(run_configuration));
@@ -809,7 +860,24 @@ void Shell::RunEngine(
             }
 
             result(run_result);
+            if (launch_completion) {
+              launch_completion->set_value(run_result);
+              launch_cancellation.Release();
+            }
           }));
+}
+
+bool Shell::WaitForUIThreadMigration() const {
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  if (!ui_thread_launch_result_.valid()) {
+    return false;
+  }
+  const auto run_status = ui_thread_launch_result_.get();
+  if (!task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() ||
+      !engine_->GetRuntimeController()->IsRootIsolateRunning()) {
+    return false;
+  }
+  return run_status == Engine::RunStatus::Success;
 }
 
 std::optional<DartErrorCode> Shell::GetUIIsolateLastError() const {

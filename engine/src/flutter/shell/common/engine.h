@@ -437,6 +437,7 @@ class Engine final : public RuntimeDelegate {
   std::unique_ptr<Engine> Spawn(
       Delegate& delegate,
       const Settings& settings,
+      const TaskRunners& task_runners,
       std::unique_ptr<Animator> animator,
       const std::string& initial_route,
       const fml::WeakPtr<IOManager>& io_manager,
@@ -1087,6 +1088,8 @@ class Engine final : public RuntimeDelegate {
   void HandleAssetPlatformMessage(std::unique_ptr<PlatformMessage> message);
 
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
+
+  void CompleteRootIsolateOwnershipTransfer() const;
 
   friend class testing::ShellTest;
 
