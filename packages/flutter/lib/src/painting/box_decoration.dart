@@ -244,6 +244,7 @@ class BoxDecoration extends Decoration {
       borderRadius: BorderRadiusGeometry.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient?.scale(factor),
+      backgroundBlendMode: backgroundBlendMode,
       shape: shape,
     );
   }
@@ -271,6 +272,10 @@ class BoxDecoration extends Decoration {
   ///
   /// The [shape] is not interpolated. To interpolate the shape, consider using
   /// a [ShapeDecoration] with different border shapes.
+  ///
+  /// The [backgroundBlendMode] is not interpolated either. The result uses the
+  /// blend mode of `a` when `t` is less than 0.5, and the blend mode of `b`
+  /// otherwise.
   ///
   /// If both values are null, this returns null. Otherwise, it returns a
   /// non-null value. If one of the values is null, then the result is obtained
@@ -311,6 +316,7 @@ class BoxDecoration extends Decoration {
       borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: Gradient.lerp(a.gradient, b.gradient, t),
+      backgroundBlendMode: t < 0.5 ? a.backgroundBlendMode : b.backgroundBlendMode,
       shape: t < 0.5 ? a.shape : b.shape,
     );
   }
