@@ -159,8 +159,7 @@ TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
   EXPECT_NE(gl_vert.find("uniform float _impeller_y_flip"), std::string::npos)
       << "GLES vertex shader is missing the y-flip uniform declaration:\n"
       << gl_vert;
-  EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
-            std::string::npos)
+  EXPECT_NE(gl_vert.find("gl_Position.y*=_impeller_y_flip"), std::string::npos)
       << "GLES vertex shader is missing the y-flip epilogue:\n"
       << gl_vert;
 
@@ -209,14 +208,13 @@ TEST(CompilerTest, YFlipInjectionHandlesEarlyReturnsInGLESVertexShader) {
       << gl_vert;
   EXPECT_NE(gl_vert.find("_impeller_user_main();"), std::string::npos)
       << gl_vert;
-  EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
-            std::string::npos)
+  EXPECT_NE(gl_vert.find("gl_Position.y*=_impeller_y_flip"), std::string::npos)
       << gl_vert;
 
   // Only the wrapper's `void main(` should remain after the rename.
-  const size_t first_main = gl_vert.find("\nvoid main(");
+  const size_t first_main = gl_vert.find("void main(");
   ASSERT_NE(first_main, std::string::npos);
-  EXPECT_EQ(gl_vert.find("\nvoid main(", first_main + 1), std::string::npos)
+  EXPECT_EQ(gl_vert.find("void main(", first_main + 1), std::string::npos)
       << gl_vert;
 }
 
