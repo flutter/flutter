@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
 
 void main() {
@@ -2059,4 +2060,58 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelViewport)), Size.zero);
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/125997.
+  testWidgets('ListWheelScrollView can resolve images during its first layout', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListWheelScrollView.useDelegate(
+          itemExtent: 100.0,
+          // A null childCount makes the viewport apply content dimensions after
+          // it builds the children.
+          childDelegate: ListWheelChildBuilderDelegate(
+            builder: (BuildContext context, int index) =>
+                Image.memory(Uint8List.fromList(kTransparentImage)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Image), findsWidgets);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/125997.
+  testWidgets('Looping ListWheelScrollView can read selectedItem during its first layout', (
+    WidgetTester tester,
+  ) async {
+    final controller = FixedExtentScrollController(initialItem: 7);
+    addTearDown(controller.dispose);
+    final selectedItems = <int>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListWheelScrollView.useDelegate(
+          controller: controller,
+          itemExtent: 100.0,
+          childDelegate: ListWheelChildLoopingListDelegate(
+            children: List<Widget>.generate(
+              10,
+              (int index) => LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  selectedItems.add(controller.selectedItem);
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(selectedItems, isNotEmpty);
+    expect(selectedItems, everyElement(7));
+  });
 }
