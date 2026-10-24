@@ -111,11 +111,6 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
   const auto& gl = reactor_->GetProcTable();
 
   gl.BindBuffer(target_type, buffer.value());
-  if (!initialized_) {
-    gl.BufferData(target_type, backing_store_->GetLength().GetByteSize(),
-                  nullptr, GL_DYNAMIC_DRAW);
-    initialized_ = true;
-  }
 
   // Take and clear the dirty range BEFORE uploading. A Flush() from another
   // thread during the upload then merges into a fresh dirty range that the
@@ -126,6 +121,19 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
     Lock lock(dirty_range_mutex_);
     std::swap(dirty_range_, dirty);
   }
+
+  if (!initialized_) {
+    gl.BufferData(target_type, backing_store_->GetLength().GetByteSize(),
+                  nullptr, GL_DYNAMIC_DRAW);
+    initialized_ = true;
+  } else if (dirty.has_value() && dirty->offset == 0) {
+    // Orphan the buffer by reallocating its storage when uploading from the
+    // start. This prevents the driver from stalling if in-flight GPU commands
+    // are still reading from the previous buffer contents.
+    gl.BufferData(target_type, backing_store_->GetLength().GetByteSize(),
+                  nullptr, GL_DYNAMIC_DRAW);
+  }
+
   if (dirty.has_value()) {
     gl.BufferSubData(target_type, dirty->offset, dirty->length,
                      backing_store_->GetBuffer() + dirty->offset);
