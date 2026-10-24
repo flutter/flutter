@@ -565,9 +565,18 @@ class _FocusState extends State<Focus> {
 
   void _initNode() {
     if (!widget._usingExternalFocus) {
-      focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+      // Do not copy the inherited value back into an external node. For a
+      // FocusScopeNode it also reflects canRequestFocus.
+      // See https://github.com/flutter/flutter/issues/147256.
+      if (widget._descendantsAreFocusable != null || widget.focusNode == null) {
+        focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+      }
       focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
-      focusNode.skipTraversal = widget.skipTraversal;
+      // Do not copy the inherited value back into an external node.
+      // See https://github.com/flutter/flutter/issues/113005.
+      if (widget._skipTraversal != null || widget.focusNode == null) {
+        focusNode.skipTraversal = widget.skipTraversal;
+      }
       if (widget._canRequestFocus != null) {
         focusNode.canRequestFocus = widget._canRequestFocus!;
       }
@@ -659,11 +668,15 @@ class _FocusState extends State<Focus> {
         if (widget.onKeyEvent != focusNode.onKeyEvent) {
           focusNode.onKeyEvent = widget.onKeyEvent;
         }
-        focusNode.skipTraversal = widget.skipTraversal;
+        if (widget._skipTraversal != null || widget.focusNode == null) {
+          focusNode.skipTraversal = widget.skipTraversal;
+        }
         if (widget._canRequestFocus != null) {
           focusNode.canRequestFocus = widget._canRequestFocus!;
         }
-        focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+        if (widget._descendantsAreFocusable != null || widget.focusNode == null) {
+          focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+        }
         focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
       }
     } else {
