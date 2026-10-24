@@ -733,7 +733,12 @@ built under those modes' configurations through `in_configuration`
 for the web SDK), so a test that
 builds a release app (icon_tree_shaker_test's tree-shaken bundle, the
 integration shard's) has them; the first build of a mode is a build of the
-engine, cached afterwards. The integration shard runs the tool as a
+engine, cached afterwards. The web SDK comes the same way
+(`//engine/src/flutter/web_sdk:web_sdk_directory`: `flutter-web-sdk.zip`
+built under the release mode and the Emscripten platform, unpacked as
+`bin/cache/flutter_web_sdk`), so `flutter build web` and the widget
+previewer run from the facsimile too; its first build is the web engine's.
+The integration shard runs the tool as a
 process on projects of its own -- hot reload on flutter_tester, the
 daemon, the debug adapter, `flutter test` -- and some of its tests run pub
 *in a workspace member* (hello_world, dev/automated_tests), which pub
@@ -765,7 +770,7 @@ cases -- plus the Impeller, no-tracking and release/profile runs,
 flutter_tools' general shard (271 files) and commands shard (the hermetic
 half whole, 67; the permeable half but for the one file that does not
 compile at this checkout, 10) and its integration shard where a Linux host
-can run it (66 of 117 files: not Android, the web SDK, CMake or xvfb),
+can run it (73 of 117 files: not Android, CMake or xvfb),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
 fuchsia_remote_debug_protocol). Left out by name: web-only and macOS-only

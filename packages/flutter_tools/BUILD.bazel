@@ -186,18 +186,20 @@ write_file(
 )
 
 # What the tool, run from the facsimile, reads of the cache beyond pub's
-# view of it: the host's engine artifacts as `flutter precache --linux`
+# view of it: the host's engine artifacts as `flutter precache --linux --web`
 # unpacks them (bundle_directory over the archives a host build uploads, in
-# the three runtime modes), the stamps Cache.updateAll checks before it
-# would download, the Material fonts and the flutter_gpu package (the tool
-# checks the directories exist).
+# the three runtime modes, and the web SDK's), the stamps Cache.updateAll
+# checks before it would download, the Material fonts and the flutter_gpu
+# package (the tool checks the directories exist).
 _TOOL_CACHE_FILES = _PUB_CACHE_FILES | {
     ":flutter_tools_snapshot": "flutter_tools.snapshot",
     "//engine/src/flutter/build/archives:host_engine_directory": "artifacts/engine/linux-x64",
     "//engine/src/flutter/build/archives:host_engine_profile_directory": "artifacts/engine/linux-x64-profile",
     "//engine/src/flutter/build/archives:host_engine_release_directory": "artifacts/engine/linux-x64-release",
     "//engine/src/flutter/build/archives:common_engine_directory": "artifacts/engine/common",
+    "//engine/src/flutter/web_sdk:web_sdk_directory": "flutter_web_sdk",
     "//bin/internal:flutter_sdk_stamp": "flutter_sdk.stamp",
+    "//bin/internal:flutter_web_sdk_stamp": "flutter_web_sdk.stamp",
     "//bin/internal:font_subset_stamp": "font-subset.stamp",
     "//bin/internal:linux_sdk_stamp": "linux-sdk.stamp",
     "//bin/internal:material_fonts_stamp": "material_fonts.stamp",
@@ -215,14 +217,18 @@ _TOOL_SDK_FILES = {
 }
 
 # The version pins the tool compares the stamps against (and the iOS USB
-# artifacts' it looks up before it skips them on Linux), and the directories
+# artifacts' it looks up before it skips them on Linux), the directories
 # create_test creates a project in -- examples/, dev/, the engine's and
-# packages/flutter's examples -- one file each so that they exist.
+# packages/flutter's examples -- one file each so that they exist, and the
+# font a web build takes from the engine's tree.
 _TOOL_DATA = [
     "//bin/internal:all_files",
     "//:dev/README.md",
     "//:examples/README.md",
     "//engine/src/flutter:examples/glfw/README.md",
+    # A web build bundles the fallback Roboto from the engine's tree
+    # (build_system/targets/web.dart).
+    "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
     "//packages/flutter/examples/api:pubspec.yaml",
 ]
 
@@ -359,26 +365,15 @@ _INTEGRATION_EXCLUDED = [
     "test/integration.shard/gradle_jni_packaging_test.dart",
     "test/integration.shard/gradle_libapp_so_packaging_test.dart",
     "test/integration.shard/gradle_non_android_plugin_test.dart",
-    # The web SDK (flutter_web_sdk, the web engine's build), which the
-    # facsimile does not hold yet: web builds and the widget previewer.
-    "test/integration.shard/asset_transformation_test.dart",
-    "test/integration.shard/flutter_build_wasm_test.dart",
+    # The host's C toolchain and CMake (native assets; `flutter build linux
+    # --config-only` runs CMake; the record_use and data-asset tests build
+    # or run for the Linux desktop as well as the web).
+    "test/integration.shard/build_linux_config_only_test.dart",
     "test/integration.shard/isolated/dart_data_asset_conflicting_assets_test.dart",
     "test/integration.shard/isolated/dart_data_asset_flutter_build_test.dart",
-    "test/integration.shard/isolated/record_use_flutter_build_test.dart",
-    "test/integration.shard/web_define_build_test.dart",
-    "test/integration.shard/web_plugin_registrant_test.dart",
-    "test/integration.shard/widget_preview_detection_test.dart",
-    "test/integration.shard/widget_preview_legacy_test.dart",
-    "test/integration.shard/widget_preview_machine_test.dart",
-    "test/integration.shard/widget_preview_pubspec_test.dart",
-    "test/integration.shard/widget_preview_smoke_test.dart",
-    # The host's C toolchain and CMake (native assets; `flutter build linux
-    # --config-only` runs CMake; the record_use tests and the data assets'
-    # `flutter run` build for the Linux desktop).
-    "test/integration.shard/build_linux_config_only_test.dart",
     "test/integration.shard/isolated/dart_data_asset_flutter_run_test.dart",
     "test/integration.shard/isolated/record_use_caching_test.dart",
+    "test/integration.shard/isolated/record_use_flutter_build_test.dart",
     "test/integration.shard/isolated/record_use_flutter_run_test.dart",
     "test/integration.shard/isolated/native_assets_flutter_build_framework_test.dart",
     "test/integration.shard/isolated/native_assets_flutter_build_test.dart",
@@ -394,6 +389,12 @@ _INTEGRATION_EXCLUDED = [
     "test/integration.shard/bash_entrypoint_test.dart",
     "test/integration.shard/batch_entrypoint_test.dart",
     "test/integration.shard/dependencies_test.dart",
+    # Wait 120 s of their own for the previewer's first load -- a DDC build
+    # of the scaffold and its browser start, which takes about that here --
+    # and overrun it nearly every time (the other previewer tests make it,
+    # retried).
+    "test/integration.shard/widget_preview_legacy_test.dart",
+    "test/integration.shard/widget_preview_pubspec_test.dart",
 ]
 
 # The integration shard's tests run pub in workspace members (hello_world,
@@ -417,10 +418,15 @@ dart_package_tests(
     cache = _TOOL_CACHE,
     cache_files = _TOOL_CACHE_FILES,
     data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
-    # Waits a minute of its own for `flutter run` to report the VM service,
-    # which a loaded machine overruns (a fresh project's resolution and
-    # compile come first).
-    flaky = ["test/integration.shard/disable_service_origin_check_test.dart"],
+    # Each waits a minute or two of its own -- for `flutter run` to report
+    # the VM service, for the widget previewer's first load -- which a loaded
+    # machine overruns (a fresh project's resolution and compile come first).
+    flaky = [
+        "test/integration.shard/disable_service_origin_check_test.dart",
+        "test/integration.shard/widget_preview_detection_test.dart",
+        "test/integration.shard/widget_preview_machine_test.dart",
+        "test/integration.shard/widget_preview_smoke_test.dart",
+    ],
     imports = _IMPORTS,
     network = True,
     package = "flutter_tools",
@@ -428,12 +434,21 @@ dart_package_tests(
     pub_cache = ":workspace_pub_cache",
     sdk_files = _TOOL_SDK_FILES,
     sdk_trees = {"@pub_workspace//:pubspecs": ""},
-    # The longest: many hot reloads, or the debug adapter's whole protocol.
+    # The longest: many hot reloads, the debug adapter's whole protocol, web
+    # builds and the widget previewer (a web app in a browser).
     sizes = {
         "test/integration.shard/break_on_framework_exceptions_test.dart": "enormous",
         "test/integration.shard/debug_adapter/flutter_adapter_test.dart": "enormous",
         "test/integration.shard/expression_evaluation_test.dart": "enormous",
+        "test/integration.shard/web_plugin_registrant_test.dart": "enormous",
+        "test/integration.shard/widget_preview_detection_test.dart": "enormous",
+        "test/integration.shard/widget_preview_machine_test.dart": "enormous",
+        "test/integration.shard/widget_preview_smoke_test.dart": "enormous",
     },
+    # Each test runs the tool, a frontend server and flutter_tester or a
+    # browser at once: four cores' worth, so that a loaded machine does not
+    # overrun the waits the tests keep for themselves.
+    tags = ["cpu:4"],
     tests = glob(
         ["test/integration.shard/**/*_test.dart"],
         exclude = _INTEGRATION_EXCLUDED,
