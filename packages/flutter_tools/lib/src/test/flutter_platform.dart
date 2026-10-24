@@ -949,6 +949,16 @@ Future<void> pipeHarnessToRemote({
           );
           logger.printTrace('test $id: JSON decoding failed: $formatException');
         }, test: (error) => error is FormatException)
+        .where((Object? message) {
+          if (message is! List<Object?>) {
+            logger.printWarning(
+              'Received unexpected non-List JSON output from test runner: $message',
+            );
+            logger.printTrace('test $id: unexpected non-List JSON payload: $message');
+            return false;
+          }
+          return true;
+        })
         .pipe(harnessChannel.sink)
         .then<void>((void value) {
           logger.printTrace('test $id: Test harness is no longer needed by test process');

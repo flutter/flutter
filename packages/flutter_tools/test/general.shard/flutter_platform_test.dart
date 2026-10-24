@@ -306,11 +306,11 @@ void main() {
         final receivedFromRemote = <Object?>[];
         harnessController.local.stream.listen(receivedFromRemote.add);
 
-        // Send non-JSON error string from remote channel followed by valid JSON.
+        // Send non-JSON error string from remote channel followed by valid JSON list.
         remoteController.local.sink.add(
           'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
         );
-        remoteController.local.sink.add('{"valid": true}');
+        remoteController.local.sink.add('[0, {"valid": true}]');
 
         await pumpEventQueue();
 
@@ -322,7 +322,10 @@ void main() {
         expect(
           receivedFromRemote,
           equals(<Object?>[
-            <String, Object?>{'valid': true},
+            <Object?>[
+              0,
+              <String, Object?>{'valid': true},
+            ],
           ]),
         );
         expect(
@@ -332,6 +335,54 @@ void main() {
           ),
         );
         expect(logger.traceText, contains('test 0: JSON decoding failed:'));
+      },
+    );
+
+    testWithoutContext(
+      'pipeHarnessToRemote safely ignores non-List JSON output and logs warning',
+      () async {
+        final harnessController = StreamChannelController<Object?>();
+        final remoteController = StreamChannelController<String>();
+        final logger = BufferLogger.test();
+
+        final Future<void> pipeFuture = pipeHarnessToRemote(
+          id: 0,
+          harnessChannel: harnessController.foreign,
+          remoteChannel: remoteController.foreign,
+          logger: logger,
+        );
+
+        final receivedFromRemote = <Object?>[];
+        harnessController.local.stream.listen(receivedFromRemote.add);
+
+        // Send non-List JSON map from remote channel followed by valid JSON list.
+        remoteController.local.sink.add('{"unexpected": "map"}');
+        remoteController.local.sink.add('[0, {"valid": true}]');
+
+        await pumpEventQueue();
+
+        await remoteController.local.sink.close();
+        await harnessController.local.sink.close();
+
+        await pipeFuture;
+
+        expect(
+          receivedFromRemote,
+          equals(<Object?>[
+            <Object?>[
+              0,
+              <String, Object?>{'valid': true},
+            ],
+          ]),
+        );
+        expect(
+          logger.warningText,
+          contains('Received unexpected non-List JSON output from test runner: {unexpected: map}'),
+        );
+        expect(
+          logger.traceText,
+          contains('test 0: unexpected non-List JSON payload: {unexpected: map}'),
+        );
       },
     );
   });
