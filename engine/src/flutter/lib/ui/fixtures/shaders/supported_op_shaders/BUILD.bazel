@@ -5,8 +5,8 @@
 # Generated from //flutter/lib/ui/fixtures/shaders/supported_op_shaders/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impellerc")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+load("//build_defs/impeller:shaders.bzl", "impellerc")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 

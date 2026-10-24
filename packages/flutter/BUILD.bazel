@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # package:flutter's sources, for the tests Bazel compiles and runs on
-# flutter_tester (engine/src/flutter/build/bazel/dart/flutter_test.bzl); the
+# flutter_tester (build_defs/dart/flutter_test.bzl); the
 # tests themselves are under test/.
 
 package(default_visibility = ["//visibility:public"])

@@ -5,13 +5,13 @@
 # dev/tools' scripts (package dev_tools) and their tests under Bazel: each
 # test compiled by the frontend server for the VM and run by package:test's
 # precompiled runner from this directory, as `dart test` runs them
-# (engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+# (build_defs/dart/dart_test.bzl; research/15).
 # gen_defaults, gen_keycodes and vitool beside them are packages of their
 # own.
 #
 #   bazel test //dev/tools:tests
 
-load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 

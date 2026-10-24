@@ -11,7 +11,7 @@
 # see //engine/src/flutter/build/bazel/toolchains), and the toolchain lists
 # them among its compiler inputs.
 
-load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@flutter//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])

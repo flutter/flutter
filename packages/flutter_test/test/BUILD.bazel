@@ -5,7 +5,7 @@
 # flutter_test's own tests under Bazel: each *_test.dart compiled by the
 # frontend server from a prelude kernel and run on the Bazel-built
 # flutter_tester, as `flutter test` runs it
-# (//packages/flutter_test:package_tests.bzl; research/15). Each test takes
+# (//build_defs/dart:flutter_package_tests.bzl; research/15). Each test takes
 # the flutter_test_config.dart of its directory or the nearest above
 # (custom_exception_reporter, semantics_checker, test_config and its
 # nested_config have their own; test_config/project_root's pubspec.yaml
@@ -13,7 +13,7 @@
 #
 #   bazel test //packages/flutter_test/test:tests
 
-load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+load("//build_defs/dart:flutter_package_tests.bzl", "flutter_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 

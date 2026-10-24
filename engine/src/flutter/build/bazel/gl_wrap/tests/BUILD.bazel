@@ -7,8 +7,8 @@
 # next to the binary as the engine's suites find them.
 
 load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:testing.bzl", "flutter_gpu_test_backends")
 
 flutter_gpu_test_backends(name = "gpu_test_backends")
 

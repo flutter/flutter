@@ -1,0 +1,12 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The repositories the build fetches: extensions.bzl (the synced_deps module
+# extension over deps.lock.bzl, which gen_deps.dart writes from DEPS) and
+# repositories.bzl (its repository rules), flutter_sdk_cache.bzl (the SDK
+# cache's downloads the tests read: the Material fonts, the Gradle wrapper).
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["deps.lock.bzl"])

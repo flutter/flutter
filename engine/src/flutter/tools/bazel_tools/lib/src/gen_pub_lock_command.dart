@@ -14,7 +14,7 @@ import 'pub_lock.dart';
 const String pubLockGeneratorLabel = 'engine/src/flutter/tools/bazel_tools/bin/gen_pub_lock.dart';
 
 /// Where `pub.lock.bzl` lives, relative to the repository root.
-const String defaultPubLockBzlPath = 'engine/src/flutter/build/bazel/dart/pub.lock.bzl';
+const String defaultPubLockBzlPath = 'build_defs/dart/pub.lock.bzl';
 
 /// Generates (or checks) `pub.lock.bzl` from the repository's `pubspec.lock`.
 final class GenPubLockCommand {

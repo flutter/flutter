@@ -5,8 +5,8 @@
 # Generated from //flutter/sky/dist/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "build_directory_tree", "zip_bundle")
-load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_action")
+load("//build_defs/dist:zip_bundle.bzl", "build_directory_tree", "zip_bundle")
+load("//build_defs/gn:gn_action.bzl", "gn_action")
 
 package(default_visibility = ["//visibility:public"])
 

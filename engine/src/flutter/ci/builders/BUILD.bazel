@@ -20,7 +20,7 @@
 # steps (scripts of the checkout) listed. The suites are manual: each stands
 # for one builder, named; a wildcard run of the tree has the tests themselves.
 
-load("//engine/src/flutter/build/bazel:install.bzl", "install")
+load("//build_defs/dist:install.bzl", "install")
 
 package(default_visibility = ["//visibility:public"])
 

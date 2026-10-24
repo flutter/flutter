@@ -1419,10 +1419,10 @@ final class ReferenceConstant {
   final String symbol;
 }
 
-const String _coptsBzl = '//engine/src/flutter/build/bazel:copts.bzl';
+const String _coptsBzl = '//build_defs/cc:copts.bzl';
 
 /// The `.bzl` the @engine_version repository writes at fetch time
-/// (build/bazel/extensions.bzl): the four arguments of
+/// (build_defs/repositories/extensions.bzl): the four arguments of
 /// shell/version/version.gni, which tools/gn computes from git and DEPS
 /// when it generates a GN build.
 const String _versionBzl = '@engine_version//:version.bzl';
@@ -1474,7 +1474,7 @@ const Map<String, List<String>> buildOutputCompilerInputs = <String, List<String
 /// A directory a zip_bundle entry names as its source (zip.py walks it):
 /// the target of its files and the directory's path relative to its
 /// repository's root, which are zip_tree's `srcs` and `root`
-/// (build/bazel/zip_bundle.bzl).
+/// (build_defs/dist/zip_bundle.bzl).
 final class DirectorySource {
   const DirectorySource(this.label, {required this.root});
 
@@ -1574,7 +1574,7 @@ enum TemplateArgumentKind {
   strings,
 
   /// One string holding `rebase_path()` results (a shader bundle's JSON),
-  /// which become the path tokens of build/bazel/gn_action.
+  /// which become the path tokens of build_defs/gn.
   pathString,
 
   /// Plain strings and `rebase_path()` results side by side (a wasm
@@ -1728,12 +1728,12 @@ final class TemplateMapping {
 
 /// The backends impeller/tools/shaders.gni expands to on a Linux host
 /// (GLES 2, GLES 3, Vulkan; no Metal), as the shader rules in
-/// build/bazel/impeller mirror them.
+/// build_defs/impeller mirror them.
 const List<String> impellerShaderBackends = <String>['gles', 'gles3', 'vk'];
 
 const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   'test_fixtures': TemplateMapping(
-    '//engine/src/flutter/testing:testing.bzl',
+    '//build_defs/testing:testing.bzl',
     'flutter_test_fixtures',
     <String, TemplateArgument>{
       'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.files),
@@ -1755,7 +1755,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // interop toolkit's ICU data): a file's bytes as a C++ array behind a
   // library.
   'embed_blob': TemplateMapping(
-    '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
+    '//build_defs/impeller:shaders.bzl',
     'embed_blob_library',
     <String, TemplateArgument>{
       'symbol_name': TemplateArgument('symbol_name', TemplateArgumentKind.scalar),
@@ -1772,42 +1772,37 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   ),
   // impeller/tools/compiler.gni's impellerc, invoked directly by the test
   // fixtures: runtime stages and shader bundles.
-  'impellerc': TemplateMapping(
-    '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
-    'impellerc',
-    <String, TemplateArgument>{
-      'shaders': TemplateArgument('shaders', TemplateArgumentKind.files),
-      'shader_target_flags': TemplateArgument('shader_target_flags', TemplateArgumentKind.strings),
-      'sl_file_extension': TemplateArgument('sl_file_extension', TemplateArgumentKind.scalar),
-      'intermediates_subdir': TemplateArgument('intermediates_subdir', TemplateArgumentKind.scalar),
-      'iplr': TemplateArgument('iplr', TemplateArgumentKind.scalar),
-      'json': TemplateArgument('json', TemplateArgumentKind.scalar),
-      'shader_bundle': TemplateArgument('shader_bundle', TemplateArgumentKind.pathString),
-      'shader_bundle_output': TemplateArgument('shader_bundle_output', TemplateArgumentKind.scalar),
-      'gles_language_version': TemplateArgument(
-        'gles_language_version',
-        TemplateArgumentKind.scalar,
-      ),
-      'metal_version': TemplateArgument('metal_version', TemplateArgumentKind.scalar),
-      'use_half_textures': TemplateArgument('use_half_textures', TemplateArgumentKind.scalar),
-      'require_framebuffer_fetch': TemplateArgument(
-        'require_framebuffer_fetch',
-        TemplateArgumentKind.scalar,
-      ),
-      'entry_point_prefix': TemplateArgument('entry_point_prefix', TemplateArgumentKind.scalar),
-      'defines': TemplateArgument('defines', TemplateArgumentKind.strings),
-      'mnemonic': TemplateArgument('mnemonic', TemplateArgumentKind.scalar),
-      // The invocations' helper for the bundle's paths.
-      'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.ignored),
-      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
-    },
-    files: true,
-  ),
+  'impellerc': TemplateMapping('//build_defs/impeller:shaders.bzl', 'impellerc', <
+    String,
+    TemplateArgument
+  >{
+    'shaders': TemplateArgument('shaders', TemplateArgumentKind.files),
+    'shader_target_flags': TemplateArgument('shader_target_flags', TemplateArgumentKind.strings),
+    'sl_file_extension': TemplateArgument('sl_file_extension', TemplateArgumentKind.scalar),
+    'intermediates_subdir': TemplateArgument('intermediates_subdir', TemplateArgumentKind.scalar),
+    'iplr': TemplateArgument('iplr', TemplateArgumentKind.scalar),
+    'json': TemplateArgument('json', TemplateArgumentKind.scalar),
+    'shader_bundle': TemplateArgument('shader_bundle', TemplateArgumentKind.pathString),
+    'shader_bundle_output': TemplateArgument('shader_bundle_output', TemplateArgumentKind.scalar),
+    'gles_language_version': TemplateArgument('gles_language_version', TemplateArgumentKind.scalar),
+    'metal_version': TemplateArgument('metal_version', TemplateArgumentKind.scalar),
+    'use_half_textures': TemplateArgument('use_half_textures', TemplateArgumentKind.scalar),
+    'require_framebuffer_fetch': TemplateArgument(
+      'require_framebuffer_fetch',
+      TemplateArgumentKind.scalar,
+    ),
+    'entry_point_prefix': TemplateArgument('entry_point_prefix', TemplateArgumentKind.scalar),
+    'defines': TemplateArgument('defines', TemplateArgumentKind.strings),
+    'mnemonic': TemplateArgument('mnemonic', TemplateArgumentKind.scalar),
+    // The invocations' helper for the bundle's paths.
+    'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.ignored),
+    'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+  }, files: true),
   // testing.gni's dart_snapshot_kernel and dart_snapshot_aot: a Dart entry
   // point to kernel with the test modes' arguments, and a kernel to an AOT
   // ELF snapshot.
   'dart_snapshot_kernel': TemplateMapping(
-    '//engine/src/flutter/testing:testing.bzl',
+    '//build_defs/testing:testing.bzl',
     'flutter_dart_snapshot_kernel',
     <String, TemplateArgument>{
       'dart_main': TemplateArgument('dart_main', TemplateArgumentKind.file),
@@ -1816,7 +1811,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     files: true,
   ),
   'dart_snapshot_aot': TemplateMapping(
-    '//engine/src/flutter/testing:testing.bzl',
+    '//build_defs/testing:testing.bzl',
     'flutter_dart_snapshot_aot',
     <String, TemplateArgument>{
       'dart_kernel': TemplateArgument('dart_kernel', TemplateArgumentKind.file),
@@ -1828,7 +1823,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // build/secondary/flutter/third_party/flatbuffers/flatbuffers.gni: flatc
   // over the schemas, the generated headers as a library.
   'flatbuffers': TemplateMapping(
-    '//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl',
+    '//build_defs/flatbuffers:flatbuffers.bzl',
     'flatbuffers',
     <String, TemplateArgument>{
       'flatbuffers': TemplateArgument('flatbuffers', TemplateArgumentKind.files),
@@ -1849,7 +1844,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // flags set the web build's settings and the emscripten toolchain's
   // features (wasm_platform; research/12).
   'wasm_toolchain': TemplateMapping(
-    '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl',
+    '//build_defs/web:wasm.bzl',
     'wasm_platform',
     <String, TemplateArgument>{
       'extra_toolchain_args': TemplateArgument('extra_toolchain_args', TemplateArgumentKind.scope),
@@ -1863,7 +1858,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // transition, so that a module can be named from any build (skwasm's
   // three variants).
   'wasm_lib': TemplateMapping(
-    '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl',
+    '//build_defs/web:wasm.bzl',
     'wasm_module',
     _wasmLinkArguments,
     files: true,
@@ -1874,7 +1869,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // wasm_lib's flags, which the target passes itself. Not a GN template:
   // the emitter maps such an executable here ([wasmExecutableMapping]).
   wasmExecutableRule: TemplateMapping(
-    '//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl',
+    '//build_defs/web:wasm.bzl',
     'wasm_executable',
     <String, TemplateArgument>{
       ..._wasmLinkArguments,
@@ -1888,7 +1883,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     compiles: true,
   ),
   'impeller_shaders': TemplateMapping(
-    '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
+    '//build_defs/impeller:shaders.bzl',
     'impeller_shaders',
     <String, TemplateArgument>{
       'name': TemplateArgument('library_name', TemplateArgumentKind.scalar),
@@ -1936,12 +1931,12 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   ),
   // build/zip_bundle.gni: an archive under zip_archives/ made by build/zip.py
   // from `{ source, destination }` scopes, a generated LICENSE first
-  // (build/bazel/zip_bundle.bzl runs the same script). GN's `deps` name the
+  // (build_defs/dist/zip_bundle.bzl runs the same script). GN's `deps` name the
   // targets whose outputs the entries are, which is how a source under the
   // build directory is resolved; under Bazel the entries' labels carry the
   // dependency, so the list itself is not written.
   'zip_bundle': TemplateMapping(
-    '//engine/src/flutter/build/bazel:zip_bundle.bzl',
+    '//build_defs/dist:zip_bundle.bzl',
     'zip_bundle',
     _zipBundleArguments,
     files: true,
@@ -1952,7 +1947,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // target OS and CPU from the platform; `deps` orders nothing a label does
   // not (the input is the dependency).
   'bin_to_assembly': TemplateMapping(
-    '//engine/src/flutter/build/bazel/dart:snapshot.bzl',
+    '//build_defs/dart:snapshot.bzl',
     'bin_to_assembly',
     <String, TemplateArgument>{
       'input': TemplateArgument('src', TemplateArgumentKind.file),
@@ -1966,7 +1961,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // zip_bundle.gni's other template: the same archive from a file listing
   // the entries (the web SDK's), without zip_bundle's license file.
   'zip_bundle_from_file': TemplateMapping(
-    '//engine/src/flutter/build/bazel:zip_bundle.bzl',
+    '//build_defs/dist:zip_bundle.bzl',
     'zip_bundle_from_file',
     _zipBundleArguments,
     files: true,
@@ -1976,7 +1971,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // directory) and takes the invoker's output directory. GN expands it to a
   // prebuilt_dart_action, which is an action under the invocation's name.
   'web_ui_ui_web_with_output': TemplateMapping(
-    '//engine/src/flutter/web_sdk:web_sdk.bzl',
+    '//build_defs/web:web_sdk.bzl',
     'web_ui_ui_web_with_output',
     <String, TemplateArgument>{
       'output_dir': TemplateArgument('output_dir', TemplateArgumentKind.buildPath),
@@ -1987,7 +1982,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // input directory's files are the rule's srcs, from a filegroup of the
   // package that owns them (directorySources).
   'sdk_rewriter': TemplateMapping(
-    '//engine/src/flutter/web_sdk:web_sdk.bzl',
+    '//build_defs/web:web_sdk.bzl',
     'sdk_rewriter',
     <String, TemplateArgument>{
       'input_dir': TemplateArgument(
@@ -2009,7 +2004,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   // bodies, which read the web engine libraries through the staged tree,
   // web_sdk.bzl).
   '_compile_platform': TemplateMapping(
-    '//engine/src/flutter/web_sdk:web_sdk.bzl',
+    '//build_defs/web:web_sdk.bzl',
     'web_platform_dill',
     <String, TemplateArgument>{
       'kernel_target': TemplateArgument('kernel_target', TemplateArgumentKind.scalar),
@@ -2020,26 +2015,21 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     files: true,
   ),
   '_compile_ddc_sdk': TemplateMapping(
-    '//engine/src/flutter/web_sdk:web_sdk.bzl',
+    '//build_defs/web:web_sdk.bzl',
     'ddc_sdk',
     <String, TemplateArgument>{'canary': TemplateArgument('canary', TemplateArgumentKind.scalar)},
     files: true,
   ),
   // build/esbuild/esbuild.gni: the prebuilt esbuild over an entry point
   // (flutter.js), which the copy of the sources it imports provides.
-  'esbuild': TemplateMapping(
-    '//engine/src/flutter/build/bazel/esbuild:esbuild.bzl',
-    'esbuild',
-    <String, TemplateArgument>{
-      'entry_point': TemplateArgument('entry_point', TemplateArgumentKind.buildPath),
-      'output_bundle': TemplateArgument('output_bundle', TemplateArgumentKind.buildPath),
-      'bundle': TemplateArgument('bundle', TemplateArgumentKind.scalar),
-      'minify': TemplateArgument('minify', TemplateArgumentKind.scalar),
-      'sourcemap': TemplateArgument('sourcemap', TemplateArgumentKind.scalar),
-      'public_deps': TemplateArgument('srcs', TemplateArgumentKind.labels),
-    },
-    files: true,
-  ),
+  'esbuild': TemplateMapping('//build_defs/web:esbuild.bzl', 'esbuild', <String, TemplateArgument>{
+    'entry_point': TemplateArgument('entry_point', TemplateArgumentKind.buildPath),
+    'output_bundle': TemplateArgument('output_bundle', TemplateArgumentKind.buildPath),
+    'bundle': TemplateArgument('bundle', TemplateArgumentKind.scalar),
+    'minify': TemplateArgument('minify', TemplateArgumentKind.scalar),
+    'sourcemap': TemplateArgument('sourcemap', TemplateArgumentKind.scalar),
+    'public_deps': TemplateArgument('srcs', TemplateArgumentKind.labels),
+  }, files: true),
 };
 
 /// GN actions known by the script they run, converted as a template
@@ -2050,7 +2040,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
 /// rebased, and its outputs a stamp.
 const Map<String, TemplateMapping> scriptMappings = <String, TemplateMapping>{
   '//flutter/build/dart/tools/dart_pkg.py': TemplateMapping(
-    '//engine/src/flutter/build/bazel/dart:dart_pkg.bzl',
+    '//build_defs/dart:dart_pkg.bzl',
     'dart_pkg',
     <String, TemplateArgument>{
       'package_name': TemplateArgument('package', TemplateArgumentKind.scalar),

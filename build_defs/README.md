@@ -1,0 +1,46 @@
+# build_defs
+
+The build rules (`.bzl` files) the repository's `BUILD` files load, with their
+scripts and helper targets, by subject. The design of each -- why it exists,
+what GN shape it stands in for, what was measured -- is in
+`engine/src/flutter/build/bazel/README.md`, the migration's design document;
+this file is the index. Rules relevant to a single directory stay with that
+directory: the toolchain configurations
+(`engine/src/flutter/build/bazel/toolchains/`), `packages/flutter/test/framework_tests.bzl`.
+
+| Directory | File | Role |
+| --- | --- | --- |
+| `cc/` | `copts.bzl` | What GN adds per target rather than per toolchain, for `BUILD` files to spell out: `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES` for first-party code (`chromium_code`, `//flutter:config`; the defines select by platform -- none on wasm, where GN's `chromium_code` is empty, `_FORTIFY_SOURCE=2` besides the C99 macros on Android) and `FLUTTER_THIRD_PARTY_COPTS` for overlays (`no_chromium_code`). |
+| `cc/` | `sanitizers.bzl` | `SANITIZER_ATTRS` and `sanitizer_launcher_lines`: what a test target carries for the sanitizers (`--//engine/src/flutter/build/bazel:asan`), and the environment lines its launcher gets (the suppression files, `ASAN_OPTIONS`). |
+| `config/` | `configuration.bzl` | `in_configuration`: a target built under another configuration -- a runtime mode (`-c opt` and the engine's `runtime_mode` flag, what `--config=host_release` sets) and/or a platform (the web engine's) -- for a consumer gathering the builds as the SDK cache does. |
+| `config/` | `checkout_view.bzl` | GN's name for the build directory of a configuration (`host_debug_unopt`, `build_directory_variant`) and the checkout-shaped runfiles tree the Dart tests and the checkout's scripts run in (`checkout_view`); shared by `install`, `local_engine`, `dart_package_test` and `checkout_script_test`. |
+| `gn/` | `gn_action.bzl, stage_build_directory.py` | The `gn_action` rule: GN's `action()` -- one run of a Python script under the hermetic `@cpython3` -- as the generated `BUILD` files emit it, with the path tokens (`$(execpath ...)`, `$(src ...)`, `$(gen ...)`, `$(built ...)`) the converter writes for `rebase_path()` results, and the build-directory outputs, tools and platform-transitioned dependencies the Android embedding's actions need, and a directory of the build directory assembled from the deps' placements for a script that reads one (`stage_build_directory.py`: sky/dist's copy of the sky_engine package); `gn_copy` for `copy()`; `run_python` for other rules that run the engine's scripts. |
+| `gn/` | `gn_build.bzl, gn_build.py` | The `gn_build` rule (`gn_build.bzl`, action script `gn_build.py`): a GN build of part of the tree as one Bazel action, for the subtrees that keep their GN rules during the migration. |
+| `gn/` | `build_directory.bzl` | `BuildDirectoryInfo`: where GN's build directory holds a rule's files, which `gn_copy`, `gn_action`, `gn_generated_file`, `zip_bundle`, `dart_pkg` and `sdk_rewriter` provide and `install` collects over a closure; see below. |
+| `dart/` | `snapshot.bzl, kernel.bzl, dart_pkg.bzl, package_test.bzl, pub.bzl, pub.lock.bzl, dart_test.bzl, flutter_test.bzl, flutter_assets.bzl, flutter_package_tests.bzl; BUILD.bazel (the precompiled test runner), extract_archive.py, package_config.py, test_assets.py` | The engine's own Dart pipeline on the wrapped SDK's tools and the prebuilt SDK: `snapshot.bzl` (`compile_platform`, `core_snapshot`, `aot_snapshot`, `bin_to_assembly` -- `lib/snapshot/BUILD.gn`'s steps), `kernel.bzl` (`dart_kernel`, GN's `flutter_frontend_server`), `package_test.bzl` (`dart_package_test`, a Dart package's own `dart test` run) and `dart_pkg.bzl` (GN's `dart_pkg.py` action, which assembles the sky_engine package); see below. `flutter_package_tests.bzl` (was `packages/flutter_test/package_tests.bzl`) runs a flutter_test package's whole test tree in one call. `pub.lock.bzl` is **generated** from `pubspec.lock` by `tools/bazel_tools/bin/gen_pub_lock.dart`; never edit by hand. |
+| `dist/` | `zip_bundle.bzl, zip_bundle.py` | GN's `zip_bundle` template (the archives CI uploads) as a rule running `build/zip.py`, with `zip_tree` for a directory's files; see below. |
+| `dist/` | `install.bzl` | `install`: a `bazel run` target laying a build's files into GN's build directory (`engine/src/out/<variant>/`, or a named directory) for the consumers that read it; the root package's `install` and the generated per-builder targets in `ci/builders`; see below. |
+| `dist/` | `local_engine.bzl, assemble_directory.py` | `local_engine`: the manifest `local_engine.json` over a build's files for `flutter --local-engine` without an install; `assembled_directory` (one GN directory as a directory artifact) and `bundle_directory` (zip_bundles unpacked as the flutter tool's cache lays them), for the tests' SDK facsimile; see below. |
+| `testing/` | `testing.bzl` | The engine's test macros as `testing/run_tests.py` runs the tests: `flutter_cc_test` and `flutter_cc_binary_test` (gtest-parallel, the sanitizer launcher), `flutter_test_fixtures`, `flutter_dart_test` (a Dart test on flutter_tester from a kernel), `flutter_gpu_test_backends`, the benchmarks, `dart_package_test`'s wrappers. |
+| `testing/` | `checkout_script_test.bzl` | The checkout-shaped runfiles tree the Dart tests and the checkout's scripts run in, and GN's name for the build directory of a configuration (`host_debug_unopt`), which the tests' launchers and `install` use; see below. |
+| `web/` | `wasm.bzl` | The Emscripten modules: `wasm_module` (a `cc_binary`-shaped link to `.wasm` + `.js` under the Emscripten toolchain, with the engine's link flags per module variant) and `wasm_platform`. |
+| `web/` | `esbuild.bzl` | `esbuild_bundle`: flutter.js bundled by esbuild (`@esbuild`), as `lib/web_ui/flutter_js`'s GN action runs it. |
+| `web/` | `web_sdk.bzl` | The flutter_web_sdk tree: `sdk_rewriter`'s rewritten libraries (`web_ui_ui_web_with_output`...), `web_sdk_root` (the tree staged beside the prebuilt SDK for its compilers), the platform kernels and the DDC compilations of the SDK. |
+| `flatbuffers/` | `flatbuffers.bzl` | The engine's `flatbuffers()` GN template as a macro: `flatc` per schema, the generated headers as a library. |
+| `impeller/` | `shaders.bzl` | The engine's `impeller_shaders()` GN template as a macro over three rules (`impellerc_compile`, `shader_archive`, `embed_blob`), and `impellerc()` itself (the template the test fixtures invoke directly) over `impellerc_run`; see below. |
+| `repositories/` | `extensions.bzl` | The `synced_deps` module extension: the table of repositories the root `MODULE.bazel` imports with `use_repo`, backed by the pins in `deps.lock.bzl` and `build/linux/sysroot_scripts/sysroots.json`; and `engine_version`, which declares `@engine_version`. |
+| `repositories/` | `repositories.bzl` | Repository rules: `synced_repository` (a directory populated by `gclient sync`, consumed in place), `cipd_package` (a CIPD instance downloaded over HTTPS, no `cipd` client needed) and `engine_version_repository` (the version strings `tools/gn` computes at gen time -- git HEAD, the content hash, Skia's and Dart's DEPS revisions -- as `@engine_version//:version.bzl`, for `shell/version`). |
+| `repositories/` | `deps.lock.bzl` | **Generated** from `DEPS` by `tools/bazel_tools/bin/gen_deps.dart`; never edit by hand. The pins (`VARS`, `GIT_DEPS`, `CIPD_DEPS`, `GCLIENT_GN_ARGS`) as Starlark data. |
+| `repositories/` | `flutter_sdk_cache.bzl` | The `flutter_sdk_cache` module extension: the SDK cache's downloads the tests read, each pinned by `bin/internal`'s version file and a sha256 -- the Material fonts (`@material_fonts`), the Gradle wrapper (`@gradle_wrapper`). |
+
+Loading a rule:
+
+```python
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
+load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
+```
+
+The generated `BUILD` files (`tools/gn_to_bazel`) emit these loads; the
+converter's `starlark_emitter.dart`, `bazel_mapping.dart` and `manifest.dart`
+hold the labels.

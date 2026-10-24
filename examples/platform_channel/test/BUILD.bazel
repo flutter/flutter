@@ -4,12 +4,12 @@
 
 # platform_channel's tests under Bazel: each *_test.dart compiled by the frontend server
 # from a prelude kernel and run on the Bazel-built flutter_tester, as
-# `flutter test` runs it (//packages/flutter_test:package_tests.bzl;
+# `flutter test` runs it (//build_defs/dart:flutter_package_tests.bzl;
 # research/15).
 #
 #   bazel test //examples/platform_channel/test:tests
 
-load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+load("//build_defs/dart:flutter_package_tests.bzl", "flutter_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 

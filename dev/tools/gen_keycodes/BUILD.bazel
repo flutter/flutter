@@ -4,11 +4,11 @@
 
 # gen_keycodes' sources and its tests under Bazel: each test compiled by
 # the frontend server for the VM and run by package:test's precompiled
-# runner (engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+# runner (build_defs/dart/dart_test.bzl; research/15).
 #
 #   bazel test //dev/tools/gen_keycodes:tests
 
-load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 

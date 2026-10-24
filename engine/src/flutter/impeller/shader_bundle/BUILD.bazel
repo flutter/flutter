@@ -4,7 +4,7 @@
 
 # Generated from //flutter/impeller/shader_bundle/BUILD.gn by gn_to_bazel; do not edit.
 
-load("//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl", "flatbuffers")
+load("//build_defs/flatbuffers:flatbuffers.bzl", "flatbuffers")
 
 package(default_visibility = ["//visibility:public"])
 

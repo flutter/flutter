@@ -14,8 +14,8 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:deps.lock.bzl", "GIT_DEPS")
-load("//engine/src/flutter/build/bazel/gn_build:gn_build.bzl", "gn_build")
+load("//build_defs/gn:gn_build.bzl", "gn_build")
+load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
 
 package(default_visibility = ["//visibility:public"])
 

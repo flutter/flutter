@@ -4,7 +4,7 @@
 
 # The integration_ui app's sources and asset, for the tests Bazel compiles
 # and runs on flutter_tester
-# (engine/src/flutter/build/bazel/dart/flutter_test.bzl).
+# (build_defs/dart/flutter_test.bzl).
 
 package(default_visibility = ["//visibility:public"])
 

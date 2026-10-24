@@ -9,7 +9,7 @@
 # `extra_toolchain_args` block of Skia arguments -- which ICU, which codecs,
 # whether PNGs are encoded by Skia or the browser -- and re-evaluates Skia
 # under each. Here a toolchain is a platform (wasm_platform in
-# toolchains/emscripten/wasm.bzl) whose flags set these settings, and Skia's
+# build_defs/web/wasm.bzl) whose flags set these settings, and Skia's
 # generated files carry select()s on them where GN reads the arguments. The
 # defaults are the host build's values (tools/gn's host block and skia.gni's
 # defaults on Linux), so that nothing changes for a build that names none of
@@ -87,7 +87,7 @@ _SETTINGS = [
 # for the platform the flag names and spends the flag -- so that a module
 # named from the command line can be given one too (`--//engine/src/flutter/
 # build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:skwasm`,
-# or --platforms of the same). See toolchains/emscripten/wasm.bzl.
+# or --platforms of the same). See build_defs/web/wasm.bzl.
 string_flag(
     name = "module_platform",
     build_setting_default = "",

@@ -15,7 +15,7 @@
 # out/wasm_release (its compile_commands.json and skwasm's link rule): the
 # module's are skwasm's, the Skia unit's are the skia source_set's.
 
-load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_module", "wasm_objects")
+load("//build_defs/web:wasm.bzl", "wasm_module", "wasm_objects")
 
 package(default_visibility = ["//visibility:private"])
 

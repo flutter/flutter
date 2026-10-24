@@ -14,7 +14,7 @@ import 'deps_outputs.dart';
 const String generatorLabel = 'engine/src/flutter/tools/bazel_tools/bin/gen_deps.dart';
 
 /// Where `deps.lock.bzl` lives, relative to the repository root.
-const String defaultDepsLockPath = 'engine/src/flutter/build/bazel/deps.lock.bzl';
+const String defaultDepsLockPath = 'build_defs/repositories/deps.lock.bzl';
 
 /// Where `.bazelignore` lives, relative to the repository root.
 const String defaultBazelignorePath = '.bazelignore';

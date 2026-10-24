@@ -6,9 +6,9 @@
 # Not converted: font_entitlement_config.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary")
-load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
+load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
 
 package(default_visibility = ["//visibility:public"])
 
