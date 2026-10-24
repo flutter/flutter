@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/pipeline_library_gles.h"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 
@@ -15,12 +16,32 @@
 
 namespace impeller {
 
+static size_t GetMaxActiveCompileJobsForReactor(
+    const std::shared_ptr<ReactorGLES>& reactor) {
+  if (!reactor || !reactor->GetProcTable().GetCapabilities()) {
+    return 1;
+  }
+  return PipelineLibraryGLES::GetMaxActiveCompileJobs(
+      *reactor->GetProcTable().GetCapabilities());
+}
+
 PipelineLibraryGLES::PipelineLibraryGLES(
     std::shared_ptr<ReactorGLES> reactor,
     std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
-    : reactor_(std::move(reactor)),
-      compile_queue_(
-          PipelineCompileQueueGLES::Create(std::move(io_task_runner))) {}
+    : reactor_(std::move(reactor)) {
+  compile_queue_ = PipelineCompileQueueGLES::Create(
+      std::move(io_task_runner), GetMaxActiveCompileJobsForReactor(reactor_));
+}
+
+size_t PipelineLibraryGLES::GetMaxActiveCompileJobs(
+    const CapabilitiesGLES& capabilities) {
+  int32_t threads = capabilities.GetMaxShaderCompilerThreads();
+  if (threads < 0) {
+    // -1 means the implementation-dependent maximum.
+    return PipelineCompileQueueGLES::kDefaultMaxActiveJobs;
+  }
+  return std::max<size_t>(static_cast<size_t>(threads), 1);
+}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
   GLint log_length = 0;
