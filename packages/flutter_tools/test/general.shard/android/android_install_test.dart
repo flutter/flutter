@@ -298,6 +298,51 @@ void main() {
     },
   );
 
+  for (final failure in <String>[
+    'INSTALL_FAILED_VERSION_DOWNGRADE',
+    'INSTALL_FAILED_UPDATE_INCOMPATIBLE',
+  ]) {
+    testWithoutContext('Does not uninstall an existing app on $failure when disabled', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        kAdbVersionCommand,
+        kAdbStartServerCommand,
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          stdout: '[ro.build.version.sdk]: [${gradle_utils.targetSdkVersion}]',
+        ),
+        FakeCommand(command: kInstallCommand.command, exitCode: 1, stderr: '[$failure]'),
+        const FakeCommand(
+          command: <String>[
+            'adb',
+            '-s',
+            '1234',
+            'shell',
+            'pm',
+            'list',
+            'packages',
+            '--user',
+            '10',
+            'app',
+          ],
+          stdout: 'package:app\n',
+        ),
+      ]);
+      final File apk = fileSystem.file('app-debug.apk')..createSync();
+      final androidApk = AndroidApk(
+        applicationPackage: apk,
+        id: 'app',
+        versionCode: 22,
+        launchActivity: 'Main',
+      );
+      final AndroidDevice androidDevice = setUpAndroidDevice(processManager: processManager)
+        ..uninstallOnInstallFailure = false;
+
+      expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), false);
+      expect(logger.errorText, contains('Skipping uninstall of the existing app'));
+      expect(processManager, hasNoRemainingExpectations);
+    });
+  }
+
   testWithoutContext(
     'Will fail to install if the apk was never installed and it fails the first time',
     () async {
