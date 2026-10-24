@@ -44,6 +44,7 @@ class BuildInfo {
     this.performanceMeasurementFile,
     required this.packageConfigPath,
     this.codeSizeDirectory,
+    this.windowsAotFormat,
     this.androidGradleConfig = const AndroidGradleConfig(),
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
@@ -86,6 +87,7 @@ class BuildInfo {
       performanceMeasurementFile: performanceMeasurementFile,
       packageConfigPath: packageConfigPath ?? this.packageConfigPath,
       codeSizeDirectory: codeSizeDirectory,
+      windowsAotFormat: windowsAotFormat,
       androidGradleConfig: androidGradleConfig,
       packageConfig: packageConfig ?? this.packageConfig,
       initializeFromDill: initializeFromDill ?? this.initializeFromDill,
@@ -176,6 +178,11 @@ class BuildInfo {
   /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
   final String? codeSizeDirectory;
+
+  /// The AOT snapshot format on Windows x64, either `elf` or `pecoff`.
+  ///
+  /// Defaults to `pecoff` when null.
+  final String? windowsAotFormat;
 
   /// Android and Gradle-specific configuration for the build.
   final AndroidGradleConfig androidGradleConfig;
@@ -313,6 +320,7 @@ class BuildInfo {
       kTrackWidgetCreation: trackWidgetCreation.toString(),
       kIconTreeShakerFlag: treeShakeIcons.toString(),
       kCodeSizeDirectory: ?codeSizeDirectory,
+      kWindowsAotFormat: ?windowsAotFormat,
       if (fileSystemRoots.isNotEmpty) kFileSystemRoots: fileSystemRoots.join(','),
       kFileSystemScheme: ?fileSystemScheme,
       kBuildName: ?buildName,
@@ -342,6 +350,7 @@ class BuildInfo {
       'PERFORMANCE_MEASUREMENT_FILE': ?performanceMeasurementFile,
       'PACKAGE_CONFIG': packageConfigPath,
       'CODE_SIZE_DIRECTORY': ?codeSizeDirectory,
+      'WINDOWS_AOT_FORMAT': ?windowsAotFormat,
       'FLAVOR': ?flavor,
     };
   }
@@ -1074,6 +1083,9 @@ const kDartObfuscation = 'DartObfuscation';
 
 /// An output directory where one or more code-size measurements may be written.
 const kCodeSizeDirectory = 'CodeSizeDirectory';
+
+/// The AOT snapshot format on Windows x64, either `elf` or `pecoff`.
+const kWindowsAotFormat = 'WindowsAotFormat';
 
 /// SHA identifier of the Apple developer code signing identity.
 ///

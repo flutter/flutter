@@ -629,6 +629,77 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
+    testWithoutContext('builds ELF library without linker for windows-x64 ELF format', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshot,
+              platform: TargetPlatform.windows_x64,
+              mode: BuildMode.release,
+            ),
+            '--deterministic',
+            '--snapshot_kind=app-aot-elf',
+            '--elf=build/foo/app.so',
+            '--strip',
+            'main.dill',
+          ],
+        ),
+      );
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: outputPath,
+        dartObfuscation: false,
+        windowsX64Elf: true,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('writes windows-x64 ELF split debug info to symbols file', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+      final String splitDebugInfoPath = fileSystem.path.join('build', 'symbols');
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshot,
+              platform: TargetPlatform.windows_x64,
+              mode: BuildMode.release,
+            ),
+            '--deterministic',
+            '--snapshot_kind=app-aot-elf',
+            '--elf=build/foo/app.so',
+            '--strip',
+            '--dwarf-stack-traces',
+            '--resolve-dwarf-paths',
+            '--save-debugging-info=build/symbols/app.windows-x64.symbols',
+            '--obfuscate',
+            'main.dill',
+          ],
+        ),
+      );
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: outputPath,
+        splitDebugInfo: splitDebugInfoPath,
+        dartObfuscation: true,
+        windowsX64Elf: true,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(fileSystem.directory(splitDebugInfoPath).existsSync(), true);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
     testWithoutContext('fails when the Visual Studio linker does not exist', () async {
       final logger = BufferLogger.test();
       final snapshotter = AOTSnapshotter(
