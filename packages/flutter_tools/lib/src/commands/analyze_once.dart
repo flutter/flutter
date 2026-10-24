@@ -14,13 +14,8 @@ class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     super.argResults,
     List<Directory> repoPackages, {
-    required super.fileSystem,
-    required super.logger,
-    required super.platform,
-    required super.processManager,
-    required super.terminal,
-    required super.artifacts,
     required super.suppressAnalytics,
+    required super.toolContext,
     this.workingDirectory,
   }) : super(repoPackages: repoPackages);
 
@@ -35,7 +30,7 @@ class AnalyzeOnce extends AnalyzeBase {
     if (isFlutterRepo) {
       // check for conflicting dependencies
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, dependencies);
+      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
       items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
         items.add(currentDirectory);
@@ -50,25 +45,23 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    final errors = <AnalysisError>[];
+    final errorsByFile = <String, List<AnalysisError>>{};
 
     final server = AnalysisServer(
       sdkPath,
       items.toList(),
-      fileSystem: fileSystem,
-      platform: platform,
-      logger: logger,
-      processManager: processManager,
-      terminal: terminal,
-      protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
+      toolContext: toolContext,
+      protocolTrafficLog: protocolTrafficLog,
+      usePlugins: usePlugins,
+      withFineDependencies: false,
     );
 
     Stopwatch? timer;
     Status? progress;
     try {
       void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-        errors.addAll(fileErrors.errors);
+        errorsByFile[fileErrors.file] = fileErrors.errors;
       }
 
       server.onErrors.listen(handleAnalysisErrors);
@@ -110,6 +103,10 @@ class AnalyzeOnce extends AnalyzeBase {
       progress?.cancel();
       timer?.stop();
     }
+
+    final List<AnalysisError> errors = errorsByFile.values
+        .expand((List<AnalysisError> fileErrors) => fileErrors)
+        .toList();
 
     // emit benchmarks
     if (isBenchmarking) {

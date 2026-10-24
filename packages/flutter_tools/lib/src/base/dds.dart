@@ -12,7 +12,6 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'io.dart' as io;
@@ -22,19 +21,18 @@ import 'utils.dart';
 export 'package:dds/dds.dart'
     show DartDevelopmentServiceException, ExistingDartDevelopmentServiceException;
 
-typedef DDSLauncherCallback =
-    Future<DartDevelopmentServiceLauncher> Function({
-      required Uri remoteVmServiceUri,
-      String? appName,
-      Uri? serviceUri,
-      bool enableAuthCodes,
-      bool serveDevTools,
-      Uri? devToolsServerAddress,
-      bool enableServicePortFallback,
-      List<String> cachedUserTags,
-      String? dartExecutable,
-      String? google3WorkspaceRoot,
-    });
+typedef DDSLauncherCallback = Future<DartDevelopmentServiceLauncher> Function({
+  required Uri remoteVmServiceUri,
+  String? appName,
+  Uri? serviceUri,
+  bool enableAuthCodes,
+  bool serveDevTools,
+  Uri? devToolsServerAddress,
+  bool enableServicePortFallback,
+  List<String> cachedUserTags,
+  String? dartExecutable,
+  String? google3WorkspaceRoot,
+});
 
 typedef StartChromeCallback = Future<io.Process> Function(List<String> urls, {List<String> args});
 
@@ -68,6 +66,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    required Artifacts artifacts,
     String? appName,
     int? ddsPort,
     bool? disableServiceAuthCodes,
@@ -105,7 +104,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
         serveDevTools: enableDevTools,
         devToolsServerAddress: devToolsServerAddress,
         google3WorkspaceRoot: google3WorkspaceRoot,
-        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        dartExecutable: artifacts.getArtifactPath(Artifact.engineDartBinary),
       );
       unawaited(_ddsInstance!.done.whenComplete(completeFuture));
     } on DartDevelopmentServiceException catch (e) {
@@ -137,6 +136,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    required Artifacts artifacts,
     String? appName,
     int? ddsPort,
     bool? disableServiceAuthCodes,
@@ -151,10 +151,12 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
   /// from a [DebuggingOptions] instance.
   Future<void> startDartDevelopmentServiceFromDebuggingOptions(
     Uri vmServiceUri, {
-    String? appName,
+    required Artifacts artifacts,
     required DebuggingOptions debuggingOptions,
+    String? appName,
   }) => startDartDevelopmentService(
     vmServiceUri,
+    artifacts: artifacts,
     appName: appName,
     ddsPort: debuggingOptions.ddsPort,
     disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,

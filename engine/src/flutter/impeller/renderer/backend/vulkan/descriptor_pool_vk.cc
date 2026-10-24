@@ -24,7 +24,7 @@ static const constexpr DescriptorPoolSize kDefaultBindingSize =
         .texture_bindings = 256u,  // Texture Bindings
         .storage_bindings = 32,
         .subpass_bindings = 4u  // Subpass Bindings
-    };
+};
 
 DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context)
     : context_(std::move(context)) {}
@@ -57,7 +57,7 @@ DescriptorPoolVK::~DescriptorPoolVK() {
   recycler->Reclaim(std::move(descriptor_sets_), std::move(pools_));
 }
 
-fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
+absl::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
     PipelineKey pipeline_key,
     const ContextVK& context_vk) {
@@ -70,7 +70,7 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
   }
 
   if (pools_.empty()) {
-    CreateNewPool(context_vk);
+    CreateNewPool(context_vk).IgnoreError();
   }
 
   vk::DescriptorSetAllocateInfo set_info;
@@ -84,7 +84,7 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
       // FragmentedPool == OutOfMemory AND most likely due to fragmentation
       result == vk::Result::eErrorFragmentedPool) {
     // If the pool ran out of memory, we need to create a new pool.
-    CreateNewPool(context_vk);
+    CreateNewPool(context_vk).IgnoreError();
     set_info.setDescriptorPool(pools_.back().get());
     result = context_vk.GetDevice().allocateDescriptorSets(&set_info, &set);
   }
@@ -95,19 +95,19 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not allocate descriptor sets: "
                    << vk::to_string(result);
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
   return set;
 }
 
-fml::Status DescriptorPoolVK::CreateNewPool(const ContextVK& context_vk) {
+absl::Status DescriptorPoolVK::CreateNewPool(const ContextVK& context_vk) {
   auto new_pool = context_vk.GetDescriptorPoolRecycler()->Get();
   if (!new_pool) {
-    return fml::Status(fml::StatusCode::kUnknown,
-                       "Failed to create descriptor pool");
+    return absl::Status(absl::StatusCode::kUnknown,
+                        "Failed to create descriptor pool");
   }
   pools_.emplace_back(std::move(new_pool));
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 void DescriptorPoolRecyclerVK::Reclaim(

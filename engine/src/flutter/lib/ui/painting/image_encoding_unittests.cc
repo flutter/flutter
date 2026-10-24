@@ -38,12 +38,12 @@ fml::AutoResetWaitableEvent message_latch;
 class MockSyncSwitch {
  public:
   struct Handlers {
-    Handlers& SetIfTrue(const std::function<void()>& handler) {
-      true_handler = handler;
+    Handlers& SetIfTrue(std::function<void()> handler) {
+      true_handler = std::move(handler);
       return *this;
     }
-    Handlers& SetIfFalse(const std::function<void()>& handler) {
-      false_handler = handler;
+    Handlers& SetIfFalse(std::function<void()> handler) {
+      false_handler = std::move(handler);
       return *this;
     }
     std::function<void()> true_handler = [] {};
@@ -217,7 +217,7 @@ std::shared_ptr<impeller::Context> MakeConvertDlImageToSkImageContext(
   EXPECT_CALL(*command_queue, Submit(_, _))
       .WillRepeatedly(
           DoAll(InvokeArgument<1>(impeller::CommandBuffer::Status::kCompleted),
-                Return(fml::Status())));
+                Return(absl::OkStatus())));
   EXPECT_CALL(*context, GetCommandQueue).WillRepeatedly(Return(command_queue));
   return context;
 }
@@ -507,7 +507,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
       .WillRepeatedly(Return(true));
   ImageEncodingImpeller::ConvertDlImageToSkImage(
       image,
-      [&did_call](const fml::StatusOr<sk_sp<SkImage>>& image) {
+      [&did_call](const absl::StatusOr<sk_sp<SkImage>>& image) {
         did_call = true;
         ASSERT_TRUE(image.ok());
         ASSERT_TRUE(image.value());
@@ -541,7 +541,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
       .WillRepeatedly(Return(true));
   ImageEncodingImpeller::ConvertDlImageToSkImage(
       image,
-      [&did_call](const fml::StatusOr<sk_sp<SkImage>>& image) {
+      [&did_call](const absl::StatusOr<sk_sp<SkImage>>& image) {
         did_call = true;
         ASSERT_TRUE(image.ok());
         ASSERT_TRUE(image.value());
@@ -579,7 +579,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageTextureSizeMismatch) {
       .WillRepeatedly(Return(true));
   ImageEncodingImpeller::ConvertDlImageToSkImage(
       image,
-      [&](const fml::StatusOr<sk_sp<SkImage>>& result) {
+      [&](const absl::StatusOr<sk_sp<SkImage>>& result) {
         did_call = true;
         ASSERT_TRUE(result.ok());
         ASSERT_TRUE(result.value());
@@ -610,7 +610,7 @@ TEST(ImageEncodingImpellerTest, PngEncoding10XR) {
 
   sk_sp<SkImage> image = surface->makeImageSnapshot();
 
-  fml::StatusOr<sk_sp<SkData>> png = EncodeImage(image, ImageByteFormat::kPNG);
+  absl::StatusOr<sk_sp<SkData>> png = EncodeImage(image, ImageByteFormat::kPNG);
   EXPECT_TRUE(png.ok());
 }
 
@@ -634,25 +634,25 @@ void PngMemoryRead(png_structp png_ptr,
   memory_reader->offset += byte_count_to_read;
 }
 
-fml::StatusOr<std::vector<uint32_t>> ReadPngFromMemory(const uint8_t* png_data,
-                                                       size_t png_size) {
+absl::StatusOr<std::vector<uint32_t>> ReadPngFromMemory(const uint8_t* png_data,
+                                                        size_t png_size) {
   png_structp png =
       png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (!png) {
-    return fml::Status(fml::StatusCode::kAborted, "unknown");
+    return absl::Status(absl::StatusCode::kAborted, "unknown");
   }
 
   png_infop info = png_create_info_struct(png);
   if (!info) {
     png_destroy_read_struct(&png, nullptr, nullptr);
-    return fml::Status(fml::StatusCode::kAborted, "unknown");
+    return absl::Status(absl::StatusCode::kAborted, "unknown");
   }
 
   fml::ScopedCleanupClosure png_cleanup(
       [&png, &info]() { png_destroy_read_struct(&png, &info, nullptr); });
 
   if (setjmp(png_jmpbuf(png))) {
-    return fml::Status(fml::StatusCode::kAborted, "unknown");
+    return absl::Status(absl::StatusCode::kAborted, "unknown");
   }
 
   PngMemoryReader memory_reader = {
@@ -707,9 +707,9 @@ TEST(ImageEncodingImpellerTest, PngEncodingBGRA10XR) {
 
   sk_sp<SkImage> image = surface->makeImageSnapshot();
 
-  fml::StatusOr<sk_sp<SkData>> png = EncodeImage(image, ImageByteFormat::kPNG);
+  absl::StatusOr<sk_sp<SkData>> png = EncodeImage(image, ImageByteFormat::kPNG);
   ASSERT_TRUE(png.ok());
-  fml::StatusOr<std::vector<uint32_t>> pixels =
+  absl::StatusOr<std::vector<uint32_t>> pixels =
       ReadPngFromMemory(png.value()->bytes(), png.value()->size());
   ASSERT_TRUE(pixels.ok());
   EXPECT_EQ(pixels.value()[0], 0xff0000ff);

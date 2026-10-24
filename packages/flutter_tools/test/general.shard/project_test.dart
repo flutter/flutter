@@ -119,6 +119,17 @@ void main() {
           globals.fs.currentDirectory.absolute.path,
         );
       });
+
+      _testInMemory('buildDirectory uses configured build-dir', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        globals.config.setValue('build-dir', 'custom_build');
+        final FlutterProject project = FlutterProject.fromDirectory(directory);
+        expect(project.buildDirectory.path, globals.fs.path.join(directory.path, 'custom_build'));
+        expect(
+          project.ephemeralDirectories.map((Directory d) => d.path),
+          contains(project.buildDirectory.path),
+        );
+      });
     });
 
     group('ensure ready for platform-specific tooling', () {
@@ -128,12 +139,12 @@ void main() {
           FlutterManifest.empty(logger: logger),
           FlutterManifest.empty(logger: logger),
         );
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectNotExists(project.directory);
       });
       _testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = await aPluginProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectNotExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
@@ -172,7 +183,7 @@ dependencies:
 ''');
         final FlutterProject project = FlutterProject.fromDirectory(directory);
 
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
 
         expectNotExists(project.flutterPluginsDependenciesFile);
       });
@@ -182,7 +193,7 @@ dependencies:
         // that a project was a plugin, but shouldn't be as this creates false
         // positives.
         project.directory.childDirectory('example').createSync();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
@@ -196,28 +207,28 @@ dependencies:
       });
       _testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
       });
       _testInMemory('generates Xcode configuration for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(
           project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'),
         );
       });
       _testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(
           androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')),
         );
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
@@ -288,7 +299,7 @@ dependencies:
         final FlutterProject project = await aPluginProject();
         project.example.directory.deleteSync();
 
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expect(
           testLogger.statusText,
           isNot(
@@ -300,7 +311,7 @@ dependencies:
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
 
@@ -314,7 +325,7 @@ dependencies:
           // Don't bother with Android, we just want the manifest.
           project.directory.childDirectory('android').deleteSync(recursive: true);
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expect(
             project.flutterPluginsDependenciesFile.readAsStringSync(),
             contains('"dev_dependency":true'),
@@ -337,7 +348,7 @@ dependencies:
           // Create a project that depends on that plugin.
           final FlutterProject project = await projectWithPluginDependency();
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expect(
             project.android.generatedPluginRegistrantFile.readAsStringSync(),
             contains('MyPlugin'),
@@ -360,7 +371,7 @@ dependencies:
           // Create a project that depends on that plugin.
           final FlutterProject project = await projectWithPluginDependency();
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: true);
+          await regeneratePlatformSpecificTooling(project, releaseMode: true);
           expect(
             project.android.generatedPluginRegistrantFile.readAsStringSync(),
             isNot(contains('MyPlugin')),
@@ -380,7 +391,7 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.macos.managedDirectory.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expectExists(project.macos.pluginRegistrantImplementation);
         },
         overrides: <Type, Generator>{
@@ -396,7 +407,7 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.macos.managedDirectory.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expectExists(project.macos.generatedXcodePropertiesFile);
         },
         overrides: <Type, Generator>{
@@ -412,7 +423,7 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.linux.cmakeFile.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
           expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
         },
@@ -429,7 +440,7 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.windows.cmakeFile.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
           expectExists(
             project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'),
@@ -445,7 +456,7 @@ dependencies:
       );
       _testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
         expectExists(
@@ -454,7 +465,7 @@ dependencies:
       });
       _testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('flutter_export_environment.sh'));
@@ -904,7 +915,7 @@ dependencies {
       setUp(() {
         fs = MemoryFileSystem.test();
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         );
         flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fs);
       });
@@ -1516,15 +1527,12 @@ android {
           expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
         });
 
-        testWithMocks(
-          'is false if pbxproj does not contain FlutterGeneratedPluginSwiftPackage in build process',
-          () async {
-            final FlutterProject project = await someProject();
-            project.ios.xcodeProjectInfoFile.createSync(recursive: true);
-            expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
-            expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
-          },
-        );
+        testWithMocks('is false if pbxproj does not contain FlutterGeneratedPluginSwiftPackage in build process', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProjectInfoFile.createSync(recursive: true);
+          expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
+          expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
+        });
 
         testWithMocks(
           'is true if pbxproj does contain FlutterGeneratedPluginSwiftPackage in build process',
@@ -1697,28 +1705,24 @@ android {
     });
 
     group('Android project file getters', () {
-      _testInMemory(
-        'Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+      _testInMemory('Project.android.gradleWrapperPropertiesFile resolves to gradle/wrapper/gradle-wrapper.properties', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          // Create gradle/wrapper/gradle-wrapper.properties inside the fake android dir
-          final File expected =
-              androidDir
-                  .childDirectory('gradle')
-                  .childDirectory('wrapper')
-                  .childFile('gradle-wrapper.properties')
-                ..createSync(recursive: true);
+        // Create gradle/wrapper/gradle-wrapper.properties inside the fake android dir
+        final File expected =
+            androidDir
+                .childDirectory('gradle')
+                .childDirectory('wrapper')
+                .childFile('gradle-wrapper.properties')
+              ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
-        },
-      );
+        expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
+      });
       _testInMemory('Project.android.appGradleFile resolves to app/build.gradle', () async {
         final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
@@ -1795,22 +1799,18 @@ android {
           expect(project.android.hostAppGradleFile.path, expected.path);
         },
       );
-      _testInMemory(
-        'Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
-          androidDir.childFile('build.gradle.kts').createSync(recursive: true);
-          final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
+      _testInMemory('Project.android.hostAppGradleFile prefers android/build.gradle over android/build.gradle.kts', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
+        androidDir.childFile('build.gradle.kts').createSync(recursive: true);
+        final File expected = androidDir.childFile('build.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.hostAppGradleFile.path, expected.path);
-        },
-      );
+        expect(project.android.hostAppGradleFile.path, expected.path);
+      });
       _testInMemory(
         'Project.android.settingsGradleFile resolves to android/settings.gradle',
         () async {
@@ -1845,113 +1845,92 @@ android {
           expect(project.android.settingsGradleFile.path, expected.path);
         },
       );
-      _testInMemory(
-        'Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_build_files',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
-          androidDir.childFile('settings.gradle.kts').createSync(recursive: true);
-          final File expected = androidDir.childFile('settings.gradle')
-            ..createSync(recursive: true);
+      _testInMemory('Project.android.settingsGradleFile prefers android/settings.gradle over android/settings.gradle.kts', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_build_files',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
+        androidDir.childFile('settings.gradle.kts').createSync(recursive: true);
+        final File expected = androidDir.childFile('settings.gradle')..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.settingsGradleFile.path, expected.path);
-        },
-      );
-      _testInMemory(
-        'Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.settingsGradleFile.path, expected.path);
+      });
+      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle exists', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          androidDir.childFile('build.gradle').createSync();
+        androidDir.childFile('build.gradle').createSync();
 
-          final File expected =
-              androidDir
-                  .childDirectory('app')
-                  .childDirectory('src')
-                  .childDirectory('main')
-                  .childFile('AndroidManifest.xml')
-                ..createSync(recursive: true);
+        final File expected =
+            androidDir
+                .childDirectory('app')
+                .childDirectory('src')
+                .childDirectory('main')
+                .childFile('AndroidManifest.xml')
+              ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.appManifestFile.path, expected.path);
-        },
-      );
-      _testInMemory(
-        'Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.appManifestFile.path, expected.path);
+      });
+      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when build.gradle.kts exists', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          androidDir.childFile('build.gradle.kts').createSync();
+        androidDir.childFile('build.gradle.kts').createSync();
 
-          final File expected =
-              androidDir
-                  .childDirectory('app')
-                  .childDirectory('src')
-                  .childDirectory('main')
-                  .childFile('AndroidManifest.xml')
-                ..createSync(recursive: true);
+        final File expected =
+            androidDir
+                .childDirectory('app')
+                .childDirectory('src')
+                .childDirectory('main')
+                .childFile('AndroidManifest.xml')
+              ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.appManifestFile.path, expected.path);
-        },
-      );
-      _testInMemory(
-        'Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.appManifestFile.path, expected.path);
+      });
+      _testInMemory('Project.android.appManifestFile resolves to android/app/src/main/AndroidManifest.xml when both build.gradle and build.gradle.kts exists', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          androidDir.childFile('build.gradle').createSync();
-          androidDir.childFile('build.gradle.kts').createSync();
+        androidDir.childFile('build.gradle').createSync();
+        androidDir.childFile('build.gradle.kts').createSync();
 
-          final File expected =
-              androidDir
-                  .childDirectory('app')
-                  .childDirectory('src')
-                  .childDirectory('main')
-                  .childFile('AndroidManifest.xml')
-                ..createSync(recursive: true);
+        final File expected =
+            androidDir
+                .childDirectory('app')
+                .childDirectory('src')
+                .childDirectory('main')
+                .childFile('AndroidManifest.xml')
+              ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.appManifestFile.path, expected.path);
-        },
-      );
-      _testInMemory(
-        'Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle',
-        () async {
-          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-            'flutter_project_test',
-          );
-          final Directory androidDir = tempDir.childDirectory('android')
-            ..createSync(recursive: true);
+        expect(project.android.appManifestFile.path, expected.path);
+      });
+      _testInMemory('Project.android.appManifestFile resolves to android/AndroidManifest.xml when not using Gradle', () async {
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_project_test',
+        );
+        final Directory androidDir = tempDir.childDirectory('android')..createSync(recursive: true);
 
-          final File expected = androidDir.childFile('AndroidManifest.xml')
-            ..createSync(recursive: true);
+        final File expected = androidDir.childFile('AndroidManifest.xml')
+          ..createSync(recursive: true);
 
-          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectory(tempDir);
 
-          expect(project.android.appManifestFile.path, expected.path);
-        },
-      );
+        expect(project.android.appManifestFile.path, expected.path);
+      });
       _testInMemory(
         'Project.android.localPropertiesFile resolves to android/local.properties',
         () async {
@@ -2046,6 +2025,239 @@ resolution: workspace
           <String>['child1', 'child2'],
         );
       });
+
+      _testInMemory('supports recursive glob pattern ** in workspace entries', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- packages/**
+''');
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+        directory
+            .childDirectory('packages')
+            .childDirectory('sub')
+            .childDirectory('child2')
+            .childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+flutter:
+resolution: workspace
+''');
+
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toSet(),
+          <String>{'child1', 'child2'},
+        );
+      });
+
+      _testInMemory('handles empty workspace entries gracefully', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- ''
+''');
+        expect(FlutterProject.fromDirectory(directory).workspaceProjects, isEmpty);
+      });
+
+      _testInMemory('handles Windows backslash separators in workspace entries', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
+name: parent
+flutter:
+workspace:
+- packages\child1
+- packages\*
+''');
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+        directory.childDirectory('packages').childDirectory('child2').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+flutter:
+resolution: workspace
+''');
+
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toSet(),
+          <String>{'child1', 'child2'},
+        );
+      });
+
+      _testInMemory(
+        'ignores build and .dart_tool directories during workspace discovery',
+        () async {
+          final Directory directory = globals.fs.directory('myproject');
+          directory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- '*'
+''');
+          directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+          directory.childDirectory('other').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: other
+flutter:
+resolution: workspace
+''');
+          // A nested pubspec inside build/ or .dart_tool/ should be ignored when wildcard matching
+          directory.childDirectory('build').childDirectory('nested').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: build_child
+flutter:
+resolution: workspace
+''');
+          directory.childDirectory('.dart_tool').childDirectory('nested').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: dart_tool_child
+flutter:
+resolution: workspace
+''');
+
+          expect(
+            FlutterProject.fromDirectory(directory).workspaceProjects
+                .map((FlutterProject subproject) => subproject.manifest.appName)
+                .toSet(),
+            <String>{'other'},
+          );
+        },
+      );
+
+      _testInMemory('workspaceRoot returns root project for member projects', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- pkgs/*
+''');
+        final Directory child1Dir = directory.childDirectory('pkgs').childDirectory('child1');
+        child1Dir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+
+        final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
+        final FlutterProject childProject = FlutterProject.fromDirectory(child1Dir);
+
+        expect(
+          globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+          globals.fs.path.canonicalize(parentProject.directory.path),
+        );
+        expect(parentProject.workspaceRoot, null);
+      });
+
+      _testInMemory('workspaceRoot works with relative paths', () async {
+        final Directory directory = globals.fs.directory('myproject')..createSync(recursive: true);
+        directory.childFile('pubspec.yaml').writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- child1
+''');
+        final Directory child1Dir = directory.childDirectory('child1')..createSync(recursive: true);
+        child1Dir.childFile('pubspec.yaml').writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+
+        final Directory originalCwd = globals.fs.currentDirectory;
+        try {
+          globals.fs.currentDirectory = directory;
+          final FlutterProject childProject = FlutterProject.fromDirectory(
+            globals.fs.directory('child1'),
+          );
+          expect(
+            globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+            globals.fs.path.canonicalize(globals.fs.currentDirectory.path),
+          );
+        } finally {
+          globals.fs.currentDirectory = originalCwd;
+        }
+      });
+
+      _testInMemory(
+        'workspaceRoot is resilient to malformed sibling packages in workspace',
+        () async {
+          final Directory directory = globals.fs.directory('myproject');
+          directory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- pkgs/*
+''');
+          final Directory validChildDir = directory
+              .childDirectory('pkgs')
+              .childDirectory('valid_child');
+          validChildDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: valid_child
+flutter:
+resolution: workspace
+''');
+          final Directory brokenChildDir = directory
+              .childDirectory('pkgs')
+              .childDirectory('broken_child');
+          brokenChildDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('invalid: yaml: [broken');
+
+          final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
+          final FlutterProject childProject = FlutterProject.fromDirectory(validChildDir);
+
+          expect(
+            globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+            globals.fs.path.canonicalize(parentProject.directory.path),
+          );
+        },
+      );
     });
   });
 
@@ -2328,6 +2540,16 @@ resolution: workspace
   });
 }
 
+Future<void> regeneratePlatformSpecificTooling(
+  FlutterProject project, {
+  required bool releaseMode,
+}) {
+  return project.regeneratePlatformSpecificTooling(
+    toolContext: FakeToolContext(fs: project.directory.fileSystem),
+    releaseMode: releaseMode,
+  );
+}
+
 Future<FlutterProject> someProject({
   String? androidManifestOverride,
   bool includePubspec = true,
@@ -2433,9 +2655,14 @@ flutter:
   return FlutterProject.fromDirectory(directory);
 }
 
-FakeCommand createKgpVersionCommand(String kgpV) {
+FakeCommand createKgpVersionCommand(String kgpV, {String? gradlewPath}) {
+  gradlewPath ??= globals.fs.path.join(
+    'some_project',
+    'android',
+    gradle_utils.getGradlewFileName(globals.platform),
+  );
   return FakeCommand(
-    command: const <String>['./gradlew', 'kgpVersion', '-q'],
+    command: <String>[gradlewPath, 'kgpVersion', '-q'],
     stdout:
         '''
 KGP Version: $kgpV
@@ -2518,8 +2745,6 @@ void _testInMemory(
         platform: globals.platform,
         artifacts: <ArtifactSet>[],
       ),
-      FlutterProjectFactory: () =>
-          FlutterProjectFactory(fileSystem: testFileSystem, logger: globals.logger),
       Pub: ThrowingPub.new,
     },
   );

@@ -176,6 +176,14 @@ abstract class Renderer {
   /// Whether this renderer natively supports resizing/scaling animated images during decoding.
   bool get supportsResizingAnimatedImages;
 
+  /// Whether this renderer can decode images itself via [createAnimatedImage].
+  ///
+  /// When this is false, [createAnimatedImage] must not be called for any
+  /// image, animated or not, and callers must fall back to a browser-provided
+  /// decoder. Some backends (notably the Impeller-based skwasm variants) are
+  /// built without the builtin image codecs.
+  bool get supportsAnimatedImages;
+
   BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight});
 
   BackendImage createImageFromImageSource(ImageSource source);
@@ -216,12 +224,18 @@ abstract class Renderer {
   }) async {
     var textureSource = object;
     final originalTextureSource = object;
-    final bool needsClone = !transferOwnership || (isMultiThreaded && !_isTransferable(object));
+    final bool isVideoFrame = object.isA<VideoFrame>();
+    // Although VideoFrame is transferable across threads, drawing directly from a
+    // VideoFrame to a WebGL texture can result in incorrect orientation due to EXIF
+    // metadata handling. Converting it to an ImageBitmap avoids this problem.
+    final bool needsClone =
+        isVideoFrame || !transferOwnership || (isMultiThreaded && !_isTransferable(object));
     if (needsClone) {
-      textureSource = (await createImageBitmap(
-        object,
-        bounds: (x: 0, y: 0, width: width, height: height),
-      )).toJSAnyShallow;
+      textureSource =
+          (await (isVideoFrame
+                  ? createImageBitmap(object)
+                  : createImageBitmap(object, bounds: (x: 0, y: 0, width: width, height: height))))
+              .toJSAnyShallow;
       if (transferOwnership) {
         if (originalTextureSource.isA<VideoFrame>()) {
           (originalTextureSource as VideoFrame).close();
@@ -254,7 +268,7 @@ abstract class Renderer {
   }
 
   bool _isTransferable(JSAny object) =>
-      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
+      object.isA<DomImageBitmap>() || object.isA<DomOffscreenCanvas>() || object.isA<VideoFrame>();
 
   Future<ui.Codec> instantiateImageCodec(
     Uint8List list, {
@@ -334,70 +348,7 @@ abstract class Renderer {
 
   BackendPathConstructors get pathConstructors;
 
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  });
-
-  ui.TextStyle createTextStyle({
-    required ui.Color? color,
-    required ui.TextDecoration? decoration,
-    required ui.Color? decorationColor,
-    required ui.TextDecorationStyle? decorationStyle,
-    required double? decorationThickness,
-    required ui.FontWeight? fontWeight,
-    required ui.FontStyle? fontStyle,
-    required ui.TextBaseline? textBaseline,
-    required String? fontFamily,
-    required List<String>? fontFamilyFallback,
-    required double? fontSize,
-    required double? letterSpacing,
-    required double? wordSpacing,
-    required double? height,
-    required ui.TextLeadingDistribution? leadingDistribution,
-    required ui.Locale? locale,
-    required ui.Paint? background,
-    required ui.Paint? foreground,
-    required List<ui.Shadow>? shadows,
-    required List<ui.FontFeature>? fontFeatures,
-    required List<ui.FontVariation>? fontVariations,
-  });
-
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  });
-
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  });
-
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style);
 
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph);
 

@@ -62,7 +62,7 @@ void ComputePassVK::SetPipeline(
 }
 
 // |ComputePass|
-fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
+absl::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
   if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
       workgroup_count[2] == 0u || !pipeline_valid_) {
     bound_image_offset_ = 0u;
@@ -70,8 +70,8 @@ fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
     descriptor_write_offset_ = 0u;
     has_label_ = false;
     pipeline_valid_ = false;
-    return fml::Status(fml::StatusCode::kCancelled,
-                       "Invalid pipeline or empty workgroup count.");
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "Invalid pipeline or empty workgroup count.");
   }
 
   const ContextVK& context_vk = ContextVK::Cast(*context_);
@@ -113,7 +113,7 @@ fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
   has_label_ = false;
   pipeline_valid_ = false;
 
-  return fml::Status();
+  return absl::OkStatus();
 }
 
 // |ResourceBinder|
@@ -148,7 +148,7 @@ bool ComputePassVK::BindResource(ShaderStage stage,
   vk::DescriptorImageInfo image_info;
   image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
   image_info.sampler = sampler_vk.GetSampler();
-  image_info.imageView = texture_vk.GetImageView();
+  image_info.imageView = texture_vk.GetSampledImageView();
   image_workspace_[bound_image_offset_++] = image_info;
 
   vk::WriteDescriptorSet write_set;

@@ -7,19 +7,20 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart' hide Target;
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -55,6 +56,8 @@ void main() {
     testUsingContext(
       'build with assets $buildMode',
       overrides: <Type, Generator>{
+        FeatureFlags: () =>
+            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <Pattern>[
@@ -272,7 +275,9 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
-          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/ios/'),
+          targetUri: projectUri.resolve(
+            '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/ios/',
+          ),
         );
         expect(
           (globals.logger as BufferLogger).traceText,
@@ -304,7 +309,8 @@ void main() {
             linkMode: DynamicLoadingBundled(),
             file: Uri.file('arm64/libbar.dylib'),
           ),
-          target: Target.fromArchitectureAndOS(Architecture.arm64, OS.iOS),
+          os: OS.iOS,
+          architecture: Architecture.arm64,
         ),
         FlutterCodeAsset(
           codeAsset: CodeAsset(
@@ -313,7 +319,8 @@ void main() {
             linkMode: DynamicLoadingBundled(),
             file: Uri.file('x64/libbar_different.dylib'),
           ),
-          target: Target.fromArchitectureAndOS(Architecture.x64, OS.iOS),
+          os: OS.iOS,
+          architecture: Architecture.x64,
         ),
       ];
 

@@ -580,8 +580,7 @@ void main() {
           fileSystem.currentDirectory.childDirectory('out'),
         ),
         throwsToolExit(
-          message:
-              'Failed to delete /out/test because the local file/directory is in use by another process',
+          message: 'Failed to delete /out/test because the local file/directory is in use by another process',
         ),
       );
       expect(fileSystem.file('out/test'), isNot(exists));

@@ -2,23 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/devfs_proxy.dart';
 import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 const kTransparentImage = <int>[
   0x89,
@@ -93,6 +99,7 @@ void main() {
   late FileSystem fileSystem;
 
   setUp(() {
+    Cache.flutterRoot = getFlutterRoot();
     fileSystem = MemoryFileSystem.test();
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('web/index.html')
@@ -295,6 +302,87 @@ void main() {
   );
 
   testWithoutContext(
+    'release asset server does not serve an absolute reference on Windows',
+    () async {
+      final windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final windowsPlatform = FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{},
+      );
+      windowsFileSystem.file(r'C:\project\build\web\index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<html></html>');
+      windowsFileSystem.file(r'C:\Windows\win.ini')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('[secret]');
+      final assetServer = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: windowsFileSystem,
+        platform: windowsPlatform,
+        flutterRoot: r'C:\flutter',
+        webBuildDirectory: r'C:\project\build\web',
+        needsCoopCoep: false,
+      );
+
+      for (final path in <String>['file:///C:/Windows/win.ini', 'C:/Windows/win.ini']) {
+        final Response response = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/$path')),
+        );
+        expect(
+          await response.readAsString(),
+          '<html></html>',
+          reason: '"$path" should not be served and should return the index.html fallback',
+        );
+      }
+
+      // Behind a base path the colon is no longer in the first segment, so it
+      // reaches the handler unencoded.
+      final prefixed = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: windowsFileSystem,
+        platform: windowsPlatform,
+        flutterRoot: r'C:\flutter',
+        webBuildDirectory: r'C:\project\build\web',
+        needsCoopCoep: false,
+        basePath: 'my_app',
+      );
+      for (final path in <String>['file:///C:/Windows/win.ini', 'C:/Windows/win.ini']) {
+        final Response response = await prefixed.handle(
+          Request('GET', Uri.parse('http://localhost:8080/my_app/$path')),
+        );
+        expect(
+          await response.readAsString(),
+          '<html></html>',
+          reason: '"/my_app/$path" should not be served',
+        );
+      }
+    },
+  );
+
+  testWithoutContext('release asset server serves nested build output paths', () async {
+    final assetServer = ReleaseAssetServer(
+      Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
+    );
+    // A colon is only meaningful in the first segment of a relative reference,
+    // so it stays usable in an asset name.
+    for (final path in <String>['assets/fonts/MyFont-Regular.ttf', 'assets/a:b.png']) {
+      fileSystem.file('build/web/$path')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('asset bytes');
+      final Response response = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/$path')),
+      );
+      expect(response.statusCode, HttpStatus.ok, reason: '"$path" should be served');
+      expect(await response.readAsString(), 'asset bytes', reason: '"$path" should be served');
+    }
+  });
+
+  testWithoutContext(
     'release asset server serves html content with COOP/COEP headers when specified',
     () async {
       final assetServer = ReleaseAssetServer(
@@ -358,15 +446,20 @@ void main() {
         const DartDevelopmentServiceConfiguration(enable: false),
         Uri.base,
         null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
         crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
       );
 
       expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
@@ -387,15 +480,20 @@ void main() {
           const DartDevelopmentServiceConfiguration(enable: false),
           Uri.base,
           null,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            fs: fileSystem,
+            flutterVersion: FakeFlutterVersion(),
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
         );
 
         expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
@@ -415,15 +513,20 @@ void main() {
         const DartDevelopmentServiceConfiguration(enable: false),
         Uri.base,
         null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
         crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.skwasm,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
       );
 
       expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
@@ -444,15 +547,20 @@ void main() {
           const DartDevelopmentServiceConfiguration(enable: false),
           Uri.base,
           null,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            fs: fileSystem,
+            flutterVersion: FakeFlutterVersion(),
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
         );
 
         expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
@@ -472,15 +580,20 @@ void main() {
         const DartDevelopmentServiceConfiguration(enable: false),
         Uri.base,
         null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost', baseHref: '/preview/'),
+        webDevServerConfig: const WebDevServerConfig(baseHref: '/preview/'),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
       );
 
       expect(server.basePath, 'preview');
@@ -498,21 +611,153 @@ void main() {
         const DartDevelopmentServiceConfiguration(enable: false),
         Uri.base,
         null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
       );
 
       expect(server.basePath, isEmpty);
     });
 
-    testUsingContext(
+    testWithoutContext('isReady is completed by markReady() or dispose()', () async {
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+      );
+
+      var serverReady = false;
+      unawaited(server.isReady.then((_) => serverReady = true));
+      expect(serverReady, false);
+
+      server.markReady();
+      await pumpEventQueue();
+      expect(serverReady, true);
+
+      final WebAssetServer server2 = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+      );
+
+      var server2Ready = false;
+      unawaited(server2.isReady.then((_) => server2Ready = true));
+      expect(server2Ready, false);
+
+      await server2.dispose();
+      await pumpEventQueue();
+      expect(server2Ready, true);
+    });
+
+    testWithoutContext('pauses requests until markReady() is called', () async {
+      fileSystem.file('build/web/index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hello');
+
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.release,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: true,
+        useLocalCanvasKit: false,
+      );
+
+      final client = HttpClient();
+      try {
+        final Future<HttpClientResponse> responseFuture = client
+            .getUrl(Uri.parse('http://localhost:${server.selectedPort}/'))
+            .then((HttpClientRequest request) => request.close());
+
+        var responseReceived = false;
+        unawaited(responseFuture.then((_) => responseReceived = true));
+
+        // Pump events to ensure request is in flight.
+        await pumpEventQueue();
+        expect(responseReceived, false);
+
+        server.markReady();
+
+        final HttpClientResponse response = await responseFuture;
+        expect(response.statusCode, HttpStatus.ok);
+        expect(await utf8.decoder.bind(response).join(), 'hello');
+      } finally {
+        client.close();
+        await server.dispose();
+      }
+    });
+
+    testWithoutContext(
       'serves assets with exact key and does not serve non-source project files as assets',
       () async {
         final WebAssetServer server = await WebAssetServer.start(
@@ -526,15 +771,20 @@ void main() {
           const DartDevelopmentServiceConfiguration(enable: false),
           Uri.base,
           null,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            fs: fileSystem,
+            flutterVersion: FakeFlutterVersion(),
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
         );
 
         // Project source file exists in assets/ directory.
@@ -568,12 +818,47 @@ void main() {
         expect(dartSourceResponse.statusCode, HttpStatus.ok);
         expect(await dartSourceResponse.readAsString(), 'void main() {}');
       },
-      overrides: <Type, Generator>{
-        Artifacts: () => Artifacts.test(),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
     );
+
+    testWithoutContext('serves assets from configured build-dir', () async {
+      final config = Config.test()..setValue('build-dir', 'out');
+      fileSystem.file('out/flutter_assets/assets/custom_dir_asset.txt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('custom dir asset');
+
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          config: config,
+          fs: fileSystem,
+          flutterVersion: FakeFlutterVersion(),
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+      );
+
+      final Response response = await server.handleRequest(
+        Request('GET', Uri.parse('http://localhost:8080/assets/assets/custom_dir_asset.txt')),
+      );
+      expect(response.statusCode, HttpStatus.ok);
+      expect(await response.readAsString(), 'custom dir asset');
+    });
 
     group('on Windows', () {
       late FileSystem windowsFileSystem;
@@ -591,61 +876,258 @@ void main() {
           ..writeAsStringSync('hello');
       });
 
-      testUsingContext(
-        'serves assets with exact key on Windows filesystem',
-        () async {
-          final WebAssetServer server = await WebAssetServer.start(
-            null,
-            null,
-            false,
-            false,
-            false,
-            BuildInfo.debug,
-            false,
-            const DartDevelopmentServiceConfiguration(enable: false),
-            Uri.base,
-            null,
-            crossOriginIsolation: false,
-            webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
-            webRenderer: WebRendererMode.canvaskit,
-            isWasm: false,
-            useLocalCanvasKit: false,
-            testMode: true,
-            fileSystem: windowsFileSystem,
+      testWithoutContext('serves assets with exact key on Windows filesystem', () async {
+        final WebAssetServer server = await WebAssetServer.start(
+          null,
+          null,
+          false,
+          false,
+          false,
+          BuildInfo.debug,
+          false,
+          const DartDevelopmentServiceConfiguration(enable: false),
+          Uri.base,
+          null,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            fs: windowsFileSystem,
+            flutterVersion: FakeFlutterVersion(),
             logger: BufferLogger.test(),
             platform: windowsPlatform,
-          );
+          ),
+          crossOriginIsolation: false,
+          webDevServerConfig: const WebDevServerConfig(),
+          webRenderer: WebRendererMode.canvaskit,
+          isWasm: false,
+          useLocalCanvasKit: false,
+          testMode: true,
+        );
 
-          // Project source file exists in assets/ directory.
-          windowsFileSystem.file(r'assets\my_asset.txt')
+        // Project source file exists in assets/ directory.
+        windowsFileSystem.file(r'assets\my_asset.txt')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('project file');
+
+        // Built asset exists in build/flutter_assets/assets/my_asset.txt.
+        windowsFileSystem.file(r'build\flutter_assets\assets\my_asset.txt')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('built asset');
+
+        // Correct key 'assets/my_asset.txt' (URL /assets/assets/my_asset.txt) succeeds.
+        final Response validResponse = await server.handleRequest(
+          Request('GET', Uri.parse('http://localhost:8080/assets/assets/my_asset.txt')),
+        );
+        expect(validResponse.statusCode, HttpStatus.ok);
+        expect(await validResponse.readAsString(), 'built asset');
+
+        // Incorrect key 'my_asset.txt' (URL /assets/my_asset.txt) must return 404.
+        final Response invalidResponse = await server.handleRequest(
+          Request('GET', Uri.parse('http://localhost:8080/assets/my_asset.txt')),
+        );
+        expect(invalidResponse.statusCode, HttpStatus.notFound);
+      });
+    });
+    testWithoutContext('release asset server returns 404 for missing static file asset requests across all static cases', () async {
+      final assetServer = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: '/flutter',
+        webBuildDirectory: 'build/web',
+        needsCoopCoep: true,
+      );
+
+      // Populate build/web with index.html only
+      fileSystem.file('build/web/index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<html></html>');
+
+      // Case 1: assets/ prefix missing
+      final Response assetsResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/assets/icons/missing.png')),
+      );
+      expect(assetsResponse.statusCode, equals(404));
+
+      // Case 2: canvaskit/ prefix missing
+      final Response canvaskitResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/canvaskit/skwasm.wasm')),
+      );
+      expect(canvaskitResponse.statusCode, equals(404));
+
+      // Case 3: *.wasm file missing
+      final Response wasmResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/main.dart.wasm')),
+      );
+      expect(wasmResponse.statusCode, equals(404));
+
+      // Case 4: *.mjs file missing
+      final Response mjsResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/main.dart.mjs')),
+      );
+      expect(mjsResponse.statusCode, equals(404));
+
+      // Case 5: *.js file missing
+      final Response jsResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/main.dart.js')),
+      );
+      expect(jsResponse.statusCode, equals(404));
+
+      // Case 6: *.css file missing
+      final Response cssResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/styles.css')),
+      );
+      expect(cssResponse.statusCode, equals(404));
+
+      // Case 7: *.json file missing
+      final Response jsonResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/manifest.json')),
+      );
+      expect(jsonResponse.statusCode, equals(404));
+
+      // Case 8: *.ico file missing
+      final Response icoResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/favicon.ico')),
+      );
+      expect(icoResponse.statusCode, equals(404));
+
+      // Case 9: *.map file missing
+      final Response mapResponse = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/main.dart.js.map')),
+      );
+      expect(mapResponse.statusCode, equals(404));
+    });
+
+    testWithoutContext('release asset server serves index.html SPA fallback for route paths without file extensions', () async {
+      final assetServer = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: '/flutter',
+        webBuildDirectory: 'build/web',
+        needsCoopCoep: false,
+      );
+
+      fileSystem.file('build/web/index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<html>index</html>');
+
+      // Client-side route paths like /settings, /assets, or /canvaskit must fall back to index.html
+      for (final route in <String>['/settings', '/assets', '/canvaskit']) {
+        final Response routeResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080$route')),
+        );
+
+        expect(routeResponse.statusCode, equals(200));
+        expect(routeResponse.headers['Content-Type'], equals('text/html'));
+        expect(await routeResponse.readAsString(), equals('<html>index</html>'));
+      }
+    });
+
+    for (final (String label, BuildInfo buildInfo, bool isWasm, WebRendererMode webRenderer)
+        in <(String, BuildInfo, bool, WebRendererMode)>[
+          ('debug with isWasm: true', BuildInfo.debug, true, WebRendererMode.skwasm),
+          ('release with isWasm: false', BuildInfo.release, false, WebRendererMode.canvaskit),
+        ]) {
+      testWithoutContext(
+        'applies proxy rules instead of falling back to index.html ($label)',
+        () async {
+          fileSystem.file('build/web/index.html')
             ..createSync(recursive: true)
-            ..writeAsStringSync('project file');
+            ..writeAsStringSync('<html>index</html>');
 
-          // Built asset exists in build/flutter_assets/assets/my_asset.txt.
-          windowsFileSystem.file(r'build\flutter_assets\assets\my_asset.txt')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('built asset');
+          final HttpServer backendServer = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+          backendServer.listen((HttpRequest request) async {
+            if (request.uri.path == '/get') {
+              request.response
+                ..statusCode = HttpStatus.ok
+                ..headers.set('content-type', 'application/json')
+                ..write('{"method":"${request.method}","proxied":true}');
+              await request.response.close();
+            } else {
+              request.response.statusCode = HttpStatus.notFound;
+              await request.response.close();
+            }
+          });
 
-          // Correct key 'assets/my_asset.txt' (URL /assets/assets/my_asset.txt) succeeds.
-          final Response validResponse = await server.handleRequest(
-            Request('GET', Uri.parse('http://localhost:8080/assets/assets/my_asset.txt')),
-          );
-          expect(validResponse.statusCode, HttpStatus.ok);
-          expect(await validResponse.readAsString(), 'built asset');
+          final logger = BufferLogger.test();
+          WebAssetServer? server;
+          final client = HttpClient();
+          try {
+            server = await WebAssetServer.start(
+              null,
+              null,
+              false,
+              false,
+              false,
+              buildInfo,
+              false,
+              const DartDevelopmentServiceConfiguration(enable: false),
+              Uri.base,
+              null,
+              toolContext: FakeToolContext(
+                artifacts: Artifacts.test(),
+                config: Config.test(),
+                fs: fileSystem,
+                flutterVersion: FakeFlutterVersion(),
+                logger: logger,
+                platform: platform,
+              ),
+              crossOriginIsolation: false,
+              webDevServerConfig: WebDevServerConfig(
+                proxy: <ProxyRule>[
+                  PrefixProxyRule(
+                    prefix: '/get',
+                    target: 'http://localhost:${backendServer.port}/',
+                  ),
+                ],
+              ),
+              webRenderer: webRenderer,
+              isWasm: isWasm,
+              useLocalCanvasKit: false,
+            );
+            server.markReady();
 
-          // Incorrect key 'my_asset.txt' (URL /assets/my_asset.txt) must return 404.
-          final Response invalidResponse = await server.handleRequest(
-            Request('GET', Uri.parse('http://localhost:8080/assets/my_asset.txt')),
-          );
-          expect(invalidResponse.statusCode, HttpStatus.notFound);
-        },
-        overrides: <Type, Generator>{
-          Artifacts: () => Artifacts.test(),
-          FileSystem: () => windowsFileSystem,
-          Platform: () => windowsPlatform,
-          ProcessManager: () => FakeProcessManager.any(),
+            // 1. Proxied GET request should reach backendServer instead of returning index.html.
+            final HttpClientRequest getRequest = await client.getUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/get'),
+            );
+            final HttpClientResponse getResponse = await getRequest.close();
+            expect(getResponse.statusCode, HttpStatus.ok);
+            expect(await utf8.decoder.bind(getResponse).join(), '{"method":"GET","proxied":true}');
+            expect(
+              logger.statusText,
+              contains(
+                '[proxyMiddleware] Matched "/get". '
+                'Requesting "http://localhost:${backendServer.port}/get"',
+              ),
+            );
+
+            // 2. Proxied POST request should also be forwarded instead of 404ing in ReleaseAssetServer.
+            final HttpClientRequest postRequest = await client.postUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/get'),
+            );
+            final HttpClientResponse postResponse = await postRequest.close();
+            expect(postResponse.statusCode, HttpStatus.ok);
+            expect(
+              await utf8.decoder.bind(postResponse).join(),
+              '{"method":"POST","proxied":true}',
+            );
+
+            // 3. Unmatched SPA route still falls back to index.html.
+            final HttpClientRequest spaRequest = await client.getUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/unmatched-route'),
+            );
+            final HttpClientResponse spaResponse = await spaRequest.close();
+            expect(spaResponse.statusCode, HttpStatus.ok);
+            expect(await utf8.decoder.bind(spaResponse).join(), '<html>index</html>');
+          } finally {
+            client.close();
+            await server?.dispose();
+            await backendServer.close(force: true);
+          }
         },
       );
-    });
+    }
   });
 }

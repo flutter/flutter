@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import "AppDelegate.h"
-#import "MainViewController.h"
 
 @implementation GREYHostApplicationDistantObject (AppDelegate)
 
@@ -15,7 +14,7 @@
 
 @interface AppDelegate ()
 
-@property(nonatomic, strong, readwrite) FlutterEngine* engine;
+@property(nonatomic, strong, readwrite) FlutterEngine *engine;
 
 @end
 
@@ -23,21 +22,10 @@
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-
-  MainViewController *mainViewController = [[MainViewController alloc] init];
-  UINavigationController *navigationController = [[UINavigationController alloc]
-      initWithRootViewController:mainViewController];
-
-  navigationController.navigationBar.translucent = NO;
-
   self.engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [self.engine runWithEntrypoint:nil];
 
-  self.window.rootViewController = navigationController;
-  [self.window makeKeyAndVisible];
-
-  return YES;
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 @end

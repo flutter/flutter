@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -149,21 +152,20 @@ base class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
 base class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
   /// Creates a sliver render object for clipping with a rounded rectangle.
   ///
-  /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
+  /// The [_borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
   /// right-angled corners.
   ///
-  /// If [clipper] is non-null, then [borderRadius] is ignored.
+  /// If [clipper] is non-null, then [_borderRadius] is ignored.
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
   /// The [clipBehavior] argument defaults to [Clip.antiAlias].
   RenderSliverClipRRect({
-    BorderRadiusGeometry borderRadius = .zero,
+    this._borderRadius = .zero,
     super.clipper,
     super.clipBehavior = .antiAlias,
     super.clipOverlap = .followEdge,
-    TextDirection? textDirection,
-  }) : _borderRadius = borderRadius,
-       _textDirection = textDirection;
+    this._textDirection,
+  });
 
   /// The border radius of the rounded corners.
   ///
@@ -283,12 +285,10 @@ base class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
 
 abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   _RenderSliverCustomClip({
-    required CustomClipper<T>? clipper,
-    required Clip clipBehavior,
-    required ClipOverlapBehavior clipOverlap,
-  }) : _clipper = clipper,
-       _clipBehavior = clipBehavior,
-       _clipOverlap = clipOverlap;
+    required this._clipper,
+    required this._clipBehavior,
+    required this._clipOverlap,
+  });
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T>? get clipper => _clipper;

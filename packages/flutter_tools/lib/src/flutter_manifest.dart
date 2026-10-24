@@ -30,7 +30,7 @@ class PluginPlatformConfig {
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
-  FlutterManifest._({required Logger logger}) : _logger = logger;
+  FlutterManifest._({required this._logger});
 
   /// Returns an empty manifest.
   factory FlutterManifest.empty({required Logger logger}) = FlutterManifest._;
@@ -127,6 +127,9 @@ class FlutterManifest {
   }
 
   final Logger _logger;
+
+  /// The logger associated with this manifest.
+  Logger get logger => _logger;
 
   /// A map representation of the entire `pubspec.yaml` file.
   var _descriptor = <String, Object?>{};
@@ -490,6 +493,8 @@ bool _validate(Object? manifest, Logger logger) {
   if (manifest is! YamlMap) {
     errors.add('Expected YAML map');
   } else {
+    final Object? rawName = manifest['name'];
+    final String packageName = rawName is String ? rawName : 'plugin';
     for (final MapEntry<Object?, Object?> kvp in manifest.entries) {
       if (kvp.key is! String) {
         errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
@@ -509,7 +514,7 @@ bool _validate(Object? manifest, Logger logger) {
               'Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.',
             );
           } else {
-            _validateFlutter(kvp.value as YamlMap?, errors);
+            _validateFlutter(kvp.value as YamlMap?, errors, packageName: packageName);
           }
         default:
           // additionalProperties are allowed.
@@ -527,7 +532,7 @@ bool _validate(Object? manifest, Logger logger) {
   return true;
 }
 
-void _validateFlutter(YamlMap? yaml, List<String> errors) {
+void _validateFlutter(YamlMap? yaml, List<String> errors, {required String packageName}) {
   if (yaml == null) {
     return;
   }
@@ -591,7 +596,10 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           );
           break;
         }
-        final List<String> pluginErrors = Plugin.validatePluginYaml(yamlValue);
+        final List<String> pluginErrors = Plugin.validatePluginYaml(
+          yamlValue,
+          packageName: packageName,
+        );
         errors.addAll(pluginErrors);
       case 'generate':
         break;

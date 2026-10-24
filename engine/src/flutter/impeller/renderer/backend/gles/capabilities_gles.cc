@@ -5,7 +5,10 @@
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 
 #include <algorithm>
+#include <charconv>
+#include <string>
 
+#include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -60,6 +63,40 @@ static const constexpr char* kAppleTextureMaxLevelExt =
 // https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_filter_anisotropic.txt
 static const constexpr char* kTextureFilterAnisotropicExt =
     "GL_EXT_texture_filter_anisotropic";
+
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_parallel_shader_compile.txt
+static const constexpr char* kParallelShaderCompileKHRExt =
+    "GL_KHR_parallel_shader_compile";
+// https://registry.khronos.org/OpenGL/extensions/ARB/ARB_parallel_shader_compile.txt
+static const constexpr char* kParallelShaderCompileARBExt =
+    "GL_ARB_parallel_shader_compile";
+
+static bool MaliDriverNeedsTextureUploadRebind(const std::string& version) {
+  // Arm's version string includes a driver release, for example:
+  // "OpenGL ES 3.2 v1.r18p0-01rel0...". If it is unavailable, retain the
+  // workaround rather than assuming that the driver has been fixed.
+  const auto marker = version.find(" v1.r");
+  if (marker == std::string::npos) {
+    return true;
+  }
+  const char* end = version.data() + version.size();
+  unsigned int release = 0;
+  const auto release_result =
+      std::from_chars(version.data() + marker + 5, end, release);
+  if (release_result.ec != std::errc{} || release_result.ptr == end ||
+      *release_result.ptr != 'p') {
+    return true;
+  }
+  unsigned int patch = 0;
+  const auto patch_result = std::from_chars(release_result.ptr + 1, end, patch);
+  if (patch_result.ec != std::errc{} ||
+      (patch_result.ptr != end && *patch_result.ptr != '-')) {
+    return true;
+  }
+  // Arm erratum EN_ID 1,792,661 affects Bifrost/Valhall r17p0-r23p0 and was
+  // fixed in r24p0. OEM backports within that range cannot be detected.
+  return release >= 17 && release < 24;
+}
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
@@ -179,6 +216,11 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   }
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();
+  needs_texture_upload_rebind_ =
+      is_es_ && !is_angle_ &&
+      (HasPrefix(desc->GetRenderer(), "Mali-G") ||
+       HasPrefix(desc->GetRenderer(), "Immortalis-G")) &&
+      MaliDriverNeedsTextureUploadRebind(desc->GetGlVersionString());
 
   // ETC2 and EAC are mandatory in OpenGL ES 3.0. BC and ASTC are gated behind
   // extensions and are not present on most mobile or desktop GLES. The whole BC
@@ -229,10 +271,27 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     // but is always an integer in practice, so floor it.
     max_sampler_anisotropy_ = static_cast<uint32_t>(std::max(value, 2.0f));
   }
+
+  // The KHR and ARB parallel shader compile extensions share the same enum for
+  // the maximum number of compiler threads.
+  if (desc->HasExtension(kParallelShaderCompileKHRExt) ||
+      desc->HasExtension(kParallelShaderCompileARBExt)) {
+    GLint value = 0;
+    gl.GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, &value);
+    max_shader_compiler_threads_ = value;
+  }
+}
+
+bool CapabilitiesGLES::NeedsTextureUploadRebind() const {
+  return needs_texture_upload_rebind_;
 }
 
 bool CapabilitiesGLES::IsES() const {
   return is_es_;
+}
+
+int32_t CapabilitiesGLES::GetMaxShaderCompilerThreads() const {
+  return max_shader_compiler_threads_;
 }
 
 bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
@@ -249,7 +308,7 @@ bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
   return supports_texture_max_level_;
 }
 
-bool CapabilitiesGLES::SupportsTextureArray() const {
+bool CapabilitiesGLES::SupportsTextureArrays() const {
   return supports_texture_array_;
 }
 

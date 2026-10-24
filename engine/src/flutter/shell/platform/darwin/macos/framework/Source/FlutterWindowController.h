@@ -50,6 +50,8 @@ struct FlutterWindowSize {
         size.height,
     };
   }
+
+  NSSize toNSSize() const { return NSMakeSize(width, height); }
 };
 
 struct FlutterWindowOffset {
@@ -76,6 +78,7 @@ struct FlutterWindowCreationRequest {
   struct FlutterWindowSize size;
   bool has_constraints;
   struct FlutterWindowConstraints constraints;
+  bool resizable;
   int64_t parent_view_id;
   void (*on_should_close)();
   void (*on_will_close)();
@@ -93,6 +96,11 @@ extern "C" {
 
 FLUTTER_DARWIN_EXPORT
 int64_t InternalFlutter_WindowController_CreateRegularWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request);
+
+FLUTTER_DARWIN_EXPORT
+int64_t InternalFlutter_WindowController_CreateSatelliteWindow(
     int64_t engine_id,
     const FlutterWindowCreationRequest* request);
 
@@ -162,6 +170,15 @@ bool InternalFlutter_Window_IsActivated(void* window);
 
 FLUTTER_DARWIN_EXPORT
 void InternalFlutter_Window_UpdatePosition(void* window);
+
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_Reparent(int64_t engineId, void* window, int64_t newParentId);
+
+FLUTTER_DARWIN_EXPORT
+void* InternalFlutter_Window_GetParent(void* window);
+
+FLUTTER_DARWIN_EXPORT
+FlutterWindowRect InternalFlutter_Window_FrameRectAsAnchorRect(void* window);
 
 FLUTTER_DARWIN_EXPORT
 FlutterWindowOffset InternalFlutter_Window_GetOffsetInParent(void* window);

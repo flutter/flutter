@@ -14,12 +14,15 @@ import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -74,12 +77,11 @@ For more information, please visit:
 
 class IMobileDevice {
   IMobileDevice({
-    required Artifacts artifacts,
+    required this._artifacts,
     required Cache cache,
     required ProcessManager processManager,
     required Logger logger,
-  }) : _artifacts = artifacts,
-       _dyLdLibEntry = cache.dyLdLibEntry,
+  }) : _dyLdLibEntry = cache.dyLdLibEntry,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   /// Create an [IMobileDevice] for testing.
@@ -121,7 +123,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
+  required ToolContext toolContext,
 }) async {
+  final ToolContext(:Config config, :FileSystem fs, :OperatingSystemUtils os, :Platform platform) =
+      toolContext;
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
@@ -149,6 +154,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
       config: globals.config,
+      analytics: globals.analytics,
+      hostPlatform: globals.platform,
+      operatingSystemUtils: globals.os,
+      flutterVersion: globals.flutterVersion,
+      reportCrashes: !await globals.isRunningOnBot,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -182,6 +192,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    analytics: globals.analytics,
+    featureFlags: featureFlags,
   );
 
   await removeExtendedAttributesForProject(
@@ -276,7 +288,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final String buildDirectoryPath = getIosBuildDirectory();
+  final String buildDirectoryPath = getIosBuildDirectory(config: config, fileSystem: fs);
 
   final Map<String, String> buildSettings =
       await app.project.buildSettingsForBuildInfo(
@@ -349,6 +361,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    toolContext: toolContext,
     printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
@@ -440,7 +453,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
+      final onlyActiveArch =
+          activeArch ==
+          CpuArch.fromHostPlatform(
+            getCurrentHostPlatform(operatingSystemUtils: os, platform: platform),
+          );
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');
@@ -911,6 +928,7 @@ Future<void> diagnoseXcodeBuildFailure(
     platform: platform,
     logger: logger,
     fileSystem: fileSystem,
+    analytics: analytics,
     device: device,
   );
 
@@ -1093,7 +1111,8 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       missingModule: _parseMissingModule(message),
     );
   } else if (message.toLowerCase().contains('has been modified since') ||
-      (message.toLowerCase().contains('module map file') && message.toLowerCase().contains('not found'))) {
+      (message.toLowerCase().contains('module map file') &&
+          message.toLowerCase().contains('not found'))) {
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
@@ -1136,6 +1155,7 @@ Future<bool> _handleIssues(
   required FlutterDarwinPlatform platform,
   required Logger logger,
   required FileSystem fileSystem,
+  required Analytics analytics,
   Device? device,
 }) async {
   var requiresProvisioningProfile = false;
@@ -1226,6 +1246,11 @@ Future<bool> _handleIssues(
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && usesSwiftPackageManager) {
+      for (final module in duplicateModules) {
+        analytics.send(
+          Event.appleUsageEvent(workflow: 'duplicate-modules-build-failure', parameter: module),
+        );
+      }
       logger.printError(
         'Your project uses both CocoaPods and Swift Package Manager, which can '
         'cause the above error. It may be caused by there being both a CocoaPod '

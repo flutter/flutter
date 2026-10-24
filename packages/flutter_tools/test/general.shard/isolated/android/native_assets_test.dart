@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -54,7 +55,11 @@ void main() {
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
       skip: const LocalPlatform().isWindows,
-      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+        FeatureFlags: () =>
+            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+      },
       () async {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
@@ -108,7 +113,9 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
-          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/android/'),
+          targetUri: projectUri.resolve(
+            '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/android/',
+          ),
         );
         expect(
           (globals.logger as BufferLogger).traceText,

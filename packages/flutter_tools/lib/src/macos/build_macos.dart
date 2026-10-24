@@ -6,6 +6,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart' show HostPlatform;
@@ -13,6 +14,7 @@ import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
@@ -86,7 +88,9 @@ Future<void> buildMacOS({
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
+  required ToolContext toolContext,
 }) async {
+  final ToolContext(:Config config, :FileSystem fs) = toolContext;
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
   if (!xcodeProject.existsSync()) {
     throwToolExit(
@@ -94,6 +98,10 @@ Future<void> buildMacOS({
       'See https://flutter.dev/to/add-desktop-support '
       'to learn about adding macOS support to a project.',
     );
+  }
+
+  if (globals.xcodeProjectInterpreter?.isInstalled != true) {
+    throwToolExit(globals.userMessages.xcodeMissing);
   }
 
   // The .xcworkspace may not exist (e.g. a project using Swift Package Manager
@@ -123,6 +131,11 @@ Future<void> buildMacOS({
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
       config: globals.config,
+      analytics: globals.analytics,
+      hostPlatform: globals.platform,
+      operatingSystemUtils: globals.os,
+      flutterVersion: globals.flutterVersion,
+      reportCrashes: !await globals.isRunningOnBot,
     ),
     SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
     MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),
@@ -138,9 +151,11 @@ Future<void> buildMacOS({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    analytics: globals.analytics,
+    featureFlags: featureFlags,
   );
 
-  final String buildDirectoryPath = getMacOSBuildDirectory();
+  final String buildDirectoryPath = getMacOSBuildDirectory(config: config, fileSystem: fs);
   final Directory flutterBuildDir = flutterProject.directory.childDirectory(buildDirectoryPath);
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
@@ -155,11 +170,14 @@ Future<void> buildMacOS({
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
   );
-  final String? scheme = projectInfo?.schemeFor(buildInfo);
-  if (scheme == null) {
-    projectInfo!.reportFlavorNotFoundAndExit();
+  if (projectInfo == null) {
+    throwToolExit('Unable to get Xcode project information.');
   }
-  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
+  final String? scheme = projectInfo.schemeFor(buildInfo);
+  if (scheme == null) {
+    projectInfo.reportFlavorNotFoundAndExit();
+  }
+  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
@@ -176,6 +194,7 @@ Future<void> buildMacOS({
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
+    toolContext: toolContext,
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
@@ -341,6 +360,7 @@ Future<void> buildMacOS({
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
     flutterProject.macos,
+    toolContext: toolContext,
   ).applicationBundle(buildInfo);
   if (applicationBundle != null) {
     final Directory outputDirectory = globals.fs.directory(applicationBundle);
@@ -371,7 +391,7 @@ Future<void> buildMacOS({
         : 'plist-impeller-enabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'macos'));
   }
-  await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
+  await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer, toolContext: toolContext);
   final Duration elapsedDuration = sw.elapsed;
   globals.analytics.send(
     Event.timing(
@@ -387,11 +407,16 @@ Future<void> buildMacOS({
 /// Size analysis will be run for release builds where the --analyze-size
 /// option has been specified. By default, size analysis JSON output is written
 /// to ~/.flutter-devtools/macos-code-size-analysis_NN.json.
-Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnalyzer) async {
+Future<void> _writeCodeSizeAnalysis(
+  BuildInfo buildInfo,
+  SizeAnalyzer? sizeAnalyzer, {
+  required ToolContext toolContext,
+}) async {
   // Bail out if the size analysis option was not specified.
   if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
     return;
   }
+  final ToolContext(:Config config, :FileSystem fs) = toolContext;
   final File? aotSnapshot = const <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]
       .map<File?>((CpuArch arch) {
         return globals.fs
@@ -420,8 +445,13 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
 
   // This analysis is only supported for release builds.
   // Attempt to guess the correct .app by picking the first one.
-  final Directory candidateDirectory = globals.fs.directory(
-    globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
+  final Directory candidateDirectory = fs.directory(
+    fs.path.join(
+      getMacOSBuildDirectory(config: config, fileSystem: fs),
+      'Build',
+      'Products',
+      'Release',
+    ),
   );
   final Directory appDirectory = candidateDirectory.listSync().whereType<Directory>().firstWhere((
     Directory directory,

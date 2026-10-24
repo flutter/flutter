@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../dart/analysis.dart';
-import '../globals.dart' as globals;
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
     List<Directory> repoPackages, {
-    required super.fileSystem,
-    required super.logger,
-    required super.terminal,
-    required super.platform,
-    required super.processManager,
-    required super.artifacts,
+    required this._analytics,
     required super.suppressAnalytics,
+    required super.toolContext,
   }) : super(repoPackages: repoPackages);
+
+  final Analytics _analytics;
 
   String? analysisTarget;
   bool firstAnalysis = true;
@@ -37,7 +36,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     if (isFlutterRepo) {
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, dependencies);
+      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
 
       directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';
@@ -51,13 +50,10 @@ class AnalyzeContinuously extends AnalyzeBase {
     final server = AnalysisServer(
       sdkPath,
       directories,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      terminal: terminal,
-      protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
+      toolContext: toolContext,
+      protocolTrafficLog: protocolTrafficLog,
+      usePlugins: usePlugins,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
@@ -129,7 +125,12 @@ class AnalyzeContinuously extends AnalyzeBase {
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
         server.dispose().whenComplete(() {
-          exitWithHooks(issueCount > 0 ? 1 : 0, shutdownHooks: globals.shutdownHooks);
+          exitWithHooks(
+            issueCount > 0 ? 1 : 0,
+            analytics: _analytics,
+            logger: logger,
+            shutdownHooks: toolContext.shutdownHooks,
+          );
         });
       }
 

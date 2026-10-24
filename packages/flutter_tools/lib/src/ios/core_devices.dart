@@ -14,7 +14,9 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -36,23 +38,23 @@ import 'xcodeproj.dart';
 /// - [launchAppWithXcodeDebugger]: Uses Xcode automation to install, launch, and debug the app.
 class IOSCoreDeviceLauncher {
   IOSCoreDeviceLauncher({
-    required IOSCoreDeviceControl coreDeviceControl,
+    required this._coreDeviceControl,
     required Logger logger,
-    required XcodeDebug xcodeDebug,
-    required FileSystem fileSystem,
+    required this._xcodeDebug,
+    required this._fileSystem,
     required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required Version? deviceVersion,
+    required this._toolContext,
     @visibleForTesting LLDB? lldb,
-  }) : _coreDeviceControl = coreDeviceControl,
-       _logger = logger,
-       _xcodeDebug = xcodeDebug,
-       _fileSystem = fileSystem,
+  }) : _logger = logger,
        _lldb =
            lldb ??
            LLDB(
              logger: logger,
              processUtils: processUtils,
              xcodeProjectInterpreter: xcodeProjectInterpreter,
+             deviceVersion: deviceVersion,
            );
 
   final IOSCoreDeviceControl _coreDeviceControl;
@@ -60,6 +62,7 @@ class IOSCoreDeviceLauncher {
   final XcodeDebug _xcodeDebug;
   final FileSystem _fileSystem;
   final LLDB _lldb;
+  final ToolContext _toolContext;
 
   /// Contains a stream that devicectl sends logs to.
   final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
@@ -247,6 +250,7 @@ class IOSCoreDeviceLauncher {
         project: project.parent,
         buildInfo: debuggingOptions.buildInfo,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: _toolContext,
       );
 
       debugProject = XcodeDebugProject(
@@ -351,12 +355,10 @@ class IOSCoreDeviceControl {
   IOSCoreDeviceControl({
     required Logger logger,
     required ProcessManager processManager,
-    required Xcode xcode,
-    required FileSystem fileSystem,
+    required this._xcode,
+    required this._fileSystem,
   }) : _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _xcode = xcode,
-       _fileSystem = fileSystem;
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -729,6 +731,7 @@ class IOSCoreDeviceControl {
       'launch',
       '--device',
       deviceId,
+      '--terminate-existing',
       if (startStopped) '--start-stopped',
       if (attachToConsole) ...<String>[
         '--console',
@@ -865,7 +868,7 @@ class IOSCoreDeviceControl {
       unawaited(
         launchProcess.exitCode
             .then((int status) async {
-              _logger.printTrace('lldb exited with code $status');
+              _logger.printTrace('devicectl exited with code $status');
               await stdoutSubscription.cancel();
               await stderrSubscription.cancel();
             })

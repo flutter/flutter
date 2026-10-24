@@ -7,12 +7,14 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
@@ -22,6 +24,7 @@ import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -78,6 +81,8 @@ void main() {
       testUsingContext(
         'build with assets $buildMode$testName',
         overrides: <Type, Generator>{
+          FeatureFlags: () =>
+              TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
           ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
             if (flutterTester) ...<FakeCommand>[
               FakeCommand(
@@ -361,7 +366,9 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
-            targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/macos/'),
+            targetUri: projectUri.resolve(
+              '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/macos/',
+            ),
           );
           final expectedArchsBeingBuilt = flutterTester
               ? (isArm64 ? 'macos_arm64' : 'macos_x64')
