@@ -48,7 +48,7 @@ final Set<LogicalKeyboardKey> _metaSynonyms = LogicalKeyboardKey.expandSynonyms(
 ///  * [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
 ///    define its key map.
 @immutable
-class KeySet<T extends KeyboardKey> {
+base class KeySet<T extends KeyboardKey> {
   /// A constructor for making a [KeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [KeySet.fromSet].
@@ -285,7 +285,7 @@ abstract class ShortcutActivator {
 /// comparison from an identity comparison to a contents comparison so that
 /// non-identical sets with the same keys in them will compare as equal.
 
-class LogicalKeySet extends KeySet<LogicalKeyboardKey>
+base class LogicalKeySet extends KeySet<LogicalKeyboardKey>
     with Diagnosticable
     implements ShortcutActivator {
   /// A constructor for making a [LogicalKeySet] of up to four keys.

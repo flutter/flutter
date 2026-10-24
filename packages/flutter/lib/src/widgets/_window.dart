@@ -1890,7 +1890,7 @@ enum _WindowControllerAspect {
 ///  * [Window], the widget to create a regular window.
 ///  * [DialogWindow], the widget to create a dialog window.
 @internal
-class WindowScope extends InheritedModel<_WindowControllerAspect> {
+base class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// Creates a new [WindowScope].
   ///
   /// This widget is used by the window widgets to provide

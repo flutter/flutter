@@ -41,7 +41,7 @@ import 'framework.dart';
 ///  * [SelectableRegion], which provides an overview of the selection system.
 ///  * [SelectionContainer.disabled], which disable selection for a
 ///    subtree.
-class SelectionContainer extends StatefulWidget {
+base class SelectionContainer extends StatefulWidget {
   /// Creates a selection container to collect the [Selectable]s in the subtree.
   ///
   /// If [registrar] is not provided, this selection container gets the

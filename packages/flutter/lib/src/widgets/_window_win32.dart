@@ -102,7 +102,7 @@ abstract class _WindowsMessageHandler {
 ///
 ///  * [WindowingOwner], the abstract class that manages native windows.
 @internal
-class WindowingOwnerWin32 extends WindowingOwner {
+base class WindowingOwnerWin32 extends WindowingOwner {
   /// Creates a new [WindowingOwnerWin32] instance.
   ///
   /// If [Platform.isWindows] is false, then this constructor will throw an

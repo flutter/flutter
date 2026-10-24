@@ -29,7 +29,7 @@ import 'sliver_multi_box_adaptor.dart';
 typedef TreeSliverNodesAnimation = ({int fromIndex, int toIndex, double value});
 
 /// Used to pass information down to [RenderTreeSliver].
-class TreeSliverNodeParentData extends SliverMultiBoxAdaptorParentData {
+base class TreeSliverNodeParentData extends SliverMultiBoxAdaptorParentData {
   /// The depth of the node, used by [RenderTreeSliver] to offset children by
   /// by the [TreeSliverIndentationType].
   int depth = 0;

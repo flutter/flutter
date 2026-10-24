@@ -28,7 +28,7 @@ const double _kDefaultRowExtent = 40.0;
 ///
 /// The values returned by [depth], [parent] and [isExpanded] getters are
 /// managed by the [TreeSliver]'s state.
-class TreeSliverNode<T> {
+base class TreeSliverNode<T> {
   /// Creates a [TreeSliverNode] instance for use in a [TreeSliver].
   TreeSliverNode(T content, {List<TreeSliverNode<T>>? children, bool expanded = false})
     : _expanded = (children?.isNotEmpty ?? false) && expanded,
@@ -169,7 +169,7 @@ mixin TreeSliverStateMixin<T> {
 /// The controller's methods to expand or collapse nodes cause the
 /// the [TreeSliver] to rebuild, so they may not be called from
 /// a build method.
-class TreeSliverController {
+base class TreeSliverController {
   /// Create a controller to be used with [TreeSliver.controller].
   TreeSliverController();
 

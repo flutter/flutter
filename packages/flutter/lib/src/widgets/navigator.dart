@@ -3729,7 +3729,7 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
 /// The state for a [Navigator] widget.
 ///
 /// A reference to this class can be obtained by calling [Navigator.of].
-class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
+base class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
 

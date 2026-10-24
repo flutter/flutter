@@ -1875,7 +1875,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
 ///    events in a widget tree.
 ///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
 ///    participating agents may disambiguate an event's target.
-class PointerScrollEvent extends PointerSignalEvent
+base class PointerScrollEvent extends PointerSignalEvent
     with _PointerEventDescription, _CopyPointerScrollEvent {
   /// Creates a pointer scroll event.
   const PointerScrollEvent({
@@ -1914,7 +1914,7 @@ class PointerScrollEvent extends PointerSignalEvent
   }
 }
 
-class _TransformedPointerScrollEvent extends _TransformedPointerEvent
+base class _TransformedPointerScrollEvent extends _TransformedPointerEvent
     with _CopyPointerScrollEvent
     implements PointerScrollEvent {
   _TransformedPointerScrollEvent(this.original, this.transform);

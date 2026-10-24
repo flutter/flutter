@@ -220,16 +220,16 @@ class Form extends StatefulWidget {
   /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
 
-  void _callPopInvoked(bool didPop, Object? result) {
-    if (onPopInvokedWithResult != null) {
-      onPopInvokedWithResult!(didPop, result);
-      return;
-    }
-    onPopInvoked?.call(didPop);
-  }
-
   @override
   FormState createState() => FormState();
+}
+
+void _callPopInvoked(Form form, bool didPop, Object? result) {
+  if (form.onPopInvokedWithResult != null) {
+    form.onPopInvokedWithResult!(didPop, result);
+    return;
+  }
+  form.onPopInvoked?.call(didPop);
 }
 
 /// State associated with a [Form] widget.
@@ -297,7 +297,8 @@ class FormState extends State<Form> {
     if (widget.canPop != null || (widget.onPopInvokedWithResult ?? widget.onPopInvoked) != null) {
       form = PopScope<Object?>(
         canPop: widget.canPop ?? true,
-        onPopInvokedWithResult: widget._callPopInvoked,
+        onPopInvokedWithResult: (bool didPop, Object? result) =>
+            _callPopInvoked(widget, didPop, result),
         child: _FormScope(formState: this, generation: _generation, child: widget.child),
       );
     } else {

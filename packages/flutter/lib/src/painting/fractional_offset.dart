@@ -51,7 +51,7 @@ import 'basic_types.dart';
 ///  * [Alignment], which uses a coordinate system based on the center of the
 ///    rectangle instead of the top left corner of the rectangle.
 @immutable
-class FractionalOffset extends Alignment {
+base class FractionalOffset extends Alignment {
   /// Creates a fractional offset.
   const FractionalOffset(double dx, double dy) : super(dx * 2.0 - 1.0, dy * 2.0 - 1.0);
 

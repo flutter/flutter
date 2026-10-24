@@ -430,7 +430,7 @@ class Ticker {
 ///
 /// To run a callback when either this future resolves or when the ticker is
 /// canceled, use [whenCompleteOrCancel].
-class TickerFuture implements Future<void> {
+base class TickerFuture implements Future<void> {
   TickerFuture._();
 
   /// Creates a [TickerFuture] instance that represents an already-complete

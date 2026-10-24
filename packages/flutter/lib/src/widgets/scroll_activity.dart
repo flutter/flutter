@@ -253,7 +253,7 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 ///
 ///  * [DragScrollActivity], which is the activity the scroll view performs
 ///    while a drag is underway.
-class ScrollDragController implements Drag {
+base class ScrollDragController implements Drag {
   /// Creates an object that scrolls a scroll view as the user drags their
   /// finger across the screen.
   ScrollDragController({
