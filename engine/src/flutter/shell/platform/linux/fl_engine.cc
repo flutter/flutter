@@ -925,7 +925,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   self->settings_handler = fl_settings_handler_new(self);
   fl_settings_handler_start(self->settings_handler, settings);
 
-  self->platform_handler = fl_platform_handler_new(self->binary_messenger);
+  self->platform_handler = fl_platform_handler_new(self);
 
   setup_keyboard(self);
 
