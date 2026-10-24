@@ -93,7 +93,7 @@ const String _kFlutterKeyDataChannel = 'flutter/keydata';
 ByteData? _wrapUnmodifiableByteData(ByteData? byteData) => byteData?.asUnmodifiableView();
 
 /// A token that represents a root isolate.
-class RootIsolateToken {
+final class RootIsolateToken {
   RootIsolateToken._(this._token);
 
   /// An enumeration representing the root isolate (0 if not a root isolate).
@@ -3324,7 +3324,7 @@ class HitTestRequest {
 /// * [PlatformDispatcher.onHitTest], the callback that the platform
 ///   invokes to hit test a view at a specific position.
 /// * [HitTestRequest], the request to hit test a view at a specific position.
-class HitTestResponse {
+final class HitTestResponse {
   /// Creates a hit test response.
   const HitTestResponse({required this.hasPlatformView});
 

@@ -61,7 +61,7 @@ class TreeSliverNodeParentData extends SliverMultiBoxAdaptorParentData {
 /// {@end-tool}
 ///
 /// {@endtemplate}
-class TreeSliverIndentationType {
+final class TreeSliverIndentationType {
   const TreeSliverIndentationType._internal(double value) : _value = value;
 
   /// The number of pixels by which [TreeSliverNode]s will be offset according

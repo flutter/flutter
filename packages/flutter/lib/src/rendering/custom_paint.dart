@@ -304,7 +304,7 @@ abstract class CustomPainter extends Listenable {
 ///  * [SemanticsNode], which is created using the properties of this class.
 ///  * [CustomPainter], which creates instances of this class.
 @immutable
-class CustomPainterSemantics {
+final class CustomPainterSemantics {
   /// Creates semantics information describing a rectangle on a canvas.
   const CustomPainterSemantics({
     this.key,

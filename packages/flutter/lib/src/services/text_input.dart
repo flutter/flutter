@@ -1494,7 +1494,7 @@ abstract class ScribbleClient {
 /// This is used to report the current text selection rect and position data
 /// to the engine for Scribble support on iPadOS 14.
 @immutable
-class SelectionRect {
+final class SelectionRect {
   /// Constructor for creating a [SelectionRect] from a text [position] and
   /// [bounds].
   const SelectionRect({
@@ -1517,9 +1517,6 @@ class SelectionRect {
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
-    }
-    if (runtimeType != other.runtimeType) {
-      return false;
     }
     return other is SelectionRect &&
         other.position == position &&
@@ -1990,7 +1987,7 @@ void _reportError(
 ///  * [TextField], a widget in which the user may enter text.
 ///  * [EditableText], a [TextInputClient] that connects to [TextInput] when it
 ///    wants to take user input from the keyboard.
-class TextInput {
+final class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
     _channel.setMethodCallHandler(_loudlyHandleTextInputInvocation);

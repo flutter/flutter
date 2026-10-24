@@ -354,7 +354,7 @@ class _SystemMouseCursorSession extends MouseCursorSession {
 /// [SystemMouseCursors] enumerates the complete set of system cursors supported
 /// by Flutter, which are hard-coded in the engine. Therefore, manually
 /// instantiating this class is not supported.
-class SystemMouseCursor extends MouseCursor {
+final class SystemMouseCursor extends MouseCursor {
   // Application code shouldn't directly instantiate system mouse cursors, since
   // the supported system cursors are enumerated in [SystemMouseCursors].
   const SystemMouseCursor._({required this.kind});
@@ -373,9 +373,6 @@ class SystemMouseCursor extends MouseCursor {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is SystemMouseCursor && other.kind == kind;
   }
 
