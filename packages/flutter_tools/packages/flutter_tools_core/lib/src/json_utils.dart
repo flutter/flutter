@@ -4,11 +4,30 @@
 
 /// Validation helpers for file system [Uri]s exchanged over the tool
 /// extension protocol.
-extension ExtensionUriValidation on Uri {
-  /// Whether this URI is an absolute `file:` directory URI ending with a
-  /// trailing slash (`/`).
-  bool get isValidDirectoryUri =>
-      isScheme('file') && hasAbsolutePath && !hasQuery && !hasFragment && path.endsWith('/');
+extension ExtensionUriValidation on Uri? {
+  /// Whether this URI is a non-null, absolute `file:` directory URI ending
+  /// with a trailing slash (`/`).
+  bool get isValidDirectoryUri => switch (this) {
+    final Uri uri =>
+      uri.isScheme('file') &&
+          uri.hasAbsolutePath &&
+          !uri.hasQuery &&
+          !uri.hasFragment &&
+          uri.path.endsWith('/'),
+    null => false,
+  };
+
+  /// Whether this URI is a non-null, absolute `file:` URI that does not end
+  /// with a trailing slash (`/`).
+  bool get isValidFileUri => switch (this) {
+    final Uri uri =>
+      uri.isScheme('file') &&
+          uri.hasAbsolutePath &&
+          !uri.hasQuery &&
+          !uri.hasFragment &&
+          !uri.path.endsWith('/'),
+    null => false,
+  };
 }
 
 /// Shared JSON deserialization utilities for Flutter tool extension models.

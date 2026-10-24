@@ -458,16 +458,21 @@ void main() {
 
   group('ExtensionBuildResult', () {
     test('serializes and deserializes successful result without errorMessage', () {
-      const result = ExtensionBuildResult(success: true);
+      final result = ExtensionBuildResult(
+        success: true,
+        executableUri: Uri.file('/path/to/bundle/app'),
+      );
 
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isTrue);
       expect(map.containsKey(ExtensionBuildResult.errorMessageKey), isFalse);
+      expect(map[ExtensionBuildResult.executableUriKey], 'file:///path/to/bundle/app');
 
       final parsed = ExtensionBuildResult.fromJson(map);
       expect(parsed, equals(result));
       expect(parsed.hashCode, equals(result.hashCode));
       expect(parsed.toString(), contains('success: true'));
+      expect(parsed.toString(), contains('file:///path/to/bundle/app'));
     });
 
     test('serializes and deserializes failed result with errorMessage', () {
@@ -476,11 +481,36 @@ void main() {
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isFalse);
       expect(map[ExtensionBuildResult.errorMessageKey], 'Compilation failed.');
+      expect(map.containsKey(ExtensionBuildResult.executableUriKey), isFalse);
 
       final parsed = ExtensionBuildResult.fromJson(map);
       expect(parsed, equals(result));
       expect(parsed.hashCode, equals(result.hashCode));
       expect(parsed.toString(), contains('Compilation failed.'));
+    });
+
+    test('fromJson validates executableUri is an absolute file URI', () {
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'success': true,
+          'executableUri': 'relative/path/app',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'success': true,
+          'executableUri': 'https://example.com/app',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => ExtensionBuildResult.fromJson(const <String, Object?>{
+          'success': true,
+          'executableUri': 123,
+        }),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('equality and hashCode distinguish different results', () {

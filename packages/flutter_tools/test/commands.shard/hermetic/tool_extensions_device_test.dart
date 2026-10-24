@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -14,18 +15,152 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionFlutterProject;
+import 'package:flutter_tools_core/flutter_tools_core.dart'
+    show
+        BuiltInPlaceholders,
+        ExtensionBuildResult,
+        ExtensionDebuggingOptions,
+        ExtensionFlutterProject,
+        TargetDevice;
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
+
+final class _TestBuildTarget extends BuildTarget {
+  const _TestBuildTarget({
+    required super.description,
+    required this.name,
+    this.errorMessage,
+    this.executableUri,
+    super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
+    this.shouldSucceed = true,
+    super.targetPlatform = 'linux-x64',
+  });
+
+  @override
+  final String name;
+
+  final String? errorMessage;
+  final Uri? executableUri;
+  final bool shouldSucceed;
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return shouldSucceed
+        ? ExtensionBuildResult(success: true, executableUri: executableUri)
+        : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
+  }
+}
+
+final class _FakeTestBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => <BuildTarget>[
+    _TestBuildTarget(
+      description: 'Fake test build target',
+      name: 'fake-test-build',
+      executableUri: Uri.parse('file:///tmp/fake_bundle/app'),
+    ),
+    const _TestBuildTarget(
+      description: 'Fake failing build target',
+      name: 'fake-failing-build',
+      shouldSucceed: false,
+      errorMessage: 'Simulated build error',
+    ),
+  ];
+}
+
+final class _FakeTestDeviceService extends DeviceService {
+  @override
+  Future<List<TargetDevice>> getDevices() async {
+    return const <TargetDevice>[
+      TargetDevice(
+        category: Category.desktop,
+        id: 'fake_test_device',
+        name: 'Fake Test Extension Device',
+        buildTarget: 'fake-test-build',
+        ephemeral: false,
+        sdkNameAndVersion: 'Fake OS 1.0',
+        targetPlatform: 'linux-x64',
+      ),
+      TargetDevice(
+        category: Category.desktop,
+        id: 'no_target_device',
+        name: 'No Target Device',
+        ephemeral: false,
+      ),
+      TargetDevice(
+        category: Category.desktop,
+        id: 'failing_build_device',
+        name: 'Failing Build Device',
+        buildTarget: 'fake-failing-build',
+        ephemeral: false,
+      ),
+      TargetDevice(
+        category: Category.desktop,
+        id: 'failing_launch_device',
+        name: 'Failing Launch Device',
+        buildTarget: 'fake-test-build',
+        ephemeral: false,
+      ),
+      TargetDevice(
+        category: Category.desktop,
+        id: 'missing_vm_service_device',
+        name: 'Missing VM Service Device',
+        buildTarget: 'fake-test-build',
+        ephemeral: false,
+      ),
+    ];
+  }
+
+  @override
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => deviceId == 'fake_test_device';
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async {
+    if (deviceId == 'fake_test_device') {
+      return executableUri == Uri.file('/tmp/fake_bundle/app') &&
+          debuggingOptions ==
+              const ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
+    }
+    if (deviceId == 'missing_vm_service_device') {
+      return executableUri == Uri.file('/tmp/fake_bundle/app');
+    }
+    return false;
+  }
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async =>
+      deviceId == 'fake_test_device' ? Uri.parse('http://127.0.0.1:8181/abcd=/') : null;
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async =>
+      deviceId == 'fake_test_device' || deviceId == 'missing_vm_service_device';
+}
+
+void _fakeLaunchExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_FakeTestBuildService(), _FakeTestDeviceService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
 
 void main() {
   setUpAll(() {
@@ -43,7 +178,16 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final discovery = ExtensionDevices(extensionManager: manager, logger: testLogger);
+        final discovery = ExtensionDevices(
+          extensionBuildManager: ExtensionBuildManager(
+            extensionManager: manager,
+            featureFlags: featureFlags,
+            logger: testLogger,
+          ),
+          extensionManager: manager,
+          fileSystem: MemoryFileSystem.test(),
+          logger: testLogger,
+        );
 
         final List<Device> devices = await discovery.devices();
         expect(devices, isEmpty);
@@ -65,7 +209,16 @@ void main() {
         );
         final testDeviceManager = TestDeviceManager(
           discoverers: <DeviceDiscovery>[
-            ExtensionDevices(extensionManager: manager, logger: testLogger),
+            ExtensionDevices(
+              extensionBuildManager: ExtensionBuildManager(
+                extensionManager: manager,
+                featureFlags: featureFlags,
+                logger: testLogger,
+              ),
+              extensionManager: manager,
+              fileSystem: MemoryFileSystem.test(),
+              logger: testLogger,
+            ),
           ],
         );
         final devicesCommand = DevicesCommand(
@@ -148,7 +301,16 @@ flutter:
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final discovery = ExtensionDevices(extensionManager: manager, logger: testLogger);
+        final discovery = ExtensionDevices(
+          extensionBuildManager: ExtensionBuildManager(
+            extensionManager: manager,
+            featureFlags: featureFlags,
+            logger: testLogger,
+          ),
+          extensionManager: manager,
+          fileSystem: localFs,
+          logger: testLogger,
+        );
 
         final List<Device> devices = await discovery.devices();
         expect(devices, hasLength(1));
@@ -184,7 +346,16 @@ flutter:
         );
         final testDeviceManager = TestDeviceManager(
           discoverers: <DeviceDiscovery>[
-            ExtensionDevices(extensionManager: manager, logger: testLogger),
+            ExtensionDevices(
+              extensionBuildManager: ExtensionBuildManager(
+                extensionManager: manager,
+                featureFlags: featureFlags,
+                logger: testLogger,
+              ),
+              extensionManager: manager,
+              fileSystem: MemoryFileSystem.test(),
+              logger: testLogger,
+            ),
           ],
         );
         final devicesCommand = DevicesCommand(
@@ -204,6 +375,136 @@ flutter:
         DeviceManager: () => TestDeviceManager(),
       },
     );
+
+    group('ExtensionBackedDevice startApp and stopApp', () {
+      Future<(ExtensionManager, BufferLogger, MemoryFileSystem, List<Device>)>
+      setUpTestDevices() async {
+        final logger = BufferLogger.test();
+        final fileSystem = MemoryFileSystem.test();
+        fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[_fakeLaunchExtensionEntryPoint],
+          featureFlags: featureFlags,
+        );
+        addTearDown(manager.dispose);
+        final discovery = ExtensionDevices(
+          extensionBuildManager: ExtensionBuildManager(
+            extensionManager: manager,
+            featureFlags: featureFlags,
+            logger: logger,
+          ),
+          extensionManager: manager,
+          fileSystem: fileSystem,
+          logger: logger,
+        );
+        final List<Device> devices = await discovery.devices();
+        return (manager, logger, fileSystem, devices);
+      }
+
+      testWithoutContext(
+        'delegates build, launch, VM service discovery, and stop via RPC',
+        () async {
+          final (_, _, _, List<Device> devices) = await setUpTestDevices();
+          final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
+
+          final LaunchResult launchResult = await device.startApp(
+            null,
+            mainPath: 'lib/main.dart',
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          expect(launchResult.started, isTrue);
+          expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
+          expect(await device.stopApp(null), isTrue);
+        },
+      );
+
+      testWithoutContext('fails when prebuiltApplication is true', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+        final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
+
+        final LaunchResult prebuiltResult = await device.startApp(
+          null,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        );
+        expect(prebuiltResult.started, isFalse);
+        expect(
+          logger.errorText,
+          contains(
+            'Prebuilt application bundles are not supported yet for tool extension devices.',
+          ),
+        );
+      });
+
+      testWithoutContext('fails when device does not specify a buildTarget', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+        final Device noTargetDevice = devices.firstWhere((Device d) => d.id == 'no_target_device');
+
+        final LaunchResult noTargetResult = await noTargetDevice.startApp(
+          null,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        expect(noTargetResult.started, isFalse);
+        expect(
+          logger.errorText,
+          contains('does not specify a buildTarget for launching applications.'),
+        );
+      });
+
+      testWithoutContext('fails when extension build target returns failure', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+        final Device failingBuildDevice = devices.firstWhere(
+          (Device d) => d.id == 'failing_build_device',
+        );
+
+        final LaunchResult failingBuildResult = await failingBuildDevice.startApp(
+          null,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        expect(failingBuildResult.started, isFalse);
+        expect(logger.errorText, contains('Build failed: Simulated build error'));
+      });
+
+      testWithoutContext('fails when DeviceService.launchApp returns false', () async {
+        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+        final Device failingLaunchDevice = devices.firstWhere(
+          (Device d) => d.id == 'failing_launch_device',
+        );
+
+        final LaunchResult failingLaunchResult = await failingLaunchDevice.startApp(
+          null,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        expect(failingLaunchResult.started, isFalse);
+        expect(
+          logger.errorText,
+          contains('Failed to launch application on Failing Launch Device.'),
+        );
+      });
+
+      testWithoutContext(
+        'fails and stops app when debugging is enabled and getVmServiceUri returns null',
+        () async {
+          final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+          final Device missingVmServiceDevice = devices.firstWhere(
+            (Device d) => d.id == 'missing_vm_service_device',
+          );
+
+          final LaunchResult result = await missingVmServiceDevice.startApp(
+            null,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          expect(result.started, isFalse);
+          expect(
+            logger.errorText,
+            contains('Failed to discover VM Service URI for Missing VM Service Device.'),
+          );
+        },
+      );
+    });
   });
 }
 

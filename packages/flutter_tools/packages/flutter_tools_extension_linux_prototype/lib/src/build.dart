@@ -129,7 +129,9 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
       );
     }
 
-    return const ExtensionBuildResult(success: true);
+    final String? appName = _getCmakeBinaryName(projectDir.uri);
+    final File? executableFile = appName != null ? File('${outputDir.path}/bundle/$appName') : null;
+    return ExtensionBuildResult(success: true, executableUri: executableFile?.absolute.uri);
   }
 }
 
@@ -226,6 +228,24 @@ class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
 
     return const ExtensionBuildResult(success: true);
   }
+}
+
+String? _getCmakeBinaryName(Uri projectDirUri) {
+  final cmakeFile = File.fromUri(projectDirUri.resolve('linux/CMakeLists.txt'));
+  if (!cmakeFile.existsSync()) {
+    return null;
+  }
+  final nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
+  for (final String line in cmakeFile.readAsLinesSync()) {
+    final RegExpMatch? match = nameSetPattern.firstMatch(line);
+    if (match != null) {
+      final String name = match.group(1)!.trim();
+      if (name.isNotEmpty) {
+        return name;
+      }
+    }
+  }
+  return null;
 }
 
 /// Prototype Linux [BuildService] implementation.
