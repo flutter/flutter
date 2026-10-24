@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -34,6 +32,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
   String? lastError;
   int? id;
   int nestedViewClickCount = 0;
+  bool isChildViewAdded = false;
   bool showPlatformView = true;
   bool useHybridComposition = false;
 
@@ -108,13 +107,8 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
                     child: const Text('ADD CHILD VIEW'),
                   ),
                 ),
-                Expanded(
-                  child: ElevatedButton(
-                    key: const ValueKey<String>('TapChildView'),
-                    onPressed: onTapChildViewPressed,
-                    child: const Text('TAP CHILD VIEW'),
-                  ),
-                ),
+                if (isChildViewAdded)
+                  const SizedBox.shrink(key: ValueKey<String>('ChildViewAdded')),
               ],
             ),
             Text(
@@ -167,8 +161,12 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
 
   Future<void> onChildViewPressed() async {
     try {
+      setState(() {
+        isChildViewAdded = false;
+      });
       await viewChannel!.invokeMethod<void>('addChildViewAndWaitForClick');
       setState(() {
+        isChildViewAdded = false;
         nestedViewClickCount++;
       });
     } catch (e) {
@@ -179,23 +177,19 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
     }
   }
 
-  Future<void> onTapChildViewPressed() async {
-    await Future<void>.delayed(const Duration(seconds: 1));
-
-    // Dispatch a tap event on the child view inside the platform view.
-    //
-    // Android mutates `MotionEvent` instances, so in this case *do not* dispatch
-    // new instances as it won't cover the `MotionEventTracker` class in the embedding
-    // which tracks events.
-    //
-    // See the issue this prevents: https://github.com/flutter/flutter/issues/61169
-    await Process.run('input', const <String>['tap', '250', '550']);
+  Future<Object?> onViewMethodChannelCall(MethodCall call) async {
+    if (call.method == 'onChildViewAdded') {
+      setState(() {
+        isChildViewAdded = true;
+      });
+    }
+    return null;
   }
 
   void onPlatformViewCreated(int id) {
     this.id = id;
     setState(() {
-      viewChannel = MethodChannel('simple_view/$id');
+      viewChannel = MethodChannel('simple_view/$id')..setMethodCallHandler(onViewMethodChannelCall);
     });
     driverDataHandler
         .registerHandler('hierarchy')
