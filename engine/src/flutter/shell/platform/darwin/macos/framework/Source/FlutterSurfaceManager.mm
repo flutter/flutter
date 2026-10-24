@@ -44,6 +44,15 @@
  */
 - (void)commit:(NSArray<FlutterSurfacePresentInfo*>*)surfaces;
 
+/**
+ * Presents the given surfaces, reporting the frame to the delegate as an empty frame if
+ * `emptyFrame` is set.
+ */
+- (void)presentSurfaces:(NSArray<FlutterSurfacePresentInfo*>*)surfaces
+             emptyFrame:(BOOL)emptyFrame
+                 atTime:(CFTimeInterval)presentationTime
+                 notify:(nullable dispatch_block_t)notify;
+
 @end
 
 static NSColor* GetBorderColorForLayer(int layer) {
@@ -242,11 +251,20 @@ static CGSize GetRequiredFrameSize(NSArray<FlutterSurfacePresentInfo*>* surfaces
 - (void)presentSurfaces:(NSArray<FlutterSurfacePresentInfo*>*)surfaces
                  atTime:(CFTimeInterval)presentationTime
                  notify:(dispatch_block_t)notify {
+  [self presentSurfaces:surfaces emptyFrame:NO atTime:presentationTime notify:notify];
+}
+
+- (void)presentEmptyFrameAtTime:(CFTimeInterval)presentationTime notify:(dispatch_block_t)notify {
+  [self presentSurfaces:@[] emptyFrame:YES atTime:presentationTime notify:notify];
+}
+
+- (void)presentSurfaces:(NSArray<FlutterSurfacePresentInfo*>*)surfaces
+             emptyFrame:(BOOL)emptyFrame
+                 atTime:(CFTimeInterval)presentationTime
+                 notify:(dispatch_block_t)notify {
   id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
   [commandBuffer commit];
   [commandBuffer waitUntilScheduled];
-
-  CGSize size = GetRequiredFrameSize(surfaces);
 
   CFTimeInterval delay = 0;
 
@@ -266,18 +284,23 @@ static CGSize GetRequiredFrameSize(NSArray<FlutterSurfacePresentInfo*>* surfaces
     CFTimeInterval now = CACurrentMediaTime();
     delay = std::max(minPresentationTime - now, 0.0);
   }
-  [_delegate onPresent:size
-             withBlock:^{
-               _lastPresentationTime = presentationTime;
-               [CATransaction begin];
-               [CATransaction setDisableActions:YES];
-               [self commit:surfaces];
-               if (notify != nil) {
-                 notify();
-               }
-               [CATransaction commit];
-             }
-                 delay:delay];
+
+  dispatch_block_t commitBlock = ^{
+    _lastPresentationTime = presentationTime;
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    [self commit:surfaces];
+    if (notify != nil) {
+      notify();
+    }
+    [CATransaction commit];
+  };
+
+  if (emptyFrame) {
+    [_delegate onPresentEmptyFrameWithBlock:commitBlock delay:delay];
+  } else {
+    [_delegate onPresent:GetRequiredFrameSize(surfaces) withBlock:commitBlock delay:delay];
+  }
 }
 
 @end
