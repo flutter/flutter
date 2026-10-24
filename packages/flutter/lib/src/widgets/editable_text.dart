@@ -3752,15 +3752,22 @@ class EditableTextState extends State<EditableText>
       }
       _currentPromptRectRange = null;
 
+      final TextEditingValue oldValue = _value;
+      _formatAndSetValue(value, SelectionChangedCause.keyboard);
+
       final bool revealObscuredInput =
           _hasInputConnection &&
           widget.obscureText &&
           WidgetsBinding.instance.platformDispatcher.brieflyShowPassword &&
-          value.text.length == _value.text.length + 1;
+          value.text.length == oldValue.text.length + 1 &&
+          _value.text.length == value.text.length;
 
+      final bool hadObscureShowCharTicksPending = _obscureShowCharTicksPending > 0;
       _obscureShowCharTicksPending = revealObscuredInput ? _kObscureShowLatestCharCursorTicks : 0;
-      _obscureLatestCharIndex = revealObscuredInput ? _value.selection.baseOffset : null;
-      _formatAndSetValue(value, SelectionChangedCause.keyboard);
+      _obscureLatestCharIndex = revealObscuredInput ? oldValue.selection.baseOffset : null;
+      if (hadObscureShowCharTicksPending && _obscureShowCharTicksPending == 0) {
+        setState(() {});
+      }
     }
 
     if (_showBlinkingCursor && _cursorTimer != null) {
