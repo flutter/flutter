@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:html';
+library;
+
 import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:js_interop';
@@ -450,7 +453,7 @@ class LocalBenchmarkServerClient {
     );
   }
 
-  /// This is the same as calling [html.HttpRequest.request] but it doesn't
+  /// This is the same as calling [HttpRequest.request] but it doesn't
   /// crash on 404, which we use to detect `flutter run`.
   Future<web.XMLHttpRequest> _requestXhr(
     Uri url, {

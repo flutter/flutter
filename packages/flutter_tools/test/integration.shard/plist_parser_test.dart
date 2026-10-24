@@ -141,8 +141,13 @@ void main() {
       file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
 
       expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), null);
+      // Before macOS 26, plutil writes its parse diagnostic to stdout; on
+      // macOS 26 it writes the same text to stderr. ProcessUtils.runSync
+      // forwards stdout to the status log and stderr to the error log, so
+      // accept the diagnostic from either stream.
+      final String output = logger.statusText + logger.errorText;
       expect(
-        logger.statusText,
+        output,
         contains(
           'Property List error: Unexpected character \x01 at line 1 / '
           'JSON error: JSON text did not start with array or object and option to allow fragments not '
@@ -151,8 +156,10 @@ void main() {
       );
       expect(
         logger.errorText,
-        'ProcessException: The command failed with exit code 1\n'
-        '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n',
+        endsWith(
+          'ProcessException: The command failed with exit code 1\n'
+          '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n',
+        ),
       );
     },
     skip: !platform.isMacOS, // [intended] requires macos tool chain.
@@ -229,8 +236,11 @@ void main() {
       parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
       isFalse,
     );
+    // See the malformed-plist getValueFromFile test above: the diagnostic
+    // comes from stdout before macOS 26 and from stderr on macOS 26.
+    final String output = logger.statusText + logger.errorText;
     expect(
-      logger.statusText,
+      output,
       contains(
         'foo.plist: Property List error: Unexpected character \x01 '
         'at line 1 / JSON error: JSON text did not start with array or object and option to allow '
@@ -239,7 +249,7 @@ void main() {
     );
     expect(
       logger.errorText,
-      equals(
+      endsWith(
         'ProcessException: The command failed with exit code 1\n'
         '  Command: /usr/bin/plutil -replace CFBundleIdentifier -string dev.flutter.fake foo.plist\n',
       ),
