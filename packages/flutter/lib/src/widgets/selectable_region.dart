@@ -24,6 +24,7 @@ import 'actions.dart';
 import 'basic.dart';
 import 'context_menu_button_item.dart';
 import 'debug.dart';
+import 'editable_text.dart' show EditableTextState;
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -549,9 +550,30 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
-    } else if (_webContextMenuEnabled) {
-      PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
+    } else {
+      if (!_focusNode.hasPrimaryFocus &&
+          _selectionDelegate.value.hasSelection &&
+          _primaryFocusIsEditable) {
+        // The selection is dismissed when an editable descendant takes the
+        // focus, and kept when the focus moves to a non-editable descendant
+        // such as a button. This is what a browser does with the page
+        // selection, and what the native text selection does on Android and
+        // iOS.
+        clearSelection();
+        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+        _finalizeSelectableRegionStatus();
+      }
+      if (_webContextMenuEnabled) {
+        PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
+      }
     }
+  }
+
+  /// Whether the node that currently holds the primary focus belongs to an
+  /// [EditableText].
+  static bool get _primaryFocusIsEditable {
+    final BuildContext? context = FocusManager.instance.primaryFocus?.context;
+    return context != null && context.findAncestorStateOfType<EditableTextState>() != null;
   }
 
   void _updateSelectionStatus() {
@@ -1978,9 +2000,16 @@ class SelectableRegionState extends State<SelectableRegion>
         // unfocused when tapping outside of it causing the selection to
         // be dismissed.
         //
+        // Only do so when the region itself holds the primary focus. When a
+        // descendant holds it, for example a text field or a menu anchor whose
+        // popup lives in the app [Overlay], unfocusing the region would take
+        // the focus away from that descendant on pointer down, before its own
+        // tap handling runs. Whether a descendant keeps its focus on a tap
+        // outside is decided by the descendant.
+        //
         // Tapping outside the selectable region does not unfocus
         // the region on non-web platforms.
-        if (kIsWeb) {
+        if (kIsWeb && _focusNode.hasPrimaryFocus) {
           _focusNode.unfocus();
         }
       },
