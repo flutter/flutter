@@ -9,7 +9,7 @@
 namespace txt {
 
 TextStyle ParagraphStyle::GetTextStyle() const {
-  TextStyle result;
+  TextStyle result = default_text_style;
   result.font_weight = font_weight;
   result.font_style = font_style;
   result.font_families = std::vector<std::string>({font_family});
