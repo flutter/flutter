@@ -858,12 +858,15 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     final FormState? form = Form.maybeOf(context);
     switch (form?.widget.autovalidateMode) {
       case AutovalidateMode.always:
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          // If the form is already validated, don't validate again.
-          if (widget.enabled && form!.widget.enabled && !hasError && !isValid) {
-            validate();
-          }
-        });
+        // A disabled form is not auto validated.
+        if (form!.widget.enabled) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            // If the form is already validated, don't validate again.
+            if (mounted && isEnabled && !hasError && !isValid) {
+              validate();
+            }
+          });
+        }
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.onUserInteraction:
       case AutovalidateMode.onUserInteractionIfError:
@@ -960,9 +963,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     final FormState? form = Form.maybeOf(context);
-    final bool isFormEnabled = form?.widget.enabled ?? true;
 
-    if (widget.enabled && isFormEnabled) {
+    if (isEnabled) {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:
           _validate();
