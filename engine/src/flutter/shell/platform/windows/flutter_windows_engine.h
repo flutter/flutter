@@ -258,7 +258,10 @@ class FlutterWindowsEngine {
   // Informs the engine that the semantics enabled state has changed.
   void UpdateSemanticsEnabled(bool enabled);
 
-  // Returns true if the semantics tree is enabled.
+  // Receives framework generation changes and updates view-owned bridges.
+  void SetSemanticsTreeEnabled(bool enabled);
+
+  // Returns whether the operating system requests semantics.
   bool semantics_enabled() const { return semantics_enabled_; }
 
   bool iaccessibleex_enabled() const {
@@ -507,6 +510,9 @@ class FlutterWindowsEngine {
       std::nullopt;
 
   bool semantics_enabled_ = false;
+
+  // Whether the framework is generating semantics trees.
+  bool semantics_tree_enabled_ = false;
 
   bool high_contrast_enabled_ = false;
 

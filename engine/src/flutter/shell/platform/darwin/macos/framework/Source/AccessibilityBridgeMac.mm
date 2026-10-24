@@ -26,8 +26,8 @@ AccessibilityBridgeMac::AccessibilityBridgeMac(__weak FlutterEngine* flutter_eng
 
 void AccessibilityBridgeMac::OnAccessibilityEvent(
     ui::AXEventGenerator::TargetedEvent targeted_event) {
-  if (!view_controller_.viewLoaded || !view_controller_.view.window) {
-    // Don't need to send accessibility events if the there is no view or window.
+  if (!flutter_engine_.semanticsEnabled || !view_controller_.attached ||
+      !view_controller_.viewLoaded || !view_controller_.view.window) {
     return;
   }
   ui::AXNode* ax_node = targeted_event.node;

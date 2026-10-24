@@ -44,10 +44,10 @@
 - (void)detachFromEngine;
 
 /**
- * Called by the associated FlutterEngine when FlutterEngine#semanticsEnabled
+ * Called by the associated FlutterEngine when FlutterEngine#semanticsTreeEnabled
  * has changed.
  */
-- (void)notifySemanticsEnabledChanged;
+- (void)notifySemanticsTreeEnabledChanged;
 
 /**
  * Notify from the framework that the semantics for this view needs to be

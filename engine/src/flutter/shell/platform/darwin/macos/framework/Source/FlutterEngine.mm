@@ -724,6 +724,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     [[engine viewControllerForIdentifier:kFlutterImplicitViewId] updateSemantics:update];
   };
   flutterArguments.custom_dart_entrypoint = entrypoint.UTF8String;
+  flutterArguments.semantics_tree_enabled_callback = [](bool enabled, void* user_data) {
+    [(__bridge FlutterEngine*)user_data setSemanticsTreeEnabled:enabled];
+  };
   flutterArguments.shutdown_dart_vm_when_done = true;
   flutterArguments.dart_entrypoint_argc = dartEntrypointArgs.size();
   flutterArguments.dart_entrypoint_argv = dartEntrypointArgs.data();
@@ -1244,14 +1247,17 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
   _semanticsEnabled = enabled;
 
-  // Update all view controllers' bridges.
-  NSEnumerator* viewControllerEnumerator = [_viewControllers objectEnumerator];
-  FlutterViewController* nextViewController;
-  while ((nextViewController = [viewControllerEnumerator nextObject])) {
-    [nextViewController notifySemanticsEnabledChanged];
-  }
-
   _embedderAPI.UpdateSemanticsEnabled(_engine, _semanticsEnabled);
+}
+
+- (void)setSemanticsTreeEnabled:(BOOL)enabled {
+  if (_semanticsTreeEnabled == enabled) {
+    return;
+  }
+  _semanticsTreeEnabled = enabled;
+  for (FlutterViewController* controller in [_viewControllers objectEnumerator]) {
+    [controller notifySemanticsTreeEnabledChanged];
+  }
 }
 
 - (void)dispatchSemanticsAction:(FlutterSemanticsAction)action
@@ -1329,6 +1335,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 }
 
 - (void)engineCallbackOnPreEngineRestart {
+  [self setSemanticsTreeEnabled:NO];
   NSEnumerator* viewControllerEnumerator = [_viewControllers objectEnumerator];
   FlutterViewController* nextViewController;
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
@@ -1381,6 +1388,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     NSLog(@"Failed to shut down Flutter engine: error %d", result);
   }
   _engine = nullptr;
+  _semanticsTreeEnabled = NO;
+  for (FlutterViewController* controller in [_viewControllers objectEnumerator]) {
+    [controller notifySemanticsTreeEnabledChanged];
+  }
 }
 
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {

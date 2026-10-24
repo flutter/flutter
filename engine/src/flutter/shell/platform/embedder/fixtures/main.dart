@@ -1802,3 +1802,65 @@ Future<void> a11y_main_multi_view() async {
   await semanticsChanged;
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 }
+
+@pragma('vm:entry-point')
+void a11y_generation_without_demand() {
+  final PlatformDispatcher dispatcher = PlatformDispatcher.instance;
+  if (dispatcher.semanticsEnabled) {
+    throw StateError('Framework generation must not enable OS demand.');
+  }
+  dispatcher.onSemanticsEnabledChanged = () {
+    throw StateError('Framework generation must not change OS demand.');
+  };
+  dispatcher.setSemanticsTreeEnabled(true);
+  final builder = SemanticsUpdateBuilder();
+  final transform = Float64List.fromList(<double>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+  for (final int id in <int>[0, 1]) {
+    final children = Int32List.fromList(id == 0 ? <int>[1] : <int>[]);
+    builder.updateNode(
+      id: id,
+      flags: SemanticsFlags.none,
+      actions: 0,
+      maxValueLength: -1,
+      currentValueLength: -1,
+      textSelectionBase: -1,
+      textSelectionExtent: -1,
+      platformViewId: -1,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      traversalParent: -1,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
+      identifier: '',
+      label: id == 0 ? 'root' : 'child 1',
+      labelAttributes: <StringAttribute>[],
+      value: '',
+      valueAttributes: <StringAttribute>[],
+      increasedValue: '',
+      increasedValueAttributes: <StringAttribute>[],
+      decreasedValue: '',
+      decreasedValueAttributes: <StringAttribute>[],
+      hint: '',
+      hintAttributes: <StringAttribute>[],
+      tooltip: '',
+      textDirection: TextDirection.ltr,
+      transform: transform,
+      hitTestTransform: transform,
+      childrenInTraversalOrder: children,
+      childrenInHitTestOrder: children,
+      additionalActions: Int32List(0),
+      controlsNodes: null,
+      inputType: SemanticsInputType.none,
+      locale: null,
+      minValue: '',
+      maxValue: '',
+    );
+  }
+  dispatcher.views.first.updateSemantics(builder.build());
+  dispatcher.sendPlatformMessage('test/semantics-updated', null, (ByteData? result) {
+    dispatcher.setSemanticsTreeEnabled(false);
+    dispatcher.sendPlatformMessage('test/semantics-disabled', null, (ByteData? result) {});
+  });
+}
