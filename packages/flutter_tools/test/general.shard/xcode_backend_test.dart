@@ -180,6 +180,7 @@ void main() {
         const treeShake = 'true';
         const srcRoot = '/path/to/project';
         const iOSVersion = '18.3.1';
+        const deploymentTarget = '16.4';
         final context = TestContext(
           <String>['build', platformName],
           <String, String>{
@@ -206,6 +207,7 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
+            'IPHONEOS_DEPLOYMENT_TARGET': deploymentTarget,
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -234,6 +236,7 @@ void main() {
                 '-dXcodeBuildScript=build',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
+                  '-dIosDeploymentTarget=$deploymentTarget',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
                 ],
                 if (platform == TargetPlatform.macos) ...<String>[
@@ -800,6 +803,7 @@ void main() {
         const treeShake = 'true';
         const srcRoot = '/path/to/project';
         const iOSVersion = '18.3.1';
+        const deploymentTarget = '16.4';
         final context = TestContext(
           <String>['prepare', platformName],
           <String, String>{
@@ -826,6 +830,7 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
+            'IPHONEOS_DEPLOYMENT_TARGET': deploymentTarget,
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -854,6 +859,7 @@ void main() {
                 '-dXcodeBuildScript=prepare',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
+                  '-dIosDeploymentTarget=$deploymentTarget',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
                 ],
                 'release_unpack_$platformName',

@@ -4,7 +4,9 @@
 
 import 'package:code_assets/code_assets.dart';
 
+import '../../../base/common.dart';
 import '../../../base/file_system.dart';
+import '../../../base/version.dart';
 import '../../../build_info.dart';
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
@@ -56,14 +58,19 @@ Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsIOS(
 ///
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
+///
+/// The framework minimum OS version uses [deploymentTarget], preserving minor
+/// and patch versions, with [targetIOSVersion] as its lower bound and default.
 Future<List<File>> copyNativeCodeAssetsIOS(
   Uri targetUri,
   Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
+  FileSystem fileSystem, {
+  String? deploymentTarget,
+}) async {
   assert(assetTargetLocations.isNotEmpty);
+  final String minimumIOSVersion = _minimumIOSVersion(deploymentTarget);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
@@ -102,7 +109,7 @@ Future<List<File>> copyNativeCodeAssetsIOS(
     await createInfoPlist(
       assetTargetUri.pathSegments.last,
       frameworkDir,
-      minimumIOSVersion: '$targetIOSVersion.0',
+      minimumIOSVersion: minimumIOSVersion,
     );
     installedFiles.add(frameworkDir.childFile('Info.plist'));
   }
@@ -112,4 +119,19 @@ Future<List<File>> copyNativeCodeAssetsIOS(
     await codesignDylib(codesignIdentity, buildMode, frameworkDir);
   }
   return installedFiles;
+}
+
+String _minimumIOSVersion(String? deploymentTarget) {
+  final String? target = deploymentTarget?.trim();
+  if (target == null || target.isEmpty) {
+    return '$targetIOSVersion.0';
+  }
+  final Version? version = Version.parse(target);
+  if (version == null || Version.versionPattern.firstMatch(target)?.end != target.length) {
+    throwToolExit(
+      'Invalid iOS deployment target "$deploymentTarget". '
+      'Expected a version such as 16, 16.4, or 17.2.1.',
+    );
+  }
+  return version < Version(targetIOSVersion, 0, 0) ? '$targetIOSVersion.0' : target;
 }
