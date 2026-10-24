@@ -16,5 +16,15 @@ void main() {
       find.text('This app is only meant to be run under the Flutter debugger'),
       findsOneWidget,
     );
+
+    final DecoratedBox background = tester.widget<DecoratedBox>(
+      find.ancestor(of: find.byType(Center), matching: find.byType(DecoratedBox)),
+    );
+    expect((background.decoration as BoxDecoration).color, entrypoint.splashBackgroundColor);
+
+    final Text message = tester.widget<Text>(
+      find.text('This app is only meant to be run under the Flutter debugger'),
+    );
+    expect(message.style?.color, entrypoint.splashTextColor);
   });
 }
