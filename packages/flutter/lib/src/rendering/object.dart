@@ -2511,7 +2511,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       _needsPaint = false;
       markNeedsPaint();
     }
-    if (_semantics.configProvider.effective.isSemanticBoundary &&
+    if (owner._semanticsOwner != null &&
+        _semantics.configProvider.effective.isSemanticBoundary &&
         (_semantics.parentDataDirty || !_semantics.built)) {
       markNeedsSemanticsUpdate();
     }
