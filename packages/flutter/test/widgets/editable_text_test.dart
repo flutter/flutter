@@ -2076,6 +2076,131 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/157495.
+  //
+  // When iOS restores first responder after an AutoFill sheet such as "Hide My
+  // Email" is dismissed, it delivers the text the user picked immediately
+  // afterwards, using the client id it already had. Attaching a fresh
+  // connection would change that id and the text would be discarded, so the
+  // reported connection is taken back instead.
+  testWidgets('takes back the reported connection so a late edit still lands', (
+    WidgetTester tester,
+  ) async {
+    Future<void> send(String method, List<dynamic> args) async {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.textInput.name,
+        SystemChannels.textInput.codec.encodeMethodCall(MethodCall(method, args)),
+        (_) {},
+      );
+    }
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+              autofillHints: const <String>[AutofillHints.email],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isTrue);
+
+    final clientId =
+        (tester.testTextInput.log
+                    .lastWhere((MethodCall call) => call.method == 'TextInput.setClient')
+                    .arguments
+                as List<dynamic>)[0]
+            as int;
+
+    // The sheet takes first responder; the engine reports the connection closed.
+    await send('TextInputClient.onConnectionClosed', <dynamic>[clientId]);
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    // The sheet is dismissed and the platform restores focus to the same client.
+    await send('TextInputClient.onFocusReceived', <dynamic>[clientId]);
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+
+    // The picked text arrives under the client id the platform still holds.
+    await send('TextInputClient.updateEditingState', <dynamic>[
+      clientId,
+      const TextEditingValue(
+        text: 'hidden@icloud.com',
+        selection: TextSelection.collapsed(offset: 17),
+      ).toJSON(),
+    ]);
+    await tester.pump();
+    expect(controller.text, 'hidden@icloud.com');
+  });
+
+  testWidgets('does not take back a connection for a different client', (
+    WidgetTester tester,
+  ) async {
+    Future<void> send(String method, List<dynamic> args) async {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.textInput.name,
+        SystemChannels.textInput.codec.encodeMethodCall(MethodCall(method, args)),
+        (_) {},
+      );
+    }
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final clientId =
+        (tester.testTextInput.log
+                    .lastWhere((MethodCall call) => call.method == 'TextInput.setClient')
+                    .arguments
+                as List<dynamic>)[0]
+            as int;
+
+    await send('TextInputClient.onConnectionClosed', <dynamic>[clientId]);
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    await send('TextInputClient.onFocusReceived', <dynamic>[clientId + 99]);
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    await send('TextInputClient.updateEditingState', <dynamic>[
+      clientId,
+      const TextEditingValue(text: 'discarded').toJSON(),
+    ]);
+    await tester.pump();
+    expect(controller.text, isEmpty);
+  });
+
   testWidgets('can re-acquire focus in Offstage', (WidgetTester tester) async {
     final editableTextKey = GlobalKey<EditableTextState>();
     await tester.pumpWidget(
