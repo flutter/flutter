@@ -921,6 +921,150 @@ void main() {
       );
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/193708.
+    testWidgets('Android view gets a cancel when it is moved to another parent during a gesture', (
+      WidgetTester tester,
+    ) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+      final GlobalKey key = GlobalKey();
+      final androidView = AndroidView(
+        key: key,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      );
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(width: 200.0, height: 100.0, child: androidView),
+        ),
+      );
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.moveBy(const Offset(10.0, 0.0));
+
+      // Moving the view to another parent detaches its render object while the pointer is down.
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: ColoredBox(color: const Color(0xFF000000), child: androidView),
+          ),
+        ),
+      );
+      await gesture.moveBy(const Offset(10.0, 0.0));
+      await gesture.up();
+
+      // The next gesture must not be dispatched as a second pointer of the canceled one.
+      await tester.tapAt(const Offset(100.0, 50.0));
+
+      expect(
+        viewsController.motionEvents[currentViewId + 1],
+        orderedEquals(<FakeAndroidMotionEvent>[
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionDown,
+            <int>[0],
+            <Offset>[Offset(50.0, 50.0)],
+          ),
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionMove,
+            <int>[0],
+            <Offset>[Offset(60.0, 50.0)],
+          ),
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionCancel,
+            <int>[0],
+            <Offset>[Offset(60.0, 50.0)],
+          ),
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionDown,
+            <int>[0],
+            <Offset>[Offset(100.0, 50.0)],
+          ),
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionUp,
+            <int>[0],
+            <Offset>[Offset(100.0, 50.0)],
+          ),
+        ]),
+      );
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/193708.
+    testWidgets('Android view gets a cancel when its gesture recognizers change during a gesture', (
+      WidgetTester tester,
+    ) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+      await tester.pumpWidget(
+        const Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+
+      // Replaces the gesture recognizer that forwards the pointer to the view.
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(() {
+                  final recognizer = EagerGestureRecognizer();
+                  addTearDown(recognizer.dispose);
+                  return recognizer;
+                }),
+              },
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+      await gesture.up();
+
+      await tester.tapAt(const Offset(100.0, 50.0));
+
+      expect(
+        viewsController.motionEvents[currentViewId + 1],
+        orderedEquals(<FakeAndroidMotionEvent>[
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionDown,
+            <int>[0],
+            <Offset>[Offset(50.0, 50.0)],
+          ),
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionCancel,
+            <int>[0],
+            <Offset>[Offset(50.0, 50.0)],
+          ),
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionDown,
+            <int>[0],
+            <Offset>[Offset(100.0, 50.0)],
+          ),
+          const FakeAndroidMotionEvent(
+            AndroidViewController.kActionUp,
+            <int>[0],
+            <Offset>[Offset(100.0, 50.0)],
+          ),
+        ]),
+      );
+    });
+
     testWidgets('Android view with eager gesture recognizer', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final viewsController = FakeAndroidPlatformViewsController();
@@ -3499,6 +3643,104 @@ void main() {
       expect(controller.dispatchedPointerEvents.length, 3);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/193708.
+    testWidgets('PlatformViewSurface gets a cancel when it is removed during a gesture', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: PlatformViewSurface(
+              controller: controller,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.moveBy(const Offset(10.0, 0.0));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await gesture.up();
+
+      final List<PointerEvent> events = controller.dispatchedPointerEvents;
+      expect(events, hasLength(3));
+      expect(events[0], isA<PointerDownEvent>());
+      expect(events[1], isA<PointerMoveEvent>());
+      expect(
+        events[2],
+        isA<PointerCancelEvent>()
+            .having((PointerCancelEvent event) => event.pointer, 'pointer', events[0].pointer)
+            .having(
+              (PointerCancelEvent event) => event.position,
+              'position',
+              const Offset(60.0, 50.0),
+            ),
+      );
+    });
+
+    testWidgets('PlatformViewSurface is removed cleanly when dispatching the cancel throws', (
+      WidgetTester tester,
+    ) async {
+      final throwingController = _CancelThrowingPlatformViewController(0);
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: PlatformViewSurface(
+              controller: throwingController,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isStateError);
+
+      // The recognizer stopped forwarding the pointer anyway.
+      await gesture.up();
+      expect(throwingController.dispatchedPointerEvents, hasLength(1));
+      expect(throwingController.dispatchedPointerEvents[0], isA<PointerDownEvent>());
+    });
+
+    testWidgets('PlatformViewSurface does not get a cancel for a pointer it never got', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: GestureDetector(
+            onVerticalDragStart: (DragStartDetails d) {},
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: PlatformViewSurface(
+                controller: controller,
+                hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The gesture arena is still undecided, so the pointer wasn't dispatched to the view yet.
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await gesture.up();
+
+      expect(controller.dispatchedPointerEvents, isEmpty);
+    });
+
     testWidgets('PlatformViewSurface with eager gesture recognizer', (WidgetTester tester) async {
       await tester.pumpWidget(
         Align(
@@ -4403,4 +4645,17 @@ void main() {
     expect(exception, isUnimplementedError);
     expect(exception.toString(), contains('HtmlElementView is only available on Flutter Web'));
   });
+}
+
+// Throws synchronously when it gets a pointer cancel, instead of returning a failed future.
+class _CancelThrowingPlatformViewController extends FakePlatformViewController {
+  _CancelThrowingPlatformViewController(super.viewId);
+
+  @override
+  Future<void> dispatchPointerEvent(PointerEvent event) {
+    if (event is PointerCancelEvent) {
+      throw StateError('Cannot handle a pointer cancel.');
+    }
+    return super.dispatchPointerEvent(event);
+  }
 }
