@@ -74,6 +74,19 @@
   }
 }
 
+- (BOOL)application:(NSApplication*)application
+    continueUserActivity:(NSUserActivity*)userActivity
+      restorationHandler:
+          (void (^)(NSArray<id<NSUserActivityRestoring>>* restorableObjects))restorationHandler {
+  for (NSObject<FlutterAppLifecycleDelegate>* delegate in self.lifecycleRegistrar.delegates) {
+    if ([delegate respondsToSelector:@selector(handleContinueUserActivity:restorationHandler:)] &&
+        [delegate handleContinueUserActivity:userActivity restorationHandler:restorationHandler]) {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication* _Nonnull)sender {
   // If the framework has already told us to terminate, terminate immediately.
   if ([self terminationHandler] == nil || [[self terminationHandler] shouldTerminate]) {

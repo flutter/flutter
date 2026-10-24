@@ -104,6 +104,21 @@ FLUTTER_DARWIN_EXPORT
 - (BOOL)handleOpenURLs:(NSArray<NSURL*>*)urls;
 
 /**
+ * Called when the |FlutterAppDelegate| gets the
+ * application:continueUserActivity:restorationHandler: callback.
+ *
+ * This is used, for instance, to handle universal links.
+ *
+ * Implementers should return YES if they handle the user activity, otherwise
+ * NO. Delegates will be called in order of registration, and once a delegate
+ * returns YES, no further delegates will receive this callback.
+ */
+- (BOOL)handleContinueUserActivity:(NSUserActivity*)userActivity
+                restorationHandler:
+                    (void (^)(NSArray<id<NSUserActivityRestoring>>* restorableObjects))
+                        restorationHandler;
+
+/**
  * Called when the |FlutterAppDelegate| gets the applicationWillTerminate
  * notification.
  *
