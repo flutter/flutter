@@ -1758,6 +1758,161 @@ void main() {
     expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/188450.
+  group('Dart SDK cache integrity', () {
+    late FileExceptionHandler exceptionHandler;
+    late MemoryFileSystem fileSystem;
+    late BufferLogger logger;
+    late Cache cache;
+    late Directory dartSdkDir;
+    late File engineStamp;
+    late File toolsStamp;
+    late File versionFile;
+
+    setUp(() {
+      exceptionHandler = FileExceptionHandler();
+      fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+      logger = BufferLogger.test();
+      cache = Cache.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: FakeProcessManager.empty(),
+      );
+      dartSdkDir = cache.getCacheDir('dart-sdk', shouldCreate: false);
+      engineStamp = cache.getStampFileFor('engine-dart-sdk')..createSync(recursive: true);
+      toolsStamp = cache.getStampFileFor('flutter_tools')..createSync(recursive: true);
+      versionFile = (cache.getCacheDir(
+        'dart-sdk/bin/resources/devtools',
+        shouldCreate: false,
+      )..createSync(recursive: true)).childFile('version.json');
+    });
+
+    testWithoutContext('returns devToolsVersion when version.json is valid', () {
+      versionFile.writeAsStringSync('{"version": "2.3.4"}');
+
+      expect(cache.devToolsVersion, '2.3.4');
+      expect(engineStamp.existsSync(), isTrue);
+      expect(toolsStamp.existsSync(), isTrue);
+      expect(dartSdkDir.existsSync(), isTrue);
+    });
+
+    testWithoutContext(
+      'invalidates stamps without deleting dart-sdk when version.json is missing',
+      () {
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(
+            message:
+                'The Dart SDK cache appears to be incomplete (often caused by '
+                'antivirus software quarantining files) and has been invalidated.\n'
+                'Please re-run your command to automatically re-download the Dart SDK. '
+                'If this issue persists, add your Flutter SDK directory to your '
+                'antivirus exclusions.',
+          ),
+        );
+        expect(engineStamp.existsSync(), isFalse);
+        expect(toolsStamp.existsSync(), isFalse);
+        expect(dartSdkDir.existsSync(), isTrue);
+        expect(logger.statusText, isEmpty);
+        expect(logger.errorText, isEmpty);
+      },
+    );
+
+    testWithoutContext(
+      'invalidates stamps and throws ToolExit when version.json is unreadable',
+      () {
+        versionFile.writeAsStringSync('{"version": "2.3.4"}');
+        exceptionHandler.addError(
+          versionFile,
+          FileSystemOp.read,
+          const FileSystemException('Permission denied'),
+        );
+
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(message: 'Could not read the DevTools version from ${versionFile.path}.'),
+        );
+        expect(engineStamp.existsSync(), isFalse);
+        expect(toolsStamp.existsSync(), isFalse);
+        expect(dartSdkDir.existsSync(), isTrue);
+        expect(logger.traceText, contains('Failed to read DevTools version file'));
+      },
+    );
+
+    for (final content in const <String>[
+      '{invalid json}',
+      '[]',
+      '{"not-version": "1.0.0"}',
+      '{"version": null}',
+      '{"version": 123}',
+      '{"version": ""}',
+      '{"version": "   "}',
+    ]) {
+      testWithoutContext(
+        'invalidates stamps and throws ToolExit when version.json contains $content',
+        () {
+          versionFile.writeAsStringSync(content);
+
+          expect(
+            () => cache.devToolsVersion,
+            throwsToolExit(
+              message: 'Could not read the DevTools version from ${versionFile.path}.',
+            ),
+          );
+          expect(engineStamp.existsSync(), isFalse);
+          expect(toolsStamp.existsSync(), isFalse);
+          expect(dartSdkDir.existsSync(), isTrue);
+        },
+      );
+    }
+
+    testWithoutContext(
+      'instructs user to delete cache directory when stamps are already absent',
+      () {
+        engineStamp.deleteSync();
+        toolsStamp.deleteSync();
+
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(
+            message:
+                'The Dart SDK cache appears to be incomplete or corrupted. '
+                'Please delete ${cache.getRoot().path} and re-run your command '
+                'to re-download the Dart SDK.',
+          ),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'instructs user to delete cache directory when stamp deletion fails on read-only cache',
+      () {
+        exceptionHandler.addError(
+          engineStamp,
+          FileSystemOp.delete,
+          const FileSystemException('Read-only file system'),
+        );
+        exceptionHandler.addError(
+          toolsStamp,
+          FileSystemOp.delete,
+          const FileSystemException('Read-only file system'),
+        );
+
+        expect(
+          () => cache.devToolsVersion,
+          throwsToolExit(
+            message:
+                'The Dart SDK cache appears to be incomplete or corrupted. '
+                'Please delete ${cache.getRoot().path} and re-run your command '
+                'to re-download the Dart SDK.',
+          ),
+        );
+        expect(logger.traceText, contains('Failed to delete engine-dart-sdk.stamp'));
+        expect(logger.traceText, contains('Failed to delete flutter_tools.stamp'));
+      },
+    );
+  });
+
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem? memoryFileSystem;
     Cache? cache;
