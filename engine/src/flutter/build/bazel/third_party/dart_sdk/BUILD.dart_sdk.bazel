@@ -58,7 +58,9 @@ filegroup(
 )
 
 # The command-line SDK: `dart` (and `dartvm`, the VM it runs), the
-# libraries and snapshots it loads, and the version file the analyzer reads
+# libraries and snapshots it loads (DDC's module loader and stack-trace
+# mapper under lib/dev_compiler among them: the flutter tool's debug web
+# builds copy them), and the version file the analyzer reads
 # (FolderBasedDartSdk.languageVersion) when it analyzes against this SDK.
 filegroup(
     name = "dart",
@@ -68,11 +70,8 @@ filegroup(
         "bin/dartaotruntime",
         "bin/dartvm",
         "version",
-    ] + glob(
-        [
-            "bin/snapshots/**",
-            "lib/**",
-        ],
-        exclude = ["lib/dev_compiler/**"],
-    ),
+    ] + glob([
+        "bin/snapshots/**",
+        "lib/**",
+    ]),
 )

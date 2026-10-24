@@ -789,6 +789,8 @@ assembled_directory(
   ConvertedFile(
     '//flutter/web_sdk',
     appendix: '''
+load("//engine/src/flutter/build/bazel:configuration.bzl", "in_configuration")
+load("//engine/src/flutter/build/bazel:local_engine.bzl", "bundle_directory")
 load("//engine/src/flutter/web_sdk:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "web_sdk_root")
 
 exports_files(["sdk_rewriter.dart"])
@@ -798,6 +800,22 @@ exports_files(["sdk_rewriter.dart"])
 web_sdk_root(
     name = "flutter_web_sdk_root",
     libraries = WEB_ENGINE_LIBRARIES,
+)
+
+# The web SDK as the flutter tool's cache lays it (bin/cache/flutter_web_sdk:
+# flutter-web-sdk.zip unpacked), for the tests' SDK facsimile (a dart_test's
+# cache_files): the archive built as the web builder builds it, under the
+# release mode and the Emscripten platform (in_configuration).
+in_configuration(
+    name = "flutter_web_sdk_archive_release",
+    platform = "//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten",
+    runtime_mode = "release",
+    target = ":flutter_web_sdk_archive",
+)
+
+bundle_directory(
+    name = "web_sdk_directory",
+    bundles = [":flutter_web_sdk_archive_release"],
 )
 ''',
   ),
