@@ -13,11 +13,11 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../devfs.dart';
@@ -58,24 +58,23 @@ class IOSSimulators extends PollingDeviceDiscovery {
 }
 
 class IOSSimulatorUtils {
-  IOSSimulatorUtils({
-    required Xcode xcode,
-    required Logger logger,
-    required ProcessManager processManager,
-    required this._operatingSystemUtils,
-  }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
-       _xcode = xcode;
+  IOSSimulatorUtils({required this._toolContext, required this._xcode})
+    : _simControl = SimControl(
+        logger: _toolContext.logger,
+        processManager: _toolContext.processManager,
+        xcode: _xcode,
+      );
 
   final SimControl _simControl;
+  final ToolContext _toolContext;
   final Xcode _xcode;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
 
-    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+    final cpuArch = CpuArch.fromHostPlatform(_toolContext.os.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
@@ -96,6 +95,7 @@ class IOSSimulatorUtils {
             simControl: _simControl,
             simulatorCategory: device.category,
             logger: _simControl._logger,
+            toolContext: _toolContext,
             cpuArch: cpuArch,
           );
         })
@@ -381,6 +381,7 @@ class IOSSimulator extends Device {
     required this._simControl,
     required this._cpuArch,
     required super.logger,
+    super.toolContext,
   }) : super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
@@ -599,6 +600,7 @@ class IOSSimulator extends Device {
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
+      toolContext: toolContext,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(

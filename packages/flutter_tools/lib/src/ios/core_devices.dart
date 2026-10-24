@@ -16,6 +16,7 @@ import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -44,6 +45,7 @@ class IOSCoreDeviceLauncher {
     required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     required Version? deviceVersion,
+    required this._toolContext,
     @visibleForTesting LLDB? lldb,
   }) : _logger = logger,
        _lldb =
@@ -60,6 +62,7 @@ class IOSCoreDeviceLauncher {
   final XcodeDebug _xcodeDebug;
   final FileSystem _fileSystem;
   final LLDB _lldb;
+  final ToolContext _toolContext;
 
   /// Contains a stream that devicectl sends logs to.
   final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
@@ -247,6 +250,7 @@ class IOSCoreDeviceLauncher {
         project: project.parent,
         buildInfo: debuggingOptions.buildInfo,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: _toolContext,
       );
 
       debugProject = XcodeDebugProject(
