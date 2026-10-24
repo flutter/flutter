@@ -2,18 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:splash/main.dart' as entrypoint;
 
 void main() {
   testWidgets('Displays flutter logo and message', (WidgetTester tester) async {
     entrypoint.main();
+    await tester.pump();
 
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(
       find.text('This app is only meant to be run under the Flutter debugger'),
       findsOneWidget,
     );
+
+    final DecoratedBox background = tester.widget<DecoratedBox>(
+      find.ancestor(of: find.byType(Center), matching: find.byType(DecoratedBox)),
+    );
+    expect((background.decoration as BoxDecoration).color, entrypoint.splashBackgroundColor);
+
+    final Text message = tester.widget<Text>(
+      find.text('This app is only meant to be run under the Flutter debugger'),
+    );
+    expect(message.style?.color, entrypoint.splashTextColor);
   });
 }
