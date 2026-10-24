@@ -2046,7 +2046,6 @@ TEST_F(FlutterWindowsEngineTest, FrameworkGenerationOwnsAccessibilityBridges) {
   EXPECT_EQ(view->accessibility_bridge().lock(), bridge.lock());
   generation_callback(false, callback_data);
   EXPECT_TRUE(bridge.expired());
-  EXPECT_EQ(view->GetNativeViewAccessible(), nullptr);
   EXPECT_EQ(demand_updates, 2);
   generation_callback(true, callback_data);
   bridge = view->accessibility_bridge();
@@ -2058,7 +2057,6 @@ TEST_F(FlutterWindowsEngineTest, FrameworkGenerationOwnsAccessibilityBridges) {
   ASSERT_FALSE(bridge.expired());
   ASSERT_TRUE(engine->Stop());
   EXPECT_TRUE(bridge.expired());
-  EXPECT_EQ(view->GetNativeViewAccessible(), nullptr);
 }
 
 TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {

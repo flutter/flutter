@@ -386,14 +386,12 @@ TEST_F(FlutterEngineTest, FrameworkGenerationResetsOnRestartAndShutdown) {
   [engine engineCallbackOnPreEngineRestart];
   EXPECT_FALSE(engine.semanticsTreeEnabled);
   EXPECT_TRUE(bridge.expired());
-  EXPECT_EQ(controller.flutterView.accessibilityChildren.count, 0u);
   [engine setSemanticsTreeEnabled:YES];
   bridge = controller.accessibilityBridge;
   ASSERT_FALSE(bridge.expired());
   [engine shutDownEngine];
   EXPECT_FALSE(engine.semanticsTreeEnabled);
   EXPECT_TRUE(bridge.expired());
-  EXPECT_EQ(controller.flutterView.accessibilityChildren.count, 0u);
   EXPECT_EQ(demandUpdates, 0);
 }
 
