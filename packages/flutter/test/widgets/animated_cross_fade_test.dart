@@ -600,6 +600,88 @@ void main() {
     final AnimatedSize animatedSizeWidget = tester.widget(find.byType(AnimatedSize));
     expect(animatedSizeWidget.clipBehavior, equals(Clip.none));
   });
+
+  testWidgets(
+    'AnimatedCrossFade size animation uses reverseDuration when transitioning to the first child',
+    (WidgetTester tester) async {
+      final Key firstKey = UniqueKey();
+      final Key secondKey = UniqueKey();
+
+      Widget build(CrossFadeState state) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: AnimatedCrossFade(
+              firstChild: SizedBox(key: firstKey, width: 100.0, height: 100.0),
+              secondChild: SizedBox(key: secondKey, width: 200.0, height: 200.0),
+              duration: const Duration(milliseconds: 100),
+              reverseDuration: const Duration(milliseconds: 200),
+              crossFadeState: state,
+            ),
+          ),
+        );
+      }
+
+      double opacityOf(Key key) {
+        final FadeTransition transition = tester.widget(
+          find.ancestor(of: find.byKey(key), matching: find.byType(FadeTransition)),
+        );
+        return transition.opacity.value;
+      }
+
+      await tester.pumpWidget(build(CrossFadeState.showSecond));
+      final RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
+      expect(box.size, const Size(200.0, 200.0));
+      expect(opacityOf(firstKey), 0.0);
+      expect(opacityOf(secondKey), 1.0);
+
+      await tester.pumpWidget(build(CrossFadeState.showFirst));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(box.size, const Size(150.0, 150.0));
+      expect(opacityOf(firstKey), moreOrLessEquals(0.5));
+      expect(opacityOf(secondKey), moreOrLessEquals(0.5));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(box.size, const Size(100.0, 100.0));
+      expect(opacityOf(firstKey), 1.0);
+      expect(opacityOf(secondKey), 0.0);
+
+      // The forward size animation still uses duration.
+      await tester.pumpWidget(build(CrossFadeState.showSecond));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(box.size, const Size(150.0, 150.0));
+      expect(opacityOf(firstKey), moreOrLessEquals(0.5));
+      expect(opacityOf(secondKey), moreOrLessEquals(0.5));
+    },
+  );
+
+  testWidgets('AnimatedCrossFade idle on first child resizes with duration', (
+    WidgetTester tester,
+  ) async {
+    Widget build(double size) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: AnimatedCrossFade(
+            firstChild: SizedBox(width: size, height: size),
+            secondChild: const SizedBox(width: 50.0, height: 50.0),
+            duration: const Duration(milliseconds: 100),
+            reverseDuration: const Duration(milliseconds: 400),
+            crossFadeState: CrossFadeState.showFirst,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(100.0));
+    final RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
+    expect(box.size, const Size(100.0, 100.0));
+
+    await tester.pumpWidget(build(200.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(box.size, const Size(150.0, 150.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(box.size, const Size(200.0, 200.0));
+  });
 }
 
 class _TickerWatchingWidget extends StatefulWidget {
