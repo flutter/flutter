@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace impeller {
@@ -83,21 +84,23 @@ std::string NextShortGLSLIdentifier(
     size_t& cursor,
     const std::unordered_set<std::string_view>& reserved);
 
-/// @brief Shortens shader-internal identifiers in `source` to compact 1- or
-///        2-character names ordered by usage frequency.
+/// @brief Builds a mapping from synthesized internal identifiers in `source`
+///        (matched by `IsSynthesizedGLSLIdentifier`) to shorter replacement
+///        identifiers.
 ///
-/// The following shader-internal identifiers are eligible for shortening:
-/// - Synthesized SPIRV-Cross temporaries matched by
-///   `IsSynthesizedGLSLIdentifier` (`_<digits>`, `mp_copy_*`, `hp_copy_*`,
-///   `spvDummy<digits>`).
-/// - Specialization constant `const` variables (`const <type> <name> =
-///   SPIRV_CROSS_CONSTANT_ID_<n>`).
-/// - Explicit-location fragment outputs (`layout(location = <n>) out ...
-///   <name>;`).
+/// Candidates are ordered by descending occurrence count so the most frequently
+/// used temporaries receive 1-character names, and replacement names never
+/// collide with GLSL keywords or existing identifiers in `source`.
+std::unordered_map<std::string_view, std::string> BuildGLSLIdentifierRenameMap(
+    std::string_view source);
+
+/// @brief Shortens synthesized SPIRV-Cross internal identifiers in `source`
+///        (`_<digits>`, `mp_copy_*`, `hp_copy_*`, `spvDummy<digits>`) using the
+///        mapping produced by `BuildGLSLIdentifierRenameMap`.
 ///
 /// External interface identifiers (uniforms, attributes, varyings, struct types
-/// and members, `_impeller_y_flip`, `_impeller_user_main`, preprocessor macros,
-/// and GLSL keywords/built-ins) are never renamed.
+/// and members, preprocessor macros, and GLSL keywords/built-ins) are never
+/// renamed.
 std::string ShortenGLSLInternalIdentifiers(std::string_view source);
 
 /// @brief Minifies SPIRV-Cross GLSL output by stripping comments, redundant

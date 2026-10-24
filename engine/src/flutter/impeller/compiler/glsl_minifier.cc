@@ -199,7 +199,8 @@ std::string NextShortGLSLIdentifier(
   }
 }
 
-std::string ShortenGLSLInternalIdentifiers(std::string_view source) {
+std::unordered_map<std::string_view, std::string> BuildGLSLIdentifierRenameMap(
+    std::string_view source) {
   // Short 2- and 3-letter GLSL keywords, types, and built-ins that must never
   // be generated as replacement names even if they do not appear in `source`.
   std::unordered_set<std::string_view> reserved = {
@@ -208,117 +209,35 @@ std::string ShortenGLSLInternalIdentifiers(std::string_view source) {
       "mod", "new", "not", "out", "pow", "sin", "tan", "vec", "xor",
   };
 
-  // Collect specialization constant variables (`const <type> <name> =
-  // SPIRV_CROSS_CONSTANT_ID_<n>`) and explicit-location fragment outputs
-  // (`layout(location = <n>) out ... <name>;`).
-  std::unordered_set<std::string_view> extra_internal_idents;
-  const re2::StringPiece src_piece(source.data(),
-                                   static_cast<int>(source.size()));
-  {
-    static const re2::LazyRE2 kSpecConstPattern = {
-        R"(\bconst\s+(?:highp\s+|mediump\s+|lowp\s+)?[a-zA-Z0-9_]+\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*SPIRV_CROSS_CONSTANT_ID_[0-9]+)"};
-    re2::StringPiece input = src_piece;
-    re2::StringPiece name;
-    while (re2::RE2::FindAndConsume(&input, *kSpecConstPattern, &name)) {
-      extra_internal_idents.emplace(name.data(), name.size());
-    }
-  }
-  {
-    static const re2::LazyRE2 kFragOutPattern = {
-        R"(\blayout\s*\([^)]*\blocation\s*=\s*[0-9]+[^)]*\)\s*out\s+(?:highp\s+|mediump\s+|lowp\s+)?vec4\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*;)"};
-    re2::StringPiece input = src_piece;
-    re2::StringPiece name;
-    while (re2::RE2::FindAndConsume(&input, *kFragOutPattern, &name)) {
-      extra_internal_idents.emplace(name.data(), name.size());
-    }
-  }
-
-  // Record any identifier that appears inside a `struct { ... }` definition or
-  // after a `.` member-access operator so struct member names are never
-  // renamed even if they share a name with a specialization constant.
-  std::unordered_set<std::string_view> struct_or_member_idents;
-  {
-    static const re2::LazyRE2 kStructPattern = {
-        R"(\bstruct\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\{([^}]*)\})"};
-    re2::StringPiece input = src_piece;
-    re2::StringPiece body;
-    while (re2::RE2::FindAndConsume(&input, *kStructPattern, &body)) {
-      size_t pos = 0;
-      const std::string_view body_sv(body.data(), body.size());
-      while (pos < body_sv.size()) {
-        if (IsGLSLIdentStartChar(body_sv[pos])) {
-          const size_t start = pos;
-          while (pos < body_sv.size() && IsGLSLIdentChar(body_sv[pos])) {
-            ++pos;
-          }
-          struct_or_member_idents.insert(body_sv.substr(start, pos - start));
-        } else {
-          ++pos;
-        }
-      }
-    }
-  }
-
-  // First pass: scan all non-preprocessor identifier tokens, populate
-  // `reserved` with every existing identifier in the shader, and count
-  // occurrences of renameable internal identifiers.
+  // Scan all word tokens in `source`, adding every identifier to `reserved` and
+  // counting occurrences of synthesized internal identifiers.
   std::unordered_map<std::string_view, size_t> candidate_counts;
-  size_t i = 0;
-  while (i < source.size()) {
-    if ((i == 0 || source[i - 1] == '\n') && source[i] == '#') {
-      while (i < source.size() && source[i] != '\n') {
-        ++i;
-      }
+  static const re2::LazyRE2 kWordPattern = {R"(([a-zA-Z0-9_]+))"};
+  re2::StringPiece input(source.data(), static_cast<int>(source.size()));
+  re2::StringPiece word;
+  while (re2::RE2::FindAndConsume(&input, *kWordPattern, &word)) {
+    const std::string_view tok(word.data(), word.size());
+    if (!IsGLSLIdentStartChar(tok.front())) {
       continue;
     }
-    if (IsGLSLIdentStartChar(source[i]) &&
-        (i == 0 || !IsGLSLIdentOrNumChar(source[i - 1]))) {
-      const size_t start = i;
-      while (i < source.size() && IsGLSLIdentChar(source[i])) {
-        ++i;
-      }
-      const std::string_view tok = source.substr(start, i - start);
-      reserved.insert(tok);
-      if (IsSynthesizedGLSLIdentifier(tok) ||
-          (extra_internal_idents.find(tok) != extra_internal_idents.end() &&
-           struct_or_member_idents.find(tok) ==
-               struct_or_member_idents.end())) {
-        ++candidate_counts[tok];
-      }
-      continue;
+    reserved.insert(tok);
+    if (IsSynthesizedGLSLIdentifier(tok)) {
+      ++candidate_counts[tok];
     }
-    if (source[i] == '.' && i + 1 < source.size() &&
-        IsGLSLIdentStartChar(source[i + 1])) {
-      ++i;
-      const size_t start = i;
-      while (i < source.size() && IsGLSLIdentChar(source[i])) {
-        ++i;
-      }
-      const std::string_view member_tok = source.substr(start, i - start);
-      reserved.insert(member_tok);
-      struct_or_member_idents.insert(member_tok);
-      candidate_counts.erase(member_tok);
-      continue;
-    }
-    ++i;
   }
 
   if (candidate_counts.empty()) {
-    return std::string(source);
+    return {};
   }
 
-  // Sort candidates by descending frequency (breaking ties by descending length
-  // and then lexicographically) so the most frequently used temporaries receive
-  // 1-character names.
+  // Sort candidates by descending frequency (breaking ties lexicographically)
+  // so the most frequently used temporaries receive 1-character names.
   std::vector<std::pair<std::string_view, size_t>> sorted_candidates(
       candidate_counts.begin(), candidate_counts.end());
   std::sort(sorted_candidates.begin(), sorted_candidates.end(),
             [](const auto& a, const auto& b) {
               if (a.second != b.second) {
                 return a.second > b.second;
-              }
-              if (a.first.size() != b.first.size()) {
-                return a.first.size() > b.first.size();
               }
               return a.first < b.first;
             });
@@ -331,41 +250,34 @@ std::string ShortenGLSLInternalIdentifiers(std::string_view source) {
       rename_map.emplace(tok, std::move(short_name));
     }
   }
+  return rename_map;
+}
 
+std::string ShortenGLSLInternalIdentifiers(std::string_view source) {
+  const auto rename_map = BuildGLSLIdentifierRenameMap(source);
   if (rename_map.empty()) {
     return std::string(source);
   }
 
-  // Second pass: rewrite renameable tokens outside preprocessor directives.
   std::string out;
   out.reserve(source.size());
-  i = 0;
+  size_t i = 0;
   while (i < source.size()) {
-    if ((i == 0 || source[i - 1] == '\n') && source[i] == '#') {
-      const size_t line_start = i;
-      while (i < source.size() && source[i] != '\n') {
-        ++i;
-      }
-      out.append(source.substr(line_start, i - line_start));
-      continue;
-    }
-    if (IsGLSLIdentStartChar(source[i]) &&
-        (i == 0 || !IsGLSLIdentOrNumChar(source[i - 1]))) {
+    if (IsGLSLIdentChar(source[i])) {
       const size_t start = i;
       while (i < source.size() && IsGLSLIdentChar(source[i])) {
         ++i;
       }
       const std::string_view tok = source.substr(start, i - start);
-      const auto it = rename_map.find(tok);
-      if (it != rename_map.end()) {
+      if (const auto it = rename_map.find(tok); it != rename_map.end()) {
         out.append(it->second);
       } else {
         out.append(tok);
       }
-      continue;
+    } else {
+      out.push_back(source[i]);
+      ++i;
     }
-    out.push_back(source[i]);
-    ++i;
   }
   return out;
 }
