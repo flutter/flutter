@@ -117,6 +117,48 @@ void testMain() {
       expect(valueInOnFinishedRenderingFrame, isFalse);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/181698
+    test('microtasks scheduled in onBeginFrame run before onDrawFrame', () async {
+      final FrameService instance = FrameService.instance;
+      final log = <String>[];
+
+      EnginePlatformDispatcher.instance.onBeginFrame = (_) {
+        log.add('onBeginFrame');
+        scheduleMicrotask(() {
+          log.add('microtask (isRenderingFrame: ${instance.isRenderingFrame})');
+          scheduleMicrotask(() {
+            log.add('chained microtask (isRenderingFrame: ${instance.isRenderingFrame})');
+          });
+        });
+      };
+
+      EnginePlatformDispatcher.instance.onDrawFrame = () {
+        log.add('onDrawFrame');
+        scheduleMicrotask(() {
+          log.add('microtask from onDrawFrame');
+        });
+      };
+
+      final frameCompleter = Completer<void>();
+      instance.onFinishedRenderingFrame = () {
+        log.add('onFinishedRenderingFrame');
+        frameCompleter.complete();
+      };
+
+      instance.scheduleFrame();
+      await frameCompleter.future;
+      await Future<void>.delayed(Duration.zero);
+
+      expect(log, <String>[
+        'onBeginFrame',
+        'microtask (isRenderingFrame: true)',
+        'chained microtask (isRenderingFrame: true)',
+        'onDrawFrame',
+        'onFinishedRenderingFrame',
+        'microtask from onDrawFrame',
+      ]);
+    });
+
     test('scheduleWarmUpFrame', () async {
       final FrameService instance = FrameService.instance;
 
