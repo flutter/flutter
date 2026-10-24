@@ -783,10 +783,22 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id "org.jetbrains.kotlin.android"`
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
+  /// - `kotlin("android")`
+  /// - any of the above followed by `version "..."`
+  /// - `alias(libs.plugins.kotlin.android)` or
+  ///   `alias(libs.plugins.jetbrains.kotlin.android)`, the catalog names that
+  ///   Android Studio project templates use
   static final _declarativeKotlinPluginPatterns = <RegExp>[
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
+    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?$_versionSuffix\\s*\$'),
+    RegExp(
+      '^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?$_versionSuffix\\s*\$',
+    ),
+    RegExp('^\\s*kotlin\\s*\\(\\s*"android"\\s*\\)$_versionSuffix\\s*\$'),
+    RegExp(r'^\s*alias\s*\(\s*libs\.plugins\.(?:jetbrains\.)?kotlin\.android\s*\)\s*$'),
   ];
+
+  /// An optional plugin version, as in `id("org.jetbrains.kotlin.android") version "2.4.20"`.
+  static const _versionSuffix = '(?:\\s+version\\s*\\(?\\s*[\'"][^\'"]*[\'"]\\s*\\)?)?';
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
   /// Expected example: `group "dev.flutter.plugin"`
@@ -880,17 +892,30 @@ class AndroidProject extends FlutterProjectPlatform {
     return false;
   }
 
-  /// True, if the app project is using Kotlin.
-  bool get isKotlin {
-    if (appGradleFile.existsSync()) {
-      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+  /// Whether the app module's Gradle build file applies the `kotlin-android`
+  /// (`org.jetbrains.kotlin.android`) plugin. Other modules, such as plugins,
+  /// are not checked.
+  bool get appliesKotlinAndroidPlugin {
+    if (!appGradleFile.existsSync()) {
+      return false;
+    }
+    if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+      return true;
+    }
+    for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+      if (firstMatchInFile(appGradleFile, pattern) != null) {
         return true;
       }
-      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
-        if (firstMatchInFile(appGradleFile, pattern) != null) {
-          return true;
-        }
-      }
+    }
+    return false;
+  }
+
+  /// True, if the app project is using Kotlin.
+  bool get isKotlin {
+    if (appliesKotlinAndroidPlugin) {
+      return true;
+    }
+    if (appGradleFile.existsSync()) {
       try {
         final String content = appGradleFile.readAsStringSync();
         if (_kotlinCompilerOptionsPattern.hasMatch(content)) {

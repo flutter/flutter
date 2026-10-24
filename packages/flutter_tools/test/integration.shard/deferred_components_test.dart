@@ -69,6 +69,42 @@ void main() {
     expect(archive.findFile('base/assets/flutter_assets/test_assets/asset1.txt') != null, true);
   });
 
+  testWithoutContext('flavored build appbundle includes the deferred component files', () async {
+    final project = DeferredComponentsProject(FlavoredDeferredComponentsConfig());
+    await project.setUpIn(tempDir);
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'build',
+      'appbundle',
+      '--flavor',
+      'free',
+      '--target-platform=android-arm64',
+    ], workingDirectory: tempDir.path);
+
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
+    expect(result, const ProcessResultMatcher(stdoutPattern: 'app-free-release.aab'));
+
+    final String line = result.stdout
+        .toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains('app-free-release.aab'));
+
+    final String outputFilePath = line.split(' ')[2].trim();
+    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    expect(outputFile, exists);
+
+    final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
+
+    expect(archive.findFile('base/lib/arm64-v8a/libapp.so') != null, true);
+    expect(archive.findFile('component1/lib/arm64-v8a/libapp.so-2.part.so') != null, true);
+    expect(
+      archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null,
+      true,
+    );
+  });
+
   testWithoutContext('simple build appbundle all targets succeeds', () async {
     final project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
