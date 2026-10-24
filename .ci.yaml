@@ -4853,6 +4853,7 @@ targets:
       subshard: "1_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4880,6 +4881,7 @@ targets:
       subshard: "2_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4907,6 +4909,7 @@ targets:
       subshard: "3_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4934,6 +4937,7 @@ targets:
       subshard: "4_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4961,6 +4965,7 @@ targets:
       subshard: "5_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4988,6 +4993,7 @@ targets:
       subshard: "6_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5015,6 +5021,7 @@ targets:
       subshard: "7_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5042,6 +5049,7 @@ targets:
       subshard: "8_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5069,6 +5077,7 @@ targets:
       subshard: "9_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5096,6 +5105,7 @@ targets:
       subshard: "10_10"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
