@@ -6,7 +6,7 @@
 #define FLUTTER_THIRD_PARTY_LIBCXX_CONFIG_FORMAT_
 
 #if !defined(_LIBCPP_BUILDING_LIBRARY)
-#error "<format> and std::format are banned in the Flutter Engine because they pull ~200 KiB of libc++ formatting and Ryu floating-point tables into libflutter.so. Use std::stringstream or fml::StringPrintf instead."
+#error "<format> and std::format are banned in the Flutter Engine because they pull ~200 KiB of libc++ formatting and Ryu floating-point tables into libflutter.so. Use std::stringstream or std::to_string instead."
 #else
 #include_next <format>
 #endif

@@ -211,10 +211,8 @@ uint32_t DifferingFields(const ContentContextOptions& a,
 std::string DescribeChange(OptionField field,
                            const ContentContextOptions& from,
                            const ContentContextOptions& to) {
-  std::stringstream stream;
-  stream << FieldName(field) << " " << FieldValue(from, field) << " -> "
-         << FieldValue(to, field);
-  return stream.str();
+  return std::string(FieldName(field)) + " " + FieldValue(from, field) +
+         " -> " + FieldValue(to, field);
 }
 
 std::string FormatSpecializationConstants(const std::vector<Scalar>& values) {
