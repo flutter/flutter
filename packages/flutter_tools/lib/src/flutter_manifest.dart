@@ -794,22 +794,30 @@ void _validateFonts(YamlList fonts, List<String> errors) {
 class AssetsEntry {
   const AssetsEntry({
     required this.uri,
+    this.bundleUri,
     this.flavors = const <String>{},
     this.platforms = const <String>{},
     this.transformers = const <AssetTransformerEntry>[],
   });
 
   final Uri uri;
+
+  /// The runtime key for an individual, flavor-specific configuration file.
+  ///
+  /// Only application assets without platform filters, transformers, or image
+  /// variants support this mapping. [uri] remains the source file on disk.
+  final Uri? bundleUri;
   final Set<String> flavors;
   final Set<String> platforms;
   final List<AssetTransformerEntry> transformers;
 
   Object? get descriptor {
-    if (transformers.isEmpty && flavors.isEmpty && platforms.isEmpty) {
+    if (bundleUri == null && transformers.isEmpty && flavors.isEmpty && platforms.isEmpty) {
       return uri.toString();
     }
     return <String, Object?>{
       _pathKey: uri.toString(),
+      if (bundleUri != null) _bundlePathKey: bundleUri!.toFilePath(windows: false),
       if (flavors.isNotEmpty) _flavorKey: flavors.toList(),
       if (platforms.isNotEmpty) _platformsKey: platforms.toList(),
       if (transformers.isNotEmpty)
@@ -818,6 +826,7 @@ class AssetsEntry {
   }
 
   static const _pathKey = 'path';
+  static const _bundlePathKey = 'bundle_path';
   static const _flavorKey = 'flavors';
   static const _platformsKey = 'platforms';
   static const _transformersKey = 'transformers';
@@ -884,9 +893,49 @@ class AssetsEntry {
         return (null, <String>['Unable to parse assets section.', ...errors].join('\n'));
       }
 
+      Uri? bundleUri;
+      if (yaml.containsKey(_bundlePathKey)) {
+        final Object? bundlePath = yaml[_bundlePathKey];
+        if (bundlePath is! String || bundlePath.isEmpty) {
+          return (null, 'The bundle_path of asset "$path" must be a non-empty string.');
+        }
+        bool isRelativeFilePath(String value) =>
+            value.isNotEmpty &&
+            !value.contains(r'\') &&
+            !value.contains(':') &&
+            !value.codeUnits.any((int code) => code < 32 || code == 127) &&
+            !value
+                .split('/')
+                .any((String segment) => segment.isEmpty || segment == '.' || segment == '..');
+        if (!isRelativeFilePath(path) || !isRelativeFilePath(bundlePath)) {
+          return (
+            null,
+            'The path and bundle_path of asset "$path" must be relative file paths '
+                'with forward slashes and no empty, ".", or ".." segments.',
+          );
+        }
+        if (path == 'packages' ||
+            path.startsWith('packages/') ||
+            bundlePath == 'packages' ||
+            bundlePath.startsWith('packages/')) {
+          return (null, 'The bundle_path of asset "$path" cannot map package assets.');
+        }
+        if ((flavors ?? <String>[]).isEmpty ||
+            (platforms ?? <String>[]).isNotEmpty ||
+            (transformers ?? <AssetTransformerEntry>[]).isNotEmpty) {
+          return (
+            null,
+            'The bundle_path of asset "$path" requires flavors and does not support '
+                'platform filters or transformers.',
+          );
+        }
+        bundleUri = Uri(pathSegments: bundlePath.split('/'));
+      }
+
       return (
         AssetsEntry(
           uri: Uri(pathSegments: path.split('/')),
+          bundleUri: bundleUri,
           flavors: Set<String>.from(flavors ?? <String>[]),
           platforms: Set<String>.from(platforms ?? <String>[]),
           transformers: transformers ?? <AssetTransformerEntry>[],
@@ -986,6 +1035,7 @@ class AssetsEntry {
     }
 
     return uri == other.uri &&
+        bundleUri == other.bundleUri &&
         setEquals(flavors, other.flavors) &&
         setEquals(platforms, other.platforms);
   }
@@ -993,6 +1043,7 @@ class AssetsEntry {
   @override
   int get hashCode => Object.hashAll(<Object?>[
     uri.hashCode,
+    bundleUri,
     Object.hashAllUnordered(flavors),
     Object.hashAllUnordered(platforms),
     Object.hashAll(transformers),
@@ -1000,7 +1051,7 @@ class AssetsEntry {
 
   @override
   String toString() =>
-      'AssetsEntry(uri: $uri, flavors: $flavors, platforms: $platforms, transformers: $transformers)';
+      'AssetsEntry(uri: $uri, bundleUri: $bundleUri, flavors: $flavors, platforms: $platforms, transformers: $transformers)';
 }
 
 /// Represents an entry in the "transformers" section of an asset.

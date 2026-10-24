@@ -257,6 +257,8 @@ class ManifestAssetBundle implements AssetBundle {
   // the current project.
   final _wildcardDirectories = <Uri, Directory>{};
 
+  Set<String> _configurationAssetKeys = <String>{};
+
   DateTime? _lastBuildTimestamp;
 
   FlutterHookResult _lastHookResult;
@@ -338,6 +340,8 @@ class ManifestAssetBundle implements AssetBundle {
     _lastBuildTimestamp = DateTime.now();
     _lastHookResult = flutterHookResult ?? FlutterHookResult.empty();
     if (flutterManifest.isEmpty && (flutterHookResult?.dataAssets.isEmpty ?? true)) {
+      _configurationAssetKeys.forEach(entries.remove);
+      _configurationAssetKeys = <String>{};
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
       )!;
@@ -547,6 +551,26 @@ class ManifestAssetBundle implements AssetBundle {
       assetVariants[asset] = <_Asset>[asset];
     }
 
+    final materialAndFrameworkAssets = <_Asset>[
+      if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
+      // Framework shaders are small and included regardless of app usage.
+      ..._getFrameworkShaders(),
+    ];
+    final Set<String> configurationAssetKeys = _addFlavorConfigurationAssets(
+      flutterManifest,
+      assetVariants,
+      <_Asset>[
+        ...materialAndFrameworkAssets,
+        for (final Map<_Asset, List<_Asset>> component in deferredComponentsAssetVariants.values)
+          for (final MapEntry<_Asset, List<_Asset>> entry in component.entries) ...<_Asset>[
+            entry.key,
+            ...entry.value,
+          ],
+      ],
+      assetBasePath,
+      flavor,
+    );
+
     // Save the contents of each image, image variant, and font
     // asset in [entries].
     for (final _Asset asset in assetVariants.keys) {
@@ -623,13 +647,6 @@ class ManifestAssetBundle implements AssetBundle {
         }
       }
     }
-    final materialAndFrameworkAssets = <_Asset>[
-      if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
-      // For all platforms, include the shaders unconditionally. They are
-      // small, and whether they're used is determined only by the app source
-      // code and not by the Flutter manifest.
-      ..._getFrameworkShaders(),
-    ];
     for (final asset in materialAndFrameworkAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
@@ -687,7 +704,85 @@ class ManifestAssetBundle implements AssetBundle {
     }
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
+    final selectedKeys = <String>{
+      for (final MapEntry<_Asset, List<_Asset>> entry in assetVariants.entries) ...<String>[
+        entry.key.entryUri.path,
+        ...entry.value.map((_Asset asset) => asset.entryUri.path),
+      ],
+      for (final asset in materialAndFrameworkAssets) asset.entryUri.path,
+    };
+    _configurationAssetKeys.difference(selectedKeys).forEach(entries.remove);
+    _configurationAssetKeys = configurationAssetKeys;
     return 0;
+  }
+
+  // Add only selected configuration files, after ordinary assets have been
+  // resolved. This leaves directory and resolution-variant discovery unchanged.
+  Set<String> _addFlavorConfigurationAssets(
+    FlutterManifest manifest,
+    Map<_Asset, List<_Asset>> assets,
+    List<_Asset> otherAssets,
+    String assetBasePath,
+    String? flavor,
+  ) {
+    if (flavor == null) {
+      return <String>{};
+    }
+    final List<AssetsEntry> configurations = manifest.assets
+        .where((AssetsEntry entry) => entry.bundleUri != null && entry.flavors.contains(flavor))
+        .toList();
+    if (configurations.isEmpty) {
+      return <String>{};
+    }
+    final keys = <String>{
+      for (final MapEntry<_Asset, List<_Asset>> entry in assets.entries) ...<String>[
+        entry.key.entryUri.normalizePath().path,
+        ...entry.value.map((_Asset asset) => asset.entryUri.normalizePath().path),
+      ],
+      for (final asset in otherAssets) asset.entryUri.normalizePath().path,
+      _kAssetManifestBinFilename,
+      _kAssetManifestBinJsonFilename,
+      kFontManifestJson,
+      _kNoticeFile,
+      _kNoticeZippedFile,
+      'kernel_blob.bin',
+      'isolate_snapshot_data',
+      'vm_snapshot_data',
+      'NativeAssetsManifest.json',
+    };
+    final selectedKeys = <String>{};
+    final cache = _AssetDirectoryCache(_fileSystem);
+    for (final entry in configurations) {
+      final Uri bundleUri = entry.bundleUri!;
+      final String key = bundleUri.path;
+      if (keys.any(
+        (String existing) =>
+            existing == key || existing.startsWith('$key/') || key.startsWith('$existing/'),
+      )) {
+        throwToolExit(
+          'The bundle_path "$key" of asset "${entry.uri}" conflicts with '
+          'another selected asset or a generated Flutter asset.',
+        );
+      }
+      final asset = _Asset(
+        baseDir: assetBasePath,
+        originUri: entry.uri,
+        relativeUri: entry.uri,
+        entryUri: bundleUri,
+        package: null,
+        flavors: entry.flavors,
+      );
+      final File source = asset.lookupAssetFile(_fileSystem);
+      if (cache.variantsFor(source.path).any((String path) => path != source.path)) {
+        throwToolExit(
+          'The bundle_path of asset "${entry.uri}" does not support image resolution variants.',
+        );
+      }
+      assets[asset] = <_Asset>[];
+      keys.add(key);
+      selectedKeys.add(key);
+    }
+    return selectedKeys;
   }
 
   @override
@@ -729,7 +824,13 @@ class ManifestAssetBundle implements AssetBundle {
     AssetBundleEntry entry,
   ) {
     final AssetBundleEntry? existingEntry = entryMap[key];
-    if (existingEntry == null || !entry.hasEquivalentConfigurationWith(existingEntry)) {
+    final DevFSContent content = entry.content;
+    final DevFSContent? existingContent = existingEntry?.content;
+    if (existingEntry == null ||
+        (content is DevFSFileContent &&
+            existingContent is DevFSFileContent &&
+            content.file.path != existingContent.file.path) ||
+        !entry.hasEquivalentConfigurationWith(existingEntry)) {
       entryMap[key] = entry;
     }
   }
@@ -884,6 +985,9 @@ class ManifestAssetBundle implements AssetBundle {
       final cache = _AssetDirectoryCache(_fileSystem);
       final componentAssets = <_Asset, List<_Asset>>{};
       for (final AssetsEntry assetsEntry in component.assets) {
+        if (assetsEntry.bundleUri != null) {
+          throwToolExit('The bundle_path field is not supported in deferred components.');
+        }
         if (assetsEntry.uri.path.endsWith('/')) {
           wildcardDirectories.add(assetsEntry.uri);
           _parseAssetsFromFolder(
@@ -1065,6 +1169,13 @@ class ManifestAssetBundle implements AssetBundle {
 
     final cache = _AssetDirectoryCache(_fileSystem);
     for (final AssetsEntry assetsEntry in flutterManifest.assets) {
+      if (assetsEntry.bundleUri != null) {
+        if (packageName != null) {
+          throwToolExit('The bundle_path field is only supported in application assets.');
+        }
+        // These files are added after flavor selection and ordinary asset parsing.
+        continue;
+      }
       if (assetsEntry.uri.path.endsWith('/')) {
         wildcardDirectories.add(assetsEntry.uri);
         _parseAssetsFromFolder(
@@ -1098,6 +1209,9 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     for (final AssetsEntry shaderEntry in flutterManifest.shaders) {
+      if (shaderEntry.bundleUri != null) {
+        throwToolExit('The bundle_path field is not supported in shaders.');
+      }
       final Uri shaderUri = shaderEntry.uri;
       for (final AssetsEntry assetEntry in flutterManifest.assets) {
         final String assetPath = assetEntry.uri.path;
