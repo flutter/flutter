@@ -112,6 +112,12 @@ write_file(
     content = ["bazel"],
 )
 
+write_file(
+    name = "flutter_web_sdk_stamp",
+    out = "flutter_web_sdk.stamp",
+    content = ["bazel"],
+)
+
 copy_file(
     name = "material_fonts_stamp",
     src = "material_fonts.version",
