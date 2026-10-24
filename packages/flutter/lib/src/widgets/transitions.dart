@@ -303,6 +303,16 @@ class MatrixTransition extends AnimatedWidget {
   /// When the animation is stopped (either in [AnimationStatus.dismissed] or
   /// [AnimationStatus.completed]), the filter quality argument will be ignored.
   ///
+  /// When [filterQuality] is null (the default), the child is re-rendered on
+  /// every frame to apply the transform. This avoids the overhead of an
+  /// [ImageFilter] layer but may cause more CPU usage for complex children.
+  ///
+  /// When [filterQuality] is set, an [ImageFilter.matrix] is applied to a
+  /// bitmap rendering of the child. This creates a saveLayer in the layer tree,
+  /// which can improve performance for complex children during animation.
+  /// However, the saveLayer introduces overhead and should only be used while
+  /// the animation is actively running.
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
