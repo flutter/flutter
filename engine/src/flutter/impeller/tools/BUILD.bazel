@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Impeller's build tools: the scripts its GN templates run, and the Bazel side
-# of args.gni. The templates themselves are build/bazel/impeller.
+# of args.gni. The templates themselves are //build_defs/impeller.
 
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
@@ -11,7 +11,7 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files(
     ["xxd.py"],
-    visibility = ["//engine/src/flutter/build/bazel/impeller:__subpackages__"],
+    visibility = ["//build_defs/impeller:__subpackages__"],
 )
 
 # GN's impeller_enable_metal, impeller_enable_opengles and

@@ -12,8 +12,8 @@
 # $root_gen_dir/flutter/shell/vmservice/android/libs/$android_app_abi/
 # libvmservice_snapshot.so`), written as the template writes it.
 
-load("//engine/src/flutter/build/bazel/dart:kernel.bzl", "dart_kernel")
-load("//engine/src/flutter/build/bazel/dart:snapshot.bzl", "aot_snapshot")
+load("//build_defs/dart:kernel.bzl", "dart_kernel")
+load("//build_defs/dart:snapshot.bzl", "aot_snapshot")
 
 exports_files(["empty.dart"])
 

@@ -24,7 +24,7 @@ with emcc's "FROZEN_CACHE is set, but cache file is missing", which names
 the library to add.
 """
 
-load("//engine/src/flutter/build/bazel:repositories.bzl", "checkout_root")
+load("//build_defs/repositories:repositories.bzl", "checkout_root")
 
 # The variants the skwasm modules' links need (wasm workers, no exceptions,
 # WebGL 2 with getProcAddress), by their embuilder names.

@@ -1,0 +1,10 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Configurations: configuration.bzl (in_configuration: a target built under
+# another runtime mode's or platform's flags) and checkout_view.bzl (GN's
+# name for a configuration's build directory; the checkout-shaped runfiles
+# tree the Dart tests and the checkout's scripts run in).
+
+package(default_visibility = ["//visibility:public"])

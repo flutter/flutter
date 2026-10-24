@@ -4,7 +4,7 @@
 
 # The SDK's version pins; the Bazel build reads the Material fonts' and the
 # Gradle wrapper's to fetch what the framework's and the tool's tests read of
-# the SDK cache (engine/src/flutter/build/bazel/dart/flutter_sdk_cache.bzl).
+# the SDK cache (build_defs/repositories/flutter_sdk_cache.bzl).
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")

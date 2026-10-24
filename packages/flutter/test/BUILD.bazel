@@ -7,9 +7,9 @@
 # configuration every test of this directory tree is wrapped in. The tests
 # themselves are declared per directory (widgets/BUILD.bazel, ...).
 
-load("//engine/src/flutter/build/bazel/dart:flutter_assets.bzl", "flutter_test_assets")
-load("//engine/src/flutter/build/bazel/dart:flutter_test.bzl", "flutter_test_prelude")
-load("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub_package_config")
+load("//build_defs/dart:flutter_assets.bzl", "flutter_test_assets")
+load("//build_defs/dart:flutter_test.bzl", "flutter_test_prelude")
+load("//build_defs/dart:pub.bzl", "pub_package_config")
 
 package(default_visibility = ["//visibility:public"])
 

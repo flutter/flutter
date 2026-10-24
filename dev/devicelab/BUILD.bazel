@@ -6,11 +6,11 @@
 # own tests under Bazel: each test compiled by the frontend server for the
 # VM and run by package:test's precompiled runner from this directory, as
 # `dart test` runs them (dev/bots' runDartTest;
-# engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+# build_defs/dart/dart_test.bzl; research/15).
 #
 #   bazel test //dev/devicelab:tests
 
-load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 

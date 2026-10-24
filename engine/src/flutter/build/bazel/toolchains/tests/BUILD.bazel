@@ -6,7 +6,7 @@
 # compiles, and a quick check that a toolchain change still matches GN.
 
 load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 cc_test(
     name = "cc_toolchain_smoke_test",

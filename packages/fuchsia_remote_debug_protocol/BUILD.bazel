@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 
 # package:fuchsia_remote_debug_protocol's sources, for the tests Bazel compiles and runs on
-# flutter_tester (engine/src/flutter/build/bazel/dart/flutter_test.bzl).
+# flutter_tester (build_defs/dart/flutter_test.bzl).
 
-load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -16,7 +16,7 @@ filegroup(
 
 # The package's tests: each compiled by the frontend server for the VM and
 # run by package:test's precompiled runner
-# (engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+# (build_defs/dart/dart_test.bzl; research/15).
 #
 #   bazel test //packages/fuchsia_remote_debug_protocol:tests
 dart_package_tests(

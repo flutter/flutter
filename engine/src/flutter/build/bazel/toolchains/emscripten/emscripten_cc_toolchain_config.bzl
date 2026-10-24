@@ -49,7 +49,7 @@ load(
     "with_feature_set",
 )
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("//engine/src/flutter/build/bazel:copts.bzl", "WASM_DEFAULT_WARNING_FLAGS")
+load("//build_defs/cc:copts.bzl", "WASM_DEFAULT_WARNING_FLAGS")
 
 # Flags GN passes to every compile of the wasm toolchain
 # (//build/config/compiler:compiler, :runtime_library, :default_warnings

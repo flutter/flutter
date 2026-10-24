@@ -6,11 +6,11 @@
 # --dart-define=dart.vm.product=false --dart-define=dart.vm.profile=true
 # test_profile/` runs (dev/bots; the README beside them), compiled with
 # kProfileMode true from a prelude of its own, and run on the Bazel-built
-# flutter_tester (//packages/flutter_test:package_tests.bzl; research/15).
+# flutter_tester (//build_defs/dart:flutter_package_tests.bzl; research/15).
 #
 #   bazel test //packages/flutter/test_profile:tests
 
-load("//packages/flutter_test:package_tests.bzl", "flutter_package_tests")
+load("//build_defs/dart:flutter_package_tests.bzl", "flutter_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 

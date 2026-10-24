@@ -6,7 +6,7 @@
 # tests, which the Dart tests of testing/dart import. A Dart package with no
 # GN build file; its tests are run_tests.py's (--type dart-host).
 
-load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_test")
+load("//build_defs/dart:package_test.bzl", "dart_package_test")
 
 package(default_visibility = ["//visibility:public"])
 

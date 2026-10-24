@@ -62,7 +62,7 @@ archive_override(
 
 # The engine's synced dependencies this module reaches directly: the CIPD
 # CPython for the Python toolchain, googletest for the test.
-synced_deps = use_extension("@flutter//engine/src/flutter/build/bazel:extensions.bzl", "synced_deps")
+synced_deps = use_extension("@flutter//build_defs/repositories:extensions.bzl", "synced_deps")
 use_repo(synced_deps, "cpython3", "googletest")
 
 # The Python toolchain comes first so that it is the one resolved ahead of

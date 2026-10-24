@@ -9,7 +9,7 @@
 # directory are external repositories, not part of this package.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/testing:testing.bzl", "source_tree_files")
+load("//build_defs/testing:testing.bzl", "source_tree_files")
 
 cc_library(
     name = "include_dir",

@@ -46,7 +46,7 @@ const Set<String> defaultToolchainMnemonics = <String>{
   'CcLtoBackendCompile',
   'CcStrip',
   'ObjcCompile',
-  // The Emscripten toolchain's module link (build/bazel/toolchains/emscripten/wasm.bzl).
+  // The Emscripten toolchain's module link (build_defs/web/wasm.bzl).
   'WasmLink',
 };
 

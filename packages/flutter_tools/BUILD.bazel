@@ -5,13 +5,13 @@
 # flutter_tools' sources and its tests under Bazel: each test compiled by
 # the frontend server for the VM and run by package:test's precompiled
 # runner from this directory, as `dart test` runs them
-# (engine/src/flutter/build/bazel/dart/dart_test.bzl; research/15).
+# (build_defs/dart/dart_test.bzl; research/15).
 #
 #   bazel test //packages/flutter_tools:general_shard
 
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
-load("//engine/src/flutter/build/bazel/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
+load("//build_defs/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
 
 package(default_visibility = ["//visibility:public"])
 

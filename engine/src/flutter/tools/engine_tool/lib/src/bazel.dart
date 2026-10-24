@@ -74,7 +74,7 @@ final class Bazel {
 
   /// The local engine target of the whole tree: the build's artifacts where
   /// Bazel builds them and `local_engine.json` beside them, which the flutter
-  /// tool reads through `--local-engine` (build/bazel/local_engine.bzl).
+  /// tool reads through `--local-engine` (build_defs/dist/local_engine.bzl).
   static const String localEngineTarget = '$rootPackage/flutter:local_engine';
 
   /// The manifest [localEngineTarget] writes.

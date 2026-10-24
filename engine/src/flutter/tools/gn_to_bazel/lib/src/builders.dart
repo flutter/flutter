@@ -805,7 +805,7 @@ String buildersBuildFile(
     ..writeln('# steps (scripts of the checkout) listed. The suites are manual: each stands')
     ..writeln('# for one builder, named; a wildcard run of the tree has the tests themselves.')
     ..writeln()
-    ..writeln('load("//engine/src/flutter/build/bazel:install.bzl", "install")')
+    ..writeln('load("//build_defs/dist:install.bzl", "install")')
     ..writeln()
     ..writeln('package(default_visibility = ["//visibility:public"])')
     ..writeln()

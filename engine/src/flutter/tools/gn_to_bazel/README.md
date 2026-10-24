@@ -79,7 +79,7 @@ What the defaults leave open on purpose -- `is_debug`, the runtime mode,
 `slimpeller` -- becomes a `select()` on the engine's config_settings. A
 list config.gni computes from those (`feature_defines_list`, read by
 reference in `//flutter/common:flutter_config`) is not evaluated: it is the
-constant of `build/bazel/copts.bzl` that `referenceConstants` names
+constant of `build_defs/cc/copts.bzl` that `referenceConstants` names
 (`FLUTTER_FEATURE_DEFINES`, the same arithmetic over the flags), as the
 Objective-C flag lists already are. A string around such a variable
 (`"FLUTTER_ENGINE_VERSION=\"$engine_version\""` in `shell/version`)
@@ -157,7 +157,7 @@ dart bin/gn_to_bazel.dart --out-dir=<repo> --repository=@skia=//flutter/third_pa
 external repository whose root is that GN directory: files under it are
 written relative to it, labels into other packages of the repository as
 `//pkg:file`, and anything outside the repository is an error. The
-repository rule `synced_repository` in `build/bazel/repositories.bzl` runs
+repository rule `synced_repository` in `build_defs/repositories/repositories.bzl` runs
 exactly this during fetch (with the checkout's own Dart SDK and `gn`), then
 watches every file in the depfile and the converter's sources, so a roll of
 the synced tree or an edit to the GN re-converts on the next build. Labels
@@ -262,7 +262,7 @@ python3 tool/install_diff.py --gn=../../out/host_debug_unopt \
     --expect-different='*.so' --expect-different='*.a'
 ```
 
-compares a build directory `install` laid out (`build/bazel/install.bzl`)
+compares a build directory `install` laid out (`build_defs/dist/install.bzl`)
 with GN's, path by path: the consumer-visible paths of a Linux host build by
 default (what the flutter tool reads from a `--local-engine`, the embedder's
 library and header, `zip_archives/`), each a file compared as above, a
@@ -431,7 +431,7 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    (engine code: it lists `//flutter:config` or depends on engine code),
    `CHROMIUM_CODE_COPTS` (the third-party trees the engine describes with
    GN, such as Skia) or `FLUTTER_THIRD_PARTY_COPTS` (`no_chromium_code`),
-   from `build/bazel/copts.bzl`; a target's own `cflags` come *before*
+   from `build_defs/cc/copts.bzl`; a target's own `cflags` come *before*
    that constant, as they come before every config's flags on GN's command
    line (lib/ui's `-Wimplicit-float-conversion` is followed, and partly
    undone, by `default_warning_flags`). `action()` becomes a `gn_action`

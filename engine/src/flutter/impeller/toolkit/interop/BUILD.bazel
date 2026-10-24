@@ -8,9 +8,9 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:cc_static_library.bzl", "cc_static_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
-load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "embed_blob_library")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
+load("//build_defs/impeller:shaders.bzl", "embed_blob_library")
 
 package(default_visibility = ["//visibility:public"])
 

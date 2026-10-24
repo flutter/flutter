@@ -8,9 +8,9 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
-load("//engine/src/flutter/build/bazel:install.bzl", "install")
-load("//engine/src/flutter/build/bazel:local_engine.bzl", "local_engine")
+load("//build_defs/dist:install.bzl", "install")
+load("//build_defs/dist:local_engine.bzl", "local_engine")
+load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -194,7 +194,7 @@ selects.config_setting_group(
 # config("config") in BUILD.gn: the two include roots engine code is written
 # against -- engine/src ("flutter/fml/...") and this directory
 # ("impeller/...", "fml/..."). Every engine library depends on it; the
-# accompanying -Wunreachable-code is in FLUTTER_COPTS (build/bazel/copts.bzl),
+# accompanying -Wunreachable-code is in FLUTTER_COPTS (build_defs/cc/copts.bzl),
 # since compiler flags do not propagate through dependencies.
 cc_library(
     name = "config",
@@ -289,7 +289,7 @@ filegroup(
 )
 
 # dart:ui_web's sources and API file, which web_sdk.gni's
-# web_ui_ui_web_with_output (web_sdk/web_sdk.bzl) rewrites into the
+# web_ui_ui_web_with_output (build_defs/web/web_sdk.bzl) rewrites into the
 # sky_engine package for sky/packages/sky_engine, and into the web SDK.
 filegroup(
     name = "ui_web_sources",
@@ -374,7 +374,7 @@ exports_files([
 
 # run_tests.py --type dart-host: `dart test` in each Dart package of
 # build_dart_host_test_list, as dart_package_test runs it
-# (build/bazel/dart/package_test.bzl). Thirteen packages there, eleven here:
+# (build_defs/dart/package_test.bzl). Thirteen packages there, eleven here:
 # ci's tests format files they write into the checkout and add to the git
 # index (format_test.dart), and clang_tidy's read a GN build directory's
 # compile_commands.json; both run with `dart test` in the checkout, not from

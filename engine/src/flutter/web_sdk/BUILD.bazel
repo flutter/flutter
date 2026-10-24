@@ -5,11 +5,11 @@
 # Generated from //flutter/web_sdk/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:configuration.bzl", "in_configuration")
-load("//engine/src/flutter/build/bazel:local_engine.bzl", "bundle_directory")
-load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "build_directory_tree", "zip_bundle_from_file")
-load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
-load("//engine/src/flutter/web_sdk:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "ddc_sdk", "sdk_rewriter", "web_platform_dill", "web_sdk_root", "web_ui_ui_web_with_output")
+load("//build_defs/config:configuration.bzl", "in_configuration")
+load("//build_defs/dist:local_engine.bzl", "bundle_directory")
+load("//build_defs/dist:zip_bundle.bzl", "build_directory_tree", "zip_bundle_from_file")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/web:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "ddc_sdk", "sdk_rewriter", "web_platform_dill", "web_sdk_root", "web_ui_ui_web_with_output")
 
 package(default_visibility = ["//visibility:public"])
 

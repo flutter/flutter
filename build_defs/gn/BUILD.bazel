@@ -1,0 +1,19 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# GN's shapes as Bazel rules: gn_action.bzl (GN's action() -- a Python
+# script under the hermetic interpreter -- gn_copy, gn_generated_file,
+# run_python), gn_build.bzl (a GN build of part of the tree as one Bazel
+# action, for the subtrees that keep their GN rules: the Dart SDK, the GPU
+# test backends) and build_directory.bzl (BuildDirectoryInfo: where GN's
+# build directory holds a rule's files, and the stripped copy a shipped
+# binary is).
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "gn_action.bzl",
+    "gn_build.py",
+    "stage_build_directory.py",
+])

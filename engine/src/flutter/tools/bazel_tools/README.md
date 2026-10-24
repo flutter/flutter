@@ -17,7 +17,7 @@ Generates the files Bazel derives from `DEPS`:
 
 | Output (relative to the repository root)      | Contents                                                                                    |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `engine/src/flutter/build/bazel/deps.lock.bzl` | `VARS`, `GIT_DEPS`, `CIPD_DEPS`, `GCLIENT_GN_ARGS[_FILE]`: the pins from `DEPS` as Starlark |
+| `build_defs/repositories/deps.lock.bzl` | `VARS`, `GIT_DEPS`, `CIPD_DEPS`, `GCLIENT_GN_ARGS[_FILE]`: the pins from `DEPS` as Starlark |
 | `.bazelignore`                                 | every directory gclient syncs or its hooks populate, plus GN outputs and tool caches        |
 
 Run it from anywhere inside the checkout after editing `DEPS`:
@@ -62,7 +62,7 @@ mnemonic, if any action
   `--incompatible_strict_action_env` gives it;
 - is a C/C++ action (`CppCompile`, `CppLink`, `CppArchive`, ...) whose
   executable is not a binary of one of the `clang_<platform>` repositories
-  defined in `build/bazel/extensions.bzl`.
+  defined in `build_defs/repositories/extensions.bzl`.
 
 The scan is textual: it proves that no command line names anything outside
 the execution root, not that the tools behave hermetically; sandboxing and the

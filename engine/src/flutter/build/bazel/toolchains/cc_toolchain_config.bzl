@@ -40,7 +40,7 @@ load(
     "tool",
 )
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("//engine/src/flutter/build/bazel:copts.bzl", "ANDROID_TOOLCHAIN_WARNING_FLAGS", "TOOLCHAIN_WARNING_FLAGS")
+load("//build_defs/cc:copts.bzl", "ANDROID_TOOLCHAIN_WARNING_FLAGS", "TOOLCHAIN_WARNING_FLAGS")
 
 # Flags GN passes to every C and C++ compile on Linux
 # (//build/config/compiler:compiler, :runtime_library, //build/config/gcc,

@@ -1,0 +1,10 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The web engine's rules: wasm.bzl (the Emscripten modules: wasm_module and
+# its link), esbuild.bzl (flutter.js bundled by esbuild) and web_sdk.bzl
+# (the flutter_web_sdk tree: sdk_rewriter's libraries, the platform
+# kernels, the DDC compilations).
+
+package(default_visibility = ["//visibility:public"])

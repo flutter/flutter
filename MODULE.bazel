@@ -12,7 +12,7 @@ locally installed prerequisite (like git or depot_tools) and is deliberately
 not synced by gclient.
 
 Dependency pins are mirrored from `DEPS` into
-`engine/src/flutter/build/bazel/deps.lock.bzl` by
+`build_defs/repositories/deps.lock.bzl` by
 `engine/src/flutter/tools/bazel_tools/bin/gen_deps.dart`; the trees gclient
 syncs are consumed in place and listed in `.bazelignore`.
 
@@ -37,7 +37,7 @@ bazel_dep(name = "rules_cc", version = "0.1.5")
 
 # Dependencies from DEPS: synced trees consumed in place, and toolchains that
 # can also be downloaded (see extensions.bzl).
-synced_deps = use_extension("//engine/src/flutter/build/bazel:extensions.bzl", "synced_deps")
+synced_deps = use_extension("//build_defs/repositories:extensions.bzl", "synced_deps")
 use_repo(
     synced_deps,
     "abseil-cpp",
@@ -108,20 +108,20 @@ use_repo(
 # The version strings tools/gn computes when it generates a GN build (the
 # engine's git revision, the content hash, Skia's and Dart's DEPS revisions),
 # for //engine/src/flutter/shell/version.
-engine_version = use_extension("//engine/src/flutter/build/bazel:extensions.bzl", "engine_version")
+engine_version = use_extension("//build_defs/repositories:extensions.bzl", "engine_version")
 use_repo(engine_version, "engine_version")
 
 # The repository's pub packages, as pubspec.lock pins them: a repository per
 # hosted package behind the hub @pub (@pub//<name>:sources), each fetched
 # from pub.dev and verified against the lock's sha256 when a target first
 # reaches it -- what the framework's tests compile against under Bazel
-# (build/bazel/dart/pub.bzl, flutter_test.bzl).
-pub = use_extension("//engine/src/flutter/build/bazel/dart:pub.bzl", "pub")
+# (build_defs/dart/pub.bzl, flutter_test.bzl).
+pub = use_extension("//build_defs/dart:pub.bzl", "pub")
 use_repo(pub, "pub", "pub_workspace")
 
 # The Flutter SDK's cache artifacts the framework's tests read through
-# FLUTTER_ROOT (the Material fonts; build/bazel/dart/flutter_sdk_cache.bzl).
-flutter_sdk_cache = use_extension("//engine/src/flutter/build/bazel/dart:flutter_sdk_cache.bzl", "flutter_sdk_cache")
+# FLUTTER_ROOT (the Material fonts; build_defs/repositories/flutter_sdk_cache.bzl).
+flutter_sdk_cache = use_extension("//build_defs/repositories:flutter_sdk_cache.bzl", "flutter_sdk_cache")
 use_repo(flutter_sdk_cache, "gradle_wrapper", "material_fonts")
 
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler

@@ -2,22 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Bazel-only build support. This package exists so that the generated
-# `deps.lock.bzl` belongs to a Bazel package and can be loaded by module
-# extensions and tooling, and holds the build-wide config_settings.
+# The engine build's settings and configuration targets: the build-wide
+# config_settings the generated BUILD files select() on and the flags the
+# builders set (.bazelrc, ci/builders/configs.bazelrc). The rules are in
+# //build_defs; the toolchains, the wrapped GN builds and the third-party
+# overlays are in the subdirectories here.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
 package(default_visibility = ["//visibility:public"])
-
-exports_files([
-    # local_engine.bzl's `assemble`.
-    "assemble_directory.py",
-    "deps.lock.bzl",
-    # zip_bundle.bzl's wrapper of build/zip.py.
-    "zip_bundle.py",
-])
 
 # GN's `is_debug` is "unoptimized", which Bazel spells -c dbg or -c fastbuild;
 # `optimized` is the complement (tools/gn without --unoptimized) and
