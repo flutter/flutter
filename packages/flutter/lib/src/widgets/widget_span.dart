@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 
 // Examples can assume:
 // late WidgetSpan myWidgetSpan;
@@ -89,7 +90,9 @@ class WidgetSpan extends PlaceholderSpan {
   /// Helper function for extracting [WidgetSpan]s in preorder, from the given
   /// [InlineSpan] as a list of widgets.
   ///
-  /// The `textScaler` is the scaling strategy for scaling the content.
+  /// The `textScaler` is the scaling strategy for scaling the content. The
+  /// extracted widgets override the ambient [MediaQueryData.textScaler] with
+  /// [TextScaler.noScaling] so that their content is not scaled twice.
   ///
   /// This function is used by [EditableText] and [RichText] so calling it
   /// directly is rarely necessary.
@@ -119,7 +122,18 @@ class WidgetSpan extends PlaceholderSpan {
               child: _AutoScaleInlineWidget(
                 span: span,
                 textScaleFactor: textScaleFactor,
-                child: span.child,
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final MediaQueryData? data = MediaQuery.maybeOf(context);
+                    if (data == null) {
+                      return span.child;
+                    }
+                    return MediaQuery(
+                      data: data.copyWith(textScaler: TextScaler.noScaling),
+                      child: span.child,
+                    );
+                  },
+                ),
               ),
             ),
           ),
