@@ -16,8 +16,6 @@
 
 namespace impeller {
 
-constexpr size_t kAllocatorBlockSize = 1024000;  // 1024 Kb.
-
 std::shared_ptr<HostBuffer> HostBuffer::Create(
     const std::shared_ptr<Allocator>& allocator,
     const std::shared_ptr<const IdleWaiter>& idle_waiter,
@@ -45,6 +43,7 @@ HostBuffer::HostBuffer(
     FML_CHECK(device_buffer) << "Failed to allocate device buffer.";
     device_buffers_[i].push_back(device_buffer);
   }
+  RefreshCurrentBuffer();
 }
 
 HostBuffer::~HostBuffer() {
@@ -55,9 +54,9 @@ HostBuffer::~HostBuffer() {
   }
 };
 
-BufferView HostBuffer::Emplace(const void* buffer,
-                               size_t length,
-                               size_t align) {
+BufferView HostBuffer::EmplaceSlow(const void* buffer,
+                                   size_t length,
+                                   size_t align) {
   auto [range, device_buffer, raw_device_buffer] =
       EmplaceInternal(buffer, length, align);
   if (device_buffer) {
@@ -117,6 +116,7 @@ bool HostBuffer::MaybeCreateNewBuffer() {
     device_buffers_[frame_index_].push_back(std::move(buffer));
   }
   offset_ = 0;
+  RefreshCurrentBuffer();
   return true;
 }
 
@@ -159,13 +159,12 @@ HostBuffer::EmplaceInternal(size_t length,
   }
 
   const std::shared_ptr<DeviceBuffer>& current_buffer = GetCurrentBuffer();
-  auto contents = current_buffer->OnGetContents();
-  cb(contents + offset_);
+  cb(current_contents_ + offset_);
   Range output_range(offset_, length);
   current_buffer->Flush(output_range);
 
   offset_ += length;
-  return std::make_tuple(output_range, nullptr, current_buffer.get());
+  return std::make_tuple(output_range, nullptr, current_raw_buffer_);
 }
 
 std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
@@ -199,14 +198,13 @@ HostBuffer::EmplaceInternal(const void* buffer, size_t length) {
   old_length = GetLength();
 
   const std::shared_ptr<DeviceBuffer>& current_buffer = GetCurrentBuffer();
-  auto contents = current_buffer->OnGetContents();
   if (buffer) {
-    ::memmove(contents + old_length, buffer, length);
+    ::memmove(current_contents_ + old_length, buffer, length);
     current_buffer->Flush(Range{old_length, length});
   }
   offset_ += length;
   return std::make_tuple(Range{old_length, length}, nullptr,
-                         current_buffer.get());
+                         current_raw_buffer_);
 }
 
 std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
@@ -231,6 +229,12 @@ const std::shared_ptr<DeviceBuffer>& HostBuffer::GetCurrentBuffer() const {
   return device_buffers_[frame_index_][current_buffer_];
 }
 
+void HostBuffer::RefreshCurrentBuffer() {
+  const std::shared_ptr<DeviceBuffer>& buffer = GetCurrentBuffer();
+  current_raw_buffer_ = buffer.get();
+  current_contents_ = buffer->OnGetContents();
+}
+
 void HostBuffer::Reset() {
   // When resetting the host buffer state at the end of the frame, check if
   // there are any unused buffers and remove them.
@@ -248,6 +252,7 @@ void HostBuffer::Reset() {
   frame_index_ = (frame_index_ + 1) % kHostBufferArenaSize;
 
   if (!submission_tracker_) {
+    RefreshCurrentBuffer();
     return;
   }
   uint64_t completed = submission_tracker_->CompletedThrough();
@@ -258,6 +263,7 @@ void HostBuffer::Reset() {
   });
 
   if (entry_stamps_[frame_index_] <= completed) {
+    RefreshCurrentBuffer();
     return;
   }
 
@@ -270,6 +276,7 @@ void HostBuffer::Reset() {
   std::shared_ptr<DeviceBuffer> buffer = allocator_->CreateBuffer(desc);
   if (!buffer) {
     VALIDATION_LOG << "Failed to replace an in-flight host buffer entry.";
+    RefreshCurrentBuffer();
     return;
   }
   retired_buffers_.emplace_back(entry_stamps_[frame_index_],
@@ -277,6 +284,7 @@ void HostBuffer::Reset() {
   device_buffers_[frame_index_].clear();
   device_buffers_[frame_index_].push_back(std::move(buffer));
   entry_stamps_[frame_index_] = 0;
+  RefreshCurrentBuffer();
 }
 
 size_t HostBuffer::GetMinimumUniformAlignment() const {
