@@ -71,12 +71,19 @@ void main() {
   ) async {
     await startApp(tester);
     final Finder button = find.byKey(app.buttonKey);
+    expect(binding.shouldPropagateDevicePointerEvents, isFalse);
 
+    // The button sits above the iframe, so the browser delivers the click to
+    // the Flutter view, not the iframe. The engine forwards the pointer events
+    // to the framework, but the binding drops them because device pointer
+    // events do not propagate by default.
     await binding.webDriverClick(tester.getCenter(button));
     await tester.pump();
-    expect(binding.shouldPropagateDevicePointerEvents, isFalse);
     expect(app.buttonClicks.value, 0);
+    expect(app.iframeClicks, 0);
 
+    // With device pointer events propagating, the same click presses the
+    // button.
     binding.shouldPropagateDevicePointerEvents = true;
     try {
       await binding.webDriverClick(tester.getCenter(button));

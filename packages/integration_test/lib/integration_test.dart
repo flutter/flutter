@@ -24,7 +24,6 @@ import 'common.dart';
 import 'src/callback.dart' as driver_actions;
 import 'src/channel.dart';
 import 'src/extension.dart';
-import 'src/view_utils.dart';
 
 export 'src/vm_service_golden_client.dart';
 
@@ -240,7 +239,7 @@ https://docs.flutter.dev/testing/integration-tests
         'webDriverClick requires a view, but no view was provided and there is no implicit view.',
       );
     }
-    final Offset viewportPosition = viewportOrigin(targetView) + position;
+    final Offset viewportPosition = driver_actions.viewportOrigin(targetView) + position;
     // Non-finite coordinates cannot be encoded for the driver and would leave
     // the click waiting for a reply forever.
     if (!viewportPosition.isFinite) {

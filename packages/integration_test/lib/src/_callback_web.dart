@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
+import 'dart:ui';
+import 'dart:ui_web' as ui_web;
 
 import '../common.dart';
 
@@ -12,6 +15,34 @@ import '../common.dart';
 ///
 ///  * `_callback_io.dart`, which has the dart:io implementation
 CallbackManager get callbackManager => _singletonWebDriverCommandManager;
+
+/// Returns the top-left corner of the element that hosts [view], in CSS pixels
+/// relative to the top-left corner of the browser viewport.
+///
+/// Adding this to a logical position in [view] gives the viewport position
+/// that WebDriver clicks expect. Returns [Offset.zero] if [view] has no host
+/// element.
+Offset viewportOrigin(FlutterView view) {
+  final JSAny? hostElement = ui_web.views.getHostElement(view.viewId);
+  if (hostElement == null) {
+    return Offset.zero;
+  }
+  final _DOMRect rect = (hostElement as _Element).getBoundingClientRect();
+  return Offset(rect.left, rect.top);
+}
+
+/// A DOM `Element`.
+@JS()
+extension type _Element._(JSObject _) implements JSObject {
+  external _DOMRect getBoundingClientRect();
+}
+
+/// A DOM `DOMRect`.
+@JS()
+extension type _DOMRect._(JSObject _) implements JSObject {
+  external double get left;
+  external double get top;
+}
 
 /// WebDriverCommandManager singleton.
 final _WebCallbackManager _singletonWebDriverCommandManager = _WebCallbackManager();

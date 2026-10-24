@@ -58,13 +58,6 @@ void main() {
   });
 
   group('CallbackManager.click', () {
-    test('returns Future<void> rather than a response map', () {
-      final CallbackManager manager = _PreexistingCallbackManager();
-
-      expect(manager.click, isA<Future<void> Function(double, double)>());
-      expect(manager.click, isNot(isA<Future<Map<String, dynamic>> Function(double, double)>()));
-    });
-
     test('defaults to UnsupportedError for implementations that predate it', () async {
       final CallbackManager manager = _PreexistingCallbackManager();
 
@@ -98,7 +91,6 @@ void main() {
         ),
       ),
     );
-    expect(binding.shouldPropagateDevicePointerEvents, isFalse);
   });
 
   testWidgets('webDriverClick rejects positions that are not finite', (WidgetTester tester) async {

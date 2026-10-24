@@ -2,68 +2,198 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Tests how `integrationDriver`, running on the host, performs the clicks
+// that an in-browser test requests with `webDriverClick`.
+
+import 'dart:collection';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/common.dart';
 import 'package:integration_test/integration_test_driver_extended.dart';
-// package:webdriver is provided through package:flutter_driver, whose
-// WebFlutterDriver.webDriver exposes these types.
+// package:flutter_driver does not re-export package:webdriver, but
+// WebFlutterDriver.webDriver returns its WebDriver, so faking a
+// WebFlutterDriver needs these types.
 // ignore: depend_on_referenced_packages
 import 'package:webdriver/async_io.dart'
     show Mouse, MouseButton, MoveTargetOutOfBoundsException, WebDriver, WebElement;
 
-/// Thrown by the fake drivers' `close` so that [integrationDriver] never
-/// reaches its `exit` call and terminates the test process.
-class _ExitPrevented implements Exception {
-  const _ExitPrevented();
+void main() {
+  test('performs a WebDriver click at the position the app asked for', () async {
+    final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
+    final mouse = _FakeMouse();
+
+    await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
+
+    expect(mouse.clicks, <Point<int>>[const Point<int>(10, 20)]);
+    expect(app.replies, <String>['complete']);
+  });
+
+  test('performs each click at its own position, in the order the app asked', () async {
+    final app = _FakeApp(clicks: <(num, num)>[(10, 20), (300, 400)]);
+    final mouse = _FakeMouse();
+
+    await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
+
+    expect(mouse.clicks, <Point<int>>[const Point<int>(10, 20), const Point<int>(300, 400)]);
+    expect(app.replies, <String>['complete', 'complete']);
+  });
+
+  test(
+    'rounds positions to whole CSS pixels, since WebDriver only moves by whole pixels',
+    () async {
+      final app = _FakeApp(clicks: <(num, num)>[(10.4, 20.6)]);
+      final mouse = _FakeMouse();
+
+      await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
+
+      expect(mouse.clicks, <Point<int>>[const Point<int>(10, 21)]);
+    },
+  );
+
+  test('accepts positions sent as JSON integers or as JSON doubles', () async {
+    // Apps compiled with dart2js encode a double such as 30.0 as `30`, which
+    // the host decodes as an int.
+    final app = _FakeApp(clicks: <(num, num)>[(30, 0), (30.0, 0.0)]);
+    final mouse = _FakeMouse();
+
+    await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
+
+    expect(mouse.clicks, <Point<int>>[const Point<int>(30, 0), const Point<int>(30, 0)]);
+  });
+
+  test('fails the click in the app and throws if the driver is not a WebFlutterDriver', () async {
+    final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
+
+    await expectLater(
+      integrationDriver(driver: _FakeFlutterDriver(app), responseDataCallback: null),
+      throwsA(
+        isStateError.having(
+          (StateError error) => error.message,
+          'message',
+          'webDriverClick requires a WebFlutterDriver, but received _FakeFlutterDriver',
+        ),
+      ),
+    );
+    expect(app.replies, <String>['error']);
+  });
+
+  test('fails the click in the app and rethrows if WebDriver cannot click', () async {
+    final app = _FakeApp(clicks: <(num, num)>[(5000, 5000)]);
+    const error = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
+    final mouse = _FakeMouse(moveToError: error);
+
+    await expectLater(
+      integrationDriver(driver: _FakeWebFlutterDriver(app, mouse), responseDataCallback: null),
+      throwsA(same(error)),
+    );
+    expect(mouse.clicks, isEmpty);
+    expect(app.replies, <String>['error']);
+  });
+
+  test('rethrows the WebDriver error even if the app disconnected before it was told', () async {
+    final app = _FakeApp(clicks: <(num, num)>[(5000, 5000)], disconnectsOnError: true);
+    const error = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
+    final mouse = _FakeMouse(moveToError: error);
+
+    await expectLater(
+      integrationDriver(driver: _FakeWebFlutterDriver(app, mouse), responseDataCallback: null),
+      throwsA(same(error)),
+    );
+  });
 }
 
-String _command(WebDriverCommandType type, [Map<String, dynamic> values = const {}]) {
-  return Response.webDriverCommand(
-    data: <String, dynamic>{...values, ...WebDriverCommand.typeToMap(type)},
-  ).toJson();
+/// Runs [integrationDriver] with [driver] until all of the app's tests passed.
+///
+/// [integrationDriver] ends by calling `exit`, which would end this test
+/// process, so the fake drivers throw [_DriverClosed] when [integrationDriver]
+/// closes them just before that.
+Future<void> _runIntegrationDriver(FlutterDriver driver) async {
+  await expectLater(
+    integrationDriver(driver: driver, responseDataCallback: null),
+    throwsA(isA<_DriverClosed>()),
+  );
 }
 
-String _click(double x, double y) =>
-    _command(WebDriverCommandType.click, <String, dynamic>{'x': x, 'y': y});
+class _DriverClosed implements Exception {
+  const _DriverClosed();
+}
 
-/// A [FlutterDriver] that plays the in-browser side of the WebDriver command
-/// handshake from [replies] and records everything the host driver asks of it.
-class _ScriptedFlutterDriver extends Fake implements FlutterDriver {
-  _ScriptedFlutterDriver(this.events, this.replies);
+/// Plays the in-browser test, which asks [integrationDriver] for clicks.
+///
+/// The host and the app talk through [FlutterDriver.requestData]:
+///
+///  1. The host sends `pending` to ask for the app's next command. The app
+///     replies with a click command for the next position it was created
+///     with, or, once all clicks are done, with a `noop` command.
+///  2. After performing a click, the host sends `complete`, or `error` if it
+///     could not perform it. The app records this in [replies], which is what
+///     makes the app's `webDriverClick` call complete or fail, and replies
+///     `ack`.
+///  3. After the `noop` command, the host sends `null` to ask for the test
+///     results, and the app replies that all tests passed.
+class _FakeApp {
+  _FakeApp({required List<(num, num)> clicks, this.disconnectsOnError = false})
+    : _clicks = Queue<(num, num)>.of(clicks);
 
-  final List<String> events;
+  /// The positions, in viewport CSS pixels, that the app asks to click.
+  final Queue<(num, num)> _clicks;
 
-  /// Replies to `requestData`, keyed by the message the host sends.
-  final Map<String?, Future<String> Function()> replies;
+  /// Whether the app disconnects instead of receiving an `error` reply.
+  final bool disconnectsOnError;
 
-  @override
-  Future<String> requestData(String? message, {Duration? timeout}) {
-    events.add('requestData($message)');
-    final Future<String> Function()? reply = replies[message];
-    if (reply == null) {
-      throw StateError('No scripted reply for requestData($message)');
+  /// The host's reply to each click, in order.
+  final List<String> replies = <String>[];
+
+  Future<String> respondTo(String? message) async {
+    switch (message) {
+      case 'pending':
+        if (_clicks.isEmpty) {
+          return _webDriverCommand(WebDriverCommandType.noop);
+        }
+        final (num x, num y) = _clicks.removeFirst();
+        return _webDriverCommand(WebDriverCommandType.click, <String, dynamic>{'x': x, 'y': y});
+      case 'complete' || 'error':
+        if (message == 'error' && disconnectsOnError) {
+          throw const SocketException('app disconnected');
+        }
+        replies.add(message!);
+        return _webDriverCommand(WebDriverCommandType.ack);
+      case null:
+        return Response.allTestsPassed().toJson();
     }
-    return reply();
+    throw StateError('Unexpected message from the host: $message');
   }
 
-  @override
-  Future<List<int>> screenshot({ScreenshotFormat format = ScreenshotFormat.png}) async {
-    events.add('screenshot');
-    return <int>[];
-  }
-
-  @override
-  Future<void> close() async {
-    events.add('close');
-    throw const _ExitPrevented();
+  static String _webDriverCommand(
+    WebDriverCommandType type, [
+    Map<String, dynamic> values = const <String, dynamic>{},
+  ]) {
+    return Response.webDriverCommand(
+      data: <String, dynamic>{...values, ...WebDriverCommand.typeToMap(type)},
+    ).toJson();
   }
 }
 
-class _ScriptedWebFlutterDriver extends _ScriptedFlutterDriver implements WebFlutterDriver {
-  _ScriptedWebFlutterDriver(super.events, super.replies, this.webDriver);
+/// A [FlutterDriver] connected to [app], without WebDriver access.
+class _FakeFlutterDriver extends Fake implements FlutterDriver {
+  _FakeFlutterDriver(this.app);
+
+  final _FakeApp app;
+
+  @override
+  Future<String> requestData(String? message, {Duration? timeout}) => app.respondTo(message);
+
+  @override
+  Future<void> close() async => throw const _DriverClosed();
+}
+
+/// A [WebFlutterDriver] connected to [app], whose WebDriver session clicks
+/// with the given mouse.
+class _FakeWebFlutterDriver extends _FakeFlutterDriver implements WebFlutterDriver {
+  _FakeWebFlutterDriver(super.app, _FakeMouse mouse) : webDriver = _FakeWebDriver(mouse);
 
   @override
   final WebDriver webDriver;
@@ -76,12 +206,17 @@ class _FakeWebDriver extends Fake implements WebDriver {
   final Mouse mouse;
 }
 
-class _RecordingMouse extends Fake implements Mouse {
-  _RecordingMouse(this.events, {this.moveToError, this.clickError});
+/// A WebDriver mouse that records the pointer position of each click.
+class _FakeMouse extends Fake implements Mouse {
+  _FakeMouse({this.moveToError});
 
-  final List<String> events;
+  /// If non-null, thrown by [moveTo] instead of moving the pointer.
   final Exception? moveToError;
-  final Exception? clickError;
+
+  /// The pointer position, in viewport CSS pixels, of each primary click.
+  final List<Point<int>> clicks = <Point<int>>[];
+
+  Point<int> _pointer = const Point<int>(0, 0);
 
   @override
   Future<void> moveTo({
@@ -90,171 +225,23 @@ class _RecordingMouse extends Fake implements Mouse {
     int? yOffset,
     bool absolute = false,
   }) async {
-    events.add(
-      'moveTo(element: $element, xOffset: $xOffset, yOffset: $yOffset, absolute: $absolute)',
-    );
     if (moveToError != null) {
       throw moveToError!;
     }
+    if (element != null) {
+      throw UnimplementedError('Moving relative to an element is not faked.');
+    }
+    final offset = Point<int>(xOffset ?? 0, yOffset ?? 0);
+    // As in WebDriver, an absolute move is relative to the viewport origin,
+    // and any other move is relative to the current pointer position.
+    _pointer = absolute ? offset : _pointer + offset;
   }
 
   @override
   Future<void> click([MouseButton button = MouseButton.primary]) async {
-    // MouseButton is a class without a toString, so name the button here.
-    final buttonName = button == MouseButton.primary
-        ? 'MouseButton.primary'
-        : 'MouseButton(${button.value})';
-    events.add('click($buttonName)');
-    if (clickError != null) {
-      throw clickError!;
+    if (button != MouseButton.primary) {
+      throw UnimplementedError('Only primary clicks are faked.');
     }
+    clicks.add(_pointer);
   }
-}
-
-void main() {
-  final String ack = _command(WebDriverCommandType.ack);
-  final String noop = _command(WebDriverCommandType.noop);
-  final String allTestsPassed = Response.allTestsPassed().toJson();
-
-  test(
-    'click performs an absolute WebDriver mouse move and click, then replies complete',
-    () async {
-      final events = <String>[];
-      final driver = _ScriptedWebFlutterDriver(events, <String?, Future<String> Function()>{
-        'pending': () async => events.contains('requestData(complete)') ? noop : _click(10.4, 20.6),
-        'complete': () async => ack,
-        null: () async => allTestsPassed,
-      }, _FakeWebDriver(_RecordingMouse(events)));
-
-      await expectLater(
-        integrationDriver(driver: driver, responseDataCallback: null),
-        throwsA(isA<_ExitPrevented>()),
-      );
-
-      expect(events, <String>[
-        'requestData(pending)',
-        'moveTo(element: null, xOffset: 10, yOffset: 21, absolute: true)',
-        'click(MouseButton.primary)',
-        'requestData(complete)',
-        'requestData(pending)',
-        'requestData(null)',
-        'close',
-      ]);
-      expect(events, isNot(contains('screenshot')));
-    },
-  );
-
-  test('clicks with integer coordinates, as JSON-encoded by dart2js, run in order', () async {
-    // dart2js encodes integral doubles such as 30.0 as `30`, which the host
-    // decodes as an int rather than a double.
-    final events = <String>[];
-    final commands = <String>[
-      _command(WebDriverCommandType.click, <String, dynamic>{'x': 30, 'y': 0}),
-      _click(7.5, 8.25),
-      noop,
-    ];
-    final driver = _ScriptedWebFlutterDriver(events, <String?, Future<String> Function()>{
-      'pending': () async => commands.removeAt(0),
-      'complete': () async => ack,
-      null: () async => allTestsPassed,
-    }, _FakeWebDriver(_RecordingMouse(events)));
-
-    await expectLater(
-      integrationDriver(driver: driver, responseDataCallback: null),
-      throwsA(isA<_ExitPrevented>()),
-    );
-
-    expect(events, <String>[
-      'requestData(pending)',
-      'moveTo(element: null, xOffset: 30, yOffset: 0, absolute: true)',
-      'click(MouseButton.primary)',
-      'requestData(complete)',
-      'requestData(pending)',
-      'moveTo(element: null, xOffset: 8, yOffset: 8, absolute: true)',
-      'click(MouseButton.primary)',
-      'requestData(complete)',
-      'requestData(pending)',
-      'requestData(null)',
-      'close',
-    ]);
-  });
-
-  test(
-    'click on a driver that is not a WebFlutterDriver replies error and throws StateError',
-    () async {
-      final events = <String>[];
-      final driver = _ScriptedFlutterDriver(events, <String?, Future<String> Function()>{
-        'pending': () async => _click(10, 20),
-        'error': () async => ack,
-      });
-
-      await expectLater(
-        integrationDriver(driver: driver, responseDataCallback: null),
-        throwsA(
-          isStateError.having(
-            (StateError error) => error.message,
-            'message',
-            'webDriverClick requires a WebFlutterDriver, but received _ScriptedFlutterDriver',
-          ),
-        ),
-      );
-
-      expect(events, <String>['requestData(pending)', 'requestData(error)']);
-    },
-  );
-
-  group('click when WebDriver throws replies error, then rethrows the WebDriver exception', () {
-    const outOfBounds = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
-
-    for (final (String name, _RecordingMouse Function(List<String>) mouse, List<String> mouseEvents)
-        in <(String, _RecordingMouse Function(List<String>), List<String>)>[
-          (
-            'from moveTo',
-            (List<String> events) => _RecordingMouse(events, moveToError: outOfBounds),
-            <String>['moveTo(element: null, xOffset: 5000, yOffset: 5000, absolute: true)'],
-          ),
-          (
-            'from click',
-            (List<String> events) => _RecordingMouse(events, clickError: outOfBounds),
-            <String>[
-              'moveTo(element: null, xOffset: 5000, yOffset: 5000, absolute: true)',
-              'click(MouseButton.primary)',
-            ],
-          ),
-        ]) {
-      test(name, () async {
-        final events = <String>[];
-        final driver = _ScriptedWebFlutterDriver(events, <String?, Future<String> Function()>{
-          'pending': () async => _click(5000, 5000),
-          'error': () async => ack,
-        }, _FakeWebDriver(mouse(events)));
-
-        await expectLater(
-          integrationDriver(driver: driver, responseDataCallback: null),
-          throwsA(same(outOfBounds)),
-        );
-
-        expect(events, <String>['requestData(pending)', ...mouseEvents, 'requestData(error)']);
-      });
-    }
-
-    test('even when replying error fails because the app disconnected', () async {
-      final events = <String>[];
-      final driver = _ScriptedWebFlutterDriver(events, <String?, Future<String> Function()>{
-        'pending': () async => _click(5000, 5000),
-        'error': () async => throw const SocketException('app disconnected'),
-      }, _FakeWebDriver(_RecordingMouse(events, moveToError: outOfBounds)));
-
-      await expectLater(
-        integrationDriver(driver: driver, responseDataCallback: null),
-        throwsA(same(outOfBounds)),
-      );
-
-      expect(events, <String>[
-        'requestData(pending)',
-        'moveTo(element: null, xOffset: 5000, yOffset: 5000, absolute: true)',
-        'requestData(error)',
-      ]);
-    });
-  });
 }

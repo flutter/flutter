@@ -18,6 +18,12 @@ import 'channel.dart';
 ///  * `_callback_web.dart`, which has the web implementation
 CallbackManager get callbackManager => _singletonCallbackManager;
 
+/// The dart:io implementation of `viewportOrigin`.
+///
+/// Views are not embedded in a browser viewport off the web, so this always
+/// returns [Offset.zero].
+Offset viewportOrigin(FlutterView view) => Offset.zero;
+
 /// IOCallbackManager singleton.
 final _IOCallbackManager _singletonCallbackManager = _IOCallbackManager();
 

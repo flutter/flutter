@@ -11,7 +11,5 @@ Future<void> main() async {
   final driver = await FlutterDriver.connect() as WebFlutterDriver;
   await (await driver.webDriver.window).setSize(const Rectangle<int>(0, 0, 1024, 1024));
 
-  // Clicks must not depend on screenshots, so no onScreenshot is passed: a
-  // screenshot request would fail the run.
   await integrationDriver(driver: driver);
 }

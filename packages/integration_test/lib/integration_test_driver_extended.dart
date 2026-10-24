@@ -74,10 +74,9 @@ Future<void> writeResponseData(
 /// The in-browser test can also ask the driver to perform a real WebDriver
 /// pointer click by calling
 /// [IntegrationTestWidgetsFlutterBinding.webDriverClick]. Clicks require
-/// `driver` to be a [WebFlutterDriver] and do not take a screenshot or need an
-/// `onScreenshot` callback. If `driver` is not a [WebFlutterDriver], the click
-/// fails in the browser and this function throws a [StateError]. If WebDriver
-/// fails to perform the click, the click fails in the browser and the WebDriver
+/// `driver` to be a [WebFlutterDriver]. If it is not, the click fails in the
+/// browser and this function throws a [StateError]. If WebDriver fails to
+/// perform the click, the click fails in the browser and the WebDriver
 /// exception is rethrown.
 ///
 /// `responseDataCallback` is the handler for processing [Response.data].
