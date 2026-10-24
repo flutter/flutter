@@ -3650,7 +3650,10 @@ class _SelectableFragment
       final selectionPaint = Paint()
         ..style = PaintingStyle.fill
         ..color = paragraph.selectionColor!;
-      for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
+      for (final TextBox textBox in paragraph.getBoxesForSelection(
+        selection,
+        boxHeightStyle: ui.BoxHeightStyle.max,
+      )) {
         context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
       }
     }
