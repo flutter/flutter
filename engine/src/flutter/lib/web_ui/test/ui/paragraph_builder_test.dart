@@ -5,6 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/test_initialization.dart';
 
@@ -13,7 +14,11 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests(
+    withImplicitView: true,
+    setUpTestViewDimensions: false,
+    testEnvironment: const ui_web.TestEnvironment(forceTestFonts: true),
+  );
 
   test('Should be able to build and layout a paragraph', () {
     final builder = ParagraphBuilder(ParagraphStyle());
@@ -108,5 +113,68 @@ Future<void> testMain() async {
     final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
     // The height should be much smaller than fontSize * 10.
     expect(paragraph.height, lessThan(2 * fontSize));
+  });
+
+  test('tracks placeholderCount and placeholderScales', () {
+    final builder = ParagraphBuilder(ParagraphStyle());
+    expect(builder.placeholderCount, 0);
+    expect(builder.placeholderScales, isEmpty);
+
+    builder.addPlaceholder(10, 20, PlaceholderAlignment.top, scale: 1.5);
+    builder.addPlaceholder(
+      30,
+      40,
+      PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      scale: 2.0,
+    );
+
+    expect(builder.placeholderCount, 2);
+    expect(builder.placeholderScales, <double>[1.5, 2.0]);
+
+    final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
+    expect(paragraph.getBoxesForPlaceholders(), hasLength(2));
+    paragraph.dispose();
+    expect(paragraph.debugDisposed, isTrue);
+  });
+
+  test('pop at root style does not throw', () {
+    final builder = ParagraphBuilder(ParagraphStyle());
+    expect(() => builder.pop(), returnsNormally);
+    builder.addText('Hello');
+    final Paragraph paragraph = builder.build();
+    paragraph.dispose();
+  });
+
+  group('hyphens', () {
+    const text = 'abcd\u00ADe';
+
+    Paragraph layoutParagraph(Hyphens? hyphens, double width) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(fontSize: 10, fontFamily: 'FlutterTest', hyphens: hyphens),
+      );
+      builder.addText(text);
+      return builder.build()..layout(ParagraphConstraints(width: width));
+    }
+
+    // Just narrower than the unbroken text, so the line breaks at the soft hyphen.
+    double breakingWidth() => layoutParagraph(null, double.infinity).longestLine - 1;
+
+    test('manual renders a hyphen at a soft hyphen line break', () {
+      final Paragraph manual = layoutParagraph(Hyphens.manual, breakingWidth());
+      final Paragraph hidden = layoutParagraph(Hyphens.hidden, breakingWidth());
+
+      expect(manual.numberOfLines, 2);
+      expect(hidden.numberOfLines, 2);
+      expect(manual.longestLine, 50);
+      expect(hidden.longestLine, 40);
+    });
+
+    test('unspecified behaves like manual', () {
+      final Paragraph unspecified = layoutParagraph(null, breakingWidth());
+      final Paragraph manual = layoutParagraph(Hyphens.manual, breakingWidth());
+
+      expect(unspecified.longestLine, manual.longestLine);
+    });
   });
 }
