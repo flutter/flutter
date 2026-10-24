@@ -383,6 +383,32 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
+  AppLifecycleState? get appLifecycleState =>
+      _appLifecycleStateTestValue ?? _platformDispatcher.appLifecycleState;
+  AppLifecycleState? _appLifecycleStateTestValue;
+
+  /// Sets a faked [appLifecycleState] for testing and calls
+  /// [onAppLifecycleStateChanged].
+  // ignore: avoid_setters_without_getters
+  set appLifecycleStateTestValue(AppLifecycleState state) {
+    _appLifecycleStateTestValue = state;
+    onAppLifecycleStateChanged?.call();
+  }
+
+  /// Deletes any existing test [appLifecycleState] and returns to using the
+  /// real [appLifecycleState] value.
+  void clearAppLifecycleStateTestValue() {
+    _appLifecycleStateTestValue = null;
+  }
+
+  @override
+  VoidCallback? get onAppLifecycleStateChanged => _platformDispatcher.onAppLifecycleStateChanged;
+  @override
+  set onAppLifecycleStateChanged(VoidCallback? callback) {
+    _platformDispatcher.onAppLifecycleStateChanged = callback;
+  }
+
+  @override
   double get textScaleFactor => _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
   double? _textScaleFactorTestValue;
 
@@ -877,6 +903,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     resetBrieflyShowPassword();
     resetSupportsShowingSystemContextMenu();
     resetInitialLifecycleState();
+    clearAppLifecycleStateTestValue();
     resetSystemFontFamily();
   }
 

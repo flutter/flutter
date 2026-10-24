@@ -1044,6 +1044,32 @@ void can_display_platform_view_with_pixel_ratio() {
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
+void can_receive_app_lifecycle_state() {
+  // The state must not be delivered on the deprecated platform channel.
+  channelBuffers.setListener('flutter/lifecycle', (
+    ByteData? data,
+    PlatformMessageResponseCallback callback,
+  ) {
+    signalNativeMessage('channel');
+    callback(null);
+  });
+  PlatformDispatcher.instance.onAppLifecycleStateChanged = () {
+    signalNativeMessage(PlatformDispatcher.instance.appLifecycleState.toString());
+  };
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+void reports_initial_lifecycle_state() {
+  PlatformDispatcher.instance.onAppLifecycleStateChanged = () {
+    signalNativeMessage(PlatformDispatcher.instance.initialLifecycleState);
+  };
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 void can_receive_locale_updates() {
   PlatformDispatcher.instance.onLocaleChanged = () {
     signalNativeCount(PlatformDispatcher.instance.locales.length);

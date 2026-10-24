@@ -21,7 +21,7 @@ import 'asset_bundle.dart';
 import 'binary_messenger.dart';
 import 'debug.dart';
 import 'hardware_keyboard.dart';
-import 'message_codec.dart';
+import 'message_codecs.dart';
 import 'platform_channel.dart';
 import 'raw_keyboard.dart' show RawKeyboard;
 import 'restoration.dart';
@@ -58,7 +58,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.accessibility.setMessageHandler(
       (dynamic message) => _handleAccessibilityMessage(message as Object),
     );
+    // The engine reports all lifecycle changes through
+    // [dart:ui.PlatformDispatcher.appLifecycleState], but messages may still be
+    // sent directly to the framework on this channel (e.g. in tests).
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    platformDispatcher.onAppLifecycleStateChanged = _handleAppLifecycleStateChanged;
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     platformDispatcher.onViewFocusChange = handleViewFocusChanged;
     TextInput.ensureInitialized();
@@ -294,20 +298,50 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   @protected
   void readInitialLifecycleStateFromNativeWindow() {
-    if (lifecycleState != null || platformDispatcher.initialLifecycleState.isEmpty) {
+    if (lifecycleState != null) {
+      return;
+    }
+    final AppLifecycleState? appLifecycleState = platformDispatcher.appLifecycleState;
+    if (appLifecycleState != null) {
+      _setAppLifecycleState(appLifecycleState);
+      return;
+    }
+    if (platformDispatcher.initialLifecycleState.isEmpty) {
       return;
     }
     _handleLifecycleMessage(platformDispatcher.initialLifecycleState);
   }
 
+  void _handleAppLifecycleStateChanged() {
+    final AppLifecycleState? state = platformDispatcher.appLifecycleState;
+    if (state != null) {
+      _setAppLifecycleState(state);
+      // Also deliver the state on the flutter/lifecycle channel for
+      // code that still listens on [SystemChannels.lifecycle]. The binding's
+      // own handler ignores this as the state is unchanged.
+      // TODO(robert-ancell): Remove when SystemChannels.lifecycle is removed.
+      ui.channelBuffers.push(
+        SystemChannels.lifecycle.name,
+        const StringCodec().encodeMessage(state.toString()),
+        (ByteData? reply) {},
+      );
+    }
+  }
+
   Future<String?> _handleLifecycleMessage(String? message) async {
-    final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
-    final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState, state!);
+    final AppLifecycleState? state = message == null ? null : _parseAppLifecycleMessage(message);
+    if (state != null) {
+      _setAppLifecycleState(state);
+    }
+    return null;
+  }
+
+  void _setAppLifecycleState(AppLifecycleState state) {
+    final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState, state);
     for (final stateChange in generated) {
       handleAppLifecycleStateChanged(stateChange);
       SystemChrome.handleAppLifecycleStateChanged(stateChange);
     }
-    return null;
   }
 
   List<AppLifecycleState> _generateStateTransitions(

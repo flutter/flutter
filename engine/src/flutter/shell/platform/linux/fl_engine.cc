@@ -1620,6 +1620,20 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
   }
 }
 
+void fl_engine_set_app_lifecycle_state(FlEngine* self,
+                                       FlutterAppLifecycleState state) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  if (self->embedder_api.SetAppLifecycleState(self->engine, state) !=
+      kSuccess) {
+    g_warning("Failed to set app lifecycle state");
+  }
+}
+
 void fl_engine_request_app_exit(FlEngine* self) {
   g_return_if_fail(FL_IS_ENGINE(self));
   fl_platform_handler_request_app_exit(self->platform_handler);

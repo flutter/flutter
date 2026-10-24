@@ -846,7 +846,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
     // Only recreate surface on subsequent appearances when viewport metrics are known.
     // First time surface creation is done on viewDidLayoutSubviews.
     [self createSurfaceIfReady];
-    [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.inactive"];
+    [self.engine setAppLifecycleState:flutter::LifecycleState::kInactive];
     [self.engine.restorationPlugin markRestorationComplete];
   }
 
@@ -860,7 +860,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
     [self onAccessibilityStatusChanged:nil];
 
     if (self.stateIsActive) {
-      [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.resumed"];
+      [self.engine setAppLifecycleState:flutter::LifecycleState::kResumed];
     }
   }
   [super viewDidAppear:animated];
@@ -869,7 +869,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 - (void)viewWillDisappear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewWillDisappear");
   if (self.engine.viewController == self) {
-    [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.inactive"];
+    [self.engine setAppLifecycleState:flutter::LifecycleState::kInactive];
   }
   [super viewWillDisappear:animated];
 }
@@ -879,7 +879,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   if (self.engine.viewController == self) {
     [self.keyboardInsetManager hideKeyboardImmediately];
     [self surfaceUpdated:NO];
-    [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.paused"];
+    [self.engine setAppLifecycleState:flutter::LifecycleState::kPaused];
     [self flushOngoingTouches];
     [self.engine notifyLowMemory];
   }
@@ -1081,8 +1081,19 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 - (void)goToApplicationLifecycle:(nonnull NSString*)state {
   // Accessing self.view will create the view. Instead use viewIfLoaded
   // to check whether the view is attached to window.
-  if (self.viewIfLoaded.window) {
-    [self.engine.lifecycleChannel sendMessage:state];
+  if (!self.viewIfLoaded.window) {
+    return;
+  }
+  static NSDictionary<NSString*, NSNumber*>* states = @{
+    @"AppLifecycleState.detached" : @(static_cast<int>(flutter::LifecycleState::kDetached)),
+    @"AppLifecycleState.resumed" : @(static_cast<int>(flutter::LifecycleState::kResumed)),
+    @"AppLifecycleState.inactive" : @(static_cast<int>(flutter::LifecycleState::kInactive)),
+    @"AppLifecycleState.hidden" : @(static_cast<int>(flutter::LifecycleState::kHidden)),
+    @"AppLifecycleState.paused" : @(static_cast<int>(flutter::LifecycleState::kPaused)),
+  };
+  NSNumber* value = states[state];
+  if (value) {
+    [self.engine setAppLifecycleState:static_cast<flutter::LifecycleState>(value.intValue)];
   }
 }
 

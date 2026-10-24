@@ -7,10 +7,12 @@ package io.flutter.embedding.engine.systemchannels;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.plugin.common.BasicMessageChannel;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +24,29 @@ public class LifecycleChannelTest {
   LifecycleChannel lifecycleChannel;
   BasicMessageChannel<String> mockChannel;
 
+  // Tests the state machine using the deprecated channel constructor.
+  @SuppressWarnings("deprecation")
   @Before
   public void setUp() {
     mockChannel = mock(BasicMessageChannel.class);
     lifecycleChannel = new LifecycleChannel(mockChannel);
+  }
+
+  @Test
+  public void lifecycleChannel_sendsStateToEngine() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    LifecycleChannel channel = new LifecycleChannel(mockFlutterJNI);
+
+    // Values match AppLifecycleState in dart:ui.
+    channel.appIsResumed();
+    verify(mockFlutterJNI, times(1)).setAppLifecycleState(1);
+    channel.noWindowsAreFocused();
+    verify(mockFlutterJNI, times(1)).setAppLifecycleState(2);
+    channel.appIsPaused();
+    verify(mockFlutterJNI, times(1)).setAppLifecycleState(4);
+    channel.appIsDetached();
+    verify(mockFlutterJNI, times(1)).setAppLifecycleState(0);
+    verify(mockChannel, never()).send(any(String.class));
   }
 
   @Test

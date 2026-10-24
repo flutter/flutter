@@ -5,6 +5,8 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#include <vector>
+
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
 #import "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data.h"
@@ -217,11 +219,11 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 /// Used for testing low memory notification.
 @interface FlutterEnginePartialMock : FlutterEngine
 
-@property(nonatomic, strong) FlutterBasicMessageChannel* lifecycleChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* keyEventChannel;
 @property(nonatomic, weak) FlutterViewController* viewController;
 @property(nonatomic, strong) FlutterTextInputPlugin* textInputPlugin;
 @property(nonatomic, assign) BOOL didCallNotifyLowMemory;
+@property(nonatomic, assign) std::vector<flutter::LifecycleState> lifecycleStates;
 @property(nonatomic, strong) FlutterFMLTaskRunner* uiTaskRunner;
 
 - (FlutterTextInputPlugin*)textInputPlugin;
@@ -238,13 +240,16 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 @implementation FlutterEnginePartialMock
 
 // Synthesize properties declared readonly in FlutterEngine.
-@synthesize lifecycleChannel;
 @synthesize keyEventChannel;
 @synthesize viewController;
 @synthesize textInputPlugin;
 
 - (void)notifyLowMemory {
   _didCallNotifyLowMemory = YES;
+}
+
+- (void)setAppLifecycleState:(flutter::LifecycleState)state {
+  _lifecycleStates.push_back(state);
 }
 
 - (instancetype)init {
@@ -1215,9 +1220,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testViewDidDisappearDoesntPauseEngineWhenNotTheViewController {
-  id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
-  mockEngine.lifecycleChannel = lifecycleChannel;
   FlutterViewController* viewControllerA =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
   FlutterViewController* viewControllerB =
@@ -1226,7 +1229,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([viewControllerMock surfaceUpdated:NO]);
   mockEngine.viewController = viewControllerB;
   [viewControllerA viewDidDisappear:NO];
-  OCMReject([lifecycleChannel sendMessage:@"AppLifecycleState.paused"]);
+  XCTAssertTrue(mockEngine.lifecycleStates.empty());
   OCMReject([viewControllerMock surfaceUpdated:[OCMArg any]]);
 }
 
@@ -1245,9 +1248,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testViewDidDisappearDoesPauseEngineWhenIsTheViewController {
-  id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
-  mockEngine.lifecycleChannel = lifecycleChannel;
   __weak FlutterViewController* weakViewController;
   @autoreleasepool {
     FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
@@ -1257,7 +1258,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     id viewControllerMock = OCMPartialMock(viewController);
     OCMStub([viewControllerMock surfaceUpdated:NO]);
     [viewController viewDidDisappear:NO];
-    OCMVerify([lifecycleChannel sendMessage:@"AppLifecycleState.paused"]);
+    XCTAssertEqual(mockEngine.lifecycleStates.size(), 1u);
+    XCTAssertEqual(mockEngine.lifecycleStates.back(), flutter::LifecycleState::kPaused);
     OCMVerify([viewControllerMock surfaceUpdated:NO]);
   }
   XCTAssertNil(weakViewController);
@@ -1321,22 +1323,19 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)
     testEngineConfigSyncMethodWillExecuteWhenViewControllerInEngineIsCurrentViewControllerInViewWillDisappear {
-  id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
-  mockEngine.lifecycleChannel = lifecycleChannel;
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
                                                                                 nibName:nil
                                                                                  bundle:nil];
   mockEngine.viewController = viewController;
   [viewController viewWillDisappear:NO];
-  OCMVerify([lifecycleChannel sendMessage:@"AppLifecycleState.inactive"]);
+  XCTAssertEqual(mockEngine.lifecycleStates.size(), 1u);
+  XCTAssertEqual(mockEngine.lifecycleStates.back(), flutter::LifecycleState::kInactive);
 }
 
 - (void)
     testEngineConfigSyncMethodWillNotExecuteWhenViewControllerInEngineIsNotCurrentViewControllerInViewWillDisappear {
-  id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
-  mockEngine.lifecycleChannel = lifecycleChannel;
   FlutterViewController* viewControllerA = [[FlutterViewController alloc] initWithEngine:mockEngine
                                                                                  nibName:nil
                                                                                   bundle:nil];
@@ -1345,7 +1344,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                   bundle:nil];
   mockEngine.viewController = viewControllerB;
   [viewControllerA viewDidDisappear:NO];
-  OCMReject([lifecycleChannel sendMessage:@"AppLifecycleState.inactive"]);
+  XCTAssertTrue(mockEngine.lifecycleStates.empty());
 }
 
 - (void)testUpdateViewportMetricsIfNeeded_DoesntInvokeEngineWhenNotTheViewController {

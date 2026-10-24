@@ -52,9 +52,6 @@ class WindowsLifecycleManager {
   // update the application lifecycle.
   bool WindowProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l, LRESULT* result);
 
-  // Signal to start  sending lifecycle state update messages.
-  virtual void BeginProcessingLifecycle();
-
   // Signal to start consuming WM_CLOSE messages.
   virtual void BeginProcessingExit();
 
@@ -109,7 +106,6 @@ class WindowsLifecycleManager {
 
   std::map<std::tuple<HWND, WPARAM, LPARAM>, int> sent_close_messages_;
 
-  bool process_lifecycle_ = false;
   bool process_exit_ = false;
 
   std::set<HWND> visible_windows_;

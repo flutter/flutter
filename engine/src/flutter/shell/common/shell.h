@@ -652,6 +652,9 @@ class Shell final : public PlatformView::Delegate,
   void OnPlatformViewSetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView::Delegate|
+  void OnPlatformViewSetAppLifecycleState(LifecycleState state) override;
+
+  // |PlatformView::Delegate|
   void OnPlatformViewRegisterTexture(
       std::shared_ptr<flutter::Texture> texture) override;
 

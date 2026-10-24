@@ -118,6 +118,24 @@ typedef enum {
   kFlutterAccessibilityFeatureDeterministicCursor = 1 << 10,
 } FlutterAccessibilityFeature;
 
+/// The lifecycle state of the application.
+///
+/// Must match the `AppLifecycleState` enum in the framework.
+typedef enum {
+  /// The application is not attached to any views. This is the initial state.
+  kFlutterAppLifecycleStateDetached,
+  /// The application is visible, has input focus, and is running.
+  kFlutterAppLifecycleStateResumed,
+  /// At least one view of the application is visible, but none have input
+  /// focus. The application is otherwise running normally.
+  kFlutterAppLifecycleStateInactive,
+  /// All views of the application are hidden.
+  kFlutterAppLifecycleStateHidden,
+  /// The application is not running, and can be detached or started again at
+  /// any time.
+  kFlutterAppLifecycleStatePaused,
+} FlutterAppLifecycleState;
+
 /// The set of possible actions that can be conveyed to a semantics node.
 ///
 /// Must match the `SemanticsAction` enum in semantics.dart.
@@ -3335,6 +3353,22 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
     FlutterAccessibilityFeature features);
 
 //------------------------------------------------------------------------------
+/// @brief      Sets the lifecycle state of the application.
+///
+///             This replaces sending the state as a string on the
+///             `flutter/lifecycle` platform channel, which is deprecated.
+///
+/// @param[in]  engine     A running engine instance.
+/// @param[in]  state      The new lifecycle state.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSetAppLifecycleState(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterAppLifecycleState state);
+
+//------------------------------------------------------------------------------
 /// @brief      Dispatch a semantics action to the specified semantics node
 ///             in the implicit view.
 ///
@@ -3753,6 +3787,9 @@ typedef FlutterEngineResult (*FlutterEngineUpdateSemanticsEnabledFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineUpdateAccessibilityFeaturesFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterAccessibilityFeature features);
+typedef FlutterEngineResult (*FlutterEngineSetAppLifecycleStateFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterAppLifecycleState state);
 typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     uint64_t id,
@@ -3865,6 +3902,7 @@ typedef struct {
   FlutterEngineRemoveViewFnPtr RemoveView;
   FlutterEngineSendViewFocusEventFnPtr SendViewFocusEvent;
   FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
+  FlutterEngineSetAppLifecycleStateFnPtr SetAppLifecycleState;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

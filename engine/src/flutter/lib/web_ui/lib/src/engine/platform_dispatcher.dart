@@ -959,6 +959,25 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     return null;
   }
 
+  /// The current lifecycle state of the application.
+  @override
+  ui.AppLifecycleState? get appLifecycleState => _currentAppLifecycleState;
+  ui.AppLifecycleState? _currentAppLifecycleState;
+
+  /// A callback that is invoked whenever [appLifecycleState] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  @override
+  ui.VoidCallback? get onAppLifecycleStateChanged => _onAppLifecycleStateChanged;
+  ui.VoidCallback? _onAppLifecycleStateChanged;
+  Zone? _onAppLifecycleStateChangedZone;
+  @override
+  set onAppLifecycleStateChanged(ui.VoidCallback? callback) {
+    _onAppLifecycleStateChanged = callback;
+    _onAppLifecycleStateChangedZone = Zone.current;
+  }
+
   /// A callback that is invoked whenever [locale] changes value.
   ///
   /// The framework invokes this callback in the same zone in which the
@@ -1270,11 +1289,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
-    invokeOnPlatformMessage(
-      'flutter/lifecycle',
-      const StringCodec().encodeMessage(state.toString()),
-      (_) {},
-    );
+    if (state == _currentAppLifecycleState) {
+      return;
+    }
+    _currentAppLifecycleState = state;
+    invoke(_onAppLifecycleStateChanged, _onAppLifecycleStateChangedZone);
   }
 
   /// A callback that is invoked whenever [textScaleFactor] changes value.

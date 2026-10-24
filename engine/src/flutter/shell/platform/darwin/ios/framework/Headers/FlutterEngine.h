@@ -408,6 +408,10 @@ FLUTTER_DARWIN_EXPORT
  *
  * Can be nil after `destroyContext` is called.
  *
+ * @deprecated The `flutter/lifecycle` channel is deprecated. The engine reports
+ * the app lifecycle state to the framework directly, so messages should not be
+ * sent on this channel.
+ *
  * @see [Lifecycle
  * Channel](https://api.flutter.dev/flutter/services/SystemChannels/lifecycle-constant.html)
  */

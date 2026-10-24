@@ -355,6 +355,11 @@ void _updateInitialLifecycleState(String state) {
 }
 
 @pragma('vm:entry-point')
+void _updateAppLifecycleState(int state) {
+  PlatformDispatcher.instance._updateAppLifecycleState(state);
+}
+
+@pragma('vm:entry-point')
 void _updateSemanticsEnabled(bool enabled) {
   PlatformDispatcher.instance._updateSemanticsEnabled(enabled);
 }
