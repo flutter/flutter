@@ -295,6 +295,7 @@ end
           kDarwinArchs: defaultMacOSArchsForEnvironment(artifacts)
               .map((CpuArch e) => e.darwinArchName)
               .join(' '),
+          kSdkRoot: await appleContext.xcode.macOSSdkLocation(),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: artifacts,
