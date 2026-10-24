@@ -703,34 +703,31 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
     // Values derived from Apple's Figma files and a simulator running iOS 18.2.
     const dragHandleTopPadding = 5.0;
+    const dragHandleBottomPadding = 5.0;
     const dragHandleHeight = 5.0;
     const dragHandleWidth = 36.0;
-    const dragHandlePadding = 15.0;
 
-    return Stack(
-      fit: StackFit.expand,
-      children: <Widget>[
-        MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(padding: const EdgeInsets.only(top: dragHandlePadding)),
-          child: _effectiveBuilder(context, controller),
-        ),
-        const Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsetsGeometry.only(top: dragHandleTopPadding),
-            child: DecoratedBox(
-              decoration: ShapeDecoration(
-                shape: RoundedSuperellipseBorder(
-                  borderRadius: BorderRadiusGeometry.all(Radius.circular(dragHandleWidth / 2)),
-                ),
-                color: CupertinoColors.tertiaryLabel,
-              ),
-              child: SizedBox(height: dragHandleHeight, width: dragHandleWidth),
-            ),
+    const Widget handle = Padding(
+      padding: EdgeInsets.only(top: dragHandleTopPadding, bottom: dragHandleBottomPadding),
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: RoundedSuperellipseBorder(
+            borderRadius: BorderRadiusGeometry.all(Radius.circular(dragHandleWidth / 2)),
           ),
+          color: CupertinoColors.tertiaryLabel,
         ),
-      ],
+        child: SizedBox(height: dragHandleHeight, width: dragHandleWidth),
+      ),
+    );
+
+    return EdgeInsetsOverlay(
+      top: handle,
+      builder: (BuildContext context, BoxConstraints constraints, metrics) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(padding: EdgeInsets.only(top: metrics.padding.top)),
+          child: _effectiveBuilder(context, controller),
+        );
+      },
     );
   }
 

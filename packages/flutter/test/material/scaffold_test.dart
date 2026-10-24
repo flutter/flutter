@@ -3816,6 +3816,70 @@ void main() {
     );
     expect(tester.getSize(find.byType(Scaffold)), Size.zero);
   });
+
+  testWidgets('Scaffold supports arbitrary Widget without PreferredSizeWidget as appBar', (
+    WidgetTester tester,
+  ) async {
+    final Key headerKey = UniqueKey();
+    final Key bodyKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: Container(
+            key: headerKey,
+            height: 75.0,
+            color: Colors.blue,
+            child: const Text('Custom Header'),
+          ),
+          body: Container(key: bodyKey),
+        ),
+      ),
+    );
+
+    expect(find.byKey(headerKey), findsOneWidget);
+    expect(find.byKey(bodyKey), findsOneWidget);
+
+    expect(tester.getSize(find.byKey(headerKey)), const Size(800.0, 75.0));
+    expect(tester.getTopLeft(find.byKey(headerKey)), Offset.zero);
+    expect(tester.getTopLeft(find.byKey(bodyKey)), const Offset(0.0, 75.0));
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0 - 75.0));
+
+    final ScaffoldState state = tester.state(find.byType(Scaffold));
+    expect(state.appBarMaxHeight, 75.0);
+  });
+
+  testWidgets('Scaffold supports arbitrary Widget as appBar with extendBodyBehindAppBar', (
+    WidgetTester tester,
+  ) async {
+    final Key headerKey = UniqueKey();
+    final Key bodyKey = UniqueKey();
+    late double bodyTopPadding;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: SizedBox(key: headerKey, height: 85.0, child: const Text('Custom Header')),
+          body: Builder(
+            builder: (BuildContext context) {
+              bodyTopPadding = MediaQuery.paddingOf(context).top;
+              return Container(key: bodyKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(headerKey)), const Size(800.0, 85.0));
+    expect(tester.getTopLeft(find.byKey(headerKey)), Offset.zero);
+    expect(tester.getTopLeft(find.byKey(bodyKey)), Offset.zero);
+    expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+    expect(bodyTopPadding, 85.0);
+
+    final ScaffoldState state = tester.state(find.byType(Scaffold));
+    expect(state.appBarMaxHeight, 85.0);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
