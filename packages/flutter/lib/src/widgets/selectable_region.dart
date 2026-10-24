@@ -458,6 +458,7 @@ class SelectableRegionState extends State<SelectableRegion>
   void initState() {
     super.initState();
     _focusNode.addListener(_handleFocusChanged);
+    _selectionDelegate.addListener(_handleSelectionChanged);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -551,6 +552,17 @@ class SelectableRegionState extends State<SelectableRegion>
       }
     } else if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
+      // There may already be a selection, so copy it into the hidden element.
+      PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
+    }
+  }
+
+  /// Sync the hidden element whenever selection changes.
+  ///
+  /// If we don't do this immediately, Safari's Edit->Copy will remain disabled.
+  void _handleSelectionChanged() {
+    if (kIsWeb) {
+      PlatformSelectableRegionContextMenu.synchronizeSelection(_selectionDelegate);
     }
   }
 
@@ -1955,6 +1967,7 @@ class SelectableRegionState extends State<SelectableRegion>
     _selectionOverlay = null;
     widget.focusNode?.removeListener(_handleFocusChanged);
     _localFocusNode?.removeListener(_handleFocusChanged);
+    _selectionDelegate.removeListener(_handleSelectionChanged);
     _localFocusNode?.dispose();
     super.dispose();
   }
@@ -1969,7 +1982,7 @@ class SelectableRegionState extends State<SelectableRegion>
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
     if (_webContextMenuEnabled) {
-      result = PlatformSelectableRegionContextMenu(child: result);
+      result = PlatformSelectableRegionContextMenu(client: _selectionDelegate, child: result);
     }
     return TapRegion(
       groupId: SelectableRegion,

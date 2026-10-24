@@ -37,9 +37,13 @@ typedef RegisterViewFactory = void Function(String, Object Function(int viewId),
 
 /// See `_platform_selectable_region_context_menu_io.dart` for full
 /// documentation.
-class PlatformSelectableRegionContextMenu extends StatelessWidget {
+class PlatformSelectableRegionContextMenu extends StatefulWidget {
   /// See `_platform_selectable_region_context_menu_io.dart`.
-  PlatformSelectableRegionContextMenu({required this.child, super.key}) {
+  PlatformSelectableRegionContextMenu({
+    required this.child,
+    required SelectionContainerDelegate client,
+    super.key,
+  }) : _client = client {
     if (_registeredViewType == null) {
       _register();
     }
@@ -47,6 +51,9 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
 
   /// See `_platform_selectable_region_context_menu_io.dart`.
   final Widget child;
+
+  /// The [SelectionContainerDelegate] for this region.
+  final SelectionContainerDelegate _client;
 
   /// See `_platform_selectable_region_context_menu_io.dart`.
   // ignore: use_setters_to_change_properties
@@ -62,6 +69,44 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   }
 
   static SelectionContainerDelegate? _activeClient;
+
+  /// Copies `client`'s selection into its hidden element and selects it in the
+  /// DOM.
+  static void synchronizeSelection(SelectionContainerDelegate client) {
+    final web.HTMLElement? element = _elementsByClient[client];
+    if (element == null) {
+      return;
+    }
+    _synchronizeDomSelection(element, client);
+  }
+
+  /// The next ID to assign to the next State instance to allow looking up the
+  /// [SelectionContainerDelegate] for that instance.
+  static int _nextElementId = 0;
+
+  /// A mapping from element IDs to [SelectionContainerDelegate]s.
+  static final Map<int, SelectionContainerDelegate> _clientsByElementId =
+      <int, SelectionContainerDelegate>{};
+
+  /// A mapping of [SelectionContainerDelegate]s to their hidden elements.
+  static final Map<SelectionContainerDelegate, web.HTMLElement> _elementsByClient =
+      <SelectionContainerDelegate, web.HTMLElement>{};
+
+  static void _synchronizeDomSelection(web.HTMLElement element, SelectionContainerDelegate client) {
+    // The innerText must contain the text in order to be selected by the browser.
+    element.innerText = client.getSelectedContent()?.plainText ?? '';
+
+    // Selecting a detached element throws, but there is nothing to copy anyway.
+    if (!element.isConnected) {
+      return;
+    }
+
+    // Programmatically select the DOM element in browser.
+    final web.Range range = web.document.createRange()..selectNode(element);
+    web.window.getSelection()
+      ?..removeAllRanges()
+      ..addRange(range);
+  }
 
   /// The client currently attached to the [PlatformSelectableRegionContextMenu].
   ///
@@ -87,6 +132,10 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   @visibleForTesting
   static void debugResetRegistry() {
     _registeredViewType = null;
+    _activeClient = null;
+    _nextElementId = 0;
+    _clientsByElementId.clear();
+    _elementsByClient.clear();
   }
 
   // Registers the view factories for the interceptor widgets.
@@ -103,16 +152,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         final Matrix4 transform = client.getTransformTo(null);
         final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
         client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
-        // The innerText must contain the text in order to be selected by
-        // the browser.
-        element.innerText = client.getSelectedContent()?.plainText ?? '';
-
-        // Programmatically select the dom element in browser.
-        final web.Range range = web.document.createRange()..selectNode(element);
-
-        web.window.getSelection()
-          ?..removeAllRanges()
-          ..addRange(range);
+        _synchronizeDomSelection(element, client);
       }
     });
   }
@@ -131,6 +171,18 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         ..style.width = '100%'
         ..style.height = '100%'
         ..classList.add(_kClassName);
+      // Set aria-hidden on the hidden element because with semantics enabled
+      // the engine's `aria-owns` un-hides the wrapper and a screen reader would
+      // otherwise announce the text.
+      htmlElement.setAttribute('aria-hidden', 'true');
+
+      // Keep track of this element by the States element ID.
+      final creationParams = params as Map<Object?, Object?>?;
+      final elementId = creationParams?['elementId'] as int?;
+      final SelectionContainerDelegate? client = _clientsByElementId[elementId];
+      if (client != null) {
+        _elementsByClient[client] = htmlElement;
+      }
 
       htmlElement.addEventListener(
         'mousedown',
@@ -149,12 +201,46 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   }
 
   @override
+  State<PlatformSelectableRegionContextMenu> createState() =>
+      _PlatformSelectableRegionContextMenuState();
+}
+
+class _PlatformSelectableRegionContextMenuState extends State<PlatformSelectableRegionContextMenu> {
+  /// A unique ID that can be used to link this state back to the corresponding
+  /// [SelectionContainerDelegate].
+  late final int _elementId;
+
+  @override
+  void initState() {
+    super.initState();
+    _elementId = PlatformSelectableRegionContextMenu._nextElementId++;
+    PlatformSelectableRegionContextMenu._clientsByElementId[_elementId] = widget._client;
+  }
+
+  @override
+  void dispose() {
+    PlatformSelectableRegionContextMenu._clientsByElementId.remove(_elementId);
+    PlatformSelectableRegionContextMenu._elementsByClient.remove(widget._client);
+    if (PlatformSelectableRegionContextMenu._activeClient == widget._client) {
+      PlatformSelectableRegionContextMenu._activeClient = null;
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.passthrough,
       children: <Widget>[
-        const Positioned.fill(child: HtmlElementView(viewType: _viewType)),
-        child,
+        Positioned.fill(
+          child: HtmlElementView(
+            viewType: _viewType,
+            // Pass through the element ID so when the element is created we can
+            // map it back to the selection delegate.
+            creationParams: <String, int>{'elementId': _elementId},
+          ),
+        ),
+        widget.child,
       ],
     );
   }
