@@ -11,10 +11,17 @@ library;
 import 'dart:math' as math;
 import 'dart:ui' show DisplayFeature, DisplayFeatureState;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'implicit_animations.dart';
 import 'media_query.dart';
+
+/// How long [DisplayFeatureSubScreen] takes to move its child between
+/// sub-screens by default.
+const Duration _defaultDuration = Duration(milliseconds: 200);
 
 /// Positions [child] such that it avoids overlapping any [DisplayFeature] that
 /// splits the screen into sub-screens.
@@ -54,7 +61,13 @@ import 'media_query.dart';
 class DisplayFeatureSubScreen extends StatelessWidget {
   /// Creates a widget that positions its child so that it avoids display
   /// features.
-  const DisplayFeatureSubScreen({super.key, this.anchorPoint, required this.child});
+  const DisplayFeatureSubScreen({
+    super.key,
+    this.anchorPoint,
+    this.duration = _defaultDuration,
+    this.curve = Curves.easeInOut,
+    required this.child,
+  });
 
   /// {@template flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   /// The anchor point used to pick the closest sub-screen.
@@ -76,6 +89,21 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   ///     sub-screen to be picked.
   /// {@endtemplate}
   final Offset? anchorPoint;
+
+  /// How long the [child] takes to move when the sub-screen it belongs to
+  /// changes.
+  ///
+  /// A fold that opens or closes changes which sub-screen holds the [child],
+  /// and the child moves there. Without a duration it arrives in the frame the
+  /// change is reported, which for a fold down the middle of the screen is a
+  /// jump of close to half the screen width.
+  ///
+  /// The first position is never animated; only later changes are. Pass
+  /// [Duration.zero] for the child to move in a single frame.
+  final Duration duration;
+
+  /// The curve the [child] follows while it moves between sub-screens.
+  final Curve curve;
 
   /// The widget below this widget in the tree.
   ///
@@ -107,7 +135,9 @@ class DisplayFeatureSubScreen extends StatelessWidget {
     final Iterable<Rect> subScreens = subScreensInBounds(wantedBounds, avoidBounds(mediaQuery));
     final Rect closestSubScreen = _closestToAnchorPoint(subScreens, resolvedAnchorPoint);
 
-    return Padding(
+    return AnimatedPadding(
+      duration: duration,
+      curve: curve,
       padding: EdgeInsets.only(
         left: closestSubScreen.left,
         top: closestSubScreen.top,
@@ -116,6 +146,16 @@ class DisplayFeatureSubScreen extends StatelessWidget {
       ),
       child: MediaQuery(data: mediaQuery.removeDisplayFeatures(closestSubScreen), child: child),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('anchorPoint', anchorPoint, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<Duration>('duration', duration, defaultValue: _defaultDuration),
+    );
+    properties.add(DiagnosticsProperty<Curve>('curve', curve, defaultValue: Curves.easeInOut));
   }
 
   static Offset _fallbackAnchorPoint(BuildContext context) {
