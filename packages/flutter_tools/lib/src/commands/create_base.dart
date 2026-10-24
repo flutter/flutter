@@ -122,13 +122,14 @@ mixin CreateBase on FlutterCommand {
     ArgParser? parser,
     String? customHelp,
     required Map<String, String> allowedHelp,
+    bool allowCustomPlatforms = false,
   }) {
     (parser ?? argParser).addMultiOption(
       'platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
       aliases: <String>['platform'],
       defaultsTo: <String>[..._kAvailablePlatforms],
-      allowed: <String>[...kAllCreatePlatforms],
+      allowed: allowCustomPlatforms ? null : <String>[...kAllCreatePlatforms],
       allowedHelp: allowedHelp,
     );
   }

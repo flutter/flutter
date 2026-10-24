@@ -143,7 +143,8 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       hide: !verboseHelp,
     );
 
-    final Map<String, String> platformsAllowedHelp = {
+    final bool isToolExtensionEnabled = featureFlags.isToolExtensionsEnabled;
+    final platformsAllowedHelp = <String, String>{
       for (final String p in kAllCreatePlatforms) p: '',
     };
     platformsAllowedHelp['darwin'] =
@@ -152,11 +153,11 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       parser: parser,
       customHelp: kPlatformHelp,
       allowedHelp: platformsAllowedHelp,
+      allowCustomPlatforms: isToolExtensionEnabled,
     );
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
         ParsedFlutterTemplateType.enabledValues(featureFlags, extensionTemplateManager: null);
-    final bool isToolExtensionEnabled = featureFlags.isToolExtensionsEnabled;
     parser.addOption(
       'template',
       abbr: 't',
@@ -204,7 +205,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     if (manager != null) {
       try {
         await manager.getProjectTemplates();
-        if (manager.cachedTemplates.isNotEmpty) {
+        if (manager.cachedTemplates.isNotEmpty || manager.cachedCustomPlatforms.isNotEmpty) {
           rebuildDynamicArgParser();
         }
       } on Object catch (e) {
@@ -218,47 +219,71 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     final ExtensionTemplateManager? manager = extensionTemplateManager;
     final List<ProjectTemplate> projectTemplates =
         manager?.cachedTemplates ?? const <ProjectTemplate>[];
-    if (projectTemplates.isEmpty) {
+    final Set<String> customPlatforms = manager?.cachedCustomPlatforms ?? const <String>{};
+    if (projectTemplates.isEmpty && customPlatforms.isEmpty) {
       return dynamicParser;
     }
     return ExtensionArgParserMixin.cloneParser(
       baseArgParser,
       optionCloner: (ArgParser newParser, Option opt) {
-        if (opt.name != 'template') {
-          ExtensionArgParserMixin.copyOption(newParser, opt);
+        if (opt.name == 'template' && projectTemplates.isNotEmpty) {
+          final Map<String, String>? allowedHelp = opt.allowedHelp != null
+              ? Map<String, String>.of(opt.allowedHelp!)
+              : null;
+          final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
+          if (allowedHelp != null) {
+            for (final template in projectTemplates) {
+              if (!template.hidden) {
+                allowedHelp[template.name] =
+                    'Generate a project using the ${template.name} template.';
+              }
+            }
+          }
+          if (allowed != null) {
+            for (final template in projectTemplates) {
+              if (!allowed.contains(template.name)) {
+                allowed.add(template.name);
+              }
+            }
+          }
+          newParser.addOption(
+            opt.name,
+            abbr: opt.abbr,
+            aliases: opt.aliases,
+            allowed: allowed,
+            allowedHelp: allowedHelp,
+            defaultsTo: opt.defaultsTo as String?,
+            help: opt.help,
+            hide: opt.hide,
+            mandatory: opt.mandatory,
+            valueHelp: opt.valueHelp,
+          );
           return;
         }
-        final Map<String, String>? allowedHelp = opt.allowedHelp != null
-            ? Map<String, String>.of(opt.allowedHelp!)
-            : null;
-        final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
-        if (allowedHelp != null) {
-          for (final template in projectTemplates) {
-            if (!template.hidden) {
-              allowedHelp[template.name] =
-                  'Generate a project using the ${template.name} template.';
+        if (opt.name == 'platforms' && customPlatforms.isNotEmpty) {
+          final Map<String, String>? allowedHelp = opt.allowedHelp != null
+              ? Map<String, String>.of(opt.allowedHelp!)
+              : null;
+          if (allowedHelp != null) {
+            for (final platform in customPlatforms) {
+              allowedHelp.putIfAbsent(platform, () => '');
             }
           }
+          newParser.addMultiOption(
+            opt.name,
+            abbr: opt.abbr,
+            aliases: opt.aliases,
+            allowed: opt.allowed,
+            allowedHelp: allowedHelp,
+            defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
+            help: opt.help,
+            hide: opt.hide,
+            splitCommas: opt.splitCommas,
+            valueHelp: opt.valueHelp,
+          );
+          return;
         }
-        if (allowed != null) {
-          for (final template in projectTemplates) {
-            if (!allowed.contains(template.name)) {
-              allowed.add(template.name);
-            }
-          }
-        }
-        newParser.addOption(
-          opt.name,
-          abbr: opt.abbr,
-          aliases: opt.aliases,
-          allowed: allowed,
-          allowedHelp: allowedHelp,
-          defaultsTo: opt.defaultsTo as String?,
-          help: opt.help,
-          hide: opt.hide,
-          mandatory: opt.mandatory,
-          valueHelp: opt.valueHelp,
-        );
+        ExtensionArgParserMixin.copyOption(newParser, opt);
       },
     );
   }
@@ -441,10 +466,12 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     final String? sampleArgument = stringArg('sample');
     final bool emptyArgument = boolArg('empty');
 
-    final ExtensionTemplateManager? manager = extensionTemplateManager;
+    final ExtensionTemplateManager? manager = featureFlags.isToolExtensionsEnabled
+        ? extensionTemplateManager
+        : null;
     if (manager != null) {
       try {
-        await manager.getProjectTemplates();
+        await manager.getProjectTemplates(projectDir: projectDir);
       } on Object catch (e) {
         toolContext.logger.printTrace('Failed to retrieve project templates: $e');
       }
@@ -482,6 +509,24 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     final generatePackage = template == FlutterTemplateType.package;
 
     final List<String> platforms = stringsArg('platforms');
+    final Set<String> customPlatforms = manager?.cachedCustomPlatforms ?? const <String>{};
+    for (final platform in customPlatforms) {
+      if (kAllCreatePlatforms.contains(platform)) {
+        logger.printWarning(
+          'Skipping custom platform "$platform" from extension because it collides with a built-in platform.',
+        );
+      }
+    }
+    final allowedPlatforms = <String>{...kAllCreatePlatforms, ...customPlatforms};
+    for (final platform in platforms) {
+      if (!allowedPlatforms.contains(platform)) {
+        throwToolExit('"$platform" is not an allowed value for option "--platforms".', exitCode: 2);
+      }
+    }
+    final requestedCustomPlatforms = <String>[
+      for (final String platform in platforms)
+        if (customPlatforms.contains(platform) && !kAllCreatePlatforms.contains(platform)) platform,
+    ];
     // `--platforms` does not support module or package.
     if (argResults!.wasParsed('platforms') &&
         (generateModule || generatePackage || generateFfiPackage)) {
@@ -622,6 +667,11 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
       gradleVersion: gradle.templateDefaultGradleVersion,
     );
+    for (final customPlatform in requestedCustomPlatforms) {
+      if (!templateContext.containsKey(customPlatform)) {
+        templateContext[customPlatform] = true;
+      }
+    }
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
     final bool creatingNewProject = !projectDir.existsSync() || projectDir.listSync().isEmpty;
@@ -786,6 +836,22 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         throwToolExit('Unsupported template type: ${template.cliName}');
     }
 
+    if (requestedCustomPlatforms.isNotEmpty &&
+        manager != null &&
+        (template == FlutterTemplateType.app ||
+            generateMethodChannelsPlugin ||
+            generateFfiPlugin)) {
+      generatedFileCount += await _renderExtensionPlatformTemplates(
+        manager: manager,
+        projectDir: relativeDir,
+        templateContext: templateContext,
+        requestedCustomPlatforms: requestedCustomPlatforms,
+        isPlugin: generateMethodChannelsPlugin || generateFfiPlugin,
+        overwrite: overwrite,
+        printStatusWhenWriting: !creatingNewProject,
+      );
+    }
+
     _generatePubspecLock(relativeDir);
 
     if (shouldCallPubGet) {
@@ -917,6 +983,70 @@ Your $application code is in $relativeAppMain.
     }
 
     return FlutterCommandResult.success();
+  }
+
+  Future<int> _renderExtensionPlatformTemplates({
+    required bool isPlugin,
+    required ExtensionTemplateManager manager,
+    required bool overwrite,
+    required bool printStatusWhenWriting,
+    required Directory projectDir,
+    required List<String> requestedCustomPlatforms,
+    required Map<String, Object?> templateContext,
+  }) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final Set<String> platformTemplatePaths = isPlugin
+        ? await manager.fetchPluginPlatformTemplates(
+            platforms: requestedCustomPlatforms,
+            projectDir: projectDir,
+          )
+        : await manager.fetchAppPlatformTemplates(
+            platforms: requestedCustomPlatforms,
+            projectDir: projectDir,
+          );
+    final candidatePaths = <String>{...platformTemplatePaths};
+    for (final ProjectTemplate cached in manager.cachedTemplates) {
+      if (requestedCustomPlatforms.contains(cached.name)) {
+        candidatePaths.add(cached.templatePath);
+      }
+    }
+
+    var generatedCount = 0;
+    for (final templatePath in candidatePaths) {
+      final Directory templateDir;
+      try {
+        templateDir = manager.resolveTemplateDirectory(templatePath);
+      } on ArgumentError catch (error) {
+        logger.printTrace('Skipping unrecognized extension platform template path: $error');
+        continue;
+      }
+      if (!templateDir.existsSync()) {
+        continue;
+      }
+      ProjectTemplate? matchingTemplate;
+      for (final ProjectTemplate cached in manager.cachedTemplates) {
+        if (cached.templatePath == templatePath) {
+          matchingTemplate = cached;
+          break;
+        }
+      }
+      final Map<String, Object?> renderedParameters = matchingTemplate != null
+          ? await manager.generateTemplateParameters(matchingTemplate.name, templateContext)
+          : templateContext;
+      final Template extTemplate = await Template.fromDirectories(
+        <Directory>[templateDir],
+        fileSystem: fs,
+        logger: logger,
+        templateRenderer: templateRenderer,
+      );
+      generatedCount += extTemplate.render(
+        projectDir,
+        renderedParameters,
+        overwriteExisting: overwrite,
+        printStatusWhenWriting: printStatusWhenWriting,
+      );
+    }
+    return generatedCount;
   }
 
   Future<int> _generateModule(

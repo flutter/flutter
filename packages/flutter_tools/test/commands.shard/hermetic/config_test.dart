@@ -513,7 +513,7 @@ class FakeExtensionManager extends Fake implements ExtensionManager {
   List<ConfigurationExtension> get configurationExtensions => extensions;
 
   @override
-  Future<void> ensureInitialized() async {}
+  Future<void> ensureInitialized({Set<String>? requiredServices, Directory? startDir}) async {}
 }
 
 class FakeConfigurationExtension extends Fake implements ConfigurationExtension {

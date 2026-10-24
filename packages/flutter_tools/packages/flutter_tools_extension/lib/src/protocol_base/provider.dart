@@ -12,12 +12,29 @@ import 'service.dart';
 
 /// Entrypoint runner for a Flutter Tool Extension running in an Isolate.
 ///
-/// Extension packages invoke [ToolExtensionEntryPoint.run] in their isolate
-/// entrypoint function, passing the initial Isolate send port and list of supported
-/// extension services.
+/// Extension packages invoke [ToolExtensionEntryPoint.run] or
+/// [ToolExtensionEntryPoint.runMain] in their isolate entrypoint function,
+/// passing the initial Isolate send port and list of supported extension services.
 class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
+
+  /// Convenience wrapper for an extension script's `main(List<String> args, Object? message)`
+  /// entrypoint when spawned via [Isolate.spawnUri].
+  static Future<void> runMain(
+    List<String> args,
+    Object? message,
+    FutureOr<void> Function(SendPort sendPort) entryPoint,
+  ) async {
+    if (message is! SendPort) {
+      throw ArgumentError.value(
+        message,
+        'message',
+        'Expected a SendPort as the initial isolate message.',
+      );
+    }
+    await entryPoint(message);
+  }
 
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///

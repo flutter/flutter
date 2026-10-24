@@ -38,8 +38,9 @@ import '../doctor.dart';
 import '../emulator.dart';
 import '../experimental/extension_build_manager.dart';
 import '../experimental/extension_clean_manager.dart';
-import '../experimental/extension_discovery.dart';
+import '../experimental/extension_kernel_compiler.dart';
 import '../experimental/extension_manager.dart';
+import '../experimental/project_extension_finder.dart';
 import '../features.dart';
 import '../flutter_cache.dart';
 import '../flutter_device_manager.dart';
@@ -174,7 +175,6 @@ class ToolDependencies {
     DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
-    List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
@@ -592,10 +592,20 @@ class ToolDependencies {
         windowsWorkflow ??
         WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
 
+    final projectExtensionFinder = ProjectExtensionFinder(fileSystem: finalFS, logger: finalLogger);
+    final extensionKernelCompiler = ExtensionKernelCompiler(
+      artifacts: finalArtifacts,
+      fileSystem: finalFS,
+      flutterRoot: finalFS.directory(flutterRoot),
+      logger: finalLogger,
+      platform: finalPlatform,
+      processManager: finalProcessManager,
+    );
     final extensionManager = ExtensionManager(
-      entryPoints: extensionEntryPoints,
+      extensionFinder: projectExtensionFinder,
       featureFlags: finalFeatureFlags,
       hostPlatform: finalOS.hostPlatform,
+      kernelCompiler: extensionKernelCompiler,
       logger: finalLogger,
     );
 
