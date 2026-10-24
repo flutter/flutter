@@ -403,19 +403,19 @@ void main() {
     expect(TestRenderingFlutterBinding.instance.takeFlutterErrorDetails(), isNull);
   });
 
-  test('RenderSliverVariedExtentList itemExtentBuilder is not called excessively', () {
+  test('RenderSliverVariedExtentList memoizes itemExtentBuilder calls within each layout pass', () {
     final children = List<RenderBox>.generate(
       100,
       (index) => RenderSizedBox(const Size(400.0, 100.0)),
     );
     final childManager = TestRenderSliverBoxChildManager(children: children);
 
-    var builderCallCount = 0;
+    final calledIndices = <int>[];
     final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList((
       index,
       layoutDimensions,
     ) {
-      builderCallCount++;
+      calledIndices.add(index);
       return 100.0;
     });
 
@@ -427,26 +427,21 @@ void main() {
     );
     layout(root);
 
-    // Reset count.
-    builderCallCount = 0;
+    // Within a single layout pass, each evaluated index is called at most once.
+    expect(calledIndices.toSet().length, calledIndices.length);
 
-    // Jump to item 45 (offset 4500).
+    // Reset calls.
+    calledIndices.clear();
+
+    // Scroll to item 45 (offset 4500).
     root.offset = ViewportOffset.fixed(4500.0);
     pumpFrame();
 
-    // Make two small scrolls.
-    builderCallCount = 0;
-    root.offset = ViewportOffset.fixed(4550.0);
-    pumpFrame();
-    final extraCalls1 = builderCallCount;
-
-    builderCallCount = 0;
-    root.offset = ViewportOffset.fixed(4600.0);
-    pumpFrame();
-    final extraCalls2 = builderCallCount;
-
-    expect(extraCalls1, lessThanOrEqualTo(2));
-    expect(extraCalls2, lessThanOrEqualTo(2));
+    // Verify each evaluated index in this layout pass was called at most once
+    // (i.e. indexToLayoutOffset and _getChildConstraints reuse the memoized extents).
+    expect(calledIndices.toSet().length, calledIndices.length);
+    // Indices from 0 up to the last visible item (item 51) are computed once: 52 calls.
+    expect(calledIndices.length, 52);
   });
 
   test('RenderSliverVariedExtentList cache invalidation', () {
@@ -482,23 +477,13 @@ void main() {
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 100.0);
 
-    // Re-assign itemExtentBuilder with same identity should not clear the cache.
+    // Re-assign itemExtentBuilder (even with same identity) clears the cache.
     builderCallCount = 0;
+    currentExtent = 200.0;
     list.itemExtentBuilder = builder;
     pumpFrame();
 
-    // Cache was not cleared.
-    expect(builderCallCount, 0);
-
-    // Assign a new builder to clear the cache.
-    currentExtent = 200.0;
-    list.itemExtentBuilder = (int index, SliverLayoutDimensions dimensions) {
-      builderCallCount++;
-      return currentExtent;
-    };
-    pumpFrame();
-
-    // The cache should have been cleared and new builder called to re-layout.
+    // The cache should have been cleared and builder called to re-layout.
     expect(builderCallCount, greaterThan(0));
     expect(child0.layoutOffset, 0.0);
     expect(child1.layoutOffset, 200.0);
@@ -663,32 +648,6 @@ void main() {
 
     // 8 children: 4 * 100 + 4 * 50 = 600.
     expect(list.computeMaxScrollOffset(list.constraints, 0.0), 600.0);
-  });
-
-  test('RenderSliverVariedExtentList handles precision issues for exact item constraints', () {
-    final children = List<RenderBox>.generate(5, (index) => RenderSizedBox(const Size(400.0, 0.1)));
-    final childManager = TestRenderSliverBoxChildManager(children: children);
-
-    final RenderSliverVariedExtentList list = childManager.createRenderSliverVariedExtentList(
-      (index, dimensions) => 0.1,
-    );
-
-    final root = RenderViewport(
-      crossAxisDirection: AxisDirection.right,
-      offset: ViewportOffset.zero(),
-      cacheExtent: 0,
-      children: <RenderSliver>[list],
-    );
-    layout(root);
-
-    // Ensure that floating-point addition issues from offset accumulation do not
-    // cause precision loss in exact item extents. For example, 0.1 + 0.1 + 0.1 in
-    // IEEE 754 yields 0.30000000000000004. If the extent was calculated via subtraction
-    // (0.30000000000000004 - 0.2), it would erroneously yield 0.10000000000000003.
-    expect(list.paintExtentOf(children[2]), 0.1);
-
-    // The child should be laid out with tight constraints of exactly 0.1
-    expect(children[2].size.height, 0.1);
   });
 }
 

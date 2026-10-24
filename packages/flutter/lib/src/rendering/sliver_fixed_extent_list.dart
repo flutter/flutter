@@ -294,14 +294,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         );
   }
 
-  @override
-  double paintExtentOf(RenderBox child) {
-    if (itemExtentBuilder == null) {
-      return itemExtent!;
-    }
-    return itemExtentBuilder!(indexOf(child), layoutDimensions)!;
-  }
-
   SliverLayoutDimensions? _currentLayoutDimensions;
 
   @override
@@ -554,8 +546,7 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
 
   /// Clears the cached item extents.
   ///
-  /// This is called when the [itemExtentBuilder] is assigned or when
-  /// the layout dimensions change in a way that affects the item extents.
+  /// This is called before each layout pass or when the [itemExtentBuilder] is assigned.
   void _clearItemExtentCache() {
     _itemExtentCache.clear();
     _itemOffsetCache.clear();
@@ -594,9 +585,6 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
   ItemExtentBuilder _itemExtentBuilder;
   set itemExtentBuilder(ItemExtentBuilder value) {
-    if (_itemExtentBuilder == value) {
-      return;
-    }
     _itemExtentBuilder = value;
     _clearItemExtentCache();
     markNeedsLayout();
@@ -613,25 +601,8 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   double? get itemExtent => null;
 
   @override
-  double paintExtentOf(RenderBox child) {
-    final int index = indexOf(child);
-    assert(
-      index != -1 && index < _itemExtentCache.length,
-      'The itemExtentBuilder should have already been called for child at index $index.',
-    );
-    return _itemExtentCache[index];
-  }
-
-  @override
   void performLayout() {
-    final SliverConstraints constraints = this.constraints;
-    if (_currentLayoutDimensions == null ||
-        _currentLayoutDimensions!.viewportMainAxisExtent != constraints.viewportMainAxisExtent ||
-        _currentLayoutDimensions!.crossAxisExtent != constraints.crossAxisExtent ||
-        _currentLayoutDimensions!.precedingScrollExtent != constraints.precedingScrollExtent) {
-      _clearItemExtentCache();
-    }
-
+    _clearItemExtentCache();
     super.performLayout();
   }
 
