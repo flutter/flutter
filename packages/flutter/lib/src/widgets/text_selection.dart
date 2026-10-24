@@ -33,6 +33,7 @@ import 'selectable_region.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
+import 'view.dart';
 
 export 'package:flutter/rendering.dart' show TextSelectionPoint;
 export 'package:flutter/services.dart' show TextSelectionDelegate;
@@ -2009,6 +2010,54 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
   }
 }
 
+/// Keeps the Android system gesture exclusion rects in sync with the
+/// interactive areas of the visible selection handles.
+///
+/// With gesture navigation, Android treats a drag that starts near the left or
+/// right edge of the screen as the system back gesture. Excluding the handles
+/// from system gestures keeps them draggable near those edges, like the
+/// selection handles of native Android text fields.
+///
+/// See https://github.com/flutter/flutter/issues/187647.
+abstract final class _SelectionHandleGestureExclusion {
+  // The interactive area of each visible handle, in physical pixels.
+  static final Map<Object, Rect> _rects = <Object, Rect>{};
+  static bool _sendScheduled = false;
+
+  /// Sets the exclusion rect of `handle` in physical pixels, or removes it if
+  /// `rect` is null.
+  static void setRect(Object handle, Rect? rect) {
+    final Rect? oldRect = rect == null ? _rects.remove(handle) : _rects[handle];
+    if (rect != null) {
+      _rects[handle] = rect;
+    }
+    if (oldRect == rect || _sendScheduled) {
+      return;
+    }
+    // Batch the updates of all handles into a single platform message.
+    _sendScheduled = true;
+    scheduleMicrotask(_sendRects);
+  }
+
+  static void _sendRects() {
+    _sendScheduled = false;
+    unawaited(
+      SystemChannels.platform
+          .invokeMethod<void>('SystemChrome.setSystemGestureExclusionRects', <Map<String, int>>[
+            for (final Rect rect in _rects.values)
+              <String, int>{
+                'left': rect.left.floor(),
+                'top': rect.top.floor(),
+                'right': rect.right.ceil(),
+                'bottom': rect.bottom.ceil(),
+              },
+          ])
+          // Not every Android embedder implements this method.
+          .onError<MissingPluginException>((MissingPluginException error, StackTrace stack) {}),
+    );
+  }
+}
+
 /// This widget represents a single draggable selection handle.
 class _SelectionHandleOverlay extends StatefulWidget {
   /// Create selection overlay.
@@ -2045,6 +2094,13 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
   late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
+  // Used to find the position of the handle's interactive area when computing
+  // its system gesture exclusion rect. The size of the interactive area is
+  // stored separately, because the overlay may force a larger size on the
+  // widget with this key.
+  final GlobalKey _interactiveAreaKey = GlobalKey();
+  Size _interactiveAreaSize = Size.zero;
+
   @override
   void initState() {
     super.initState();
@@ -2053,6 +2109,49 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
 
     _handleVisibilityChanged();
     widget.visibility?.addListener(_handleVisibilityChanged);
+
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      SchedulerBinding.instance.addPostFrameCallback(
+        _updateSystemGestureExclusion,
+        debugLabel: '_SelectionHandleOverlay.updateSystemGestureExclusion',
+      );
+    }
+  }
+
+  // Updates the system gesture exclusion rect after every frame, since the
+  // handle follows its leader and can move without being rebuilt, for example
+  // when an ancestor scrolls.
+  void _updateSystemGestureExclusion(Duration timeStamp) {
+    if (!mounted) {
+      return;
+    }
+    final renderBox = _interactiveAreaKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null ||
+        !renderBox.attached ||
+        _interactiveAreaSize.isEmpty ||
+        widget.handleLayerLink.leader == null ||
+        !(widget.visibility?.value ?? true)) {
+      _SelectionHandleGestureExclusion.setRect(this, null);
+    } else {
+      final Rect rect = MatrixUtils.transformRect(
+        renderBox.getTransformTo(null),
+        Offset.zero & _interactiveAreaSize,
+      );
+      final double devicePixelRatio = View.of(context).devicePixelRatio;
+      _SelectionHandleGestureExclusion.setRect(
+        this,
+        Rect.fromLTRB(
+          rect.left * devicePixelRatio,
+          rect.top * devicePixelRatio,
+          rect.right * devicePixelRatio,
+          rect.bottom * devicePixelRatio,
+        ),
+      );
+    }
+    SchedulerBinding.instance.addPostFrameCallback(
+      _updateSystemGestureExclusion,
+      debugLabel: '_SelectionHandleOverlay.updateSystemGestureExclusion',
+    );
   }
 
   void _handleVisibilityChanged() {
@@ -2086,6 +2185,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
   void dispose() {
     widget.visibility?.removeListener(_handleVisibilityChanged);
     _controller.dispose();
+    _SelectionHandleGestureExclusion.setRect(this, null);
     super.dispose();
   }
 
@@ -2100,6 +2200,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
         : handleRect.expandToInclude(
             Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveDimension / 2),
           );
+    _interactiveAreaSize = interactiveRect.size;
     final RelativeRect padding = interactiveRect.isEmpty
         ? RelativeRect.fill
         : RelativeRect.fromLTRB(
@@ -2129,6 +2230,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
       child: FadeTransition(
         opacity: _opacity,
         child: SizedBox(
+          key: _interactiveAreaKey,
           width: interactiveRect.width,
           height: interactiveRect.height,
           child: Align(
