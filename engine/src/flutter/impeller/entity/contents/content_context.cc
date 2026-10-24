@@ -291,6 +291,7 @@ struct ContentContext::Pipelines {
   Variants<ShadowVerticesShader> shadow_vertices_;
   Variants<SolidFillPipeline> solid_fill;
   Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter;
+  Variants<StretchFilterPipeline> stretch_filter;
   Variants<SweepGradientFillPipeline> sweep_gradient_fill;
   Variants<SweepGradientSSBOFillPipeline> sweep_gradient_ssbo_fill;
   Variants<SweepGradientUniformFillPipeline> sweep_gradient_uniform_fill;
@@ -858,6 +859,7 @@ ContentContext::ContentContext(
                                                   options_trianglestrip);
   pipelines_->srgb_to_linear_filter.CreateDefault(*context_,
                                                   options_trianglestrip);
+  pipelines_->stretch_filter.CreateDefault(*context_, options_trianglestrip);
   pipelines_->yuv_to_rgb_filter.CreateDefault(*context_, options_trianglestrip);
 
   if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {
@@ -1185,6 +1187,11 @@ PipelineRef ContentContext::GetLinearToSrgbFilterPipeline(
 PipelineRef ContentContext::GetSrgbToLinearFilterPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->srgb_to_linear_filter, opts);
+}
+
+PipelineRef ContentContext::GetStretchFilterPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->stretch_filter, opts);
 }
 
 PipelineRef ContentContext::GetClipPipeline(ContentContextOptions opts) const {

@@ -245,7 +245,9 @@ sk_sp<SkImageFilter> ToSk(const DlImageFilter* filter) {
       return skia_filter->makeWithLocalMatrix(ToSkMatrix(lm_filter->matrix()));
     }
     case DlImageFilterType::kRuntimeEffect:
-      // UNSUPPORTED.
+    case DlImageFilterType::kStretch:
+      // UNSUPPORTED (ImageFilter.shader and ImageFilter.stretch are only
+      // supported on Impeller).
       return nullptr;
   }
 }

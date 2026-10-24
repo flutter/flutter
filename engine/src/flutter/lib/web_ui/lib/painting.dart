@@ -685,6 +685,19 @@ class ImageFilter {
     throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
   }
 
+  factory ImageFilter.stretch({
+    // ignore: avoid_unused_constructor_parameters
+    double overscrollX = 0.0,
+    // ignore: avoid_unused_constructor_parameters
+    double overscrollY = 0.0,
+    // ignore: avoid_unused_constructor_parameters
+    double interpolationStrength = 0.7,
+    // ignore: avoid_unused_constructor_parameters
+    required Rect bounds,
+  }) {
+    throw UnsupportedError('ImageFilter.stretch only supported with Impeller rendering engine.');
+  }
+
   static bool get isShaderFilterSupported => false;
 
   String get debugShortDescription => toString();

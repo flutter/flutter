@@ -6,6 +6,8 @@
 
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_stretch_image_filter.h"
+#include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/flow/testing/diff_context_test.h"
@@ -725,6 +727,94 @@ TEST_F(ImageFilterLayerTest, EmptyFilterWithOffset) {
 
   layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), child_bounds.Shift(offset));
+}
+
+TEST_F(ImageFilterLayerTest, StretchFilterUpdatesMutatorsStackWithGlobalBounds) {
+  const DlMatrix initial_transform =
+      DlMatrix::MakeTranslation({10.0f, 20.0f}) *
+      DlMatrix::MakeScale({2.0f, 2.0f, 1.0f});
+  const DlRect local_stretch_bounds = DlRect::MakeLTRB(0.0f, 0.0f, 300.0f, 500.0f);
+  const DlRect child_bounds = DlRect::MakeLTRB(50.0f, 60.0f, 250.0f, 460.0f);
+  const DlPath child_path = DlPath::MakeRect(child_bounds);
+  const DlPoint layer_offset = DlPoint(5.0f, 15.0f);
+
+  auto stretch_filter =
+      DlImageFilter::MakeStretch(0.1f, -0.3f, 0.7f, local_stretch_bounds);
+  auto mock_layer = std::make_shared<MockLayer>(child_path);
+  auto layer = std::make_shared<ImageFilterLayer>(stretch_filter, layer_offset);
+  layer->Add(mock_layer);
+
+  preroll_context()->state_stack.set_preroll_delegate(initial_transform);
+  layer->Preroll(preroll_context());
+
+  // The child's parent_mutators should contain the translation from
+  // layer_offset followed by kStretchEffect with stretch_bounds mapped by the
+  // combined CTM (initial_transform * Translate(layer_offset)).
+  const DlMatrix expected_ctm =
+      initial_transform * DlMatrix::MakeTranslation(layer_offset);
+  const DlRect expected_global_stretch_rect =
+      local_stretch_bounds.TransformAndClipBounds(expected_ctm);
+
+  MutatorsStack expected_mutators;
+  expected_mutators.PushTransform(DlMatrix::MakeTranslation(layer_offset));
+  expected_mutators.PushStretchEffect(0.1f, -0.3f, 0.7f,
+                                      expected_global_stretch_rect);
+  EXPECT_EQ(mock_layer->parent_mutators(), expected_mutators);
+  EXPECT_EQ(preroll_context()->state_stack.outstanding_image_filter(), nullptr);
+}
+
+TEST_F(
+    ImageFilterLayerTest,
+    StretchFilterWithChildTransformAndClipUpdatesMutatorsStackAndEmbeddedViewParams) {
+  const DlMatrix initial_transform = DlMatrix::MakeScale({2.0f, 2.0f, 1.0f});
+  const DlRect local_stretch_bounds =
+      DlRect::MakeLTRB(0.0f, 0.0f, 300.0f, 600.0f);
+  const DlPoint layer_offset = DlPoint(5.0f, 10.0f);
+  const DlMatrix child_transform = DlMatrix::MakeTranslation({12.0f, 24.0f});
+  const DlRect child_clip_rect = DlRect::MakeLTRB(20.0f, 30.0f, 180.0f, 260.0f);
+  const DlRect child_bounds = DlRect::MakeLTRB(30.0f, 40.0f, 170.0f, 240.0f);
+  const DlPath child_path = DlPath::MakeRect(child_bounds);
+
+  auto stretch_filter =
+      DlImageFilter::MakeStretch(0.0f, 0.3f, 0.7f, local_stretch_bounds);
+  auto mock_layer = std::make_shared<MockLayer>(child_path);
+  auto clip_layer =
+      std::make_shared<ClipRectLayer>(child_clip_rect, Clip::kHardEdge);
+  auto transform_layer = std::make_shared<TransformLayer>(child_transform);
+  auto filter_layer =
+      std::make_shared<ImageFilterLayer>(stretch_filter, layer_offset);
+
+  clip_layer->Add(mock_layer);
+  transform_layer->Add(clip_layer);
+  filter_layer->Add(transform_layer);
+
+  preroll_context()->state_stack.set_preroll_delegate(initial_transform);
+  filter_layer->Preroll(preroll_context());
+
+  const DlMatrix expected_filter_ctm =
+      initial_transform * DlMatrix::MakeTranslation(layer_offset);
+  const DlRect expected_global_stretch_rect =
+      local_stretch_bounds.TransformAndClipBounds(expected_filter_ctm);
+
+  MutatorsStack expected_mutators;
+  expected_mutators.PushTransform(DlMatrix::MakeTranslation(layer_offset));
+  expected_mutators.PushStretchEffect(0.0f, 0.3f, 0.7f,
+                                      expected_global_stretch_rect);
+  expected_mutators.PushTransform(child_transform);
+  expected_mutators.PushClipRect(child_clip_rect);
+  EXPECT_EQ(mock_layer->parent_mutators(), expected_mutators);
+
+  // Verify EmbeddedViewParams::mappedBoundingRect() and stretchedBoundingRect()
+  // with this mutators stack.
+  const DlMatrix pv_ctm = expected_filter_ctm * child_transform;
+  EmbeddedViewParams params(pv_ctm, DlSize(200.0f, 200.0f), expected_mutators);
+  const DlRect unstretched = params.finalBoundingRect();
+  const DlRect mapped = params.mappedBoundingRect();
+  const DlRect unioned = params.stretchedBoundingRect();
+
+  EXPECT_GT(mapped.GetTop(), unstretched.GetTop());
+  EXPECT_GT(mapped.GetBottom(), unstretched.GetBottom());
+  EXPECT_EQ(unioned, unstretched.Union(mapped));
 }
 
 }  // namespace testing

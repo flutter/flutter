@@ -25,6 +25,7 @@
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_playground.h"
 #include "impeller/display_list/dl_text_impeller.h"
+#include "impeller/display_list/image_filter.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
@@ -1889,6 +1890,37 @@ TEST_P(DisplayListTest,
   ASSERT_TRUE(it != backdrop_data.end());
   EXPECT_FALSE(it->second.coverage_union.IsEmpty());
   EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 1000, 1000));
+}
+
+TEST_P(DisplayListTest, WrapInputConvertsDlStretchImageFilter) {
+  const flutter::DlRect dl_stretch_bounds =
+      flutter::DlRect::MakeLTRB(20.0f, 40.0f, 320.0f, 640.0f);
+  flutter::DlStretchImageFilter dl_filter(0.15f, -0.25f, 0.7f,
+                                          dl_stretch_bounds);
+
+  // Use an input rect larger than stretch_bounds (simulating Clip.none overflow)
+  // to verify that GetCoverage returns the input coverage without inflating or
+  // clipping to stretch_bounds, while GetSourceCoverage unions with the
+  // transformed stretch_bounds.
+  const Rect input_rect = Rect::MakeLTRB(0.0f, 0.0f, 400.0f, 800.0f);
+  auto wrapped =
+      WrapInput(GetContentContext(), &dl_filter, FilterInput::Make(input_rect));
+  ASSERT_NE(wrapped, nullptr);
+
+  const Matrix effect_transform = Matrix::MakeScale({2.0f, 2.0f, 1.0f});
+  wrapped->SetEffectTransform(effect_transform);
+
+  Entity entity;
+  entity.SetTransform(effect_transform);
+  std::optional<Rect> coverage = wrapped->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), input_rect);
+
+  std::optional<Rect> source_coverage = wrapped->GetSourceCoverage(
+      effect_transform, Rect::MakeLTRB(40.0f, 800.0f, 640.0f, 1280.0f));
+  ASSERT_TRUE(source_coverage.has_value());
+  EXPECT_EQ(source_coverage.value(),
+            Rect::MakeLTRB(40.0f, 80.0f, 640.0f, 1280.0f));
 }
 
 }  // namespace testing

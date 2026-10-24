@@ -149,6 +149,14 @@ std::shared_ptr<FilterContents> WrapInput(ContentContext& renderer,
                                                runtime_filter->uniform_data(),
                                                std::move(texture_inputs));
     }
+    case flutter::DlImageFilterType::kStretch: {
+      const flutter::DlStretchImageFilter* stretch_filter = filter->asStretch();
+      FML_DCHECK(stretch_filter);
+      return FilterContents::MakeStretch(
+          input, stretch_filter->overscroll_x(), stretch_filter->overscroll_y(),
+          stretch_filter->interpolation_strength(),
+          stretch_filter->stretch_bounds());
+    }
   }
   FML_UNREACHABLE();
 }
