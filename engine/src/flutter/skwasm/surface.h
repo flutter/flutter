@@ -66,14 +66,16 @@ class Surface {
   uint32_t RenderPictures(flutter::DisplayList** picture,
                           int count,
                           int width,
-                          int height);
+                          int height,
+                          bool capture_image_bitmaps);
   void OnRenderComplete(uint32_t callback_id, SkwasmObject image_bitmap);
   void RenderPicturesOnWorker(sk_sp<flutter::DisplayList>* picture,
                               int picture_count,
                               int width,
                               int height,
                               uint32_t callback_id,
-                              double raster_start);
+                              double raster_start,
+                              bool capture_image_bitmaps);
 
   // Image Rasterization
   uint32_t RasterizeImage(flutter::DlImage* image, ImageByteFormat format);
@@ -101,9 +103,6 @@ class Surface {
   void RecreateSurface();
 
   CallbackHandler* callback_handler_ = nullptr;
-
-  // Main thread only
-  uint32_t current_callback_id_ = 0;
 
   int canvas_width_ = 0;
   int canvas_height_ = 0;

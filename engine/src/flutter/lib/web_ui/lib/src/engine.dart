@@ -52,6 +52,7 @@ export 'engine/clipboard.dart';
 export 'engine/compositing/canvas_provider.dart';
 export 'engine/compositing/composition.dart';
 export 'engine/compositing/display_canvas_factory.dart';
+export 'engine/compositing/hybrid_canvas_rasterizer.dart';
 export 'engine/compositing/multi_surface_rasterizer.dart';
 export 'engine/compositing/offscreen_canvas_rasterizer.dart';
 export 'engine/compositing/rasterizer.dart';
