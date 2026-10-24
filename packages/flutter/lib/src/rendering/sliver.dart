@@ -1118,7 +1118,9 @@ class SliverPhysicalParentData extends ParentData {
   /// If null or zero, the child is inflexible and determines its own size in the cross axis.
   /// If non-zero, the amount of space the child can occupy in the cross axis is
   /// determined by dividing the free space (after placing the inflexible children)
-  /// according to the flex factors of the flexible children.
+  /// according to the flex factors of the flexible children. If the inflexible
+  /// children consume all of the available cross axis space, flexible children
+  /// receive zero extent.
   ///
   /// This value is only used by the [SliverCrossAxisGroup] widget to determine
   /// how to allocate its [SliverConstraints.crossAxisExtent] to its children.
