@@ -1265,8 +1265,15 @@ MakeRenderTargetFromBackingStoreImpeller(
       resolve_tex_desc, metal->texture.texture,
       [callback = metal->texture.destruction_callback,
        user_data = metal->texture.user_data]() { callback(user_data); });
-  if (!resolve_tex) {
-    FML_LOG(ERROR) << "Could not wrap embedder supplied Metal render texture.";
+  if (!resolve_tex || !resolve_tex->IsValid()) {
+    // A wrapped texture is invalid when the embedder's texture disagrees with
+    // the requested backing store size. Rendering into it would leave the
+    // render target without a color attachment and crash the raster thread
+    // (https://github.com/flutter/flutter/issues/185394); skip the layer.
+    FML_LOG(ERROR) << "Could not wrap embedder supplied Metal render texture "
+                      "(requested "
+                   << size.width << "x" << size.height
+                   << ", texture is invalid or has a different size).";
     return nullptr;
   }
 
@@ -1286,7 +1293,7 @@ MakeRenderTargetFromBackingStoreImpeller(
   auto msaa_tex =
       aiks_context->GetContext()->GetResourceAllocator()->CreateTexture(
           msaa_tex_desc);
-  if (!msaa_tex) {
+  if (!msaa_tex || !msaa_tex->IsValid()) {
     FML_LOG(ERROR) << "Could not allocate MSAA color texture.";
     return nullptr;
   }
