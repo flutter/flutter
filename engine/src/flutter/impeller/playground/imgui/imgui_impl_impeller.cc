@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <climits>
 #include <memory>
-#include <sstream>
+#include <string>
 #include <vector>
 
 #include "fml/mapping.h"
@@ -256,10 +256,9 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
           clip_rect = visible_clip.value();
         }
 
-        std::stringstream label;
-        label << "ImGui draw list " << draw_list_i << " (command " << cmd_i
-              << ")";
-        render_pass.SetCommandLabel(label.str());
+        render_pass.SetCommandLabel("ImGui draw list " +
+                                    std::to_string(draw_list_i) + " (command " +
+                                    std::to_string(cmd_i) + ")");
         render_pass.SetViewport(viewport);
         render_pass.SetScissor(impeller::IRect32::RoundOut(clip_rect));
         render_pass.SetPipeline(bd->pipeline);

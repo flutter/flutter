@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 /// Symbols pulled in by `std::format` and `libc++`'s Ryu floating-point tables
-/// (~200 KiB in engine binaries). Use `std::stringstream` or `fml::StringPrintf`
+/// (~200 KiB in engine binaries). Use `std::stringstream` or `std::to_string`
 /// instead.
 const List<String> forbiddenSymbolSubstrings = <String>[
   'std::__fl::__format',
@@ -51,7 +51,7 @@ bool checkForbiddenNativeSymbols({required String nmPath, required String binary
     if (found.length > 20) {
       stderr.writeln('  ... and ${found.length - 20} more.');
     }
-    stderr.writeln('Use std::stringstream or fml::StringPrintf instead of std::format.');
+    stderr.writeln('Use std::stringstream or std::to_string instead of std::format.');
     return false;
   }
 
