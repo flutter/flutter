@@ -313,6 +313,23 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
+    // Collect the text-bearing widgets up front, then match each to a semantics
+    // node below using two conditions: the node's label/value must *contain* the
+    // widget's rendered text, and the widget must paint within the node's bounds.
+    //
+    // Containment (rather than the previous exact match) is what catches a
+    // Semantics widget that contributes an extra label merging with a descendant
+    // Text — the merged label "Custom label\nVisible text" never equals any
+    // single Text's string, so the old code skipped the check. It also keeps
+    // purely decorative text — which contributes to no node's label/value — out
+    // of the check. The geometric bound disambiguates other widgets that merely
+    // share the same string. See https://github.com/flutter/flutter/issues/180081.
+    final List<Element> textElements = find
+        .byWidgetPredicate((Widget widget) => widget is Text || widget is EditableText)
+        .hitTestable()
+        .evaluate()
+        .toList();
+
     var result = const Evaluation.pass();
     for (final RenderView renderView in tester.binding.renderViews) {
       final layer = renderView.debugLayer! as OffsetLayer;
@@ -329,7 +346,31 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return data;
       });
 
-      result += await _evaluateNode(root, tester, image, byteData!, renderView);
+      // Precompute each text element's painted bounds in screen coordinates once
+      // per view. Mapping a render object to screen space walks the render tree
+      // (getTransformTo, O(tree depth)); doing it here rather than for every
+      // (node, element) pair keeps the per-node geometric check O(1).
+      final elementScreenBounds = <Element, Rect>{};
+      for (final element in textElements) {
+        final Rect? screenBounds = _elementScreenBounds(element, renderView);
+        if (screenBounds != null) {
+          elementScreenBounds[element] = screenBounds;
+        }
+      }
+
+      // Tracks which text elements have already been checked within this view,
+      // so that each one is evaluated against a single semantics node (the
+      // deepest one that owns it) and not again for its ancestors.
+      final evaluatedElements = <Element>{};
+      result += await _evaluateNode(
+        root,
+        tester,
+        image,
+        byteData!,
+        renderView,
+        elementScreenBounds,
+        evaluatedElements,
+      );
     }
 
     return result;
@@ -341,6 +382,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
+    Map<Element, Rect> elementScreenBounds,
+    Set<Element> evaluatedElements,
   ) async {
     var result = const Evaluation.pass();
 
@@ -361,17 +404,93 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       return true;
     });
     for (final child in children) {
-      result += await _evaluateNode(child, tester, image, byteData, renderView);
+      result += await _evaluateNode(
+        child,
+        tester,
+        image,
+        byteData,
+        renderView,
+        elementScreenBounds,
+        evaluatedElements,
+      );
     }
     if (shouldSkipNode(data)) {
       return result;
     }
-    final String text = data.label.isEmpty ? data.value : data.label;
-    final Iterable<Element> elements = find.text(text).hitTestable().evaluate();
-    for (final element in elements) {
+    // Match each text-bearing widget to this node when (a) its rendered text is
+    // part of the node's accessibility label or value, and (b) it paints within
+    // the node's bounds. (a) keeps decorative text and labels that fully replace
+    // the visible text out of the check; (b) disambiguates other widgets that
+    // happen to share the same string. Children are visited first, so the
+    // deepest (most specific) node claims each element via [evaluatedElements].
+    final Rect nodeBounds = _nodeScreenBounds(node);
+    for (final MapEntry<Element, Rect> entry in elementScreenBounds.entries) {
+      final Element element = entry.key;
+      if (evaluatedElements.contains(element)) {
+        continue;
+      }
+      final String? text = _renderedText(element);
+      if (text == null || text.isEmpty) {
+        continue;
+      }
+      if (!data.label.contains(text) && !data.value.contains(text)) {
+        continue;
+      }
+      final Rect intersection = nodeBounds.intersect(entry.value);
+      if (intersection.width <= 0 || intersection.height <= 0) {
+        continue;
+      }
+      evaluatedElements.add(element);
       result += await _evaluateElement(node, element, tester, image, byteData, renderView);
     }
     return result;
+  }
+
+  /// The plain rendered text of a [Text] or [EditableText] [element], or null if
+  /// it exposes no text string.
+  String? _renderedText(Element element) {
+    final Widget widget = element.widget;
+    if (widget is Text) {
+      return widget.data ?? widget.textSpan?.toPlainText();
+    }
+    if (widget is EditableText) {
+      return widget.controller.text;
+    }
+    return null;
+  }
+
+  /// [element]'s painted bounds in screen coordinates, or null if it has no
+  /// [RenderBox] and therefore cannot be matched against a semantics node.
+  Rect? _elementScreenBounds(Element element, RenderView renderView) {
+    final RenderObject? renderBox = element.renderObject;
+    if (renderBox is! RenderBox) {
+      return null;
+    }
+
+    final Matrix4 globalTransform = renderBox.getTransformTo(null);
+
+    // The semantics node transform will include root view transform, which is
+    // not included in renderBox.getTransformTo(null). Manually multiply the
+    // root transform to the global transform.
+    final rootTransform = Matrix4.identity();
+    renderView.applyPaintTransform(renderView.child!, rootTransform);
+    rootTransform.multiply(globalTransform);
+    return MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
+  }
+
+  /// [node]'s rect mapped into the same screen coordinate space used by
+  /// [_elementScreenBounds], by applying its own and its ancestors' transforms.
+  Rect _nodeScreenBounds(SemanticsNode node) {
+    Rect nodeBounds = node.rect;
+    SemanticsNode? current = node;
+    while (current != null) {
+      final Matrix4? transform = current.transform;
+      if (transform != null) {
+        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
+      }
+      current = current.parent;
+    }
+    return nodeBounds;
   }
 
   Future<Evaluation> _evaluateElement(
@@ -386,42 +505,16 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     late bool isBold;
     double? fontSize;
 
-    late final Rect screenBounds;
-    late final Rect paintBoundsWithOffset;
-
     final RenderObject? renderBox = element.renderObject;
     if (renderBox is! RenderBox) {
       throw StateError('Unexpected renderObject type: $renderBox');
     }
 
     final Matrix4 globalTransform = renderBox.getTransformTo(null);
-    paintBoundsWithOffset = MatrixUtils.transformRect(
+    final Rect paintBoundsWithOffset = MatrixUtils.transformRect(
       globalTransform,
       renderBox.paintBounds.inflate(4.0),
     );
-
-    // The semantics node transform will include root view transform, which is
-    // not included in renderBox.getTransformTo(null). Manually multiply the
-    // root transform to the global transform.
-    final rootTransform = Matrix4.identity();
-    renderView.applyPaintTransform(renderView.child!, rootTransform);
-    rootTransform.multiply(globalTransform);
-    screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
-    Rect nodeBounds = node.rect;
-    SemanticsNode? current = node;
-    while (current != null) {
-      final Matrix4? transform = current.transform;
-      if (transform != null) {
-        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
-      }
-      current = current.parent;
-    }
-    final Rect intersection = nodeBounds.intersect(screenBounds);
-    if (intersection.width <= 0 || intersection.height <= 0) {
-      // Skip this element since it doesn't correspond to the given semantic
-      // node.
-      return const Evaluation.pass();
-    }
 
     final Widget widget = element.widget;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
