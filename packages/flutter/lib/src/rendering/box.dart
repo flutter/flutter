@@ -2033,13 +2033,15 @@ abstract class RenderBox extends RenderObject {
       _computingThisDryLayout = true;
       return true;
     }());
-    final Size result = computeDryLayout(constraints);
-    assert(() {
-      assert(_computingThisDryLayout);
-      _computingThisDryLayout = false;
-      return true;
-    }());
-    return result;
+    try {
+      return computeDryLayout(constraints);
+    } finally {
+      assert(() {
+        assert(_computingThisDryLayout);
+        _computingThisDryLayout = false;
+        return true;
+      }());
+    }
   }
 
   /// Computes the value returned by [getDryLayout]. Do not call this
@@ -2142,13 +2144,15 @@ abstract class RenderBox extends RenderObject {
       _computingThisDryBaseline = true;
       return true;
     }());
-    final result = BaselineOffset(computeDryBaseline(pair.$1, pair.$2));
-    assert(() {
-      assert(_computingThisDryBaseline);
-      _computingThisDryBaseline = false;
-      return true;
-    }());
-    return result;
+    try {
+      return BaselineOffset(computeDryBaseline(pair.$1, pair.$2));
+    } finally {
+      assert(() {
+        assert(_computingThisDryBaseline);
+        _computingThisDryBaseline = false;
+        return true;
+      }());
+    }
   }
 
   /// Computes the value returned by [getDryBaseline].
@@ -2665,7 +2669,15 @@ abstract class RenderBox extends RenderObject {
           String name,
           double constraint,
         ) {
-          final double result = function(constraint);
+          final double result;
+          try {
+            result = function(constraint);
+          } catch (exception, stack) {
+            Error.throwWithStackTrace(
+              _debugCheckingIntrinsicsError('$name($constraint)', exception),
+              stack,
+            );
+          }
           if (result < 0) {
             failures.add(
               ErrorDescription(' * $name($constraint) returned a negative value: $result'),
@@ -2753,6 +2765,11 @@ abstract class RenderBox extends RenderObject {
         final Size dryLayoutSize;
         try {
           dryLayoutSize = getDryLayout(constraints);
+        } catch (exception, stack) {
+          Error.throwWithStackTrace(
+            _debugCheckingIntrinsicsError('getDryLayout($constraints)', exception),
+            stack,
+          );
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
@@ -2793,9 +2810,29 @@ abstract class RenderBox extends RenderObject {
         _debugDryLayoutCalculationValid = true;
         final double? dryBaseline;
         final double? realBaseline;
+        var method = 'getDryBaseline($constraints, $baseline)';
         try {
           dryBaseline = getDryBaseline(constraints, baseline);
+          method = 'getDistanceToBaseline($baseline, onlyReal: true)';
           realBaseline = getDistanceToBaseline(baseline, onlyReal: true);
+        } catch (exception, stack) {
+          // This check runs from debugPaint, outside of the try/catch that
+          // reports paint exceptions, so report the error here instead of
+          // throwing it.
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: _debugCheckingIntrinsicsError(method, exception),
+              stack: stack,
+              library: 'rendering library',
+              context: ErrorDescription(
+                'while verifying the baselines of ${objectRuntimeType(this, 'RenderBox')}',
+              ),
+              informationCollector: () => <DiagnosticsNode>[
+                describeForError('The RenderBox being verified was'),
+              ],
+            ),
+          );
+          return true;
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
@@ -2839,6 +2876,52 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
+  }
+
+  /// Creates the error thrown when one of the intrinsic dimension, dry layout,
+  /// or baseline methods throws while [RenderObject.debugCheckingIntrinsics] is
+  /// true, explaining why the method was called and how to address it.
+  ///
+  /// The `method` argument describes the call that threw, including its
+  /// arguments, e.g. `getMinIntrinsicWidth(Infinity)`.
+  FlutterError _debugCheckingIntrinsicsError(String method, Object exception) {
+    assert(RenderObject.debugCheckingIntrinsics);
+    final String type = objectRuntimeType(this, 'RenderBox');
+    return FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('$type.$method threw an exception during a debug-only consistency check.'),
+      ErrorDescription(
+        'Because debugCheckIntrinsicSizes is true, the framework calls the intrinsic '
+        'dimension, dry layout, and dry baseline methods of every RenderBox after it is '
+        'laid out, with RenderObject.debugCheckingIntrinsics set to true, to verify that '
+        'they are consistent with its actual layout. These checks only run in debug mode.',
+      ),
+      ErrorDescription(
+        'The exception may have been thrown by a descendant of this $type. '
+        'See the stack trace to find the method that threw.',
+      ),
+      // Use the full text of the original exception: a FlutterError would
+      // otherwise only be described by its type.
+      DiagnosticsProperty<String>(
+        'The original exception was',
+        '$exception',
+        style: DiagnosticsTreeStyle.errorProperty,
+      ),
+      ErrorHint(
+        'If the original error describes a problem in your widget tree, fix that first: '
+        'this check only re-ran the same computation.',
+      ),
+      ErrorHint(
+        'If you are writing your own RenderBox subclass, make sure its intrinsic dimension, '
+        'computeDryLayout, and computeDryBaseline methods work for any constraints. If a value '
+        'genuinely cannot be computed, skip the assertion while '
+        'RenderObject.debugCheckingIntrinsics is true (as RenderViewport and LayoutBuilder do), '
+        'or call debugCannotComputeDryLayout from computeDryLayout or computeDryBaseline.',
+      ),
+      ErrorHint(
+        'Otherwise, this may be a bug in the framework. Please report it: '
+        'https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+      ),
+    ]);
   }
 
   @override
