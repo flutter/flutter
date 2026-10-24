@@ -20,6 +20,49 @@ class ContextVK;
 class CommandPoolRecyclerVK;
 
 //------------------------------------------------------------------------------
+/// @brief      Holds a |vk::CommandPool| and its collected command buffers
+///             while they wait to be reset and recycled.
+///
+/// A |CommandPoolVK| creates one of these when it is destroyed and hands it to
+/// the |ResourceManagerVK|, whose thread destroys it, which returns the pool to
+/// the |CommandPoolRecyclerVK|. If the device is gone by then, the handles are
+/// released without any Vulkan calls, like |CommandPoolVK| does.
+///
+/// Visible for testing.
+class BackgroundCommandPoolVK final {
+ public:
+  BackgroundCommandPoolVK(BackgroundCommandPoolVK&&) = default;
+
+  // The recycler also recycles command buffers that were never used, up to a
+  // limit of 16 per frame. This number was somewhat arbitrarily chosen.
+  static constexpr size_t kUnusedCommandBufferLimit = 16u;
+
+  explicit BackgroundCommandPoolVK(
+      vk::UniqueCommandPool&& pool,
+      std::vector<vk::UniqueCommandBuffer>&& buffers,
+      size_t unused_count,
+      std::weak_ptr<CommandPoolRecyclerVK> recycler,
+      std::weak_ptr<DeviceHolderVK> device_holder);
+
+  ~BackgroundCommandPoolVK();
+
+ private:
+  BackgroundCommandPoolVK(const BackgroundCommandPoolVK&) = delete;
+
+  BackgroundCommandPoolVK& operator=(const BackgroundCommandPoolVK&) = delete;
+
+  vk::UniqueCommandPool pool_;
+
+  // These are retained because the destructor of the C++ UniqueCommandBuffer
+  // wrapper type will attempt to reset the cmd buffer, and doing so may be a
+  // thread safety violation as this may happen on the fence waiter thread.
+  std::vector<vk::UniqueCommandBuffer> buffers_;
+  const size_t unused_count_;
+  std::weak_ptr<CommandPoolRecyclerVK> recycler_;
+  std::weak_ptr<DeviceHolderVK> device_holder_;
+};
+
+//------------------------------------------------------------------------------
 /// @brief      Manages the lifecycle of a single |vk::CommandPool|.
 ///
 /// A |vk::CommandPool| is expensive to create and reset. This class manages
