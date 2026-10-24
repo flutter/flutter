@@ -160,6 +160,35 @@ TEST(MutatorsStack, PushBackdropFilter) {
   ASSERT_EQ(i, num_of_mutators);
 }
 
+TEST(MutatorsStack, PushStretchEffect) {
+  MutatorsStack stack;
+  DlRect stretch_rect = DlRect::MakeLTRB(10.0f, 20.0f, 310.0f, 620.0f);
+  stack.PushStretchEffect(0.15f, -0.25f, 0.7f, stretch_rect);
+  auto iter = stack.Bottom();
+  ASSERT_EQ(iter->get()->GetType(), MutatorType::kStretchEffect);
+  const auto& mutation = iter->get()->GetStretchEffectMutation();
+  EXPECT_FLOAT_EQ(mutation.overscroll_x, 0.15f);
+  EXPECT_FLOAT_EQ(mutation.overscroll_y, -0.25f);
+  EXPECT_FLOAT_EQ(mutation.interpolation_strength, 0.7f);
+  EXPECT_EQ(mutation.stretch_rect, stretch_rect);
+}
+
+TEST(MutatorsStack, StretchedBoundingRectExpandsWithStretchMutation) {
+  MutatorsStack stack;
+  stack.PushTransform(DlMatrix::MakeTranslation({50.0f, 100.0f}));
+  stack.PushStretchEffect(0.0f, 0.3f, 0.7f,
+                          DlRect::MakeLTRB(0.0f, 0.0f, 300.0f, 600.0f));
+  EmbeddedViewParams params(DlMatrix::MakeTranslation({50.0f, 100.0f}),
+                            DlSize(200.0f, 200.0f), stack);
+  EXPECT_EQ(params.finalBoundingRect(),
+            DlRect::MakeLTRB(50.0f, 100.0f, 250.0f, 300.0f));
+  DlRect stretched = params.stretchedBoundingRect();
+  EXPECT_FLOAT_EQ(stretched.GetLeft(), 50.0f);
+  EXPECT_FLOAT_EQ(stretched.GetTop(), 100.0f);
+  EXPECT_FLOAT_EQ(stretched.GetRight(), 250.0f);
+  EXPECT_GT(stretched.GetBottom(), 300.0f);
+}
+
 TEST(MutatorsStack, Pop) {
   MutatorsStack stack;
   DlMatrix matrix;
@@ -304,6 +333,11 @@ TEST(Mutator, CopyConstructor) {
   Mutator mutator6 = Mutator(filter, DlRect());
   Mutator copy6 = Mutator(mutator6);
   ASSERT_TRUE(mutator6 == copy6);
+
+  Mutator mutator7 = Mutator(
+      StretchEffectMutation(0.1f, -0.2f, 0.7f, DlRect::MakeLTRB(0, 0, 300, 600)));
+  Mutator copy7 = Mutator(mutator7);
+  ASSERT_TRUE(mutator7 == copy7);
 }
 
 TEST(Mutator, Equality) {
@@ -343,6 +377,12 @@ TEST(Mutator, Equality) {
   Mutator mutator6 = Mutator(filter1, DlRect());
   Mutator other_mutator6 = Mutator(filter2, DlRect());
   ASSERT_TRUE(mutator6 == other_mutator6);
+
+  Mutator mutator7 = Mutator(
+      StretchEffectMutation(0.1f, 0.2f, 0.7f, DlRect::MakeLTRB(0, 0, 300, 600)));
+  Mutator other_mutator7 = Mutator(
+      StretchEffectMutation(0.1f, 0.2f, 0.7f, DlRect::MakeLTRB(0, 0, 300, 600)));
+  ASSERT_TRUE(mutator7 == other_mutator7);
 }
 
 TEST(Mutator, UnEquality) {
@@ -363,6 +403,12 @@ TEST(Mutator, UnEquality) {
   Mutator mutator3 = Mutator(filter, DlRect());
   Mutator other_mutator3 = Mutator(filter2, DlRect());
   ASSERT_TRUE(mutator3 != other_mutator3);
+
+  Mutator mutator4 = Mutator(
+      StretchEffectMutation(0.1f, 0.2f, 0.7f, DlRect::MakeLTRB(0, 0, 300, 600)));
+  Mutator other_mutator4 = Mutator(
+      StretchEffectMutation(0.1f, 0.3f, 0.7f, DlRect::MakeLTRB(0, 0, 300, 600)));
+  ASSERT_TRUE(mutator4 != other_mutator4);
 }
 
 }  // namespace testing

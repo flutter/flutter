@@ -30,7 +30,54 @@ public class FlutterMutatorsStack {
     CLIP_RRECT,
     CLIP_PATH,
     TRANSFORM,
-    OPACITY
+    OPACITY,
+    STRETCH_EFFECT
+  }
+
+  /**
+   * Represents an overscroll stretch effect mutation on a {@link
+   * io.flutter.plugin.platform.PlatformView}.
+   *
+   * <p>The stretch remaps content within {@code rect} (the global screen bounds of the stretched
+   * viewport container) according to the normalized overscroll amounts.
+   */
+  public static class FlutterStretchEffect {
+    public final float overscrollX;
+    public final float overscrollY;
+    public final float interpolationStrength;
+    @NonNull public final RectF rect;
+
+    public FlutterStretchEffect(
+        float overscrollX,
+        float overscrollY,
+        float interpolationStrength,
+        @NonNull RectF rect) {
+      this.overscrollX = overscrollX;
+      this.overscrollY = overscrollY;
+      this.interpolationStrength = interpolationStrength;
+      this.rect = rect;
+    }
+
+    public float getOverscrollX() {
+      return overscrollX;
+    }
+
+    public float getOverscrollY() {
+      return overscrollY;
+    }
+
+    public float getInterpolationStrength() {
+      return interpolationStrength;
+    }
+
+    @NonNull
+    public RectF getRect() {
+      return rect;
+    }
+
+    public boolean isActive() {
+      return (Math.abs(overscrollX) > 1e-4f || Math.abs(overscrollY) > 1e-4f) && !rect.isEmpty();
+    }
   }
 
   /**
@@ -47,6 +94,7 @@ public class FlutterMutatorsStack {
     @Nullable private Path path;
     @Nullable private float[] radiis;
     private float opacity = 1.f;
+    @Nullable private FlutterStretchEffect stretchEffect;
 
     private FlutterMutatorType type;
 
@@ -104,6 +152,17 @@ public class FlutterMutatorsStack {
     }
 
     /**
+     * Initialize a stretch effect mutator.
+     *
+     * @param stretchEffect the stretch effect mutation to apply.
+     */
+    public FlutterMutator(@NonNull FlutterStretchEffect stretchEffect) {
+      this.type = FlutterMutatorType.STRETCH_EFFECT;
+      this.stretchEffect = stretchEffect;
+      this.rect = stretchEffect.getRect();
+    }
+
+    /**
      * Get the mutator type.
      *
      * @return The type of the mutator.
@@ -147,6 +206,18 @@ public class FlutterMutatorsStack {
     public float getOpacity() {
       return opacity;
     }
+
+    /**
+     * Get the stretch effect of the mutator if the {@link #getType()} returns {@link
+     * FlutterMutatorType#STRETCH_EFFECT}.
+     *
+     * @return the {@link FlutterStretchEffect} if the type is {@link
+     *     FlutterMutatorType#STRETCH_EFFECT}; otherwise null.
+     */
+    @Nullable
+    public FlutterStretchEffect getStretchEffect() {
+      return stretchEffect;
+    }
   }
 
   private @NonNull List<FlutterMutator> mutators;
@@ -154,6 +225,7 @@ public class FlutterMutatorsStack {
   private List<Path> finalClippingPaths;
   private Matrix finalMatrix;
   private float finalOpacity;
+  @Nullable private FlutterStretchEffect finalStretchEffect;
 
   /** Initialize the mutator stack. */
   public FlutterMutatorsStack() {
@@ -161,6 +233,7 @@ public class FlutterMutatorsStack {
     finalMatrix = new Matrix();
     finalClippingPaths = new ArrayList<Path>();
     finalOpacity = 1.f;
+    finalStretchEffect = null;
   }
 
   /**
@@ -239,6 +312,38 @@ public class FlutterMutatorsStack {
   }
 
   /**
+   * Push a stretch effect {@link FlutterMutatorsStack.FlutterMutator} to the stack.
+   *
+   * <p>The {@code left}, {@code top}, {@code right}, and {@code bottom} bounds are already mapped
+   * into global screen coordinates by the engine's {@code ImageFilterEntry::update_mutators}.
+   *
+   * @param overscrollX normalized horizontal overscroll amount.
+   * @param overscrollY normalized vertical overscroll amount.
+   * @param interpolationStrength curve interpolation strength.
+   * @param left left bound of the stretch container in global physical pixels.
+   * @param top top bound of the stretch container in global physical pixels.
+   * @param right right bound of the stretch container in global physical pixels.
+   * @param bottom bottom bound of the stretch container in global physical pixels.
+   */
+  public void pushStretchEffect(
+      float overscrollX,
+      float overscrollY,
+      float interpolationStrength,
+      float left,
+      float top,
+      float right,
+      float bottom) {
+    RectF rect = new RectF(left, top, right, bottom);
+    FlutterStretchEffect stretchEffect =
+        new FlutterStretchEffect(overscrollX, overscrollY, interpolationStrength, rect);
+    FlutterMutator mutator = new FlutterMutator(stretchEffect);
+    mutators.add(mutator);
+    if (stretchEffect.isActive()) {
+      finalStretchEffect = stretchEffect;
+    }
+  }
+
+  /**
    * Get a list of all the raw mutators. The 0 index of the returned list is the top of the stack.
    */
   public List<FlutterMutator> getMutators() {
@@ -272,5 +377,14 @@ public class FlutterMutatorsStack {
    */
   public float getFinalOpacity() {
     return finalOpacity;
+  }
+
+  /**
+   * Returns the final active stretch effect to apply to the view, or null if no stretch effect is
+   * active.
+   */
+  @Nullable
+  public FlutterStretchEffect getFinalStretchEffect() {
+    return finalStretchEffect;
   }
 }

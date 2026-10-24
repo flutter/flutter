@@ -1358,6 +1358,40 @@ void main() {
     expect(tester.layers, contains(isA<ImageFilterLayer>()));
   });
 
+  testWidgets('StretchEffect configures ImageFilterLayer with ImageFilter.stretch', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          width: 300.0,
+          height: 500.0,
+          child: StretchEffect(
+            stretchStrength: 0.25,
+            axis: Axis.vertical,
+            child: ColoredBox(color: Color(0xFF00FF00)),
+          ),
+        ),
+      ),
+    );
+
+    if (shaderSupported) {
+      final ImageFilterLayer layer = tester.layers.whereType<ImageFilterLayer>().single;
+      expect(
+        layer.imageFilter,
+        equals(
+          ui.ImageFilter.stretch(
+            overscrollY: 0.25,
+            bounds: const Rect.fromLTWH(0.0, 0.0, 300.0, 500.0),
+          ),
+        ),
+      );
+    } else {
+      expect(tester.layers, contains(isA<TransformLayer>()));
+    }
+  });
+
   testWidgets(
     'Stretching animation completes after fling under scroll physics with high friction',
     (WidgetTester tester) async {

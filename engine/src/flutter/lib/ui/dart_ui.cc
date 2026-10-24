@@ -215,6 +215,7 @@ typedef CanvasPath Path;
   V(ImageFilter, initColorFilter)                \
   V(ImageFilter, initComposeFilter)              \
   V(ImageFilter, initShader)                     \
+  V(ImageFilter, initStretch)                    \
   V(ImageFilter, initMatrix)                     \
   V(ImageShader, dispose)                        \
   V(ImageShader, initWithImage)                  \

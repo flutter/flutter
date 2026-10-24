@@ -666,6 +666,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         // TODO(https://github.com/flutter/flutter/issues/179127)
         break;
       }
+      case flutter::MutatorType::kStretchEffect:
+        break;
     }
     ++iter;
   }

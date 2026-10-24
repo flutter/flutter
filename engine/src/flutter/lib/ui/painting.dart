@@ -4486,6 +4486,47 @@ abstract class ImageFilter {
     return _FragmentShaderImageFilter(shader, filterQuality);
   }
 
+  /// Creates an image filter that applies an overscroll stretch effect.
+  ///
+  /// The [overscrollX] and [overscrollY] arguments specify the normalized
+  /// overscroll pull distance along the horizontal and vertical axes, typically
+  /// in the range `[-1.0, 1.0]` with `0.0` producing no stretch:
+  ///  * Positive values (`> 0.0`) anchor the leading (left or top) edge of
+  ///    [bounds] and stretch content toward the trailing (right or bottom) edge.
+  ///  * Negative values (`< 0.0`) anchor the trailing (right or bottom) edge of
+  ///    [bounds] and stretch content toward the leading (left or top) edge.
+  ///
+  /// The [interpolationStrength] argument controls the non-linear falloff of
+  /// the stretch distortion across [bounds] and defaults to `0.7`.
+  ///
+  /// The required [bounds] argument specifies the scroll or stretch container
+  /// rectangle in the local coordinate space of the canvas or layer where this
+  /// filter is applied. Coordinates inside [bounds] are normalized to `[0, 1]`
+  /// before evaluating the stretch curve, while content outside [bounds] is
+  /// left unstretched. Under a rotated canvas transform, [bounds] is mapped to
+  /// its axis-aligned bounding box in device space and the stretch acts along
+  /// the device axes.
+  ///
+  /// > [!WARNING]
+  /// > This filter is only supported when using the Impeller rendering engine, so
+  /// > callers should gate its usage on [isShaderFilterSupported]. On web targets,
+  /// > calling this constructor throws an [UnsupportedError]; on the Skia backend,
+  /// > the canvas image filter is a no-op while platform view mutators are still
+  /// > forwarded by [SceneBuilder.pushImageFilter].
+  factory ImageFilter.stretch({
+    double overscrollX = 0.0,
+    double overscrollY = 0.0,
+    double interpolationStrength = 0.7,
+    required Rect bounds,
+  }) {
+    return _StretchImageFilter(
+      overscrollX: overscrollX,
+      overscrollY: overscrollY,
+      interpolationStrength: interpolationStrength,
+      bounds: bounds,
+    );
+  }
+
   /// Whether [ImageFilter.shader] is supported on the current backend.
   ///
   /// > [!WARNING]
@@ -4713,6 +4754,48 @@ class _FragmentShaderImageFilter implements ImageFilter {
   int get hashCode => Object.hash(shader, filterQuality);
 }
 
+class _StretchImageFilter implements ImageFilter {
+  _StretchImageFilter({
+    required this.overscrollX,
+    required this.overscrollY,
+    required this.interpolationStrength,
+    required this.bounds,
+  });
+
+  final double overscrollX;
+  final double overscrollY;
+  final double interpolationStrength;
+  final Rect bounds;
+
+  late final _ImageFilter nativeFilter = _ImageFilter.stretch(this);
+
+  @override
+  _ImageFilter _toNativeImageFilter() => nativeFilter;
+
+  @override
+  String get debugShortDescription =>
+      'stretch($overscrollX, $overscrollY, $interpolationStrength, $bounds)';
+
+  @override
+  String toString() =>
+      'ImageFilter.stretch($overscrollX, $overscrollY, $interpolationStrength, $bounds)';
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _StretchImageFilter &&
+        other.overscrollX == overscrollX &&
+        other.overscrollY == overscrollY &&
+        other.interpolationStrength == interpolationStrength &&
+        other.bounds == bounds;
+  }
+
+  @override
+  int get hashCode => Object.hash(overscrollX, overscrollY, interpolationStrength, bounds);
+}
+
 /// An [ImageFilter] that is backed by a native DlImageFilter.
 ///
 /// This is a private class, rather than being the implementation of the public
@@ -4781,6 +4864,19 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
     _initShader(filter.shader, filter.filterQuality.index);
   }
 
+  _ImageFilter.stretch(_StretchImageFilter filter) : creator = filter {
+    _constructor();
+    _initStretch(
+      filter.overscrollX,
+      filter.overscrollY,
+      filter.interpolationStrength,
+      filter.bounds.left,
+      filter.bounds.top,
+      filter.bounds.right,
+      filter.bounds.bottom,
+    );
+  }
+
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
   external void _constructor();
 
@@ -4823,6 +4919,19 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Int32)>(symbol: 'ImageFilter::initShader')
   external void _initShader(FragmentShader shader, int filterQuality);
+
+  @Native<
+    Void Function(Pointer<Void>, Double, Double, Double, Double, Double, Double, Double)
+  >(symbol: 'ImageFilter::initStretch', isLeaf: true)
+  external void _initStretch(
+    double overscrollX,
+    double overscrollY,
+    double interpolationStrength,
+    double boundsLeft,
+    double boundsTop,
+    double boundsRight,
+    double boundsBottom,
+  );
 
   /// The original Dart object that created the native wrapper, which retains
   /// the values used for the filter.
