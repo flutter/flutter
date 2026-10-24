@@ -16,7 +16,6 @@ class SceneDelegate: FlutterSceneDelegate {
   ) {
     flutterEngine.run()
     GeneratedPluginRegistrant.register(with: flutterEngine)
-    self.registerSceneLifeCycle(with: flutterEngine)
 
     if let viewController = window?.rootViewController as? ViewController {
       viewController.flutterEngine = flutterEngine

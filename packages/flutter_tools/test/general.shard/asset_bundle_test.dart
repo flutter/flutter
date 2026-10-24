@@ -23,6 +23,7 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/package_config.dart';
 
 void main() {
@@ -82,6 +83,54 @@ void main() {
           ),
           expectedBinAssetManifest,
         );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Platform: () => platform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'empty pubspec with data assets from hook',
+      () async {
+        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync('');
+        final File dataAssetFile = globals.fs.file('data/foo.txt')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('hello');
+
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+          flutterHookResult: FlutterHookResult(
+            buildStart: DateTime.now(),
+            buildEnd: DateTime.now(),
+            dataAssets: <HookAsset>[
+              HookAsset(file: dataAssetFile.uri, name: 'data/foo.txt', package: 'my_app'),
+            ],
+            dependencies: <Uri>[dataAssetFile.uri],
+          ),
+        );
+        expect(bundle.entries.keys, contains('packages/my_app/data/foo.txt'));
+        expect(
+          const StandardMessageCodec().decodeMessage(
+            ByteData.sublistView(
+              Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()),
+            ),
+          ),
+          <Object?, Object?>{
+            'packages/my_app/data/foo.txt': <Object?>[
+              <Object?, Object?>{'asset': 'packages/my_app/data/foo.txt'},
+            ],
+          },
+        );
+        expect(bundle.needsBuild(), isFalse);
+        dataAssetFile.deleteSync();
+        expect(bundle.needsBuild(), isTrue);
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
@@ -770,14 +819,17 @@ flutter:
     await writeBundle(
       directory,
       const <String, AssetBundleEntry>{},
-      targetPlatform: TargetPlatform.android,
-      impellerStatus: ImpellerStatus.disabled,
-      processManager: globals.processManager,
-      fileSystem: globals.fs,
-      artifacts: globals.artifacts!,
-      logger: testLogger,
-      projectDir: globals.fs.currentDirectory,
       buildMode: BuildMode.debug,
+      impellerStatus: ImpellerStatus.disabled,
+      projectDir: globals.fs.currentDirectory,
+      targetPlatform: TargetPlatform.android,
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        fs: globals.fs,
+        logger: testLogger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -935,14 +987,17 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.android,
-          impellerStatus: ImpellerStatus.disabled,
-          processManager: globals.processManager,
-          fileSystem: globals.fs,
-          artifacts: globals.artifacts!,
-          logger: testLogger,
-          projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
+          impellerStatus: ImpellerStatus.disabled,
+          projectDir: globals.fs.currentDirectory,
+          targetPlatform: TargetPlatform.android,
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            fs: globals.fs,
+            logger: testLogger,
+            platform: globals.platform,
+            processManager: globals.processManager,
+          ),
         );
       },
       overrides: <Type, Generator>{
@@ -998,14 +1053,17 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.web_javascript,
-          impellerStatus: ImpellerStatus.disabled,
-          processManager: globals.processManager,
-          fileSystem: globals.fs,
-          artifacts: globals.artifacts!,
-          logger: testLogger,
-          projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
+          impellerStatus: ImpellerStatus.disabled,
+          projectDir: globals.fs.currentDirectory,
+          targetPlatform: TargetPlatform.web_javascript,
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            fs: globals.fs,
+            logger: testLogger,
+            platform: globals.platform,
+            processManager: globals.processManager,
+          ),
         );
       },
       overrides: <Type, Generator>{
@@ -1160,14 +1218,17 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.web_javascript,
-          impellerStatus: ImpellerStatus.disabled,
-          processManager: globals.processManager,
-          fileSystem: globals.fs,
-          artifacts: globals.artifacts!,
-          logger: testLogger,
-          projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
+          impellerStatus: ImpellerStatus.disabled,
+          projectDir: globals.fs.currentDirectory,
+          targetPlatform: TargetPlatform.web_javascript,
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            fs: globals.fs,
+            logger: testLogger,
+            platform: globals.platform,
+            processManager: globals.processManager,
+          ),
         );
         expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
       },

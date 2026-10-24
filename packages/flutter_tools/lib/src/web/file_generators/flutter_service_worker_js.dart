@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../base/file_system.dart';
 import '../../base/utils.dart';
-import '../../globals.dart' as globals;
 
 /// The caching strategy for the generated service worker.
 enum ServiceWorkerStrategy implements CliEnum {
@@ -46,16 +46,17 @@ enum ServiceWorkerStrategy implements CliEnum {
 /// version is deployed.
 String generateServiceWorker(
   String fileGeneratorsPath, {
+  required FileSystem fileSystem,
   required ServiceWorkerStrategy serviceWorkerStrategy,
 }) {
   if (serviceWorkerStrategy == ServiceWorkerStrategy.none) {
     return '';
   }
 
-  final String flutterServiceWorkerJsPath = globals.localFileSystem.path.join(
+  final String flutterServiceWorkerJsPath = fileSystem.path.join(
     fileGeneratorsPath,
     'js',
     'flutter_service_worker.js',
   );
-  return globals.localFileSystem.file(flutterServiceWorkerJsPath).readAsStringSync();
+  return fileSystem.file(flutterServiceWorkerJsPath).readAsStringSync();
 }

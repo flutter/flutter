@@ -25,7 +25,6 @@
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "flutter/shell/common/animator.h"
-#include "flutter/shell/common/pointer_data_dispatcher.h"
 #include "flutter/shell/common/run_configuration.h"
 
 namespace flutter {
@@ -66,7 +65,7 @@ namespace flutter {
 ///           name and it does happen to be one of the older classes in the
 ///           repository.
 ///
-class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
+class Engine final : public RuntimeDelegate {
  public:
   //----------------------------------------------------------------------------
   /// @brief      Indicates the result of the call to `Engine::Run`.
@@ -354,6 +353,10 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     /// @param[in]  request  The request to change the focus state of the view.
     virtual void RequestViewFocusChange(
         const ViewFocusChangeRequest& request) = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Notifies the shell to reset internal engine caches.
+    virtual void OnEngineResetInternalState() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -362,7 +365,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             tests.
   ///
   Engine(Delegate& delegate,
-         const PointerDataDispatcherMaker& dispatcher_maker,
          const std::shared_ptr<fml::ConcurrentTaskRunner>&
              image_decoder_task_runner,
          const TaskRunners& task_runners,
@@ -381,12 +383,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///                                tasks that require access to components
   ///                                that cannot be safely accessed by the
   ///                                engine. This is the shell.
-  /// @param      dispatcher_maker   The callback provided by `PlatformView` for
-  ///                                engine to create the pointer data
-  ///                                dispatcher. Similar to other engine
-  ///                                resources, this dispatcher_maker and its
-  ///                                returned dispatcher is only safe to be
-  ///                                called from the UI thread.
   /// @param      vm                 An instance of the running Dart VM.
   /// @param[in]  isolate_snapshot   The snapshot used to create the root
   ///                                isolate. Even though the isolate is not
@@ -416,7 +412,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///                                GPU.
   ///
   Engine(Delegate& delegate,
-         const PointerDataDispatcherMaker& dispatcher_maker,
          DartVM& vm,
          fml::RefPtr<const DartSnapshot> isolate_snapshot,
          const TaskRunners& task_runners,
@@ -441,7 +436,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   std::unique_ptr<Engine> Spawn(
       Delegate& delegate,
-      const PointerDataDispatcherMaker& dispatcher_maker,
       const Settings& settings,
       std::unique_ptr<Animator> animator,
       const std::string& initial_route,
@@ -651,22 +645,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///                      measured in microseconds.
   ///
   void ReportTimings(std::vector<int64_t> timings);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Notifies the framework that a texture has a new frame
-  ///             available.
-  ///
-  ///             This is called when the platform marks a texture as having new
-  ///             content via `MarkTextureFrameAvailable`. The framework uses
-  ///             this to mark the corresponding texture render object as
-  ///             needing paint, ensuring the view containing the texture is
-  ///             recomposited even if no other render objects are dirty.
-  ///
-  /// @param[in]  texture_id  The ID of the texture that has a new frame.
-  ///
-  /// @note       Must be called on the UI task runner.
-  ///
-  void NotifyTextureFrameAvailable(int64_t texture_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Gets the main port of the root isolate. Since the isolate is
@@ -901,15 +879,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   void SetAccessibilityFeatures(int32_t flags);
 
-  //----------------------------------------------------------------------------
-  /// @brief      Notifies the framework that all views should be marked dirty.
-  ///
-  ///             This is called when the engine needs to force full re-render
-  ///             of all views on the next frame, for example during lifecycle
-  ///             events.
-  ///
-  void MarkAllViewsNeedRender();
-
   // |RuntimeDelegate|
   void ScheduleFrame(bool regenerate_layer_trees) override;
 
@@ -922,6 +891,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   // |RuntimeDelegate|
   FontCollection& GetFontCollection() override;
+
+  // |RuntimeDelegate|
+  void ResetInternalState() override;
 
   // |RuntimeDelegate|
   std::shared_ptr<AssetManager> GetAssetManager() override;
@@ -937,14 +909,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
   GetImageGeneratorRegistry();
-
-  // |PointerDataDispatcher::Delegate|
-  void DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
-                        uint64_t trace_flow_id) override;
-
-  // |PointerDataDispatcher::Delegate|
-  void ScheduleSecondaryVsyncCallback(uintptr_t id,
-                                      const fml::closure& callback) override;
 
   //----------------------------------------------------------------------------
   /// @brief      Get the last Entrypoint that was used in the RunConfiguration
@@ -1130,11 +1094,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   const Settings settings_;
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<RuntimeController> runtime_controller_;
-
-  // The pointer_data_dispatcher_ depends on animator_ and runtime_controller_.
-  // So it should be defined after them to ensure that pointer_data_dispatcher_
-  // is destructed first.
-  std::unique_ptr<PointerDataDispatcher> pointer_data_dispatcher_;
 
   std::string last_entry_point_;
   std::string last_entry_point_library_;
