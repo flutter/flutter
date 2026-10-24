@@ -49,6 +49,12 @@ namespace {
 // would result in an unrecoverable busy-spin on the main browser thread.
 std::atomic<bool> g_raster_thread_initialized{false};
 unsigned long g_raster_thread = 0;
+uint32_t g_next_callback_id = 0;
+
+uint32_t NextCallbackId() {
+  assert(emscripten_is_main_browser_thread());
+  return ++g_next_callback_id;
+}
 }  // namespace
 
 unsigned long Skwasm::GetRasterThread() {
@@ -101,11 +107,11 @@ void Skwasm::Surface::Dispose() {
 // Main thread only
 uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
 
-  // Allocated here instead of on the worker so that current_callback_id_ is
-  // only ever modified on the main thread.
-  context_lost_callback_id_ = ++current_callback_id_;
+  // Allocated here instead of on the worker so that callback IDs are unique
+  // across all surfaces sharing the callback handler.
+  context_lost_callback_id_ = NextCallbackId();
 
   skwasm_dispatchTransferCanvas(GetRasterThread(), this, canvas, callback_id);
   return callback_id;
@@ -161,7 +167,7 @@ void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
 
 uint32_t Skwasm::Surface::SetSize(int width, int height) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
 
   skwasm_dispatchResizeSurface(GetRasterThread(), this, width, height,
                                callback_id);
@@ -193,9 +199,10 @@ void Skwasm::Surface::ResizeSurface(int width, int height) {
 uint32_t Skwasm::Surface::RenderPictures(flutter::DisplayList** pictures,
                                          int count,
                                          int width,
-                                         int height) {
+                                         int height,
+                                         bool capture_image_bitmaps) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> picture_pointers =
       std::make_unique<sk_sp<flutter::DisplayList>[]>(count);
   for (int i = 0; i < count; i++) {
@@ -206,7 +213,7 @@ uint32_t Skwasm::Surface::RenderPictures(flutter::DisplayList** pictures,
   // other thread See surface_renderPicturesOnWorker
   skwasm_dispatchRenderPictures(GetRasterThread(), this,
                                 picture_pointers.release(), count, width,
-                                height, callback_id);
+                                height, callback_id, capture_image_bitmaps);
   return callback_id;
 }
 
@@ -222,7 +229,8 @@ void Skwasm::Surface::RenderPicturesOnWorker(
     int width,
     int height,
     uint32_t callback_id,
-    double raster_start) {
+    double raster_start,
+    bool capture_image_bitmaps) {
   // Resizing here, rather than in a separate message, guarantees that no other
   // message (e.g. a render for a differently-sized view) can resize the surface
   // between the resize and the capture below.
@@ -234,8 +242,10 @@ void Skwasm::Surface::RenderPicturesOnWorker(
   for (int i = 0; i < picture_count; i++) {
     sk_sp<flutter::DisplayList> picture = pictures[i];
     render_context_->RenderPicture(picture);
-    image_bitmap_array =
-        skwasm_captureImageBitmap(gl_context_, image_bitmap_array);
+    if (capture_image_bitmaps) {
+      image_bitmap_array =
+          skwasm_captureImageBitmap(gl_context_, image_bitmap_array);
+    }
   }
   skwasm_resolveAndPostImages(this, image_bitmap_array, raster_start,
                               callback_id);
@@ -246,7 +256,7 @@ void Skwasm::Surface::RenderPicturesOnWorker(
 uint32_t Skwasm::Surface::RasterizeImage(flutter::DlImage* image,
                                          Skwasm::ImageByteFormat format) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
   image->ref();
 
   skwasm_dispatchRasterizeImage(GetRasterThread(), this, image, format,
@@ -294,7 +304,7 @@ void Skwasm::Surface::RasterizeImageOnWorker(flutter::DlImage* image,
 
 uint32_t Skwasm::Surface::TriggerContextLoss() {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callback_id = ++current_callback_id_;
+  uint32_t callback_id = NextCallbackId();
   skwasm_dispatchTriggerContextLoss(GetRasterThread(), this, callback_id);
   return callback_id;
 }
@@ -473,8 +483,10 @@ SKWASM_EXPORT uint32_t surface_renderPictures(Skwasm::Surface* surface,
                                               flutter::DisplayList** pictures,
                                               int count,
                                               int width,
-                                              int height) {
-  return surface->RenderPictures(pictures, count, width, height);
+                                              int height,
+                                              bool capture_image_bitmaps) {
+  return surface->RenderPictures(pictures, count, width, height,
+                                 capture_image_bitmaps);
 }
 
 SKWASM_EXPORT void surface_renderPicturesOnWorker(
@@ -484,12 +496,14 @@ SKWASM_EXPORT void surface_renderPicturesOnWorker(
     int width,
     int height,
     uint32_t callback_id,
-    double raster_start) {
+    double raster_start,
+    bool capture_image_bitmaps) {
   // This will release the pictures when they leave scope.
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> pictures_pointer =
       std::unique_ptr<sk_sp<flutter::DisplayList>[]>(pictures);
-  surface->RenderPicturesOnWorker(pictures, picture_count, width, height,
-                                  callback_id, raster_start);
+  surface->RenderPicturesOnWorker(pictures_pointer.get(), picture_count, width,
+                                  height, callback_id, raster_start,
+                                  capture_image_bitmaps);
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Skwasm::Surface* surface,
