@@ -51,7 +51,7 @@ Directory resolveExtensionOutputDir({
 }
 
 /// Resolves all engine and host artifacts declared on [target] using
-/// [artifacts] and [buildMode].
+/// [artifacts], [buildMode], and optional downloaded [extensionArtifacts].
 ///
 /// Throws a [ToolExit] if any requested artifact name is invalid or unsupported.
 // TODO(bkonyi): Download required artifacts on demand if not already cached.
@@ -59,10 +59,14 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionBuildTarget target,
+  Map<String, String> extensionArtifacts = const <String, String>{},
 }) {
   final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
-  final resolvedArtifacts = <String, String>{};
+  final resolvedArtifacts = <String, String>{...extensionArtifacts};
   for (final ExtensionArtifact artifact in target.artifacts) {
+    if (extensionArtifacts.containsKey(artifact.name)) {
+      continue;
+    }
     resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
       _resolveArtifact(artifact),
       platform: targetPlatform,
@@ -70,6 +74,9 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
     );
   }
   for (final ExtensionHostArtifact artifact in target.hostArtifacts) {
+    if (extensionArtifacts.containsKey(artifact.name)) {
+      continue;
+    }
     final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
     resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(hostArtifact).path;
   }
