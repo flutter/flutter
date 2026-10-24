@@ -8,6 +8,7 @@ import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/embedder/embedder.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/testing/testing.gni")
 
 declare_args() {
@@ -475,6 +476,18 @@ shared_library("flutter_engine_library") {
   public_configs = [ "//flutter:config" ]
 }
 
+if (is_linux || is_android || is_mac) {
+  check_forbidden_native_symbols("check_native_symbols") {
+    visibility = [ ":*" ]
+    deps = [ ":flutter_engine_library" ]
+    if (is_mac) {
+      library = "$root_out_dir/libflutter_engine.dylib"
+    } else {
+      library = "$root_out_dir/libflutter_engine.so"
+    }
+  }
+}
+
 copy("copy_headers") {
   visibility = [ ":*" ]
   sources = [ "embedder.h" ]
@@ -582,6 +595,9 @@ group("flutter_engine") {
       ":copy_headers",
       ":flutter_engine_library",
     ]
+    if (is_linux || is_android || is_mac) {
+      deps += [ ":check_native_symbols" ]
+    }
 
     # For the Mac, the dylib is packaged in a framework with the appropriate
     # headers.

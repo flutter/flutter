@@ -1,0 +1,20 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_THIRD_PARTY_LIBCXX_CONFIG_VERSION_
+#define FLUTTER_THIRD_PARTY_LIBCXX_CONFIG_VERSION_
+
+#include_next <version>
+
+#if !defined(_LIBCPP_BUILDING_LIBRARY)
+// <format> and std::format are banned in the Flutter Engine because they pull
+// ~200 KiB of libc++ formatting and Ryu floating-point tables into
+// libflutter.so. Undefine the feature-test macros so third-party headers (such
+// as vulkan_to_string.hpp) fall back to <sstream>.
+#undef __cpp_lib_format
+#undef __cpp_lib_format_ranges
+#undef __cpp_lib_format_uchar
+#endif
+
+#endif  // FLUTTER_THIRD_PARTY_LIBCXX_CONFIG_VERSION_

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <format>
+#include <string>
 #include <thread>
 
 #include "flutter/flow/frame_timings.h"
@@ -291,7 +291,7 @@ TEST(FrameTimingsRecorderTest, FrameNumberTraceArgIsValid) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
 
   std::string actual_arg =
-      std::format("{}", static_cast<int>(recorder->GetFrameNumber()));
+      std::to_string(static_cast<int>(recorder->GetFrameNumber()));
   std::string expected_arg = recorder->GetFrameNumberTraceArg();
 
   ASSERT_EQ(actual_arg, expected_arg);

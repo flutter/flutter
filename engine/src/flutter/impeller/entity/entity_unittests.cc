@@ -5,8 +5,10 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <iomanip>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -2626,7 +2628,9 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
       } else {
         float portion_of_rect =
             screen_offset_y * GetContentScale().y / scale / rect_size;
-        label = std::format("- {:.2g}", portion_of_rect);
+        std::stringstream stream;
+        stream << "- " << std::setprecision(2) << portion_of_rect;
+        label = stream.str();
       }
       if (IsPlaygroundEnabled()) {
         ImGui::GetBackgroundDrawList()->AddText(

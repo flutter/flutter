@@ -4,7 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 
-#include <format>
+#include <string>
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
@@ -164,7 +164,7 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
 #ifdef IMPELLER_DEBUG
   ContextVK::SetDebugName(
       device, pass.get(),
-      std::format("Compat Render Pass: {}", desc.GetLabel()));
+      std::string("Compat Render Pass: ") + std::string(desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return pass;
@@ -215,7 +215,7 @@ absl::StatusOr<vk::UniqueDescriptorSetLayout> MakeDescriptorSetLayout(
 #ifdef IMPELLER_DEBUG
   ContextVK::SetDebugName(
       device_holder->GetDevice(), descs_layout.get(),
-      std::format("Descriptor Set Layout: {}", desc.GetLabel()));
+      std::string("Descriptor Set Layout: ") + std::string(desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return absl::StatusOr<vk::UniqueDescriptorSetLayout>(std::move(descs_layout));
@@ -238,8 +238,9 @@ absl::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
   }
 
 #ifdef IMPELLER_DEBUG
-  ContextVK::SetDebugName(device_holder->GetDevice(), *pipeline_layout.value,
-                          std::format("Pipeline Layout {}", desc.GetLabel()));
+  ContextVK::SetDebugName(
+      device_holder->GetDevice(), *pipeline_layout.value,
+      std::string("Pipeline Layout ") + std::string(desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return std::move(pipeline_layout.value);
@@ -456,8 +457,9 @@ absl::StatusOr<vk::UniquePipeline> MakePipeline(
   }
 
 #ifdef IMPELLER_DEBUG
-  ContextVK::SetDebugName(device_holder->GetDevice(), *pipeline,
-                          std::format("Pipeline {}", desc.GetLabel()));
+  ContextVK::SetDebugName(
+      device_holder->GetDevice(), *pipeline,
+      std::string("Pipeline ") + std::string(desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return std::move(pipeline);
