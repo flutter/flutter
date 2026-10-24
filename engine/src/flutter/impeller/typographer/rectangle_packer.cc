@@ -5,6 +5,8 @@
 #include "impeller/typographer/rectangle_packer.h"
 
 #include <algorithm>
+#include <cstdint>
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -85,6 +87,17 @@ bool SkylineRectanglePacker::AddRect(int p_width, int p_height, IPoint16* loc) {
 
   // add rectangle to skyline
   if (-1 != bestIndex) {
+    // IPoint16::x_/y_ are int16_t. A placement whose origin does not fit in
+    // that range would otherwise be silently truncated below, reporting a
+    // corrupted (wrapped) coordinate as a successful placement. Reject it
+    // instead, the same way an out-of-bounds request is already rejected
+    // above.
+    if (bestX > std::numeric_limits<int16_t>::max() ||
+        bestY > std::numeric_limits<int16_t>::max()) {
+      loc->x_ = 0;
+      loc->y_ = 0;
+      return false;
+    }
     AddSkylineLevel(bestIndex, bestX, bestY, p_width, p_height);
     loc->x_ = bestX;
     loc->y_ = bestY;
