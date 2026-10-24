@@ -17,7 +17,7 @@
 
 # This file is loaded as the root of @zlib, so the main module is named.
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_THIRD_PARTY_COPTS")
+load("@flutter//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_THIRD_PARTY_COPTS")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])

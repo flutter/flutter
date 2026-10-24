@@ -7,15 +7,15 @@
 # around gen_snapshot, bin_to_linkable) plus the macOS universal-binary and
 # cross-target plumbing of gen_snapshot itself, none of which the converter
 # reads yet. The pipeline below is that file's host path, target for target,
-# on the rules in //engine/src/flutter/build/bazel/dart:snapshot.bzl, with the
+# on the rules in //build_defs/dart:snapshot.bzl, with the
 # tools the wrapped Dart SDK build provides. The gen_snapshot/analyze_snapshot
 # exports (generate_snapshot_bins) are artifact packaging, a later phase.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//engine/src/flutter/build/bazel/dart:snapshot.bzl", "bin_to_assembly", "compile_platform", "core_snapshot")
-load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_generated_file")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/dart:snapshot.bzl", "bin_to_assembly", "compile_platform", "core_snapshot")
+load("//build_defs/gn:gn_action.bzl", "gn_generated_file")
 
 package(default_visibility = ["//visibility:public"])
 

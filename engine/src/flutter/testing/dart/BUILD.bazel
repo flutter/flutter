@@ -16,8 +16,8 @@
 # (//engine/src:spawn_helper_kernel). The defines name the runfiles root's
 # paths (see flutter_dart_tests).
 
-load("//engine/src/flutter/build/bazel/dart:kernel.bzl", "dart_package_root")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_dart_tests")
+load("//build_defs/dart:kernel.bzl", "dart_package_root")
+load("//build_defs/testing:testing.bzl", "flutter_dart_tests")
 
 package(default_visibility = ["//visibility:public"])
 

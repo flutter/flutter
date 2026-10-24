@@ -4,8 +4,8 @@
 
 # Generated from //flutter/third_party/canvaskit/BUILD.gn by gn_to_bazel; do not edit.
 
-load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
-load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_platform")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/web:wasm.bzl", "wasm_platform")
 
 package(default_visibility = ["//visibility:public"])
 

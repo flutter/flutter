@@ -217,7 +217,7 @@ filegroup(
 
 # The packages of this tree that the engine's own Dart tools and their tests
 # import when `dart test` runs in a package of the tree
-# (testing/run_tests.py --type dart-host; build/bazel/dart/package_test.bzl):
+# (testing/run_tests.py --type dart-host; build_defs/dart/package_test.bzl):
 # package:test's runner and everything below it -- the analyzer it parses
 # test files with, coverage, shelf and the web-socket packages of its browser
 # platforms, vm_service, frontend_server_client -- and the core and tools

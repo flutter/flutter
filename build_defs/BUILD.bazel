@@ -1,0 +1,9 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The build rules (.bzl) the repository's BUILD files load, by subject; see
+# README.md here for the index. The rules' scripts and helper targets sit in
+# the subdirectories beside them.
+
+package(default_visibility = ["//visibility:public"])

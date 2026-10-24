@@ -7,9 +7,9 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:configuration.bzl", "in_configuration")
-load("//engine/src/flutter/build/bazel:local_engine.bzl", "bundle_directory")
-load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle", "zip_tree")
+load("//build_defs/config:configuration.bzl", "in_configuration")
+load("//build_defs/dist:local_engine.bzl", "bundle_directory")
+load("//build_defs/dist:zip_bundle.bzl", "zip_bundle", "zip_tree")
 
 package(default_visibility = ["//visibility:public"])
 

@@ -9,7 +9,7 @@
 /// files ([convertedFiles]); `--check` verifies that they are what the
 /// converter produces, which is the presubmit. The files of
 /// [fetchTimeFiles] are generated into external repositories by Bazel
-/// itself (`synced_repository` in build/bazel/repositories.bzl) and are not
+/// itself (`synced_repository` in build_defs/repositories/repositories.bzl) and are not
 /// checked in; they are listed for what they need.
 library;
 
@@ -104,9 +104,9 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
     ],
     appendix: r'''
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
-load("//engine/src/flutter/build/bazel:install.bzl", "install")
-load("//engine/src/flutter/build/bazel:local_engine.bzl", "local_engine")
+load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
+load("//build_defs/dist:install.bzl", "install")
+load("//build_defs/dist:local_engine.bzl", "local_engine")
 
 # config("config"), config("export_dynamic_symbols") and
 # config("export_dynamic_test_symbols") of BUILD.gn, by hand: the first is the
@@ -118,7 +118,7 @@ load("//engine/src/flutter/build/bazel:local_engine.bzl", "local_engine")
 # config("config") in BUILD.gn: the two include roots engine code is written
 # against -- engine/src ("flutter/fml/...") and this directory
 # ("impeller/...", "fml/..."). Every engine library depends on it; the
-# accompanying -Wunreachable-code is in FLUTTER_COPTS (build/bazel/copts.bzl),
+# accompanying -Wunreachable-code is in FLUTTER_COPTS (build_defs/cc/copts.bzl),
 # since compiler flags do not propagate through dependencies.
 cc_library(
     name = "config",
@@ -213,7 +213,7 @@ filegroup(
 )
 
 # dart:ui_web's sources and API file, which web_sdk.gni's
-# web_ui_ui_web_with_output (web_sdk/web_sdk.bzl) rewrites into the
+# web_ui_ui_web_with_output (build_defs/web/web_sdk.bzl) rewrites into the
 # sky_engine package for sky/packages/sky_engine, and into the web SDK.
 filegroup(
     name = "ui_web_sources",
@@ -298,7 +298,7 @@ exports_files([
 
 # run_tests.py --type dart-host: `dart test` in each Dart package of
 # build_dart_host_test_list, as dart_package_test runs it
-# (build/bazel/dart/package_test.bzl). Thirteen packages there, eleven here:
+# (build_defs/dart/package_test.bzl). Thirteen packages there, eleven here:
 # ci's tests format files they write into the checkout and add to the git
 # index (format_test.dart), and clang_tidy's read a GN build directory's
 # compile_commands.json; both run with `dart test` in the checkout, not from
@@ -764,7 +764,7 @@ exports_files([
   ConvertedFile(
     '//flutter/sky/packages/sky_engine',
     appendix: '''
-load("//engine/src/flutter/build/bazel:local_engine.bzl", "assembled_directory")
+load("//build_defs/dist:local_engine.bzl", "assembled_directory")
 
 # The package as the SDK cache holds it (bin/cache/pkg/sky_engine): one
 # directory of what the targets above place under gen/dart-pkg/sky_engine,
@@ -778,7 +778,7 @@ assembled_directory(
 )
 ''',
   ),
-  // The web SDK's Dart side (web_sdk/web_sdk.bzl): the seven libraries
+  // The web SDK's Dart side (build_defs/web/web_sdk.bzl): the seven libraries
   // sdk_rewriter rewrites into flutter_web_sdk/lib, libraries.json beside
   // them, the three platform kernels and the two DDC compilations of the
   // SDK -- the file's own templates over the prebuilt SDK's kernel_worker
@@ -789,9 +789,9 @@ assembled_directory(
   ConvertedFile(
     '//flutter/web_sdk',
     appendix: '''
-load("//engine/src/flutter/build/bazel:configuration.bzl", "in_configuration")
-load("//engine/src/flutter/build/bazel:local_engine.bzl", "bundle_directory")
-load("//engine/src/flutter/web_sdk:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "web_sdk_root")
+load("//build_defs/config:configuration.bzl", "in_configuration")
+load("//build_defs/dist:local_engine.bzl", "bundle_directory")
+load("//build_defs/web:web_sdk.bzl", "WEB_ENGINE_LIBRARIES", "web_sdk_root")
 
 exports_files(["sdk_rewriter.dart"])
 
@@ -837,8 +837,8 @@ bundle_directory(
           'generated_file: the entitlements list of the macOS bundle',
     },
     appendix: '''
-load("//engine/src/flutter/build/bazel:local_engine.bzl", "bundle_directory")
-load("//engine/src/flutter/build/bazel:configuration.bzl", "in_configuration")
+load("//build_defs/dist:local_engine.bzl", "bundle_directory")
+load("//build_defs/config:configuration.bzl", "in_configuration")
 
 # The GN file, for the wrapped GN builds that read //flutter/build
 # (//engine/src/flutter/build:gn_files; a glob does not enter a package).
@@ -929,7 +929,7 @@ bundle_directory(
           'generated_file over metadata: the entitlements list of the macOS bundle',
     },
     appendix: '''
-load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
+load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
 
 # run_tests.py --type font-subset: `python3 test.py --variant <build
 # directory>` from this directory, against the binary and the archive at
@@ -972,7 +972,7 @@ exports_files([
     # The gtest-parallel wrapper of flutter_cc_test (testing.bzl).
     "gtest_parallel_run.sh",
     # CI's sanitizer environment, which the test launchers source under the
-    # asan flag (build/bazel/sanitizers.bzl).
+    # asan flag (build_defs/cc/sanitizers.bzl).
     "sanitizer_suppressions.sh",
     "lsan_suppressions.txt",
     "tsan_suppressions.txt",
@@ -1054,7 +1054,7 @@ filegroup(
 ''',
   ),
   // The shader pipeline's users (research/08, step 4): impeller_shaders()
-  // invocations become the macro in build/bazel/impeller.
+  // invocations become the macro in build_defs/impeller.
   ConvertedFile('//flutter/impeller/shader_archive'),
   ConvertedFile('//flutter/impeller/tessellator'),
   ConvertedFile('//flutter/impeller/renderer'),

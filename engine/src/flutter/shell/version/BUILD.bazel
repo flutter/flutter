@@ -6,7 +6,7 @@
 
 load("@engine_version//:version.bzl", "CONTENT_HASH", "DART_VERSION", "ENGINE_VERSION", "SKIA_VERSION")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 

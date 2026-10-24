@@ -5,7 +5,7 @@
 # Root BUILD file of @io: package:io (a DEPS tree), one of the
 # packages of the engine's pub workspace that its Dart tools and their tests
 # import; staged by dart_package_test at the path the package configuration
-# names it by (build/bazel/dart/package_test.bzl).
+# names it by (build_defs/dart/package_test.bzl).
 
 package(default_visibility = ["//visibility:public"])
 

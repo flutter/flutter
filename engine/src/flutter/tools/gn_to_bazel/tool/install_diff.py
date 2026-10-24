@@ -6,7 +6,7 @@
 """Compares an installed Bazel build directory with a GN build directory.
 
 `bazel run //engine/src/flutter:install -- <directory>` lays a build's files
-out as GN's `engine/src/out/<build>/` is (build/bazel/install.bzl). This tool
+out as GN's `engine/src/out/<build>/` is (build_defs/dist/install.bzl). This tool
 walks the consumer-visible paths of such a directory -- what the flutter
 tool reads from a `--local-engine`, the embedder's library and header, the
 archives -- in both and reports, per path: whether it is on both sides, and

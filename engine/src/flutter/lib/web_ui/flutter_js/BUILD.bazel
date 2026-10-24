@@ -5,8 +5,8 @@
 # Generated from //flutter/lib/web_ui/flutter_js/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel/esbuild:esbuild.bzl", "esbuild")
-load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/web:esbuild.bzl", "esbuild")
 
 package(default_visibility = ["//visibility:public"])
 

@@ -6,8 +6,8 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/impeller:shaders.bzl", "impeller_shaders")
 
 package(default_visibility = ["//visibility:public"])
 

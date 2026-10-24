@@ -4,7 +4,7 @@
 
 # The repository root as a Bazel package: the files of the gclient checkout
 # that tests of the engine's Dart tools read (testing/run_tests.py
-# --type dart-host, build/bazel/dart/package_test.bzl) -- DEPS and the
+# --type dart-host, build_defs/dart/package_test.bzl) -- DEPS and the
 # .bazelignore generated from it (tools/bazel_tools' tests check the
 # generation), and .gclient, which `et fetch` locates to run gclient from
 # its directory (tools/engine_tool's tests). .gclient is the checkout's own,
@@ -25,7 +25,7 @@ exports_files([
 ])
 
 # The repository's Dart and framework tests that Bazel compiles and runs
-# (engine/src/flutter/build/bazel/dart/flutter_test.bzl, dart_test.bzl; the
+# (build_defs/dart/flutter_test.bzl, dart_test.bzl; the
 # README in build/bazel), gathered as dev/bots' framework_tests and
 # flutter_tools_tests shards run them: every tree that runs on a Linux host
 # without a device, a browser, Android's or the desktop's toolchains.
