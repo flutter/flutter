@@ -2471,17 +2471,35 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     }
   }
 
+  // Captured before the replacement below, which mutates self.text in place
+  // and collapses _selectedTextRange, destroying both. Stays empty when
+  // nothing is deleted, which is what the framework cannot otherwise observe.
+  NSString* removedText = @"";
+
   if (!_selectedTextRange.isEmpty) {
+    removedText = [self.text substringWithRange:_selectedTextRange.range];
     // Cache the last deleted emoji to use for an iOS bug where the next
     // insertion corrupts the emoji characters.
     // See: https://github.com/flutter/flutter/issues/111494#issuecomment-1248441346
     if (IsEmoji(self.text, _selectedTextRange.range)) {
-      NSString* deletedText = [self.text substringWithRange:_selectedTextRange.range];
-      NSRange deleteFirstCharacterRange = fml::RangeForCharacterAtIndex(deletedText, 0);
+      NSRange deleteFirstCharacterRange = fml::RangeForCharacterAtIndex(removedText, 0);
       self.temporarilyDeletedComposedCharacter =
-          [deletedText substringWithRange:deleteFirstCharacterRange];
+          [removedText substringWithRange:deleteFirstCharacterRange];
     }
     [self replaceRange:_selectedTextRange withText:@""];
+  }
+
+  // Reported after everything above, so the framework never runs app code in
+  // the middle of this method. The platform-to-framework leg is inline on the
+  // merged platform/UI thread, so a handler invoked from a message sent
+  // earlier would see -- and could write to -- a half-updated editor.
+  //
+  // Skipped for autofill shadow views, which carry client 0 and are not the
+  // focused client; see -updateEditingState.
+  if (_textInputClient != 0) {
+    [self.textInputDelegate flutterTextInputView:self
+                               didDeleteBackward:removedText
+                                      withClient:_textInputClient];
   }
 }
 
