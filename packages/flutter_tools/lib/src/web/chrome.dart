@@ -200,7 +200,9 @@ class ChromiumLauncher {
       );
 
       if (userDataDirFlag != null) {
-        final Directory userDataDir = _fileSystem.directory(userDataDirFlag.split('=')[1]);
+        final Directory userDataDir = _fileSystem.directory(
+          userDataDirFlag.substring('--user-data-dir='.length),
+        );
         webBrowserFlags.remove(userDataDirFlag);
         return userDataDir;
       }
