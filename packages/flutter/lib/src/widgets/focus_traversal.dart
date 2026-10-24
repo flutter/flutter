@@ -155,6 +155,20 @@ enum TraversalEdgeBehavior {
   stop,
 }
 
+// Returns the [FocusScopeNode.focusedChild] of `scope`, or null when that node
+// cannot take part in focus traversal because it is not attached to the widget
+// tree.
+//
+// Focus can be requested for a [FocusNode] that no widget owns, for instance
+// with `FocusScope.of(context).requestFocus(FocusNode())`. That adds the node
+// to the focus tree even though it has no context, and therefore no geometry
+// for the traversal policies to work with, so traversal has to start over from
+// the beginning of the scope instead.
+FocusNode? _traversableFocusedChild(FocusScopeNode scope) {
+  final FocusNode? focusedChild = scope.focusedChild;
+  return focusedChild?.context == null ? null : focusedChild;
+}
+
 /// Determines how focusable widgets are traversed within a [FocusTraversalGroup].
 ///
 /// The focus traversal policy is what determines which widget is "next",
@@ -234,12 +248,13 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     required bool forward,
   }) {
     if (node is FocusScopeNode) {
-      if (node.focusedChild != null) {
+      final FocusNode? focusedChild = _traversableFocusedChild(node);
+      if (focusedChild != null) {
         // Can't stop here as the `focusedChild` may be a focus scope node
         // without a first focus. The first focus will be picked in the
         // next iteration.
         return _requestTabTraversalFocus(
-          node.focusedChild!,
+          focusedChild,
           alignmentPolicy: alignmentPolicy,
           alignment: alignment,
           duration: duration,
@@ -330,7 +345,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     bool ignoreCurrentFocus = false,
   }) {
     final FocusScopeNode scope = currentNode.nearestScope!;
-    FocusNode? candidate = scope.focusedChild;
+    FocusNode? candidate = _traversableFocusedChild(scope);
     if (ignoreCurrentFocus || candidate == null && scope.descendants.isNotEmpty) {
       final Iterable<FocusNode> sorted = _sortAllDescendants(
         scope,
@@ -435,7 +450,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode);
 
   static bool _canRequestTraversalFocus(FocusNode node) {
-    return node.canRequestFocus && !node.skipTraversal;
+    // A node that is not attached to the widget tree has no geometry, so the
+    // traversal policies can neither sort it nor move the focus to it.
+    return node.canRequestFocus && !node.skipTraversal && node.context != null;
   }
 
   static Iterable<FocusNode> _getDescendantsWithoutExpandingScope(FocusNode node) {
@@ -485,7 +502,8 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       //
       // Current focused node needs to be in the group so that the caller can
       // find the next traversable node from the current focused node.
-      if (node == currentNode || (node.canRequestFocus && !node.skipTraversal)) {
+      if (node.context != null &&
+          (node == currentNode || (node.canRequestFocus && !node.skipTraversal))) {
         groups[groupNode] ??= _FocusTraversalGroupInfo(
           groupNode,
           members: <FocusNode>[],
@@ -590,7 +608,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   bool _moveFocus(FocusNode currentNode, {required bool forward}) {
     final FocusScopeNode nearestScope = currentNode.nearestScope!;
     invalidateScopeData(nearestScope);
-    FocusNode? focusedChild = nearestScope.focusedChild;
+    FocusNode? focusedChild = _traversableFocusedChild(nearestScope);
     if (focusedChild == null) {
       final FocusNode? firstFocus = forward
           ? findFirstFocus(currentNode)
@@ -1218,10 +1236,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     _FocusTraversalGroupNode? groupNode,
   ) {
     if (node is FocusScopeNode) {
-      if (node.focusedChild != null) {
+      final FocusNode? focusedChild = _traversableFocusedChild(node);
+      if (focusedChild != null) {
         return _requestTraversalFocusInDirection(
           currentNode,
-          node.focusedChild!,
+          focusedChild,
           node,
           direction,
           groupNode,
@@ -1369,7 +1388,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   bool inDirection(FocusNode currentNode, TraversalDirection direction) {
     final _FocusTraversalGroupNode? groupNode = FocusTraversalGroup._getGroupNode(currentNode);
     final FocusScopeNode nearestScope = currentNode.nearestScope!;
-    final FocusNode? focusedChild = nearestScope.focusedChild;
+    final FocusNode? focusedChild = _traversableFocusedChild(nearestScope);
     if (focusedChild == null) {
       final FocusNode firstFocus = findFirstFocusInDirection(currentNode, direction) ?? currentNode;
       switch (direction) {
