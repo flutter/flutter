@@ -195,6 +195,59 @@ https://docs.flutter.dev/testing/integration-tests
     return data['bytes']! as List<int>;
   }
 
+  /// Web only. Performs a real browser pointer click at [position] using
+  /// WebDriver, and completes once the browser has dispatched the click.
+  ///
+  /// [position] is a logical position in [view], such as the one returned by
+  /// [WidgetTester.getCenter]. If [view] is null, the implicit view is used.
+  ///
+  /// Unlike [WidgetTester.tap], which dispatches synthetic pointer events
+  /// directly to Flutter's gesture system, the click goes through the
+  /// browser's own hit testing and event dispatch. This makes it possible to
+  /// test interactions with platform views such as [HtmlElementView], for
+  /// example an `<iframe>`'s click listeners, which synthetic Flutter pointer
+  /// events never reach. DOM listeners run before the returned future
+  /// completes, so their effects can be asserted immediately after awaiting
+  /// this method.
+  ///
+  /// This method does not modify [shouldPropagateDevicePointerEvents].
+  /// Browser pointer events arrive in the test binding as
+  /// [TestBindingEventSource.device] events, which the binding ignores by
+  /// default. To assert on Flutter widgets reacting to the click (for example
+  /// a button's `onPressed`), set [shouldPropagateDevicePointerEvents] to true
+  /// before calling this method, and [WidgetTester.pump] afterwards to process
+  /// the resulting frame.
+  ///
+  /// When semantics are enabled, the browser may hit test the semantics DOM
+  /// node of a widget instead of the Flutter view, and the widget may then
+  /// react through a semantics action regardless of
+  /// [shouldPropagateDevicePointerEvents]. To test raw pointer delivery, run
+  /// the test with semantics disabled (for example, `semanticsEnabled: false`
+  /// in [testWidgets]).
+  ///
+  /// Only works on the web when tests are run via the `flutter drive` command
+  /// with a driver that uses [integrationDriver] from
+  /// `integration_test_driver_extended.dart`. Completes with an
+  /// [UnsupportedError] on other platforms, an [ArgumentError] if the
+  /// resulting viewport position is not finite, a [StateError] if [view] is
+  /// null and there is no implicit view, or an error if the driver fails
+  /// to perform the click.
+  Future<void> webDriverClick(Offset position, {FlutterView? view}) async {
+    final FlutterView? targetView = view ?? platformDispatcher.implicitView;
+    if (targetView == null) {
+      throw StateError(
+        'webDriverClick requires a view, but no view was provided and there is no implicit view.',
+      );
+    }
+    final Offset viewportPosition = driver_actions.viewportOrigin(targetView) + position;
+    // Non-finite coordinates cannot be encoded for the driver and would leave
+    // the click waiting for a reply forever.
+    if (!viewportPosition.isFinite) {
+      throw ArgumentError.value(position, 'position', 'must be a finite position in the view');
+    }
+    await callbackManager.click(viewportPosition.dx, viewportPosition.dy);
+  }
+
   /// Android only. Converts the Flutter surface to an image view.
   /// Be aware that if you are conducting a perf test, you may not want to call
   /// this method since the this is an expensive operation that affects the

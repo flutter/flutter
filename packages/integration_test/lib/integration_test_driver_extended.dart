@@ -5,6 +5,9 @@
 // This is a CLI library; we use prints as part of the interface.
 // ignore_for_file: avoid_print
 
+/// @docImport 'integration_test.dart';
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -68,6 +71,14 @@ Future<void> writeResponseData(
 ///
 /// As a result, returning `false` from `onScreenshot` will make the test fail.
 ///
+/// The in-browser test can also ask the driver to perform a real WebDriver
+/// pointer click by calling
+/// [IntegrationTestWidgetsFlutterBinding.webDriverClick]. Clicks require
+/// `driver` to be a [WebFlutterDriver]. If it is not, the click fails in the
+/// browser and this function throws a [StateError]. If WebDriver fails to
+/// perform the click, the click fails in the browser and the WebDriver
+/// exception is rethrown.
+///
 /// `responseDataCallback` is the handler for processing [Response.data].
 /// The default value is `writeResponseData`.
 ///
@@ -112,6 +123,36 @@ Future<void> integrationDriver({
         jsonResponse = await driver.requestData(DriverTestMessage.error().toString());
       }
 
+      response = Response.fromJson(jsonResponse);
+    } else if (webDriverCommand == '${WebDriverCommandType.click}') {
+      if (driver is! WebFlutterDriver) {
+        // Fail the in-browser `webDriverClick` call instead of leaving it
+        // waiting for a reply.
+        try {
+          await driver.requestData(DriverTestMessage.error().toString());
+        } catch (_) {
+          // Report the StateError below even if the app disconnected.
+        }
+        throw StateError(
+          'webDriverClick requires a WebFlutterDriver, but received ${driver.runtimeType}',
+        );
+      }
+      try {
+        await driver.webDriver.mouse.moveTo(
+          xOffset: (response.data!['x'] as num).round(),
+          yOffset: (response.data!['y'] as num).round(),
+          absolute: true,
+        );
+        await driver.webDriver.mouse.click();
+        jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
+      } catch (_) {
+        try {
+          await driver.requestData(DriverTestMessage.error().toString());
+        } catch (_) {
+          // Preserve the original WebDriver exception if the app disconnected.
+        }
+        rethrow;
+      }
       response = Response.fromJson(jsonResponse);
     } else if (webDriverCommand == '${WebDriverCommandType.ack}') {
       // Previous command completed ask for a new one.
