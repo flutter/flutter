@@ -104,6 +104,33 @@ void testMain() {
       expect(imageFilterLayer.paintBounds, const ui.Rect.fromLTRB(10, 0, 60, 50));
     });
 
+    test('ImageFilter.stretch applies stretch matrix in preroll', () async {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      canvas.drawRect(
+        const ui.Rect.fromLTRB(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
+
+      final sb = LayerSceneBuilder();
+      sb.pushImageFilter(
+        ui.ImageFilter.stretch(
+          overscrollX: 0.2,
+          overscrollY: 0.5,
+          bounds: const ui.Rect.fromLTRB(0, 0, 100, 100),
+        ),
+      );
+      sb.addPicture(ui.Offset.zero, picture);
+
+      final LayerScene scene = sb.build();
+      final LayerTree layerTree = scene.layerTree;
+      await renderScene(scene);
+
+      final imageFilterLayer = layerTree.rootLayer.debugLayers.single as ImageFilterEngineLayer;
+      expect(imageFilterLayer.paintBounds, const ui.Rect.fromLTRB(0, 0, 120, 150));
+    });
+
     test('Opacity layer works correctly with Scene.toImage', () async {
       // This is a regression test for https://github.com/flutter/flutter/issues/138009
       final testRecorder = ui.PictureRecorder();

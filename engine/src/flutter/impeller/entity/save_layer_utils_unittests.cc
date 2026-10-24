@@ -337,6 +337,30 @@ TEST(SaveLayerUtilsTest,
   EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 50, 50));
 }
 
+TEST(SaveLayerUtilsTest, StretchFilterUsesExplicitStretchBoundsCoverage) {
+  const Rect stretch_bounds = Rect::MakeLTRB(0, 0, 300, 600);
+  const Matrix ctm = Matrix::MakeScale({2.0f, 2.0f, 1.0f});
+  auto image_filter = FilterContents::MakeStretch(
+      FilterInput::Make(Rect::MakeLTRB(0, 400, 300, 600)), 0.0f, 0.3f, 0.7f,
+      stretch_bounds);
+  image_filter->SetEffectTransform(ctm);
+
+  // Even when the parent coverage_limit (e.g. a post-PlatformView overlay slice
+  // clip) only covers the bottom portion of the viewport,
+  // ComputeSaveLayerCoverage preserves the full explicit stretch_bounds
+  // transformed by effect_transform so the stretch shader's normalized UV
+  // coordinates span the full scroll container.
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/stretch_bounds,                   //
+      /*effect_transform=*/ctm,                              //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 800, 600, 1200),  //
+      /*image_filter=*/image_filter                          //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 600, 1200));
+}
+
 }  // namespace testing
 }  // namespace impeller
 

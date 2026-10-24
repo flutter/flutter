@@ -52,6 +52,15 @@ std::shared_ptr<DlImageFilter> DlImageFilter::MakeCompose(
   return DlComposeImageFilter::Make(outer, inner);
 }
 
+std::shared_ptr<DlImageFilter> DlImageFilter::MakeStretch(
+    DlScalar overscroll_x,
+    DlScalar overscroll_y,
+    DlScalar interpolation_strength,
+    const DlRect& stretch_bounds) {
+  return DlStretchImageFilter::Make(overscroll_x, overscroll_y,
+                                    interpolation_strength, stretch_bounds);
+}
+
 DlVector2 DlImageFilter::map_vectors_affine(const DlMatrix& ctm,
                                             DlScalar x,
                                             DlScalar y) {

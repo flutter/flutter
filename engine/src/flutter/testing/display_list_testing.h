@@ -314,6 +314,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
         case DlImageFilterType::kDilate:
         case DlImageFilterType::kErode:
         case DlImageFilterType::kMatrix:
+        case DlImageFilterType::kStretch:
           RecordByType(DisplayListOpType::kSetPodImageFilter);
           break;
         case DlImageFilterType::kCompose:

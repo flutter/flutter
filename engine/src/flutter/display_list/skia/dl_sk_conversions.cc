@@ -245,8 +245,33 @@ sk_sp<SkImageFilter> ToSk(const DlImageFilter* filter) {
       return skia_filter->makeWithLocalMatrix(ToSkMatrix(lm_filter->matrix()));
     }
     case DlImageFilterType::kRuntimeEffect:
-      // UNSUPPORTED.
+      // UNSUPPORTED (ImageFilter.shader is only supported on Impeller).
       return nullptr;
+    case DlImageFilterType::kStretch: {
+      const DlStretchImageFilter* stretch_filter = filter->asStretch();
+      FML_DCHECK(stretch_filter != nullptr);
+      const DlRect& bounds = stretch_filter->stretch_bounds();
+      if (bounds.IsEmpty() ||
+          (impeller::ScalarNearlyZero(stretch_filter->overscroll_x()) &&
+           impeller::ScalarNearlyZero(stretch_filter->overscroll_y()))) {
+        return nullptr;
+      }
+      DlScalar abs_overscroll_x = std::abs(stretch_filter->overscroll_x());
+      DlScalar abs_overscroll_y = std::abs(stretch_filter->overscroll_y());
+      DlScalar scale_x = 1.0f + abs_overscroll_x;
+      DlScalar scale_y = 1.0f + abs_overscroll_y;
+      DlScalar pivot_x = stretch_filter->overscroll_x() >= 0.0f
+                             ? bounds.GetLeft()
+                             : bounds.GetRight();
+      DlScalar pivot_y = stretch_filter->overscroll_y() >= 0.0f
+                             ? bounds.GetTop()
+                             : bounds.GetBottom();
+      SkMatrix matrix = SkMatrix::Scale(scale_x, scale_y);
+      matrix.postTranslate(-pivot_x * abs_overscroll_x,
+                           -pivot_y * abs_overscroll_y);
+      return SkImageFilters::MatrixTransform(
+          matrix, ToSk(DlImageSampling::kMipmapLinear), nullptr);
+    }
   }
 }
 

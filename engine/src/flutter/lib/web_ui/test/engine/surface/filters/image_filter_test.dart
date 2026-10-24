@@ -75,5 +75,42 @@ void testMain() {
       expect(filter3, isNot(equals(filter2)));
       expect(filter3, filter3);
     });
+
+    test('stretch creates matrix filter anchored at leading or trailing bounds edge', () {
+      const bounds = Rect.fromLTRB(10.0, 20.0, 310.0, 620.0);
+      final positive = ImageFilter.stretch(overscrollX: 0.2, overscrollY: 0.5, bounds: bounds);
+      final expectedPositive = Float64List(16)
+        ..[0] = 1.2
+        ..[5] = 1.5
+        ..[10] = 1.0
+        ..[12] = -10.0 * 0.2
+        ..[13] = -20.0 * 0.5
+        ..[15] = 1.0;
+      expect(
+        positive,
+        equals(ImageFilter.matrix(expectedPositive, filterQuality: FilterQuality.medium)),
+      );
+
+      final negative = ImageFilter.stretch(overscrollX: -0.2, overscrollY: -0.5, bounds: bounds);
+      final expectedNegative = Float64List(16)
+        ..[0] = 1.2
+        ..[5] = 1.5
+        ..[10] = 1.0
+        ..[12] = -310.0 * 0.2
+        ..[13] = -620.0 * 0.5
+        ..[15] = 1.0;
+      expect(
+        negative,
+        equals(ImageFilter.matrix(expectedNegative, filterQuality: FilterQuality.medium)),
+      );
+
+      final empty = ImageFilter.stretch(overscrollX: 0.2, overscrollY: 0.5, bounds: Rect.zero);
+      expect(
+        empty,
+        equals(
+          ImageFilter.matrix(Matrix4.identity().toFloat64(), filterQuality: FilterQuality.medium),
+        ),
+      );
+    });
   });
 }
