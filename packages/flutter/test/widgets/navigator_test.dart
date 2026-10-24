@@ -1933,7 +1933,7 @@ void main() {
                       return OnTapPage(
                         id: 'dialog',
                         onTap: () {
-                          // Push a second screen / popup on top of the dialog
+                          // Push a second screen / popup on top of the dialog.
                           Navigator.push<void>(
                             context,
                             PageRouteBuilder<void>(
@@ -1960,23 +1960,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('dialog'), findsOneWidget);
 
-    // Open top_screen on top of dialog
+    // Open top_screen on top of dialog.
     await tester.tap(find.text('dialog'));
     await tester.pumpAndSettle();
     expect(find.text('top_screen'), findsOneWidget);
 
-    // Call ModalRoute.of(dialogContext)!.pop('dialog_dismissed') from inside the dialog
+    // Call ModalRoute.of(dialogContext)!.pop('dialog_dismissed') from inside the dialog.
     ModalRoute.of(dialogContext)!.pop('dialog_dismissed');
     await tester.pumpAndSettle();
 
-    // top_screen is still visible and was NOT popped!
+    // The top_screen is still visible and was not popped.
     expect(find.text('top_screen'), findsOneWidget);
     expect(find.text('dialog'), findsNothing);
 
-    // The dialog's future completed with the value passed to pop()
+    // The dialog's future completed with the value passed to pop().
     expect(await dialogResult, 'dialog_dismissed');
 
-    // Popping the top_screen now reveals home directly
+    // Popping the top_screen now reveals home directly.
     Navigator.pop(tester.element(find.text('top_screen')));
     await tester.pumpAndSettle();
     expect(find.text('home'), findsOneWidget);
@@ -2087,16 +2087,132 @@ void main() {
 
     final Route<void> routeA = routes['/A']!;
 
-    // Call pop multiple times in a row
+    // Call pop multiple times in a row.
     routeA.pop();
     routeA.pop();
     routeA.pop();
 
     await tester.pumpAndSettle();
-    // Only /A was popped, / is still present and not affected by extra pop calls
+    // Only /A was popped; / is still present and not affected by extra pop calls.
+    expect(find.text('/'), findsOneWidget);
+    expect(routes['/']!.isActive, true);
+
+    // Calling pop on an already disposed route also does nothing gracefully.
+    routeA.pop();
     expect(find.text('/'), findsOneWidget);
     expect(routes['/']!.isActive, true);
   });
+
+  testWidgets(
+    'Navigator.maybePop does not pop route if a new route was pushed while willPop was pending',
+    (WidgetTester tester) async {
+      final willPopCompleter = Completer<RoutePopDisposition>();
+      late Route<void> routeA;
+      late Route<void> routeB;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          onGenerateRoute: (RouteSettings settings) {
+            if (settings.name == '/A') {
+              routeA = _AsyncWillPopRoute<void>(
+                completer: willPopCompleter,
+                settings: settings,
+                pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                  return const OnTapPage(id: 'A');
+                },
+              );
+              return routeA;
+            }
+            if (settings.name == '/B') {
+              routeB = PageRouteBuilder<void>(
+                settings: settings,
+                pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                  return const OnTapPage(id: 'B');
+                },
+              );
+              return routeB;
+            }
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                return const OnTapPage(id: '/');
+              },
+            );
+          },
+        ),
+      );
+
+      Navigator.pushNamed(tester.element(find.text('/')), '/A');
+      await tester.pumpAndSettle();
+      expect(find.text('A'), findsOneWidget);
+
+      // Call maybePop on navigator, which begins waiting for routeA.willPop().
+      final Future<bool> maybePopFuture = Navigator.maybePop(tester.element(find.text('A')));
+      await tester.pump();
+
+      // While willPop is pending, push /B on top.
+      Navigator.pushNamed(tester.element(find.text('A')), '/B');
+      await tester.pumpAndSettle();
+      expect(find.text('B'), findsOneWidget);
+      expect(routeB.isCurrent, isTrue);
+
+      // Now complete routeA's willPop with pop.
+      willPopCompleter.complete(RoutePopDisposition.pop);
+      final bool popHandled = await maybePopFuture;
+      await tester.pumpAndSettle();
+
+      // The maybePop returned true (handled/aborted), but routeA was not popped.
+      expect(popHandled, isTrue);
+      expect(find.text('B'), findsOneWidget);
+      expect(routeB.isActive, isTrue);
+      expect(routeA.isActive, isTrue);
+    },
+  );
+
+  testWidgets(
+    'Route.pop pops local history of LocalHistoryRoute without popping the route itself',
+    (WidgetTester tester) async {
+      final routes = <String, Route<void>>{};
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          onGenerateRoute: (RouteSettings settings) {
+            routes[settings.name!] = PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                return OnTapPage(id: settings.name!);
+              },
+            );
+            return routes[settings.name];
+          },
+        ),
+      );
+
+      Navigator.pushNamed(tester.element(find.text('/')), '/A');
+      await tester.pumpAndSettle();
+      expect(find.text('/A'), findsOneWidget);
+
+      final routeA = routes['/A']! as ModalRoute<void>;
+      var localHistoryRemoved = false;
+      routeA.addLocalHistoryEntry(LocalHistoryEntry(onRemove: () => localHistoryRemoved = true));
+      expect(routeA.willHandlePopInternally, isTrue);
+
+      // Popping routeA first pops its local history entry.
+      routeA.pop();
+      await tester.pumpAndSettle();
+      expect(localHistoryRemoved, isTrue);
+      expect(find.text('/A'), findsOneWidget);
+      expect(routeA.isActive, isTrue);
+      expect(routeA.willHandlePopInternally, isFalse);
+
+      // Popping routeA again pops the route itself.
+      routeA.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('/A'), findsNothing);
+      expect(find.text('/'), findsOneWidget);
+      expect(routeA.isActive, isFalse);
+    },
+  );
 
   testWidgets('remove a route whose value is awaited', (WidgetTester tester) async {
     late Future<String?> pageValue;
@@ -7247,6 +7363,15 @@ class NoAnimationPageRoute extends PageRouteBuilder<void> {
           return pageBuilder(context);
         },
       );
+}
+
+class _AsyncWillPopRoute<T> extends PageRouteBuilder<T> {
+  _AsyncWillPopRoute({required super.pageBuilder, required this.completer, super.settings});
+
+  final Completer<RoutePopDisposition> completer;
+
+  @override
+  Future<RoutePopDisposition> willPop() => completer.future;
 }
 
 class StatefulTestWidget extends StatefulWidget {

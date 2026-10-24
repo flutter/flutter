@@ -469,7 +469,6 @@ abstract class Route<T> extends _RoutePlaceholder {
   ///    route given a [BuildContext].
   ///  * [Navigator.pop], which pops the top-most route on the navigator regardless
   ///    of which route initiated the request.
-  @optionalTypeArgs
   void pop([T? result]) {
     navigator?.popRoute<T>(this, result);
   }
@@ -492,7 +491,6 @@ abstract class Route<T> extends _RoutePlaceholder {
   ///  * [pop], which pops this route unconditionally.
   ///  * [Navigator.maybePopRoute], which is the static method that consults
   ///    [popDisposition] before popping a specific route.
-  @optionalTypeArgs
   @awaitNotRequired
   Future<bool> maybePop([T? result]) {
     return navigator?.maybePopRoute<T>(this, result) ?? Future<bool>.value(false);
@@ -2871,10 +2869,6 @@ class Navigator extends StatefulWidget {
   ///
   /// The popped route will animate off screen according to its transition.
   ///
-  /// If non-null, `result` will be used as the result of the route that is
-  /// popped; the future that had been returned from pushing the popped route
-  /// will complete with `result`.
-  ///
   /// {@template flutter.widgets.navigator.popRoute}
   /// The route's [Route.didPop] method is called first. If that method
   /// returns false, then the route remains in the [Navigator]'s history (the
@@ -2885,12 +2879,13 @@ class Navigator extends StatefulWidget {
   /// popped; the future that had been returned from pushing the popped route
   /// will complete with `result`. Routes such as dialogs or popup menus
   /// typically use this mechanism to return the value selected by the user to
-  /// the widget that created their route. The type of `result`, if provided,
-  /// must match the type argument of the class of the popped route (`T`).
+  /// the widget that created their route.
   ///
-  /// The popped route and the route below it are notified (see [Route.didPop],
-  /// [Route.didComplete], and [Route.didPopNext]). If the [Navigator] has any
-  /// [Navigator.observers], they will be notified as well (see
+  /// The popped route is notified (see [Route.didPop] and [Route.didComplete]).
+  /// If the popped route was the top-most route, the route below it is notified
+  /// as well (see [Route.didPopNext]). Otherwise, adjacent routes receive
+  /// [Route.didChangeNext] and [Route.didChangePrevious]. If the [Navigator] has
+  /// any [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didPop]).
   ///
   /// The `T` type argument is the type of the return value of the popped route.
@@ -5713,7 +5708,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
     assert(lastEntry.route._isInstalledIn(this));
     assert(lastEntry.route._debugCheckCanConsumeResult(result, methodName: 'maybePop'));
-    return _maybePopEntry<T>(lastEntry, result);
+    return _maybePopEntry<T>(lastEntry, result, mustRemainCurrent: true);
   }
 
   /// Consults the given `route`'s [Route.popDisposition] and [Route.willPop]
@@ -5740,10 +5735,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return false;
     }
     assert(entry.route._debugCheckCanConsumeResult(result, methodName: 'maybePopRoute'));
-    return _maybePopEntry<T>(entry, result);
+    return _maybePopEntry<T>(entry, result, mustRemainCurrent: false);
   }
 
-  Future<bool> _maybePopEntry<T extends Object?>(_RouteEntry entry, T? result) async {
+  Future<bool> _maybePopEntry<T extends Object?>(
+    _RouteEntry entry,
+    T? result, {
+    required bool mustRemainCurrent,
+  }) async {
     // TODO(justinmc): When the deprecated willPop method is removed, delete
     // this code and use only popDisposition, below.
     if (await entry.route.willPop() == RoutePopDisposition.doNotPop) {
@@ -5754,12 +5753,20 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return true;
     }
 
-    final _RouteEntry? currentEntry = _firstRouteEntryWhereOrNull(
-      _RouteEntry.isRoutePredicate(entry.route),
-    );
-    if (currentEntry == null || !currentEntry.isPresent) {
-      // Forget about this pop, something happened to our history in the meantime.
-      return true;
+    if (mustRemainCurrent) {
+      final _RouteEntry? newLastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      if (entry != newLastEntry) {
+        // Forget about this pop, something happened to our history in the meantime.
+        return true;
+      }
+    } else {
+      final _RouteEntry? currentEntry = _firstRouteEntryWhereOrNull(
+        _RouteEntry.isRoutePredicate(entry.route),
+      );
+      if (currentEntry == null || !currentEntry.isPresent) {
+        // Forget about this pop, something happened to our history in the meantime.
+        return true;
+      }
     }
 
     switch (entry.route.popDisposition) {
@@ -5817,10 +5824,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// The popped route will animate off screen according to its transition.
   ///
-  /// The given `route` must be installed in this navigator; this method will
-  /// throw an exception in assert mode if it is not. If the route is not
-  /// currently present (e.g. it is already being popped, removed, or disposed),
-  /// calling this method does nothing.
+  /// The given `route` must be installed in this navigator and present in its
+  /// history; this method will throw an exception in assert mode if it is not.
+  /// If the route is currently undergoing an exit transition (e.g. it is
+  /// already being popped or removed), calling this method does nothing.
   ///
   /// {@macro flutter.widgets.navigator.popRoute}
   ///
@@ -5835,15 +5842,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void popRoute<T extends Object?>(Route<dynamic> route, [T? result]) {
     assert(!_debugLocked);
     assert(route._isInstalledIn(this));
-    assert(
-      _history.any(_RouteEntry.isRoutePredicate(route)),
-      'The route $route is not in the history of this Navigator.',
-    );
+    final _RouteEntry? entry = _firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(route));
+    assert(entry != null, 'The route $route is not in the history of this Navigator.');
     assert(() {
-      final _RouteEntry? entry = _firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(route));
       return entry?.route._debugCheckCanConsumeResult(result, methodName: 'popRoute') ?? true;
     }());
-    final _RouteEntry? entry = _firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(route));
     if (entry == null || !entry.isPresent) {
       return;
     }
