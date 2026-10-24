@@ -176,6 +176,10 @@ class MockVulkanContextBuilder {
   int compression_exhausted_create_image_failures_ = 0;
 };
 
+/// @brief Returns the subpass dependencies passed to the most recent
+///        `vkCreateRenderPass` call on the given device.
+std::vector<VkSubpassDependency> GetLastRenderPassDependencies(VkDevice device);
+
 /// @brief Override the image size returned by all swapchain images.
 void SetSwapchainImageSize(ISize size);
 
