@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 
+#include <cmath>
 #include <cstring>
 #include <unordered_set>
 
@@ -879,6 +880,229 @@ TEST(PointerDataPacketConverterTest, CanConvertViewId) {
   ASSERT_EQ(result.size(), (size_t)2);
   ASSERT_EQ(result[0].view_id, 100);
   ASSERT_EQ(result[1].view_id, 200);
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresNonFinitePositions) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(6);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 1.0, 1.0, 0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 1.0, 1.0, 1);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, NAN, NAN, 1);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
+  packet->SetPointerData(3, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, INFINITY,
+                             INFINITY, 0);
+  packet->SetPointerData(4, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, INFINITY,
+                             INFINITY, 0);
+  packet->SetPointerData(5, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite move is dropped, and the non-finite up and remove use the
+  // last position of the pointer, so no hover is synthesized.
+  ASSERT_EQ(result.size(), (size_t)5);
+  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
+  ASSERT_EQ(result[1].change, PointerData::Change::kDown);
+
+  ASSERT_EQ(result[2].change, PointerData::Change::kMove);
+  ASSERT_EQ(result[2].physical_x, 3.0);
+  ASSERT_EQ(result[2].physical_y, 4.0);
+  ASSERT_EQ(result[2].physical_delta_x, 2.0);
+  ASSERT_EQ(result[2].physical_delta_y, 3.0);
+
+  ASSERT_EQ(result[3].change, PointerData::Change::kUp);
+  ASSERT_EQ(result[3].synthesized, 0);
+  ASSERT_EQ(result[3].physical_x, 3.0);
+  ASSERT_EQ(result[3].physical_y, 4.0);
+
+  ASSERT_EQ(result[4].change, PointerData::Change::kRemove);
+  ASSERT_EQ(result[4].synthesized, 0);
+  ASSERT_EQ(result[4].physical_x, 3.0);
+  ASSERT_EQ(result[4].physical_y, 4.0);
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresGestureWithNonFiniteDown) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(5);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, NAN, NAN, 1);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0, 0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(3, data);
+  // Android sends a remove right after the up of a touch.
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(4, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // Without a down, the rest of the gesture is dropped too.
+  ASSERT_EQ(result.size(), (size_t)0);
+}
+
+TEST(PointerDataPacketConverterTest,
+     IgnoresTrackpadGestureWithNonFinitePanZoomStart) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(3);
+  PointerData data{};
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, NAN, NAN, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 3.0, 4.0, 1.0, 1.0, 1.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     3.0, 4.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(2, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // Without a pan/zoom start, the rest of the gesture is dropped too.
+  ASSERT_EQ(result.size(), (size_t)0);
+}
+
+TEST(PointerDataPacketConverterTest,
+     IgnoresGestureWithNonFiniteDownForKnownPointer) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  // Android doesn't remove a touch pointer after a cancel, so the next touch
+  // starts with a known pointer that isn't down.
+  auto packet = std::make_unique<PointerDataPacket>(7);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 1.0, 1.0, 1);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 1.0, 1.0,
+                             0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, NAN, NAN, 1);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
+  packet->SetPointerData(3, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0, 0);
+  packet->SetPointerData(4, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(5, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(6, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // Only the first gesture and the remove get through. As for any remove at a
+  // new position, a hover is synthesized before it.
+  ASSERT_EQ(result.size(), (size_t)5);
+  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
+  ASSERT_EQ(result[0].synthesized, 1);
+  ASSERT_EQ(result[1].change, PointerData::Change::kDown);
+  ASSERT_EQ(result[2].change, PointerData::Change::kCancel);
+  ASSERT_EQ(result[3].change, PointerData::Change::kHover);
+  ASSERT_EQ(result[3].synthesized, 1);
+  ASSERT_EQ(result[4].change, PointerData::Change::kRemove);
+  ASSERT_EQ(result[4].synthesized, 0);
+}
+
+TEST(PointerDataPacketConverterTest,
+     IgnoresTrackpadGestureWithNonFinitePanZoomStartForKnownPointer) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(5);
+  PointerData data{};
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, NAN, NAN, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 3.0, 4.0, 1.0, 1.0, 1.0, 0.0);
+  packet->SetPointerData(3, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     3.0, 4.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(4, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The second gesture doesn't start at the stale position of the first one;
+  // it is dropped.
+  ASSERT_EQ(result.size(), (size_t)3);
+  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
+  ASSERT_EQ(result[0].synthesized, 1);
+  ASSERT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
+  ASSERT_EQ(result[2].change, PointerData::Change::kPanZoomEnd);
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresNonFinitePanZoomUpdate) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(5);
+  PointerData data{};
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 1.0, 1.0, 2.0, 2.0, 1.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 1.0, 1.0, NAN, NAN, 1.0, 0.0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 1.0, 1.0, 5.0, 5.0, 1.0, 0.0);
+  packet->SetPointerData(3, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(4, data);
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite update is dropped, so the next update's pan delta is
+  // computed from the last valid pan.
+  ASSERT_EQ(result.size(), (size_t)5);
+  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
+  ASSERT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
+  ASSERT_EQ(result[2].change, PointerData::Change::kPanZoomUpdate);
+  ASSERT_EQ(result[2].pan_delta_x, 2.0);
+  ASSERT_EQ(result[2].pan_delta_y, 2.0);
+  ASSERT_EQ(result[3].change, PointerData::Change::kPanZoomUpdate);
+  ASSERT_EQ(result[3].pan_x, 5.0);
+  ASSERT_EQ(result[3].pan_y, 5.0);
+  ASSERT_EQ(result[3].pan_delta_x, 3.0);
+  ASSERT_EQ(result[3].pan_delta_y, 3.0);
+  ASSERT_EQ(result[4].change, PointerData::Change::kPanZoomEnd);
 }
 
 }  // namespace testing
