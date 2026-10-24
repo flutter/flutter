@@ -1,0 +1,22 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: flutter_tools_extension_linux_prototype
+protocolVersion: 1
+entrypoint: bin/flutter_tools_extension_linux_prototype.dart
+supportedPlatforms:
+  - linux
+services:
+  - diagnostics
+  - config
+  - template
+  - device
+  - build
+  - clean
+buildTargets:
+  - custom-linux-build
+templates:
+  - custom-linux-app
+platforms:
+  - custom_linux

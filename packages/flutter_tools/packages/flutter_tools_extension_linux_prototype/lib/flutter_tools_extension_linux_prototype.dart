@@ -18,15 +18,16 @@ import 'src/template.dart';
 
 /// Isolate entrypoint for the prototype Linux Flutter Tool Extension.
 void linuxExtensionEntryPoint(SendPort sendPort) {
+  final dependencies = ExtensionDependencies.bootstrap();
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[
       LinuxExtensionDiagnostics(),
       LinuxConfigurationExtension(),
       LinuxTemplateService(),
-      LinuxDeviceService(),
+      LinuxDeviceService(dependencies: dependencies),
       LinuxBuildService(),
-      LinuxCleanService(),
+      LinuxCleanService(dependencies: dependencies),
     ],
     extensionName: 'flutter_tools_extension_linux_prototype',
     supportedPlatforms: const <String>{'linux'},
