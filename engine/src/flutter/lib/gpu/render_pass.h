@@ -95,6 +95,11 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   /// can observe which mutations re-dirty it.
   void ClearPipelineStateDirtyForTesting();
 
+  /// The pipeline descriptor the next draw would build from the current
+  /// render target and pipeline state, without a context or pipeline. Has no
+  /// side effects.
+  impeller::PipelineDescriptor BuildPipelineDescriptorForTesting() const;
+
   struct BufferAndUniformSlot {
     impeller::ShaderUniformSlot slot;
     impeller::BufferResource view;
@@ -141,6 +146,12 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   /// the pipeline.
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
   GetOrCreatePipeline();
+
+  /// Build the pipeline descriptor for the current state: the pass's
+  /// fixed-function state plus attachment formats and the sample count taken
+  /// from the render target. Only indices that have a color attachment are
+  /// included.
+  impeller::PipelineDescriptor BuildPipelineDescriptor() const;
 
   // The non-dirtying counterpart of GetColorAttachmentDescriptor, for the
   // pipeline rebuild itself.

@@ -184,34 +184,31 @@ void RenderPass::ClearBindings() {
   index_buffer_type = impeller::IndexType::kNone;
 }
 
-std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
-RenderPass::GetOrCreatePipeline() {
-  // Consecutive draws overwhelmingly reuse the same pipeline state; skip the
-  // descriptor rebuild, hash, and pipeline-library lookup entirely until a
-  // state mutation marks it dirty. Draw rates reach tens of thousands per
-  // frame, so this path stays free of per-draw allocation and hashing. A
-  // memoized null is a build failure that was already reported for this
-  // exact state; returning it without retrying keeps a broken pipeline from
-  // re-logging on every draw.
-  if (!pipeline_state_dirty_) {
-    return memoized_pipeline_;
-  }
-  pipeline_state_dirty_ = false;
-  memoized_pipeline_ = nullptr;
-
+impeller::PipelineDescriptor RenderPass::BuildPipelineDescriptor() const {
   // Infer the pipeline layout based on the shape of the RenderTarget.
   auto pipeline_desc = pipeline_descriptor_;
 
   pipeline_desc.SetSampleCount(render_target_.GetSampleCount());
 
+  // Only attachments the render target has go into the pipeline. Blend state
+  // set for any other index stays in color_descriptors_ for a later target
+  // but is not part of this pipeline.
+  std::map<size_t, impeller::ColorAttachmentDescriptor> color_descriptors;
   render_target_.IterateAllColorAttachments(
       [&](size_t index, const impeller::ColorAttachment& attachment) -> bool {
-        auto& color = ColorAttachmentDescriptorAt(index);
-        color.format = render_target_.GetRenderTargetPixelFormat();
+        auto found = color_descriptors_.find(index);
+        impeller::ColorAttachmentDescriptor color =
+            found == color_descriptors_.end()
+                ? impeller::ColorAttachmentDescriptor{}
+                : found->second;
+        // Each attachment can have its own format; GetRenderTargetPixelFormat
+        // only describes attachment 0.
+        color.format = attachment.texture->GetTextureDescriptor().format;
+        color_descriptors[index] = color;
         return true;
       });
 
-  pipeline_desc.SetColorAttachmentDescriptors(color_descriptors_);
+  pipeline_desc.SetColorAttachmentDescriptors(std::move(color_descriptors));
 
   {
     auto stencil = render_target_.GetStencilAttachment();
@@ -237,6 +234,31 @@ RenderPass::GetOrCreatePipeline() {
       pipeline_desc.ClearDepthAttachment();
     }
   }
+
+  return pipeline_desc;
+}
+
+impeller::PipelineDescriptor RenderPass::BuildPipelineDescriptorForTesting()
+    const {
+  return BuildPipelineDescriptor();
+}
+
+std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
+RenderPass::GetOrCreatePipeline() {
+  // Consecutive draws overwhelmingly reuse the same pipeline state; skip the
+  // descriptor rebuild, hash, and pipeline-library lookup entirely until a
+  // state mutation marks it dirty. Draw rates reach tens of thousands per
+  // frame, so this path stays free of per-draw allocation and hashing. A
+  // memoized null is a build failure that was already reported for this
+  // exact state; returning it without retrying keeps a broken pipeline from
+  // re-logging on every draw.
+  if (!pipeline_state_dirty_) {
+    return memoized_pipeline_;
+  }
+  pipeline_state_dirty_ = false;
+  memoized_pipeline_ = nullptr;
+
+  auto pipeline_desc = BuildPipelineDescriptor();
 
   auto& context = *GetContext();
 
