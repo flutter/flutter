@@ -995,12 +995,10 @@ if (is_win) {
     # Non-Mac Posix linker flags.
     # Specifically tell the linker to perform optimizations.
     # See http://lwn.net/Articles/192624/ .
-    if (is_wasm && wasm_prioritize_size) {
-      common_optimize_on_ldflags += [ "-Oz" ]
-    } else {
-      common_optimize_on_ldflags += [ "-Wl,-O2" ]
-    }
-    common_optimize_on_ldflags += [ "-Wl,--gc-sections" ]
+    common_optimize_on_ldflags += [
+      "-Wl,-O2",
+      "-Wl,--gc-sections",
+    ]
 
     if (!using_sanitizer && !is_wasm) {
       # Functions interposed by the sanitizers can make ld think
@@ -1013,6 +1011,7 @@ if (is_win) {
 
 # Default "optimization on" config. On Windows, this favors size over speed.
 config("optimize") {
+  ldflags = common_optimize_on_ldflags
   if (is_win) {
     # Favor size over speed, /O1 must be before the common flags. The GYP
     # build also specifies /Os and /GF but these are implied by /O1.
@@ -1025,6 +1024,14 @@ config("optimize") {
   } else if (is_wasm) {
     if (wasm_prioritize_size) {
       cflags = [ "-Oz" ]
+
+      # In Emscripten, `-Wl,-O2` (from `common_optimize_on_ldflags`) is
+      # forwarded directly to `wasm-ld` without changing `em++`'s driver-level
+      # `OPT_LEVEL`, so `config("no_optimize")` links with `wasm-ld -O2` while
+      # skipping post-link Binaryen (`wasm-opt`) optimization. Passing `-Oz`
+      # here sets `em++`'s `OPT_LEVEL=2, SHRINK_LEVEL=2` so `wasm-opt -Oz` only
+      # runs in optimized builds (alongside `wasm-ld -O2`).
+      ldflags += [ "-Oz" ]
     } else {
       cflags = [ "-O3" ]
     }
@@ -1044,7 +1051,7 @@ config("optimize") {
     lto_flags += [ "-flto" ]
   }
 
-  ldflags = common_optimize_on_ldflags + lto_flags
+  ldflags += lto_flags
   cflags += lto_flags
 }
 
