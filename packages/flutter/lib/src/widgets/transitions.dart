@@ -303,6 +303,8 @@ class MatrixTransition extends AnimatedWidget {
   /// When the animation is stopped (either in [AnimationStatus.dismissed] or
   /// [AnimationStatus.completed]), the filter quality argument will be ignored.
   ///
+  /// While the animation is running, this value is passed to [Transform.filterQuality].
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
