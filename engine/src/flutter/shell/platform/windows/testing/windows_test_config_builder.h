@@ -85,8 +85,9 @@ class WindowsConfigBuilder {
   ViewControllerPtr Run() const;
 
  private:
-  // Initialize COM, so that it is available for use in the library and/or
-  // plugins.
+  // Initialize COM on the calling thread as STA.
+  //
+  // Matches the Windows runner and is required by TSF (`ITfThreadMgr`).
   void InitializeCOM() const;
 
   WindowsTestContext& context_;

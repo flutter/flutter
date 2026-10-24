@@ -79,6 +79,27 @@ class EngineModifier {
   // they are already initialized.
   void InitializeKeyboard() { engine_->InitializeKeyboard(); }
 
+  // Replaces the engine-owned on-screen keyboard and updates the text plugin.
+  void SetOnScreenKeyboard(std::unique_ptr<OnScreenKeyboard> keyboard) {
+    engine_->on_screen_keyboard_ = std::move(keyboard);
+    if (engine_->text_input_plugin_) {
+      engine_->text_input_plugin_->on_screen_keyboard_ =
+          engine_->on_screen_keyboard_.get();
+    }
+  }
+
+  // Replaces the engine-owned TSF bridge and updates the text plugin.
+  void SetTsfBridge(std::unique_ptr<TsfBridge> tsf_bridge) {
+    engine_->tsf_bridge_ = std::move(tsf_bridge);
+    if (engine_->text_input_plugin_) {
+      engine_->text_input_plugin_->tsf_bridge_ = engine_->tsf_bridge_.get();
+    }
+  }
+
+  void OnOnScreenKeyboardVisibilityChanged() {
+    engine_->OnOnScreenKeyboardVisibilityChanged();
+  }
+
   void SetLifecycleManager(std::unique_ptr<WindowsLifecycleManager>&& handler) {
     engine_->lifecycle_manager_ = std::move(handler);
   }
