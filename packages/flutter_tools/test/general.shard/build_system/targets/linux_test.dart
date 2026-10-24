@@ -121,6 +121,33 @@ void main() {
     },
   );
 
+  testWithoutContext('UnpackLinux copies libvmservice_snapshot.so in profile mode', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final artifacts = Artifacts.test();
+    setUpCacheDirectory(fileSystem, artifacts, mode: BuildMode.profile);
+
+    final String desktopPathForX64 = artifacts.getArtifactPath(
+      Artifact.linuxDesktopPath,
+      platform: TargetPlatform.linux_x64,
+      mode: BuildMode.profile,
+    );
+    fileSystem.file('$desktopPathForX64/libvmservice_snapshot.so').createSync(recursive: true);
+
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: 'profile'},
+      artifacts: artifacts,
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    testEnvironment.buildDir.createSync(recursive: true);
+
+    await const UnpackLinux(TargetPlatform.linux_x64).build(testEnvironment);
+
+    expect(fileSystem.file('linux/flutter/ephemeral/libvmservice_snapshot.so'), exists);
+  });
+
   // Only required for the test below that still depends on the context.
   late FileSystem fileSystem;
 
@@ -146,12 +173,21 @@ void main() {
       // Create input files.
       testEnvironment.buildDir.childFile('app.dill').createSync();
       testEnvironment.buildDir.childFile('native_assets.json').createSync();
+      fileSystem
+          .file(
+            testEnvironment.artifacts.getArtifactPath(
+              Artifact.vmserviceKernelDill,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync();
 
       await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
 
       final Directory output = testEnvironment.outputDir.childDirectory('flutter_assets');
 
       expect(output.childFile('kernel_blob.bin'), exists);
+      expect(output.childFile('vmservice_snapshot.dill'), exists);
       expect(output.childFile('version.json'), exists);
       final String versionFile = output.childFile('version.json').readAsStringSync();
       expect(versionFile, contains('"version":"2.0.0"'));
@@ -182,6 +218,14 @@ void main() {
 
       environment.buildDir.childFile('app.dill').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
+      flavorFileSystem
+          .file(
+            environment.artifacts.getArtifactPath(
+              Artifact.vmserviceKernelDill,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync();
 
       flavorFileSystem.file('pubspec.yaml')
         ..createSync()
@@ -327,16 +371,20 @@ flutter:
   });
 }
 
-void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
+void setUpCacheDirectory(
+  FileSystem fileSystem,
+  Artifacts artifacts, {
+  BuildMode mode = BuildMode.debug,
+}) {
   final String desktopPathForX64 = artifacts.getArtifactPath(
     Artifact.linuxDesktopPath,
     platform: TargetPlatform.linux_x64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   final String desktopPathForArm64 = artifacts.getArtifactPath(
     Artifact.linuxDesktopPath,
     platform: TargetPlatform.linux_arm64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   fileSystem.file('$desktopPathForX64/unrelated-stuff').createSync(recursive: true);
   fileSystem.file('$desktopPathForX64/libflutter_linux_gtk.so').createSync(recursive: true);
@@ -346,12 +394,12 @@ void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
   final String headersPathForX64 = artifacts.getArtifactPath(
     Artifact.linuxHeaders,
     platform: TargetPlatform.linux_x64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   final String headersPathForArm64 = artifacts.getArtifactPath(
     Artifact.linuxHeaders,
     platform: TargetPlatform.linux_arm64,
-    mode: BuildMode.debug,
+    mode: mode,
   );
   fileSystem.file('$headersPathForX64/foo.h').createSync(recursive: true);
   fileSystem.file('$headersPathForArm64/foo.h').createSync(recursive: true);

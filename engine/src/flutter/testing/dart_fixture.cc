@@ -5,7 +5,6 @@
 #include "flutter/testing/dart_fixture.h"
 
 #include <utility>
-#include "flutter/fml/paths.h"
 
 namespace flutter::testing {
 
@@ -54,10 +53,6 @@ void DartFixture::SetSnapshotsAndAssets(Settings& settings) {
   // snapshots will be present in the application AOT dylib.
   if (DartVM::IsRunningPrecompiledCode()) {
     FML_CHECK(PrepareSettingsForAOTWithSymbols(settings, aot_symbols_));
-#if FML_OS_LINUX
-    settings.vmservice_snapshot_library_path.emplace_back(fml::paths::JoinPaths(
-        {GetTestingAssetsPath(), "libvmservice_snapshot.so"}));
-#endif  // FML_OS_LINUX
   } else {
     settings.application_kernels = [this]() -> Mappings {
       std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;

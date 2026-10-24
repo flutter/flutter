@@ -681,6 +681,14 @@ abstract class IosAssetBundle extends Target {
       environment.fileSystem
           .file(isolateSnapshotData)
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+
+      final String vmserviceDill = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceKernelDill,
+        mode: BuildMode.debug,
+      );
+      environment.fileSystem
+          .file(vmserviceDill)
+          .copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
     } else {
       environment.buildDir
           .childDirectory('App.framework')
@@ -742,8 +750,35 @@ abstract class IosAssetBundle extends Target {
     await _updateMinimumOSVersion(appFrameworkInfoPlist, environment);
 
     await _signFramework(environment, frameworkBinary, buildMode);
+
+    final Directory vmServiceFrameworkDir = environment.outputDir.childDirectory(
+      _kVmServiceFrameworkName,
+    );
+    if (vmServiceFrameworkDir.existsSync()) {
+      vmServiceFrameworkDir.deleteSync(recursive: true);
+    }
+    if (buildMode == BuildMode.profile) {
+      final String vmServiceArtifactPath = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceFramework,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.profile,
+      );
+      copyDirectory(
+        environment.fileSystem.directory(vmServiceArtifactPath),
+        vmServiceFrameworkDir,
+        followLinks: false,
+      );
+      await _signFramework(
+        environment,
+        vmServiceFrameworkDir.childFile(_kVmServiceExecutableName),
+        buildMode,
+      );
+    }
   }
 }
+
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
 
 /// Build a debug iOS application bundle.
 class DebugIosApplicationBundle extends IosAssetBundle {
@@ -756,6 +791,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   List<Source> get inputs => <Source>[
     const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
     const Source.pattern('{BUILD_DIR}/app.dill'),
     ...super.inputs,
   ];
@@ -765,6 +801,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vm_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vmservice_snapshot.dill'),
     ...super.outputs,
   ];
 
@@ -799,6 +836,23 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
 
   @override
   String get name => 'profile_ios_bundle_flutter_assets';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(
+      Artifact.vmserviceFramework,
+      platform: TargetPlatform.ios,
+      mode: BuildMode.profile,
+    ),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/$_kVmServiceExecutableName'),
+    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Info.plist'),
+  ];
 
   @override
   List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];

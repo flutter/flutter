@@ -70,6 +70,14 @@ abstract class AndroidAssetBundle extends Target {
       environment.fileSystem
           .file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
+
+      final String vmserviceDill = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceKernelDill,
+        mode: BuildMode.debug,
+      );
+      environment.fileSystem
+          .file(vmserviceDill)
+          .copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
     }
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
@@ -112,6 +120,7 @@ class DebugAndroidApplication extends AndroidAssetBundle {
     ...super.inputs,
     const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
   ];
 
   @override
@@ -120,6 +129,7 @@ class DebugAndroidApplication extends AndroidAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/vm_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/vmservice_snapshot.dill'),
   ];
 }
 
