@@ -4,7 +4,7 @@
 
 #include "impeller/core/formats.h"
 
-#include <format>
+#include <iomanip>
 #include <sstream>
 
 #include "impeller/base/validation.h"
@@ -144,14 +144,15 @@ std::string ColorAttachmentToString(const ColorAttachment& color) {
 std::string DepthAttachmentToString(const DepthAttachment& depth) {
   std::stringstream stream;
   stream << AttachmentToString(depth) << ",";
-  stream << std::format("ClearDepth={:.2f}", depth.clear_depth);
+  stream << "ClearDepth=" << std::fixed << std::setprecision(2)
+         << depth.clear_depth;
   return stream.str();
 }
 
 std::string StencilAttachmentToString(const StencilAttachment& stencil) {
   std::stringstream stream;
   stream << AttachmentToString(stencil) << ",";
-  stream << std::format("ClearStencil={}", stencil.clear_stencil);
+  stream << "ClearStencil=" << stencil.clear_stencil;
   return stream.str();
 }
 

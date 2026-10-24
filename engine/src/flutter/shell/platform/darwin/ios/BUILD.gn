@@ -11,6 +11,7 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/testing/testing.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
@@ -406,6 +407,12 @@ copy("copy_dylib") {
   deps = [ ":create_flutter_framework_dylib" ]
 }
 
+check_forbidden_native_symbols("check_native_symbols") {
+  visibility = [ ":*" ]
+  deps = [ ":create_flutter_framework_dylib" ]
+  library = "$root_out_dir/libFlutter.dylib"
+}
+
 copy("copy_asan_runtime_dylib") {
   visibility = [ ":*" ]
 
@@ -511,6 +518,7 @@ shared_library("copy_and_verify_framework_module") {
 group("universal_flutter_framework") {
   visibility = [ ":*" ]
   deps = [
+    ":check_native_symbols",
     ":copy_and_verify_framework_module",
     ":copy_dylib",
     ":copy_framework_icu",

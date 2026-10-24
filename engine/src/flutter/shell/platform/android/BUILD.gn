@@ -12,6 +12,7 @@ import("//flutter/lib/snapshot/gen_snapshot.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/vulkan/config.gni")
 
 shell_gpu_configuration("android_gpu_configuration") {
@@ -461,6 +462,11 @@ action("check_imports") {
          ] + rebase_path(android_java_sources, root_build_dir)
 }
 
+check_forbidden_native_symbols("check_native_symbols") {
+  deps = [ ":flutter_shell_native" ]
+  library = "$root_build_dir/libflutter.so"
+}
+
 action("flutter_shell_java") {
   script = "//build/android/gyp/javac.py"
   depfile = "$target_gen_dir/$target_name.d"
@@ -569,6 +575,7 @@ action("android_jar") {
   ]
 
   deps = [
+    ":check_native_symbols",
     ":flutter_shell_java",
     ":flutter_shell_native",
     ":pom_content_hash_embedding",
@@ -725,7 +732,10 @@ zip_bundle("android_symbols") {
     },
   ]
 
-  deps = [ ":flutter_shell_native" ]
+  deps = [
+    ":check_native_symbols",
+    ":flutter_shell_native",
+  ]
 }
 
 zip_bundle("flutter_jar_zip") {

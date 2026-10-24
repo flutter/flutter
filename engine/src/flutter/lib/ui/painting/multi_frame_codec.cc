@@ -169,9 +169,9 @@ MultiFrameCodec::State::GetNextFrameImage(
     const auto pixel_format =
         ImageDecoderImpeller::ToPixelFormat(info.colorType());
     if (!pixel_format.has_value()) {
-      std::string decode_error(
-          std::format("Unsupported pixel format (SkColorType={})",
-                      static_cast<int>(info.colorType())));
+      std::string decode_error =
+          "Unsupported pixel format (SkColorType=" +
+          std::to_string(static_cast<int>(info.colorType())) + ")";
       FML_DLOG(ERROR) << decode_error;
       return std::make_pair(nullptr, decode_error);
     }

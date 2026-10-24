@@ -5,9 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_VERTEX_BUFFER_BUILDER_H_
 #define FLUTTER_IMPELLER_RENDERER_VERTEX_BUFFER_BUILDER_H_
 
-#include <format>
 #include <initializer_list>
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -137,7 +137,7 @@ class VertexBufferBuilder {
       return {};
     }
     if (!label_.empty()) {
-      buffer->SetLabel(std::format("{} Vertices", label_));
+      buffer->SetLabel(label_ + " Vertices");
     }
     return DeviceBuffer::AsBufferView(std::move(buffer));
   }
@@ -166,7 +166,7 @@ class VertexBufferBuilder {
       return {};
     }
     if (!label_.empty()) {
-      buffer->SetLabel(std::format("{} Indices", label_));
+      buffer->SetLabel(label_ + " Indices");
     }
     return DeviceBuffer::AsBufferView(std::move(buffer));
   }

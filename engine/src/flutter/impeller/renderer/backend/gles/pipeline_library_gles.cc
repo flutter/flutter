@@ -181,9 +181,9 @@ absl::Status PipelineLibraryGLES::PendingProgram::CompileShaders() {
   }
 
   gl.SetDebugLabel(DebugResourceType::kShader, vert_shader_,
-                   std::format("{} Vertex Shader", desc_.GetLabel()));
+                   std::string(desc_.GetLabel()) + " Vertex Shader");
   gl.SetDebugLabel(DebugResourceType::kShader, frag_shader_,
-                   std::format("{} Fragment Shader", desc_.GetLabel()));
+                   std::string(desc_.GetLabel()) + " Fragment Shader");
 
   gl.ShaderSourceMapping(vert_shader_, *vert_mapping,
                          desc_.GetSpecializationConstants());
