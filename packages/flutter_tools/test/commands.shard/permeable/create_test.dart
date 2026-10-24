@@ -633,6 +633,44 @@ void main() {
   );
 
   testUsingContext(
+    'package project sets dynamic flutter SDK version bounds in pubspec.yaml',
+    () async {
+      const expectedFlutterVersion = '3.13.0';
+      final CreateCommand command = createCreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--template=package', '--no-pub', projectDir.path]);
+
+      final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+      final pubspec = Pubspec.parse(rawPubspec);
+      expect(pubspec.environment['flutter'], VersionConstraint.parse('>=$expectedFlutterVersion'));
+    },
+    overrides: {
+      FlutterVersion: () => FakeFlutterVersion(frameworkVersion: '3.13.0'),
+      Platform: _kNoColorTerminalPlatform,
+    },
+  );
+
+  testUsingContext(
+    'plugin project sets dynamic flutter SDK version bounds in pubspec.yaml',
+    () async {
+      const expectedFlutterVersion = '3.13.0';
+      final CreateCommand command = createCreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--template=plugin', '--no-pub', projectDir.path]);
+
+      final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+      final pubspec = Pubspec.parse(rawPubspec);
+      expect(pubspec.environment['flutter'], VersionConstraint.parse('>=$expectedFlutterVersion'));
+    },
+    overrides: {
+      FlutterVersion: () => FakeFlutterVersion(frameworkVersion: '3.13.0'),
+      Platform: _kNoColorTerminalPlatform,
+    },
+  );
+
+  testUsingContext(
     'can create a plugin project',
     () async {
       await _createAndAnalyzeProject(
