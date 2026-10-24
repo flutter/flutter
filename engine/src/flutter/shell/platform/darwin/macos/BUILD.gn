@@ -62,10 +62,7 @@ source_set("InternalFlutterSwift") {
     "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
   ]
   bridge_header = "InternalFlutterSwift-Bridging-Header.h"
-  sources = [
-    "framework/Source/FlutterRunLoop.swift",
-    "framework/Source/ResizeSynchronizer.swift",
-  ]
+  sources = [ "framework/Source/ResizeSynchronizer.swift" ]
   deps = [ "//flutter/shell/platform/darwin/common:framework_common" ]
   public = _flutter_framework_headers + framework_common_headers
 }
@@ -184,6 +181,11 @@ shared_library("flutter_framework_dylib") {
     "-Wl,-install_name,@rpath/$_flutter_framework_filename/$_framework_binary_subpath",
     "-fapplication-extension",
   ]
+
+  # Keep the public Swift API of the internal Swift modules from being exported; see
+  # //flutter/testing/symbols/verify_exported.dart.
+  configs +=
+      [ "//flutter/shell/platform/darwin/common:swift_unexported_symbols" ]
 
   deps = [ ":flutter_framework_source" ]
 }
