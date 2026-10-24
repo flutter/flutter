@@ -383,6 +383,43 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // flush() with default arguments must flush the whole buffer. On OpenGL ES
+  // the flushed range is uploaded with glBufferSubData when the buffer is
+  // bound, so a bad range there loses the vertex data.
+  test('DeviceBuffer.flush with defaults makes the whole buffer drawable', () async {
+    final ByteData vertexData = float32(<double>[
+      -0.5, 0.5, //
+      0.0, -0.5, //
+      0.5, 0.5, //
+    ]);
+    final gpu.DeviceBuffer vertexBuffer = gpu.gpuContext.createDeviceBuffer(
+      gpu.StorageMode.hostVisible,
+      vertexData.lengthInBytes,
+    );
+    expect(vertexBuffer.overwrite(vertexData), isTrue);
+    vertexBuffer.flush();
+
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+    state.renderPass.bindVertexBuffer(
+      gpu.BufferView(vertexBuffer, offsetInBytes: 0, lengthInBytes: vertexData.lengthInBytes),
+    );
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+    state.renderPass.draw(3);
+    await submitAndWait(state.commandBuffer);
+
+    final ByteData bytes = await readTextureBytes(state.renderTexture);
+    const int center = (50 * 100 + 50) * 4;
+    expect(bytes.getUint8(center + 0), lessThan(0x40)); // red
+    expect(bytes.getUint8(center + 1), greaterThan(0xC0)); // green
+    expect(bytes.getUint8(center + 3), 0xFF); // alpha
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('GpuContext.createTexture', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
 
