@@ -49,11 +49,14 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
   ///             See https://github.com/flutter/flutter/issues/126673. It
   ///             probably makes sense to eventually make this a compile-time
   ///             decision (i.e. with `#ifdef`) instead of a runtime option.
-  DisplayListParagraphPainter(DisplayListBuilder* builder,
-                              const std::vector<DlPaint>& dl_paints,
-                              bool impeller_enabled)
+  DisplayListParagraphPainter(
+      DisplayListBuilder* builder,
+      const std::vector<DlPaint>& dl_paints,
+      std::unordered_map<uint32_t, std::shared_ptr<DlText>>& dl_text_cache,
+      bool impeller_enabled)
       : builder_(builder),
         dl_paints_(dl_paints),
+        dl_text_cache_(dl_text_cache),
         impeller_enabled_(impeller_enabled) {}
 
   void drawTextBlob(const sk_sp<SkTextBlob>& blob,
@@ -74,9 +77,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
         // If there is no path, this is an emoji and should be drawn as is,
         // ignoring the color source.
         if (path.isEmpty()) {
-          builder_->DrawText(DlTextImpeller::Make(
-                                 impeller::MakeTextFrameFromTextBlobSkia(blob)),
-                             x, y, dl_paints_[paint_id]);
+          builder_->DrawText(MakeOrGetDlText(blob), x, y, dl_paints_[paint_id]);
 
           return;
         }
@@ -86,13 +87,11 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
         builder_->DrawPath(DlPath(transformed), dl_paints_[paint_id]);
         return;
       }
-      builder_->DrawText(
-          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob)),
-          x, y, dl_paints_[paint_id]);
+      builder_->DrawText(MakeOrGetDlText(blob), x, y, dl_paints_[paint_id]);
       return;
     }
 #endif  // IMPELLER_SUPPORTS_RENDERING
-    builder_->DrawText(DlTextSkia::Make(blob), x, y, dl_paints_[paint_id]);
+    builder_->DrawText(MakeOrGetDlText(blob), x, y, dl_paints_[paint_id]);
   }
 
   void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -109,18 +108,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
       DlBlurMaskFilter filter(DlBlurStyle::kNormal, blur_sigma, false);
       paint.setMaskFilter(&filter);
     }
-    std::shared_ptr<DlText> text;
-#if IMPELLER_SUPPORTS_RENDERING
-    if (impeller_enabled_) {
-      text =
-          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob));
-    } else {
-      text = DlTextSkia::Make(blob);
-    }
-#else
-    text = DlTextSkia::Make(blob);
-#endif
-    builder_->DrawText(text, x, y, paint);
+    builder_->DrawText(MakeOrGetDlText(blob), x, y, paint);
   }
 
   void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
@@ -196,8 +184,25 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     return paint;
   }
 
+  std::shared_ptr<DlText> MakeOrGetDlText(const sk_sp<SkTextBlob>& blob) {
+    auto [it, inserted] = dl_text_cache_.try_emplace(blob->uniqueID(), nullptr);
+    if (inserted) {
+#if IMPELLER_SUPPORTS_RENDERING
+      if (impeller_enabled_) {
+        it->second = DlTextImpeller::MakeFromBlob(blob);
+      } else {
+        it->second = DlTextSkia::Make(blob);
+      }
+#else
+      it->second = DlTextSkia::Make(blob);
+#endif
+    }
+    return it->second;
+  }
+
   DisplayListBuilder* builder_;
   const std::vector<DlPaint>& dl_paints_;
+  std::unordered_map<uint32_t, std::shared_ptr<DlText>>& dl_text_cache_;
   const bool impeller_enabled_;
 };
 
@@ -289,13 +294,15 @@ bool ParagraphSkia::DidExceedMaxLines() {
 }
 
 void ParagraphSkia::Layout(double width) {
+  dl_text_cache_.clear();
   line_metrics_.reset();
   line_metrics_styles_.clear();
   paragraph_->layout(width);
 }
 
 bool ParagraphSkia::Paint(DisplayListBuilder* builder, double x, double y) {
-  DisplayListParagraphPainter painter(builder, dl_paints_, impeller_enabled_);
+  DisplayListParagraphPainter painter(builder, dl_paints_, dl_text_cache_,
+                                      impeller_enabled_);
   paragraph_->paint(&painter, x, y);
   return true;
 }
