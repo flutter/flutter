@@ -343,6 +343,7 @@ class LocalizationOptions {
     bool? suppressWarnings,
     bool? relaxSyntax,
     bool? useNamedParameters,
+    bool? useExplicitPluralValues,
   }) : templateArbFile = templateArbFile ?? 'app_en.arb',
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
@@ -353,7 +354,8 @@ class LocalizationOptions {
        useEscaping = useEscaping ?? false,
        suppressWarnings = suppressWarnings ?? false,
        relaxSyntax = relaxSyntax ?? false,
-       useNamedParameters = useNamedParameters ?? false;
+       useNamedParameters = useNamedParameters ?? false,
+       useExplicitPluralValues = useExplicitPluralValues ?? false;
 
   /// The `--arb-dir` argument.
   ///
@@ -456,6 +458,15 @@ class LocalizationOptions {
   ///
   /// Defaults to `false`.
   final bool useNamedParameters;
+
+  /// The `use-explicit-plural-values` argument.
+  ///
+  /// Whether explicit plural values such as `=1` match only that exact value
+  /// and take precedence over plural categories such as `one`. If false,
+  /// `=0`, `=1` and `=2` are treated as `zero`, `one` and `two`.
+  ///
+  /// Defaults to `false`.
+  final bool useExplicitPluralValues;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -527,6 +538,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger),
     relaxSyntax: _tryReadBool(yamlNode, 'relax-syntax', logger),
     useNamedParameters: _tryReadBool(yamlNode, 'use-named-parameters', logger),
+    useExplicitPluralValues: _tryReadBool(yamlNode, 'use-explicit-plural-values', logger),
   );
 }
 
@@ -569,6 +581,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     useEscaping: command.boolArg('use-escaping'),
     suppressWarnings: command.boolArg('suppress-warnings'),
     useNamedParameters: command.boolArg('use-named-parameters'),
+    useExplicitPluralValues: command.boolArg('use-explicit-plural-values'),
   );
 }
 

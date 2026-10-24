@@ -205,6 +205,14 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       'use-named-parameters',
       help: 'Whether or not to use named parameters for the generated localization methods.',
     );
+    argParser.addFlag(
+      'use-explicit-plural-values',
+      help:
+          'Whether explicit plural cases such as "=1" match only that exact value and take '
+          'precedence over plural categories such as "one", as specified by ICU. '
+          'By default this is false for backwards compatibility, in which case "=0", "=1" '
+          'and "=2" are treated as "zero", "one" and "two".',
+    );
   }
 
   final ToolContext _toolContext;
