@@ -1255,6 +1255,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
 
   @override
   void insertRenderObjectChild(covariant RenderObject child, int slot) {
+    if (_currentlyUpdatingChildIndex == null) {
+      _insertReplacementRenderObjectChild(child, slot);
+      return;
+    }
     assert(_currentlyUpdatingChildIndex == slot);
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _currentBeforeChild);
@@ -1271,9 +1275,58 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
     renderObject.move(child as RenderBox, after: _currentBeforeChild);
   }
 
+  /// Inserts the render object of a child that rebuilt into a different
+  /// render object while this element was not updating its children.
+  ///
+  /// This happens when a child does not insert a render object of its own
+  /// between this element and the render object it builds, for example when
+  /// both [SliverChildBuilderDelegate.addRepaintBoundaries] and
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] are false.
+  ///
+  /// The new render object takes the layout offset of the render object it
+  /// replaces, so that the next layout keeps the child instead of discarding
+  /// and rebuilding it.
+  void _insertReplacementRenderObjectChild(RenderObject child, int slot) {
+    final ({int slot, double? layoutOffset})? removedChild = _removedChild;
+    _removedChild = null;
+    _currentBeforeChild = _renderObjectBefore(slot);
+    try {
+      _currentlyUpdatingChildIndex = slot;
+      insertRenderObjectChild(child, slot);
+    } finally {
+      _currentlyUpdatingChildIndex = null;
+      _currentBeforeChild = null;
+    }
+    if (removedChild != null && removedChild.slot == slot) {
+      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      childParentData.layoutOffset = removedChild.layoutOffset;
+    }
+  }
+
+  /// The slot and layout offset of the last render object that a child removed
+  /// while this element was not updating its children.
+  ({int slot, double? layoutOffset})? _removedChild;
+
+  /// Returns the render object of the closest child before `index` that is
+  /// in the child list of [renderObject], or null if there is none.
+  RenderBox? _renderObjectBefore(int index) {
+    int? key = _childElements.lastKeyBefore(index);
+    while (key != null) {
+      final child = _childElements[key]?.renderObject as RenderBox?;
+      if (child != null && !(child.parentData! as SliverMultiBoxAdaptorParentData).keptAlive) {
+        return child;
+      }
+      key = _childElements.lastKeyBefore(key);
+    }
+    return null;
+  }
+
   @override
   void removeRenderObjectChild(covariant RenderObject child, int slot) {
-    assert(_currentlyUpdatingChildIndex != null);
+    if (_currentlyUpdatingChildIndex == null) {
+      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      _removedChild = (slot: slot, layoutOffset: childParentData.layoutOffset);
+    }
     renderObject.remove(child as RenderBox);
   }
 
