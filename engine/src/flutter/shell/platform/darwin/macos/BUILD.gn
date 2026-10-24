@@ -169,6 +169,7 @@ source_set("flutter_framework_source") {
   frameworks = [
     "Carbon.framework",
     "Cocoa.framework",
+    "CoreText.framework",
     "CoreVideo.framework",
     "IOSurface.framework",
     "Metal.framework",

@@ -34,6 +34,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 
+#import <CoreText/CoreText.h>
 #import <CoreVideo/CoreVideo.h>
 #import <IOSurface/IOSurface.h>
 
@@ -1266,6 +1267,20 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
 #pragma mark - Private methods
 
+- (void)onFontsChanged:(NSNotification*)notification {
+  if (![NSThread isMainThread]) {
+    __weak FlutterEngine* weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [weakSelf onFontsChanged:notification];
+    });
+    return;
+  }
+
+  if (self.running) {
+    _embedderAPI.ReloadSystemFonts(_engine);
+  }
+}
+
 - (void)sendUserLocales {
   if (!self.running) {
     return;
@@ -1412,6 +1427,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 }
 - (void)setUpNotificationCenterListeners {
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+  [center addObserver:self
+             selector:@selector(onFontsChanged:)
+                 name:(__bridge NSString*)kCTFontManagerRegisteredFontsChangedNotification
+               object:nil];
   // macOS fires this private message when VoiceOver turns on or off.
   [center addObserver:self
              selector:@selector(onAccessibilityStatusChanged:)

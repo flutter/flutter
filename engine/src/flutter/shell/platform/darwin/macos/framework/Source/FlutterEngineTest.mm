@@ -5,6 +5,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 
+#import <CoreText/CoreText.h>
+
 #include <objc/objc.h>
 
 #include <algorithm>
@@ -1315,6 +1317,86 @@ TEST_F(FlutterEngineTest, UnregistersPluginsOnEngineDestruction) {
   EXPECT_FALSE([fakeAppDelegate hasDelegate:plugin]);
 
   [NSApplication sharedApplication].delegate = previousDelegate;
+}
+
+TEST_F(FlutterEngineTest, FontNotificationsReloadOnlyRunningEngines) {
+  FlutterEngine* engine = GetFlutterEngine();
+  size_t reload_count = 0;
+  auto original_reload_system_fonts = engine.embedderAPI.ReloadSystemFonts;
+  engine.embedderAPI.ReloadSystemFonts =
+      MOCK_ENGINE_PROC(ReloadSystemFonts, ([&](auto handle) {
+                         EXPECT_TRUE([NSThread isMainThread]);
+                         ++reload_count;
+                         return original_reload_system_fonts(handle);
+                       }));
+
+  NSNotificationName notification =
+      (__bridge NSString*)kCTFontManagerRegisteredFontsChangedNotification;
+  [[NSNotificationCenter defaultCenter] postNotificationName:notification object:nil];
+  EXPECT_EQ(reload_count, 0u);
+
+  ASSERT_TRUE([engine runWithEntrypoint:@"main"]);
+  [[NSNotificationCenter defaultCenter] postNotificationName:notification object:nil];
+  EXPECT_EQ(reload_count, 1u);
+
+  [engine shutDownEngine];
+  [[NSNotificationCenter defaultCenter] postNotificationName:notification object:nil];
+  EXPECT_EQ(reload_count, 1u);
+}
+
+TEST_F(FlutterEngineTest, BackgroundFontNotificationsReloadOnMainThread) {
+  FlutterEngine* engine = GetFlutterEngine();
+  size_t reload_count = 0;
+  auto original_reload_system_fonts = engine.embedderAPI.ReloadSystemFonts;
+  engine.embedderAPI.ReloadSystemFonts =
+      MOCK_ENGINE_PROC(ReloadSystemFonts, ([&](auto handle) {
+                         EXPECT_TRUE([NSThread isMainThread]);
+                         ++reload_count;
+                         return original_reload_system_fonts(handle);
+                       }));
+  ASSERT_TRUE([engine runWithEntrypoint:@"main"]);
+
+  std::thread notification_thread([] {
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:(__bridge NSString*)kCTFontManagerRegisteredFontsChangedNotification
+                      object:nil];
+  });
+  notification_thread.join();
+  EXPECT_EQ(reload_count, 0u);
+
+  __block BOOL drained = NO;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    drained = YES;
+  });
+  while (!drained) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, YES);
+  }
+  EXPECT_EQ(reload_count, 1u);
+}
+
+TEST_F(FlutterEngineTest, QueuedFontNotificationsDoNotRetainEngines) {
+  __weak FlutterEngine* weak_engine;
+  @autoreleasepool {
+    weak_engine = GetFlutterEngine();
+    ASSERT_TRUE([GetFlutterEngine() runWithEntrypoint:@"main"]);
+
+    std::thread notification_thread([] {
+      [[NSNotificationCenter defaultCenter]
+          postNotificationName:(__bridge NSString*)kCTFontManagerRegisteredFontsChangedNotification
+                        object:nil];
+    });
+    notification_thread.join();
+    ShutDownEngine();
+  }
+  EXPECT_EQ(weak_engine, nil);
+
+  __block BOOL drained = NO;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    drained = YES;
+  });
+  while (!drained) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, YES);
+  }
 }
 
 TEST_F(FlutterEngineTest, RunWithEntrypointUpdatesDisplayConfig) {
