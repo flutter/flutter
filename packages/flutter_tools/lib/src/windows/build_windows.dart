@@ -258,6 +258,9 @@ Future<void> _runBuild(
 
       // Known secondary error lines for pubspec.yaml
       r'No file or variants found for asset:',
+
+      // Errors from the Flutter tool backend
+      RegExp.escape(PrefixedErrorLogger.prefix),
     ].join('|'),
   );
 
@@ -273,7 +276,10 @@ Future<void> _runBuild(
         if (install) ...<String>['--target', 'INSTALL'],
         if (logger.isVerbose) '--verbose',
       ],
-      environment: <String, String>{if (logger.isVerbose) 'VERBOSE_SCRIPT_LOGGING': 'true'},
+      environment: <String, String>{
+        if (logger.isVerbose) 'VERBOSE_SCRIPT_LOGGING': 'true',
+        if (!logger.isVerbose) 'PREFIXED_ERROR_LOGGING': 'true',
+      },
       trace: true,
       stdoutErrorMatcher: errorMatcher,
     );

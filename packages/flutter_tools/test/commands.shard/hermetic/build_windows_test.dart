@@ -154,7 +154,10 @@ void main() {
         ...<String>['--target', 'INSTALL'],
         if (verbose) '--verbose',
       ],
-      environment: <String, String>{if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'true'},
+      environment: <String, String>{
+        if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'true',
+        if (!verbose) 'PREFIXED_ERROR_LOGGING': 'true',
+      },
       onRun: onRun,
       stdout: stdout,
     );
@@ -1168,6 +1171,41 @@ No file or variants found for asset: images/a_dot_burr.jpeg.
       expect(logger.errorText, r'''
 Error detected in pubspec.yaml:
 No file or variants found for asset: images/a_dot_burr.jpeg.
+''');
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'Windows build surfaces errors from the Flutter tool backend',
+    () async {
+      final fakeVisualStudio = FakeVisualStudio();
+      setUpMockProjectFilesForBuild();
+
+      const stdout = r'''
+  Generating C:/foo/windows/x64/flutter/ephemeral/flutter_windows.dll, [etc], _phony_
+  [ERROR]   Building assets for package:foo failed.
+  [ERROR]   build.dart returned with exit code: 255.
+  [ERROR]   stderr:
+  [ERROR]   Exception: Failed to download prebuilt binary: 404
+  Building Custom Rule C:/foo/windows/x64/flutter/CMakeLists.txt
+''';
+
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        cmakeGenerationCommand(),
+        buildCommand('Release', stdout: stdout),
+      ]);
+
+      final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
+      expect(logger.errorText, r'''
+  [ERROR]   Building assets for package:foo failed.
+  [ERROR]   build.dart returned with exit code: 255.
+  [ERROR]   stderr:
+  [ERROR]   Exception: Failed to download prebuilt binary: 404
 ''');
     },
     overrides: <Type, Generator>{

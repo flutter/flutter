@@ -413,7 +413,8 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 main.cc:(.text+0x13): undefined reference to `Foo::bar()'
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ninja: build stopped: subcommand failed.
-ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
+[ERROR] No file or variants found for asset: images/a_dot_burr.jpeg
+[ERROR]   Exception: Failed to download prebuilt binary: 404
 ''';
 
       processManager.addCommands(<FakeCommand>[
@@ -431,7 +432,8 @@ lib/main.dart:4:3: Error: Method not found: 'foo'.
 /foo/linux/main.cc:12:7: error: 'bar' is a private member of 'Foo'
 /foo/linux/my_application.h:4:10: fatal error: 'gtk/gtk.h' file not found
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
-ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
+[ERROR] No file or variants found for asset: images/a_dot_burr.jpeg
+[ERROR]   Exception: Failed to download prebuilt binary: 404
 ''');
     },
     overrides: <Type, Generator>{
