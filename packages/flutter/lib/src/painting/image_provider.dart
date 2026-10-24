@@ -1223,6 +1223,26 @@ enum ResizeImagePolicy {
   /// </tr>
   /// </table>
   fit,
+
+  /// Scales the image as necessary to ensure that it covers the bounding box
+  /// specified by [ResizeImage.width] and [ResizeImage.height] while
+  /// maintaining its aspect ratio.
+  ///
+  /// Both [ResizeImage.width] and [ResizeImage.height] must be non-null. The
+  /// aspect ratio comes from the intrinsic size of the image, so the caller
+  /// does not need to know the size of the image in advance. One side of the
+  /// decoded image is usually larger than the bounding box.
+  ///
+  /// If [ResizeImage.allowUpscaling] is true, the image will be scaled up or
+  /// down to cover the bounding box; otherwise it will only ever be scaled
+  /// down. If the image is too small to cover the bounding box and
+  /// [ResizeImage.allowUpscaling] is false, the image is decoded at its
+  /// intrinsic size.
+  ///
+  /// This is conceptually similar to [BoxFit.cover]. Use this policy for an
+  /// image that is painted with [BoxFit.cover], to decode the fewest pixels
+  /// that still fill the box without loss of detail.
+  cover,
 }
 
 /// Instructs Flutter to decode the image at the specified dimensions
@@ -1263,7 +1283,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// defined by `width` and `height`. The image will lose detail and
   /// use less memory if resized to a size smaller than the native size.
   ///
-  /// At least one of `width` and `height` must be non-null.
+  /// At least one of `width` and `height` must be non-null. If `policy` is
+  /// [ResizeImagePolicy.cover], both must be non-null.
   ///
   /// {@macro flutter.painting.ResizeImage.useLogicalSize}
   const ResizeImage(
@@ -1273,7 +1294,11 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     this.policy = ResizeImagePolicy.exact,
     this.allowUpscaling = false,
     this.useLogicalSize = false,
-  }) : assert(width != null || height != null);
+  }) : assert(width != null || height != null),
+       assert(
+         policy != ResizeImagePolicy.cover || (width != null && height != null),
+         'ResizeImagePolicy.cover needs both width and height.',
+       );
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -1291,6 +1316,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   final int? height;
 
   /// The policy that determines how [width] and [height] are interpreted.
+  ///
+  /// [ResizeImagePolicy.cover] requires both [width] and [height].
   ///
   /// Defaults to [ResizeImagePolicy.exact].
   final ResizeImagePolicy policy;
@@ -1446,6 +1473,21 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
                 }
               }
 
+              return ui.TargetImageSize(width: targetWidth, height: targetHeight);
+            case ResizeImagePolicy.cover:
+              final int boxWidth = effectiveWidth!;
+              final int boxHeight = effectiveHeight!;
+              // Integer math: a double scale can round 3000 * (448 / 3000) up to 449.
+              final bool widthCovers = boxWidth * intrinsicHeight >= boxHeight * intrinsicWidth;
+              final int targetWidth = widthCovers
+                  ? boxWidth
+                  : (boxHeight * intrinsicWidth + intrinsicHeight - 1) ~/ intrinsicHeight;
+              final int targetHeight = widthCovers
+                  ? (boxWidth * intrinsicHeight + intrinsicWidth - 1) ~/ intrinsicWidth
+                  : boxHeight;
+              if (!allowUpscaling && targetWidth >= intrinsicWidth) {
+                return const ui.TargetImageSize();
+              }
               return ui.TargetImageSize(width: targetWidth, height: targetHeight);
           }
         },
