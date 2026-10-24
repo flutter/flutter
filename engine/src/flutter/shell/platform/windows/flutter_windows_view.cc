@@ -404,6 +404,10 @@ void FlutterWindowsView::OnResetImeComposing() {
   binding_handler_->OnResetImeComposing();
 }
 
+void FlutterWindowsView::OnTextInputClientChanged(bool active) {
+  binding_handler_->OnTextInputClientChanged(active);
+}
+
 // Sends new size information to FlutterEngine.
 void FlutterWindowsView::SendWindowMetrics(size_t width,
                                            size_t height,

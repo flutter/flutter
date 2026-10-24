@@ -341,6 +341,13 @@ void FlutterWindow::OnResetImeComposing() {
   AbortImeComposing();
 }
 
+void FlutterWindow::OnTextInputClientChanged(bool active) {
+  text_input_client_active_ = active;
+  if (focused_) {
+    text_input_manager_->SetImeEnabled(active);
+  }
+}
+
 bool FlutterWindow::OnBitmapSurfaceCleared() {
   HDC dc = ::GetDC(GetWindowHandle());
   bool result = ::PatBlt(dc, 0, 0, current_width_, current_height_, BLACKNESS);
@@ -585,6 +592,7 @@ FlutterWindow::HandleMessage(UINT const message,
                              WPARAM const wparam,
                              LPARAM const lparam) noexcept {
   LPARAM result_lparam = lparam;
+  bool update_ime_after_default = false;
   int x_pos = 0, y_pos = 0;
   UINT width = 0, height = 0;
   UINT button_pressed = 0;
@@ -734,8 +742,10 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_SETFOCUS:
       OnWindowStateEvent(WindowStateEvent::kFocus);
       ::CreateCaret(window_handle_, nullptr, 1, 1);
+      update_ime_after_default = true;
       break;
     case WM_KILLFOCUS:
+      text_input_manager_->SetImeEnabled(false);
       OnWindowStateEvent(WindowStateEvent::kUnfocus);
       ::DestroyCaret();
       break;
@@ -894,7 +904,12 @@ FlutterWindow::HandleMessage(UINT const message,
       break;
   }
 
-  return Win32DefWindowProc(window_handle_, message, wparam, result_lparam);
+  const LRESULT result =
+      Win32DefWindowProc(window_handle_, message, wparam, result_lparam);
+  if (update_ime_after_default) {
+    text_input_manager_->SetImeEnabled(text_input_client_active_);
+  }
+  return result;
 }
 
 LRESULT FlutterWindow::OnGetObject(UINT const message,
