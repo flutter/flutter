@@ -5,9 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 
-#include <format>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
@@ -194,7 +194,7 @@ class ContextVK final : public Context,
       // No-op if validation layers are not enabled.
       return true;
     }
-    std::string combined = std::format("{} {}", label, trailing);
+    std::string combined = std::string(label) + " " + std::string(trailing);
     return SetDebugName(GetDevice(), handle, combined);
   }
 

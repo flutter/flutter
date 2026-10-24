@@ -5,7 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_COMPUTE_PIPELINE_BUILDER_H_
 #define FLUTTER_IMPELLER_RENDERER_COMPUTE_PIPELINE_BUILDER_H_
 
-#include <format>
+#include <string>
 
 #include "impeller/base/validation.h"
 #include "impeller/renderer/compute_pipeline_descriptor.h"
@@ -51,7 +51,7 @@ struct ComputePipelineBuilder {
       const Context& context,
       ComputePipelineDescriptor& desc) {
     // Setup debug instrumentation.
-    desc.SetLabel(std::format("{} Pipeline", ComputeShader::kLabel));
+    desc.SetLabel(std::string(ComputeShader::kLabel) + " Pipeline");
 
     // Resolve pipeline entrypoints.
     {

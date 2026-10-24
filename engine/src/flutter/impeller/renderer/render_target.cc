@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/render_target.h"
 
-#include <format>
 #include <sstream>
 
 #include "impeller/base/validation.h"
@@ -294,22 +293,19 @@ std::string RenderTarget::ToString() const {
   std::stringstream stream;
 
   if (color0_.has_value()) {
-    stream << std::format("Color[{}]=({})", 0,
-                          ColorAttachmentToString(color0_.value()));
+    stream << "Color[0]=(" << ColorAttachmentToString(color0_.value()) << ")";
   }
   for (const auto& [index, color] : colors_) {
-    stream << std::format("Color[{}]=({})", index,
-                          ColorAttachmentToString(color));
+    stream << "Color[" << index << "]=(" << ColorAttachmentToString(color)
+           << ")";
   }
   if (depth_) {
     stream << ",";
-    stream << std::format("Depth=({})",
-                          DepthAttachmentToString(depth_.value()));
+    stream << "Depth=(" << DepthAttachmentToString(depth_.value()) << ")";
   }
   if (stencil_) {
     stream << ",";
-    stream << std::format("Stencil=({})",
-                          StencilAttachmentToString(stencil_.value()));
+    stream << "Stencil=(" << StencilAttachmentToString(stencil_.value()) << ")";
   }
   return stream.str();
 }

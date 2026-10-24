@@ -4,8 +4,8 @@
 
 #include "impeller/entity/contents/content_context.h"
 
-#include <format>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "flutter/display_list/image/dl_image.h"
@@ -193,7 +193,8 @@ RenderPipelineHandleT* CreateIfNeeded(
       /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
                            PipelineDescriptor& desc) {
         opts.ApplyToPipelineDescriptor(desc);
-        desc.SetLabel(std::format("{} V#{}", desc.GetLabel(), variants_count));
+        desc.SetLabel(std::string(desc.GetLabel()) + " V#" +
+                      std::to_string(variants_count));
       });
   std::unique_ptr<RenderPipelineHandleT> variant =
       std::make_unique<RenderPipelineHandleT>(std::move(variant_future));
