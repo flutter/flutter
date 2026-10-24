@@ -496,10 +496,21 @@ class _HeroFlightManifest {
 
   // The bounding box for `context`'s render object,  in `ancestorContext`'s
   // render object's coordinate space.
-  static Rect _boundingBoxFor(BuildContext context, BuildContext? ancestorContext) {
+  //
+  // Returns null if the render object has not been laid out yet, as there is no
+  // meaningful bounding box to compute in that case.
+  static Rect? _boundingBoxFor(BuildContext context, BuildContext? ancestorContext) {
     assert(ancestorContext != null);
     final box = context.findRenderObject()! as RenderBox;
-    assert(box.hasSize && box.size.isFinite);
+    if (!box.hasSize || !box.size.isFinite) {
+      // The hero has not been laid out. This happens when the hero lives in a
+      // route that has never been shown, e.g. a route that was pushed on top of
+      // another route before the latter had a chance to lay out.
+      //
+      // Any flight that would use this hero cannot be started, as there is no
+      // position to animate the hero to or from.
+      return null;
+    }
     return MatrixUtils.transformRect(
       box.getTransformTo(ancestorContext?.findRenderObject()),
       Offset.zero & box.size,
@@ -508,14 +519,18 @@ class _HeroFlightManifest {
 
   /// The bounding box of [fromHero], in [fromRoute]'s coordinate space.
   ///
+  /// This is null if [fromHero] has not been laid out.
+  ///
   /// This property should only be accessed in [_HeroFlight.start].
-  late final Rect fromHeroLocation = _boundingBoxFor(fromHero.context, fromRoute.subtreeContext);
+  late final Rect? fromHeroLocation = _boundingBoxFor(fromHero.context, fromRoute.subtreeContext);
 
   /// The bounding box of [toHero], in [toRoute]'s coordinate space.
   ///
+  /// This is null if [toHero] has not been laid out.
+  ///
   /// This property should only be accessed in [_HeroFlight.start] or
   /// [_HeroFlight.divert].
-  late final Rect toHeroLocation = _boundingBoxFor(toHero.context, toRoute.subtreeContext);
+  late final Rect? toHeroLocation = _boundingBoxFor(toHero.context, toRoute.subtreeContext);
 
   /// Whether this [_HeroFlightManifest] is valid and can be used to start or
   /// divert a [_HeroFlight].
@@ -524,7 +539,22 @@ class _HeroFlightManifest {
   /// [_HeroFlightManifest], this flag must be checked to ensure the [RectTween]
   /// the [_HeroFlightManifest] produces does not contain coordinates that have
   /// [double.infinity] or [double.nan].
-  late final bool isValid = toHeroLocation.isFinite && (isDiverted || fromHeroLocation.isFinite);
+  ///
+  /// A manifest whose hero has not been laid out is also invalid, as there is no
+  /// position to animate the hero to or from.
+  late final bool isValid = _computeIsValid();
+
+  bool _computeIsValid() {
+    final Rect? toLocation = toHeroLocation;
+    if (toLocation == null || !toLocation.isFinite) {
+      return false;
+    }
+    if (isDiverted) {
+      return true;
+    }
+    final Rect? fromLocation = fromHeroLocation;
+    return fromLocation != null && fromLocation.isFinite;
+  }
 
   @override
   String toString() {
@@ -718,6 +748,8 @@ class _HeroFlight {
         shouldIncludeChildInPlaceholder = true;
     }
 
+    assert(manifest.fromHeroLocation != null, 'A flight can only start with a laid out hero.');
+    assert(manifest.toHeroLocation != null, 'A flight can only start with a laid out hero.');
     heroRectTween = manifest.createHeroRectTween(
       begin: manifest.fromHeroLocation,
       end: manifest.toHeroLocation,

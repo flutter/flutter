@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -3347,6 +3348,62 @@ Future<void> main() async {
     expect(find.text('Middle Screen'), findsOneWidget);
     expect(find.text('Last Screen'), findsNothing);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/194447.
+  testWidgets(
+    'Predictive back gesture does not throw when a SnackBar is shown in a route that was never laid out',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          // Builds the stack ['/', '/details'] at once, so the '/' route is
+          // never shown and therefore never laid out.
+          initialRoute: '/details',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => const Scaffold(body: Center(child: Text('Home'))),
+            '/details': (BuildContext context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('Hello')));
+                  },
+                  child: const Text('Show SnackBar'),
+                ),
+              ),
+            ),
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Show SnackBar'));
+      await tester.pumpAndSettle();
+
+      // The SnackBar is built into every Scaffold, including the one in the
+      // '/' route, which is offstage and has never been laid out.
+      expect(find.byType(SnackBar, skipOffstage: false), findsNWidgets(2));
+
+      // Start a predictive back gesture.
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('startBackGesture', <String, dynamic>{
+            'touchOffset': <double>[5.0, 300.0],
+            'progress': 0.0,
+            'swipeEdge': 0, // left
+          }),
+        ),
+        (_) {},
+      );
+      await tester.pump();
+
+      // The SnackBar's Hero in the '/' route has never been laid out, so there
+      // is no position to fly it to or from. The hero flight must be skipped
+      // instead of throwing.
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
   testWidgets(
