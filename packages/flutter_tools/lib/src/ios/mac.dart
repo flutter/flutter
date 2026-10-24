@@ -430,13 +430,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       globals.printError('and specify one using the -d, --device-id flag.');
       return XcodeBuildResult(success: false);
     }
-  } else {
-    if (environmentType == EnvironmentType.physical) {
-      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneOS.platformName]);
-    } else {
-      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneSimulator.platformName]);
-    }
+  } else if (environmentType == EnvironmentType.physical) {
+    buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneOS.platformName]);
   }
+  // Simulator builds omit -sdk: it is applied to every target, including the host tools of SwiftPM
+  // build tool plugins, which would then be built for the simulator instead of macOS.
+  // -destination is enough to select the SDK. See https://github.com/flutter/flutter/issues/195155
 
   buildCommands.add('-destination');
   if (deviceID != null) {
