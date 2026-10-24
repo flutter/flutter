@@ -54,4 +54,39 @@ TEST(BlitPassVKTest, MipmapGenerationTransitionsAllLevelsCorrectly) {
   EXPECT_EQ(barriers[7].subresourceRange.levelCount, 6u);
 }
 
+TEST(BlitPassVKTest, MipmapGenerationInitialBarrierAllowsTransferWrites) {
+  auto context = testing::MockVulkanContextBuilder().Build();
+  ASSERT_TRUE(context->IsValid());
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  ASSERT_TRUE(cmd_buffer);
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+  ASSERT_TRUE(blit_pass);
+
+  auto vk_cmd_buffer = static_cast<CommandBufferVK*>(cmd_buffer.get());
+
+  TextureDescriptor desc;
+  desc.size = ISize(100, 65);
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.mip_count = 6;
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  ASSERT_TRUE(blit_pass->GenerateMipmap(texture, "TestMipmap"));
+
+  auto& barriers =
+      testing::GetImageMemoryBarriers(vk_cmd_buffer->GetCommandBuffer());
+  ASSERT_FALSE(barriers.empty());
+
+  // The first barrier moves every level to TransferDst. The blits that follow
+  // write levels 1..N in that layout, so the barrier must make them visible to
+  // transfer writes, not reads.
+  const auto& initial = barriers[0];
+  EXPECT_EQ(initial.newLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  EXPECT_EQ(initial.subresourceRange.baseMipLevel, 0u);
+  EXPECT_EQ(initial.subresourceRange.levelCount, 6u);
+  EXPECT_EQ(initial.dstAccessMask,
+            static_cast<VkAccessFlags>(VK_ACCESS_TRANSFER_WRITE_BIT));
+}
+
 }  // namespace impeller
