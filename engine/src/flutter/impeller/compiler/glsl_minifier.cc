@@ -4,7 +4,6 @@
 
 #include "impeller/compiler/glsl_minifier.h"
 
-#include <cctype>
 #include <charconv>
 #include <cmath>
 #include <sstream>
@@ -27,7 +26,11 @@ std::string StripGLSLComments(std::string_view source) {
 }
 
 bool IsGLSLIdentOrNumChar(char c) {
-  return std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '.';
+  // Use explicit ASCII range checks rather than `std::isalnum` because GLSL
+  // identifiers and numeric literals are strictly ASCII, whereas `<cctype>`
+  // classification functions depend on the active global C locale.
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+         (c >= '0' && c <= '9') || c == '_' || c == '.';
 }
 
 bool NeedsGLSLSpaceBetween(char prev, char next) {
@@ -48,6 +51,11 @@ std::string ShortenGLSLFloatLiteral(std::string_view token, float value) {
   // decimal representation that round-trips to the exact same `float`.
   char buf[32];
   const auto [end_ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
+  // Fall back to the original token if `std::to_chars` reports a conversion
+  // error.
+  if (ec != std::errc{}) {
+    return std::string(token);
+  }
   std::string candidate(buf, end_ptr);
   // Ensure the shortened token still contains a decimal point or exponent so
   // GLSL continues to lex it as a floating-point literal rather than an int.
@@ -63,18 +71,35 @@ std::string ShortenGLSLFloatLiteralsInLine(std::string_view line) {
   size_t i = 0;
   while (i < line.size()) {
     // Only attempt to parse a numeric literal at the start of a token so digits
-    // embedded in identifiers (such as `vec4` or `_123`) are ignored.
+    // embedded in identifiers (such as `vec4` or `_123`) are ignored. Use an
+    // explicit ASCII digit check rather than `std::isdigit` to avoid any locale
+    // dependency.
     const bool at_token_start = (i == 0 || !IsGLSLIdentOrNumChar(line[i - 1]));
-    if (at_token_start && std::isdigit(static_cast<unsigned char>(line[i]))) {
+    if (at_token_start && line[i] >= '0' && line[i] <= '9') {
       float value = 0.0f;
       const char* first = line.data() + i;
       const char* last = line.data() + line.size();
       const auto [ptr, ec] = std::from_chars(first, last, value);
+      // SPIRV-Cross may emit float literals with a trailing `f` or `F` suffix
+      // (e.g. `0.300000011920928955078125f`) when targeting GLSL ES 3.00 or
+      // desktop GLSL. Because `std::from_chars` stops before the suffix and
+      // `f`/`F` is an identifier character, explicitly consume a trailing
+      // `f`/`F` if the parsed slice contains a decimal point or exponent and
+      // is not followed by another identifier/number character (such as
+      // `1.0foo`).
+      const std::string_view parsed(first, static_cast<size_t>(ptr - first));
+      const bool has_float_suffix =
+          ptr < last && (*ptr == 'f' || *ptr == 'F') &&
+          parsed.find_first_of(".eE") != std::string_view::npos &&
+          (ptr + 1 == last || !IsGLSLIdentOrNumChar(*(ptr + 1)));
       // Accept the parsed token only if `std::from_chars` succeeded and the
       // match ends at a token boundary (not followed by an identifier/dot
       // character such as `123abc` or `1.0.2`).
-      if (ec == std::errc{} && (ptr == last || !IsGLSLIdentOrNumChar(*ptr))) {
-        const std::string_view token(first, static_cast<size_t>(ptr - first));
+      if (ec == std::errc{} &&
+          (ptr == last || !IsGLSLIdentOrNumChar(*ptr) || has_float_suffix)) {
+        const char* token_end = has_float_suffix ? ptr + 1 : ptr;
+        const std::string_view token(first,
+                                     static_cast<size_t>(token_end - first));
         out += ShortenGLSLFloatLiteral(token, value);
         i += token.size();
         continue;
@@ -150,8 +175,10 @@ std::string MinifyGLSL(std::string_view source) {
       continue;
     }
 
-    // Non-preprocessor lines can be joined onto a single line as long as a
-    // separating space is inserted when adjacent boundary tokens would merge.
+    // Non-preprocessor lines are joined onto a single line to save ~12 KiB of
+    // newline bytes across the embedded GLES/GLES3 shader blobs, inserting a
+    // separating space only when adjacent boundary tokens would otherwise
+    // merge.
     const std::string minified_line =
         MinifyGLSLNonPreprocessorLine(shortened_line);
     if (!result.empty() && result.back() != '\n' &&

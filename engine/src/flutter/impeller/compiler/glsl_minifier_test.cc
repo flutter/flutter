@@ -89,12 +89,14 @@ TEST(GLSLMinifierTest, ShortenGLSLFloatLiteral) {
   EXPECT_EQ(ShortenGLSLFloatLiteral("1.0000000000", 1.0f), "1.0");
   EXPECT_EQ(ShortenGLSLFloatLiteral("42.000000000", 42.0f), "42.0");
 
-  // Verbose SPIRV-Cross float literals shorten to their exact decimal or
-  // scientific representation.
+  // Verbose SPIRV-Cross float literals (with or without `f`/`F` suffixes)
+  // shorten to their exact decimal or scientific representation.
   EXPECT_EQ(ShortenGLSLFloatLiteral("0.300000011920928955078125", 0.3f), "0.3");
+  EXPECT_EQ(ShortenGLSLFloatLiteral("0.300000011920928955078125f", 0.3f),
+            "0.3");
   EXPECT_EQ(ShortenGLSLFloatLiteral("0.10999999940395355224609375", 0.11f),
             "0.11");
-  EXPECT_EQ(ShortenGLSLFloatLiteral("0.589999973773956298828125", 0.59f),
+  EXPECT_EQ(ShortenGLSLFloatLiteral("0.589999973773956298828125F", 0.59f),
             "0.59");
   EXPECT_EQ(ShortenGLSLFloatLiteral("100000000000000000000.0", 1e20f), "1e+20");
 
@@ -121,12 +123,23 @@ TEST(GLSLMinifierTest, ShortenGLSLFloatLiteralsInLine) {
   EXPECT_EQ(ShortenGLSLFloatLiteralsInLine("vec4 _123 = v0;"),
             "vec4 _123 = v0;");
 
+  // Literals with `f`/`F` suffixes (emitted in GLSL ES 3.00 / desktop GLSL)
+  // are recognized and shortened, while short suffixed literals and identifiers
+  // starting with `f` after digits are preserved.
+  EXPECT_EQ(ShortenGLSLFloatLiteralsInLine(
+                "vec3 w = vec3(0.300000011920928955078125f, "
+                "0.10999999940395355224609375F, 1.5f);"),
+            "vec3 w = vec3(0.3, 0.11, 1.5f);");
+  EXPECT_EQ(ShortenGLSLFloatLiteralsInLine("0.300000011920928955078125f"),
+            "0.3");
+
   // Out-of-range float literals (where std::from_chars fails) and malformed
   // numeric prefixes followed by identifier/dot chars are left intact.
   EXPECT_EQ(ShortenGLSLFloatLiteralsInLine("float big = 1e9999999999;"),
             "float big = 1e9999999999;");
-  EXPECT_EQ(ShortenGLSLFloatLiteralsInLine("int x = 123abc + 1.0.2;"),
-            "int x = 123abc + 1.0.2;");
+  EXPECT_EQ(
+      ShortenGLSLFloatLiteralsInLine("int x = 123abc + 123f + 1.0foo + 1.0.2;"),
+      "int x = 123abc + 123f + 1.0foo + 1.0.2;");
 }
 
 TEST(GLSLMinifierTest, TrimGLSLLineWhitespace) {
