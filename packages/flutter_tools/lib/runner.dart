@@ -61,7 +61,7 @@ Future<int> run(
   return runInContext<int>(() async {
     globals.terminal.applyFeatureFlags(featureFlags);
 
-    reportCrashes ??= !await globals.isRunningOnBot;
+    reportCrashes ??= !globals.isRunningOnBot;
     final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
       analytics: globals.analytics,
       androidSdkBuilder: () => globals.androidSdk,

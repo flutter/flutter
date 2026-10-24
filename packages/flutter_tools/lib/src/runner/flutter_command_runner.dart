@@ -482,7 +482,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // e.g. `flutter bash-completion` or `flutter zsh-completion`
     final bool isShellCompletionCommand =
         !stdio.hasTerminal && (topLevelResults.command?.name ?? '').endsWith('-completion');
-    if (isShellCompletionCommand || await botDetector.isRunningOnBot) {
+    if (isShellCompletionCommand || botDetector.isRunningOnBot) {
       return false;
     }
 

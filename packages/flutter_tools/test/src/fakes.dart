@@ -420,7 +420,7 @@ class FakeBotDetector implements BotDetector {
   const FakeBotDetector(bool isRunningOnBot) : _isRunningOnBot = isRunningOnBot;
 
   @override
-  Future<bool> get isRunningOnBot async => _isRunningOnBot;
+  bool get isRunningOnBot => _isRunningOnBot;
 
   final bool _isRunningOnBot;
 }

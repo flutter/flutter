@@ -135,7 +135,7 @@ Future<void> buildMacOS({
       hostPlatform: globals.platform,
       operatingSystemUtils: globals.os,
       flutterVersion: globals.flutterVersion,
-      reportCrashes: !await globals.isRunningOnBot,
+      reportCrashes: !globals.isRunningOnBot,
     ),
     SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
     MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),

@@ -158,7 +158,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       hostPlatform: globals.platform,
       operatingSystemUtils: globals.os,
       flutterVersion: globals.flutterVersion,
-      reportCrashes: !await globals.isRunningOnBot,
+      reportCrashes: !globals.isRunningOnBot,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
