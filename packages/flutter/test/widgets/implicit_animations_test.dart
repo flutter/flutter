@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -808,6 +810,83 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(SlideTransition)), Size.zero);
+  });
+
+  testWidgets('ImplicitlyAnimatedWidget reports animationBehavior in diagnostics', (
+    WidgetTester tester,
+  ) async {
+    final builder = DiagnosticPropertiesBuilder();
+    AnimatedContainer(
+      duration: animationDuration,
+      animationBehavior: AnimationBehavior.preserve,
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+    expect(description, contains('animationBehavior: preserve'));
+
+    final defaultBuilder = DiagnosticPropertiesBuilder();
+    AnimatedContainer(duration: animationDuration).debugFillProperties(defaultBuilder);
+    final List<String> defaultDescription = defaultBuilder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+    expect(defaultDescription, isNot(contains('animationBehavior: normal')));
+  });
+
+  testWidgets('AnimationBehavior.preserve keeps the full duration when animations are disabled', (
+    WidgetTester tester,
+  ) async {
+    debugSemanticsDisableAnimations = true;
+    addTearDown(() => debugSemanticsDisableAnimations = null);
+
+    Widget buildContainer(double width, AnimationBehavior animationBehavior) {
+      return Center(
+        child: AnimatedContainer(
+          key: ValueKey<AnimationBehavior>(animationBehavior),
+          duration: animationDuration,
+          animationBehavior: animationBehavior,
+          width: width,
+          height: 10.0,
+        ),
+      );
+    }
+
+    // The default behavior shortens the animation, so it is over well before
+    // half of its nominal duration has passed.
+    await tester.pumpWidget(buildContainer(100.0, AnimationBehavior.normal));
+    await tester.pumpWidget(buildContainer(200.0, AnimationBehavior.normal));
+    await tester.pump(animationDuration ~/ 2);
+    expect(tester.getSize(find.byType(AnimatedContainer)).width, 200.0);
+
+    // AnimationBehavior.preserve keeps the full duration.
+    await tester.pumpWidget(buildContainer(100.0, AnimationBehavior.preserve));
+    await tester.pumpWidget(buildContainer(200.0, AnimationBehavior.preserve));
+    await tester.pump(animationDuration ~/ 2);
+    expect(tester.getSize(find.byType(AnimatedContainer)).width, 150.0);
+    await tester.pump(animationDuration ~/ 2);
+    expect(tester.getSize(find.byType(AnimatedContainer)).width, 200.0);
+  });
+
+  testWidgets('TweenAnimationBuilder forwards animationBehavior', (WidgetTester tester) async {
+    debugSemanticsDisableAnimations = true;
+    addTearDown(() => debugSemanticsDisableAnimations = null);
+
+    double? value;
+    await tester.pumpWidget(
+      TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        duration: animationDuration,
+        animationBehavior: AnimationBehavior.preserve,
+        builder: (BuildContext context, double tweenValue, Widget? child) {
+          value = tweenValue;
+          return const Placeholder();
+        },
+      ),
+    );
+    await tester.pump(animationDuration ~/ 2);
+    expect(value, 0.5);
   });
 }
 
