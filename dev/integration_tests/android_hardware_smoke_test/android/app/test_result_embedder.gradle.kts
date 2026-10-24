@@ -14,6 +14,12 @@ tasks.register("embedTestResultImages") {
     group = "verification"
     description = "Dynamically discovers, pulls, and embeds all on-device test result images into the AGP HTML report."
 
+    // Resolve the adb executable from the Android Gradle Plugin's public SDK components API.
+    val adbExecutable =
+        project.extensions
+            .getByType(com.android.build.api.variant.ApplicationAndroidComponentsExtension::class.java)
+            .sdkComponents.adb
+
     doLast {
         val buildDir = layout.buildDirectory.get().asFile
         val reportsDir = File(buildDir, "reports/androidTests/connected")
@@ -33,9 +39,7 @@ tasks.register("embedTestResultImages") {
         val packageId = "com.example.android_hardware_smoke_test"
         val discoveredTests = mutableListOf<DiscoveredTest>()
 
-        // Resolve binary safe adb executable from Android Gradle Plugin BaseExtension
-        val android = project.extensions.getByType(com.android.build.gradle.BaseExtension::class.java)
-        val adbPath = android.adbExecutable.absolutePath
+        val adbPath = adbExecutable.get().asFile.absolutePath
         println("Resolved binary-safe adb executable from AGP: $adbPath")
 
         // 1. Query the device sandbox to list all files in cache/results/ using ProcessBuilder
