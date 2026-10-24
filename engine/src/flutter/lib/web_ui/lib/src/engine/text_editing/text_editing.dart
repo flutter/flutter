@@ -1416,6 +1416,9 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       // events (like blur). These events might invalidate the current
       // inputConfiguration or disable the strategy before placeForm() returns.
       // Therefore, we must defensively check if the element is still valid/present.
+      if (!isEnabled) {
+        return;
+      }
       focusedFormElement?.focusWithoutScroll();
       moveFocusToActiveDomElement();
     }
@@ -1451,6 +1454,13 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
     geometry?.applyToDomElement(activeDomElement);
     if (hasAutofillGroup) {
       placeForm();
+      // placeForm() involves DOM manipulation which can trigger synchronous
+      // events (like blur), and those can disable the strategy before it
+      // returns. Everything below dereferences activeDomElement, so bail out
+      // rather than throwing on a strategy that is no longer active.
+      if (!isEnabled) {
+        return;
+      }
       // If domElement is not focused cursor location will not be correct.
       moveFocusToActiveDomElement();
     }
