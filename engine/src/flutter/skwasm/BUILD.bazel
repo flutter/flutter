@@ -4,8 +4,8 @@
 
 # Generated from //flutter/skwasm/BUILD.gn by gn_to_bazel; do not edit.
 
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS")
-load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_module")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS")
+load("//build_defs/web:wasm.bzl", "wasm_module")
 
 package(default_visibility = ["//visibility:public"])
 

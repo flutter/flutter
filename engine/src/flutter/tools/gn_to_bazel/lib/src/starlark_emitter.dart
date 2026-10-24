@@ -737,12 +737,12 @@ final class _Emitter {
   }
 
   /// generated_file("x") with `contents`: a `gn_generated_file`
-  /// (build/bazel/gn_action) writing the lines, named after GN's output
+  /// (build_defs/gn) writing the lines, named after GN's output
   /// path under the build directory (or under the package's own gen dir,
   /// when it is there), with the output on record for install. The
   /// `metadata`-walking form (`data_keys`) is not converted.
   void _convertGeneratedFile(GnTarget target) {
-    _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_generated_file');
+    _use('//build_defs/gn:gn_action.bzl', 'gn_generated_file');
     final rule = _Rule('gn_generated_file', target.name, target.comments);
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
@@ -981,7 +981,7 @@ final class _Emitter {
     }
   }
 
-  /// action("x") becomes a `gn_action` (build/bazel/gn_action): the script
+  /// action("x") becomes a `gn_action` (build_defs/gn): the script
   /// runs once with GN's arguments, in which `rebase_path(f, root_build_dir)`
   /// results become the rule's path tokens -- `$(execpath label)` for a
   /// source file, `$(src dir)` for a source directory, `$(gen path)` for
@@ -1004,7 +1004,7 @@ final class _Emitter {
         return;
       }
     }
-    _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_action');
+    _use('//build_defs/gn:gn_action.bzl', 'gn_action');
     final rule = _Rule('gn_action', target.name, target.comments);
     final GnVariable? args = target.variables['args'];
     for (final GnVariable variable in target.variables.values) {
@@ -1592,7 +1592,7 @@ final class _Emitter {
     copts.always.clear();
     copts.sequence.removeWhere(((Condition, _Item) entry) => entry.$1 == Condition.always);
     final constant = _isEngineCode(target) ? 'FLUTTER_COPTS' : 'CHROMIUM_CODE_COPTS';
-    _use('//engine/src/flutter/build/bazel:copts.bzl', constant);
+    _use('//build_defs/cc:copts.bzl', constant);
     copts.always.add(_Item(constant, quoted: false));
     for (final name in const <String>['deps', 'public_deps']) {
       final GnVariable? deps = target.variables[name];
@@ -2459,7 +2459,7 @@ final class _Emitter {
   }
 
   /// copy("x") becomes a `gn_copy`: its sources as they are, GN's
-  /// destination recorded (see build/bazel/gn_action) -- or, when the
+  /// destination recorded (see build_defs/gn) -- or, when the
   /// outputs are under the target's own gen dir and name the files, either
   /// literally (a renaming copy, which GN allows for one source) or through
   /// `{{source_file_part}}`/`{{source_name_part}}` with more than the bare
@@ -2475,7 +2475,7 @@ final class _Emitter {
   /// the build directory, `$root_out_dir/skwasm/skwasm.js` -- are the module
   /// itself, whose files they are.
   void _convertCopy(GnTarget target) {
-    _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_copy');
+    _use('//build_defs/gn:gn_action.bzl', 'gn_copy');
     final rule = _Rule('gn_copy', target.name, target.comments);
     final _ToolchainEdge? edge = _toolchainEdge(target);
     if (edge != null) {
@@ -2777,7 +2777,7 @@ final class _Emitter {
         ? 'flutter_cc_test'
         : kind;
     if (display || gtestParallel) {
-      _use('//engine/src/flutter/testing:testing.bzl', ruleKind);
+      _use('//build_defs/testing:testing.bzl', ruleKind);
     } else {
       _use('@rules_cc//cc:defs.bzl', kind);
     }
@@ -2868,7 +2868,7 @@ final class _Emitter {
     if (!library && !shared && gpuBackendTests.contains('$gnPackage:${target.name}')) {
       if (!_declaredGpuBackends) {
         _declaredGpuBackends = true;
-        _use('//engine/src/flutter/testing:testing.bzl', 'flutter_gpu_test_backends');
+        _use('//build_defs/testing:testing.bzl', 'flutter_gpu_test_backends');
         rules.add(
           _Rule('flutter_gpu_test_backends', gpuBackendsTargetName, const <String>[
             '# SwiftShader, its ICD manifest and the Vulkan loader, next to the',
@@ -3029,10 +3029,10 @@ final class _Emitter {
           : _isEngineCode(target)
           ? 'FLUTTER_COPTS'
           : 'CHROMIUM_CODE_COPTS';
-      _use('//engine/src/flutter/build/bazel:copts.bzl', constant);
+      _use('//build_defs/cc:copts.bzl', constant);
       rule.list('copts').always.insert(0, _Item(constant, quoted: false));
       if (chromiumCode) {
-        _use('//engine/src/flutter/build/bazel:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
+        _use('//build_defs/cc:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
         rule
             .list('local_defines')
             .always

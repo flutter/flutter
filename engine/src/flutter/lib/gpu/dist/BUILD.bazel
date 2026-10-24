@@ -5,7 +5,7 @@
 # Generated from //flutter/lib/gpu/dist/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle", "zip_tree")
+load("//build_defs/dist:zip_bundle.bzl", "zip_bundle", "zip_tree")
 
 package(default_visibility = ["//visibility:public"])
 

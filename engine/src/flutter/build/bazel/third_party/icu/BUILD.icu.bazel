@@ -18,8 +18,8 @@
 # those directories.
 
 # This file is loaded as the root of @icu, so the main module is named.
-load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_THIRD_PARTY_COPTS")
-load("@flutter//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_action")
+load("@flutter//build_defs/cc:copts.bzl", "FLUTTER_THIRD_PARTY_COPTS")
+load("@flutter//build_defs/gn:gn_action.bzl", "gn_action")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])

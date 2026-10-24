@@ -20,7 +20,7 @@ import 'package:path/path.dart' as p;
 /// (`<out-dir>/flutter/fml/BUILD.bazel`). With `--check` the existing files
 /// are compared instead and a difference is a failure. With `--repository`
 /// the inputs are laid out as the packages of an external repository (the
-/// fetch-time conversion of build/bazel/repositories.bzl).
+/// fetch-time conversion of build_defs/repositories/repositories.bzl).
 Future<void> main(List<String> arguments) async {
   exitCode = await run(arguments);
 }

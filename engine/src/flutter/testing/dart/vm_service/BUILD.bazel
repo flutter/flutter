@@ -7,7 +7,7 @@
 # --profile-microtasks). Hand-written like ../BUILD.bazel; the list of tests
 # is BUILD.gn's.
 
-load("//engine/src/flutter/testing:testing.bzl", "flutter_dart_tests")
+load("//build_defs/testing:testing.bzl", "flutter_dart_tests")
 
 package(default_visibility = ["//visibility:public"])
 

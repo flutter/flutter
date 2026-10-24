@@ -10,7 +10,7 @@
 # data, so a roll changes nothing here.
 
 # This file is loaded as the root of @boringssl, so the main module is named.
-load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_THIRD_PARTY_COPTS")
+load("@flutter//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_THIRD_PARTY_COPTS")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load(
     ":gen/sources.bzl",

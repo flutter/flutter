@@ -12,7 +12,7 @@ helpers, and the two SDK-cache paths tests read through FLUTTER_ROOT
 anything of its own.
 """
 
-load("//engine/src/flutter/build/bazel/dart:flutter_test.bzl", "flutter_tests")
+load("//build_defs/dart:flutter_test.bzl", "flutter_tests")
 
 def framework_tests(name, tests, data = [], deps = [], impeller = True, prelude = "//packages/flutter/test:prelude", compile_args = [], **kwargs):
     """One flutter_test per file of `tests`, as `flutter test` runs packages/flutter's, and a suite.

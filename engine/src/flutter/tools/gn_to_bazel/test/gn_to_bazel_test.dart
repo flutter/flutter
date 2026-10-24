@@ -2074,10 +2074,7 @@ gn_action(
         // output tree).
         expect(output, contains('srcs = [\n        "lib.cc",\n        ":tables",\n    ],'));
         expect(output, contains('includes = ["include"]'));
-        expect(
-          output,
-          contains('load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_action")'),
-        );
+        expect(output, contains('load("//build_defs/gn:gn_action.bzl", "gn_action")'));
       });
 
       test("names a test after its output_name, with GN's name as an alias", () async {
@@ -2846,10 +2843,7 @@ dart_pkg(
 )
 '''),
       );
-      expect(
-        output,
-        contains('load("//engine/src/flutter/build/bazel/dart:dart_pkg.bzl", "dart_pkg")'),
-      );
+      expect(output, contains('load("//build_defs/dart:dart_pkg.bzl", "dart_pkg")'));
       expect(output, isNot(contains('gn_action(')));
     });
 
@@ -2917,7 +2911,7 @@ executable("example_unittests") {
 # Generated from //flutter/example/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -3109,7 +3103,7 @@ source_set("x") {
 ''',
         appendix: '''
 load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
 
 flutter_test_fixtures(name = "x_fixtures")
 
@@ -3123,8 +3117,8 @@ cc_test(
         output,
         contains('''
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
 '''),
       );
       expect(
@@ -4007,7 +4001,7 @@ source_set("example") {
       expect(
         output,
         contains(
-          'load("@flutter//engine/src/flutter/build/bazel:copts.bzl", '
+          'load("@flutter//build_defs/cc:copts.bzl", '
           '"CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")',
         ),
       );
@@ -4097,10 +4091,7 @@ config("flutter_config") {
   defines = feature_defines_list
 }
 ''');
-      expect(
-        output,
-        contains('load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_FEATURE_DEFINES")\n'),
-      );
+      expect(output, contains('load("//build_defs/cc:copts.bzl", "FLUTTER_FEATURE_DEFINES")\n'));
       expect(
         output,
         contains(
@@ -4243,7 +4234,7 @@ executable("impeller_dart_unittests") {
       expect(
         output,
         contains(
-          'load("//engine/src/flutter/testing:testing.bzl", "flutter_display_test", "flutter_gpu_test_backends")',
+          'load("//build_defs/testing:testing.bzl", "flutter_display_test", "flutter_gpu_test_backends")',
         ),
       );
       expect(
@@ -4339,12 +4330,7 @@ variant("m") {
         gnPackage: '//flutter/skw',
         tree: tree,
       );
-      expect(
-        output,
-        contains(
-          'load("//engine/src/flutter/build/bazel/toolchains/emscripten:wasm.bzl", "wasm_module")',
-        ),
-      );
+      expect(output, contains('load("//build_defs/web:wasm.bzl", "wasm_module")'));
       expect(
         output,
         contains(r'''
@@ -4694,7 +4680,7 @@ executable("ui_unittests") {
       expect(
         output,
         contains(
-          'load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends")',
+          'load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends")',
         ),
       );
       expect(
@@ -6101,7 +6087,7 @@ copy("shaders") {
 }
 '''),
         contains(r'''
-load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -6281,8 +6267,8 @@ flatbuffers("schema") {
         output,
         contains('''
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl", "flatbuffers")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/flatbuffers:flatbuffers.bzl", "flatbuffers")
 '''),
       );
       expect(
@@ -6353,7 +6339,7 @@ impeller_shaders("entity_shaders") {
       expect(
         output,
         contains('''
-load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
+load("//build_defs/impeller:shaders.bzl", "impeller_shaders")
 
 package(default_visibility = ["//visibility:public"])
 

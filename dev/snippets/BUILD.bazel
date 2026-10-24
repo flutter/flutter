@@ -4,11 +4,11 @@
 
 # The snippets package under Bazel: its tests compiled by the frontend
 # server and run by package:test's precompiled runner
-# (engine/src/flutter/build/bazel/dart/dart_test.bzl; NEED_DECISION D14).
+# (build_defs/dart/dart_test.bzl; NEED_DECISION D14).
 #
 #   bazel test //dev/snippets:tests
 
-load("//engine/src/flutter/build/bazel/dart:dart_test.bzl", "dart_package_tests")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
 

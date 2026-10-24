@@ -6,7 +6,7 @@
 # host_prebuilt_dart_sdk), pinned to the same Dart revision as the tree. The
 # engine's GN build uses it to run the Dart tools it does not build itself;
 # what Bazel actions need of it so far: the AOT runtime and the frontend
-# server snapshot it runs (build/bazel/dart/kernel.bzl).
+# server snapshot it runs (build_defs/dart/kernel.bzl).
 
 package(default_visibility = ["//visibility:public"])
 
@@ -25,7 +25,7 @@ filegroup(
 # every file of the checkout's directory, not the repository's own markers.
 # The SDK's libraries (lib/libraries.json and the sources it names), which
 # the web SDK's compilers read as `dart-sdk/lib` beside flutter_web_sdk
-# (web_sdk/web_sdk.bzl).
+# (build_defs/web/web_sdk.bzl).
 filegroup(
     name = "lib",
     srcs = glob(["lib/**"]),
@@ -51,7 +51,7 @@ filegroup(
 )
 
 # The VM's platform kernel, which the frontend server compiles a VM program
-# against (--target=vm; build/bazel/dart/dart_test.bzl).
+# against (--target=vm; build_defs/dart/dart_test.bzl).
 filegroup(
     name = "vm_platform",
     srcs = ["lib/_internal/vm_platform_strong.dill"],

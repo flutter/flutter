@@ -10,7 +10,7 @@
 # the directory has no BUILD.gn; the step is the builder file's. flutter_tester
 # runs the Dart source through the VM's kernel service, which reads the
 # patched SDK beside the binary, as in GN's build directory.
-load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_test")
+load("//build_defs/dart:package_test.bzl", "dart_package_test")
 
 package(default_visibility = ["//visibility:public"])
 

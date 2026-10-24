@@ -1,0 +1,18 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# What leaves the build: zip_bundle.bzl (GN's zip_bundle: the archives CI
+# uploads, and zip_tree), install.bzl (a build's files laid into GN's build
+# directory for the consumers that read one), local_engine.bzl (the
+# manifest flutter_tools reads instead of an install; assembled_directory
+# and bundle_directory, the directories the tests' SDK facsimile lays).
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    # local_engine.bzl's assembly of a directory.
+    "assemble_directory.py",
+    # zip_bundle.bzl's wrapper of build/zip.py.
+    "zip_bundle.py",
+])

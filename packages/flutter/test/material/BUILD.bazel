@@ -5,7 +5,7 @@
 # packages/flutter/test/material under Bazel: each *_test.dart compiled by the
 # frontend server from the test tree's prelude kernel and run on the
 # Bazel-built flutter_tester, as `flutter test` runs it (../framework_tests.bzl;
-# engine/src/flutter/build/bazel/dart/flutter_test.bzl; research/15).
+# build_defs/dart/flutter_test.bzl; research/15).
 #
 #   bazel test //packages/flutter/test/material:material
 

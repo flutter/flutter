@@ -12,7 +12,7 @@
 # ../dart/BUILD.bazel (GN's foreach over flutter_frontend_server); the test
 # list is BUILD.gn's.
 
-load("//engine/src/flutter/testing:testing.bzl", "flutter_dart_tests")
+load("//build_defs/testing:testing.bzl", "flutter_dart_tests")
 
 package(default_visibility = ["//visibility:public"])
 

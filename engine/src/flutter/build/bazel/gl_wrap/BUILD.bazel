@@ -19,12 +19,12 @@
 # directory of its own module (the executable, with ANGLE linked
 # statically), and the engine's test utilities look next to the executable
 # as well -- GN's data_deps put them in the build directory. A suite gets
-# them from flutter_gpu_test_backends (//flutter/testing:testing.bzl), a
+# them from flutter_gpu_test_backends (//build_defs/testing:testing.bzl), a
 # copy in its own package carried as `data`.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:deps.lock.bzl", "GIT_DEPS")
-load("//engine/src/flutter/build/bazel/gn_build:gn_build.bzl", "gn_build")
+load("//build_defs/gn:gn_build.bzl", "gn_build")
+load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
 
 package(default_visibility = ["//visibility:public"])
 

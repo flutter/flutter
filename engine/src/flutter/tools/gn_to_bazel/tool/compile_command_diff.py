@@ -44,7 +44,7 @@ import shlex
 import sys
 
 # Bazel's name for a synced tree -> its path under engine/src. Mirrors the
-# source trees of build/bazel/extensions.bzl (the toolchains are not compiled
+# source trees of build_defs/repositories/extensions.bzl (the toolchains are not compiled
 # code and are left out); a repository missing here is reported once, so that
 # drift shows up in the output rather than as silently unmatched files.
 SYNCED_REPOSITORIES = {
