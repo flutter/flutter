@@ -1344,6 +1344,10 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   @override
+  ImageStream createStream(ImageConfiguration configuration) =>
+      imageProvider.createStream(configuration);
+
+  @override
   @Deprecated(
     'Implement loadImage for image loading. '
     'This feature was deprecated after v3.7.0-1.4.pre.',
