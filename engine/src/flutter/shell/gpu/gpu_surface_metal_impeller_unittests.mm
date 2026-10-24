@@ -200,8 +200,9 @@ TEST(SnapshotControllerImpeller, MakeImpellerSnapshotSyncRecyclesHostBuffer) {
   auto display_list = builder.Build();
 
   for (int i = 0; i < 100; ++i) {
-    auto texture = controller->MakeImpellerSnapshotSync(display_list, DlISize(100, 100),
-                                                        SnapshotPixelFormat::kDontCare);
+    auto texture =
+        controller->MakeImpellerSnapshotSync([&](impeller::AiksContext*) { return display_list; },
+                                             DlISize(100, 100), SnapshotPixelFormat::kDontCare);
     ASSERT_NE(texture, nullptr);
   }
 
