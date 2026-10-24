@@ -535,7 +535,7 @@ void main() {
   testWidgets(
     '3D transform renders the same with or without needsCompositing',
     (WidgetTester tester) async {
-      for (double angle = 0; angle <= math.pi / 4; angle += 0.05) {
+      for (double angle = 0; angle <= math.pi / 4; angle += 0.01) {
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
         final layer = renderBox.debugLayer! as OffsetLayer;
@@ -547,6 +547,7 @@ void main() {
           find.byType(RepaintBoundary).first,
           matchesReferenceImage(imageWithCompositing),
         );
+        await tester.pump();
       }
     },
     skip: isBrowser, // due to https://github.com/flutter/flutter/issues/49857
