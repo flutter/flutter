@@ -471,14 +471,13 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 #endif  // IMPELLER_DEBUG
 
   TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
-  const bool is_wrapped_fbo = color_gles.IsWrapped();
+  // A wrapped texture name never gets here; OnEncodeCommands refuses it.
+  const bool is_wrapped_fbo = color_gles.IsWrappedFBO();
 
   std::optional<GLuint> fbo = 0;
   if (is_wrapped_fbo) {
-    if (color_gles.GetFBO().has_value()) {
-      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-      gl.BindFramebuffer(GL_FRAMEBUFFER, *color_gles.GetFBO());
-    }
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+    gl.BindFramebuffer(GL_FRAMEBUFFER, *color_gles.GetFBO());
   } else {
     // Create (once) and bind an offscreen FBO. The cached FBO remembers which
     // subresource it is bound to, so it is re-attached only when freshly
@@ -937,6 +936,16 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
     return false;
   }
   const ColorAttachment& color0 = render_target.GetColorAttachment(0);
+  {
+    const TextureGLES& color_gles = TextureGLES::Cast(*color0.texture);
+    if (color_gles.IsWrapped() && !color_gles.IsWrappedFBO()) {
+      // A wrapped texture name belongs to the caller. Rendering into it is
+      // not supported, as with uploads and SetContents, and it has no
+      // framebuffer of its own to draw into.
+      VALIDATION_LOG << "Cannot render into a wrapped texture.";
+      return false;
+    }
+  }
   const std::optional<DepthAttachment>& depth0 =
       render_target.GetDepthAttachment();
   const std::optional<StencilAttachment>& stencil0 =

@@ -401,6 +401,20 @@ void mockReadPixels(GLint x,
                         type, data);
 }
 
+void mockBlitFramebuffer(GLint src_x0,
+                         GLint src_y0,
+                         GLint src_x1,
+                         GLint src_y1,
+                         GLint dst_x0,
+                         GLint dst_y0,
+                         GLint dst_x1,
+                         GLint dst_y1,
+                         GLbitfield mask,
+                         GLenum filter) {
+  return CallMockMethod(&IMockGLESImpl::BlitFramebuffer, src_x0, src_y0, src_x1,
+                        src_y1, dst_x0, dst_y0, dst_x1, dst_y1, mask, filter);
+}
+
 void mockDiscardFramebufferEXT(GLenum target,
                                GLsizei numAttachments,
                                const GLenum* attachments) {
@@ -752,6 +766,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockCheckFramebufferStatus);
   } else if (strcmp(name, "glReadPixels") == 0) {
     return reinterpret_cast<void*>(mockReadPixels);
+  } else if (strcmp(name, "glBlitFramebuffer") == 0) {
+    return reinterpret_cast<void*>(mockBlitFramebuffer);
   } else if (strcmp(name, "glGenFramebuffers") == 0) {
     return reinterpret_cast<void*>(mockGenFramebuffers);
   } else if (strcmp(name, "glBindFramebuffer") == 0) {
