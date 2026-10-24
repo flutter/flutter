@@ -321,9 +321,7 @@ TEST_F(FlutterEngineTest, DartSemanticsTreeIsRetainedWithoutOSDemand) {
   while (!semanticsHandled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
   }
-  [engine.binaryMessenger setMessageHandlerOnChannel:@"test/semantics-updated"
-                                binaryMessageHandler:nil];
-
+  ASSERT_TRUE(engine.semanticsTreeEnabled);
   ASSERT_FALSE(engine.semanticsEnabled);
   auto bridge = viewController.accessibilityBridge.lock();
   ASSERT_TRUE(bridge);
@@ -343,6 +341,60 @@ TEST_F(FlutterEngineTest, DartSemanticsTreeIsRetainedWithoutOSDemand) {
   ASSERT_EQ(exposed_root.accessibilityChildren.count, 1u);
   NSAccessibilityElement* exposed_child = exposed_root.accessibilityChildren[0];
   EXPECT_TRUE([exposed_child.accessibilityValue isEqualToString:@"child 1"]);
+
+  engine.semanticsEnabled = NO;
+  EXPECT_EQ(viewController.accessibilityBridge.lock(), bridge);
+  semanticsHandled = NO;
+  [engine.binaryMessenger sendOnChannel:@"test/semantics-delta" message:nil];
+  while (!semanticsHandled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
+  EXPECT_FALSE(engine.semanticsEnabled);
+  EXPECT_TRUE([native_child.accessibilityValue isEqualToString:@"child 2"]);
+
+  bridge.reset();
+  semanticsHandled = NO;
+  [engine.binaryMessenger sendOnChannel:@"test/semantics-disable" message:nil];
+  while (!semanticsHandled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
+  EXPECT_FALSE(engine.semanticsTreeEnabled);
+  EXPECT_FALSE(engine.semanticsEnabled);
+  EXPECT_TRUE(viewController.accessibilityBridge.expired());
+  EXPECT_EQ(viewController.flutterView.accessibilityChildren.count, 0u);
+  [engine.binaryMessenger setMessageHandlerOnChannel:@"test/semantics-updated"
+                                binaryMessageHandler:nil];
+}
+
+TEST_F(FlutterEngineTest, FrameworkGenerationResetsOnRestartAndShutdown) {
+  FlutterEngine* engine = GetFlutterEngine();
+  ASSERT_TRUE([engine runWithEntrypoint:@"main"]);
+  int demandUpdates = 0;
+  engine.embedderAPI.UpdateSemanticsEnabled =
+      MOCK_ENGINE_PROC(UpdateSemanticsEnabled, ([&](auto engine, bool enabled) {
+                         ++demandUpdates;
+                         return kSuccess;
+                       }));
+  [engine setSemanticsTreeEnabled:YES];
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
+  [controller loadView];
+  auto bridge = controller.accessibilityBridge;
+  ASSERT_FALSE(bridge.expired());
+  EXPECT_FALSE(engine.semanticsEnabled);
+  [engine engineCallbackOnPreEngineRestart];
+  EXPECT_FALSE(engine.semanticsTreeEnabled);
+  EXPECT_TRUE(bridge.expired());
+  EXPECT_EQ(controller.flutterView.accessibilityChildren.count, 0u);
+  [engine setSemanticsTreeEnabled:YES];
+  bridge = controller.accessibilityBridge;
+  ASSERT_FALSE(bridge.expired());
+  [engine shutDownEngine];
+  EXPECT_FALSE(engine.semanticsTreeEnabled);
+  EXPECT_TRUE(bridge.expired());
+  EXPECT_EQ(controller.flutterView.accessibilityChildren.count, 0u);
+  EXPECT_EQ(demandUpdates, 0);
 }
 
 TEST_F(FlutterEngineTest, CanToggleAccessibility) {
@@ -370,6 +422,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
                          enabled_called = enabled;
                          return kSuccess;
                        }));
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
@@ -437,6 +490,10 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
                        }));
   engine.semanticsEnabled = NO;
   EXPECT_FALSE(semanticsEnabled);
+  EXPECT_FALSE(viewController.accessibilityBridge.expired());
+  EXPECT_EQ([engine.viewController.flutterView.accessibilityChildren count], 1u);
+  [engine setSemanticsTreeEnabled:NO];
+  EXPECT_TRUE(viewController.accessibilityBridge.expired());
   // Verify the accessibility tree is removed from the view.
   EXPECT_EQ([engine.viewController.flutterView.accessibilityChildren count], 0u);
 
@@ -464,6 +521,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
                          enabled_called = enabled;
                          return kSuccess;
                        }));
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
@@ -539,6 +597,7 @@ TEST_F(FlutterEngineTest, ProducesAccessibilityTreeWhenAddingViews) {
                          enabled_called = enabled;
                          return kSuccess;
                        }));
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   EXPECT_TRUE(enabled_called);
 

@@ -91,53 +91,83 @@ void sendFooMessage() {
 void semanticsTreeWithoutOSDemand() {
   final PlatformDispatcher dispatcher = PlatformDispatcher.instance;
   dispatcher.setSemanticsTreeEnabled(true);
-  final builder = SemanticsUpdateBuilder();
-  final transform = Float64List.fromList(<double>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
-  for (final int id in <int>[0, 1]) {
-    final children = Int32List.fromList(id == 0 ? <int>[1] : <int>[]);
-    builder.updateNode(
-      id: id,
-      flags: SemanticsFlags.none,
-      actions: 0,
-      maxValueLength: -1,
-      currentValueLength: -1,
-      textSelectionBase: -1,
-      textSelectionExtent: -1,
-      platformViewId: -1,
-      scrollChildren: 0,
-      scrollIndex: 0,
-      traversalParent: -1,
-      scrollPosition: 0.0,
-      scrollExtentMax: 0.0,
-      scrollExtentMin: 0.0,
-      rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
-      identifier: '',
-      label: id == 0 ? 'root' : 'child 1',
-      labelAttributes: <StringAttribute>[],
-      value: '',
-      valueAttributes: <StringAttribute>[],
-      increasedValue: '',
-      increasedValueAttributes: <StringAttribute>[],
-      decreasedValue: '',
-      decreasedValueAttributes: <StringAttribute>[],
-      hint: '',
-      hintAttributes: <StringAttribute>[],
-      tooltip: '',
-      textDirection: TextDirection.ltr,
-      transform: transform,
-      hitTestTransform: transform,
-      childrenInTraversalOrder: children,
-      childrenInHitTestOrder: children,
-      additionalActions: Int32List(0),
-      controlsNodes: null,
-      inputType: SemanticsInputType.none,
-      locale: null,
-      minValue: '',
-      maxValue: '',
-    );
+  void sendUpdate(bool includeRoot, String childLabel) {
+    final builder = SemanticsUpdateBuilder();
+    final transform = Float64List.fromList(<double>[
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+    ]);
+    for (final int id in includeRoot ? <int>[0, 1] : <int>[1]) {
+      final children = Int32List.fromList(id == 0 ? <int>[1] : <int>[]);
+      builder.updateNode(
+        id: id,
+        flags: SemanticsFlags.none,
+        actions: 0,
+        maxValueLength: -1,
+        currentValueLength: -1,
+        textSelectionBase: -1,
+        textSelectionExtent: -1,
+        platformViewId: -1,
+        scrollChildren: 0,
+        scrollIndex: 0,
+        traversalParent: -1,
+        scrollPosition: 0.0,
+        scrollExtentMax: 0.0,
+        scrollExtentMin: 0.0,
+        rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
+        identifier: '',
+        label: id == 0 ? 'root' : childLabel,
+        labelAttributes: <StringAttribute>[],
+        value: '',
+        valueAttributes: <StringAttribute>[],
+        increasedValue: '',
+        increasedValueAttributes: <StringAttribute>[],
+        decreasedValue: '',
+        decreasedValueAttributes: <StringAttribute>[],
+        hint: '',
+        hintAttributes: <StringAttribute>[],
+        tooltip: '',
+        textDirection: TextDirection.ltr,
+        transform: transform,
+        hitTestTransform: transform,
+        childrenInTraversalOrder: children,
+        childrenInHitTestOrder: children,
+        additionalActions: Int32List(0),
+        controlsNodes: null,
+        inputType: SemanticsInputType.none,
+        locale: null,
+        minValue: '',
+        maxValue: '',
+      );
+    }
+    dispatcher.views.first.updateSemantics(builder.build());
+    dispatcher.sendPlatformMessage('test/semantics-updated', null, (ByteData? result) {});
   }
-  dispatcher.views.first.updateSemantics(builder.build());
-  dispatcher.sendPlatformMessage('test/semantics-updated', null, (ByteData? result) {});
+
+  dispatcher.onPlatformMessage = (channel, data, response) {
+    if (channel == 'test/semantics-delta') {
+      sendUpdate(false, 'child 2');
+    } else if (channel == 'test/semantics-disable') {
+      dispatcher.setSemanticsTreeEnabled(false);
+      dispatcher.sendPlatformMessage('test/semantics-updated', null, (ByteData? result) {});
+    }
+    response?.call(null);
+  };
+  sendUpdate(true, 'child 1');
 }
 
 @Native<Void Function(Handle)>(symbol: 'NotifyEngineId')

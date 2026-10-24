@@ -1934,6 +1934,15 @@ typedef void (*FlutterUpdateSemanticsCallback2)(
     const FlutterSemanticsUpdate2* /* semantics update */,
     void* /* user data*/);
 
+/// Notifies the embedder when the framework starts or stops generating
+/// semantics trees. This is independent of the operating system's demand for
+/// semantics, which the embedder reports with
+/// FlutterEngineUpdateSemanticsEnabled. Invoked on the platform thread, before
+/// subsequent semantics updates. The embedder must prepare to receive updates
+/// before returning when enabled is true.
+typedef void (*FlutterSemanticsTreeEnabledCallback)(bool enabled,
+                                                    void* user_data);
+
 /// An update to whether a message channel has a listener set or not.
 typedef struct {
   /// The size of the struct. Must be sizeof(FlutterChannelUpdate).
@@ -2879,6 +2888,10 @@ typedef struct {
   /// If true, the engine will decode images in wide gamut color spaces
   /// (Display P3) when supported. If false, images are decoded to sRGB.
   bool enable_wide_gamut;
+
+  /// Optional notification of framework semantics generation changes. May be
+  /// null. See FlutterSemanticsTreeEnabledCallback for threading and ordering.
+  FlutterSemanticsTreeEnabledCallback semantics_tree_enabled_callback;
 } FlutterProjectArgs;
 
 typedef struct {

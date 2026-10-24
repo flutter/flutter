@@ -38,6 +38,7 @@ TEST(FlutterTextInputSemanticsObjectTest, DoesInitialize) {
                                                        defer:NO];
     window.contentView = viewController.view;
 
+    [engine setSemanticsTreeEnabled:YES];
     engine.semanticsEnabled = YES;
 
     auto bridge = viewController.accessibilityBridge.lock();

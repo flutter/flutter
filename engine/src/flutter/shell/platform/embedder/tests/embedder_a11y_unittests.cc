@@ -11,9 +11,11 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/fml/thread.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
+#include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 #include "flutter/testing/testing.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
@@ -28,6 +30,119 @@ namespace testing {
 
 using EmbedderA11yTest = testing::EmbedderTest;
 using ::testing::ElementsAre;
+
+std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
+
+namespace {
+
+class SemanticsLifecycleContext : public EmbedderTestContextSoftware {
+ public:
+  using EmbedderTestContextSoftware::EmbedderTestContextSoftware;
+
+  std::vector<std::string> events;
+  fml::AutoResetWaitableEvent done;
+  fml::RefPtr<fml::TaskRunner> platform_runner;
+};
+
+enum class SemanticsCallbackMode { kPresent, kNull, kLegacy };
+
+class EmbedderSemanticsLifecycleTest
+    : public EmbedderTest,
+      public ::testing::WithParamInterface<bool> {
+ protected:
+  void CheckLifecycle(SemanticsCallbackMode mode) {
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+    GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
+#else
+    SemanticsLifecycleContext context(GetFixturesDirectory());
+    UniqueEngine engine;
+    fml::Thread platform_thread("semantics-lifecycle");
+    context.platform_runner = platform_thread.GetTaskRunner();
+    EmbedderTestTaskRunner task_runner(
+        context.platform_runner, [&](FlutterTask task) {
+          if (engine.is_valid()) {
+            EXPECT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+          }
+        });
+    context.platform_runner->PostTask([&] {
+      const auto runner_description =
+          task_runner.GetFlutterTaskRunnerDescription();
+      context.SetSemanticsUpdateCallback2(
+          [&](const FlutterSemanticsUpdate2* update) {
+            EXPECT_TRUE(context.platform_runner->RunsTasksOnCurrentThread());
+            ASSERT_EQ(update->node_count, 2u);
+            EXPECT_THAT(std::vector<int32_t>(
+                            {update->nodes[0]->id, update->nodes[1]->id}),
+                        ::testing::UnorderedElementsAre(0, 1));
+            context.events.push_back("update");
+          });
+      EmbedderConfigBuilder builder(context);
+      builder.SetSurface(DlISize(1, 1));
+      builder.SetDartEntrypoint("a11y_generation_without_demand");
+      builder.SetPlatformTaskRunner(&runner_description);
+      if (GetParam()) {
+        builder.SetUITaskRunner(&runner_description);
+      }
+      auto& args = builder.GetProjectArgs();
+      args.semantics_tree_enabled_callback = [](bool enabled, void* user_data) {
+        auto& context = *static_cast<SemanticsLifecycleContext*>(
+            static_cast<EmbedderTestContext*>(user_data));
+        EXPECT_TRUE(context.platform_runner->RunsTasksOnCurrentThread());
+        context.events.push_back(enabled ? "enabled" : "disabled");
+      };
+      if (mode == SemanticsCallbackMode::kNull) {
+        args.semantics_tree_enabled_callback = nullptr;
+      } else if (mode == SemanticsCallbackMode::kLegacy) {
+        // Leave a non-null value beyond struct_size to detect an unsafe read.
+        args.struct_size =
+            offsetof(FlutterProjectArgs, semantics_tree_enabled_callback);
+      }
+      builder.SetPlatformMessageCallback(
+          [&](const FlutterPlatformMessage* message) {
+            if (std::strcmp(message->channel, "test/semantics-updated") == 0) {
+              EXPECT_EQ(FlutterEngineSendPlatformMessageResponse(
+                            engine.get(), message->response_handle, nullptr, 0),
+                        kSuccess);
+            } else if (std::strcmp(message->channel,
+                                   "test/semantics-disabled") == 0) {
+              context.done.Signal();
+            }
+          });
+      engine = builder.LaunchEngine();
+      ASSERT_TRUE(engine.is_valid());
+    });
+    context.done.Wait();
+    if (mode == SemanticsCallbackMode::kPresent) {
+      EXPECT_THAT(context.events, ElementsAre("enabled", "update", "disabled"));
+    } else {
+      EXPECT_THAT(context.events, ElementsAre("update"));
+    }
+    context.platform_runner->PostTask([&] {
+      engine.reset();
+      context.done.Signal();
+    });
+    context.done.Wait();
+#endif
+  }
+};
+
+TEST_P(EmbedderSemanticsLifecycleTest, GenerationCallbackPrecedesFirstUpdate) {
+  CheckLifecycle(SemanticsCallbackMode::kPresent);
+}
+
+TEST_P(EmbedderSemanticsLifecycleTest, ExplicitNullCallback) {
+  CheckLifecycle(SemanticsCallbackMode::kNull);
+}
+
+TEST_P(EmbedderSemanticsLifecycleTest, ShortLegacyProjectArgs) {
+  CheckLifecycle(SemanticsCallbackMode::kLegacy);
+}
+
+INSTANTIATE_TEST_SUITE_P(SeparateAndSharedRunners,
+                         EmbedderSemanticsLifecycleTest,
+                         ::testing::Bool());
+
+}  // namespace
 
 #if !defined(OS_FUCHSIA) || (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 constexpr static char kTooltip[] = "tooltip";
