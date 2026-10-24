@@ -1875,9 +1875,9 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('/')); // push /A
+    await tester.tap(find.text('/')); // Push /A.
     await tester.pumpAndSettle();
-    await tester.tap(find.text('A')); // push /B
+    await tester.tap(find.text('A')); // Push /B.
     await tester.pumpAndSettle();
 
     expect(find.text('B'), findsOneWidget);
@@ -1955,7 +1955,7 @@ void main() {
       ),
     );
 
-    // Open dialog
+    // Open dialog.
     await tester.tap(find.text('home'));
     await tester.pumpAndSettle();
     expect(find.text('dialog'), findsOneWidget);
