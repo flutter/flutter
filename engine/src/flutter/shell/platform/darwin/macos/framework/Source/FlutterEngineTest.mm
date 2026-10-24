@@ -300,6 +300,51 @@ TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
   }
 }
 
+TEST_F(FlutterEngineTest, DartSemanticsTreeIsRetainedWithoutOSDemand) {
+  FlutterEngine* engine = GetFlutterEngine();
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [viewController loadView];
+  ASSERT_NE(viewController.flutterView, nil);
+  ASSERT_FALSE(engine.semanticsEnabled);
+
+  __block BOOL semanticsHandled = NO;
+  [engine.binaryMessenger setMessageHandlerOnChannel:@"test/semantics-updated"
+                                binaryMessageHandler:^(NSData* message, FlutterBinaryReply reply) {
+                                  semanticsHandled = YES;
+                                  reply(nil);
+                                }];
+  ASSERT_TRUE([engine runWithEntrypoint:@"semanticsTreeWithoutOSDemand"]);
+
+  // The message follows the semantics update on the same platform task runner.
+  while (!semanticsHandled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
+  }
+  [engine.binaryMessenger setMessageHandlerOnChannel:@"test/semantics-updated"
+                                binaryMessageHandler:nil];
+
+  ASSERT_FALSE(engine.semanticsEnabled);
+  auto bridge = viewController.accessibilityBridge.lock();
+  ASSERT_TRUE(bridge);
+  auto root = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(root);
+  NSAccessibilityElement* native_root = root->GetNativeViewAccessible();
+  EXPECT_TRUE([native_root.accessibilityLabel isEqualToString:@"root"]);
+  ASSERT_EQ(native_root.accessibilityChildren.count, 1u);
+  NSAccessibilityElement* native_child = native_root.accessibilityChildren[0];
+  EXPECT_TRUE([native_child.accessibilityValue isEqualToString:@"child 1"]);
+
+  engine.semanticsEnabled = YES;
+
+  ASSERT_EQ(viewController.flutterView.accessibilityChildren.count, 1u);
+  NSAccessibilityElement* exposed_root = viewController.flutterView.accessibilityChildren[0];
+  EXPECT_TRUE([exposed_root.accessibilityLabel isEqualToString:@"root"]);
+  ASSERT_EQ(exposed_root.accessibilityChildren.count, 1u);
+  NSAccessibilityElement* exposed_child = exposed_root.accessibilityChildren[0];
+  EXPECT_TRUE([exposed_child.accessibilityValue isEqualToString:@"child 1"]);
+}
+
 TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   FlutterEngine* engine = GetFlutterEngine();
   // Capture the update callbacks before the embedder API initializes.
