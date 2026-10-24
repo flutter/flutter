@@ -32,6 +32,10 @@ class AnimatedSize extends StatefulWidget {
     this.alignment = Alignment.center,
     this.curve = Curves.linear,
     required this.duration,
+    @Deprecated(
+      'This field is ignored because AnimatedSize only animates forward. '
+      'This feature was deprecated after v3.47.0-0.0.pre.',
+    )
     this.reverseDuration,
     this.clipBehavior = Clip.hardEdge,
     this.onEnd,
@@ -75,6 +79,10 @@ class AnimatedSize extends StatefulWidget {
   /// size when going in reverse.
   ///
   /// If not specified, defaults to [duration].
+  @Deprecated(
+    'This field is ignored because AnimatedSize only animates forward. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   final Duration? reverseDuration;
 
   /// {@macro flutter.material.Material.clipBehavior}
