@@ -187,6 +187,36 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     return mImm;
   }
 
+  /**
+   * Handles window focus changes for text input.
+   *
+   * <p>Android tears down the input connection when the app loses window focus (e.g. when the
+   * screen is turned off and on again), and the view may lose focus as well, but the framework is
+   * unaware of this: it still considers its input connection to be active and will not call
+   * TextInput.show again when the window regains focus. Without an active input connection, Android
+   * delivers hardware key events to the IME first (ViewRootImpl's ImeInputStage), which consumes
+   * editor shortcuts such as Ctrl+V, and the framework never receives the key events.
+   *
+   * <p>When the window regains focus and there is a framework text input client using {@code
+   * TextInputType.none} but no active input connection, focus the view and request the framework to
+   * resend its text input state. This re-attaches the client and restarts the input connection
+   * without showing the soft keyboard. Other input types are unaffected.
+   *
+   * <p>See https://github.com/flutter/flutter/issues/182941.
+   */
+  public void onWindowFocusChanged(boolean hasFocus) {
+    if (hasFocus
+        && inputTarget.type == InputTarget.Type.FRAMEWORK_CLIENT
+        && isTextInputTypeNone()
+        && !mImm.isAcceptingText()) {
+      Log.i(
+          TAG,
+          "Window focus regained without an active input connection; re-establishing input connection.");
+      mView.requestFocus();
+      textInputChannel.requestExistingInputState();
+    }
+  }
+
   @VisibleForTesting
   Editable getEditable() {
     return mEditable;
@@ -427,15 +457,29 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     mImm.sendAppPrivateCommand(mView, action, data);
   }
 
+  private boolean isTextInputTypeNone() {
+    return configuration != null
+        && configuration.inputType != null
+        && configuration.inputType.type == TextInputChannel.TextInputType.NONE;
+  }
+
   @VisibleForTesting
   void showTextInput(View view) {
-    if (configuration == null
-        || configuration.inputType == null
-        || configuration.inputType.type != TextInputChannel.TextInputType.NONE) {
+    if (isTextInputTypeNone()) {
+      // TextInputType.none means "do not show the soft keyboard", not "no text input".
+      // Establish (and focus) the input connection without showing the soft keyboard so
+      // that hardware key events (e.g. Ctrl+V paste from a physical keyboard or a
+      // barcode scanner) are dispatched to an active IME editor. Without an active input
+      // connection, Android's ViewRootImpl delivers hardware key events to the IME first
+      // (ImeInputStage), which consumes editor shortcuts such as Ctrl+V, and the
+      // framework never receives the key events.
+      // See https://github.com/flutter/flutter/issues/182941.
+      view.requestFocus();
+      mImm.restartInput(view);
+      hideTextInput(view);
+    } else {
       view.requestFocus();
       mImm.showSoftInput(view, 0);
-    } else {
-      hideTextInput(view);
     }
   }
 
