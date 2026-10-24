@@ -27,6 +27,26 @@ namespace flutter {
 class PlatformViewIOS;
 
 /**
+ * The numbers behind a spoken scroll status. Compared across frames to skip
+ * repeated announcements without building strings.
+ */
+struct AccessibilityScrollStatus {
+  enum class Form { kNone, kRows, kPage };
+
+  Form form = Form::kNone;
+  int32_t uid = -1;
+  int64_t first = 0;
+  int64_t last = 0;
+  int64_t total = 0;
+
+  bool operator==(const AccessibilityScrollStatus& other) const {
+    return form == other.form && uid == other.uid && first == other.first && last == other.last &&
+           total == other.total;
+  }
+  bool operator!=(const AccessibilityScrollStatus& other) const { return !(*this == other); }
+};
+
+/**
  * An accessibility instance is bound to the `FlutterEngine` through
  * `PlatformViewIOS` and can be rebound to one `FlutterViewController` at a
  * time.
@@ -116,6 +136,9 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   // (i.e. the status bar or keyboard)
   static constexpr int32_t kSemanticObjectIdInvalid = -1;
   int32_t last_focused_semantics_object_id_ = kSemanticObjectIdInvalid;
+
+  // The last announced scroll status, used to skip repeats.
+  AccessibilityScrollStatus last_scroll_status_;
 
   NSMutableDictionary<NSNumber*, SemanticsObject*>* objects_;
   FlutterBasicMessageChannel* accessibility_channel_;
