@@ -57,7 +57,8 @@ mixin RendererBinding
     platformDispatcher
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
-      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
+      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
+      ..onPlatformConfigurationChanged = handlePlatformConfigurationChanged;
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
@@ -444,6 +445,12 @@ mixin RendererBinding
   /// See [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
   @protected
   void handlePlatformBrightnessChanged() {}
+
+  /// Called when the platform configuration changes (such as [PlatformDispatcher.alwaysUse24HourFormat]).
+  ///
+  /// See [dart:ui.PlatformDispatcher.onPlatformConfigurationChanged].
+  @protected
+  void handlePlatformConfigurationChanged() {}
 
   /// Creates a [MouseTracker] which manages state about currently connected
   /// mice, for hover notification.
