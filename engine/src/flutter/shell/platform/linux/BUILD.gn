@@ -178,6 +178,7 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
+    "fl_view_input_gtk3.cc",
     "fl_view_monitor.cc",
     "fl_view_renderer.cc",
     "fl_view_renderer_opengl.cc",
