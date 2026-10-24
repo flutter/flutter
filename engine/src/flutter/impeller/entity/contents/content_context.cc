@@ -277,7 +277,6 @@ struct ContentContext::Pipelines {
   Variants<PorterDuffBlendPipeline> destination_over_blend;
   Variants<PorterDuffBlendPipeline> modulate_blend;
   Variants<PorterDuffBlendPipeline> plus_blend;
-  Variants<PorterDuffBlendPipeline> screen_blend;
   Variants<PorterDuffBlendPipeline> source_a_top_blend;
   Variants<PorterDuffBlendPipeline> source_blend;
   Variants<PorterDuffBlendPipeline> source_in_blend;
@@ -510,7 +509,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   desc.SetPolygonMode(PolygonMode::kFill);
 }
 
-std::array<std::vector<Scalar>, 15> GetPorterDuffSpecConstants(
+std::array<std::vector<Scalar>, 14> GetPorterDuffSpecConstants(
     bool supports_decal) {
   Scalar x = supports_decal ? 1 : 0;
   return {{
@@ -528,7 +527,6 @@ std::array<std::vector<Scalar>, 15> GetPorterDuffSpecConstants(
       {x, 1, -1, 1, -1, 0},  // Xor
       {x, 1, 0, 1, 0, 0},    // Plus
       {x, 0, 0, 0, 0, 1},    // Modulate
-      {x, 0, 0, 1, 0, -1},   // Screen
   }};
 }
 
@@ -729,7 +727,7 @@ ContentContext::ContentContext(
     pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
                                                {supports_decal});
 
-    const std::array<std::vector<Scalar>, 15> porter_duff_constants =
+    const std::array<std::vector<Scalar>, 14> porter_duff_constants =
         GetPorterDuffSpecConstants(supports_decal);
     pipelines_->clear_blend.CreateDefault(*context_, options_trianglestrip,
                                           porter_duff_constants[0]);
@@ -759,8 +757,6 @@ ContentContext::ContentContext(
                                          porter_duff_constants[12]);
     pipelines_->modulate_blend.CreateDefault(*context_, options_trianglestrip,
                                              porter_duff_constants[13]);
-    pipelines_->screen_blend.CreateDefault(*context_, options_trianglestrip,
-                                           porter_duff_constants[14]);
   }
 
   if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
@@ -896,7 +892,7 @@ std::shared_ptr<Texture> ContentContext::GetEmptyTexture() const {
   return empty_texture_;
 }
 
-fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
+absl::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     std::string_view label,
     ISize texture_size,
     const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -933,7 +929,7 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
   return MakeSubpass(label, subpass_target, command_buffer, subpass_callback);
 }
 
-fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
+absl::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     std::string_view label,
     const RenderTarget& subpass_target,
     const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -942,27 +938,27 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
 
   auto subpass_texture = subpass_target.GetRenderTargetTexture();
   if (!subpass_texture) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   auto sub_renderpass = command_buffer->CreateRenderPass(subpass_target);
   if (!sub_renderpass) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
   sub_renderpass->SetLabel(label);
 
   if (!subpass_callback(*this, *sub_renderpass)) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   if (!sub_renderpass->EncodeCommands()) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   const std::shared_ptr<Texture>& target_texture =
       subpass_target.GetRenderTargetTexture();
   if (target_texture->GetMipCount() > 1) {
-    fml::Status mipmap_status =
+    absl::Status mipmap_status =
         AddMipmapGeneration(command_buffer, context, target_texture);
     if (!mipmap_status.ok()) {
       return mipmap_status;
@@ -1260,7 +1256,6 @@ PipelineRef ContentContext::GetPorterDuffPipeline(
     case BlendMode::kModulate:
       return GetModulateBlendPipeline(opts);
     case BlendMode::kScreen:
-      return GetScreenBlendPipeline(opts);
     case BlendMode::kOverlay:
     case BlendMode::kDarken:
     case BlendMode::kLighten:
@@ -1350,11 +1345,6 @@ PipelineRef ContentContext::GetPlusBlendPipeline(
 PipelineRef ContentContext::GetModulateBlendPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->modulate_blend, opts);
-}
-
-PipelineRef ContentContext::GetScreenBlendPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->screen_blend, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorPipeline(

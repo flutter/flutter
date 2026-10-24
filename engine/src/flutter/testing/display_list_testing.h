@@ -642,8 +642,8 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
   static constexpr size_t kCategoryCount =
       static_cast<size_t>(DisplayListOpCategory::kMaxCategory) + 1;
 
-  std::array<uint32_t, kTypeCount> type_counts_;
-  std::array<uint32_t, kCategoryCount> category_counts_;
+  std::array<uint32_t, kTypeCount> type_counts_{};
+  std::array<uint32_t, kCategoryCount> category_counts_{};
   uint32_t op_count_ = 0u;
 };
 

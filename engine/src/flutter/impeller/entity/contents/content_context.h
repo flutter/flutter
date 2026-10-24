@@ -13,7 +13,6 @@
 
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/status_or.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
@@ -26,6 +25,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/typographer/lazy_glyph_atlas.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 /// Pipeline state configuration.
@@ -196,7 +196,6 @@ class ContentContext {
   PipelineRef GetRadialGradientUniformFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRRectBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetRSuperellipseBlurPipeline(ContentContextOptions opts) const;
-  PipelineRef GetScreenBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetSolidFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetSourceATopBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetSourceBlendPipeline(ContentContextOptions opts) const;
@@ -238,7 +237,7 @@ class ContentContext {
 
   /// @brief  Creates a new texture of size `texture_size` and calls
   ///         `subpass_callback` with a `RenderPass` for drawing to the texture.
-  fml::StatusOr<RenderTarget> MakeSubpass(
+  absl::StatusOr<RenderTarget> MakeSubpass(
       std::string_view label,
       ISize texture_size,
       const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -248,7 +247,7 @@ class ContentContext {
       int32_t mip_count = 1) const;
 
   /// Makes a subpass that will render to `subpass_target`.
-  fml::StatusOr<RenderTarget> MakeSubpass(
+  absl::StatusOr<RenderTarget> MakeSubpass(
       std::string_view label,
       const RenderTarget& subpass_target,
       const std::shared_ptr<CommandBuffer>& command_buffer,
