@@ -1864,7 +1864,11 @@ void Canvas::SaveLayer(const Paint& paint,
       Entity::IsBlendModeDestructive(paint.blend_mode),  //
       /*flood_input_coverage=*/!!backdrop_filter ||
           (paint.color_filter &&
-           paint.color_filter->modifies_transparent_black())  //
+           paint.color_filter->modifies_transparent_black()),  //
+      /*max_subpass_size=*/
+      renderer_.GetContext()
+          ->GetCapabilities()
+          ->GetMaximumRenderPassAttachmentSize()  //
   );
 
   if (!maybe_subpass_coverage.has_value()) {

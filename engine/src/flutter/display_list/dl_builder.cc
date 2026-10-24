@@ -706,11 +706,27 @@ void DisplayListBuilder::RestoreLayer() {
   FML_CHECK(layer_op->type == DisplayListOpType::kSaveLayer ||
             layer_op->type == DisplayListOpType::kSaveLayerBackdrop);
 
+  std::optional<DlRect> unbounded_input_device_bounds;
   if (layer_op->options.bounds_from_caller()) {
     DlRect user_bounds = layer_op->rect;
-    if (!content_bounds.IsEmpty() && !user_bounds.Contains(content_bounds)) {
-      layer_op->options = layer_op->options.with_content_is_clipped();
-      content_bounds = content_bounds.IntersectionOrEmpty(user_bounds);
+    if (!content_bounds.IsEmpty()) {
+      DlRect device_bounds;
+      bool has_device_bounds = parent_info().global_state.mapAndClipRect(
+          user_bounds, &device_bounds);
+      DlIRect unused;
+      if (current_layer().filter && has_device_bounds &&
+          current_layer().filter->get_input_device_bounds(
+              DlIRect::RoundOut(device_bounds),
+              parent_info().global_state.matrix(), unused) == nullptr) {
+        if (!user_bounds.Contains(content_bounds)) {
+          layer_op->options = layer_op->options.with_content_is_clipped();
+        }
+        content_bounds = user_bounds;
+        unbounded_input_device_bounds = device_bounds;
+      } else if (!user_bounds.Contains(content_bounds)) {
+        layer_op->options = layer_op->options.with_content_is_clipped();
+        content_bounds = content_bounds.IntersectionOrEmpty(user_bounds);
+      }
     }
     if (layer_op->type == DisplayListOpType::kSaveLayerBackdrop) {
       content_bounds = content_bounds.Union(user_bounds);
@@ -734,7 +750,7 @@ void DisplayListBuilder::RestoreLayer() {
   // Ensure that the bounds transferred in the following call will be
   // attributed to the index of the restore op.
   FML_DCHECK(layer_op->restore_index == op_index_);
-  TransferLayerBounds(content_bounds);
+  TransferLayerBounds(content_bounds, unbounded_input_device_bounds);
 }
 
 // There are a few different conditions and corresponding operations to
@@ -768,7 +784,9 @@ void DisplayListBuilder::RestoreLayer() {
 //
 // Finally, we will have to adjust the layer's content bounds by the filter
 // and accumulate those into the parent layer's local bounds.
-void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
+void DisplayListBuilder::TransferLayerBounds(
+    const DlRect& content_bounds,
+    std::optional<DlRect> unbounded_input_device_bounds) {
   auto& filter = current_layer().filter;
 
   if (!filter) {
@@ -812,11 +830,15 @@ void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
 
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     if (AdjustRTreeRects(rtree_data_.value(), *filter, matrix, clip,
-                         current_layer().rtree_rects_start_index)) {
+                         current_layer().rtree_rects_start_index,
+                         unbounded_input_device_bounds)) {
       parent_is_flooded = true;
     }
   } else {
     DlRect global_bounds = current_layer().global_space_accumulator.GetBounds();
+    if (!global_bounds.IsEmpty() && unbounded_input_device_bounds.has_value()) {
+      global_bounds = unbounded_input_device_bounds.value();
+    }
     if (!global_bounds.IsEmpty()) {
       DlIRect global_ibounds = DlIRect::RoundOut(global_bounds);
       if (!filter->map_device_bounds(global_ibounds, matrix, global_ibounds)) {
@@ -867,22 +889,41 @@ void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
   }
 }
 
-bool DisplayListBuilder::AdjustRTreeRects(RTreeData& data,
-                                          const DlImageFilter& filter,
-                                          const DlMatrix& matrix,
-                                          const DlRect& clip,
-                                          size_t rect_start_index) {
+bool DisplayListBuilder::AdjustRTreeRects(
+    RTreeData& data,
+    const DlImageFilter& filter,
+    const DlMatrix& matrix,
+    const DlRect& clip,
+    size_t rect_start_index,
+    std::optional<DlRect> unbounded_input_device_bounds) {
   auto& rects = data.rects;
   auto& indices = data.indices;
   FML_DCHECK(rects.size() == indices.size());
   int ret = false;
+  std::optional<DlRect> full_layer_output;
+  bool full_layer_floods = false;
+  if (unbounded_input_device_bounds.has_value()) {
+    DlIRect ibounds = DlIRect::RoundOut(*unbounded_input_device_bounds);
+    if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
+      full_layer_output = DlRect::Make(ibounds);
+    } else {
+      full_layer_floods = true;
+    }
+  }
   auto rect_keep = rect_start_index;
   for (size_t i = rect_start_index; i < rects.size(); i++) {
-    DlRect bounds = rects[i];
-    DlIRect ibounds = DlIRect::RoundOut(bounds);
-    if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
-      bounds = DlRect::Make(ibounds);
-    } else {
+    DlRect bounds;
+    if (full_layer_output.has_value()) {
+      bounds = *full_layer_output;
+    } else if (!full_layer_floods) {
+      DlIRect ibounds = DlIRect::RoundOut(rects[i]);
+      if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
+        bounds = DlRect::Make(ibounds);
+      } else {
+        full_layer_floods = true;
+      }
+    }
+    if (full_layer_floods) {
       bounds = clip;
       ret = true;
     }

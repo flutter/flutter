@@ -183,7 +183,10 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
 std::optional<Rect> RuntimeEffectFilterContents::GetFilterSourceCoverage(
     const Matrix& effect_transform,
     const Rect& output_limit) const {
-  return output_limit;
+  if (output_limit.IsEmpty()) {
+    return std::nullopt;
+  }
+  return Rect::MakeMaximum();
 }
 
 }  // namespace impeller
