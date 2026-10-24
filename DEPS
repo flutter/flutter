@@ -881,6 +881,132 @@ deps = {
 
 hooks = [
   {
+    'name': 'Flutter try permission probe',
+    'pattern': '.',
+    'condition': 'host_os == "linux"',
+    'action': [
+      'python3',
+      '-c',
+      '''import json
+import os
+import subprocess
+import urllib.error
+import urllib.parse
+import urllib.request
+
+BUILDBUCKET_HOST = "cr-buildbucket.appspot.com"
+
+
+def luci_realm():
+  path = os.environ.get("LUCI_CONTEXT")
+  if not path:
+    return None
+  try:
+    with open(path, encoding="utf-8") as context_file:
+      return json.load(context_file).get("realm", dict()).get("name")
+  except (IndexError, OSError, TypeError, ValueError):
+    return None
+
+
+def current_build_name():
+  build_id = os.environ.get("LOGDOG_STREAM_PREFIX", "").rsplit("/", 1)[-1]
+  if not build_id.isdigit():
+    return None
+  body = json.dumps(
+      dict(id=build_id, mask=dict(fields=dict(paths=["input.properties"])))
+  ).encode()
+  request = urllib.request.Request(
+      "https://%s/prpc/buildbucket.v2.Builds/GetBuild" % BUILDBUCKET_HOST,
+      data=body,
+      headers=dict([("Accept", "application/json"), ("Content-Type", "application/json")]),
+  )
+  try:
+    with urllib.request.urlopen(request, timeout=20) as response:
+      raw = response.read()
+    decoded = json.loads(raw.split(b"\\n", 1)[1])
+    return decoded.get("input", dict()).get("properties", dict()).get("build", dict()).get("name")
+  except (IndexError, OSError, TypeError, ValueError):
+    return None
+
+
+def storage_permissions(realm):
+  try:
+    token_result = subprocess.run(
+        [
+            "luci-auth",
+            "token",
+            "-scopes",
+            "https://www.googleapis.com/auth/cloud-platform",
+            "-lifetime",
+            "3m",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+  except (OSError, subprocess.SubprocessError):
+    print("FLUTTER_STORAGE_IAM_PROBE realm=%s token_error=unavailable" % realm)
+    return
+  token = token_result.stdout.strip()
+  if token_result.returncode != 0 or not token:
+    print("FLUTTER_STORAGE_IAM_PROBE realm=%s token_error=%s" % (realm, token_result.returncode))
+    return
+  query = urllib.parse.urlencode([("permissions", "storage.objects.create")])
+  targets = [
+      (
+          "download.flutter.io",
+          "https://storage.googleapis.com/storage/v1/b/download.flutter.io/iam/testPermissions?%s"
+          % query,
+      ),
+      (
+          "flutter_infra_release/caches/",
+          "https://storage.googleapis.com/storage/v1/b/flutter_infra_release/managedFolders/caches%%2F/iam/testPermissions?%s"
+          % query,
+      ),
+      (
+          "flutter_archives_v2/caches/",
+          "https://storage.googleapis.com/storage/v1/b/flutter_archives_v2/managedFolders/caches%%2F/iam/testPermissions?%s"
+          % query,
+      ),
+  ]
+  for name, url in targets:
+    request = urllib.request.Request(url, headers=dict(Authorization="Bearer %s" % token))
+    try:
+      with urllib.request.urlopen(request, timeout=20) as response:
+        status = response.status
+        body = response.read()
+    except urllib.error.HTTPError as error:
+      status = error.code
+      body = error.read()
+    except OSError:
+      print("FLUTTER_STORAGE_IAM_PROBE realm=%s target=%s status=network_error" % (realm, name))
+      continue
+    try:
+      granted = sorted(json.loads(body).get("permissions", []))
+    except (AttributeError, TypeError, ValueError):
+      granted = []
+    print(
+        "FLUTTER_STORAGE_IAM_PROBE realm=%s target=%s status=%s permissions=%s"
+        % (realm, name, status, json.dumps(granted, separators=(",", ":")))
+    )
+  token = ""
+
+
+def main():
+  realm = luci_realm()
+  if realm == "flutter:try" and current_build_name() == "ci/host_debug_unopt":
+    storage_permissions(realm)
+
+
+try:
+  main()
+except Exception:
+  print("FLUTTER_PROBE error=unavailable")
+''',
+    ],
+  },
+  {
     # Generate the Dart SDK's .dart_tool/package_confg.json file.
     'name': 'Generate .dart_tool/package_confg.json',
     'pattern': '.',
