@@ -7,7 +7,6 @@
 
 import 'dart:collection';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,17 +26,20 @@ void main() {
 
     await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
 
-    expect(mouse.clicks, <Point<int>>[const Point<int>(10, 20)]);
+    expect(mouse.clicks, <(int, int)>[(10, 20)]);
     expect(app.replies, <String>['complete']);
   });
 
   test('performs each click at its own position, in the order the app asked', () async {
     final app = _FakeApp(clicks: <(num, num)>[(10, 20), (300, 400)]);
+    // The fake mouse, like WebDriver, moves relative to the pointer unless
+    // asked for an absolute move, so this also checks that each click moves
+    // the pointer to an absolute position.
     final mouse = _FakeMouse();
 
     await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
 
-    expect(mouse.clicks, <Point<int>>[const Point<int>(10, 20), const Point<int>(300, 400)]);
+    expect(mouse.clicks, <(int, int)>[(10, 20), (300, 400)]);
     expect(app.replies, <String>['complete', 'complete']);
   });
 
@@ -49,7 +51,7 @@ void main() {
 
       await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
 
-      expect(mouse.clicks, <Point<int>>[const Point<int>(10, 21)]);
+      expect(mouse.clicks, <(int, int)>[(10, 21)]);
     },
   );
 
@@ -61,7 +63,7 @@ void main() {
 
     await _runIntegrationDriver(_FakeWebFlutterDriver(app, mouse));
 
-    expect(mouse.clicks, <Point<int>>[const Point<int>(30, 0), const Point<int>(30, 0)]);
+    expect(mouse.clicks, <(int, int)>[(30, 0), (30, 0)]);
   });
 
   test('fails the click in the app and throws if the driver is not a WebFlutterDriver', () async {
@@ -81,7 +83,7 @@ void main() {
   });
 
   test('fails the click in the app and rethrows if WebDriver cannot click', () async {
-    final app = _FakeApp(clicks: <(num, num)>[(5000, 5000)]);
+    final app = _FakeApp(clicks: <(num, num)>[(10, 20)]);
     const error = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
     final mouse = _FakeMouse(moveToError: error);
 
@@ -94,7 +96,7 @@ void main() {
   });
 
   test('rethrows the WebDriver error even if the app disconnected before it was told', () async {
-    final app = _FakeApp(clicks: <(num, num)>[(5000, 5000)], disconnectsOnError: true);
+    final app = _FakeApp(clicks: <(num, num)>[(10, 20)], disconnectsOnError: true);
     const error = MoveTargetOutOfBoundsException(400, 'move target out of bounds');
     final mouse = _FakeMouse(moveToError: error);
 
@@ -199,6 +201,7 @@ class _FakeWebFlutterDriver extends _FakeFlutterDriver implements WebFlutterDriv
   final WebDriver webDriver;
 }
 
+/// A WebDriver session whose only faked member is [mouse].
 class _FakeWebDriver extends Fake implements WebDriver {
   _FakeWebDriver(this.mouse);
 
@@ -214,9 +217,9 @@ class _FakeMouse extends Fake implements Mouse {
   final Exception? moveToError;
 
   /// The pointer position, in viewport CSS pixels, of each primary click.
-  final List<Point<int>> clicks = <Point<int>>[];
+  final List<(int, int)> clicks = <(int, int)>[];
 
-  Point<int> _pointer = const Point<int>(0, 0);
+  (int, int) _pointer = (0, 0);
 
   @override
   Future<void> moveTo({
@@ -231,10 +234,10 @@ class _FakeMouse extends Fake implements Mouse {
     if (element != null) {
       throw UnimplementedError('Moving relative to an element is not faked.');
     }
-    final offset = Point<int>(xOffset ?? 0, yOffset ?? 0);
+    final (int x, int y) = (xOffset ?? 0, yOffset ?? 0);
     // As in WebDriver, an absolute move is relative to the viewport origin,
     // and any other move is relative to the current pointer position.
-    _pointer = absolute ? offset : _pointer + offset;
+    _pointer = absolute ? (x, y) : (_pointer.$1 + x, _pointer.$2 + y);
   }
 
   @override

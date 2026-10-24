@@ -12,10 +12,10 @@ import 'package:web/web.dart' as web;
 /// Platform view type of the same-origin `<iframe srcdoc>` that counts clicks.
 const String iframeViewType = 'webdriver-click-iframe';
 
-/// Key of the Flutter button that counts taps.
+/// Key of the Flutter button that counts clicks.
 const Key buttonKey = Key('webdriver-click-button');
 
-/// Number of taps the Flutter button received.
+/// Number of clicks the Flutter button received.
 final ValueNotifier<int> buttonClicks = ValueNotifier<int>(0);
 
 /// Number of `click` events the iframe document received.
@@ -28,6 +28,8 @@ Completer<void> iframeLoaded = Completer<void>();
 bool _factoryRegistered = false;
 
 void main() {
+  // Each test calls main, so reset the counters and register the view factory
+  // only once.
   buttonClicks.value = 0;
   iframeClicks = 0;
   iframeLoaded = Completer<void>();

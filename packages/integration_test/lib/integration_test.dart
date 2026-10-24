@@ -230,7 +230,7 @@ https://docs.flutter.dev/testing/integration-tests
   /// `integration_test_driver_extended.dart`. Completes with an
   /// [UnsupportedError] on other platforms, an [ArgumentError] if the
   /// resulting viewport position is not finite, a [StateError] if [view] is
-  /// null and there is no implicit view, and with an error if the driver fails
+  /// null and there is no implicit view, or an error if the driver fails
   /// to perform the click.
   Future<void> webDriverClick(Offset position, {FlutterView? view}) async {
     final FlutterView? targetView = view ?? platformDispatcher.implicitView;

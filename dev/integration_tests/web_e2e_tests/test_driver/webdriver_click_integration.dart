@@ -46,14 +46,15 @@ void main() {
   final IntegrationTestWidgetsFlutterBinding binding =
       IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // Tests run with semantics disabled: otherwise a real click on the button
-  // lands on its semantics DOM node and taps it via a semantics action,
-  // bypassing pointer events entirely.
   Future<void> startApp(WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
     await app.iframeLoaded.future.timeout(const Duration(seconds: 10));
   }
+
+  // Each test passes `semanticsEnabled: false`: otherwise a real click on the
+  // button lands on its semantics DOM node and taps it via a semantics action,
+  // bypassing pointer events entirely.
 
   testWidgets('webDriverClick delivers a real browser click to an iframe platform view', (
     WidgetTester tester,
