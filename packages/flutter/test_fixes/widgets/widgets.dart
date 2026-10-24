@@ -41,9 +41,6 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/123352
   WidgetsBinding.instance.renderViewElement;
 
-  // Changes made in https://github.com/flutter/flutter/pull/119647
-  MediaQueryData.fromWindow(View.of(context));
-
   // Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067
   AnimatedSize(vsync: vsync, duration: Duration.zero);
 
@@ -73,11 +70,6 @@ void main() {
   const Stack stack = Stack(overflow: Overflow.clip);
   const Stack stack = Stack(error: '');
   final behavior = stack.overflow;
-
-  // Changes made in https://github.com/flutter/flutter/pull/68736
-  MediaQuery.of(context, nullOk: true);
-  MediaQuery.of(context, nullOk: false);
-  MediaQuery.of(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/70726
   Navigator.of(context, nullOk: true);
@@ -195,9 +187,6 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/78588
   final ScrollBehavior scrollBehavior = ScrollBehavior();
   scrollBehavior.buildViewportChrome(context, child, axisDirection);
-
-  // Changes made in https://github.com/flutter/flutter/pull/114459
-  MediaQuery.boldTextOverride(context);
 
   // Changes made in https://github.com/flutter/flutter/pull/122555
   final ScrollableDetails details = ScrollableDetails(
