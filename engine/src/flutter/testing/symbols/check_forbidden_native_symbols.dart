@@ -5,13 +5,24 @@
 import 'dart:convert';
 import 'dart:io';
 
-/// Symbols pulled in by `std::format` and `libc++`'s Ryu floating-point tables
-/// (~200 KiB in engine binaries). Use `std::stringstream` or `std::to_string`
-/// instead.
-const List<String> forbiddenSymbolSubstrings = <String>[
+/// Template symbols instantiated from `<format>`. These are only emitted when a
+/// translation unit uses `std::format`, so they are forbidden in both optimized
+/// and unoptimized builds.
+const List<String> forbiddenFormatSymbolSubstrings = <String>[
   'std::__fl::__format',
   'std::__fl::vformat',
   'std::__fl::__vformat_to',
+];
+
+/// Out-of-line `libc++` Ryu floating-point table symbols (~200 KiB) defined in
+/// `libcxx/src/ryu/*.cpp` and referenced by `libcxx/src/charconv.cpp`.
+///
+/// Because `libcxx` is linked as a `source_set`, these symbols remain present
+/// in unoptimized (`is_debug`) builds where linker dead-code stripping
+/// (`--gc-sections` / `-dead_strip`) is disabled, and are stripped in optimized
+/// builds unless engine code pulls in floating-point `std::to_chars` or
+/// `std::format`.
+const List<String> forbiddenRyuSymbolSubstrings = <String>[
   'std::__fl::__d2fixed_buffered_n',
   'std::__fl::__d2s_buffered_n',
   'std::__fl::__f2s_buffered_n',
@@ -19,7 +30,11 @@ const List<String> forbiddenSymbolSubstrings = <String>[
 
 /// Checks [binaryPath] using `llvm-nm` at [nmPath] and returns `true` if no
 /// forbidden symbols are defined in the binary.
-bool checkForbiddenNativeSymbols({required String nmPath, required String binaryPath}) {
+bool checkForbiddenNativeSymbols({
+  required String nmPath,
+  required String binaryPath,
+  bool unoptimized = false,
+}) {
   final ProcessResult nmResult = Process.runSync(nmPath, <String>[
     '--defined-only',
     '-C',
@@ -33,9 +48,14 @@ bool checkForbiddenNativeSymbols({required String nmPath, required String binary
     return false;
   }
 
+  final forbiddenSubstrings = <String>[
+    ...forbiddenFormatSymbolSubstrings,
+    if (!unoptimized) ...forbiddenRyuSymbolSubstrings,
+  ];
+
   final found = <String>[];
   for (final String line in LineSplitter.split(nmResult.stdout as String)) {
-    for (final String pattern in forbiddenSymbolSubstrings) {
+    for (final pattern in forbiddenSubstrings) {
       if (line.contains(pattern)) {
         found.add(line);
         break;
@@ -61,7 +81,7 @@ bool checkForbiddenNativeSymbols({required String nmPath, required String binary
 void _printUsage() {
   stderr.writeln(
     'Usage: dart check_forbidden_native_symbols.dart '
-    '--nm <path> --library <path> [--stamp <path>]',
+    '--nm <path> --library <path> [--stamp <path>] [--unoptimized]',
   );
 }
 
@@ -69,10 +89,13 @@ void main(List<String> arguments) {
   String? nmPath;
   String? binaryPath;
   String? stampPath;
+  var unoptimized = false;
 
   for (var i = 0; i < arguments.length; i++) {
     final String arg = arguments[i];
-    if ((arg == '--nm' || arg == '--library' || arg == '--binary' || arg == '--stamp') &&
+    if (arg == '--unoptimized') {
+      unoptimized = true;
+    } else if ((arg == '--nm' || arg == '--library' || arg == '--binary' || arg == '--stamp') &&
         i + 1 < arguments.length) {
       final String value = arguments[++i];
       switch (arg) {
@@ -103,7 +126,11 @@ void main(List<String> arguments) {
     exit(1);
   }
 
-  if (!checkForbiddenNativeSymbols(nmPath: nmPath, binaryPath: binaryPath)) {
+  if (!checkForbiddenNativeSymbols(
+    nmPath: nmPath,
+    binaryPath: binaryPath,
+    unoptimized: unoptimized,
+  )) {
     exit(1);
   }
 

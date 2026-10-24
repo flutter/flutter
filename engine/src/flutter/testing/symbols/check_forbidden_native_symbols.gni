@@ -43,5 +43,8 @@ template("check_forbidden_native_symbols") {
       "--library",
       rebase_path(invoker.library, root_build_dir),
     ]
+    if (is_debug) {
+      args += [ "--unoptimized" ]
+    }
   }
 }
