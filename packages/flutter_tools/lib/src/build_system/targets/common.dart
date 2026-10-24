@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart' show OS;
 import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
@@ -15,6 +16,7 @@ import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
+import '../../isolated/native_assets/targets.dart' show parseNativeOS;
 import '../../project.dart';
 import '../../windows/visual_studio.dart';
 import '../build_system.dart';
@@ -174,6 +176,15 @@ class KernelSnapshot extends Target {
   static const dillName = 'app.dill';
   static const recordedUsesFileName = 'recorded_uses.json';
 
+  static const _builtInPlatformKeys = <String>{
+    'android',
+    'ios',
+    'linux',
+    'macos',
+    'web',
+    'windows',
+  };
+
   /// The content of an empty recorded uses file.
   ///
   /// We always write this file even if no resources are recorded to prevent
@@ -204,7 +215,30 @@ class KernelSnapshot extends Target {
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
-    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    // Custom extension platforms are not part of the built-in TargetPlatform
+    // enum. When TargetPlatform.fromName fails and kExtensionTargetOs is
+    // explicitly provided, fall back to a representative TargetPlatform so
+    // KernelCompiler can resolve the host engine's Artifact.platformKernelDill
+    // and link the platform kernel into the output dill for custom embedders.
+    TargetPlatform targetPlatform;
+    OS? customTargetOs;
+    try {
+      targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    } on Exception {
+      final String? extensionTargetOs = environment.defines[kExtensionTargetOs];
+      if (extensionTargetOs == null || extensionTargetOs.trim().isEmpty) {
+        rethrow;
+      }
+      customTargetOs = parseNativeOS(extensionTargetOs);
+      targetPlatform = switch (customTargetOs) {
+        OS.android => TargetPlatform.android,
+        OS.fuchsia => TargetPlatform.fuchsia_arm64,
+        OS.iOS => TargetPlatform.ios,
+        OS.macOS => TargetPlatform.darwin,
+        OS.windows => TargetPlatform.windows_x64,
+        _ => TargetPlatform.linux_x64,
+      };
+    }
 
     // This configuration is all optional.
     final String? frontendServerStarterPath = environment.defines[kFrontendServerStarterPath];
@@ -257,16 +291,28 @@ class KernelSnapshot extends Target {
         TargetPlatform.throwUnsupportedTarget();
     }
 
-    final String? targetOS = switch (targetPlatform.os) {
-      .fuchsia => 'fuchsia',
-      .android => 'android',
-      .macos => 'macos',
-      .ios => 'ios',
-      .linux => 'linux',
-      .windows => 'windows',
-      .tester || .web => null,
-      .unsupported => TargetPlatform.throwUnsupportedTarget(),
-    };
+    // frontend_server's --target-os flag only accepts the six built-in VM
+    // operating systems (OS.values: 'android', 'fuchsia', 'ios', 'linux',
+    // 'macos', 'windows') and is used by AOT global type-flow analysis (TFA)
+    // to constant-fold Platform.operatingSystem and Platform.is<OS> checks.
+    // For custom extension platforms, only pass --target-os when
+    // customTargetOs is one of those six operating systems (for example, a
+    // Linux-based embedded target that sets ExtensionTargetOs=linux). For
+    // custom operating systems not in OS.values, omit --target-os (null) so
+    // Platform.operatingSystem is evaluated at runtime by the embedder instead
+    // of being constant-folded to 'linux'.
+    final String? targetOS = customTargetOs != null
+        ? (OS.values.contains(customTargetOs) ? customTargetOs.name : null)
+        : switch (targetPlatform.os) {
+            .fuchsia => 'fuchsia',
+            .android => 'android',
+            .macos => 'macos',
+            .ios => 'ios',
+            .linux => 'linux',
+            .windows => 'windows',
+            .tester || .web => null,
+            .unsupported => TargetPlatform.throwUnsupportedTarget(),
+          };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packagesFile,
@@ -277,6 +323,19 @@ class KernelSnapshot extends Target {
 
     final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
     await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
+    final String? rawPluginPlatformKey = environment.defines[kExtensionPluginPlatformKey]?.trim();
+    final String? customPlatformKey =
+        (rawPluginPlatformKey != null && rawPluginPlatformKey.isNotEmpty)
+        ? rawPluginPlatformKey
+        : environment.defines[kExtensionTargetOs]?.trim().toLowerCase();
+    if (customPlatformKey != null &&
+        customPlatformKey.isNotEmpty &&
+        !_builtInPlatformKeys.contains(customPlatformKey)) {
+      dartDefines.removeWhere(
+        (String define) => define.startsWith('$kFlutterCustomPlatformDartDefine='),
+      );
+      dartDefines.add('$kFlutterCustomPlatformDartDefine=$customPlatformKey');
+    }
 
     final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(

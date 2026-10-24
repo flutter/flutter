@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import 'build_system/constants.dart';
+import 'build_system/native_assets.dart';
 import 'build_system/source.dart';
 import 'json_utils.dart';
 
@@ -83,6 +85,87 @@ enum BuildMode {
   String toString() => cliName;
 }
 
+/// Representation of a Flutter plugin resolved for an extension target platform.
+@immutable
+class ExtensionPlugin {
+  const ExtensionPlugin({
+    required this.name,
+    required this.path,
+    this.configuration = const <String, Object?>{},
+  });
+
+  /// Deserializes an [ExtensionPlugin] from a JSON-serializable map.
+  factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Missing or invalid "$nameKey" for ExtensionPlugin.');
+    }
+    final Uri path = json.directoryUri(pathKey);
+    final Map<String, Object?> configuration = json.optionalField<Map<String, Object?>>(
+      configurationKey,
+      defaultValue: const <String, Object?>{},
+    );
+    return ExtensionPlugin(name: name, path: path, configuration: configuration);
+  }
+
+  /// Map key for [configuration].
+  static const String configurationKey = 'configuration';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
+
+  /// Map key for [path].
+  static const String pathKey = 'path';
+
+  /// Deserializes a list of [ExtensionPlugin] objects from RPC parameter data.
+  static List<ExtensionPlugin> listFromJson(Object? rpcResult) {
+    if (rpcResult case final List<Object?> list) {
+      return <ExtensionPlugin>[
+        for (final Object? item in list)
+          switch (item) {
+            final Map<String, Object?> map => ExtensionPlugin.fromJson(map),
+            final Object? invalid => throw FormatException(
+              'Invalid entry in ExtensionPlugin list: $invalid',
+            ),
+          },
+      ];
+    }
+    throw FormatException('Invalid ExtensionPlugin list: $rpcResult');
+  }
+
+  /// The package name of the plugin.
+  final String name;
+
+  /// The absolute, trailing-slash terminated directory URI of the plugin root on disk.
+  final Uri path;
+
+  /// The raw platform-specific configuration map from `pubspec.yaml` under
+  /// `flutter.plugin.platforms.<platformKey>`.
+  final Map<String, Object?> configuration;
+
+  /// Serializes the plugin to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    nameKey: name,
+    pathKey: path.toString(),
+    configurationKey: configuration,
+  };
+
+  @override
+  String toString() => 'ExtensionPlugin(name: $name, path: $path, configuration: $configuration)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionPlugin &&
+            other.name == name &&
+            other.path == path &&
+            const DeepCollectionEquality().equals(other.configuration, configuration));
+  }
+
+  @override
+  int get hashCode => Object.hash(name, path, const DeepCollectionEquality().hash(configuration));
+}
+
 /// Representation of a custom `flutter build` subcommand target provided by a tool extension.
 @immutable
 class ExtensionBuildTarget {
@@ -93,10 +176,15 @@ class ExtensionBuildTarget {
     required this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
+    this.nativeAssetsConfig,
+    this.pluginPlatformKey,
   });
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
+    final Map<String, Object?>? rawNativeAssetsConfig = json.nullableField<Map<String, Object?>>(
+      nativeAssetsConfigKey,
+    );
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
       name: json.requiredField<String>(nameKey),
@@ -109,6 +197,10 @@ class ExtensionBuildTarget {
         for (final String name in json.stringIterable(hostArtifactsKey))
           ExtensionHostArtifact(name),
       },
+      nativeAssetsConfig: rawNativeAssetsConfig != null
+          ? ExtensionNativeAssetsConfig.fromJson(rawNativeAssetsConfig)
+          : null,
+      pluginPlatformKey: json.nullableField<String>(pluginPlatformKeyKey),
     );
   }
 
@@ -124,8 +216,14 @@ class ExtensionBuildTarget {
   /// Map key for [name].
   static const String nameKey = 'name';
 
+  /// Map key for [nativeAssetsConfig].
+  static const String nativeAssetsConfigKey = 'nativeAssetsConfig';
+
   /// Map key for [outputDir].
   static const String outputDirKey = 'outputDir';
+
+  /// Map key for [pluginPlatformKey].
+  static const String pluginPlatformKeyKey = 'pluginPlatformKey';
 
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
@@ -163,6 +261,10 @@ class ExtensionBuildTarget {
   /// Host-side build tool or library artifacts required by this build target.
   final Set<ExtensionHostArtifact> hostArtifacts;
 
+  /// Optional Dart hooks (`native_assets`) target OS, architecture, and compiler
+  /// configuration for custom targets.
+  final ExtensionNativeAssetsConfig? nativeAssetsConfig;
+
   /// The directory pattern used by `flutter build` to determine this target's
   /// output directory, for example
   /// `'${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
@@ -173,6 +275,10 @@ class ExtensionBuildTarget {
   /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
   final String outputDir;
 
+  /// Optional platform key under `flutter.plugin.platforms.<key>` in `pubspec.yaml`
+  /// used to resolve plugins for this target (e.g. `'linux'`, `'custom_platform'`).
+  final String? pluginPlatformKey;
+
   /// Serializes the build target to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     descriptionKey: description,
@@ -180,14 +286,18 @@ class ExtensionBuildTarget {
     targetPlatformKey: targetPlatform,
     artifactsKey: artifacts.map((ExtensionArtifact a) => a.name).toList(),
     hostArtifactsKey: hostArtifacts.map((ExtensionHostArtifact a) => a.name).toList(),
+    nativeAssetsConfigKey: ?nativeAssetsConfig?.toMap(),
     outputDirKey: outputDir,
+    pluginPlatformKeyKey: ?pluginPlatformKey,
   };
 
   @override
   String toString() =>
       'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, '
       'description: $description, artifacts: $artifacts, '
-      'hostArtifacts: $hostArtifacts, outputDir: $outputDir)';
+      'hostArtifacts: $hostArtifacts, outputDir: $outputDir, '
+      'nativeAssetsConfig: $nativeAssetsConfig, '
+      'pluginPlatformKey: $pluginPlatformKey)';
 
   @override
   bool operator ==(Object other) {
@@ -197,6 +307,8 @@ class ExtensionBuildTarget {
             other.name == name &&
             other.targetPlatform == targetPlatform &&
             other.outputDir == outputDir &&
+            other.nativeAssetsConfig == nativeAssetsConfig &&
+            other.pluginPlatformKey == pluginPlatformKey &&
             _setEquals(other.artifacts, artifacts) &&
             _setEquals(other.hostArtifacts, hostArtifacts));
   }
@@ -207,6 +319,8 @@ class ExtensionBuildTarget {
     name,
     targetPlatform,
     outputDir,
+    nativeAssetsConfig,
+    pluginPlatformKey,
     Object.hashAllUnordered(artifacts),
     Object.hashAllUnordered(hostArtifacts),
   );
