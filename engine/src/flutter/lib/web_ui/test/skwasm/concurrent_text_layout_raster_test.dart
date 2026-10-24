@@ -117,4 +117,63 @@ Future<void> testMain() async {
     // Completing without a RuntimeError or hang is the pass condition.
     expect(frame, greaterThan(0));
   }, timeout: const Timeout(Duration(minutes: 2)));
+
+  test('concurrent glyph metrics and rasterization use the same font safely', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/193439.
+    // Keep the font and variation fixed so layout and rasterization share a
+    // FreeType face, while changing sizes to miss their respective glyph caches.
+    ui.Paragraph layoutParagraph(double fontSize) {
+      final builder = ui.ParagraphBuilder(ui.ParagraphStyle())
+        ..pushStyle(
+          ui.TextStyle(
+            fontFamily: 'RobotoVariable',
+            fontSize: fontSize,
+            fontVariations: const <ui.FontVariation>[.new('wght', 400.0)],
+          ),
+        )
+        ..addText(
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz '
+          '0123456789 ()*+,-.:@',
+        );
+      return builder.build()..layout(const ui.ParagraphConstraints(width: 300.0));
+    }
+
+    final ui.Paragraph paragraph = layoutParagraph(12.0);
+    addTearDown(paragraph.dispose);
+
+    // Approximate (sqrt(5) - 1) / 2 to avoid repeating cached glyph sizes.
+    const fractionalIncrement = 0.6180339887;
+    var fontSizeSeed = 0.0;
+    var frame = 0;
+    while (frame < _maxFrames) {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      // Draw six copies at scales between 0.8 and 12.8 to vary raster glyph sizes.
+      for (var index = 0; index < 6; index += 1) {
+        canvas
+          ..save()
+          ..translate(10.0 + index * 3.0, 10.0 + index * 40.0)
+          ..scale(0.8 + (frame * fractionalIncrement + index * 2.0) % 12.0)
+          ..drawParagraph(paragraph, ui.Offset.zero)
+          ..restore();
+      }
+      final ui.Picture picture = recorder.endRecording();
+      final sceneBuilder = ui.SceneBuilder()..addPicture(ui.Offset.zero, picture);
+      try {
+        final Future<void> renderFuture = renderScene(sceneBuilder.build());
+        // Yield to dispatch raster work; renderFuture synchronizes completion.
+        await Future<void>.delayed(Duration.zero);
+        for (var index = 0; index < _paragraphsPerFrame; index += 1) {
+          fontSizeSeed += fractionalIncrement;
+          layoutParagraph(4.0 + fontSizeSeed % 60.0).dispose();
+        }
+        await renderFuture;
+      } finally {
+        picture.dispose();
+      }
+      frame += 1;
+    }
+
+    expect(frame, _maxFrames);
+  });
 }
