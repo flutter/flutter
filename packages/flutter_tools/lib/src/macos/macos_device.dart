@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:process/process.dart';
 
+import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
+import '../convert.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
@@ -68,6 +73,50 @@ class MacOSDevice extends DesktopDevice {
   @override
   String? executablePathForDevice(covariant MacOSApp package, BuildInfo buildInfo) {
     return package.executable(buildInfo);
+  }
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  bool get supportsScreenRecording => true;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    final ProcessResult result = await toolContext.processManager.run(<String>[
+      'screencapture',
+      '-x',
+      outputFile.path,
+    ]);
+    if (result.exitCode != 0) {
+      throwToolExit('screencapture failed: ${result.stderr}');
+    }
+  }
+
+  @override
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async {
+    final args = <String>[
+      'screencapture',
+      '-v',
+      if (duration != null) ...['-V', '${duration.inSeconds}'],
+      outputFile.path,
+    ];
+    final Process process = await toolContext.processManager.start(args);
+    unawaited(process.stdout.drain<void>());
+    final stderrBuf = StringBuffer();
+
+    Future<void> runRecording() async {
+      final (int exitCode, _) = await (
+        process.exitCode,
+        process.stderr.transform(utf8AllowMalformed.decoder).forEach(stderrBuf.write),
+      ).wait;
+
+      if (!ScreenRecording.stoppedExitCodes.contains(exitCode)) {
+        throwToolExit('screencapture failed (exit $exitCode): $stderrBuf');
+      }
+    }
+
+    return ScreenRecording(process, runRecording());
   }
 
   @override

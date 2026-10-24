@@ -1626,6 +1626,7 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,
       'screenshot': device.supportsScreenshot,
+      'screenRecording': device.supportsScreenRecording,
       // TODO(bkonyi): remove once fg3 is updated.
       'fastStart': false,
       'flutterExit': device.supportsFlutterExit,
