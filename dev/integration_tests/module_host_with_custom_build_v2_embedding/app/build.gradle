@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-apply plugin: 'com.android.application'
+plugins {
+    id "com.android.application"
+}
 
 android {
     namespace = "io.flutter.addtoapp"

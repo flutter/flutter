@@ -18,6 +18,7 @@ buildscript {
 }
 
 plugins {
+    id "com.android.application"
     id "com.github.hierynomus.license-report" version "0.16.1"
 }
 
@@ -29,8 +30,6 @@ allprojects {
         mavenCentral()
     }
 }
-
-apply plugin: "com.android.application"
 
 android {
   namespace = "io.flutter.licensecheck"
