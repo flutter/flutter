@@ -52,6 +52,7 @@ export 'src/widgets/drag_boundary.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/draggable_scrollable_sheet.dart';
 export 'src/widgets/dual_transition_builder.dart';
+export 'src/widgets/edge_insets_overlay.dart';
 export 'src/widgets/editable_text.dart';
 export 'src/widgets/expansible.dart';
 export 'src/widgets/fade_in_image.dart';
