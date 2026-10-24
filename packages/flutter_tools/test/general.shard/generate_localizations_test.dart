@@ -46,6 +46,10 @@ const singleZhMessageArbFileString = '''
 {
   "title": "标题"
 }''';
+const singleArMessageArbFileString = '''
+{
+  "title": "مرحبا"
+}''';
 const intlImportDartCode = '''
 import 'package:intl/intl.dart' as intl;
 ''';
@@ -90,6 +94,15 @@ void main() {
     bool suppressWarnings = false,
     bool relaxSyntax = false,
     bool useNamedParameters = false,
+    Map<String, List<String>>? outputClassMixins,
+    List<String>? outputBaseClassMixins,
+    String? fallbackLocale,
+    LocalizationRuntimeOptions? localizationRuntime,
+    String? libraryPackage,
+    String? libraryAlias,
+    List<String>? inputPathStrings,
+    Set<String>? ignoreArbKeys,
+    ArbConflictResolution arbConflictResolution = ArbConflictResolution.error,
     void Function(Directory)? setup,
     FileSystem? fileSystem,
   }) {
@@ -121,6 +134,15 @@ void main() {
         suppressWarnings: suppressWarnings,
         useRelaxedSyntax: relaxSyntax,
         useNamedParameters: useNamedParameters,
+        outputClassMixins: outputClassMixins,
+        outputBaseClassMixins: outputBaseClassMixins,
+        fallbackLocale: fallbackLocale,
+        localizationRuntime: localizationRuntime,
+        libraryPackage: libraryPackage ?? LocalizationRuntimeOptions.defaultPackage,
+        libraryAlias: libraryAlias ?? LocalizationRuntimeOptions.defaultAlias,
+        inputPathStrings: inputPathStrings,
+        ignoreArbKeys: ignoreArbKeys,
+        arbConflictResolution: arbConflictResolution,
         projectPathString: (fileSystem ?? fs).currentDirectory.path,
       )
       ..loadResources()
@@ -3566,5 +3588,1550 @@ String helloNameAndAge({required String name, required int age}) {
         ),
       ),
     );
+  });
+
+  group('gen_l10n extensibility options', () {
+    testWithoutContext('outputClassMixins applies mixins globally to subclasses', () {
+      setupLocalizations(
+        <String, String>{'en': singleMessageArbFileString, 'es': singleEsMessageArbFileString},
+        outputClassMixins: <String, List<String>>{
+          '*': <String>['GlobalMixinA', 'GlobalMixinB'],
+        },
+      );
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(
+        enFile,
+        contains(
+          'class AppLocalizationsEn extends AppLocalizations with GlobalMixinA, GlobalMixinB {',
+        ),
+      );
+
+      final String esFile = getGeneratedFileContent(locale: 'es');
+      expect(
+        esFile,
+        contains(
+          'class AppLocalizationsEs extends AppLocalizations with GlobalMixinA, GlobalMixinB {',
+        ),
+      );
+    });
+
+    testWithoutContext('outputClassMixins applies locale-specific and wildcard mixins', () {
+      setupLocalizations(
+        <String, String>{'en': singleMessageArbFileString, 'es': singleEsMessageArbFileString},
+        outputClassMixins: <String, List<String>>{
+          '*': <String>['SharedMixin'],
+          'es': <String>['EsMixin'],
+        },
+      );
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(
+        enFile,
+        contains('class AppLocalizationsEn extends AppLocalizations with SharedMixin {'),
+      );
+
+      final String esFile = getGeneratedFileContent(locale: 'es');
+      expect(
+        esFile,
+        contains('class AppLocalizationsEs extends AppLocalizations with SharedMixin, EsMixin {'),
+      );
+    });
+
+    testWithoutContext(
+      'outputClassMixins falls back to explicit fallback key for unspecified locales',
+      () {
+        setupLocalizations(
+          <String, String>{
+            'en': singleMessageArbFileString,
+            'zh': singleZhMessageArbFileString,
+            'es': singleEsMessageArbFileString,
+          },
+          outputClassMixins: <String, List<String>>{
+            'fallback': <String>['FallbackMixin'],
+            'zh': <String>['ZhMixin'],
+          },
+        );
+
+        final String zhFile = getGeneratedFileContent(locale: 'zh');
+        expect(
+          zhFile,
+          contains('class AppLocalizationsZh extends AppLocalizations with ZhMixin {'),
+        );
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(
+          enFile,
+          contains('class AppLocalizationsEn extends AppLocalizations with FallbackMixin {'),
+        );
+
+        final String esFile = getGeneratedFileContent(locale: 'es');
+        expect(
+          esFile,
+          contains('class AppLocalizationsEs extends AppLocalizations with FallbackMixin {'),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'outputClassMixins falls back to fallbackLocale mixin for unspecified locales',
+      () {
+        setupLocalizations(
+          <String, String>{
+            'en': singleMessageArbFileString,
+            'zh': singleZhMessageArbFileString,
+            'es': singleEsMessageArbFileString,
+          },
+          fallbackLocale: 'en',
+          outputClassMixins: <String, List<String>>{
+            'en': <String>['EnMixin'],
+            'zh': <String>['ZhMixin'],
+          },
+        );
+
+        final String zhFile = getGeneratedFileContent(locale: 'zh');
+        expect(
+          zhFile,
+          contains('class AppLocalizationsZh extends AppLocalizations with ZhMixin {'),
+        );
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(
+          enFile,
+          contains('class AppLocalizationsEn extends AppLocalizations with EnMixin {'),
+        );
+
+        final String esFile = getGeneratedFileContent(locale: 'es');
+        expect(
+          esFile,
+          contains('class AppLocalizationsEs extends AppLocalizations with EnMixin {'),
+        );
+      },
+    );
+
+    testWithoutContext('unqualified outputBaseClassMixins applies mixins to base class', () {
+      setupLocalizations(
+        <String, String>{'en': singleMessageArbFileString},
+        outputBaseClassMixins: <String>['CoreLocalizations'],
+      );
+
+      final String baseFile = getGeneratedFileContent();
+      expect(baseFile, contains('abstract class AppLocalizations with CoreLocalizations {'));
+    });
+
+    testWithoutContext(
+      'qualified outputBaseClassMixins preserves library-prefix qualification',
+      () {
+        setupLocalizations(
+          <String, String>{'en': singleMessageArbFileString},
+          outputBaseClassMixins: <String>['coreX.CoreLocalizations'],
+        );
+
+        final String baseFile = getGeneratedFileContent();
+        expect(
+          baseFile,
+          contains('abstract class AppLocalizations with coreX.CoreLocalizations {'),
+        );
+      },
+    );
+
+    testWithoutContext('unqualified outputClassMixins applies mixins to locale subclass', () {
+      setupLocalizations(
+        <String, String>{'en': singleMessageArbFileString, 'ar': singleArMessageArbFileString},
+        outputClassMixins: <String, List<String>>{
+          'ar': <String>['CoreLocalizationsAr'],
+        },
+      );
+
+      final String arFile = getGeneratedFileContent(locale: 'ar');
+      expect(
+        arFile,
+        contains('class AppLocalizationsAr extends AppLocalizations with CoreLocalizationsAr {'),
+      );
+    });
+
+    testWithoutContext('qualified outputClassMixins preserves library-prefix qualification', () {
+      setupLocalizations(
+        <String, String>{'en': singleMessageArbFileString, 'ar': singleArMessageArbFileString},
+        outputClassMixins: <String, List<String>>{
+          'ar': <String>['coreX.CoreLocalizationsAr'],
+        },
+      );
+
+      final String arFile = getGeneratedFileContent(locale: 'ar');
+      expect(
+        arFile,
+        contains(
+          'class AppLocalizationsAr extends AppLocalizations with coreX.CoreLocalizationsAr {',
+        ),
+      );
+    });
+
+    testWithoutContext('qualified fallback mixin applies to locales without specific mixins', () {
+      setupLocalizations(
+        <String, String>{'en': singleMessageArbFileString, 'es': singleEsMessageArbFileString},
+        outputClassMixins: <String, List<String>>{
+          'fallback': <String>['coreX.CoreLocalizationsEn'],
+        },
+      );
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(
+        enFile,
+        contains(
+          'class AppLocalizationsEn extends AppLocalizations with coreX.CoreLocalizationsEn {',
+        ),
+      );
+      final String esFile = getGeneratedFileContent(locale: 'es');
+      expect(
+        esFile,
+        contains(
+          'class AppLocalizationsEs extends AppLocalizations with coreX.CoreLocalizationsEn {',
+        ),
+      );
+    });
+
+    testWithoutContext('mixture of qualified and unqualified mixins generates expected clauses', () {
+      setupLocalizations(
+        <String, String>{'en': singleMessageArbFileString, 'ar': singleArMessageArbFileString},
+        outputBaseClassMixins: <String>['CoreLocalizations', 'coreX.CoreLocalizationsExtra'],
+        outputClassMixins: <String, List<String>>{
+          'ar': <String>['CoreLocalizationsAr', 'coreX.CoreLocalizationsArExtra'],
+        },
+      );
+
+      final String baseFile = getGeneratedFileContent();
+      expect(
+        baseFile,
+        contains(
+          'abstract class AppLocalizations with CoreLocalizations, coreX.CoreLocalizationsExtra {',
+        ),
+      );
+      final String arFile = getGeneratedFileContent(locale: 'ar');
+      expect(
+        arFile,
+        contains(
+          'class AppLocalizationsAr extends AppLocalizations with CoreLocalizationsAr, coreX.CoreLocalizationsArExtra {',
+        ),
+      );
+    });
+
+    testWithoutContext('invalid mixin identifier in outputClassMixins throws L10nException', () {
+      expect(
+        () => setupLocalizations(
+          <String, String>{'en': singleMessageArbFileString},
+          outputClassMixins: <String, List<String>>{
+            '*': <String>['123InvalidMixin'],
+          },
+        ),
+        throwsA(
+          isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('is not a valid Dart mixin type reference'),
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext(
+      'invalid mixin identifier in outputBaseClassMixins throws L10nException',
+      () {
+        expect(
+          () => setupLocalizations(
+            <String, String>{'en': singleMessageArbFileString},
+            outputBaseClassMixins: <String>['Invalid-Mixin'],
+          ),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains('is not a valid Dart mixin type reference'),
+            ),
+          ),
+        );
+      },
+    );
+
+    testWithoutContext('invalid identifiers in mixins throw L10nException', () {
+      const invalidIdentifiers = <String>[
+        '123InvalidMixin',
+        'core-x.CoreLocalizations',
+        'coreX.invalidClass',
+      ];
+      for (final invalid in invalidIdentifiers) {
+        expect(
+          () => setupLocalizations(
+            <String, String>{'en': singleMessageArbFileString},
+            outputBaseClassMixins: <String>[invalid],
+          ),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains('is not a valid Dart mixin type reference'),
+            ),
+          ),
+          reason: 'Expected "$invalid" in outputBaseClassMixins to throw L10nException',
+        );
+        expect(
+          () => setupLocalizations(
+            <String, String>{'en': singleMessageArbFileString},
+            outputClassMixins: <String, List<String>>{
+              '*': <String>[invalid],
+            },
+          ),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains('is not a valid Dart mixin type reference'),
+            ),
+          ),
+          reason: 'Expected "$invalid" in outputClassMixins to throw L10nException',
+        );
+      }
+    });
+
+    testWithoutContext('invalid qualified references in mixins throw L10nException', () {
+      const invalidQualified = <String>[
+        'coreX.',
+        '.CoreLocalizations',
+        'coreX.CoreLocalizations.Extra',
+      ];
+      for (final invalid in invalidQualified) {
+        expect(
+          () => setupLocalizations(
+            <String, String>{'en': singleMessageArbFileString},
+            outputBaseClassMixins: <String>[invalid],
+          ),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains('is not a valid Dart mixin type reference'),
+            ),
+          ),
+          reason: 'Expected "$invalid" to throw L10nException',
+        );
+      }
+    });
+
+    testWithoutContext('arbitrary expressions and code are rejected as mixins', () {
+      const arbitraryExpressions = <String>['foo.bar.baz()', 'Foo()', 'Foo + Bar', 'foo.bar + baz'];
+      for (final expr in arbitraryExpressions) {
+        expect(
+          () => setupLocalizations(
+            <String, String>{'en': singleMessageArbFileString},
+            outputBaseClassMixins: <String>[expr],
+          ),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains('is not a valid Dart mixin type reference'),
+            ),
+          ),
+          reason: 'Expected "$expr" to throw L10nException',
+        );
+      }
+    });
+
+    testWithoutContext('fallbackLocale: en directly returns AppLocalizationsEn in lookup and does not generate fallback factory', () {
+      setupLocalizations(<String, String>{
+        'en': singleMessageArbFileString,
+        'es': singleEsMessageArbFileString,
+      }, fallbackLocale: 'en');
+
+      final String baseFile = getGeneratedFileContent();
+      expect(baseFile, contains('// The requested locale is unsupported.'));
+      expect(baseFile, contains('// Falling back to the configured fallback locale: "en".'));
+      expect(baseFile, contains('return AppLocalizationsEn();'));
+      expect(baseFile, isNot(contains('factory AppLocalizations.fallback')));
+      expect(baseFile, isNot(contains('fallback()')));
+      expect(baseFile, isNot(contains('throw FlutterError(')));
+    });
+
+    testWithoutContext('fallbackLocale: ar directly returns AppLocalizationsAr in lookup and does not generate fallback factory', () {
+      setupLocalizations(<String, String>{
+        'en': singleMessageArbFileString,
+        'ar': singleArMessageArbFileString,
+      }, fallbackLocale: 'ar');
+
+      final String baseFile = getGeneratedFileContent();
+      expect(baseFile, contains('// The requested locale is unsupported.'));
+      expect(baseFile, contains('// Falling back to the configured fallback locale: "ar".'));
+      expect(baseFile, contains('return AppLocalizationsAr();'));
+      expect(baseFile, isNot(contains('factory AppLocalizations.fallback')));
+      expect(baseFile, isNot(contains('fallback()')));
+      expect(baseFile, isNot(contains('throw FlutterError(')));
+    });
+
+    testWithoutContext(
+      'no fallback-locale preserves standard FlutterError and generates no fallback factory',
+      () {
+        setupLocalizations(<String, String>{
+          'en': singleMessageArbFileString,
+          'es': singleEsMessageArbFileString,
+        });
+
+        final String baseFile = getGeneratedFileContent();
+        expect(baseFile, contains('throw FlutterError('));
+        expect(baseFile, isNot(contains('factory AppLocalizations.fallback')));
+        expect(baseFile, isNot(contains('fallback()')));
+        expect(baseFile, isNot(contains('Falling back to the configured fallback locale')));
+      },
+    );
+
+    testWithoutContext(
+      'fallbackLocale throws L10nException when locale is not found in ARB files',
+      () {
+        expect(
+          () => setupLocalizations(<String, String>{
+            'en': singleMessageArbFileString,
+          }, fallbackLocale: 'fr'),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains('The fallback locale "fr" was not found in the input ARB files.'),
+            ),
+          ),
+        );
+      },
+    );
+
+    testWithoutContext('fallbackLocale throws L10nException when used with deferred loading', () {
+      expect(
+        () => setupLocalizations(
+          <String, String>{'en': singleMessageArbFileString},
+          fallbackLocale: 'en',
+          useDeferredLoading: true,
+        ),
+        throwsA(
+          isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('The fallback-locale option cannot be used with use-deferred-loading.'),
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext(
+      'default localization library configuration preserves existing generated output',
+      () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "total": "{count, plural, =0{none} =1{one} other{many}}",
+  "@total": {
+    "placeholders": {
+      "count": { "type": "num" }
+    }
+  }
+}''',
+        });
+
+        final String baseFile = getGeneratedFileContent();
+        expect(baseFile, contains("import 'package:intl/intl.dart' as intl;"));
+        expect(baseFile, contains('intl.Intl.canonicalizedLocale(locale.toString())'));
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(enFile, contains("import 'package:intl/intl.dart' as intl;"));
+        expect(enFile, contains('intl.Intl.pluralLogic('));
+      },
+    );
+
+    testWithoutContext('localization library with custom package and default alias', () {
+      setupLocalizations(<String, String>{
+        'en': singleMessageArbFileString,
+      }, libraryPackage: 'package:my_localization/my_localization.dart');
+
+      final String baseFile = getGeneratedFileContent();
+      expect(baseFile, contains("import 'package:my_localization/my_localization.dart' as intl;"));
+      expect(baseFile, contains('intl.Intl.canonicalizedLocale(locale.toString())'));
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(enFile, contains("import 'package:my_localization/my_localization.dart' as intl;"));
+    });
+
+    testWithoutContext('localization library with custom alias and default package URI', () {
+      setupLocalizations(<String, String>{
+        'en': '''
+{
+  "total": "{count, plural, =0{none} =1{one} other{many}}",
+  "@total": {
+    "placeholders": {
+      "count": { "type": "num" }
+    }
+  }
+}''',
+      }, libraryAlias: 'customIntl');
+
+      final String baseFile = getGeneratedFileContent();
+      expect(baseFile, contains("import 'package:intl/intl.dart' as customIntl;"));
+      expect(baseFile, contains('customIntl.Intl.canonicalizedLocale(locale.toString())'));
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(enFile, contains("import 'package:intl/intl.dart' as customIntl;"));
+      expect(enFile, contains('customIntl.Intl.pluralLogic('));
+    });
+
+    testWithoutContext('localization library with custom package and custom alias', () {
+      setupLocalizations(
+        <String, String>{
+          'en': '''
+{
+  "total": "{count, plural, =0{none} =1{one} other{many}}",
+  "@total": {
+    "placeholders": {
+      "count": { "type": "num" }
+    }
+  }
+}''',
+        },
+        libraryPackage: 'package:core/core.dart',
+        libraryAlias: 'coreTr',
+      );
+
+      final String baseFile = getGeneratedFileContent();
+      expect(baseFile, contains("import 'package:core/core.dart' as coreTr;"));
+      expect(baseFile, contains('coreTr.Intl.canonicalizedLocale(locale.toString())'));
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(enFile, contains("import 'package:core/core.dart' as coreTr;"));
+      expect(enFile, contains('coreTr.Intl.pluralLogic('));
+    });
+
+    testWithoutContext(
+      'generated references consistently use configured library alias across formats',
+      () {
+        setupLocalizations(
+          <String, String>{
+            'en': '''
+{
+  "price": "{amount}",
+  "@price": {
+    "placeholders": {
+      "amount": { "type": "double", "format": "currency" }
+    }
+  },
+  "today": "{date}",
+  "@today": {
+    "placeholders": {
+      "date": { "type": "DateTime", "format": "yMd" }
+    }
+  },
+  "pluralMsg": "{count, plural, =0{zero} other{other}}",
+  "@pluralMsg": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "selectMsg": "{gender, select, female{she} male{he} other{they}}",
+  "@selectMsg": {
+    "placeholders": {
+      "gender": { "type": "String" }
+    }
+  }
+}''',
+          },
+          libraryPackage: 'package:core/core.dart',
+          libraryAlias: 'coreTr',
+        );
+
+        final String baseFile = getGeneratedFileContent();
+        expect(baseFile, contains("import 'package:core/core.dart' as coreTr;"));
+        expect(baseFile, contains('coreTr.Intl.canonicalizedLocale(locale.toString())'));
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(enFile, contains("import 'package:core/core.dart' as coreTr;"));
+        expect(enFile, contains('coreTr.NumberFormat.currency('));
+        expect(enFile, contains('coreTr.DateFormat.yMd('));
+        expect(enFile, contains('coreTr.Intl.pluralLogic('));
+        expect(enFile, contains('coreTr.Intl.selectLogic('));
+        expect(enFile, isNot(contains('intl.')));
+      },
+    );
+
+    testWithoutContext(
+      'LocalizationsGenerator throws when library alias is not a valid Dart identifier',
+      () {
+        expect(
+          () => setupLocalizations(<String, String>{
+            'en': singleMessageArbFileString,
+          }, libraryAlias: '123invalid'),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains('The library alias "123invalid" is not a valid Dart identifier.'),
+            ),
+          ),
+        );
+      },
+    );
+
+    testWithoutContext('LocalizationsGenerator throws when library package URI is invalid', () {
+      expect(
+        () => setupLocalizations(<String, String>{
+          'en': singleMessageArbFileString,
+        }, libraryPackage: 'invalid_uri_without_scheme'),
+        throwsA(
+          isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('The library package URI "invalid_uri_without_scheme" is not a valid URI.'),
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext(
+      'custom symbols configuration replaces all generated library references',
+      () {
+        setupLocalizations(
+          <String, String>{
+            'en': '''
+{
+  "price": "{amount}",
+  "@price": {
+    "placeholders": {
+      "amount": { "type": "double", "format": "currency" }
+    }
+  },
+  "today": "{date}",
+  "@today": {
+    "placeholders": {
+      "date": { "type": "DateTime", "format": "yMd" }
+    }
+  },
+  "pluralMsg": "{count, plural, =0{zero} other{other}}",
+  "@pluralMsg": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "selectMsg": "{gender, select, female{she} male{he} other{they}}",
+  "@selectMsg": {
+    "placeholders": {
+      "gender": { "type": "String" }
+    }
+  }
+}''',
+          },
+          localizationRuntime: const LocalizationRuntimeOptions(
+            package: 'package:custom_loc/custom_loc.dart',
+            alias: 'myLoc',
+            symbols: LocalizationRuntimeSymbols(
+              canonicalizedLocale: 'CustomLocale.canonicalize',
+              pluralLogic: 'CustomPlural.choose',
+              selectLogic: 'CustomSelect.choose',
+              dateFormat: 'CustomDateFormatter',
+              numberFormat: 'CustomNumberFormatter',
+            ),
+          ),
+        );
+
+        final String baseFile = getGeneratedFileContent();
+        expect(baseFile, contains("import 'package:custom_loc/custom_loc.dart' as myLoc;"));
+        expect(baseFile, contains('myLoc.CustomLocale.canonicalize(locale.toString())'));
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(enFile, contains("import 'package:custom_loc/custom_loc.dart' as myLoc;"));
+        expect(
+          enFile,
+          contains(
+            'final myLoc.CustomNumberFormatter amountNumberFormat = myLoc.CustomNumberFormatter.currency(',
+          ),
+        );
+        expect(
+          enFile,
+          contains(
+            'final myLoc.CustomDateFormatter dateDateFormat = myLoc.CustomDateFormatter.yMd(',
+          ),
+        );
+        expect(enFile, contains('myLoc.CustomPlural.choose('));
+        expect(enFile, contains('myLoc.CustomSelect.choose('));
+        expect(enFile, isNot(contains('intl.')));
+        expect(enFile, isNot(contains('intl.DateFormat')));
+        expect(enFile, isNot(contains('intl.NumberFormat')));
+        expect(enFile, isNot(contains('intl.Intl.')));
+      },
+    );
+
+    testWithoutContext('custom symbols with empty alias emits un-prefixed symbol references', () {
+      setupLocalizations(
+        <String, String>{
+          'en': '''
+{
+  "price": "{amount}",
+  "@price": {
+    "placeholders": {
+      "amount": { "type": "double", "format": "currency" }
+    }
+  },
+  "pluralMsg": "{count, plural, =0{zero} other{other}}",
+  "@pluralMsg": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
+}''',
+        },
+        localizationRuntime: const LocalizationRuntimeOptions(
+          package: 'package:custom_loc/custom_loc.dart',
+          alias: '',
+          symbols: LocalizationRuntimeSymbols(
+            canonicalizedLocale: 'canonicalizeLocale',
+            pluralLogic: 'pluralLogic',
+            numberFormat: 'NumberFormatter',
+          ),
+        ),
+      );
+
+      final String baseFile = getGeneratedFileContent();
+      expect(baseFile, contains("import 'package:custom_loc/custom_loc.dart';"));
+      expect(baseFile, isNot(contains("import 'package:custom_loc/custom_loc.dart' as")));
+      expect(baseFile, contains('canonicalizeLocale(locale.toString())'));
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(enFile, contains("import 'package:custom_loc/custom_loc.dart';"));
+      expect(
+        enFile,
+        contains('final NumberFormatter amountNumberFormat = NumberFormatter.currency('),
+      );
+      expect(enFile, contains('pluralLogic('));
+    });
+
+    testWithoutContext(
+      'partial symbols configuration customizes specified symbols and keeps defaults for others',
+      () {
+        setupLocalizations(
+          <String, String>{
+            'en': '''
+{
+  "price": "{amount}",
+  "@price": {
+    "placeholders": {
+      "amount": { "type": "double", "format": "currency" }
+    }
+  },
+  "pluralMsg": "{count, plural, =0{zero} other{other}}",
+  "@pluralMsg": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
+}''',
+          },
+          localizationRuntime: const LocalizationRuntimeOptions(
+            package: 'package:custom_loc/custom_loc.dart',
+            alias: 'myLoc',
+            symbols: LocalizationRuntimeSymbols(pluralLogic: 'CustomPlural.choose'),
+          ),
+        );
+
+        final String baseFile = getGeneratedFileContent();
+        expect(baseFile, contains('myLoc.Intl.canonicalizedLocale(locale.toString())'));
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(enFile, contains('myLoc.CustomPlural.choose('));
+        expect(
+          enFile,
+          contains('final myLoc.NumberFormat amountNumberFormat = myLoc.NumberFormat.currency('),
+        );
+      },
+    );
+
+    testWithoutContext('custom date format placeholder uses configured dateFormat constructor', () {
+      setupLocalizations(
+        <String, String>{
+          'en': '''
+{
+  "customDate": "{date}",
+  "@customDate": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yyyy-MM-dd",
+        "isCustomDateFormat": "true"
+      }
+    }
+  }
+}''',
+        },
+        localizationRuntime: const LocalizationRuntimeOptions(
+          package: 'package:custom_loc/custom_loc.dart',
+          alias: 'myLoc',
+          symbols: LocalizationRuntimeSymbols(dateFormat: 'CustomDateFormatter'),
+        ),
+      );
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(
+        enFile,
+        contains(
+          "final myLoc.CustomDateFormatter dateDateFormat = myLoc.CustomDateFormatter('yyyy-MM-dd', localeName);",
+        ),
+      );
+    });
+
+    testWithoutContext(
+      'custom date format and number format symbols are used in generated methods',
+      () {
+        setupLocalizations(
+          <String, String>{
+            'en': '''
+{
+  "shortDate": "{date}",
+  "@shortDate": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "customPattern": "{date}",
+  "@customPattern": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yyyy-MM-dd",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "combinedDate": "{date}",
+  "@combinedDate": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd+jms"
+      }
+    }
+  },
+  "money": "{amount}",
+  "@money": {
+    "placeholders": {
+      "amount": { "type": "double", "format": "currency" }
+    }
+  },
+  "compact": "{count}",
+  "@compact": {
+    "placeholders": {
+      "count": { "type": "int", "format": "compact" }
+    }
+  }
+}''',
+          },
+          localizationRuntime: const LocalizationRuntimeOptions(
+            package: 'package:custom_loc/custom_loc.dart',
+            alias: 'myLoc',
+            symbols: LocalizationRuntimeSymbols(
+              dateFormat: 'CustomDateFormatter',
+              numberFormat: 'CustomNumberFormatter',
+            ),
+          ),
+        );
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(
+          enFile,
+          contains(
+            'final myLoc.CustomDateFormatter dateDateFormat = myLoc.CustomDateFormatter.yMd(localeName);',
+          ),
+        );
+        expect(
+          enFile,
+          contains(
+            "final myLoc.CustomDateFormatter dateDateFormat = myLoc.CustomDateFormatter('yyyy-MM-dd', localeName);",
+          ),
+        );
+        expect(
+          enFile,
+          contains(
+            'final myLoc.CustomDateFormatter dateDateFormat = myLoc.CustomDateFormatter.yMd(localeName).add_jms();',
+          ),
+        );
+        expect(
+          enFile,
+          contains(
+            'final myLoc.CustomNumberFormatter amountNumberFormat = myLoc.CustomNumberFormatter.currency(',
+          ),
+        );
+        expect(
+          enFile,
+          contains(
+            'final myLoc.CustomNumberFormatter countNumberFormat = myLoc.CustomNumberFormatter.compact(',
+          ),
+        );
+      },
+    );
+
+    testWithoutContext('inline ICU date argument expression uses configured dateFormat', () {
+      setupLocalizations(
+        <String, String>{
+          'en': '''
+{
+  "icuDate": "Date: {today, date, ::yMd}",
+  "@icuDate": {
+    "description": "ICU date formatting"
+  }
+}''',
+        },
+        localizationRuntime: const LocalizationRuntimeOptions(
+          package: 'package:custom_loc/custom_loc.dart',
+          alias: 'myLoc',
+          symbols: LocalizationRuntimeSymbols(dateFormat: 'CustomDateFormatter'),
+        ),
+      );
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(enFile, contains('myLoc.CustomDateFormatter.yMd(localeName).format(today)'));
+    });
+
+    testWithoutContext('LocalizationsGenerator throws when symbol reference is invalid', () {
+      expect(
+        () => setupLocalizations(
+          <String, String>{'en': singleMessageArbFileString},
+          localizationRuntime: const LocalizationRuntimeOptions(
+            symbols: LocalizationRuntimeSymbols(canonicalizedLocale: '123badIdentifier'),
+          ),
+        ),
+        throwsA(
+          isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains(
+              'The symbol "123badIdentifier" for canonicalizedLocale is not a valid Dart symbol reference.',
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        () => setupLocalizations(
+          <String, String>{'en': singleMessageArbFileString},
+          localizationRuntime: const LocalizationRuntimeOptions(
+            symbols: LocalizationRuntimeSymbols(pluralLogic: 'invalid..symbol'),
+          ),
+        ),
+        throwsA(
+          isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains(
+              'The symbol "invalid..symbol" for pluralLogic is not a valid Dart symbol reference.',
+            ),
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext('arb-dir as a list of paths merges ARB files from multiple directories', () {
+      final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+      final Directory featureDir = fs.directory('feature_l10n')..createSync(recursive: true);
+
+      mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "home": "Home",
+  "@home": { "description": "Home label" }
+}''');
+      featureDir.childFile('feature_en.arb').writeAsStringSync('''
+{
+  "feature": "Feature Detail",
+  "@feature": { "description": "Feature detail label" }
+}''');
+
+      LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: mainDir.path,
+          inputPathStrings: <String>[mainDir.path, featureDir.path],
+          outputPathString: mainDir.path,
+          templateArbFileName: 'app_en.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+          projectPathString: fs.currentDirectory.path,
+        )
+        ..loadResources()
+        ..writeOutputFiles();
+
+      final String enFile = getGeneratedFileContent(locale: 'en');
+      expect(enFile, contains("String get home => 'Home';"));
+      expect(enFile, contains("String get feature => 'Feature Detail';"));
+    });
+
+    testWithoutContext(
+      'arb-dir as a list of paths throws L10nException on conflicting key translations',
+      () {
+        final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+        final Directory featureDir = fs.directory('feature_l10n')..createSync(recursive: true);
+        mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "title": "First Title",
+  "@title": { "description": "Title" }
+}''');
+        featureDir.childFile('feature_en.arb').writeAsStringSync('''
+{
+  "title": "Conflicting Title",
+  "@title": { "description": "Title" }
+}''');
+
+        expect(
+          () => LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: mainDir.path,
+            inputPathStrings: <String>[mainDir.path, featureDir.path],
+            outputPathString: mainDir.path,
+            templateArbFileName: 'app_en.arb',
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            logger: logger,
+            projectPathString: fs.currentDirectory.path,
+          ).loadResources(),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              allOf(
+                contains('Conflicting values for message "title" found for locale "en"'),
+                contains('First Title'),
+                contains('Conflicting Title'),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    group('arb-conflict-resolution options', () {
+      testWithoutContext('multiple directories with unique keys generates all keys regardless of conflict resolution', () {
+        final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+        final Directory featureDir = fs.directory('feature_l10n')..createSync(recursive: true);
+        mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "key1": "Value 1",
+  "@key1": { "description": "Key 1" },
+  "key2": "Value 2",
+  "@key2": { "description": "Key 2" }
+}''');
+        mainDir.childFile('app_ar.arb').writeAsStringSync('''
+{
+  "key1": "القيمة 1",
+  "key2": "القيمة 2"
+}''');
+        featureDir.childFile('feature_en.arb').writeAsStringSync('''
+{
+  "key3": "Value 3",
+  "@key3": { "description": "Key 3" },
+  "key4": "Value 4",
+  "@key4": { "description": "Key 4" }
+}''');
+        featureDir.childFile('feature_ar.arb').writeAsStringSync('''
+{
+  "key3": "القيمة 3",
+  "key4": "القيمة 4"
+}''');
+
+        LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: mainDir.path,
+            inputPathStrings: <String>[mainDir.path, featureDir.path],
+            outputPathString: mainDir.path,
+            templateArbFileName: 'app_en.arb',
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            logger: logger,
+            projectPathString: fs.currentDirectory.path,
+          )
+          ..loadResources()
+          ..writeOutputFiles();
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(enFile, contains("String get key1 => 'Value 1';"));
+        expect(enFile, contains("String get key2 => 'Value 2';"));
+        expect(enFile, contains("String get key3 => 'Value 3';"));
+        expect(enFile, contains("String get key4 => 'Value 4';"));
+
+        final String arFile = getGeneratedFileContent(locale: 'ar');
+        expect(arFile, contains("String get key1 => 'القيمة 1';"));
+        expect(arFile, contains("String get key2 => 'القيمة 2';"));
+        expect(arFile, contains("String get key3 => 'القيمة 3';"));
+        expect(arFile, contains("String get key4 => 'القيمة 4';"));
+      });
+
+      testWithoutContext(
+        'same key with identical values across multiple directories does not cause conflict',
+        () {
+          final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+          final Directory featureDir = fs.directory('feature_l10n')..createSync(recursive: true);
+          mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "sharedKey": "Identical Value",
+  "@sharedKey": { "description": "Shared description" },
+  "key1": "Value 1",
+  "@key1": { "description": "Key 1" }
+}''');
+          featureDir.childFile('feature_en.arb').writeAsStringSync('''
+{
+  "sharedKey": "Identical Value",
+  "@sharedKey": { "description": "Shared description" },
+  "key2": "Value 2",
+  "@key2": { "description": "Key 2" }
+}''');
+
+          LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: mainDir.path,
+              inputPathStrings: <String>[mainDir.path, featureDir.path],
+              outputPathString: mainDir.path,
+              templateArbFileName: 'app_en.arb',
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+              logger: logger,
+              projectPathString: fs.currentDirectory.path,
+              arbConflictResolution: ArbConflictResolution.error,
+            )
+            ..loadResources()
+            ..writeOutputFiles();
+
+          final String enFile = getGeneratedFileContent(locale: 'en');
+          expect(enFile, contains("String get sharedKey => 'Identical Value';"));
+          expect(enFile, contains("String get key1 => 'Value 1';"));
+          expect(enFile, contains("String get key2 => 'Value 2';"));
+        },
+      );
+
+      testWithoutContext(
+        'same key with different values and default configuration throws L10nException',
+        () {
+          final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+          final Directory featureDir = fs.directory('feature_l10n')..createSync(recursive: true);
+          mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "title": "First Title",
+  "@title": { "description": "Title" }
+}''');
+          featureDir.childFile('feature_en.arb').writeAsStringSync('''
+{
+  "title": "Second Title",
+  "@title": { "description": "Title" }
+}''');
+
+          expect(
+            () => LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: mainDir.path,
+              inputPathStrings: <String>[mainDir.path, featureDir.path],
+              outputPathString: mainDir.path,
+              templateArbFileName: 'app_en.arb',
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+              logger: logger,
+              projectPathString: fs.currentDirectory.path,
+            ).loadResources(),
+            throwsA(
+              isA<L10nException>().having(
+                (L10nException e) => e.message,
+                'message',
+                allOf(
+                  contains('Conflicting values for message "title" found for locale "en"'),
+                  contains('First Title'),
+                  contains('Second Title'),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+
+      testWithoutContext(
+        'same key with different values and explicit error configuration throws L10nException',
+        () {
+          final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+          final Directory featureDir = fs.directory('feature_l10n')..createSync(recursive: true);
+          mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "title": "First Title",
+  "@title": { "description": "Title" }
+}''');
+          featureDir.childFile('feature_en.arb').writeAsStringSync('''
+{
+  "title": "Second Title",
+  "@title": { "description": "Title" }
+}''');
+
+          expect(
+            () => LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: mainDir.path,
+              inputPathStrings: <String>[mainDir.path, featureDir.path],
+              outputPathString: mainDir.path,
+              templateArbFileName: 'app_en.arb',
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+              logger: logger,
+              projectPathString: fs.currentDirectory.path,
+              arbConflictResolution: ArbConflictResolution.error,
+            ).loadResources(),
+            throwsA(
+              isA<L10nException>().having(
+                (L10nException e) => e.message,
+                'message',
+                allOf(
+                  contains('Conflicting values for message "title" found for locale "en"'),
+                  contains('First Title'),
+                  contains('Second Title'),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+
+      testWithoutContext(
+        'same key with different values and first configuration keeps the first value',
+        () {
+          final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+          final Directory featureDir = fs.directory('feature_l10n')..createSync(recursive: true);
+          final Directory thirdDir = fs.directory('third_l10n')..createSync(recursive: true);
+          mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "title": "First Title",
+  "@title": { "description": "Title 1" },
+  "extra1": "Extra 1",
+  "@extra1": { "description": "Extra 1" }
+}''');
+          featureDir.childFile('feature_en.arb').writeAsStringSync('''
+{
+  "title": "Second Title",
+  "@title": { "description": "Title 2" },
+  "extra2": "Extra 2",
+  "@extra2": { "description": "Extra 2" }
+}''');
+          thirdDir.childFile('third_en.arb').writeAsStringSync('''
+{
+  "title": "Third Title",
+  "@title": { "description": "Title 3" },
+  "extra3": "Extra 3",
+  "@extra3": { "description": "Extra 3" }
+}''');
+
+          LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: mainDir.path,
+              inputPathStrings: <String>[mainDir.path, featureDir.path, thirdDir.path],
+              outputPathString: mainDir.path,
+              templateArbFileName: 'app_en.arb',
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+              logger: logger,
+              projectPathString: fs.currentDirectory.path,
+              arbConflictResolution: ArbConflictResolution.first,
+            )
+            ..loadResources()
+            ..writeOutputFiles();
+
+          final String enFile = getGeneratedFileContent(locale: 'en');
+          expect(enFile, contains("String get title => 'First Title';"));
+          expect(enFile, isNot(contains("String get title => 'Second Title';")));
+          expect(enFile, isNot(contains("String get title => 'Third Title';")));
+          expect(enFile, contains("String get extra1 => 'Extra 1';"));
+          expect(enFile, contains("String get extra2 => 'Extra 2';"));
+          expect(enFile, contains("String get extra3 => 'Extra 3';"));
+        },
+      );
+
+      testWithoutContext(
+        'same key with different values and last configuration keeps the last value',
+        () {
+          final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+          final Directory featureDir = fs.directory('feature_l10n')..createSync(recursive: true);
+          final Directory thirdDir = fs.directory('third_l10n')..createSync(recursive: true);
+          mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "title": "First Title",
+  "@title": { "description": "Title 1" },
+  "extra1": "Extra 1",
+  "@extra1": { "description": "Extra 1" }
+}''');
+          featureDir.childFile('feature_en.arb').writeAsStringSync('''
+{
+  "title": "Second Title",
+  "@title": { "description": "Title 2" },
+  "extra2": "Extra 2",
+  "@extra2": { "description": "Extra 2" }
+}''');
+          thirdDir.childFile('third_en.arb').writeAsStringSync('''
+{
+  "title": "Third Title",
+  "@title": { "description": "Title 3" },
+  "extra3": "Extra 3",
+  "@extra3": { "description": "Extra 3" }
+}''');
+
+          LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: mainDir.path,
+              inputPathStrings: <String>[mainDir.path, featureDir.path, thirdDir.path],
+              outputPathString: mainDir.path,
+              templateArbFileName: 'app_en.arb',
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+              logger: logger,
+              projectPathString: fs.currentDirectory.path,
+              arbConflictResolution: ArbConflictResolution.last,
+            )
+            ..loadResources()
+            ..writeOutputFiles();
+
+          final String enFile = getGeneratedFileContent(locale: 'en');
+          expect(enFile, contains("String get title => 'Third Title';"));
+          expect(enFile, isNot(contains("String get title => 'First Title';")));
+          expect(enFile, isNot(contains("String get title => 'Second Title';")));
+          expect(enFile, contains("String get extra1 => 'Extra 1';"));
+          expect(enFile, contains("String get extra2 => 'Extra 2';"));
+          expect(enFile, contains("String get extra3 => 'Extra 3';"));
+        },
+      );
+
+      testWithoutContext('single arb-dir generates properly and preserves duplicate file rejection in same directory', () {
+        final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+        mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "title": "Single Dir Title",
+  "@title": { "description": "Title" }
+}''');
+
+        LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: mainDir.path,
+            outputPathString: mainDir.path,
+            templateArbFileName: 'app_en.arb',
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            logger: logger,
+            projectPathString: fs.currentDirectory.path,
+            arbConflictResolution: ArbConflictResolution.first,
+          )
+          ..loadResources()
+          ..writeOutputFiles();
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(enFile, contains("String get title => 'Single Dir Title';"));
+
+        mainDir.childFile('other_en.arb').writeAsStringSync('''
+{
+  "title": "Duplicate File Title"
+}''');
+
+        expect(
+          () => LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: mainDir.path,
+            outputPathString: mainDir.path,
+            templateArbFileName: 'app_en.arb',
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            logger: logger,
+            projectPathString: fs.currentDirectory.path,
+            arbConflictResolution: ArbConflictResolution.first,
+          ).loadResources(),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains("Multiple arb files with the same 'en' locale detected"),
+            ),
+          ),
+        );
+      });
+
+      testWithoutContext(
+        'invalid arb-conflict-resolution values in configuration throw clear error',
+        () async {
+          final Directory mainDir = fs.directory(defaultL10nPath)..createSync(recursive: true);
+          mainDir.childFile('app_en.arb').writeAsStringSync('''
+{
+  "title": "Title",
+  "@title": { "description": "Title" }
+}''');
+
+          final File l10nYaml = fs.file('l10n.yaml')
+            ..writeAsStringSync('''
+arb-conflict-resolution: invalid_choice
+''');
+
+          expect(
+            () => parseLocalizationsOptionsFromYAML(
+              file: l10nYaml,
+              logger: logger,
+              fileSystem: fs,
+              defaultArbDir: mainDir.path,
+            ),
+            throwsA(
+              isA<L10nException>().having(
+                (L10nException e) => e.message,
+                'message',
+                contains(
+                  'Invalid "arb-conflict-resolution" value: "invalid_choice". Supported values are "error", "first", and "last".',
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    });
+
+    group('gen_l10n ignore options', () {
+      const defaultArb = <String, String>{
+        'en': '''
+{
+  "title": "Title",
+  "@title": { "description": "Title label" },
+  "subtitle": "Subtitle",
+  "@subtitle": { "description": "Subtitle label" }
+}''',
+      };
+
+      testWithoutContext(
+        'default behavior without ignore configuration generates all standard fields and imports',
+        () {
+          setupLocalizations(defaultArb);
+          final String baseFile = getGeneratedFileContent();
+
+          expect(baseFile, contains('static AppLocalizations? of(BuildContext context)'));
+          expect(
+            baseFile,
+            contains(
+              'static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();',
+            ),
+          );
+          expect(
+            baseFile,
+            contains(
+              'static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[',
+            ),
+          );
+          expect(baseFile, contains('    delegate,'));
+          expect(baseFile, contains('static const List<Locale> supportedLocales = <Locale>['));
+          expect(baseFile, contains('AppLocalizations lookupAppLocalizations(Locale locale)'));
+          expect(
+            baseFile,
+            contains(
+              'class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations>',
+            ),
+          );
+          expect(
+            baseFile,
+            contains("import 'package:flutter_localizations/flutter_localizations.dart';"),
+          );
+          expect(baseFile, contains("import 'package:flutter/foundation.dart';"));
+          expect(baseFile, contains("import 'output-localization-file_en.dart';"));
+          expect(baseFile, contains('String get title;'));
+          expect(baseFile, contains('String get subtitle;'));
+        },
+      );
+
+      testWithoutContext('ignoring an individual ARB key removes it from base class and subclasses and skips untranslated checks', () {
+        setupLocalizations(
+          <String, String>{
+            'en': '''
+{
+  "keptMessage": "Kept Message",
+  "@keptMessage": { "description": "Kept label" },
+  "ignoredMessage": "Ignored Message",
+  "@ignoredMessage": { "description": "Ignored label" }
+}''',
+            'es': '''
+{
+  "keptMessage": "Mensaje conservado"
+}''',
+          },
+          untranslatedMessagesFile: 'untranslated.json',
+          ignoreArbKeys: const <String>{'ignoredMessage'},
+        );
+
+        final String baseFile = getGeneratedFileContent();
+        expect(baseFile, contains('String get keptMessage;'));
+        expect(baseFile, isNot(contains('ignoredMessage')));
+
+        final String enFile = getGeneratedFileContent(locale: 'en');
+        expect(enFile, contains("String get keptMessage => 'Kept Message';"));
+        expect(enFile, isNot(contains('ignoredMessage')));
+
+        final String esFile = getGeneratedFileContent(locale: 'es');
+        expect(esFile, contains("String get keptMessage => 'Mensaje conservado';"));
+        expect(esFile, isNot(contains('ignoredMessage')));
+
+        final File untranslatedFile = fs.file(fs.path.join(defaultL10nPath, 'untranslated.json'));
+        if (untranslatedFile.existsSync()) {
+          final String content = untranslatedFile.readAsStringSync();
+          expect(content, isNot(contains('ignoredMessage')));
+        }
+      });
+
+      testWithoutContext(
+        'ignoring multiple ARB keys removes all specified keys while retaining standard elements',
+        () {
+          setupLocalizations(
+            <String, String>{
+              'en': '''
+{
+  "keptMessage": "Kept Message",
+  "@keptMessage": { "description": "Kept label" },
+  "ignoredFirst": "First Ignored",
+  "@ignoredFirst": { "description": "First ignored" },
+  "ignoredSecond": "Second Ignored",
+  "@ignoredSecond": { "description": "Second ignored" }
+}''',
+            },
+            ignoreArbKeys: const <String>{'ignoredFirst', 'ignoredSecond'},
+          );
+
+          final String baseFile = getGeneratedFileContent();
+          expect(baseFile, contains('String get keptMessage;'));
+          expect(baseFile, isNot(contains('ignoredFirst')));
+          expect(baseFile, isNot(contains('ignoredSecond')));
+          expect(baseFile, contains('static AppLocalizations? of(BuildContext context)'));
+          expect(
+            baseFile,
+            contains(
+              'static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();',
+            ),
+          );
+          expect(
+            baseFile,
+            contains(
+              'static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[',
+            ),
+          );
+          expect(baseFile, contains('static const List<Locale> supportedLocales = <Locale>['));
+          expect(baseFile, contains('AppLocalizations lookupAppLocalizations(Locale locale)'));
+        },
+      );
+
+      testWithoutContext(
+        'specifying non-existent ARB key in ignore-arb-keys throws L10nException',
+        () {
+          expect(
+            () => setupLocalizations(defaultArb, ignoreArbKeys: const <String>{'unknownKey'}),
+            throwsA(
+              isA<L10nException>().having(
+                (L10nException e) => e.message,
+                'message',
+                contains(
+                  'The ARB key "unknownKey" specified in "ignore-arb-keys" does not exist in the template ARB file.',
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    });
   });
 }
