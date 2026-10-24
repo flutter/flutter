@@ -843,5 +843,22 @@ TEST(DisplayListPath, CannotConstructFromSkiaInverseEvenOdd) {
 }
 #endif
 
+TEST(DisplayListPath, CacheIdentityIsSharedForCopies) {
+  DlPath path = DlPath::MakeRect(DlRect::MakeWH(10, 10));
+  ASSERT_NE(path.GetCacheIdentity(), nullptr);
+  // Copies share the same cache identity.
+  EXPECT_EQ(path.GetCacheIdentity(), DlPath(path).GetCacheIdentity());
+
+  DlPath other = DlPath::MakeRect(DlRect::MakeWH(20, 20));
+  ASSERT_NE(other.GetCacheIdentity(), nullptr);
+  EXPECT_NE(path.GetCacheIdentity(), other.GetCacheIdentity());
+
+  // A separately created path with identical geometry has a distinct
+  // identity so cached data is never shared between unrelated paths.
+  DlPath recreated = DlPath::MakeRect(DlRect::MakeWH(10, 10));
+  ASSERT_NE(recreated.GetCacheIdentity(), nullptr);
+  EXPECT_NE(path.GetCacheIdentity(), recreated.GetCacheIdentity());
+}
+
 }  // namespace testing
 }  // namespace flutter
