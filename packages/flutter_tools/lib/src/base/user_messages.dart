@@ -14,7 +14,7 @@ import 'platform.dart';
 class UserMessages {
   // Messages used in multiple components.
   String get flutterToolBugInstructions =>
-      'Please report a bug at https://github.com/flutter/flutter/issues.';
+      'Please report a bug at https://github.com/flutter/flutter/issues';
 
   // Messages used in AndroidValidator
   String androidJavaMinimumVersion(String javaVersion) =>
