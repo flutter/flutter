@@ -44,6 +44,10 @@ const String kProfilePrerollFrame = 'preroll_frame';
 /// to the renderer.
 const String kProfileApplyFrame = 'apply_frame';
 
+/// A benchmark metric that includes preparation and frame submission, including
+/// asynchronous rasterization.
+const String kProfilePresentationDuration = 'presentation_duration';
+
 /// Measures the amount of time [action] takes.
 ///
 /// See also:
@@ -434,29 +438,38 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   Future<Profile> run() async {
     _runCompleter = Completer<void>();
     final Profile localProfile = profile = Profile(name: name, useCustomWarmUp: useCustomWarmUp);
-    final Widget widget = createWidget();
-
-    registerEngineBenchmarkValueListener(kProfilePrerollFrame, (num value) {
-      localProfile.addDataPoint(
-        kProfilePrerollFrame,
-        Duration(microseconds: value.toInt()),
-        reported: false,
-      );
-    });
-    registerEngineBenchmarkValueListener(kProfileApplyFrame, (num value) {
-      localProfile.addDataPoint(
-        kProfileApplyFrame,
-        Duration(microseconds: value.toInt()),
-        reported: false,
-      );
-    });
-
-    _binding._beginRecording(this, widget);
-
     try {
+      final Widget widget = createWidget();
+
+      registerEngineBenchmarkValueListener(kProfilePresentationDuration, (num value) {
+        localProfile.addDataPoint(
+          kProfilePresentationDuration,
+          Duration(microseconds: value.toInt()),
+          reported: true,
+        );
+      });
+
+      registerEngineBenchmarkValueListener(kProfilePrerollFrame, (num value) {
+        localProfile.addDataPoint(
+          kProfilePrerollFrame,
+          Duration(microseconds: value.toInt()),
+          reported: false,
+        );
+      });
+      registerEngineBenchmarkValueListener(kProfileApplyFrame, (num value) {
+        localProfile.addDataPoint(
+          kProfileApplyFrame,
+          Duration(microseconds: value.toInt()),
+          reported: false,
+        );
+      });
+
+      _binding._beginRecording(this, widget);
+
       await _runCompleter!.future;
       return localProfile;
     } finally {
+      stopListeningToEngineBenchmarkValues(kProfilePresentationDuration);
       stopListeningToEngineBenchmarkValues(kProfilePrerollFrame);
       stopListeningToEngineBenchmarkValues(kProfileApplyFrame);
       _runCompleter = null;
