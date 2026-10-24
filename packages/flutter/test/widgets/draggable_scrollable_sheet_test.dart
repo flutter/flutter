@@ -1517,6 +1517,113 @@ void main() {
     );
   });
 
+  group('DraggableScrollableController attached to more than one sheet', () {
+    Widget sheet({Key? key, required DraggableScrollableController controller}) {
+      return DraggableScrollableSheet(
+        key: key,
+        controller: controller,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SingleChildScrollView(
+            controller: scrollController,
+            child: const SizedBox(height: 1000),
+          );
+        },
+      );
+    }
+
+    Widget column({required bool insertSibling, required Widget child}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            if (insertSibling) const Expanded(child: SizedBox.expand()),
+            Expanded(child: child),
+          ],
+        ),
+      );
+    }
+
+    testWidgets('throws a descriptive error when two sheets share a controller', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Expanded(child: sheet(controller: controller)),
+              Expanded(child: sheet(controller: controller)),
+            ],
+          ),
+        ),
+      );
+
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   DraggableScrollableController is already attached to a sheet.\n'
+          '   A DraggableScrollableController can only be attached to one\n'
+          '   DraggableScrollableSheet at a time, but it was given to a new\n'
+          '   sheet while it was still attached to another one.\n'
+          '   This can also happen when a single DraggableScrollableSheet is\n'
+          '   recreated instead of updated, for example because its key changed\n'
+          '   or because a widget was inserted before it in the tree. The new\n'
+          '   sheet attaches to the controller before the old sheet is\n'
+          '   disposed.\n'
+          '   Use a separate DraggableScrollableController for each sheet. If\n'
+          '   the sheet is being recreated, give it a GlobalKey so that it\n'
+          '   keeps its state when it moves in the tree, or avoid changing its\n'
+          '   key.\n',
+        ),
+      );
+    });
+
+    testWidgets('throws when a sheet is recreated because a sibling is inserted before it', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(column(insertSibling: false, child: sheet(controller: controller)));
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpWidget(column(insertSibling: true, child: sheet(controller: controller)));
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(
+        (exception! as FlutterError).message,
+        startsWith('DraggableScrollableController is already attached to a sheet.'),
+      );
+    });
+
+    testWidgets('a GlobalKey lets a moved sheet keep its controller, as the error suggests', (
+      WidgetTester tester,
+    ) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      final GlobalKey sheetKey = GlobalKey();
+      await tester.pumpWidget(
+        column(
+          insertSibling: false,
+          child: sheet(key: sheetKey, controller: controller),
+        ),
+      );
+      await tester.pumpWidget(
+        column(
+          insertSibling: true,
+          child: sheet(key: sheetKey, controller: controller),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(controller.isAttached, isTrue);
+    });
+  });
+
   testWidgets('DraggableScrollableController must be attached before using any of its parameters', (
     WidgetTester tester,
   ) async {
