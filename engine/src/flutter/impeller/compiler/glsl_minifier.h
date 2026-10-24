@@ -5,8 +5,10 @@
 #ifndef FLUTTER_IMPELLER_COMPILER_GLSL_MINIFIER_H_
 #define FLUTTER_IMPELLER_COMPILER_GLSL_MINIFIER_H_
 
+#include <cstddef>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 
 namespace impeller {
 namespace compiler {
@@ -17,6 +19,12 @@ namespace compiler {
 /// Newlines following single-line comments are preserved so preprocessor
 /// directives on subsequent lines remain line-delimited.
 std::string StripGLSLComments(std::string_view source);
+
+/// @brief Returns true if `c` can start a GLSL identifier (`[a-zA-Z_]`).
+bool IsGLSLIdentStartChar(char c);
+
+/// @brief Returns true if `c` can appear in a GLSL identifier (`[a-zA-Z0-9_]`).
+bool IsGLSLIdentChar(char c);
 
 /// @brief Returns true if `c` can appear in a GLSL identifier or numeric
 ///        literal (`[a-zA-Z0-9_.]`).
@@ -61,9 +69,40 @@ std::string CollapseGLSLHorizontalWhitespace(std::string_view line);
 ///        spaces that are not required by `NeedsGLSLSpaceBetween`.
 std::string MinifyGLSLNonPreprocessorLine(std::string_view line);
 
+/// @brief Returns true if `token` is a synthesized SPIRV-Cross internal
+///        identifier:
+///        - Unnamed SPIR-V SSA/local temporaries (`_<digits>`, e.g. `_2461`).
+///        - RelaxedPrecision copy temporaries (`mp_copy_*` or `hp_copy_*`).
+///        - Dummy single-iteration loop counters (`spvDummy<digits>`).
+bool IsSynthesizedGLSLIdentifier(std::string_view token);
+
+/// @brief Generates the next short valid GLSL identifier starting from `cursor`
+///        (`a`..`z`, `A`..`Z`, `aa`.., etc.) that is not present in `reserved`,
+///        advancing `cursor` past the returned identifier.
+std::string NextShortGLSLIdentifier(
+    size_t& cursor,
+    const std::unordered_set<std::string_view>& reserved);
+
+/// @brief Shortens shader-internal identifiers in `source` to compact 1- or
+///        2-character names ordered by usage frequency.
+///
+/// The following shader-internal identifiers are eligible for shortening:
+/// - Synthesized SPIRV-Cross temporaries matched by
+///   `IsSynthesizedGLSLIdentifier` (`_<digits>`, `mp_copy_*`, `hp_copy_*`,
+///   `spvDummy<digits>`).
+/// - Specialization constant `const` variables (`const <type> <name> =
+///   SPIRV_CROSS_CONSTANT_ID_<n>`).
+/// - Explicit-location fragment outputs (`layout(location = <n>) out ...
+///   <name>;`).
+///
+/// External interface identifiers (uniforms, attributes, varyings, struct types
+/// and members, `_impeller_y_flip`, `_impeller_user_main`, preprocessor macros,
+/// and GLSL keywords/built-ins) are never renamed.
+std::string ShortenGLSLInternalIdentifiers(std::string_view source);
+
 /// @brief Minifies SPIRV-Cross GLSL output by stripping comments, redundant
-///        whitespace, and non-preprocessor newlines, and shortening verbose
-///        32-bit float literals.
+///        whitespace, and non-preprocessor newlines, shortening verbose 32-bit
+///        float literals, and shrinking shader-internal identifiers.
 ///
 /// Preprocessor directives (lines beginning with `#`, such as `#version`,
 /// `#extension`, `#ifndef`, `#define`, and `#endif`) are preserved on their own

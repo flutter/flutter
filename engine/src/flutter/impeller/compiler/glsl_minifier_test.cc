@@ -30,6 +30,25 @@ TEST(GLSLMinifierTest, StripGLSLComments) {
             "int  a;\nint b;");
 }
 
+TEST(GLSLMinifierTest, IsGLSLIdentStartCharAndIdentChar) {
+  EXPECT_TRUE(IsGLSLIdentStartChar('a'));
+  EXPECT_TRUE(IsGLSLIdentStartChar('z'));
+  EXPECT_TRUE(IsGLSLIdentStartChar('A'));
+  EXPECT_TRUE(IsGLSLIdentStartChar('Z'));
+  EXPECT_TRUE(IsGLSLIdentStartChar('_'));
+  EXPECT_FALSE(IsGLSLIdentStartChar('0'));
+  EXPECT_FALSE(IsGLSLIdentStartChar('.'));
+  EXPECT_FALSE(IsGLSLIdentStartChar('+'));
+
+  EXPECT_TRUE(IsGLSLIdentChar('a'));
+  EXPECT_TRUE(IsGLSLIdentChar('Z'));
+  EXPECT_TRUE(IsGLSLIdentChar('_'));
+  EXPECT_TRUE(IsGLSLIdentChar('0'));
+  EXPECT_TRUE(IsGLSLIdentChar('9'));
+  EXPECT_FALSE(IsGLSLIdentChar('.'));
+  EXPECT_FALSE(IsGLSLIdentChar(' '));
+}
+
 TEST(GLSLMinifierTest, IsGLSLIdentOrNumChar) {
   EXPECT_TRUE(IsGLSLIdentOrNumChar('a'));
   EXPECT_TRUE(IsGLSLIdentOrNumChar('z'));
@@ -164,6 +183,106 @@ TEST(GLSLMinifierTest, MinifyGLSLNonPreprocessorLine) {
   EXPECT_EQ(
       MinifyGLSLNonPreprocessorLine("  highp   float  x = a -  -b +  +c ; \t "),
       "highp float x=a- -b+ +c;");
+}
+
+TEST(GLSLMinifierTest, IsSynthesizedGLSLIdentifier) {
+  EXPECT_TRUE(IsSynthesizedGLSLIdentifier("_0"));
+  EXPECT_TRUE(IsSynthesizedGLSLIdentifier("_2461"));
+  EXPECT_TRUE(IsSynthesizedGLSLIdentifier("mp_copy_91"));
+  EXPECT_TRUE(IsSynthesizedGLSLIdentifier("hp_copy_3405"));
+  EXPECT_TRUE(IsSynthesizedGLSLIdentifier("spvDummy95"));
+
+  EXPECT_FALSE(IsSynthesizedGLSLIdentifier(""));
+  EXPECT_FALSE(IsSynthesizedGLSLIdentifier("_"));
+  EXPECT_FALSE(IsSynthesizedGLSLIdentifier("_abc"));
+  EXPECT_FALSE(IsSynthesizedGLSLIdentifier("mp_copy_"));
+  EXPECT_FALSE(IsSynthesizedGLSLIdentifier("spvDummy"));
+  EXPECT_FALSE(IsSynthesizedGLSLIdentifier("_impeller_user_main"));
+  EXPECT_FALSE(IsSynthesizedGLSLIdentifier("frag_info"));
+}
+
+TEST(GLSLMinifierTest, NextShortGLSLIdentifier) {
+  std::unordered_set<std::string_view> reserved = {"a", "do"};
+  size_t cursor = 0;
+  // Skips "a" because it is in `reserved` and returns "b".
+  EXPECT_EQ(NextShortGLSLIdentifier(cursor, reserved), "b");
+  EXPECT_EQ(cursor, 2u);
+
+  // Jump to the last 1-character identifier ('Z' at index 51) and then the
+  // first 2-character identifier ("aa" at index 52).
+  cursor = 51;
+  EXPECT_EQ(NextShortGLSLIdentifier(cursor, reserved), "Z");
+  EXPECT_EQ(NextShortGLSLIdentifier(cursor, reserved), "aa");
+
+  // Jump to a 3-character identifier (index 52 + 52 * 63 = 3328).
+  cursor = 52 + 52 * 63;
+  EXPECT_EQ(NextShortGLSLIdentifier(cursor, reserved), "aaa");
+}
+
+TEST(GLSLMinifierTest, ShortenGLSLInternalIdentifiers) {
+  // Empty or no-candidate sources are returned unchanged.
+  EXPECT_EQ(ShortenGLSLInternalIdentifiers(""), "");
+  EXPECT_EQ(
+      ShortenGLSLInternalIdentifiers("void main(){gl_FragColor=vec4(1.0);}"),
+      "void main(){gl_FragColor=vec4(1.0);}");
+
+  // Preprocessor lines (including a trailing preprocessor line without `\n`)
+  // are skipped and preserved verbatim.
+  EXPECT_EQ(
+      ShortenGLSLInternalIdentifiers("#define _123 1.0\nvoid main(){}\n#endif"),
+      "#define _123 1.0\nvoid main(){}\n#endif");
+
+  // Synthesized temporaries, specialization constant variables, and explicit
+  // location fragment outputs are shortened in descending frequency order
+  // (breaking ties by descending length and then lexicographically), while
+  // avoiding existing identifiers and preserving struct members.
+  const std::string source =
+      "#version 300 es\n"
+      "const float supports_decal=SPIRV_CROSS_CONSTANT_ID_1;\n"
+      "const float shared_member=SPIRV_CROSS_CONSTANT_ID_0;\n"
+      "struct FragInfo{float shared_member;vec4 color;};\n"
+      "uniform FragInfo frag_info;\n"
+      "layout(location=0) out highp vec4 frag_color;\n"
+      "void main(){"
+      "float a=1.0;"
+      "float _100=supports_decal+frag_info.shared_member;"
+      "float mp_copy_100=_100+_100;"
+      "float _20=mp_copy_100;"
+      "float _30=mp_copy_100;"
+      "for(int spvDummy1=0;spvDummy1<1;spvDummy1++){"
+      "frag_color=vec4(_20,_30,shared_member,a);"
+      "}"
+      "}\n";
+  const std::string shortened = ShortenGLSLInternalIdentifiers(source);
+  // `a` is already used in `main()`, so the highest-frequency temporaries get
+  // `b`, `c`, `d`, `e`, etc.
+  EXPECT_EQ(shortened.find("mp_copy_100"), std::string::npos) << shortened;
+  EXPECT_EQ(shortened.find("spvDummy1"), std::string::npos) << shortened;
+  EXPECT_EQ(shortened.find("supports_decal"), std::string::npos) << shortened;
+  EXPECT_EQ(shortened.find("frag_color"), std::string::npos) << shortened;
+  EXPECT_EQ(shortened.find("_100"), std::string::npos) << shortened;
+  // `shared_member` appears in `struct FragInfo` and `.shared_member`, so it
+  // must NOT be renamed even though a specialization constant shares its name.
+  EXPECT_NE(shortened.find("struct FragInfo{float shared_member;vec4 color;};"),
+            std::string::npos)
+      << shortened;
+  EXPECT_NE(shortened.find("frag_info.shared_member"), std::string::npos)
+      << shortened;
+
+  // Also test when a `.member` access appears without a `struct` definition.
+  const std::string dot_only =
+      "const float custom_const=SPIRV_CROSS_CONSTANT_ID_0;\n"
+      "void main(){float x=u.custom_const+custom_const;}\n";
+  EXPECT_EQ(ShortenGLSLInternalIdentifiers(dot_only), dot_only);
+
+  // When a 2-character candidate (`_0`) cannot be shortened because all 52
+  // 1-character names are already present in the shader, `rename_map` is empty
+  // and the source is returned unchanged.
+  const std::string all_single_chars_used =
+      "void main(){float a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,"
+      "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,_0;}";
+  EXPECT_EQ(ShortenGLSLInternalIdentifiers(all_single_chars_used),
+            all_single_chars_used);
 }
 
 TEST(GLSLMinifierTest, StripsSingleLineAndMultiLineComments) {
