@@ -24,6 +24,9 @@
 
   // Extra size constraints coming from the window positioner.
   CGSize _positionerSizeConstraints;
+
+  // Set to true when first frame has been rendered.
+  BOOL _hasContent;
 }
 
 @property(readonly, nonatomic) NSWindow* window;
@@ -34,6 +37,8 @@
 - (instancetype)initWithWindow:(NSWindow*)window
          flutterViewController:(FlutterViewController*)viewController
                creationRequest:(const FlutterWindowCreationRequest&)creationRequest;
+
+- (void)resetPositioner;
 
 @end
 
@@ -193,11 +198,17 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 }
 
 - (void)updatePosition {
-  [self viewDidUpdateContents:self.flutterViewController.flutterView
-                     withSize:self.flutterViewController.flutterView.bounds.size];
+  // This is called from Flutter though controller updatePosition. The logic is same
+  // as same as when the content changes so the implementation can be shared.
+  // All calls to updatePosition before the first surface is available are ignored.
+  if (_hasContent) {
+    [self viewDidUpdateContents:self.flutterViewController.flutterView
+                       withSize:self.flutterViewController.flutterView.bounds.size];
+  }
 }
 
 - (void)viewDidUpdateContents:(FlutterView*)view withSize:(NSSize)newSize {
+  _hasContent = YES;
   // There is no positioner associated with this window.
   if (_creationRequest.on_get_window_position == nullptr) {
     bool firstFrame = self.onFirstFrame != nil;
@@ -214,6 +225,10 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
       self.onFirstFrame = nil;
     }
   } else {
+    // For bordered windows the positioner needs size including the frame.
+    newSize =
+        [self.window frameRectForContentRect:NSMakeRect(0, 0, newSize.width, newSize.height)].size;
+
     NSRect globalScreenFrame = ComputeGlobalScreenFrame();
 
     NSRect parentRect =
@@ -227,6 +242,10 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     auto position = _creationRequest.on_get_window_position(
         FlutterWindowSize::fromNSSize(newSize), FlutterWindowRect::fromNSRect(parentRect),
         FlutterWindowRect::fromNSRect(screenRect));
+
+    if (position == nullptr) {
+      return;
+    }
 
     NSRect positionRect = position->toNSRect();
     FlipRect(positionRect, globalScreenFrame);
@@ -262,6 +281,10 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   }
 }
 
+- (void)resetPositioner {
+  _creationRequest.on_get_window_position = nil;
+}
+
 @end
 
 @interface FlutterPopupWindow : NSPanel
@@ -279,6 +302,39 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
 - (BOOL)canBecomeMainWindow {
   return NO;
+}
+
+@end
+
+// Satellite window will only become key window when Flutter explicitly
+// request the view to be first responder.
+@interface FlutterSatelliteWindow : NSPanel {
+  BOOL _canBecomeKeyWindow;
+}
+@end
+
+@implementation FlutterSatelliteWindow
+
+- (BOOL)canBecomeKeyWindow {
+  return _canBecomeKeyWindow;
+}
+
+- (BOOL)acceptsFirstResponder {
+  return NO;
+}
+
+- (BOOL)canBecomeMainWindow {
+  return NO;
+}
+
+- (BOOL)makeFirstResponder:(NSResponder*)responder {
+  _canBecomeKeyWindow = YES;
+  return [super makeFirstResponder:responder];
+}
+
+- (void)resignKeyWindow {
+  _canBecomeKeyWindow = NO;
+  [super resignKeyWindow];
 }
 
 @end
@@ -523,6 +579,106 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   return controller.viewIdentifier;
 }
 
+- (FlutterViewIdentifier)createSatelliteWindow:(const FlutterWindowCreationRequest*)request {
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
+
+  NSPanel* window = [[FlutterSatelliteWindow alloc] init];
+  // If this is not set there will be double free on window close when
+  // using ARC.
+  [window setReleasedWhenClosed:NO];
+
+  window.contentViewController = controller;
+  window.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
+                     NSWindowStyleMaskUtilityWindow | NSWindowStyleMaskNonactivatingPanel;
+  if (request->resizable) {
+    window.styleMask |= NSWindowStyleMaskResizable;
+  }
+
+  window.collectionBehavior = NSWindowCollectionBehaviorAuxiliary |
+                              NSWindowCollectionBehaviorTransient |
+                              NSWindowCollectionBehaviorMoveToActiveSpace;
+  window.hidesOnDeactivate = YES;
+  window.floatingPanel = YES;
+  // Without this the satellite immediately steals focus from the parent.
+  window.becomesKeyOnlyIfNeeded = YES;
+
+  if (request->has_size) {
+    [window flutterSetContentSize:request->size];
+  }
+  if (request->resizable && request->has_constraints) {
+    [window flutterSetConstraints:request->constraints];
+  }
+
+  FlutterWindowOwner* owner = [[FlutterWindowOwner alloc] initWithWindow:window
+                                                   flutterViewController:controller
+                                                         creationRequest:*request];
+
+  controller.flutterView.contentDelegate = owner;
+
+  if (!request->has_size) {
+    controller.flutterView.sizingDelegate = owner;
+    [controller.flutterView constraintsDidChange];
+  }
+
+  window.delegate = owner;
+  [_windows addObject:owner];
+
+  NSWindow* parent = nil;
+  FML_DCHECK(request->parent_view_id != 0);
+  for (FlutterWindowOwner* owner in _windows) {
+    if (owner.flutterViewController.viewIdentifier == request->parent_view_id) {
+      parent = owner.window;
+      break;
+    }
+  }
+
+  NSAssert(parent != nil, @"Satellite window must have a parent window.");
+
+  [parent addChildWindow:window ordered:NSWindowAbove];
+  window.alphaValue = 0.0;
+
+  FML_DCHECK(owner.onFirstFrame == nil);
+  __weak __typeof(owner) weakOwner = owner;
+  owner.onFirstFrame = ^{
+    window.alphaValue = 1.0;
+    [weakOwner resetPositioner];
+  };
+
+  return controller.viewIdentifier;
+}
+
+- (void)reparentWindow:(NSWindow*)window newParentId:(int64_t)parentViewId {
+  NSWindow* parent = nil;
+
+  for (FlutterWindowOwner* owner in _windows) {
+    if (owner.flutterViewController.viewIdentifier == parentViewId) {
+      parent = owner.window;
+      break;
+    }
+  }
+
+  FML_CHECK(parent != nil);
+
+  // Check if the new parent is not a child of the window being reparented.
+  NSWindow* child = parent;
+  while (child != nil) {
+    if (child == window) {
+      NSLog(@"Cannot reparent to a child window.");
+      return;
+    }
+    child = child.parentWindow;
+  }
+
+  if (parent != window.parentWindow) {
+    [window.parentWindow removeChildWindow:window];
+    [parent addChildWindow:window ordered:NSWindowAbove];
+    FlutterWindowOwner* owner = (FlutterWindowOwner*)window.delegate;
+    [owner updatePosition];
+  }
+}
+
 - (FlutterViewIdentifier)createRegularWindow:(const FlutterWindowCreationRequest*)request {
   FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
                                                                             nibName:nil
@@ -636,6 +792,14 @@ int64_t InternalFlutter_WindowController_CreateRegularWindow(
   FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
   [engine enableMultiView];
   return [engine.windowController createRegularWindow:request];
+}
+
+int64_t InternalFlutter_WindowController_CreateSatelliteWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request) {
+  FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
+  [engine enableMultiView];
+  return [engine.windowController createSatelliteWindow:request];
 }
 
 int64_t InternalFlutter_WindowController_CreateDialogWindow(
@@ -765,6 +929,29 @@ void InternalFlutter_Window_UpdatePosition(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   FlutterWindowOwner* owner = (FlutterWindowOwner*)w.delegate;
   [owner updatePosition];
+}
+
+void InternalFlutter_Window_Reparent(int64_t engineId, void* window, int64_t newParentId) {
+  FlutterEngine* engine = [FlutterEngine engineForIdentifier:engineId];
+  NSWindow* w = (__bridge NSWindow*)window;
+  [engine.windowController reparentWindow:w newParentId:newParentId];
+}
+
+void* InternalFlutter_Window_GetParent(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  return (__bridge void*)w.parentWindow;
+}
+
+FlutterWindowRect InternalFlutter_Window_FrameRectAsAnchorRect(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  NSRect globalScreenFrame = ComputeGlobalScreenFrame();
+  NSRect frameRect = w.frame;
+  FlipRect(frameRect, globalScreenFrame);
+  NSRect contentRect = [w convertRectToScreen:w.contentView.bounds];
+  FlipRect(contentRect, globalScreenFrame);
+  return FlutterWindowRect::fromNSRect(NSMakeRect(frameRect.origin.x - contentRect.origin.x,
+                                                  frameRect.origin.y - contentRect.origin.y,
+                                                  frameRect.size.width, frameRect.size.height));
 }
 
 FlutterWindowOffset InternalFlutter_Window_GetOffsetInParent(void* window) {

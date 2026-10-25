@@ -64,8 +64,8 @@ Future<int> run(
     reportCrashes ??= !await globals.isRunningOnBot;
     final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
       analytics: globals.analytics,
-      androidSdk: globals.androidSdk,
-      androidStudio: globals.androidStudio,
+      androidSdkBuilder: () => globals.androidSdk,
+      androidStudioBuilder: () => globals.androidStudio,
       androidWorkflow: androidWorkflow,
       artifacts: globals.artifacts,
       botDetector: globals.botDetector,
@@ -85,10 +85,10 @@ Future<int> run(
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
       git: globals.git,
-      gradleUtils: globals.gradleUtils,
+      gradleUtilsBuilder: () => globals.gradleUtils!,
       iosSimulatorUtils: globals.iosSimulatorUtils,
       iosWorkflow: globals.iosWorkflow,
-      java: globals.java,
+      javaBuilder: () => globals.java,
       localEngineLocator: globals.localEngineLocator,
       logger: globals.logger,
       nativeAssetsBuilder: globals.nativeAssetsBuilder,
@@ -115,6 +115,7 @@ Future<int> run(
       body: () async {
         final runner = FlutterCommandRunner(
           analytics: toolDeps.analytics,
+          extensionManager: toolDeps.extensionManager,
           featureFlags: featureFlags,
           toolContext: toolDeps.toolContext,
           verboseHelp: verboseHelp,
@@ -169,7 +170,12 @@ Future<int> run(
               // Triggering [runZoned]'s error callback does not necessarily mean that
               // we stopped executing the body. See https://github.com/dart-lang/sdk/issues/42150.
               if (firstError == null) {
-                return await exitWithHooks(0, shutdownHooks: shutdownHooks);
+                return await exitWithHooks(
+                  0,
+                  analytics: toolDeps.analytics,
+                  logger: toolDeps.toolContext.logger,
+                  shutdownHooks: shutdownHooks,
+                );
               }
 
               // We already hit some error, so don't return success. The error path
@@ -188,8 +194,10 @@ Future<int> run(
                 reportCrashes!,
                 getVersion,
                 shutdownHooks,
-                featureFlags: featureFlags,
                 usingLocalEngine: usingLocalEngine,
+                analytics: toolDeps.analytics,
+                featureFlags: featureFlags,
+                logger: toolDeps.toolContext.logger,
               );
             }
           },
@@ -207,8 +215,10 @@ Future<int> run(
               reportCrashes!,
               getVersion,
               shutdownHooks,
-              featureFlags: featureFlags,
               usingLocalEngine: usingLocalEngine,
+              analytics: toolDeps.analytics,
+              featureFlags: featureFlags,
+              logger: toolDeps.toolContext.logger,
             );
           },
         )!;
@@ -233,7 +243,9 @@ Future<int> _handleToolError(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
   required bool usingLocalEngine,
+  required Analytics analytics,
   required FeatureFlags featureFlags,
+  required Logger logger,
 }) async {
   return _alreadyHandlingToolError ??= _handleToolErrorImpl(
     error,
@@ -244,7 +256,9 @@ Future<int> _handleToolError(
     getFlutterVersion,
     shutdownHooks,
     usingLocalEngine: usingLocalEngine,
+    analytics: analytics,
     featureFlags: featureFlags,
+    logger: logger,
   );
 }
 
@@ -257,41 +271,53 @@ Future<int> _handleToolErrorImpl(
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
   required bool usingLocalEngine,
+  required Analytics analytics,
   required FeatureFlags featureFlags,
+  required Logger logger,
 }) async {
   if (error is UsageException) {
-    globals.printError('${error.message}\n');
-    globals.printError(
+    logger.printError('${error.message}\n');
+    logger.printError(
       "Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.",
     );
     // Argument error exit code.
-    return exitWithHooks(64, shutdownHooks: shutdownHooks);
+    return exitWithHooks(64, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
   } else if (error is ToolExit) {
     if (error.message != null) {
-      globals.printError(error.message!);
+      logger.printError(error.message!);
     }
     if (verbose) {
-      globals.printError('\n$stackTrace\n');
+      logger.printError('\n$stackTrace\n');
     }
-    return exitWithHooks(error.exitCode ?? 1, shutdownHooks: shutdownHooks);
+    return exitWithHooks(
+      error.exitCode ?? 1,
+      analytics: analytics,
+      logger: logger,
+      shutdownHooks: shutdownHooks,
+    );
   } else if (error is ProcessExit) {
     // We've caught an exit code.
     if (error.immediate) {
       exit(error.exitCode);
       return error.exitCode;
     } else {
-      return exitWithHooks(error.exitCode, shutdownHooks: shutdownHooks);
+      return exitWithHooks(
+        error.exitCode,
+        analytics: analytics,
+        logger: logger,
+        shutdownHooks: shutdownHooks,
+      );
     }
   } else if (error is ProcessException &&
-      _isErrorDueToGitMissing(error, globals.processManager, globals.logger)) {
-    globals.printError('${error.message}\n');
-    globals.printError(
+      _isErrorDueToGitMissing(error, globals.processManager, logger)) {
+    logger.printError('${error.message}\n');
+    logger.printError(
       'An error was encountered when trying to run git.\n'
       "Please ensure git is installed and available in your system's search path. "
       'See https://docs.flutter.dev/get-started for instructions on '
       'installing git for your platform.',
     );
-    return exitWithHooks(1, shutdownHooks: shutdownHooks);
+    return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
   } else {
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
@@ -305,22 +331,22 @@ Future<int> _handleToolErrorImpl(
           .map((Feature f) => f.configSetting)
           .join(', ');
       globals.stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');
-      return exitWithHooks(1, shutdownHooks: shutdownHooks);
+      return exitWithHooks(1, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
     }
 
     // Flutter tool crash analytics benefits from the concrete Dart error type.
     // The tool is not obfuscated, and collapsing unknown types to Object loses useful signal.
     // ignore: avoid_type_to_string
-    globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
+    analytics.send(Event.exception(exception: error.runtimeType.toString()));
 
     if (!usingLocalEngine) {
       await asyncGuard(
         () async {
           final crashReportSender = CrashReportSender(
             platform: globals.platform,
-            logger: globals.logger,
+            logger: logger,
             operatingSystemUtils: globals.os,
-            analytics: globals.analytics,
+            analytics: analytics,
           );
           await crashReportSender.sendReport(
             error: error,
@@ -330,21 +356,21 @@ Future<int> _handleToolErrorImpl(
           );
         },
         onError: (dynamic error) {
-          globals.printError('Error sending crash report: $error');
+          logger.printError('Error sending crash report: $error');
         },
       );
     }
 
-    globals.printError('Oops; flutter has exited unexpectedly: "$error".');
+    logger.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      final logger = BufferLogger(
+      final doctorLogger = BufferLogger(
         terminal: globals.terminal,
         outputPreferences: globals.outputPreferences,
         verbose: true /* Capture flutter doctor -v */,
       );
 
-      final doctorText = DoctorText(logger);
+      final doctorText = DoctorText(doctorLogger);
 
       final details = CrashDetails(
         command: _crashCommand(args),
@@ -355,7 +381,12 @@ Future<int> _handleToolErrorImpl(
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter!.informUser(details, file);
 
-      return await exitWithHooks(1, shutdownHooks: shutdownHooks);
+      return await exitWithHooks(
+        1,
+        analytics: analytics,
+        logger: logger,
+        shutdownHooks: shutdownHooks,
+      );
       // This catch catches all exceptions to ensure the message below is printed.
       // ignore: avoid_catches_without_on_clauses
     } catch (error, st) {
