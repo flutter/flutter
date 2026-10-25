@@ -1747,6 +1747,79 @@ void PlatformViewAndroidJNIImpl::HardwareBufferClose(
   FML_CHECK(fml::jni::CheckException(env));
 }
 
+namespace {
+class AndroidPathReceiver final : public DlPathReceiver {
+ public:
+  explicit AndroidPathReceiver(JNIEnv* env)
+      : env_(env),
+        android_path_(env->NewObject(path_class->obj(), path_constructor)) {}
+
+  void SetFillType(DlPathFillType type) {
+    jfieldID fill_type_field_id;
+    switch (type) {
+      case DlPathFillType::kOdd:
+        fill_type_field_id = g_path_fill_type_even_odd_field;
+        break;
+      case DlPathFillType::kNonZero:
+        fill_type_field_id = g_path_fill_type_winding_field;
+        break;
+      default:
+        // DlPathFillType does not have corresponding kInverseEvenOdd or
+        // kInverseWinding fill types.
+        return;
+    }
+
+    // Get the static enum field value (Path.FillType.WINDING or
+    // Path.FillType.EVEN_ODD)
+    fml::jni::ScopedJavaLocalRef<jobject> fill_type_enum =
+        fml::jni::ScopedJavaLocalRef<jobject>(
+            env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
+                                             fill_type_field_id));
+    FML_CHECK(fml::jni::CheckException(env_));
+    FML_CHECK(!fill_type_enum.is_null());
+
+    // Call Path.setFillType(Path.FillType)
+    env_->CallVoidMethod(android_path_, path_set_fill_type_method,
+                         fill_type_enum.obj());
+    FML_CHECK(fml::jni::CheckException(env_));
+  }
+
+  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
+    env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
+  }
+  void LineTo(const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_line_to_method, p2.x, p2.y);
+  }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_quad_to_method,  //
+                         cp.x, cp.y, p2.x, p2.y);
+  }
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
+    if (!path_conic_to_method) {
+      return false;
+    }
+    env_->CallVoidMethod(android_path_, path_conic_to_method,  //
+                         cp.x, cp.y, p2.x, p2.y, weight);
+    return true;
+  };
+  void CubicTo(const DlPoint& cp1,
+               const DlPoint& cp2,
+               const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_cubic_to_method,  //
+                         cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+  }
+  void Close() override {
+    env_->CallVoidMethod(android_path_, path_close_method);
+  }
+
+  jobject TakePath() const { return android_path_; }
+
+ private:
+  JNIEnv* env_;
+  jobject android_path_;
+};
+}  // namespace
+
 void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
     int view_id,
     int x,
@@ -1839,10 +1912,38 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
                             radiisArray.obj());
         break;
       }
+      case MutatorType::kOpacity: {
+        float opacity = (*iter)->GetAlphaFloat();
+        env->CallVoidMethod(mutatorsStack, g_mutators_stack_push_opacity_method,
+                            opacity);
+        break;
+      }
+      case MutatorType::kClipPath: {
+        auto& dlPath = (*iter)->GetPath();
+        // The layer mutator mechanism should have already caught and
+        // redirected these simplified path cases, which is important because
+        // the conics they generate (in the case of oval and rrect) will
+        // not match the results of an impeller path conversion very closely.
+        FML_DCHECK(!dlPath.IsRect());
+        FML_DCHECK(!dlPath.IsOval());
+        FML_DCHECK(!dlPath.IsRoundRect());
+
+        // Define and populate an Android Path with data from the DlPath
+        AndroidPathReceiver receiver(env);
+        receiver.SetFillType(dlPath.GetFillType());
+
+        // TODO(flar): https://github.com/flutter/flutter/issues/164808
+        // Need to convert the fill type to the Android enum and
+        // call setFillType on the path...
+        dlPath.Dispatch(receiver);
+
+        env->CallVoidMethod(mutatorsStack,
+                            g_mutators_stack_push_clippath_method,
+                            receiver.TakePath());
+        break;
+      }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
-      case MutatorType::kClipPath:
-      case MutatorType::kOpacity:
       case MutatorType::kBackdropFilter:
       case MutatorType::kBackdropClipRect:
       case MutatorType::kBackdropClipRRect:
@@ -2200,79 +2301,6 @@ void PlatformViewAndroidJNIImpl::destroyOverlaySurface2() {
 
   FML_CHECK(fml::jni::CheckException(env));
 }
-
-namespace {
-class AndroidPathReceiver final : public DlPathReceiver {
- public:
-  explicit AndroidPathReceiver(JNIEnv* env)
-      : env_(env),
-        android_path_(env->NewObject(path_class->obj(), path_constructor)) {}
-
-  void SetFillType(DlPathFillType type) {
-    jfieldID fill_type_field_id;
-    switch (type) {
-      case DlPathFillType::kOdd:
-        fill_type_field_id = g_path_fill_type_even_odd_field;
-        break;
-      case DlPathFillType::kNonZero:
-        fill_type_field_id = g_path_fill_type_winding_field;
-        break;
-      default:
-        // DlPathFillType does not have corresponding kInverseEvenOdd or
-        // kInverseWinding fill types.
-        return;
-    }
-
-    // Get the static enum field value (Path.FillType.WINDING or
-    // Path.FillType.EVEN_ODD)
-    fml::jni::ScopedJavaLocalRef<jobject> fill_type_enum =
-        fml::jni::ScopedJavaLocalRef<jobject>(
-            env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
-                                             fill_type_field_id));
-    FML_CHECK(fml::jni::CheckException(env_));
-    FML_CHECK(!fill_type_enum.is_null());
-
-    // Call Path.setFillType(Path.FillType)
-    env_->CallVoidMethod(android_path_, path_set_fill_type_method,
-                         fill_type_enum.obj());
-    FML_CHECK(fml::jni::CheckException(env_));
-  }
-
-  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
-    env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
-  }
-  void LineTo(const DlPoint& p2) override {
-    env_->CallVoidMethod(android_path_, path_line_to_method, p2.x, p2.y);
-  }
-  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
-    env_->CallVoidMethod(android_path_, path_quad_to_method,  //
-                         cp.x, cp.y, p2.x, p2.y);
-  }
-  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
-    if (!path_conic_to_method) {
-      return false;
-    }
-    env_->CallVoidMethod(android_path_, path_conic_to_method,  //
-                         cp.x, cp.y, p2.x, p2.y, weight);
-    return true;
-  };
-  void CubicTo(const DlPoint& cp1,
-               const DlPoint& cp2,
-               const DlPoint& p2) override {
-    env_->CallVoidMethod(android_path_, path_cubic_to_method,  //
-                         cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
-  }
-  void Close() override {
-    env_->CallVoidMethod(android_path_, path_close_method);
-  }
-
-  jobject TakePath() const { return android_path_; }
-
- private:
-  JNIEnv* env_;
-  jobject android_path_;
-};
-}  // namespace
 
 void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
     int32_t view_id,

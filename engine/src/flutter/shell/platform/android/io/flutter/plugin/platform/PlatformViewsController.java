@@ -10,18 +10,25 @@ import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.MutableContextWrapper;
+import android.graphics.Path;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.util.SparseArray;
+import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
+import android.view.SurfaceControl;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
@@ -148,6 +155,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Platform view IDs that were displayed since the start of the current frame.
   private final HashSet<Integer> currentFrameUsedPlatformViewIds;
 
+  private final HashSet<Integer> viewsWithPendingSurfaceCallback = new HashSet<>();
+
+  @Nullable private SurfaceControl.Transaction pendingSurfaceControlTransaction = null;
+
   // Used to acquire the original motion events using the motionEventIds.
   private final MotionEventTracker motionEventTracker;
 
@@ -248,6 +259,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         @Override
         public void dispose(int viewId) {
+          viewsWithPendingSurfaceCallback.remove(viewId);
           final PlatformView platformView = platformViews.get(viewId);
           if (platformView == null) {
             Log.e(TAG, "Disposing unknown platform view with id: " + viewId);
@@ -921,6 +933,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     destroyOverlaySurfaces();
     removeOverlaySurfaces();
+    viewsWithPendingSurfaceCallback.clear();
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_33 && pendingSurfaceControlTransaction != null) {
+      pendingSurfaceControlTransaction.close();
+      pendingSurfaceControlTransaction = null;
+    }
     flutterView = null;
     flutterViewConvertedToImageView = false;
 
@@ -1274,8 +1291,167 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     if (view != null) {
       view.setLayoutParams(layoutParams);
       view.bringToFront();
+      if (view instanceof SurfaceView) {
+        // In Legacy Hybrid Composition, the Flutter background is rendered into a FlutterImageView
+        // on the Activity window surface (Z = 0) while a default SurfaceView sits below it
+        // (mSubLayer = -2) and punches a hole in the Activity window canvas. Setting view alpha on
+        // the SurfaceView lets Android scale the hole-punch alpha on API 34+ (and SurfaceControl
+        // alpha when Z-ordered above parent) without fading the SurfaceControl against its black
+        // background layer.
+        view.setAlpha(mutatorsStack.getFinalOpacity());
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
+          maybeApplyClipToSurfaceView(
+              (SurfaceView) view, x, y, width, height, mutatorsStack, viewId);
+        }
+      }
     }
     currentFrameUsedPlatformViewIds.add(viewId);
+  }
+
+  @RequiresApi(API_LEVELS.API_33)
+  private void maybeApplyClipToSurfaceView(
+      SurfaceView surfaceView,
+      int x,
+      int y,
+      int width,
+      int height,
+      FlutterMutatorsStack mutatorsStack,
+      int viewId) {
+    // 1. CALCULATE THE FINAL RECT (RECT, RRECT, PATH, TRANSFORM)
+    // We start with the view's final on-screen bounds.
+    RectF screenRectF = new RectF(x, y, x + width, y + height);
+    Rect screenRect = new Rect();
+    screenRectF.roundOut(screenRect);
+
+    List<Path> clippingPaths = mutatorsStack.getFinalClippingPaths();
+
+    if (clippingPaths != null && !clippingPaths.isEmpty()) {
+      RectF pathBounds = new RectF();
+      for (Path path : clippingPaths) {
+        // Compute the axis-aligned bounding box of the path.
+        path.computeBounds(pathBounds, true);
+
+        // Round out to ensure we cover the pixels (ceil/floor logic).
+        Rect pathRectInt = new Rect();
+        pathBounds.roundOut(pathRectInt);
+
+        // Intersect the current visible area with this clip.
+        // If the path is a complex shape (star, rounded rect), this
+        // constrains the surface to the bounding box of that shape.
+        boolean anyIntersection = screenRect.intersect(pathRectInt);
+        if (!anyIntersection) {
+          screenRect.setEmpty();
+          break;
+        }
+      }
+    }
+
+    // 2. CONVERT TO LOCAL SURFACE COORDINATES
+    // SurfaceControl.setCrop expects coordinates relative to the Surface (0,0).
+    // We shift the calculated screen-space rect by the view's origin (-x, -y).
+    screenRect.offset(-x, -y);
+    if (screenRect.width() < 0 || screenRect.height() < 0) {
+      screenRect.setEmpty();
+    }
+
+    // 3. APPLY EITHER IN TIME, OR AS A CALLBACK
+    // If the widget tree recently changed, the SurfaceControl will likely be null.
+    // So apply via a SurfaceHolder.Callback(). Otherwise, apply via standard
+    // transaction apis.
+    SurfaceControl sc = surfaceView.getSurfaceControl();
+    if (sc == null) {
+      if (viewsWithPendingSurfaceCallback.contains(viewId)) {
+        return;
+      }
+      viewsWithPendingSurfaceCallback.add(viewId);
+      SurfaceHolder.Callback cb = createSurfaceClipCallback(surfaceView, screenRect, viewId);
+      surfaceView.getHolder().addCallback(cb);
+      return;
+    }
+    if (!sc.isValid()) {
+      Log.i(
+          TAG,
+          "Skipping applying clip to SurfaceView: "
+              + surfaceView.getId()
+              + " because it has an invalid SurfaceControl.");
+      return;
+    }
+    createTransaction().setCrop(sc, screenRect);
+  }
+
+  @RequiresApi(API_LEVELS.API_33)
+  private SurfaceHolder.Callback createSurfaceClipCallback(
+      @NonNull final SurfaceView surfaceView, @NonNull final Rect screenRect, final int viewId) {
+    return new SurfaceHolder.Callback() {
+      @Override
+      public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
+        if (surfaceControl != null && surfaceControl.isValid()) {
+          createTransaction().setCrop(surfaceControl, screenRect);
+          applySurfaceControlTransaction();
+        } else {
+          Log.i(
+              TAG,
+              "Failed to apply clipping to SurfaceView: "
+                  + surfaceView.getId()
+                  + " - the SurfaceControl was null or invalid during surfaceCreated callback.");
+        }
+        // Because this transaction is created outside of the frame timing, we can't
+        // guarantee there is another frame coming (if, say, the app has a static
+        // layout). So we schedule one to ensure the crop is rendered properly.
+        // See https://github.com/flutter/flutter/issues/175546.
+        if (flutterJNI != null) {
+          flutterJNI.scheduleFrame();
+        }
+        viewsWithPendingSurfaceCallback.remove(viewId);
+        surfaceView.getHolder().removeCallback(this);
+      }
+
+      @Override
+      public void surfaceChanged(
+          @NonNull SurfaceHolder holder, int format, int width, int height) {}
+
+      @Override
+      public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+        viewsWithPendingSurfaceCallback.remove(viewId);
+        surfaceView.getHolder().removeCallback(this);
+      }
+    };
+  }
+
+  @RequiresApi(API_LEVELS.API_33)
+  private SurfaceControl.Transaction createTransaction() {
+    if (pendingSurfaceControlTransaction == null) {
+      pendingSurfaceControlTransaction = newTransaction();
+    }
+    return pendingSurfaceControlTransaction;
+  }
+
+  /** Allocates a transaction so tests can spy on the instance retained by the controller. */
+  @VisibleForTesting
+  @RequiresApi(API_LEVELS.API_33)
+  SurfaceControl.Transaction newTransaction() {
+    return new SurfaceControl.Transaction();
+  }
+
+  @RequiresApi(API_LEVELS.API_33)
+  private void applySurfaceControlTransaction() {
+    if (pendingSurfaceControlTransaction == null) {
+      return;
+    }
+    final SurfaceControl.Transaction tx = pendingSurfaceControlTransaction;
+    pendingSurfaceControlTransaction = null;
+
+    if (flutterView != null) {
+      final AttachedSurfaceControl rootSurfaceControl = flutterView.getRootSurfaceControl();
+      if (rootSurfaceControl != null) {
+        flutterView.invalidate();
+        rootSurfaceControl.applyTransactionOnDraw(tx);
+        return;
+      }
+    }
+    tx.apply();
+    tx.close();
   }
 
   /**
@@ -1387,6 +1563,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       } else {
         parentView.setVisibility(View.GONE);
       }
+    }
+
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
+      applySurfaceControlTransaction();
     }
   }
 
