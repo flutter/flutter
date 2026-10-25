@@ -17,6 +17,12 @@ uses the opaque node API. Only node and text implementations share the node's
 private layout. The native-tree build flag and runtime capability checks remain
 in effect for all three implementations.
 
+Display bookkeeping lives in `fl_display_monitor.cc`, with discovery and signal
+subscriptions behind `fl_display_monitor_backend.h`. The GTK3 and GTK4 source
+sets select their respective adapters. Adapters return owned monitor snapshots
+and disconnect all subscriptions on disposal. The GTK4 adapter retains the
+existing behavior of resetting display IDs when the monitor list changes.
+
 ## GTK conditional-compilation audit
 
 Inventory GTK4 switches and GTK version checks per C/C++/Objective-C source file:

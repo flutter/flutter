@@ -78,3 +78,68 @@ TEST_F(FlDisplayMonitorTest, DimensionsArePhysicalPixels) {
   fl_display_monitor_start(monitor);
   EXPECT_TRUE(called);
 }
+
+// Emit the toolkit's topology signal without changing the host's monitor setup.
+static void emit_monitor_change(GdkDisplay* display) {
+#if FLUTTER_LINUX_GTK4
+  g_list_model_items_changed(gdk_display_get_monitors(display), 0, 0, 0);
+#else
+  g_signal_emit_by_name(display, "monitor-added",
+                        gdk_display_get_monitor(display, 0));
+#endif
+}
+
+TEST_F(FlDisplayMonitorTest, RepeatedStartKeepsOneSubscription) {
+  // Keep the engine-owned watcher unstarted to isolate this subscription.
+  int updates = 0;
+  fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([&](auto, auto, const FlutterEngineDisplay*, size_t) {
+                         updates++;
+                         return kSuccess;
+                       }));
+  GdkDisplay* display = gdk_display_get_default();
+  g_autoptr(FlDisplayMonitor) monitor = fl_display_monitor_new(engine, display);
+  fl_display_monitor_start(monitor);
+  fl_display_monitor_start(monitor);
+  EXPECT_EQ(updates, 2);
+  emit_monitor_change(display);
+  EXPECT_EQ(updates, 3);
+
+  g_clear_object(&monitor);
+  emit_monitor_change(display);
+  EXPECT_EQ(updates, 3);
+}
+
+#if FLUTTER_LINUX_GTK4
+TEST_F(FlDisplayMonitorTest, PropertySubscriptionsSurviveTopologyUpdates) {
+  // Keep the engine-owned watcher unstarted to isolate this subscription.
+  int updates = 0;
+  fl_engine_get_embedder_api(engine)->NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([&](auto, auto, const FlutterEngineDisplay*, size_t) {
+                         updates++;
+                         return kSuccess;
+                       }));
+  GdkDisplay* display = gdk_display_get_default();
+  g_autoptr(GdkMonitor) native_monitor =
+      GDK_MONITOR(g_list_model_get_item(gdk_display_get_monitors(display), 0));
+  ASSERT_NE(native_monitor, nullptr);
+  g_autoptr(FlDisplayMonitor) monitor = fl_display_monitor_new(engine, display);
+  fl_display_monitor_start(monitor);
+  const FlutterEngineDisplayId original_id =
+      fl_display_monitor_get_display_id(monitor, native_monitor);
+  EXPECT_NE(original_id, 0u);
+  g_object_notify(G_OBJECT(native_monitor), "geometry");
+  EXPECT_EQ(updates, 2);
+  EXPECT_EQ(fl_display_monitor_get_display_id(monitor, native_monitor),
+            original_id);
+  emit_monitor_change(display);
+  EXPECT_EQ(updates, 3);
+  g_object_notify(G_OBJECT(native_monitor), "scale-factor");
+  EXPECT_EQ(updates, 4);
+  g_clear_object(&monitor);
+  g_object_notify(G_OBJECT(native_monitor), "geometry");
+  EXPECT_EQ(updates, 4);
+}
+#endif

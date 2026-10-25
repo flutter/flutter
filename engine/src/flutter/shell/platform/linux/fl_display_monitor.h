@@ -35,6 +35,7 @@ FlDisplayMonitor* fl_display_monitor_new(FlEngine* engine, GdkDisplay* display);
  * @monitor: an #FlDisplayMonitor.
  *
  * Start monitoring for display changes.
+ * Repeated calls refresh the display information without adding subscriptions.
  */
 void fl_display_monitor_start(FlDisplayMonitor* monitor);
 
@@ -50,10 +51,6 @@ void fl_display_monitor_start(FlDisplayMonitor* monitor);
 FlutterEngineDisplayId fl_display_monitor_get_display_id(
     FlDisplayMonitor* monitor,
     GdkMonitor* gdk_monitor);
-
-#if FLUTTER_LINUX_GTK4
-GListModel* fl_display_monitor_gtk4_get_monitors(GdkDisplay* display);
-#endif
 
 G_END_DECLS
 
