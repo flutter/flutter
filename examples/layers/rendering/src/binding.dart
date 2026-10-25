@@ -29,15 +29,17 @@ class ViewRenderingFlutterBinding extends RenderingFlutterBinding {
     // TODO(goderbauer): Create window if embedder doesn't provide an implicit view.
     assert(PlatformDispatcher.instance.implicitView != null);
     _renderView = initRenderView(PlatformDispatcher.instance.implicitView!);
-    _renderView.child = _root;
+    _renderView!.child = _root;
     _root = null;
   }
 
   RenderBox? _root;
 
   @override
-  RenderView get renderView => _renderView;
-  late RenderView _renderView;
+  RenderView get renderView => _renderView!;
+  // Null until initInstances creates it. The semantics callbacks below can
+  // run before that, when the platform has semantics enabled at startup.
+  RenderView? _renderView;
 
   /// Creates a [RenderView] object to be the root of the
   /// [RenderObject] rendering tree, and initializes it so that it
@@ -56,13 +58,13 @@ class ViewRenderingFlutterBinding extends RenderingFlutterBinding {
   PipelineOwner createRootPipelineOwner() {
     return PipelineOwner(
       onSemanticsOwnerCreated: () {
-        renderView.scheduleInitialSemantics();
+        _renderView?.scheduleInitialSemantics();
       },
       onSemanticsUpdate: (SemanticsUpdate update) {
         renderView.updateSemantics(update);
       },
       onSemanticsOwnerDisposed: () {
-        renderView.clearSemantics();
+        _renderView?.clearSemantics();
       },
     );
   }
