@@ -415,6 +415,9 @@ dart_package_tests(
     name = "integration_shard",
     size = "large",
     srcs = _HARNESS,
+    # The widget previewer's tests drive a headless Chrome.
+    browser = "@chrome//:chrome-linux64/chrome",
+    browser_files = ["@chrome//:chrome"],
     cache = _TOOL_CACHE,
     cache_files = _TOOL_CACHE_FILES,
     data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
@@ -453,6 +456,37 @@ dart_package_tests(
         ["test/integration.shard/**/*_test.dart"],
         exclude = _INTEGRATION_EXCLUDED,
     ),
+    # pub touches the workspace's lock when it resolves a member.
+    writable = ["pubspec.lock"],
+)
+
+# The web shard: the tool's web support run as a process -- `flutter run -d
+# chrome` and `-d web-server`, hot reload and restart on the web, the DDC
+# library bundle's expression evaluation, the web driver service -- against
+# the pinned Chrome for Testing and its chromedriver (dev/bots'
+# web_tool_tests shard, whose builders carry the same `chrome_and_driver`).
+dart_package_tests(
+    name = "web_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    browser = "@chrome//:chrome-linux64/chrome",
+    # The web-server device's tests connect a browser through `chromedriver`
+    # on PATH.
+    browser_driver = "@chrome//:chromedriver-linux64/chromedriver",
+    browser_files = ["@chrome//:chrome"],
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    data = glob(["test/web.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The tool, a frontend server, a web server and a browser at once.
+    tags = ["cpu:4"],
+    tests = glob(["test/web.shard/**/*_test.dart"]),
     # pub touches the workspace's lock when it resolves a member.
     writable = ["pubspec.lock"],
 )

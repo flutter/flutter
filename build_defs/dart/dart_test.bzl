@@ -292,7 +292,7 @@ export FLUTTER_ROOT="$root"
 # (Cache.lock opens bin/cache/lockfile); what tests read of it is laid
 # in by `cache` and `cache_files`.
 mkdir -p "$root/bin/cache"
-{pub_cache_env}{tool_env}{writable}cd "{package}"
+{pub_cache_env}{tool_env}{browser_env}{writable}cd "{package}"
 exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} "{test}" "$@"
 """.format(
             package = ctx.label.package or ".",
@@ -308,6 +308,13 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
             tool_env = ("export PATH=\"$root/bin:$PATH\"\n" +
                         "export HOME=\"${TEST_TMPDIR:-$(mktemp -d)}/home\"\n" +
                         "mkdir -p \"$HOME\"\n") if [p for p in ctx.attr.sdk_files.values() if p.startswith("bin/")] else "",
+            # The browser the test drives, by the variable the tool and the web
+            # engine's test runner both read, and its driver's directory on
+            # PATH (the web-server device's tests spawn `chromedriver`). A
+            # file of another repository lies under `../<repository>/`, which
+            # short_path says.
+            browser_env = ("export CHROME_EXECUTABLE=\"$root/%s\"\n" % ctx.file.browser.short_path if ctx.file.browser else "") +
+                          ("export PATH=\"$root/%s:$PATH\"\n" % paths.dirname(ctx.file.browser_driver.short_path) if ctx.file.browser_driver else ""),
             # Files the tool rewrites in place (pub touches the workspace's
             # lock), copied over their symlinks into the writable runfiles
             # tree so that the source stays as it is.
@@ -371,7 +378,7 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
         for path, file in ctx.attr.pub_cache[PubCacheInfo].entries.items():
             cache[paths.join(".pub-cache", path)] = file
     runfiles = ctx.runfiles(
-        files = regular,
+        files = regular + ctx.files.browser_files + ctx.files.browser_driver,
         # The runtime configuration at the package's .dart_tool/, where `dart
         # test --precompiled` reads it from the working directory and a tool
         # under test looks for its own (flutter_tools' template images);
@@ -440,6 +447,21 @@ dart_test = rule(
                   "at their paths within their repository, as `cache` lays them under bin/cache " +
                   "(`@pub_workspace//:pubspecs` at the root: every workspace member's pubspec, for a " +
                   "test that runs pub in a member).",
+        ),
+        "browser": attr.label(
+            allow_single_file = True,
+            doc = "A browser's executable, exported as CHROME_EXECUTABLE (`@chrome//:chrome-linux64/chrome`, Chrome " +
+                  "for Testing at the web engine's pinned version: browsers.bzl); `browser_files` carries its directory.",
+        ),
+        "browser_files": attr.label_list(
+            allow_files = True,
+            doc = "The browser's directory, whole (`@chrome//:chrome`): the executable loads its libraries and " +
+                  "resources from beside itself.",
+        ),
+        "browser_driver": attr.label(
+            allow_single_file = True,
+            doc = "The browser's WebDriver executable (`@chrome//:chromedriver-linux64/chromedriver`); its directory " +
+                  "goes first on PATH, where the web-server device's tests spawn `chromedriver`.",
         ),
         "writable": attr.string_list(
             doc = "Paths under FLUTTER_ROOT the tool under test rewrites in place (`pubspec.lock`: pub " +
@@ -553,7 +575,8 @@ def dart_package_tests(
       compile_args: further frontend server arguments, for the prelude and
         the tests alike.
       **kwargs: dart_tests' other arguments (size, large, sizes, flaky, tags, network,
-        runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable, pub_cache).
+        runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable, pub_cache,
+        browser, browser_files, browser_driver).
     """
     workspace_packages = {":sources": package} | packages
     config_roots = [package, "test"] + roots
