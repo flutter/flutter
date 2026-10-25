@@ -16,8 +16,6 @@ import 'felt_config.dart';
 import 'firefox.dart';
 import 'safari_macos.dart';
 
-/// The port number for debugging.
-const int kDevtoolsPort = 12345;
 const int kMaxScreenshotWidth = 1024;
 const int kMaxScreenshotHeight = 1024;
 
