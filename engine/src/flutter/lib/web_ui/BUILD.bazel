@@ -1,0 +1,234 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The web engine: package:ui, the Dart implementation of dart:ui for the web,
+# which web_sdk/BUILD.gn's sdk_rewriter rewrites into the web SDK's dart:ui,
+# dart:_engine and dart:ui_web (the web_sdk package's targets take the
+# sources from here), and its unit tests (test/, felt's suites). No GN build
+# file of its own: hand-written.
+
+load("//build_defs/dart:dart_test.bzl", "dart_vm_kernel")
+load("//build_defs/dart:pub.bzl", "pub_package_config")
+load("//build_defs/web:web_ui_tests.bzl", "web_ui_host_page", "web_ui_test_bundles", "web_ui_test_suite")
+
+package(default_visibility = ["//visibility:public"])
+
+# Every Dart source of the package, for api_check (the dart:ui API
+# comparison) and the test compiles.
+filegroup(
+    name = "web_ui_dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)
+
+# The directories web_sdk/BUILD.gn's sdk_rewriter invocations read (each
+# `input_dir`, less its `exclude_pattern`; the converter's directorySources
+# names them): dart:ui's own sources without the engine under src/, the
+# engine without skwasm, and skwasm's two halves, with their API files.
+filegroup(
+    name = "web_ui_sources",
+    srcs = glob(
+        ["lib/**/*.dart"],
+        exclude = ["lib/src/**"],
+    ),
+)
+
+filegroup(
+    name = "web_engine_sources",
+    srcs = glob(
+        ["lib/src/engine/**/*.dart"],
+        exclude = ["lib/src/engine/skwasm/**"],
+    ),
+)
+
+filegroup(
+    name = "skwasm_stub_sources",
+    srcs = glob(["lib/src/engine/skwasm/skwasm_stub/**/*.dart"]),
+)
+
+filegroup(
+    name = "skwasm_impl_sources",
+    srcs = glob(["lib/src/engine/skwasm/skwasm_impl/**/*.dart"]),
+)
+
+# dart:ui_web's sources and API file, which web_sdk.gni's
+# web_ui_ui_web_with_output (build_defs/web/web_sdk.bzl) rewrites into the
+# sky_engine package for sky/packages/sky_engine, and into the web SDK.
+filegroup(
+    name = "ui_web_sources",
+    srcs = glob(["lib/ui_web/src/ui_web/**/*.dart"]),
+)
+
+exports_files([
+    "lib/src/engine.dart",
+    "lib/src/engine/skwasm/skwasm_impl.dart",
+    "lib/src/engine/skwasm/skwasm_stub.dart",
+    "lib/ui_web/src/ui_web.dart",
+])
+
+# ---------------------------------------------------------------------------
+# The unit tests (test/), as felt runs them: lib/web_ui/test/felt_config.yaml's
+# test sets, bundles and suites (dev/felt.dart). The compiles are Bazel's,
+# one action per test file (build_defs/web/web_ui_tests.bzl).
+
+# package:ui itself as a pub package: its pubspec and library.
+filegroup(
+    name = "package",
+    srcs = ["pubspec.yaml"] + glob(["lib/**"]),
+)
+
+# The lock the package resolves against: its own, apart from the repository's
+# workspace (pubspec.lock here; pub.lock.bzl's PUB_LOCKS), with the versions
+# felt tests with.
+WEB_UI_LOCK = "engine/src/flutter/lib/web_ui"
+
+# The path packages of the pubspec, as pub packages.
+_PATH_PACKAGES = {
+    ":package": "ui",
+    "//engine/src/flutter/testing/skia_gold_client:package": "skia_gold_client",
+    "//engine/src/flutter/third_party:web_locale_keymap_package": "web_locale_keymap",
+    "//engine/src/flutter/third_party:web_test_fonts_package": "web_test_fonts",
+    "//engine/src/flutter/tools/pkg/engine_repo_tools:package": "engine_repo_tools",
+    "//engine/src/flutter/tools/pkg/git_repo_tools:package": "git_repo_tools",
+    "//engine/src/flutter/web_sdk:web_engine_tester_package": "web_engine_tester",
+    "//engine/src/flutter/web_sdk:web_test_utils_package": "web_test_utils",
+}
+
+# The package configuration of the test compiles: package:ui, the pubspec's
+# path packages and the hosted packages of the lock the tests reach (the
+# dev_dependencies too: package:test's browser bootstrap).
+pub_package_config(
+    name = "test_package_config",
+    out = "test_package_config.json",
+    dev_roots = ["ui"],
+    lock = WEB_UI_LOCK,
+    packages = _PATH_PACKAGES,
+    roots = ["ui"],
+)
+
+# What a test file imports besides package:ui: test/common's helpers, the
+# test set's own helpers and fixtures -- and other test files (routing_test
+# imports history_test, pointer_binding_test keyboard_converter_test).
+_TEST_SOURCES = glob(["test/**"])
+
+# felt_config.yaml's test sets: each directory's test files.
+_TEST_SETS = {
+    "canvaskit": glob(["test/canvaskit/**/*_test.dart"]),
+    "engine": glob(["test/engine/**/*_test.dart"]),
+    "fallbacks": glob(["test/fallbacks/**/*_test.dart"]),
+    "skwasm": glob(["test/skwasm/**/*_test.dart"]),
+    "ui": glob(["test/ui/**/*_test.dart"]),
+    "webparagraph": glob(["test/webparagraph/**/*_test.dart"]),
+}
+
+# felt_config.yaml's test bundles: a test set compiled for a compile
+# configuration (the fallbacks bundle, two: dart2wasm-skwasm and
+# dart2js-canvaskit, compiled side by side).
+_BUNDLES = {
+    "dart2js-canvaskit-canvaskit": ("dart2js-canvaskit", "canvaskit"),
+    "dart2js-canvaskit-engine": ("dart2js-canvaskit", "engine"),
+    "dart2js-canvaskit-ui": ("dart2js-canvaskit", "ui"),
+    "dart2js-canvaskit-webparagraph": ("dart2js-canvaskit", "webparagraph"),
+    "dart2wasm-canvaskit-engine": ("dart2wasm-canvaskit", "engine"),
+    "dart2wasm-skwasm-skwasm": ("dart2wasm-skwasm", "skwasm"),
+    "dart2wasm-skwasm-ui": ("dart2wasm-skwasm", "ui"),
+}
+
+[
+    web_ui_test_bundles(
+        name = "bundles/" + bundle,
+        srcs = _TEST_SOURCES,
+        bundle = bundle,
+        compile_config = _BUNDLES[bundle][0],
+        package_config = ":test_package_config",
+        # Built by the tests that run them, not by a wildcard.
+        tags = ["manual"],
+        test_set = _BUNDLES[bundle][1],
+        tests = _TEST_SETS[_BUNDLES[bundle][1]],
+    )
+    for bundle in _BUNDLES
+]
+
+# felt itself, compiled for the VM and placed where dev/felt.dart lives: felt
+# derives every path from its script's (dev/environment.dart: engine/src is
+# five directories up), so from the runfiles it finds the bundles and the
+# artifacts under engine/src/out/web_tests, where web_ui_test lays them.
+dart_vm_kernel(
+    name = "dev/felt",
+    srcs = glob(["dev/**/*.dart"]),
+    main = "dev/felt.dart",
+    package_config = ":test_package_config",
+)
+
+# The same configuration for felt at run time, in the runfiles layout at the
+# package's .dart_tool (its server resolves /packages/ URLs through it).
+pub_package_config(
+    name = "runtime_package_config",
+    out = "runtime_package_config.json",
+    dev_roots = ["ui"],
+    layout = "runfiles",
+    location = "engine/src/flutter/lib/web_ui/.dart_tool/package_config.json",
+    lock = WEB_UI_LOCK,
+    packages = _PATH_PACKAGES,
+    roots = ["ui"],
+)
+
+# The host page's script, as felt's copy step compiles it.
+web_ui_host_page(
+    name = "host_page",
+    main = "//engine/src/flutter/web_sdk:web_engine_tester/lib/static/host.dart",
+    package_config = ":test_package_config",
+)
+
+# What felt and the runner read of the package at run time: the tests (the
+# runner checks each file exists beside the bundle's compiled output),
+# dev/ (felt_config.yaml, package_lock.yaml), the runner's configuration
+# files, and the library (served to the browser for source maps).
+_PACKAGE_FILES = glob(
+    ["**"],
+    exclude = [
+        ".dart_tool/**",
+        "BUILD.bazel",
+    ],
+)
+
+# felt_config.yaml's test suites a Linux host runs: Chrome's, each over a
+# bundle (the run configuration -- the CanvasKit variant, cross-origin
+# isolation, single-threaded skwasm, the browser's flags -- is felt's own,
+# read from felt_config.yaml by suite name).
+_SUITES = {
+    "chrome-dart2js-canvaskit-engine": "dart2js-canvaskit-engine",
+}
+
+[
+    web_ui_test_suite(
+        name = suite,
+        # The Skia Gold client reads the engine's release version file.
+        srcs = _PACKAGE_FILES + ["//engine/src/flutter:.engine-release.version"],
+        browser = "@chrome//:chrome-linux64/chrome",
+        browser_files = ["@chrome//:chrome"],
+        bundle = _SUITES[suite],
+        fallback_fonts = ["@google_fonts_for_unit_tests//:fonts"],
+        felt = ":dev/felt",
+        fonts = ["//engine/src/flutter/txt:third_party/fonts/" + font for font in [
+            "ahem.ttf",
+            "Roboto-Regular.ttf",
+            "RobotoSlab-VariableFont_wght.ttf",
+            "NotoNaskhArabic-Regular.ttf",
+            "NotoColorEmoji.ttf",
+        ]],
+        host_files = [
+            ":host_page",
+            "//engine/src/flutter/web_sdk:web_engine_tester_host_files",
+        ],
+        runtime_package_config = ":runtime_package_config",
+        suite = suite,
+        # The browser, felt's server and the test page at once.
+        tags = ["cpu:2"],
+        test_images = ["@skia//:resources_images_tree"],
+        test_set = _BUNDLES[_SUITES[suite]][1],
+        tests = _TEST_SETS[_BUNDLES[_SUITES[suite]][1]],
+        web_sdk = "//engine/src/flutter/web_sdk:flutter_web_sdk_archive_release",
+    )
+    for suite in _SUITES
+]

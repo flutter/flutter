@@ -786,6 +786,65 @@ runtime modes or a device. The compile's defines for
 the SDK version are fixed words (`-DFLUTTER_VERSION=bazel`...), so a kernel
 is the same on every commit and the cache holds across them.
 
+## The web engine's unit tests: felt's suites
+
+`lib/web_ui/test` -- 189 files in six test sets (`engine`, `ui`, `canvaskit`,
+`webparagraph`, `skwasm`, `fallbacks`) -- is run by felt
+(`lib/web_ui/dev`): a compile step (dart2js or dart2wasm per bundle, one
+compile per file, into `out/web_tests/test_bundles/<bundle>/` with a
+`results.json`), a copy step that lays the artifacts the tests load
+(`out/web_tests/artifacts/`: CanvasKit's variants and skwasm from the web
+build, flutter.js, test fonts, Skia's test images, the harness's host page)
+and a run step: package:test's runner in process, its browser platform
+replaced by felt's own (a shelf server serving the bundle, the artifacts and
+a generated page per test; Chrome driven over the DevTools protocol for
+uncaught exceptions and screenshots), one suite at a time,
+`--concurrency=1`. `lib/web_ui/test/felt_config.yaml` names the sets, the
+bundles (set × compiler × renderer), the run configurations (browser,
+CanvasKit variant, cross-origin isolation, flags) and the suites; CI's web
+test builders compile the bundles from the prebuilt SDK and run the Chrome,
+Firefox and Safari suites.
+
+Under Bazel (`build_defs/web/web_ui_tests.bzl`; `lib/web_ui/BUILD.bazel`),
+the same three steps are the build's. The tests import `package:ui`, never
+`dart:ui`, so the compile needs no engine build: `web_ui_test_bundle` runs
+felt's exact command from `@dart_sdk_linux_x64` over a package
+configuration of package:ui, its path packages and the hosted packages of
+**lib/web_ui's own `pubspec.lock`** (its versions differ from the
+workspace's; `pub.lock.bzl`'s `PUB_LOCKS`, `pub_package_config(lock =
+...)`), one action per file into a directory shaped as the bundle with a
+one-file `results.json` -- `bundles/<bundle>/<file>`. The run is felt
+itself: `dart_vm_kernel` compiles `dev/felt.dart` and puts the kernel at
+`dev/felt.dill`, where felt's path derivation (engine/src is five
+directories above its script) makes the runfiles' `engine/src/out/web_tests`
+its build directory; `web_ui_test` lays the bundle and the artifacts there
+(CanvasKit, skwasm and flutter.js straight from
+`flutter_web_sdk_archive_release`'s entries -- the web SDK's layout is
+felt's -- the five fonts with a `FontManifest.json`, `@google_fonts_for_unit_tests`
+as the fallback fonts, `@skia//:resources_images_tree` less the invalid
+files, the host page with `web_ui_host_page`'s dart2js of `host.dart`), puts
+felt's package configuration at the package's `.dart_tool` for its server,
+and runs `felt test --run --suite=<suite>` on the pinned `@chrome`
+(`CHROME_NO_SANDBOX=true` inside Bazel's sandbox) with cwd `lib/web_ui`.
+One test target per file and suite, `<suite>/<file>`, a `test_suite` per
+felt suite; the files run in parallel (felt's Chrome takes its DevTools
+port from Chrome's own output now, not a constant). Skia Gold: felt's
+client probes Gold and, reached, compares the goldens as for a developer
+online; unreached, the goldens compare nothing, as offline; CI's uploads
+stay felt's.
+
+```sh
+bazel test //engine/src/flutter/lib/web_ui:chrome-dart2js-canvaskit-engine   # 86 files; felt's suite of that name
+bazel test //engine/src/flutter/lib/web_ui:chrome-dart2js-canvaskit-engine/alarm_clock_test
+bazel build //engine/src/flutter/lib/web_ui:bundles/dart2js-canvaskit-engine   # the compiles alone
+```
+
+`chrome-dart2js-canvaskit-engine`: 86 of 86 files, 1,274 cases and 13
+skipped, in 4m18s from cold (the compiles included) -- what `felt test
+--suite=chrome-dart2js-canvaskit-engine` counts. Firefox (an X display),
+Safari and Edge (other hosts) stay felt's; the other Chrome suites follow
+the same shape.
+
 ## Wrapped GN builds: the GPU test backends
 
 The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader
