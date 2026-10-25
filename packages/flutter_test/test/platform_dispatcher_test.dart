@@ -51,6 +51,22 @@ void main() {
     expect(fakePlatformDispatcher.resetInternalStateCalled, isTrue);
   });
 
+  test('TestPlatformDispatcher delegates semantics tree generation changes', () {
+    final fakePlatformDispatcher = _FakePlatformDispatcher(
+      displays: const <Display>[],
+      views: const <FlutterView>[],
+    );
+    final testPlatformDispatcher = TestPlatformDispatcher(
+      platformDispatcher: fakePlatformDispatcher,
+    );
+
+    testPlatformDispatcher.setSemanticsTreeEnabled(true);
+    expect(fakePlatformDispatcher.semanticsTreeEnabledChanges, <bool>[true]);
+
+    testPlatformDispatcher.setSemanticsTreeEnabled(false);
+    expect(fakePlatformDispatcher.semanticsTreeEnabledChanges, <bool>[true, false]);
+  });
+
   testWidgets('TestPlatformDispatcher can fake locale', (WidgetTester tester) async {
     verifyPropertyFaked<Locale>(
       tester: tester,
@@ -717,6 +733,13 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
   double get textScaleFactor => 1.0;
 
   bool resetInternalStateCalled = false;
+
+  final List<bool> semanticsTreeEnabledChanges = <bool>[];
+
+  @override
+  void setSemanticsTreeEnabled(bool enabled) {
+    semanticsTreeEnabledChanges.add(enabled);
+  }
 
   @override
   void resetInternalState() {
