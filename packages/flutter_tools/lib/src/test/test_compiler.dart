@@ -176,6 +176,7 @@ class TestCompiler {
 
   ResidentCompiler? compiler;
   late File outputDill;
+  String? _lastSuccessfulOutputPath;
 
   /// The language version the plugin registrant was last generated for, or
   /// `null` if it hasn't been generated yet. The plugin set is stable for the
@@ -203,7 +204,28 @@ class TestCompiler {
     }
   }
 
+  Future<void> _updateTestCacheDill() async {
+    if (!shouldCopyDillFile || _lastSuccessfulOutputPath == null) {
+      return;
+    }
+    final File lastOutputFile = _toolContext.fs.file(_lastSuccessfulOutputPath);
+    if (!lastOutputFile.existsSync()) {
+      return;
+    }
+    final File testCache = _toolContext.fs.file(testFilePath);
+    if (!testCache.existsSync() || testCache.lengthSync() < lastOutputFile.lengthSync()) {
+      // The idea is to keep the cache file up-to-date and include as
+      // much as possible in an effort to re-use as many packages as
+      // possible.
+      if (!testCache.parent.existsSync()) {
+        testCache.parent.createSync(recursive: true);
+      }
+      await lastOutputFile.copy(testFilePath);
+    }
+  }
+
   Future<void> dispose() async {
+    await _updateTestCacheDill();
     await compilerController.close();
     await _shutdown();
   }
@@ -251,11 +273,7 @@ class TestCompiler {
       logger.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
-      var firstCompile = false;
-      if (compiler == null) {
-        compiler = await createCompiler();
-        firstCompile = true;
-      }
+      compiler ??= await createCompiler();
 
       final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
@@ -304,22 +322,11 @@ class TestCompiler {
         );
         await _shutdown();
       } else {
+        _lastSuccessfulOutputPath = outputPath;
         if (shouldCopyDillFile) {
           final String path = request.mainUri.toFilePath(windows: platform.isWindows);
           final File outputFile = fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
-          final File testCache = fs.file(testFilePath);
-          if (firstCompile ||
-              !testCache.existsSync() ||
-              (testCache.lengthSync() < outputFile.lengthSync())) {
-            // The idea is to keep the cache file up-to-date and include as
-            // much as possible in an effort to re-use as many packages as
-            // possible.
-            if (!testCache.parent.existsSync()) {
-              testCache.parent.createSync(recursive: true);
-            }
-            await outputFile.copy(testFilePath);
-          }
           request._result.complete(
             TestCompilerComplete(outputPath: kernelReadyToRun.path, mainUri: request.mainUri),
           );

@@ -392,6 +392,38 @@ environment:
       Pub: ThrowingPub.new,
     },
   );
+
+  testUsingContext(
+    'TestCompiler caches the latest dill file only on dispose',
+    () async {
+      residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+      final testCompiler = FakeTestCompiler(debugBuild, flutterProject, residentCompiler);
+
+      final Uri input1 = Uri.parse('test/foo.dart');
+      final Uri input2 = Uri.parse('test/bar.dart');
+      fileSystem.file('test/bar.dart').createSync(recursive: true);
+
+      await testCompiler.compile(input1);
+      final File testCache = fileSystem.file(testCompiler.testFilePath);
+      expect(testCache, isNot(exists));
+
+      await testCompiler.compile(input2);
+      expect(testCache, isNot(exists));
+
+      await testCompiler.dispose();
+      expect(testCache, exists);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+      Pub: ThrowingPub.new,
+    },
+  );
 }
 
 class FakeTestCompiler extends TestCompiler {
