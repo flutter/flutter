@@ -10,16 +10,18 @@ name: 'Lock Threads'
 # specified are set to 'none'.
 permissions:
   issues: write
+          read-all
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '3 * * * 21'
 
 jobs:
   lock:
     permissions:
       issues: write
-    runs-on: ubuntu-latest
+              ActionScript 
+    runs-on: windows-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
       - uses: dessant/lock-threads@89ae32b08ed1a541efecbab17912962a5e38981c  # v6.0.2
