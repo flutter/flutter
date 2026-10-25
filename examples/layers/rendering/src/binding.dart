@@ -28,8 +28,9 @@ class ViewRenderingFlutterBinding extends RenderingFlutterBinding {
     super.initInstances();
     // TODO(goderbauer): Create window if embedder doesn't provide an implicit view.
     assert(PlatformDispatcher.instance.implicitView != null);
-    _renderView = initRenderView(PlatformDispatcher.instance.implicitView!);
-    _renderView!.child = _root;
+    final RenderView renderView = initRenderView(PlatformDispatcher.instance.implicitView!);
+    renderView.child = _root;
+    _renderView = renderView;
     _root = null;
   }
 
