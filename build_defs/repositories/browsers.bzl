@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""The browser the tool's web tests drive, as a Bazel repository.
+"""The browsers the web tests drive, as Bazel repositories.
 
 flutter_tools' web tests (test/web.shard, the widget previewer's integration
 tests) run `flutter run -d chrome` and the previewer in a headless Chrome,
@@ -19,8 +19,13 @@ the tests drive the pinned browser wherever they run, not whatever the host
 has. The lock file is watched: a browser roll that changes it fails the
 fetch until the pins follow.
 
-Chrome needs the host's X11, NSS, GTK and audio libraries at run time
-(the workstation's and the web CI images' package sets); the sandbox
+`firefox` is the same for Firefox (the version the lock names, from
+Mozilla's release archive): felt's Firefox suites of the web engine's unit
+tests drive it through FIREFOX_EXECUTABLE, on an X display felt starts
+itself (Xvfb, the host's) when none is set.
+
+Chrome and Firefox need the host's X11, NSS, GTK and audio libraries at run
+time (the workstation's and the web CI images' package sets); the sandbox
 leaves /usr/lib readable.
 """
 
@@ -35,8 +40,15 @@ _CHROMEDRIVER_SHA256 = "7f397fa71614b2d97dcb06a87f3297c91725042803654d6c7fedcd10
 _CHROME_URL = "https://storage.googleapis.com/chrome-for-testing-public/%s/linux64/chrome-linux64.zip"
 _CHROMEDRIVER_URL = "https://storage.googleapis.com/chrome-for-testing-public/%s/linux64/chromedriver-linux64.zip"
 
-def _locked_chrome_version(rctx):
-    """The `chrome: version:` of package_lock.yaml (a small, fixed shape; no YAML parser here)."""
+# The Firefox version the lock named when this was pinned, and the sha256 of
+# linux-x86_64's firefox-<version>.tar.xz.
+_FIREFOX_VERSION = "148.0"
+_FIREFOX_SHA256 = "a3ea5907006baa19183d5f582f7781c1d0e22fd1605603c4a76fc14b7f55be23"
+
+_FIREFOX_URL = "https://ftp.mozilla.org/pub/firefox/releases/%s/linux-x86_64/en-US/firefox-%s.tar.xz"
+
+def _locked_version(rctx, browser):
+    """The `<browser>: version:` of package_lock.yaml (a small, fixed shape; no YAML parser here)."""
 
     # Read from the tree, not by label: lib/web_ui/dev has no BUILD file.
     lock = rctx.path(Label("//:MODULE.bazel")).dirname.get_child("engine/src/flutter/lib/web_ui/dev/package_lock.yaml")
@@ -48,12 +60,12 @@ def _locked_chrome_version(rctx):
             continue
         if not line.startswith(" "):
             section = stripped.rstrip(":")
-        elif section == "chrome" and stripped.startswith("version:"):
+        elif section == browser and stripped.startswith("version:"):
             return stripped[len("version:"):].strip().strip("'\"")
-    fail("lib/web_ui/dev/package_lock.yaml names no chrome version")
+    fail("lib/web_ui/dev/package_lock.yaml names no %s version" % browser)
 
 def _chrome_impl(rctx):
-    named = _locked_chrome_version(rctx)
+    named = _locked_version(rctx, "chrome")
     if named != _CHROME_VERSION:
         fail(("lib/web_ui/dev/package_lock.yaml names Chrome %s, but %s pins %s: update _CHROME_VERSION, " +
               "_CHROME_SHA256 and _CHROMEDRIVER_SHA256 (sha256sum of %s and %s).") % (
@@ -95,12 +107,57 @@ chrome = repository_rule(
     doc = "Chrome for Testing and its chromedriver at the version lib/web_ui/dev/package_lock.yaml pins, for the tool's web tests.",
 )
 
+def _firefox_impl(rctx):
+    named = _locked_version(rctx, "firefox")
+    if named != _FIREFOX_VERSION:
+        fail(("lib/web_ui/dev/package_lock.yaml names Firefox %s, but %s pins %s: update _FIREFOX_VERSION and " +
+              "_FIREFOX_SHA256 (sha256sum of %s).") % (
+            named,
+            "build_defs/repositories/browsers.bzl",
+            _FIREFOX_VERSION,
+            _FIREFOX_URL % (named, named),
+        ))
+    rctx.download_and_extract(
+        url = _FIREFOX_URL % (named, named),
+        sha256 = _FIREFOX_SHA256,
+        type = "tar.xz",
+    )
+
+    # The policy felt writes beside the executable before it launches Firefox
+    # (no update checks); here already, so that felt finds it and writes
+    # nothing into the repository.
+    rctx.file("firefox/distribution/policies.json", """{
+  "policies": {
+    "DisableAppUpdate": true
+  }
+}
+""")
+    rctx.file("BUILD.bazel", """# Firefox %s, the browser lib/web_ui/dev/package_lock.yaml pins (browsers.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+# The browser's directory whole: the executable loads its libraries and
+# resources from beside itself.
+filegroup(
+    name = "firefox",
+    srcs = glob(["firefox/**"]),
+)
+
+exports_files(["firefox/firefox"])
+""" % named)
+
+firefox = repository_rule(
+    implementation = _firefox_impl,
+    doc = "Firefox at the version lib/web_ui/dev/package_lock.yaml pins, for the web engine's Firefox suites.",
+)
+
 def _browsers_impl(mctx):
     chrome(name = "chrome")
+    firefox(name = "firefox")
     root = mctx.modules[0] if mctx.modules else None
     if root != None and root.is_root:
         return mctx.extension_metadata(
-            root_module_direct_deps = ["chrome"],
+            root_module_direct_deps = ["chrome", "firefox"],
             root_module_direct_dev_deps = [],
             reproducible = True,
         )
@@ -108,5 +165,5 @@ def _browsers_impl(mctx):
 
 browsers = module_extension(
     implementation = _browsers_impl,
-    doc = "The browsers the tests drive (@chrome: Chrome for Testing at the web engine's pinned version).",
+    doc = "The browsers the tests drive, at the web engine's pinned versions: @chrome (Chrome for Testing), @firefox.",
 )

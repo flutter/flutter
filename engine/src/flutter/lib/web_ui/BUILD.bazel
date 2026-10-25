@@ -220,12 +220,13 @@ _PACKAGE_FILES = glob(
     ],
 )
 
-# felt_config.yaml's test suites a Linux host runs: Chrome's sixteen, each
-# over a bundle (the run configuration -- the CanvasKit variant, cross-origin
-# isolation, single-threaded skwasm, wimp, the browser's flags -- is felt's
-# own, read from felt_config.yaml by suite name). Firefox's need an X
-# display; Safari's and Edge's other hosts.
-_SUITES = {
+# felt_config.yaml's test suites a Linux host runs, each over a bundle (the
+# run configuration -- the CanvasKit variant, cross-origin isolation,
+# single-threaded skwasm, wimp, the browser's flags -- is felt's own, read
+# from felt_config.yaml by suite name): Chrome's sixteen and Firefox's eight
+# (on an X display felt starts itself: Xvfb, the host's). Safari's and
+# Edge's need other hosts.
+_CHROME_SUITES = {
     "chrome-coi-dart2wasm-skwasm-skwasm": "dart2wasm-skwasm-skwasm",
     "chrome-coi-dart2wasm-skwasm-ui": "dart2wasm-skwasm-ui",
     "chrome-coi-fallbacks": "fallbacks",
@@ -244,10 +245,65 @@ _SUITES = {
     "chrome-full-dart2js-canvaskit-ui": "dart2js-canvaskit-ui",
 }
 
-# Every suite: the web engine's unit tests whole.
+_FIREFOX_SUITES = {
+    "firefox-coi-dart2wasm-skwasm-skwasm": "dart2wasm-skwasm-skwasm",
+    "firefox-coi-dart2wasm-skwasm-ui": "dart2wasm-skwasm-ui",
+    "firefox-dart2js-canvaskit-canvaskit": "dart2js-canvaskit-canvaskit",
+    "firefox-dart2js-canvaskit-engine": "dart2js-canvaskit-engine",
+    "firefox-dart2js-canvaskit-ui": "dart2js-canvaskit-ui",
+    "firefox-dart2wasm-canvaskit-engine": "dart2wasm-canvaskit-engine",
+    "firefox-dart2wasm-skwasm-ui": "dart2wasm-skwasm-ui",
+    "firefox-fallbacks": "fallbacks",
+}
+
+_SUITES = _CHROME_SUITES | _FIREFOX_SUITES
+
+# The browsers: each suite's executable, the variable felt finds it through,
+# its directory, and the environment it needs inside Bazel's sandbox (its
+# own sandbox does not start within another).
+_BROWSERS = {
+    "chrome": {
+        "browser": "@chrome//:chrome-linux64/chrome",
+        "env": {"CHROME_NO_SANDBOX": "true"},
+        "files": ["@chrome"],
+        "variable": "CHROME_EXECUTABLE",
+    },
+    "firefox": {
+        "browser": "@firefox//:firefox/firefox",
+        "env": {
+            "MOZ_DISABLE_CONTENT_SANDBOX": "1",
+            "MOZ_DISABLE_GPU_SANDBOX": "1",
+            "MOZ_DISABLE_RDD_SANDBOX": "1",
+            "MOZ_DISABLE_SOCKET_PROCESS_SANDBOX": "1",
+        },
+        "files": ["@firefox"],
+        "variable": "FIREFOX_EXECUTABLE",
+    },
+}
+
+# Files a suite leaves out: a file that declares no test on the suite's
+# browser runs as "no tests ran" on its own (felt's one run over the whole
+# suite does not notice).
+_EXCLUDED = {
+    # testMain returns at once on Firefox (flutter/flutter#160096).
+    "firefox-dart2js-canvaskit-engine": ["test/engine/semantics/semantics_test.dart"],
+    "firefox-dart2wasm-canvaskit-engine": ["test/engine/semantics/semantics_test.dart"],
+}
+
+# Every suite: the web engine's unit tests whole; and per browser.
 test_suite(
     name = "tests",
     tests = _SUITES.keys(),
+)
+
+test_suite(
+    name = "chrome_tests",
+    tests = _CHROME_SUITES.keys(),
+)
+
+test_suite(
+    name = "firefox_tests",
+    tests = _FIREFOX_SUITES.keys(),
 )
 
 [
@@ -255,9 +311,12 @@ test_suite(
         name = suite,
         # The Skia Gold client reads the engine's release version file.
         srcs = _PACKAGE_FILES + ["//engine/src/flutter:.engine-release.version"],
-        browser = "@chrome//:chrome-linux64/chrome",
-        browser_files = ["@chrome//:chrome"],
+        browser = _BROWSERS[suite.split("-")[0]]["browser"],
+        browser_files = _BROWSERS[suite.split("-")[0]]["files"],
+        browser_variable = _BROWSERS[suite.split("-")[0]]["variable"],
         bundle = _SUITES[suite],
+        env = _BROWSERS[suite.split("-")[0]]["env"],
+        exclude = _EXCLUDED.get(suite, []),
         fallback_fonts = ["@google_fonts_for_unit_tests//:fonts"],
         felt = ":dev/felt",
         fonts = ["//engine/src/flutter/txt:third_party/fonts/" + font for font in [
