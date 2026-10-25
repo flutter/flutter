@@ -16,6 +16,7 @@ import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -35,7 +36,7 @@ import 'xcodeproj.dart';
 /// - [launchAppWithoutDebugger]: Uses `devicectl` to install and launch the app without a debugger.
 /// - [launchAppWithLLDBDebugger]: Uses `devicectl` to install and launch the app, then attaches an LLDB debugger.
 /// - [launchAppWithXcodeDebugger]: Uses Xcode automation to install, launch, and debug the app.
-class IOSCoreDeviceLauncher {
+class IOSCoreDeviceLauncher with ToolContextMixin {
   IOSCoreDeviceLauncher({
     required this._coreDeviceControl,
     required Logger logger,
@@ -44,6 +45,7 @@ class IOSCoreDeviceLauncher {
     required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     required Version? deviceVersion,
+    required this.toolContext,
     @visibleForTesting LLDB? lldb,
   }) : _logger = logger,
        _lldb =
@@ -60,6 +62,9 @@ class IOSCoreDeviceLauncher {
   final XcodeDebug _xcodeDebug;
   final FileSystem _fileSystem;
   final LLDB _lldb;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   /// Contains a stream that devicectl sends logs to.
   final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
@@ -247,6 +252,7 @@ class IOSCoreDeviceLauncher {
         project: project.parent,
         buildInfo: debuggingOptions.buildInfo,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: toolContext,
       );
 
       debugProject = XcodeDebugProject(

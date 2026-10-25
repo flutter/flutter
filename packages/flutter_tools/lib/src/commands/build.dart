@@ -120,17 +120,11 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildSwiftPackage(
         analytics: analytics,
-        artifacts: artifacts,
         buildSystem: buildSystem,
-        cache: cache,
         codesign: codesign,
         featureFlags: featureFlags,
-        fileSystem: fs,
-        flutterVersion: flutterVersion,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
         templateRenderer: templateRenderer,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
         xcode: xcode,
       ),

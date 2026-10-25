@@ -58,6 +58,7 @@ class MacOSDevice extends DesktopDevice {
       targetOverride: mainPath,
       verboseLogging: logger.isVerbose,
       usingCISystem: usingCISystem,
+      toolContext: toolContext,
     );
   }
 

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 import '../xcode_project.dart';
@@ -18,9 +21,9 @@ abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [MacOSApp] from a macOS project directory.
-  factory MacOSApp.fromMacOSProject(MacOSProject project) {
+  factory MacOSApp.fromMacOSProject(MacOSProject project, {required ToolContext toolContext}) {
     // projectBundleId is unused for macOS apps. Use a placeholder bundle ID.
-    return BuildableMacOSApp(project, 'com.example.placeholder');
+    return BuildableMacOSApp(project, 'com.example.placeholder', toolContext: toolContext);
   }
 
   /// Creates a new [MacOSApp] from an existing app bundle.
@@ -159,10 +162,14 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
   final FileSystemEntity applicationPackage;
 }
 
-class BuildableMacOSApp extends MacOSApp {
-  BuildableMacOSApp(this.project, String projectBundleId) : super(projectBundleId: projectBundleId);
+class BuildableMacOSApp extends MacOSApp with ToolContextMixin {
+  BuildableMacOSApp(this.project, String projectBundleId, {required this.toolContext})
+    : super(projectBundleId: projectBundleId);
 
   final MacOSProject project;
+  @override
+  @protected
+  final ToolContext toolContext;
 
   @override
   String get name => 'macOS';
@@ -171,13 +178,13 @@ class BuildableMacOSApp extends MacOSApp {
   String? applicationBundle(BuildInfo buildInfo) {
     final File appBundleNameFile = project.nameFile;
     if (!appBundleNameFile.existsSync()) {
-      globals.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
+      logger.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
       return null;
     }
 
-    return globals.fs.path.join(
+    return fs.path.join(
       project.parent.directory.path,
-      getMacOSBuildDirectory(),
+      getMacOSBuildDirectory(config: config, fileSystem: fs),
       'Build',
       'Products',
       bundleDirectory(buildInfo),
@@ -195,7 +202,7 @@ class BuildableMacOSApp extends MacOSApp {
     if (directory == null) {
       return null;
     }
-    final _BundleInfo? bundleInfo = MacOSApp._executableFromBundle(globals.fs.directory(directory));
+    final _BundleInfo? bundleInfo = MacOSApp._executableFromBundle(fs.directory(directory));
     return bundleInfo?.executable;
   }
 }

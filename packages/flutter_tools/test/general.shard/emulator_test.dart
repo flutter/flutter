@@ -49,7 +49,11 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     sdk = FakeAndroidSdk();
-    xcode = Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
+    xcode = Xcode.test(
+      processManager: fakeProcessManager,
+      fileSystem: fileSystem,
+      toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager, fs: fileSystem),
+    );
 
     sdk
       ..avdManagerPath = 'avdmanager'

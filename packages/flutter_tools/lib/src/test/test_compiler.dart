@@ -143,7 +143,7 @@ class TestCompiler with ToolContextMixin {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
     return fs.path.join(
       flutterProject!.directory.path,
-      getBuildDirectory(),
+      getBuildDirectory(config, fs),
       'test_cache',
       getDefaultCachedKernelPath(
         config: config,
