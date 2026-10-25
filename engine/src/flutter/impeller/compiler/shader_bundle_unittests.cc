@@ -5,8 +5,13 @@
 #include "gtest/gtest.h"
 #include "impeller/compiler/shader_bundle.h"
 
+#include <filesystem>
+
+#include "flutter/fml/file.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
 #include "impeller/compiler/source_options.h"
+#include "impeller/compiler/switches.h"
 #include "impeller/compiler/types.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
@@ -346,6 +351,47 @@ TEST(ShaderBundleTest, InjectsTargetDefinesDuringCompilation) {
   std::optional<fb::shaderbundle::ShaderBundleT> bundle =
       GenerateShaderBundleFlatbuffer(config, options);
   EXPECT_FALSE(bundle.has_value());
+}
+
+TEST(ShaderBundleTest, GenerateShaderBundleEscapesSpacesInDepfile) {
+  fml::ScopedTemporaryDirectory temp_dir;
+  fml::UniqueFD spaced_fd = fml::OpenDirectory(temp_dir.fd(), "with space",
+                                               /*create_if_necessary=*/true,
+                                               fml::FilePermission::kReadWrite);
+  ASSERT_TRUE(spaced_fd.is_valid());
+  auto fixture =
+      flutter::testing::OpenFixtureAsMapping("flutter_gpu_unlit.frag");
+  ASSERT_TRUE(fixture);
+  ASSERT_TRUE(fml::WriteAtomically(spaced_fd, "unlit.frag", *fixture));
+
+  const std::filesystem::path root(temp_dir.path());
+  // generic_string() uses forward slashes so the JSON stays valid on Windows.
+  const std::string shader_path =
+      (root / "with space" / "unlit.frag").generic_string();
+
+  Switches switches;
+  switches.working_directory = std::make_shared<fml::UniqueFD>(
+      fml::OpenDirectory(temp_dir.path().c_str(), /*create_if_necessary=*/false,
+                         fml::FilePermission::kReadWrite));
+  switches.shader_bundle =
+      R"({"UnlitFragment": {"type": "fragment", "file": ")" + shader_path +
+      R"("}})";
+  switches.sl_file_name = root / "out bundle.shaderbundle";
+  switches.depfile_path = "out.d";
+
+  ASSERT_TRUE(GenerateShaderBundle(switches));
+
+  auto depfile =
+      fml::FileMapping::CreateReadOnly(*switches.working_directory, "out.d");
+  ASSERT_TRUE(depfile);
+  const std::string contents(
+      reinterpret_cast<const char*>(depfile->GetMapping()), depfile->GetSize());
+
+  EXPECT_NE(contents.find("out\ bundle.shaderbundle: "), std::string::npos)
+      << contents;
+  EXPECT_NE(contents.find("with\ space/unlit.frag"), std::string::npos)
+      << contents;
+  EXPECT_EQ(contents.find("with space"), std::string::npos) << contents;
 }
 
 }  // namespace testing
