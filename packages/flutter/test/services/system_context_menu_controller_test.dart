@@ -207,7 +207,7 @@ void main() {
     expect(hideCount, 0);
   });
 
-  test('showing a second controller while one is visible is an error', () {
+  test('showing a second controller replaces the previous menu', () {
     // Create an active connection, which is required to show the system menu.
     final client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
     final TextInputConnection connection = TextInput.attach(client, client.configuration);
@@ -215,7 +215,12 @@ void main() {
       connection.close();
     });
 
-    final controller1 = SystemContextMenuController();
+    var controller1SystemHideCount = 0;
+    final controller1 = SystemContextMenuController(
+      onSystemHide: () {
+        controller1SystemHideCount += 1;
+      },
+    );
     addTearDown(() {
       controller1.dispose();
     });
@@ -234,14 +239,16 @@ void main() {
     expect(controller1.isVisible, isTrue);
     expect(controller2.isVisible, isFalse);
     const rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
-    expect(() {
-      controller2.showWithItems(rect2, items);
-    }, throwsAssertionError);
-    expect(controller1.isVisible, isTrue);
-    expect(controller2.isVisible, isFalse);
+    controller2.showWithItems(rect2, items);
+    expect(controller1.isVisible, isFalse);
+    expect(controller2.isVisible, isTrue);
+    expect(controller1SystemHideCount, 0);
 
     controller1.hide();
     expect(controller1.isVisible, isFalse);
+    expect(controller2.isVisible, isTrue);
+
+    controller2.hide();
     expect(controller2.isVisible, isFalse);
   });
 
@@ -645,6 +652,63 @@ void main() {
     final String callbackId1 = (items1[0] as IOSSystemContextMenuItemDataCustom).callbackId;
 
     expect(() => controller1.handleCustomContextMenuAction(callbackId1), throwsAssertionError);
+  });
+
+  test('showWithItems replaces a visible menu from another controller', () {
+    // Regression for https://github.com/flutter/flutter/issues/195181.
+    final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(connection.close);
+
+    final methodCalls = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
+        methodCalls.add(methodCall.method);
+        return;
+      },
+    );
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      );
+    });
+
+    var controller1SystemHideCount = 0;
+    final controller1 = SystemContextMenuController(
+      onSystemHide: () {
+        controller1SystemHideCount += 1;
+      },
+    );
+    final controller2 = SystemContextMenuController();
+    var controller1Disposed = false;
+    addTearDown(() {
+      if (!controller1Disposed) {
+        controller1.dispose();
+      }
+      controller2.dispose();
+    });
+
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    const items = <IOSSystemContextMenuItemData>[IOSSystemContextMenuItemDataCopy()];
+
+    controller1.showWithItems(rect, items);
+    expect(controller1.isVisible, isTrue);
+
+    controller2.showWithItems(rect, items);
+
+    expect(controller1.isVisible, isFalse);
+    expect(controller2.isVisible, isTrue);
+
+    controller1.dispose();
+    controller1Disposed = true;
+    expect(controller2.isVisible, isTrue);
+    expect(controller1SystemHideCount, 0);
+    expect(methodCalls, <String>[
+      'ContextMenu.showSystemContextMenu',
+      'ContextMenu.showSystemContextMenu',
+    ]);
   });
 
   test('platform dismissal clears callbacks', () {

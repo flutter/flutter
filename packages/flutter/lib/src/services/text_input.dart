@@ -2904,6 +2904,14 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
 
   static SystemContextMenuController? _lastShown;
 
+  /// Releases callbacks registered by a menu that this one is replacing.
+  void _clearPreviousMenuCallbacks() {
+    final SystemContextMenuController? previous = _lastShown;
+    if (previous != null && previous != this) {
+      previous._customActionCallbacks.clear();
+    }
+  }
+
   final Map<String, VoidCallback> _customActionCallbacks = <String, VoidCallback>{};
 
   /// The target [Rect] that was last given to [show].
@@ -2989,15 +2997,11 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     );
 
     // Don't show the same thing that's already being shown.
-    if (_lastShown != null && _lastShown!.isVisible && _lastShown!._lastTargetRect == targetRect) {
+    if (_lastShown == this && isVisible && _lastTargetRect == targetRect) {
       return Future<void>.value();
     }
 
-    assert(
-      _lastShown == null || _lastShown == this || !_lastShown!.isVisible,
-      'Attempted to show while another instance was still visible.',
-    );
-
+    _clearPreviousMenuCallbacks();
     ServicesBinding.systemContextMenuClient = this;
 
     _lastTargetRect = targetRect;
@@ -3049,18 +3053,14 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     );
 
     // Don't show the same thing that's already being shown.
-    if (_lastShown != null &&
-        _lastShown!.isVisible &&
-        _lastShown!._lastTargetRect == targetRect &&
-        listEquals(_lastShown!._lastItems, items)) {
+    if (_lastShown == this &&
+        isVisible &&
+        _lastTargetRect == targetRect &&
+        listEquals(_lastItems, items)) {
       return Future<void>.value();
     }
 
-    assert(
-      _lastShown == null || _lastShown == this || !_lastShown!.isVisible,
-      'Attempted to show while another instance was still visible.',
-    );
-
+    _clearPreviousMenuCallbacks();
     ServicesBinding.systemContextMenuClient = this;
 
     _customActionCallbacks.clear();
