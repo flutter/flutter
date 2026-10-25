@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
       onEnter: (_) => setState(
         () => _tooltipController = TooltipWindowController(
           parent: WindowScope.of(context),
-          anchorRect: _getAnchorRect()!,
+          anchorRect: () => _getAnchorRect()!,
           positioner: const WindowPositioner(
             parentAnchor: WindowPositionerAnchor.right,
             childAnchor: WindowPositionerAnchor.left,

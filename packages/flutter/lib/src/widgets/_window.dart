@@ -17,6 +17,7 @@
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window_io.dart' if (dart.library.js_interop) '_window_web.dart' as window_impl;
@@ -64,6 +65,10 @@ See: https://github.com/flutter/flutter/issues/30701.
 ///  * [WindowController], the controller for regular top-level windows.
 @internal
 sealed class BaseWindowController extends ChangeNotifier {
+  BaseWindowController() {
+    _ContentSizeUpdater.instance.register(this);
+  }
+
   /// The current size of the drawable area of the window.
   ///
   /// This might differ from the requested size.
@@ -98,11 +103,22 @@ sealed class BaseWindowController extends ChangeNotifier {
     _view = view;
   }
 
+  /// Called after every frame with the size the [rootView] content was laid
+  /// out at, as long as the view has a [RenderView].
+  ///
+  /// Parent windows are notified before their children, so implementations
+  /// may rely on the parent geometry having been pushed already.
+  @protected
+  void updateContentSize(Size size) {}
+
   /// Whether or not the underlying native window is destroyed.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool get isDestroyed;
+
+  /// The number of ancestors of this window; top level windows have depth 0.
+  int get _depth;
 }
 
 /// Delegate class for regular window controller.
@@ -435,6 +451,9 @@ abstract class WindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setFullscreen(bool fullscreen, {Display? display});
+
+  @override
+  int get _depth => 0;
 }
 
 /// Delegate class for dialog window controller.
@@ -728,6 +747,9 @@ abstract class DialogWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setMinimized(bool minimized);
+
+  @override
+  int get _depth => parent == null ? 0 : parent!._depth + 1;
 }
 
 /// Delegate class for tooltip window controller.
@@ -790,7 +812,9 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// The [parent] argument specifies the parent window of this tooltip.
   ///
   /// The [anchorRect] argument specifies the rectangle in the parent's coordinate
-  /// space to which the tooltip is anchored.
+  /// space to which the tooltip is anchored. The getter is re-evaluated every
+  /// time the tooltip position is computed. It is called in after widget layout
+  /// has been calculated.
   ///
   /// The [positioner] argument specifies how the tooltip should be positioned
   /// relative to the [anchorRect].
@@ -807,7 +831,7 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   factory TooltipWindowController({
     required BaseWindowController parent,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     BoxConstraints constraints = const BoxConstraints(),
     TooltipWindowControllerDelegate? delegate,
@@ -864,7 +888,10 @@ abstract class TooltipWindowController extends BaseWindowController {
 
   /// Updates the position of the tooltip.
   ///
-  /// This requests that the tooltip be repositioned according to the new [anchorRect] and/or [positioner].
+  /// This requests that the tooltip be repositioned according to the new [positioner].
+  ///
+  /// The anchor rect is captured at creation and cannot be changed; to anchor
+  /// the tooltip to a different rectangle, create a new controller.
   ///
   /// On Linux due to a platform limitation this has no effect and only the
   /// positioner passed in the constructor is used. This means that tooltips
@@ -872,7 +899,10 @@ abstract class TooltipWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
+  void updatePosition({WindowPositioner? positioner});
+
+  @override
+  int get _depth => parent._depth + 1;
 }
 
 /// Delegate class for popup window controller.
@@ -932,7 +962,9 @@ abstract class PopupWindowController extends BaseWindowController {
   /// The [parent] argument specifies the parent window of this popup.
   ///
   /// The [anchorRect] argument specifies the rectangle in the parent's coordinate
-  /// space to which the popup is anchored.
+  /// space to which the popup is anchored. The getter is re-evaluated every
+  /// time the popup position is computed. It is called in after widget layout
+  /// has been calculated.
   ///
   /// The [positioner] argument specifies how the popup should be positioned
   /// relative to the [anchorRect].
@@ -946,7 +978,7 @@ abstract class PopupWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   factory PopupWindowController({
     required BaseWindowController parent,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     BoxConstraints? constraints,
     PopupWindowControllerDelegate? delegate,
@@ -1000,11 +1032,14 @@ abstract class PopupWindowController extends BaseWindowController {
 
   /// Updates the position of the popup.
   ///
-  /// This requests that the popup be repositioned according to the new [anchorRect] and/or [positioner].
+  /// This requests that the popup be repositioned according to the new [positioner].
+  ///
+  /// The anchor rect is captured at creation and cannot be changed; to anchor
+  /// the popup to a different rectangle, create a new controller.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
+  void updatePosition({WindowPositioner? positioner});
 
   /// Returns the offset of the popup's top-left corner in the parent window client area.
   ///
@@ -1057,6 +1092,9 @@ abstract class PopupWindowController extends BaseWindowController {
       }
     }
   }
+
+  @override
+  int get _depth => parent._depth + 1;
 }
 
 /// Delegate class for satellite window controller.
@@ -1337,6 +1375,9 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void activate();
+
+  @override
+  int get _depth => parent._depth + 1;
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
@@ -1390,7 +1431,7 @@ abstract class WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   });
@@ -1406,7 +1447,7 @@ abstract class WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   });
@@ -1481,7 +1522,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -1492,7 +1533,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -2618,5 +2659,42 @@ class _WindowManagerState extends State<WindowManager> {
         },
       ),
     );
+  }
+}
+
+/// Reports the laid out content size of every window to its controller after
+/// each frame, see [BaseWindowController.updateContentSize].
+class _ContentSizeUpdater {
+  _ContentSizeUpdater() {
+    WidgetsBinding.instance.addPersistentFrameCallback((_) => _update());
+  }
+
+  static final _ContentSizeUpdater instance = _ContentSizeUpdater();
+
+  final List<BaseWindowController> _controllers = <BaseWindowController>[];
+
+  void register(BaseWindowController controller) {
+    _controllers.add(controller);
+  }
+
+  void _update() {
+    _controllers.removeWhere((BaseWindowController controller) => controller.isDestroyed);
+    if (_controllers.isEmpty) {
+      return;
+    }
+    final renderViews = <int, RenderView>{
+      for (final RenderView view in WidgetsBinding.instance.renderViews)
+        view.flutterView.viewId: view,
+    };
+    // Parents first so that children are positioned against the updated
+    // parent geometry.
+    final List<BaseWindowController> controllers = _controllers.toList()
+      ..sort((BaseWindowController a, BaseWindowController b) => a._depth.compareTo(b._depth));
+    for (final controller in controllers) {
+      final RenderView? renderView = renderViews[controller.rootView.viewId];
+      if (renderView != null) {
+        controller.updateContentSize(renderView.size);
+      }
+    }
   }
 }

@@ -103,19 +103,30 @@ void testWindowController() {
 @pragma('vm:entry-point')
 void testWindowControllerRetainCycle() {}
 
+/// Pushes the logical content size of the last view to the native window,
+/// like the framework window controllers do after each frame.
+@Native<Void Function(Double, Double)>(symbol: 'PushContentSize')
+external void pushContentSize(double width, double height);
+
+void _renderAndPushContentSize(Size size) {
+  final FlutterView view = PlatformDispatcher.instance.views.last;
+  final baseRecorder = PictureRecorder();
+  final canvas = Canvas(baseRecorder);
+  final blackPaint = Paint()..color = const Color(0xFF000000);
+  canvas.drawRect(Offset.zero & size, blackPaint);
+  final Picture picture = baseRecorder.endRecording();
+  final builder = SceneBuilder();
+  builder.addPicture(Offset.zero, picture);
+  view.render(builder.build(), size: size);
+  final Size logicalSize = size / view.devicePixelRatio;
+  pushContentSize(logicalSize.width, logicalSize.height);
+}
+
 @pragma('vm:entry-point')
 // Used in FlutterWindowControllerSizeTest.SizedToContentResizable
 void testRenderSizedToContentResizable() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-    final baseRecorder = PictureRecorder();
-    final canvas = Canvas(baseRecorder);
-    final blackPaint = Paint()..color = const Color(0xFF000000);
-    canvas.drawRect(const Rect.fromLTRB(0.0, 0.0, 300, 300.0), blackPaint);
-    final Picture picture = baseRecorder.endRecording();
-
-    final builder = SceneBuilder();
-    builder.addPicture(Offset.zero, picture);
-    PlatformDispatcher.instance.views.last.render(builder.build(), size: const Size(300, 300));
+    _renderAndPushContentSize(const Size(300, 300));
   };
 
   signalNativeTest();
@@ -126,15 +137,7 @@ void testRenderSizedToContentResizable() {
 void testRenderSizedToContent() {
   var frameCount = 0;
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-    final size = frameCount == 0 ? const Size(300, 300) : const Size(200, 200);
-    final baseRecorder = PictureRecorder();
-    final canvas = Canvas(baseRecorder);
-    final blackPaint = Paint()..color = const Color(0xFF000000);
-    canvas.drawRect(Offset.zero & size, blackPaint);
-    final Picture picture = baseRecorder.endRecording();
-    final builder = SceneBuilder();
-    builder.addPicture(Offset.zero, picture);
-    PlatformDispatcher.instance.views.last.render(builder.build(), size: size);
+    _renderAndPushContentSize(frameCount == 0 ? const Size(300, 300) : const Size(200, 200));
     ++frameCount;
     if (frameCount == 1) {
       PlatformDispatcher.instance.scheduleFrame();

@@ -83,11 +83,6 @@ struct FlutterWindowCreationRequest {
   void (*on_should_close)();
   void (*on_will_close)();
   void (*notify_listeners)();
-  // For sized to content windows with positioner returns the desired window position for given
-  // configuration. All coordinates are in logical space.
-  FlutterWindowRect* (*on_get_window_position)(const FlutterWindowSize& child_size,
-                                               const FlutterWindowRect& parent_rect,
-                                               const FlutterWindowRect& output_rect);
 };
 
 extern "C" {
@@ -128,6 +123,9 @@ void* InternalFlutter_Window_GetHandle(int64_t engine_id, FlutterViewIdentifier 
 FLUTTER_DARWIN_EXPORT
 FlutterWindowSize InternalFlutter_Window_GetContentSize(void* window);
 
+// Sets the content size of the window, clamped to its constraints. The size is
+// applied when the next surface is committed so that resizing the window does
+// not race with presenting the surface.
 FLUTTER_DARWIN_EXPORT
 void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSize* size);
 
@@ -169,19 +167,33 @@ FLUTTER_DARWIN_EXPORT
 bool InternalFlutter_Window_IsActivated(void* window);
 
 FLUTTER_DARWIN_EXPORT
-void InternalFlutter_Window_UpdatePosition(void* window);
-
-FLUTTER_DARWIN_EXPORT
 void InternalFlutter_Window_Reparent(int64_t engineId, void* window, int64_t newParentId);
 
 FLUTTER_DARWIN_EXPORT
-void* InternalFlutter_Window_GetParent(void* window);
-
-FLUTTER_DARWIN_EXPORT
-FlutterWindowRect InternalFlutter_Window_FrameRectAsAnchorRect(void* window);
-
-FLUTTER_DARWIN_EXPORT
 FlutterWindowOffset InternalFlutter_Window_GetOffsetInParent(void* window);
+
+// Moves the window so that its content area matches the given rect in Flutter
+// global coordinates (top-left origin over the union of all screens). Like
+// InternalFlutter_Window_SetContentSize, a size change is applied when the
+// next surface is committed.
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_SetContentRect(void* window, const FlutterWindowRect* rect);
+
+// Returns the content rect of the parent window in Flutter global coordinates,
+// or an empty rect if the window has no parent.
+FLUTTER_DARWIN_EXPORT
+FlutterWindowRect InternalFlutter_Window_ParentContentRect(void* window);
+
+// Returns the visible frame of the screen hosting the window (or its parent)
+// in Flutter global coordinates, or an empty rect if it is not on screen.
+FLUTTER_DARWIN_EXPORT
+FlutterWindowRect InternalFlutter_Window_ScreenVisibleFrame(void* window);
+
+// Notifies the window that the framework finished sizing it to its content;
+// from now on the window size is owned by the user. Takes effect once any
+// pending size change has been applied.
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_SizingComplete(void* window);
 
 // NOLINTEND(google-objc-function-naming)
 }

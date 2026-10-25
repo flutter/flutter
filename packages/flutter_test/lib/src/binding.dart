@@ -640,7 +640,6 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required this._constraints,
-    required this._anchorRect,
     required this._positioner,
     required BaseWindowController parent,
   }) : _parent = parent,
@@ -667,7 +666,6 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
   final TooltipWindowControllerDelegate _delegate;
   final _TestWindowingOwner windowingOwner;
   BoxConstraints _constraints;
-  ui.Rect _anchorRect;
   WindowPositioner _positioner;
   final BaseWindowController _parent;
   Size? _lastRenderedSize;
@@ -685,8 +683,7 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
   }
 
   @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
-    _anchorRect = anchorRect ?? _anchorRect;
+  void updatePosition({WindowPositioner? positioner}) {
     _positioner = positioner ?? _positioner;
   }
 
@@ -715,7 +712,6 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required this._constraints,
-    required this._anchorRect,
     required this._positioner,
     required BaseWindowController parent,
   }) : _parent = parent,
@@ -742,7 +738,6 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
   final PopupWindowControllerDelegate _delegate;
   final _TestWindowingOwner windowingOwner;
   BoxConstraints _constraints;
-  ui.Rect _anchorRect;
   WindowPositioner _positioner;
   final BaseWindowController _parent;
   Size? _lastRenderedSize;
@@ -760,8 +755,7 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
   }
 
   @override
-  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
-    _anchorRect = anchorRect ?? _anchorRect;
+  void updatePosition({WindowPositioner? positioner}) {
     _positioner = positioner ?? _positioner;
   }
 
@@ -1059,7 +1053,7 @@ class _TestWindowingOwner extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required Rect anchorRect,
+    required ValueGetter<Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -1068,7 +1062,6 @@ class _TestWindowingOwner extends WindowingOwner {
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
       constraints: constraints,
-      anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
     );
@@ -1078,7 +1071,7 @@ class _TestWindowingOwner extends WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints constraints,
-    required ui.Rect anchorRect,
+    required ValueGetter<ui.Rect> anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -1087,7 +1080,6 @@ class _TestWindowingOwner extends WindowingOwner {
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
       constraints: constraints,
-      anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
     );
