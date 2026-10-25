@@ -54,25 +54,15 @@ def _resources(_os, _inputs):
     # dart2js and dart2wasm each hold the whole engine in memory.
     return {"cpu": 1, "memory": 2500}
 
-def _web_ui_test_bundle_impl(ctx):
-    test = ctx.file.test
-    config = COMPILE_CONFIGS[ctx.attr.compile_config]
-    set_root = "%s/test/%s" % (ctx.label.package, ctx.attr.test_set)
-    if not test.path.startswith(set_root + "/"):
-        fail("%s: %s is not under %s" % (ctx.label, test.path, set_root))
-    relative = test.path[len(set_root) + 1:]
-    out = ctx.actions.declare_directory(ctx.label.name)
-    sdk = ctx.attr._sdk[DefaultInfo].files
-    dart = [f for f in sdk.to_list() if f.short_path.endswith("/bin/dart")][0]
-    sdk_root = dart.path[:-len("/bin/dart")]
+def _compile_command(config, dart, sdk_root, package_config, test, out, relative):
+    """felt's compile command for one configuration (compile_bundle_step.dart), and its output."""
     defines = [
         "-DFLUTTER_WEB_USE_SKIA=%s" % ("true" if config.renderer == "canvaskit" else "false"),
         "-DFLUTTER_WEB_USE_SKWASM=%s" % ("true" if config.renderer == "skwasm" else "false"),
     ]
-    package_config = ctx.file.package_config
     if config.compiler == "dart2js":
         target = "%s/%s.browser_test.dart.js" % (out.path, relative)
-        command = [
+        return target, [
             dart.path,
             "compile",
             "js",
@@ -81,39 +71,55 @@ def _web_ui_test_bundle_impl(ctx):
             "--disable-inlining",
             "--enable-asserts",
         ] + defines + ["-O2", "-o", target, test.path]
-    else:
-        target = "%s/%s.browser_test.dart.wasm" % (out.path, relative)
-        command = [
-            sdk_root + "/bin/dartaotruntime",
-            sdk_root + "/bin/snapshots/dart2wasm_product.snapshot",
-            "--libraries-spec=" + sdk_root + "/lib/libraries.json",
-            "--packages=" + package_config.path,
-            "--enable-asserts",
-            "--enable-experimental-ffi",
-            "--enable-experimental-wasm-interop",
-        ] + defines + ([
-            "--import-shared-memory",
-            "--shared-memory-max-pages=32768",
-        ] if config.renderer == "skwasm" else []) + [test.path, target]
+    target = "%s/%s.browser_test.dart.wasm" % (out.path, relative)
+    return target, [
+        sdk_root + "/bin/dartaotruntime",
+        sdk_root + "/bin/snapshots/dart2wasm_product.snapshot",
+        "--libraries-spec=" + sdk_root + "/lib/libraries.json",
+        "--packages=" + package_config.path,
+        "--enable-asserts",
+        "--enable-experimental-ffi",
+        "--enable-experimental-wasm-interop",
+    ] + defines + ([
+        "--import-shared-memory",
+        "--shared-memory-max-pages=32768",
+    ] if config.renderer == "skwasm" else []) + [test.path, target]
+
+def _web_ui_test_bundle_impl(ctx):
+    test = ctx.file.test
+    configs = [COMPILE_CONFIGS[name] for name in ctx.attr.compile_configs]
+    set_root = "%s/test/%s" % (ctx.label.package, ctx.attr.test_set)
+    if not test.path.startswith(set_root + "/"):
+        fail("%s: %s is not under %s" % (ctx.label, test.path, set_root))
+    relative = test.path[len(set_root) + 1:]
+    out = ctx.actions.declare_directory(ctx.label.name)
+    sdk = ctx.attr._sdk[DefaultInfo].files
+    dart = [f for f in sdk.to_list() if f.short_path.endswith("/bin/dart")][0]
+    sdk_root = dart.path[:-len("/bin/dart")]
+    package_config = ctx.file.package_config
+
+    # One compile per configuration into the same directory (the fallbacks
+    # bundle holds a file's dart2wasm and dart2js outputs side by side).
+    script = ["set -e"]
+    for config in configs:
+        target, command = _compile_command(config, dart, sdk_root, package_config, test, out, relative)
+        script.append("mkdir -p \"$(dirname '%s')\"" % target)
+        script.append(" ".join(["'%s'" % part for part in command]))
     results = json.encode_indent({
         "name": ctx.attr.bundle,
         "directory": ctx.attr.test_set,
-        "builds": [{"compiler": config.compiler, "renderer": config.renderer}],
+        "builds": [{"compiler": config.compiler, "renderer": config.renderer} for config in configs],
         "results": {relative: "success"},
     }, indent = "  ")
+    script.append("cat > '%s/results.json' <<'EOF'\n%s\nEOF" % (out.path, results))
     ctx.actions.run_shell(
-        command = "set -e\nmkdir -p \"$(dirname '%s')\"\n%s\ncat > '%s/results.json' <<'EOF'\n%s\nEOF\n" % (
-            target,
-            " ".join(["'%s'" % part for part in command]),
-            out.path,
-            results,
-        ),
+        command = "\n".join(script) + "\n",
         inputs = depset(
             [test, package_config] + ctx.files.srcs,
             transitive = [sdk, ctx.attr.package_config[PubPackageConfigInfo].sources],
         ),
         outputs = [out],
-        mnemonic = "WebUiTestCompile" + ("Js" if config.compiler == "dart2js" else "Wasm"),
+        mnemonic = "WebUiTestCompile",
         progress_message = "Compiling %s for %s" % (relative, ctx.attr.bundle),
         resource_set = _resources,
         # The compilers write their caches and temporary files under HOME.
@@ -144,7 +150,11 @@ web_ui_test_bundle = rule(
         ),
         "test_set": attr.string(mandatory = True, doc = "The test set's directory under lib/web_ui/test (felt_config.yaml's test-sets)."),
         "bundle": attr.string(mandatory = True, doc = "felt's bundle name, written into results.json."),
-        "compile_config": attr.string(mandatory = True, values = COMPILE_CONFIGS.keys(), doc = "The compile configuration."),
+        "compile_configs": attr.string_list(
+            mandatory = True,
+            allow_empty = False,
+            doc = "The bundle's compile configurations (COMPILE_CONFIGS' names): one, or the fallbacks bundle's two.",
+        ),
         "package_config": attr.label(
             allow_single_file = [".json"],
             providers = [PubPackageConfigInfo],
@@ -155,13 +165,13 @@ web_ui_test_bundle = rule(
     },
 )
 
-def web_ui_test_bundles(name, bundle, compile_config, test_set, tests, srcs, package_config, **kwargs):
+def web_ui_test_bundles(name, bundle, compile_configs, test_set, tests, srcs, package_config, **kwargs):
     """One web_ui_test_bundle per test file of a bundle, and a filegroup over them.
 
     Args:
       name: the filegroup's name (`<name>` lists every file's directory).
       bundle: felt's bundle name (felt_config.yaml's test-bundles).
-      compile_config: the bundle's compile configuration (COMPILE_CONFIGS).
+      compile_configs: the bundle's compile configurations (COMPILE_CONFIGS' names).
       test_set: the test set's directory under lib/web_ui/test.
       tests: the test files (a glob over `test/<test_set>/**/*_test.dart`).
       srcs: the other sources the files import.
@@ -182,7 +192,7 @@ def web_ui_test_bundles(name, bundle, compile_config, test_set, tests, srcs, pac
             srcs = srcs,
             test_set = test_set,
             bundle = bundle,
-            compile_config = compile_config,
+            compile_configs = compile_configs,
             package_config = package_config,
             **kwargs
         )
@@ -363,8 +373,14 @@ web_ui_test = rule(
     },
 )
 
-def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags = [], **kwargs):
+def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags = [], network = [], **kwargs):
     """felt's test suite as Bazel tests: one web_ui_test per file, and a test_suite over them.
+
+    The tests run with no network (`block-network`): felt's Skia Gold client
+    finds Gold unreachable and the goldens compare nothing, as they do for a
+    developer offline -- a verdict that depends neither on the host's fonts
+    against CI's baselines nor on Gold. The few files that fetch from the
+    web by design (`network`) keep it, as `requires-network`.
 
     Args:
       name: the test_suite's name (the suite's).
@@ -374,6 +390,7 @@ def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags
       test_set: the test set's directory under lib/web_ui/test.
       size: each test's size.
       tags: each test's tags, and the suite's.
+      network: the test files that reach the web (font_fallback_service_test downloads a Noto font).
       **kwargs: web_ui_test's other attributes, the same for every file.
     """
     prefix = "test/%s/" % test_set
@@ -386,7 +403,7 @@ def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags
             bundle = ":bundles/%s/%s" % (bundle, stem),
             suite = suite,
             size = size,
-            tags = tags,
+            tags = tags + (["requires-network"] if test in network else ["block-network"]),
             **kwargs
         )
         names.append(":" + target)
