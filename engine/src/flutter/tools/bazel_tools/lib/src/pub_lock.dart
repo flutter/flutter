@@ -277,12 +277,74 @@ void _writeNames(
   buffer.writeln('$indent],');
 }
 
+void _writeHosted(
+  StringBuffer buffer,
+  PubLock lock,
+  PubWorkspace workspace, {
+  String indent = '    ',
+}) {
+  for (final String name in lock.hosted.keys.toList()..sort()) {
+    final HostedPackage package = lock.hosted[name]!;
+    buffer
+      ..writeln('$indent"$name": struct(')
+      ..writeln('$indent    version = "${package.version}",')
+      ..writeln('$indent    sha256 = "${package.sha256}",')
+      ..writeln('$indent    url = "${package.archiveUrl}",');
+    _writeNames(
+      buffer,
+      'deps',
+      workspace.hostedDependencies[name] ?? const <String>[],
+      indent: '$indent    ',
+    );
+    buffer.writeln('$indent),');
+  }
+}
+
+void _writePackages(StringBuffer buffer, PubWorkspace workspace, {String indent = '    '}) {
+  for (final String name in workspace.packages.keys.toList()..sort()) {
+    final WorkspacePackage package = workspace.packages[name]!;
+    buffer
+      ..writeln('$indent"$name": struct(')
+      ..writeln('$indent    path = "${package.path}",');
+    _writeNames(buffer, 'deps', package.dependencies.dependencies, indent: '$indent    ');
+    _writeNames(buffer, 'dev_deps', package.dependencies.devDependencies, indent: '$indent    ');
+    buffer.writeln('$indent),');
+  }
+}
+
+void _writeOthers(
+  StringBuffer buffer,
+  PubLock lock,
+  PubWorkspace workspace, {
+  String indent = '    ',
+}) {
+  for (final String name in lock.others.keys.toList()..sort()) {
+    if (workspace.packages.containsKey(name)) {
+      continue;
+    }
+    buffer.writeln('$indent"$name": "${lock.others[name]}",');
+  }
+}
+
+/// A `pubspec.lock` with the workspace it resolves: the pair the generator
+/// renders, for the repository's workspace and for each other lock of the
+/// tree.
+typedef ResolvedLock = ({PubLock lock, PubWorkspace workspace});
+
 /// Renders [lock] and [workspace] as `pub.lock.bzl`: `PUB_HOSTED`, the hosted
 /// packages by name with version, sha256, archive URL and dependencies, for
 /// the `pub` module extension to fetch and `pub_package_config` to walk;
 /// `PUB_WORKSPACE`, the repository's own packages with their paths and
-/// dependencies; and `PUB_OTHER_SOURCES`, the rest by source, on record.
-String generatePubLock(PubLock lock, PubWorkspace workspace, {required String generator}) {
+/// dependencies; `PUB_OTHER_SOURCES`, the rest by source, on record; and
+/// `PUB_LOCKS`, the same three tables for each of [otherLocks] -- the tree's
+/// other `pubspec.lock` files (a package resolved apart from the workspace,
+/// lib/web_ui), by the directory of each under the repository root.
+String generatePubLock(
+  PubLock lock,
+  PubWorkspace workspace, {
+  required String generator,
+  Map<String, ResolvedLock> otherLocks = const <String, ResolvedLock>{},
+}) {
   final buffer = StringBuffer()
     ..writeln('# Copyright 2013 The Flutter Authors. All rights reserved.')
     ..writeln('# Use of this source code is governed by a BSD-style license that can be')
@@ -304,36 +366,22 @@ String generatePubLock(PubLock lock, PubWorkspace workspace, {required String ge
     ..writeln("walk. The packages of the other sources -- the Flutter SDK's own")
     ..writeln('(sky_engine, which the engine builds) and the git ones -- are listed for')
     ..writeln('the record; the Bazel side provides them from the tree or does without.')
+    ..writeln('PUB_LOCKS holds the same for each other pubspec.lock of the tree (a package')
+    ..writeln('resolved apart from the workspace), by its directory; a version that')
+    ..writeln("differs from the workspace's is a repository of its own, pub__<name>-<version>.")
     ..writeln('"""')
     ..writeln()
     ..writeln("# name: (version, sha256 of the archive, the archive's URL, the names under")
     ..writeln('# its `dependencies`).')
     ..writeln('PUB_HOSTED = {');
-  for (final String name in lock.hosted.keys.toList()..sort()) {
-    final HostedPackage package = lock.hosted[name]!;
-    buffer
-      ..writeln('    "$name": struct(')
-      ..writeln('        version = "${package.version}",')
-      ..writeln('        sha256 = "${package.sha256}",')
-      ..writeln('        url = "${package.archiveUrl}",');
-    _writeNames(buffer, 'deps', workspace.hostedDependencies[name] ?? const <String>[]);
-    buffer.writeln('    ),');
-  }
+  _writeHosted(buffer, lock, workspace);
   buffer
     ..writeln('}')
     ..writeln()
     ..writeln("# name: (the package's directory under the repository root, the names under")
     ..writeln('# its `dependencies` and under its `dev_dependencies`).')
     ..writeln('PUB_WORKSPACE = {');
-  for (final String name in workspace.packages.keys.toList()..sort()) {
-    final WorkspacePackage package = workspace.packages[name]!;
-    buffer
-      ..writeln('    "$name": struct(')
-      ..writeln('        path = "${package.path}",');
-    _writeNames(buffer, 'deps', package.dependencies.dependencies);
-    _writeNames(buffer, 'dev_deps', package.dependencies.devDependencies);
-    buffer.writeln('    ),');
-  }
+  _writePackages(buffer, workspace);
   buffer
     ..writeln('}')
     ..writeln()
@@ -341,11 +389,30 @@ String generatePubLock(PubLock lock, PubWorkspace workspace, {required String ge
       '# name: source, for the packages the lock takes from neither a pub server nor the tree.',
     )
     ..writeln('PUB_OTHER_SOURCES = {');
-  for (final String name in lock.others.keys.toList()..sort()) {
-    if (workspace.packages.containsKey(name)) {
-      continue;
-    }
-    buffer.writeln('    "$name": "${lock.others[name]}",');
+  _writeOthers(buffer, lock, workspace);
+  buffer
+    ..writeln('}')
+    ..writeln()
+    ..writeln("# The tree's other locks, by the directory of each: the same three tables")
+    ..writeln('# (`hosted`, `packages`, `others`) for what that lock resolves.')
+    ..writeln('PUB_LOCKS = {');
+  for (final String directory in otherLocks.keys.toList()..sort()) {
+    final ResolvedLock other = otherLocks[directory]!;
+    buffer
+      ..writeln('    "$directory": struct(')
+      ..writeln('        hosted = {');
+    _writeHosted(buffer, other.lock, other.workspace, indent: '            ');
+    buffer
+      ..writeln('        },')
+      ..writeln('        packages = {');
+    _writePackages(buffer, other.workspace, indent: '            ');
+    buffer
+      ..writeln('        },')
+      ..writeln('        others = {');
+    _writeOthers(buffer, other.lock, other.workspace, indent: '            ');
+    buffer
+      ..writeln('        },')
+      ..writeln('    ),');
   }
   buffer.writeln('}');
   return buffer.toString();

@@ -218,6 +218,118 @@ PUB_OTHER_SOURCES = {
 }
 '''),
     );
+    expect(bzl, endsWith('PUB_LOCKS = {\n}\n'));
+  });
+
+  test("renders the tree's other locks under PUB_LOCKS, by directory", () {
+    // A lock resolved apart from the workspace, pinning its own version of a
+    // hosted package and a path package of the tree.
+    const otherLock = '''
+packages:
+  async:
+    dependency: "direct dev"
+    description:
+      name: async
+      sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.11.0"
+  web_engine_tester:
+    dependency: "direct dev"
+    description:
+      path: "../../web_sdk/web_engine_tester"
+      relative: true
+    source: path
+    version: "0.0.0"
+''';
+    const otherConfig = '''
+{
+  "configVersion": 2,
+  "packages": [
+    {"name": "async", "rootUri": "file:///home/me/.pub-cache/hosted/pub.dev/async-2.11.0", "packageUri": "lib/"},
+    {"name": "web_engine_tester", "rootUri": "../../../web_sdk/web_engine_tester", "packageUri": "lib/"},
+    {"name": "ui", "rootUri": "../", "packageUri": "lib/"}
+  ]
+}
+''';
+    const otherPubspecs = <String, String>{
+      '/home/me/.pub-cache/hosted/pub.dev/async-2.11.0/pubspec.yaml': '''
+name: async
+dependencies:
+  meta: any
+''',
+      '/home/me/repo/engine/src/flutter/web_sdk/web_engine_tester/pubspec.yaml': '''
+name: web_engine_tester
+dependencies:
+  ui:
+    path: ../../lib/web_ui
+''',
+      '/home/me/repo/engine/src/flutter/lib/web_ui/pubspec.yaml': '''
+name: ui
+dev_dependencies:
+  async: 2.11.0
+  web_engine_tester:
+    path: ../../web_sdk/web_engine_tester
+''',
+    };
+    final PubLock parsed = PubLock.parse(otherLock);
+    final String bzl = generatePubLock(
+      PubLock.parse(lock),
+      resolve(),
+      generator: 'gen_pub_lock.dart',
+      otherLocks: <String, ResolvedLock>{
+        'engine/src/flutter/lib/web_ui': (
+          lock: parsed,
+          workspace: PubWorkspace.resolve(
+            lock: parsed,
+            packageConfigJson: otherConfig,
+            packageConfigUri: Uri.parse(
+              'file:///home/me/repo/engine/src/flutter/lib/web_ui/.dart_tool/package_config.json',
+            ),
+            repositoryRoot: Uri.parse('file:///home/me/repo/'),
+            readPubspec: (Uri pubspec) => otherPubspecs[pubspec.toFilePath()],
+          ),
+        ),
+      },
+    );
+    expect(
+      bzl,
+      endsWith('''
+PUB_LOCKS = {
+    "engine/src/flutter/lib/web_ui": struct(
+        hosted = {
+            "async": struct(
+                version = "2.11.0",
+                sha256 = "0000000000000000000000000000000000000000000000000000000000000000",
+                url = "https://pub.dev/api/archives/async-2.11.0.tar.gz",
+                deps = [
+                    "meta",
+                ],
+            ),
+        },
+        packages = {
+            "ui": struct(
+                path = "engine/src/flutter/lib/web_ui",
+                deps = [],
+                dev_deps = [
+                    "async",
+                    "web_engine_tester",
+                ],
+            ),
+            "web_engine_tester": struct(
+                path = "engine/src/flutter/web_sdk/web_engine_tester",
+                deps = [
+                    "ui",
+                ],
+                dev_deps = [],
+            ),
+        },
+        others = {
+        },
+    ),
+}
+'''),
+    );
   });
 
   test('rejects a package without a pin', () {

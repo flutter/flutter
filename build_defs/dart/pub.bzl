@@ -21,6 +21,11 @@ the files of each (`@pub//<name>:sources`, `@pub//<name>:pubspec`). Bazel
 fetches a repository when a target first reaches it, so a build fetches the
 packages it uses and no other (the lock has 174; a framework test reaches
 about a third), in parallel, and the repository cache holds the archives.
+The tree's other locks -- a package resolved apart from the workspace, with
+pins of its own: lib/web_ui's, for felt and the web engine's unit tests --
+are PUB_LOCKS, by directory; a version the workspace's lock does not pin is
+a repository and hub package of its own, `pub__<name>-<version>` and
+`@pub//<name>-<version>`, and `lock = "<directory>"` resolves against it.
 
 pub_package_config writes a `package_config.json` -- the file the frontend
 server and the VM take as `--packages` -- over the closure of some packages'
@@ -41,6 +46,7 @@ compile's inputs.
 load(
     "//build_defs/dart:pub.lock.bzl",
     "PUB_HOSTED",
+    "PUB_LOCKS",
     "PUB_OTHER_SOURCES",
     "PUB_WORKSPACE",
 )
@@ -49,6 +55,41 @@ load(
 # (a pub cache for a test that resolves a member in place: pub resolves the
 # workspace as one).
 PUB_WORKSPACE_PACKAGES = sorted(PUB_WORKSPACE.keys())
+
+def _tables(lock):
+    """The three tables of a lock: the workspace's (None) or one of PUB_LOCKS, by its directory."""
+    if lock == None:
+        return struct(hosted = PUB_HOSTED, packages = PUB_WORKSPACE, others = PUB_OTHER_SOURCES)
+    if lock not in PUB_LOCKS:
+        fail("pub: no lock at %s in pub.lock.bzl (PUB_LOCKS has %s)" % (lock, ", ".join(PUB_LOCKS.keys())))
+    return PUB_LOCKS[lock]
+
+def hub_package(name, version):
+    """The @pub hub's package for a hosted package: `<name>`, or `<name>-<version>` when another lock pins a version the workspace's does not.
+
+    Args:
+      name: the package's name.
+      version: the version the lock in question pins.
+
+    Returns:
+      The package's name under @pub (and, after `pub__`, its repository's).
+    """
+    if name in PUB_HOSTED and PUB_HOSTED[name].version == version:
+        return name
+    return "%s-%s" % (name, version)
+
+def _hosted_packages():
+    """Every (hub package, hosted package) the locks pin, the workspace's first."""
+    packages = {}
+    for name in PUB_HOSTED:
+        packages[name] = PUB_HOSTED[name]
+    for lock in PUB_LOCKS:
+        hosted = PUB_LOCKS[lock].hosted
+        for name in hosted:
+            hub = hub_package(name, hosted[name].version)
+            if hub not in packages:
+                packages[hub] = hosted[name]
+    return packages
 
 PubPackageConfigInfo = provider(
     doc = "A package_config.json and the files of the packages it names.",
@@ -116,25 +157,33 @@ pub_package = repository_rule(
     },
 )
 
-_HUB_PACKAGE_BUILD = '''# {name} {version}: the repository pub__{name}, fetched when first reached (pub.bzl).
+_HUB_PACKAGE_BUILD = '''# {name} {version}: the repository pub__{hub}, fetched when first reached (pub.bzl).
 
 package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "sources",
-    actual = "@pub__{name}//:sources",
+    actual = "@pub__{hub}//:sources",
 )
 
 alias(
     name = "pubspec",
-    actual = "@pub__{name}//:pubspec.yaml",
+    actual = "@pub__{hub}//:pubspec.yaml",
 )
 '''
 
 def _pub_hub_impl(rctx):
-    rctx.file("BUILD.bazel", "# The hub of the pub module extension (pub.bzl): one package per hosted package of pubspec.lock.\n")
-    for name in PUB_HOSTED:
-        rctx.file(name + "/BUILD.bazel", _HUB_PACKAGE_BUILD.format(name = name, version = PUB_HOSTED[name].version))
+    rctx.file("BUILD.bazel", "# The hub of the pub module extension (pub.bzl): one package per hosted package of the locks " +
+                             "(the workspace's by name; a version another lock pins as <name>-<version>).\n")
+    packages = _hosted_packages()
+    for hub in packages:
+        package = packages[hub]
+        rctx.file(hub + "/BUILD.bazel", _HUB_PACKAGE_BUILD.format(
+            # A pub package's name has no dash: what precedes one is the name.
+            name = hub.split("-")[0],
+            version = package.version,
+            hub = hub,
+        ))
 
 _pub_hub = repository_rule(
     implementation = _pub_hub_impl,
@@ -172,11 +221,12 @@ _pub_workspace = repository_rule(
 )
 
 def _pub_impl(mctx):
-    for name in PUB_HOSTED:
-        package = PUB_HOSTED[name]
+    packages = _hosted_packages()
+    for hub in packages:
+        package = packages[hub]
         pub_package(
-            name = "pub__" + name,
-            package = name,
+            name = "pub__" + hub,
+            package = hub.split("-")[0],
             version = package.version,
             url = package.url,
             sha256 = package.sha256,
@@ -194,10 +244,11 @@ def _pub_impl(mctx):
 
 pub = module_extension(
     implementation = _pub_impl,
-    doc = "The repository's pub packages (pubspec.lock) as the repositories pub__<name> behind the hub @pub.",
+    doc = "The repository's pub packages (pubspec.lock, and the tree's other locks) as the repositories " +
+          "pub__<name> (pub__<name>-<version> for a version another lock pins) behind the hub @pub.",
 )
 
-def pub_closure(roots, dev_roots = [], without = []):
+def pub_closure(roots, dev_roots = [], without = [], lock = None):
     """The packages some roots reach through their dependencies, by kind.
 
     Args:
@@ -208,12 +259,18 @@ def pub_closure(roots, dev_roots = [], without = []):
         dependencies count, as for pub).
       without: package names not followed: left out with everything only
         they reach.
+      lock: the lock walked: the workspace's (None), or the directory of one
+        of the tree's other locks (pub.lock.bzl's PUB_LOCKS:
+        `engine/src/flutter/lib/web_ui`).
 
     Returns:
-      A struct of sorted name lists: `hosted` (pub.lock.bzl's PUB_HOSTED),
-      `workspace` (PUB_WORKSPACE) and `other` (neither: the SDK's and git
-      packages of PUB_OTHER_SOURCES, or a name the lock does not know).
+      A struct of sorted name lists: `hosted` (the lock's hosted packages),
+      `workspace` (its packages of the tree) and `other` (neither: the SDK's
+      and git packages, or a name the lock does not know), and `hosted_labels`,
+      the hosted packages' `@pub//<package>:sources` labels by name (a version
+      the workspace's lock does not pin is `@pub//<name>-<version>`).
     """
+    tables = _tables(lock)
     seen = {name: True for name in without}
     pending = []
     for name in list(roots) + list(dev_roots):
@@ -226,19 +283,19 @@ def pub_closure(roots, dev_roots = [], without = []):
 
     # Every name is queued once (marked when queued), so the walk takes at
     # most one step per package; Starlark has no unbounded loop.
-    for _ in range(len(PUB_HOSTED) + len(PUB_WORKSPACE) + len(PUB_OTHER_SOURCES) + len(pending) + 1):
+    for _ in range(len(tables.hosted) + len(tables.packages) + len(tables.others) + len(pending) + 1):
         if not pending:
             break
         name = pending.pop()
         deps = []
-        if name in PUB_HOSTED:
+        if name in tables.hosted:
             hosted[name] = True
-            deps = PUB_HOSTED[name].deps
-        elif name in PUB_WORKSPACE:
+            deps = tables.hosted[name].deps
+        elif name in tables.packages:
             workspace[name] = True
-            deps = list(PUB_WORKSPACE[name].deps)
+            deps = list(tables.packages[name].deps)
             if name in dev_roots:
-                deps += PUB_WORKSPACE[name].dev_deps
+                deps += tables.packages[name].dev_deps
         else:
             other[name] = True
         for dep in deps:
@@ -251,6 +308,10 @@ def pub_closure(roots, dev_roots = [], without = []):
         hosted = sorted(hosted.keys()),
         workspace = sorted(workspace.keys()),
         other = sorted(other.keys()),
+        hosted_labels = {
+            name: "@pub//%s:sources" % hub_package(name, tables.hosted[name].version)
+            for name in sorted(hosted.keys())
+        },
     )
 
 # The two layouts a package configuration is written for.
@@ -345,7 +406,7 @@ _pub_package_config = rule(
     },
 )
 
-def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without = [], layout = EXECROOT, location = None, **kwargs):
+def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without = [], layout = EXECROOT, location = None, lock = None, **kwargs):
     """A package_config.json over the closure of some packages' dependencies.
 
     Args:
@@ -363,11 +424,13 @@ def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without 
       location: the path in the layout the configuration is read from, when
         a rule places it elsewhere than its output (dart_test: the package's
         `.dart_tool/package_config.json`).
+      lock: the lock resolved against: the workspace's (None) or the
+        directory of one of the tree's other locks (`engine/src/flutter/lib/web_ui`).
       **kwargs: the rule's other attributes (visibility, tags).
 
     Also declares `<name>_sources`, a filegroup of the packages' files.
     """
-    closure = pub_closure(roots, dev_roots, without)
+    closure = pub_closure(roots, dev_roots, without, lock)
     given = {package: label for label, package in packages.items()}
     missing = [package for package in closure.workspace + closure.other if package not in given]
     if missing:
@@ -379,7 +442,7 @@ def pub_package_config(name, out, roots, dev_roots = [], packages = {}, without 
     unreached = [package for package in without if package in given]
     if unreached:
         fail("%s: `without` and `packages` both name %s" % (name, ", ".join(unreached)))
-    hosted = {"@pub//%s:sources" % package: package for package in closure.hosted}
+    hosted = {label: package for package, label in closure.hosted_labels.items()}
     _pub_package_config(
         name = name,
         out = out,
@@ -410,10 +473,8 @@ PubCacheInfo = provider(
 def _pub_cache_impl(ctx):
     entries = {}
     for target, name in ctx.attr.packages.items():
-        if name not in PUB_HOSTED:
-            fail("%s: %s is not a hosted package of the lock" % (ctx.label, name))
-        package = PUB_HOSTED[name]
-        directory = "hosted/pub.dev/%s-%s" % (name, package.version)
+        version = ctx.attr.versions[name]
+        directory = "hosted/pub.dev/%s-%s" % (name, version)
         for file in target[DefaultInfo].files.to_list():
             # An external repository's file: ../<repository>/<path>.
             path = file.short_path
@@ -424,9 +485,9 @@ def _pub_cache_impl(ctx):
         # The archive's hash beside the package, as `pub get` writes it when
         # it downloads one; pub compares it with the server's and, finding
         # them equal, leaves the package alone.
-        digest = ctx.actions.declare_file("%s/%s-%s.sha256" % (ctx.label.name, name, package.version))
-        ctx.actions.write(digest, package.sha256)
-        entries["hosted-hashes/pub.dev/%s-%s.sha256" % (name, package.version)] = digest
+        digest = ctx.actions.declare_file("%s/%s-%s.sha256" % (ctx.label.name, name, version))
+        ctx.actions.write(digest, ctx.attr.hashes[name])
+        entries["hosted-hashes/pub.dev/%s-%s.sha256" % (name, version)] = digest
     return [
         DefaultInfo(files = depset(entries.values())),
         PubCacheInfo(entries = entries),
@@ -440,10 +501,12 @@ _pub_cache = rule(
             allow_files = True,
             doc = "The hosted packages: each one's files (@pub//<name>:sources) to its name.",
         ),
+        "versions": attr.string_dict(doc = "Each package's version, by name (the lock's)."),
+        "hashes": attr.string_dict(doc = "Each package's archive sha256, by name (the lock's)."),
     },
 )
 
-def pub_cache(name, roots, dev_roots = [], without = [], **kwargs):
+def pub_cache(name, roots, dev_roots = [], without = [], lock = None, **kwargs):
     """A pub cache holding the hosted packages some roots reach, for a test that runs `pub get`.
 
     A test that resolves a project of its own with the real pub (flutter_tools'
@@ -459,11 +522,16 @@ def pub_cache(name, roots, dev_roots = [], without = [], **kwargs):
         transitively (pub_closure).
       dev_roots: the workspace packages whose `dev_dependencies` it covers too.
       without: packages of the closure left out.
+      lock: the lock resolved against: the workspace's (None) or the
+        directory of one of the tree's other locks.
       **kwargs: the rule's other attributes (visibility, tags).
     """
-    closure = pub_closure(roots, dev_roots, without)
+    closure = pub_closure(roots, dev_roots, without, lock)
+    hosted = _tables(lock).hosted
     _pub_cache(
         name = name,
-        packages = {"@pub//%s:sources" % package: package for package in closure.hosted},
+        packages = {label: package for package, label in closure.hosted_labels.items()},
+        versions = {package: hosted[package].version for package in closure.hosted},
+        hashes = {package: hosted[package].sha256 for package in closure.hosted},
         **kwargs
     )
