@@ -173,7 +173,7 @@ absl::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
 
   if (!pipeline_) {
     return absl::Status(absl::StatusCode::kCancelled,
-                       "No compute pipeline is bound.");
+                        "No compute pipeline is bound.");
   }
 
   if (descriptor_set_dirty_) {

@@ -148,7 +148,7 @@ TEST_F(FlutterGpuComputePassTest, CreatingAndEndingFollowsThePassLifecycle) {
     EXPECT_CALL(*impeller_command_buffer_, OnCreateComputePass)
         .WillOnce(Return(compute_b));
     EXPECT_CALL(*compute_b, EncodeCommands).WillOnce(Return(true));
-    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(fml::Status()));
+    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(absl::OkStatus()));
   }
 
   ASSERT_TRUE(command_buffer_->CreateRenderPass(impeller::RenderTarget()));

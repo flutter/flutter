@@ -353,7 +353,7 @@ absl::Status ComputePass::Dispatch(std::array<uint32_t, 3> workgroup_count) {
     bindings_dirty_ = false;
   }
 
-  if (fml::Status status = compute_pass_->Compute(workgroup_count);
+  if (absl::Status status = compute_pass_->Compute(workgroup_count);
       !status.ok()) {
     return absl::InternalError(status.message());
   }

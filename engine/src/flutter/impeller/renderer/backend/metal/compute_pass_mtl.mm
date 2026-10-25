@@ -153,7 +153,7 @@ absl::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
 
   if (!pass_bindings_cache_.GetPipeline()) {
     return absl::Status(absl::StatusCode::kCancelled,
-                       "No compute pipeline is bound.");
+                        "No compute pipeline is bound.");
   }
 
   // Unlike Vulkan and GLES, Metal does not bake the threadgroup size into the

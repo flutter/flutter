@@ -130,7 +130,7 @@ class MockComputePass : public ComputePass {
       SetPipeline,
       (const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline),
       (override));
-  MOCK_METHOD(fml::Status,
+  MOCK_METHOD(absl::Status,
               Compute,
               ((std::array<uint32_t, 3>)workgroup_count),
               (override));

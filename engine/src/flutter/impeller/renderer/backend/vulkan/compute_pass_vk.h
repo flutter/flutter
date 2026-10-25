@@ -110,7 +110,7 @@ class ComputePassVK final : public ComputePass {
 
   /// Allocates, writes and binds a descriptor set for the current pipeline and
   /// bindings.
-  fml::Status BindDescriptorSet();
+  absl::Status BindDescriptorSet();
 
   /// Pops the debug group pushed by `SetCommandLabel`, if any.
   void PopCommandLabel();
