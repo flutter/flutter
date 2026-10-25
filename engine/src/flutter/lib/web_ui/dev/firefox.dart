@@ -105,16 +105,25 @@ user_pref("security.sandbox.content.level", 0);
         final resolved = File(executable.resolveSymbolicLinksSync());
 
         final policiesDir = Directory(path.join(resolved.parent.absolute.path, 'distribution'));
-        policiesDir.createSync(recursive: true);
         final policiesFile = File(path.join(policiesDir.path, 'policies.json'));
-        policiesFile.writeAsStringSync('''
+        const policies = '''
 {
   "policies": {
     "DisableAppUpdate": true
   }
 }
-''');
+''';
+        // Written once: the installation may be read-only afterwards (a Bazel
+        // test's runfiles point into a repository Bazel fetched, which ships
+        // the file).
+        if (!policiesFile.existsSync() || policiesFile.readAsStringSync() != policies) {
+          policiesDir.createSync(recursive: true);
+          policiesFile.writeAsStringSync(policies);
+        }
 
+        // A free port for the debugger server, so that more than one suite
+        // can run on a machine at once.
+        final int debuggerPort = await _freePort();
         final args = <String>[
           url.toString(),
           '--profile',
@@ -124,7 +133,7 @@ user_pref("security.sandbox.content.level", 0);
           '-height $kMaxScreenshotHeight',
           '-new-window',
           '-new-instance',
-          '--start-debugger-server $kDevtoolsPort',
+          '--start-debugger-server $debuggerPort',
         ];
 
         final String? linuxDisplay = await _ensureLinuxDisplay();
@@ -152,7 +161,7 @@ user_pref("security.sandbox.content.level", 0);
             .listen((String string) => print('[Firefox:stderr] $string'));
 
         remoteDebuggerCompleter.complete(
-          getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')),
+          getRemoteDebuggerUrl(Uri.parse('http://localhost:$debuggerPort')),
         );
 
         unawaited(
@@ -168,6 +177,14 @@ user_pref("security.sandbox.content.level", 0);
   }
 
   Firefox._(this._process, this.remoteDebuggerUrl);
+
+  /// A port nothing listens on at the moment: bound and released.
+  static Future<int> _freePort() async {
+    final ServerSocket socket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final int port = socket.port;
+    await socket.close();
+    return port;
+  }
 
   static Process? _xvfbProcess;
   static Future<String?>? _virtualDisplayFuture;
