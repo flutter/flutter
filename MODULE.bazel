@@ -125,10 +125,11 @@ use_repo(pub, "pub", "pub_workspace")
 flutter_sdk_cache = use_extension("//build_defs/repositories:flutter_sdk_cache.bzl", "flutter_sdk_cache")
 use_repo(flutter_sdk_cache, "gradle_wrapper", "material_fonts")
 
-# The browser the tool's web tests drive: Chrome for Testing at the version the
-# web engine's lib/web_ui/dev/package_lock.yaml pins (build_defs/repositories/browsers.bzl).
+# The browsers the web tests drive, at the versions the web engine's
+# lib/web_ui/dev/package_lock.yaml pins (build_defs/repositories/browsers.bzl):
+# Chrome for Testing, and Firefox for the web engine's Firefox suites.
 browsers = use_extension("//build_defs/repositories:browsers.bzl", "browsers")
-use_repo(browsers, "chrome")
+use_repo(browsers, "chrome", "firefox")
 
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
 # found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
