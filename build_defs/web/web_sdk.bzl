@@ -191,9 +191,9 @@ def web_ui_ui_web_with_output(name, output_dir, **kwargs):
     """
     sdk_rewriter(
         name = name,
-        srcs = ["//engine/src/flutter:ui_web_sources"],
+        srcs = ["//engine/src/flutter/lib/web_ui:ui_web_sources"],
         input_dir = "engine/src/flutter/lib/web_ui/lib/ui_web/src/ui_web",
-        api_file = "//engine/src/flutter:lib/web_ui/lib/ui_web/src/ui_web.dart",
+        api_file = "//engine/src/flutter/lib/web_ui:lib/ui_web/src/ui_web.dart",
         library_name = "ui_web",
         public = True,
         output_dir = output_dir,

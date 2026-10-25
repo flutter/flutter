@@ -62,6 +62,20 @@ filegroup(
     visibility = ["//engine/src/flutter/web_sdk:__pkg__"],
 )
 
+# The same two as pub packages -- each pubspec and library -- for the web
+# engine's unit tests, which import them (lib/web_ui's pubspec).
+filegroup(
+    name = "web_test_fonts_package",
+    srcs = ["web_test_fonts/pubspec.yaml"] + glob(["web_test_fonts/lib/**"]),
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+filegroup(
+    name = "web_locale_keymap_package",
+    srcs = ["web_locale_keymap/pubspec.yaml"] + glob(["web_locale_keymap/lib/**"]),
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
 exports_files(
     [
         "web_locale_keymap/lib/web_locale_keymap.dart",
