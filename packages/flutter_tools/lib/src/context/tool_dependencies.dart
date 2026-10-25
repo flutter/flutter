@@ -574,17 +574,6 @@ class ToolDependencies {
           featureFlags: finalFeatureFlags,
         );
 
-    final EmulatorManager finalEmulatorManager =
-        emulatorManager ??
-        EmulatorManager(
-          androidSdkBuilder: () => finalAndroidContext.androidSdk,
-          androidWorkflow: finalAndroidWorkflow,
-          fileSystem: finalFS,
-          javaBuilder: () => finalAndroidContext.java,
-          logger: finalLogger,
-          processManager: finalProcessManager,
-        );
-
     final MacOSWorkflow finalMacOSWorkflow =
         macOSWorkflow ?? MacOSWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
 
@@ -598,6 +587,19 @@ class ToolDependencies {
       hostPlatform: finalOS.hostPlatform,
       logger: finalLogger,
     );
+
+    final EmulatorManager finalEmulatorManager =
+        emulatorManager ??
+        EmulatorManager(
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          androidWorkflow: finalAndroidWorkflow,
+          extensionManager: extensionManager,
+          featureFlags: finalFeatureFlags,
+          fileSystem: finalFS,
+          javaBuilder: () => finalAndroidContext.java,
+          logger: finalLogger,
+          processManager: finalProcessManager,
+        );
 
     final extensionBuildManager = ExtensionBuildManager(
       extensionManager: extensionManager,

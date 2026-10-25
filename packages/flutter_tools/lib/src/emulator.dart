@@ -16,6 +16,9 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
 import 'device.dart';
+import 'experimental/extension_device_manager.dart';
+import 'experimental/extension_manager.dart';
+import 'features.dart';
 import 'ios/ios_emulators.dart';
 
 EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
@@ -29,6 +32,8 @@ class EmulatorManager {
     required Logger logger,
     required ProcessManager processManager,
     AndroidSdk? Function()? androidSdkBuilder,
+    ExtensionManager? extensionManager,
+    FeatureFlags? featureFlags,
   }) : _androidSdkBuilder = androidSdkBuilder,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _androidEmulators = AndroidEmulators(
@@ -39,6 +44,12 @@ class EmulatorManager {
          processManager: processManager,
        ) {
     _emulatorDiscoverers.add(_androidEmulators);
+    if (extensionManager != null &&
+        (featureFlags == null || featureFlags.isToolExtensionsEnabled)) {
+      _emulatorDiscoverers.add(
+        ExtensionEmulators(extensionManager: extensionManager, logger: logger),
+      );
+    }
   }
 
   final AndroidSdk? Function()? _androidSdkBuilder;
