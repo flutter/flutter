@@ -813,8 +813,12 @@ configuration of package:ui, its path packages and the hosted packages of
 **lib/web_ui's own `pubspec.lock`** (its versions differ from the
 workspace's; `pub.lock.bzl`'s `PUB_LOCKS`, `pub_package_config(lock =
 ...)`), one action per file into a directory shaped as the bundle with a
-one-file `results.json` -- `bundles/<bundle>/<file>`. The run is felt
-itself: `dart_vm_kernel` compiles `dev/felt.dart` and puts the kernel at
+one-file `results.json` -- `bundles/<bundle>/<file>`. Every file of
+`test/` is an input of every compile (test files import other test files),
+but the compilers say what they read (dart2js's `.deps`, dart2wasm's
+`--depfile`) and the action hands Bazel the rest as its unused-inputs
+list, so a test edit recompiles what imports it and no more. The run is
+felt itself: `dart_vm_kernel` compiles `dev/felt.dart` and puts the kernel at
 `dev/felt.dill`, where felt's path derivation (engine/src is five
 directories above its script) makes the runfiles' `engine/src/out/web_tests`
 its build directory; `web_ui_test` lays the bundle and the artifacts there
