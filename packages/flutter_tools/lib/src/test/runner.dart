@@ -352,6 +352,7 @@ import 'dart:ui';
 import 'package:ffi/ffi.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_channel/isolate_channel.dart';
+import 'package:stream_channel/stream_channel.dart';
 import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
 ''');
 
@@ -406,6 +407,13 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
     buffer.writeln();
 
     buffer.writeln(r'''
+/// Shuts down the lightweight engine isolate from the native side.
+///
+/// Sets `Isolate._mayExit = true` in the engine, permitting `Isolate.exit()`
+/// to terminate the isolate and trigger native shell deletion in `tester_main.cc`.
+@Native<Void Function()>(symbol: 'ForceShutdownIsolate')
+external void _forceShutdownIsolate();
+
 @Native<Void Function(Pointer<Utf8>, Pointer<Utf8>)>(symbol: 'Spawn')
 external void _spawn(Pointer<Utf8> entrypoint, Pointer<Utf8> route);
 
@@ -424,10 +432,19 @@ void spawn({required SendPort port, String entrypoint = 'main', String route = '
 void createChannelAndConnect(String path, String name, Function testMain) {
   goldenFileComparator = LocalFileComparator(Uri.parse(path));
   autoUpdateGoldenFiles = $autoUpdateGoldenFiles;
+  final SendPort sendPort = IsolateNameServer.lookupPortByName(name)!;
+  // Clean up global port mapping once resolved.
+  IsolateNameServer.removePortNameMapping(name);
   final IsolateChannel<dynamic> channel = IsolateChannel<dynamic>.connectSend(
-    IsolateNameServer.lookupPortByName(name)!,
+    sendPort,
   );
-  channel.pipe(RemoteListener.start(() => testMain));
+  final StreamChannel<Object?> suiteChannel = RemoteListener.start(() => testMain);
+  channel.pipe(suiteChannel);
+  // Shut down the isolate and its native engine shell when the suite finishes.
+  suiteChannel.sink.done.whenComplete(() {
+    _forceShutdownIsolate();
+    Isolate.exit();
+  });
 }
 
 @pragma('vm:entry-point')
@@ -610,10 +627,22 @@ class SpawnPlugin extends PlatformPlugin {
     final String correctedPath = ${platform.isWindows ? r'"/$path"' : 'path'};
     await launchIsolate(correctedPath);
 
-    final StreamChannel<dynamic> channel = _channels[pathToImport(correctedPath)]!;
-    final RunnerSuiteController controller = deserializeSuite(correctedPath, platform,
+    final StreamChannel<dynamic> rawChannel = _channels.remove(pathToImport(correctedPath))!;
+    final StreamController<dynamic> controller = StreamController<dynamic>(sync: true);
+    controller.stream.listen(
+      rawChannel.sink.add,
+      onError: rawChannel.sink.addError,
+      onDone: () {
+        // package:test reserves channel 0 on its MultiChannel for suite control
+        // messages. Transmitting 'close' notifies RemoteListener to shut down.
+        rawChannel.sink.add(<Object?>[0, <String, Object?>{'type': 'close'}]);
+        rawChannel.sink.close();
+      },
+    );
+    final StreamChannel<dynamic> channel = StreamChannel<dynamic>(rawChannel.stream, controller.sink);
+    final RunnerSuiteController suiteController = deserializeSuite(correctedPath, platform,
         suiteConfig, const PluginEnvironment(), channel, message);
-    return controller.suite;
+    return suiteController.suite;
   }
 }
 ''');

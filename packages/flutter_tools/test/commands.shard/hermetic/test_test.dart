@@ -878,6 +878,61 @@ const List<String> packageTestArgs = <String>[
   );
 
   testUsingContext(
+    'Configures isolate teardown in generated spawners when --experimental-faster-testing is set',
+    () async {
+      final testCommand = TestCommand(toolContext: toolContext);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      var caughtToolExit = false;
+      await asyncGuard<void>(
+        () => commandRunner.run(const <String>[
+          'test',
+          '--no-pub',
+          '--experimental-faster-testing',
+          '--',
+          'test/fake_test.dart',
+          'test/fake_test_2.dart',
+        ]),
+        onError: (Object error) async {
+          expect(error, isA<ToolExit>());
+          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
+          caughtToolExit = true;
+
+          final Directory spawnerDir = fs.directory(
+            fs.path.join('build', 'isolate_spawning_tester'),
+          );
+          final File childSourceFile = spawnerDir.childFile('child_test_isolate_spawner.dart');
+          final File rootSourceFile = spawnerDir.childFile('root_test_isolate_spawner.dart');
+
+          expect(childSourceFile.existsSync(), true);
+          final String childSource = childSourceFile.readAsStringSync();
+          expect(
+            childSource,
+            contains('/// Shuts down the lightweight engine isolate from the native side.'),
+          );
+          expect(childSource, contains('external void _forceShutdownIsolate();'));
+          expect(childSource, contains('_forceShutdownIsolate();'));
+          expect(childSource, contains('Isolate.exit();'));
+          expect(childSource, contains('suiteChannel.sink.done.whenComplete'));
+          expect(childSource, contains('IsolateNameServer.removePortNameMapping(name);'));
+
+          expect(rootSourceFile.existsSync(), true);
+          final String rootSource = rootSourceFile.readAsStringSync();
+          expect(rootSource, contains("<String, Object?>{'type': 'close'}"));
+          expect(rootSource, contains('_channels.remove(pathToImport(correctedPath))!'));
+        },
+      );
+      expect(caughtToolExit, true);
+    },
+    overrides: <Type, Generator>{
+      AnsiTerminal: () => _FakeTerminal(),
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+    },
+  );
+
+  testUsingContext(
     'Verbose prints phase timings',
     () async {
       final testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
