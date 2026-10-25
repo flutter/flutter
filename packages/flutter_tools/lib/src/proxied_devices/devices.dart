@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/dds.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -855,6 +856,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    required Artifacts artifacts,
     String? appName,
     FlutterDevice? device,
     int? ddsPort,
@@ -876,6 +878,7 @@ class ProxiedDartDevelopmentService
       _ddsStartedLocally = true;
       await _localDds.startDartDevelopmentService(
         vmServiceUri,
+        artifacts: artifacts,
         appName: appName,
         ddsPort: ddsPort,
         ipv6: ipv6,

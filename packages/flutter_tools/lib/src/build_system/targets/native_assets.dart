@@ -18,6 +18,7 @@ import 'package:package_config/package_config_types.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../context_runner.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
 import '../../features.dart';
@@ -138,7 +139,13 @@ Directory _buildCodeAssetsDirectory(
       targetPlatform == TargetPlatform.linux_riscv64) {
     final String? linuxGtkVersion = environment.defines['FLUTTER_LINUX_GTK'];
     return environment.projectDir
-        .childDirectory(getLinuxBuildDirectory(targetPlatform, null, linuxGtkVersion))
+        .childDirectory(
+          getLinuxBuildDirectory(
+            targetPlatform,
+            linuxGtkVersion: linuxGtkVersion,
+            toolContext: const GlobalToolContext(),
+          ),
+        )
         .childDirectory(buildModeEnvironment);
   }
   return environment.outputDir;

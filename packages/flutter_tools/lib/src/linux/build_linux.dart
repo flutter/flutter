@@ -94,7 +94,14 @@ Future<void> buildLinux(
   final String buildModeName = buildInfo.mode.cliName;
   final Directory platformBuildDirectory = fs
       .directory(linuxProject.parent.directory.path)
-      .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor, linuxGtkVersion));
+      .childDirectory(
+        getLinuxBuildDirectory(
+          targetPlatform,
+          flavor: buildInfo.flavor,
+          linuxGtkVersion: linuxGtkVersion,
+          toolContext: toolContext,
+        ),
+      );
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(
@@ -144,7 +151,12 @@ Future<void> buildLinux(
       // This analysis is only supported for release builds.
       outputDirectory: fs.directory(
         fs.path.join(
-          getLinuxBuildDirectory(targetPlatform, buildInfo.flavor, linuxGtkVersion),
+          getLinuxBuildDirectory(
+            targetPlatform,
+            flavor: buildInfo.flavor,
+            linuxGtkVersion: linuxGtkVersion,
+            toolContext: toolContext,
+          ),
           'release',
           'bundle',
         ),

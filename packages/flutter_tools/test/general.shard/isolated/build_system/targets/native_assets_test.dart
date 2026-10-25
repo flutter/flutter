@@ -83,7 +83,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{
           kBuildMode: BuildMode.debug.cliName,
-          kTargetPlatform: getNameForTargetPlatform(TargetPlatform.linux_x64),
+          kTargetPlatform: TargetPlatform.linux_x64.getName(),
           'FLUTTER_LINUX_GTK': 'gtk4',
         },
         outputDir: fileSystem.currentDirectory.childDirectory('ignored-output'),

@@ -7,13 +7,14 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
+import '../context/tool_context.dart';
 
 abstract class LinuxApp extends ApplicationPackage {
   LinuxApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [LinuxApp] from a linux sub project.
-  factory LinuxApp.fromLinuxProject(LinuxProject project) {
-    return BuildableLinuxApp(project: project);
+  factory LinuxApp.fromLinuxProject(LinuxProject project, {required ToolContext toolContext}) {
+    return BuildableLinuxApp(project: project, toolContext: toolContext);
   }
 
   /// Creates a new [LinuxApp] from an existing executable.
@@ -44,17 +45,24 @@ class PrebuiltLinuxApp extends LinuxApp {
 }
 
 class BuildableLinuxApp extends LinuxApp {
-  BuildableLinuxApp({required this.project})
-    : super(projectBundleId: project.parent.manifest.appName);
+  BuildableLinuxApp({required this.project, required ToolContext toolContext})
+    : _toolContext = toolContext,
+      super(projectBundleId: project.parent.manifest.appName);
 
   final LinuxProject project;
+  final ToolContext _toolContext;
 
   @override
   String executable(BuildInfo buildInfo) {
     final String? binaryName = getCmakeExecutableName(project);
-    final String linuxGtkVersion = buildInfo.linuxGtkVersion ?? 'gtk3';
-    return project.cmakeFile.fileSystem.path.join(
-      getLinuxBuildDirectory(null, buildInfo.flavor, linuxGtkVersion),
+    final FileSystem fileSystem = project.cmakeFile.fileSystem;
+    return fileSystem.path.join(
+      getLinuxBuildDirectory(
+        null,
+        flavor: buildInfo.flavor,
+        linuxGtkVersion: buildInfo.linuxGtkVersion,
+        toolContext: _toolContext,
+      ),
       buildInfo.mode.cliName,
       'bundle',
       binaryName,
