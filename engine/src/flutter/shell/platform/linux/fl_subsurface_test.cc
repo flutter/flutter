@@ -58,14 +58,33 @@ TEST_F(FlSubsurfaceTest, EmptyInputRegion) {
   ASSERT_NE(subsurface, nullptr);
 }
 
-// The subsurface is synchronized with the parent surface, so its contents stay
-// in step with the GTK window.
-TEST_F(FlSubsurfaceTest, Synchronized) {
+// The subsurface is desynchronized from the parent surface, so frames are shown
+// as soon as they are committed without the GTK window being redrawn.
+TEST_F(FlSubsurfaceTest, Desynchronized) {
   EXPECT_CALL(wayland, Request(::testing::StrEq("wl_subsurface"),
-                               WL_SUBSURFACE_SET_SYNC));
+                               WL_SUBSURFACE_SET_SYNC))
+      .Times(0);
+  EXPECT_CALL(wayland, Request(::testing::StrEq("wl_subsurface"),
+                               WL_SUBSURFACE_SET_DESYNC));
 
   g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
   ASSERT_NE(subsurface, nullptr);
+}
+
+// The subsurface can be synchronized with the parent surface while that is
+// resized, and desynchronized again afterwards.
+TEST_F(FlSubsurfaceTest, SetSynchronized) {
+  g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
+  ASSERT_NE(subsurface, nullptr);
+
+  ::testing::InSequence sequence;
+  EXPECT_CALL(wayland, Request(::testing::StrEq("wl_subsurface"),
+                               WL_SUBSURFACE_SET_SYNC));
+  EXPECT_CALL(wayland, Request(::testing::StrEq("wl_subsurface"),
+                               WL_SUBSURFACE_SET_DESYNC));
+
+  fl_subsurface_set_synchronized(subsurface, TRUE);
+  fl_subsurface_set_synchronized(subsurface, FALSE);
 }
 
 TEST_F(FlSubsurfaceTest, SetPosition) {
