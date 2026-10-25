@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -107,7 +108,12 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+        ),
 
         // ignore: avoid_redundant_argument_values
       );
@@ -174,12 +180,17 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
         ),
       );
       expect(androidApk, isNotNull);
@@ -220,12 +231,17 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
         ),
       );
 
@@ -267,12 +283,17 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
           buildInfo: const BuildInfo(
             BuildMode.debug,
             null,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
           ),
         );
 
@@ -414,7 +435,12 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+        ),
       );
       expect(androidApk, isNotNull);
       expect(androidApk!.id, 'io.flutter.examples.hello_world');
@@ -484,7 +510,12 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+          ),
         );
         expect(androidApk, isNotNull);
         expect(androidApk!.id, 'io.flutter.examples.hello_world');
@@ -831,8 +862,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Name.With.Dots',
-        fileSystem: fileSystem,
-        logger: logger,
+        toolContext: toolContext,
       );
       expect(iosApp.name, 'Name.With.Dots');
       expect(iosApp.archiveBundleOutputPath, 'build/ios/archive/Name.With.Dots.xcarchive');
@@ -849,8 +879,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
-        fileSystem: fileSystem,
-        logger: logger,
+        toolContext: toolContext,
       );
       final String iconDirSuffix = fileSystem.path.join(
         'Runner',
@@ -865,8 +894,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
-        fileSystem: fileSystem,
-        logger: logger,
+        toolContext: toolContext,
       );
       final String iconDirSuffix = fileSystem.path.join(
         'Runner',
@@ -913,8 +941,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
-        fileSystem: fileSystem,
-        logger: logger,
+        toolContext: toolContext,
       );
       final String iconDirSuffix = fileSystem.path.join(
         'Runner',
@@ -938,8 +965,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
-        fileSystem: fileSystem,
-        logger: logger,
+        toolContext: toolContext,
       );
       final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
@@ -954,8 +980,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
-        fileSystem: fileSystem,
-        logger: logger,
+        toolContext: toolContext,
       );
       final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
@@ -1002,8 +1027,7 @@ void main() {
         IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
-        fileSystem: fileSystem,
-        logger: logger,
+        toolContext: toolContext,
       );
       final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',

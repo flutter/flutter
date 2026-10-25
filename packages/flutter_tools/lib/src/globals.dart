@@ -32,7 +32,6 @@ import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
 import 'cache.dart';
-import 'context_runner.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
@@ -256,7 +255,7 @@ TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 ///
 /// This is depended on by [localFileSystem] which is called before any
 /// [AppContext] is set up, and thus this cannot be a Context getter.
-final shutdownHooks = ShutdownHooks();
+ShutdownHooks get shutdownHooks => LocalSignals.instance.shutdownHooks;
 
 // Unless we're in a test of this class's signal handling features, we must
 // have only one instance created with the singleton LocalSignals instance
@@ -273,11 +272,11 @@ CocoaPods? get cocoaPods => context.get<CocoaPods>();
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
       FlutterProjectFactory(
+        config: config,
         featureFlags: featureFlags,
         fileSystem: fs,
         logger: logger,
         plistParser: plistParser,
-        toolContext: const GlobalToolContext(),
         xcode: xcode,
         xcodeProjectInterpreter: xcodeProjectInterpreter,
       );

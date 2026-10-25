@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../application_package.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -196,7 +197,7 @@ class BuildableMacOSApp extends MacOSApp {
 
   @override
   String? applicationBundle(BuildInfo buildInfo) {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:Config config, :FileSystem fs, :Logger logger) = _toolContext;
     final File appBundleNameFile = project.nameFile;
     if (!appBundleNameFile.existsSync()) {
       logger.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
@@ -205,7 +206,7 @@ class BuildableMacOSApp extends MacOSApp {
 
     return fs.path.join(
       project.parent.directory.path,
-      getMacOSBuildDirectory(),
+      getMacOSBuildDirectory(config: config, fileSystem: fs),
       'Build',
       'Products',
       bundleDirectory(buildInfo),

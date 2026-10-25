@@ -336,29 +336,9 @@ class ToolDependencies {
           config: finalConfig,
         );
     finalAnalyticsInitialized = true;
+    LocalSignals.instance.configureExit(analytics: finalAnalytics, logger: finalLogger);
 
     // 9. Project Factory and Operating System Utilities
-    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
-        xcodeProjectInterpreter ??
-        XcodeProjectInterpreter(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-        );
-
-    final Xcode finalXcode =
-        xcode ??
-        Xcode(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          userMessages: finalUserMessages,
-        );
-
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
     final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
       finalFS.path.join(projectRoot, 'pubspec.yaml'),
@@ -382,18 +362,19 @@ class ToolDependencies {
         plistParser ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
-    late final ToolContext finalToolContext;
+    late final XcodeProjectInterpreter finalXcodeProjectInterpreter;
+    late final Xcode finalXcode;
 
     final FlutterProjectFactory finalProjectFactory =
         projectFactory ??
         FlutterProjectFactory(
+          config: finalConfig,
           featureFlags: finalFeatureFlags,
           fileSystem: finalFS,
           logger: finalLogger,
           plistParser: finalPlistParser,
-          toolContextBuilder: () => finalToolContext,
-          xcode: finalXcode,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+          xcodeBuilder: () => finalXcode,
+          xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
         );
 
     final finalOS = OperatingSystemUtils(
@@ -450,21 +431,6 @@ class ToolDependencies {
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
-    // 11. AppleContext Dependencies
-    final CocoaPods finalCocoaPods =
-        cocoaPods ??
-        CocoaPods(
-          fileSystem: finalFS,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          platform: finalPlatform,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          analytics: finalAnalytics,
-        );
-
-    final CocoaPodsValidator finalCocoapodsValidator =
-        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
-
     // Artifacts will be updated later if a local engine is used.
     final Artifacts finalArtifacts = switch (artifacts) {
       final DeferredArtifacts deferredArtifacts => deferredArtifacts,
@@ -479,40 +445,7 @@ class ToolDependencies {
       ),
     };
 
-    final XCDevice finalXCDevice =
-        xcdevice ??
-        XCDevice(
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          artifacts: finalArtifacts,
-          cache: finalCache,
-          platform: finalPlatform,
-          xcode: finalXcode,
-          iproxy: IProxy(
-            artifacts: finalArtifacts,
-            logger: finalLogger,
-            processManager: finalProcessManager,
-            dyLdLibEntry: finalCache.dyLdLibEntry,
-          ),
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-          shutdownHooks: finalShutdownHooks,
-        );
-
-    final IOSWorkflow finalIOSWorkflow =
-        iosWorkflow ??
-        IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
-
-    final IOSSimulatorUtils finalIOSSimulatorUtils =
-        iosSimulatorUtils ??
-        IOSSimulatorUtils(
-          logger: finalLogger,
-          operatingSystemUtils: finalOS,
-          processManager: finalProcessManager,
-          xcode: finalXcode,
-        );
-
-    finalToolContext = ToolContext(
+    final finalToolContext = ToolContext(
       artifacts: finalArtifacts,
       botDetector: finalBotDetector,
       cache: finalCache,
@@ -540,6 +473,57 @@ class ToolDependencies {
       terminal: finalTerminal,
       userMessages: finalUserMessages,
     );
+
+    // 11. AppleContext Dependencies
+    finalXcodeProjectInterpreter =
+        xcodeProjectInterpreter ??
+        XcodeProjectInterpreter(analytics: finalAnalytics, toolContext: finalToolContext);
+
+    finalXcode =
+        xcode ??
+        Xcode(
+          platform: finalPlatform,
+          processManager: finalProcessManager,
+          logger: finalLogger,
+          fileSystem: finalFS,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+          userMessages: finalUserMessages,
+        );
+
+    final CocoaPods finalCocoaPods =
+        cocoaPods ??
+        CocoaPods(
+          fileSystem: finalFS,
+          processManager: finalProcessManager,
+          logger: finalLogger,
+          platform: finalPlatform,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+          analytics: finalAnalytics,
+        );
+
+    final CocoaPodsValidator finalCocoapodsValidator =
+        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
+
+    final XCDevice finalXCDevice =
+        xcdevice ??
+        XCDevice(
+          analytics: finalAnalytics,
+          iproxy: IProxy(
+            artifacts: finalArtifacts,
+            logger: finalLogger,
+            processManager: finalProcessManager,
+            dyLdLibEntry: finalCache.dyLdLibEntry,
+          ),
+          toolContext: finalToolContext,
+          xcode: finalXcode,
+        );
+
+    final IOSWorkflow finalIOSWorkflow =
+        iosWorkflow ??
+        IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
+
+    final IOSSimulatorUtils finalIOSSimulatorUtils =
+        iosSimulatorUtils ?? IOSSimulatorUtils(toolContext: finalToolContext, xcode: finalXcode);
 
     // 12. AndroidContext Dependencies
     final AndroidSdk? Function() finalAndroidSdkBuilder =
@@ -660,9 +644,12 @@ class ToolDependencies {
           buildTargets: finalBuildTargets,
           extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
+          iosSimulatorUtils: finalIOSSimulatorUtils,
+          iosWorkflow: finalIOSWorkflow,
           macOSWorkflow: finalMacOSWorkflow,
           toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
+          xcDevice: finalXCDevice,
         );
 
     return ToolDependencies(

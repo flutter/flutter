@@ -14,6 +14,7 @@ import 'package:yaml/yaml.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -25,7 +26,6 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'context/tool_context.dart';
-import 'context_runner.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -61,22 +61,24 @@ class FlutterProjectFactory {
   FlutterProjectFactory({
     required this._fileSystem,
     required this._logger,
+    this._config,
     this._featureFlags,
     this._plistParser,
-    this._toolContext,
-    this._toolContextBuilder,
     this._xcode,
+    this._xcodeBuilder,
     this._xcodeProjectInterpreter,
+    this._xcodeProjectInterpreterBuilder,
   });
 
+  final Config? _config;
   final FeatureFlags? _featureFlags;
   final FileSystem _fileSystem;
   final Logger _logger;
   final PlistParser? _plistParser;
-  final ToolContext? _toolContext;
-  final ToolContext? Function()? _toolContextBuilder;
   final Xcode? _xcode;
+  final Xcode? Function()? _xcodeBuilder;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
+  final XcodeProjectInterpreter? Function()? _xcodeProjectInterpreterBuilder;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -84,7 +86,13 @@ class FlutterProjectFactory {
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
-    final ToolContext? resolvedToolContext = _toolContext ?? _toolContextBuilder?.call();
+    final Config? config = _config;
+    final Directory? buildDirectory = config != null
+        ? directory.childDirectory(getBuildDirectory(config, directory.fileSystem))
+        : null;
+    final Xcode? resolvedXcode = _xcode ?? _xcodeBuilder?.call();
+    final XcodeProjectInterpreter? resolvedXcodeProjectInterpreter =
+        _xcodeProjectInterpreter ?? _xcodeProjectInterpreterBuilder?.call();
     final File pubspec = directory.childFile(bundle.defaultManifestPath);
     if (!pubspec.existsSync()) {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -101,12 +109,12 @@ class FlutterProjectFactory {
         directory,
         manifest,
         exampleManifest,
+        buildDirectory: buildDirectory,
         featureFlags: _featureFlags,
         plistParser: _plistParser,
         projectFactory: this,
-        toolContext: resolvedToolContext,
-        xcode: _xcode,
-        xcodeProjectInterpreter: _xcodeProjectInterpreter,
+        xcode: resolvedXcode,
+        xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
       );
     }
     return projects.putIfAbsent(directory.path, () {
@@ -124,12 +132,12 @@ class FlutterProjectFactory {
         directory,
         manifest,
         exampleManifest,
+        buildDirectory: buildDirectory,
         featureFlags: _featureFlags,
         plistParser: _plistParser,
         projectFactory: this,
-        toolContext: resolvedToolContext,
-        xcode: _xcode,
-        xcodeProjectInterpreter: _xcodeProjectInterpreter,
+        xcode: resolvedXcode,
+        xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
       );
     });
   }
@@ -159,7 +167,6 @@ class FlutterProject {
     this._featureFlags,
     this._plistParser,
     this._projectFactory,
-    this._toolContext,
     this._xcode,
     this._xcodeProjectInterpreter,
   }) {
@@ -169,7 +176,6 @@ class FlutterProject {
   final FeatureFlags? _featureFlags;
   final PlistParser? _plistParser;
   final FlutterProjectFactory? _projectFactory;
-  final ToolContext? _toolContext;
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
@@ -273,8 +279,7 @@ class FlutterProject {
   final Directory? _buildDirectory;
 
   /// The location of the build folder.
-  Directory get buildDirectory =>
-      _buildDirectory ?? directory.childDirectory(getBuildDirectory(null, directory.fileSystem));
+  Directory get buildDirectory => _buildDirectory ?? directory.childDirectory('build');
 
   /// The manifest of this project.
   FlutterManifest get manifest => _manifest;
@@ -533,7 +538,6 @@ class FlutterProject {
     featureFlags: _featureFlags,
     plistParser: _plistParser,
     projectFactory: _projectFactory,
-    toolContext: _toolContext,
     xcode: _xcode,
     xcodeProjectInterpreter: _xcodeProjectInterpreter,
   );
@@ -647,6 +651,7 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> regeneratePlatformSpecificTooling({
+    required ToolContext toolContext,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     required bool releaseMode,
     PubspecCache? pubspecCache,
@@ -654,6 +659,7 @@ class FlutterProject {
     PackageConfig? packageConfig,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
+      toolContext: toolContext,
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
       // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
@@ -677,6 +683,7 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required ToolContext toolContext,
     required bool releaseMode,
     bool androidPlatform = false,
     bool iosPlatform = false,
@@ -694,7 +701,7 @@ class FlutterProject {
     }
 
     final migration = ProjectMigration(<ProjectMigrator>[
-      AnalysisOptionsMigration(this, globals.logger, packageConfig: packageConfig),
+      AnalysisOptionsMigration(this, toolContext.logger, packageConfig: packageConfig),
     ]);
     await migration.run();
 
@@ -725,16 +732,14 @@ class FlutterProject {
       await ios.ensureReadyForPlatformSpecificTooling(
         plistParser: _plistParser ?? globals.plistParser,
         templateRenderer: globals.templateRenderer,
-        toolContext: _toolContext ?? const GlobalToolContext(),
+        toolContext: toolContext,
       );
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
     }
     if (macOSPlatform) {
-      await macos.ensureReadyForPlatformSpecificTooling(
-        toolContext: _toolContext ?? const GlobalToolContext(),
-      );
+      await macos.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();

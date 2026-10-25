@@ -7,6 +7,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../base/analyze_size.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
@@ -115,6 +116,7 @@ Future<void> buildMacOS({
   ) = appleContext;
   final ToolContext(
     :BotDetector botDetector,
+    :Config config,
     :FileSystem fs,
     :FileSystemUtils fileSystemUtils,
     :Logger logger,
@@ -170,7 +172,7 @@ Future<void> buildMacOS({
     featureFlags: featureFlags,
   );
 
-  final String buildDirectoryPath = getMacOSBuildDirectory();
+  final String buildDirectoryPath = getMacOSBuildDirectory(config: config, fileSystem: fs);
   final Directory flutterBuildDir = flutterProject.directory.childDirectory(buildDirectoryPath);
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
@@ -209,6 +211,7 @@ Future<void> buildMacOS({
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
+    toolContext: toolContext,
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
@@ -408,13 +411,7 @@ Future<void> buildMacOS({
         : 'plist-impeller-enabled';
     analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'macos'));
   }
-  await _writeCodeSizeAnalysis(
-    buildInfo,
-    sizeAnalyzer,
-    fileSystem: fs,
-    fileSystemUtils: fileSystemUtils,
-    logger: logger,
-  );
+  await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer, toolContext: toolContext);
   final Duration elapsedDuration = sw.elapsed;
   analytics.send(
     Event.timing(
@@ -433,14 +430,18 @@ Future<void> buildMacOS({
 Future<void> _writeCodeSizeAnalysis(
   BuildInfo buildInfo,
   SizeAnalyzer? sizeAnalyzer, {
-  required FileSystem fileSystem,
-  required FileSystemUtils fileSystemUtils,
-  required Logger logger,
+  required ToolContext toolContext,
 }) async {
   // Bail out if the size analysis option was not specified.
   if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
     return;
   }
+  final ToolContext(
+    :Config config,
+    fs: FileSystem fileSystem,
+    :FileSystemUtils fileSystemUtils,
+    :Logger logger,
+  ) = toolContext;
   final File? aotSnapshot = const <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]
       .map<File?>((CpuArch arch) {
         return fileSystem
@@ -470,7 +471,12 @@ Future<void> _writeCodeSizeAnalysis(
   // This analysis is only supported for release builds.
   // Attempt to guess the correct .app by picking the first one.
   final Directory candidateDirectory = fileSystem.directory(
-    fileSystem.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
+    fileSystem.path.join(
+      getMacOSBuildDirectory(config: config, fileSystem: fileSystem),
+      'Build',
+      'Products',
+      'Release',
+    ),
   );
   final Directory appDirectory = candidateDirectory.listSync().whereType<Directory>().firstWhere((
     Directory directory,

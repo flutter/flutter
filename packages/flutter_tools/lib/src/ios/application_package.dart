@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../application_package.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -125,8 +126,7 @@ class BuildableIOSApp extends IOSApp {
     this.project,
     String projectBundleId,
     String? productName, {
-    required this._fileSystem,
-    required this._logger,
+    required this._toolContext,
   }) : _appProductName = productName,
        super(projectBundleId: projectBundleId);
 
@@ -138,21 +138,13 @@ class BuildableIOSApp extends IOSApp {
     final String? productName = await project.productName(buildInfo);
     final String? projectBundleId = await project.productBundleIdentifier(buildInfo);
     if (projectBundleId != null) {
-      final ToolContext(fs: FileSystem fileSystem, :Logger logger) = toolContext;
-      return BuildableIOSApp(
-        project,
-        projectBundleId,
-        productName,
-        fileSystem: fileSystem,
-        logger: logger,
-      );
+      return BuildableIOSApp(project, projectBundleId, productName, toolContext: toolContext);
     }
     return null;
   }
 
   final IosProject project;
-  final FileSystem _fileSystem;
-  final Logger _logger;
+  final ToolContext _toolContext;
 
   final String? _appProductName;
 
@@ -166,19 +158,29 @@ class BuildableIOSApp extends IOSApp {
   String get deviceBundlePath => _buildAppPath(XcodeSdk.IPhoneOS.platformName);
 
   @override
-  Directory get appDeltaDirectory =>
-      _fileSystem.directory(_fileSystem.path.join(getIosBuildDirectory(), 'app-delta'));
+  Directory get appDeltaDirectory {
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    return fs.directory(
+      fs.path.join(getIosBuildDirectory(config: config, fileSystem: fs), 'app-delta'),
+    );
+  }
 
   // Xcode uses this path for the final archive bundle location,
   // not a top-level output directory.
   // Specifying `build/ios/archive/Runner` will result in `build/ios/archive/Runner.xcarchive`.
-  String get archiveBundlePath =>
-      _fileSystem.path.join(getIosBuildDirectory(), 'archive', _appProductName ?? 'Runner');
+  String get archiveBundlePath {
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    return fs.path.join(
+      getIosBuildDirectory(config: config, fileSystem: fs),
+      'archive',
+      _appProductName ?? 'Runner',
+    );
+  }
 
   // The output xcarchive bundle path `build/ios/archive/Runner.xcarchive`.
   String get archiveBundleOutputPath => '$archiveBundlePath.xcarchive';
 
-  String get builtInfoPlistPathAfterArchive => _fileSystem.path.join(
+  String get builtInfoPlistPathAfterArchive => _toolContext.fs.path.join(
     archiveBundleOutputPath,
     'Products',
     'Applications',
@@ -202,17 +204,25 @@ class BuildableIOSApp extends IOSApp {
   Future<String> get templateLaunchImageDirNameForImages async =>
       _templateImageAssetDirNameForImages(_launchImageAsset);
 
-  String get ipaOutputPath => _fileSystem.path.join(getIosBuildDirectory(), 'ipa');
+  String get ipaOutputPath {
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    return fs.path.join(getIosBuildDirectory(config: config, fileSystem: fs), 'ipa');
+  }
 
   String _buildAppPath(String type) {
-    return _fileSystem.path.join(getIosBuildDirectory(), type, '$_appProductName.app');
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    return fs.path.join(
+      getIosBuildDirectory(config: config, fileSystem: fs),
+      type,
+      '$_appProductName.app',
+    );
   }
 
   String _projectImageAssetDirName(String asset) =>
-      _fileSystem.path.join('ios', 'Runner', 'Assets.xcassets', asset);
+      _toolContext.fs.path.join('ios', 'Runner', 'Assets.xcassets', asset);
 
   // Template asset's Contents.json file is in flutter_tools, but the actual
-  String _templateImageAssetDirNameForContentsJson(String asset) => _fileSystem.path.join(
+  String _templateImageAssetDirNameForContentsJson(String asset) => _toolContext.fs.path.join(
     Cache.flutterRoot!,
     'packages',
     'flutter_tools',
@@ -222,16 +232,13 @@ class BuildableIOSApp extends IOSApp {
 
   // Template asset's images are in flutter_template_images package.
   Future<String> _templateImageAssetDirNameForImages(String asset) async {
-    final Directory imageTemplate = await templatePathProvider.imageDirectory(
-      null,
-      _fileSystem,
-      _logger,
-    );
-    return _fileSystem.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final Directory imageTemplate = await templatePathProvider.imageDirectory(null, fs, logger);
+    return fs.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
   }
 
   String _templateImageAssetDirNameSuffix(String asset) =>
-      _fileSystem.path.join('app', 'ios.tmpl', 'Runner', 'Assets.xcassets', asset);
+      _toolContext.fs.path.join('app', 'ios.tmpl', 'Runner', 'Assets.xcassets', asset);
 
   String get _appIconAsset => 'AppIcon.appiconset';
   String get _launchImageAsset => 'LaunchImage.imageset';
