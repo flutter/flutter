@@ -329,12 +329,16 @@ under `opt`, `-Oz` where a variant's platform turns on
 since the SDK is optional in the checkout, and `spike_test`, which
 serves the module over a local HTTP server (an ES-module loader fetches
 its `.wasm`) and reads its exports' results from headless Chrome's DOM
-dump -- the host's Chrome, or `--test_env=CHROME=`; a hermetic browser
-is the web phase's.
+dump -- the host's Chrome, or `--test_env=CHROME=` (the pinned Chrome for
+Testing, `@chrome`, never returns from `--dump-dom` on this host; the tool's
+tests drive it over DevTools instead).
 
 ```
-bazelisk build -c opt //engine/src/flutter/build/bazel/toolchains/emscripten/spike:all
-bazelisk test -c opt //engine/src/flutter/build/bazel/toolchains/emscripten/spike:spike_test
+# A wasm module builds for a variant of the web build (wasm.bzl: the
+# module_platform flag names the wasm_platform; CanvasKit's here, an embind
+# module without LTO like this one).
+bazelisk build -c opt --//engine/src/flutter/build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:canvaskit //engine/src/flutter/build/bazel/toolchains/emscripten/spike:all
+bazelisk test -c opt --//engine/src/flutter/build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:canvaskit //engine/src/flutter/build/bazel/toolchains/emscripten/spike:spike_test
 ```
 
 Against `out/wasm_release`: the Skia unit's compile line carries every
@@ -737,7 +741,16 @@ resolves against the whole workspace: `@pub_workspace` (a repository the
 pub extension makes: every member's pubspec at its path) is laid at the
 root (`sdk_trees`) with a workspace-wide `pub_cache`, the lock is copied
 over its symlink first (`writable`: pub touches it), the SDK's bin is on
-PATH and the tool gets a HOME of the test's own for its settings.
+PATH and the tool gets a HOME of the test's own for its settings. The web
+shard (`flutter run -d chrome` and `-d web-server`, hot reload and restart
+on the web, the web driver service) and the previewer's tests drive a
+browser: `browser` exports Chrome for Testing -- at the version the web
+engine's `lib/web_ui/dev/package_lock.yaml` pins, fetched as `@chrome` by
+`build_defs/repositories/browsers.bzl` together with its chromedriver, what
+CI's `chrome_and_driver` dependency holds -- as `CHROME_EXECUTABLE`, and
+`browser_driver` puts the driver's directory on PATH, so the tests drive the
+pinned browser wherever they run and not the host's. Chrome itself loads the
+host's X11, NSS, GTK and audio libraries (the sandbox leaves `/usr` readable).
 
 ```sh
 bazel test //:framework_tests //:tool_tests //:dart_tests   # everything below, the root's suites
@@ -749,6 +762,7 @@ bazel test //packages/flutter/examples/api/test:tests //packages/flutter_test/te
 bazel test //packages/flutter/test_release:tests    # -Ddart.vm.product=true
 bazel test //packages/flutter_tools:general_shard   # dart_test: the tool's unit tests
 bazel test //packages/flutter_tools:commands_shard_hermetic //packages/flutter_tools:commands_shard_permeable
+bazel test //packages/flutter_tools:integration_shard //packages/flutter_tools:web_shard   # the tool as a process
 bazel test //dev/bots:tests //dev/tools/gen_keycodes:tests
 ```
 
@@ -761,7 +775,8 @@ cases -- plus the Impeller, no-tracking and release/profile runs,
 flutter_tools' general shard (271 files) and commands shard (the hermetic
 half whole, 67; the permeable half but for the one file that does not
 compile at this checkout, 10) and its integration shard where a Linux host
-can run it (73 of 117 files: not Android, CMake or xvfb),
+can run it (73 of 117 files: not Android, CMake or xvfb) and its web shard
+(18 files, on the pinned Chrome),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
 fuchsia_remote_debug_protocol). Left out by name: web-only and macOS-only
