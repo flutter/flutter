@@ -6,15 +6,18 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
 
 const _primaryDeviceId = 'custom_device_1';
 const _secondaryDeviceId = 'custom_device_2';
@@ -25,25 +28,36 @@ const _eventTypeKey = 'type';
 final class _StreamingTestDeviceService extends DeviceService {
   _StreamingTestDeviceService({
     required this.eventSendPort,
+    this.disconnectPrimaryAfterPolls,
     this.exitAfterEmitting = false,
+    this.failGetDevicesOnPoll,
     this.linesByDevice = const <String, List<String>>{},
     this.throwOnStart = false,
   });
 
   final SendPort eventSendPort;
+  final int? disconnectPrimaryAfterPolls;
   final bool exitAfterEmitting;
+  final int? failGetDevicesOnPoll;
   final Map<String, List<String>> linesByDevice;
   final bool throwOnStart;
+  int _getDevicesCallCount = 0;
 
   @override
   Future<List<TargetDevice>> getDevices() async {
-    return const <TargetDevice>[
-      TargetDevice(
-        id: _primaryDeviceId,
-        name: 'Primary Extension Device',
-        category: Category.desktop,
-      ),
-      TargetDevice(
+    _getDevicesCallCount++;
+    if (_getDevicesCallCount == failGetDevicesOnPoll) {
+      throw StateError('Simulated transient getDevices failure');
+    }
+    final int? maxPolls = disconnectPrimaryAfterPolls;
+    return <TargetDevice>[
+      if (maxPolls == null || _getDevicesCallCount <= maxPolls)
+        const TargetDevice(
+          id: _primaryDeviceId,
+          name: 'Primary Extension Device',
+          category: Category.desktop,
+        ),
+      const TargetDevice(
         id: _secondaryDeviceId,
         name: 'Secondary Extension Device',
         category: Category.desktop,
@@ -387,6 +401,122 @@ void main() {
           ),
         );
       }
+    });
+
+    testWithoutContext('disposing DeviceLogReader returned by ExtensionBackedDevice.getLogReader clears cached reader so subsequent getLogReader starts a new stream', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final Stream<Map<String, Object?>> events = eventPort
+          .cast<Map<String, Object?>>()
+          .asBroadcastStream();
+      final SendPort eventSendPort = eventPort.sendPort;
+
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(eventSendPort: eventSendPort),
+          ]),
+        );
+      }
+
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
+
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final List<TargetDevice> targetDevices = await client.getDevices();
+      final device = ExtensionBackedDevice(
+        connection: conn,
+        deviceService: client,
+        logger: logger,
+        targetDevice: targetDevices.first,
+      );
+      addTearDown(device.dispose);
+
+      final Future<Map<String, Object?>> firstStartFuture = events.firstWhere(
+        (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
+      );
+      final DeviceLogReader firstReader = await device.getLogReader();
+      expect((await firstStartFuture)[DeviceService.deviceIdParam], equals(_primaryDeviceId));
+
+      final Future<Map<String, Object?>> firstStopFuture = events.firstWhere(
+        (Map<String, Object?> event) => event[_eventTypeKey] == _stopEventType,
+      );
+      firstReader.dispose();
+      expect((await firstStopFuture)[DeviceService.deviceIdParam], equals(_primaryDeviceId));
+
+      final Future<Map<String, Object?>> secondStartFuture = events.firstWhere(
+        (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
+      );
+      final DeviceLogReader secondReader = await device.getLogReader();
+      expect(secondReader, isA<ExtensionDeviceLogReader>());
+      expect(secondReader, isNot(same(firstReader)));
+      expect((await secondStartFuture)[DeviceService.deviceIdParam], equals(_primaryDeviceId));
+    });
+
+    testWithoutContext('ExtensionDevices.pollingGetDevices reuses cached ExtensionBackedDevice across polls and disposes removed devices', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final Stream<Map<String, Object?>> events = eventPort
+          .cast<Map<String, Object?>>()
+          .asBroadcastStream();
+      final SendPort eventSendPort = eventPort.sendPort;
+
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(
+              eventSendPort: eventSendPort,
+              disconnectPrimaryAfterPolls: 3,
+              failGetDevicesOnPoll: 2,
+            ),
+          ]),
+        );
+      }
+
+      final manager = ExtensionManager(
+        entryPoints: <ExtensionEntryPoint>[entryPoint],
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(manager.dispose);
+
+      final discovery = ExtensionDevices(extensionManager: manager, logger: logger);
+      addTearDown(discovery.dispose);
+
+      final List<Device> firstPoll = await discovery.pollingGetDevices();
+      expect(firstPoll, hasLength(2));
+      final Device primaryFirst = firstPoll.firstWhere(
+        (Device device) => device.id == _primaryDeviceId,
+      );
+
+      final Future<Map<String, Object?>> startEventFuture = events.firstWhere(
+        (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
+      );
+      final DeviceLogReader readerFirst = await primaryFirst.getLogReader();
+      expect((await startEventFuture)[DeviceService.deviceIdParam], equals(_primaryDeviceId));
+
+      final List<Device> transientFailurePoll = await discovery.pollingGetDevices();
+      expect(transientFailurePoll, isEmpty);
+      expect(await primaryFirst.getLogReader(), same(readerFirst));
+
+      final List<Device> thirdPoll = await discovery.pollingGetDevices();
+      expect(thirdPoll, hasLength(2));
+      final Device primaryThird = thirdPoll.firstWhere(
+        (Device device) => device.id == _primaryDeviceId,
+      );
+      expect(primaryThird, same(primaryFirst));
+      expect(await primaryThird.getLogReader(), same(readerFirst));
+
+      final Future<Map<String, Object?>> stopEventFuture = events.firstWhere(
+        (Map<String, Object?> event) => event[_eventTypeKey] == _stopEventType,
+      );
+      final List<Device> fourthPoll = await discovery.pollingGetDevices();
+      expect(fourthPoll.map((Device device) => device.id), equals(<String>[_secondaryDeviceId]));
+
+      final Map<String, Object?> stopEvent = await stopEventFuture;
+      expect(stopEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
+      expect(await primaryFirst.getLogReader(), isA<NoOpDeviceLogReader>());
     });
   });
 }

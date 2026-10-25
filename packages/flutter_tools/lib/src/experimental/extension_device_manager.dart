@@ -26,18 +26,22 @@ final class ExtensionDeviceClient extends DeviceService {
   final ExtensionConnection connection;
   final Logger _logger;
 
-  @override
-  Future<List<TargetDevice>> getDevices() async {
+  Future<List<TargetDevice>> _fetchDevices() async {
     _logger.printTrace(
       'ExtensionDeviceClient fetching devices via RPC ("${DeviceService.getDevicesMethod}")...',
     );
+    final Object? rawResult = await connection
+        .sendRequest(DeviceService.getDevicesMethod)
+        .timeout(const Duration(seconds: 5));
+    final List<TargetDevice> devices = TargetDevice.listFromJson(rawResult);
+    _logger.printTrace('ExtensionDeviceClient received ${devices.length} device(s) via RPC.');
+    return devices;
+  }
+
+  @override
+  Future<List<TargetDevice>> getDevices() async {
     try {
-      final Object? rawResult = await connection
-          .sendRequest(DeviceService.getDevicesMethod)
-          .timeout(const Duration(seconds: 5));
-      final List<TargetDevice> devices = TargetDevice.listFromJson(rawResult);
-      _logger.printTrace('ExtensionDeviceClient received ${devices.length} device(s) via RPC.');
-      return devices;
+      return await _fetchDevices();
     } on Object catch (err, stack) {
       _logger.printTrace('ExtensionDeviceClient failed to get devices: $err\n$stack');
     }
@@ -103,51 +107,28 @@ final class ExtensionDeviceClient extends DeviceService {
 /// via [DeviceService.logEntryNotificationMethod] notifications.
 class ExtensionDeviceLogReader extends DeviceLogReader {
   ExtensionDeviceLogReader._({
-    required ExtensionConnection connection,
+    required this._connection,
     required this._deviceId,
     required this._deviceService,
     required this._logger,
     required this.name,
+    this._onDispose,
   }) {
     _logLinesController = StreamController<String>.broadcast(onListen: _flushPendingLines);
-    _notificationSubscription = connection
-        .onNotification(DeviceService.logEntryNotificationMethod)
-        .listen(
-          (Map<String, Object?> params) {
-            if (_isDisposed || _logLinesController.isClosed) {
-              return;
-            }
-            if (params[DeviceService.deviceIdParam] == _deviceId) {
-              if (params[DeviceService.lineKey] case final String line) {
-                if (_logLinesController.hasListener) {
-                  _logLinesController.add(line);
-                } else if (_pendingLines.length < _maxPendingLines) {
-                  _pendingLines.add(line);
-                }
-              }
-            }
-          },
-          onDone: () {
-            if (_isDisposed || _logLinesController.isClosed) {
-              return;
-            }
-            if (_pendingLines.isEmpty) {
-              unawaited(_logLinesController.close());
-            } else {
-              _closeAfterFlush = true;
-            }
-          },
-        );
   }
 
   /// Creates an [ExtensionDeviceLogReader] and starts the device log stream on
   /// the extension isolate.
+  ///
+  /// If [onDispose] is provided, it is invoked once when the reader is disposed
+  /// or fails to start.
   static Future<ExtensionDeviceLogReader> create({
     required ExtensionConnection connection,
     required String deviceId,
     required DeviceService deviceService,
     required Logger logger,
     required String name,
+    void Function()? onDispose,
   }) async {
     final reader = ExtensionDeviceLogReader._(
       connection: connection,
@@ -155,6 +136,7 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
       deviceService: deviceService,
       logger: logger,
       name: name,
+      onDispose: onDispose,
     );
     await reader._startLogStream();
     return reader;
@@ -162,9 +144,11 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
 
   static const _maxPendingLines = 1000;
 
+  final ExtensionConnection _connection;
   final String _deviceId;
   final DeviceService _deviceService;
   final Logger _logger;
+  final void Function()? _onDispose;
   final _pendingLines = <String>[];
 
   @override
@@ -193,11 +177,40 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
 
   Future<void> _startLogStream() async {
     try {
+      _notificationSubscription = _connection
+          .onNotification(DeviceService.logEntryNotificationMethod)
+          .listen(
+            (Map<String, Object?> params) {
+              if (_isDisposed || _logLinesController.isClosed) {
+                return;
+              }
+              if (params[DeviceService.deviceIdParam] == _deviceId) {
+                if (params[DeviceService.lineKey] case final String line) {
+                  if (_logLinesController.hasListener) {
+                    _logLinesController.add(line);
+                  } else if (_pendingLines.length < _maxPendingLines) {
+                    _pendingLines.add(line);
+                  }
+                }
+              }
+            },
+            onDone: () {
+              if (_isDisposed || _logLinesController.isClosed) {
+                return;
+              }
+              if (_pendingLines.isEmpty) {
+                unawaited(_logLinesController.close());
+              } else {
+                _closeAfterFlush = true;
+              }
+            },
+          );
       await _deviceService.startLogStream(deviceId: _deviceId);
     } on Object catch (error) {
       _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
       if (!_isDisposed) {
         _isDisposed = true;
+        _onDispose?.call();
         await _notificationSubscription?.cancel();
         _notificationSubscription = null;
         if (!_logLinesController.isClosed) {
@@ -216,6 +229,7 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
       return;
     }
     _isDisposed = true;
+    _onDispose?.call();
     _pendingLines.clear();
     await _notificationSubscription?.cancel();
     _notificationSubscription = null;
@@ -236,6 +250,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
 
   final ExtensionManager _extensionManager;
   final Logger _logger;
+  final _devicesByKey = <(ExtensionConnection, String), ExtensionBackedDevice>{};
 
   @override
   bool get supportsPlatform => true;
@@ -256,34 +271,80 @@ class ExtensionDevices extends PollingDeviceDiscovery {
     final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;
     if (deviceServices.isEmpty) {
       _logger.printTrace('ExtensionDevices found 0 active device extensions.');
+      _disposeCachedDevices();
       return <Device>[];
     }
 
-    final List<List<Device>> devicesPerService = await Future.wait(
+    final List<(ExtensionDeviceClient, List<TargetDevice>?)> devicesPerService = await Future.wait(
       deviceServices.whereType<ExtensionDeviceClient>().map((ExtensionDeviceClient service) async {
         try {
-          final List<TargetDevice> devices = await service.getDevices();
-          return devices
-              .map(
-                (TargetDevice targetDevice) => ExtensionBackedDevice(
-                  connection: service.connection,
-                  deviceService: service,
-                  logger: _logger,
-                  targetDevice: targetDevice,
-                ),
-              )
-              .toList();
+          final List<TargetDevice> devices = await service._fetchDevices();
+          return (service, devices);
         } on Object catch (e, st) {
           _logger.printTrace('Error querying device extension service: $e\n$st');
-          return <Device>[];
+          return (service, null);
         }
       }),
     );
 
-    final targetDevices = <Device>[for (final deviceList in devicesPerService) ...deviceList];
+    final failedConnections = <ExtensionConnection>{};
+    final seenKeys = <(ExtensionConnection, String)>{};
+    final targetDevices = <Device>[];
+    for (final (ExtensionDeviceClient service, List<TargetDevice>? devices) in devicesPerService) {
+      if (devices == null) {
+        failedConnections.add(service.connection);
+        continue;
+      }
+      for (final TargetDevice targetDevice in devices) {
+        final (ExtensionConnection, String) key = (service.connection, targetDevice.id);
+        if (!seenKeys.add(key)) {
+          continue;
+        }
+        final ExtensionBackedDevice? existing = _devicesByKey[key];
+        final ExtensionBackedDevice device;
+        if (existing != null && !existing._disposed) {
+          existing._targetDevice = targetDevice;
+          device = existing;
+        } else {
+          device = ExtensionBackedDevice(
+            connection: service.connection,
+            deviceService: service,
+            logger: _logger,
+            targetDevice: targetDevice,
+          );
+          _devicesByKey[key] = device;
+        }
+        targetDevices.add(device);
+      }
+    }
+
+    final removedKeys = <(ExtensionConnection, String)>[
+      for (final (ExtensionConnection connection, String deviceId) in _devicesByKey.keys)
+        if (!seenKeys.contains((connection, deviceId)) && !failedConnections.contains(connection))
+          (connection, deviceId),
+    ];
+    for (final key in removedKeys) {
+      final ExtensionBackedDevice? removedDevice = _devicesByKey.remove(key);
+      if (removedDevice != null) {
+        unawaited(removedDevice.dispose());
+      }
+    }
 
     _logger.printTrace('ExtensionDevices retrieved ${targetDevices.length} target device(s).');
     return targetDevices;
+  }
+
+  void _disposeCachedDevices() {
+    for (final ExtensionBackedDevice device in _devicesByKey.values) {
+      unawaited(device.dispose());
+    }
+    _devicesByKey.clear();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _disposeCachedDevices();
   }
 
   @override
@@ -308,7 +369,7 @@ class ExtensionBackedDevice extends Device {
 
   final DeviceService _deviceService;
   final Logger _logger;
-  final TargetDevice _targetDevice;
+  TargetDevice _targetDevice;
   final ExtensionConnection connection;
   Future<ExtensionDeviceLogReader>? _logReader;
   bool _disposed = false;
@@ -366,6 +427,9 @@ class ExtensionBackedDevice extends Device {
       deviceService: _deviceService,
       logger: _logger,
       name: name,
+      onDispose: () {
+        _logReader = null;
+      },
     );
   }
 
@@ -375,9 +439,14 @@ class ExtensionBackedDevice extends Device {
   @override
   Future<void> dispose() async {
     _disposed = true;
-    final ExtensionDeviceLogReader? reader = await _logReader;
+    final Future<ExtensionDeviceLogReader>? logReaderFuture = _logReader;
     _logReader = null;
-    await reader?.dispose();
+    try {
+      final ExtensionDeviceLogReader? reader = await logReaderFuture;
+      await reader?.dispose();
+    } on Object {
+      // Ignore errors if log reader creation failed.
+    }
   }
 
   @override
