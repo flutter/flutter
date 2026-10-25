@@ -7,6 +7,42 @@ GTK major versions into one process. Build the GTK4 tests from the repository ro
 autoninja -C engine/src/out/host_debug_unopt flutter_linux_gtk4 flutter_linux_gtk4_unittests
 ```
 
+## GTK conditional-compilation audit
+
+Inventory GTK4 switches and GTK version checks per C/C++/Objective-C source file:
+
+```sh
+python3 engine/src/flutter/shell/platform/linux/testing/audit_gtk4_ifdefs.py
+python3 engine/src/flutter/shell/platform/linux/testing/audit_gtk4_ifdefs.py \
+  engine/src/flutter/shell/platform/linux/fl_view.cc --details
+python3 engine/src/flutter/shell/platform/linux/testing/audit_gtk4_ifdefs.py \
+  --json > /tmp/gtk4-ifdefs.json
+```
+
+The default scan covers the Linux embedder, sorted by block count. Pass files or
+directories to change the scope; overlapping paths are deduplicated. `--sort path`
+orders the report by filename. Detailed and JSON output include branch line
+ranges, `#else` alternatives, and enclosing conditions. Comments, string literals,
+and header guards are excluded; continued directives retain physical line numbers.
+`BODY_LINES` counts the union of physical branch-body lines (including comments
+and blank lines), excluding conditional directive lines. Nested blocks do not
+double-count these lines.
+
+This is a source inventory, not a preprocessor or proof of runtime compatibility:
+conditions are not evaluated, includes are not expanded, and every alternative
+of a GTK-related conditional is reported. Files without matches are omitted.
+Presence tests of `FLUTTER_LINUX_GTK4` are annotated because they also match a
+macro defined as `0`; this is informational, since the current GN targets define
+the macro for GTK4 and leave it undefined for GTK3. Malformed conditionals or
+unreadable files cause a nonzero exit and are included in JSON's `errors` array.
+
+Run the audit utility's tests with:
+
+```sh
+python3 -m unittest discover -s engine/src/flutter/shell/platform/linux/testing \
+  -p audit_gtk4_ifdefs_test.py
+```
+
 ## Runtime compatibility
 
 The optional runtime validator configures an isolated output directory, checks
