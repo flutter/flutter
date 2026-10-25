@@ -41,7 +41,7 @@ take `<owner>/<repo>` from `git remote -v` — prefer `upstream`, else
 ```bash
 curl -sSL -H "Accept: application/vnd.github+json" \
   https://api.github.com/repos/<owner>/<repo>/pulls/<number> \
-  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['head']['ref']); print(d['base']['ref']); print(d['state']); print(d['user']['login']); print(d['title'])"
+  | python3 -c "import json,sys; d=json.load(sys.stdin); print('Not Found' if d.get('message') == 'Not Found' else 'Error' if 'message' in d else '\\n'.join([d.get('head',{}).get('ref',''), d.get('base',{}).get('ref',''), d.get('state',''), d.get('user',{}).get('login',''), d.get('title','')])) if isinstance(d, dict) else print('Error')"
 ```
 
 Prints head ref, base ref, state, author, title.
