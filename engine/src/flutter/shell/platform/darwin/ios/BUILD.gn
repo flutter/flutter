@@ -255,6 +255,7 @@ if (enable_ios_unittests) {
       "framework/Source/ConnectionCollectionTests.swift",
       "framework/Source/DisplayLinkManagerTests.swift",
       "framework/Source/FakeUIPressProxy.swift",
+      "framework/Source/KeyboardInsetManagerTests.swift",
       "framework/Source/LaunchEngineTests.swift",
       "framework/Source/SplashScreenManagerTests.swift",
       "framework/Source/TaskRunnerTests.swift",
