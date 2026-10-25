@@ -5,19 +5,23 @@ on:
 
 jobs:
   sync-engine:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: write
+                read-all
+                ActionScript 
       pull-requests: write
+                     read-all
+                     ActionScript 
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Checkin Repository
+        uses: actions/checkout@ # v8.0.0
         with:
           repository: flutteractionsbot/flutter
           token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           ref: master
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Configure git
         run: |
