@@ -21,6 +21,8 @@
 ///    for a catalog of commonly-used Flutter widgets.
 @Deprecated(
   'Use package:cupertino_ui/cupertino_ui.dart instead. '
+  'See the migration guide at: '
+  'https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui. '
   'This feature was deprecated after v3.47.0-0.0.pre.',
 )
 library cupertino;
