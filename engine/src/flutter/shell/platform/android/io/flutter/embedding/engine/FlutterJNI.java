@@ -1670,11 +1670,16 @@ public class FlutterJNI {
   public void deferredComponentInstallFailure(
       int loadingUnitId, @NonNull String error, boolean isTransient) {
     ensureRunningOnMainThread();
-    nativeDeferredComponentInstallFailure(loadingUnitId, error, isTransient);
+    ensureAttachedToNative();
+    nativeDeferredComponentInstallFailure(
+        nativeShellHolderId, loadingUnitId, error, isTransient);
   }
 
   private native void nativeDeferredComponentInstallFailure(
-      int loadingUnitId, @NonNull String error, boolean isTransient);
+      long nativeShellHolderId,
+      int loadingUnitId,
+      @NonNull String error,
+      boolean isTransient);
 
   // ----- End Deferred Components Support ----
 

@@ -13,5 +13,6 @@ before running any of the tests.
 This app contains two sets of tests:
 
  * `flutter drive` tests that run a debug mode app to validate framework side logic
- * `run_release_test.sh <bundletool.jar path>` which builds and installs a release version of this app and
-   validates the loading units are loaded correctly. A path to bundletool.jar must be provided
+ * `run_release_test.sh <bundletool.jar path>` which builds and installs a release version of this app,
+   validates that an injected transient install failure reaches Dart, and verifies that a retry loads
+   the deferred component successfully. A path to bundletool.jar must be provided

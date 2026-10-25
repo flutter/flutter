@@ -54,17 +54,27 @@ class MyHomePageState extends State<MyHomePage> {
   void _pressHandler() {
     if (libraryFuture == null) {
       setState(() {
-        libraryFuture = component1.loadLibrary().then((dynamic _) {
-          // Delay to give debug runs more than one frame to capture
-          // the placeholder text.
-          Future<void>.delayed(const Duration(milliseconds: 750), () {
-            setState(() {
-              postLoadDisplayWidget = component1.LogoScreen();
-            });
-          });
-        });
+        libraryFuture = _loadComponent();
       });
     }
+  }
+
+  Future<void> _loadComponent() async {
+    try {
+      await component1.loadLibrary();
+    } catch (error) {
+      print('Deferred component error delivered to Dart: $error');
+      await component1.loadLibrary();
+    }
+
+    // Delay to give debug runs more than one frame to capture the placeholder.
+    await Future<void>.delayed(const Duration(milliseconds: 750));
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      postLoadDisplayWidget = component1.LogoScreen();
+    });
   }
 
   @override
