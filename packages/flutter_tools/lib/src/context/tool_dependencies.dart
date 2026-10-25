@@ -340,7 +340,8 @@ class ToolDependencies {
 
     // 9. Project Factory and Operating System Utilities
     final FlutterProjectFactory finalProjectFactory =
-        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
+        projectFactory ??
+        FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS, config: finalConfig);
 
     final finalOS = OperatingSystemUtils(
       fileSystem: finalFS,
@@ -442,13 +443,7 @@ class ToolDependencies {
     // 11. AppleContext Dependencies
     final XcodeProjectInterpreter finalXcodeProjectInterpreter =
         xcodeProjectInterpreter ??
-        XcodeProjectInterpreter(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-        );
+        XcodeProjectInterpreter(analytics: finalAnalytics, toolContext: finalToolContext);
 
     final Xcode finalXcode =
         xcode ??
@@ -478,15 +473,15 @@ class ToolDependencies {
     final XCDevice finalXCDevice =
         xcdevice ??
         XCDevice(
-          xcode: finalXcode,
+          analytics: finalAnalytics,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
             processManager: finalProcessManager,
             dyLdLibEntry: finalCache.dyLdLibEntry,
           ),
-          analytics: finalAnalytics,
           toolContext: finalToolContext,
+          xcode: finalXcode,
         );
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
@@ -513,7 +508,7 @@ class ToolDependencies {
         IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
 
     final IOSSimulatorUtils finalIOSSimulatorUtils =
-        iosSimulatorUtils ?? IOSSimulatorUtils(xcode: finalXcode, toolContext: finalToolContext);
+        iosSimulatorUtils ?? IOSSimulatorUtils(toolContext: finalToolContext, xcode: finalXcode);
 
     final PlistParser finalPlistParser =
         plistParser ??

@@ -170,23 +170,21 @@ Future<List<String>> _xcodeBuildSettingsLines({
   String? configurationBuildDir,
   required bool printWarnings,
 }) async {
-  final ToolContext(:Artifacts artifacts, :Config config, :Logger logger) = toolContext;
+  final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs, :Logger logger) =
+      toolContext;
   final xcodeBuildSettings = <String>[];
-  final FileSystem fileSystem = project.directory.fileSystem;
 
-  final String flutterRoot = fileSystem.path.normalize(Cache.flutterRoot!);
+  final String flutterRoot = fs.path.normalize(Cache.flutterRoot!);
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  xcodeBuildSettings.add(
-    'FLUTTER_APPLICATION_PATH=${fileSystem.path.normalize(project.directory.path)}',
-  );
+  xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
 
   final String packageDirectory = useMacOSConfig
       ? project.macos.flutterFrameworkSwiftPackageDirectory.path
       : project.ios.flutterFrameworkSwiftPackageDirectory.path;
   xcodeBuildSettings.add(
-    'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=${fileSystem.path.normalize(packageDirectory)}',
+    'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=${fs.path.normalize(packageDirectory)}',
   );
 
   // Tell CocoaPods behavior to codesign in parallel with rest of scripts to speed it up.
@@ -199,9 +197,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
-  xcodeBuildSettings.add(
-    'FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory(config, fileSystem)}',
-  );
+  xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory(config, fs)}');
 
   final String buildName =
       parsedBuildName(manifest: project.manifest, logger: logger, buildInfo: buildInfo) ?? '1.0.0';
@@ -221,9 +217,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
     final String engineOutPath = localEngineInfo.targetOutPath;
-    xcodeBuildSettings.add(
-      'FLUTTER_ENGINE=${fileSystem.path.dirname(fileSystem.path.dirname(engineOutPath))}',
-    );
+    xcodeBuildSettings.add('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
 
     final String localEngineName = localEngineInfo.localTargetName;
     xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');

@@ -492,9 +492,9 @@ class PackagesGetCommand extends FlutterCommand {
         // with Flutter project files.
         // See https://github.com/flutter/flutter/issues/189550.
         if (_dependsOnFlutter(graph, workspaceRootName)) {
-          await project.regeneratePlatformSpecificTooling(
+          await regeneratePlatformSpecificTooling(
+            project,
             releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
-            toolContext: _toolContext,
             pubspecCache: pubspecCache,
             packageGraph: graph,
             packageConfig: packageConfig,
@@ -506,9 +506,9 @@ class PackagesGetCommand extends FlutterCommand {
           // (or has already been) processed in the main loop, avoiding
           // double post-processing.
           if (!graph.roots.contains(exampleProject.manifest.appName)) {
-            await exampleProject.regeneratePlatformSpecificTooling(
+            await regeneratePlatformSpecificTooling(
+              exampleProject,
               releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
-              toolContext: _toolContext,
               pubspecCache: pubspecCache,
               packageGraph: graph,
               packageConfig: packageConfig,

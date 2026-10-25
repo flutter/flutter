@@ -101,7 +101,9 @@ void main() {
         logger: testLogger,
         processManager: processManager,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
-        targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/test/'),
+        targetUri: projectUri.resolve(
+          '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/test/',
+        ),
       );
       expect(testLogger.traceText, isNot(contains('Copying native assets to')));
     },
@@ -326,7 +328,9 @@ void main() {
         logger: testLogger,
         processManager: processManager,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
-        targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/linux/'),
+        targetUri: projectUri.resolve(
+          '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/linux/',
+        ),
       );
 
       // Verify installed files only contain native_assets.json and used.so, but not unused.so.

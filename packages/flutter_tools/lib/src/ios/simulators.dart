@@ -59,14 +59,14 @@ class IOSSimulators extends PollingDeviceDiscovery {
 }
 
 class IOSSimulatorUtils {
-  IOSSimulatorUtils({required Xcode xcode, required this._toolContext}) : _xcode = xcode {
+  IOSSimulatorUtils({required this._toolContext, required this._xcode}) {
     final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
-    _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode);
+    _simControl = SimControl(logger: logger, processManager: processManager, xcode: _xcode);
   }
 
   late final SimControl _simControl;
-  final Xcode _xcode;
   final ToolContext _toolContext;
+  final Xcode _xcode;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {

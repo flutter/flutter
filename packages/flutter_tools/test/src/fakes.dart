@@ -1093,9 +1093,14 @@ class FakeArtifacts extends Fake implements Artifacts {
 }
 
 class FakeCache extends Fake implements Cache {
-  FakeCache({FileSystem? fileSystem}) : _fileSystem = fileSystem ?? MemoryFileSystem.test();
+  FakeCache({FileSystem? fileSystem, this.olderThanToolsStamp = true})
+    : _fileSystem = fileSystem ?? MemoryFileSystem.test();
 
   final FileSystem _fileSystem;
+  final bool olderThanToolsStamp;
+
+  @override
+  bool isOlderThanToolsStamp(FileSystemEntity entity) => olderThanToolsStamp;
 
   @override
   Future<void> lock() async {}
@@ -1314,6 +1319,32 @@ class FakeToolContext extends Fake implements ToolContext {
     this._userMessages,
   });
 
+  factory FakeToolContext.macosHost({
+    required ProcessManager processManager,
+    Config? config,
+    FileSystem? fs,
+    Logger? logger,
+    Platform? platform,
+  }) {
+    final FileSystem fileSystem = fs ?? MemoryFileSystem.test();
+    final Logger log = logger ?? BufferLogger.test();
+    final Platform hostPlatform =
+        platform ?? FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+    return FakeToolContext(
+      config: config ?? Config.test(),
+      fs: fileSystem,
+      logger: log,
+      os: OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: log,
+        platform: hostPlatform,
+        processManager: processManager,
+      ),
+      platform: hostPlatform,
+      processManager: processManager,
+    );
+  }
+
   final Artifacts? _artifacts;
   final BotDetector? _botDetector;
   final Cache? _cache;
@@ -1420,7 +1451,7 @@ class FakeToolContext extends Fake implements ToolContext {
 
   @override
   late final FlutterProjectFactory projectFactory =
-      _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger);
+      _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger, config: config);
 
   @override
   late final ShutdownHooks shutdownHooks = _shutdownHooks ?? ShutdownHooks();

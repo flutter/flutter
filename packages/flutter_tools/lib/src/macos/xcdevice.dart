@@ -51,14 +51,13 @@ enum XCDeviceEventInterface {
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
-    required Xcode xcode,
-    required IProxy iproxy,
     required this._analytics,
+    required IProxy iproxy,
     required this._toolContext,
+    required this._xcode,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
-  }) : _iProxy = iproxy,
-       _xcode = xcode {
+  }) : _iProxy = iproxy {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
@@ -67,6 +66,14 @@ class XCDevice {
       :ProcessManager processManager,
       :ShutdownHooks shutdownHooks,
     ) = _toolContext;
+    _coreDeviceControl =
+        coreDeviceControl ??
+        IOSCoreDeviceControl(
+          logger: logger,
+          processManager: processManager,
+          xcode: _xcode,
+          fileSystem: fs,
+        );
     _iMobileDevice = IMobileDevice(
       artifacts: artifacts,
       cache: cache,
@@ -74,17 +81,9 @@ class XCDevice {
       processManager: processManager,
     );
     _iosDeploy = IOSDeploy(artifacts: artifacts, toolContext: _toolContext);
-    _coreDeviceControl =
-        coreDeviceControl ??
-        IOSCoreDeviceControl(
-          logger: logger,
-          processManager: processManager,
-          xcode: xcode,
-          fileSystem: fs,
-        );
     _xcodeDebug =
         xcodeDebug ??
-        XcodeDebug(logger: logger, processManager: processManager, xcode: xcode, fileSystem: fs);
+        XcodeDebug(logger: logger, processManager: processManager, xcode: _xcode, fileSystem: fs);
     shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();
@@ -105,7 +104,6 @@ class XCDevice {
     }
   }
 
-  final ToolContext _toolContext;
   late final IMobileDevice _iMobileDevice;
   late final IOSDeploy _iosDeploy;
   final Xcode _xcode;
@@ -113,6 +111,7 @@ class XCDevice {
   late final IOSCoreDeviceControl _coreDeviceControl;
   late final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
+  final ToolContext _toolContext;
 
   List<Object>? _cachedListResults;
 
@@ -482,6 +481,7 @@ class XCDevice {
     required List<Object> allAvailableDevices,
     required List<IOSCoreDevice> coreDevices,
   }) {
+    final Logger logger = _toolContext.logger;
     final coreDeviceMap = <String, IOSCoreDevice>{};
     for (final device in coreDevices) {
       if (device.udid != null) {
@@ -526,7 +526,6 @@ class XCDevice {
     //  },
     // ...
 
-    final Logger logger = _toolContext.logger;
     final deviceMap = <String, IOSDevice>{};
     for (final device in allAvailableDevices) {
       if (device is Map<String, Object?>) {

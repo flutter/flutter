@@ -85,14 +85,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -112,13 +113,14 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -140,13 +142,14 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -164,13 +167,14 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -210,14 +214,15 @@ void main() {
         );
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -260,15 +265,16 @@ void main() {
         );
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         fakeLLDB.setIsRunning(true, 123);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
         final shutdownHooks = FakeShutdownHooks();
@@ -321,15 +327,16 @@ void main() {
         fakeCoreDeviceControl.terminateException = Exception('failed to terminate');
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         fakeLLDB.setIsRunning(true, 123);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
         final shutdownHooks = FakeShutdownHooks();
@@ -388,14 +395,15 @@ void main() {
         );
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -441,14 +449,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -487,14 +496,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -539,14 +549,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -585,14 +596,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -633,14 +645,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -683,14 +696,15 @@ void main() {
         );
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB(attachSuccess: false);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -714,7 +728,6 @@ void main() {
       testWithoutContext('succeeds with PrebuiltIOSApp', () async {
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final IOSApp package = FakePrebuiltIOSApp();
         final fileSystem = MemoryFileSystem.test();
         final fakeXcodeDebug = FakeXcodeDebug(
@@ -725,9 +738,11 @@ void main() {
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: fakeXcodeDebug,
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -746,7 +761,6 @@ void main() {
       testWithoutContext('succeeds with BuildableIOSApp', () async {
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeIosProject = FakeIosProject();
         final IOSApp package = FakeBuildableIOSApp(fakeIosProject);
         final fileSystem = MemoryFileSystem.test();
@@ -758,9 +772,11 @@ void main() {
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: fakeXcodeDebug,
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -779,7 +795,6 @@ void main() {
       testWithoutContext('fails with BuildableIOSApp if unable to find workspace', () async {
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeIosProject = FakeIosProject(missingWorkspace: true);
         final IOSApp package = FakeBuildableIOSApp(fakeIosProject);
         final fileSystem = MemoryFileSystem.test();
@@ -791,9 +806,11 @@ void main() {
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: fakeXcodeDebug,
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -812,7 +829,6 @@ void main() {
       testWithoutContext('fails with BuildableIOSApp if unable to find scheme', () async {
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeIosProject = FakeIosProject(missingScheme: true);
         final IOSApp package = FakeBuildableIOSApp(fakeIosProject);
         final fileSystem = MemoryFileSystem.test();
@@ -824,9 +840,11 @@ void main() {
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: fakeXcodeDebug,
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -851,14 +869,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: xcodeDebug,
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -880,14 +899,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: xcodeDebug,
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -908,14 +928,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: xcodeDebug,
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -935,14 +956,15 @@ void main() {
 
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
           xcodeDebug: xcodeDebug,
-          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+            toolContext: FakeToolContext.macosHost(processManager: processManager),
+          ),
           deviceVersion: Version(16, 0, 0),
+          toolContext: FakeToolContext.macosHost(logger: logger, processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -1078,7 +1100,10 @@ void main() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
       // TODO(fujino): re-use fakeProcessManager
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
       deviceControl = IOSCoreDeviceControl(
         logger: logger,
         processManager: fakeProcessManager,

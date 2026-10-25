@@ -788,6 +788,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late final Directory directory = fileSystem.directory('app_name');
 
   @override
+  Directory get buildDirectory => directory.childDirectory('build');
+
+  @override
   bool isModule = false;
 
   @override

@@ -159,7 +159,7 @@ void main() {
             'APP_NAME': '',
             'FLUTTER_TEST_IMPELLER': 'true',
             'PATH':
-                '${device.nativeAssetsBuilder!.windowsBuildDirectory(project, toolContext: FakeToolContext())};${platform.environment['PATH']}',
+                '${device.nativeAssetsBuilder!.windowsBuildDirectory(project, toolContext: FakeToolContext(fs: fileSystem))};${platform.environment['PATH']}',
           },
         ),
       );

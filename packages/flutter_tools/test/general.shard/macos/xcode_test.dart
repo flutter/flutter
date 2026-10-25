@@ -673,12 +673,17 @@ void main() {
         xcode = Xcode.test(
           processManager: FakeProcessManager.any(),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-            processManager: FakeProcessManager.any(),
+            toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
             version: null, // Not installed.
           ),
         );
         fileSystem = MemoryFileSystem.test();
         xcdevice = XCDevice(
+          xcode: xcode,
+          iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
+          coreDeviceControl: FakeIOSCoreDeviceControl(),
+          xcodeDebug: FakeXcodeDebug(),
+          analytics: const NoOpAnalytics(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
             cache: Cache.test(processManager: FakeProcessManager.any()),
@@ -688,11 +693,6 @@ void main() {
             processManager: fakeProcessManager,
             shutdownHooks: FakeShutdownHooks(),
           ),
-          xcode: xcode,
-          iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-          coreDeviceControl: FakeIOSCoreDeviceControl(),
-          xcodeDebug: FakeXcodeDebug(),
-          analytics: const NoOpAnalytics(),
         );
       });
 
@@ -714,6 +714,14 @@ void main() {
       final shutdownHooks = ShutdownHooks();
 
       final xcdevice = XCDevice(
+        xcode: Xcode.test(
+          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        ),
+        iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        coreDeviceControl: FakeIOSCoreDeviceControl(),
+        xcodeDebug: FakeXcodeDebug(),
+        analytics: const NoOpAnalytics(),
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
           cache: Cache.test(processManager: FakeProcessManager.any()),
@@ -723,11 +731,6 @@ void main() {
           processManager: FakeProcessManager.any(),
           shutdownHooks: shutdownHooks,
         ),
-        xcode: Xcode.test(processManager: FakeProcessManager.any()),
-        iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        coreDeviceControl: FakeIOSCoreDeviceControl(),
-        xcodeDebug: FakeXcodeDebug(),
-        analytics: const NoOpAnalytics(),
       );
 
       expect(shutdownHooks.registeredHooks, hasLength(1));
@@ -752,7 +755,10 @@ void main() {
       late FakeIOSCoreDeviceControl coreDeviceControl;
 
       setUp(() {
-        xcode = Xcode.test(processManager: FakeProcessManager.any());
+        xcode = Xcode.test(
+          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        );
         fileSystem = MemoryFileSystem.test();
         coreDeviceControl = FakeIOSCoreDeviceControl();
         fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -760,6 +766,11 @@ void main() {
           fakeFlutterVersion: FakeFlutterVersion(),
         );
         xcdevice = XCDevice(
+          xcode: xcode,
+          iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
+          coreDeviceControl: coreDeviceControl,
+          xcodeDebug: FakeXcodeDebug(),
+          analytics: fakeAnalytics,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
             cache: Cache.test(processManager: FakeProcessManager.any()),
@@ -769,11 +780,6 @@ void main() {
             processManager: fakeProcessManager,
             shutdownHooks: FakeShutdownHooks(),
           ),
-          xcode: xcode,
-          iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-          coreDeviceControl: coreDeviceControl,
-          xcodeDebug: FakeXcodeDebug(),
-          analytics: fakeAnalytics,
         );
       });
 
@@ -1595,6 +1601,11 @@ void main() {
               ),
             );
             xcdevice = XCDevice(
+              xcode: xcode,
+              iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
+              coreDeviceControl: coreDeviceControl,
+              xcodeDebug: FakeXcodeDebug(),
+              analytics: fakeAnalytics,
               toolContext: FakeToolContext(
                 artifacts: Artifacts.test(),
                 cache: Cache.test(processManager: FakeProcessManager.any()),
@@ -1604,11 +1615,6 @@ void main() {
                 processManager: fakeProcessManager,
                 shutdownHooks: FakeShutdownHooks(),
               ),
-              xcode: xcode,
-              iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-              coreDeviceControl: coreDeviceControl,
-              xcodeDebug: FakeXcodeDebug(),
-              analytics: fakeAnalytics,
             );
             const devicesOutput = '''
 [

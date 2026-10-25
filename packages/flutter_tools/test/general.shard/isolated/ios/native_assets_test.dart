@@ -7,6 +7,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -275,7 +276,9 @@ void main() {
           logger: logger,
           processManager: processManager,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
-          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/ios/'),
+          targetUri: projectUri.resolve(
+            '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/ios/',
+          ),
         );
         expect(
           logger.traceText,

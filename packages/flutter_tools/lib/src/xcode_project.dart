@@ -243,9 +243,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
+    final FileSystem fileSystem = parent.directory.fileSystem;
     return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
       this,
-      buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
+      buildDirectory: fileSystem.directory(
+        fileSystem.path.join(parent.buildDirectory.basename, darwinPlatform.name),
+      ),
     );
   }
 
@@ -1062,8 +1065,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        toolContext: toolContext,
         targetOverride: bundle.defaultMainPath(parent.directory.fileSystem),
+        toolContext: toolContext,
       );
     }
   }
@@ -1270,8 +1273,8 @@ class MacOSProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        toolContext: toolContext,
         useMacOSConfig: true,
+        toolContext: toolContext,
       );
     }
   }

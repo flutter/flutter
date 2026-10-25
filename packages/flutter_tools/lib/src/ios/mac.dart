@@ -14,6 +14,8 @@ import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/utils.dart';
@@ -123,6 +125,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
 }) async {
+  final ToolContext(:Config config, :FileSystem fs, :OperatingSystemUtils os, :Platform platform) =
+      toolContext;
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
@@ -293,7 +297,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final String buildDirectoryPath = getIosBuildDirectory();
+  final String buildDirectoryPath = getIosBuildDirectory(config: config, fileSystem: fs);
 
   final Map<String, String> buildSettings =
       await app.project.buildSettingsForBuildInfo(
@@ -465,7 +469,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
+      final onlyActiveArch =
+          activeArch ==
+          CpuArch.fromHostPlatform(
+            getCurrentHostPlatform(operatingSystemUtils: os, platform: platform),
+          );
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');
