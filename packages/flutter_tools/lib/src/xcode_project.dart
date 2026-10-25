@@ -256,7 +256,9 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
     return _projectInfo ??= await interpreter.getInfo(
       this,
-      buildDirectory: _fileSystem.directory(darwinPlatform.buildDirectory()),
+      buildDirectory: _fileSystem.directory(
+        _fileSystem.path.join(parent.buildDirectory.basename, darwinPlatform.name),
+      ),
     );
   }
 
@@ -995,7 +997,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     if (!_flutterLibRoot.existsSync()) {
       return;
     }
-    await _updateGeneratedXcodeConfigIfNeeded(cache: cache);
+    await _updateGeneratedXcodeConfigIfNeeded(toolContext: toolContext);
   }
 
   /// Check if one the [XcodeProjectInfo.targets] of the project is
@@ -1085,12 +1087,13 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return false;
   }
 
-  Future<void> _updateGeneratedXcodeConfigIfNeeded({required Cache cache}) async {
-    if (cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+  Future<void> _updateGeneratedXcodeConfigIfNeeded({required ToolContext toolContext}) async {
+    if (toolContext.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
         targetOverride: bundle.defaultMainPath(parent.directory.fileSystem),
+        toolContext: toolContext,
       );
     }
   }
@@ -1324,16 +1327,16 @@ class MacOSProject extends XcodeBasedProject {
 
   Future<void> ensureReadyForPlatformSpecificTooling({required ToolContext toolContext}) async {
     // TODO(stuartmorgan): Add create-from-template logic here.
-    final Cache cache = toolContext.cache;
-    await _updateGeneratedXcodeConfigIfNeeded(cache: cache);
+    await _updateGeneratedXcodeConfigIfNeeded(toolContext: toolContext);
   }
 
-  Future<void> _updateGeneratedXcodeConfigIfNeeded({required Cache cache}) async {
-    if (cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+  Future<void> _updateGeneratedXcodeConfigIfNeeded({required ToolContext toolContext}) async {
+    if (toolContext.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
         useMacOSConfig: true,
+        toolContext: toolContext,
       );
     }
   }

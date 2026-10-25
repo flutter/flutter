@@ -1629,4 +1629,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   int? getDirectorySize(Directory directory) => 1024;
+
+  @override
+  void chmod(FileSystemEntity file, String mode) {}
 }

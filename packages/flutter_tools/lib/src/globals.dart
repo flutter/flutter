@@ -32,7 +32,6 @@ import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
 import 'cache.dart';
-import 'context_runner.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
@@ -273,11 +272,11 @@ CocoaPods? get cocoaPods => context.get<CocoaPods>();
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
       FlutterProjectFactory(
+        config: config,
         featureFlags: featureFlags,
         fileSystem: fs,
         logger: logger,
         plistParser: plistParser,
-        toolContext: const GlobalToolContext(),
         xcode: xcode,
         xcodeProjectInterpreter: xcodeProjectInterpreter,
       );

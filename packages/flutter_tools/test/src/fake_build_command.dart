@@ -160,6 +160,7 @@ BuildCommand createFakeBuildCommand({
             processUtils ??
             ProcessUtils(processManager: targetProcessManager, logger: targetLogger),
         projectFactory: FlutterProjectFactory(
+          config: config ?? FakeConfig(),
           featureFlags: targetFeatureFlags,
           fileSystem: fs,
           logger: targetLogger,
@@ -215,6 +216,11 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (!project.ios.exists) {
       return null;
     }
-    return BuildableIOSApp(project.ios, 'com.example.test', 'Runner');
+    return BuildableIOSApp(
+      project.ios,
+      'com.example.test',
+      'Runner',
+      toolContext: FakeToolContext(fs: fileSystem),
+    );
   }
 }
