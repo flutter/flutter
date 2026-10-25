@@ -80,6 +80,9 @@ def _compile_command(config, dart, sdk_root, package_config, test, out, relative
         "--enable-asserts",
         "--enable-experimental-ffi",
         "--enable-experimental-wasm-interop",
+        # The files read, for the unused-inputs list (dart2js writes its own
+        # .deps beside the output).
+        "--depfile=" + target + ".d",
     ] + defines + ([
         "--import-shared-memory",
         "--shared-memory-max-pages=32768",
@@ -100,11 +103,13 @@ def _web_ui_test_bundle_impl(ctx):
 
     # One compile per configuration into the same directory (the fallbacks
     # bundle holds a file's dart2wasm and dart2js outputs side by side).
-    script = ["set -e"]
+    script = ["set -euo pipefail"]
+    deps_files = []
     for config in configs:
         target, command = _compile_command(config, dart, sdk_root, package_config, test, out, relative)
         script.append("mkdir -p \"$(dirname '%s')\"" % target)
         script.append(" ".join(["'%s'" % part for part in command]))
+        deps_files.append(target + (".deps" if config.compiler == "dart2js" else ".d"))
     results = json.encode_indent({
         "name": ctx.attr.bundle,
         "directory": ctx.attr.test_set,
@@ -112,13 +117,38 @@ def _web_ui_test_bundle_impl(ctx):
         "results": {relative: "success"},
     }, indent = "  ")
     script.append("cat > '%s/results.json' <<'EOF'\n%s\nEOF" % (out.path, results))
-    ctx.actions.run_shell(
-        command = "\n".join(script) + "\n",
+
+    # Which of `srcs` the compile did not read -- test files import other
+    # test files, so every file of test/ is an input, but a change to one
+    # should recompile only what imports it. dart2js lists the files it read
+    # in <out>.deps (file: URLs under the execroot), dart2wasm in its depfile
+    # (make syntax); the inputs not among them go to Bazel's unused-inputs
+    # list, and the lists themselves, which name the sandbox's directory,
+    # do not stay in the output.
+    candidates = ctx.actions.declare_file(ctx.label.name + ".candidates")
+    ctx.actions.write(candidates, "\n".join([f.path for f in ctx.files.srcs]) + "\n")
+    unused = ctx.actions.declare_file(ctx.label.name + ".unused")
+    script.append(
+        ("cat %s | tr ' ' '\\n' | sed -e 's#^file://##' -e 's#.*/execroot/_main/##' -e 's#:$##' " +
+         "| grep -v -e '^\\\\\\\\$' -e '^$' -e '^/' | LC_ALL=C sort -u > '%s.used'") % (
+            " ".join(["'%s'" % f for f in deps_files]),
+            unused.path,
+        ),
+    )
+    script.append("LC_ALL=C sort -u '%s' | LC_ALL=C comm -23 - '%s.used' > '%s'" % (candidates.path, unused.path, unused.path))
+    script.append("rm -f '%s.used' %s" % (unused.path, " ".join(["'%s'" % f for f in deps_files])))
+
+    # A script file rather than run_shell: only `run` takes an unused-inputs list.
+    compile = ctx.actions.declare_file(ctx.label.name + ".compile.sh")
+    ctx.actions.write(compile, "#!/bin/bash\n" + "\n".join(script) + "\n", is_executable = True)
+    ctx.actions.run(
+        executable = compile,
         inputs = depset(
-            [test, package_config] + ctx.files.srcs,
+            [test, package_config, candidates] + ctx.files.srcs,
             transitive = [sdk, ctx.attr.package_config[PubPackageConfigInfo].sources],
         ),
-        outputs = [out],
+        outputs = [out, unused],
+        unused_inputs_list = unused,
         mnemonic = "WebUiTestCompile",
         progress_message = "Compiling %s for %s" % (relative, ctx.attr.bundle),
         resource_set = _resources,
