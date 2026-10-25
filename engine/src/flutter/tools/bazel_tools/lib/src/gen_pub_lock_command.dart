@@ -16,7 +16,14 @@ const String pubLockGeneratorLabel = 'engine/src/flutter/tools/bazel_tools/bin/g
 /// Where `pub.lock.bzl` lives, relative to the repository root.
 const String defaultPubLockBzlPath = 'build_defs/dart/pub.lock.bzl';
 
-/// Generates (or checks) `pub.lock.bzl` from the repository's `pubspec.lock`.
+/// The tree's other `pubspec.lock` files -- packages resolved apart from the
+/// repository's workspace -- by directory under the repository root; each
+/// becomes an entry of `PUB_LOCKS`. The web engine's (lib/web_ui: felt and
+/// the web engine's unit tests) pins its own versions.
+const List<String> otherLockDirectories = <String>['engine/src/flutter/lib/web_ui'];
+
+/// Generates (or checks) `pub.lock.bzl` from the repository's `pubspec.lock`
+/// and the tree's other locks ([otherLockDirectories]).
 final class GenPubLockCommand {
   GenPubLockCommand._({
     required this.repoRoot,
@@ -107,50 +114,32 @@ final class GenPubLockCommand {
 
   /// Runs the command and returns the process exit code.
   Future<int> run() async {
-    final lockFile = io.File(p.join(repoRoot, 'pubspec.lock'));
-    if (!lockFile.existsSync()) {
-      _stderr.writeln('No pubspec.lock found at ${lockFile.path}.');
+    final ResolvedLock? root = await _resolve('.');
+    if (root == null) {
       return 1;
     }
-    final PubLock lock;
-    try {
-      lock = PubLock.parse(await lockFile.readAsString(), fileName: lockFile.path);
-    } on FormatException catch (e) {
-      _stderr.writeln('Failed to parse pubspec.lock: $e');
-      return 1;
+    final otherLocks = <String, ResolvedLock>{};
+    for (final String directory in otherLockDirectories) {
+      final ResolvedLock? other = await _resolve(directory);
+      if (other == null) {
+        return 1;
+      }
+      otherLocks[directory] = other;
     }
-    final packageConfigFile = io.File(p.join(repoRoot, '.dart_tool', 'package_config.json'));
-    if (!packageConfigFile.existsSync()) {
-      _stderr.writeln(
-        'No ${packageConfigFile.path}: run `pub get` (flutter update-packages) first; the '
-        'dependency graph comes from the packages it locates.',
-      );
-      return 1;
-    }
-    final PubWorkspace workspace;
-    try {
-      workspace = PubWorkspace.resolve(
-        lock: lock,
-        packageConfigJson: await packageConfigFile.readAsString(),
-        packageConfigUri: packageConfigFile.absolute.uri,
-        repositoryRoot: io.Directory(repoRoot).absolute.uri,
-        readPubspec: (Uri pubspec) {
-          final file = io.File.fromUri(pubspec);
-          return file.existsSync() ? file.readAsStringSync() : null;
-        },
-      );
-    } on FormatException catch (e) {
-      _stderr.writeln('Failed to resolve the workspace: $e');
-      return 1;
-    }
-    final String rendered = generatePubLock(lock, workspace, generator: pubLockGeneratorLabel);
+    final String rendered = generatePubLock(
+      root.lock,
+      root.workspace,
+      generator: pubLockGeneratorLabel,
+      otherLocks: otherLocks,
+    );
     final file = io.File(p.join(repoRoot, defaultPubLockBzlPath));
     final String? existing = file.existsSync() ? await file.readAsString() : null;
+    final summary =
+        '${root.lock.hosted.length} hosted packages, '
+        '${root.workspace.packages.length} of the tree; '
+        '${otherLocks.length} other lock(s)';
     if (existing == rendered) {
-      _stdout.writeln(
-        'Up to date: $defaultPubLockBzlPath (${lock.hosted.length} hosted packages, '
-        '${workspace.packages.length} of the tree)',
-      );
+      _stdout.writeln('Up to date: $defaultPubLockBzlPath ($summary)');
       return 0;
     }
     if (check) {
@@ -163,10 +152,53 @@ final class GenPubLockCommand {
     }
     file.parent.createSync(recursive: true);
     await file.writeAsString(rendered);
-    _stdout.writeln(
-      'Wrote $defaultPubLockBzlPath (${lock.hosted.length} hosted packages, '
-      '${workspace.packages.length} of the tree)',
-    );
+    _stdout.writeln('Wrote $defaultPubLockBzlPath ($summary)');
     return 0;
+  }
+
+  /// Parses the `pubspec.lock` of [directory] (under the repository root) and
+  /// resolves it through the `.dart_tool/package_config.json` beside it;
+  /// null, with the reason on stderr, when either is missing or malformed.
+  Future<ResolvedLock?> _resolve(String directory) async {
+    final String where = p.normalize(p.join(repoRoot, directory));
+    final lockFile = io.File(p.join(where, 'pubspec.lock'));
+    if (!lockFile.existsSync()) {
+      _stderr.writeln('No pubspec.lock found at ${lockFile.path}.');
+      return null;
+    }
+    final PubLock lock;
+    try {
+      lock = PubLock.parse(await lockFile.readAsString(), fileName: lockFile.path);
+    } on FormatException catch (e) {
+      _stderr.writeln('Failed to parse ${lockFile.path}: $e');
+      return null;
+    }
+    final packageConfigFile = io.File(p.join(where, '.dart_tool', 'package_config.json'));
+    if (!packageConfigFile.existsSync()) {
+      _stderr.writeln(
+        'No ${packageConfigFile.path}: run `pub get` there first '
+        '(flutter update-packages for the workspace; lib/web_ui/dev/felt does it for '
+        "the web engine's); the dependency graph comes from the packages it locates.",
+      );
+      return null;
+    }
+    try {
+      return (
+        lock: lock,
+        workspace: PubWorkspace.resolve(
+          lock: lock,
+          packageConfigJson: await packageConfigFile.readAsString(),
+          packageConfigUri: packageConfigFile.absolute.uri,
+          repositoryRoot: io.Directory(repoRoot).absolute.uri,
+          readPubspec: (Uri pubspec) {
+            final file = io.File.fromUri(pubspec);
+            return file.existsSync() ? file.readAsStringSync() : null;
+          },
+        ),
+      );
+    } on FormatException catch (e) {
+      _stderr.writeln('Failed to resolve the packages of ${lockFile.path}: $e');
+      return null;
+    }
   }
 }
