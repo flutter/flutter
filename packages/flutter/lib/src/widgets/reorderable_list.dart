@@ -956,7 +956,8 @@ class SliverReorderableListState extends State<SliverReorderableList>
         if (_insertIndex! >= _items.length) {
           // Drop at the starting position of the last element and offset its own extent
           _finalDropPosition =
-              _itemOffsetAt(_items.length - 1) - _extentOffset(item.itemExtent, _scrollDirection);
+              _itemOffsetAt(_items.length - 1) -
+              _extentOffset(item.globalItemExtent, _scrollDirection);
         } else {
           // Drop at the end of the current element occupying the insert position
           _finalDropPosition =
@@ -966,7 +967,8 @@ class SliverReorderableListState extends State<SliverReorderableList>
       } else {
         if (_insertIndex! == 0) {
           // Drop at the starting position of the first element and offset its own extent
-          _finalDropPosition = _itemOffsetAt(0) - _extentOffset(item.itemExtent, _scrollDirection);
+          _finalDropPosition =
+              _itemOffsetAt(0) - _extentOffset(item.globalItemExtent, _scrollDirection);
         } else {
           // Drop at the end of the previous element occupying the insert position
           final int atIndex = _insertIndex! - 1;
@@ -1048,7 +1050,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
       _dragInfo!.dragPosition - _dragInfo!.dragOffset,
       _scrollDirection,
     );
-    final double proxyItemEnd = proxyItemStart + gapExtent;
+    final double proxyItemEnd = proxyItemStart + _dragInfo!.globalItemExtent;
 
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
@@ -1121,6 +1123,8 @@ class SliverReorderableListState extends State<SliverReorderableList>
     }
   }
 
+  // The auto scroller maps this rect's size through the scrollable's
+  // transform itself, so it takes the item's local size.
   Rect get _dragTargetRect {
     final Offset origin = _dragInfo!.dragPosition - _dragInfo!.dragOffset;
     return Rect.fromLTWH(
@@ -1383,8 +1387,12 @@ class _ReorderableItemState extends State<_ReorderableItem> {
 
   Rect targetGeometry() {
     final itemRenderBox = context.findRenderObject()! as RenderBox;
-    final Offset itemPosition = itemRenderBox.localToGlobal(Offset.zero) + _targetOffset;
-    return itemPosition & itemRenderBox.size;
+    // The target offset is in the item's own coordinates, so map it through
+    // the item's transform to compare it with global drag positions.
+    return MatrixUtils.transformRect(
+      itemRenderBox.getTransformTo(null),
+      _targetOffset & itemRenderBox.size,
+    );
   }
 
   void rebuild() {
@@ -1519,8 +1527,16 @@ class _DragInfo extends Drag {
     index = item.index;
     child = item.widget.child;
     capturedThemes = item.widget.capturedThemes;
-    dragOffset = itemRenderBox.globalToLocal(initialPosition);
     itemSize = item.context.size!;
+    // Drag positions are global, so keep the grab offset and the item's size
+    // global too: they differ from the local ones when an ancestor, such as
+    // an app-wide zoom, scales the list.
+    final Rect globalItemRect = MatrixUtils.transformRect(
+      itemRenderBox.getTransformTo(null),
+      Offset.zero & itemSize,
+    );
+    dragOffset = initialPosition - globalItemRect.topLeft;
+    globalItemSize = globalItemRect.size;
     _rawDragPosition = initialPosition;
     if (listState.widget.dragBoundaryProvider != null) {
       boundary = listState.widget.dragBoundaryProvider!.call(listState.context);
@@ -1529,6 +1545,7 @@ class _DragInfo extends Drag {
     }
     dragPosition = _adjustedDragOffset(initialPosition);
     itemExtent = _sizeExtent(itemSize, scrollDirection);
+    globalItemExtent = _sizeExtent(globalItemSize, scrollDirection);
     itemLayoutConstraints = itemRenderBox.constraints;
     scrollable = Scrollable.of(item.context);
   }
@@ -1546,10 +1563,23 @@ class _DragInfo extends Drag {
   late int index;
   late Widget child;
   late Offset dragPosition;
+
+  /// The global offset of the drag start from the item's top left corner.
   late Offset dragOffset;
+
+  /// The size of the item in its own coordinates.
   late Size itemSize;
+
+  /// The size of the item in global coordinates.
+  late Size globalItemSize;
   late BoxConstraints itemLayoutConstraints;
+
+  /// The extent of the item in its own coordinates, used for the gap.
   late double itemExtent;
+
+  /// The extent of the item in global coordinates, used to compare the
+  /// dragged item with the other items.
+  late double globalItemExtent;
   late CapturedThemes capturedThemes;
   ScrollableState? scrollable;
   AnimationController? _proxyAnimation;
@@ -1597,7 +1627,7 @@ class _DragInfo extends Drag {
       return offset;
     }
     final Offset adjOffset = boundary!
-        .nearestPositionWithinBoundary((offset - dragOffset) & itemSize)
+        .nearestPositionWithinBoundary((offset - dragOffset) & globalItemSize)
         .shift(dragOffset)
         .topLeft;
     return adjOffset;
@@ -1617,7 +1647,7 @@ class _DragInfo extends Drag {
         size: itemSize,
         constraints: itemLayoutConstraints,
         animation: _proxyAnimation!,
-        position: dragPosition - dragOffset - _overlayOrigin(context),
+        position: _globalToOverlay(context, dragPosition - dragOffset),
         proxyDecorator: proxyDecorator,
         child: child,
       ),
@@ -1625,10 +1655,10 @@ class _DragInfo extends Drag {
   }
 }
 
-Offset _overlayOrigin(BuildContext context) {
+Offset _globalToOverlay(BuildContext context, Offset position) {
   final OverlayState overlay = Overlay.of(context, debugRequiredFor: context.widget);
   final overlayBox = overlay.context.findRenderObject()! as RenderBox;
-  return overlayBox.localToGlobal(Offset.zero);
+  return overlayBox.globalToLocal(position);
 }
 
 class _DragItemProxy extends StatelessWidget {
@@ -1655,7 +1685,6 @@ class _DragItemProxy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget proxyChild = proxyDecorator?.call(child, index, animation.view) ?? child;
-    final Offset overlayOrigin = _overlayOrigin(context);
 
     return MediaQuery(
       // Remove the top padding so that any nested list views in the item
@@ -1668,7 +1697,7 @@ class _DragItemProxy extends StatelessWidget {
           final Offset? dropPosition = listState._finalDropPosition;
           if (dropPosition != null) {
             effectivePosition = Offset.lerp(
-              dropPosition - overlayOrigin,
+              _globalToOverlay(context, dropPosition),
               effectivePosition,
               Curves.easeOut.transform(animation.value),
             )!;

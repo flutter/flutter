@@ -2157,6 +2157,44 @@ void main() {
     expect(tester.getSize(find.byType(ReorderableDragStartListener)), Size.zero);
   });
 
+  testWidgets('SliverReorderableList drag follows the pointer under a scaled ancestor', (
+    WidgetTester tester,
+  ) async {
+    // Drags item 0 by localDelta in the list's own coordinates with the whole
+    // app, overlay included, scaled by scale, and returns the resulting order.
+    Future<List<int>> dragFirstItem(double scale, double localDelta) async {
+      final items = List<int>.generate(8, (int index) => index);
+      await tester.pumpWidget(
+        Transform.scale(
+          // A fresh tree for each scale, so drags do not share list state.
+          key: ValueKey<double>(scale),
+          scale: scale,
+          alignment: Alignment.topLeft,
+          child: TestList(items: items),
+        ),
+      );
+      final Offset start = tester.getCenter(find.text('item 0'));
+      final TestGesture drag = await tester.startGesture(start);
+      await tester.pump(kPressTimeout);
+      final Offset pointer = start + Offset(0, localDelta * scale);
+      await drag.moveTo(pointer);
+      await tester.pump(kPressTimeout);
+
+      // The proxy keeps the grabbed point under the pointer.
+      expect(tester.getCenter(find.text('item 0')).dx, moreOrLessEquals(pointer.dx));
+      expect(tester.getCenter(find.text('item 0')).dy, moreOrLessEquals(pointer.dy));
+
+      await drag.up();
+      await tester.pumpAndSettle();
+      return items;
+    }
+
+    final List<int> unscaled = await dragFirstItem(1.0, 250);
+    expect(unscaled, isNot(List<int>.generate(8, (int index) => index)));
+    expect(await dragFirstItem(0.5, 250), unscaled);
+    expect(await dragFirstItem(1.5, 250), unscaled);
+  });
+
   testWidgets('ReorderableDelayedDragStartListener does not crash at zero area', (
     WidgetTester tester,
   ) async {
