@@ -6603,6 +6603,25 @@ void _testLocale() {
     expect(object.element.getAttribute('lang'), 'es-MX');
   });
 
+  test('nodes with language and country locale use a language tag', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      locale: const ui.Locale('es', 'US'),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('lang'), 'es-US');
+
+    semantics().semanticsEnabled = false;
+  });
+
   test('nodes with same locale as parent does not set lang', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
