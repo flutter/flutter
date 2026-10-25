@@ -4,7 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
+/// The background color of the splash screen.
 const Color splashBackgroundColor = Color(0xFFFFFFFF);
+
+/// The text color of the splash screen message.
 const Color splashTextColor = Color(0xDD000000);
 
 void main() {
