@@ -11,6 +11,30 @@ namespace {
 
 class FlRenderTextureGtk4Test : public flutter::testing::LinuxTest {};
 
+TEST_F(FlRenderTextureGtk4Test, DoesNotExposeRenderingDetailsAsAccessibleName) {
+  g_autoptr(GtkWidget) widget =
+      GTK_WIDGET(g_object_ref_sink(fl_render_texture_gtk4_new()));
+  EXPECT_FALSE(gtk_test_accessible_has_property(GTK_ACCESSIBLE(widget),
+                                                GTK_ACCESSIBLE_PROPERTY_LABEL));
+
+  // A first frame and subsequent size changes must not publish pixel
+  // dimensions.
+  for (int size : {64, 128}) {
+    const gsize stride = size * 4;
+    g_autoptr(GBytes) bytes =
+        g_bytes_new_take(g_malloc0(stride * size), stride * size);
+    g_autoptr(GdkTexture) texture =
+        gdk_memory_texture_new(size, size, GDK_MEMORY_DEFAULT, bytes, stride);
+    fl_render_texture_gtk4_set_texture(FL_RENDER_TEXTURE_GTK4(widget), texture);
+    EXPECT_FALSE(gtk_test_accessible_has_property(
+        GTK_ACCESSIBLE(widget), GTK_ACCESSIBLE_PROPERTY_LABEL));
+  }
+
+  fl_render_texture_gtk4_set_texture(FL_RENDER_TEXTURE_GTK4(widget), nullptr);
+  EXPECT_FALSE(gtk_test_accessible_has_property(GTK_ACCESSIBLE(widget),
+                                                GTK_ACCESSIBLE_PROPERTY_LABEL));
+}
+
 TEST_F(FlRenderTextureGtk4Test, TextureDoesNotSetMinimumSize) {
   constexpr int kTextureWidth = 640;
   constexpr int kTextureHeight = 480;

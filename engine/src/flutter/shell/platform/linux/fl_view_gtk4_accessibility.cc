@@ -1687,13 +1687,13 @@ static gboolean fl_view_gtk4_accessibility_find_transform(
 static const gchar* fl_view_gtk4_accessibility_get_root_label(
     FlViewGtk4Accessibility* self) {
   if (self->semantics_store == nullptr) {
-    return "Flutter view";
+    return nullptr;
   }
 
   const FlAccessibilitySemanticsNode* root =
       fl_accessibility_semantics_store_lookup_node(self->semantics_store, 0);
   if (root == nullptr || root->label == nullptr || root->label[0] == '\0') {
-    return "Flutter view";
+    return nullptr;
   }
   return root->label;
 }
@@ -1861,6 +1861,11 @@ void fl_view_gtk4_accessibility_update_accessible_name(
   g_return_if_fail(self != nullptr);
 
   const gchar* label = fl_view_gtk4_accessibility_get_root_label(self);
+  if (label == nullptr) {
+    gtk_accessible_reset_property(GTK_ACCESSIBLE(self->view),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL);
+    return;
+  }
   GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
   GtkAccessibleProperty properties[] = {property};
   GValue value = G_VALUE_INIT;

@@ -18,30 +18,6 @@ struct _FlRenderTextureGtk4 {
   GtkAccessible* accessible_child;
 };
 
-static void fl_render_texture_gtk4_update_accessible_name(
-    FlRenderTextureGtk4* self) {
-#if GTK_CHECK_VERSION(4, 0, 0)
-  g_autofree gchar* label = nullptr;
-  if (self->texture_width > 0 && self->texture_height > 0) {
-    label = g_strdup_printf("Flutter render surface %dx%d", self->texture_width,
-                            self->texture_height);
-  } else {
-    label = g_strdup("Flutter render surface");
-  }
-
-  GtkAccessibleProperty property = GTK_ACCESSIBLE_PROPERTY_LABEL;
-  GtkAccessibleProperty properties[] = {property};
-  GValue value = G_VALUE_INIT;
-  gtk_accessible_property_init_value(property, &value);
-  g_value_set_string(&value, label);
-  gtk_accessible_update_property_value(GTK_ACCESSIBLE(self), 1, properties,
-                                       &value);
-  g_value_unset(&value);
-#else
-  (void)self;
-#endif
-}
-
 enum {
   SIGNAL_RESIZE,
   LAST_SIGNAL,
@@ -197,7 +173,6 @@ static void fl_render_texture_gtk4_class_init(FlRenderTextureGtk4Class* klass) {
 
 static void fl_render_texture_gtk4_init(FlRenderTextureGtk4* self) {
   gtk_widget_set_overflow(GTK_WIDGET(self), GTK_OVERFLOW_HIDDEN);
-  fl_render_texture_gtk4_update_accessible_name(self);
 }
 
 GtkWidget* fl_render_texture_gtk4_new(void) {
@@ -246,7 +221,6 @@ void fl_render_texture_gtk4_set_texture(FlRenderTextureGtk4* self,
         "new_texture_width=%d new_texture_height=%d texture=%p",
         self, old_texture_width, old_texture_height, new_texture_width,
         new_texture_height, texture);
-    fl_render_texture_gtk4_update_accessible_name(self);
     gtk_widget_queue_resize(GTK_WIDGET(self));
   }
   gtk_widget_queue_draw(GTK_WIDGET(self));

@@ -23,6 +23,36 @@ namespace {
 
 class FlViewGtk4AccessibilityTest : public flutter::testing::LinuxTest {};
 
+TEST_F(FlViewGtk4AccessibilityTest, ViewNameUsesOnlyApplicationSemantics) {
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  fl_view_gtk4_accessibility_update_accessible_name(
+      view->accessibility_backend);
+  EXPECT_FALSE(gtk_test_accessible_has_property(GTK_ACCESSIBLE(view),
+                                                GTK_ACCESSIBLE_PROPERTY_LABEL));
+
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.label = "Application content";
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  gtk_test_accessible_assert_property(GTK_ACCESSIBLE(view),
+                                      GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                      "Application content");
+
+  root.label = "";
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  EXPECT_FALSE(gtk_test_accessible_has_property(GTK_ACCESSIBLE(view),
+                                                GTK_ACCESSIBLE_PROPERTY_LABEL));
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, ScrollContainersPreserveRoleAcrossUpdates) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
