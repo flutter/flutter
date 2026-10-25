@@ -1726,6 +1726,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// thrown and this is not called, then the exception is rethrown when
   /// the [testWidgets] call completes.
   ///
+  /// The returned value is whatever object was thrown, so it is not
+  /// necessarily an [Exception]. It is often an [Error], such as a
+  /// [FlutterError] or an [AssertionError] reported by the framework, or an
+  /// [Error] thrown from a widget's `build` method. Use matchers such as
+  /// `isA<Exception>()`, `isA<Error>()`, `isAssertionError`, or `isFlutterError`
+  /// to check the result.
+  ///
   /// If two exceptions are thrown in a row without the first one being
   /// acknowledged with a call to this method, then when the second exception is
   /// thrown, they are both dumped to the console and then the second is
