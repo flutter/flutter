@@ -7,6 +7,16 @@ GTK major versions into one process. Build the GTK4 tests from the repository ro
 autoninja -C engine/src/out/host_debug_unopt flutter_linux_gtk4 flutter_linux_gtk4_unittests
 ```
 
+## Implementation boundaries
+
+GTK4 accessibility tree reconciliation and view integration live in
+`fl_view_gtk4_accessibility.cc`. Native node roles, properties, actions, and
+lifecycle live in `fl_gtk4_accessible_node.cc`; text queries, selection, protected
+values, and editing live in `fl_gtk4_text_accessible_node.cc`. Tree reconciliation
+uses the opaque node API. Only node and text implementations share the node's
+private layout. The native-tree build flag and runtime capability checks remain
+in effect for all three implementations.
+
 ## GTK conditional-compilation audit
 
 Inventory GTK4 switches and GTK version checks per C/C++/Objective-C source file:

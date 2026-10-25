@@ -387,6 +387,9 @@ def main():
           'collector': Path(__file__),
           'fixture': source / 'fl_accessibility_parity_test.cc',
           'gtk4_adapter': source / 'fl_view_gtk4_accessibility.cc',
+          'gtk4_node_adapter': source / 'fl_gtk4_accessible_node.cc',
+          'gtk4_node_layout': source / 'fl_gtk4_accessible_node_private.h',
+          'gtk4_text_adapter': source / 'fl_gtk4_text_accessible_node.cc',
       }
       report['environment']['sha256'] = {
           name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in files.items()
