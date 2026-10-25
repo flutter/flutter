@@ -6,10 +6,13 @@
 # and one Skia translation unit compiled and linked by the Emscripten
 # toolchain with the flags of GN's wasm toolchain, the module run in
 # headless Chrome. Manual: the SDK is in the checkout only under
-# `download_emsdk`, and the browser is the host's.
+# `download_emsdk`, and the browser is the host's (Chrome for Testing 145,
+# @chrome, never returns from --dump-dom here). The module builds for a
+# variant of the web build (wasm.bzl: the module_platform flag) -- CanvasKit's,
+# an embind module without LTO like this one:
 #
-#   bazel build //engine/src/flutter/build/bazel/toolchains/emscripten/spike:all
-#   bazel test //engine/src/flutter/build/bazel/toolchains/emscripten/spike:spike_test
+#   bazel build -c opt --//engine/src/flutter/build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:canvaskit //engine/src/flutter/build/bazel/toolchains/emscripten/spike:all
+#   bazel test -c opt --//engine/src/flutter/build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:canvaskit //engine/src/flutter/build/bazel/toolchains/emscripten/spike:spike_test
 #
 # The flags per target are what GN attaches to the counterpart target in
 # out/wasm_release (its compile_commands.json and skwasm's link rule): the
