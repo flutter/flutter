@@ -141,9 +141,14 @@ void main() {
   });
 
   test('debugDeviceActiveCursor returns null before any update', () {
-    final manager = MouseCursorManager(_TestMouseCursor('fallback', const <String>[]));
+    final log = <String>[];
+    final cursor = _TestMouseCursor('fallback', log);
+    final manager = MouseCursorManager(cursor);
 
+    // Constructing the manager must not create sessions for any device.
     expect(manager.debugDeviceActiveCursor(0), isNull);
+    expect(cursor.sessions, isEmpty);
+    expect(log, isEmpty);
   });
 }
 
