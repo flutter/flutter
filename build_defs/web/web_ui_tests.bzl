@@ -350,16 +350,16 @@ def _web_ui_test_impl(ctx):
 # {label}: felt's run step on one compiled test, from the runfiles tree.
 set -euo pipefail
 root="$PWD"
-export CHROME_EXECUTABLE="$root/{chrome}"
-# Chrome's own sandbox does not start inside Bazel's.
-export CHROME_NO_SANDBOX=true
-export HOME="${{TEST_TMPDIR:-$(mktemp -d)}}/home"
+export {variable}="$root/{browser}"
+{env}export HOME="${{TEST_TMPDIR:-$(mktemp -d)}}/home"
 mkdir -p "$HOME"
 cd "$root/{package}"
 exec "$root/{dart}" --packages="$root/{config}" "{felt}" test --run --suite="{suite}" "$@"
 """.format(
         label = ctx.label,
-        chrome = ctx.file.browser.short_path,
+        variable = ctx.attr.browser_variable,
+        browser = ctx.file.browser.short_path,
+        env = "".join(["export %s=\"%s\"\n" % (name, value) for name, value in ctx.attr.env.items()]),
         package = package,
         dart = ctx.file._dart.short_path,
         config = config_path,
@@ -396,14 +396,23 @@ web_ui_test = rule(
         "fallback_fonts": attr.label_list(allow_files = True, doc = "The fallback fonts (@google_fonts_for_unit_tests), laid as assets/fallback_fonts."),
         "test_images": attr.label_list(allow_files = True, doc = "Skia's resources/images, laid as test_images."),
         "host_files": attr.label_list(allow_files = True, doc = "The host page: index.html, host.css, favicon.ico and host.dart.js, laid as host/."),
-        "browser": attr.label(allow_single_file = True, mandatory = True, doc = "Chrome's executable (@chrome), exported as CHROME_EXECUTABLE."),
+        "browser": attr.label(allow_single_file = True, mandatory = True, doc = "The browser's executable (@chrome, @firefox), exported as `browser_variable`."),
         "browser_files": attr.label_list(allow_files = True, doc = "The browser's directory, whole."),
+        "browser_variable": attr.string(
+            default = "CHROME_EXECUTABLE",
+            values = ["CHROME_EXECUTABLE", "FIREFOX_EXECUTABLE"],
+            doc = "The variable felt finds the browser through.",
+        ),
+        "env": attr.string_dict(
+            doc = "Other variables exported before felt runs (CHROME_NO_SANDBOX for Chrome: its own sandbox does not " +
+                  "start inside Bazel's; Firefox's MOZ_DISABLE_*_SANDBOX likewise).",
+        ),
         "_sdk": attr.label(default = "@dart_sdk_linux_x64//:dart"),
         "_dart": attr.label(default = "@dart_sdk_linux_x64//:bin/dart", allow_single_file = True),
     },
 )
 
-def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags = [], network = [], **kwargs):
+def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags = [], network = [], exclude = [], **kwargs):
     """felt's test suite as Bazel tests: one web_ui_test per file, and a test_suite over them.
 
     The tests run with no network (`block-network`): felt's Skia Gold client
@@ -421,11 +430,16 @@ def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags
       size: each test's size.
       tags: each test's tags, and the suite's.
       network: the test files that reach the web (font_fallback_service_test downloads a Noto font).
+      exclude: the test files left out of this suite (a file that declares no test on the suite's
+        browser: felt's one run over the whole suite does not notice, a run of the file alone
+        reports that no test ran).
       **kwargs: web_ui_test's other attributes, the same for every file.
     """
     prefix = "test/%s/" % test_set
     names = []
     for test in tests:
+        if test in exclude:
+            continue
         stem = test[len(prefix):-len(".dart")]
         target = "%s/%s" % (suite, stem)
         web_ui_test(
