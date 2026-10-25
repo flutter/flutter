@@ -4607,7 +4607,7 @@ _compile_platform("dart2js_full") {
         contains(r'''
 sdk_rewriter(
     name = "web_engine_library",
-    srcs = ["//engine/src/flutter:web_engine_sources"],
+    srcs = ["//engine/src/flutter/lib/web_ui:web_engine_sources"],
     api_file = "engine.dart",
     exclude = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm",
     input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine",

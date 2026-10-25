@@ -188,12 +188,13 @@ cc_library(
 # package (testing/run_tests.py --type dart-host; the tests themselves are
 # dart_package_test targets in the packages' own directories, see the suite
 # below): .ci.yaml (engine_build_configs, engine_tool; the builder
-# configurations are //engine/src/flutter/ci's), bin/et (engine_tool's
-# entry-point test), and for api_check the web engine's dart:ui sources
-# (lib/web_ui has no build file of its own yet; when it does, these move
-# there, as the iOS embedding's AccessibilityFeatures moved to
-# //engine/src/flutter/shell).
-exports_files([".ci.yaml"])
+# configurations are //engine/src/flutter/ci's) and bin/et (engine_tool's
+# entry-point test). The web engine's sources are //engine/src/flutter/lib/web_ui's;
+# its tests' Skia Gold client reads the release version file.
+exports_files([
+    ".ci.yaml",
+    ".engine-release.version",
+])
 
 # The embedder examples' directory, which flutter_tools' create_test creates a
 # project in (the SDK facsimile its tests run from needs the directory to
@@ -205,23 +206,6 @@ filegroup(
     srcs = glob(["bin/et*"]),
     visibility = ["//visibility:public"],
 )
-
-filegroup(
-    name = "web_ui_dart_sources",
-    srcs = glob(["lib/web_ui/lib/**/*.dart"]),
-    visibility = ["//visibility:public"],
-)
-
-# dart:ui_web's sources and API file, which web_sdk.gni's
-# web_ui_ui_web_with_output (build_defs/web/web_sdk.bzl) rewrites into the
-# sky_engine package for sky/packages/sky_engine, and into the web SDK.
-filegroup(
-    name = "ui_web_sources",
-    srcs = glob(["lib/web_ui/lib/ui_web/src/ui_web/**/*.dart"]),
-    visibility = ["//visibility:public"],
-)
-
-exports_files(["lib/web_ui/lib/ui_web/src/ui_web.dart"])
 
 # The scripts of tools/ that actions of other packages run (the Android
 # embedding's: shell/platform/android/BUILD.gn's gen_android_build_config_java
@@ -254,47 +238,6 @@ checkout_script_test(
     in_checkout = True,
     script = "tools/gn_test.py",
 )
-
-# The web engine's other source directories web_sdk/BUILD.gn's sdk_rewriter
-# invocations read (each `input_dir`, less its `exclude_pattern`; the
-# converter's directorySources names them): dart:ui's own sources without
-# the engine under src/, the engine without skwasm, and skwasm's two halves
-# with their API files.
-filegroup(
-    name = "web_ui_sources",
-    srcs = glob(
-        ["lib/web_ui/lib/**/*.dart"],
-        exclude = ["lib/web_ui/lib/src/**"],
-    ),
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "web_engine_sources",
-    srcs = glob(
-        ["lib/web_ui/lib/src/engine/**/*.dart"],
-        exclude = ["lib/web_ui/lib/src/engine/skwasm/**"],
-    ),
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "skwasm_stub_sources",
-    srcs = glob(["lib/web_ui/lib/src/engine/skwasm/skwasm_stub/**/*.dart"]),
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "skwasm_impl_sources",
-    srcs = glob(["lib/web_ui/lib/src/engine/skwasm/skwasm_impl/**/*.dart"]),
-    visibility = ["//visibility:public"],
-)
-
-exports_files([
-    "lib/web_ui/lib/src/engine.dart",
-    "lib/web_ui/lib/src/engine/skwasm/skwasm_impl.dart",
-    "lib/web_ui/lib/src/engine/skwasm/skwasm_stub.dart",
-])
 
 # run_tests.py --type dart-host: `dart test` in each Dart package of
 # build_dart_host_test_list, as dart_package_test runs it
@@ -816,6 +759,39 @@ in_configuration(
 bundle_directory(
     name = "web_sdk_directory",
     bundles = [":flutter_web_sdk_archive_release"],
+)
+
+# The two Dart packages of this directory the web engine's unit tests and
+# felt reach (lib/web_ui's pubspec: web_engine_tester, the test harness's
+# host page and golden matcher; web_test_utils, the image comparison), each
+# as a pub package: its pubspec and library, for a pub_package_config.
+filegroup(
+    name = "web_engine_tester_package",
+    srcs = ["web_engine_tester/pubspec.yaml"] + glob(["web_engine_tester/lib/**"]),
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+filegroup(
+    name = "web_test_utils_package",
+    srcs = ["web_test_utils/pubspec.yaml"] + glob(["web_test_utils/lib/**"]),
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+# The test harness's host page -- its static files, and host.dart for the
+# dart2js compile the web engine's tests lay beside them (web_ui_tests.bzl).
+filegroup(
+    name = "web_engine_tester_host_files",
+    srcs = [
+        "web_engine_tester/lib/static/favicon.ico",
+        "web_engine_tester/lib/static/host.css",
+        "web_engine_tester/lib/static/index.html",
+    ],
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+exports_files(
+    ["web_engine_tester/lib/static/host.dart"],
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
 )
 ''',
   ),
@@ -1631,6 +1607,14 @@ filegroup(
     name = "resources_images",
     srcs = glob(["resources/images/*"]),
 )
+
+# The same tree whole (its pngsuite/ and orientation/ too), which the web
+# engine's unit tests read as /test_images/ (felt's copy_artifacts_step;
+# @flutter//build_defs/web:web_ui_tests.bzl).
+filegroup(
+    name = "resources_images_tree",
+    srcs = glob(["resources/images/**"]),
+)
 ''',
   ),
   ConvertedFile(
@@ -2193,6 +2177,9 @@ const Set<String> handWrittenPackages = <String>{
   'engine/src/flutter/build',
   'engine/src/flutter/impeller/tools',
   'engine/src/flutter/lib/snapshot',
+  // The web engine's sources (web_sdk/BUILD.gn's sdk_rewriter inputs and API
+  // files) and its unit tests.
+  'engine/src/flutter/lib/web_ui',
   'engine/src/flutter/shell/vmservice',
   // The Dart tests under flutter_tester: GN's foreach over the test list and
   // run_tests.py's run matrix, which GN does not have.

@@ -24,7 +24,7 @@ cc_library(
 
 sdk_rewriter(
     name = "web_ui_library_sources",
-    srcs = ["//engine/src/flutter:web_ui_sources"],
+    srcs = ["//engine/src/flutter/lib/web_ui:web_ui_sources"],
     exclude = "engine/src/flutter/lib/web_ui/lib/src",
     input_dir = "engine/src/flutter/lib/web_ui/lib",
     output_dir = "$root_out_dir/flutter_web_sdk/lib/ui/",
@@ -38,8 +38,8 @@ web_ui_ui_web_with_output(
 
 sdk_rewriter(
     name = "web_engine_library",
-    srcs = ["//engine/src/flutter:web_engine_sources"],
-    api_file = "//engine/src/flutter:lib/web_ui/lib/src/engine.dart",
+    srcs = ["//engine/src/flutter/lib/web_ui:web_engine_sources"],
+    api_file = "//engine/src/flutter/lib/web_ui:lib/src/engine.dart",
     exclude = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm",
     input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine",
     library_name = "engine",
@@ -48,8 +48,8 @@ sdk_rewriter(
 
 sdk_rewriter(
     name = "skwasm_stub_library",
-    srcs = ["//engine/src/flutter:skwasm_stub_sources"],
-    api_file = "//engine/src/flutter:lib/web_ui/lib/src/engine/skwasm/skwasm_stub.dart",
+    srcs = ["//engine/src/flutter/lib/web_ui:skwasm_stub_sources"],
+    api_file = "//engine/src/flutter/lib/web_ui:lib/src/engine/skwasm/skwasm_stub.dart",
     input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub",
     library_name = "skwasm_stub",
     output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_stub/",
@@ -57,8 +57,8 @@ sdk_rewriter(
 
 sdk_rewriter(
     name = "skwasm_impl_library",
-    srcs = ["//engine/src/flutter:skwasm_impl_sources"],
-    api_file = "//engine/src/flutter:lib/web_ui/lib/src/engine/skwasm/skwasm_impl.dart",
+    srcs = ["//engine/src/flutter/lib/web_ui:skwasm_impl_sources"],
+    api_file = "//engine/src/flutter/lib/web_ui:lib/src/engine/skwasm/skwasm_impl.dart",
     input_dir = "engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl",
     library_name = "skwasm_impl",
     output_dir = "$root_out_dir/flutter_web_sdk/lib/_skwasm_impl/",
@@ -224,4 +224,37 @@ in_configuration(
 bundle_directory(
     name = "web_sdk_directory",
     bundles = [":flutter_web_sdk_archive_release"],
+)
+
+# The two Dart packages of this directory the web engine's unit tests and
+# felt reach (lib/web_ui's pubspec: web_engine_tester, the test harness's
+# host page and golden matcher; web_test_utils, the image comparison), each
+# as a pub package: its pubspec and library, for a pub_package_config.
+filegroup(
+    name = "web_engine_tester_package",
+    srcs = ["web_engine_tester/pubspec.yaml"] + glob(["web_engine_tester/lib/**"]),
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+filegroup(
+    name = "web_test_utils_package",
+    srcs = ["web_test_utils/pubspec.yaml"] + glob(["web_test_utils/lib/**"]),
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+# The test harness's host page -- its static files, and host.dart for the
+# dart2js compile the web engine's tests lay beside them (web_ui_tests.bzl).
+filegroup(
+    name = "web_engine_tester_host_files",
+    srcs = [
+        "web_engine_tester/lib/static/favicon.ico",
+        "web_engine_tester/lib/static/host.css",
+        "web_engine_tester/lib/static/index.html",
+    ],
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
+)
+
+exports_files(
+    ["web_engine_tester/lib/static/host.dart"],
+    visibility = ["//engine/src/flutter/lib/web_ui:__pkg__"],
 )

@@ -1515,19 +1515,19 @@ const Map<String, DirectorySource> directorySources = <String, DirectorySource>{
   // dart:ui's sources without the engine under src/, the engine without
   // skwasm, skwasm's two halves, and the two packages of third_party.
   '//flutter/lib/web_ui/lib': DirectorySource(
-    '//engine/src/flutter:web_ui_sources',
+    '//engine/src/flutter/lib/web_ui:web_ui_sources',
     root: 'engine/src/flutter/lib/web_ui/lib',
   ),
   '//flutter/lib/web_ui/lib/src/engine': DirectorySource(
-    '//engine/src/flutter:web_engine_sources',
+    '//engine/src/flutter/lib/web_ui:web_engine_sources',
     root: 'engine/src/flutter/lib/web_ui/lib/src/engine',
   ),
   '//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub': DirectorySource(
-    '//engine/src/flutter:skwasm_stub_sources',
+    '//engine/src/flutter/lib/web_ui:skwasm_stub_sources',
     root: 'engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_stub',
   ),
   '//flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl': DirectorySource(
-    '//engine/src/flutter:skwasm_impl_sources',
+    '//engine/src/flutter/lib/web_ui:skwasm_impl_sources',
     root: 'engine/src/flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl',
   ),
   '//flutter/third_party/web_test_fonts/lib/web_test_fonts': DirectorySource(

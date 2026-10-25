@@ -63,6 +63,7 @@ use_repo(
     "glfw",
     "glslang",
     "gn",
+    "google_fonts_for_unit_tests",
     "googletest",
     "googletest_tree",
     "gtest_parallel",

@@ -12,6 +12,13 @@ package(default_visibility = ["//visibility:public"])
 
 # The library and the in-tree packages it imports, for the packages and
 # kernel compiles that import it.
+# The package as a pub package -- its pubspec and library -- for a
+# pub_package_config (felt's, lib/web_ui).
+filegroup(
+    name = "package",
+    srcs = ["pubspec.yaml"] + glob(["lib/**"]),
+)
+
 filegroup(
     name = "dart_sources",
     srcs = glob(["lib/**/*.dart"]) + [
