@@ -15,8 +15,10 @@ import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_macos_framework.dart';
 import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/project.dart' show FlutterProject;
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
@@ -546,6 +548,93 @@ void main() {
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
+      },
+    );
+
+    testUsingContext(
+      'rewrites a Generated.xcconfig that names another Flutter',
+      () async {
+        final Directory projectDir = memoryFileSystem.directory('/project')..createSync();
+        projectDir.childDirectory('ios').childDirectory('Pods').createSync(recursive: true);
+        projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '{"configVersion": 2, "packages": [{"name": "project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+          );
+        projectDir
+            .childDirectory('.dart_tool')
+            .childFile('package_graph.json')
+            .writeAsStringSync(
+              '{"configVersion": 1, "packages": [{"name": "project", "rootUri": "..", "packageUri": "lib/", "dependencies": []}]}',
+            );
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
+        projectDir.childFile('.metadata').createSync();
+        // Debug builds copy the LLDB files into the output directory.
+        final Directory ephemeral = projectDir
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral');
+        ephemeral.childFile('flutter_lldbinit').createSync(recursive: true);
+        ephemeral.childFile('flutter_lldb_helper.py').createSync();
+        memoryFileSystem.currentDirectory = projectDir;
+        // Written by another Flutter after this one's tools stamp, so the
+        // stamp-based regeneration keeps it.
+        final File toolsStamp = cache.getStampFileFor('flutter_tools')
+          ..createSync(recursive: true)
+          ..setLastModifiedSync(DateTime(2026));
+        final File generatedXcconfig =
+            projectDir
+                .childDirectory('ios')
+                .childDirectory('Flutter')
+                .childFile('Generated.xcconfig')
+              ..writeAsStringSync('FLUTTER_ROOT=/other/flutter\n')
+              ..setLastModifiedSync(toolsStamp.lastModifiedSync().add(const Duration(minutes: 1)));
+        memoryFileSystem
+            .directory('Artifact.flutterXcframework.TargetPlatform.ios.debug')
+            .createSync(recursive: true);
+        projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
+          ..createSync(recursive: true)
+          ..childFile('link_hooks_result.json')
+              .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
+
+        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          artifacts: Artifacts.test(fileSystem: memoryFileSystem),
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            final Directory output = environment.outputDir;
+            output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
+            output
+                .childDirectory('App.framework')
+                .childDirectory('flutter_assets')
+                .childFile('NativeAssetsManifest.json')
+              ..createSync(recursive: true)
+              ..writeAsStringSync('{"format-version": [1, 0, 0], "native-assets": {}}');
+          }),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+
+        await createTestCommandRunner(command)
+            .run(<String>['ios-framework', '--no-plugins', '--no-profile', '--no-release']);
+
+        expect(
+          generatedXcconfig.readAsStringSync(),
+          contains('FLUTTER_ROOT=${memoryFileSystem.path.normalize(Cache.flutterRoot!)}\n'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
+        Cache: () => cache,
+        Pub: () => FakePub(),
       },
     );
   });
@@ -1824,6 +1913,21 @@ class FakePlistParser extends PlistParser {
   String? plistJsonContent(String filePath) {
     return _jsonContentByPath[filePath];
   }
+}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext? context,
+    required FlutterProject project,
+    bool upgrade = false,
+    bool offline = false,
+    String? flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
+    PubOutputMode outputMode = PubOutputMode.all,
+  }) async {}
 }
 
 class FakeDarwinAddToAppCodesigning extends Fake implements DarwinAddToAppCodesigning {
