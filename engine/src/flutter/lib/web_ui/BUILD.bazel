@@ -121,17 +121,45 @@ _TEST_SETS = {
     "webparagraph": glob(["test/webparagraph/**/*_test.dart"]),
 }
 
-# felt_config.yaml's test bundles: a test set compiled for a compile
-# configuration (the fallbacks bundle, two: dart2wasm-skwasm and
+# felt_config.yaml's test bundles: a test set compiled for its compile
+# configurations (the fallbacks bundle has two, dart2wasm-skwasm and
 # dart2js-canvaskit, compiled side by side).
 _BUNDLES = {
-    "dart2js-canvaskit-canvaskit": ("dart2js-canvaskit", "canvaskit"),
-    "dart2js-canvaskit-engine": ("dart2js-canvaskit", "engine"),
-    "dart2js-canvaskit-ui": ("dart2js-canvaskit", "ui"),
-    "dart2js-canvaskit-webparagraph": ("dart2js-canvaskit", "webparagraph"),
-    "dart2wasm-canvaskit-engine": ("dart2wasm-canvaskit", "engine"),
-    "dart2wasm-skwasm-skwasm": ("dart2wasm-skwasm", "skwasm"),
-    "dart2wasm-skwasm-ui": ("dart2wasm-skwasm", "ui"),
+    "dart2js-canvaskit-canvaskit": (
+        ["dart2js-canvaskit"],
+        "canvaskit",
+    ),
+    "dart2js-canvaskit-engine": (
+        ["dart2js-canvaskit"],
+        "engine",
+    ),
+    "dart2js-canvaskit-ui": (
+        ["dart2js-canvaskit"],
+        "ui",
+    ),
+    "dart2js-canvaskit-webparagraph": (
+        ["dart2js-canvaskit"],
+        "webparagraph",
+    ),
+    "dart2wasm-canvaskit-engine": (
+        ["dart2wasm-canvaskit"],
+        "engine",
+    ),
+    "dart2wasm-skwasm-skwasm": (
+        ["dart2wasm-skwasm"],
+        "skwasm",
+    ),
+    "dart2wasm-skwasm-ui": (
+        ["dart2wasm-skwasm"],
+        "ui",
+    ),
+    "fallbacks": (
+        [
+            "dart2wasm-skwasm",
+            "dart2js-canvaskit",
+        ],
+        "fallbacks",
+    ),
 }
 
 [
@@ -139,7 +167,7 @@ _BUNDLES = {
         name = "bundles/" + bundle,
         srcs = _TEST_SOURCES,
         bundle = bundle,
-        compile_config = _BUNDLES[bundle][0],
+        compile_configs = _BUNDLES[bundle][0],
         package_config = ":test_package_config",
         # Built by the tests that run them, not by a wildcard.
         tags = ["manual"],
@@ -192,13 +220,35 @@ _PACKAGE_FILES = glob(
     ],
 )
 
-# felt_config.yaml's test suites a Linux host runs: Chrome's, each over a
-# bundle (the run configuration -- the CanvasKit variant, cross-origin
-# isolation, single-threaded skwasm, the browser's flags -- is felt's own,
-# read from felt_config.yaml by suite name).
+# felt_config.yaml's test suites a Linux host runs: Chrome's sixteen, each
+# over a bundle (the run configuration -- the CanvasKit variant, cross-origin
+# isolation, single-threaded skwasm, wimp, the browser's flags -- is felt's
+# own, read from felt_config.yaml by suite name). Firefox's need an X
+# display; Safari's and Edge's other hosts.
 _SUITES = {
+    "chrome-coi-dart2wasm-skwasm-skwasm": "dart2wasm-skwasm-skwasm",
+    "chrome-coi-dart2wasm-skwasm-ui": "dart2wasm-skwasm-ui",
+    "chrome-coi-fallbacks": "fallbacks",
+    "chrome-dart2js-canvaskit-canvaskit": "dart2js-canvaskit-canvaskit",
     "chrome-dart2js-canvaskit-engine": "dart2js-canvaskit-engine",
+    "chrome-dart2js-canvaskit-ui": "dart2js-canvaskit-ui",
+    "chrome-dart2js-webparagraph-ui": "dart2js-canvaskit-webparagraph",
+    "chrome-dart2wasm-canvaskit-engine": "dart2wasm-canvaskit-engine",
+    "chrome-dart2wasm-wimp-skwasm": "dart2wasm-skwasm-skwasm",
+    "chrome-dart2wasm-wimp-ui": "dart2wasm-skwasm-ui",
+    "chrome-fallbacks": "fallbacks",
+    "chrome-force-st-dart2wasm-skwasm-skwasm": "dart2wasm-skwasm-skwasm",
+    "chrome-force-st-dart2wasm-skwasm-ui": "dart2wasm-skwasm-ui",
+    "chrome-force-st-fallbacks": "fallbacks",
+    "chrome-full-dart2js-canvaskit-canvaskit": "dart2js-canvaskit-canvaskit",
+    "chrome-full-dart2js-canvaskit-ui": "dart2js-canvaskit-ui",
 }
+
+# Every suite: the web engine's unit tests whole.
+test_suite(
+    name = "tests",
+    tests = _SUITES.keys(),
+)
 
 [
     web_ui_test_suite(
@@ -221,6 +271,11 @@ _SUITES = {
             ":host_page",
             "//engine/src/flutter/web_sdk:web_engine_tester_host_files",
         ],
+        # The tests run with no network (the goldens compare nothing, as for
+        # a developer offline: web_paragraph.locales.png is 10 px wider on
+        # this host than CI's baseline, under felt too) but for the one that
+        # downloads a Noto font from fonts.gstatic.com by design.
+        network = ["test/engine/font_fallback_service_test.dart"],
         runtime_package_config = ":runtime_package_config",
         suite = suite,
         # The browser, felt's server and the test page at once.

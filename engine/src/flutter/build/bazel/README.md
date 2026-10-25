@@ -827,13 +827,21 @@ felt's package configuration at the package's `.dart_tool` for its server,
 and runs `felt test --run --suite=<suite>` on the pinned `@chrome`
 (`CHROME_NO_SANDBOX=true` inside Bazel's sandbox) with cwd `lib/web_ui`.
 One test target per file and suite, `<suite>/<file>`, a `test_suite` per
-felt suite; the files run in parallel (felt's Chrome takes its DevTools
-port from Chrome's own output now, not a constant). Skia Gold: felt's
-client probes Gold and, reached, compares the goldens as for a developer
-online; unreached, the goldens compare nothing, as offline; CI's uploads
-stay felt's.
+felt suite and `:tests` over all sixteen Chrome suites -- the CanvasKit
+`chromium` and `full` variants, skwasm's cross-origin-isolated and
+single-threaded runs, wimp, WebParagraph, dart2wasm's engine suite, the
+three fallbacks suites (whose bundle compiles a file twice, dart2wasm-skwasm
+and dart2js-canvaskit side by side); the files run in parallel (felt's
+Chrome takes its DevTools port from Chrome's own output now, not a
+constant). The tests run with no network (`block-network`): felt's Skia
+Gold client finds Gold unreachable and the goldens compare nothing, as for
+a developer offline -- with the network the verdict depended on the host's
+fonts against CI's baselines (`web_paragraph.locales.png` is 10 px wider
+here, under felt on the checkout just the same) and on Gold; CI's Gold
+comparison and upload stay felt's job.
 
 ```sh
+bazel test //engine/src/flutter/lib/web_ui:tests                              # the sixteen Chrome suites: 546 tests
 bazel test //engine/src/flutter/lib/web_ui:chrome-dart2js-canvaskit-engine   # 86 files; felt's suite of that name
 bazel test //engine/src/flutter/lib/web_ui:chrome-dart2js-canvaskit-engine/alarm_clock_test
 bazel build //engine/src/flutter/lib/web_ui:bundles/dart2js-canvaskit-engine   # the compiles alone
@@ -841,9 +849,9 @@ bazel build //engine/src/flutter/lib/web_ui:bundles/dart2js-canvaskit-engine   #
 
 `chrome-dart2js-canvaskit-engine`: 86 of 86 files, 1,274 cases and 13
 skipped, in 4m18s from cold (the compiles included) -- what `felt test
---suite=chrome-dart2js-canvaskit-engine` counts. Firefox (an X display),
-Safari and Edge (other hosts) stay felt's; the other Chrome suites follow
-the same shape.
+--suite=chrome-dart2js-canvaskit-engine` counts. All sixteen: 546 files,
+10,448 cases and 121 skipped, 19 minutes from cold with the 336 compiles.
+Firefox (an X display), Safari and Edge (other hosts) stay felt's.
 
 ## Wrapped GN builds: the GPU test backends
 
