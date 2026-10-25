@@ -95,6 +95,7 @@ class BuildMacosCommand extends BuildSubCommand {
         analytics: analytics,
       ),
       usingCISystem: usingCISystem,
+      toolContext: toolContext,
     );
     return FlutterCommandResult.success();
   }

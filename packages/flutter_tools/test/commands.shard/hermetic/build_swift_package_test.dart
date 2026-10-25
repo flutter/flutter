@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -67,29 +68,43 @@ void main() {
   const codesignIdentity = 'Apple Development: Company (TEAM_ID)';
   const codesignIdentityFile = '$cacheDirectoryPath/.codesign_identity';
 
+  BuildSwiftPackage createCommand({
+    required FileSystem fs,
+    required Logger logger,
+    required ProcessManager processManager,
+    Platform? platform,
+  }) {
+    return BuildSwiftPackage(
+      analytics: FakeAnalytics(),
+      buildSystem: FakeBuildSystem(),
+      codesign: FakeDarwinAddToAppCodesigning(),
+      featureFlags: FakeFeatureFlags(),
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: FakeToolContext(
+        artifacts: FakeArtifacts(_engineArtifactPath),
+        cache: FakeCache(fs, _flutterRoot),
+        config: Config.test(),
+        flutterVersion: FakeFlutterVersion(),
+        fs: fs,
+        logger: logger,
+        platform: platform ?? FakePlatform(),
+        processManager: processManager,
+      ),
+      verboseHelp: false,
+      xcode: FakeXcode(),
+    );
+  }
+
   group('BuildSwiftPackage', () {
     group('Argument Validation', () {
       testUsingContext('validate platform argument', () async {
         final fs = MemoryFileSystem.test();
         final logger = BufferLogger.test();
         final processManager = FakeProcessManager.list([]);
-        final command = BuildSwiftPackage(
-          analytics: FakeAnalytics(),
-          buildSystem: FakeBuildSystem(),
-          codesign: FakeDarwinAddToAppCodesigning(),
-          featureFlags: FakeFeatureFlags(),
-          templateRenderer: const MustacheTemplateRenderer(),
-          toolContext: FakeToolContext(
-            artifacts: FakeArtifacts(_engineArtifactPath),
-            cache: FakeCache(fs, _flutterRoot),
-            flutterVersion: FakeFlutterVersion(),
-            fs: fs,
-            logger: logger,
-            platform: FakePlatform(),
-            processManager: processManager,
-          ),
-          verboseHelp: false,
-          xcode: FakeXcode(),
+        final BuildSwiftPackage command = createCommand(
+          fs: fs,
+          logger: logger,
+          processManager: processManager,
         );
 
         final runner = FlutterCommandRunner(
@@ -114,23 +129,10 @@ void main() {
         final fs = MemoryFileSystem.test();
         final logger = BufferLogger.test();
         final processManager = FakeProcessManager.list([]);
-        final command = BuildSwiftPackage(
-          analytics: FakeAnalytics(),
-          buildSystem: FakeBuildSystem(),
-          codesign: FakeDarwinAddToAppCodesigning(),
-          featureFlags: FakeFeatureFlags(),
-          templateRenderer: const MustacheTemplateRenderer(),
-          toolContext: FakeToolContext(
-            artifacts: FakeArtifacts(_engineArtifactPath),
-            cache: FakeCache(fs, _flutterRoot),
-            flutterVersion: FakeFlutterVersion(),
-            fs: fs,
-            logger: logger,
-            platform: FakePlatform(),
-            processManager: processManager,
-          ),
-          verboseHelp: false,
-          xcode: FakeXcode(),
+        final BuildSwiftPackage command = createCommand(
+          fs: fs,
+          logger: logger,
+          processManager: processManager,
         );
 
         final runner = FlutterCommandRunner(
@@ -157,23 +159,11 @@ void main() {
           final fs = MemoryFileSystem.test();
           final logger = BufferLogger.test();
           final processManager = FakeProcessManager.list([]);
-          final command = BuildSwiftPackage(
-            analytics: FakeAnalytics(),
-            buildSystem: FakeBuildSystem(),
-            codesign: FakeDarwinAddToAppCodesigning(),
-            featureFlags: FakeFeatureFlags(),
-            templateRenderer: const MustacheTemplateRenderer(),
-            toolContext: FakeToolContext(
-              artifacts: FakeArtifacts(_engineArtifactPath),
-              cache: FakeCache(fs, _flutterRoot),
-              flutterVersion: FakeFlutterVersion(),
-              fs: fs,
-              logger: logger,
-              platform: FakePlatform(environment: <String, String>{'LUCI_CI': 'True'}),
-              processManager: processManager,
-            ),
-            verboseHelp: false,
-            xcode: FakeXcode(),
+          final BuildSwiftPackage command = createCommand(
+            fs: fs,
+            logger: logger,
+            platform: FakePlatform(environment: <String, String>{'LUCI_CI': 'True'}),
+            processManager: processManager,
           );
 
           final runner = FlutterCommandRunner(
@@ -213,23 +203,10 @@ void main() {
           'with relative path',
           () async {
             final logger = BufferLogger.test();
-            final command = BuildSwiftPackage(
-              analytics: FakeAnalytics(),
-              buildSystem: FakeBuildSystem(),
-              codesign: FakeDarwinAddToAppCodesigning(),
-              featureFlags: FakeFeatureFlags(),
-              templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: FakeToolContext(
-                artifacts: FakeArtifacts(_engineArtifactPath),
-                cache: FakeCache(fs, _flutterRoot),
-                flutterVersion: FakeFlutterVersion(),
-                fs: fs,
-                logger: logger,
-                platform: FakePlatform(),
-                processManager: processManager,
-              ),
-              verboseHelp: false,
-              xcode: FakeXcode(),
+            final BuildSwiftPackage command = createCommand(
+              fs: fs,
+              logger: logger,
+              processManager: processManager,
             );
 
             final Directory projectDir = fs.directory('/project')..createSync(recursive: true);
@@ -274,23 +251,10 @@ void main() {
           'with absolute path',
           () async {
             final logger = BufferLogger.test();
-            final command = BuildSwiftPackage(
-              analytics: FakeAnalytics(),
-              buildSystem: FakeBuildSystem(),
-              codesign: FakeDarwinAddToAppCodesigning(),
-              featureFlags: FakeFeatureFlags(),
-              templateRenderer: const MustacheTemplateRenderer(),
-              toolContext: FakeToolContext(
-                artifacts: FakeArtifacts(_engineArtifactPath),
-                cache: FakeCache(fs, _flutterRoot),
-                flutterVersion: FakeFlutterVersion(),
-                fs: fs,
-                logger: logger,
-                platform: FakePlatform(),
-                processManager: processManager,
-              ),
-              verboseHelp: false,
-              xcode: FakeXcode(),
+            final BuildSwiftPackage command = createCommand(
+              fs: fs,
+              logger: logger,
+              processManager: processManager,
             );
 
             final Directory projectDir = fs.directory('/project')..createSync(recursive: true);
@@ -337,23 +301,10 @@ void main() {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list([]);
-      final command = BuildSwiftPackage(
-        analytics: FakeAnalytics(),
-        buildSystem: FakeBuildSystem(),
-        codesign: FakeDarwinAddToAppCodesigning(),
-        featureFlags: FakeFeatureFlags(),
-        templateRenderer: const MustacheTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(_engineArtifactPath),
-          cache: FakeCache(fs, _flutterRoot),
-          flutterVersion: FakeFlutterVersion(),
-          fs: fs,
-          logger: logger,
-          platform: FakePlatform(),
-          processManager: processManager,
-        ),
-        verboseHelp: false,
-        xcode: FakeXcode(),
+      final BuildSwiftPackage command = createCommand(
+        fs: fs,
+        logger: logger,
+        processManager: processManager,
       );
       final Directory swiftPackageOutput = fs.directory(nativeIntegrationSwiftPackagePath);
       swiftPackageOutput.createSync(recursive: true);
@@ -367,23 +318,10 @@ void main() {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list([]);
-      final command = BuildSwiftPackage(
-        analytics: FakeAnalytics(),
-        buildSystem: FakeBuildSystem(),
-        codesign: FakeDarwinAddToAppCodesigning(),
-        featureFlags: FakeFeatureFlags(),
-        templateRenderer: const MustacheTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(_engineArtifactPath),
-          cache: FakeCache(fs, _flutterRoot),
-          flutterVersion: FakeFlutterVersion(),
-          fs: fs,
-          logger: logger,
-          platform: FakePlatform(),
-          processManager: processManager,
-        ),
-        verboseHelp: false,
-        xcode: FakeXcode(),
+      final BuildSwiftPackage command = createCommand(
+        fs: fs,
+        logger: logger,
+        processManager: processManager,
       );
       final Directory appPath = fs.currentDirectory.childDirectory('my_flutter_app');
       appPath.childFile('ios/Flutter/ephemeral/flutter_lldbinit').createSync(recursive: true);
@@ -3458,6 +3396,7 @@ BuildSwiftPackageUtils _createTestUtils({
     toolContext: FakeToolContext(
       artifacts: FakeArtifacts(_engineArtifactPath),
       cache: FakeCache(fs, _flutterRoot),
+      config: Config.test(),
       flutterVersion: FakeFlutterVersion(),
       fs: fs,
       logger: logger,

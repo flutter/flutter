@@ -8,6 +8,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
@@ -69,7 +70,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required ToolContext super.toolContext,
     required super.verboseHelp,
     required this._xcode,
-  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       BuildInfoOptions.flavor,
@@ -121,12 +122,8 @@ class BuildSwiftPackage extends BuildSubCommand {
   @override
   ToolContext get toolContext => super.toolContext!;
 
-  Platform get _platform => toolContext.platform;
-  FileSystem get _fileSystem => toolContext.fs;
-  Cache get _cache => toolContext.cache;
-
   @override
-  bool get supported => _platform.isMacOS;
+  bool get supported => toolContext.platform.isMacOS;
 
   FlutterDarwinPlatform get _targetPlatform {
     final String platformString = getValue(_platformOption);
@@ -210,7 +207,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   late BuildSwiftPackageUtils utils = BuildSwiftPackageUtils(
     analytics: _analytics,
     buildSystem: _buildSystem,
-    flutterRoot: _cache.flutterRoot,
+    flutterRoot: toolContext.cache.flutterRoot,
     project: project,
     templateRenderer: _templateRenderer,
     toolContext: toolContext,
@@ -252,10 +249,11 @@ class BuildSwiftPackage extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final FileSystem fileSystem = toolContext.fs;
     final String outputArgument =
         getValue(_output) ??
-        _fileSystem.path.join(
-          _fileSystem.currentDirectory.path,
+        fileSystem.path.join(
+          fileSystem.currentDirectory.path,
           'build',
           _targetPlatform.name,
           'SwiftPackages',
@@ -265,8 +263,8 @@ class BuildSwiftPackage extends BuildSubCommand {
       throwToolExit('Please provide a value for --output.');
     }
 
-    final Directory outputDirectory = _fileSystem.directory(
-      _fileSystem.path.absolute(_fileSystem.path.normalize(outputArgument)),
+    final Directory outputDirectory = fileSystem.directory(
+      fileSystem.path.absolute(fileSystem.path.normalize(outputArgument)),
     );
     final Directory cacheDirectory = outputDirectory.childDirectory('.cache')
       ..createSync(recursive: true);
@@ -275,7 +273,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     )..createSync(recursive: true);
     final Directory pluginsDirectory = flutterIntegrationPackage.childDirectory(_kFlutterPlugins);
 
-    await project.regeneratePlatformSpecificTooling(cache: _cache, releaseMode: false);
+    await regeneratePlatformSpecificTooling(project, releaseMode: false);
 
     final List<BuildInfo> buildInfos = await _getBuildInfos();
     if (buildInfos.isEmpty) {
@@ -581,16 +579,18 @@ class FlutterFrameworkDependency {
     required Directory xcframeworkOutput,
     required String? codesignIdentity,
   }) async {
-    final Status status = _utils.logger.startProgress(
+    final ToolContext(:Artifacts artifacts, :Logger logger, :ProcessManager processManager) =
+        _utils.toolContext;
+    final Status status = logger.startProgress(
       '   ├─Copying ${_targetPlatform.binaryName}.xcframework...',
     );
     try {
-      final String frameworkArtifactPath = _utils.artifacts.getArtifactPath(
+      final String frameworkArtifactPath = artifacts.getArtifactPath(
         _targetPlatform.xcframeworkArtifact,
         platform: _targetPlatform.targetPlatform,
         mode: buildMode,
       );
-      final ProcessResult result = await _utils.processManager.run(<String>[
+      final ProcessResult result = await processManager.run(<String>[
         'rsync',
         '-av',
         '--delete',
@@ -610,20 +610,20 @@ class FlutterFrameworkDependency {
           .childDirectory('${_targetPlatform.binaryName}.xcframework')
           .path;
       try {
-        final ProcessResult chmodResult = await _utils.processManager.run(<String>[
+        final ProcessResult chmodResult = await processManager.run(<String>[
           'chmod',
           '-R',
           'u+w',
           copiedPath,
         ]);
         if (chmodResult.exitCode != 0) {
-          _utils.logger.printWarning(
+          logger.printWarning(
             'Failed to make the XCFramework writable. This may cause the build to '
             'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
           );
         }
       } on ProcessException catch (e) {
-        _utils.logger.printWarning(
+        logger.printWarning(
           'Failed to make the XCFramework writable. This may cause the build to '
           'fail when using lipo.\nError: $copiedPath: $e',
         );
@@ -635,7 +635,7 @@ class FlutterFrameworkDependency {
         await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
           codesignIdentity: codesignIdentity,
           xcframework: copiedXCFramework,
-          processManager: _utils.processManager,
+          processManager: processManager,
           buildMode: buildMode,
         );
       }
@@ -734,22 +734,20 @@ class FlutterPluginSwiftDependencies {
     required List<Plugin> plugins,
     required Directory pluginsDirectory,
   }) async {
-    final Status status = _utils.logger.startProgress('Processing plugins...');
+    final ToolContext(fs: FileSystem fileSystem, :Logger logger) = _utils.toolContext;
+    final Status status = logger.startProgress('Processing plugins...');
     var skipped = true;
     try {
       ErrorHandlingFileSystem.deleteIfExists(pluginsDirectory, recursive: true);
     } on FileSystemException catch (e, stackTrace) {
       // Delete may fail due to Xcode writing hidden files to the directory at the same time.
       // The delete succeeds in deleting the non-XCode generated contents so it's okay to ignore.
-      _utils.logger.printTrace('Failed to delete ${pluginsDirectory.path}: $e\n$stackTrace');
+      logger.printTrace('Failed to delete ${pluginsDirectory.path}: $e\n$stackTrace');
     }
     try {
       for (final plugin in plugins) {
         // If plugin does not support the platform, skip it.
-        if (!plugin.supportSwiftPackageManagerForPlatform(
-          _utils.fileSystem,
-          _targetPlatform.name,
-        )) {
+        if (!plugin.supportSwiftPackageManagerForPlatform(fileSystem, _targetPlatform.name)) {
           continue;
         }
         final ({
@@ -772,7 +770,7 @@ class FlutterPluginSwiftDependencies {
     } finally {
       status.stop();
       if (skipped) {
-        _utils.logger.printStatus('   │   └── Skipping processing plugins. No change detected.');
+        logger.printStatus('   │   └── Skipping processing plugins. No change detected.');
       }
     }
   }
@@ -791,8 +789,9 @@ class FlutterPluginSwiftDependencies {
     })
   >
   _processPlugin(Plugin plugin, Directory pluginsDirectory, Directory cacheDirectory) async {
+    final FileSystem fileSystem = _utils.toolContext.fs;
     final String swiftPackagePath = await _copyPlugin(plugin, pluginsDirectory);
-    final File manifest = _utils.fileSystem.directory(swiftPackagePath).childFile('Package.swift');
+    final File manifest = fileSystem.directory(swiftPackagePath).childFile('Package.swift');
 
     final Directory pluginCache = cacheDirectory
         .childDirectory(_kManifests)
@@ -833,12 +832,12 @@ class FlutterPluginSwiftDependencies {
       }
       await _injectFlutterDependencies(
         targetNames: targetNames,
-        workingDirectory: _utils.fileSystem.directory(swiftPackagePath),
+        workingDirectory: fileSystem.directory(swiftPackagePath),
       );
     }
 
     _saveManifestInfoToCache(
-      basename: _utils.fileSystem.directory(plugin.path).basename,
+      basename: fileSystem.directory(plugin.path).basename,
       manifest: manifest,
       cachedManifest: cachedManifest,
       cachedVersionFile: cachedVersionFile,
@@ -854,13 +853,14 @@ class FlutterPluginSwiftDependencies {
 
   /// Copies the plugin to the [pluginsDirectory] and returns the path to the copied Swift package.
   Future<String> _copyPlugin(Plugin plugin, Directory pluginsDirectory) async {
+    final FileSystem fileSystem = _utils.toolContext.fs;
     final Directory pluginDestination = pluginsDirectory.childDirectory(plugin.name)
       ..createSync(recursive: true);
     // The entire plugin is copied instead of just the Swift package to maintain any relative
     // links within the plugin.
     // Example: https://github.com/firebase/flutterfire/blob/198aef8db6c96a08f57d750f1fa756da5e4a68a5/packages/firebase_core/firebase_core/ios/firebase_core/Package.swift#L21-L26
     copyDirectory(
-      _utils.fileSystem.directory(plugin.path),
+      fileSystem.directory(plugin.path),
       pluginDestination,
       shouldCopyDirectory: (directory) {
         // Skip copying symlinks and build outputs.
@@ -873,7 +873,7 @@ class FlutterPluginSwiftDependencies {
     );
 
     final String? swiftPackagePath = plugin.pluginSwiftPackagePath(
-      _utils.fileSystem,
+      fileSystem,
       _targetPlatform.name,
       overridePath: pluginDestination.path,
     );
@@ -900,12 +900,13 @@ class FlutterPluginSwiftDependencies {
     required File cachedManifest,
     required File cachedVersionFile,
   }) async {
+    final ToolContext(fs: FileSystem fileSystem, :Logger logger) = _utils.toolContext;
     final fingerprinter = Fingerprinter(
-      fileSystem: _utils.fileSystem,
+      fileSystem: fileSystem,
       fingerprintPath: pluginCache.childFile('manifest.fingerprint').path,
       paths: [
         manifest.path,
-        _utils.fileSystem.path.join(
+        fileSystem.path.join(
           _utils.flutterRoot,
           'packages',
           'flutter_tools',
@@ -915,7 +916,7 @@ class FlutterPluginSwiftDependencies {
           'build_swift_package.dart',
         ),
       ],
-      logger: _utils.logger,
+      logger: logger,
     );
 
     if (fingerprinter.doesFingerprintMatch() &&
@@ -980,7 +981,7 @@ class FlutterPluginSwiftDependencies {
   /// Uses `swift` command line tool to convert Package.swift to json.
   Future<Map<String, Object?>> _parseSwiftPackage(File swiftPackageManifest) async {
     try {
-      final ProcessResult parsedManifest = await _utils.processManager.run([
+      final ProcessResult parsedManifest = await _utils.toolContext.processManager.run([
         'swift',
         'package',
         'dump-package',
@@ -1054,7 +1055,8 @@ class FlutterPluginSwiftDependencies {
     required List<String> targetNames,
     required Directory workingDirectory,
   }) async {
-    final ProcessResult result = await _utils.processManager.run([
+    final ProcessManager processManager = _utils.toolContext.processManager;
+    final ProcessResult result = await processManager.run([
       'swift',
       'package',
       'add-dependency',
@@ -1066,7 +1068,7 @@ class FlutterPluginSwiftDependencies {
       throwToolExit('Failed to add FlutterFramework as a dependency. ${result.stderr}');
     }
     for (final targetName in targetNames) {
-      final ProcessResult targetResult = await _utils.processManager.run([
+      final ProcessResult targetResult = await processManager.run([
         'swift',
         'package',
         'add-target-dependency',
@@ -1089,6 +1091,7 @@ class FlutterPluginSwiftDependencies {
   (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>) generateDependencies({
     required Directory packagesForConfiguration,
   }) {
+    final FileSystem fileSystem = _utils.toolContext.fs;
     final List<SwiftPackagePackageDependency> packageDependencies = [];
     final List<SwiftPackageTargetDependency> targetDependencies = [];
     for (final ({
@@ -1100,7 +1103,7 @@ class FlutterPluginSwiftDependencies {
         in copiedPlugins) {
       // Symlink the swift package inside the packagesForConfiguration directory
       final Link symlink = packagesForConfiguration.childLink(plugin.name);
-      final String target = _utils.fileSystem.path.relative(
+      final String target = fileSystem.path.relative(
         plugin.swiftPackagePath,
         from: symlink.parent.path,
       );
@@ -1149,12 +1152,13 @@ class AppFrameworkAndNativeAssetsDependencies {
     required String targetFile,
     required String? codesignIdentity,
   }) async {
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _utils.toolContext;
     final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
     final appFrameworks = <Directory>[];
     final Map<String, List<({XcodeSdk sdk, String path})>> nativeAssetFrameworks = {};
     final List<String> warnings = [];
 
-    final Status status = _utils.logger.startProgress(
+    final Status status = logger.startProgress(
       '   ├─Building $_appBinaryName.xcframework and native assets...',
     );
     try {
@@ -1183,7 +1187,7 @@ class AppFrameworkAndNativeAssetsDependencies {
         frameworks: appFrameworks,
         frameworkBinaryName: _appBinaryName,
         outputDirectory: xcframeworkOutput,
-        processManager: _utils.processManager,
+        processManager: processManager,
         codesignIdentity: codesignIdentity,
         buildMode: buildInfo.mode,
       );
@@ -1203,7 +1207,7 @@ class AppFrameworkAndNativeAssetsDependencies {
     } finally {
       status.stop();
       for (final warning in warnings) {
-        _utils.logger.printWarning('   │   └── $warning');
+        logger.printWarning('   │   └── $warning');
       }
     }
   }
@@ -1218,13 +1222,22 @@ class AppFrameworkAndNativeAssetsDependencies {
     required FlutterDarwinPlatform platform,
     required XcodeSdk sdk,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FlutterVersion flutterVersion,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      platform: Platform hostPlatform,
+      :ProcessManager processManager,
+    ) = _utils.toolContext;
     final environment = Environment(
-      projectDir: _utils.fileSystem.currentDirectory,
+      projectDir: fileSystem.currentDirectory,
       packageConfigPath: packageConfigPath,
       outputDir: outputBuildDirectory,
       buildDir: _utils.project.dartTool.childDirectory('flutter_build'),
-      cacheDir: _utils.cache.getRoot(),
-      flutterRootDir: _utils.fileSystem.directory(_utils.flutterRoot),
+      cacheDir: cache.getRoot(),
+      flutterRootDir: fileSystem.directory(_utils.flutterRoot),
       defines: <String, String>{
         kTargetFile: targetFile,
         kTargetPlatform: platform.targetPlatform.getName(),
@@ -1232,15 +1245,13 @@ class AppFrameworkAndNativeAssetsDependencies {
         ...buildInfo.toBuildSystemEnvironment(),
         kBuildSwiftPackage: 'true',
       },
-      artifacts: _utils.artifacts,
-      fileSystem: _utils.fileSystem,
-      logger: _utils.logger,
-      processManager: _utils.processManager,
-      platform: _utils.platform,
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: hostPlatform,
       analytics: _utils.analytics,
-      engineVersion: _utils.artifacts.usesLocalArtifacts
-          ? null
-          : _utils.flutterVersion.engineRevision,
+      engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
     final Target target = determineTarget(platform, sdk, buildInfo);
@@ -1248,7 +1259,7 @@ class AppFrameworkAndNativeAssetsDependencies {
     final BuildResult result = await _utils.buildSystem.build(target, environment);
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        _utils.logger.printError(measurement.exception.toString());
+        logger.printError(measurement.exception.toString());
       }
       throwToolExit('The $_appBinaryName.xcframework build failed.');
     }
@@ -1261,12 +1272,13 @@ class AppFrameworkAndNativeAssetsDependencies {
     Map<String, List<({XcodeSdk sdk, String path})>> nativeAssetFrameworks, {
     required XcodeSdk sdk,
   }) {
+    final FileSystem fileSystem = _utils.toolContext.fs;
     final Map<String, String> deviceAssets = DarwinAddToAppNativeAssets.parseNativeAssetsManifest(
       outputDirectory,
       _targetPlatform,
     );
     for (final MapEntry<String, String> asset in deviceAssets.entries) {
-      final String pathToAsset = _utils.fileSystem.path.join(
+      final String pathToAsset = fileSystem.path.join(
         outputDirectory.path,
         'native_assets',
         asset.value,
@@ -1291,9 +1303,11 @@ class AppFrameworkAndNativeAssetsDependencies {
     required String? codesignIdentity,
     required BuildInfo buildInfo,
   }) async {
+    final ToolContext(fs: FileSystem fileSystem, :ProcessManager processManager) =
+        _utils.toolContext;
     final List<String> warnings = [];
     for (final List<({XcodeSdk sdk, String path})> assetPaths in nativeAssetFrameworks.values) {
-      final String binaryName = _utils.fileSystem.file(assetPaths.first.path).basename;
+      final String binaryName = fileSystem.file(assetPaths.first.path).basename;
 
       // Add a warning if the asset does not support all sdks.
       if (assetPaths.length != _targetPlatform.sdks.length) {
@@ -1309,10 +1323,10 @@ class AppFrameworkAndNativeAssetsDependencies {
       final List<Directory> frameworks = [];
       var invalidAsset = false;
       var pathPerPlatformMessage = '';
-      final String frameworkName = _utils.fileSystem.file(assetPaths.first.path).parent.basename;
+      final String frameworkName = fileSystem.file(assetPaths.first.path).parent.basename;
 
       for (final assetPath in assetPaths) {
-        final File binaryAsset = _utils.fileSystem.file(assetPath.path);
+        final File binaryAsset = fileSystem.file(assetPath.path);
         // The parent of the binary is the framework directory.
         final Directory frameworkDir = binaryAsset.parent;
         if (frameworkDir.basename != frameworkName) {
@@ -1341,7 +1355,7 @@ class AppFrameworkAndNativeAssetsDependencies {
         frameworks: frameworks,
         frameworkBinaryName: binaryName,
         outputDirectory: xcframeworkOutput,
-        processManager: _utils.processManager,
+        processManager: processManager,
         codesignIdentity: codesignIdentity,
         buildMode: buildInfo.mode,
       );
@@ -1376,18 +1390,19 @@ class AppFrameworkAndNativeAssetsDependencies {
 
   /// Defines specific to the platform.
   Future<Map<String, String>> _platformDefines(FlutterDarwinPlatform platform, XcodeSdk sdk) async {
+    final Artifacts artifacts = _utils.toolContext.artifacts;
     switch (platform) {
       case FlutterDarwinPlatform.ios:
         return <String, String>{
           kIosArchs: defaultIOSArchsForEnvironment(
             sdk.sdkType,
-            _utils.artifacts,
+            artifacts,
           ).map((CpuArch e) => e.darwinArchName).join(' '),
           kSdkRoot: await _utils.xcode.sdkLocation(sdk.sdkType),
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
-          kDarwinArchs: defaultMacOSArchsForEnvironment(_utils.artifacts)
+          kDarwinArchs: defaultMacOSArchsForEnvironment(artifacts)
               .map((CpuArch e) => e.darwinArchName)
               .join(' '),
         };
@@ -1427,7 +1442,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       List<SwiftPackageTargetDependency> targetDependencies,
       List<SwiftPackageTarget> packageTargets,
     ) = generateDependenciesFromDirectory(
-      fileSystem: _utils.fileSystem,
+      fileSystem: _utils.toolContext.fs,
       directoryName: _kNativeAssets,
       xcframeworkDirectory: xcframeworkOutput.childDirectory(_kNativeAssets),
     );
@@ -1470,7 +1485,8 @@ class CocoaPodPluginDependencies {
         .childDirectory(xcodeBuildConfiguration)
         .childDirectory(_kCocoaPods);
 
-    final Status status = _utils.logger.startProgress('   ├─Building CocoaPod frameworks...');
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _utils.toolContext;
+    final Status status = logger.startProgress('   ├─Building CocoaPod frameworks...');
     var skipped = false;
     try {
       final bool dependenciesChanged = _haveDependenciesChanged(
@@ -1531,12 +1547,12 @@ class CocoaPodPluginDependencies {
         });
       }
 
-      for (final MapEntry<String, List<Directory>> entry in frameworksPerPod.entries) {
+      for (final MapEntry(:String key, :List<Directory> value) in frameworksPerPod.entries) {
         await _produceXCFramework(
-          frameworks: entry.value,
-          frameworkBinaryName: entry.key,
+          frameworks: value,
+          frameworkBinaryName: key,
           outputDirectory: cocoapodXCFrameworkOutput,
-          processManager: _utils.processManager,
+          processManager: processManager,
           codesignIdentity: codesignIdentity,
           buildMode: buildInfo.mode,
         );
@@ -1551,9 +1567,7 @@ class CocoaPodPluginDependencies {
     } finally {
       status.stop();
       if (skipped) {
-        _utils.logger.printStatus(
-          '   │   └── Skipping building CocoaPod plugins. No change detected.',
-        );
+        logger.printStatus('   │   └── Skipping building CocoaPod plugins. No change detected.');
       }
     }
   }
@@ -1561,9 +1575,10 @@ class CocoaPodPluginDependencies {
   @visibleForTesting
   /// Wrap [processPodsIfNeeded] in a method to be overwritten in tests.
   Future<void> processPods(XcodeBasedProject xcodeProject, BuildInfo buildInfo) async {
+    final ToolContext(:Config config, fs: FileSystem fileSystem) = _utils.toolContext;
     await processPodsIfNeeded(
       xcodeProject,
-      _targetPlatform.buildDirectory(),
+      _targetPlatform.buildDirectory(config: config, fileSystem: fileSystem),
       buildInfo.mode,
       flutterRoot: _utils.flutterRoot,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
@@ -1590,7 +1605,7 @@ class CocoaPodPluginDependencies {
     required Directory podsDirectory,
   }) async {
     final String configuration = _configurationForSdkType(sdk, xcodeBuildConfiguration);
-    final ProcessResult buildPluginsResult = await _utils.processManager.run(<String>[
+    final ProcessResult buildPluginsResult = await _utils.toolContext.processManager.run(<String>[
       ..._utils.xcode.xcrunCommand(),
       'xcodebuild',
       '-alltargets',
@@ -1628,6 +1643,7 @@ class CocoaPodPluginDependencies {
   ///     > plugin_a.framework
   /// ```
   Future<Map<String, List<Directory>>> _findFrameworks(Directory configurationBuildDir) async {
+    final FileSystem fileSystem = _utils.toolContext.fs;
     final frameworks = <String, List<Directory>>{};
 
     final Iterable<Directory> products = configurationBuildDir
@@ -1637,10 +1653,10 @@ class CocoaPodPluginDependencies {
       for (final Directory podProduct
           in builtProduct.listSync(followLinks: false).whereType<Directory>()) {
         final String podFrameworkName = podProduct.basename;
-        if (_utils.fileSystem.path.extension(podFrameworkName) != '.framework') {
+        if (fileSystem.path.extension(podFrameworkName) != '.framework') {
           continue;
         }
-        final String binaryName = _utils.fileSystem.path.basenameWithoutExtension(podFrameworkName);
+        final String binaryName = fileSystem.path.basenameWithoutExtension(podFrameworkName);
         if (_utils.project.isModule && (binaryName == 'FlutterPluginRegistrant')) {
           // Flutter modules generate a FlutterPluginRegistrant framework. Since the
           // FlutterPluginRegistrant is being used as a Swift Package in this command, it should
@@ -1705,11 +1721,12 @@ class CocoaPodPluginDependencies {
     required bool buildStatic,
     required File codesignIdentityFile,
   }) {
+    final ToolContext(fs: FileSystem fileSystem, :Logger logger) = _utils.toolContext;
     final fingerprintedFiles = <String>[codesignIdentityFile.path];
 
     final File staticStatus =
-        _utils.fileSystem.file(
-            _utils.fileSystem.path.join(
+        fileSystem.file(
+            fileSystem.path.join(
               cacheDirectoryPath,
               'build_${xcodeBuildConfiguration}_static_status',
             ),
@@ -1738,19 +1755,19 @@ class CocoaPodPluginDependencies {
     }
 
     final fingerprinter = Fingerprinter(
-      fingerprintPath: _utils.fileSystem.path.join(
+      fingerprintPath: fileSystem.path.join(
         cacheDirectoryPath,
         'build_${xcodeBuildConfiguration}_pod_inputs.fingerprint',
       ),
       paths: <String>[
-        _utils.fileSystem.path.join(
+        fileSystem.path.join(
           _utils.flutterRoot,
           'packages',
           'flutter_tools',
           'bin',
           'podhelper.rb',
         ),
-        _utils.fileSystem.path.join(
+        fileSystem.path.join(
           _utils.flutterRoot,
           'packages',
           'flutter_tools',
@@ -1761,8 +1778,8 @@ class CocoaPodPluginDependencies {
         ),
         ...fingerprintedFiles,
       ],
-      fileSystem: _utils.fileSystem,
-      logger: _utils.logger,
+      fileSystem: fileSystem,
+      logger: logger,
     );
     return fingerprinter;
   }
@@ -1797,7 +1814,7 @@ class CocoaPodPluginDependencies {
     required Directory xcframeworkOutput,
   }) {
     return generateDependenciesFromDirectory(
-      fileSystem: _utils.fileSystem,
+      fileSystem: _utils.toolContext.fs,
       directoryName: _kCocoaPods,
       xcframeworkDirectory: xcframeworkOutput.childDirectory(_kCocoaPods),
     );
@@ -1924,12 +1941,13 @@ class FlutterNativeIntegrationSwiftPackage {
   /// Generates bash scripts and xcfilelists to be used for integrating SwiftPM into the
   /// [scriptsDirectory].
   Future<void> _generateScripts(Directory scriptsDirectory) async {
+    final ToolContext(fs: FileSystem fileSystem, :Logger logger) = _utils.toolContext;
     ErrorHandlingFileSystem.deleteIfExists(scriptsDirectory, recursive: true);
     final Template scriptsTemplate = await Template.fromName(
-      _utils.fileSystem.path.join('add_to_app', 'darwin', _kScripts),
-      fileSystem: _utils.fileSystem,
+      fileSystem.path.join('add_to_app', 'darwin', _kScripts),
+      fileSystem: fileSystem,
       templateManifest: null,
-      logger: _utils.logger,
+      logger: logger,
       templateRenderer: _utils.templateRenderer,
     );
     scriptsTemplate.render(scriptsDirectory, <String, Object>{
@@ -1949,11 +1967,12 @@ class FlutterNativeIntegrationSwiftPackage {
   /// Generate source files for Swift package executable tools to be used for integrating SwiftPM
   /// into the [sourcesDirectory].
   Future<void> _generateToolsSources(Directory sourcesDirectory) async {
+    final ToolContext(fs: FileSystem fileSystem, :Logger logger) = _utils.toolContext;
     final Template toolsTemplate = await Template.fromName(
-      _utils.fileSystem.path.join('add_to_app', 'darwin', _kTools),
-      fileSystem: _utils.fileSystem,
+      fileSystem.path.join('add_to_app', 'darwin', _kTools),
+      fileSystem: fileSystem,
       templateManifest: null,
-      logger: _utils.logger,
+      logger: logger,
       templateRenderer: _utils.templateRenderer,
     );
     toolsTemplate.render(sourcesDirectory, <String, Object>{}, printStatusWhenWriting: false);
@@ -1962,12 +1981,13 @@ class FlutterNativeIntegrationSwiftPackage {
   /// Generate source files for Swift package plugins to be used for integrating SwiftPM into the
   /// [pluginsDirectory].
   Future<void> _generatePluginsSources({required Directory pluginsDirectory}) async {
+    final ToolContext(fs: FileSystem fileSystem, :Logger logger) = _utils.toolContext;
     // Copy swift plugins to be used for integrating SwiftPM into an native project.
     final Template pluginsTemplate = await Template.fromName(
-      _utils.fileSystem.path.join('add_to_app', 'darwin', 'Plugins'),
-      fileSystem: _utils.fileSystem,
+      fileSystem.path.join('add_to_app', 'darwin', 'Plugins'),
+      fileSystem: fileSystem,
       templateManifest: null,
-      logger: _utils.logger,
+      logger: logger,
       templateRenderer: _utils.templateRenderer,
     );
 
@@ -1983,11 +2003,12 @@ class FlutterNativeIntegrationSwiftPackage {
   Future<void> _generateTestSources(Directory testDirectory) async {
     ErrorHandlingFileSystem.deleteIfExists(testDirectory, recursive: true);
     if (_generateTests) {
+      final ToolContext(fs: FileSystem fileSystem, :Logger logger) = _utils.toolContext;
       final Template testsTemplate = await Template.fromName(
-        _utils.fileSystem.path.join('add_to_app', 'darwin', _kTests),
-        fileSystem: _utils.fileSystem,
+        fileSystem.path.join('add_to_app', 'darwin', _kTests),
+        fileSystem: fileSystem,
         templateManifest: null,
-        logger: _utils.logger,
+        logger: logger,
         templateRenderer: _utils.templateRenderer,
       );
       testsTemplate.render(testDirectory, <String, Object>{}, printStatusWhenWriting: false);

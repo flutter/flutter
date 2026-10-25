@@ -386,7 +386,7 @@ void main() {
           expect(project.lldbHelperPythonFile, isNot(exists));
 
           await project.ensureReadyForPlatformSpecificTooling(
-            cache: FakeCache(olderThanToolsStamp: true),
+            toolContext: FakeToolContext(cache: FakeCache(olderThanToolsStamp: true), fs: fs),
           );
 
           expect(project.lldbInitFile, exists);
@@ -406,7 +406,7 @@ void main() {
           project.lldbHelperPythonFile.writeAsStringSync('old');
 
           await project.ensureReadyForPlatformSpecificTooling(
-            cache: FakeCache(olderThanToolsStamp: true),
+            toolContext: FakeToolContext(cache: FakeCache(olderThanToolsStamp: true), fs: fs),
           );
 
           expect(project.lldbInitFile.readAsStringSync(), contains('Generated file, do not edit.'));
@@ -786,6 +786,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late final Directory directory = fileSystem.directory('app_name');
+
+  @override
+  Directory get buildDirectory => directory.childDirectory('build');
 
   @override
   bool isModule = false;

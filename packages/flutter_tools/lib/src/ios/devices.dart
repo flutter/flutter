@@ -327,6 +327,7 @@ class IOSDevice extends Device {
     required this._xcodeDebug,
     required IProxy iProxy,
     required super.logger,
+    super.toolContext,
     required this._analytics,
     required this._xcode,
   }) : _iproxy = iProxy,
@@ -545,12 +546,12 @@ class IOSDevice extends Device {
       final XcodeBuildResult buildResult = await buildXcodeProject(
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
-        flutterRoot: _xcode!.flutterRoot,
         targetOverride: mainPath,
         activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
+        toolContext: toolContext,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
@@ -835,8 +836,8 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: FlutterProject.current(),
           buildInfo: debuggingOptions.buildInfo,
-          flutterRoot: _xcode!.flutterRoot,
           targetOverride: mainPath,
+          toolContext: toolContext,
         );
       }
     }
@@ -1209,9 +1210,9 @@ class IOSDevice extends Device {
       await updateGeneratedXcodeProperties(
         project: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
-        flutterRoot: _xcode!.flutterRoot,
         targetOverride: mainPath,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: toolContext,
       );
 
       final IosProject project = package.project;

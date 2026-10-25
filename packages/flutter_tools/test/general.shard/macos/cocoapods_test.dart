@@ -1225,7 +1225,7 @@ end''');
                 processManager: fakeProcessManager,
               ),
               xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-                processManager: fakeProcessManager,
+                toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
               ),
             );
 
@@ -1286,7 +1286,9 @@ end''');
           platform: FakePlatform(operatingSystem: 'macos'),
           processManager: fakeProcessManager,
         ),
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
+        ),
       );
 
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1491,7 +1493,9 @@ end''');
           platform: FakePlatform(operatingSystem: 'macos'),
           processManager: fakeProcessManager,
         ),
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
+        ),
       );
 
       final bool didInstall = await cocoaPods.processPods(

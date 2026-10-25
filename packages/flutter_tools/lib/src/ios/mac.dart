@@ -14,12 +14,15 @@ import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -112,7 +115,6 @@ class IMobileDevice {
 Future<XcodeBuildResult> buildXcodeProject({
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
-  required String flutterRoot,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
   CpuArch? activeArch,
@@ -121,7 +123,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
+  required ToolContext toolContext,
 }) async {
+  final ToolContext(
+    :Cache cache,
+    :Config config,
+    :FileSystem fs,
+    :OperatingSystemUtils os,
+    :Platform platform,
+  ) = toolContext;
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
@@ -283,7 +293,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final String buildDirectoryPath = getIosBuildDirectory();
+  final String buildDirectoryPath = getIosBuildDirectory(config: config, fileSystem: fs);
 
   final Map<String, String> buildSettings =
       await app.project.buildSettingsForBuildInfo(
@@ -356,7 +366,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
-    flutterRoot: flutterRoot,
+    toolContext: toolContext,
     printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
@@ -373,7 +383,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project.ios,
     buildDirectoryPath,
     buildInfo.mode,
-    flutterRoot: flutterRoot,
+    flutterRoot: cache.flutterRoot,
   );
   if (configOnly) {
     return XcodeBuildResult(success: true);
@@ -453,7 +463,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
+      final onlyActiveArch =
+          activeArch ==
+          CpuArch.fromHostPlatform(
+            getCurrentHostPlatform(operatingSystemUtils: os, platform: platform),
+          );
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.darwinArchName}');
