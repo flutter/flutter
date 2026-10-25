@@ -409,8 +409,9 @@ copy("copy_dylib") {
 
 check_forbidden_native_symbols("check_native_symbols") {
   visibility = [ ":*" ]
-  deps = [ ":create_flutter_framework_dylib" ]
-  library = "$root_out_dir/libFlutter.dylib"
+  deps = [ ":copy_dylib" ]
+  _dylib_outputs = get_target_outputs(":copy_dylib")
+  library = _dylib_outputs[0]
 }
 
 copy("copy_asan_runtime_dylib") {

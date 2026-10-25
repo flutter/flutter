@@ -69,9 +69,11 @@ executable("flutter_shell_native_unittests") {
   ]
 }
 
+_flutter_shell_native_output_name = "flutter"
+
 shared_library("flutter_shell_native") {
   inputs = [ "android_exports.lst" ]
-  output_name = "flutter"
+  output_name = _flutter_shell_native_output_name
   deps = [ ":flutter_shell_native_src" ]
   ldflags = [ "-Wl,--version-script=" +
               rebase_path("android_exports.lst", root_build_dir) ]
@@ -464,7 +466,8 @@ action("check_imports") {
 
 check_forbidden_native_symbols("check_native_symbols") {
   deps = [ ":flutter_shell_native" ]
-  library = "$root_build_dir/libflutter.so"
+  _out_dir = get_label_info(":flutter_shell_native", "root_out_dir")
+  library = "$_out_dir/lib$_flutter_shell_native_output_name.so"
 }
 
 action("flutter_shell_java") {

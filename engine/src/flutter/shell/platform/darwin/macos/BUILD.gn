@@ -280,8 +280,9 @@ copy("copy_dylib") {
 
 check_forbidden_native_symbols("check_native_symbols") {
   visibility = [ ":*" ]
-  deps = [ ":flutter_framework_dylib" ]
-  library = "$root_out_dir/lib$_flutter_framework_name.dylib"
+  deps = [ ":copy_dylib" ]
+  _dylib_outputs = get_target_outputs(":copy_dylib")
+  library = _dylib_outputs[0]
 }
 
 action("copy_framework_info_plist") {

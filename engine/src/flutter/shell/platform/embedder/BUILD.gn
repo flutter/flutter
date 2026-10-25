@@ -457,10 +457,12 @@ if (enable_unittests) {
   }
 }
 
+_flutter_engine_output_name = "flutter_engine"
+
 shared_library("flutter_engine_library") {
   visibility = [ ":*" ]
 
-  output_name = "flutter_engine"
+  output_name = _flutter_engine_output_name
 
   ldflags = []
   if (is_mac && !embedder_for_target) {
@@ -480,10 +482,11 @@ if (is_linux || is_android || is_mac) {
   check_forbidden_native_symbols("check_native_symbols") {
     visibility = [ ":*" ]
     deps = [ ":flutter_engine_library" ]
+    _out_dir = get_label_info(":flutter_engine_library", "root_out_dir")
     if (is_mac) {
-      library = "$root_out_dir/libflutter_engine.dylib"
+      library = "$_out_dir/lib$_flutter_engine_output_name.dylib"
     } else {
-      library = "$root_out_dir/libflutter_engine.so"
+      library = "$_out_dir/lib$_flutter_engine_output_name.so"
     }
   }
 }

@@ -352,7 +352,9 @@ shared_library("flutter_linux_gtk") {
 
 check_forbidden_native_symbols("check_native_symbols") {
   deps = [ ":flutter_linux_gtk" ]
-  library = "$root_build_dir/libflutter_${host_os}_gtk.so"
+  _out_dir = get_label_info(":flutter_linux_gtk", "root_out_dir")
+  _lib_name = get_label_info(":flutter_linux_gtk", "name")
+  library = "$_out_dir/lib$_lib_name.so"
 }
 
 copy("publish_headers_linux") {
