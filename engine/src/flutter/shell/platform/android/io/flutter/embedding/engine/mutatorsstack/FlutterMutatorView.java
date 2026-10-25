@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.android.AndroidTouchProcessor;
+import io.flutter.plugin.platform.PlatformViewGestureTracker;
 import io.flutter.util.ViewUtils;
 
 /**
@@ -35,6 +36,7 @@ public class FlutterMutatorView extends FrameLayout {
   private int top;
 
   private final AndroidTouchProcessor androidTouchProcessor;
+  private final PlatformViewGestureTracker gestureTracker = new PlatformViewGestureTracker();
   private Paint paint;
 
   /**
@@ -191,12 +193,46 @@ public class FlutterMutatorView extends FrameLayout {
     return super.requestSendAccessibilityEvent(child, event);
   }
 
+  /**
+   * Informs this view that Flutter has won the gesture arena for the active touch sequence.
+   *
+   * <p>Subsequent {@link MotionEvent#ACTION_MOVE} events will request unbuffered dispatch to
+   * minimize latency and prevent stutter for Flutter-driven gestures (e.g., scrolling).
+   *
+   * @param gestureId The identifier (downTime) of the gesture that Flutter won. Unbuffered dispatch
+   *     is only enabled if this matches the currently active gesture's downTime.
+   */
+  public void onFlutterWonGesture(long gestureId) {
+    gestureTracker.onFlutterWonGesture(gestureId);
+  }
+
+  @VisibleForTesting
+  public boolean getFlutterWonGesture() {
+    return gestureTracker.getFlutterWonGesture();
+  }
+
+  @VisibleForTesting
+  boolean isGestureActive() {
+    return gestureTracker.isGestureActive();
+  }
+
+  @VisibleForTesting
+  long getCurrentDownTime() {
+    return gestureTracker.getCurrentDownTime();
+  }
+
+  @VisibleForTesting
+  void requestUnbuffered(MotionEvent event) {
+    requestUnbufferedDispatch(event);
+  }
+
   @Override
   @SuppressLint("ClickableViewAccessibility")
   public boolean onTouchEvent(MotionEvent event) {
     if (androidTouchProcessor == null) {
       return super.onTouchEvent(event);
     }
+    gestureTracker.onTouchEvent(event, this::requestUnbuffered);
     final Matrix screenMatrix = new Matrix();
     screenMatrix.postTranslate(getLeft(), getTop());
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);

@@ -7,12 +7,16 @@ import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
@@ -25,6 +29,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
 const xcodebuild = '/usr/bin/xcodebuild';
@@ -67,6 +72,25 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
 
+  ToolContext createToolContext({FileSystem? fs, Platform? targetPlatform}) {
+    final FileSystem resolvedFs = fs ?? fileSystem;
+    final Platform resolvedPlatform = targetPlatform ?? platform;
+    return FakeToolContext(
+      config: Config.test(),
+      fs: resolvedFs,
+      logger: logger,
+      os: OperatingSystemUtils(
+        fileSystem: resolvedFs,
+        logger: logger,
+        platform: resolvedPlatform,
+        processManager: fakeProcessManager,
+      ),
+      platform: resolvedPlatform,
+      processManager: fakeProcessManager,
+      processUtils: ProcessUtils(logger: logger, processManager: fakeProcessManager),
+    );
+  }
+
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
     platform = FakePlatform(operatingSystem: 'macos');
@@ -74,11 +98,8 @@ void main() {
     fileSystem.file(xcodebuild).createSync(recursive: true);
     logger = BufferLogger.test();
     xcodeProjectInterpreter = XcodeProjectInterpreter(
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      toolContext: createToolContext(),
     );
   });
 
@@ -193,11 +214,8 @@ void main() {
   testWithoutContext('xcodebuild isInstalled is false when not on MacOS', () {
     final Platform platform = FakePlatform(operatingSystem: 'notMacOS');
     xcodeProjectInterpreter = XcodeProjectInterpreter(
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      toolContext: createToolContext(targetPlatform: platform),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -645,11 +663,8 @@ void main() {
       ]);
 
       final xcodeProjectInterpreter = XcodeProjectInterpreter(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        toolContext: createToolContext(),
       );
 
       expect(
@@ -690,11 +705,8 @@ void main() {
       ]);
 
       final xcodeProjectInterpreter = XcodeProjectInterpreter(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        toolContext: createToolContext(),
       );
 
       await expectLater(
@@ -735,11 +747,8 @@ void main() {
       ]);
 
       final xcodeProjectInterpreter = XcodeProjectInterpreter(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        toolContext: createToolContext(),
       );
 
       await expectLater(
@@ -781,11 +790,8 @@ void main() {
       ]);
 
       final xcodeProjectInterpreter = XcodeProjectInterpreter(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        toolContext: createToolContext(),
       );
 
       await expectLater(
@@ -828,11 +834,8 @@ void main() {
       ]);
 
       final xcodeProjectInterpreter = XcodeProjectInterpreter(
-        logger: logger,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
+        toolContext: createToolContext(),
       );
 
       await expectLater(
@@ -949,11 +952,8 @@ Information about project "Runner":
     ]);
 
     final xcodeProjectInterpreter = XcodeProjectInterpreter(
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      toolContext: createToolContext(),
     );
 
     final XcodeProjectInfo? info = await xcodeProjectInterpreter.getInfo(
@@ -965,6 +965,81 @@ Information about project "Runner":
     );
 
     expect(info!.schemes, <String>['Runner', 'WatchScheme']);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('getInfo filters local Swift package schemes from project schemes', () async {
+    const workingDirectory = '/';
+    final Directory buildDirectory = fileSystem.directory('build/ios');
+    final xcodeProject = FakeXcodeBasedProject(workingDirectory, fileSystem);
+
+    // A local Swift package added directly to the Xcode project (not fetched
+    // as a remote dependency, so it never appears under the SwiftPM
+    // `checkouts` directory) but which ships its own scheme.
+    xcodeProject.hostAppRoot
+        .childDirectory('LocalPackages')
+        .childDirectory('LocalDependency')
+        .childDirectory('.swiftpm')
+        .childDirectory('xcode')
+        .childDirectory('xcshareddata')
+        .childDirectory('xcschemes')
+        .childFile('LocalDependency.xcscheme')
+        .createSync(recursive: true);
+
+    xcodeProject.xcodeProjectInfoFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+/* Begin XCLocalSwiftPackageReference section */
+		1A2B3C4D /* XCLocalSwiftPackageReference "LocalPackages/LocalDependency" */ = {
+			isa = XCLocalSwiftPackageReference;
+			customName = MyLocalDependency;
+			relativePath = LocalPackages/LocalDependency;
+		};
+/* End XCLocalSwiftPackageReference section */
+''');
+
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      kResolvePackagesCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/build/ios/SourcePackages',
+          '-skipPackagePluginValidation',
+          '-skipPackageSignatureValidation',
+          '-list',
+        ],
+        stdout: '''
+Information about project "Runner":
+    Targets:
+        Runner
+
+    Build Configurations:
+        Debug
+        Release
+
+    Schemes:
+        Runner
+        LocalDependency
+
+''',
+      ),
+    ]);
+
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      analytics: const NoOpAnalytics(),
+      toolContext: createToolContext(),
+    );
+
+    final XcodeProjectInfo? info = await xcodeProjectInterpreter.getInfo(
+      xcodeProject,
+      buildDirectory: buildDirectory,
+    );
+
+    expect(info!.schemes, <String>['Runner']);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -1439,6 +1514,9 @@ Information about project "Runner":
     late FakePlatform macOS;
     late FileSystem fs;
 
+    FakeToolContext createToolContext({Artifacts? artifacts}) =>
+        FakeToolContext(artifacts: artifacts ?? localIosArtifacts, fs: fs, platform: macOS);
+
     setUp(() {
       fs = MemoryFileSystem.test();
       localIosArtifacts = Artifacts.testLocalEngine(
@@ -1457,7 +1535,7 @@ Information about project "Runner":
       setUp(() {
         fakeProcessManager = FakeProcessManager.empty();
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
           version: Version(26, 0, 0),
         );
         xcode = Xcode.test(
@@ -1600,6 +1678,7 @@ PODS:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: createToolContext(),
             printWarnings: true,
           );
 
@@ -1682,6 +1761,7 @@ Build settings for action build and target good_plugin:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: createToolContext(),
             printWarnings: true,
           );
 
@@ -1750,6 +1830,7 @@ Build settings for action build and target good_plugin:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: createToolContext(),
             printWarnings: true,
           );
 
@@ -1824,6 +1905,7 @@ Build settings for action build and target bad_plugin:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: createToolContext(),
             printWarnings: true,
           );
 
@@ -1855,7 +1937,7 @@ Build settings for action build and target bad_plugin:
         'does not print warning on Xcode < 26',
         () async {
           xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
             version: Version(16, 0, 0),
           );
           xcode = Xcode.test(
@@ -1937,6 +2019,7 @@ PODS:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: createToolContext(),
             printWarnings: true,
           );
 
@@ -1984,7 +2067,11 @@ PODS:
         fs.directory('path/to/project'),
       );
       await expectLater(
-        () => updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo),
+        () => updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: createToolContext(),
+        ),
         throwsToolExit(message: '32-bit iOS local engine binaries are not supported.'),
       );
     });
@@ -1999,7 +2086,12 @@ PODS:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
-
+          toolContext: createToolContext(
+            artifacts: Artifacts.testLocalEngine(
+              localEngine: 'out/host_profile_arm64',
+              localEngineHost: 'out/host_release',
+            ),
+          ),
           useMacOSConfig: true,
         );
 
@@ -2040,7 +2132,12 @@ PODS:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
-
+          toolContext: createToolContext(
+            artifacts: Artifacts.testLocalEngine(
+              localEngine: 'out/host_profile',
+              localEngineHost: 'out/host_release',
+            ),
+          ),
           useMacOSConfig: true,
         );
 
@@ -2076,7 +2173,11 @@ PODS:
       final FlutterProject project = FlutterProject.fromDirectoryTest(
         fs.directory('path/to/project'),
       );
-      await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+      await updateGeneratedXcodeProperties(
+        project: project,
+        buildInfo: buildInfo,
+        toolContext: createToolContext(),
+      );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
@@ -2095,7 +2196,11 @@ PODS:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fs.directory('path/to/project'),
         );
-        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: createToolContext(),
+        );
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.existsSync(), isTrue);
@@ -2125,7 +2230,11 @@ PODS:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fs.directory('path/to/project'),
         );
-        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: createToolContext(),
+        );
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.existsSync(), isTrue);
@@ -2151,7 +2260,16 @@ PODS:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            toolContext: createToolContext(
+              artifacts: Artifacts.testLocalEngine(
+                localEngine: 'out/ios_debug_sim_unopt',
+                localEngineHost: 'out/host_debug_unopt',
+              ),
+            ),
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -2185,7 +2303,16 @@ PODS:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            toolContext: createToolContext(
+              artifacts: Artifacts.testLocalEngine(
+                localEngine: 'out/ios_debug_sim_arm64',
+                localEngineHost: 'out/host_debug_unopt',
+              ),
+            ),
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -2235,6 +2362,7 @@ PODS:
       await updateGeneratedXcodeProperties(
         project: FlutterProject.fromDirectoryTest(fs.directory('path/to/project')),
         buildInfo: buildInfo,
+        toolContext: createToolContext(),
       );
 
       final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -2469,7 +2597,7 @@ flutter:
       setUp(() {
         fakeProcessManager = FakeProcessManager.empty();
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
           version: Version(26, 0, 0),
         );
         xcode = Xcode.test(
@@ -2487,7 +2615,7 @@ flutter:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
-
+            toolContext: createToolContext(),
             configurationBuildDir: 'path/to/project/build/ios/iphoneos',
           );
 
@@ -2514,7 +2642,11 @@ flutter:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            toolContext: createToolContext(),
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -2539,7 +2671,11 @@ flutter:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            toolContext: createToolContext(),
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -2573,6 +2709,7 @@ flutter:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
+          toolContext: createToolContext(),
           useMacOSConfig: true,
         );
         final File buildPhaseScript = fs.file(
@@ -2599,7 +2736,11 @@ flutter:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fs.directory('path/to/project'),
         );
-        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: createToolContext(),
+        );
         final File buildPhaseScript = fs.file(
           'path/to/project/ios/Flutter/ephemeral/flutter_native_integration.env',
         );
@@ -2622,11 +2763,8 @@ flutter:
     final fs = MemoryFileSystem.test();
     final Directory buildDirectory = fs.directory('/build/ios');
     final xcodeProjectInterpreter = XcodeProjectInterpreter(
-      logger: logger,
-      fileSystem: fs,
-      platform: platform,
-      processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
+      toolContext: createToolContext(fs: fs),
     );
     expect(
       xcodeProjectInterpreter.swiftPackageCachePath(buildDirectory),

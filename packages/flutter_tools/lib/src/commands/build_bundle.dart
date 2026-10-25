@@ -5,32 +5,45 @@
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/config.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
-import '../bundle.dart';
+import '../build_system/build_system.dart';
 import '../bundle_builder.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../isolated/build_targets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
-    required super.logger,
-    bool verboseHelp = false,
-    BundleBuilder? bundleBuilder,
-  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
-       super(verboseHelp: verboseHelp) {
-    usesTargetOption();
-    usesFilesystemOptions(hide: !verboseHelp);
-    usesBuildNumberOption();
-    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
-    usesDartDefineOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
+    required this.buildSystem,
+    required this.featureFlags,
+    required ToolContext super.toolContext,
+    required super.verboseHelp,
+    this._bundleBuilder,
+  }) : super(logger: toolContext.logger) {
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
+    registerOptionBundles(const <OptionBundle>[
+      FilesystemOptionsBundle(),
+      BuildModeOptionsBundle(defaultToRelease: false),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.target,
+      CommonOptions.buildNumber,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
+      CommonOptions.pub,
+      BuildInfoOptions.trackWidgetCreation,
+    ], verboseHelp: verboseHelp);
     argParser
       ..addOption(
         'depfile',
-        defaultsTo: defaultDepfilePath,
+        defaultsTo: fs.path.join(getBuildDirectory(config, fs), 'snapshot_blob.bin.d'),
         help:
             'A file path where a depfile will be written. '
             'This contains all build inputs and outputs in a Make-style syntax.',
@@ -54,7 +67,7 @@ class BuildBundleCommand extends BuildSubCommand {
       )
       ..addOption(
         'asset-dir',
-        defaultsTo: getAssetBuildDirectory(),
+        defaultsTo: getAssetBuildDirectory(config, fs),
         help:
             'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
             'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
@@ -64,11 +77,14 @@ class BuildBundleCommand extends BuildSubCommand {
         hide: !verboseHelp,
         help: '(deprecated) Icon font tree shaking is not supported by this command.',
       );
-    usesPubOption();
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
-  final BundleBuilder _bundleBuilder;
+  final BuildSystem buildSystem;
+  final BundleBuilder? _bundleBuilder;
+  final FeatureFlags featureFlags;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'bundle';
@@ -84,10 +100,9 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
-    final String projectDir = globals.fs.file(targetFile).parent.parent.path;
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(
-      globals.fs.directory(projectDir),
-    );
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.directory(projectDir));
     return Event.commandUsageValues(
       workflow: commandPath,
       commandHasTerminal: hasTerminal,
@@ -111,44 +126,42 @@ class BuildBundleCommand extends BuildSubCommand {
     final String targetPlatform = stringArg('target-platform')!;
     final platform = TargetPlatform.fromName(targetPlatform);
     // Check for target platforms that are only allowed via feature flags.
-    switch (platform) {
-      case TargetPlatform.darwin:
+    switch (platform.os) {
+      case .macos:
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
+      case .windows:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
+      case .linux:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
+      case .android || .fuchsia || .ios || .tester || .web:
         break;
-      case TargetPlatform.unsupported:
+      case .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
 
     final BuildInfo buildInfo = await getBuildInfo();
+    final BundleBuilder bundleBuilder =
+        _bundleBuilder ??
+        BundleBuilder(
+          analytics: analytics,
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: toolContext,
+        );
 
-    await _bundleBuilder.build(
-      platform: platform,
+    await bundleBuilder.build(
       buildInfo: buildInfo,
-      mainPath: targetFile,
-      depfilePath: stringArg('depfile'),
+      platform: platform,
       assetDirPath: stringArg('asset-dir'),
+      buildSystem: buildSystem,
+      depfilePath: stringArg('depfile'),
+      mainPath: targetFile,
     );
     return FlutterCommandResult.success();
   }

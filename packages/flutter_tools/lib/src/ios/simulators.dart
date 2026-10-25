@@ -13,11 +13,11 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../devfs.dart';
@@ -58,24 +58,23 @@ class IOSSimulators extends PollingDeviceDiscovery {
 }
 
 class IOSSimulatorUtils {
-  IOSSimulatorUtils({
-    required Xcode xcode,
-    required Logger logger,
-    required ProcessManager processManager,
-    required this._operatingSystemUtils,
-  }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
-       _xcode = xcode;
+  IOSSimulatorUtils({required this._toolContext, required this._xcode})
+    : _simControl = SimControl(
+        logger: _toolContext.logger,
+        processManager: _toolContext.processManager,
+        xcode: _xcode,
+      );
 
   final SimControl _simControl;
+  final ToolContext _toolContext;
   final Xcode _xcode;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
 
-    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+    final cpuArch = CpuArch.fromHostPlatform(_toolContext.os.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
@@ -96,6 +95,7 @@ class IOSSimulatorUtils {
             simControl: _simControl,
             simulatorCategory: device.category,
             logger: _simControl._logger,
+            toolContext: _toolContext,
             cpuArch: cpuArch,
           );
         })
@@ -363,6 +363,7 @@ class IOSSimulator extends Device {
     required this._simControl,
     required this._cpuArch,
     required super.logger,
+    super.toolContext,
   }) : super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
@@ -403,7 +404,7 @@ class IOSSimulator extends Device {
   @override
   Future<CpuArch> get cpuArch async => _cpuArch;
 
-  final _logReaders = <IOSApp?, DeviceLogReader>{};
+  final _logReaders = <IOSApp?, _IOSSimulatorLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;
 
   @override
@@ -496,13 +497,25 @@ class IOSSimulator extends Device {
 
     ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
+      final _IOSSimulatorLogReader logReader = getLogReader(app: package);
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(app: package),
+        logReader,
         ipv6: debuggingOptions.ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         logger: globals.logger,
       );
+      // Launch the app only after the log stream is ready; otherwise the
+      // Dart VM Service URL it logs on startup can be missed.
+      const warningDelay = Duration(seconds: 30);
+      final timer = Timer(warningDelay, () {
+        globals.printError(
+          'The iOS simulator log stream did not start after ${warningDelay.inSeconds} seconds. '
+          'This is taking much longer than expected...',
+        );
+      });
+      await logReader._ready.future;
+      timer.cancel();
     }
 
     // Launch the updated application in the simulator.
@@ -569,6 +582,7 @@ class IOSSimulator extends Device {
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
+      toolContext: toolContext,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(
@@ -630,7 +644,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
+  _IOSSimulatorLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
   }
@@ -672,8 +686,11 @@ class IOSSimulator extends Device {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
-      usesIpv6: ipv6,
+      // Do not throw on error since DelegateVMServiceDiscoveryForAttach falls
+      // back to log-based protocol discovery.
+      throwOnError: false,
       useDeviceIPAsHost: false,
+      usesIpv6: ipv6,
     );
 
     return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
@@ -854,6 +871,14 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     onCancel: _stop,
   );
 
+  /// Completes once the log stream is ready to deliver events, or has exited.
+  ///
+  /// `log stream` is ready once it prints its first line (a "Filtering the log
+  /// data using ..." header).
+  ///
+  /// Recreated on every listen, since each one starts a new `log stream`.
+  var _ready = Completer<void>();
+
   @override
   @visibleForTesting
   StreamController<String> get linesController => _linesController;
@@ -869,10 +894,18 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   String get name => device.name;
 
   Future<void> _start() async {
+    // Use a local so that a previous process exiting late cannot complete it.
+    _ready = Completer<void>();
+    final Completer<void> ready = _ready;
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
       _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
-      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen((String line) {
+        if (!ready.isCompleted) {
+          ready.complete();
+        }
+        _onUnifiedLoggingLine(line);
+      });
       _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
     } else {
       // Fall back to syslog parsing.
@@ -894,6 +927,9 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     // cleanup in the callback.
     unawaited(
       _deviceProcess?.exitCode.whenComplete(() {
+        if (!ready.isCompleted) {
+          ready.complete();
+        }
         if (_linesController.hasListener) {
           _linesController.close();
         }

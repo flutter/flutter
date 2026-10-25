@@ -122,9 +122,7 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/routes_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
-    'packages/flutter/test/widgets/scrollbar_test.dart',
     'packages/flutter/test/widgets/heroes_test.dart',
-    'packages/flutter/test/widgets/drawer_test.dart',
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
     'packages/flutter/test/widgets/page_transitions_builder_test.dart',
@@ -280,39 +278,27 @@ class TestsCrossImportChecker {
     // Find any cross imports that are not in the known list.
     for (final MapEntry<CrossImportCheckedLibrary, CrossImportingFiles> entry
         in crossImportsPerLibrary.entries) {
-      final Set<File> unknownCupertinoImports = getUnknowns(
-        _knownCrossImports,
-        entry.value.cupertinoImports,
-        prefix: _flutterTestPrefix,
-      );
-      final Set<File> unknownMaterialImports = getUnknowns(
-        _knownCrossImports,
-        entry.value.materialImports,
-        prefix: _flutterTestPrefix,
-      );
-
-      if (unknownMaterialImports.isNotEmpty) {
-        valid = false;
-        foundError(
-          getImportError(
-            flutterRoot: flutterRoot,
-            files: unknownMaterialImports,
-            checkedLibrary: entry.key,
-            importStatement: LibraryCrossImportStatementType.material,
-          ).split('\n'),
+      // Report each import type separately, so that the error names the
+      // library that was actually imported (e.g. MaterialUI vs. Material).
+      for (final LibraryCrossImportStatementType importStatement
+          in LibraryCrossImportStatementType.values) {
+        final Set<File> unknownImports = getUnknowns(
+          _knownCrossImports,
+          entry.value[importStatement] ?? <File>{},
+          prefix: _flutterTestPrefix,
         );
-      }
 
-      if (unknownCupertinoImports.isNotEmpty) {
-        valid = false;
-        foundError(
-          getImportError(
-            flutterRoot: flutterRoot,
-            files: unknownCupertinoImports,
-            checkedLibrary: entry.key,
-            importStatement: LibraryCrossImportStatementType.cupertino,
-          ).split('\n'),
-        );
+        if (unknownImports.isNotEmpty) {
+          valid = false;
+          foundError(
+            getImportError(
+              flutterRoot: flutterRoot,
+              files: unknownImports,
+              checkedLibrary: entry.key,
+              importStatement: importStatement,
+            ).split('\n'),
+          );
+        }
       }
     }
 
@@ -322,9 +308,7 @@ class TestsCrossImportChecker {
     // See https://github.com/flutter/flutter/issues/177028.
     for (final MapEntry<CrossImportCheckedLibrary, CrossImportingFiles> entry
         in crossImportsPerLibrary.entries) {
-      final Set<File> crossImportsForLibrary = entry.value.cupertinoImports.union(
-        entry.value.materialImports,
-      );
+      final Set<File> crossImportsForLibrary = getAllCrossImportingFiles(entry.value);
       final Set<String> knownCrossImportsForLibrary = entry.key.knownCrossImports;
       final Set<String> fixedCrossImports = differencePaths(
         knownCrossImportsForLibrary,
