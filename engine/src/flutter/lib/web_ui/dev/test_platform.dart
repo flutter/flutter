@@ -84,8 +84,10 @@ class BrowserPlatform extends PlatformPlugin {
         // Serves source files from the engine src root for devtools debugging.
         .add(_createSourceHandler())
         // Serves files from the root of web_ui. Some tests download assets that are embedded
-        // directly in the test folder, such as test/html/image/sample_image1.png etc
-        .add(createStaticHandler(env.environment.webUiRootDir.path))
+        // directly in the test folder, such as test/html/image/sample_image1.png etc. The
+        // files may be symlinks into another tree (a Bazel runfiles tree lays the checkout
+        // that way), which the handler refuses unless told to serve them.
+        .add(createStaticHandler(env.environment.webUiRootDir.path, serveFilesOutsidePath: true))
         // Serves absolute package URLs (i.e. not /packages/* but /Users/user/*/hosted/pub.dartlang.org/*).
         // This handler goes last, after all more specific handlers failed to handle the request.
         .add(_createAbsolutePackageUrlHandler())
