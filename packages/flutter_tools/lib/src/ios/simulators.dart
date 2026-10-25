@@ -72,13 +72,12 @@ class IOSSimulatorUtils {
     required this._plistParser,
     required this._toolContext,
     required this._xcode,
-  }) : _simControl = SimControl(
-         logger: _toolContext.logger,
-         processManager: _toolContext.processManager,
-         xcode: _xcode,
-       );
+  }) {
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+    _simControl = SimControl(logger: logger, processManager: processManager, xcode: _xcode);
+  }
 
-  final SimControl _simControl;
+  late final SimControl _simControl;
   final Xcode _xcode;
   final Analytics _analytics;
   final PlistParser _plistParser;
@@ -95,8 +94,7 @@ class IOSSimulatorUtils {
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
         .map<IOSSimulator?>((BootedSimDevice device) {
-          final String? udid = device.udid;
-          final String? name = device.name;
+          final BootedSimDevice(:String? udid, :String? name) = device;
           if (udid == null) {
             logger.printTrace('Could not parse simulator udid');
             return null;
@@ -612,6 +610,7 @@ class IOSSimulator extends Device {
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
+      toolContext: toolContext,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(

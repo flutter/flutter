@@ -552,6 +552,7 @@ class IOSDevice extends Device {
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
+        toolContext: toolContext,
       );
       if (!buildResult.success) {
         logger.printError('Could not build the precompiled application for the device.');
@@ -837,6 +838,7 @@ class IOSDevice extends Device {
           project: FlutterProject.current(),
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
+          toolContext: toolContext,
         );
       }
     }
@@ -1218,6 +1220,7 @@ class IOSDevice extends Device {
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: toolContext,
       );
 
       final IosProject project = package.project;

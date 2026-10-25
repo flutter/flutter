@@ -221,11 +221,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       AndroidWorkflow: () =>
           AndroidWorkflow(androidSdkBuilder: () => globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
-        userMessages: globals.userMessages,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
         androidSdk: globals.androidSdk,
+        toolContext: const GlobalToolContext(),
       ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
@@ -414,23 +411,20 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
-        xcode: globals.xcode!,
+        analytics: globals.analytics,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
-        analytics: globals.analytics,
         templateRenderer: globals.templateRenderer,
         toolContext: const GlobalToolContext(),
+        xcode: globals.xcode!,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
+        toolContext: const GlobalToolContext(),
       ),
     },
   );
