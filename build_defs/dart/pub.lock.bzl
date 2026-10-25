@@ -16,6 +16,9 @@ reaches: each package's dependencies are here, for pub_package_config to
 walk. The packages of the other sources -- the Flutter SDK's own
 (sky_engine, which the engine builds) and the git ones -- are listed for
 the record; the Bazel side provides them from the tree or does without.
+PUB_LOCKS holds the same for each other pubspec.lock of the tree (a package
+resolved apart from the workspace), by its directory; a version that
+differs from the workspace's is a repository of its own, pub__<name>-<version>.
 """
 
 # name: (version, sha256 of the archive, the archive's URL, the names under
@@ -3180,4 +3183,766 @@ PUB_WORKSPACE = {
 PUB_OTHER_SOURCES = {
     "assets_for_android_views": "git",
     "sky_engine": "sdk",
+}
+
+# The tree's other locks, by the directory of each: the same three tables
+# (`hosted`, `packages`, `others`) for what that lock resolves.
+PUB_LOCKS = {
+    "engine/src/flutter/lib/web_ui": struct(
+        hosted = {
+            "_fe_analyzer_shared": struct(
+                version = "91.0.0",
+                sha256 = "c209688d9f5a5f26b2fb47a188131a6fb9e876ae9e47af3737c0b4f58a93470d",
+                url = "https://pub.dev/api/archives/_fe_analyzer_shared-91.0.0.tar.gz",
+                deps = [
+                    "meta",
+                ],
+            ),
+            "analyzer": struct(
+                version = "8.4.1",
+                sha256 = "f51c8499b35f9b26820cfe914828a6a98a94efd5cc78b37bb7d03debae3a1d08",
+                url = "https://pub.dev/api/archives/analyzer-8.4.1.tar.gz",
+                deps = [
+                    "_fe_analyzer_shared",
+                    "collection",
+                    "convert",
+                    "crypto",
+                    "glob",
+                    "meta",
+                    "package_config",
+                    "path",
+                    "pub_semver",
+                    "source_span",
+                    "watcher",
+                    "yaml",
+                ],
+            ),
+            "archive": struct(
+                version = "4.0.3",
+                sha256 = "528579c7e4579719f04b21eeeeddfd73a18b31dabc22766893b7d1be7f49b967",
+                url = "https://pub.dev/api/archives/archive-4.0.3.tar.gz",
+                deps = [
+                    "crypto",
+                    "path",
+                    "posix",
+                ],
+            ),
+            "args": struct(
+                version = "2.7.0",
+                sha256 = "d0481093c50b1da8910eb0bb301626d4d8eb7284aa739614d2b394ee09e3ea04",
+                url = "https://pub.dev/api/archives/args-2.7.0.tar.gz",
+                deps = [],
+            ),
+            "async": struct(
+                version = "2.13.1",
+                sha256 = "e2eb0491ba5ddb6177742d2da23904574082139b07c1e33b8503b9f46f3e1a37",
+                url = "https://pub.dev/api/archives/async-2.13.1.tar.gz",
+                deps = [
+                    "collection",
+                    "meta",
+                ],
+            ),
+            "boolean_selector": struct(
+                version = "2.1.2",
+                sha256 = "8aab1771e1243a5063b8b0ff68042d67334e3feab9e95b9490f9a6ebf73b42ea",
+                url = "https://pub.dev/api/archives/boolean_selector-2.1.2.tar.gz",
+                deps = [
+                    "source_span",
+                    "string_scanner",
+                ],
+            ),
+            "cli_config": struct(
+                version = "0.2.0",
+                sha256 = "ac20a183a07002b700f0c25e61b7ee46b23c309d76ab7b7640a028f18e4d99ec",
+                url = "https://pub.dev/api/archives/cli_config-0.2.0.tar.gz",
+                deps = [
+                    "args",
+                    "yaml",
+                ],
+            ),
+            "cli_util": struct(
+                version = "0.6.0",
+                sha256 = "89b8801ba49f8b593fbf2d3e59efd0f566c46cd4ba6837ae2610c72b52a0f899",
+                url = "https://pub.dev/api/archives/cli_util-0.6.0.tar.gz",
+                deps = [
+                    "ffi",
+                    "meta",
+                    "path",
+                ],
+            ),
+            "collection": struct(
+                version = "1.19.1",
+                sha256 = "2f5709ae4d3d59dd8f7cd309b4e023046b57d8a6c82130785d2b0e5868084e76",
+                url = "https://pub.dev/api/archives/collection-1.19.1.tar.gz",
+                deps = [],
+            ),
+            "convert": struct(
+                version = "3.1.2",
+                sha256 = "b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68",
+                url = "https://pub.dev/api/archives/convert-3.1.2.tar.gz",
+                deps = [
+                    "typed_data",
+                ],
+            ),
+            "coverage": struct(
+                version = "1.16.0",
+                sha256 = "ff89e37c19355194e279d26dafe8e4bece46c9ea63a30be4dc68214f5bc290d3",
+                url = "https://pub.dev/api/archives/coverage-1.16.0.tar.gz",
+                deps = [
+                    "args",
+                    "cli_config",
+                    "cli_util",
+                    "glob",
+                    "logging",
+                    "meta",
+                    "package_config",
+                    "path",
+                    "source_maps",
+                    "stack_trace",
+                    "vm_service",
+                    "yaml",
+                ],
+            ),
+            "crypto": struct(
+                version = "3.0.7",
+                sha256 = "c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf",
+                url = "https://pub.dev/api/archives/crypto-3.0.7.tar.gz",
+                deps = [
+                    "typed_data",
+                ],
+            ),
+            "csslib": struct(
+                version = "1.0.2",
+                sha256 = "09bad715f418841f976c77db72d5398dc1253c21fb9c0c7f0b0b985860b2d58e",
+                url = "https://pub.dev/api/archives/csslib-1.0.2.tar.gz",
+                deps = [
+                    "source_span",
+                ],
+            ),
+            "ffi": struct(
+                version = "2.2.0",
+                sha256 = "6d7fd89431262d8f3125e81b50d3847a091d846eafcd4fdb88dd06f36d705a45",
+                url = "https://pub.dev/api/archives/ffi-2.2.0.tar.gz",
+                deps = [],
+            ),
+            "file": struct(
+                version = "7.0.1",
+                sha256 = "a3b4f84adafef897088c160faf7dfffb7696046cb13ae90b508c2cbc95d3b8d4",
+                url = "https://pub.dev/api/archives/file-7.0.1.tar.gz",
+                deps = [
+                    "meta",
+                    "path",
+                ],
+            ),
+            "frontend_server_client": struct(
+                version = "4.1.0",
+                sha256 = "404dbf9bce29beafbe9dcb19219447b6f7d49900cd42b8d3b7af102b24508e25",
+                url = "https://pub.dev/api/archives/frontend_server_client-4.1.0.tar.gz",
+                deps = [
+                    "async",
+                    "package_config",
+                    "path",
+                ],
+            ),
+            "glob": struct(
+                version = "2.2.0",
+                sha256 = "218aeb56050c714f62a3182775320dfa04602b55074873e24e31bbd39bda96fb",
+                url = "https://pub.dev/api/archives/glob-2.2.0.tar.gz",
+                deps = [
+                    "async",
+                    "collection",
+                    "file",
+                    "path",
+                    "string_scanner",
+                ],
+            ),
+            "html": struct(
+                version = "0.15.5",
+                sha256 = "1fc58edeaec4307368c60d59b7e15b9d658b57d7f3125098b6294153c75337ec",
+                url = "https://pub.dev/api/archives/html-0.15.5.tar.gz",
+                deps = [
+                    "csslib",
+                    "source_span",
+                ],
+            ),
+            "http": struct(
+                version = "1.3.0",
+                sha256 = "fe7ab022b76f3034adc518fb6ea04a82387620e19977665ea18d30a1cf43442f",
+                url = "https://pub.dev/api/archives/http-1.3.0.tar.gz",
+                deps = [
+                    "async",
+                    "http_parser",
+                    "meta",
+                    "web",
+                ],
+            ),
+            "http_multi_server": struct(
+                version = "3.2.2",
+                sha256 = "aa6199f908078bb1c5efb8d8638d4ae191aac11b311132c3ef48ce352fb52ef8",
+                url = "https://pub.dev/api/archives/http_multi_server-3.2.2.tar.gz",
+                deps = [
+                    "async",
+                ],
+            ),
+            "http_parser": struct(
+                version = "4.1.2",
+                sha256 = "178d74305e7866013777bab2c3d8726205dc5a4dd935297175b19a23a2e66571",
+                url = "https://pub.dev/api/archives/http_parser-4.1.2.tar.gz",
+                deps = [
+                    "collection",
+                    "source_span",
+                    "string_scanner",
+                    "typed_data",
+                ],
+            ),
+            "image": struct(
+                version = "4.5.3",
+                sha256 = "13d3349ace88f12f4a0d175eb5c12dcdd39d35c4c109a8a13dfeb6d0bd9e31c3",
+                url = "https://pub.dev/api/archives/image-4.5.3.tar.gz",
+                deps = [
+                    "archive",
+                    "meta",
+                    "xml",
+                ],
+            ),
+            "io": struct(
+                version = "1.1.0",
+                sha256 = "2635216ca6a737e60de577ffa1a48a0bec76ca8a62917cfc1bb88c14c570646f",
+                url = "https://pub.dev/api/archives/io-1.1.0.tar.gz",
+                deps = [
+                    "meta",
+                    "path",
+                    "string_scanner",
+                ],
+            ),
+            "js": struct(
+                version = "0.7.2",
+                sha256 = "53385261521cc4a0c4658fd0ad07a7d14591cf8fc33abbceae306ddb974888dc",
+                url = "https://pub.dev/api/archives/js-0.7.2.tar.gz",
+                deps = [],
+            ),
+            "logging": struct(
+                version = "1.3.0",
+                sha256 = "c8245ada5f1717ed44271ed1c26b8ce85ca3228fd2ffdb75468ab01979309d61",
+                url = "https://pub.dev/api/archives/logging-1.3.0.tar.gz",
+                deps = [],
+            ),
+            "matcher": struct(
+                version = "0.12.17",
+                sha256 = "dc58c723c3c24bf8d3e2d3ad3f2f9d7bd9cf43ec6feaa64181775e60190153f2",
+                url = "https://pub.dev/api/archives/matcher-0.12.17.tar.gz",
+                deps = [
+                    "async",
+                    "meta",
+                    "stack_trace",
+                    "term_glyph",
+                    "test_api",
+                ],
+            ),
+            "meta": struct(
+                version = "1.19.0",
+                sha256 = "307249ce4ff29d58a18e97f6345f539382eb9c9c29ecda628900f31de0443dd9",
+                url = "https://pub.dev/api/archives/meta-1.19.0.tar.gz",
+                deps = [],
+            ),
+            "mime": struct(
+                version = "2.1.0",
+                sha256 = "bd47de35f07e27267e69c8c8b22edf9473bfee170a60d60fcc93730c5144b7f6",
+                url = "https://pub.dev/api/archives/mime-2.1.0.tar.gz",
+                deps = [],
+            ),
+            "node_preamble": struct(
+                version = "2.0.2",
+                sha256 = "6e7eac89047ab8a8d26cf16127b5ed26de65209847630400f9aefd7cd5c730db",
+                url = "https://pub.dev/api/archives/node_preamble-2.0.2.tar.gz",
+                deps = [],
+            ),
+            "package_config": struct(
+                version = "2.2.0",
+                sha256 = "f096c55ebb7deb7e384101542bfba8c52696c1b56fca2eb62827989ef2353bbc",
+                url = "https://pub.dev/api/archives/package_config-2.2.0.tar.gz",
+                deps = [
+                    "path",
+                ],
+            ),
+            "path": struct(
+                version = "1.9.1",
+                sha256 = "75cca69d1490965be98c73ceaea117e8a04dd21217b37b292c9ddbec0d955bc5",
+                url = "https://pub.dev/api/archives/path-1.9.1.tar.gz",
+                deps = [],
+            ),
+            "petitparser": struct(
+                version = "7.1.0",
+                sha256 = "2f1564aadb14215e478563b5406cb80729d022158c01dc50c96013c2f7eb4790",
+                url = "https://pub.dev/api/archives/petitparser-7.1.0.tar.gz",
+                deps = [
+                    "collection",
+                    "meta",
+                ],
+            ),
+            "platform": struct(
+                version = "3.2.0",
+                sha256 = "a36d119c13416516a7b5913fbe8af8531e11633d784c550b2125f76c758524ec",
+                url = "https://pub.dev/api/archives/platform-3.2.0.tar.gz",
+                deps = [
+                    "meta",
+                ],
+            ),
+            "pool": struct(
+                version = "1.5.3",
+                sha256 = "4177f68c237ea2128d1bee66ac17b2ce05ba3dbaafcbdd54c5d40a39d0b6b11c",
+                url = "https://pub.dev/api/archives/pool-1.5.3.tar.gz",
+                deps = [
+                    "async",
+                    "stack_trace",
+                ],
+            ),
+            "posix": struct(
+                version = "6.5.2",
+                sha256 = "bc1bad54ad2b735816e31f8d4600cfde6c7839975085ddfbca48b6c9f7c4044e",
+                url = "https://pub.dev/api/archives/posix-6.5.2.tar.gz",
+                deps = [
+                    "ffi",
+                    "meta",
+                    "path",
+                ],
+            ),
+            "process": struct(
+                version = "5.0.6",
+                sha256 = "4242ba3508d37e01808bdf71ad1d5bb93a8d671bf2e7450e6b1b353fb0808891",
+                url = "https://pub.dev/api/archives/process-5.0.6.tar.gz",
+                deps = [
+                    "file",
+                    "path",
+                    "platform",
+                ],
+            ),
+            "process_runner": struct(
+                version = "4.2.4",
+                sha256 = "edb4a3764852cce0cdcb4db7a5c3c4adbad36e3cffeec9766edef5aeb9986db6",
+                url = "https://pub.dev/api/archives/process_runner-4.2.4.tar.gz",
+                deps = [
+                    "args",
+                    "async",
+                    "file",
+                    "meta",
+                    "path",
+                    "platform",
+                    "process",
+                    "test",
+                ],
+            ),
+            "pub_semver": struct(
+                version = "2.2.1",
+                sha256 = "261236774e8b1d69cfc6b9eabbc96c40f25e7a2d6b171f3385d4f65d5734fb24",
+                url = "https://pub.dev/api/archives/pub_semver-2.2.1.tar.gz",
+                deps = [
+                    "collection",
+                ],
+            ),
+            "quiver": struct(
+                version = "3.2.2",
+                sha256 = "ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2",
+                url = "https://pub.dev/api/archives/quiver-3.2.2.tar.gz",
+                deps = [
+                    "matcher",
+                ],
+            ),
+            "shelf": struct(
+                version = "1.4.3",
+                sha256 = "e75e9cf311d7fd712048038cc17c25199c38536c20330d53e7db058b543d5a48",
+                url = "https://pub.dev/api/archives/shelf-1.4.3.tar.gz",
+                deps = [
+                    "async",
+                    "collection",
+                    "http_parser",
+                    "path",
+                    "stack_trace",
+                    "stream_channel",
+                ],
+            ),
+            "shelf_packages_handler": struct(
+                version = "3.0.2",
+                sha256 = "89f967eca29607c933ba9571d838be31d67f53f6e4ee15147d5dc2934fee1b1e",
+                url = "https://pub.dev/api/archives/shelf_packages_handler-3.0.2.tar.gz",
+                deps = [
+                    "path",
+                    "shelf",
+                    "shelf_static",
+                ],
+            ),
+            "shelf_static": struct(
+                version = "1.2.0",
+                sha256 = "480504af9e5323899c5be26a4f6c2fc4437d50954d39842f0290f4ae733d57b4",
+                url = "https://pub.dev/api/archives/shelf_static-1.2.0.tar.gz",
+                deps = [
+                    "convert",
+                    "http_parser",
+                    "mime",
+                    "path",
+                    "shelf",
+                ],
+            ),
+            "shelf_web_socket": struct(
+                version = "3.0.0",
+                sha256 = "3632775c8e90d6c9712f883e633716432a27758216dfb61bd86a8321c0580925",
+                url = "https://pub.dev/api/archives/shelf_web_socket-3.0.0.tar.gz",
+                deps = [
+                    "shelf",
+                    "stream_channel",
+                    "web_socket_channel",
+                ],
+            ),
+            "source_map_stack_trace": struct(
+                version = "2.1.2",
+                sha256 = "c0713a43e323c3302c2abe2a1cc89aa057a387101ebd280371d6a6c9fa68516b",
+                url = "https://pub.dev/api/archives/source_map_stack_trace-2.1.2.tar.gz",
+                deps = [
+                    "path",
+                    "source_maps",
+                    "stack_trace",
+                ],
+            ),
+            "source_maps": struct(
+                version = "0.10.14",
+                sha256 = "14c2945847669b44089bb1222f66873d7ff7103c58911917f2a63c5a62327898",
+                url = "https://pub.dev/api/archives/source_maps-0.10.14.tar.gz",
+                deps = [
+                    "source_span",
+                ],
+            ),
+            "source_span": struct(
+                version = "1.10.2",
+                sha256 = "56a02f1f4cd1a2d96303c0144c93bd6d909eea6bee6bf5a0e0b685edbd4c47ab",
+                url = "https://pub.dev/api/archives/source_span-1.10.2.tar.gz",
+                deps = [
+                    "collection",
+                    "path",
+                    "term_glyph",
+                ],
+            ),
+            "stack_trace": struct(
+                version = "1.12.1",
+                sha256 = "8b27215b45d22309b5cddda1aa2b19bdfec9df0e765f2de506401c071d38d1b1",
+                url = "https://pub.dev/api/archives/stack_trace-1.12.1.tar.gz",
+                deps = [
+                    "path",
+                ],
+            ),
+            "stream_channel": struct(
+                version = "2.1.4",
+                sha256 = "969e04c80b8bcdf826f8f16579c7b14d780458bd97f56d107d3950fdbeef059d",
+                url = "https://pub.dev/api/archives/stream_channel-2.1.4.tar.gz",
+                deps = [
+                    "async",
+                ],
+            ),
+            "string_scanner": struct(
+                version = "1.4.1",
+                sha256 = "921cd31725b72fe181906c6a94d987c78e3b98c2e205b397ea399d4054872b43",
+                url = "https://pub.dev/api/archives/string_scanner-1.4.1.tar.gz",
+                deps = [
+                    "source_span",
+                ],
+            ),
+            "sync_http": struct(
+                version = "0.3.1",
+                sha256 = "7f0cd72eca000d2e026bcd6f990b81d0ca06022ef4e32fb257b30d3d1014a961",
+                url = "https://pub.dev/api/archives/sync_http-0.3.1.tar.gz",
+                deps = [],
+            ),
+            "term_glyph": struct(
+                version = "1.2.2",
+                sha256 = "7f554798625ea768a7518313e58f83891c7f5024f88e46e7182a4558850a4b8e",
+                url = "https://pub.dev/api/archives/term_glyph-1.2.2.tar.gz",
+                deps = [],
+            ),
+            "test": struct(
+                version = "1.26.3",
+                sha256 = "75906bf273541b676716d1ca7627a17e4c4070a3a16272b7a3dc7da3b9f3f6b7",
+                url = "https://pub.dev/api/archives/test-1.26.3.tar.gz",
+                deps = [
+                    "analyzer",
+                    "async",
+                    "boolean_selector",
+                    "collection",
+                    "coverage",
+                    "http_multi_server",
+                    "io",
+                    "js",
+                    "matcher",
+                    "node_preamble",
+                    "package_config",
+                    "path",
+                    "pool",
+                    "shelf",
+                    "shelf_packages_handler",
+                    "shelf_static",
+                    "shelf_web_socket",
+                    "source_span",
+                    "stack_trace",
+                    "stream_channel",
+                    "test_api",
+                    "test_core",
+                    "typed_data",
+                    "web_socket_channel",
+                    "webkit_inspection_protocol",
+                    "yaml",
+                ],
+            ),
+            "test_api": struct(
+                version = "0.7.7",
+                sha256 = "ab2726c1a94d3176a45960b6234466ec367179b87dd74f1611adb1f3b5fb9d55",
+                url = "https://pub.dev/api/archives/test_api-0.7.7.tar.gz",
+                deps = [
+                    "async",
+                    "boolean_selector",
+                    "collection",
+                    "meta",
+                    "source_span",
+                    "stack_trace",
+                    "stream_channel",
+                    "string_scanner",
+                    "term_glyph",
+                ],
+            ),
+            "test_core": struct(
+                version = "0.6.12",
+                sha256 = "0cc24b5ff94b38d2ae73e1eb43cc302b77964fbf67abad1e296025b78deb53d0",
+                url = "https://pub.dev/api/archives/test_core-0.6.12.tar.gz",
+                deps = [
+                    "analyzer",
+                    "args",
+                    "async",
+                    "boolean_selector",
+                    "collection",
+                    "coverage",
+                    "frontend_server_client",
+                    "glob",
+                    "io",
+                    "meta",
+                    "package_config",
+                    "path",
+                    "pool",
+                    "source_map_stack_trace",
+                    "source_maps",
+                    "source_span",
+                    "stack_trace",
+                    "stream_channel",
+                    "test_api",
+                    "vm_service",
+                    "yaml",
+                ],
+            ),
+            "typed_data": struct(
+                version = "1.4.0",
+                sha256 = "f9049c039ebfeb4cf7a7104a675823cd72dba8297f264b6637062516699fa006",
+                url = "https://pub.dev/api/archives/typed_data-1.4.0.tar.gz",
+                deps = [
+                    "collection",
+                ],
+            ),
+            "vm_service": struct(
+                version = "15.4.0",
+                sha256 = "89b11d62e1040ee681af3b4f1c97a803ecbf010c6e8b9c5896ee5b08c3bf7b78",
+                url = "https://pub.dev/api/archives/vm_service-15.4.0.tar.gz",
+                deps = [],
+            ),
+            "watcher": struct(
+                version = "1.1.1",
+                sha256 = "69da27e49efa56a15f8afe8f4438c4ec02eff0a117df1b22ea4aad194fe1c104",
+                url = "https://pub.dev/api/archives/watcher-1.1.1.tar.gz",
+                deps = [
+                    "async",
+                    "path",
+                ],
+            ),
+            "web": struct(
+                version = "1.1.1",
+                sha256 = "868d88a33d8a87b18ffc05f9f030ba328ffefba92d6c127917a2ba740f9cfe4a",
+                url = "https://pub.dev/api/archives/web-1.1.1.tar.gz",
+                deps = [],
+            ),
+            "web_socket": struct(
+                version = "1.0.1",
+                sha256 = "34d64019aa8e36bf9842ac014bb5d2f5586ca73df5e4d9bf5c936975cae6982c",
+                url = "https://pub.dev/api/archives/web_socket-1.0.1.tar.gz",
+                deps = [
+                    "web",
+                ],
+            ),
+            "web_socket_channel": struct(
+                version = "3.0.3",
+                sha256 = "d645757fb0f4773d602444000a8131ff5d48c9e47adfe9772652dd1a4f2d45c8",
+                url = "https://pub.dev/api/archives/web_socket_channel-3.0.3.tar.gz",
+                deps = [
+                    "async",
+                    "crypto",
+                    "stream_channel",
+                    "web",
+                    "web_socket",
+                ],
+            ),
+            "webdriver": struct(
+                version = "3.1.0",
+                sha256 = "2f3a14ca026957870cfd9c635b83507e0e51d8091568e90129fbf805aba7cade",
+                url = "https://pub.dev/api/archives/webdriver-3.1.0.tar.gz",
+                deps = [
+                    "matcher",
+                    "path",
+                    "stack_trace",
+                    "sync_http",
+                ],
+            ),
+            "webkit_inspection_protocol": struct(
+                version = "1.2.1",
+                sha256 = "87d3f2333bb240704cd3f1c6b5b7acd8a10e7f0bc28c28dcf14e782014f4a572",
+                url = "https://pub.dev/api/archives/webkit_inspection_protocol-1.2.1.tar.gz",
+                deps = [
+                    "logging",
+                ],
+            ),
+            "xml": struct(
+                version = "6.6.1",
+                sha256 = "971043b3a0d3da28727e40ed3e0b5d18b742fa5a68665cca88e74b7876d5e025",
+                url = "https://pub.dev/api/archives/xml-6.6.1.tar.gz",
+                deps = [
+                    "collection",
+                    "meta",
+                    "petitparser",
+                ],
+            ),
+            "yaml": struct(
+                version = "3.1.3",
+                sha256 = "b9da305ac7c39faa3f030eccd175340f968459dae4af175130b3fc47e40d76ce",
+                url = "https://pub.dev/api/archives/yaml-3.1.3.tar.gz",
+                deps = [
+                    "collection",
+                    "source_span",
+                    "string_scanner",
+                ],
+            ),
+        },
+        packages = {
+            "engine_repo_tools": struct(
+                path = "engine/src/flutter/tools/pkg/engine_repo_tools",
+                deps = [
+                    "meta",
+                    "path",
+                ],
+                dev_deps = [
+                    "test",
+                ],
+            ),
+            "git_repo_tools": struct(
+                path = "engine/src/flutter/tools/pkg/git_repo_tools",
+                deps = [
+                    "meta",
+                    "path",
+                    "process",
+                    "process_runner",
+                ],
+                dev_deps = [
+                    "process_fakes",
+                    "test",
+                ],
+            ),
+            "skia_gold_client": struct(
+                path = "engine/src/flutter/testing/skia_gold_client",
+                deps = [
+                    "args",
+                    "crypto",
+                    "engine_repo_tools",
+                    "git_repo_tools",
+                    "meta",
+                    "path",
+                    "process",
+                ],
+                dev_deps = [
+                    "process_fakes",
+                    "test",
+                ],
+            ),
+            "ui": struct(
+                path = "engine/src/flutter/lib/web_ui",
+                deps = [
+                    "meta",
+                    "web_locale_keymap",
+                    "web_test_fonts",
+                ],
+                dev_deps = [
+                    "archive",
+                    "args",
+                    "async",
+                    "convert",
+                    "crypto",
+                    "html",
+                    "http",
+                    "http_multi_server",
+                    "image",
+                    "package_config",
+                    "path",
+                    "pool",
+                    "quiver",
+                    "shelf",
+                    "shelf_packages_handler",
+                    "shelf_static",
+                    "shelf_web_socket",
+                    "skia_gold_client",
+                    "stack_trace",
+                    "stream_channel",
+                    "test",
+                    "test_api",
+                    "test_core",
+                    "typed_data",
+                    "watcher",
+                    "web_engine_tester",
+                    "web_socket_channel",
+                    "web_test_utils",
+                    "webdriver",
+                    "webkit_inspection_protocol",
+                    "yaml",
+                ],
+            ),
+            "web_engine_tester": struct(
+                path = "engine/src/flutter/web_sdk/web_engine_tester",
+                deps = [
+                    "stack_trace",
+                    "stream_channel",
+                    "test",
+                    "ui",
+                    "webkit_inspection_protocol",
+                ],
+                dev_deps = [],
+            ),
+            "web_locale_keymap": struct(
+                path = "engine/src/flutter/third_party/web_locale_keymap",
+                deps = [],
+                dev_deps = [
+                    "test",
+                ],
+            ),
+            "web_test_fonts": struct(
+                path = "engine/src/flutter/third_party/web_test_fonts",
+                deps = [],
+                dev_deps = [
+                    "args",
+                    "path",
+                ],
+            ),
+            "web_test_utils": struct(
+                path = "engine/src/flutter/web_sdk/web_test_utils",
+                deps = [
+                    "image",
+                    "path",
+                    "skia_gold_client",
+                ],
+                dev_deps = [
+                    "test",
+                ],
+            ),
+        },
+        others = {
+        },
+    ),
 }
