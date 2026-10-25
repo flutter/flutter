@@ -221,11 +221,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       AndroidWorkflow: () =>
           AndroidWorkflow(androidSdkBuilder: () => globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
-        userMessages: globals.userMessages,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
         androidSdk: globals.androidSdk,
+        toolContext: const GlobalToolContext(),
       ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
@@ -416,26 +413,23 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
-        xcode: globals.xcode!,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        analytics: globals.analytics,
+        cocoaPods: globals.cocoaPods!,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
-        analytics: globals.analytics,
-        cocoaPods: globals.cocoaPods!,
         plistParser: globals.plistParser,
         templateRenderer: globals.templateRenderer,
         toolContext: const GlobalToolContext(),
+        xcode: globals.xcode!,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
+        toolContext: const GlobalToolContext(),
       ),
     },
   );

@@ -246,6 +246,7 @@ class IOSCoreDeviceLauncher {
         project: project.parent,
         buildInfo: debuggingOptions.buildInfo,
         configurationBuildDir: bundle.parent.absolute.path,
+        toolContext: _toolContext,
       );
 
       debugProject = XcodeDebugProject(

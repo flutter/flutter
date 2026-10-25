@@ -503,7 +503,10 @@ void main() {
 
   group('Simulator screenshot', () {
     testWithoutContext('supports screenshots', () async {
-      final xcode = Xcode.test(processManager: FakeProcessManager.any());
+      final xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
       final Logger logger = BufferLogger.test();
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -705,7 +708,10 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       mockIosProject = FakeIosProject();
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
     });
 
     group('syslog', () {
@@ -751,7 +757,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             xcode: xcode,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -805,7 +815,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             xcode: xcode,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -872,7 +886,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             xcode: xcode,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -965,7 +983,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             xcode: xcode,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -1037,7 +1059,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             xcode: xcode,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final completer = Completer<void>();
@@ -1112,7 +1138,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             xcode: xcode,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -1189,7 +1219,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
 
       final fakeProcessManagerBadSimctl = FakeProcessManager.list(<FakeCommand>[
         kWhichSysctlCommand,
@@ -1200,7 +1233,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           exitCode: 1,
         ),
       ]);
-      xcodeBadSimctl = Xcode.test(processManager: fakeProcessManagerBadSimctl);
+      xcodeBadSimctl = Xcode.test(
+        processManager: fakeProcessManagerBadSimctl,
+        toolContext: FakeToolContext.macosHost(processManager: fakeProcessManagerBadSimctl),
+      );
       logger = BufferLogger.test();
       simControl = SimControl(logger: logger, processManager: fakeProcessManager, xcode: xcode);
       simControlBadSimctl = SimControl(
@@ -1643,7 +1679,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
       testPlistParser = FakePlistParser();
       logger = BufferLogger.test();
     });

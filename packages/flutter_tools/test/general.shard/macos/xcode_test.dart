@@ -673,7 +673,7 @@ void main() {
         xcode = Xcode.test(
           processManager: FakeProcessManager.any(),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-            processManager: FakeProcessManager.any(),
+            toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
             version: null, // Not installed.
           ),
         );
@@ -727,7 +727,10 @@ void main() {
           processManager: FakeProcessManager.any(),
           shutdownHooks: shutdownHooks,
         ),
-        xcode: Xcode.test(processManager: FakeProcessManager.any()),
+        xcode: Xcode.test(
+          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        ),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         coreDeviceControl: FakeIOSCoreDeviceControl(),
@@ -760,7 +763,10 @@ void main() {
       late FakeIOSCoreDeviceControl coreDeviceControl;
 
       setUp(() {
-        xcode = Xcode.test(processManager: FakeProcessManager.any());
+        xcode = Xcode.test(
+          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        );
         fileSystem = MemoryFileSystem.test();
         coreDeviceControl = FakeIOSCoreDeviceControl();
         fakeAnalytics = getInitializedFakeAnalyticsInstance(

@@ -367,6 +367,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    toolContext: toolContext,
     printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {

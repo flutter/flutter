@@ -679,6 +679,7 @@ class SpawnPlugin extends PlatformPlugin {
   ) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Config config,
       :FileSystem fs,
       :Logger logger,
       :Platform platform,
@@ -699,7 +700,7 @@ class SpawnPlugin extends PlatformPlugin {
     ) = spec;
 
     final Directory buildDirectory = fs.directory(
-      fs.path.join(flutterProject.directory.path, getBuildDirectory()),
+      fs.path.join(flutterProject.directory.path, getBuildDirectory(config, fs)),
     );
     final Directory isolateSpawningTesterDirectory = buildDirectory.childDirectory(
       'isolate_spawning_tester',
@@ -806,7 +807,7 @@ class SpawnPlugin extends PlatformPlugin {
       'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (nativeAssetsBuilder != null && platform.isWindows)
         'PATH':
-            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${platform.environment['PATH']}',
+            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject, toolContext: _toolContext)};${platform.environment['PATH']}',
     };
 
     logger.printTrace(
