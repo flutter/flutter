@@ -23,6 +23,70 @@ namespace {
 
 class FlViewGtk4AccessibilityTest : public flutter::testing::LinuxTest {};
 
+TEST_F(FlViewGtk4AccessibilityTest, CheckAndPressStatesFollowControlRole) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.label = "Control";
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  const auto check = [&](bool has_checked, GtkAccessibleTristate checked,
+                         bool has_pressed, GtkAccessibleTristate pressed) {
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    EXPECT_EQ(
+        gtk_test_accessible_has_state(native, GTK_ACCESSIBLE_STATE_CHECKED),
+        has_checked);
+    EXPECT_EQ(
+        gtk_test_accessible_has_state(native, GTK_ACCESSIBLE_STATE_PRESSED),
+        has_pressed);
+    if (has_checked) {
+      gtk_test_accessible_assert_state(native, GTK_ACCESSIBLE_STATE_CHECKED,
+                                       checked);
+    }
+    if (has_pressed) {
+      gtk_test_accessible_assert_state(native, GTK_ACCESSIBLE_STATE_PRESSED,
+                                       pressed);
+    }
+  };
+  check(false, GTK_ACCESSIBLE_TRISTATE_FALSE, false,
+        GTK_ACCESSIBLE_TRISTATE_FALSE);
+  flags.is_toggled = kFlutterTristateTrue;
+  check(false, GTK_ACCESSIBLE_TRISTATE_FALSE, true,
+        GTK_ACCESSIBLE_TRISTATE_TRUE);
+  flags.is_toggled = kFlutterTristateFalse;
+  check(false, GTK_ACCESSIBLE_TRISTATE_FALSE, true,
+        GTK_ACCESSIBLE_TRISTATE_FALSE);
+  // A checkbox's own checked state wins even with inconsistent toggle flags.
+  flags.is_toggled = kFlutterTristateTrue;
+  flags.is_checked = kFlutterCheckStateFalse;
+  check(true, GTK_ACCESSIBLE_TRISTATE_FALSE, false,
+        GTK_ACCESSIBLE_TRISTATE_FALSE);
+  flags.is_checked = kFlutterCheckStateMixed;
+  check(true, GTK_ACCESSIBLE_TRISTATE_MIXED, false,
+        GTK_ACCESSIBLE_TRISTATE_FALSE);
+  flags.is_in_mutually_exclusive_group = true;
+  flags.is_checked = kFlutterCheckStateTrue;
+  check(true, GTK_ACCESSIBLE_TRISTATE_TRUE, false,
+        GTK_ACCESSIBLE_TRISTATE_FALSE);
+  flags.is_checked = kFlutterCheckStateNone;
+  flags.is_toggled = kFlutterTristateNone;
+  check(false, GTK_ACCESSIBLE_TRISTATE_FALSE, false,
+        GTK_ACCESSIBLE_TRISTATE_FALSE);
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, ExplicitFocusStateWorksWithoutActions) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";

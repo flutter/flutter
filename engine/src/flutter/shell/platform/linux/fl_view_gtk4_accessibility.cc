@@ -1527,11 +1527,10 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
         self, GTK_ACCESSIBLE_STATE_EXPANDED,
         flags->is_expanded == kFlutterTristateTrue);
   }
-  if (flags->is_checked != kFlutterCheckStateNone ||
-      flags->is_toggled != kFlutterTristateNone) {
+  if (role == GTK_ACCESSIBLE_ROLE_CHECKBOX ||
+      role == GTK_ACCESSIBLE_ROLE_RADIO) {
     GtkAccessibleTristate checked_value = GTK_ACCESSIBLE_TRISTATE_FALSE;
-    if (flags->is_checked == kFlutterCheckStateTrue ||
-        flags->is_toggled == kFlutterTristateTrue) {
+    if (flags->is_checked == kFlutterCheckStateTrue) {
       checked_value = GTK_ACCESSIBLE_TRISTATE_TRUE;
     } else if (flags->is_checked == kFlutterCheckStateMixed) {
       checked_value = GTK_ACCESSIBLE_TRISTATE_MIXED;
@@ -1541,7 +1540,9 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   } else {
     fl_gtk4_accessible_node_reset_state(self, GTK_ACCESSIBLE_STATE_CHECKED);
   }
-  if (flags->is_toggled != kFlutterTristateNone) {
+  // Match GtkToggleButton: pressed describes toggle buttons; checked describes
+  // checkboxes and radios. Publishing both adds spurious AT-SPI capabilities.
+  if (role == kFlGtkAccessibleRoleToggleButton) {
     fl_gtk4_accessible_node_set_state_tristate(
         self, GTK_ACCESSIBLE_STATE_PRESSED,
         flags->is_toggled == kFlutterTristateTrue

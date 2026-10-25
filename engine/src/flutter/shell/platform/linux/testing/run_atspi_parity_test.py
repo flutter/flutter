@@ -199,13 +199,19 @@ def run_backend(Atspi, binary, output, require_password_privacy=False):
     nodes = descendants(root)
     expected = {
         'Parity root', 'Activate', 'Checked', 'Editor', 'Password', 'Slider', 'Scroll region',
-        'Nested group', 'Finish comparison', 'Unicode'
+        'Nested group', 'Finish comparison', 'Unicode', 'Toggle'
     }
     if nodes.keys() != expected:
       raise RuntimeError(f'Incomplete parity tree: {sorted(nodes)}')
     before = snapshot(Atspi, nodes)
     if require_password_privacy and before['Scroll region']['role'] != 'grouping':
       raise RuntimeError('GTK4 must expose a named scroll container as a grouping')
+    if require_password_privacy:
+      toggle = before['Toggle']
+      if toggle['role'] != 'toggle button' or 'pressed' not in toggle['states']:
+        raise RuntimeError('Toggle button lost its role or pressed state')
+      if {'checked', 'checkable'} & set(toggle['states']):
+        raise RuntimeError('Toggle button advertises checkbox states')
     password = protected_value_checks(Atspi, nodes['Password'], 'fixture-private-value')
     if require_password_privacy:
       require_protected(password)

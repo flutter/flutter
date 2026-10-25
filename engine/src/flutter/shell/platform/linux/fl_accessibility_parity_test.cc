@@ -51,13 +51,13 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
           gtk_get_major_version(), gtk_get_minor_version(),
           gtk_get_micro_version(), glib_major_version, glib_minor_version,
           glib_micro_version);
-  FlutterSemanticsFlags flags[10] = {};
-  FlutterSemanticsNode2 semantics[10] = {};
-  FlutterSemanticsNode2* nodes[10] = {};
+  FlutterSemanticsFlags flags[11] = {};
+  FlutterSemanticsNode2 semantics[11] = {};
+  FlutterSemanticsNode2* nodes[11] = {};
   const char* names[] = {"Parity root",   "Activate",     "Checked",
                          "Editor",        "Password",     "Slider",
                          "Scroll region", "Nested group", "Finish comparison",
-                         "Unicode"};
+                         "Unicode",       "Toggle"};
   for (size_t i = 0; i < G_N_ELEMENTS(semantics); i++) {
     flags[i].is_enabled = kFlutterTristateTrue;
     semantics[i].id = i;
@@ -67,7 +67,7 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
                          static_cast<double>(i * 20 + 20)};
     nodes[i] = &semantics[i];
   }
-  int32_t children[] = {1, 2, 3, 4, 5, 6, 7};
+  int32_t children[] = {1, 2, 3, 4, 5, 6, 7, 10};
   int32_t nested_children[] = {8, 9};
   semantics[0].child_count = G_N_ELEMENTS(children);
   semantics[0].children_in_traversal_order = children;
@@ -77,6 +77,8 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
   semantics[1].actions = semantics[2].actions = semantics[8].actions =
       kFlutterSemanticsActionTap;
   flags[2].is_checked = kFlutterCheckStateTrue;
+  flags[10].is_toggled = kFlutterTristateTrue;
+  semantics[10].actions = kFlutterSemanticsActionTap;
   flags[3].is_text_field = flags[4].is_text_field = flags[9].is_text_field =
       true;
   flags[4].is_obscured = true;
