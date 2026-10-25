@@ -24,10 +24,35 @@ export 'package:flutter/services.dart' show KeyEvent;
 /// For text entry, consider using a [EditableText], which integrates with
 /// on-screen keyboards and input method editors (IMEs).
 ///
+/// ## Why a [FocusNode] is required
+///
+/// Key events are delivered through the focus tree: each event is first sent to
+/// the [FocusNode] that has primary focus, and then to each of its ancestors in
+/// turn until one of them handles it. A [KeyboardListener] inserts its
+/// [focusNode] into the focus tree with a [Focus] widget, so [onKeyEvent] is
+/// only called when [focusNode] has focus, either because it has primary focus
+/// itself or because one of its descendants does, and no descendant handled
+/// the event first.
+///
+/// To start receiving events, the [focusNode] has to gain focus. Set
+/// [autofocus] to true, or call [FocusNode.requestFocus]. The [focusNode] is
+/// owned by the caller: create it in a [State] object and dispose of it in
+/// [State.dispose].
+///
+/// [KeyboardListener] never handles the events it sees; it always lets them
+/// continue to propagate to its ancestors.
+///
+/// To receive every key event regardless of focus, register a handler with
+/// [HardwareKeyboard.addHandler] instead of using this widget.
+///
 /// See also:
 ///
 ///  * [EditableText], which should be used instead of this widget for text
 ///    entry.
+///  * [Focus], which can also handle key events, and can stop them from
+///    propagating further by returning [KeyEventResult.handled].
+///  * [HardwareKeyboard], which can notify handlers of every key event,
+///    independently of focus.
 class KeyboardListener extends StatelessWidget {
   /// Creates a widget that receives keyboard events.
   ///
@@ -46,6 +71,9 @@ class KeyboardListener extends StatelessWidget {
   });
 
   /// Controls whether this widget has keyboard focus.
+  ///
+  /// [onKeyEvent] is only called while this node, or one of its descendants,
+  /// has focus. See the class documentation for details.
   final FocusNode focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}
