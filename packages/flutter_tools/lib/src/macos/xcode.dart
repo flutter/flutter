@@ -4,20 +4,16 @@
 
 import 'dart:async';
 
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
@@ -55,26 +51,13 @@ class Xcode {
   /// buffer logger, and test [XcodeProjectInterpreter].
   @visibleForTesting
   factory Xcode.test({
-    required ProcessManager processManager,
+    required ToolContext toolContext,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
-    Platform? platform,
-    FileSystem? fileSystem,
-    String flutterRoot = '',
-    Logger? logger,
   }) {
-    platform ??= FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
-    logger ??= BufferLogger.test();
-    fileSystem ??= MemoryFileSystem.test();
     return Xcode(
-      toolContext: _XcodeTestToolContext(
-        fs: fileSystem,
-        flutterRoot: flutterRoot,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      ),
+      toolContext: toolContext,
       xcodeProjectInterpreter:
-          xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
+          xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(toolContext: toolContext),
     );
   }
 
@@ -291,48 +274,6 @@ class Xcode {
     final String versionString = runResult.stdout.trim();
     return Version.parse(versionString);
   }
-}
-
-class _XcodeTestToolContext implements ToolContext {
-  _XcodeTestToolContext({
-    required this.fs,
-    required String flutterRoot,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
-  }) : cache = Cache.test(
-         fileSystem: fs,
-         flutterRoot: flutterRoot,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
-       processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       userMessages = UserMessages();
-
-  @override
-  final Cache cache;
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Logger logger;
-
-  @override
-  final Platform platform;
-
-  @override
-  final ProcessManager processManager;
-
-  @override
-  final ProcessUtils processUtils;
-
-  @override
-  final UserMessages userMessages;
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Determines the iOS [EnvironmentType] from [sdkroot].

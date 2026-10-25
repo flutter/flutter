@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -441,13 +442,14 @@ and ensure "Debug executable" is checked in the "Info" tab.
     required BuildInfo buildInfo,
     String? mainPath,
     required String configurationBuildDir,
+    required ToolContext toolContext,
   }) async {
     await updateGeneratedXcodeProperties(
       project: project,
       buildInfo: buildInfo,
-      flutterRoot: _xcode.flutterRoot,
       targetOverride: mainPath,
       configurationBuildDir: configurationBuildDir,
+      toolContext: toolContext,
     );
   }
 }

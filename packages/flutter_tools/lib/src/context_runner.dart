@@ -217,11 +217,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       AndroidWorkflow: () =>
           AndroidWorkflow(androidSdkBuilder: () => globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
-        userMessages: globals.userMessages,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
         androidSdk: globals.androidSdk,
+        toolContext: const GlobalToolContext(),
       ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
@@ -321,12 +318,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         cache: globals.cache,
       ),
       HotRunnerConfig: () => HotRunnerConfig(),
-      IOSSimulatorUtils: () => IOSSimulatorUtils(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        xcode: globals.xcode!,
-        operatingSystemUtils: globals.os,
-      ),
+      IOSSimulatorUtils: () =>
+          IOSSimulatorUtils(toolContext: const GlobalToolContext(), xcode: globals.xcode!),
       IOSWorkflow: () => IOSWorkflow(
         featureFlags: featureFlags,
         xcode: globals.xcode!,
@@ -405,28 +398,19 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       XCDevice: () => XCDevice(
-        processManager: globals.processManager,
-        logger: globals.logger,
-        artifacts: globals.artifacts!,
-        cache: globals.cache,
-        platform: globals.platform,
-        xcode: globals.xcode!,
+        analytics: globals.analytics,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
           logger: globals.logger,
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
-        fileSystem: globals.fs,
-        analytics: globals.analytics,
-        shutdownHooks: globals.shutdownHooks,
+        toolContext: const GlobalToolContext(),
+        xcode: globals.xcode!,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
+        toolContext: const GlobalToolContext(),
       ),
     },
   );

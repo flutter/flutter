@@ -151,7 +151,13 @@ class WebTestCompiler {
       fs: fs,
       projectRootPath: projectDirectory.absolute.path,
     );
-    if (output == null || output.errorCount > 0) {
+    final bool compileFailed = output == null || output.errorCount > 0;
+    sendDdcCompileAnalytics(
+      deprecatedJsInterop: buildInfo.deprecatedJsInterop,
+      command: 'test',
+      succeeded: !compileFailed,
+    );
+    if (compileFailed) {
       throwToolExit('Failed to compile');
     }
     // Cache the output kernel file to speed up subsequent compiles.
