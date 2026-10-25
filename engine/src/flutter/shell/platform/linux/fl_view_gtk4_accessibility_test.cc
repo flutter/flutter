@@ -53,6 +53,122 @@ TEST_F(FlViewGtk4AccessibilityTest, ViewNameUsesOnlyApplicationSemantics) {
                                                 GTK_ACCESSIBLE_PROPERTY_LABEL));
 }
 
+TEST_F(FlViewGtk4AccessibilityTest,
+       StructuralContainersPreserveChildTraversal) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  int32_t children[] = {1};
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.child_count = 1;
+  root.children_in_traversal_order = children;
+  FlutterSemanticsNode2 child = {};
+  child.id = 1;
+  child.label = "Content";
+  FlutterSemanticsNode2* nodes[] = {&root, &child};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 2;
+  update.nodes = nodes;
+
+  for (const char* label : {"", "Related controls", ""}) {
+    root.label = label;
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    EXPECT_EQ(gtk_accessible_get_accessible_role(native),
+              label[0] == '\0' ? GTK_ACCESSIBLE_ROLE_GENERIC
+                               : GTK_ACCESSIBLE_ROLE_GROUP);
+    g_autoptr(GtkAccessible) native_child =
+        fl_gtk_runtime_accessible_get_first_accessible_child(native);
+    ASSERT_NE(native_child, nullptr);
+    gtk_test_accessible_assert_property(
+        native_child, GTK_ACCESSIBLE_PROPERTY_LABEL, "Content");
+    EXPECT_EQ(
+        gtk_accessible_get_accessible_role(GTK_ACCESSIBLE(view->render_area)),
+        GTK_ACCESSIBLE_ROLE_GENERIC);
+  }
+}
+
+TEST_F(FlViewGtk4AccessibilityTest, ValueOnlyLeafExposesText) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.value = "42 results";
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) native =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_NE(native, nullptr);
+  EXPECT_EQ(gtk_accessible_get_accessible_role(native),
+            GTK_ACCESSIBLE_ROLE_LABEL);
+  gtk_test_accessible_assert_property(native, GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                      "42 results");
+
+  flags.is_obscured = true;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) protected_node =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_NE(protected_node, nullptr);
+  EXPECT_FALSE(gtk_test_accessible_has_property(protected_node,
+                                                GTK_ACCESSIBLE_PROPERTY_LABEL));
+  EXPECT_FALSE(gtk_test_accessible_has_property(
+      protected_node, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT));
+}
+
+TEST_F(FlViewGtk4AccessibilityTest, ButtonRoleTakesPrecedenceOverPresentation) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  flags.is_button = true;
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.label = "Open photo";
+  root.actions = kFlutterSemanticsActionTap;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  for (bool is_image : {true, false}) {
+    flags.is_image = is_image;
+    flags.is_header = !is_image;
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    EXPECT_EQ(gtk_accessible_get_accessible_role(native),
+              GTK_ACCESSIBLE_ROLE_BUTTON);
+    gtk_test_accessible_assert_property(native, GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                        "Open photo");
+  }
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, ScrollContainersPreserveRoleAcrossUpdates) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
@@ -1222,7 +1338,7 @@ TEST_F(FlViewGtk4AccessibilityTest, RoleChangesReplaceAndDetachNativeNodes) {
   ASSERT_NE(new_root, nullptr);
   ASSERT_NE(new_root, old_root);
   EXPECT_EQ(gtk_accessible_get_accessible_role(old_root),
-            GTK_ACCESSIBLE_ROLE_GROUP);
+            GTK_ACCESSIBLE_ROLE_GENERIC);
   EXPECT_EQ(gtk_accessible_get_accessible_role(new_root),
             GTK_ACCESSIBLE_ROLE_HEADING);
   g_autoptr(GtkAccessible) exported_root =

@@ -217,15 +217,6 @@ static GtkAccessibleRole fl_view_gtk4_accessibility_get_role(
   if (flags->is_text_field) {
     return GTK_ACCESSIBLE_ROLE_TEXT_BOX;
   }
-  if (flags->is_header || semantics->heading_level > 0) {
-    return GTK_ACCESSIBLE_ROLE_HEADING;
-  }
-  if (flags->is_image) {
-    return GTK_ACCESSIBLE_ROLE_IMG;
-  }
-  if (flags->is_link) {
-    return GTK_ACCESSIBLE_ROLE_LINK;
-  }
   if (flags->is_in_mutually_exclusive_group &&
       flags->is_checked != kFlutterCheckStateNone) {
     return GTK_ACCESSIBLE_ROLE_RADIO;
@@ -242,6 +233,15 @@ static GtkAccessibleRole fl_view_gtk4_accessibility_get_role(
   if (flags->is_button) {
     return GTK_ACCESSIBLE_ROLE_BUTTON;
   }
+  if (flags->is_header || semantics->heading_level > 0) {
+    return GTK_ACCESSIBLE_ROLE_HEADING;
+  }
+  if (flags->is_image) {
+    return GTK_ACCESSIBLE_ROLE_IMG;
+  }
+  if (flags->is_link) {
+    return GTK_ACCESSIBLE_ROLE_LINK;
+  }
   // Scroll containers may temporarily have no exported children or available
   // directional actions. Keep their container role at scroll boundaries and
   // as children appear. Explicit control roles above still take precedence.
@@ -253,10 +253,17 @@ static GtkAccessibleRole fl_view_gtk4_accessibility_get_role(
     // accessible names, even when the label property is supplied.
     return GTK_ACCESSIBLE_ROLE_GROUP;
   }
+  const bool has_label =
+      semantics->label != nullptr && semantics->label[0] != '\0';
   if (semantics->child_count > 0) {
-    return GTK_ACCESSIBLE_ROLE_GROUP;
+    // Layout-only containers preserve traversal without claiming a semantic
+    // grouping. Named containers still need GROUP to expose their names.
+    return has_label ? GTK_ACCESSIBLE_ROLE_GROUP : GTK_ACCESSIBLE_ROLE_GENERIC;
   }
-  if (semantics->label != nullptr && semantics->label[0] != '\0') {
+  if (has_label || (!flags->is_obscured && semantics->value != nullptr &&
+                    semantics->value[0] != '\0')) {
+    // Value-only leaves use the value as their name below. GENERIC prohibits
+    // names and would hide that text from assistive technology.
     return GTK_ACCESSIBLE_ROLE_LABEL;
   }
   return GTK_ACCESSIBLE_ROLE_GENERIC;
