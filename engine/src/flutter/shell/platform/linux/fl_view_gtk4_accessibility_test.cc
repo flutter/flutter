@@ -23,6 +23,63 @@ namespace {
 
 class FlViewGtk4AccessibilityTest : public flutter::testing::LinuxTest {};
 
+TEST_F(FlViewGtk4AccessibilityTest, ExplicitFocusStateWorksWithoutActions) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.label = "Keyboard focus target";
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  const auto check = [&](bool focusable, bool focused) {
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    auto* iface = reinterpret_cast<FlGtkAccessibleInterface4_10*>(
+        GTK_ACCESSIBLE_GET_IFACE(native));
+    EXPECT_EQ(iface->get_platform_state(
+                  native, FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSABLE),
+              focusable);
+    EXPECT_EQ(iface->get_platform_state(
+                  native, FL_GTK_ACCESSIBLE_PLATFORM_STATE_FOCUSED),
+              focused);
+    EXPECT_EQ(iface->get_platform_state(
+                  native, FL_GTK_ACCESSIBLE_PLATFORM_STATE_ACTIVE),
+              focused);
+  };
+  check(false, false);
+  flags.is_focused = kFlutterTristateFalse;
+  check(true, false);
+  flags.is_focused = kFlutterTristateTrue;
+  check(true, true);
+  flags.is_hidden = true;
+  check(false, false);
+  flags.is_hidden = false;
+  check(true, true);
+  flags.is_enabled = kFlutterTristateFalse;
+  check(false, false);
+  flags.is_enabled = kFlutterTristateTrue;
+  flags.is_focused = kFlutterTristateFalse;
+  check(true, false);
+  flags.is_focused = kFlutterTristateNone;
+  check(false, false);
+  flags.is_button = true;
+  root.actions = kFlutterSemanticsActionTap;
+  check(true, false);
+  flags.is_hidden = true;
+  check(false, false);
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, ViewNameUsesOnlyApplicationSemantics) {
   g_autoptr(FlView) view = fl_view_new(project);
   g_object_ref_sink(view);

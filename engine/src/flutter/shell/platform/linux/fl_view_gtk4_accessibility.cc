@@ -1402,7 +1402,6 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
 
   const FlutterSemanticsFlags* flags = &semantics->flags;
   const gboolean is_enabled = flags->is_enabled != kFlutterTristateFalse;
-  const gboolean is_focused = flags->is_focused == kFlutterTristateTrue;
   const gboolean is_hidden = flags->is_hidden;
   const gboolean is_required = flags->is_required == kFlutterTristateTrue;
   const gboolean is_read_only = flags->is_text_field && flags->is_read_only;
@@ -1430,12 +1429,16 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
             (!action.moves_cursor || self->text_actions_enabled));
   }
 
+  // A non-null focus state also marks passive Focus widgets as focusable.
+  // Hidden nodes must not advertise input focus or keyboard focusability.
   const gboolean is_focusable =
-      is_enabled &&
-      (semantics->actions != 0 || flags->is_button || flags->is_text_field ||
-       flags->is_link || flags->is_slider ||
-       flags->is_checked != kFlutterCheckStateNone ||
+      is_enabled && !is_hidden &&
+      (flags->is_focused != kFlutterTristateNone || semantics->actions != 0 ||
+       flags->is_button || flags->is_text_field || flags->is_link ||
+       flags->is_slider || flags->is_checked != kFlutterCheckStateNone ||
        flags->is_toggled != kFlutterTristateNone);
+  const gboolean is_focused =
+      is_focusable && flags->is_focused == kFlutterTristateTrue;
   fl_gtk4_accessible_node_set_platform_states(self, is_focusable, is_focused,
                                               is_focused);
   self->has_bounds = TRUE;
