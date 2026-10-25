@@ -464,6 +464,13 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/prebuilts/linux-x64/esbuild",
         build_file = _OVERLAYS + ":esbuild/BUILD.esbuild.bazel",
     ),
+    # The Noto fonts the web engine's unit tests fall back to (DEPS:
+    # flutter/flutter_font_fallbacks; felt lays them as assets/fallback_fonts).
+    # Data, not a tool, but a CIPD package of DEPS all the same.
+    "google_fonts_for_unit_tests": struct(
+        path = "engine/src/flutter/third_party/google_fonts_for_unit_tests",
+        build_file = _OVERLAYS + ":google_fonts_for_unit_tests/BUILD.google_fonts_for_unit_tests.bazel",
+    ),
     "gn": struct(
         path = "engine/src/flutter/third_party/gn",
         build_file = _OVERLAYS + ":gn/BUILD.gn_tool.bazel",
