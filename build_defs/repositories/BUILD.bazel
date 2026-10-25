@@ -5,7 +5,9 @@
 # The repositories the build fetches: extensions.bzl (the synced_deps module
 # extension over deps.lock.bzl, which gen_deps.dart writes from DEPS) and
 # repositories.bzl (its repository rules), flutter_sdk_cache.bzl (the SDK
-# cache's downloads the tests read: the Material fonts, the Gradle wrapper).
+# cache's downloads the tests read: the Material fonts, the Gradle wrapper),
+# browsers.bzl (Chrome for Testing at the web engine's pinned version, for
+# the tool's web tests).
 
 package(default_visibility = ["//visibility:public"])
 
