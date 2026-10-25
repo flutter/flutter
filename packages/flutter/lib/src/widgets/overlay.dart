@@ -1084,7 +1084,8 @@ mixin _RenderTheaterMixin on RenderBox {
     assert(!debugNeedsLayout);
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (final RenderBox child in _childrenInPaintOrder()) {
-      if (child is _RenderDeferredLayoutBox && child._isPendingLayout) {
+      // A kept-alive layout surrogate may leave its deferred child unlaid out.
+      if (child is _RenderDeferredLayoutBox && child.needsLayout) {
         continue;
       }
       assert(!child.debugNeedsLayout);
@@ -1143,6 +1144,7 @@ mixin _RenderTheaterMixin on RenderBox {
     var isHit = false;
     while (!isHit && iterator.moveNext()) {
       final RenderBox child = iterator.current;
+      // Hit testing between frames can use stale geometry, but requires a size.
       if (child is _RenderDeferredLayoutBox && !child.hasSize) {
         continue;
       }
@@ -1163,6 +1165,7 @@ mixin _RenderTheaterMixin on RenderBox {
   void paint(PaintingContext context, Offset offset) {
     for (final RenderBox child in _childrenInPaintOrder()) {
       final childParentData = child.parentData! as StackParentData;
+      // RenderObject._paintWithContext skips deferred children needing layout.
       context.paintChild(child, childParentData.offset + offset);
     }
   }
@@ -1402,6 +1405,10 @@ class _RenderTheater extends RenderBox
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (final RenderBox child in _childrenInPaintOrder()) {
+      // Match the actual baseline traversal when deferred layout is pending.
+      if (child is _RenderDeferredLayoutBox && child.needsLayout) {
+        continue;
+      }
       baselineOffset = baselineOffset.minOf(
         BaselineOffset(
           _RenderTheaterMixin.baselineForChild(
@@ -1582,11 +1589,12 @@ class _RenderTheater extends RenderBox
       visitor(child);
       final childParentData = child.parentData! as _TheaterParentData;
 
-      childParentData.visitOverlayPortalChildrenOnOverlayEntry((RenderObject child) {
-        if (child is _RenderDeferredLayoutBox && child._isPendingLayout) {
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry((RenderObject overlayChild) {
+        // Semantics collection requires up-to-date layout.
+        if (overlayChild is _RenderDeferredLayoutBox && overlayChild.needsLayout) {
           return;
         }
-        visitor(child);
+        visitor(overlayChild);
       });
       child = childParentData.nextSibling;
     }
@@ -2616,14 +2624,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     assert(debugNeedsLayout == _needsLayout);
     return _needsLayout;
   }
-
-  // A deferred child can remain attached when its layout surrogate is moved to
-  // a sliver keep-alive bucket before the surrogate is laid out.
-  // Baseline and semantics require up-to-date layout, while hit testing can use
-  // a stale size but must skip a child with no size. Painting needs no special
-  // handling because RenderObject._paintWithContext skips children that need
-  // layout.
-  bool get _isPendingLayout => needsLayout;
 
   bool _needsLayout = true;
   @override

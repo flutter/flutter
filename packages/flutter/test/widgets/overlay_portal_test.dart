@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/constants.dart';
@@ -3081,16 +3079,20 @@ void main() {
                 builder: (BuildContext context) => Center(
                   child: SizedBox(
                     height: 400.0,
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: 20,
-                      itemBuilder: (BuildContext context, int index) => index == 3
-                          ? _KeepAliveOverlayPortalItem(
-                              onOverlayHit: () {
-                                overlayHitCount += 1;
-                              },
-                            )
-                          : SizedBox(height: 250.0, child: Text('Item $index')),
+                    // Let debug baseline verification check the overlay child
+                    // without asking the viewport for an unsupported baseline.
+                    child: IgnoreBaseline(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: 20,
+                        itemBuilder: (BuildContext context, int index) => index == 3
+                            ? _KeepAliveOverlayPortalItem(
+                                onOverlayHit: () {
+                                  overlayHitCount += 1;
+                                },
+                              )
+                            : SizedBox(height: 250.0, child: Text('Item $index')),
+                      ),
                     ),
                   ),
                 ),
@@ -3764,11 +3766,12 @@ class _KeepAliveOverlayPortalItemState extends State<_KeepAliveOverlayPortalItem
                 height: 50.0,
                 child: Semantics(
                   label: _KeepAliveOverlayPortalItem.overlayLabel,
+                  excludeSemantics: true,
                   child: Listener(
                     key: _KeepAliveOverlayPortalItem.overlayKey,
                     behavior: HitTestBehavior.opaque,
                     onPointerDown: (PointerDownEvent event) => widget.onOverlayHit(),
-                    child: const _PaintOrder(),
+                    child: const _PaintOrder(child: Text('Overlay baseline')),
                   ),
                 ),
               ),
@@ -3793,7 +3796,7 @@ class _KeepAliveOverlayPortalItemState extends State<_KeepAliveOverlayPortalItem
 OverlayEntry _buildOverlayEntry(WidgetBuilder builder) => OverlayEntry(builder: builder);
 
 class _PaintOrder extends SingleChildRenderObjectWidget {
-  const _PaintOrder();
+  const _PaintOrder({super.child});
   static List<_PaintOrder> paintOrder = <_PaintOrder>[];
 
   void onPaint() => paintOrder.add(this);
