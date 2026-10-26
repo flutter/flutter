@@ -414,11 +414,12 @@ embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/annotations-23.0.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/collection-1.1.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/core-1.13.1.jar",
-  "//flutter/third_party/android_embedding_dependencies/lib/core-1.10.3.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/core-common-2.0.3.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/core-common-2.2.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/core-runtime-2.2.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/customview-1.0.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/exifinterface-1.4.1.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/feature-delivery-2.1.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/fragment-1.7.1.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/kotlin-stdlib-1.8.22.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/kotlin-stdlib-common-1.8.22.jar",
@@ -440,6 +441,8 @@ embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/viewpager-1.0.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/window-1.2.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/window-java-1.2.0.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/play-services-basement-18.1.0.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/play-services-tasks-18.0.2.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/relinker-1.4.5.jar",
 ]
 
