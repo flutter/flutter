@@ -49,13 +49,13 @@ class GenericVariants {
 
   /// Defaults are created ahead of time rather than on first use, so they are
   /// logged as eagerly created with the pipeline library.
-  void SetDefault(const Context& context,
+  void SetDefault(PipelineLibrary& pipeline_library,
                   const ContentContextOptions& options,
                   std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
     default_options_ = options;
     if (pipeline) {
       if (std::optional<PipelineDescriptor> desc = pipeline->GetDescriptor()) {
-        context.GetPipelineLibrary()->LogPipelineCreation(*desc);
+        pipeline_library.LogPipelineCreation(*desc);
       }
       Set(options, std::move(pipeline));
     }
@@ -119,10 +119,10 @@ class Variants : public GenericVariants {
     GenericVariants::Set(options, std::move(pipeline));
   }
 
-  void SetDefault(const Context& context,
+  void SetDefault(PipelineLibrary& pipeline_library,
                   const ContentContextOptions& options,
                   std::unique_ptr<PipelineHandleT> pipeline) {
-    GenericVariants::SetDefault(context, options, std::move(pipeline));
+    GenericVariants::SetDefault(pipeline_library, options, std::move(pipeline));
   }
 
   void CreateDefault(const Context& context,
@@ -137,7 +137,7 @@ class Variants : public GenericVariants {
     }
     options.ApplyToPipelineDescriptor(*desc);
     desc_ = desc;
-    SetDefault(context, options,
+    SetDefault(*context.GetPipelineLibrary(), options,
                std::make_unique<PipelineHandleT>(context, desc_,
                                                  /*async=*/true));
   }
@@ -713,7 +713,7 @@ ContentContext::ContentContext(
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
     pipelines_->clip.SetDefault(
-        *context_, options,
+        *context_->GetPipelineLibrary(), options,
         std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
