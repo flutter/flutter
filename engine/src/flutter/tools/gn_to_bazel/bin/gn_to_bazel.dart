@@ -242,6 +242,9 @@ Future<int> run(List<String> arguments) async {
       buildifier: buildifier,
       check: check,
     );
+    // felt's configuration as the Starlark table lib/web_ui/BUILD.bazel's
+    // web_ui_tests call reads (lib/src/felt_config.dart).
+    failures += await _feltOutputs(root, buildifier: buildifier, check: check);
   }
   final String? depfile = options.option('depfile');
   if (depfile != null) {
@@ -253,7 +256,7 @@ Future<int> run(List<String> arguments) async {
     stdout.writeln(
       '${inputs.length} generated BUILD.bazel file(s) up to date; '
       '${mirroredLists.length} hand-written list(s) match their GN files'
-      '${options.rest.isEmpty && outDir == null ? "; the builders' configurations and install targets are current" : ''}',
+      '${options.rest.isEmpty && outDir == null ? "; the builders' configurations and install targets, and lib/web_ui's felt_config.bzl, are current" : ''}',
     );
   }
   return failures == 0 ? 0 : 1;
@@ -320,6 +323,38 @@ Future<int> _builderOutputs(
     }
   }
   return failures;
+}
+
+/// Writes (or, with [check], compares) lib/web_ui/felt_config.bzl from
+/// lib/web_ui/test/felt_config.yaml; returns the number of failures.
+Future<int> _feltOutputs(String root, {required String? buildifier, required bool check}) async {
+  final String webUiDir = p.join(root, 'flutter/lib/web_ui');
+  final yaml = File(p.join(webUiDir, 'test/felt_config.yaml'));
+  final bzl = File(p.join(webUiDir, 'felt_config.bzl'));
+  final String relative = p.relative(bzl.path, from: root);
+  String content;
+  try {
+    content = FeltConfig.parse(yaml.readAsStringSync()).toStarlark();
+  } on FormatException catch (e) {
+    stderr.writeln('error: ${p.relative(yaml.path, from: root)}: ${e.message}');
+    return 1;
+  }
+  if (buildifier != null) {
+    content = await _format(buildifier, content, type: 'bzl');
+  }
+  if (check) {
+    if (!bzl.existsSync() || bzl.readAsStringSync() != content) {
+      stderr.writeln(
+        '$relative is out of date with respect to flutter/lib/web_ui/test/felt_config.yaml; '
+        'rerun tools/gn_to_bazel',
+      );
+      return 1;
+    }
+    return 0;
+  }
+  bzl.writeAsStringSync(content);
+  stdout.writeln('flutter/lib/web_ui/test/felt_config.yaml -> $relative');
+  return 0;
 }
 
 /// `--repository=@skia=//flutter/third_party/skia`, with the packages of
@@ -391,8 +426,8 @@ Future<String?> _findOnPath(String name) async {
   return which.exitCode == 0 ? (which.stdout as String).trim() : null;
 }
 
-Future<String> _format(String buildifier, String content) async {
-  final Process process = await Process.start(buildifier, <String>['-type=build']);
+Future<String> _format(String buildifier, String content, {String type = 'build'}) async {
+  final Process process = await Process.start(buildifier, <String>['-type=$type']);
   process.stdin.write(content);
   await process.stdin.close();
   final String formatted = await process.stdout.transform(const SystemEncoding().decoder).join();

@@ -57,7 +57,14 @@ ninja targets, into GN's `--target-dir` or the directory `tools/gn` names
 for the flags, and a `<build>_tests` suite over the Bazel suites that
 stand for its `run_tests.py` types (`runTestsTypeSuites`;
 `runTestsEngineSuites` is the `engine` type's executables by name, resolved
-among the converted tests); both files are covered by `--check`.
+among the converted tests); both files are covered by `--check`. The same
+run reads `lib/web_ui/test/felt_config.yaml`, the web engine's test
+configuration (`lib/src/felt_config.dart`, which parses it as felt's own
+`dev/felt_config.dart` does and rejects a dangling reference by name), and
+writes `lib/web_ui/felt_config.bzl`: `FELT_CONFIG`, the five tables as one
+Starlark dict, from which `lib/web_ui/BUILD.bazel`'s one `web_ui_tests` call
+(build_defs/web/web_ui_tests.bzl) declares the bundles, the tests per file
+and suite, and the suites; `--check` covers it too.
 
 By default the converter assumes the Linux x64 *host* and leaves the
 *target* open (`generationAssumptions` in `bazel_mapping.dart`): the host
