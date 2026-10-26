@@ -153,6 +153,10 @@ std::optional<std::u16string> TextInputManager::GetString(int type) const {
   if (window_handle_ == nullptr) {
     return std::nullopt;
   }
+  return ReadImmString(type);
+}
+
+std::optional<std::u16string> TextInputManager::ReadImmString(int type) const {
   ImmContext imm_context(window_handle_);
   if (imm_context.IsValid()) {
     // Read the composing string length.

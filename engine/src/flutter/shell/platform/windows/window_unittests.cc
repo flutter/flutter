@@ -4,6 +4,7 @@
 
 #include <array>
 
+#include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/testing/mock_direct_manipulation.h"
 #include "flutter/shell/platform/windows/testing/mock_text_input_manager.h"
 #include "flutter/shell/platform/windows/testing/mock_window.h"
@@ -19,6 +20,25 @@ using testing::Return;
 
 namespace flutter {
 namespace testing {
+
+namespace {
+
+// Runs the real TextInputManager logic, mocking only the strings read from IMM.
+class MockImmTextInputManager : public TextInputManager {
+ public:
+  MockImmTextInputManager() = default;
+  ~MockImmTextInputManager() override = default;
+
+  MOCK_METHOD(std::optional<std::u16string>,
+              ReadImmString,
+              (int),
+              (const, override));
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockImmTextInputManager);
+};
+
+}  // namespace
 
 TEST(MockWindow, CreateDestroy) {
   MockWindow window;
@@ -269,6 +289,58 @@ TEST(MockWindow, OnImeCompositionResultWithoutCompositionIsText) {
       .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
+  window.InjectWindowMessage(WM_IME_ENDCOMPOSITION, 0, 0);
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/140537.
+//
+// Once a composition has ended, the IME window is no longer active. A bare
+// space typed next arrives as a result string without any
+// WM_IME_STARTCOMPOSITION and must still be read and delivered as text.
+TEST(MockWindow, OnImeCompositionResultAfterPreviousCompositionIsText) {
+  auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
+  auto* text_input_manager = new MockImmTextInputManager();
+  std::unique_ptr<TextInputManager> text_input_manager_ptr(text_input_manager);
+  MockWindow window(std::move(windows_proc_table),
+                    std::move(text_input_manager_ptr));
+  EXPECT_CALL(*text_input_manager, ReadImmString(GCS_COMPSTR))
+      .WillRepeatedly(
+          Return(std::optional<std::u16string>(std::u16string(u"가"))));
+  EXPECT_CALL(*text_input_manager, ReadImmString(GCS_RESULTSTR))
+      .WillOnce(Return(std::optional<std::u16string>(std::u16string(u"가 "))))
+      .WillOnce(Return(std::optional<std::u16string>(std::u16string(u" "))));
+
+  // The result string is queued behind both WM_IME_ENDCOMPOSITION messages.
+  EXPECT_CALL(window, Win32PeekMessage(_, WM_IME_COMPOSITION,
+                                       WM_IME_COMPOSITION, PM_NOREMOVE))
+      .Times(2)
+      .WillRepeatedly([](LPMSG message, UINT, UINT, UINT) {
+        message->message = WM_IME_COMPOSITION;
+        message->lParam = GCS_RESULTSTR;
+        return TRUE;
+      });
+
+  {
+    InSequence dummy;
+    EXPECT_CALL(window, OnComposeBegin()).Times(1);
+    EXPECT_CALL(window, OnComposeChange(std::u16string(u"가"), 1)).Times(1);
+    EXPECT_CALL(window, OnComposeChange(std::u16string(u"가 "), 2)).Times(1);
+    EXPECT_CALL(window, OnComposeCommit()).Times(1);
+    EXPECT_CALL(window, OnComposeEnd()).Times(1);
+    EXPECT_CALL(window, OnText(std::u16string(u" "))).Times(1);
+    EXPECT_CALL(window, OnComposeEnd()).Times(1);
+  }
+  ON_CALL(window, OnImeComposition)
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
+  EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(3);
+
+  // "가" followed by a space ends the composition.
+  window.InjectWindowMessage(WM_IME_STARTCOMPOSITION, 0, 0);
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
+  window.InjectWindowMessage(WM_IME_ENDCOMPOSITION, 0, 0);
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
+  // A second space with nothing being composed.
   window.InjectWindowMessage(WM_IME_ENDCOMPOSITION, 0, 0);
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
 }
