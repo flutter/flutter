@@ -131,6 +131,12 @@ use_repo(flutter_sdk_cache, "gradle_wrapper", "material_fonts")
 browsers = use_extension("//build_defs/repositories:browsers.bzl", "browsers")
 use_repo(browsers, "chrome", "firefox")
 
+# The system libraries those browsers load, from Debian's packages at the
+# build sysroot's versions rather than from the host
+# (build_defs/repositories/debian_runtime.bzl; the lock file beside it).
+debian_runtime = use_extension("//build_defs/repositories:debian_runtime.bzl", "debian_runtime")
+use_repo(debian_runtime, "sysroot_linux_x64_runtime")
+
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
 # found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
 register_toolchains(

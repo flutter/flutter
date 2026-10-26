@@ -3,8 +3,40 @@
 # found in the LICENSE file.
 
 # The web engine's rules: wasm.bzl (the Emscripten modules: wasm_module and
-# its link), esbuild.bzl (flutter.js bundled by esbuild) and web_sdk.bzl
-# (the flutter_web_sdk tree: sdk_rewriter's libraries, the platform
-# kernels, the DDC compilations).
+# its link), esbuild.bzl (flutter.js bundled by esbuild), web_sdk.bzl (the
+# flutter_web_sdk tree: sdk_rewriter's libraries, the platform kernels, the
+# DDC compilations), web_ui_tests.bzl (lib/web_ui's tests under felt) and
+# browser_launcher.bzl (the pinned browsers with the build's libraries).
+
+load(":browser_launcher.bzl", "browser_libraries")
 
 package(default_visibility = ["//visibility:public"])
+
+# The system libraries the browsers the tests drive load (GTK, NSS, X11,
+# ALSA, D-Bus, fontconfig, Mesa, ...): the runtime sysroot's by default --
+# Debian's packages at the build sysroot's versions, pinned
+# (build_defs/repositories/debian_runtime.bzl) -- put on LD_LIBRARY_PATH by
+# browser_launcher's script, with Mesa's drivers and GLVND's EGL vendor
+# named to their loaders; the host's with
+# `--//build_defs/web:browser_libraries=//build_defs/web:host_libraries`
+# (nothing set). The C library and the X display are the host's either way
+# (browser_launcher.bzl). label_flag is Bazel's own.
+label_flag(
+    name = "browser_libraries",
+    build_setting_default = ":sysroot_libraries",
+)
+
+browser_libraries(
+    name = "sysroot_libraries",
+    directories = ["@sysroot_linux_x64_runtime//:libraries"],
+    environment = {
+        "@sysroot_linux_x64_runtime//:dri": "LIBGL_DRIVERS_PATH",
+        "@sysroot_linux_x64_runtime//:egl_vendors": "__EGL_VENDOR_LIBRARY_DIRS",
+    },
+    font_configuration = "@sysroot_linux_x64_runtime//:fontconfig_conf_d",
+    fonts = ["@sysroot_linux_x64_runtime//:fonts"],
+)
+
+browser_libraries(
+    name = "host_libraries",
+)

@@ -749,8 +749,9 @@ engine's `lib/web_ui/dev/package_lock.yaml` pins, fetched as `@chrome` by
 `build_defs/repositories/browsers.bzl` together with its chromedriver, what
 CI's `chrome_and_driver` dependency holds -- as `CHROME_EXECUTABLE`, and
 `browser_driver` puts the driver's directory on PATH, so the tests drive the
-pinned browser wherever they run and not the host's. Chrome itself loads the
-host's X11, NSS, GTK and audio libraries (the sandbox leaves `/usr` readable).
+pinned browser wherever they run and not the host's; Chrome's system
+libraries (X11, NSS, GTK, ...) come from the runtime sysroot through the
+same launcher the web engine's tests use (the next section).
 
 ```sh
 bazel test //:framework_tests //:tool_tests //:dart_tests   # everything below, the root's suites
@@ -870,8 +871,88 @@ and whole. What the BUILD file still says is this host's: the browsers
 files a suite leaves out, the files that need the network. A new suite,
 bundle or set is an edit to felt_config.yaml and a run of the converter.
 
+The browsers' system libraries come from the build, not the host. Chrome
+and Firefox ship their own libraries but load the platform's from the
+system -- GTK, NSS, X11, ALSA, D-Bus, fontconfig, some eighty shared
+objects (`LD_DEBUG=libs`) -- and a test took them from whatever the host
+had. The build sysroot the engine compiles against (`@sysroot_linux_x64`,
+Chromium's Debian bullseye tarball) names every one of them but cannot
+supply them: Chromium strips its sysroot's shared objects to stubs for
+linking (`libgtk-3.so.0` is 403 KB there, 8 MB whole), and a loader given
+one asserts or faults. So the build fetches the same packages whole: the
+build sysroot carries dpkg's metadata for its 640 packages
+(`debian/<package>/DEBIAN/{control,md5sums}`), from which
+`build_defs/repositories/debian_runtime_lock.py` maps the browsers' `NEEDED`
+sonames to packages, adds Mesa (Firefox's WebGL on Xvfb is Mesa's
+llvmpipe, which Firefox loads by `dlopen` rather than `NEEDED`; Chrome
+brings its own ANGLE and SwiftShader) and Debian's fonts (DejaVu, and
+Liberation, the metric-compatible stand-ins for Arial, Times and Courier,
+with fontconfig's own rules, `fontconfig-config`), closes
+over `Depends` (140 packages at the build sysroot's versions -- Mesa's
+LLVM 11 the largest; architecture-independent data packages other than
+those three, and the C library and compiler runtime, left out), finds each
+file in snapshot.debian.org's immutable archive and pins its sha256 into
+`debian_runtime.lock.bzl`; the `debian_runtime` extension
+(`debian_runtime.bzl`) downloads them and unpacks each `data.tar` with
+the engine's own llvm-ar into `@sysroot_linux_x64_runtime` (253 MB
+unpacked; about a minute to fetch), then makes the two `conf.d` links
+fontconfig-config's postinst would have made for the debconf defaults
+(`10-hinting-slight.conf`, `70-no-bitmaps.conf`: unpacking runs no
+postinst). `browser_launcher`
+(`build_defs/web/browser_launcher.bzl`) writes a script in the browser's
+name that puts that tree's `lib/x86_64-linux-gnu` and
+`usr/lib/x86_64-linux-gnu` first on `LD_LIBRARY_PATH`, points Mesa at its
+drivers (`LIBGL_DRIVERS_PATH`) and GLVND at its EGL vendor
+(`__EGL_VENDOR_LIBRARY_DIRS`) -- both found by absolute path otherwise --
+writes a `fonts.conf` confining fontconfig to the sysroot's
+`usr/share/fonts`, including its `etc/fonts/conf.d`, with a cache
+directory of the test's own
+(`FONTCONFIG_FILE`: a rendering depends on no font of the host, and
+fontconfig scans twenty files rather than the host's hundreds), and execs the
+browser: the browser process alone, so that felt's Dart VM and the Xvfb
+it starts keep the host's libraries. `web_ui_test` and
+`dart_test` take the launcher as their `browser` (flutter_tools' web shard
+also wraps chromedriver). Under it Chrome loads 80 libraries from the
+sysroot and 8 from the host: `ld-linux`, `libc`, `libm`, `libdl`,
+`libpthread`, `librt`, `libresolv` and `libgcc_s`, by design -- the host's
+dynamic loader must match its own libc, and a library built against glibc
+2.31 runs on any newer one. What stays the host's: those eight, the X
+display (Xvfb), and the configuration the sysroot's other libraries read
+by absolute path (GTK's settings). Firefox's
+policies file, which felt writes beside the executable it resolves, is
+written beside the launcher's script by the rule. The label flag
+`--//build_defs/web:browser_libraries` names a `browser_libraries` target:
+`//build_defs/web:sysroot_libraries` by default,
+`//build_defs/web:host_libraries` for the host's (the script then sets
+nothing). Without Mesa, Firefox's WebGL suites fail as "Skwasm requires
+WebGL support": the host's Mesa cannot load beside the sysroot's older
+`libdrm` and `libexpat`, which is the general hazard of mixing the two --
+the closure must be complete. Measured on this host, the 923 tests with
+`--local_test_jobs=6`: with the sysroot's libraries but the host's fonts
+(the first form of this), 923 pass in 2,071 s of wall time, the per-test
+sums Chrome 4,028 s (545 tests, median 5.7 s) and Firefox 4,764 s (375,
+median 12.0 s); with the host's libraries (the flag) 923 pass in 2,295 s
+(a few minutes of it re-checking the action cache under the changed
+flag), Chrome 3,955 s (median 5.8 s), Firefox 3,560 s (median 8.0 s) --
+Firefox paid about 4 s per test under the sysroot, the sysroot's
+fontconfig 2.13 rebuilding a cache over the host's hundreds of fonts in
+every test's HOME (it cannot read the host's caches, a newer format),
+which is why the fonts joined the sysroot. Which fonts matters: the
+WebParagraph suite measures `Arial` (this host has it, Microsoft's core
+fonts). With DejaVu alone, four of its files fail, a line of Arial at
+20 px measuring 24 rather than 22 (DejaVu Sans is taller); with
+Liberation Sans answering for Arial but no hinting style set, three
+cases of `paragraph_get_position_test` are a pixel off (fontconfig's
+default is hintfull, under which the TrueType hints of Liberation Sans
+1.07 move its advances); with the postinst's `hintslight`, 923 pass in
+1,989 s of wall time, the fastest of the three forms: Chrome 3,802 s (546
+tests, median 5.1 s), Firefox 3,994 s (377, median 9.3 s -- the cache it
+rebuilds per test now covers 22 files; 1.3 s above the host's libraries
+and caches).
+
 ```sh
 bazel test //engine/src/flutter/lib/web_ui:tests                              # Chrome's sixteen suites and Firefox's eight: 923 tests
+bazel test --//build_defs/web:browser_libraries=//build_defs/web:host_libraries //engine/src/flutter/lib/web_ui:tests   # the host's libraries
 bazel test //engine/src/flutter/lib/web_ui:chrome_tests                       # 546 tests
 bazel test //engine/src/flutter/lib/web_ui:chrome-dart2js-canvaskit-engine   # 86 files; felt's suite of that name
 bazel test //engine/src/flutter/lib/web_ui:chrome-dart2js-canvaskit-engine/alarm_clock_test
