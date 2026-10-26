@@ -2580,6 +2580,8 @@ TEST_P(EmbedderTestMultiBackend, PlatformViewMutatorsAreValid) {
                 FML_CHECK(false)
                     << "There should be no transformation in the test.";
                 break;
+              case kFlutterPlatformViewMutationTypeClipPath:
+                break;
             }
 
             ASSERT_EQ(*platform_view.mutations[i], mutation);
@@ -2690,6 +2692,8 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
                 mutation.type = kFlutterPlatformViewMutationTypeTransformation;
                 mutation.transformation = FlutterTransformationMake(
                     DlMatrix::MakeScale({2.0, 2.0, 1}));
+                break;
+              case kFlutterPlatformViewMutationTypeClipPath:
                 break;
             }
 
@@ -2809,6 +2813,8 @@ TEST_F(EmbedderTest,
                 mutation.transformation =
                     FlutterTransformationMake(root_surface_transformation);
 
+                break;
+              case kFlutterPlatformViewMutationTypeClipPath:
                 break;
             }
 
@@ -4537,13 +4543,15 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   EmbedderExternalTextureGL::ExternalTextureCallback callback(
       [&](int64_t, size_t, size_t) {
         resolve_called = true;
-        auto res = std::make_unique<FlutterOpenGLTexture>();
+        auto res = std::make_unique<FlutterOpenGLExternalTexture>();
+        res->struct_size = sizeof(FlutterOpenGLExternalTexture);
         res->target = GL_TEXTURE_2D;
         res->name = name;
         res->format = GL_RGBA8;
         res->user_data = nullptr;
         res->destruction_callback = [](void*) {};
         res->width = res->height = 100;
+        res->has_uv_transform = false;
         return res;
       });
   EmbedderExternalTextureGL texture(1, callback);
@@ -4579,13 +4587,15 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
 TEST_F(EmbedderTest, ExternalTextureGLNullContextDoesNotCrash) {
   EmbedderExternalTextureGL::ExternalTextureCallback callback(
       [](int64_t, size_t, size_t) {
-        auto res = std::make_unique<FlutterOpenGLTexture>();
+        auto res = std::make_unique<FlutterOpenGLExternalTexture>();
+        res->struct_size = sizeof(FlutterOpenGLExternalTexture);
         res->target = GL_TEXTURE_2D;
         res->name = 1;
         res->format = GL_RGBA8;
         res->user_data = nullptr;
         res->destruction_callback = [](void*) {};
         res->width = res->height = 100;
+        res->has_uv_transform = false;
         return res;
       });
   EmbedderExternalTextureGL texture(1, callback);

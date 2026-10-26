@@ -8,6 +8,7 @@
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/hash_combine.h"
@@ -102,7 +103,9 @@ class EmbedderExternalView {
 
   DlISize GetRenderSurfaceSize() const;
 
-  void Render(DlCanvas& dl_canvas, bool clear_surface);
+  void Render(DlCanvas& dl_canvas,
+              bool clear_surface,
+              const std::vector<DlRect>& difference_clips = {});
 
   const DlRegion& GetDlRegion() const;
 

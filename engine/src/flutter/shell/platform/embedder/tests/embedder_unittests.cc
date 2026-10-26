@@ -2854,10 +2854,18 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
 }
 
 #if defined(__clang_analyzer__)
+#ifndef TEST_VM_SNAPSHOT_DATA
 #define TEST_VM_SNAPSHOT_DATA "vm_data"
+#endif
+#ifndef TEST_VM_SNAPSHOT_INSTRUCTIONS
 #define TEST_VM_SNAPSHOT_INSTRUCTIONS "vm_instructions"
+#endif
+#ifndef TEST_ISOLATE_SNAPSHOT_DATA
 #define TEST_ISOLATE_SNAPSHOT_DATA "isolate_data"
+#endif
+#ifndef TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS
 #define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS "isolate_instructions"
+#endif
 #endif
 
 //------------------------------------------------------------------------------
@@ -4314,6 +4322,259 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
 
   // Check that the FFI call was executed on the platform thread.
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterEngine spawned_engine = nullptr;
+
+  // Null parent engine.
+  EXPECT_EQ(FlutterEngineSpawn(nullptr, nullptr, &spawned_engine),
+            kInvalidArguments);
+
+  // Null spawn_info.
+  EXPECT_EQ(FlutterEngineSpawn(engine.get(), nullptr, &spawned_engine),
+            kInvalidArguments);
+
+  // Null out pointer.
+  FlutterEngineSpawnInfo valid_info = {};
+  valid_info.struct_size = sizeof(FlutterEngineSpawnInfo);
+  EXPECT_EQ(FlutterEngineSpawn(engine.get(), &valid_info, nullptr),
+            kInvalidArguments);
+
+  // Non-zero entrypoint_argc with null entrypoint_argv.
+  FlutterEngineSpawnInfo bad_argv_info = {};
+  bad_argv_info.struct_size = sizeof(FlutterEngineSpawnInfo);
+  bad_argv_info.entrypoint_argc = 1;
+  bad_argv_info.entrypoint_argv = nullptr;
+  EXPECT_EQ(FlutterEngineSpawn(engine.get(), &bad_argv_info, &spawned_engine),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnInheritsParentRendererConfig) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterEngineSpawnInfo spawn_info = {};
+  spawn_info.struct_size = sizeof(FlutterEngineSpawnInfo);
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(FlutterEngineSpawn(engine.get(), &spawn_info, &spawned_engine),
+            kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  UniqueEngine unique_spawned(spawned_engine);
+}
+
+TEST_F(EmbedderTest, EmbedderSpawnIndependentShutdown) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+
+  FlutterEngineSpawnInfo spawn_info = {};
+  spawn_info.struct_size = sizeof(FlutterEngineSpawnInfo);
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_info, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  // Shutdown parent engine first while spawned engine remains running.
+  parent_engine.reset();
+
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 200;
+  metrics.height = 200;
+  metrics.pixel_ratio = 1.0;
+  EXPECT_EQ(FlutterEngineSendWindowMetricsEvent(spawned_engine, &metrics),
+            kSuccess);
+
+  EXPECT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderLoadDartDeferredLibraryLifecycle) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(nullptr, nullptr),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), nullptr),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(nullptr, nullptr),
+            kInvalidArguments);
+  EXPECT_EQ(
+      FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(), nullptr),
+      kInvalidArguments);
+
+  bool destruction_called = false;
+  const uint8_t dummy_data[] = {0x00, 0x01, 0x02, 0x03};
+  const uint8_t dummy_instructions[] = {0x10, 0x11, 0x12, 0x13};
+
+  FlutterDartDeferredLibrary library = {};
+  library.struct_size = sizeof(FlutterDartDeferredLibrary);
+  library.loading_unit_id = 42;
+  library.snapshot_data = dummy_data;
+  library.snapshot_data_size = sizeof(dummy_data);
+  library.snapshot_instructions = dummy_instructions;
+  library.snapshot_instructions_size = sizeof(dummy_instructions);
+  library.user_data = &destruction_called;
+  library.destruction_callback = [](void* user_data) {
+    *reinterpret_cast<bool*>(user_data) = true;
+  };
+
+  FlutterDartDeferredLibraryLoadError load_error = {};
+  load_error.struct_size = sizeof(FlutterDartDeferredLibraryLoadError);
+  load_error.loading_unit_id = 99;
+  load_error.error_message = "Network error";
+  load_error.transient = true;
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), &library),
+            kSuccess);
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(),
+                                                            &load_error),
+            kSuccess);
+
+  engine.reset();
+  EXPECT_TRUE(destruction_called);
+}
+
+TEST_F(EmbedderTest, EmbedderCustomAssetResolversInProjectArgs) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  FlutterCustomAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterCustomAssetResolver);
+  resolver.user_data = nullptr;
+  resolver.get_as_mapping_callback =
+      [](const char* asset_name, void* user_data,
+         FlutterAssetMapping* mapping_out) -> bool { return false; };
+  const FlutterCustomAssetResolver* resolvers[] = {&resolver};
+
+  builder.GetProjectArgs().custom_asset_resolvers = resolvers;
+  builder.GetProjectArgs().custom_asset_resolvers_count = 1;
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest,
+       EmbedderPlatformDispatchTableAndImageDecoderInProjectArgs) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  FlutterImageDecoderRegistration decoder_reg = {};
+  decoder_reg.struct_size = sizeof(FlutterImageDecoderRegistration);
+  decoder_reg.priority = 1;
+  decoder_reg.create_decoder =
+      [](void* user_data, const uint8_t* data, size_t data_size,
+         FlutterImageDecoder* decoder_out) -> bool { return false; };
+  const FlutterImageDecoderRegistration* decoders[] = {&decoder_reg};
+
+  builder.GetProjectArgs().image_decoders = decoders;
+  builder.GetProjectArgs().image_decoders_count = 1;
+  builder.GetProjectArgs().scale_font_size_callback =
+      [](const FlutterScaleFontSizeInfo* info, double* scaled_font_size_out,
+         void* user_data) -> bool {
+    *scaled_font_size_out = info->font_size;
+    return true;
+  };
+  builder.GetProjectArgs().vm_service_uri_callback =
+      [](const FlutterVMServiceUriInfo* info, void* user_data) {};
+  builder.GetProjectArgs().request_dart_deferred_library_callback =
+      [](intptr_t loading_unit_id, void* user_data) {};
+  builder.GetProjectArgs().enable_direct_platform_message_dispatch = true;
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest, EmbedderDeferredRendererValidation) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(
+      context, EmbedderConfigBuilder::InitializationPreference::kNoInitialize);
+  builder.SetAssetsPath();
+  builder.SetSnapshots();
+  builder.SetSurface(DlISize(1, 1));
+
+  FlutterRendererConfig deferred_config = {};
+  deferred_config.type = kDeferred;
+  deferred_config.deferred.struct_size = sizeof(FlutterDeferredRendererConfig);
+  deferred_config.deferred.resolve_callback = nullptr;
+
+  FlutterEngine engine = nullptr;
+  auto project_args = builder.GetProjectArgs();
+  EXPECT_EQ(FlutterEngineInitialize(FLUTTER_ENGINE_VERSION, &deferred_config,
+                                    &project_args, nullptr, &engine),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderExtendedWindowMetricsAndCornerRadii) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterDisplayCornerRadii radii = {};
+  radii.struct_size = sizeof(FlutterDisplayCornerRadii);
+  radii.top_left = 12.0;
+  radii.top_right = 12.0;
+  radii.bottom_right = 8.0;
+  radii.bottom_left = 8.0;
+
+  FlutterDisplayFeature hinge = {};
+  hinge.struct_size = sizeof(FlutterDisplayFeature);
+  hinge.bounds = {0.0, 0.0, 10.0, 600.0};
+  hinge.type = kFlutterDisplayFeatureTypeHinge;
+  hinge.state = kFlutterDisplayFeatureStatePostureFlat;
+  const FlutterDisplayFeature* features[] = {&hinge};
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(FlutterWindowMetricsEvent);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 2.0;
+  event.physical_padding = {24.0, 0.0, 16.0, 0.0};
+  event.physical_system_gesture_insets = {0.0, 12.0, 0.0, 12.0};
+  event.physical_touch_slop = 16.0;
+  event.display_corner_radii = &radii;
+  event.display_features_count = 1;
+  event.display_features = features;
+
+  EXPECT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderPrefetchDefaultFontManagerAndProcTable) {
+  EXPECT_EQ(FlutterEnginePrefetchDefaultFontManager(), kSuccess);
+
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.LoadDartDeferredLibrary,
+            &FlutterEngineLoadDartDeferredLibrary);
+  EXPECT_EQ(table.NotifyDartDeferredLibraryLoadError,
+            &FlutterEngineNotifyDartDeferredLibraryLoadError);
+  EXPECT_EQ(table.Spawn, &FlutterEngineSpawn);
+  EXPECT_EQ(table.PrefetchDefaultFontManager,
+            &FlutterEnginePrefetchDefaultFontManager);
 }
 
 }  // namespace testing

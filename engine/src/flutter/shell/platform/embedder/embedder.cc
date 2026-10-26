@@ -6,10 +6,13 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 
 #include <cstring>
+#include <future>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "impeller/base/flags.h"
@@ -43,6 +46,8 @@ extern const intptr_t kPlatformStrongDillSize;
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 }
 
+#include "flutter/assets/asset_manager.h"
+#include "flutter/assets/asset_resolver.h"
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/common/task_runners.h"
@@ -52,6 +57,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/lib/ui/painting/image_generator.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -68,6 +74,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/writer.h"
+#include "txt/platform.h"
 
 // Note: the IMPELLER_SUPPORTS_RENDERING may be defined even when the
 // embedder/BUILD.gn variable impeller_supports_rendering is disabled.
@@ -104,6 +111,9 @@ extern const intptr_t kPlatformStrongDillSize;
 #ifdef SHELL_ENABLE_VULKAN
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h"
+#ifdef IMPELLER_SUPPORTS_RENDERING
+#include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #endif  // SHELL_ENABLE_VULKAN
 
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
@@ -172,6 +182,11 @@ static bool IsOpenGLRendererConfigValid(const FlutterRendererConfig* config) {
     return false;
   }
 
+  if (SAFE_EXISTS(open_gl_config, gl_external_texture_frame_callback) &&
+      SAFE_EXISTS(open_gl_config, external_texture_frame_callback)) {
+    return false;
+  }
+
   return true;
 }
 
@@ -228,6 +243,20 @@ static bool IsVulkanRendererConfigValid(const FlutterRendererConfig* config) {
   return true;
 }
 
+static bool IsDeferredRendererConfigValid(const FlutterRendererConfig* config) {
+  if (config->type != kDeferred) {
+    return false;
+  }
+
+  const FlutterDeferredRendererConfig* deferred_config = &config->deferred;
+
+  if (!SAFE_EXISTS(deferred_config, resolve_callback)) {
+    return false;
+  }
+
+  return true;
+}
+
 static bool IsRendererValid(const FlutterRendererConfig* config) {
   if (config == nullptr) {
     return false;
@@ -242,12 +271,162 @@ static bool IsRendererValid(const FlutterRendererConfig* config) {
       return IsMetalRendererConfigValid(config);
     case kVulkan:
       return IsVulkanRendererConfigValid(config);
+    case kDeferred:
+      return IsDeferredRendererConfigValid(config);
     default:
       return false;
   }
 
   return false;
 }
+
+namespace {
+
+struct SharedRendererConfigState {
+  std::mutex mutex;
+  FlutterRendererConfig config = {};
+  void* resolve_user_data = nullptr;
+  bool is_resolved = false;
+  bool resolution_failed = false;
+  std::shared_ptr<impeller::Context> impeller_context;
+  std::shared_ptr<std::promise<void>> resolved_promise =
+      std::make_shared<std::promise<void>>();
+  std::shared_future<void> resolved_future =
+      resolved_promise->get_future().share();
+};
+
+std::mutex g_renderer_config_states_mutex;
+std::unordered_map<const flutter::EmbedderEngine*,
+                   std::shared_ptr<SharedRendererConfigState>>
+    g_renderer_config_states;
+
+std::shared_ptr<SharedRendererConfigState> GetRendererConfigState(
+    const flutter::EmbedderEngine* engine) {
+  std::lock_guard<std::mutex> lock(g_renderer_config_states_mutex);
+  auto it = g_renderer_config_states.find(engine);
+  return it != g_renderer_config_states.end() ? it->second : nullptr;
+}
+
+void SetRendererConfigState(
+    const flutter::EmbedderEngine* engine,
+    std::shared_ptr<SharedRendererConfigState> renderer_state) {
+  std::lock_guard<std::mutex> lock(g_renderer_config_states_mutex);
+  g_renderer_config_states[engine] = std::move(renderer_state);
+}
+
+void ClearRendererConfigState(const flutter::EmbedderEngine* engine) {
+  std::lock_guard<std::mutex> lock(g_renderer_config_states_mutex);
+  g_renderer_config_states.erase(engine);
+}
+
+std::unique_ptr<flutter::EmbedderExternalTextureResolver>
+CreateExternalTextureResolver(const FlutterRendererConfig* config,
+                              void* user_data) {
+  using ExternalTextureResolver = flutter::EmbedderExternalTextureResolver;
+  auto external_texture_resolver = std::make_unique<ExternalTextureResolver>();
+  if (config == nullptr) {
+    return external_texture_resolver;
+  }
+
+#ifdef SHELL_ENABLE_GL
+  if (config->type == kOpenGL) {
+    const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
+    if (SAFE_ACCESS(open_gl_config, external_texture_frame_callback, nullptr) !=
+        nullptr) {
+      flutter::EmbedderExternalTextureGL::ExternalTextureCallback
+          external_texture_callback =
+              [ptr = open_gl_config->external_texture_frame_callback,
+               user_data](int64_t texture_identifier, size_t width,
+                          size_t height)
+          -> std::unique_ptr<FlutterOpenGLExternalTexture> {
+        auto texture = std::make_unique<FlutterOpenGLExternalTexture>();
+        texture->struct_size = sizeof(FlutterOpenGLExternalTexture);
+        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver =
+          std::make_unique<ExternalTextureResolver>(external_texture_callback);
+    } else if (SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
+                           nullptr) != nullptr) {
+      flutter::EmbedderExternalTextureGL::ExternalTextureCallback
+          external_texture_callback =
+              [ptr = open_gl_config->gl_external_texture_frame_callback,
+               user_data](int64_t texture_identifier, size_t width,
+                          size_t height)
+          -> std::unique_ptr<FlutterOpenGLExternalTexture> {
+        FlutterOpenGLTexture legacy_texture = {};
+        if (!ptr(user_data, texture_identifier, width, height,
+                 &legacy_texture)) {
+          return nullptr;
+        }
+        auto texture = std::make_unique<FlutterOpenGLExternalTexture>();
+        texture->struct_size = sizeof(FlutterOpenGLExternalTexture);
+        texture->target = legacy_texture.target;
+        texture->name = legacy_texture.name;
+        texture->format = legacy_texture.format;
+        texture->user_data = legacy_texture.user_data;
+        texture->destruction_callback = legacy_texture.destruction_callback;
+        texture->width = legacy_texture.width;
+        texture->height = legacy_texture.height;
+        texture->has_uv_transform = false;
+        return texture;
+      };
+      external_texture_resolver =
+          std::make_unique<ExternalTextureResolver>(external_texture_callback);
+    }
+  }
+#endif
+#ifdef SHELL_ENABLE_METAL
+  if (config->type == kMetal) {
+    const FlutterMetalRendererConfig* metal_config = &config->metal;
+    if (SAFE_ACCESS(metal_config, external_texture_frame_callback, nullptr)) {
+      flutter::EmbedderExternalTextureMetal::ExternalTextureCallback
+          external_texture_metal_callback =
+              [ptr = metal_config->external_texture_frame_callback, user_data](
+                  int64_t texture_identifier, size_t width, size_t height)
+          -> std::unique_ptr<FlutterMetalExternalTexture> {
+        std::unique_ptr<FlutterMetalExternalTexture> texture =
+            std::make_unique<FlutterMetalExternalTexture>();
+        texture->struct_size = sizeof(FlutterMetalExternalTexture);
+        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_metal_callback);
+    }
+  }
+#endif
+#ifdef SHELL_ENABLE_VULKAN
+  if (config->type == kVulkan) {
+    const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
+    if (auto callback = SAFE_ACCESS(vulkan_config,
+                                    external_texture_frame_callback, nullptr)) {
+      auto external_texture_vulkan_callback =
+          [frame_callback = callback, user_data](
+              int64_t texture_identifier, size_t width,
+              size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
+        std::unique_ptr<FlutterVulkanExternalTexture> texture =
+            std::make_unique<FlutterVulkanExternalTexture>();
+        texture->struct_size = sizeof(FlutterVulkanExternalTexture);
+        if (!frame_callback(user_data, texture_identifier, width, height,
+                            texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_vulkan_callback);
+    }
+  }
+#endif
+  return external_texture_resolver;
+}
+
+}  // namespace
 
 #if FML_OS_LINUX || FML_OS_WIN
 static void* DefaultGLProcResolver(const char* name) {
@@ -312,7 +491,9 @@ InferOpenGLPlatformViewCreationCallback(
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
     bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    impeller::Flags impeller_flags,
+    const std::shared_ptr<SharedRendererConfigState>& renderer_state =
+        nullptr) {
 #ifdef SHELL_ENABLE_GL
   if (config->type != kOpenGL) {
     return nullptr;
@@ -484,21 +665,28 @@ InferOpenGLPlatformViewCreationCallback(
 
   return fml::MakeCopyable(
       [gl_dispatch_table, fbo_reset_after_present, platform_dispatch_table,
-       enable_impeller, impeller_flags,
+       enable_impeller, impeller_flags, renderer_state,
        external_view_embedder =
            std::move(external_view_embedder)](flutter::Shell& shell) mutable {
         std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
             std::move(external_view_embedder);
         if (enable_impeller) {
-          return std::make_unique<flutter::PlatformViewEmbedder>(
-              shell,                   // delegate
-              shell.GetTaskRunners(),  // task runners
+          std::shared_ptr<impeller::Context> shared_context;
+          if (renderer_state) {
+            std::lock_guard<std::mutex> lock(renderer_state->mutex);
+            shared_context = renderer_state->impeller_context;
+          }
+          auto embedder_surface =
               std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
                   gl_dispatch_table, fbo_reset_after_present, view_embedder,
-                  shell.GetShutdownSafeIOTaskRunner(),
-                  impeller_flags),      // embedder_surface
-              platform_dispatch_table,  // embedder platform dispatch table
-              view_embedder             // external view embedder
+                  shell.GetShutdownSafeIOTaskRunner(), impeller_flags,
+                  shared_context);
+          return std::make_unique<flutter::PlatformViewEmbedder>(
+              shell,                        // delegate
+              shell.GetTaskRunners(),       // task runners
+              std::move(embedder_surface),  // embedder_surface
+              platform_dispatch_table,      // embedder platform dispatch table
+              view_embedder                 // external view embedder
           );
         }
         return std::make_unique<flutter::PlatformViewEmbedder>(
@@ -624,7 +812,9 @@ InferVulkanPlatformViewCreationCallback(
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
     bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    impeller::Flags impeller_flags,
+    const std::shared_ptr<SharedRendererConfigState>& renderer_state =
+        nullptr) {
   if (config->type != kVulkan) {
     return nullptr;
   }
@@ -677,6 +867,12 @@ InferVulkanPlatformViewCreationCallback(
             .present_image = vulkan_present_image_callback,
     };
 
+    std::shared_ptr<impeller::Context> shared_context;
+    if (renderer_state) {
+      std::lock_guard<std::mutex> lock(renderer_state->mutex);
+      shared_context = renderer_state->impeller_context;
+    }
+
     std::unique_ptr<flutter::EmbedderSurfaceVulkanImpeller> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
             config->vulkan.version, vk_instance,
@@ -688,7 +884,8 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkDevice>(config->vulkan.device),
             config->vulkan.queue_family_index,
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
-            view_embedder, impeller_flags);
+            view_embedder, impeller_flags, /*enable_vulkan_validation=*/false,
+            shared_context);
 
     return fml::MakeCopyable(
         [embedder_surface = std::move(embedder_surface),
@@ -817,6 +1014,418 @@ InferSoftwarePlatformViewCreationCallback(
 }
 
 static flutter::Shell::CreateCallback<flutter::PlatformView>
+InferDeferredPlatformViewCreationCallback(
+    const FlutterRendererConfig* config,
+    void* engine_user_data,
+    const flutter::PlatformViewEmbedder::PlatformDispatchTable&
+        platform_dispatch_table,
+    std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
+        external_view_embedder,
+    bool enable_impeller,
+    impeller::Flags impeller_flags,
+    const std::shared_ptr<SharedRendererConfigState>& renderer_state,
+    const std::shared_ptr<flutter::EmbedderEngine*>& engine_ptr_holder) {
+  if (config->type != kDeferred) {
+    return nullptr;
+  }
+
+  const FlutterDeferredRendererConfig* deferred_config = &config->deferred;
+  auto resolve_callback =
+      SAFE_ACCESS(deferred_config, resolve_callback, nullptr);
+  if (!resolve_callback || !renderer_state) {
+    return nullptr;
+  }
+
+  std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
+      std::move(external_view_embedder);
+
+  return fml::MakeCopyable([resolve_callback, engine_user_data,
+                            platform_dispatch_table, view_embedder,
+                            enable_impeller, impeller_flags, renderer_state,
+                            engine_ptr_holder](flutter::Shell& shell) mutable {
+    auto io_task_runner = shell.GetShutdownSafeIOTaskRunner();
+    flutter::PlatformViewEmbedder::ResolveEmbedderSurfaceCallback
+        surface_factory =
+            [resolve_callback, engine_user_data, view_embedder, enable_impeller,
+             impeller_flags, renderer_state, engine_ptr_holder,
+             io_task_runner]() -> std::unique_ptr<flutter::EmbedderSurface> {
+      FlutterRendererConfig resolved = {};
+      std::shared_ptr<impeller::Context> shared_context;
+      flutter::EmbedderEngine* current_engine =
+          engine_ptr_holder ? *engine_ptr_holder : nullptr;
+      {
+        std::lock_guard<std::mutex> lock(renderer_state->mutex);
+        if (!renderer_state->is_resolved &&
+            !renderer_state->resolution_failed) {
+          if (resolve_callback(renderer_state->resolve_user_data, &resolved) &&
+              resolved.type != kDeferred && IsRendererValid(&resolved)) {
+            renderer_state->config = resolved;
+            renderer_state->is_resolved = true;
+            if (current_engine) {
+              current_engine->SetRendererConfig(resolved);
+              current_engine->SetExternalTextureResolver(
+                  CreateExternalTextureResolver(&resolved, engine_user_data));
+            }
+            renderer_state->resolved_promise->set_value();
+          } else {
+            renderer_state->resolution_failed = true;
+            renderer_state->resolved_promise->set_value();
+            FML_LOG(ERROR) << "Deferred renderer configuration resolution "
+                              "failed or returned an invalid renderer config.";
+            return nullptr;
+          }
+        }
+        if (renderer_state->resolution_failed) {
+          return nullptr;
+        }
+        resolved = renderer_state->config;
+        shared_context = renderer_state->impeller_context;
+      }
+
+      if (current_engine) {
+        current_engine->SetRendererConfig(resolved);
+        current_engine->SetExternalTextureResolver(
+            CreateExternalTextureResolver(&resolved, engine_user_data));
+      }
+
+      switch (resolved.type) {
+        case kVulkan: {
+#ifdef SHELL_ENABLE_VULKAN
+          std::function<void*(VkInstance, const char*)>
+              vulkan_get_instance_proc_address =
+                  [ptr = resolved.vulkan.get_instance_proc_address_callback,
+                   engine_user_data](VkInstance instance,
+                                     const char* proc_name) -> void* {
+            return ptr(engine_user_data, instance, proc_name);
+          };
+
+          auto vulkan_get_next_image =
+              [ptr = resolved.vulkan.get_next_image_callback, engine_user_data](
+                  const flutter::DlISize& frame_size) -> FlutterVulkanImage {
+            FlutterFrameInfo frame_info = {
+                .struct_size = sizeof(FlutterFrameInfo),
+                .size = {static_cast<uint32_t>(frame_size.width),
+                         static_cast<uint32_t>(frame_size.height)},
+            };
+            return ptr(engine_user_data, &frame_info);
+          };
+
+          auto vulkan_present_image_callback =
+              [ptr = resolved.vulkan.present_image_callback, engine_user_data](
+                  VkImage image, VkFormat format) -> bool {
+            FlutterVulkanImage image_desc = {
+                .struct_size = sizeof(FlutterVulkanImage),
+                .image = reinterpret_cast<uint64_t>(image),
+                .format = static_cast<uint32_t>(format),
+            };
+            return ptr(engine_user_data, &image_desc);
+          };
+
+          auto vk_instance = static_cast<VkInstance>(resolved.vulkan.instance);
+          auto proc_addr = vulkan_get_instance_proc_address(
+              vk_instance, "vkGetInstanceProcAddr");
+
+#if IMPELLER_SUPPORTS_RENDERING
+          if (enable_impeller) {
+            flutter::EmbedderSurfaceVulkanImpeller::VulkanDispatchTable
+                vulkan_dispatch_table = {
+                    .get_instance_proc_address =
+                        reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
+                    .get_next_image = vulkan_get_next_image,
+                    .present_image = vulkan_present_image_callback,
+            };
+            return std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
+                resolved.vulkan.version, vk_instance,
+                resolved.vulkan.enabled_instance_extension_count,
+                resolved.vulkan.enabled_instance_extensions,
+                resolved.vulkan.enabled_device_extension_count,
+                resolved.vulkan.enabled_device_extensions,
+                static_cast<VkPhysicalDevice>(resolved.vulkan.physical_device),
+                static_cast<VkDevice>(resolved.vulkan.device),
+                resolved.vulkan.queue_family_index,
+                static_cast<VkQueue>(resolved.vulkan.queue),
+                vulkan_dispatch_table, view_embedder, impeller_flags,
+                /*enable_vulkan_validation=*/false, shared_context);
+          }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+          flutter::EmbedderSurfaceVulkan::VulkanDispatchTable
+              vulkan_dispatch_table = {
+                  .get_instance_proc_address =
+                      reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
+                  .get_next_image = vulkan_get_next_image,
+                  .present_image = vulkan_present_image_callback,
+          };
+          return std::make_unique<flutter::EmbedderSurfaceVulkan>(
+              resolved.vulkan.version, vk_instance,
+              resolved.vulkan.enabled_instance_extension_count,
+              resolved.vulkan.enabled_instance_extensions,
+              resolved.vulkan.enabled_device_extension_count,
+              resolved.vulkan.enabled_device_extensions,
+              static_cast<VkPhysicalDevice>(resolved.vulkan.physical_device),
+              static_cast<VkDevice>(resolved.vulkan.device),
+              resolved.vulkan.queue_family_index,
+              static_cast<VkQueue>(resolved.vulkan.queue),
+              vulkan_dispatch_table, view_embedder);
+#else
+          FML_LOG(ERROR)
+              << "This Flutter Engine does not support Vulkan rendering.";
+          return nullptr;
+#endif  // SHELL_ENABLE_VULKAN
+        }
+        case kOpenGL: {
+#ifdef SHELL_ENABLE_GL
+          const FlutterOpenGLRendererConfig* open_gl_config = &resolved.open_gl;
+          auto gl_make_current = [ptr = open_gl_config->make_current,
+                                  engine_user_data]() -> bool {
+            return ptr(engine_user_data);
+          };
+          auto gl_clear_current = [ptr = open_gl_config->clear_current,
+                                   engine_user_data]() -> bool {
+            return ptr(engine_user_data);
+          };
+          auto gl_present =
+              [present = open_gl_config->present,
+               present_with_info = open_gl_config->present_with_info,
+               engine_user_data](
+                  flutter::GLPresentInfo gl_present_info) -> bool {
+            if (present) {
+              return present(engine_user_data);
+            }
+            std::optional<FlutterRect> frame_damage_rect;
+            if (gl_present_info.frame_damage) {
+              frame_damage_rect =
+                  DlIRectToFlutterRect(*(gl_present_info.frame_damage));
+            }
+            std::optional<FlutterRect> buffer_damage_rect;
+            if (gl_present_info.buffer_damage) {
+              buffer_damage_rect =
+                  DlIRectToFlutterRect(*(gl_present_info.buffer_damage));
+            }
+            FlutterDamage frame_damage{
+                .struct_size = sizeof(FlutterDamage),
+                .num_rects = frame_damage_rect ? size_t{1} : size_t{0},
+                .damage =
+                    frame_damage_rect ? &frame_damage_rect.value() : nullptr,
+            };
+            FlutterDamage buffer_damage{
+                .struct_size = sizeof(FlutterDamage),
+                .num_rects = buffer_damage_rect ? size_t{1} : size_t{0},
+                .damage =
+                    buffer_damage_rect ? &buffer_damage_rect.value() : nullptr,
+            };
+            FlutterPresentInfo present_info = {
+                .struct_size = sizeof(FlutterPresentInfo),
+                .fbo_id = gl_present_info.fbo_id,
+                .frame_damage = frame_damage,
+                .buffer_damage = buffer_damage,
+            };
+            return present_with_info(engine_user_data, &present_info);
+          };
+          auto gl_fbo_callback =
+              [fbo_callback = open_gl_config->fbo_callback,
+               fbo_with_frame_info_callback =
+                   open_gl_config->fbo_with_frame_info_callback,
+               engine_user_data](
+                  flutter::GLFrameInfo gl_frame_info) -> intptr_t {
+            if (fbo_callback) {
+              return fbo_callback(engine_user_data);
+            }
+            FlutterFrameInfo frame_info = {};
+            frame_info.struct_size = sizeof(FlutterFrameInfo);
+            frame_info.size = {gl_frame_info.width, gl_frame_info.height};
+            return fbo_with_frame_info_callback(engine_user_data, &frame_info);
+          };
+          auto gl_populate_existing_damage =
+              [populate_existing_damage =
+                   open_gl_config->populate_existing_damage,
+               engine_user_data](intptr_t id) -> flutter::GLFBOInfo {
+            if (!populate_existing_damage) {
+              return flutter::GLFBOInfo{
+                  .fbo_id = static_cast<uint32_t>(id),
+                  .existing_damage = std::nullopt,
+              };
+            }
+            FlutterDamage existing_damage;
+            populate_existing_damage(engine_user_data, id, &existing_damage);
+            std::optional<flutter::DlIRect> existing_damage_rect = std::nullopt;
+            if (existing_damage.num_rects > 0 &&
+                existing_damage.damage != nullptr) {
+              existing_damage_rect = flutter::DlIRect();
+              for (size_t i = 0; i < existing_damage.num_rects; i++) {
+                existing_damage_rect = existing_damage_rect->Union(
+                    FlutterRectToDlIRect(existing_damage.damage[i]));
+              }
+            }
+            return flutter::GLFBOInfo{
+                .fbo_id = static_cast<uint32_t>(id),
+                .existing_damage = existing_damage_rect,
+            };
+          };
+          std::function<bool()> gl_make_resource_current_callback = nullptr;
+          if (SAFE_ACCESS(open_gl_config, make_resource_current, nullptr) !=
+              nullptr) {
+            gl_make_resource_current_callback =
+                [ptr = open_gl_config->make_resource_current,
+                 engine_user_data]() { return ptr(engine_user_data); };
+          }
+          std::function<flutter::DlMatrix(void)>
+              gl_surface_transformation_callback = nullptr;
+          if (SAFE_ACCESS(open_gl_config, surface_transformation, nullptr) !=
+              nullptr) {
+            gl_surface_transformation_callback =
+                [ptr = open_gl_config->surface_transformation,
+                 engine_user_data]() {
+                  FlutterTransformation transformation = ptr(engine_user_data);
+                  // clang-format off
+                  return flutter::DlMatrix(
+                      transformation.scaleX, transformation.skewY,  0.0f, transformation.pers0,
+                      transformation.skewX,  transformation.scaleY, 0.0f, transformation.pers1,
+                      0.0f,                  0.0f,                  1.0f, 0.0f,
+                      transformation.transX, transformation.transY, 0.0f, transformation.pers2
+                  );
+                  // clang-format on
+                };
+            if (view_embedder) {
+              view_embedder->SetSurfaceTransformationCallback(
+                  gl_surface_transformation_callback);
+            }
+          }
+          flutter::GPUSurfaceGLDelegate::GLProcResolver gl_proc_resolver =
+              nullptr;
+          if (SAFE_ACCESS(open_gl_config, gl_proc_resolver, nullptr) !=
+              nullptr) {
+            gl_proc_resolver = [ptr = open_gl_config->gl_proc_resolver,
+                                engine_user_data](const char* gl_proc_name) {
+              return ptr(engine_user_data, gl_proc_name);
+            };
+          } else {
+#if FML_OS_LINUX || FML_OS_WIN
+            gl_proc_resolver = DefaultGLProcResolver;
+#endif
+          }
+          bool fbo_reset_after_present =
+              SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
+          flutter::EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table = {
+              gl_make_current,
+              gl_clear_current,
+              gl_present,
+              gl_fbo_callback,
+              gl_make_resource_current_callback,
+              gl_surface_transformation_callback,
+              gl_proc_resolver,
+              gl_populate_existing_damage,
+          };
+#ifdef IMPELLER_SUPPORTS_RENDERING
+          if (enable_impeller) {
+            return std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
+                gl_dispatch_table, fbo_reset_after_present, view_embedder,
+                io_task_runner, impeller_flags, shared_context);
+          }
+#endif
+          return std::make_unique<flutter::EmbedderSurfaceGLSkia>(
+              gl_dispatch_table, fbo_reset_after_present, view_embedder);
+#else
+          FML_LOG(ERROR)
+              << "This Flutter Engine does not support OpenGL rendering.";
+          return nullptr;
+#endif  // SHELL_ENABLE_GL
+        }
+        case kMetal: {
+#ifdef SHELL_ENABLE_METAL
+          std::function<bool(flutter::GPUMTLTextureInfo texture)>
+              metal_present =
+                  [ptr = resolved.metal.present_drawable_callback,
+                   engine_user_data](flutter::GPUMTLTextureInfo texture) {
+                    FlutterMetalTexture embedder_texture;
+                    embedder_texture.struct_size = sizeof(FlutterMetalTexture);
+                    embedder_texture.texture = texture.texture;
+                    embedder_texture.texture_id = texture.texture_id;
+                    embedder_texture.user_data = texture.destruction_context;
+                    embedder_texture.destruction_callback =
+                        texture.destruction_callback;
+                    return ptr(engine_user_data, &embedder_texture);
+                  };
+          auto metal_get_texture =
+              [ptr = resolved.metal.get_next_drawable_callback,
+               engine_user_data](const flutter::DlISize& frame_size)
+              -> flutter::GPUMTLTextureInfo {
+            FlutterFrameInfo frame_info = {};
+            frame_info.struct_size = sizeof(FlutterFrameInfo);
+            frame_info.size = {static_cast<uint32_t>(frame_size.width),
+                               static_cast<uint32_t>(frame_size.height)};
+            flutter::GPUMTLTextureInfo texture_info;
+            FlutterMetalTexture metal_texture =
+                ptr(engine_user_data, &frame_info);
+            texture_info.texture_id = metal_texture.texture_id;
+            texture_info.texture = metal_texture.texture;
+            texture_info.destruction_callback =
+                metal_texture.destruction_callback;
+            texture_info.destruction_context = metal_texture.user_data;
+            return texture_info;
+          };
+          if (enable_impeller) {
+            flutter::EmbedderSurfaceMetalImpeller::MetalDispatchTable
+                metal_dispatch_table = {
+                    .present = metal_present,
+                    .get_texture = metal_get_texture,
+            };
+            return std::make_unique<flutter::EmbedderSurfaceMetalImpeller>(
+                const_cast<flutter::GPUMTLDeviceHandle>(resolved.metal.device),
+                const_cast<flutter::GPUMTLCommandQueueHandle>(
+                    resolved.metal.present_command_queue),
+                metal_dispatch_table, view_embedder, impeller_flags);
+          }
+#if !SLIMPELLER
+          flutter::EmbedderSurfaceMetalSkia::MetalDispatchTable
+              metal_dispatch_table = {
+                  .present = metal_present,
+                  .get_texture = metal_get_texture,
+          };
+          return std::make_unique<flutter::EmbedderSurfaceMetalSkia>(
+              const_cast<flutter::GPUMTLDeviceHandle>(resolved.metal.device),
+              const_cast<flutter::GPUMTLCommandQueueHandle>(
+                  resolved.metal.present_command_queue),
+              metal_dispatch_table, view_embedder);
+#else
+          FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+          return nullptr;
+#endif
+#else
+          FML_LOG(ERROR)
+              << "This Flutter Engine does not support Metal rendering.";
+          return nullptr;
+#endif  // SHELL_ENABLE_METAL
+        }
+        case kSoftware: {
+          auto software_present_backing_store =
+              [ptr = resolved.software.surface_present_callback,
+               engine_user_data](const void* allocation, size_t row_bytes,
+                                 size_t height) -> bool {
+            return ptr(engine_user_data, allocation, row_bytes, height);
+          };
+          flutter::EmbedderSurfaceSoftware::SoftwareDispatchTable
+              software_dispatch_table = {
+                  software_present_backing_store,
+          };
+          return std::make_unique<flutter::EmbedderSurfaceSoftware>(
+              software_dispatch_table, view_embedder);
+        }
+        default:
+          return nullptr;
+      }
+    };
+
+    return std::make_unique<flutter::PlatformViewEmbedder>(
+        shell,                       // delegate
+        shell.GetTaskRunners(),      // task runners
+        std::move(surface_factory),  // embedder surface factory
+        platform_dispatch_table,     // platform dispatch table
+        std::move(view_embedder)     // external view embedder
+    );
+  });
+}
+
+static flutter::Shell::CreateCallback<flutter::PlatformView>
 InferPlatformViewCreationCallback(
     const FlutterRendererConfig* config,
     void* user_data,
@@ -825,7 +1434,10 @@ InferPlatformViewCreationCallback(
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
     bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    impeller::Flags impeller_flags,
+    const std::shared_ptr<SharedRendererConfigState>& renderer_state = nullptr,
+    const std::shared_ptr<flutter::EmbedderEngine*>& engine_ptr_holder =
+        nullptr) {
   if (config == nullptr) {
     return nullptr;
   }
@@ -834,7 +1446,8 @@ InferPlatformViewCreationCallback(
     case kOpenGL:
       return InferOpenGLPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller, impeller_flags);
+          std::move(external_view_embedder), enable_impeller, impeller_flags,
+          renderer_state);
     case kSoftware:
       return InferSoftwarePlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
@@ -846,7 +1459,13 @@ InferPlatformViewCreationCallback(
     case kVulkan:
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller, impeller_flags);
+          std::move(external_view_embedder), enable_impeller, impeller_flags,
+          renderer_state);
+    case kDeferred:
+      return InferDeferredPlatformViewCreationCallback(
+          config, user_data, platform_dispatch_table,
+          std::move(external_view_embedder), enable_impeller, impeller_flags,
+          renderer_state, engine_ptr_holder);
     default:
       return nullptr;
   }
@@ -1151,7 +1770,11 @@ MakeRenderTargetFromBackingStoreImpeller(
     const fml::closure& on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
-    const FlutterOpenGLFramebuffer* framebuffer) {
+    const FlutterOpenGLFramebuffer* framebuffer,
+    flutter::EmbedderRenderTarget::MakeOrClearCurrentCallback on_make_current =
+        nullptr,
+    flutter::EmbedderRenderTarget::MakeOrClearCurrentCallback on_clear_current =
+        nullptr) {
 #if defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
   auto format = FlutterFormatToImpellerPixelFormat(framebuffer->target);
   if (!format.has_value()) {
@@ -1162,7 +1785,8 @@ MakeRenderTargetFromBackingStoreImpeller(
       impeller::ContextGLES::Cast(*aiks_context->GetContext());
   const bool implicit_msaa = aiks_context->GetContext()
                                  ->GetCapabilities()
-                                 ->SupportsImplicitResolvingMSAA();
+                                 ->SupportsImplicitResolvingMSAA() &&
+                             framebuffer->name != 0;
   const auto size = impeller::ISize(config.size.width, config.size.height);
 
   impeller::TextureDescriptor color0_tex;
@@ -1226,14 +1850,19 @@ MakeRenderTargetFromBackingStoreImpeller(
   render_target_desc.SetDepthAttachment(depth0);
   render_target_desc.SetStencilAttachment(stencil0);
 
-  fml::closure framebuffer_destruct =
-      [callback = framebuffer->destruction_callback,
-       user_data = framebuffer->user_data]() { callback(user_data); };
+  fml::closure framebuffer_destruct = [callback =
+                                           framebuffer->destruction_callback,
+                                       user_data = framebuffer->user_data]() {
+    if (callback) {
+      callback(user_data);
+    }
+  };
 
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
       backing_store, aiks_context,
       std::make_unique<impeller::RenderTarget>(std::move(render_target_desc)),
-      on_release, framebuffer_destruct);
+      on_release, framebuffer_destruct, std::move(on_make_current),
+      std::move(on_clear_current));
 #else
   return nullptr;
 #endif
@@ -1462,7 +2091,8 @@ CreateEmbedderRenderTarget(
                context = backing_store.open_gl.surface.user_data]()
               -> flutter::EmbedderRenderTarget::SetCurrentResult {
             bool invalidate_api_state = false;
-            bool ok = callback(context, &invalidate_api_state);
+            bool ok =
+                callback ? callback(context, &invalidate_api_state) : true;
             return {ok, invalidate_api_state};
           };
 
@@ -1471,14 +2101,25 @@ CreateEmbedderRenderTarget(
                context = backing_store.open_gl.surface.user_data]()
               -> flutter::EmbedderRenderTarget::SetCurrentResult {
             bool invalidate_api_state = false;
-            bool ok = callback(context, &invalidate_api_state);
+            bool ok =
+                callback ? callback(context, &invalidate_api_state) : true;
             return {ok, invalidate_api_state};
           };
 
           if (enable_impeller) {
-            // TODO(https://github.com/flutter/flutter/issues/151670): Implement
-            //  GL Surface backing stores for Impeller.
-            FML_LOG(ERROR) << "Unimplemented";
+            const FlutterOpenGLSurface* surface_ptr =
+                &backing_store.open_gl.surface;
+            // 0x8058 is GL_RGBA8 from <GLES3/gl3.h>.
+            constexpr uint32_t kGLRGBA8 = 0x8058;
+            FlutterOpenGLFramebuffer fb = {};
+            fb.target = SAFE_ACCESS(surface_ptr, format, kGLRGBA8);
+            fb.name = 0;
+            fb.user_data = backing_store.open_gl.surface.user_data;
+            fb.destruction_callback =
+                backing_store.open_gl.surface.destruction_callback;
+            render_target = MakeRenderTargetFromBackingStoreImpeller(
+                backing_store, collect_callback.Release(), aiks_context, config,
+                &fb, std::move(on_make_current), std::move(on_clear_current));
             break;
           } else {
             auto skia_surface = MakeSkSurfaceFromBackingStore(
@@ -1523,7 +2164,13 @@ CreateEmbedderRenderTarget(
     }
     case kFlutterBackingStoreTypeVulkan: {
       if (enable_impeller) {
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+        render_target = flutter::EmbedderRenderTargetImpeller::MakeVulkan(
+            backing_store, collect_callback.Release(), aiks_context, config,
+            &backing_store.vulkan);
+#else
         FML_LOG(ERROR) << "Unimplemented";
+#endif
         break;
       } else {
         auto skia_surface = MakeSkSurfaceFromBackingStore(
@@ -1562,6 +2209,12 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
       SAFE_ACCESS(compositor, present_view_callback, nullptr);
   bool avoid_backing_store_cache =
       SAFE_ACCESS(compositor, avoid_backing_store_cache, false);
+  bool merge_raster_thread_on_platform_views =
+      SAFE_ACCESS(compositor, merge_raster_thread_on_platform_views, false);
+  bool coalesce_overlay_layers =
+      SAFE_ACCESS(compositor, coalesce_overlay_layers, false);
+  uint64_t platform_view_mutation_capabilities =
+      SAFE_ACCESS(compositor, platform_view_mutation_capabilities, 0);
 
   // Make sure the required callbacks are present
   if (!c_create_callback || !c_collect_callback) {
@@ -1618,7 +2271,8 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
 
   return std::make_unique<flutter::EmbedderExternalViewEmbedder>(
       avoid_backing_store_cache, create_render_target_callback,
-      present_callback);
+      present_callback, merge_raster_thread_on_platform_views,
+      coalesce_overlay_layers, platform_view_mutation_capabilities);
 }
 
 // Translates embedder metrics to engine metrics, or returns a string on error.
@@ -1669,6 +2323,64 @@ MakeViewportMetricsFromWindowMetrics(
       SAFE_ACCESS(flutter_metrics, physical_view_inset_left, 0.0);
   metrics.display_id = SAFE_ACCESS(flutter_metrics, display_id, 0);
 
+  if (STRUCT_HAS_MEMBER(flutter_metrics, physical_padding)) {
+    metrics.physical_padding_top = flutter_metrics->physical_padding.top;
+    metrics.physical_padding_right = flutter_metrics->physical_padding.right;
+    metrics.physical_padding_bottom = flutter_metrics->physical_padding.bottom;
+    metrics.physical_padding_left = flutter_metrics->physical_padding.left;
+  }
+
+  if (STRUCT_HAS_MEMBER(flutter_metrics, physical_system_gesture_insets)) {
+    metrics.physical_system_gesture_inset_top =
+        flutter_metrics->physical_system_gesture_insets.top;
+    metrics.physical_system_gesture_inset_right =
+        flutter_metrics->physical_system_gesture_insets.right;
+    metrics.physical_system_gesture_inset_bottom =
+        flutter_metrics->physical_system_gesture_insets.bottom;
+    metrics.physical_system_gesture_inset_left =
+        flutter_metrics->physical_system_gesture_insets.left;
+  }
+
+  metrics.physical_touch_slop =
+      SAFE_ACCESS(flutter_metrics, physical_touch_slop, -1.0);
+
+  const FlutterDisplayCornerRadii* corner_radii =
+      SAFE_ACCESS(flutter_metrics, display_corner_radii, nullptr);
+  if (corner_radii != nullptr) {
+    metrics.physical_display_corner_radius_top_left =
+        SAFE_ACCESS(corner_radii, top_left, -1.0);
+    metrics.physical_display_corner_radius_top_right =
+        SAFE_ACCESS(corner_radii, top_right, -1.0);
+    metrics.physical_display_corner_radius_bottom_right =
+        SAFE_ACCESS(corner_radii, bottom_right, -1.0);
+    metrics.physical_display_corner_radius_bottom_left =
+        SAFE_ACCESS(corner_radii, bottom_left, -1.0);
+  }
+
+  size_t display_features_count =
+      SAFE_ACCESS(flutter_metrics, display_features_count, 0);
+  const FlutterDisplayFeature** display_features =
+      SAFE_ACCESS(flutter_metrics, display_features, nullptr);
+  if (display_features_count > 0 && display_features == nullptr) {
+    return "Display features count was non-zero, but display_features was "
+           "null.";
+  }
+  for (size_t i = 0; i < display_features_count; ++i) {
+    const FlutterDisplayFeature* feature = display_features[i];
+    if (feature == nullptr) {
+      return "Display feature at index was null.";
+    }
+    FlutterRect bounds = SAFE_ACCESS(feature, bounds, FlutterRect{});
+    metrics.physical_display_features_bounds.push_back(bounds.left);
+    metrics.physical_display_features_bounds.push_back(bounds.top);
+    metrics.physical_display_features_bounds.push_back(bounds.right);
+    metrics.physical_display_features_bounds.push_back(bounds.bottom);
+    metrics.physical_display_features_type.push_back(static_cast<int>(
+        SAFE_ACCESS(feature, type, kFlutterDisplayFeatureTypeUnknown)));
+    metrics.physical_display_features_state.push_back(static_cast<int>(
+        SAFE_ACCESS(feature, state, kFlutterDisplayFeatureStateUnknown)));
+  }
+
   if (metrics.device_pixel_ratio <= 0.0) {
     return "Device pixel ratio was invalid. It must be greater than zero.";
   }
@@ -1688,12 +2400,22 @@ MakeViewportMetricsFromWindowMetrics(
            "physical height or width.";
   }
 
+  if (metrics.physical_padding_top < 0 || metrics.physical_padding_right < 0 ||
+      metrics.physical_padding_bottom < 0 ||
+      metrics.physical_padding_left < 0) {
+    return "Physical padding values are invalid. They must be non-negative.";
+  }
+
+  if (metrics.physical_system_gesture_inset_top < 0 ||
+      metrics.physical_system_gesture_inset_right < 0 ||
+      metrics.physical_system_gesture_inset_bottom < 0 ||
+      metrics.physical_system_gesture_inset_left < 0) {
+    return "Physical system gesture insets are invalid. They must be "
+           "non-negative.";
+  }
+
   return metrics;
 }
-
-struct _FlutterPlatformMessageResponseHandle {
-  std::unique_ptr<flutter::PlatformMessage> message;
-};
 
 struct LoadedElfDeleter {
   void operator()(Dart_LoadedElf* elf) {
@@ -2044,185 +2766,269 @@ CreateEmbedderSemanticsUpdateCallback(const FlutterProjectArgs* args,
   return nullptr;
 }
 
-FlutterEngineResult FlutterEngineRun(size_t version,
-                                     const FlutterRendererConfig* config,
-                                     const FlutterProjectArgs* args,
-                                     void* user_data,
-                                     FLUTTER_API_SYMBOL(FlutterEngine) *
-                                         engine_out) {
-  auto result =
-      FlutterEngineInitialize(version, config, args, user_data, engine_out);
+namespace {
 
-  if (result != kSuccess) {
-    return result;
+// A custom AssetResolver backed by embedder-provided C callbacks.
+class EmbedderCustomAssetResolver : public flutter::AssetResolver {
+ public:
+  explicit EmbedderCustomAssetResolver(
+      const FlutterCustomAssetResolver& resolver)
+      : resolver_(resolver) {}
+
+  ~EmbedderCustomAssetResolver() override {
+    if (resolver_.destruction_callback != nullptr) {
+      resolver_.destruction_callback(resolver_.user_data);
+    }
   }
 
-  return FlutterEngineRunInitialized(*engine_out);
+  // |flutter::AssetResolver|
+  bool IsValid() const override {
+    return resolver_.get_as_mapping_callback != nullptr;
+  }
+
+  // |flutter::AssetResolver|
+  bool IsValidAfterAssetManagerChange() const override { return true; }
+
+  // |flutter::AssetResolver|
+  flutter::AssetResolver::AssetResolverType GetType() const override {
+    return flutter::AssetResolver::AssetResolverType::kApkAssetProvider;
+  }
+
+  // |flutter::AssetResolver|
+  std::unique_ptr<fml::Mapping> GetAsMapping(
+      const std::string& asset_name) const override {
+    if (resolver_.get_as_mapping_callback == nullptr) {
+      return nullptr;
+    }
+    FlutterAssetMapping c_mapping = {};
+    c_mapping.struct_size = sizeof(FlutterAssetMapping);
+    if (!resolver_.get_as_mapping_callback(asset_name.c_str(),
+                                           resolver_.user_data, &c_mapping)) {
+      return nullptr;
+    }
+    const FlutterAssetMapping* mapping_ptr = &c_mapping;
+    const uint8_t* mapping_data = SAFE_ACCESS(mapping_ptr, mapping, nullptr);
+    size_t mapping_size = SAFE_ACCESS(mapping_ptr, mapping_size, 0);
+    VoidCallback destruction_cb =
+        SAFE_ACCESS(mapping_ptr, destruction_callback, nullptr);
+    void* destruction_user_data = SAFE_ACCESS(mapping_ptr, user_data, nullptr);
+
+    if (mapping_data == nullptr && mapping_size > 0) {
+      if (destruction_cb != nullptr) {
+        destruction_cb(destruction_user_data);
+      }
+      return nullptr;
+    }
+    fml::NonOwnedMapping::ReleaseProc release_func = nullptr;
+    if (destruction_cb != nullptr) {
+      release_func = [destruction_cb, destruction_user_data](
+                         const uint8_t* data, size_t size) {
+        destruction_cb(destruction_user_data);
+      };
+    }
+    return std::make_unique<fml::NonOwnedMapping>(mapping_data, mapping_size,
+                                                  release_func, false);
+  }
+
+  // |flutter::AssetResolver|
+  bool operator==(const flutter::AssetResolver& other) const override {
+    if (other.GetType() != GetType()) {
+      return false;
+    }
+    const auto* other_resolver =
+        static_cast<const EmbedderCustomAssetResolver*>(&other);
+    return resolver_.user_data == other_resolver->resolver_.user_data &&
+           resolver_.get_as_mapping_callback ==
+               other_resolver->resolver_.get_as_mapping_callback &&
+           resolver_.destruction_callback ==
+               other_resolver->resolver_.destruction_callback;
+  }
+
+ private:
+  FlutterCustomAssetResolver resolver_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderCustomAssetResolver);
+};
+
+// A custom ImageGenerator backed by embedder-provided C callbacks.
+class EmbedderImageDecoder : public flutter::ImageGenerator {
+ public:
+  explicit EmbedderImageDecoder(std::unique_ptr<FlutterImageDecoder> decoder)
+      : decoder_(std::move(decoder)) {}
+
+  ~EmbedderImageDecoder() override {
+    const FlutterImageDecoder* decoder_ptr = decoder_.get();
+    if (decoder_ptr != nullptr &&
+        SAFE_ACCESS(decoder_ptr, destruction_callback, nullptr) != nullptr) {
+      decoder_ptr->destruction_callback(decoder_ptr->user_data);
+    }
+  }
+
+  // |flutter::ImageGenerator|
+  const SkImageInfo& GetInfo() override {
+    if (!info_initialized_) {
+      info_initialized_ = true;
+      info_ = FetchInfo();
+    }
+    return info_;
+  }
+
+  // |flutter::ImageGenerator|
+  unsigned int GetFrameCount() const override { return 1; }
+
+  // |flutter::ImageGenerator|
+  unsigned int GetPlayCount() const override { return 1; }
+
+  // |flutter::ImageGenerator|
+  const flutter::ImageGenerator::FrameInfo GetFrameInfo(
+      unsigned int frame_index) override {
+    return {std::nullopt, 0, SkCodecAnimation::DisposalMethod::kKeep,
+            std::nullopt, SkCodecAnimation::Blend::kSrcOver};
+  }
+
+  // |flutter::ImageGenerator|
+  SkISize GetScaledDimensions(float desired_scale) override {
+    return GetInfo().dimensions();
+  }
+
+  // |flutter::ImageGenerator|
+  bool GetPixels(const SkImageInfo& info,
+                 void* pixels,
+                 size_t row_bytes,
+                 unsigned int frame_index,
+                 std::optional<unsigned int> prior_frame) override {
+    const FlutterImageDecoder* decoder_ptr = decoder_.get();
+    if (decoder_ptr == nullptr ||
+        SAFE_ACCESS(decoder_ptr, get_pixels, nullptr) == nullptr) {
+      return false;
+    }
+    FlutterImageDecoderInfo c_info = {};
+    c_info.struct_size = sizeof(FlutterImageDecoderInfo);
+    c_info.width = static_cast<size_t>(info.width());
+    c_info.height = static_cast<size_t>(info.height());
+    switch (info.colorType()) {
+      case kBGRA_8888_SkColorType:
+        c_info.color_type = kFlutterImageDecoderColorTypeBGRA8888;
+        break;
+      case kRGBA_8888_SkColorType:
+      default:
+        c_info.color_type = kFlutterImageDecoderColorTypeRGBA8888;
+        break;
+    }
+    switch (info.alphaType()) {
+      case kOpaque_SkAlphaType:
+        c_info.alpha_type = kFlutterImageDecoderAlphaTypeOpaque;
+        break;
+      case kUnpremul_SkAlphaType:
+        c_info.alpha_type = kFlutterImageDecoderAlphaTypeUnpremul;
+        break;
+      case kPremul_SkAlphaType:
+      default:
+        c_info.alpha_type = kFlutterImageDecoderAlphaTypePremul;
+        break;
+    }
+    c_info.color_space = kFlutterImageDecoderColorSpaceSRGB;
+    return decoder_ptr->get_pixels(decoder_ptr->user_data, &c_info, pixels,
+                                   row_bytes);
+  }
+
+  bool IsValidImageData() {
+    return GetInfo().width() > 0 && GetInfo().height() > 0;
+  }
+
+ private:
+  SkImageInfo FetchInfo() {
+    const FlutterImageDecoder* decoder_ptr = decoder_.get();
+    if (decoder_ptr == nullptr ||
+        SAFE_ACCESS(decoder_ptr, get_info, nullptr) == nullptr) {
+      return SkImageInfo::MakeUnknown();
+    }
+    FlutterImageDecoderInfo c_info = {};
+    c_info.struct_size = sizeof(FlutterImageDecoderInfo);
+    if (!decoder_ptr->get_info(decoder_ptr->user_data, &c_info)) {
+      return SkImageInfo::MakeUnknown();
+    }
+    const FlutterImageDecoderInfo* c_info_ptr = &c_info;
+    SkColorType color_type = kRGBA_8888_SkColorType;
+    switch (SAFE_ACCESS(c_info_ptr, color_type,
+                        kFlutterImageDecoderColorTypeRGBA8888)) {
+      case kFlutterImageDecoderColorTypeBGRA8888:
+        color_type = kBGRA_8888_SkColorType;
+        break;
+      case kFlutterImageDecoderColorTypeRGBA8888:
+      default:
+        color_type = kRGBA_8888_SkColorType;
+        break;
+    }
+    SkAlphaType alpha_type = kPremul_SkAlphaType;
+    switch (SAFE_ACCESS(c_info_ptr, alpha_type,
+                        kFlutterImageDecoderAlphaTypePremul)) {
+      case kFlutterImageDecoderAlphaTypeOpaque:
+        alpha_type = kOpaque_SkAlphaType;
+        break;
+      case kFlutterImageDecoderAlphaTypeUnpremul:
+        alpha_type = kUnpremul_SkAlphaType;
+        break;
+      case kFlutterImageDecoderAlphaTypePremul:
+      default:
+        alpha_type = kPremul_SkAlphaType;
+        break;
+    }
+    return SkImageInfo::Make(
+        static_cast<int>(SAFE_ACCESS(c_info_ptr, width, 0)),
+        static_cast<int>(SAFE_ACCESS(c_info_ptr, height, 0)), color_type,
+        alpha_type, SkColorSpace::MakeSRGB());
+  }
+
+  std::unique_ptr<FlutterImageDecoder> decoder_;
+  SkImageInfo info_;
+  bool info_initialized_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderImageDecoder);
+};
+
+struct EmbedderImageDecoderRegistrationHolder {
+  FlutterImageDecoderRegistration registration;
+  explicit EmbedderImageDecoderRegistrationHolder(
+      const FlutterImageDecoderRegistration& reg)
+      : registration(reg) {}
+  ~EmbedderImageDecoderRegistrationHolder() {
+    const FlutterImageDecoderRegistration* reg_ptr = &registration;
+    if (SAFE_ACCESS(reg_ptr, destruction_callback, nullptr) != nullptr) {
+      registration.destruction_callback(registration.user_data);
+    }
+  }
+};
+
+flutter::ImageGeneratorFactory CreateEmbedderImageDecoderFactory(
+    const FlutterImageDecoderRegistration& registration) {
+  auto holder =
+      std::make_shared<EmbedderImageDecoderRegistrationHolder>(registration);
+  return [holder](const sk_sp<SkData>& buffer)
+             -> std::shared_ptr<flutter::ImageGenerator> {
+    const FlutterImageDecoderRegistration* reg_ptr = &holder->registration;
+    if (SAFE_ACCESS(reg_ptr, create_decoder, nullptr) == nullptr ||
+        buffer == nullptr) {
+      return nullptr;
+    }
+    auto c_decoder = std::make_unique<FlutterImageDecoder>();
+    c_decoder->struct_size = sizeof(FlutterImageDecoder);
+    if (!holder->registration.create_decoder(holder->registration.user_data,
+                                             buffer->bytes(), buffer->size(),
+                                             c_decoder.get())) {
+      return nullptr;
+    }
+    auto generator =
+        std::make_shared<EmbedderImageDecoder>(std::move(c_decoder));
+    if (!generator->IsValidImageData()) {
+      return nullptr;
+    }
+    return generator;
+  };
 }
 
-FlutterEngineResult FlutterEngineInitialize(size_t version,
-                                            const FlutterRendererConfig* config,
-                                            const FlutterProjectArgs* args,
-                                            void* user_data,
-                                            FLUTTER_API_SYMBOL(FlutterEngine) *
-                                                engine_out) {
-  // Step 0: Figure out arguments for shell creation.
-  if (version != FLUTTER_ENGINE_VERSION) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidLibraryVersion,
-        "Flutter embedder version mismatch. There has been a breaking change. "
-        "Please consult the changelog and update the embedder.");
-  }
-
-  if (engine_out == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "The engine out parameter was missing.");
-  }
-
-  if (args == nullptr) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "The Flutter project arguments were missing.");
-  }
-
-  if (SAFE_ACCESS(args, assets_path, nullptr) == nullptr) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "The assets path in the Flutter project arguments was missing.");
-  }
-
-  if (SAFE_ACCESS(args, main_path__unused__, nullptr) != nullptr) {
-    FML_LOG(WARNING)
-        << "FlutterProjectArgs.main_path is deprecated and should be set null.";
-  }
-
-  if (SAFE_ACCESS(args, packages_path__unused__, nullptr) != nullptr) {
-    FML_LOG(WARNING) << "FlutterProjectArgs.packages_path is deprecated and "
-                        "should be set null.";
-  }
-
-  if (!IsRendererValid(config)) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "The renderer configuration was invalid.");
-  }
-
-  std::string icu_data_path;
-  if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
-    icu_data_path = SAFE_ACCESS(args, icu_data_path, nullptr);
-  }
-
-#if !SLIMPELLER
-  if (SAFE_ACCESS(args, persistent_cache_path, nullptr) != nullptr) {
-    std::string persistent_cache_path =
-        SAFE_ACCESS(args, persistent_cache_path, nullptr);
-    flutter::PersistentCache::SetCacheDirectoryPath(persistent_cache_path);
-  }
-
-  if (SAFE_ACCESS(args, is_persistent_cache_read_only, false)) {
-    flutter::PersistentCache::gIsReadOnly = true;
-  }
-#endif  //  !SLIMPELLER
-
-  fml::CommandLine command_line;
-  if (SAFE_ACCESS(args, command_line_argc, 0) != 0 &&
-      SAFE_ACCESS(args, command_line_argv, nullptr) != nullptr) {
-    command_line = fml::CommandLineFromArgcArgv(
-        SAFE_ACCESS(args, command_line_argc, 0),
-        SAFE_ACCESS(args, command_line_argv, nullptr));
-  }
-
-  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
-
-  if (SAFE_ACCESS(args, aot_data, nullptr)) {
-    if (SAFE_ACCESS(args, vm_snapshot_data, nullptr) ||
-        SAFE_ACCESS(args, vm_snapshot_instructions, nullptr) ||
-        SAFE_ACCESS(args, isolate_snapshot_data, nullptr) ||
-        SAFE_ACCESS(args, isolate_snapshot_instructions, nullptr)) {
-      return LOG_EMBEDDER_ERROR(
-          kInvalidArguments,
-          "Multiple AOT sources specified. Embedders should provide either "
-          "*_snapshot_* buffers or aot_data, not both.");
-    }
-  }
-
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
-    PopulateAOTSnapshotMappingCallbacks(args, settings);
-  } else {
-    PopulateJITSnapshotMappingCallbacks(args, settings);
-  }
-
-  settings.icu_data_path = icu_data_path;
-  settings.assets_path = args->assets_path;
-  settings.leak_vm = !SAFE_ACCESS(args, shutdown_dart_vm_when_done, false);
-  settings.old_gen_heap_size = SAFE_ACCESS(args, dart_old_gen_heap_size, -1);
-  settings.enable_wide_gamut = SAFE_ACCESS(args, enable_wide_gamut, false);
-
-  if (!flutter::DartVM::IsRunningPrecompiledCode()) {
-    // Verify the assets path contains Dart 2 kernel assets.
-    const std::string kApplicationKernelSnapshotFileName = "kernel_blob.bin";
-    std::string application_kernel_path = fml::paths::JoinPaths(
-        {settings.assets_path, kApplicationKernelSnapshotFileName});
-    if (!fml::IsFile(application_kernel_path)) {
-      return LOG_EMBEDDER_ERROR(
-          kInvalidArguments,
-          "Not running in AOT mode but could not resolve the kernel binary.");
-    }
-    settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
-  }
-
-  if (SAFE_ACCESS(args, root_isolate_create_callback, nullptr) != nullptr) {
-    VoidCallback callback =
-        SAFE_ACCESS(args, root_isolate_create_callback, nullptr);
-    settings.root_isolate_create_callback =
-        [callback, user_data](const auto& isolate) { callback(user_data); };
-  }
-
-  // Wire up callback for engine and print logging.
-  if (SAFE_ACCESS(args, log_message_callback, nullptr) != nullptr) {
-    FlutterLogMessageCallback callback =
-        SAFE_ACCESS(args, log_message_callback, nullptr);
-    settings.log_message_callback = [callback, user_data](
-                                        const std::string& tag,
-                                        const std::string& message) {
-      callback(tag.c_str(), message.c_str(), user_data);
-    };
-  } else {
-    settings.log_message_callback = [](const std::string& tag,
-                                       const std::string& message) {
-      // Fall back to logging to stdout if unspecified.
-      if (tag.empty()) {
-        std::cout << tag << ": ";
-      }
-      std::cout << message << std::endl;
-    };
-  }
-
-  if (SAFE_ACCESS(args, log_tag, nullptr) != nullptr) {
-    settings.log_tag = SAFE_ACCESS(args, log_tag, nullptr);
-  }
-
-  bool has_update_semantics_2_callback =
-      SAFE_ACCESS(args, update_semantics_callback2, nullptr) != nullptr;
-  bool has_update_semantics_callback =
-      SAFE_ACCESS(args, update_semantics_callback, nullptr) != nullptr;
-  bool has_legacy_update_semantics_callback =
-      SAFE_ACCESS(args, update_semantics_node_callback, nullptr) != nullptr ||
-      SAFE_ACCESS(args, update_semantics_custom_action_callback, nullptr) !=
-          nullptr;
-
-  int semantic_callback_count = (has_update_semantics_2_callback ? 1 : 0) +
-                                (has_update_semantics_callback ? 1 : 0) +
-                                (has_legacy_update_semantics_callback ? 1 : 0);
-
-  if (semantic_callback_count > 1) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Multiple semantics update callbacks provided. "
-        "Embedders should provide either `update_semantics_callback2`, "
-        "`update_semantics_callback`, or both "
-        "`update_semantics_node_callback` and "
-        "`update_semantics_custom_action_callback`.");
-  }
-
+flutter::PlatformViewEmbedder::PlatformDispatchTable
+CreatePlatformDispatchTable(const FlutterProjectArgs* args, void* user_data) {
   flutter::PlatformViewEmbedder::UpdateSemanticsCallback
       update_semantics_callback =
           CreateEmbedderSemanticsUpdateCallback(args, user_data);
@@ -2338,6 +3144,274 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         };
   }
 
+  flutter::PlatformViewEmbedder::RequestDartDeferredLibraryCallback
+      request_dart_deferred_library_callback = nullptr;
+  if (SAFE_ACCESS(args, request_dart_deferred_library_callback, nullptr) !=
+      nullptr) {
+    request_dart_deferred_library_callback =
+        [ptr = args->request_dart_deferred_library_callback, user_data](
+            intptr_t loading_unit_id) { ptr(loading_unit_id, user_data); };
+  }
+
+  flutter::PlatformViewEmbedder::GetScaledFontSizeCallback
+      get_scaled_font_size_callback = nullptr;
+  if (SAFE_ACCESS(args, scale_font_size_callback, nullptr) != nullptr) {
+    get_scaled_font_size_callback =
+        [ptr = args->scale_font_size_callback, user_data](
+            double unscaled_font_size, int configuration_id) -> double {
+      FlutterScaleFontSizeInfo info = {
+          .struct_size = sizeof(FlutterScaleFontSizeInfo),
+          .font_size = unscaled_font_size,
+          .text_scale_factor = static_cast<double>(configuration_id),
+      };
+      double scaled_out = -1.0;
+      if (ptr(&info, &scaled_out, user_data)) {
+        return scaled_out;
+      }
+      return -1.0;
+    };
+  }
+
+  bool enable_direct_platform_message_dispatch =
+      SAFE_ACCESS(args, enable_direct_platform_message_dispatch, false);
+
+  flutter::PlatformViewEmbedder::PlatformDispatchTable table = {};
+  table.update_semantics_callback = update_semantics_callback;
+  table.platform_message_response_callback = platform_message_response_callback;
+  table.vsync_callback = vsync_callback;
+  table.compute_platform_resolved_locale_callback =
+      compute_platform_resolved_locale_callback;
+  table.on_pre_engine_restart_callback = on_pre_engine_restart_callback;
+  table.on_channel_update = channel_update_callback;
+  table.view_focus_change_request_callback = view_focus_change_request_callback;
+  table.get_scaled_font_size_callback = get_scaled_font_size_callback;
+  table.request_dart_deferred_library_callback =
+      request_dart_deferred_library_callback;
+  table.enable_direct_platform_message_dispatch =
+      enable_direct_platform_message_dispatch;
+  return table;
+}
+
+}  // namespace
+
+FlutterEngineResult FlutterEngineRun(size_t version,
+                                     const FlutterRendererConfig* config,
+                                     const FlutterProjectArgs* args,
+                                     void* user_data,
+                                     FLUTTER_API_SYMBOL(FlutterEngine) *
+                                         engine_out) {
+  auto result =
+      FlutterEngineInitialize(version, config, args, user_data, engine_out);
+
+  if (result != kSuccess) {
+    return result;
+  }
+
+  return FlutterEngineRunInitialized(*engine_out);
+}
+
+FlutterEngineResult FlutterEngineInitialize(size_t version,
+                                            const FlutterRendererConfig* config,
+                                            const FlutterProjectArgs* args,
+                                            void* user_data,
+                                            FLUTTER_API_SYMBOL(FlutterEngine) *
+                                                engine_out) {
+  // Step 0: Figure out arguments for shell creation.
+  if (version != FLUTTER_ENGINE_VERSION) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidLibraryVersion,
+        "Flutter embedder version mismatch. There has been a breaking change. "
+        "Please consult the changelog and update the embedder.");
+  }
+
+  if (engine_out == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The engine out parameter was missing.");
+  }
+
+  if (args == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The Flutter project arguments were missing.");
+  }
+
+  size_t custom_resolvers_count =
+      SAFE_ACCESS(args, custom_asset_resolvers_count, 0);
+  const FlutterCustomAssetResolver** custom_resolvers =
+      SAFE_ACCESS(args, custom_asset_resolvers, nullptr);
+  bool has_custom_resolvers =
+      custom_resolvers_count > 0 && custom_resolvers != nullptr;
+
+  if (SAFE_ACCESS(args, assets_path, nullptr) == nullptr &&
+      !has_custom_resolvers) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "The assets path in the Flutter project arguments was missing.");
+  }
+
+  if (SAFE_ACCESS(args, main_path__unused__, nullptr) != nullptr) {
+    FML_LOG(WARNING)
+        << "FlutterProjectArgs.main_path is deprecated and should be set null.";
+  }
+
+  if (SAFE_ACCESS(args, packages_path__unused__, nullptr) != nullptr) {
+    FML_LOG(WARNING) << "FlutterProjectArgs.packages_path is deprecated and "
+                        "should be set null.";
+  }
+
+  if (!IsRendererValid(config)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The renderer configuration was invalid.");
+  }
+
+  std::string icu_data_path;
+  if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
+    icu_data_path = SAFE_ACCESS(args, icu_data_path, nullptr);
+  }
+
+#if !SLIMPELLER
+  if (SAFE_ACCESS(args, persistent_cache_path, nullptr) != nullptr) {
+    std::string persistent_cache_path =
+        SAFE_ACCESS(args, persistent_cache_path, nullptr);
+    flutter::PersistentCache::SetCacheDirectoryPath(persistent_cache_path);
+  }
+
+  if (SAFE_ACCESS(args, is_persistent_cache_read_only, false)) {
+    flutter::PersistentCache::gIsReadOnly = true;
+  }
+#endif  //  !SLIMPELLER
+
+  fml::CommandLine command_line;
+  if (SAFE_ACCESS(args, command_line_argc, 0) != 0 &&
+      SAFE_ACCESS(args, command_line_argv, nullptr) != nullptr) {
+    command_line = fml::CommandLineFromArgcArgv(
+        SAFE_ACCESS(args, command_line_argc, 0),
+        SAFE_ACCESS(args, command_line_argv, nullptr));
+  }
+
+  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
+
+  if (SAFE_ACCESS(args, aot_data, nullptr)) {
+    if (SAFE_ACCESS(args, vm_snapshot_data, nullptr) ||
+        SAFE_ACCESS(args, vm_snapshot_instructions, nullptr) ||
+        SAFE_ACCESS(args, isolate_snapshot_data, nullptr) ||
+        SAFE_ACCESS(args, isolate_snapshot_instructions, nullptr)) {
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "Multiple AOT sources specified. Embedders should provide either "
+          "*_snapshot_* buffers or aot_data, not both.");
+    }
+  }
+
+  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+    PopulateAOTSnapshotMappingCallbacks(args, settings);
+  } else {
+    PopulateJITSnapshotMappingCallbacks(args, settings);
+  }
+
+  settings.icu_data_path = icu_data_path;
+  if (SAFE_ACCESS(args, assets_path, nullptr) != nullptr) {
+    settings.assets_path = args->assets_path;
+  }
+  settings.leak_vm = !SAFE_ACCESS(args, shutdown_dart_vm_when_done, false);
+  settings.old_gen_heap_size = SAFE_ACCESS(args, dart_old_gen_heap_size, -1);
+  settings.enable_wide_gamut = SAFE_ACCESS(args, enable_wide_gamut, false);
+
+  auto asset_manager = std::make_shared<flutter::AssetManager>();
+  if (fml::UniqueFD::traits_type::IsValid(settings.assets_dir)) {
+    asset_manager->PushBack(std::make_unique<flutter::DirectoryAssetBundle>(
+        fml::Duplicate(settings.assets_dir), true));
+  }
+  if (!settings.assets_path.empty()) {
+    asset_manager->PushBack(std::make_unique<flutter::DirectoryAssetBundle>(
+        fml::OpenDirectory(settings.assets_path.c_str(), false,
+                           fml::FilePermission::kRead),
+        true));
+  }
+  if (has_custom_resolvers) {
+    for (size_t i = 0; i < custom_resolvers_count; ++i) {
+      const FlutterCustomAssetResolver* resolver = custom_resolvers[i];
+      if (resolver != nullptr &&
+          SAFE_ACCESS(resolver, get_as_mapping_callback, nullptr) != nullptr) {
+        asset_manager->PushBack(
+            std::make_unique<EmbedderCustomAssetResolver>(*resolver));
+      }
+    }
+  }
+
+  if (!flutter::DartVM::IsRunningPrecompiledCode()) {
+    // Verify the assets contain Dart 2 kernel assets.
+    const std::string kApplicationKernelSnapshotFileName = "kernel_blob.bin";
+    std::string application_kernel_path = fml::paths::JoinPaths(
+        {settings.assets_path, kApplicationKernelSnapshotFileName});
+    bool kernel_exists =
+        (!settings.assets_path.empty() && fml::IsFile(application_kernel_path));
+    if (!kernel_exists && has_custom_resolvers) {
+      auto kernel_mapping =
+          asset_manager->GetAsMapping(kApplicationKernelSnapshotFileName);
+      kernel_exists = (kernel_mapping != nullptr);
+    }
+    if (!kernel_exists) {
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "Not running in AOT mode but could not resolve the kernel binary.");
+    }
+    settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
+  }
+
+  if (SAFE_ACCESS(args, root_isolate_create_callback, nullptr) != nullptr) {
+    VoidCallback callback =
+        SAFE_ACCESS(args, root_isolate_create_callback, nullptr);
+    settings.root_isolate_create_callback =
+        [callback, user_data](const auto& isolate) { callback(user_data); };
+  }
+
+  // Wire up callback for engine and print logging.
+  if (SAFE_ACCESS(args, log_message_callback, nullptr) != nullptr) {
+    FlutterLogMessageCallback callback =
+        SAFE_ACCESS(args, log_message_callback, nullptr);
+    settings.log_message_callback = [callback, user_data](
+                                        const std::string& tag,
+                                        const std::string& message) {
+      callback(tag.c_str(), message.c_str(), user_data);
+    };
+  } else {
+    settings.log_message_callback = [](const std::string& tag,
+                                       const std::string& message) {
+      // Fall back to logging to stdout if unspecified.
+      if (tag.empty()) {
+        std::cout << tag << ": ";
+      }
+      std::cout << message << std::endl;
+    };
+  }
+
+  if (SAFE_ACCESS(args, log_tag, nullptr) != nullptr) {
+    settings.log_tag = SAFE_ACCESS(args, log_tag, nullptr);
+  }
+
+  bool has_update_semantics_2_callback =
+      SAFE_ACCESS(args, update_semantics_callback2, nullptr) != nullptr;
+  bool has_update_semantics_callback =
+      SAFE_ACCESS(args, update_semantics_callback, nullptr) != nullptr;
+  bool has_legacy_update_semantics_callback =
+      SAFE_ACCESS(args, update_semantics_node_callback, nullptr) != nullptr ||
+      SAFE_ACCESS(args, update_semantics_custom_action_callback, nullptr) !=
+          nullptr;
+
+  int semantic_callback_count = (has_update_semantics_2_callback ? 1 : 0) +
+                                (has_update_semantics_callback ? 1 : 0) +
+                                (has_legacy_update_semantics_callback ? 1 : 0);
+
+  if (semantic_callback_count > 1) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Multiple semantics update callbacks provided. "
+        "Embedders should provide either `update_semantics_callback2`, "
+        "`update_semantics_callback`, or both "
+        "`update_semantics_node_callback` and "
+        "`update_semantics_custom_action_callback`.");
+  }
+
   auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
       SAFE_ACCESS(args, compositor, nullptr), settings.enable_impeller);
   if (!external_view_embedder_result.ok()) {
@@ -2347,25 +3421,29 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   }
 
   flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
-      {
-          update_semantics_callback,                  //
-          platform_message_response_callback,         //
-          vsync_callback,                             //
-          compute_platform_resolved_locale_callback,  //
-          on_pre_engine_restart_callback,             //
-          channel_update_callback,                    //
-          view_focus_change_request_callback,         //
-  };
+      CreatePlatformDispatchTable(args, user_data);
 
   impeller::Flags impeller_flags;
   impeller_flags.use_sdfs = settings.impeller_use_sdfs;
   impeller_flags.top_left_default_framebuffer_origin =
       settings.impeller_top_left_default_framebuffer_origin;
 
+  auto renderer_state = std::make_shared<SharedRendererConfigState>();
+  renderer_state->config = *config;
+  if (config->type == kDeferred) {
+    renderer_state->resolve_user_data = user_data;
+  } else {
+    renderer_state->is_resolved = true;
+    renderer_state->resolved_promise->set_value();
+  }
+
+  auto engine_ptr_holder = std::make_shared<flutter::EmbedderEngine*>(nullptr);
+
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      settings.enable_impeller, impeller_flags);
+      settings.enable_impeller, impeller_flags, renderer_state,
+      engine_ptr_holder);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -2378,79 +3456,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         return std::make_unique<flutter::Rasterizer>(shell);
       };
 
-  using ExternalTextureResolver = flutter::EmbedderExternalTextureResolver;
-  std::unique_ptr<ExternalTextureResolver> external_texture_resolver;
-  external_texture_resolver = std::make_unique<ExternalTextureResolver>();
+  auto external_texture_resolver =
+      CreateExternalTextureResolver(config, user_data);
 
-#ifdef SHELL_ENABLE_GL
-  flutter::EmbedderExternalTextureGL::ExternalTextureCallback
-      external_texture_callback;
-  if (config->type == kOpenGL) {
-    const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
-    if (SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
-                    nullptr) != nullptr) {
-      external_texture_callback =
-          [ptr = open_gl_config->gl_external_texture_frame_callback, user_data](
-              int64_t texture_identifier, size_t width,
-              size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
-        std::unique_ptr<FlutterOpenGLTexture> texture =
-            std::make_unique<FlutterOpenGLTexture>();
-        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
-          return nullptr;
-        }
-        return texture;
-      };
-      external_texture_resolver =
-          std::make_unique<ExternalTextureResolver>(external_texture_callback);
-    }
-  }
-#endif
-#ifdef SHELL_ENABLE_METAL
-  flutter::EmbedderExternalTextureMetal::ExternalTextureCallback
-      external_texture_metal_callback;
-  if (config->type == kMetal) {
-    const FlutterMetalRendererConfig* metal_config = &config->metal;
-    if (SAFE_ACCESS(metal_config, external_texture_frame_callback, nullptr)) {
-      external_texture_metal_callback =
-          [ptr = metal_config->external_texture_frame_callback, user_data](
-              int64_t texture_identifier, size_t width,
-              size_t height) -> std::unique_ptr<FlutterMetalExternalTexture> {
-        std::unique_ptr<FlutterMetalExternalTexture> texture =
-            std::make_unique<FlutterMetalExternalTexture>();
-        texture->struct_size = sizeof(FlutterMetalExternalTexture);
-        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
-          return nullptr;
-        }
-        return texture;
-      };
-      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
-          external_texture_metal_callback);
-    }
-  }
-#endif
-#ifdef SHELL_ENABLE_VULKAN
-  if (config->type == kVulkan) {
-    const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
-    if (auto callback = SAFE_ACCESS(vulkan_config,
-                                    external_texture_frame_callback, nullptr)) {
-      auto external_texture_vulkan_callback =
-          [frame_callback = callback, user_data](
-              int64_t texture_identifier, size_t width,
-              size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
-        std::unique_ptr<FlutterVulkanExternalTexture> texture =
-            std::make_unique<FlutterVulkanExternalTexture>();
-        texture->struct_size = sizeof(FlutterVulkanExternalTexture);
-        if (!frame_callback(user_data, texture_identifier, width, height,
-                            texture.get())) {
-          return nullptr;
-        }
-        return texture;
-      };
-      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
-          external_texture_vulkan_callback);
-    }
-  }
-#endif
   auto custom_task_runners = SAFE_ACCESS(args, custom_task_runners, nullptr);
   auto thread_config_callback = [&custom_task_runners](
                                     const fml::Thread::ThreadConfig& config) {
@@ -2512,13 +3520,22 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     }
   };
 
-  auto run_configuration =
-      flutter::RunConfiguration::InferFromSettings(settings);
+  flutter::RunConfiguration run_configuration(
+      flutter::IsolateConfiguration::InferFromSettings(settings, asset_manager),
+      asset_manager);
 
   if (SAFE_ACCESS(args, custom_dart_entrypoint, nullptr) != nullptr) {
     auto dart_entrypoint = std::string{args->custom_dart_entrypoint};
     if (!dart_entrypoint.empty()) {
-      run_configuration.SetEntrypoint(std::move(dart_entrypoint));
+      std::string dart_entrypoint_library;
+      if (command_line.GetOptionValue("dart-entrypoint-library",
+                                      &dart_entrypoint_library) &&
+          !dart_entrypoint_library.empty()) {
+        run_configuration.SetEntrypointAndLibrary(
+            std::move(dart_entrypoint), std::move(dart_entrypoint_library));
+      } else {
+        run_configuration.SetEntrypoint(std::move(dart_entrypoint));
+      }
     }
   }
 
@@ -2556,6 +3573,44 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       on_create_rasterizer,                 //
       std::move(external_texture_resolver)  //
   );
+
+  *engine_ptr_holder = embedder_engine.get();
+  embedder_engine->SetRendererConfig(*config);
+  if (config->type == kDeferred) {
+    embedder_engine->SetDeferredRendererResolvedFuture(
+        renderer_state->resolved_future);
+  }
+  embedder_engine->SetSavedProjectArgs(*args);
+  embedder_engine->SetAssetManager(asset_manager);
+  SetRendererConfigState(embedder_engine.get(), renderer_state);
+
+  size_t image_decoders_count = SAFE_ACCESS(args, image_decoders_count, 0);
+  const FlutterImageDecoderRegistration** image_decoders =
+      SAFE_ACCESS(args, image_decoders, nullptr);
+  if (image_decoders_count > 0 && image_decoders != nullptr) {
+    for (size_t i = 0; i < image_decoders_count; ++i) {
+      const FlutterImageDecoderRegistration* reg = image_decoders[i];
+      if (reg != nullptr &&
+          SAFE_ACCESS(reg, create_decoder, nullptr) != nullptr) {
+        int32_t priority = SAFE_ACCESS(reg, priority, 0);
+        auto factory = CreateEmbedderImageDecoderFactory(*reg);
+        embedder_engine->AddImageGenerator(factory, priority);
+      }
+    }
+  }
+
+  if (SAFE_ACCESS(args, vm_service_uri_callback, nullptr) != nullptr) {
+    FlutterVMServiceUriCallback cb =
+        SAFE_ACCESS(args, vm_service_uri_callback, nullptr);
+    embedder_engine->SetVMServiceUriCallback(
+        [cb, user_data](const std::string& uri) {
+          FlutterVMServiceUriInfo info = {
+              .struct_size = sizeof(FlutterVMServiceUriInfo),
+              .uri = uri.c_str(),
+          };
+          cb(&info, user_data);
+        });
+  }
 
   // Release the ownership of the embedder engine to the caller.
   *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(
@@ -2598,6 +3653,219 @@ FlutterEngineResult FlutterEngineRunInitialized(
         "project arguments specified.");
   }
 
+  return kSuccess;
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
+                                           parent_engine,
+                                       const FlutterEngineSpawnInfo* spawn_info,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           spawned_engine_out) {
+  if (parent_engine == nullptr || spawn_info == nullptr ||
+      spawned_engine_out == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Invalid arguments for FlutterEngineSpawn.");
+  }
+
+  auto parent = reinterpret_cast<flutter::EmbedderEngine*>(parent_engine);
+  if (!parent->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Parent engine must be running to spawn.");
+  }
+
+  const FlutterProjectArgs& parent_args = parent->GetSavedProjectArgs();
+  const FlutterProjectArgs* args = &parent_args;
+  void* user_data = SAFE_ACCESS(spawn_info, user_data, nullptr);
+
+  flutter::Settings settings = parent->GetShell().GetSettings();
+  if (SAFE_ACCESS(args, root_isolate_create_callback, nullptr) != nullptr) {
+    VoidCallback callback =
+        SAFE_ACCESS(args, root_isolate_create_callback, nullptr);
+    settings.root_isolate_create_callback =
+        [callback, user_data](const auto& isolate) { callback(user_data); };
+  }
+  if (SAFE_ACCESS(args, log_message_callback, nullptr) != nullptr) {
+    FlutterLogMessageCallback callback =
+        SAFE_ACCESS(args, log_message_callback, nullptr);
+    settings.log_message_callback = [callback, user_data](
+                                        const std::string& tag,
+                                        const std::string& message) {
+      callback(tag.c_str(), message.c_str(), user_data);
+    };
+  }
+
+  const FlutterCompositor* compositor = SAFE_ACCESS(
+      spawn_info, compositor, SAFE_ACCESS(args, compositor, nullptr));
+  auto external_view_embedder_result =
+      InferExternalViewEmbedderFromArgs(compositor, settings.enable_impeller);
+  if (!external_view_embedder_result.ok()) {
+    FML_LOG(ERROR) << external_view_embedder_result.status().message();
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Compositor arguments were invalid.");
+  }
+
+  flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
+      CreatePlatformDispatchTable(args, user_data);
+
+  impeller::Flags impeller_flags;
+  impeller_flags.use_sdfs = settings.impeller_use_sdfs;
+  impeller_flags.top_left_default_framebuffer_origin =
+      settings.impeller_top_left_default_framebuffer_origin;
+
+  std::optional<FlutterRendererConfig> parent_config =
+      parent->GetRendererConfig();
+  if (!parent_config.has_value()) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Parent engine does not have a valid renderer configuration.");
+  }
+  auto renderer_state = GetRendererConfigState(parent);
+  if (!renderer_state) {
+    renderer_state = std::make_shared<SharedRendererConfigState>();
+    renderer_state->config = *parent_config;
+    renderer_state->is_resolved = true;
+    renderer_state->resolved_promise->set_value();
+  }
+  if (parent->GetShell().GetPlatformView()) {
+    std::lock_guard<std::mutex> lock(renderer_state->mutex);
+    if (!renderer_state->impeller_context) {
+      renderer_state->impeller_context =
+          parent->GetShell().GetPlatformView()->GetImpellerContext();
+    }
+  }
+  const FlutterRendererConfig* effective_renderer = &(*parent_config);
+
+  auto engine_ptr_holder = std::make_shared<flutter::EmbedderEngine*>(nullptr);
+
+  auto on_create_platform_view = InferPlatformViewCreationCallback(
+      effective_renderer, user_data, platform_dispatch_table,
+      std::move(external_view_embedder_result.value()),
+      settings.enable_impeller, impeller_flags, renderer_state,
+      engine_ptr_holder);
+  if (!on_create_platform_view) {
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not infer platform view creation callback for spawned engine.");
+  }
+
+  flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
+      [](flutter::Shell& shell) {
+        return std::make_unique<flutter::Rasterizer>(shell);
+      };
+
+  FlutterRendererConfig texture_config = *effective_renderer;
+  if (renderer_state) {
+    std::lock_guard<std::mutex> lock(renderer_state->mutex);
+    if (renderer_state->is_resolved) {
+      texture_config = renderer_state->config;
+    }
+  }
+  auto external_texture_resolver =
+      CreateExternalTextureResolver(&texture_config, user_data);
+
+  std::shared_ptr<flutter::EmbedderThreadHost> thread_host =
+      parent->GetThreadHost();
+  const flutter::TaskRunners& task_runners = parent->GetTaskRunners();
+  auto asset_manager = parent->GetAssetManager();
+
+  flutter::RunConfiguration run_configuration =
+      asset_manager
+          ? flutter::RunConfiguration(
+                flutter::IsolateConfiguration::InferFromSettings(
+                    settings, asset_manager, nullptr,
+                    flutter::IsolateLaunchType::kExistingGroup),
+                asset_manager)
+          : flutter::RunConfiguration::InferFromSettings(
+                settings, nullptr, flutter::IsolateLaunchType::kExistingGroup);
+
+  std::string entrypoint = "main";
+  if (SAFE_ACCESS(spawn_info, entrypoint, nullptr) != nullptr &&
+      std::strlen(spawn_info->entrypoint) > 0) {
+    entrypoint = spawn_info->entrypoint;
+  } else if (SAFE_ACCESS(args, custom_dart_entrypoint, nullptr) != nullptr &&
+             std::strlen(args->custom_dart_entrypoint) > 0) {
+    entrypoint = args->custom_dart_entrypoint;
+  }
+  std::string library_uri;
+  if (SAFE_ACCESS(spawn_info, library_uri, nullptr) != nullptr &&
+      std::strlen(spawn_info->library_uri) > 0) {
+    library_uri = spawn_info->library_uri;
+  }
+  if (!library_uri.empty()) {
+    run_configuration.SetEntrypointAndLibrary(entrypoint, library_uri);
+  } else {
+    run_configuration.SetEntrypoint(entrypoint);
+  }
+
+  size_t entrypoint_argc = SAFE_ACCESS(spawn_info, entrypoint_argc, 0);
+  const char* const* entrypoint_argv =
+      SAFE_ACCESS(spawn_info, entrypoint_argv, nullptr);
+  if (entrypoint_argc > 0) {
+    if (entrypoint_argv == nullptr) {
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "entrypoint_argc > 0 but entrypoint_argv was null.");
+    }
+    std::vector<std::string> entrypoint_args(entrypoint_argc);
+    for (size_t i = 0; i < entrypoint_argc; ++i) {
+      entrypoint_args[i] =
+          entrypoint_argv[i] ? std::string{entrypoint_argv[i]} : std::string{};
+    }
+    run_configuration.SetEntrypointArgs(std::move(entrypoint_args));
+  }
+
+  std::string initial_route;
+  if (SAFE_ACCESS(spawn_info, initial_route, nullptr) != nullptr) {
+    initial_route = spawn_info->initial_route;
+  }
+
+  auto spawned_engine =
+      parent->Spawn(thread_host, task_runners, std::move(run_configuration),
+                    initial_route, on_create_platform_view,
+                    on_create_rasterizer, std::move(external_texture_resolver));
+  if (!spawned_engine) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Failed to spawn child shell from parent.");
+  }
+
+  *engine_ptr_holder = spawned_engine.get();
+  spawned_engine->SetRendererConfig(texture_config);
+  if (renderer_state) {
+    spawned_engine->SetDeferredRendererResolvedFuture(
+        renderer_state->resolved_future);
+  }
+  spawned_engine->SetSavedProjectArgs(parent_args);
+  spawned_engine->SetAssetManager(asset_manager);
+  SetRendererConfigState(spawned_engine.get(), renderer_state);
+
+  for (const auto& image_generator : parent->GetImageGenerators()) {
+    spawned_engine->AddImageGenerator(image_generator.factory,
+                                      image_generator.priority);
+  }
+
+  if (SAFE_ACCESS(args, vm_service_uri_callback, nullptr) != nullptr) {
+    FlutterVMServiceUriCallback cb =
+        SAFE_ACCESS(args, vm_service_uri_callback, nullptr);
+    spawned_engine->SetVMServiceUriCallback(
+        [cb, user_data](const std::string& uri) {
+          FlutterVMServiceUriInfo info = {
+              .struct_size = sizeof(FlutterVMServiceUriInfo),
+              .uri = uri.c_str(),
+          };
+          cb(&info, user_data);
+        });
+  }
+
+  if (!spawned_engine->NotifyCreated()) {
+    ClearRendererConfigState(spawned_engine.get());
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not create platform view components for spawned engine.");
+  }
+
+  *spawned_engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(
+      spawned_engine.release());
   return kSuccess;
 }
 
@@ -2748,6 +4016,7 @@ FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
   embedder_engine->NotifyDestroyed();
   embedder_engine->CollectShell();
   embedder_engine->CollectThreadHost();
+  ClearRendererConfigState(embedder_engine);
   return kSuccess;
 }
 
@@ -2892,8 +4161,7 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
   for (size_t i = 0; i < events_count; ++i) {
     flutter::PointerData pointer_data;
     pointer_data.Clear();
-    // this is currely in use only on android embedding.
-    pointer_data.embedder_id = 0;
+    pointer_data.embedder_id = SAFE_ACCESS(current, embedder_id, 0);
     pointer_data.time_stamp = SAFE_ACCESS(current, timestamp, 0);
     pointer_data.change = ToPointerDataChange(
         SAFE_ACCESS(current, phase, FlutterPointerPhase::kCancel));
@@ -2946,6 +4214,16 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     pointer_data.pressure_max = SAFE_ACCESS(current, pressure_max, 0.0);
     pointer_data.view_id =
         SAFE_ACCESS(current, view_id, kFlutterImplicitViewId);
+    pointer_data.distance = SAFE_ACCESS(current, distance, 0.0);
+    pointer_data.distance_max = SAFE_ACCESS(current, distance_max, 0.0);
+    pointer_data.size = SAFE_ACCESS(current, size, 0.0);
+    pointer_data.radius_major = SAFE_ACCESS(current, radius_major, 0.0);
+    pointer_data.radius_minor = SAFE_ACCESS(current, radius_minor, 0.0);
+    pointer_data.radius_min = SAFE_ACCESS(current, radius_min, 0.0);
+    pointer_data.radius_max = SAFE_ACCESS(current, radius_max, 0.0);
+    pointer_data.orientation = SAFE_ACCESS(current, orientation, 0.0);
+    pointer_data.tilt = SAFE_ACCESS(current, tilt, 0.0);
+    pointer_data.platformData = SAFE_ACCESS(current, platform_data, 0);
     packet->SetPointerData(i, pointer_data);
     current = reinterpret_cast<const FlutterPointerEvent*>(
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);
@@ -3119,8 +4397,15 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
 
   std::unique_ptr<flutter::PlatformMessage> message;
   if (message_size == 0) {
-    message = std::make_unique<flutter::PlatformMessage>(
-        flutter_message->channel, response);
+    if (message_data != nullptr) {
+      message = std::make_unique<flutter::PlatformMessage>(
+          flutter_message->channel,
+          fml::MallocMapping(reinterpret_cast<uint8_t*>(malloc(1)), 0),
+          response);
+    } else {
+      message = std::make_unique<flutter::PlatformMessage>(
+          flutter_message->channel, response);
+    }
   } else {
     message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel,
@@ -3199,7 +4484,7 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   auto response = handle->message->response();
 
   if (response) {
-    if (data_length == 0) {
+    if (data == nullptr) {
       response->CompleteEmpty();
     } else {
       response->Complete(std::make_unique<fml::DataMapping>(
@@ -3224,10 +4509,6 @@ FlutterEngineResult FlutterEngineRegisterExternalTexture(
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  if (texture_identifier == 0) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Texture identifier was invalid.");
-  }
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)->RegisterTexture(
           texture_identifier)) {
     return LOG_EMBEDDER_ERROR(kInternalInconsistency,
@@ -3241,11 +4522,6 @@ FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     int64_t texture_identifier) {
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
-  }
-
-  if (texture_identifier == 0) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Texture identifier was invalid.");
   }
 
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)->UnregisterTexture(
@@ -3262,9 +4538,6 @@ FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
     int64_t texture_identifier) {
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
-  }
-  if (texture_identifier == 0) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid texture identifier.");
   }
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->MarkTextureFrameAvailable(texture_identifier)) {
@@ -3751,7 +5024,10 @@ FlutterEngineResult FlutterEngineNotifyDisplayUpdate(
         display = reinterpret_cast<const FlutterEngineDisplay*>(
             reinterpret_cast<const uint8_t*>(display) + display->struct_size);
       }
-      engine->GetShell().OnDisplayUpdates(std::move(displays));
+      if (!engine->OnDisplayUpdates(std::move(displays))) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Engine handle was invalid.");
+      }
       return kSuccess;
     }
     default:
@@ -3788,6 +5064,9 @@ FlutterEngineResult FlutterEngineSetNextFrameCallback(
 
   flutter::EmbedderEngine* embedder_engine =
       reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
 
   fml::WeakPtr<flutter::PlatformView> weak_platform_view =
       embedder_engine->GetShell().GetPlatformView();
@@ -3800,6 +5079,105 @@ FlutterEngineResult FlutterEngineSetNextFrameCallback(
   weak_platform_view->SetNextFrameCallback(
       [callback, user_data]() { callback(user_data); });
 
+  return kSuccess;
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineLoadDartDeferredLibrary(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterDartDeferredLibrary* library) {
+  if (engine == nullptr || library == nullptr) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "Invalid engine or library for deferred library.");
+  }
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  intptr_t loading_unit_id = SAFE_ACCESS(library, loading_unit_id, 0);
+  const uint8_t* snapshot_data = SAFE_ACCESS(library, snapshot_data, nullptr);
+  size_t snapshot_data_size = SAFE_ACCESS(library, snapshot_data_size, 0);
+  const uint8_t* snapshot_instructions =
+      SAFE_ACCESS(library, snapshot_instructions, nullptr);
+  size_t snapshot_instructions_size =
+      SAFE_ACCESS(library, snapshot_instructions_size, 0);
+  void* user_data = SAFE_ACCESS(library, user_data, nullptr);
+  VoidCallback destruction_callback =
+      SAFE_ACCESS(library, destruction_callback, nullptr);
+
+  struct DeferredLibraryReleaseTracker {
+    VoidCallback callback = nullptr;
+    void* user_data = nullptr;
+    ~DeferredLibraryReleaseTracker() {
+      if (callback != nullptr) {
+        callback(user_data);
+      }
+    }
+  };
+  std::shared_ptr<DeferredLibraryReleaseTracker> tracker;
+  if (destruction_callback != nullptr) {
+    tracker = std::make_shared<DeferredLibraryReleaseTracker>();
+    tracker->callback = destruction_callback;
+    tracker->user_data = user_data;
+  }
+
+  std::unique_ptr<const fml::Mapping> data_mapping;
+  if (snapshot_data != nullptr) {
+    fml::NonOwnedMapping::ReleaseProc release_func = nullptr;
+    if (tracker) {
+      release_func = [tracker](const uint8_t* data, size_t size) {};
+    }
+    data_mapping = std::make_unique<fml::NonOwnedMapping>(
+        snapshot_data, snapshot_data_size, release_func, false);
+  }
+
+  std::unique_ptr<const fml::Mapping> instr_mapping;
+  if (snapshot_instructions != nullptr) {
+    fml::NonOwnedMapping::ReleaseProc release_func = nullptr;
+    if (tracker) {
+      release_func = [tracker](const uint8_t* data, size_t size) {};
+    }
+    instr_mapping = std::make_unique<fml::NonOwnedMapping>(
+        snapshot_instructions, snapshot_instructions_size, release_func, false);
+  }
+
+  if (!embedder_engine->LoadDartDeferredLibrary(
+          loading_unit_id, std::move(data_mapping), std::move(instr_mapping))) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not load Dart deferred library.");
+  }
+  return kSuccess;
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineNotifyDartDeferredLibraryLoadError(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterDartDeferredLibraryLoadError* error) {
+  if (engine == nullptr || error == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Invalid engine handle or error struct.");
+  }
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  intptr_t loading_unit_id = SAFE_ACCESS(error, loading_unit_id, 0);
+  const char* error_message = SAFE_ACCESS(error, error_message, nullptr);
+  bool transient = SAFE_ACCESS(error, transient, false);
+  std::string message = error_message ? error_message : "";
+  if (!embedder_engine->LoadDartDeferredLibraryError(loading_unit_id, message,
+                                                     transient)) {
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not notify Dart deferred library load error.");
+  }
+  return kSuccess;
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEnginePrefetchDefaultFontManager(void) {
+  txt::GetDefaultFontManager();
   return kSuccess;
 }
 
@@ -3859,6 +5237,11 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(AddView, FlutterEngineAddView);
   SET_PROC(RemoveView, FlutterEngineRemoveView);
   SET_PROC(SendViewFocusEvent, FlutterEngineSendViewFocusEvent);
+  SET_PROC(LoadDartDeferredLibrary, FlutterEngineLoadDartDeferredLibrary);
+  SET_PROC(NotifyDartDeferredLibraryLoadError,
+           FlutterEngineNotifyDartDeferredLibraryLoadError);
+  SET_PROC(Spawn, FlutterEngineSpawn);
+  SET_PROC(PrefetchDefaultFontManager, FlutterEnginePrefetchDefaultFontManager);
 #undef SET_PROC
 
   return kSuccess;

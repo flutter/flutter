@@ -4,8 +4,10 @@
 
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 
+#include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_image_impeller.h"
@@ -28,6 +30,36 @@
 
 namespace flutter {
 
+namespace {
+
+// OpenGL ES GL_OES_EGL_image_external texture target constant (0x8D65).
+#ifndef GL_TEXTURE_EXTERNAL_OES
+#define GL_TEXTURE_EXTERNAL_OES 0x8D65
+#endif
+
+// OpenGL ES GL_OES_rgb8_rgba8 internal format constant (0x8058).
+#ifndef GL_RGBA8_OES
+#define GL_RGBA8_OES 0x8058
+#endif
+
+DlMatrix ToDlMatrix(const FlutterOpenGLExternalTexture* texture) {
+  if (texture == nullptr || !SAFE_ACCESS(texture, has_uv_transform, false) ||
+      !STRUCT_HAS_MEMBER(texture, uv_transform)) {
+    return DlMatrix();
+  }
+  // Convert the 4x4 column-major float[16] UV matrix into a DlMatrix.
+  // Column 0: m[0..3], Column 1: m[4..7], Column 2: m[8..11], Column 3:
+  // m[12..15].
+  const float* m = texture->uv_transform;
+  return DlMatrix::MakeColumn(m[0], m[1], m[2], m[3],     // column 0
+                              m[4], m[5], m[6], m[7],     // column 1
+                              m[8], m[9], m[10], m[11],   // column 2
+                              m[12], m[13], m[14], m[15]  // column 3
+  );
+}
+
+}  // namespace
+
 EmbedderExternalTextureGL::EmbedderExternalTextureGL(
     int64_t texture_identifier,
     const ExternalTextureCallback& callback)
@@ -42,7 +74,7 @@ void EmbedderExternalTextureGL::Paint(PaintContext& context,
                                       const DlRect& bounds,
                                       bool freeze,
                                       const DlImageSampling sampling) {
-  if (last_image_ == nullptr) {
+  if (last_image_ == nullptr && !freeze) {
     last_image_ =
         ResolveTexture(Id(),                                                 //
                        context.gr_context,                                   //
@@ -55,6 +87,39 @@ void EmbedderExternalTextureGL::Paint(PaintContext& context,
   const DlPaint* paint = context.paint;
 
   if (last_image_) {
+    if (!last_uv_transform_.IsIdentity()) {
+      // Scale from normalized [0, 1] UV coordinates to pixel dimensions with a
+      // unit z-scale (1.0f), composed with the embedder's UV transform matrix.
+      constexpr DlScalar kUnitZScale = 1.0f;
+      DlMatrix scale_and_uv =
+          DlMatrix::MakeScale({static_cast<DlScalar>(last_image_->width()),
+                               static_cast<DlScalar>(last_image_->height()),
+                               kUnitZScale}) *
+          last_uv_transform_;
+      if (scale_and_uv.IsInvertible()) {
+        DlAutoCanvasRestore auto_restore(canvas, true);
+        // The incoming OpenGL external texture has a bottom-left origin
+        // (positive Y up), so flip vertically into DisplayList's top-left
+        // origin.
+        canvas->Translate(bounds.GetX(), bounds.GetY() + bounds.GetHeight());
+        canvas->Scale(bounds.GetWidth(), -bounds.GetHeight());
+
+        DlMatrix transform = scale_and_uv.Invert();
+        DlPaint paint_with_shader =
+            paint ? *paint : DlPaint().setAntiAlias(false);
+        auto image_source =
+            DlColorSource::MakeImage(last_image_, DlTileMode::kClamp,
+                                     DlTileMode::kClamp, sampling, &transform);
+        paint_with_shader.setColorSource(image_source);
+        // Draw a unit 1x1 quad in normalized UV space, scaled to `bounds` via
+        // the canvas transform above.
+        constexpr DlScalar kUnitUvExtent = 1.0f;
+        canvas->DrawRect(DlRect::MakeWH(kUnitUvExtent, kUnitUvExtent),
+                         paint_with_shader);
+        return;
+      }
+    }
+
     DlRect image_bounds = DlRect::Make(last_image_->GetBounds());
     if (bounds != image_bounds) {
       canvas->DrawImageRect(last_image_, image_bounds, bounds, sampling, paint);
@@ -86,12 +151,14 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
   }
   context->flushAndSubmit();
   context->resetContext(kAll_GrBackendState);
-  std::unique_ptr<FlutterOpenGLTexture> texture =
+  std::unique_ptr<FlutterOpenGLExternalTexture> texture =
       external_texture_callback_(texture_id, size.width(), size.height());
 
   if (!texture) {
     return nullptr;
   }
+
+  last_uv_transform_ = ToDlMatrix(texture.get());
 
   GrGLTextureInfo gr_texture_info = {texture->target, texture->name,
                                      texture->format};
@@ -136,12 +203,14 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     int64_t texture_id,
     impeller::AiksContext* aiks_context,
     const SkISize& size) {
-  std::unique_ptr<FlutterOpenGLTexture> texture =
+  std::unique_ptr<FlutterOpenGLExternalTexture> texture =
       external_texture_callback_(texture_id, size.width(), size.height());
 
   if (!texture) {
     return nullptr;
   }
+
+  last_uv_transform_ = ToDlMatrix(texture.get());
 
   // Call the destruction callback if an error occurs.
   fml::ScopedCleanupClosure scoped_cleanup([&texture]() {
@@ -150,14 +219,24 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     }
   });
 
-  if (texture->format != GL_RGBA8) {
+  if (texture->format != GL_RGBA8 && texture->format != GL_RGBA8_OES) {
     FML_LOG(ERROR) << "Only support GL_RGBA8 format now";
     return nullptr;
   }
 
+  size_t width = size.width();
+  size_t height = size.height();
+  if (texture->width != 0 && texture->height != 0) {
+    width = texture->width;
+    height = texture->height;
+  }
+
   impeller::TextureDescriptor desc;
-  desc.size = impeller::ISize(texture->width, texture->height);
+  desc.size = impeller::ISize(width, height);
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  if (texture->target == GL_TEXTURE_EXTERNAL_OES) {
+    desc.type = impeller::TextureType::kTextureExternalOES;
+  }
 
   impeller::ContextGLES& context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());
@@ -197,7 +276,9 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
 void EmbedderExternalTextureGL::OnGrContextCreated() {}
 
 // |flutter::Texture|
-void EmbedderExternalTextureGL::OnGrContextDestroyed() {}
+void EmbedderExternalTextureGL::OnGrContextDestroyed() {
+  last_image_ = nullptr;
+}
 
 // |flutter::Texture|
 void EmbedderExternalTextureGL::MarkNewFrameAvailable() {

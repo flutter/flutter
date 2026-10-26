@@ -23,10 +23,18 @@ static const auto kRootViewIdentifier = EmbedderExternalView::ViewIdentifier{};
 EmbedderExternalViewEmbedder::EmbedderExternalViewEmbedder(
     bool avoid_backing_store_cache,
     const CreateRenderTargetCallback& create_render_target_callback,
-    const PresentCallback& present_callback)
+    const PresentCallback& present_callback,
+    bool merge_raster_thread_on_platform_views,
+    bool coalesce_overlay_layers,
+    uint64_t platform_view_mutation_capabilities)
     : avoid_backing_store_cache_(avoid_backing_store_cache),
       create_render_target_callback_(create_render_target_callback),
-      present_callback_(present_callback) {
+      present_callback_(present_callback),
+      merge_raster_thread_on_platform_views_(
+          merge_raster_thread_on_platform_views),
+      coalesce_overlay_layers_(coalesce_overlay_layers),
+      platform_view_mutation_capabilities_(
+          platform_view_mutation_capabilities) {
   FML_DCHECK(create_render_target_callback_);
   FML_DCHECK(present_callback_);
 }
@@ -40,6 +48,47 @@ void EmbedderExternalViewEmbedder::CollectView(int64_t view_id) {
 void EmbedderExternalViewEmbedder::SetSurfaceTransformationCallback(
     SurfaceTransformationCallback surface_transformation_callback) {
   surface_transformation_callback_ = std::move(surface_transformation_callback);
+}
+
+void EmbedderExternalViewEmbedder::SetMergeRasterThreadOnPlatformViews(
+    bool merge_raster_thread_on_platform_views) {
+  merge_raster_thread_on_platform_views_ =
+      merge_raster_thread_on_platform_views;
+}
+
+void EmbedderExternalViewEmbedder::SetCoalesceOverlayLayers(
+    bool coalesce_overlay_layers) {
+  coalesce_overlay_layers_ = coalesce_overlay_layers;
+}
+
+void EmbedderExternalViewEmbedder::SetPlatformViewMutationCapabilities(
+    uint64_t platform_view_mutation_capabilities) {
+  platform_view_mutation_capabilities_ = platform_view_mutation_capabilities;
+}
+
+// |ExternalViewEmbedder|
+void EmbedderExternalViewEmbedder::Teardown() {
+  render_target_caches_.clear();
+  Reset();
+}
+
+// |ExternalViewEmbedder|
+bool EmbedderExternalViewEmbedder::SupportsDynamicThreadMerging() {
+  return merge_raster_thread_on_platform_views_;
+}
+
+bool EmbedderExternalViewEmbedder::FrameHasPlatformLayers() const {
+  return CountPlatformViews() > 0;
+}
+
+size_t EmbedderExternalViewEmbedder::CountPlatformViews() const {
+  size_t count = 0;
+  for (const auto& vid : composition_order_) {
+    if (vid.platform_view_id.has_value()) {
+      ++count;
+    }
+  }
+  return count;
 }
 
 DlMatrix EmbedderExternalViewEmbedder::GetSurfaceTransformation() const {
@@ -97,6 +146,37 @@ void EmbedderExternalViewEmbedder::PrerollCompositeEmbeddedView(
 }
 
 // |ExternalViewEmbedder|
+PostPrerollResult EmbedderExternalViewEmbedder::PostPrerollAction(
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+  // Keep the raster and platform threads merged for 10 frames after the last
+  // platform view is removed to avoid rapid merge/unmerge thrashing.
+  static constexpr int kDefaultMergedLeaseDuration = 10;
+
+  should_resubmit_frame_ = false;
+  if (!FrameHasPlatformLayers()) {
+    previous_frame_view_count_ = 0;
+    return PostPrerollResult::kSuccess;
+  }
+  if (!merge_raster_thread_on_platform_views_ || !raster_thread_merger) {
+    return PostPrerollResult::kSuccess;
+  }
+  if (!raster_thread_merger->IsMerged()) {
+    // The raster thread is not yet merged with the platform thread. Cancel the
+    // in-flight frame, merge the threads for the lease duration, and instruct
+    // the caller to retry the frame on the merged thread.
+    CancelFrame();
+    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
+    return PostPrerollResult::kSkipAndRetryFrame;
+  }
+  raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
+  if (previous_frame_view_count_ == 0) {
+    should_resubmit_frame_ = true;
+    return PostPrerollResult::kResubmitFrame;
+  }
+  return PostPrerollResult::kSuccess;
+}
+
+// |ExternalViewEmbedder|
 DlCanvas* EmbedderExternalViewEmbedder::GetRootCanvas() {
   auto found = pending_views_.find(kRootViewIdentifier);
   if (found == pending_views_.end()) {
@@ -123,7 +203,8 @@ DlCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
 
 static FlutterBackingStoreConfig MakeBackingStoreConfig(
     int64_t view_id,
-    const DlISize& backing_store_size) {
+    const DlISize& backing_store_size,
+    bool is_root_layer) {
   FlutterBackingStoreConfig config = {};
 
   config.struct_size = sizeof(config);
@@ -131,6 +212,7 @@ static FlutterBackingStoreConfig MakeBackingStoreConfig(
   config.size.width = backing_store_size.width;
   config.size.height = backing_store_size.height;
   config.view_id = view_id;
+  config.is_root_layer = is_root_layer;
 
   return config;
 }
@@ -240,10 +322,16 @@ class Layer {
     platform_views_.push_back(platform_view);
   }
 
+  struct SliceWithClips {
+    EmbedderExternalView* slice = nullptr;
+    std::vector<DlRect> difference_clips;
+  };
+
   /// Adds Flutter contents to this layer.
   void AddFlutterContents(EmbedderExternalView* contents,
-                          const DlRegion& contents_region) {
-    flutter_contents_.push_back(contents);
+                          const DlRegion& contents_region,
+                          std::vector<DlRect> difference_clips = {}) {
+    flutter_contents_.push_back({contents, std::move(difference_clips)});
     flutter_contents_region_ =
         DlRegion::MakeUnion(flutter_contents_region_, contents_region);
   }
@@ -346,10 +434,10 @@ class Layer {
 
     DlSkCanvasAdapter dl_canvas(canvas);
     bool clear_surface = true;
-    for (auto c : flutter_contents_) {
+    for (const auto& c : flutter_contents_) {
       FML_DCHECK(render_target_->GetRenderTargetSize() ==
-                 c->GetRenderSurfaceSize());
-      c->Render(dl_canvas, clear_surface);
+                 c.slice->GetRenderSurfaceSize());
+      c.slice->Render(dl_canvas, clear_surface, c.difference_clips);
       clear_surface = false;
     }
     dl_canvas.Flush();
@@ -358,12 +446,21 @@ class Layer {
 
 #ifdef IMPELLER_SUPPORTS_RENDERING
   void RenderFlutterContentsImpeller(bool frame_boundary) {
+    auto [ok, invalidate_api_state] = render_target_->MaybeMakeCurrent();
+    if (!ok) {
+      FML_LOG(ERROR)
+          << "Could not make the render target current for Impeller.";
+      return;
+    }
+    fml::ScopedCleanupClosure clear_current_surface(
+        [&]() { render_target_->MaybeClearCurrent(); });
+
     auto dl_builder = DisplayListBuilder();
     bool clear_surface = true;
-    for (auto c : flutter_contents_) {
+    for (const auto& c : flutter_contents_) {
       FML_DCHECK(render_target_->GetRenderTargetSize() ==
-                 c->GetRenderSurfaceSize());
-      c->Render(dl_builder, clear_surface);
+                 c.slice->GetRenderSurfaceSize());
+      c.slice->Render(dl_builder, clear_surface, c.difference_clips);
       clear_surface = false;
     }
     auto display_list = dl_builder.Build();
@@ -384,7 +481,7 @@ class Layer {
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
   std::vector<PlatformView> platform_views_;
-  std::vector<EmbedderExternalView*> flutter_contents_;
+  std::vector<SliceWithClips> flutter_contents_;
   DlRegion flutter_contents_region_;
   std::unique_ptr<EmbedderRenderTarget> render_target_;
   friend class LayerBuilder;
@@ -400,11 +497,13 @@ class Layer {
 /// Implements https://flutter.dev/go/optimized-platform-view-layers
 class LayerBuilder {
  public:
-  using RenderTargetProvider =
-      std::function<std::unique_ptr<EmbedderRenderTarget>(
-          const DlISize& frame_size)>;
+  using RenderTargetProvider = std::function<std::unique_ptr<
+      EmbedderRenderTarget>(const DlISize& frame_size, bool is_root_layer)>;
 
-  explicit LayerBuilder(DlISize frame_size) : frame_size_(frame_size) {
+  explicit LayerBuilder(DlISize frame_size,
+                        bool coalesce_overlay_layers = false)
+      : frame_size_(frame_size),
+        coalesce_overlay_layers_(coalesce_overlay_layers) {
     layers_.push_back(Layer());
   }
 
@@ -425,9 +524,72 @@ class LayerBuilder {
 
   /// Prepares the render targets for all layers that have Flutter contents.
   void PrepareBackingStore(const RenderTargetProvider& target_provider) {
-    for (auto& layer : layers_) {
+    bool seen_any_layer = false;
+    std::optional<size_t> first_overlay_layer_index;
+    bool coalesce_into_single_overlay = coalesce_overlay_layers_;
+
+    for (size_t i = 0; i < layers_.size(); ++i) {
+      auto& layer = layers_[i];
+      if (!layer.platform_views().empty()) {
+        seen_any_layer = true;
+      }
       if (layer.has_flutter_contents()) {
-        layer.SetRenderTarget(target_provider(frame_size_));
+        const bool is_root_layer = !seen_any_layer;
+        seen_any_layer = true;
+        if (is_root_layer) {
+          layer.SetRenderTarget(
+              target_provider(frame_size_, /*is_root_layer=*/true));
+        } else if (!first_overlay_layer_index.has_value()) {
+          first_overlay_layer_index = i;
+          layer.SetRenderTarget(
+              target_provider(frame_size_, /*is_root_layer=*/false));
+        } else if (!coalesce_into_single_overlay) {
+          auto target = target_provider(frame_size_, /*is_root_layer=*/false);
+          if (target != nullptr) {
+            layer.SetRenderTarget(std::move(target));
+          } else {
+            coalesce_into_single_overlay = true;
+          }
+        }
+      }
+    }
+
+    if (coalesce_into_single_overlay && first_overlay_layer_index.has_value()) {
+      const size_t first_idx = *first_overlay_layer_index;
+      const size_t last_idx = layers_.size() - 1;
+      if (last_idx > first_idx) {
+        std::vector<Layer::SliceWithClips> coalesced_slices;
+        DlRegion coalesced_region;
+        for (size_t i = first_idx; i <= last_idx; ++i) {
+          if (!layers_[i].has_flutter_contents()) {
+            continue;
+          }
+          std::vector<DlRect> diff_clips;
+          for (size_t j = i + 1; j <= last_idx; ++j) {
+            for (const auto& pv : layers_[j].platform_views()) {
+              diff_clips.push_back(ToDlRect(pv.clipped_frame));
+            }
+          }
+          for (auto& item : layers_[i].flutter_contents_) {
+            item.difference_clips.insert(item.difference_clips.end(),
+                                         diff_clips.begin(), diff_clips.end());
+            coalesced_slices.push_back(std::move(item));
+          }
+          coalesced_region = DlRegion::MakeUnion(
+              coalesced_region, layers_[i].flutter_contents_region_);
+          if (i != last_idx) {
+            layers_[i].flutter_contents_.clear();
+            layers_[i].flutter_contents_region_ = DlRegion();
+          }
+        }
+        auto overlay_target = std::move(layers_[first_idx].render_target_);
+        for (size_t i = first_idx; i < last_idx; ++i) {
+          layers_[i].render_target_.reset();
+        }
+        layers_[last_idx].flutter_contents_ = std::move(coalesced_slices);
+        layers_[last_idx].flutter_contents_region_ =
+            std::move(coalesced_region);
+        layers_[last_idx].render_target_ = std::move(overlay_target);
       }
     }
   }
@@ -535,6 +697,7 @@ class LayerBuilder {
 
   std::vector<Layer> layers_;
   DlISize frame_size_;
+  bool coalesce_overlay_layers_ = false;
 };
 
 };  // namespace
@@ -544,6 +707,9 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {
+  // Fallback presentation timestamp when SurfaceFrame does not specify one.
+  constexpr uint64_t kFallbackPresentationTimeNanos = 0;
+
   // The unordered_map render_target_cache creates a new entry if the view ID is
   // unrecognized.
   EmbedderRenderTargetCache& render_target_cache =
@@ -551,25 +717,57 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
   DlRect _rect = DlRect::MakeSize(pending_frame_size_)
                      .TransformAndClipBounds(pending_surface_transformation_);
 
-  LayerBuilder builder(DlIRect::RoundOut(_rect).GetSize());
+  LayerBuilder builder(DlIRect::RoundOut(_rect).GetSize(),
+                       coalesce_overlay_layers_);
 
   for (auto view_id : composition_order_) {
     auto& view = pending_views_[view_id];
     builder.AddExternalView(view.get());
   }
 
-  builder.PrepareBackingStore([&](const DlISize& frame_size) {
-    if (!avoid_backing_store_cache_) {
-      std::unique_ptr<EmbedderRenderTarget> target =
-          render_target_cache.GetRenderTarget(
-              EmbedderExternalView::RenderTargetDescriptor(frame_size));
-      if (target != nullptr) {
-        return target;
-      }
+  previous_frame_view_count_ = CountPlatformViews();
+  const bool resubmit_only_platform_views = should_resubmit_frame_;
+  should_resubmit_frame_ = false;
+
+  if (resubmit_only_platform_views) {
+    // On the first merged pass of a 0 -> >0 platform-view transition, present
+    // only the platform-view layers so the embedder can allocate and position
+    // platform views on the platform thread before the resubmitted frame
+    // renders backing stores.
+    auto presentation_time_optional =
+        frame ? frame->submit_info().presentation_time : std::nullopt;
+    uint64_t presentation_time =
+        presentation_time_optional.has_value()
+            ? presentation_time_optional->ToEpochDelta().ToNanoseconds()
+            : kFallbackPresentationTimeNanos;
+
+    EmbedderLayers presented_layers(
+        pending_frame_size_, pending_device_pixel_ratio_,
+        pending_surface_transformation_, presentation_time,
+        platform_view_mutation_capabilities_);
+
+    builder.PushLayers(presented_layers);
+    presented_layers.InvokePresentCallback(flutter_view_id, present_callback_);
+    if (frame) {
+      frame->Submit();
     }
-    auto config = MakeBackingStoreConfig(flutter_view_id, frame_size);
-    return create_render_target_callback_(context, aiks_context, config);
-  });
+    return;
+  }
+
+  builder.PrepareBackingStore(
+      [&](const DlISize& frame_size, bool is_root_layer) {
+        if (!avoid_backing_store_cache_) {
+          std::unique_ptr<EmbedderRenderTarget> target =
+              render_target_cache.GetRenderTarget(
+                  EmbedderExternalView::RenderTargetDescriptor(frame_size));
+          if (target != nullptr) {
+            return target;
+          }
+        }
+        auto config =
+            MakeBackingStoreConfig(flutter_view_id, frame_size, is_root_layer);
+        return create_render_target_callback_(context, aiks_context, config);
+      });
 
   // This is where unused render targets will be collected. Control may flow
   // to the embedder. Here, the embedder has the opportunity to trample on the
@@ -609,18 +807,20 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
 #endif  //  !SLIMPELLER
 
   {
-    auto presentation_time_optional = frame->submit_info().presentation_time;
+    auto presentation_time_optional =
+        frame ? frame->submit_info().presentation_time : std::nullopt;
     uint64_t presentation_time =
         presentation_time_optional.has_value()
             ? presentation_time_optional->ToEpochDelta().ToNanoseconds()
-            : 0;
+            : kFallbackPresentationTimeNanos;
 
     // Submit the scribbled layer to the embedder for presentation.
     //
     // @warning: Embedder may trample on our OpenGL context here.
     EmbedderLayers presented_layers(
         pending_frame_size_, pending_device_pixel_ratio_,
-        pending_surface_transformation_, presentation_time);
+        pending_surface_transformation_, presentation_time,
+        platform_view_mutation_capabilities_);
 
     builder.PushLayers(presented_layers);
 
@@ -640,7 +840,9 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
     }
   }
 
-  frame->Submit();
+  if (frame) {
+    frame->Submit();
+  }
 }
 
 }  // namespace flutter

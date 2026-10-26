@@ -79,11 +79,16 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
     bool fbo_reset_after_present,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
     std::shared_ptr<fml::BasicTaskRunner> io_task_runner,
-    impeller::Flags impeller_flags)
+    impeller::Flags impeller_flags,
+    std::shared_ptr<impeller::Context> shared_context)
     : gl_dispatch_table_(std::move(gl_dispatch_table)),
       fbo_reset_after_present_(fbo_reset_after_present),
+      impeller_context_(std::static_pointer_cast<impeller::ContextGLES>(
+          std::move(shared_context))),
       external_view_embedder_(std::move(external_view_embedder)),
-      worker_(std::make_shared<ReactorWorker>()) {
+      worker_(std::make_shared<ReactorWorker>()),
+      io_task_runner_(std::move(io_task_runner)),
+      impeller_flags_(impeller_flags) {
   // Make sure all required members of the dispatch table are checked.
   if (!gl_dispatch_table_.gl_make_current_callback ||
       !gl_dispatch_table_.gl_clear_current_callback ||
@@ -93,13 +98,36 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
       !gl_dispatch_table_.gl_proc_resolver) {
     return;
   }
-  // Certain GL backends need to made current before any GL
+  valid_ = true;
+}
+
+EmbedderSurfaceGLImpeller::~EmbedderSurfaceGLImpeller() = default;
+
+void EmbedderSurfaceGLImpeller::SetupImpellerContext() {
+  if (context_initialized_ || !valid_) {
+    return;
+  }
+  context_initialized_ = true;
+
+  if (impeller_context_) {
+    auto worker_id = impeller_context_->AddReactorWorker(worker_);
+    if (!worker_id.has_value()) {
+      FML_LOG(ERROR) << "Could not add reactor worker.";
+      impeller_context_.reset();
+      valid_ = false;
+    }
+    return;
+  }
+
+  // Certain GL backends need to be made current before any GL
   // state can be accessed.
   gl_dispatch_table_.gl_make_current_callback();
 
   auto gl = std::make_unique<impeller::ProcTableGLES>(
       gl_dispatch_table_.gl_proc_resolver);
   if (!gl->IsValid()) {
+    gl_dispatch_table_.gl_clear_current_callback();
+    valid_ = false;
     return;
   }
 
@@ -108,30 +136,32 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   const auto shader_mappings = GetShaderMappings(is_gles3);
 
   impeller_context_ = impeller::ContextGLES::Create(
-      impeller_flags, std::move(gl), shader_mappings,
-      /*enable_gpu_tracing=*/false, std::move(io_task_runner));
+      impeller_flags_, std::move(gl), shader_mappings,
+      /*enable_gpu_tracing=*/false, std::move(io_task_runner_));
 
   if (!impeller_context_) {
     FML_LOG(ERROR) << "Could not create Impeller context.";
+    gl_dispatch_table_.gl_clear_current_callback();
+    valid_ = false;
     return;
   }
 
   auto worker_id = impeller_context_->AddReactorWorker(worker_);
   if (!worker_id.has_value()) {
     FML_LOG(ERROR) << "Could not add reactor worker.";
+    impeller_context_.reset();
+    gl_dispatch_table_.gl_clear_current_callback();
+    valid_ = false;
     return;
   }
 
   gl_dispatch_table_.gl_clear_current_callback();
-  if (impeller_flags.use_sdfs) {
+  if (impeller_flags_.use_sdfs) {
     FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLESSDF).";
   } else {
     FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLES).";
   }
-  valid_ = true;
 }
-
-EmbedderSurfaceGLImpeller::~EmbedderSurfaceGLImpeller() = default;
 
 // |EmbedderSurface|
 bool EmbedderSurfaceGLImpeller::IsValid() const {
@@ -201,6 +231,12 @@ EmbedderSurfaceGLImpeller::GLContextFramebufferInfo() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
+  if (!context_initialized_) {
+    SetupImpellerContext();
+  }
+  if (!impeller_context_) {
+    return nullptr;
+  }
   // Ensure that the GL context is current before creating the GPU surface.
   // GPUSurfaceGLImpeller initialization will set up shader pipelines, and the
   // current thread needs to be able to execute reactor operations.
@@ -216,6 +252,9 @@ std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
 // |EmbedderSurface|
 std::shared_ptr<impeller::Context>
 EmbedderSurfaceGLImpeller::CreateImpellerContext() const {
+  if (!context_initialized_) {
+    const_cast<EmbedderSurfaceGLImpeller*>(this)->SetupImpellerContext();
+  }
   return impeller_context_;
 }
 

@@ -59,7 +59,10 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   EmbedderExternalViewEmbedder(
       bool avoid_backing_store_cache,
       const CreateRenderTargetCallback& create_render_target_callback,
-      const PresentCallback& present_callback);
+      const PresentCallback& present_callback,
+      bool merge_raster_thread_on_platform_views = false,
+      bool coalesce_overlay_layers = false,
+      uint64_t platform_view_mutation_capabilities = 0);
 
   //----------------------------------------------------------------------------
   /// @brief      Collects the external view embedder.
@@ -80,7 +83,14 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   void SetSurfaceTransformationCallback(
       SurfaceTransformationCallback surface_transformation_callback);
 
- private:
+  void SetMergeRasterThreadOnPlatformViews(
+      bool merge_raster_thread_on_platform_views);
+
+  void SetCoalesceOverlayLayers(bool coalesce_overlay_layers);
+
+  void SetPlatformViewMutationCapabilities(
+      uint64_t platform_view_mutation_capabilities);
+
   // |ExternalViewEmbedder|
   void CancelFrame() override;
 
@@ -99,6 +109,11 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
       std::unique_ptr<EmbeddedViewParams> params) override;
 
   // |ExternalViewEmbedder|
+  PostPrerollResult PostPrerollAction(
+      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
+      override;
+
+  // |ExternalViewEmbedder|
   DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
@@ -111,20 +126,43 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
 
+  // |ExternalViewEmbedder|
+  void Teardown() override;
+
+  // |ExternalViewEmbedder|
+  bool SupportsDynamicThreadMerging() override;
+
  private:
+  // Default device pixel ratio before PrepareFlutterView is called.
+  static constexpr double kDefaultDevicePixelRatio = 1.0;
+
   const bool avoid_backing_store_cache_;
   const CreateRenderTargetCallback create_render_target_callback_;
   const PresentCallback present_callback_;
+  bool merge_raster_thread_on_platform_views_ = false;
+  bool coalesce_overlay_layers_ = false;
+  uint64_t platform_view_mutation_capabilities_ = 0;
   SurfaceTransformationCallback surface_transformation_callback_;
   DlISize pending_frame_size_;
-  double pending_device_pixel_ratio_ = 1.0;
+  double pending_device_pixel_ratio_ = kDefaultDevicePixelRatio;
   DlMatrix pending_surface_transformation_;
   EmbedderExternalView::PendingViews pending_views_;
   std::vector<EmbedderExternalView::ViewIdentifier> composition_order_;
+  // Number of platform views rendered in the previous frame, used to detect the
+  // 0 -> >0 platform-view transition when merging threads.
+  size_t previous_frame_view_count_ = 0;
+  // True when the current pass is the first merged pass after a 0 -> >0
+  // platform-view transition and should present only platform-view layers
+  // before resubmitting.
+  bool should_resubmit_frame_ = false;
   // The render target caches for views. Each key is a view ID.
   std::unordered_map<int64_t, EmbedderRenderTargetCache> render_target_caches_;
 
   void Reset();
+
+  bool FrameHasPlatformLayers() const;
+
+  size_t CountPlatformViews() const;
 
   DlMatrix GetSurfaceTransformation() const;
 

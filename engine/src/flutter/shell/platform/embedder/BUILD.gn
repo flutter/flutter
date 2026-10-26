@@ -108,6 +108,7 @@ template("embedder_source_set") {
       "//flutter/flow",
       "//flutter/fml",
       "//flutter/lib/ui",
+      "//flutter/runtime",
       "//flutter/runtime:libdart",
       "//flutter/shell/common",
       "//flutter/skia",
@@ -211,7 +212,10 @@ embedder_source_set("embedder_as_internal_library") {
 }
 
 source_set("embedder_headers") {
-  public = [ "embedder.h" ]
+  public = [
+    "embedder.h",
+    "embedder_struct_macros.h",
+  ]
 
   public_configs = [ "//flutter:config" ]
 }
@@ -386,7 +390,9 @@ if (enable_unittests) {
     include_dirs = [ "." ]
 
     sources = [
+      "tests/embedder_comp_unittests.cc",
       "tests/embedder_frozen_unittests.cc",
+      "tests/embedder_semantics_unittests.cc",
       "tests/embedder_unittests.cc",
     ]
 
