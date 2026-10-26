@@ -15,3 +15,19 @@
 # This is intentionally a subset of .ci.yaml from the master branch.
 enabled_branches:
   - cp-577928128-experimental
+
+targets:
+  - name: Linux analyze
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: analyze
+      dependencies: >-
+        [
+          {"dependency": "ktlint", "version": "version_1_5_0"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
+        ]
+      tags: >
+        ["framework","hostonly","shard","linux"]
+    runIf:
+      - bin/**
