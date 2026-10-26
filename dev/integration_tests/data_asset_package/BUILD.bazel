@@ -5,15 +5,14 @@
 # The package the app beside it depends on, which flutter_tools' isolated
 # tests (integration.shard) copy with the app.
 
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "project",
     srcs = glob(
         ["**"],
-        exclude = [
-            "**/.dart_tool/**",
-            "BUILD.bazel",
-        ],
+        exclude = FLUTTER_PROJECT_GENERATED + ["BUILD.bazel"],
     ),
 )

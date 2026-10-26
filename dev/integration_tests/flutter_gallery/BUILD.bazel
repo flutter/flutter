@@ -7,6 +7,8 @@
 # its integration shard analyzes (analyze_suggestions_integration_test) and
 # configures a Linux build of (build_linux_config_only_test).
 
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
 package(default_visibility = ["//visibility:public"])
 
 # The package's files, for its tests (test/BUILD.bazel) and the
@@ -24,13 +26,16 @@ exports_files([
 
 filegroup(
     name = "project",
-    srcs = glob([
-        "android/**",
-        "ios/**",
-        "lib/**",
-        "linux/**",
-        "macos/**",
-        "web/**",
-        "windows/**",
-    ]) + ["pubspec.yaml"],
+    srcs = glob(
+        [
+            "android/**",
+            "ios/**",
+            "lib/**",
+            "linux/**",
+            "macos/**",
+            "web/**",
+            "windows/**",
+        ],
+        exclude = FLUTTER_PROJECT_GENERATED,
+    ) + ["pubspec.yaml"],
 )

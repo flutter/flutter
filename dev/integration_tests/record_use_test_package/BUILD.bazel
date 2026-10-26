@@ -5,6 +5,8 @@
 # The package flutter_tools' isolated/record_use_* tests (integration.shard)
 # copy beside record_use_test_app: a link hook recording uses.
 
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
@@ -15,7 +17,7 @@ filegroup(
             "hook/**",
             "lib/**",
         ],
-        exclude = ["**/.dart_tool/**"],
+        exclude = FLUTTER_PROJECT_GENERATED,
     ) + [
         "pubspec.yaml",
     ],
