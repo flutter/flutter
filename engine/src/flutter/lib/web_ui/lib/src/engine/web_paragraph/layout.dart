@@ -101,11 +101,23 @@ class TextLayout {
       allClusters.addAll(span.extractClusters());
     }
     allClusters.sort((a, b) => a.start.compareTo(b.start));
+    // The browser gives some invisible characters, such as a soft hyphen (U+00AD) or a zero
+    // width space (U+200B), no cluster of their own. Map each of those code units to the
+    // cluster before it (or the first cluster, at the start of the text), so that text ranges
+    // that include them still map to cluster ranges in order.
+    var unmappedStart = 0;
     for (var i = 0; i < allClusters.length; ++i) {
       final WebCluster cluster = allClusters[i];
+      for (var j = unmappedStart; j < cluster.start; ++j) {
+        _mapping.add(textIndex: j, clusterIndex: math.max(i - 1, 0));
+      }
       for (int j = cluster.start; j < cluster.end; ++j) {
         _mapping.add(textIndex: j, clusterIndex: i);
       }
+      unmappedStart = math.max(unmappedStart, cluster.end);
+    }
+    for (var j = unmappedStart; j < paragraph.text.length; ++j) {
+      _mapping.add(textIndex: j, clusterIndex: math.max(allClusters.length - 1, 0));
     }
 
     // One more dummy element in the end to avoid extra checks
@@ -1077,7 +1089,13 @@ class _TextClusterMapping {
       final int clusterIndex = toClusterIndex(start);
       return ClusterRange.collapsed(clusterIndex);
     }
-    return ClusterRange(start: toClusterIndex(start), end: toClusterIndex(end - 1) + 1);
+    int startClusterIndex = toClusterIndex(start);
+    if (_clusters[startClusterIndex].end <= start) {
+      // `start` has no cluster of its own and is mapped to the cluster before it, so the range
+      // starts at the next cluster.
+      startClusterIndex += 1;
+    }
+    return ClusterRange(start: startClusterIndex, end: toClusterIndex(end - 1) + 1);
   }
 
   ui.TextRange toTextRange(ClusterRange clusterRange) {

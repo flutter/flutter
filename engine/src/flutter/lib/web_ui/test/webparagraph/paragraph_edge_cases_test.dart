@@ -833,4 +833,41 @@ Future<void> testMain() async {
       },
     );
   });
+
+  group('Paragraph characters without a cluster', () {
+    // The browser gives some invisible characters no cluster of their own.
+    for (final (String name, String text) in <(String, String)>[
+      ('soft hyphen', 'ab cd\u00AD'),
+      ('zero width space', 'ab cd\u200B'),
+    ]) {
+      test('Layout handles a trailing $name', () {
+        final builder = ui.ParagraphBuilder(ahemStyle);
+        builder.addText(text);
+        final ui.Paragraph paragraph = builder.build();
+
+        expect(() => paragraph.layout(const ui.ParagraphConstraints(width: 40)), returnsNormally);
+        expect(paragraph.numberOfLines, 2);
+      });
+    }
+
+    for (final (String name, String character) in <(String, String)>[
+      ('soft hyphen', '\u00AD'),
+      ('zero width space', '\u200B'),
+    ]) {
+      test('A span that starts with a $name covers only its own text', () {
+        final builder = ui.ParagraphBuilder(ahemStyle);
+        builder.addText('abcd');
+        builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFF0000FF)));
+        builder.addText('${character}ef');
+        builder.pop();
+        final ui.Paragraph paragraph = builder.build();
+        paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+        final ui.TextBox abcd = paragraph.getBoxesForRange(0, 4).single;
+        final List<ui.TextBox> ef = paragraph.getBoxesForRange(5, 7);
+        expect(ef, hasLength(1));
+        expect(ef.single.left, closeTo(abcd.right, 0.01));
+      });
+    }
+  });
 }
