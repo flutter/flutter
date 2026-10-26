@@ -545,9 +545,14 @@ void main() {
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(false, angle)));
         await expectLater(
           find.byType(RepaintBoundary).first,
-          matchesReferenceImage(imageWithCompositing),
+          matchesReferenceImage(
+            imageWithCompositing,
+            // Allow a small tolerance for minor subpixel antialiasing differences
+            // along 3D quad edges between direct canvas rasterization and
+            // composited texture sampling.
+            maxDifferentPixelsRate: 0.001,
+          ),
         );
-        await tester.pump();
       }
     },
     skip: isBrowser, // due to https://github.com/flutter/flutter/issues/49857

@@ -112,6 +112,16 @@ void main() {
         await matchesReferenceImage(red100).matchAsync(green100),
         equals('does not match on 57 pixels'),
       );
+
+      // 57 pixels out of 10,000 is 0.57% (0.0057 rate).
+      expect(
+        await matchesReferenceImage(red100, maxDifferentPixelsRate: 0.01).matchAsync(green100),
+        isNull,
+      );
+      expect(
+        await matchesReferenceImage(red100, maxDifferentPixelsRate: 0.005).matchAsync(green100),
+        equals('does not match on 57 pixels (0.570% differs, max allowed: 0.500%)'),
+      );
     });
 
     testWidgets('when widget does not look the same', (WidgetTester tester) async {

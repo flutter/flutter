@@ -628,12 +628,20 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
 /// });
 /// ```
 ///
+/// If [maxDifferentPixelsRate] is greater than 0.0, the comparison passes if
+/// the ratio of different pixels to total pixels does not exceed this value.
+/// The value must be between 0.0 and 1.0.
+///
 /// See also:
 ///
 ///  * [matchesGoldenFile], which should be used instead if you need to verify
 ///    that a [Finder] or [ui.Image] matches a golden image.
-AsyncMatcher matchesReferenceImage(ui.Image image) {
-  return _MatchesReferenceImage(image);
+AsyncMatcher matchesReferenceImage(ui.Image image, {double maxDifferentPixelsRate = 0.0}) {
+  assert(
+    0.0 <= maxDifferentPixelsRate && maxDifferentPixelsRate <= 1.0,
+    'maxDifferentPixelsRate must be between 0.0 and 1.0',
+  );
+  return _MatchesReferenceImage(image, maxDifferentPixelsRate: maxDifferentPixelsRate);
 }
 
 /// Asserts that a [SemanticsNode] contains the specified information.
@@ -2558,9 +2566,10 @@ int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
 }
 
 class _MatchesReferenceImage extends AsyncMatcher {
-  const _MatchesReferenceImage(this.referenceImage);
+  const _MatchesReferenceImage(this.referenceImage, {this.maxDifferentPixelsRate = 0.0});
 
   final ui.Image referenceImage;
+  final double maxDifferentPixelsRate;
 
   @override
   Future<String?> matchAsync(dynamic item) async {
@@ -2606,7 +2615,17 @@ class _MatchesReferenceImage extends AsyncMatcher {
           Uint8List.view(bytes.buffer),
           Uint8List.view(referenceBytes.buffer),
         );
-        return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+        final int totalPixels = referenceImage.width * referenceImage.height;
+        final double differentPixelsRate = countDifferentPixels / totalPixels;
+        if (differentPixelsRate <= maxDifferentPixelsRate) {
+          return null;
+        }
+        if (maxDifferentPixelsRate == 0.0) {
+          return 'does not match on $countDifferentPixels pixels';
+        }
+        return 'does not match on $countDifferentPixels pixels '
+            '(${(differentPixelsRate * 100).toStringAsFixed(3)}% differs, '
+            'max allowed: ${(maxDifferentPixelsRate * 100).toStringAsFixed(3)}%)';
       } finally {
         if (disposeImage) {
           image.dispose();
