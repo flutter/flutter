@@ -17,9 +17,10 @@ package(default_visibility = ["//visibility:public"])
 # Debian's packages at the build sysroot's versions, pinned
 # (build_defs/repositories/debian_runtime.bzl) -- put on LD_LIBRARY_PATH by
 # browser_launcher's script, with Mesa's drivers and GLVND's EGL vendor
-# named to their loaders; the host's with
+# named to their loaders, and the X server felt starts for Firefox run on
+# them by display_launcher's script; the host's with
 # `--//build_defs/web:browser_libraries=//build_defs/web:host_libraries`
-# (nothing set). The C library and the X display are the host's either way
+# (nothing set; the host's Xvfb). The C library is the host's either way
 # (browser_launcher.bzl). label_flag is Bazel's own.
 label_flag(
     name = "browser_libraries",
@@ -35,6 +36,8 @@ browser_libraries(
     },
     font_configuration = "@sysroot_linux_x64_runtime//:fontconfig_conf_d",
     fonts = ["@sysroot_linux_x64_runtime//:fonts"],
+    xkb = "@sysroot_linux_x64_runtime//:xkb",
+    xvfb = "@sysroot_linux_x64_runtime//:xvfb",
 )
 
 browser_libraries(

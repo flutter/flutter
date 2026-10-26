@@ -22,11 +22,13 @@ fetch until the pins follow.
 `firefox` is the same for Firefox (the version the lock names, from
 Mozilla's release archive): felt's Firefox suites of the web engine's unit
 tests drive it through FIREFOX_EXECUTABLE, on an X display felt starts
-itself (Xvfb, the host's) when none is set.
+itself (Xvfb, by name) when none is set.
 
-Chrome and Firefox need the host's X11, NSS, GTK and audio libraries at run
-time (the workstation's and the web CI images' package sets); the sandbox
-leaves /usr/lib readable.
+Chrome and Firefox load the platform's X11, NSS, GTK and audio libraries
+at run time, and Xvfb is a program of the platform's: the tests get them
+from the build too -- the runtime sysroot (debian_runtime.bzl) through the
+launchers of //build_defs/web:browser_launcher.bzl -- or from the host,
+under `--//build_defs/web:browser_libraries=//build_defs/web:host_libraries`.
 """
 
 # The Chrome version lib/web_ui/dev/package_lock.yaml named when this was
