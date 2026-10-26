@@ -205,7 +205,6 @@ class InkSparkle extends InteractiveInkFeature {
   final TextDirection _textDirection;
 
   late final ui.FragmentShader _fragmentShader;
-  late final _InkSparkleUniforms _uniforms;
   bool _fragmentShaderInitialized = false;
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse],
@@ -247,7 +246,6 @@ class InkSparkle extends InteractiveInkFeature {
 
     if (!_fragmentShaderInitialized) {
       _fragmentShader = _InkSparkleFactory._program!.fragmentShader();
-      _uniforms = _InkSparkleUniforms(_fragmentShader);
       _fragmentShaderInitialized = true;
     }
 
@@ -290,34 +288,66 @@ class InkSparkle extends InteractiveInkFeature {
     final double rotation2 = turbulencePhase * _rotateLeft + 2.0 * math.pi;
     final double rotation3 = turbulencePhase * _rotateRight + 2.75 * math.pi;
 
-    _uniforms.color.set(
-      _color.red / 255.0,
-      _color.green / 255.0,
-      _color.blue / 255.0,
-      _color.alpha / 255.0,
-    );
-    // u_composite_1 packs u_alpha, u_sparkle_alpha, u_blur and u_radius_scale.
-    _uniforms.composite1.set(_alpha.value, _sparkleAlpha.value, 1.0, _radiusScale.value);
-    _uniforms.center.set(_center.value.x, _center.value.y);
-    _uniforms.maxRadius.set(_targetRadius);
-    _uniforms.resolutionScale.set(1.0 / _width, 1.0 / _height);
-    _uniforms.noiseScale.set(_noiseDensity / _width, _noiseDensity / _height);
-    _uniforms.noisePhase.set(noisePhase / 1000.0);
-    _uniforms.circle1.set(
-      turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.cos(turbulenceScale * 0.55)),
-      turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.sin(turbulenceScale * 0.55)),
-    );
-    _uniforms.circle2.set(
-      turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.45)),
-      turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.45)),
-    );
-    _uniforms.circle3.set(
-      turbulenceScale + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.35)),
-      turbulenceScale + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.35)),
-    );
-    _uniforms.rotation1.set(math.cos(rotation1), math.sin(rotation1));
-    _uniforms.rotation2.set(math.cos(rotation2), math.sin(rotation2));
-    _uniforms.rotation3.set(math.cos(rotation3), math.sin(rotation3));
+    _fragmentShader
+      // uColor
+      ..setFloat(0, _color.red / 255.0)
+      ..setFloat(1, _color.green / 255.0)
+      ..setFloat(2, _color.blue / 255.0)
+      ..setFloat(3, _color.alpha / 255.0)
+      // Composite 1 (u_alpha, u_sparkle_alpha, u_blur, u_radius_scale)
+      ..setFloat(4, _alpha.value)
+      ..setFloat(5, _sparkleAlpha.value)
+      ..setFloat(6, 1.0)
+      ..setFloat(7, _radiusScale.value)
+      // uCenter
+      ..setFloat(8, _center.value.x)
+      ..setFloat(9, _center.value.y)
+      // uMaxRadius
+      ..setFloat(10, _targetRadius)
+      // uResolutionScale
+      ..setFloat(11, 1.0 / _width)
+      ..setFloat(12, 1.0 / _height)
+      // uNoiseScale
+      ..setFloat(13, _noiseDensity / _width)
+      ..setFloat(14, _noiseDensity / _height)
+      // uNoisePhase
+      ..setFloat(15, noisePhase / 1000.0)
+      // uCircle1
+      ..setFloat(
+        16,
+        turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.cos(turbulenceScale * 0.55)),
+      )
+      ..setFloat(
+        17,
+        turbulenceScale * 0.5 + (turbulencePhase * 0.01 * math.sin(turbulenceScale * 0.55)),
+      )
+      // uCircle2
+      ..setFloat(
+        18,
+        turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.45)),
+      )
+      ..setFloat(
+        19,
+        turbulenceScale * 0.2 + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.45)),
+      )
+      // uCircle3
+      ..setFloat(
+        20,
+        turbulenceScale + (turbulencePhase * -0.0066 * math.cos(turbulenceScale * 0.35)),
+      )
+      ..setFloat(
+        21,
+        turbulenceScale + (turbulencePhase * -0.0066 * math.sin(turbulenceScale * 0.35)),
+      )
+      // uRotation1
+      ..setFloat(22, math.cos(rotation1))
+      ..setFloat(23, math.sin(rotation1))
+      // uRotation2
+      ..setFloat(24, math.cos(rotation2))
+      ..setFloat(25, math.sin(rotation2))
+      // uRotation3
+      ..setFloat(26, math.cos(rotation3))
+      ..setFloat(27, math.sin(rotation3));
   }
 
   /// Transforms the canvas for an ink feature to be painted on the [canvas].
@@ -378,39 +408,6 @@ class InkSparkle extends InteractiveInkFeature {
       canvas.clipRect(rect);
     }
   }
-}
-
-/// The uniforms declared in `shaders/ink_sparkle.frag`, looked up by name once
-/// so that [InkSparkle] only has to set their values on each frame.
-class _InkSparkleUniforms {
-  _InkSparkleUniforms(ui.FragmentShader shader)
-    : color = shader.getUniformVec4('u_color'),
-      composite1 = shader.getUniformVec4('u_composite_1'),
-      center = shader.getUniformVec2('u_center'),
-      maxRadius = shader.getUniformFloat('u_max_radius'),
-      resolutionScale = shader.getUniformVec2('u_resolution_scale'),
-      noiseScale = shader.getUniformVec2('u_noise_scale'),
-      noisePhase = shader.getUniformFloat('u_noise_phase'),
-      circle1 = shader.getUniformVec2('u_circle1'),
-      circle2 = shader.getUniformVec2('u_circle2'),
-      circle3 = shader.getUniformVec2('u_circle3'),
-      rotation1 = shader.getUniformVec2('u_rotation1'),
-      rotation2 = shader.getUniformVec2('u_rotation2'),
-      rotation3 = shader.getUniformVec2('u_rotation3');
-
-  final ui.UniformVec4Slot color;
-  final ui.UniformVec4Slot composite1;
-  final ui.UniformVec2Slot center;
-  final ui.UniformFloatSlot maxRadius;
-  final ui.UniformVec2Slot resolutionScale;
-  final ui.UniformVec2Slot noiseScale;
-  final ui.UniformFloatSlot noisePhase;
-  final ui.UniformVec2Slot circle1;
-  final ui.UniformVec2Slot circle2;
-  final ui.UniformVec2Slot circle3;
-  final ui.UniformVec2Slot rotation1;
-  final ui.UniformVec2Slot rotation2;
-  final ui.UniformVec2Slot rotation3;
 }
 
 class _InkSparkleFactory extends InteractiveInkFeatureFactory {
