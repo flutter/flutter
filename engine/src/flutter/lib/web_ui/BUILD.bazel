@@ -10,6 +10,7 @@
 
 load("//build_defs/dart:dart_test.bzl", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "pub_package_config")
+load("//build_defs/web:browser_launcher.bzl", "browser_launcher")
 load("//build_defs/web:web_ui_tests.bzl", "web_ui_host_page", "web_ui_tests")
 load(":felt_config.bzl", "FELT_CONFIG")
 
@@ -138,26 +139,50 @@ web_ui_host_page(
     package_config = ":test_package_config",
 )
 
-# The browsers this host runs felt's suites on: each one's executable, the
-# variable felt finds it through, its directory, and the environment it needs
-# inside Bazel's sandbox (its own sandbox does not start within another).
-# Safari's and Edge's suites need other hosts and are left out.
+# The browsers this host runs felt's suites on, each through a launcher that
+# gives it the build's system libraries (browser_launcher.bzl;
+# --//build_defs/web:browser_libraries selects the host's instead): the
+# pinned Chrome and Firefox (build_defs/repositories/browsers.bzl). Safari's
+# and Edge's suites need other hosts and are left out.
+browser_launcher(
+    name = "chrome",
+    browser = "@chrome//:chrome-linux64/chrome",
+    browser_files = ["@chrome"],
+)
+
+browser_launcher(
+    name = "firefox",
+    browser = "@firefox//:firefox/firefox",
+    browser_files = ["@firefox"],
+    # What felt writes beside the executable it resolves (dev/firefox.dart),
+    # here beside the launcher's script, so that it finds it written.
+    policies = """{
+  "policies": {
+    "DisableAppUpdate": true
+  }
+}
+""",
+)
+
+# Each browser's launcher, the variable felt finds it through, and the
+# environment it needs inside Bazel's sandbox (its own sandbox does not
+# start within another).
 _BROWSERS = {
     "chrome": {
-        "browser": "@chrome//:chrome-linux64/chrome",
+        "browser": ":chrome",
         "env": {"CHROME_NO_SANDBOX": "true"},
-        "files": ["@chrome"],
+        "files": [],
         "variable": "CHROME_EXECUTABLE",
     },
     "firefox": {
-        "browser": "@firefox//:firefox/firefox",
+        "browser": ":firefox",
         "env": {
             "MOZ_DISABLE_CONTENT_SANDBOX": "1",
             "MOZ_DISABLE_GPU_SANDBOX": "1",
             "MOZ_DISABLE_RDD_SANDBOX": "1",
             "MOZ_DISABLE_SOCKET_PROCESS_SANDBOX": "1",
         },
-        "files": ["@firefox"],
+        "files": [],
         "variable": "FIREFOX_EXECUTABLE",
     },
 }
