@@ -545,10 +545,14 @@ void main() {
         final fakeArtifactManager = _FakeExtensionArtifactManager(
           downloadedArtifacts: const <String, String>{
             'custom-ext-artifact': '/cache/custom-ext-artifact',
+            'genSnapshot': '/cache/shadowed-gen-snapshot',
           },
         );
         const target = ExtensionBuildTarget(
-          artifacts: <ExtensionArtifact>{ExtensionArtifact('custom-ext-artifact')},
+          artifacts: <ExtensionArtifact>{
+            BuiltInArtifacts.genSnapshot,
+            ExtensionArtifact('custom-ext-artifact'),
+          },
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir:
@@ -581,7 +585,10 @@ void main() {
         );
         expect(
           fakeBuildManager.lastBuildArgs!['resolvedArtifacts'],
-          equals(const <String, String>{'custom-ext-artifact': '/cache/custom-ext-artifact'}),
+          equals(const <String, String>{
+            'custom-ext-artifact': '/cache/custom-ext-artifact',
+            'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_x64.release',
+          }),
         );
       },
       overrides: <Type, Generator>{

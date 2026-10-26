@@ -41,11 +41,9 @@ class ExtensionArtifactManager {
   static const String _hiddenExtensionsCacheDirName = '.flutter_tool_extensions';
   static const String _artifactsCacheSubdirName = 'artifacts';
   static const String _defaultEngineVersion = 'unknown';
-  static const String _zipExtension = '.zip';
   static const String _extractedDirName = 'extracted';
   static const String _sha256StampSuffix = '.sha256';
   static const String _lockFileSuffix = '.lock';
-  static final RegExp _whitespaceRegExp = RegExp(r'\s+');
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
@@ -214,6 +212,13 @@ class ExtensionArtifactManager {
       ];
 
       for (final dep in filteredDeps) {
+        if (resolvedArtifacts.containsKey(dep.name)) {
+          logger.printWarning(
+            'Artifact "${dep.name}" from extension "${ext.extensionName}" conflicts with an '
+            'artifact of the same name from another extension and will be ignored.',
+          );
+          continue;
+        }
         resolvedArtifacts[dep.name] = await _ensureArtifactCached(
           ext.extensionName,
           engineVersion,
@@ -309,18 +314,16 @@ class ExtensionArtifactManager {
     final Directory artifactDir = engineDir.childDirectory(dep.name);
     final File stampFile = engineDir.childFile('.${dep.name}$_sha256StampSuffix');
     final File lockFile = engineDir.childFile('.${dep.name}$_lockFileSuffix');
-    final bool isZip = dep.url.path.endsWith(_zipExtension);
+    final bool isZip = dep.isZipArchive;
     final String resolvedPath = isZip ? artifactDir.path : artifactFile.path;
 
     if (!force &&
-        await _isArtifactCachedAndVerified(
-          artifactDir: artifactDir,
-          artifactFile: artifactFile,
-          dep: dep,
+        _isArtifactCachedAndVerified(
+          engineDir,
+          dep,
+          deleteStaleOnMismatch: false,
           extensionName: extensionName,
-          isZip: isZip,
           logger: logger,
-          stampFile: stampFile,
         )) {
       return resolvedPath;
     }
@@ -331,14 +334,12 @@ class ExtensionArtifactManager {
       logger: logger,
       scope: () async {
         if (!force &&
-            await _isArtifactCachedAndVerified(
-              artifactDir: artifactDir,
-              artifactFile: artifactFile,
-              dep: dep,
+            _isArtifactCachedAndVerified(
+              engineDir,
+              dep,
+              deleteStaleOnMismatch: true,
               extensionName: extensionName,
-              isZip: isZip,
               logger: logger,
-              stampFile: stampFile,
             )) {
           return;
         }
@@ -350,7 +351,7 @@ class ExtensionArtifactManager {
           'Downloading artifact "${dep.name}" for extension "$extensionName"...',
         );
         try {
-          final String expectedSha = dep.sha256?.toLowerCase() ?? await _fetchRemoteSha256(dep);
+          final String expectedSha = dep.sha256.toLowerCase();
           await _downloadAndVerifyToStagingFile(
             dep: dep,
             expectedSha: expectedSha,
@@ -378,167 +379,54 @@ class ExtensionArtifactManager {
     return resolvedPath;
   }
 
-  /// Checks whether [dep] is already cached and matches its expected SHA-256
-  /// checksum.
+  /// Checks whether [dep] is already cached in [versionDir] and its `.sha256`
+  /// stamp file matches [ArtifactDependency.sha256].
   ///
-  /// When [dep] provides an inline [ArtifactDependency.sha256], single-file
-  /// artifacts are hashed directly via [_verifyCachedFile] and extracted `.zip`
-  /// directories are verified against [stampFile] via [_verifyCachedDirectory].
-  /// When [dep] uses a remote [ArtifactDependency.sha256Url], offline cache
-  /// hits rely on the previously recorded checksum in [stampFile] so already
-  /// cached artifacts do not require network access to verify.
-  Future<bool> _isArtifactCachedAndVerified({
-    required Directory artifactDir,
-    required File artifactFile,
-    required ArtifactDependency dep,
+  /// When [deleteStaleOnMismatch] is `true` (inside the cross-process lock),
+  /// deletes any stale cached file/directory and stamp file if the stamp does
+  /// not match [ArtifactDependency.sha256].
+  bool _isArtifactCachedAndVerified(
+    Directory versionDir,
+    ArtifactDependency dep, {
+    required bool deleteStaleOnMismatch,
     required String extensionName,
-    required bool isZip,
     required Logger logger,
-    required File stampFile,
-  }) async {
-    if (dep.sha256 case final String sha) {
-      final String expectedSha = sha.toLowerCase();
-      if (!isZip && artifactFile.existsSync()) {
-        return _verifyCachedFile(
-          artifactFile: artifactFile,
-          dep: dep,
-          expectedSha: expectedSha,
-          extensionName: extensionName,
-          logger: logger,
-          stampFile: stampFile,
-        );
-      }
-      if (isZip && stampFile.existsSync() && artifactDir.existsSync()) {
-        return _verifyCachedDirectory(
-          artifactDir: artifactDir,
-          dep: dep,
-          expectedSha: expectedSha,
-          extensionName: extensionName,
-          logger: logger,
-          stampFile: stampFile,
-        );
-      }
+  }) {
+    final bool isZip = dep.isZipArchive;
+    final FileSystemEntity target = isZip
+        ? versionDir.childDirectory(dep.name)
+        : versionDir.childFile(dep.name);
+    final File stampFile = versionDir.childFile('.${dep.name}$_sha256StampSuffix');
+    if (!target.existsSync() || !stampFile.existsSync()) {
       return false;
     }
-
-    if (stampFile.existsSync()) {
-      final String recordedSha = stampFile.readAsStringSync().trim().toLowerCase();
-      if (ArtifactDependency.isValidSha256(recordedSha)) {
-        if (isZip && artifactDir.existsSync()) {
-          logger.printTrace(
-            'Unzipped artifact "${dep.name}" for extension "$extensionName" already cached and verified.',
-          );
-          return true;
-        }
-        if (!isZip && artifactFile.existsSync()) {
-          return _verifyCachedFile(
-            artifactFile: artifactFile,
-            dep: dep,
-            expectedSha: recordedSha,
-            extensionName: extensionName,
-            logger: logger,
-            stampFile: stampFile,
-          );
-        }
-      }
-    }
-    return false;
-  }
-
-  /// Computes the SHA-256 digest of a cached single-file artifact [artifactFile]
-  /// and compares it against [expectedSha].
-  ///
-  /// Deletes [artifactFile] and [stampFile] and returns `false` if the digest
-  /// does not match so the caller can re-download the artifact cleanly.
-  Future<bool> _verifyCachedFile({
-    required File artifactFile,
-    required ArtifactDependency dep,
-    required String expectedSha,
-    required String extensionName,
-    required Logger logger,
-    required File stampFile,
-  }) async {
-    final Digest existingDigest = await sha256.bind(artifactFile.openRead()).first;
-    if (existingDigest.toString().toLowerCase() == expectedSha) {
-      logger.printTrace(
-        'Artifact "${dep.name}" for extension "$extensionName" already cached and verified.',
-      );
-      return true;
-    }
-    logger.printTrace('Cached artifact "${dep.name}" failed SHA-256 verification; re-downloading.');
-    artifactFile.deleteSync();
-    if (stampFile.existsSync()) {
-      stampFile.deleteSync();
-    }
-    return false;
-  }
-
-  /// Checks whether the digest recorded in [stampFile] for an extracted `.zip`
-  /// artifact directory [artifactDir] matches [expectedSha].
-  ///
-  /// Deletes [artifactDir] and [stampFile] and returns `false` if the stamp does
-  /// not match.
-  bool _verifyCachedDirectory({
-    required Directory artifactDir,
-    required ArtifactDependency dep,
-    required String expectedSha,
-    required String extensionName,
-    required Logger logger,
-    required File stampFile,
-  }) {
-    final String existingSha = stampFile.readAsStringSync().trim().toLowerCase();
-    if (existingSha == expectedSha) {
-      logger.printTrace(
-        'Unzipped artifact "${dep.name}" for extension "$extensionName" already cached and verified.',
-      );
-      return true;
-    }
-    logger.printTrace(
-      'Cached unzipped artifact "${dep.name}" failed SHA-256 verification; re-downloading.',
-    );
-    artifactDir.deleteSync(recursive: true);
-    stampFile.deleteSync();
-    return false;
-  }
-
-  /// Downloads and parses a remote SHA-256 checksum from [ArtifactDependency.sha256Url].
-  ///
-  /// Supports both raw 64-character hex strings and `sha256sum`-formatted lines
-  /// (`<hex>  <filename>`). Throws a [ToolExit] on network failure, non-200 HTTP
-  /// status, or malformed checksum content.
-  Future<String> _fetchRemoteSha256(ArtifactDependency dep) async {
-    final Uri sha256Url = dep.sha256Url!;
-    final String body;
     try {
-      final HttpClientRequest request = await _httpClient.getUrl(sha256Url);
-      final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok) {
-        await response.drain<void>();
-        throwToolExit(
-          'Failed to download SHA-256 checksum for artifact "${dep.name}" from $sha256Url: '
-          'HTTP ${response.statusCode}',
+      final String recordedSha = stampFile.readAsStringSync().trim().toLowerCase();
+      if (recordedSha == dep.sha256.toLowerCase()) {
+        logger.printTrace(
+          'Artifact "${dep.name}" for extension "$extensionName" already cached and verified.',
         );
+        return true;
       }
-      body = await utf8.decodeStream(response);
-    } on IOException catch (e) {
-      throwToolExit(
-        'Failed to download SHA-256 checksum for artifact "${dep.name}" from $sha256Url: $e',
-      );
-    } on OSError catch (e) {
-      throwToolExit(
-        'Failed to download SHA-256 checksum for artifact "${dep.name}" from $sha256Url: $e',
-      );
+    } on FileSystemException {
+      // Fall through to re-download.
     }
-    final String trimmed = body.trim();
-    final String token = trimmed.isEmpty
-        ? ''
-        : trimmed.split(_whitespaceRegExp).first.toLowerCase();
-    if (!ArtifactDependency.isValidSha256(token)) {
-      throwToolExit(
-        'Invalid SHA-256 checksum for artifact "${dep.name}" from $sha256Url: "$trimmed"',
+    if (deleteStaleOnMismatch) {
+      logger.printTrace(
+        'Cached artifact "${dep.name}" failed SHA-256 verification; re-downloading.',
       );
+      try {
+        if (target.existsSync()) {
+          target.deleteSync(recursive: isZip);
+        }
+        if (stampFile.existsSync()) {
+          stampFile.deleteSync();
+        }
+      } on FileSystemException {
+        // Ignore cleanup errors; _installStagedArtifact will overwrite.
+      }
     }
-    return token;
+    return false;
   }
 
   /// Streams the artifact from [ArtifactDependency.url] into [stagingFile] while

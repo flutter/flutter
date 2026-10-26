@@ -27,9 +27,10 @@ import 'package:test/test.dart';
 import '../../src/fakes.dart';
 
 final class _FakeArtifactService extends ArtifactService {
-  _FakeArtifactService(this.artifacts);
+  _FakeArtifactService(this.artifacts, {this.targetPlatformsObserver});
 
   final List<ArtifactDependency> artifacts;
+  final SendPort? targetPlatformsObserver;
 
   @override
   Future<List<ArtifactDependency>> downloadArtifacts({
@@ -37,6 +38,7 @@ final class _FakeArtifactService extends ArtifactService {
     required HostPlatform hostPlatform,
     Set<String>? targetPlatforms,
   }) async {
+    targetPlatformsObserver?.send(targetPlatforms?.toList());
     return <ArtifactDependency>[
       for (final ArtifactDependency artifact in artifacts)
         if (artifact.matchesPlatforms(
@@ -46,6 +48,22 @@ final class _FakeArtifactService extends ArtifactService {
           artifact,
     ];
   }
+}
+
+ExtensionEntryPoint _createMultiTargetEntryPoint({
+  required List<ArtifactDependency> artifacts,
+  required SendPort targetPlatformsObserver,
+}) {
+  return (SendPort sendPort) {
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[
+        _FakeArtifactService(artifacts, targetPlatformsObserver: targetPlatformsObserver),
+      ],
+      extensionName: 'multi_ext',
+      supportedPlatforms: const <String>{'linux'},
+    );
+  };
 }
 
 void main() {
@@ -269,11 +287,15 @@ void main() {
       );
       expect(downloadCount, 2);
 
-      // Corrupt the cached file; next call should detect SHA-256 mismatch and re-download.
+      // Corrupt the cached stamp; next call should detect SHA-256 mismatch and re-download.
       artifactFile.writeAsStringSync('corrupted bytes');
+      stampFile.writeAsStringSync(
+        '0000000000000000000000000000000000000000000000000000000000000000',
+      );
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});
       expect(downloadCount, 3);
       expect(artifactFile.readAsBytesSync(), equals(content));
+      expect(stampFile.readAsStringSync(), contentSha256);
     });
 
     test(
@@ -358,103 +380,6 @@ void main() {
     );
 
     test(
-      'fetches sha256Url on cache miss and verifies offline via stamp file on cache hit',
-      () async {
-        final List<int> content = utf8.encode('remote checksummed binary');
-        final contentSha256 = sha256.convert(content).toString();
-        final Uri artifactUri = Uri.parse('https://example.com/remote_bin');
-        final Uri sha256Uri = Uri.parse('https://example.com/remote_bin.sha256sum');
-
-        void entryPoint(SendPort sendPort) {
-          ToolExtensionEntryPoint.run(
-            sendPort,
-            <ToolExtensionService>[
-              _FakeArtifactService(<ArtifactDependency>[
-                ArtifactDependency(
-                  name: 'remote_bin',
-                  sha256Url: sha256Uri,
-                  url: artifactUri,
-                  hostPlatform: HostPlatform.linux_x64,
-                ),
-              ]),
-            ],
-            extensionName: 'sha_url_ext',
-            supportedPlatforms: const <String>{'linux'},
-          );
-        }
-
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          entryPoints: <ExtensionEntryPoint>[entryPoint],
-        );
-        addTearDown(manager.dispose);
-
-        var shaFetchCount = 0;
-        var artifactFetchCount = 0;
-        var failNetwork = false;
-        final httpClient = _FakeHttpClient((Uri url) async {
-          if (failNetwork) {
-            throw const SocketException('Offline');
-          }
-          if (url == sha256Uri) {
-            shaFetchCount++;
-            return _FakeHttpClientResponse(
-              HttpStatus.ok,
-              utf8.encode('${contentSha256.toUpperCase()}  remote_bin\n'),
-            );
-          }
-          if (url == artifactUri) {
-            artifactFetchCount++;
-            return _FakeHttpClientResponse(HttpStatus.ok, content);
-          }
-          return _FakeHttpClientResponse(HttpStatus.notFound, const <int>[]);
-        });
-
-        final Directory cacheDir = fs.directory('/sha_url_cache');
-        final artifactManager = ExtensionArtifactManager(
-          cacheDir: cacheDir,
-          extensionManager: manager,
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          httpClient: httpClient,
-          toolContext: FakeToolContext(
-            fs: fs,
-            logger: logger,
-            os: osUtils,
-            platform: FakePlatform(),
-          ),
-        );
-
-        final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded();
-        expect(shaFetchCount, 1);
-        expect(artifactFetchCount, 1);
-        final File cachedFile = cacheDir
-            .childDirectory('sha_url_ext')
-            .childDirectory('fake_engine_revision')
-            .childFile('remote_bin');
-        expect(resolved, <String, String>{'remote_bin': cachedFile.path});
-        expect(cachedFile.existsSync(), isTrue);
-
-        // Subsequent call while offline should verify against local .sha256 stamp without fetching sha256Url.
-        failNetwork = true;
-        final Map<String, String> cachedResolved = await artifactManager
-            .ensureArtifactsDownloaded();
-        expect(cachedResolved, <String, String>{'remote_bin': cachedFile.path});
-        expect(shaFetchCount, 1);
-        expect(artifactFetchCount, 1);
-
-        // Corrupting the file triggers re-fetching sha256Url and artifact when online.
-        failNetwork = false;
-        cachedFile.writeAsStringSync('tampered');
-        await artifactManager.ensureArtifactsDownloaded();
-        expect(shaFetchCount, 2);
-        expect(artifactFetchCount, 2);
-        expect(cachedFile.readAsBytesSync(), equals(content));
-      },
-    );
-
-    test(
       'concurrent ensureArtifactsDownloaded calls for same artifact are safe and deduplicated',
       () async {
         final List<int> content = utf8.encode('concurrent payload');
@@ -518,6 +443,7 @@ void main() {
         await downloadStarted.future;
         final Future<Map<String, String>> call2 = artifactManager.ensureArtifactsDownloaded();
         final Future<Map<String, String>> call3 = artifactManager.ensureArtifactsDownloaded();
+        await pumpEventQueue();
         releaseDownload.complete();
 
         await Future.wait(<Future<Map<String, String>>>[call1, call2, call3]);
@@ -647,6 +573,9 @@ void main() {
       engineDir.childFile('linux-x64-custom-artifact')
         ..createSync(recursive: true)
         ..writeAsBytesSync(content);
+      engineDir.childFile('.linux-x64-custom-artifact.sha256')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(expectedSha);
 
       var downloadTriggered = false;
       final httpClient = _FakeHttpClient((Uri url) async {
@@ -671,39 +600,35 @@ void main() {
       () async {
         final List<int> content = utf8.encode('multi-target payload');
         final contentSha256 = sha256.convert(content).toString();
+        final targetPlatformsPort = ReceivePort();
+        addTearDown(targetPlatformsPort.close);
 
-        void entryPoint(SendPort sendPort) {
-          ToolExtensionEntryPoint.run(
-            sendPort,
-            <ToolExtensionService>[
-              _FakeArtifactService(<ArtifactDependency>[
-                ArtifactDependency(
-                  name: 'linux_bin',
-                  sha256: contentSha256,
-                  url: Uri.parse('https://example.com/linux_bin'),
-                  hostPlatform: HostPlatform.linux_x64,
-                  targetPlatform: 'linux-x64',
-                ),
-                ArtifactDependency(
-                  name: 'embedder_bin',
-                  sha256: contentSha256,
-                  url: Uri.parse('https://example.com/embedder_bin'),
-                  hostPlatform: HostPlatform.linux_x64,
-                  targetPlatform: 'custom-embedder-arm64',
-                ),
-                ArtifactDependency(
-                  name: 'unselected_bin',
-                  sha256: contentSha256,
-                  url: Uri.parse('https://example.com/unselected_bin'),
-                  hostPlatform: HostPlatform.linux_x64,
-                  targetPlatform: 'other-platform',
-                ),
-              ]),
-            ],
-            extensionName: 'multi_ext',
-            supportedPlatforms: const <String>{'linux'},
-          );
-        }
+        final ExtensionEntryPoint entryPoint = _createMultiTargetEntryPoint(
+          artifacts: <ArtifactDependency>[
+            ArtifactDependency(
+              name: 'linux_bin',
+              sha256: contentSha256,
+              url: Uri.parse('https://example.com/linux_bin'),
+              hostPlatform: HostPlatform.linux_x64,
+              targetPlatform: 'linux-x64',
+            ),
+            ArtifactDependency(
+              name: 'embedder_bin',
+              sha256: contentSha256,
+              url: Uri.parse('https://example.com/embedder_bin'),
+              hostPlatform: HostPlatform.linux_x64,
+              targetPlatform: 'custom-embedder-arm64',
+            ),
+            ArtifactDependency(
+              name: 'unselected_bin',
+              sha256: contentSha256,
+              url: Uri.parse('https://example.com/unselected_bin'),
+              hostPlatform: HostPlatform.linux_x64,
+              targetPlatform: 'other-platform',
+            ),
+          ],
+          targetPlatformsObserver: targetPlatformsPort.sendPort,
+        );
 
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
@@ -737,12 +662,91 @@ void main() {
           targetPlatforms: const <String>{'linux', 'custom-embedder-arm64'},
         );
 
+        expect(
+          await targetPlatformsPort.first,
+          unorderedEquals(<String>['linux', 'custom-embedder-arm64']),
+        );
         expect(downloadedUrls, <Uri>[
           Uri.parse('https://example.com/linux_bin'),
           Uri.parse('https://example.com/embedder_bin'),
         ]);
       },
     );
+
+    test('warns and skips conflicting artifact names across multiple extensions', () async {
+      final List<int> content = utf8.encode('shared artifact payload');
+      final contentSha256 = sha256.convert(content).toString();
+
+      void firstEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency(
+                name: 'shared_bin',
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/ext1/shared_bin'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+            ]),
+          ],
+          extensionName: 'first_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      void secondEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency(
+                name: 'shared_bin',
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/ext2/shared_bin'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+            ]),
+          ],
+          extensionName: 'second_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[firstEntryPoint, secondEntryPoint],
+      );
+      addTearDown(manager.dispose);
+
+      final downloadedUrls = <Uri>[];
+      final httpClient = _FakeHttpClient((Uri url) async {
+        downloadedUrls.add(url);
+        return _FakeHttpClientResponse(HttpStatus.ok, content);
+      });
+
+      final Directory cacheDir = fs.directory('/collision_cache');
+      final artifactManager = ExtensionArtifactManager(
+        cacheDir: cacheDir,
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClient: httpClient,
+        toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
+      );
+
+      final Map<String, String> resolved = await artifactManager.ensureArtifactsDownloaded();
+      expect(resolved['shared_bin'], '/collision_cache/first_ext/fake_engine_revision/shared_bin');
+      expect(downloadedUrls, <Uri>[Uri.parse('https://example.com/ext1/shared_bin')]);
+      expect(
+        logger.warningText,
+        contains(
+          'Artifact "shared_bin" from extension "second_ext" conflicts with an '
+          'artifact of the same name from another extension and will be ignored.',
+        ),
+      );
+    });
   });
 }
 
