@@ -403,7 +403,7 @@ void main() {
       }
     });
 
-    testWithoutContext('disposing DeviceLogReader returned by ExtensionBackedDevice.getLogReader clears cached reader so subsequent getLogReader starts a new stream', () async {
+    testWithoutContext('multiple concurrent subscribers to logLines across getLogReader calls all receive full log output and startLogStream is called once', () async {
       final eventPort = ReceivePort();
       addTearDown(eventPort.close);
       final Stream<Map<String, Object?>> events = eventPort
@@ -411,10 +411,21 @@ void main() {
           .asBroadcastStream();
       final SendPort eventSendPort = eventPort.sendPort;
 
+      final startEvents = <Map<String, Object?>>[];
+      final StreamSubscription<Map<String, Object?>> startSub = events
+          .where((Map<String, Object?> event) => event[_eventTypeKey] == _startEventType)
+          .listen(startEvents.add);
+      addTearDown(startSub.cancel);
+
       void entryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-            _StreamingTestDeviceService(eventSendPort: eventSendPort),
+            _StreamingTestDeviceService(
+              eventSendPort: eventSendPort,
+              linesByDevice: const <String, List<String>>{
+                _primaryDeviceId: <String>['Booting application...', 'Flutter run key commands.'],
+              },
+            ),
           ]),
         );
       }
@@ -432,25 +443,23 @@ void main() {
       );
       addTearDown(device.dispose);
 
-      final Future<Map<String, Object?>> firstStartFuture = events.firstWhere(
-        (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
-      );
       final DeviceLogReader firstReader = await device.getLogReader();
-      expect((await firstStartFuture)[DeviceService.deviceIdParam], equals(_primaryDeviceId));
-
-      final Future<Map<String, Object?>> firstStopFuture = events.firstWhere(
-        (Map<String, Object?> event) => event[_eventTypeKey] == _stopEventType,
-      );
-      firstReader.dispose();
-      expect((await firstStopFuture)[DeviceService.deviceIdParam], equals(_primaryDeviceId));
-
-      final Future<Map<String, Object?>> secondStartFuture = events.firstWhere(
-        (Map<String, Object?> event) => event[_eventTypeKey] == _startEventType,
-      );
       final DeviceLogReader secondReader = await device.getLogReader();
-      expect(secondReader, isA<ExtensionDeviceLogReader>());
-      expect(secondReader, isNot(same(firstReader)));
-      expect((await secondStartFuture)[DeviceService.deviceIdParam], equals(_primaryDeviceId));
+      expect(secondReader, same(firstReader));
+
+      final Future<List<String>> firstSubscriberLines = firstReader.logLines.take(2).toList();
+      final Future<List<String>> secondSubscriberLines = secondReader.logLines.take(2).toList();
+
+      expect(
+        await firstSubscriberLines,
+        equals(<String>['Booting application...', 'Flutter run key commands.']),
+      );
+      expect(
+        await secondSubscriberLines,
+        equals(<String>['Booting application...', 'Flutter run key commands.']),
+      );
+      expect(startEvents, hasLength(1));
+      expect(startEvents.single[DeviceService.deviceIdParam], equals(_primaryDeviceId));
     });
 
     testWithoutContext('ExtensionDevices.pollingGetDevices reuses cached ExtensionBackedDevice across polls and disposes removed devices', () async {
