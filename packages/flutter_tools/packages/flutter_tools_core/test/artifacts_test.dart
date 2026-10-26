@@ -233,6 +233,34 @@ void main() {
         ),
         isTrue,
       );
+      expect(
+        darwinDep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.darwin_arm64,
+          targetPlatforms: const <String>{'macos-arm64'},
+        ),
+        isTrue,
+      );
+
+      final macosArm64Dep = ArtifactDependency(
+        name: 'macos-arm64-bin',
+        sha256: validSha256,
+        url: Uri.parse('https://example.com/macos-arm64.zip'),
+        targetPlatform: 'macos-arm64',
+      );
+      expect(
+        macosArm64Dep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.darwin_arm64,
+          targetPlatforms: const <String>{'darwin-arm64'},
+        ),
+        isTrue,
+      );
+      expect(
+        macosArm64Dep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.darwin_arm64,
+          targetPlatforms: const <String>{'darwin'},
+        ),
+        isTrue,
+      );
     });
 
     test('throws FormatException on invalid JSON', () {
