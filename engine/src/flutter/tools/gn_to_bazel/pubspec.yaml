@@ -20,6 +20,7 @@ dependencies:
   engine_build_configs: any
   meta: any
   path: any
+  yaml: any
 
 dev_dependencies:
   test: any
