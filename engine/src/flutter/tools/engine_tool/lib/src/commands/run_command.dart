@@ -147,19 +147,20 @@ See `flutter run --help` for a listing
     // built it, that directory.
     final localEngines = <String, String>{};
     if (plan.backend == BuildBackend.bazel) {
-      // The host build, and the target build when it is another one: the
-      // host's own through its local engine manifest, which `flutter run
-      // --local-engine` reads in place; another platform's (Android's,
-      // whose Gradle plugin reads GN's layout) through its install target
-      // run into its build directory (the whole of the build, as GN's
-      // default target; the shell's targets are among it).
+      // The host build, and the target build when it is another one: a
+      // developer's build through its local engine manifest, which `flutter
+      // run --local-engine[-host]` reads in place (Android's through the
+      // Gradle plugin, given the manifest's directory as `local-engine-out`);
+      // a CI build, which names ninja targets, through its install target run
+      // into its build directory (the shell's targets are among them).
       final bazel = Bazel(environment, _configs);
       for (final build in <Build>[hostBuild, if (hostBuild.name != plan.build.name) plan.build]) {
         final String? config = bazel.configFor(build);
         if (config == null) {
           return 1;
         }
-        if (bazel.usesLocalEngineManifest(build)) {
+        final String? installTarget = bazel.installTargetFor(build);
+        if (installTarget == null) {
           final String? localEngine = await bazel.buildLocalEngine(config);
           if (localEngine == null) {
             environment.logger.error('Failed to build ${build.name}');
@@ -171,7 +172,7 @@ See `flutter run --help` for a listing
         final int exitCode = await bazel.run(<String>[
           'run',
           '--config=$config',
-          bazel.installTargetFor(build),
+          installTarget,
           '--',
           bazel.buildDirectoryFor(build),
         ]);
