@@ -6,7 +6,6 @@
 
 #include <utility>
 
-#include "flutter/fml/status.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
@@ -14,6 +13,7 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/texture_util.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -55,7 +55,7 @@ bool InlinePassContext::EndPass(bool is_onscreen) {
   const std::shared_ptr<Texture>& target_texture =
       GetPassTarget().GetRenderTarget().GetRenderTargetTexture();
   if (target_texture->GetMipCount() > 1) {
-    fml::Status mip_status = AddMipmapGeneration(
+    absl::Status mip_status = AddMipmapGeneration(
         command_buffer_, renderer_.GetContext(), target_texture);
     if (!mip_status.ok()) {
       return false;
