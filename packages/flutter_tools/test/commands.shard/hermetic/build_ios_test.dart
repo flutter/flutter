@@ -1615,8 +1615,8 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   HostPlatform hostPlatform = HostPlatform.linux_x64;
 
   @override
-  void chmod(FileSystemEntity entity, String mode) {}
+  int? getDirectorySize(Directory directory) => 1024;
 
   @override
-  int? getDirectorySize(Directory directory) => 1024;
+  void chmod(FileSystemEntity file, String mode) {}
 }

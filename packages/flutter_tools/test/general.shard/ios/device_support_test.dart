@@ -25,7 +25,7 @@ void main() {
 
       final deviceSupport = IOSDeviceSupport(
         toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
-        xcode: null,
+        xcode: FakeXcode(),
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -658,7 +658,7 @@ void main() {
         final Directory homeDir = fileSystem.directory('/Users/username');
         final deviceSupport = IOSDeviceSupport(
           toolContext: FakeToolContext(),
-          xcode: null,
+          xcode: FakeXcode(),
           homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
           operatingSystemVersion: '17.0',
@@ -673,7 +673,7 @@ void main() {
         final Directory homeDir = fileSystem.directory('/Users/username');
         final deviceSupport = IOSDeviceSupport(
           toolContext: FakeToolContext(),
-          xcode: null,
+          xcode: FakeXcode(),
           homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
           operatingSystemVersion: '17.0',
@@ -709,7 +709,7 @@ void main() {
 
         final deviceSupport = IOSDeviceSupport(
           toolContext: FakeToolContext(),
-          xcode: null,
+          xcode: FakeXcode(),
           homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
           operatingSystemVersion: '17.0',
@@ -740,7 +740,7 @@ void main() {
 
         final deviceSupport = IOSDeviceSupport(
           toolContext: FakeToolContext(),
-          xcode: null,
+          xcode: FakeXcode(),
           homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
           operatingSystemVersion: '17.0',

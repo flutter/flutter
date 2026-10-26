@@ -16,12 +16,13 @@ import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/device_support.dart';
 import 'package:flutter_tools/src/ios/lldb.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show FakeToolContext;
+import '../../src/fakes.dart' show FakeToolContext, FakeXcode;
 
 const _deviceId = '123';
 const _appProcessId = 5678;
@@ -47,7 +48,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -98,7 +102,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -169,7 +176,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(27, 0, 0),
     );
 
@@ -235,7 +245,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -294,7 +307,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
     final expectedInputs = [
@@ -346,7 +362,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -414,7 +433,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -483,7 +505,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
 
@@ -524,7 +549,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(16, 0, 0),
     );
     expect(lldb.isRunning, isFalse);
@@ -581,7 +609,10 @@ void main() {
       final lldb = LLDB(
         logger: logger,
         processUtils: processUtils,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        xcode: Xcode.test(
+          processManager: FakeProcessManager.any(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        ),
         deviceVersion: Version(16, 0, 0),
       );
 
@@ -669,7 +700,10 @@ void main() {
       final lldb = LLDB(
         logger: logger,
         processUtils: processUtils,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        xcode: Xcode.test(
+          processManager: FakeProcessManager.any(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        ),
         deviceVersion: Version(16, 0, 0),
       );
 
@@ -791,7 +825,10 @@ void main() {
     final lldb = LLDB(
       logger: logger,
       processUtils: processUtils,
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
       deviceVersion: Version(27, 0, 0),
     );
 
@@ -1102,7 +1139,7 @@ IOSDeviceSupport createDeviceSupport({
           processUtils ??
           ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
     ),
-    xcode: null,
+    xcode: FakeXcode(),
     homeDirectory: homeDirectory,
     modelCode: modelCode,
     operatingSystemVersion: operatingSystemVersion,

@@ -20,6 +20,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -31,7 +32,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
@@ -326,6 +326,7 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required this._analytics,
     required this._xcode,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
   }) : _iproxy = iProxy,
        super(
@@ -349,8 +350,9 @@ class IOSDevice extends Device {
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
-  final Xcode? _xcode;
+  final Xcode _xcode;
   final IProxy _iproxy;
+  final TemplateRenderer _templateRenderer;
 
   Version? get sdkVersion {
     return Version.parse(_sdkVersion);
@@ -522,7 +524,11 @@ class IOSDevice extends Device {
     @visibleForTesting Duration? discoveryTimeout,
     @visibleForTesting ShutdownHooks? shutdownHooks,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      shutdownHooks: ShutdownHooks defaultShutdownHooks,
+    ) = toolContext;
     String? packageId;
     if (isWirelesslyConnected &&
         debuggingOptions.debuggingEnabled &&
@@ -541,12 +547,12 @@ class IOSDevice extends Device {
       final XcodeBuildResult buildResult = await buildXcodeProject(
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
-        toolContext: toolContext,
         targetOverride: mainPath,
         activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
+        toolContext: toolContext,
       );
       if (!buildResult.success) {
         logger.printError('Could not build the precompiled application for the device.');
@@ -626,7 +632,7 @@ class IOSDevice extends Device {
           launchArguments: launchArguments,
           mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
-          shutdownHooks: shutdownHooks ?? toolContext.shutdownHooks,
+          shutdownHooks: shutdownHooks ?? defaultShutdownHooks,
           shouldAttachDebugger: shouldAttachDebugger,
         );
         installationResult = result ? 0 : 1;
@@ -1113,12 +1119,17 @@ class IOSDevice extends Device {
       return (launchSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
     }
 
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      shutdownHooks: ShutdownHooks defaultShutdownHooks,
+    ) = toolContext;
     IOSDeploymentMethod? deploymentMethod;
 
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
@@ -1135,7 +1146,7 @@ class IOSDevice extends Device {
           bundlePath: package.deviceBundlePath,
           bundleId: package.id,
           launchArguments: launchArguments,
-          shutdownHooks: globals.shutdownHooks,
+          shutdownHooks: defaultShutdownHooks,
           mode: debuggingOptions.buildInfo.mode,
         );
 
@@ -1157,7 +1168,7 @@ class IOSDevice extends Device {
           bundlePath: package.deviceBundlePath,
           bundleId: package.id,
           launchArguments: launchArguments,
-          shutdownHooks: globals.shutdownHooks,
+          shutdownHooks: defaultShutdownHooks,
         );
 
         if (launchSuccess) {
@@ -1177,8 +1188,6 @@ class IOSDevice extends Device {
 
     deploymentMethod ??= IOSDeploymentMethod.coreDeviceWithXcode;
 
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
-
     // If LLDB is not available or fails, fallback to using Xcode.
     logger.printStatus(
       'You may be prompted to give access to control Xcode. Flutter uses Xcode '
@@ -1194,12 +1203,11 @@ class IOSDevice extends Device {
     });
 
     XcodeDebugProject debugProject;
-    final FlutterProject flutterProject = FlutterProject.current();
 
     if (package is PrebuiltIOSApp) {
       debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
         package.deviceBundlePath,
-        templateRenderer: globals.templateRenderer,
+        templateRenderer: _templateRenderer,
         verboseLogging: logger.isVerbose,
       );
     } else if (package is BuildableIOSApp) {
@@ -1208,7 +1216,7 @@ class IOSDevice extends Device {
       // knows where to find the app bundle to launch.
       final Directory bundle = fs.directory(package.deviceBundlePath);
       await updateGeneratedXcodeProperties(
-        project: flutterProject,
+        project: package.project.parent,
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
         configurationBuildDir: bundle.parent.absolute.path,
@@ -1302,7 +1310,7 @@ class IOSDevice extends Device {
         app: app,
         iMobileDevice: _iMobileDevice,
         usingCISystem: usingCISystem,
-        xcode: globals.xcode,
+        xcode: _xcode,
       ),
     );
   }
@@ -1375,16 +1383,16 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsScreenshot {
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
-      return globals.xcode!.isDevicectlInstalled;
+      return _xcode.isDevicectlInstalled;
     }
     return false;
   }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
       var success = false;
       try {

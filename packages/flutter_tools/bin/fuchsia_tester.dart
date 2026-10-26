@@ -12,14 +12,13 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
@@ -125,6 +124,7 @@ Future<void> run(List<String> args) async {
       logger: globals.logger,
       platform: globals.platform,
       processManager: globals.processManager,
+      templateRenderer: const MustacheTemplateRenderer(),
     );
 
     Directory? testDirectory;
@@ -170,7 +170,6 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
     );
-    final ToolContext(:FileSystem fs, :Platform platform) = dependencies.toolContext;
     final debuggingOptions = DebuggingOptions.enabled(buildInfo);
     final testRunner = FlutterTestRunner(toolContext: dependencies.toolContext);
     exitCode = await testRunner.runTests(
@@ -182,8 +181,8 @@ Future<void> run(List<String> args) async {
         watcher: collector,
         enableVmService: collector != null,
         precompiledDillFiles: tests,
-        concurrency: math.max(1, platform.numberOfProcessors - 2),
-        icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl] as String),
+        concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
+        icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
         coverageDirectory: coverageDirectory,
         nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
       ),

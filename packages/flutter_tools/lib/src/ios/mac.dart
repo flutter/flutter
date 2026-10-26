@@ -115,7 +115,6 @@ class IMobileDevice {
 Future<XcodeBuildResult> buildXcodeProject({
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
-  required ToolContext toolContext,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
   CpuArch? activeArch,
@@ -124,6 +123,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
+  required ToolContext toolContext,
 }) async {
   final ToolContext(:Config config, :FileSystem fs, :OperatingSystemUtils os, :Platform platform) =
       toolContext;

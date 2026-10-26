@@ -97,24 +97,19 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   final Platform platform = FakePlatform(operatingSystem: 'macos');
   final Logger logger = BufferLogger.test();
   final ProcessManager processManager = FakeProcessManager.any();
+  final toolContext = FakeToolContext(
+    artifacts: Artifacts.test(),
+    cache: Cache.test(processManager: processManager),
+    fs: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
   return IOSDevice(
     'test',
-    toolContext: FakeToolContext(
-      fs: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    ),
-    xcode: null,
-    iosDeploy: IOSDeploy(
-      artifacts: Artifacts.test(),
-      toolContext: FakeToolContext(
-        cache: Cache.test(processManager: processManager),
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-      ),
-    ),
+    toolContext: toolContext,
+    xcode: FakeXcode(),
+    iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
     iMobileDevice: IMobileDevice.test(processManager: processManager),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
@@ -129,6 +124,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: false,
+    templateRenderer: FakeTemplateRenderer(),
   );
 }
 

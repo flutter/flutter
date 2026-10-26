@@ -634,8 +634,8 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager, {Artifacts? artifacts}) 
   );
 
   return IOSDeploy(
-    artifacts: artifacts ?? Artifacts.test(),
     toolContext: FakeToolContext(
+      artifacts: artifacts ?? Artifacts.test(),
       cache: cache,
       logger: BufferLogger.test(),
       platform: macPlatform,

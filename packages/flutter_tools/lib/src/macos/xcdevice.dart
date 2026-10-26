@@ -13,6 +13,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -20,7 +21,6 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
@@ -53,6 +53,7 @@ class XCDevice {
   XCDevice({
     required this._analytics,
     required IProxy iproxy,
+    required this._templateRenderer,
     required this._toolContext,
     required this._xcode,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
@@ -66,21 +67,15 @@ class XCDevice {
       :ProcessManager processManager,
       :ShutdownHooks shutdownHooks,
     ) = _toolContext;
-    _coreDeviceControl =
-        coreDeviceControl ??
-        IOSCoreDeviceControl(
-          logger: logger,
-          processManager: processManager,
-          xcode: _xcode,
-          fileSystem: fs,
-        );
     _iMobileDevice = IMobileDevice(
       artifacts: artifacts,
       cache: cache,
       logger: logger,
       processManager: processManager,
     );
-    _iosDeploy = IOSDeploy(artifacts: artifacts, toolContext: _toolContext);
+    _iosDeploy = IOSDeploy(toolContext: _toolContext);
+    _coreDeviceControl =
+        coreDeviceControl ?? IOSCoreDeviceControl(toolContext: _toolContext, xcode: _xcode);
     _xcodeDebug =
         xcodeDebug ??
         XcodeDebug(logger: logger, processManager: processManager, xcode: _xcode, fileSystem: fs);
@@ -111,6 +106,7 @@ class XCDevice {
   late final IOSCoreDeviceControl _coreDeviceControl;
   late final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   List<Object>? _cachedListResults;
@@ -481,7 +477,6 @@ class XCDevice {
     required List<Object> allAvailableDevices,
     required List<IOSCoreDevice> coreDevices,
   }) {
-    final Logger logger = _toolContext.logger;
     final coreDeviceMap = <String, IOSCoreDevice>{};
     for (final device in coreDevices) {
       if (device.udid != null) {
@@ -553,7 +548,7 @@ class XCDevice {
                 Event.appleUsageEvent(workflow: 'device', parameter: 'ios-trust-failure'),
               );
             }
-            logger.printTrace(errorMessage);
+            _toolContext.logger.printTrace(errorMessage);
           }
 
           final int? code = _errorCode(errorProperties);
@@ -634,6 +629,7 @@ class XCDevice {
           modelCode: modelCode,
           operatingSystemVersion: operatingSystemVersion,
           iProxy: _iProxy,
+          toolContext: _toolContext,
           analytics: _analytics,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
@@ -641,16 +637,16 @@ class XCDevice {
           coreDeviceLauncher: IOSCoreDeviceLauncher(
             coreDeviceControl: _coreDeviceControl,
             xcodeDebug: _xcodeDebug,
-            xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-            deviceVersion: Version.parse(sdkVersionString),
             toolContext: _toolContext,
+            xcode: _xcode,
+            deviceVersion: Version.parse(sdkVersionString),
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
-          toolContext: _toolContext,
+          templateRenderer: _templateRenderer,
         );
       }
     }

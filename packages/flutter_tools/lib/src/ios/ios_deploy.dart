@@ -27,12 +27,11 @@ const deviceLockedErrorMessage = 'the device was not, or could not be, unlocked'
 const unknownAppLaunchError = 'Error 0xe8000022';
 
 class IOSDeploy {
-  IOSDeploy({required this._artifacts, required this._toolContext});
+  IOSDeploy({required this._toolContext});
 
-  final Artifacts _artifacts;
   final ToolContext _toolContext;
 
-  String get _binaryPath => _artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
+  String get _binaryPath => _toolContext.artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
 
   Map<String, String> get iosDeployEnv {
     // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
@@ -61,7 +60,12 @@ class IOSDeploy {
       bundleId,
     ];
 
-    return _stream(launchCommand);
+    return _toolContext.processUtils.stream(
+      launchCommand,
+      mapFunction: _monitorFailure,
+      trace: true,
+      environment: iosDeployEnv,
+    );
   }
 
   /// Installs the specified app bundle.
@@ -86,7 +90,12 @@ class IOSDeploy {
       if (launchArguments.isNotEmpty) ...<String>['--args', launchArguments.join(' ')],
     ];
 
-    return _stream(launchCommand);
+    return _toolContext.processUtils.stream(
+      launchCommand,
+      mapFunction: _monitorFailure,
+      trace: true,
+      environment: iosDeployEnv,
+    );
   }
 
   /// Returns [IOSDeployDebugger] wrapping attached debugger logic.
@@ -155,7 +164,12 @@ class IOSDeploy {
       if (launchArguments.isNotEmpty) ...<String>['--args', launchArguments.join(' ')],
     ];
 
-    return _stream(launchCommand);
+    return _toolContext.processUtils.stream(
+      launchCommand,
+      mapFunction: _monitorFailure,
+      trace: true,
+      environment: iosDeployEnv,
+    );
   }
 
   Future<bool> isAppInstalled({required String bundleId, required String deviceId}) async {
@@ -183,15 +197,7 @@ class IOSDeploy {
     return true;
   }
 
-  Future<int> _stream(List<String> launchCommand) {
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
-    return processUtils.stream(
-      launchCommand,
-      mapFunction: (String stdout) => _monitorIOSDeployFailure(stdout, logger),
-      trace: true,
-      environment: iosDeployEnv,
-    );
-  }
+  String _monitorFailure(String stdout) => _monitorIOSDeployFailure(stdout, _toolContext.logger);
 }
 
 /// lldb attach state flow.
