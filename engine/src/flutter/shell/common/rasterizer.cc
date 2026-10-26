@@ -805,7 +805,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
       // something that still need to be figured out.
       bool force_full_repaint =
           external_view_embedder_ &&
-          (!raster_thread_merger_ || raster_thread_merger_->IsMerged());
+          (embedder_root_canvas != nullptr || !raster_thread_merger_ ||
+           raster_thread_merger_->IsMerged());
 
       damage = std::make_unique<FrameDamage>();
       auto existing_damage = frame->framebuffer_info().existing_damage;
@@ -842,7 +843,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     frame->set_submit_info(submit_info);
 
     if (external_view_embedder_ &&
-        (!raster_thread_merger_ || raster_thread_merger_->IsMerged())) {
+        (embedder_root_canvas != nullptr || !raster_thread_merger_ ||
+         raster_thread_merger_->IsMerged())) {
       FML_DCHECK(!frame->IsSubmitted());
       external_view_embedder_->SubmitFlutterView(
           view_id, surface_->GetContext(), surface_->GetAiksContext(),

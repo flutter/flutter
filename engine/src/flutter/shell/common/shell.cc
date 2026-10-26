@@ -1061,6 +1061,63 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
+void Shell::OnPlatformViewCreatedAsync(
+    std::function<std::unique_ptr<Surface>()> create_surface_callback) {
+  TRACE_EVENT0("flutter", "Shell::OnPlatformViewCreatedAsync");
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  rasterizer_->DisableThreadMergerIfNeeded();
+
+  auto* platform_view = platform_view_.get();
+  FML_DCHECK(platform_view);
+
+  auto io_task = [io_manager = io_manager_->GetWeakPtr(), platform_view]() {
+    if (io_manager && !io_manager->GetResourceContext()) {
+      sk_sp<GrDirectContext> resource_context =
+          platform_view->CreateResourceContext();
+      io_manager->NotifyResourceContextAvailable(resource_context);
+    }
+  };
+
+  auto ui_task = [engine = engine_->GetWeakPtr()]() {
+    if (engine) {
+      engine->ScheduleFrame();
+    }
+  };
+
+  auto raster_task = fml::MakeCopyable(
+      [create_surface_callback = std::move(create_surface_callback),
+       rasterizer = rasterizer_->GetWeakPtr(),
+       io_task_runner = task_runners_.GetIOTaskRunner(), io_task,
+       ui_task_runner = task_runners_.GetUITaskRunner(), ui_task,
+       &waiting_for_first_frame = waiting_for_first_frame_]() mutable {
+        if (!rasterizer) {
+          return;
+        }
+        std::unique_ptr<Surface> surface =
+            create_surface_callback ? create_surface_callback() : nullptr;
+        if (surface && !surface->IsValid()) {
+          surface.reset();
+        }
+        if (!surface) {
+          FML_LOG(ERROR) << "Failed to create platform view rendering surface";
+          return;
+        }
+
+        rasterizer->EnableThreadMergerIfNeeded();
+        rasterizer->Setup(std::move(surface));
+
+        waiting_for_first_frame.store(true);
+
+        fml::TaskRunner::RunNowOrPostTask(io_task_runner, io_task);
+        fml::TaskRunner::RunNowOrPostTask(ui_task_runner, ui_task);
+      });
+
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
+                                    raster_task);
+}
+
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewDestroyed() {
   TRACE_EVENT0("flutter", "Shell::OnPlatformViewDestroyed");
@@ -1735,7 +1792,7 @@ void Shell::UpdateAssetResolverByType(
       fml::MakeCopyable(
           [engine = weak_engine_, type,
            asset_resolver = std::move(updated_asset_resolver)]() mutable {
-            if (engine) {
+            if (engine && engine->GetAssetManager()) {
               engine->GetAssetManager()->UpdateResolverByType(
                   std::move(asset_resolver), type);
             }

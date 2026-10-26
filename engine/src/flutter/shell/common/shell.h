@@ -329,6 +329,14 @@ class Shell final : public PlatformView::Delegate,
   bool IsSetup() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Notifies the shell that the platform view was created and
+  ///             sets up the rendering surface asynchronously on the raster
+  ///             task runner without blocking the platform thread on a latch.
+  ///
+  void OnPlatformViewCreatedAsync(
+      std::function<std::unique_ptr<Surface>()> create_surface_callback);
+
+  //----------------------------------------------------------------------------
   /// @brief      Captures a screenshot and optionally Base64 encodes the data
   ///             of the last layer tree rendered by the rasterizer in this
   ///             shell.

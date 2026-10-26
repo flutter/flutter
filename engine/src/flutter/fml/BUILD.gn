@@ -17,6 +17,8 @@ source_set("fml") {
     "base32.cc",
     "base32.h",
     "build_config.h",
+    "callback_cache.cc",
+    "callback_cache.h",
     "closure.h",
     "concurrent_message_loop.cc",
     "concurrent_message_loop.h",
@@ -115,7 +117,10 @@ source_set("fml") {
     ":string_conversion",
   ]
 
-  deps = [ "//third_party/abseil-cpp/absl/numeric:int128" ]
+  deps = [
+    "//flutter/third_party/rapidjson",
+    "//third_party/abseil-cpp/absl/numeric:int128",
+  ]
   if (target_os != "wasm") {
     deps += [ "//flutter/third_party/icu" ]
 
@@ -332,6 +337,7 @@ if (enable_unittests) {
       "ascii_trie_unittests.cc",
       "backtrace_unittests.cc",
       "base32_unittest.cc",
+      "callback_cache_unittests.cc",
       "closure_unittests.cc",
       "command_line_unittest.cc",
       "container_unittests.cc",

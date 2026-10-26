@@ -174,6 +174,7 @@ impeller_component("vulkan") {
   public_deps = [
     "../../:renderer",
     "../../../shader_archive",
+    "//flutter/common",
     "//flutter/flutter_vma",
     "//flutter/fml",
     "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
