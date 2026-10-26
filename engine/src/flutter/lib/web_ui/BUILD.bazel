@@ -10,7 +10,7 @@
 
 load("//build_defs/dart:dart_test.bzl", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "pub_package_config")
-load("//build_defs/web:browser_launcher.bzl", "browser_launcher")
+load("//build_defs/web:browser_launcher.bzl", "browser_launcher", "display_launcher")
 load("//build_defs/web:web_ui_tests.bzl", "web_ui_host_page", "web_ui_tests")
 load(":felt_config.bzl", "FELT_CONFIG")
 
@@ -164,9 +164,15 @@ browser_launcher(
 """,
 )
 
-# Each browser's launcher, the variable felt finds it through, and the
+# The X display felt gives Firefox (headless Firefox initializes WebGL only
+# on one): felt starts Xvfb by name, so a script of that name first on the
+# tests' PATH runs the build's X server on the build's libraries -- or the
+# host's, under the host's libraries.
+display_launcher(name = "Xvfb")
+
+# Each browser's launcher, the variable felt finds it through, the
 # environment it needs inside Bazel's sandbox (its own sandbox does not
-# start within another).
+# start within another), and the programs felt starts for it.
 _BROWSERS = {
     "chrome": {
         "browser": ":chrome",
@@ -183,6 +189,7 @@ _BROWSERS = {
             "MOZ_DISABLE_SOCKET_PROCESS_SANDBOX": "1",
         },
         "files": [],
+        "tools": [":Xvfb"],
         "variable": "FIREFOX_EXECUTABLE",
     },
 }
@@ -193,7 +200,7 @@ _BROWSERS = {
 # `:chrome_tests`, `:firefox_tests` and `:<suite>` (the run configuration --
 # the CanvasKit variant, cross-origin isolation, single-threaded skwasm, wimp,
 # the browser's flags -- is felt's own, read from felt_config.yaml by suite
-# name; on an X display felt starts itself: Xvfb, the host's).
+# name; on an X display felt starts itself, the `:Xvfb` above).
 web_ui_tests(
     name = "tests",
     # What a test file imports besides package:ui: test/common's helpers, the

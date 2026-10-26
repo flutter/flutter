@@ -347,13 +347,21 @@ def _web_ui_test_impl(ctx):
     config_path = package + "/.dart_tool/package_config.json"
     symlinks[config_path] = ctx.file.runtime_package_config
 
+    # The programs felt starts by name (Xvfb for Firefox): their directories
+    # first on PATH.
+    tool_directories = []
+    for tool in ctx.files.tools:
+        directory = tool.short_path.rsplit("/", 1)[0]
+        if directory not in tool_directories:
+            tool_directories.append(directory)
+
     launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
     ctx.actions.write(launcher, """#!/bin/bash
 # {label}: felt's run step on one compiled test, from the runfiles tree.
 set -euo pipefail
 root="$PWD"
 export {variable}="$root/{browser}"
-{env}export HOME="${{TEST_TMPDIR:-$(mktemp -d)}}/home"
+{env}{path}export HOME="${{TEST_TMPDIR:-$(mktemp -d)}}/home"
 mkdir -p "$HOME"
 cd "$root/{package}"
 exec "$root/{dart}" --packages="$root/{config}" "{felt}" test --run --suite="{suite}" "$@"
@@ -362,6 +370,7 @@ exec "$root/{dart}" --packages="$root/{config}" "{felt}" test --run --suite="{su
         variable = ctx.attr.browser_variable,
         browser = ctx.file.browser.short_path,
         env = "".join(["export %s=\"%s\"\n" % (name, value) for name, value in ctx.attr.env.items()]),
+        path = "".join(["export PATH=\"$root/%s:$PATH\"\n" % directory for directory in tool_directories]),
         package = package,
         dart = ctx.file._dart.short_path,
         config = config_path,
@@ -369,7 +378,7 @@ exec "$root/{dart}" --packages="$root/{config}" "{felt}" test --run --suite="{su
         suite = ctx.attr.suite,
     ), is_executable = True)
     runfiles = ctx.runfiles(
-        files = [ctx.file.felt, ctx.file.runtime_package_config, ctx.file.browser] + ctx.files.srcs + ctx.files.browser_files,
+        files = [ctx.file.felt, ctx.file.runtime_package_config, ctx.file.browser] + ctx.files.srcs + ctx.files.browser_files + ctx.files.tools,
         symlinks = symlinks,
         transitive_files = depset(transitive = [
             ctx.attr._sdk[DefaultInfo].files,
@@ -378,8 +387,10 @@ exec "$root/{dart}" --packages="$root/{config}" "{felt}" test --run --suite="{su
     )
 
     # A browser_launcher's runfiles: the browser's directory and the
-    # libraries its script puts on LD_LIBRARY_PATH.
+    # libraries its script puts on LD_LIBRARY_PATH; the tools' likewise.
     runfiles = runfiles.merge(ctx.attr.browser[DefaultInfo].default_runfiles)
+    for tool in ctx.attr.tools:
+        runfiles = runfiles.merge(tool[DefaultInfo].default_runfiles)
     return [DefaultInfo(executable = launcher, runfiles = runfiles)]
 
 web_ui_test = rule(
@@ -417,6 +428,11 @@ web_ui_test = rule(
         "env": attr.string_dict(
             doc = "Other variables exported before felt runs (CHROME_NO_SANDBOX for Chrome: its own sandbox does not " +
                   "start inside Bazel's; Firefox's MOZ_DISABLE_*_SANDBOX likewise).",
+        ),
+        "tools": attr.label_list(
+            allow_files = True,
+            doc = "Programs felt starts by name, their directories put first on PATH: a display_launcher's Xvfb " +
+                  "(browser_launcher.bzl) for Firefox, which felt gives a display of its own.",
         ),
         "_sdk": attr.label(default = "@dart_sdk_linux_x64//:dart"),
         "_dart": attr.label(default = "@dart_sdk_linux_x64//:bin/dart", allow_single_file = True),
@@ -504,8 +520,8 @@ def web_ui_tests(
         rendering of test/felt_config.yaml).
       browsers: the browsers this host runs, by felt's name (`chrome`, `firefox`), each a dict of
         `browser` (the executable), `files` (its directory), `variable` (the variable felt finds it
-        through) and `env` (web_ui_test's attributes); suites of other browsers (Safari's, Edge's)
-        are left out.
+        through), `env` and `tools` (web_ui_test's attributes; `tools` may be left out); suites of
+        other browsers (Safari's, Edge's) are left out.
       srcs: the sources the test files import (a glob over test/).
       package_config: the pub_package_config of the compiles.
       felt: felt compiled for the VM.
@@ -569,6 +585,7 @@ def web_ui_tests(
                 test_images = test_images,
                 test_set = config["test_sets"][test_set],
                 tests = test_sets[test_set],
+                tools = browsers[browser].get("tools", []),
                 web_sdk = web_sdk,
             )
         native.test_suite(

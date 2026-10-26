@@ -98,6 +98,25 @@ filegroup(
     ),
 )
 
+# The X server felt starts for Firefox (xvfb) and its keyboard data
+# (xkb-data), for //build_defs/web:browser_launcher.bzl's display_launcher.
+filegroup(
+    name = "xvfb",
+    srcs = glob(
+        ["usr/bin/Xvfb"],
+        allow_empty = True,
+    ),
+)
+
+filegroup(
+    name = "xkb",
+    srcs = glob(
+        ["usr/share/X11/xkb"],
+        allow_empty = True,
+        exclude_directories = 0,
+    ),
+)
+
 # The packages' metadata and files, for anything that reads them whole.
 filegroup(
     name = "all_files",

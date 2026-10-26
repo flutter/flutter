@@ -652,7 +652,7 @@
     },
     "//build_defs/repositories:debian_runtime.bzl%debian_runtime": {
       "general": {
-        "bzlTransitiveDigest": "QI4Z7NL8OiPMYjYfP8fsMKV21tO76fL5kFrmZ4rNZc4=",
+        "bzlTransitiveDigest": "Nku64ON+l61cJG8PDUskfnhrAjHCZOddmp7cKZXKH94=",
         "usagesDigest": "nTsUsBhSDpFZgdbF2jOPB4oxE47cwsoxJB0FshbYshY=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
@@ -673,7 +673,7 @@
                   "1f67421437b6eb18669d2868e3e02cb88668683d635198142f48aacc5b397118"
                 ],
                 "fonts-liberation": [
-                  "https://snapshot.debian.org/archive/debian/20200223T031131Z/pool/main/f/fonts-liberation/fonts-liberation_1.07.4-11_all.deb",
+                  "https://snapshot.debian.org/archive/debian/20240901T000000Z/pool/main/f/fonts-liberation/fonts-liberation_1.07.4-11_all.deb",
                   "efd381517f958b01969343634ffcbdd60056be7779af84c6f53a005090430204"
                 ],
                 "gcc-10-base": [
@@ -704,6 +704,10 @@
                   "https://snapshot.debian.org/archive/debian/20220424T205543Z/pool/main/a/at-spi2-core/libatspi2.0-0_2.44.1-1~bpo11+1_amd64.deb",
                   "45b3023428861d08c2887795876bf14fdfafdb3fc5f276b8a2d94f40d6fcf452"
                 ],
+                "libaudit1": [
+                  "https://snapshot.debian.org/archive/debian/20210106T204513Z/pool/main/a/audit/libaudit1_3.0-2_amd64.deb",
+                  "e3aa1383e387dc077a1176f7f3cbfdbc084bcc270a8938f598d5cb119773b268"
+                ],
                 "libavahi-client3": [
                   "https://snapshot.debian.org/archive/debian/20230213T151507Z/pool/main/a/avahi/libavahi-client3_0.8-5+deb11u2_amd64.deb",
                   "3bac9b62e88f4b9a4569c6c5fba1dea7789cc970aed3f64ca24bed3809493aa9"
@@ -728,6 +732,10 @@
                   "https://snapshot.debian.org/archive/debian/20230731T030404Z/pool/main/libb/libbsd/libbsd0_0.11.3-1+deb11u1_amd64.deb",
                   "6ec5a08a4bb32c0dc316617f4bbefa8654c472d1cd4412ab8995f3955491f4a8"
                 ],
+                "libbz2-1.0": [
+                  "https://snapshot.debian.org/archive/debian/20200720T204543Z/pool/main/b/bzip2/libbz2-1.0_1.0.8-4_amd64.deb",
+                  "16e27c3ebd97981e70db3733f899963362748f178a62644df69d1f247e741379"
+                ],
                 "libcairo-gobject2": [
                   "https://snapshot.debian.org/archive/debian/20210102T023040Z/pool/main/c/cairo/libcairo-gobject2_1.16.0-5_amd64.deb",
                   "a046d3ca805d4151029941fae736bfdf1c6f3dbcf1bd581102bd5ad844ea013e"
@@ -735,6 +743,10 @@
                 "libcairo2": [
                   "https://snapshot.debian.org/archive/debian/20210102T023040Z/pool/main/c/cairo/libcairo2_1.16.0-5_amd64.deb",
                   "b27210c0cf7757120e871abeba7de12a5cf94727a2360ecca5eb8e50ca809d12"
+                ],
+                "libcap-ng0": [
+                  "https://snapshot.debian.org/archive/debian/20201120T152954Z/pool/main/libc/libcap-ng/libcap-ng0_0.7.9-2.2+b1_amd64.deb",
+                  "d34e29769b8ef23e9b9920814afb7905b8ee749db0814e6a8d937ccc4f309830"
                 ],
                 "libcolord2": [
                   "https://snapshot.debian.org/archive/debian/20210112T204729Z/pool/main/c/colord/libcolord2_1.4.5-3_amd64.deb",
@@ -811,6 +823,10 @@
                 "libfontconfig1": [
                   "https://snapshot.debian.org/archive/debian/20200515T145056Z/pool/main/f/fontconfig/libfontconfig1_2.13.1-4.2_amd64.deb",
                   "b92861827627a76e74d6f447a5577d039ef2f95da18af1f29aa98fb96baea4c1"
+                ],
+                "libfontenc1": [
+                  "https://snapshot.debian.org/archive/debian/20240901T000000Z/pool/main/libf/libfontenc/libfontenc1_1.1.4-1_amd64.deb",
+                  "1d0aa6ea16a34a8de1ea170360c4cb699f3239aeddb292df2d2c4eb6e835de4b"
                 ],
                 "libfreetype6": [
                   "https://snapshot.debian.org/archive/debian/20220702T033910Z/pool/main/f/freetype/libfreetype6_2.10.4+dfsg-1+deb11u1_amd64.deb",
@@ -1072,6 +1088,10 @@
                   "https://snapshot.debian.org/archive/debian/20200602T083835Z/pool/main/libu/libunistring/libunistring2_0.9.10-4_amd64.deb",
                   "654433ad02d3a8b05c1683c6c29a224500bf343039c34dcec4e5e9515345e3d4"
                 ],
+                "libunwind8": [
+                  "https://snapshot.debian.org/archive/debian/20240901T000000Z/pool/main/libu/libunwind/libunwind8_1.3.2-2_amd64.deb",
+                  "a8cc1181a479375aeb603cfe748cc19dc3a700a47ffdcb09fa025fe02b0c73bf"
+                ],
                 "libuuid1": [
                   "https://snapshot.debian.org/archive/debian-security/20240331T115150Z/pool/updates/main/u/util-linux/libuuid1_2.36.1-8+deb11u2_amd64.deb",
                   "60d982ddfbc6f3cba122b26a887bec00722247e6c657968704daf93d93f5afe3"
@@ -1172,6 +1192,10 @@
                   "https://snapshot.debian.org/archive/debian/20200414T204951Z/pool/main/libx/libxfixes/libxfixes3_5.0.3-2_amd64.deb",
                   "58622d0d65c3535bd724c4da62ae7acb71e0e8f527bcbd65daf8c97e6f0ef843"
                 ],
+                "libxfont2": [
+                  "https://snapshot.debian.org/archive/debian/20240901T000000Z/pool/main/libx/libxfont/libxfont2_2.0.4-1_amd64.deb",
+                  "db5b67a3fc9f3a6adef313cb977a5a2480d751424cca49b286799b4bb98d8694"
+                ],
                 "libxi6": [
                   "https://snapshot.debian.org/archive/debian/20200602T210137Z/pool/main/libx/libxi/libxi6_1.7.10-1_amd64.deb",
                   "4d583f43b5396ca5434100a7274613e9983357d80875a47b29a4f3218fe0bec0"
@@ -1215,6 +1239,14 @@
                 "shared-mime-info": [
                   "https://snapshot.debian.org/archive/debian/20201009T210056Z/pool/main/s/shared-mime-info/shared-mime-info_2.0-1_amd64.deb",
                   "de0a814e186af5a941e1fcd3044da62eb155638fcf9616d6005bcfc6696bbe67"
+                ],
+                "xkb-data": [
+                  "https://snapshot.debian.org/archive/debian/20200229T152633Z/pool/main/x/xkeyboard-config/xkb-data_2.29-2_all.deb",
+                  "9122cccc67e6b3c3aef2fa9c50ef9d793a12f951c76698a02b1f4ceb9e3634e5"
+                ],
+                "xvfb": [
+                  "https://snapshot.debian.org/archive/debian/20240901T000000Z/pool/main/x/xorg-server/xvfb_1.20.11-1+deb11u13_amd64.deb",
+                  "36e84b5f4ce290fc8a98cf235ac81fea21ac7b1bb8c90dd4f7ecb5b7d71986a9"
                 ],
                 "zlib1g": [
                   "https://snapshot.debian.org/archive/debian-security/20220825T195306Z/pool/updates/main/z/zlib/zlib1g_1.2.11.dfsg-2+deb11u2_amd64.deb",
