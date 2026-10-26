@@ -488,13 +488,16 @@ Once everything has landed:
 
 Old APIs can be marked as deprecated as part of this process. Deprecation is not a way to avoid making a breaking change; you should consider deprecating an API to be equivalent to removing it, as some of our customers (and we ourselves) consider using a deprecated API to be anathema (triggering a build failure).
 
+To any users receiving a deprecation message, the steps to migrate off of the deprecated API should be crystal clear. Typically this means writing a migration guide and including it in the deprecation message.
+
 The syntax for deprecations must match the following pattern:
 
 ```dart
 @Deprecated(
-  'Call prepareFrame followed by owner.requestVisualUpdate() instead. '
-  'This will enable an improvement to performance in a future version of Flutter. '
-  'This feature was deprecated after v2.9.0-0.1.pre.'
+  'Use textScaler instead. '
+  'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+  'See the migration guide at https://docs.flutter.dev/release/breaking-changes/deprecate-textscalefactor. '
+  'This feature was deprecated after v3.12.0-2.0.pre.',
 )
 ```
 
@@ -504,6 +507,7 @@ In other words:
 @Deprecated(
   '[description of how to migrate] '
   '[brief motivation for why we are breaking the API] '
+  '[link to the migration guide] '
   'This feature was deprecated after v[beta version at time of deprecation].'
 )
 ```
