@@ -257,7 +257,7 @@ class RenderListWheelViewport extends RenderBox
   /// [itemExtent]. Then the children are evenly distributed along the visible
   /// angles up to ±[math.pi] / 2.
   ///
-  /// Just as it's impossible to stretch a paper to cover the an entire
+  /// Just as it's impossible to stretch a paper to cover an entire
   /// half of a cylinder's surface where the cylinder has the same diameter
   /// as the paper's length, choosing a [diameterRatio] smaller than [math.pi]
   /// will leave same gaps between the children.
