@@ -65,16 +65,19 @@ test_suite(
     tests = ["//packages/flutter/test:all_impeller"],
 )
 
-# flutter_tools' unit tests, command tests, integration tests and web tests
-# (the last two run the tool itself from the tests' SDK facsimile, which
-# holds the engine in its three runtime modes and the web SDK: the first
-# build is three builds of the engine and one of the web engine; the web
-# tests drive the pinned Chrome for Testing, @chrome).
+# flutter_tools' unit tests, command tests, integration tests, desktop
+# tests and web tests (the last three run the tool itself from the tests'
+# SDK facsimile, which holds the engine in its three runtime modes and the
+# web SDK: the first build is three builds of the engine and one of the web
+# engine; the desktop tests build Linux apps with CMake, GTK and clang from
+# the build on an X display of their own; the web tests drive the pinned
+# Chrome for Testing, @chrome).
 test_suite(
     name = "tool_tests",
     tests = [
         "//packages/flutter_tools:commands_shard_hermetic",
         "//packages/flutter_tools:commands_shard_permeable",
+        "//packages/flutter_tools:desktop_shard",
         "//packages/flutter_tools:general_shard",
         "//packages/flutter_tools:integration_shard",
         "//packages/flutter_tools:web_shard",

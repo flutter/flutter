@@ -727,6 +727,16 @@ DEBIAN_RUNTIME_PACKAGES = {
         "url": "https://snapshot.debian.org/archive/debian/20210301T210829Z/pool/main/libz/libzstd/libzstd1_1.4.8+dfsg-2.1_amd64.deb",
         "version": "1.4.8+dfsg-2.1",
     },
+    "ninja-build": {
+        "sha256": "54e7ab6ca81951f3de4e3d41666409647ad619319dd43f6cc66c1694c849eca3",
+        "url": "https://snapshot.debian.org/archive/debian/20240901T000000Z/pool/main/n/ninja-build/ninja-build_1.10.1-1_amd64.deb",
+        "version": "1.10.1-1",
+    },
+    "pkg-config": {
+        "sha256": "09a05a23c5fd5baacd488255a6b0114909210691b830fb951acd276e9bcd632a",
+        "url": "https://snapshot.debian.org/archive/debian/20200421T214331Z/pool/main/p/pkg-config/pkg-config_0.29.2-1_amd64.deb",
+        "version": "0.29.2-1",
+    },
     "shared-mime-info": {
         "sha256": "de0a814e186af5a941e1fcd3044da62eb155638fcf9616d6005bcfc6696bbe67",
         "url": "https://snapshot.debian.org/archive/debian/20201009T210056Z/pool/main/s/shared-mime-info/shared-mime-info_2.0-1_amd64.deb",
