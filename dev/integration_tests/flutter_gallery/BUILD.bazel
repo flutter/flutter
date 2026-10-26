@@ -9,6 +9,19 @@
 
 package(default_visibility = ["//visibility:public"])
 
+# The package's files, for its tests (test/BUILD.bazel) and the
+# configurations that cover it.
+filegroup(
+    name = "sources",
+    srcs = glob(["lib/**"]) + ["pubspec.yaml"],
+)
+
+exports_files([
+    # The one asset of the gallery's own (pubspec.yaml's assets).
+    "lib/gallery/example_code.dart",
+    "pubspec.yaml",
+])
+
 filegroup(
     name = "project",
     srcs = glob([

@@ -1,0 +1,16 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The multiple-windows example (a package outside the pub workspace, whose
+# dependencies the workspace's lock covers): its files, for its tests
+# (test/BUILD.bazel).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob(["lib/**"]) + ["pubspec.yaml"],
+)
+
+exports_files(["pubspec.yaml"])

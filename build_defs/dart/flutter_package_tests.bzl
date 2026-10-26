@@ -60,6 +60,7 @@ def flutter_package_tests(
         imports = None,
         compile_args = [],
         assets = [],
+        package_assets = {},
         shaders = FRAMEWORK_SHADERS,
         cache = SDK_CACHE,
         test_configs = None,
@@ -97,6 +98,11 @@ def flutter_package_tests(
       assets: the package's own asset files, as its pubspec declares them
         (labels in the package's BUILD file; keyed by their paths under
         the package's directory).
+      package_assets: dependencies whose files the pubspec names as assets
+        (`packages/<name>/...`) or whose own pubspecs declare fonts: each
+        one's files (a pub repository's `sources`) to the package's name;
+        their lib/ files are placed under `packages/<name>/`, their assets/
+        and fonts/ files at their root-relative paths there.
       shaders: the asset directory's shaders; the framework's by default.
       cache: the SDK-cache paths; the Dart SDK and the fonts by default.
       test_configs: the tree's `flutter_test_config.dart` and `pubspec.yaml`
@@ -133,6 +139,7 @@ def flutter_package_tests(
         name = name + "_assets",
         assets = assets,
         assets_root = package_label[2:],
+        package_assets = package_assets,
         shaders = shaders,
     )
     flutter_test_prelude(
