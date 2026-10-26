@@ -640,6 +640,9 @@ public class FlutterJNI {
 
   private native void nativeSurfaceCreated(long nativeShellHolderId, @NonNull Surface surface);
 
+  @SuppressWarnings("unused")
+  private native boolean nativeShouldDisableAHB();
+
   /**
    * In hybrid composition, call this method when the {@link Surface} has changed.
    *

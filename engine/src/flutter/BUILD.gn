@@ -194,6 +194,7 @@ group("unittests") {
       "//flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
       "//flutter/impeller/toolkit/android:apk_unittests",
       "//flutter/impeller/toolkit/android:unittests",
+      "//flutter/shell/platform/android:flutter_embedder_native_unittests",
       "//flutter/shell/platform/android:flutter_shell_native_unittests",
     ]
   }
@@ -205,6 +206,7 @@ group("unittests") {
   if (enable_unittests) {
     public_deps += [
       "//flutter/assets:assets_unittests",
+      "//flutter/common:common_unittests",
       "//flutter/display_list:display_list_rendertests",
       "//flutter/display_list:display_list_unittests",
       "//flutter/flow:flow_unittests",
@@ -216,6 +218,7 @@ group("unittests") {
       "//flutter/shell/common:shell_unittests",
       "//flutter/shell/geometry:geometry_unittests",
       "//flutter/shell/gpu:gpu_surface_unittests",
+      "//flutter/shell/platform/android:flutter_embedder_native_unittests",
       "//flutter/shell/platform/embedder:embedder_a11y_unittests",
       "//flutter/shell/platform/embedder:embedder_proctable_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
@@ -255,14 +258,6 @@ group("unittests") {
         "//flutter/shell/platform/darwin/common:framework_common_swift_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_unittests",
         "//flutter/third_party/spring_animation:spring_animation_unittests",
-      ]
-    }
-
-    if (!is_win && !is_fuchsia) {
-      public_deps += [
-        "//flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
-        "//flutter/shell/platform/android/jni:jni_unittests",
-        "//flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
       ]
     }
 

@@ -815,17 +815,18 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
     if (overlayerSurface == null) {
-      final SurfaceControl.Builder surfaceControlBuilder = new SurfaceControl.Builder();
-      surfaceControlBuilder.setBufferSize(flutterView.getWidth(), flutterView.getHeight());
-      surfaceControlBuilder.setFormat(PixelFormat.RGBA_8888);
-      surfaceControlBuilder.setName("Flutter Overlay Surface");
-      surfaceControlBuilder.setOpaque(false);
-      surfaceControlBuilder.setHidden(false);
-      final SurfaceControl surfaceControl = surfaceControlBuilder.build();
+      final SurfaceControl surfaceControl =
+          new SurfaceControl.Builder()
+              .setBufferSize(
+                  Math.max(1, flutterView.getWidth()), Math.max(1, flutterView.getHeight()))
+              .setFormat(PixelFormat.RGBA_8888)
+              .setName("Flutter Overlay Surface")
+              .setOpaque(false)
+              .setHidden(false)
+              .build();
       final SurfaceControl.Transaction tx =
           flutterView.getRootSurfaceControl().buildReparentTransaction(surfaceControl);
-      tx.setLayer(surfaceControl, 1000);
-      tx.apply();
+      tx.setLayer(surfaceControl, 1000).apply();
       overlayerSurface = new Surface(surfaceControl);
       overlaySurfaceControl = surfaceControl;
     }
