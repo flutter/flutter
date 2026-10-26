@@ -151,4 +151,63 @@ void main() {
       expect(result.data!['illegal_refresh_rate_frame_count'], 10);
     },
   );
+
+  test('MemoryTest.handleLogcatLine ignores duplicate benchmark markers', () async {
+    final memoryTest = MemoryTest('project', 'test', 'package');
+    memoryTest.prepareForNextMessage('TAPPED');
+
+    memoryTest.handleLogcatLine('I/flutter: ==== MEMORY BENCHMARK ==== TAPPED ====');
+    await memoryTest.receivedNextMessage;
+
+    // A duplicate marker must not throw a StateError ('Future already completed').
+    memoryTest.handleLogcatLine('I/flutter: ==== MEMORY BENCHMARK ==== TAPPED ====');
+  });
+
+  test('MemoryTest.tapNotification taps once when TAPPED is received on first tap', () async {
+    late _TestMemoryTest memoryTest;
+    var tapCalls = 0;
+    final tapDevice = _TapRecordingFakeDevice(
+      onTap: (int x, int y) async {
+        tapCalls += 1;
+        memoryTest.handleLogcatLine('I/flutter: ==== MEMORY BENCHMARK ==== TAPPED ====');
+      },
+    );
+    memoryTest = _TestMemoryTest(tapDevice);
+
+    await memoryTest.tapNotification();
+    expect(tapCalls, 1);
+  });
+
+  test('MemoryTest.tapNotification retries sequentially when initial tap is dropped', () async {
+    late _TestMemoryTest memoryTest;
+    var tapCalls = 0;
+    final tapDevice = _TapRecordingFakeDevice(
+      onTap: (int x, int y) async {
+        tapCalls += 1;
+        if (tapCalls == 2) {
+          memoryTest.handleLogcatLine('I/flutter: ==== MEMORY BENCHMARK ==== TAPPED ====');
+        }
+      },
+    );
+    memoryTest = _TestMemoryTest(tapDevice);
+
+    await memoryTest.tapNotification();
+    expect(tapCalls, 2);
+  });
+}
+
+class _TapRecordingFakeDevice extends FakeDevice {
+  const _TapRecordingFakeDevice({required this.onTap}) : super(deviceId: 'fakeDeviceId');
+
+  final Future<void> Function(int x, int y) onTap;
+
+  @override
+  Future<void> tap(int x, int y) => onTap(x, y);
+}
+
+class _TestMemoryTest extends MemoryTest {
+  _TestMemoryTest(this.device) : super('project', 'test', 'package', requiresTapToStart: true);
+
+  @override
+  final Device device;
 }

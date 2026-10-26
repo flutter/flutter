@@ -2162,6 +2162,11 @@ class CompileTest {
 class MemoryTest {
   MemoryTest(this.project, this.test, this.package, {this.requiresTapToStart = false});
 
+  static const Duration nextMessageTimeout = Duration(seconds: 60);
+  static const Duration _tapRetryTimeout = Duration(seconds: 1);
+  static const int _maxTapIterations = 10;
+  static const int _tapCoordinate = 100;
+
   final String project;
   final String test;
   final String package;
@@ -2180,6 +2185,18 @@ class MemoryTest {
     _receivedNextMessage = Completer<void>();
   }
 
+  /// Completes [receivedNextMessage] if [line] contains the expected
+  /// memory benchmark marker for the last [prepareForNextMessage] call.
+  @visibleForTesting
+  void handleLogcatLine(String line) {
+    if (_nextMessage != null &&
+        line.contains('==== MEMORY BENCHMARK ==== $_nextMessage ====') &&
+        !(_receivedNextMessage?.isCompleted ?? true)) {
+      _nextMessage = null;
+      _receivedNextMessage?.complete();
+    }
+  }
+
   int get iterationCount => 10;
 
   Device? get device => _device;
@@ -2194,11 +2211,7 @@ class MemoryTest {
       await device!.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final StreamSubscription<String> adb = device!.logcat.listen((String data) {
-        if (data.contains('==== MEMORY BENCHMARK ==== $_nextMessage ====')) {
-          _receivedNextMessage?.complete();
-        }
-      });
+      final StreamSubscription<String> adb = device!.logcat.listen(handleLogcatLine);
 
       for (var iteration = 0; iteration < iterationCount; iteration += 1) {
         print('running memory test iteration $iteration...');
@@ -2245,8 +2258,8 @@ class MemoryTest {
       'run',
       options: <String>['--verbose', '--release', '--no-resident', '-d', device!.deviceId, test],
     );
-    print('awaiting "ready" message...');
-    await receivedNextMessage;
+    print('awaiting "ready" message... (timeout: $nextMessageTimeout)');
+    await receivedNextMessage?.timeout(nextMessageTimeout);
   }
 
   /// Taps the application and looks for acknowledgement.
@@ -2256,29 +2269,19 @@ class MemoryTest {
     // Keep "tapping" the device till it responds with the string we expect,
     // or throw an error instead of tying up the infrastructure for 30 minutes.
     prepareForNextMessage('TAPPED');
-    var tapped = false;
-    var tapCount = 0;
-    await Future.any(<Future<void>>[
-      () async {
-        while (true) {
-          if (tapped) {
-            break;
-          }
-          tapCount += 1;
-          print('tapping device... [$tapCount]');
-          await device!.tap(100, 100);
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+    for (var tapCount = 1; tapCount <= _maxTapIterations; tapCount += 1) {
+      print('tapping device... [$tapCount]');
+      await device!.tap(_tapCoordinate, _tapCoordinate);
+      print('awaiting "tapped" message... (timeout: $_tapRetryTimeout)');
+      try {
+        await receivedNextMessage?.timeout(_tapRetryTimeout);
+        return;
+      } on TimeoutException {
+        if (tapCount == _maxTapIterations) {
+          rethrow;
         }
-      }(),
-      () async {
-        print('awaiting "tapped" message... (timeout: 10 seconds)');
-        try {
-          await receivedNextMessage?.timeout(const Duration(seconds: 10));
-        } finally {
-          tapped = true;
-        }
-      }(),
-    ]);
+      }
+    }
   }
 
   /// To change the behavior of the test, override this.
@@ -2295,8 +2298,8 @@ class MemoryTest {
     }
 
     prepareForNextMessage('DONE');
-    print('awaiting "done" message...');
-    await receivedNextMessage;
+    print('awaiting "done" message... (timeout: $nextMessageTimeout)');
+    await receivedNextMessage?.timeout(nextMessageTimeout);
 
     await recordEnd();
   }
@@ -2393,6 +2396,8 @@ String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
 class ReportedDurationTest {
   ReportedDurationTest(this.flavor, this.project, this.test, this.package, this.durationPattern);
 
+  static const Duration durationTimeout = Duration(seconds: 60);
+
   final ReportedDurationTestFlavor flavor;
   final String project;
   final String test;
@@ -2416,7 +2421,7 @@ class ReportedDurationTest {
       await flutter('packages', options: <String>['get']);
 
       final StreamSubscription<String> adb = device!.logcat.listen((String data) {
-        if (durationPattern.hasMatch(data)) {
+        if (durationPattern.hasMatch(data) && !durationCompleter.isCompleted) {
           durationCompleter.complete(int.parse(durationPattern.firstMatch(data)!.group(1)!));
         }
       });
@@ -2434,7 +2439,7 @@ class ReportedDurationTest {
         ],
       );
 
-      final int duration = await durationCompleter.future;
+      final int duration = await durationCompleter.future.timeout(durationTimeout);
       print('terminating...');
       await device!.stop(package);
       await adb.cancel();
