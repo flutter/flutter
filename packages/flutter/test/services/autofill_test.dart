@@ -139,6 +139,32 @@ void main() {
         MethodCall('TextInput.setClient', <dynamic>[1, expectedConfiguration]),
       ]);
     });
+
+    test('AutofillScope.attach sends the payload from the client configuration toJson', () async {
+      final client = FakeAutofillClient(const TextEditingValue(text: 'test'));
+      client.textInputConfiguration = ExtraFieldTextInputConfiguration(
+        autofillConfiguration: AutofillConfiguration(
+          uniqueIdentifier: client.autofillId,
+          autofillHints: const <String>[AutofillHints.email],
+          currentEditingValue: client.currentTextEditingValue,
+        ),
+      );
+
+      scope.register(client);
+      client.currentAutofillScope = scope;
+
+      scope.attach(client, client.textInputConfiguration);
+
+      final Map<String, dynamic> expectedConfiguration = client.textInputConfiguration.toJson();
+      expect(expectedConfiguration['extraField'], 'extraValue');
+      expectedConfiguration['fields'] = <Map<String, dynamic>>[
+        client.textInputConfiguration.toJson(),
+      ];
+
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, expectedConfiguration]),
+      ]);
+    });
   });
 
   group('AutoFillConfiguration', () {
@@ -309,5 +335,14 @@ class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {
 
   void register(AutofillClient client) {
     clients.putIfAbsent(client.autofillId, () => client);
+  }
+}
+
+class ExtraFieldTextInputConfiguration extends TextInputConfiguration {
+  const ExtraFieldTextInputConfiguration({super.autofillConfiguration});
+
+  @override
+  Map<String, dynamic> toJson() {
+    return super.toJson()..['extraField'] = 'extraValue';
   }
 }

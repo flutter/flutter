@@ -848,16 +848,19 @@ abstract class AutofillScope {
 // [AutofillScope] attaches: the client's own configuration, plus the
 // configurations of every client in the scope under the `fields` key.
 //
-// Every constructor parameter of [TextInputConfiguration] must be forwarded
-// below. A parameter that is not forwarded silently falls back to its default
-// for every client in the scope (see
-// https://github.com/flutter/flutter/issues/192340), so this list must be kept
-// in sync with the [TextInputConfiguration] constructor.
+// The payload is built from `currentClientConfiguration.toJson()`, so every
+// field of the client's configuration reaches the platform, including fields
+// added to [TextInputConfiguration] in the future (see
+// https://github.com/flutter/flutter/issues/192340).
+//
+// Every constructor parameter of [TextInputConfiguration] is also forwarded to
+// `super` so that the getters on this object match the client's configuration.
+// Keep this list in sync with the [TextInputConfiguration] constructor.
 @immutable
 class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
-    required TextInputConfiguration currentClientConfiguration,
+    required this.currentClientConfiguration,
   }) : super(
          viewId: currentClientConfiguration.viewId,
          inputType: currentClientConfiguration.inputType,
@@ -881,10 +884,11 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
        );
 
   final Iterable<TextInputConfiguration> allConfigurations;
+  final TextInputConfiguration currentClientConfiguration;
 
   @override
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> result = super.toJson();
+    final Map<String, dynamic> result = currentClientConfiguration.toJson();
     result['fields'] = allConfigurations
         .map((TextInputConfiguration configuration) => configuration.toJson())
         .toList(growable: false);
