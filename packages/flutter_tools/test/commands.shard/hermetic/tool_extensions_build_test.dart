@@ -262,6 +262,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -601,6 +602,7 @@ void main() {
       );
       final config = Config.test()..setValue('build-dir', 'custom_build_root');
       final subCommand = ExtensionBuildSubCommand(
+        artifactManager: _FakeExtensionArtifactManager(),
         buildManager: buildManager,
         target: target,
         toolContext: FakeToolContext(config: config, fs: fs, logger: BufferLogger.test()),
@@ -626,6 +628,7 @@ void main() {
           targetPlatform: 'linux-x64',
         );
         final subCommand = ExtensionBuildSubCommand(
+          artifactManager: _FakeExtensionArtifactManager(),
           buildManager: buildManager,
           target: target,
           toolContext: FakeToolContext(fs: fs, logger: BufferLogger.test()),
@@ -661,6 +664,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -712,6 +716,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),

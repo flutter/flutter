@@ -809,13 +809,20 @@ class RunCommand extends RunCommandBase {
       }
     }
 
+    // Ensure any tool extension artifacts required by the target devices are
+    // downloaded and verified before creating FlutterDevice instances and
+    // starting the application.
     if (_extensionArtifactManager case final ExtensionArtifactManager artifactManager) {
       final List<String?> resolvedPlatforms = await Future.wait(
         devices!.map((Device device) async {
           final TargetPlatform tp = await device.targetPlatform;
+          // Built-in target platforms resolve directly via TargetPlatform.getName().
           if (tp != TargetPlatform.unsupported) {
             return tp.getName();
           }
+          // Custom extension devices report TargetPlatform.unsupported and expose
+          // their platform identifier via targetPlatformDisplayName (or fall back
+          // to the generic 'custom' display name when unspecified).
           final String displayName = await device.targetPlatformDisplayName;
           return displayName.isNotEmpty && displayName != _defaultCustomTargetPlatformDisplayName
               ? displayName
@@ -823,6 +830,9 @@ class RunCommand extends RunCommandBase {
         }),
       );
       final Set<String> runTargetPlatforms = resolvedPlatforms.nonNulls.toSet();
+      // If no specific target platform names were resolved (e.g. a custom device
+      // using the generic 'custom' display name), pass null to download artifacts
+      // for all target platforms supported by the active extension.
       await artifactManager.ensureArtifactsDownloaded(
         targetPlatforms: runTargetPlatforms.isNotEmpty ? runTargetPlatforms : null,
       );

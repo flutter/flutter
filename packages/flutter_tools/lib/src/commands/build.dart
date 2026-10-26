@@ -190,13 +190,16 @@ class BuildCommand extends FlutterCommand {
 
   @override
   Future<void> initializeDynamicOptions() async {
-    if (_extensionBuildManager case final extensionBuildManager?) {
+    if ((_extensionBuildManager, _extensionArtifactManager) case (
+      final ExtensionBuildManager extensionBuildManager,
+      final ExtensionArtifactManager extensionArtifactManager,
+    )) {
       final List<ExtensionBuildTarget> targets = await extensionBuildManager.getBuildTargets();
       for (final target in targets) {
         if (!subcommands.containsKey(target.name)) {
           _addSubcommand(
             ExtensionBuildSubCommand(
-              artifactManager: _extensionArtifactManager,
+              artifactManager: extensionArtifactManager,
               buildManager: extensionBuildManager,
               target: target,
               toolContext: toolContext,
@@ -261,11 +264,11 @@ abstract class BuildSubCommand extends FlutterCommand {
 /// A dynamically registered `flutter build` subcommand backed by a tool extension.
 class ExtensionBuildSubCommand extends BuildSubCommand {
   ExtensionBuildSubCommand({
+    required this._artifactManager,
     required this._buildManager,
     required this.target,
     required ToolContext super.toolContext,
     required super.verboseHelp,
-    this._artifactManager,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
     registerOptionBundle(const BuildModeOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
@@ -274,7 +277,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     ], verboseHelp: verboseHelp);
   }
 
-  final ExtensionArtifactManager? _artifactManager;
+  final ExtensionArtifactManager _artifactManager;
   final ExtensionBuildManager _buildManager;
 
   /// The custom build target definition provided by the tool extension.
@@ -291,11 +294,9 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Map<String, String> extensionArtifacts =
-        await _artifactManager?.ensureArtifactsDownloaded(
-          targetPlatforms: <String>{target.targetPlatform},
-        ) ??
-        const <String, String>{};
+    final Map<String, String> extensionArtifacts = await _artifactManager.ensureArtifactsDownloaded(
+      targetPlatforms: <String>{target.targetPlatform},
+    );
     final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();

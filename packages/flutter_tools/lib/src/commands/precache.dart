@@ -168,7 +168,8 @@ class PrecacheCommand extends FlutterCommand {
     if (_platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
       await _cache.lock();
     }
-    if (boolArg('force')) {
+    final bool force = boolArg('force');
+    if (force) {
       _cache.clearStampFiles();
     }
 
@@ -230,7 +231,7 @@ class PrecacheCommand extends FlutterCommand {
       if (targetPlatforms == null || targetPlatforms.isNotEmpty) {
         await _extensionArtifactManager.ensureArtifactsDownloaded(
           targetPlatforms: targetPlatforms,
-          force: boolArg('force'),
+          force: force,
         );
       }
     }

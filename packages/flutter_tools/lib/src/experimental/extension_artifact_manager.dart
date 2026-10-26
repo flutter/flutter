@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide HostPlatform;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -23,12 +24,17 @@ import 'extension_manager.dart';
 /// Manages querying, downloading, and verifying custom artifacts required by
 /// tool extensions in a shared content-addressed cache.
 class ExtensionArtifactManager {
+  /// Creates an [ExtensionArtifactManager] that downloads and verifies
+  /// extension-provided artifacts in a shared local cache.
+  ///
+  /// The optional [_cacheDir] and [httpClient] parameters are intended only for
+  /// hermetic testing.
   ExtensionArtifactManager({
     required this._extensionManager,
     required this._featureFlags,
     required this._toolContext,
-    this._cacheDir,
-    HttpClient? httpClient,
+    @visibleForTesting this._cacheDir,
+    @visibleForTesting HttpClient? httpClient,
   }) : _httpClient = httpClient ?? HttpClient();
 
   static const String _dartDataHomeEnvKey = 'DART_DATA_HOME';
@@ -51,8 +57,12 @@ class ExtensionArtifactManager {
   final Directory? _cacheDir;
   final HttpClient _httpClient;
 
+  /// Tracks in-flight download futures keyed by `<extensionName>/<engineVersion>/<artifactName>`
+  /// to deduplicate concurrent artifact requests within the same process.
   final _inFlightDownloads = <String, Future<String>>{};
 
+  /// The current Flutter engine revision from the tool cache, or
+  /// [_defaultEngineVersion] (`'unknown'`) when the revision is empty.
   String get _engineVersion {
     final String revision = _toolContext.cache.engineRevision.trim();
     return revision.isNotEmpty ? revision : _defaultEngineVersion;
@@ -210,6 +220,13 @@ class ExtensionArtifactManager {
     return resolvedArtifacts;
   }
 
+  /// Queries [ext] over JSON-RPC via [ArtifactService.downloadArtifactsMethod]
+  /// for the list of [ArtifactDependency] descriptors required for the given
+  /// [engineVersion], [currentHostPlatform], and optional [targetPlatforms].
+  ///
+  /// Logs a warning and returns an empty list if the RPC fails or returns
+  /// malformed data so a single failing extension does not abort artifact
+  /// resolution for other extensions.
   Future<List<ArtifactDependency>> _queryExtensionArtifacts(
     ExtensionConnection ext, {
     required HostPlatform currentHostPlatform,
@@ -234,6 +251,9 @@ class ExtensionArtifactManager {
     }
   }
 
+  /// Ensures [dep] is present and verified in the local cache under
+  /// `<cacheDir>/<extensionName>/<engineVersion>/<dep.name>`, deduplicating
+  /// concurrent in-process requests via [_inFlightDownloads].
   Future<String> _ensureArtifactCached(
     String extensionName,
     String engineVersion,
@@ -259,6 +279,16 @@ class ExtensionArtifactManager {
     }
   }
 
+  /// Downloads, verifies, and installs [dep] into the `<extensionName>/<engineVersion>`
+  /// cache directory, returning the local filesystem path to the cached file or
+  /// extracted directory.
+  ///
+  /// Uses a fast unlocked check first (`_isArtifactCachedAndVerified`) when
+  /// [force] is `false`. If a download is needed, acquires a cross-process file
+  /// lock (`.${dep.name}.lock` via `fs.runLocked`), re-checks the cache
+  /// inside the lock, downloads to a temporary staging directory, verifies the
+  /// SHA-256 checksum, and atomically installs the artifact and its `.sha256`
+  /// stamp file.
   Future<String> _downloadAndVerifyArtifact(
     String extensionName,
     String engineVersion,
@@ -343,6 +373,15 @@ class ExtensionArtifactManager {
     return resolvedPath;
   }
 
+  /// Checks whether [dep] is already cached and matches its expected SHA-256
+  /// checksum.
+  ///
+  /// When [dep] provides an inline [ArtifactDependency.sha256], single-file
+  /// artifacts are hashed directly via [_verifyCachedFile] and extracted `.zip`
+  /// directories are verified against [stampFile] via [_verifyCachedDirectory].
+  /// When [dep] uses a remote [ArtifactDependency.sha256Url], offline cache
+  /// hits rely on the previously recorded checksum in [stampFile] so already
+  /// cached artifacts do not require network access to verify.
   Future<bool> _isArtifactCachedAndVerified({
     required Directory artifactDir,
     required File artifactFile,
@@ -401,6 +440,11 @@ class ExtensionArtifactManager {
     return false;
   }
 
+  /// Computes the SHA-256 digest of a cached single-file artifact [artifactFile]
+  /// and compares it against [expectedSha].
+  ///
+  /// Deletes [artifactFile] and [stampFile] and returns `false` if the digest
+  /// does not match so the caller can re-download the artifact cleanly.
   Future<bool> _verifyCachedFile({
     required File artifactFile,
     required ArtifactDependency dep,
@@ -424,6 +468,11 @@ class ExtensionArtifactManager {
     return false;
   }
 
+  /// Verifies that an extracted `.zip` artifact directory [artifactDir] matches
+  /// [expectedSha] by comparing against the digest recorded in [stampFile].
+  ///
+  /// Deletes [artifactDir] and [stampFile] and returns `false` if the stamp does
+  /// not match.
   bool _verifyCachedDirectory({
     required Directory artifactDir,
     required ArtifactDependency dep,
@@ -447,6 +496,11 @@ class ExtensionArtifactManager {
     return false;
   }
 
+  /// Downloads and parses a remote SHA-256 checksum from [ArtifactDependency.sha256Url].
+  ///
+  /// Supports both raw 64-character hex strings and `sha256sum`-formatted lines
+  /// (`<hex>  <filename>`). Throws a [ToolExit] on network failure, non-200 HTTP
+  /// status, or malformed checksum content.
   Future<String> _fetchRemoteSha256(ArtifactDependency dep) async {
     final Uri sha256Url = dep.sha256Url!;
     final String body;
@@ -482,6 +536,11 @@ class ExtensionArtifactManager {
     return token;
   }
 
+  /// Streams the artifact from [ArtifactDependency.url] into [stagingFile] while
+  /// computing its SHA-256 digest incrementally.
+  ///
+  /// Throws a [ToolExit] if the HTTP request fails or the computed digest does
+  /// not match [expectedSha].
   Future<void> _downloadAndVerifyToStagingFile({
     required ArtifactDependency dep,
     required String expectedSha,
@@ -526,6 +585,9 @@ Actual:   $actualDigest''');
     }
   }
 
+  /// Installs a verified [stagingFile] into its final cache destination
+  /// ([artifactDir] when [isZip] is `true`, or [artifactFile] otherwise) and
+  /// writes [expectedSha] to [stampFile] via atomic renames from [stagingDir].
   void _installStagedArtifact({
     required Directory artifactDir,
     required File artifactFile,
@@ -564,6 +626,7 @@ Actual:   $actualDigest''');
   }
 }
 
+/// A minimal [Sink] that collects emitted chunked-conversion events in [events].
 class _AccumulatorSink<T> implements Sink<T> {
   final events = <T>[];
 
