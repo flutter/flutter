@@ -24,7 +24,7 @@ class SnippetConfiguration {
   /// and returned to dartdoc for insertion in the output.
   final Directory skeletonsDirectory;
 
-  /// Gets the skeleton file to use for the given [SampleType] and DartPad
+  /// Gets the skeleton file to use for the given [type] and DartPad
   /// preference.
   File getHtmlSkeletonFile(String type) {
     final filename = type == 'dartpad' ? 'dartpad-sample.html' : '$type.html';

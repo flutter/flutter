@@ -83,6 +83,17 @@ class CapabilitiesGLES final
   /// @brief Whether this is an ES GL variant or (if false) desktop GL.
   bool IsES() const;
 
+  /// @brief The value of `GL_MAX_SHADER_COMPILER_THREADS_KHR` as returned by
+  ///        `glGetIntegerv` if GL_KHR_parallel_shader_compile (or its desktop
+  ///        GL equivalent, GL_ARB_parallel_shader_compile) is supported,
+  ///        otherwise 0.
+  ///
+  ///        A value of 0 means the driver will not compile shaders in
+  ///        parallel. A value of -1 means the implementation-dependent
+  ///        maximum; the limit is a GLuint whose initial value is 0xFFFFFFFF,
+  ///        which reads back as -1 through `glGetIntegerv`.
+  int32_t GetMaxShaderCompilerThreads() const;
+
   // |Capabilities|
   /// Always false. Rendering into a non-zero mip level is not yet implemented
   /// on the GLES backend; see SupportsFramebufferRenderMipmap in the .cc file.
@@ -100,7 +111,8 @@ class CapabilitiesGLES final
   ///        available below them through GL_EXT_texture_array (desktop GL 2.x)
   ///        or GL_NV_texture_array (OpenGL ES 2.0). When absent, callers must
   ///        fall back to a texture atlas.
-  bool SupportsTextureArray() const;
+  // |Capabilities|
+  bool SupportsTextureArrays() const override;
 
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
@@ -192,6 +204,7 @@ class CapabilitiesGLES final
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
   uint32_t max_sampler_anisotropy_ = 1;
+  int32_t max_shader_compiler_threads_ = 0;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
 };
 

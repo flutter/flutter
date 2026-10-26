@@ -125,8 +125,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 }
 
-/// Parse the data for a locale from a file, and store it in the [attributes]
-/// and [resources] keys.
+/// Parse the data for a locale from a file, and store it in
+/// [localeToResourceAttributes] and [localeToResources].
 void loadMatchingArbsIntoBundleMaps({
   required Directory directory,
   required RegExp filenamePattern,

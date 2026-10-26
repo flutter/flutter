@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/foundation.dart';
+library;
+
 /// The name of the route containing the test suite.
 const String popupControlsRoute = 'popups';
 
