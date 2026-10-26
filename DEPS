@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': '62095415d5e287aee912f612cf0a697f04cffd93',
+  'skia_revision': 'ab9b798555a6cc38e7adeacb86ca6a99c5be5819',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -304,7 +304,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/re2' + '@' + 'c84a140c93352cdabbfb547c531be34515b12228',
 
   'engine/src/flutter/third_party/brotli':
-   Var('skia_git') + '/external/github.com/google/brotli.git' + '@' + '350100a5bb9d9671aca85213b2ec7a70a361b0cd',
+   Var('skia_git') + '/external/github.com/google/brotli.git' + '@' + 'db24a98aed38a16de78cc05ca15cdd8dc2a0d92d',
 
   'engine/src/flutter/third_party/yapf':
   Var('flutter_git') + '/third_party/yapf' + '@' + '212c5b5ad8e172d2d914ae454c121c89cccbcb35',
