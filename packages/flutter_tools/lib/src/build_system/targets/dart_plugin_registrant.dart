@@ -21,9 +21,8 @@ class DartPluginRegistrantTarget extends Target {
   const DartPluginRegistrantTarget({this.templateRenderer = const MustacheTemplateRenderer()})
     : _project = null;
 
-  /// Construct a [DartPluginRegistrantTarget].
-  ///
-  /// If `project` is unset, a [FlutterProject] based on environment is used.
+  /// Construct a [DartPluginRegistrantTarget] that uses [project] instead of
+  /// resolving a [FlutterProject] from the build [Environment].
   @visibleForTesting
   const DartPluginRegistrantTarget.test(
     FlutterProject project, {
