@@ -290,6 +290,34 @@ class LocalEngineInfo {
 
   /// The name of the host (build) platform, e.g. `host_debug_unopt`.
   String get localHostName => _hostName ?? fileSystem.path.basename(hostOutPath);
+
+  /// The variables a re-entrant build (the desktop CMake projects'
+  /// `flutter assemble`, through bin/tool_backend.dart) names the local engine
+  /// by: `LOCAL_ENGINE` and `LOCAL_ENGINE_HOST`, and the engine source as
+  /// `FLUTTER_ENGINE`.
+  ///
+  /// GN's build directories are named by their build under `<engine>/src/out`,
+  /// so the names and the source go; a Bazel build directory, which the tool
+  /// knows by its manifest ([LocalEngineLayout]), goes as its own path, which
+  /// `--local-engine` takes as it is, and the source is found as the tool
+  /// finds it for any absolute path.
+  Map<String, String> toReentrantBuildEnvironment({required FileSystem fileSystem}) {
+    final environment = <String, String>{};
+    final bool targetIsBazel = LocalEngineLayout.of(
+      targetOutPath,
+      fileSystem: fileSystem,
+    ).hasManifest;
+    final bool hostIsBazel = LocalEngineLayout.of(hostOutPath, fileSystem: fileSystem).hasManifest;
+    if (!targetIsBazel) {
+      // $ENGINE/src/out/foo_bar_baz -> $ENGINE/src
+      environment['FLUTTER_ENGINE'] = fileSystem.path.dirname(
+        fileSystem.path.dirname(targetOutPath),
+      );
+    }
+    environment['LOCAL_ENGINE'] = targetIsBazel ? targetOutPath : localTargetName;
+    environment['LOCAL_ENGINE_HOST'] = hostIsBazel ? hostOutPath : localHostName;
+    return environment;
+  }
 }
 
 /// How a local engine build directory lays out the artifacts the tool reads.
@@ -1592,6 +1620,9 @@ class _TestLocalEngine extends _TestArtifacts {
         targetOutPath: engineOutPath,
         hostOutPath: engineHostOutPath,
         fileSystem: fileSystem,
+        // As CachedLocalEngineArtifacts: a Bazel directory's manifest names the build.
+        targetName: LocalEngineLayout.of(engineOutPath, fileSystem: fileSystem).name,
+        hostName: LocalEngineLayout.of(engineHostOutPath, fileSystem: fileSystem).name,
       );
 
   @override

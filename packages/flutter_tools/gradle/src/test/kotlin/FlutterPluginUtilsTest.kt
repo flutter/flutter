@@ -359,6 +359,18 @@ class FlutterPluginUtilsTest {
 
     // shouldProjectUseLocalEngine skipped as it is a wrapper for a single getter
 
+    // isBazelLocalEngine
+    @Test
+    fun `isBazelLocalEngine is true for a directory holding the Bazel build's manifest`(
+        @TempDir tempDir: Path
+    ) {
+        val engineOut = tempDir.resolve("bazel-bin/engine/src/flutter").toFile()
+        engineOut.mkdirs()
+        assertEquals(false, FlutterPluginUtils.isBazelLocalEngine(engineOut))
+        File(engineOut, FlutterPluginUtils.LOCAL_ENGINE_MANIFEST).writeText("""{"name": "android_debug_arm64", "entries": {}}""")
+        assertEquals(true, FlutterPluginUtils.isBazelLocalEngine(engineOut))
+    }
+
     // isProjectVerbose
     @Test
     fun `isProjectVerbose returns false by default`() {

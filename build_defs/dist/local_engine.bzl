@@ -36,8 +36,8 @@ that directory (`dart-sdk`, the prebuilt SDK's repository); a path named in
 `assemble` is built as a directory artifact from the entries under it
 (`gen/dart-pkg/sky_engine`: dart_pkg's directory and the copied libraries,
 one tree for package:sky_engine's root); every other entry maps to its
-file, and a GN directory whose files all sit by the same names in one
-directory of the build maps as that directory too (`flutter_patched_sdk`,
+file, and a GN directory whose every entry sits at its relative path under
+one directory of the build maps as that directory too (`flutter_patched_sdk`,
 the frontend server's --sdk-root).
 """
 
@@ -162,24 +162,33 @@ def _local_engine_impl(ctx):
         assembled = _assemble(ctx, prefix, entries)
         mapping[prefix] = _relative_path(assembled.path, directory)
         outputs.append(assembled)
-    folded = {}
+    subtrees = {}
     for file, path in entries:
         if _covered(path, ctx.attr.assemble):
             continue
         mapping[path] = _relative_path(file.path, directory)
         outputs.append(file)
-        if not file.is_directory and "/" in path:
-            folded.setdefault(paths.dirname(path), []).append((path, mapping[path]))
+        parts = path.split("/")
+        for depth in range(1, len(parts)):
+            subtrees.setdefault("/".join(parts[:depth]), []).append((path, mapping[path]))
 
-    # A GN directory whose files all sit, by the same names, in one directory
-    # of the build maps as that directory too (flutter_patched_sdk, which the
-    # tool hands the frontend server as --sdk-root).
-    for gn_directory, children in folded.items():
+    # A GN directory whose every entry under it, at any depth, sits at its
+    # relative path under one directory of the build maps as that directory
+    # too (flutter_patched_sdk, which the tool hands the frontend server as
+    # --sdk-root). One agreeing child is not enough: gen/dart-pkg/sky_engine
+    # has AUTHORS copied from the source root beside lib/ from the Dart tree,
+    # and an entry for it would shadow dart_pkg's directory at gen/dart-pkg.
+    for gn_directory, descendants in subtrees.items():
         if gn_directory in mapping:
             continue
-        real_directories = {paths.dirname(real): None for _, real in children}
-        same_names = [paths.basename(path) == paths.basename(real) for path, real in children]
-        if len(real_directories) == 1 and all(same_names):
+        real_directories = {}
+        for path, real in descendants:
+            relative = path[len(gn_directory) + 1:]
+            if real.endswith("/" + relative):
+                real_directories[real[:-len(relative) - 1]] = None
+            else:
+                real_directories[None] = None
+        if len(real_directories) == 1 and None not in real_directories:
             mapping[gn_directory] = real_directories.keys()[0]
 
     ctx.actions.write(manifest, json.encode_indent({

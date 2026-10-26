@@ -509,10 +509,15 @@ install(
 local_engine(
     name = "local_engine",
     testonly = True,
-    assemble = [
-        "gen/dart-pkg/sky_engine",
-        "shader_lib",
-    ],
+    # The host build's assembled directories; an Android build has neither
+    # (its contents are the root group's).
+    assemble = select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "gen/dart-pkg/sky_engine",
+            "shader_lib",
+        ],
+    }),
     contents = _LOCAL_ENGINE_CONTENTS,
     files = _LOCAL_ENGINE_FILES,
     trees = _LOCAL_ENGINE_TREES,

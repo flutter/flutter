@@ -345,6 +345,63 @@ class BaseFlutterTaskHelperTest {
     }
 
     @Test
+    fun `createSpecActionFromTask names a Bazel local engine by its path, without a source path`() {
+        val buildModeString = "debug"
+        // A Bazel build directory goes to the flutter tool as its own path (what --local-engine
+        // takes as it is), with no --local-engine-src-path: there is no out/ directory to name.
+        val bazelLocalEngine = "/checkout/engine/src/bazel-bin/engine/src/flutter"
+
+        val baseFlutterTask = mockk<BaseFlutterTask>()
+        val mockExecSpec = mockk<ExecSpec>()
+        val mockProcessForkOptions = mockk<ProcessForkOptions>()
+
+        every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
+        val execSpecActionFromTask = BaseFlutterTaskHelper.createExecSpecActionFromTask(baseFlutterTask)
+
+        every { baseFlutterTask.flutterExecutable } returns BaseFlutterTaskPropertiesTest.flutterExecutableTest
+        every {
+            baseFlutterTask.flutterExecutable!!.absolutePath
+        } returns BaseFlutterTaskPropertiesTest.FLUTTER_EXECUTABLE_ABSOLUTE_PATH_TEST
+        every { baseFlutterTask.targetPath } returns BaseFlutterTaskPropertiesTest.FLUTTER_TARGET_FILE_PATH
+
+        every { baseFlutterTask.localEngine } returns bazelLocalEngine
+        every { baseFlutterTask.localEngineSrcPath } returns null
+        every { baseFlutterTask.localEngineHost } returns bazelLocalEngine
+
+        every { baseFlutterTask.verbose } returns true
+        every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
+        every { baseFlutterTask.performanceMeasurementFile } returns null
+        every { baseFlutterTask.buildMode } returns buildModeString
+        every { baseFlutterTask.flutterRoot } returns BaseFlutterTaskPropertiesTest.flutterRootTest
+        every { baseFlutterTask.flutterRoot!!.absolutePath } returns BaseFlutterTaskPropertiesTest.FLUTTER_ROOT_ABSOLUTE_PATH_TEST
+        every { baseFlutterTask.trackWidgetCreation } returns null
+        every { baseFlutterTask.splitDebugInfo } returns null
+        every { baseFlutterTask.treeShakeIcons } returns null
+        every { baseFlutterTask.dartObfuscation } returns null
+        every { baseFlutterTask.dartDefines } returns null
+        every { baseFlutterTask.bundleSkSLPath } returns null
+        every { baseFlutterTask.codeSizeDirectory } returns null
+        every { baseFlutterTask.flavor } returns null
+        every { baseFlutterTask.extraGenSnapshotOptions } returns null
+        every { baseFlutterTask.frontendServerStarterPath } returns null
+        every { baseFlutterTask.extraFrontEndOptions } returns null
+        every { baseFlutterTask.targetPlatformValues } returns BaseFlutterTaskPropertiesTest.targetPlatformValuesList
+        every { baseFlutterTask.minSdkVersion } returns BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST
+
+        every { mockExecSpec.executable(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.workingDir(any()) } returns mockProcessForkOptions
+        every { mockExecSpec.args(any<String>(), any()) } returns mockExecSpec
+        every { mockExecSpec.args(any<String>()) } returns mockExecSpec
+        every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
+
+        execSpecActionFromTask.execute(mockExecSpec)
+
+        verify { mockExecSpec.args("--local-engine", bazelLocalEngine) }
+        verify { mockExecSpec.args("--local-engine-host", bazelLocalEngine) }
+        verify(exactly = 0) { mockExecSpec.args("--local-engine-src-path", any()) }
+    }
+
+    @Test
     fun `buildBundle calls the correct methods`() {
         val baseFlutterTask = mockk<BaseFlutterTask>()
         val mockLoggingManager = mockk<LoggingManager>()

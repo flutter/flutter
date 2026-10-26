@@ -2722,7 +2722,128 @@ Gradle Crashed
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('honors --no-android-gradle-daemon setting', () async {
+    testUsingContext('build apk uses a Bazel local engine through its manifest', () async {
+      // A Bazel build directory: the manifest names the build (which the
+      // directory's own name does not) and maps GN's root-level Maven files
+      // to where Bazel built them.
+      final Directory bazelOut = fileSystem.directory('bazel-bin/engine/src/flutter')
+        ..createSync(recursive: true);
+      const mapped = <String, String>{
+        'flutter_embedding_debug.pom': 'shell/platform/android/flutter_embedding_debug.pom',
+        'flutter_embedding_debug.jar': 'shell/platform/android/flutter_embedding_debug.jar',
+        'flutter_embedding_debug.maven-metadata.xml':
+            'shell/platform/android/flutter_embedding_debug.maven-metadata.xml',
+        'arm64_v8a_debug.pom': 'shell/platform/android/arm64_v8a_debug.pom',
+        'arm64_v8a_debug.jar': 'shell/platform/android/arm64_v8a_debug.jar',
+        'arm64_v8a_debug.maven-metadata.xml':
+            'shell/platform/android/arm64_v8a_debug.maven-metadata.xml',
+      };
+      bazelOut
+          .childFile('local_engine.json')
+          .writeAsStringSync(
+            json.encode(<String, Object?>{'name': 'android_debug_arm64', 'entries': mapped}),
+          );
+      for (final String path in mapped.values) {
+        bazelOut.childFile(path).createSync(recursive: true);
+      }
+      bazelOut.childFile(mapped['flutter_embedding_debug.pom']!).writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
+  <dependencies>
+  </dependencies>
+</project>
+''');
+      final Directory bazelHostOut = fileSystem.directory('bazel-host/engine/src/flutter')
+        ..createSync(recursive: true);
+      bazelHostOut
+          .childFile('local_engine.json')
+          .writeAsStringSync(
+            json.encode(<String, Object?>{'name': 'host_debug', 'entries': <String, String>{}}),
+          );
+
+      final AndroidGradleBuilder builder = createBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.testLocalEngine(
+          localEngine: bazelOut.path,
+          localEngineHost: bazelHostOut.path,
+          fileSystem: fileSystem,
+        ),
+        analytics: fakeAnalytics,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'gradlew',
+            '-q',
+            '-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0',
+            '-Plocal-engine-build-mode=debug',
+            '-Plocal-engine-out=bazel-bin/engine/src/flutter',
+            '-Plocal-engine-host-out=bazel-host/engine/src/flutter',
+            // The ABI comes from the manifest's name, not the path.
+            '-Ptarget-platform=android-arm64',
+            '-Ptarget=lib/main.dart',
+            '-Pbase-application-name=android.app.Application',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=false',
+            'assembleDebug',
+          ],
+        ),
+      );
+
+      fileSystem.file('android/gradlew').createSync(recursive: true);
+      fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+      fileSystem.file('android/build.gradle').createSync(recursive: true);
+      fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+      await expectLater(() async {
+        await builder.buildGradleApp(
+          project: project,
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.debug,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          configOnly: false,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+      }, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+
+      // The Maven repository's links lead to the files where Bazel built them.
+      final Link jarLink = fileSystem.link(
+        '/.tmp_rand0/flutter_tool_local_engine_repo.rand0/io/flutter/arm64_v8a_debug/'
+        '1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b/'
+        'arm64_v8a_debug-1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b.jar',
+      );
+      expect(jarLink, exists);
+      expect(
+        jarLink.targetSync(),
+        fileSystem.path.absolute(
+          'bazel-bin/engine/src/flutter/shell/platform/android/arm64_v8a_debug.jar',
+        ),
+      );
+    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+
+    testUsingContext('honors --no-android-gradle-daemon setting', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
