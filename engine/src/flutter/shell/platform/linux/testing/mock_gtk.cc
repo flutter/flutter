@@ -35,6 +35,20 @@ static MockGtk* mock = nullptr;
 MockGtk::MockGtk() {
   thread = g_thread_self();
   mock = this;
+  ON_CALL(*this, gdk_display_get_n_monitors(::testing::_))
+      .WillByDefault(::testing::Return(1));
+  ON_CALL(*this, gdk_display_get_monitor(::testing::_, ::testing::_))
+      .WillByDefault([](GdkDisplay*, int) {
+        return GDK_MONITOR(g_object_new(gdk_monitor_get_type(), nullptr));
+      });
+  ON_CALL(*this, gdk_monitor_get_geometry(::testing::_, ::testing::_))
+      .WillByDefault(
+          [](GdkMonitor*, GdkRectangle* geometry) { *geometry = {}; });
+  ON_CALL(*this, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
+  ON_CALL(*this, gdk_monitor_get_scale_factor(::testing::_))
+      .WillByDefault(::testing::Return(1));
+
   ON_CALL(*this, gdk_window_get_width(::testing::_))
       .WillByDefault(::testing::Return(100));
   ON_CALL(*this, gdk_window_get_height(::testing::_))
@@ -109,12 +123,14 @@ GdkDisplay* gdk_window_get_display(GdkWindow* window) {
 
 int gdk_display_get_n_monitors(GdkDisplay* display) {
   check_thread();
-  return 1;
+  return mock != nullptr ? mock->gdk_display_get_n_monitors(display) : 1;
 }
 
 GdkMonitor* gdk_display_get_monitor(GdkDisplay* display, int n) {
   check_thread();
-  return GDK_MONITOR(g_object_new(gdk_monitor_get_type(), nullptr));
+  return mock != nullptr
+             ? mock->gdk_display_get_monitor(display, n)
+             : GDK_MONITOR(g_object_new(gdk_monitor_get_type(), nullptr));
 }
 
 GdkMonitor* gdk_display_get_monitor_at_window(GdkDisplay* display,
@@ -125,16 +141,21 @@ GdkMonitor* gdk_display_get_monitor_at_window(GdkDisplay* display,
 
 void gdk_monitor_get_geometry(GdkMonitor* monitor, GdkRectangle* geometry) {
   check_thread();
+  if (mock != nullptr) {
+    mock->gdk_monitor_get_geometry(monitor, geometry);
+  } else {
+    *geometry = {};
+  }
 }
 
 int gdk_monitor_get_refresh_rate(GdkMonitor* monitor) {
   check_thread();
-  return 60000;
+  return mock != nullptr ? mock->gdk_monitor_get_refresh_rate(monitor) : 60000;
 }
 
 int gdk_monitor_get_scale_factor(GdkMonitor* monitor) {
   check_thread();
-  return 1;
+  return mock != nullptr ? mock->gdk_monitor_get_scale_factor(monitor) : 1;
 }
 
 GdkCursor* gdk_cursor_new_from_name(GdkDisplay* display, const gchar* name) {

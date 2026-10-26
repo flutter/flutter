@@ -125,6 +125,8 @@ source_set("flutter_linux_sources") {
     "fl_compositor_software.cc",
     "fl_dart_project.cc",
     "fl_display_monitor.cc",
+    "fl_display_monitor_backend.h",
+    "fl_display_monitor_gtk3.cc",
     "fl_engine.cc",
     "fl_event_channel.cc",
     "fl_framebuffer.cc",
