@@ -1849,6 +1849,47 @@ void main() {
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
     });
   });
+
+  testWithoutContext('Cache.flutterRoot precedence prefers explicit flutterRoot, then rootOverride, then defaultFlutterRoot', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final osUtils = FakeOperatingSystemUtils();
+    final platform = FakePlatform(
+      environment: const <String, String>{'FLUTTER_ROOT': '/env/flutter'},
+    );
+    final Directory rootOverride = fileSystem.directory('/override/flutter');
+
+    final explicitCache = Cache(
+      fileSystem: fileSystem,
+      flutterRoot: '/explicit/flutter',
+      logger: logger,
+      osUtils: osUtils,
+      platform: platform,
+      rootOverride: rootOverride,
+    );
+    expect(explicitCache.flutterRoot, '/explicit/flutter');
+
+    final overrideCache = Cache(
+      fileSystem: fileSystem,
+      logger: logger,
+      osUtils: osUtils,
+      platform: platform,
+      rootOverride: rootOverride,
+    );
+    expect(overrideCache.flutterRoot, '/override/flutter');
+
+    final mutableEnv = <String, String>{'FLUTTER_ROOT': '/env/flutter'};
+    final defaultCache = Cache(
+      fileSystem: fileSystem,
+      logger: logger,
+      osUtils: osUtils,
+      platform: FakePlatform(environment: mutableEnv),
+    );
+    expect(defaultCache.flutterRoot, '/env/flutter');
+    // Subsequent accesses should return the memoized value.
+    mutableEnv['FLUTTER_ROOT'] = '/mutated/flutter';
+    expect(defaultCache.flutterRoot, '/env/flutter');
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {

@@ -57,7 +57,7 @@ class WebTestCompiler {
       return (
         entryPoint: relativeTestSegments.join('/'),
         configFile: testConfigPath,
-        goldensUri: fs.file(testFilePath).absolute.uri,
+        goldensUri: Uri.file(testFilePath),
       );
     }).toList();
     return fs.file(fs.path.join(outputDirectory.path, 'main.dart'))

@@ -8,6 +8,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../context/tool_context.dart';
 import '../globals.dart' as globals;
 import '../template.dart';
@@ -218,9 +219,16 @@ class BuildableIOSApp extends IOSApp {
       _toolContext.fs.path.join('ios', 'Runner', 'Assets.xcassets', asset);
 
   // Template asset's Contents.json file is in flutter_tools, but the actual
-  String _templateImageAssetDirNameForContentsJson(String asset) => templatePathProvider
-      .directoryInPackage(_templateImageAssetDirNameSuffix(asset), project.hostAppRoot.fileSystem)
-      .path;
+  String _templateImageAssetDirNameForContentsJson(String asset) {
+    final ToolContext(:Cache cache, :FileSystem fs) = _toolContext;
+    return fs.path.join(
+      cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      'templates',
+      _templateImageAssetDirNameSuffix(asset),
+    );
+  }
 
   // Template asset's images are in flutter_template_images package.
   Future<String> _templateImageAssetDirNameForImages(String asset) async {
