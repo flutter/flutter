@@ -112,23 +112,20 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
     required this._deviceService,
     required this._logger,
     required this.name,
-    this._onDispose,
   }) {
-    _logLinesController = StreamController<String>.broadcast(onListen: _flushPendingLines);
+    _logLinesController = StreamController<String>.broadcast(
+      onListen: () => scheduleMicrotask(_flushPendingLines),
+    );
   }
 
   /// Creates an [ExtensionDeviceLogReader] and starts the device log stream on
   /// the extension isolate.
-  ///
-  /// If [onDispose] is provided, it is invoked once when the reader is disposed
-  /// or fails to start.
   static Future<ExtensionDeviceLogReader> create({
     required ExtensionConnection connection,
     required String deviceId,
     required DeviceService deviceService,
     required Logger logger,
     required String name,
-    void Function()? onDispose,
   }) async {
     final reader = ExtensionDeviceLogReader._(
       connection: connection,
@@ -136,7 +133,6 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
       deviceService: deviceService,
       logger: logger,
       name: name,
-      onDispose: onDispose,
     );
     await reader._startLogStream();
     return reader;
@@ -148,7 +144,6 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
   final String _deviceId;
   final DeviceService _deviceService;
   final Logger _logger;
-  final void Function()? _onDispose;
   final _pendingLines = <String>[];
 
   @override
@@ -210,7 +205,6 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
       _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
       if (!_isDisposed) {
         _isDisposed = true;
-        _onDispose?.call();
         await _notificationSubscription?.cancel();
         _notificationSubscription = null;
         if (!_logLinesController.isClosed) {
@@ -229,7 +223,6 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
       return;
     }
     _isDisposed = true;
-    _onDispose?.call();
     _pendingLines.clear();
     await _notificationSubscription?.cancel();
     _notificationSubscription = null;
@@ -427,9 +420,6 @@ class ExtensionBackedDevice extends Device {
       deviceService: _deviceService,
       logger: _logger,
       name: name,
-      onDispose: () {
-        _logReader = null;
-      },
     );
   }
 
