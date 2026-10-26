@@ -7212,7 +7212,7 @@ install(
         contains(
           '# local_engine.json: linux/host_debug\n'
           "#   ninja's default target, everything: "
-          'bazel run --config=host_debug //engine/src/flutter:install\n',
+          'bazel build --config=host_debug //engine/src/flutter:local_engine\n',
         ),
       );
       // The tests: the suites of the run_tests.py types, the `engine` type's

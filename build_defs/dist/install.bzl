@@ -4,23 +4,23 @@
 
 """`bazel run` targets that lay a build's files into GN's build directory.
 
-What consumes an engine build reads a directory laid out as GN's
-`engine/src/out/<build>/` is: the flutter tool's `--local-engine` reads
-`flutter_tester`, `gen_snapshot`, `icudtl.dat`, `dart-sdk/`,
-`flutter_patched_sdk/`, `gen/flutter/lib/snapshot/`, `flutter_linux/`,
-`gen/dart-pkg/sky_engine/` and the rest from there, and CI's uploader reads
-the archives from its `zip_archives/`. Under Bazel each of those is an
-output under its own package in bazel-bin; install copies a chosen set of
-them to where the consumers look -- `engine/src/out/<variant>/<path>`,
-`<variant>` being GN's name for the configuration's build directory
-(host_debug_unopt, host_release, ...; checkout_view.bzl) -- or to a
-directory named on the command line. The copies land in the checkout
-(BUILD_WORKSPACE_DIRECTORY), outside Bazel's output tree, as GN's would;
-the rule's own output is the script that copies.
+CI's recipes read a directory laid out as GN's `engine/src/out/<build>/`
+is: the archives from its `zip_archives/`, a build's executables and
+libraries from its root. Under Bazel each of those is an output under its
+own package in bazel-bin; install copies a chosen set of them to where the
+consumers look -- `engine/src/out/<variant>/<path>`, `<variant>` being GN's
+name for the configuration's build directory (host_debug_unopt,
+host_release, ...; checkout_view.bzl) -- or to a directory named on the
+command line. The copies land in the checkout (BUILD_WORKSPACE_DIRECTORY),
+outside Bazel's output tree, as GN's would; the rule's own output is the
+script that copies. The installs are the builders' (ci/builders/BUILD.bazel,
+one per CI build over its ninja targets); the flutter tool reads a
+developer's build where Bazel built it instead, through the manifest
+`local_engine` (local_engine.bzl) writes, which shares this rule's
+attributes and aspect.
 
-    bazel run //engine/src/flutter:install
-    bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
-    bazel run --config=host_release //engine/src/flutter/ci/builders:host_release
+    bazel run --config=ci_host_release //engine/src/flutter/ci/builders:ci_host_release
+    bazel run --config=ci_host_debug //engine/src/flutter/ci/builders:ci_host_debug -- engine/src/out/ci/host_debug_bazel
 
 `contents` are targets whose dependency closure says where GN's build
 directory holds its files (BuildDirectoryInfo, build_directory.bzl: copies,

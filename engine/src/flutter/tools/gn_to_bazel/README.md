@@ -185,7 +185,7 @@ bazel aquery --output=jsonproto -c dbg \
     'mnemonic("CppCompile", deps(//engine/src/flutter/display_list:display_list_unittests))' \
     > /tmp/aquery.json
 python3 tool/compile_command_diff.py --aquery=/tmp/aquery.json \
-    --compile-commands=../../out/host_debug_unopt/compile_commands.json --engine-only
+    --compile-commands=../../../out/host_debug_unopt/compile_commands.json --engine-only
 ```
 
 checks the other end: for every source file both systems compile, the flags of
@@ -232,8 +232,8 @@ third-party files' `-Werror`/runtime-mode defines.
 ```sh
 (cd ../.. && ninja -C out/host_debug_unopt flutter/build/archives:artifacts ...)
 bazel build //engine/src/flutter/build/archives:all //engine/src/flutter/tools/font_subset:font_subset ...
-python3 tool/artifact_diff.py --gn=../../out/host_debug_unopt \
-    --bazel=../../out/bazel-bin/engine/src/flutter \
+python3 tool/artifact_diff.py --gn=../../../out/host_debug_unopt \
+    --bazel=../../../out/bazel-bin/engine/src/flutter \
     --expect-different=gen_snapshot --expect-different=flutter_tester \
     --expect-different=impellerc --expect-different='*.so' --expect-different='*.a' \
     --expect-different=font-subset --expect-different=bin/impellerc
@@ -254,22 +254,27 @@ headers and the license identical, the library and `gen_snapshot` the
 binaries.
 
 ```sh
-bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
-python3 tool/install_diff.py --gn=../../out/host_debug_unopt \
-    --bazel=../../out/host_debug_unopt_bazel \
+bazel build //engine/src/flutter:local_engine
+python3 tool/install_diff.py --gn=../../../out/host_debug_unopt \
+    --bazel=../../../out/bazel-bin/engine/src/flutter \
     --expect-different=flutter_tester --expect-different=gen_snapshot \
     --expect-different=impellerc --expect-different=font-subset \
     --expect-different='*.so' --expect-different='*.a'
 ```
 
-compares a build directory `install` laid out (`build_defs/dist/install.bzl`)
-with GN's, path by path: the consumer-visible paths of a Linux host build by
-default (what the flutter tool reads from a `--local-engine`, the embedder's
-library and header, `zip_archives/`), each a file compared as above, a
-directory compared file by file (GN's depfiles, stamps and the snapshot's
-assembly intermediates left out), an archive compared entry by entry.
-Against `host_debug_unopt`: 16 of 16 paths agree, 1,098 files identical,
-the eight binaries expected different, nothing missing.
+compares a Bazel build with GN's, path by path: either a build directory a
+builder's `install` laid out (`build_defs/dist/install.bzl`) or, as above,
+the directory holding a `local_engine.json`, whose entries map GN's paths
+to where Bazel built the files (`build_defs/dist/local_engine.bzl`). The
+paths are the consumer-visible ones of a Linux host build by default (what
+the flutter tool reads from a `--local-engine`, the embedder's library and
+header, `zip_archives/` -- which a manifest has not), each a file compared
+as above, a directory compared file by file (GN's depfiles, stamps and the
+snapshot's assembly intermediates left out; under a manifest, only GN's
+files are looked for, since Bazel keeps other outputs beside the mapped
+ones), an archive compared entry by entry. Against `host_debug_unopt`, the
+manifest's 16 paths all agree: 1,380 files identical, the eight binaries
+expected different, nothing missing.
 
 The Android builders have no GN build directory on a developer's machine
 to diff against, so their archives were compared with what CI uploaded
@@ -289,7 +294,7 @@ them (`bazel run --config=<build> //engine/src/flutter/ci/builders:<build>
 
 ```sh
 bazel build --config=host_debug_unopt //engine/src/flutter/...
-python3 tool/compile_commands.py --out=../../out/host_debug_unopt_bazel --config=host_debug_unopt
+python3 tool/compile_commands.py --out=../../../out/host_debug_unopt_bazel --config=host_debug_unopt
 ```
 
 writes the build directory's `compile_commands.json` from `bazel aquery`,

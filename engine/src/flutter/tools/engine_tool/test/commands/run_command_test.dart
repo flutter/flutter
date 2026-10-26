@@ -7,6 +7,7 @@ import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:engine_build_configs/src/build_config.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/commands/run_command.dart';
 import 'package:engine_tool/src/environment.dart';
@@ -20,6 +21,7 @@ import 'package:process_runner/process_runner.dart';
 import 'package:test/test.dart';
 
 import '../src/test_build_configs.dart';
+import '../src/utils.dart';
 
 void main() {
   late io.Directory tempRoot;
@@ -407,7 +409,8 @@ void main() {
             'run',
             '--config=host_debug',
             // The builder's own install target: the test's build names
-            // ninja targets (a developer's would use the root install).
+            // ninja targets (a developer's, without, is read in place through
+            // its local engine manifest; the group below).
             '//engine/src/flutter/ci/builders:host_debug',
             '--',
             p.join(testEngine.outDir.path, 'host_debug'),
@@ -440,6 +443,104 @@ void main() {
         testLogs.map((l) => l.message).join(),
         contains('cannot express linux/android_debug_arm64'),
       );
+    });
+
+    group("--backend bazel with the developer's builds", () {
+      // local_engine.json's builds: ninja's default target, everything (no
+      // ninja targets), which the flutter tool reads where Bazel builds it,
+      // through each build's local engine manifest.
+      Map<String, BuilderConfig> developerConfigs() {
+        final builders = TestBuilderConfig();
+        builders.addBuild(
+          name: 'linux/android_debug_arm64',
+          dimension: TestDroneDimension.linux,
+          targetDir: 'android_debug_arm64',
+          gnFlags: const ['--android', '--android-cpu=arm64'],
+          enableLto: false,
+        );
+        builders.addBuild(
+          name: 'linux/host_debug',
+          dimension: TestDroneDimension.linux,
+          targetDir: 'host_debug',
+          enableLto: false,
+        );
+        final Map<String, Object?> json = builders.buildJson();
+        for (final build in json['builds']! as List<Object?>) {
+          ((build! as Map<String, Object?>)['ninja']! as Map<String, Object?>)['targets'] =
+              <String>[];
+        }
+        return {
+          'local_engine': BuilderConfig.fromJson(map: json, path: 'ci/builders/local_engine.json'),
+        };
+      }
+
+      test('builds the host and Android local engines, then runs `flutter run` on both', () async {
+        // What Bazel answers: the output directory, and each configuration's
+        // manifest among its local engine target's files.
+        final testEnv = TestEnvironment.withTestEngine(
+          cannedProcesses: <CannedProcess>[
+            CannedProcess(
+              (command) => command.length > 1 && command[1] == 'info',
+              stdout: '/cache/execroot/_main/bazel-out\n',
+            ),
+            CannedProcess(
+              (command) =>
+                  command.length > 2 &&
+                  command[1] == 'cquery' &&
+                  command[2] == '--config=host_debug',
+              stdout: 'bazel-out/k8-dbg/bin/engine/src/flutter/local_engine.json\n',
+            ),
+            CannedProcess(
+              (command) =>
+                  command.length > 2 &&
+                  command[1] == 'cquery' &&
+                  command[2] == '--config=android_debug_arm64',
+              stdout: 'bazel-out/android_arm64-opt/bin/engine/src/flutter/local_engine.json\n',
+            ),
+          ],
+        );
+        addTearDown(testEnv.cleanup);
+        final CommandRunner<int> et = _engineTool(
+          RunCommand(
+            environment: testEnv.environment,
+            configs: developerConfigs(),
+            flutterTool: _FakeFlutterTool(),
+          ),
+        );
+
+        final int? result = await et.run([
+          'run',
+          '--config=android_debug_arm64',
+          '--backend',
+          'bazel',
+        ]);
+
+        printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
+        expect(result, equals(0));
+        final List<List<String>> commands = testEnv.processHistory.map((p) => p.command).toList();
+        // Neither build is installed: there is no install target to run.
+        expect(commands.where((c) => c.first == 'bazelisk' && c[1] == 'run'), isEmpty);
+        expect(
+          commands,
+          containsAllInOrder([
+            ['bazelisk', 'build', '--config=host_debug', '//engine/src/flutter:local_engine'],
+            [
+              'bazelisk',
+              'build',
+              '--config=android_debug_arm64',
+              '//engine/src/flutter:local_engine',
+            ],
+            containsAllInOrder([
+              endsWith('flutter'),
+              'run',
+              '--local-engine',
+              '/cache/execroot/_main/bazel-out/android_arm64-opt/bin/engine/src/flutter',
+              '--local-engine-host',
+              '/cache/execroot/_main/bazel-out/k8-dbg/bin/engine/src/flutter',
+            ]),
+          ]),
+        );
+      });
     });
 
     group('delegates to `flutter run` in mode', () {
