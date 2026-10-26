@@ -27,6 +27,7 @@
 #include "impeller/runtime_stage/runtime_stage.h"
 #include "runtime_stage_types_flatbuffers.h"
 #include "spirv_common.hpp"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 namespace compiler {
@@ -957,7 +958,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_type=*/TypeNameWithPaddingOfSize(alignment_pad),
           /*p_base_type=*/spirv_cross::SPIRType::BaseType::Void,
           /*p_name=*/
-          "_PADDING_" + GetMemberNameAtIndex(struct_type, i) + "_",
+          absl::StrCat("_PADDING_", GetMemberNameAtIndex(struct_type, i), "_"),
           /*p_offset=*/current_byte_offset,
           /*p_size=*/alignment_pad,
           /*p_byte_length=*/alignment_pad,

@@ -13,6 +13,7 @@
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -227,8 +228,8 @@ MultiFrameCodec::State::GetNextFrameImage(
         ImageDecoderImpeller::ToPixelFormat(info.colorType());
     if (!pixel_format.has_value()) {
       std::string decode_error =
-          "Unsupported pixel format (SkColorType=" +
-          std::to_string(static_cast<int>(info.colorType())) + ")";
+          absl::StrCat("Unsupported pixel format (SkColorType=",
+                       static_cast<int>(info.colorType()), ")");
       FML_DLOG(ERROR) << decode_error;
       return std::make_pair(nullptr, decode_error);
     }

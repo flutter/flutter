@@ -13,6 +13,7 @@
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/shader_function_gles.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -181,9 +182,9 @@ absl::Status PipelineLibraryGLES::PendingProgram::CompileShaders() {
   }
 
   gl.SetDebugLabel(DebugResourceType::kShader, vert_shader_,
-                   std::string(desc_.GetLabel()) + " Vertex Shader");
+                   absl::StrCat(desc_.GetLabel(), " Vertex Shader"));
   gl.SetDebugLabel(DebugResourceType::kShader, frag_shader_,
-                   std::string(desc_.GetLabel()) + " Fragment Shader");
+                   absl::StrCat(desc_.GetLabel(), " Fragment Shader"));
 
   gl.ShaderSourceMapping(vert_shader_, *vert_mapping,
                          desc_.GetSpecializationConstants());

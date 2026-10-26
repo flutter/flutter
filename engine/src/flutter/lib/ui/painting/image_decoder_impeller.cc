@@ -6,7 +6,6 @@
 
 #include <cmath>
 #include <memory>
-#include <sstream>
 #include <string>
 
 #include "flutter/fml/closure.h"
@@ -22,6 +21,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/size.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -96,8 +96,8 @@ absl::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
       ImageDecoderImpeller::ToPixelFormat(sk_image_format.colorType());
   if (!pixel_format.has_value()) {
     std::string decode_error =
-        "Codec pixel format is not supported (SkColorType=" +
-        std::to_string(static_cast<int>(sk_image_format.colorType())) + ")";
+        absl::StrCat("Codec pixel format is not supported (SkColorType=",
+                     static_cast<int>(sk_image_format.colorType()), ")");
     return absl::InvalidArgumentError(decode_error);
   }
   return {{
@@ -431,8 +431,8 @@ ImageDecoderImpeller::DecompressTexture(
 
   if (!ToPixelFormat(image_info.value().colorType()).has_value()) {
     std::string decode_error =
-        "Codec pixel format is not supported (SkColorType=" +
-        std::to_string(static_cast<int>(image_info.value().colorType())) + ")";
+        absl::StrCat("Codec pixel format is not supported (SkColorType=",
+                     static_cast<int>(image_info.value().colorType()), ")");
     FML_DLOG(ERROR) << decode_error;
     return absl::InvalidArgumentError(decode_error);
   }
@@ -510,11 +510,8 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     return std::make_pair(nullptr, decode_error);
   }
 
-  {
-    std::ostringstream label;
-    label << "ui.Image(" << static_cast<const void*>(dest_texture.get()) << ")";
-    dest_texture->SetLabel(label.str());
-  }
+  dest_texture->SetLabel(
+      absl::StrCat("ui.Image(0x", absl::Hex(dest_texture.get()), ")"));
 
   auto command_buffer = context->CreateCommandBuffer();
   if (!command_buffer) {
@@ -669,8 +666,8 @@ ImageDecoderImpeller::UploadTextureToStorage(
   const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
     std::string decode_error =
-        "Unsupported pixel format (SkColorType=" +
-        std::to_string(static_cast<int>(image_info.colorType())) + ")";
+        absl::StrCat("Unsupported pixel format (SkColorType=",
+                     static_cast<int>(image_info.colorType()), ")");
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);
   }
@@ -701,11 +698,7 @@ ImageDecoderImpeller::UploadTextureToStorage(
     return std::make_pair(nullptr, decode_error);
   }
 
-  {
-    std::ostringstream label;
-    label << "ui.Image(" << static_cast<const void*>(texture.get()) << ")";
-    texture->SetLabel(label.str());
-  }
+  texture->SetLabel(absl::StrCat("ui.Image(0x", absl::Hex(texture.get()), ")"));
 
   context->DisposeThreadLocalCachedResources();
 

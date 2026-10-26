@@ -13,6 +13,7 @@
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/renderer/vertex_descriptor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -62,7 +63,7 @@ struct PipelineBuilder {
       const Context& context,
       PipelineDescriptor& desc) {
     // Setup debug instrumentation.
-    desc.SetLabel(std::string(FragmentShader::kLabel) + " Pipeline");
+    desc.SetLabel(absl::StrCat(FragmentShader::kLabel, " Pipeline"));
 
     // Resolve pipeline entrypoints.
     {

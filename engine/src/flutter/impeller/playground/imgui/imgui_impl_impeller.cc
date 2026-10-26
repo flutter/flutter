@@ -35,6 +35,7 @@
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 struct ImGui_ImplImpeller_Data {
   explicit ImGui_ImplImpeller_Data(
@@ -256,9 +257,8 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
           clip_rect = visible_clip.value();
         }
 
-        render_pass.SetCommandLabel("ImGui draw list " +
-                                    std::to_string(draw_list_i) + " (command " +
-                                    std::to_string(cmd_i) + ")");
+        render_pass.SetCommandLabel(absl::StrCat(
+            "ImGui draw list ", draw_list_i, " (command ", cmd_i, ")"));
         render_pass.SetViewport(viewport);
         render_pass.SetScissor(impeller::IRect32::RoundOut(clip_rect));
         render_pass.SetPipeline(bd->pipeline);

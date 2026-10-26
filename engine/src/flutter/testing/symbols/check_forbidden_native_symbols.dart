@@ -71,7 +71,7 @@ bool checkForbiddenNativeSymbols({
     if (found.length > 20) {
       stderr.writeln('  ... and ${found.length - 20} more.');
     }
-    stderr.writeln('Use std::stringstream or std::to_string instead of std::format.');
+    stderr.writeln('Use absl::StrCat or std::stringstream instead of std::format.');
     return false;
   }
 

@@ -30,6 +30,7 @@
 #include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/context.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -194,7 +195,7 @@ class ContextVK final : public Context,
       // No-op if validation layers are not enabled.
       return true;
     }
-    std::string combined = std::string(label) + " " + std::string(trailing);
+    std::string combined = absl::StrCat(label, " ", trailing);
     return SetDebugName(GetDevice(), handle, combined);
   }
 

@@ -18,6 +18,7 @@
 #include "flutter/fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/geometry/color.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -211,8 +212,8 @@ uint32_t DifferingFields(const ContentContextOptions& a,
 std::string DescribeChange(OptionField field,
                            const ContentContextOptions& from,
                            const ContentContextOptions& to) {
-  return std::string(FieldName(field)) + " " + FieldValue(from, field) +
-         " -> " + FieldValue(to, field);
+  return absl::StrCat(FieldName(field), " ", FieldValue(from, field), " -> ",
+                      FieldValue(to, field));
 }
 
 std::string FormatSpecializationConstants(const std::vector<Scalar>& values) {
@@ -263,9 +264,9 @@ std::string FormatOptions(const ContentContextOptions& options,
       if (FieldValue(options, field) != "on") {
         continue;
       }
-      part = "+" + std::string(FieldName(field));
+      part = absl::StrCat("+", FieldName(field));
     } else {
-      part = std::string(FieldName(field)) + "=" + FieldValue(options, field);
+      part = absl::StrCat(FieldName(field), "=", FieldValue(options, field));
     }
     if (!result.empty()) {
       result += ' ';
@@ -328,8 +329,8 @@ PipelineVariantRecorder::Entry& PipelineVariantRecorder::GetEntry(
   const std::vector<Scalar>& constants =
       descriptor.GetSpecializationConstants();
   std::string identity =
-      label + "|" + FormatSpecializationConstants(constants) + "|" +
-      (options.has_value() ? FormatOptions(options.value()) : "");
+      absl::StrCat(label, "|", FormatSpecializationConstants(constants), "|",
+                   options.has_value() ? FormatOptions(options.value()) : "");
   Entry& entry = entries[identity];
   if (entry.label.empty()) {
     entry.label = std::move(label);
@@ -493,8 +494,9 @@ size_t PipelineVariantRecorder::PrintUnusedShaders(std::ostream& out) const {
   for (const UnusedShader& shader : unused) {
     std::string name = shader.label;
     if (!shader.specialization_constants.empty()) {
-      name += " SC=" +
-              FormatSpecializationConstants(shader.specialization_constants);
+      absl::StrAppend(
+          &name, " SC=",
+          FormatSpecializationConstants(shader.specialization_constants));
     }
     width = std::max(width, name.size());
     names.push_back(std::move(name));
@@ -549,8 +551,9 @@ class PipelineVariantRecorder::ReportPrinter {
     if (entry.specialization_constants.empty()) {
       return entry.label;
     }
-    return entry.label + " SC=" +
-           FormatSpecializationConstants(entry.specialization_constants);
+    return absl::StrCat(
+        entry.label,
+        " SC=", FormatSpecializationConstants(entry.specialization_constants));
   }
 
   /// The heading of the group `entry` is printed in, showing only the option
@@ -807,8 +810,9 @@ void PipelineVariantRecorder::ReportPrinter::PrintWarmedNotDrawn(
                                     twin.drawn->options.value());
         }
       }
-      drawn_as = "drawn as: " + changes + " (" +
-                 WithThousandsSeparators(twin.drawn->draw_count) + " draws)";
+      drawn_as = absl::StrCat("drawn as: ", changes, " (",
+                              WithThousandsSeparators(twin.drawn->draw_count),
+                              " draws)");
     }
     out << "      " << std::left << std::setw(static_cast<int>(width))
         << Name(entry) << "  " << drawn_as << "\n";

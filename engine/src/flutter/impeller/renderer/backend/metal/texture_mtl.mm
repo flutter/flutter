@@ -11,6 +11,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -89,7 +90,7 @@ void TextureMTL::SetLabel(std::string_view label, std::string_view trailing) {
   if (is_drawable_) {
     return;
   }
-  std::string combined = std::string(label) + " " + std::string(trailing);
+  std::string combined = absl::StrCat(label, " ", trailing);
   [aquire_proc_() setLabel:@(combined.data())];
 #endif  // IMPELLER_DEBUG
 }

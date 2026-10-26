@@ -16,6 +16,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -197,8 +198,7 @@ void TextureGLES::SetLabel(std::string_view label) {
 void TextureGLES::SetLabel(std::string_view label, std::string_view trailing) {
 #ifdef IMPELLER_DEBUG
   if (reactor_->CanSetDebugLabels()) {
-    reactor_->SetDebugLabel(handle_.Get(),
-                            std::string(label) + " " + std::string(trailing));
+    reactor_->SetDebugLabel(handle_.Get(), absl::StrCat(label, " ", trailing));
   }
 #endif  // IMPELLER_DEBUG
 }

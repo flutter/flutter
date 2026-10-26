@@ -9,6 +9,7 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/core/texture.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -150,10 +151,8 @@ std::string DepthAttachmentToString(const DepthAttachment& depth) {
 }
 
 std::string StencilAttachmentToString(const StencilAttachment& stencil) {
-  std::stringstream stream;
-  stream << AttachmentToString(stencil) << ",";
-  stream << "ClearStencil=" << stencil.clear_stencil;
-  return stream.str();
+  return absl::StrCat(AttachmentToString(stencil),
+                      ",ClearStencil=", stencil.clear_stencil);
 }
 
 }  // namespace impeller

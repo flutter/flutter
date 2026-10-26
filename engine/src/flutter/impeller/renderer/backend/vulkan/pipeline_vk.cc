@@ -17,6 +17,7 @@
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
 #include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -164,7 +165,7 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
 #ifdef IMPELLER_DEBUG
   ContextVK::SetDebugName(
       device, pass.get(),
-      std::string("Compat Render Pass: ") + std::string(desc.GetLabel()));
+      absl::StrCat("Compat Render Pass: ", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return pass;
@@ -215,7 +216,7 @@ absl::StatusOr<vk::UniqueDescriptorSetLayout> MakeDescriptorSetLayout(
 #ifdef IMPELLER_DEBUG
   ContextVK::SetDebugName(
       device_holder->GetDevice(), descs_layout.get(),
-      std::string("Descriptor Set Layout: ") + std::string(desc.GetLabel()));
+      absl::StrCat("Descriptor Set Layout: ", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return absl::StatusOr<vk::UniqueDescriptorSetLayout>(std::move(descs_layout));
@@ -238,9 +239,8 @@ absl::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
   }
 
 #ifdef IMPELLER_DEBUG
-  ContextVK::SetDebugName(
-      device_holder->GetDevice(), *pipeline_layout.value,
-      std::string("Pipeline Layout ") + std::string(desc.GetLabel()));
+  ContextVK::SetDebugName(device_holder->GetDevice(), *pipeline_layout.value,
+                          absl::StrCat("Pipeline Layout ", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return std::move(pipeline_layout.value);
@@ -457,9 +457,8 @@ absl::StatusOr<vk::UniquePipeline> MakePipeline(
   }
 
 #ifdef IMPELLER_DEBUG
-  ContextVK::SetDebugName(
-      device_holder->GetDevice(), *pipeline,
-      std::string("Pipeline ") + std::string(desc.GetLabel()));
+  ContextVK::SetDebugName(device_holder->GetDevice(), *pipeline,
+                          absl::StrCat("Pipeline ", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return std::move(pipeline);
