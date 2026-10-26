@@ -14,4 +14,4 @@
 
 # This is intentionally a subset of .ci.yaml from the master branch.
 enabled_branches:
-  - \S+-experimental
+  - cp-577928128-experimental
