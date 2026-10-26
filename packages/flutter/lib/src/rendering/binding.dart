@@ -597,14 +597,19 @@ mixin RendererBinding
       return;
     }
     _automaticPointerInterceptorsEnabled = value;
-    if (!value) {
+    if (!value && _hitTestRegionsSupportedOnPlatform) {
       rootPipelineOwner.clearHitTestRegions();
     }
     scheduleFrame();
   }
 
+  // Whether the hit-test region pass can run on the current platform. Regions
+  // are only ever computed (and therefore only ever need clearing) when this is
+  // true.
+  bool get _hitTestRegionsSupportedOnPlatform => kIsWeb || debugEnableHitTestRegionsOnAllPlatforms;
+
   bool get _shouldFlushHitTestRegions =>
-      _automaticPointerInterceptorsEnabled && (kIsWeb || debugEnableHitTestRegionsOnAllPlatforms);
+      _automaticPointerInterceptorsEnabled && _hitTestRegionsSupportedOnPlatform;
 
   bool _debugMouseTrackerUpdateScheduled = false;
   void _scheduleMouseTrackerUpdate() {

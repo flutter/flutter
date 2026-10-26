@@ -68,13 +68,13 @@ void main() {
   setUp(() {
     initialConfiguration = binding.renderView.configuration;
     binding.renderView.configuration = _createViewConfiguration();
-    debugEnableHitTestRegionsOnAllPlatforms = false;
     binding.automaticPointerInterceptorsEnabled = false;
+    debugEnableHitTestRegionsOnAllPlatforms = false;
   });
 
   tearDown(() {
-    debugEnableHitTestRegionsOnAllPlatforms = false;
     binding.automaticPointerInterceptorsEnabled = false;
+    debugEnableHitTestRegionsOnAllPlatforms = false;
     binding.renderView.configuration = initialConfiguration;
     final RenderBox emptyBox = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 0.0, height: 0.0),
@@ -635,6 +635,57 @@ void main() {
     expect(childUpdates, hasLength(2));
     expect(childUpdates.last, isEmpty);
   });
+
+  test(
+    'toggling automaticPointerInterceptorsEnabled does not dispatch anything when the pass cannot run on this platform',
+    () {
+      final childUpdates = <Float64List>[];
+      final childOwner = PipelineOwner(onHitTestRegionsUpdate: childUpdates.add);
+      binding.rootPipelineOwner.adoptChild(childOwner);
+      final childView = RenderView(
+        configuration: _createViewConfiguration(),
+        view: binding.platformDispatcher.views.single,
+      );
+      childOwner.rootNode = childView;
+      childView.prepareInitialFrame();
+      addTearDown(() {
+        childOwner.rootNode = null;
+        binding.rootPipelineOwner.dropChild(childOwner);
+        childOwner.dispose();
+      });
+
+      childView.child = RenderStack(
+        textDirection: TextDirection.ltr,
+        children: <RenderBox>[
+          _positioned(left: 0, top: 0, width: 300, height: 300, child: _createPlatformView(11)),
+          _positioned(left: 5, top: 15, width: 40, height: 30, child: _createHitTarget()),
+        ],
+      );
+
+      // Compute regions once with the debug override on, so that there is
+      // something that a teardown could clear.
+      debugEnableHitTestRegionsOnAllPlatforms = true;
+      binding.automaticPointerInterceptorsEnabled = true;
+      binding.pumpCompleteFrame();
+      expect(childUpdates, hasLength(1));
+      expect(childUpdates.single, isNotEmpty);
+
+      // Without the override, a non-web platform never runs the pass, so
+      // turning the flag off must not dispatch an (empty) update either.
+      debugEnableHitTestRegionsOnAllPlatforms = false;
+      binding.automaticPointerInterceptorsEnabled = false;
+      expect(childUpdates, hasLength(1));
+
+      // Turning the flag back on without the override does not run the pass.
+      binding.automaticPointerInterceptorsEnabled = true;
+      binding.pumpCompleteFrame();
+      expect(childUpdates, hasLength(1));
+
+      binding.automaticPointerInterceptorsEnabled = false;
+      expect(childUpdates, hasLength(1));
+    },
+    skip: kIsWeb, // [intended] On the web, the pass always runs regardless of the debug override.
+  );
 
   test('drops overlays clipped to empty intersection and does not overlap against completely clipped platform view', () {
     debugEnableHitTestRegionsOnAllPlatforms = true;

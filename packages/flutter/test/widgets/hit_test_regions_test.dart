@@ -71,21 +71,21 @@ class _PaintCountingPainter extends CustomPainter {
 
 void main() {
   setUp(() {
-    debugEnableHitTestRegionsOnAllPlatforms = false;
     RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
+    debugEnableHitTestRegionsOnAllPlatforms = false;
   });
 
   tearDown(() {
-    debugEnableHitTestRegionsOnAllPlatforms = false;
     RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
+    debugEnableHitTestRegionsOnAllPlatforms = false;
   });
 
   void configureTestView(WidgetTester tester, {double devicePixelRatio = 1.0}) {
     tester.view.devicePixelRatio = devicePixelRatio;
     tester.view.physicalSize = Size(800.0 * devicePixelRatio, 600.0 * devicePixelRatio);
     addTearDown(() {
-      debugEnableHitTestRegionsOnAllPlatforms = false;
       RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
+      debugEnableHitTestRegionsOnAllPlatforms = false;
       tester.view.reset();
     });
   }
