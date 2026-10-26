@@ -1697,6 +1697,62 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // Renders into two color attachments with different formats. The pipeline
+  // must be built with each attachment's own format.
+  test('Can render into color attachments with different formats', () async {
+    const gpu.PixelFormat format0 = gpu.PixelFormat.r16g16b16a16Float;
+    if (!gpu.gpuContext.supportsTextureFormat(format0, renderTarget: true)) {
+      markTestSkipped('r16g16b16a16Float is not renderable on this device.');
+      return;
+    }
+    final gpu.Texture target0 = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      100,
+      100,
+      format: format0,
+    );
+    final gpu.Texture target1 = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      100,
+      100,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
+      gpu.RenderTarget(
+        colorAttachments: <gpu.ColorAttachment>[
+          gpu.ColorAttachment(texture: target0),
+          gpu.ColorAttachment(texture: target1),
+        ],
+      ),
+    );
+
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
+    final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
+      library['UnlitVertex']!,
+      library['TwoTargetsFragment']!,
+    );
+    renderPass.bindPipeline(pipeline);
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+    );
+    renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+    renderPass.draw(3);
+    await submitAndWait(commandBuffer);
+
+    // Attachment 1 holds the inverse of lime: magenta.
+    final ByteData bytes = await readTextureBytes(target1);
+    const int center = (50 * 100 + 50) * 4;
+    expect(bytes.getUint8(center + 0), greaterThan(0xC0)); // red
+    expect(bytes.getUint8(center + 1), lessThan(0x40)); // green
+    expect(bytes.getUint8(center + 2), greaterThan(0xC0)); // blue
+    expect(bytes.getUint8(center + 3), 0xFF); // alpha
+    // The OpenGL ES backend renders into a single color attachment only.
+  }, skip: !(impellerEnabled && flutterGpuEnabled) || impellerBackend == 'opengles');
+
   // Renders a green triangle pointing downwards.
   test('Can render triangle', () async {
     final RenderPassState state = createSimpleRenderPass();
