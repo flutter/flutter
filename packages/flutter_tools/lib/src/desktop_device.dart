@@ -34,7 +34,7 @@ abstract class DesktopDevice extends Device {
   final _deviceLogReader = DesktopLogReader();
 
   @override
-  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter? createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: toolContext.fs);
   }
 

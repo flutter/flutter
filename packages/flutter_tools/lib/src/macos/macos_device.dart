@@ -4,12 +4,14 @@
 
 import 'package:process/process.dart';
 
+import '../application_package.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../desktop_device.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../project.dart';
 import 'application_package.dart';
@@ -20,6 +22,14 @@ import 'macos_workflow.dart';
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({required super.toolContext})
     : super('macos', platformType: PlatformType.macos, ephemeral: false);
+
+  // Sandboxed apps keep DevFS in their container
+  // (~/Library/Containers/<bundle-id>/Data/tmp), which macOS 14+ blocks other
+  // processes from writing to without user consent or Full Disk Access. Sync
+  // over the VM service so the app writes to its own container.
+  // See https://github.com/flutter/flutter/issues/193907.
+  @override
+  DevFSWriter? createDevFSWriter(ApplicationPackage? app, String? userIdentifier) => null;
 
   @override
   Future<bool> isSupported() async => true;
