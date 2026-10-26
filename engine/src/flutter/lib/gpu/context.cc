@@ -114,8 +114,22 @@ Dart_Handle InternalFlutterGpu_Context_InitializeDefault(Dart_Handle wrapper) {
 
 extern int InternalFlutterGpu_Context_GetDefaultColorFormat(
     flutter::gpu::Context* wrapper) {
-  return static_cast<int>(flutter::gpu::FromImpellerPixelFormat(
-      wrapper->GetContext().GetCapabilities()->GetDefaultColorFormat()));
+  const impeller::PixelFormat format =
+      wrapper->GetContext().GetCapabilities()->GetDefaultColorFormat();
+  // With wide gamut enabled, Metal's default color format is an
+  // extended-range format that Flutter GPU does not expose, so it would map
+  // to kUnknown. Report the 8-bit format Metal uses without wide gamut.
+  switch (format) {
+    case impeller::PixelFormat::kB10G10R10XR:
+    case impeller::PixelFormat::kB10G10R10A10XR:
+      return static_cast<int>(
+          flutter::gpu::FlutterGPUPixelFormat::kB8G8R8A8UNormInt);
+    case impeller::PixelFormat::kB10G10R10XRSRGB:
+      return static_cast<int>(
+          flutter::gpu::FlutterGPUPixelFormat::kB8G8R8A8UNormIntSRGB);
+    default:
+      return static_cast<int>(flutter::gpu::FromImpellerPixelFormat(format));
+  }
 }
 
 extern int InternalFlutterGpu_Context_GetDefaultStencilFormat(
