@@ -184,15 +184,16 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
     if (_StretchEffectShader._initialized) {
       _fragmentShader?.dispose();
       _fragmentShader = _StretchEffectShader._program!.fragmentShader();
-      _fragmentShader!.setFloat(2, maxStretchIntensity);
+      // u_size and u_texture are set by the engine for ImageFilter.shader.
+      _fragmentShader!.getUniformFloat('u_max_stretch_intensity').set(maxStretchIntensity);
       if (widget.axis == Axis.vertical) {
-        _fragmentShader!.setFloat(3, 0.0);
-        _fragmentShader!.setFloat(4, widget.stretchStrength);
+        _fragmentShader!.getUniformFloat('u_overscroll_x').set(0.0);
+        _fragmentShader!.getUniformFloat('u_overscroll_y').set(widget.stretchStrength);
       } else {
-        _fragmentShader!.setFloat(3, widget.stretchStrength);
-        _fragmentShader!.setFloat(4, 0.0);
+        _fragmentShader!.getUniformFloat('u_overscroll_x').set(widget.stretchStrength);
+        _fragmentShader!.getUniformFloat('u_overscroll_y').set(0.0);
       }
-      _fragmentShader!.setFloat(5, interpolationStrength);
+      _fragmentShader!.getUniformFloat('u_interpolation_strength').set(interpolationStrength);
 
       imageFilter = ui.ImageFilter.shader(_fragmentShader!);
     } else {
