@@ -83,10 +83,10 @@ abstract base class DeviceService extends ToolExtensionService {
   /// or return `null` if the process exits or VM Service discovery fails.
   Future<Uri?> getVmServiceUri({required String deviceId});
 
-  /// Stops a running application on [deviceId].
+  /// Stops any running application on [deviceId].
   ///
   /// Returns `true` if a running application was stopped, or `false` if no
-  /// application was running on [deviceId].
+  /// application was running on [deviceId] or stopping it failed.
   Future<bool> stopApp({required String deviceId});
 
   @override

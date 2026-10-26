@@ -80,6 +80,8 @@ final class _FakeTestBuildService extends BuildService {
 }
 
 final class _FakeTestDeviceService extends DeviceService {
+  final _runningDevices = <String>{};
+
   @override
   Future<List<TargetDevice>> getDevices() async {
     return const <TargetDevice>[
@@ -135,12 +137,21 @@ final class _FakeTestDeviceService extends DeviceService {
     required Uri executableUri,
   }) async {
     if (deviceId == 'fake_test_device') {
-      return executableUri == Uri.file('/tmp/fake_bundle/app') &&
+      final bool launched =
+          executableUri == Uri.file('/tmp/fake_bundle/app') &&
           debuggingOptions ==
               const ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
+      if (launched) {
+        _runningDevices.add(deviceId);
+      }
+      return launched;
     }
     if (deviceId == 'missing_vm_service_device') {
-      return executableUri == Uri.file('/tmp/fake_bundle/app');
+      final launched = executableUri == Uri.file('/tmp/fake_bundle/app');
+      if (launched) {
+        _runningDevices.add(deviceId);
+      }
+      return launched;
     }
     return false;
   }
@@ -150,8 +161,7 @@ final class _FakeTestDeviceService extends DeviceService {
       deviceId == 'fake_test_device' ? Uri.parse('http://127.0.0.1:8181/abcd=/') : null;
 
   @override
-  Future<bool> stopApp({required String deviceId}) async =>
-      deviceId == 'fake_test_device' || deviceId == 'missing_vm_service_device';
+  Future<bool> stopApp({required String deviceId}) async => _runningDevices.remove(deviceId);
 }
 
 void _fakeLaunchExtensionEntryPoint(SendPort sendPort) {
@@ -486,7 +496,7 @@ flutter:
       });
 
       testWithoutContext(
-        'fails and stops app when debugging is enabled and getVmServiceUri returns null',
+        'fails without stopping app when debugging is enabled and getVmServiceUri returns null',
         () async {
           final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
           final Device missingVmServiceDevice = devices.firstWhere(
@@ -498,10 +508,9 @@ flutter:
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           );
           expect(result.started, isFalse);
-          expect(
-            logger.errorText,
-            contains('Failed to discover VM Service URI for Missing VM Service Device.'),
-          );
+          expect(logger.errorText, contains('Error waiting for a debug connection.'));
+          expect(await missingVmServiceDevice.stopApp(null), isTrue);
+          expect(await missingVmServiceDevice.stopApp(null), isFalse);
         },
       );
     });

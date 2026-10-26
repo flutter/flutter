@@ -141,7 +141,10 @@ final class LinuxDeviceService extends DeviceService {
     if (!runningApp.vmServiceCompleter.isCompleted) {
       runningApp.vmServiceCompleter.complete();
     }
-    runningApp.process.kill();
+    final bool killed = runningApp.process.kill();
+    if (!killed) {
+      return false;
+    }
     await runningApp.process.exitCode;
     return true;
   }

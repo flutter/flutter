@@ -446,8 +446,7 @@ class ExtensionBackedDevice extends Device {
     if (debuggingEnabled) {
       final Uri? vmServiceUri = await _deviceService.getVmServiceUri(deviceId: id);
       if (vmServiceUri == null) {
-        logger.printError('Failed to discover VM Service URI for $name.');
-        await stopApp(package, userIdentifier: userIdentifier);
+        logger.printError('Error waiting for a debug connection.');
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
