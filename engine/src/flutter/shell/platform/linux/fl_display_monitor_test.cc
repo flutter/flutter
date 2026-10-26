@@ -160,6 +160,32 @@ TEST_F(FlDisplayMonitorSnapshotTest, ReorderingDoesNotReassignIds) {
   EXPECT_EQ(displays[1].display_id, first_id);
 }
 
+TEST_F(FlDisplayMonitorSnapshotTest,
+       RepeatedStartDoesNotDuplicateSubscriptions) {
+  current = {first};
+  fl_display_monitor_start(watcher);
+  fl_display_monitor_start(watcher);
+  EXPECT_EQ(updates, 2);
+
+  current.push_back(second);
+  g_signal_emit_by_name(display, "monitor-added", second);
+  EXPECT_EQ(updates, 3);
+  ASSERT_EQ(displays.size(), 2u);
+  const auto first_id = displays[0].display_id;
+
+  current = {first};
+  g_signal_emit_by_name(display, "monitor-removed", second);
+  EXPECT_EQ(updates, 4);
+  ASSERT_EQ(displays.size(), 1u);
+  EXPECT_EQ(displays[0].display_id, first_id);
+  EXPECT_EQ(fl_display_monitor_get_display_id(watcher, second), 0u);
+
+  g_clear_object(&watcher);
+  g_signal_emit_by_name(display, "monitor-added", second);
+  g_signal_emit_by_name(display, "monitor-removed", first);
+  EXPECT_EQ(updates, 4);
+}
+
 TEST_F(FlDisplayMonitorSnapshotTest, DisposalDisconnectsBothTopologySignals) {
   current = {first};
   fl_display_monitor_start(watcher);

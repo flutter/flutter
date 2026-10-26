@@ -8,6 +8,7 @@ struct _FlDisplayMonitorBackend {
   GdkDisplay* display;
   FlDisplayMonitorBackendChanged changed;
   gpointer user_data;
+  bool started;
 };
 
 static void monitor_added_cb(GdkDisplay* display,
@@ -34,6 +35,10 @@ FlDisplayMonitorBackend* fl_display_monitor_backend_new(
 }
 
 void fl_display_monitor_backend_start(FlDisplayMonitorBackend* self) {
+  if (self->started) {
+    return;
+  }
+  self->started = true;
   g_signal_connect(self->display, "monitor-added", G_CALLBACK(monitor_added_cb),
                    self);
   g_signal_connect(self->display, "monitor-removed",
