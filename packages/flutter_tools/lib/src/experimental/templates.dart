@@ -61,7 +61,7 @@ base class ExtensionTemplateManager extends TemplateService {
       await _extensionManager.discoverExtensions(startDir: projectDir);
     }
     for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions) {
-      _cachedCustomPlatforms.addAll(ext.config.platforms);
+      _cachedCustomPlatforms.addAll(ext.config.targetPlatforms);
     }
     return cachedCustomPlatforms;
   }
@@ -172,7 +172,7 @@ base class ExtensionTemplateManager extends TemplateService {
         ? null
         : <String>{
             for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions)
-              if (ext.config.platforms.any(platformSet.contains)) ext.name,
+              if (ext.config.targetPlatforms.any(platformSet.contains)) ext.name,
           };
     final List<ExtensionConnection> connections = _extensionManager.connections
         .where(

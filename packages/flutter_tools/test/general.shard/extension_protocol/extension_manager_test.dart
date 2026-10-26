@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_kernel_compiler.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/experimental/project_extension_finder.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:test/fake.dart';
 
@@ -123,7 +124,7 @@ dev_dependencies:
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: diag_ext
-supported_platforms:
+host_platforms:
   - linux
 services:
   - diagnostics
@@ -138,7 +139,7 @@ services:
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: build_ext
-supported_platforms:
+host_platforms:
   - linux
 services:
   - build
@@ -187,8 +188,10 @@ build_targets:
                 Uri entrypointUri, {
                 required Logger logger,
                 required Uri packageConfigUri,
+                ExtensionPackageConfig? expectedConfig,
                 String? extensionName,
               }) async {
+                expect(expectedConfig?.name, extensionName);
                 spawnedExtensions.add(extensionName ?? entrypointUri.toString());
                 return _FakeExtensionConnection(
                   capabilities: ToolExtensionCapabilities(

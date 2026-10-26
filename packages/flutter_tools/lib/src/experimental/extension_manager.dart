@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 
@@ -23,6 +24,7 @@ typedef ExtensionUriSpawner = Future<ExtensionConnection> Function(
   Uri entrypointUri, {
   required Logger logger,
   required Uri packageConfigUri,
+  ExtensionPackageConfig? expectedConfig,
   String? extensionName,
 });
 
@@ -112,7 +114,7 @@ class ExtensionManager {
       } else {
         _logger.printTrace(
           'Extension "${ext.name}" does not support host platform "$hostPlatformName" '
-          '(supported platforms: ${ext.config.supportedPlatforms}); skipping.',
+          '(host platforms: ${ext.config.hostPlatforms}); skipping.',
         );
       }
     }
@@ -162,6 +164,7 @@ class ExtensionManager {
             : ext.entrypointUri;
         final ExtensionConnection connection = await _uriSpawner(
           runnableUri,
+          expectedConfig: ext.config,
           logger: _logger,
           packageConfigUri: ext.packageConfigUri,
           extensionName: ext.name,

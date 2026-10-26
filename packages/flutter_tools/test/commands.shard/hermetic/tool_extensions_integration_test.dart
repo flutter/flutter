@@ -308,13 +308,13 @@ dev_dependencies:
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: flutter_tools_extension_linux_prototype
-supported_platforms:
+host_platforms:
   - linux
 services:
   - template
 templates:
   - custom-linux-app
-platforms:
+target_platforms:
   - custom_linux
 ''');
         extDir.childFile('bin/flutter_tools_extension_linux_prototype.dart')
