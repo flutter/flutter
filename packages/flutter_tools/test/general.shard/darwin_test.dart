@@ -126,17 +126,5 @@ void main() {
       expect(logger.errorText, startsWith('note: note message\n'));
       expect(logger.hadErrorOutput, isFalse);
     });
-
-    testWithoutContext('VerboseLogger output format', () {
-      final verboseLogger = VerboseLogger(logger);
-      printXcodeWarning(
-        'warning message',
-        logger: verboseLogger,
-        filePath: '/path/to',
-        lineNumber: 123,
-      );
-      expect(logger.errorText, '/path/to:123: warning: warning message\n');
-      expect(verboseLogger.hadErrorOutput, isFalse);
-    });
   });
 }

@@ -14,38 +14,15 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:process/process.dart';
 
-import '../../artifacts.dart';
-import '../../base/bot_detector.dart';
 import '../../base/common.dart';
-import '../../base/config.dart';
 import '../../base/file_system.dart';
-import '../../base/io.dart';
-import '../../base/logger.dart';
-import '../../base/os.dart';
-import '../../base/platform.dart';
-import '../../base/process.dart';
-import '../../base/signals.dart';
-import '../../base/terminal.dart';
-import '../../base/time.dart';
-import '../../base/user_messages.dart';
 import '../../build_info.dart';
-import '../../context/tool_context.dart';
 import '../../convert.dart';
-import '../../custom_devices/custom_devices_config.dart';
 import '../../dart/package_map.dart';
 import '../../features.dart';
-import '../../flutter_cache.dart';
-import '../../git.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
-import '../../native_assets.dart';
-import '../../persistent_tool_state.dart';
-import '../../pre_run_validator.dart';
-import '../../project.dart';
-import '../../runner/local_engine.dart';
-import '../../version.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart' show MissingDefineException;
@@ -440,143 +417,14 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
   return FlutterNativeAssetsBuildRunnerImpl(
     environment.packageConfigPath,
     packageConfig,
+    fileSystem,
+    environment.logger,
+    environment.platform,
+    environment.processManager,
     runPackageName,
     pubspecPath,
     includeDevDependencies: includeDevDependencies,
-    toolContext: _EnvironmentToolContext(environment),
   );
-}
-
-class _EnvironmentToolContext implements ToolContext {
-  _EnvironmentToolContext(this._environment);
-
-  final Environment _environment;
-
-  @override
-  Artifacts get artifacts => _environment.artifacts;
-
-  @override
-  late final botDetector = BotDetector(platform: platform);
-
-  @override
-  late final cache = FlutterCache(
-    fileSystem: fs,
-    logger: logger,
-    platform: platform,
-    osUtils: os,
-    projectFactory: projectFactory,
-    stdio: stdio,
-  );
-
-  @override
-  late final config = Config(
-    Config.kFlutterSettings,
-    fileSystem: fs,
-    logger: logger,
-    platform: platform,
-  );
-
-  @override
-  late final customDevicesConfig = CustomDevicesConfig(
-    fileSystem: fs,
-    logger: logger,
-    platform: platform,
-  );
-
-  @override
-  late final fileSystemUtils = FileSystemUtils(fileSystem: fs, platform: platform);
-
-  @override
-  late final flutterVersion = FlutterVersion(
-    flutterRoot: _environment.flutterRootDir.path,
-    fs: fs,
-    git: git,
-    platform: platform,
-  );
-
-  @override
-  FileSystem get fs => _environment.fileSystem;
-
-  @override
-  late final git = Git(currentPlatform: platform, runProcessWith: processUtils);
-
-  @override
-  late final localEngineLocator = LocalEngineLocator(
-    userMessages: userMessages,
-    logger: logger,
-    platform: platform,
-    fileSystem: fs,
-    flutterRoot: _environment.flutterRootDir.path,
-  );
-
-  @override
-  Logger get logger => _environment.logger;
-
-  @override
-  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => null;
-
-  @override
-  late final os = OperatingSystemUtils(
-    fileSystem: fs,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
-
-  @override
-  late final outputPreferences = OutputPreferences(
-    wrapText: stdio.hasTerminal,
-    showColor: platform.stdoutSupportsAnsi,
-    stdio: stdio,
-  );
-
-  @override
-  late final persistentToolState = PersistentToolState(
-    fileSystem: fs,
-    logger: logger,
-    platform: platform,
-  );
-
-  @override
-  Platform get platform => _environment.platform;
-
-  @override
-  PreRunValidator get preRunValidator => const NoOpPreRunValidator();
-
-  @override
-  late final processInfo = ProcessInfo(fs);
-
-  @override
-  ProcessManager get processManager => _environment.processManager;
-
-  @override
-  late final processUtils = ProcessUtils(processManager: processManager, logger: logger);
-
-  @override
-  late final projectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
-
-  @override
-  late final shutdownHooks = ShutdownHooks();
-
-  @override
-  Signals get signals => LocalSignals.instance;
-
-  @override
-  late final stdio = Stdio();
-
-  @override
-  SystemClock get systemClock => const SystemClock();
-
-  @override
-  late final terminal = AnsiTerminal(
-    stdio: stdio,
-    platform: platform,
-    now: DateTime.now(),
-    shutdownHooks: shutdownHooks,
-  );
-
-  @override
-  late final userMessages = UserMessages();
 }
 
 bool _isTestTarget(Environment environment) {

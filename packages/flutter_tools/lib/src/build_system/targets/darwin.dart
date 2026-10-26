@@ -234,18 +234,11 @@ void _printXcodeLog(
   }
 
   // Must be printed to stderr to be streamed to the Flutter tool in xcode_backend.dart.
-  // Unwrap DelegatingLogger (e.g. VerboseLogger) so Xcode log prefixes start at column 0.
   // Save and restore hadErrorOutput so Xcode warnings and notes do not trip --fatal-warnings.
-  var unwrappedLogger = logger;
-  while (unwrappedLogger is DelegatingLogger) {
-    unwrappedLogger = unwrappedLogger.delegate;
-  }
-  final bool previousLoggerHadErrorOutput = logger.hadErrorOutput;
-  final bool previousUnwrappedHadErrorOutput = unwrappedLogger.hadErrorOutput;
-  unwrappedLogger.printError('$linePath${logType.name}: $message', wrap: false);
+  final bool hadErrorOutput = logger.hadErrorOutput;
+  logger.printError('$linePath${logType.name}: $message', wrap: false);
   if (logType != XcodeLogType.error) {
-    logger.hadErrorOutput = previousLoggerHadErrorOutput;
-    unwrappedLogger.hadErrorOutput = previousUnwrappedHadErrorOutput;
+    logger.hadErrorOutput = hadErrorOutput;
   }
 }
 

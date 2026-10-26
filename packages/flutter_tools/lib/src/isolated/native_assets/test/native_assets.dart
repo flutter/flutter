@@ -98,10 +98,13 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     packageConfigPath,
     packageConfig,
+    fileSystem,
+    logger,
+    platform,
+    processManager,
     runPackageName,
     pubspecPath,
     includeDevDependencies: true,
-    toolContext: toolContext,
   );
 
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
