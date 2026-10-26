@@ -15,6 +15,7 @@
 #include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
 
@@ -202,13 +203,28 @@ EmbedderSurfaceGLImpeller::GLContextFramebufferInfo() const {
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
   // Ensure that the GL context is current before creating the GPU surface.
-  // GPUSurfaceGLImpeller initialization will set up shader pipelines, and the
-  // current thread needs to be able to execute reactor operations.
-  GLContextMakeCurrent();
+  // GPUSurfaceGLImpeller and AiksContext initialization will set up shader
+  // pipelines and allocate textures, so the current thread needs to be able to
+  // execute reactor operations.
+  auto context_switch = GLContextMakeCurrent();
+  if (!context_switch || !context_switch->GetResult()) {
+    FML_LOG(ERROR)
+        << "Could not make GL context current to create GPU surface.";
+    return nullptr;
+  }
+
+  if (!aiks_context_) {
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+        impeller_context_, impeller::TypographerContextSkia::Make());
+    if (!aiks_context_->IsValid()) {
+      aiks_context_.reset();
+      return nullptr;
+    }
+  }
 
   return std::make_unique<GPUSurfaceGLImpeller>(
       this,                     // GPU surface GL delegate
-      impeller_context_,        // Impeller context
+      aiks_context_,            // AiksContext
       !external_view_embedder_  // render to surface
   );
 }

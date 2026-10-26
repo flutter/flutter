@@ -38,6 +38,7 @@
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 // CREATE_NATIVE_ENTRY is leaky by design
@@ -102,13 +103,18 @@ class FakePbufferSnapshotSurfaceProducer final
     // Make the snapshot surface current because constructing a
     // GPUSurfaceGLImpeller and its AiksContext may invoke graphics APIs.
     egl_->MakeCurrent();
-    return std::make_unique<GPUSurfaceGLImpeller>(delegate_, context_,
+    if (!aiks_context_) {
+      aiks_context_ = std::make_shared<impeller::AiksContext>(
+          context_, impeller::TypographerContextSkia::Make());
+    }
+    return std::make_unique<GPUSurfaceGLImpeller>(delegate_, aiks_context_,
                                                   /*render_to_surface=*/true);
   }
 
  private:
   GPUSurfaceGLDelegate* delegate_;
   std::shared_ptr<impeller::Context> context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<FakeEGL> egl_;
 };
 
@@ -293,6 +299,88 @@ TEST_F(ShellTest, SceneToImageWithoutSurfaceOnImpellerGLES) {
   EXPECT_EQ(height, 8);
 
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, GPUSurfaceGLImpellerSharesAiksContext) {
+  auto mock_gles_impl =
+      std::make_unique<NiceMock<impeller::testing::MockGLESImpl>>();
+  ConfigureMockDriver(*mock_gles_impl);
+  size_t create_program_calls = 0;
+  ON_CALL(*mock_gles_impl, CreateProgram()).WillByDefault([&]() {
+    create_program_calls++;
+    return 1;
+  });
+  std::shared_ptr<impeller::testing::MockGLES> mock_gles =
+      impeller::testing::MockGLES::Init(std::move(mock_gles_impl));
+
+  auto egl = std::make_shared<FakeEGL>();
+  egl->MakeCurrent();
+  std::shared_ptr<impeller::ContextGLES> context =
+      impeller::ContextGLES::Create(impeller::Flags{},
+                                    std::make_unique<impeller::ProcTableGLES>(
+                                        impeller::testing::kMockResolverGLES),
+                                    ShaderLibraryMappings(),
+                                    /*enable_gpu_tracing=*/false);
+  ASSERT_TRUE(context);
+  auto worker = std::make_shared<FakeEGLReactorWorker>(egl);
+  context->AddReactorWorker(worker);
+
+  class StubGLDelegate final : public GPUSurfaceGLDelegate {
+   public:
+    explicit StubGLDelegate(std::shared_ptr<FakeEGL> egl)
+        : egl_(std::move(egl)) {}
+
+    std::unique_ptr<GLContextResult> GLContextMakeCurrent() override {
+      egl_->MakeCurrent();
+      return std::make_unique<GLContextDefaultResult>(true);
+    }
+    bool GLContextClearCurrent() override {
+      egl_->ClearCurrent();
+      return true;
+    }
+    bool GLContextPresent(const GLPresentInfo& present_info) override {
+      return true;
+    }
+    GLFBOInfo GLContextFBO(GLFrameInfo frame_info) const override {
+      return GLFBOInfo{0, std::nullopt};
+    }
+
+   private:
+    std::shared_ptr<FakeEGL> egl_;
+  };
+
+  StubGLDelegate delegate(egl);
+  std::shared_ptr<impeller::Context> base_context = context;
+  std::weak_ptr<impeller::AiksContext> weak_aiks_context;
+  std::weak_ptr<impeller::PipelineLibrary> weak_pipeline_library =
+      base_context->GetPipelineLibrary();
+  {
+    FakePbufferSnapshotSurfaceProducer producer(&delegate, context, egl);
+    std::unique_ptr<Surface> first_surface = producer.CreateSnapshotSurface();
+    ASSERT_NE(first_surface, nullptr);
+    EXPECT_TRUE(first_surface->IsValid());
+    const size_t programs_after_first_surface = create_program_calls;
+    EXPECT_GT(programs_after_first_surface, 0u);
+
+    std::unique_ptr<Surface> second_surface = producer.CreateSnapshotSurface();
+    ASSERT_NE(second_surface, nullptr);
+    EXPECT_TRUE(second_surface->IsValid());
+    EXPECT_EQ(create_program_calls, programs_after_first_surface);
+    EXPECT_NE(first_surface->GetAiksContext(), nullptr);
+    EXPECT_EQ(first_surface->GetAiksContext(),
+              second_surface->GetAiksContext());
+    weak_aiks_context = first_surface->GetAiksContext();
+    EXPECT_FALSE(weak_aiks_context.expired());
+  }
+  // Once the surfaces and producer are destroyed, the shared AiksContext must
+  // not leak.
+  EXPECT_TRUE(weak_aiks_context.expired());
+
+  // Once the ContextGLES is released, its PipelineLibrary must not leak.
+  base_context->Shutdown();
+  base_context.reset();
+  context.reset();
+  EXPECT_TRUE(weak_pipeline_library.expired());
 }
 
 }  // namespace testing

@@ -11,6 +11,7 @@
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/logging.h"
 #include "flutter/impeller/toolkit/egl/surface.h"
+#include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 
 namespace flutter {
@@ -100,11 +101,30 @@ bool AndroidSurfaceGLImpeller::IsValid() const {
 // |AndroidSurface|
 std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateGPUSurface(
     GrDirectContext* gr_context) {
-  auto surface = std::make_unique<GPUSurfaceGLImpeller>(
-      this,                                    // delegate
-      android_context_->GetImpellerContext(),  // context
-      true                                     // render to surface
-  );
+  // Constructing an AiksContext and its ContentContext invokes GL APIs (e.g.
+  // allocating the 1x1 empty_texture_), so ensure an EGL context is current on
+  // the calling thread before lazily initializing `aiks_context_`.
+  if (!OnGLContextMakeCurrent()) {
+    if (!offscreen_surface_ || !android_context_->OnscreenContextMakeCurrent(
+                                   offscreen_surface_.get())) {
+      FML_DLOG(ERROR) << "Could not make GL context current.";
+      return nullptr;
+    }
+  }
+  if (!aiks_context_) {
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+        android_context_->GetImpellerContext(),
+        impeller::TypographerContextSkia::Make());
+    if (!aiks_context_->IsValid()) {
+      aiks_context_.reset();
+      return nullptr;
+    }
+  }
+  auto surface =
+      std::make_unique<GPUSurfaceGLImpeller>(this,           // delegate
+                                             aiks_context_,  // aiks_context
+                                             true  // render to surface
+      );
   if (!surface->IsValid()) {
     return nullptr;
   }
@@ -160,11 +180,24 @@ std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateSnapshotSurface() {
     FML_DLOG(ERROR) << "Could not make snapshot surface current.";
     return nullptr;
   }
-  return std::make_unique<GPUSurfaceGLImpeller>(
-      this,                                    // delegate
-      android_context_->GetImpellerContext(),  // context
-      true                                     // render to surface
-  );
+  if (!aiks_context_) {
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+        android_context_->GetImpellerContext(),
+        impeller::TypographerContextSkia::Make());
+    if (!aiks_context_->IsValid()) {
+      aiks_context_.reset();
+      return nullptr;
+    }
+  }
+  auto surface =
+      std::make_unique<GPUSurfaceGLImpeller>(this,           // delegate
+                                             aiks_context_,  // aiks_context
+                                             true  // render to surface
+      );
+  if (!surface->IsValid()) {
+    return nullptr;
+  }
+  return surface;
 }
 
 // |AndroidSurface|

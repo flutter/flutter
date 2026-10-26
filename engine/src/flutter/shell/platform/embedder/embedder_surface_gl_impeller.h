@@ -47,6 +47,9 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
   EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;
   std::shared_ptr<impeller::ContextGLES> impeller_context_;
+  // Lazily initialized on the raster thread in CreateGPUSurface() once the GL
+  // context is current and reused across GPUSurfaceGLImpeller recreations.
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<ReactorWorker> worker_;
 
