@@ -141,6 +141,7 @@ abstract class Pub {
   }
 
   /// Create a [Pub] instance for testing.
+  @visibleForTesting
   factory Pub.test({
     required BotDetector botDetector,
     required FileSystem fileSystem,

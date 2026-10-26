@@ -470,7 +470,7 @@ class UpgradeCommandRunner {
     final String? projectRoot = findProjectRoot(fs);
     if (projectRoot != null) {
       logger.printStatus('');
-      await Pub(toolContext: _toolContext).get(
+      await Pub(toolContext: _toolContext, stdio: _toolContext.stdio).get(
         context: PubContext.pubUpgrade,
         project: projectFactory.fromDirectory(fs.directory(projectRoot)),
         upgrade: true,
