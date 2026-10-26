@@ -458,6 +458,13 @@ class TextLayout {
     if (ellipsisBlock != null) {
       // There are no trailing spaces if we add the ellipsis block
       trailingSpacesWidth = 0.0;
+      // Whitespace before the ellipsis is inside the line, so it is decorated like any other
+      // text.
+      for (final LineBlock block in line.visualBlocks) {
+        if (block is TextBlock) {
+          block.whitespacesWidth = 0.0;
+        }
+      }
       if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
         // We need to adjust the block shift from line start because we are adding the ellipsis block at the end
         ellipsisBlock.shiftFromLineStart = blockShiftFromLineStart;

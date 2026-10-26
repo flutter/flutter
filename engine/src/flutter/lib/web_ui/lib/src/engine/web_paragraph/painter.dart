@@ -29,23 +29,6 @@ void _resizePaintCanvas(ui.Rect rect, double effectiveScaleX, double effectiveSc
   _paintContext.scale(effectiveScaleX, effectiveScaleY);
 }
 
-/// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text block.
-(ui.Rect sourceRect, ui.Rect targetRect) _calculateBlock(TextBlock block, ui.Offset offset) {
-  final double dpr = ui.window.devicePixelRatio;
-  final ui.Rect advance = block.advance;
-
-  // Define the text clusters rect (using advances, not selected rects)
-  // Source rect must take in account the scaling
-  final sourceRect = ui.Rect.fromLTWH(0, 0, advance.width * dpr, advance.height * dpr);
-
-  // We shift the target rect to the correct x position inside the line and
-  // the correct y position of the line itself
-  // (and then to the paragraph.paint x and y)
-  final targetRect = ui.Rect.fromLTWH(offset.dx, offset.dy, advance.width, advance.height);
-
-  return (sourceRect, targetRect);
-}
-
 /// Represents the combined geometry of the canvas transformation matrix and device pixel ratio,
 /// providing physical-to-local coordinate snapping and projection for WebParagraph painting.
 @visibleForTesting
@@ -217,38 +200,57 @@ abstract class WebParagraphPainter {
           continue;
         }
 
-        // Let's calculate the sizes
-        final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateBlock(
-          block as TextBlock,
-          offset.translate(
-            line.advance.left + line.formattingShift + block.shiftFromLineStart,
-            line.advance.top + line.fontBoundingBoxAscent - block.multipliedFontBoundingBoxAscent,
-          ),
+        final textBlock = block as TextBlock;
+        // Most blocks have neither a background nor decorations.
+        if (!textBlock.style.hasElement(styleElement)) {
+          continue;
+        }
+        assert(
+          textBlock.whitespacesWidth <= textBlock.advance.width + 1e-6,
+          'Trailing whitespace is a part of the block, up to rounding of the measured widths',
         );
+        final double baseline = offset.dy + line.baseline;
+        final double blockLeft =
+            offset.dx + line.advance.left + line.formattingShift + textBlock.shiftFromLineStart;
+        // Trailing whitespace of a line gets no background or decorations, as in SkParagraph. It
+        // ends the block logically, so it is on the visual right of an LTR block and on the visual
+        // left of an RTL one.
+        final double left = blockLeft + (textBlock.isLtr ? 0.0 : textBlock.whitespacesWidth);
+        final double right =
+            blockLeft +
+            textBlock.advance.width -
+            (textBlock.isLtr ? textBlock.whitespacesWidth : 0.0);
 
         switch (styleElement) {
           case StyleElements.background:
-            // TODO(jlavrova): We use calculateBlock in several places and it may need to calculate the rect height
-            // differently for background blocks (to include the entire line height instead of just the text height).
-            // I correct the value in place for now, but it may need to be fixed in calculateBlock itself.
-            final double baseline = offset.dy + line.baseline;
-            final correctedTargetRect = ui.Rect.fromLTRB(
-              targetRect.left,
+            // The font box of the block, with the text height behavior of the line.
+            final fontBox = ui.Rect.fromLTRB(
+              left,
               baseline -
                   (line.usesRawAscent
-                      ? block.rawFontBoundingBoxAscent
-                      : block.multipliedFontBoundingBoxAscent),
-              targetRect.right,
+                      ? textBlock.rawFontBoundingBoxAscent
+                      : textBlock.multipliedFontBoundingBoxAscent),
+              right,
               baseline +
                   (line.usesRawDescent
-                      ? block.rawFontBoundingBoxDescent
-                      : block.multipliedFontBoundingBoxDescent),
+                      ? textBlock.rawFontBoundingBoxDescent
+                      : textBlock.multipliedFontBoundingBoxDescent),
             );
-            _paintBlockBackground(canvas, correctedTargetRect, block.style.background!, transform);
+            _paintBlockBackground(canvas, fontBox, textBlock.style.background!, transform);
           case StyleElements.decorations:
+            DecorationPainter.paintDecorations(
+              canvas,
+              textBlock,
+              left,
+              right,
+              baseline,
+              1 / transform.effectiveScaleX,
+            );
           case StyleElements.shadows:
           case StyleElements.text:
-            throw Exception('Only the background is drawn directly on the output canvas');
+            throw Exception(
+              'Only the background and decorations are drawn directly on the output canvas',
+            );
         }
       }
     }
@@ -309,7 +311,6 @@ abstract class WebParagraphPainter {
         // Fill out all the blocks on Canvas2D canvas
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.shadows, layout);
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.text, layout);
-        DomCanvasParagraphPainter._fillAllBlocks(StyleElements.decorations, layout);
 
         final DomImageData imageData = _paintContext.getImageData(
           0,
@@ -319,6 +320,16 @@ abstract class WebParagraphPainter {
         );
         return imageData.data.buffer.asUint8List();
       },
+    );
+
+    // Decorations can extend past the glyph ink that bounds the raster, so they go on the output
+    // canvas on top of the text. They start at the raster's pixel-snapped paragraph origin
+    // (targetRect.topLeft + canvas2dShift) to stay aligned with the glyphs.
+    _paintAllBlocks(
+      StyleElements.decorations,
+      canvas,
+      targetRect.topLeft + canvas2dShift,
+      transform,
     );
   }
 
@@ -360,18 +371,10 @@ class DomCanvasParagraphPainter {
             _paintContext.translate(block.spanShiftFromLineStart, 0);
             _fillBlockText(layout, block as TextBlock);
           case StyleElements.decorations:
-            // For decorations we need to shift to the start of the block
-            _paintContext.translate(block.shiftFromLineStart, -line.fontBoundingBoxAscent);
-            // Let's calculate the sizes
-            final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateBlock(
-              block as TextBlock,
-              ui.Offset(line.advance.left + line.formattingShift, line.advance.top),
-            );
-            // TODO(jlavrova): Implement decorations entirely on ui.Canvas
-            DomCanvasDecorationPainter.fillDecorations(_paintContext, block, sourceRect);
           case StyleElements.background:
             throw Exception(
-              'Background is drawn directly on the output canvas, not on the canvas2D',
+              'Background and decorations are drawn directly on the output canvas, not on the '
+              'canvas2D',
             );
         }
         _paintContext.restore();
