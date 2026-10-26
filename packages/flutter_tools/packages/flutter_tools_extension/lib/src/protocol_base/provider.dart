@@ -12,42 +12,33 @@ import 'service.dart';
 
 /// Entrypoint runner for a Flutter Tool Extension running in an Isolate.
 ///
-/// Extension packages invoke [ToolExtensionEntryPoint.run] or
-/// [ToolExtensionEntryPoint.runMain] in their isolate entrypoint function,
-/// passing the initial Isolate send port and list of supported extension services.
+/// Extension packages invoke [ToolExtensionEntryPoint.run] in their isolate
+/// entrypoint function, passing the initial Isolate send port and list of
+/// supported extension services.
 class ToolExtensionEntryPoint {
   /// The reserved JSON-RPC method name used to query extension capabilities.
   static const String getCapabilitiesMethod = 'extension.getCapabilities';
 
-  /// Convenience wrapper for an extension script's `main(List<String> args, Object? message)`
-  /// entrypoint when spawned via [Isolate.spawnUri].
-  static Future<void> runMain(
-    List<String> args,
-    Object? message,
-    FutureOr<void> Function(SendPort sendPort) entryPoint,
-  ) async {
-    if (message is! SendPort) {
-      throw ArgumentError.value(
-        message,
-        'message',
-        'Expected a SendPort as the initial isolate message.',
-      );
-    }
-    await entryPoint(message);
-  }
-
   /// Entrypoint function to serve [services] over the Isolate [sendPort].
   ///
-  /// If provided, [extensionName] should be the name of the extension package
-  /// and is surfaced by the host tool in error messages and artifact cache
-  /// directories.
+  /// Validates that [sendPort] is a [SendPort] (throwing an [ArgumentError]
+  /// otherwise). If provided, [extensionName] should be the name of the
+  /// extension package and is surfaced by the host tool in error messages and
+  /// artifact cache directories.
   static Future<void> run(
-    SendPort sendPort,
+    Object? sendPort,
     List<ToolExtensionService> services, {
     Set<String>? supportedPlatforms,
     void Function(String message)? logger,
     String? extensionName,
   }) async {
+    if (sendPort is! SendPort) {
+      throw ArgumentError.value(
+        sendPort,
+        'sendPort',
+        'Expected a SendPort as the initial isolate message.',
+      );
+    }
     final rpcHandlers = <String, ExtensionRpcHandler>{};
 
     for (final service in services) {

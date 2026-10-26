@@ -64,7 +64,7 @@ extension ExtensionJsonParsing on Map<String, Object?> {
     };
   }
 
-  /// Extracts an optional set of unique [String]s from this JSON map,
+  /// Extracts an optional set of unique [String]s from a JSON list at [key],
   /// returning [defaultValue] if the key is missing or `null`, or throwing
   /// a [FormatException] if the value is not an [Iterable], contains
   /// non-[String] elements, or contains empty elements when [rejectEmpty] is
