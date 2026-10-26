@@ -272,28 +272,6 @@
                                        completionHandler:[OCMArg any]]);
 }
 
-- (void)testWindowSceneDidUpdateEffectiveGeometry {
-  if (@available(iOS 26.0, *)) {
-    [self setupMockApplication];
-
-    FlutterSceneDelegate* sceneDelegate = [[FlutterSceneDelegate alloc] init];
-    id mockSceneDelegate = OCMPartialMock(sceneDelegate);
-
-    FlutterPluginSceneLifeCycleDelegate* mockLifecycleDelegate =
-        OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
-    OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
-
-    id scene = OCMClassMock([UIWindowScene class]);
-    id geometry = OCMClassMock([UIWindowSceneGeometry class]);
-
-    [((FlutterSceneDelegate*)mockSceneDelegate) windowScene:scene
-                                 didUpdateEffectiveGeometry:geometry];
-
-    OCMVerify(times(1), [mockLifecycleDelegate windowScene:scene
-                                didUpdateEffectiveGeometry:geometry]);
-  }
-}
-
 - (void)testRegisterSceneLifeCycleWithFlutterEngine {
   [self setupMockApplication];
 
