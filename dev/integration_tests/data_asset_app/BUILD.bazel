@@ -5,6 +5,8 @@
 # The project flutter_tools' isolated/dart_data_asset_* tests (integration.shard)
 # copy and run `flutter run` and `flutter test` in.
 
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
@@ -18,6 +20,6 @@ filegroup(
             "test/**",
             "web/**",
         ],
-        exclude = ["**/.dart_tool/**"],
+        exclude = FLUTTER_PROJECT_GENERATED,
     ) + ["pubspec.yaml"],
 )
