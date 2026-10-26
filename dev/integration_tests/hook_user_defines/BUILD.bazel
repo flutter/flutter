@@ -5,6 +5,8 @@
 # The package flutter_tools' isolated/native_assets_* tests (integration.shard)
 # add to the projects they create: a build hook reading user defines.
 
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
@@ -16,7 +18,7 @@ filegroup(
             "src/**",
             "test/**",
         ],
-        exclude = ["**/.dart_tool/**"],
+        exclude = FLUTTER_PROJECT_GENERATED,
     ) + [
         "pubspec.yaml",
     ],

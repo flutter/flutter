@@ -744,7 +744,15 @@ resolves against the whole workspace: `@pub_workspace` (a repository the
 pub extension makes: every member's pubspec at its path) is laid at the
 root (`sdk_trees`) with a workspace-wide `pub_cache`, the lock is copied
 over its symlink first (`writable`: pub touches it), the SDK's bin is on
-PATH and the tool gets a HOME of the test's own for its settings. The web
+PATH and the tool gets a HOME of the test's own for its settings. The
+projects those tests copy or run in (hello_world, the gallery,
+dev/integration_tests/*) are filegroups of globs over the source tree,
+which exclude what the tool itself writes into a project
+(`FLUTTER_PROJECT_GENERATED`, `build_defs/dart/flutter_project.bzl`:
+`.dart_tool/`, `build/`, `android/local.properties`, the generated plugin
+registrants, the `ephemeral/` directories), so that a developer's `flutter
+test` in one of them does not reach the runfiles -- where those files would
+be read-only symlinks the tool under test fails to rewrite. The web
 shard (`flutter run -d chrome` and `-d web-server`, hot reload and restart
 on the web, the web driver service) and the previewer's tests drive a
 browser: `browser` exports Chrome for Testing -- at the version the web
