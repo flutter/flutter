@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:meta/meta.dart';
@@ -168,20 +169,26 @@ class ExtensionConnection {
   /// Spawns an extension isolate dynamically from [entrypointUri] (a compiled
   /// `.dill` Kernel URI or `.dart` script URI) using [packageConfigUri] and
   /// completes the capability handshake.
+  ///
+  /// When [expectedConfig] is provided, validates that the runtime
+  /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
+  /// the static declarations in `extension/flutter_tools/config.yaml`,
+  /// disposing the connection and throwing a [StateError] if they drift.
   static Future<ExtensionConnection> spawnUri(
     Uri entrypointUri, {
     required Logger logger,
     required Uri packageConfigUri,
     List<String> args = const <String>[],
+    ExtensionPackageConfig? expectedConfig,
     String? extensionName,
     Duration timeout = const Duration(seconds: 5),
-  }) {
+  }) async {
     logger.printTrace(
       'ExtensionConnection spawning extension isolate from URI "$entrypointUri"...',
     );
-    return _spawnAndHandshake(
+    final ExtensionConnection connection = await _spawnAndHandshake(
       logger: logger,
-      extensionName: extensionName,
+      extensionName: extensionName ?? expectedConfig?.name,
       timeout: timeout,
       isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
         return Isolate.spawnUri(
@@ -194,6 +201,41 @@ class ExtensionConnection {
         );
       },
     );
+    if (expectedConfig != null) {
+      try {
+        connection._validateCapabilitiesMatchConfig(expectedConfig);
+      } on Object {
+        await connection.dispose();
+        rethrow;
+      }
+    }
+    return connection;
+  }
+
+  void _validateCapabilitiesMatchConfig(ExtensionPackageConfig expectedConfig) {
+    final Set<String> actualServices = capabilities.services.toSet();
+    if (actualServices.length != expectedConfig.services.length ||
+        !actualServices.containsAll(expectedConfig.services)) {
+      throw StateError(
+        'Extension "$extensionName" capabilities mismatch: '
+        'extension/flutter_tools/config.yaml declares services '
+        '${expectedConfig.services.toList()}, '
+        'but ToolExtensionEntryPoint.run registered ${capabilities.services}.',
+      );
+    }
+    if (expectedConfig.hostPlatforms.isNotEmpty) {
+      final Set<String> actualPlatforms = capabilities.supportedPlatforms;
+      if (actualPlatforms.length != expectedConfig.hostPlatforms.length ||
+          !actualPlatforms.containsAll(expectedConfig.hostPlatforms)) {
+        throw StateError(
+          'Extension "$extensionName" capabilities mismatch: '
+          'extension/flutter_tools/config.yaml declares host_platforms '
+          '${expectedConfig.hostPlatforms.toList()}, '
+          'but ToolExtensionEntryPoint.run registered supportedPlatforms '
+          '${actualPlatforms.toList()}.',
+        );
+      }
+    }
   }
 
   static Future<ExtensionConnection> _spawnAndHandshake({

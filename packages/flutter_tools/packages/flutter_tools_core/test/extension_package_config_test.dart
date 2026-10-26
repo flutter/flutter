@@ -13,14 +13,14 @@ void main() {
       final config = ExtensionPackageConfig(
         name: 'my_custom_ext',
         entrypoint: 'bin/custom_entry.dart',
-        supportedPlatforms: const <String>{'Linux', 'MacOS'},
+        hostPlatforms: const <String>{'Linux', 'MacOS'},
         services: const <String>{'diagnostics', 'config', 'build', 'template'},
         buildTargets: const <String>{'custom-build'},
         templates: const <String>{'custom-app'},
-        platforms: const <String>{'custom_linux'},
+        targetPlatforms: const <String>{'custom_linux'},
       );
 
-      expect(config.supportedPlatforms, const <String>{'linux', 'macos'});
+      expect(config.hostPlatforms, const <String>{'linux', 'macos'});
       expect(config.supportsHostPlatform('LINUX'), isTrue);
       expect(config.supportsHostPlatform('windows'), isFalse);
 
@@ -28,7 +28,7 @@ void main() {
       expect(map[ExtensionPackageConfig.nameKey], 'my_custom_ext');
       expect(map[ExtensionPackageConfig.entrypointKey], 'bin/custom_entry.dart');
       expect(
-        map[ExtensionPackageConfig.supportedPlatformsKey],
+        map[ExtensionPackageConfig.hostPlatformsKey],
         unorderedEquals(const <String>['linux', 'macos']),
       );
       expect(
@@ -37,7 +37,7 @@ void main() {
       );
       expect(map[ExtensionPackageConfig.buildTargetsKey], const <String>['custom-build']);
       expect(map[ExtensionPackageConfig.templatesKey], const <String>['custom-app']);
-      expect(map[ExtensionPackageConfig.platformsKey], const <String>['custom_linux']);
+      expect(map[ExtensionPackageConfig.targetPlatformsKey], const <String>['custom_linux']);
 
       final String encoded = jsonEncode(map);
       final parsed = ExtensionPackageConfig.fromMap(
@@ -50,83 +50,54 @@ void main() {
       expect(parsed.toString(), contains('bin/custom_entry.dart'));
     });
 
-    test('applies default entrypoint when omitted', () {
+    test('applies default entrypoint and allows omitted or empty services', () {
       final config = ExtensionPackageConfig.fromMap(const <String, Object?>{
         ExtensionPackageConfig.nameKey: 'minimal_ext',
-        ExtensionPackageConfig.servicesKey: <String>['diagnostics'],
       });
 
       expect(config.name, 'minimal_ext');
       expect(config.entrypoint, 'bin/minimal_ext.dart');
-      expect(config.supportedPlatforms, isEmpty);
+      expect(config.hostPlatforms, isEmpty);
       expect(config.supportsHostPlatform('windows'), isTrue);
-      expect(config.services, const <String>{'diagnostics'});
+      expect(config.services, isEmpty);
       expect(config.buildTargets, isEmpty);
       expect(config.templates, isEmpty);
-      expect(config.platforms, isEmpty);
-    });
+      expect(config.targetPlatforms, isEmpty);
 
-    test('falls back to packageName when name key is omitted', () {
-      final config = ExtensionPackageConfig.fromMap(const <String, Object?>{
-        ExtensionPackageConfig.servicesKey: <String>['diagnostics'],
-      }, packageName: 'inferred_ext');
-
-      expect(config.name, 'inferred_ext');
-      expect(config.entrypoint, 'bin/inferred_ext.dart');
+      final emptyServicesConfig = ExtensionPackageConfig.fromMap(const <String, Object?>{
+        ExtensionPackageConfig.nameKey: 'minimal_ext',
+        ExtensionPackageConfig.servicesKey: <String>[],
+      });
+      expect(emptyServicesConfig, equals(config));
     });
 
     test('trims list entries', () {
       final config = ExtensionPackageConfig.fromMap(const <String, Object?>{
         ExtensionPackageConfig.nameKey: 'my_ext',
         ExtensionPackageConfig.servicesKey: <String>[' diagnostics ', 'build'],
-        ExtensionPackageConfig.platformsKey: <String>[' custom_os '],
+        ExtensionPackageConfig.targetPlatformsKey: <String>[' custom_os '],
       });
 
       expect(config.services, const <String>{'diagnostics', 'build'});
-      expect(config.platforms, const <String>{'custom_os'});
+      expect(config.targetPlatforms, const <String>{'custom_os'});
     });
 
     test('constructor trims string list entries', () {
       final config = ExtensionPackageConfig(
         name: 'my_ext',
         services: const <String>[' diagnostics ', 'build '],
-        supportedPlatforms: const <String>[' Linux '],
+        hostPlatforms: const <String>[' Linux '],
         buildTargets: const <String>[' custom-build '],
         templates: const <String>[' custom-app '],
       );
 
       expect(config.services, const <String>{'diagnostics', 'build'});
-      expect(config.supportedPlatforms, const <String>{'linux'});
+      expect(config.hostPlatforms, const <String>{'linux'});
       expect(config.buildTargets, const <String>{'custom-build'});
       expect(config.templates, const <String>{'custom-app'});
     });
 
-    test('throws FormatException when services is missing or empty', () {
-      const servicesError =
-          'Extension config.yaml must specify a non-empty list of services for '
-          '"${ExtensionPackageConfig.servicesKey}".';
-      for (final json in const <Map<String, Object?>>[
-        <String, Object?>{ExtensionPackageConfig.nameKey: 'my_ext'},
-        <String, Object?>{
-          ExtensionPackageConfig.nameKey: 'my_ext',
-          ExtensionPackageConfig.servicesKey: null,
-        },
-        <String, Object?>{
-          ExtensionPackageConfig.nameKey: 'my_ext',
-          ExtensionPackageConfig.servicesKey: <String>[],
-        },
-      ]) {
-        expect(
-          () => ExtensionPackageConfig.fromMap(json),
-          throwsA(
-            isA<FormatException>().having(
-              (FormatException e) => e.message,
-              'message',
-              servicesError,
-            ),
-          ),
-        );
-      }
+    test('throws FormatException when services contains empty string elements', () {
       expect(
         () => ExtensionPackageConfig.fromMap(const <String, Object?>{
           ExtensionPackageConfig.nameKey: 'my_ext',
@@ -141,6 +112,12 @@ void main() {
         () => ExtensionPackageConfig.fromMap(const <String, Object?>{
           ExtensionPackageConfig.servicesKey: <String>['diagnostics'],
         }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPackageConfig.fromMap(const <String, Object?>{
+          ExtensionPackageConfig.servicesKey: <String>['diagnostics'],
+        }, packageName: 'inferred_ext'),
         throwsFormatException,
       );
       expect(
@@ -161,9 +138,19 @@ void main() {
       for (final invalidEntrypoint in const <String>[
         '../outside.dart',
         'bin/../../outside.dart',
+        '%2e%2e/outside.dart',
+        'bin/%2e%2e/outside.dart',
+        './inside.dart',
+        'bin/./inside.dart',
         '/abs/path.dart',
         'file:///abs/path.dart',
+        'https://example.com/ext.dart',
+        'bin/my_ext.dart?foo=bar',
+        'bin/my_ext.dart#frag',
         r'bin\my_ext.dart',
+        'bin/not_a_dart_file.txt',
+        'bin/.dart',
+        '.dart',
       ]) {
         expect(
           () => ExtensionPackageConfig.fromMap(<String, Object?>{
@@ -172,6 +159,7 @@ void main() {
             ExtensionPackageConfig.servicesKey: const <String>['diagnostics'],
           }),
           throwsFormatException,
+          reason: 'Expected "$invalidEntrypoint" to be rejected',
         );
       }
       for (final invalidPlatform in const <String>[
@@ -183,14 +171,14 @@ void main() {
         expect(
           () => ExtensionPackageConfig.fromMap(<String, Object?>{
             ExtensionPackageConfig.nameKey: 'my_ext',
-            ExtensionPackageConfig.platformsKey: <Object?>[invalidPlatform],
+            ExtensionPackageConfig.targetPlatformsKey: <Object?>[invalidPlatform],
             ExtensionPackageConfig.servicesKey: const <String>['diagnostics'],
           }),
           throwsA(
             isA<FormatException>().having(
               (FormatException e) => e.message,
               'message',
-              'Extension config.yaml "${ExtensionPackageConfig.platformsKey}" entries must be '
+              'Extension config.yaml "${ExtensionPackageConfig.targetPlatformsKey}" entries must be '
                   'lowercase snake_case identifiers starting with a letter (e.g. "custom_os"), '
                   'got: "$invalidPlatform".',
             ),
@@ -217,17 +205,17 @@ void main() {
       final base = ExtensionPackageConfig(
         name: 'ext',
         services: const <String>{'a', 'b'},
-        platforms: const <String>{'p1', 'p2'},
+        targetPlatforms: const <String>{'p1', 'p2'},
       );
       final reordered = ExtensionPackageConfig(
         name: 'ext',
         services: const <String>{'b', 'a'},
-        platforms: const <String>{'p2', 'p1'},
+        targetPlatforms: const <String>{'p2', 'p1'},
       );
       final differentPlatforms = ExtensionPackageConfig(
         name: 'ext',
         services: const <String>{'a', 'b'},
-        platforms: const <String>{'p1'},
+        targetPlatforms: const <String>{'p1'},
       );
 
       expect(base, equals(reordered));

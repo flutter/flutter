@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
 Future<void> main(List<String> args, [Object? message]) async {
-  await ToolExtensionEntryPoint.runMain(args, message, linuxExtensionEntryPoint);
+  await linuxExtensionEntryPoint(message);
 }
