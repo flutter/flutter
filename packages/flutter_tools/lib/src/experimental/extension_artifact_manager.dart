@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide HostPlatform;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
@@ -24,11 +25,6 @@ import 'extension_manager.dart';
 /// Manages querying, downloading, and verifying custom artifacts required by
 /// tool extensions in a shared content-addressed cache.
 class ExtensionArtifactManager {
-  /// Creates an [ExtensionArtifactManager] that downloads and verifies
-  /// extension-provided artifacts in a shared local cache.
-  ///
-  /// The optional [_cacheDir] and [httpClient] parameters are intended only for
-  /// hermetic testing.
   ExtensionArtifactManager({
     required this._extensionManager,
     required this._featureFlags,
@@ -145,8 +141,17 @@ class ExtensionArtifactManager {
   /// required artifacts for the current engine version, host platform, and
   /// optional [targetPlatforms] are downloaded and verified in the shared cache.
   ///
+  /// When [targetPlatforms] is `null`, artifacts for all target platforms
+  /// supported by each active extension are requested.
+  ///
   /// Returns a map from each downloaded artifact's [ArtifactDependency.name] to
-  /// its local filesystem path.
+  /// its local filesystem path, or an empty map when tool extensions are
+  /// disabled, extension initialization fails, or no active extension implements
+  /// [ArtifactService].
+  ///
+  /// RPC failures when querying an extension's artifact list log a warning and
+  /// skip that extension, whereas download, extraction, or SHA-256 verification
+  /// failures throw a [ToolExit].
   ///
   /// When [force] is `true`, existing cached artifacts are re-downloaded.
   Future<Map<String, String>> ensureArtifactsDownloaded({
@@ -287,7 +292,7 @@ class ExtensionArtifactManager {
   /// [force] is `false`. If a download is needed, acquires a cross-process file
   /// lock (`.${dep.name}.lock` via `fs.runLocked`), re-checks the cache
   /// inside the lock, downloads to a temporary staging directory, verifies the
-  /// SHA-256 checksum, and atomically installs the artifact and its `.sha256`
+  /// SHA-256 checksum, and installs the artifact followed by its `.sha256`
   /// stamp file.
   Future<String> _downloadAndVerifyArtifact(
     String extensionName,
@@ -468,8 +473,8 @@ class ExtensionArtifactManager {
     return false;
   }
 
-  /// Verifies that an extracted `.zip` artifact directory [artifactDir] matches
-  /// [expectedSha] by comparing against the digest recorded in [stampFile].
+  /// Checks whether the digest recorded in [stampFile] for an extracted `.zip`
+  /// artifact directory [artifactDir] matches [expectedSha].
   ///
   /// Deletes [artifactDir] and [stampFile] and returns `false` if the stamp does
   /// not match.
@@ -546,7 +551,7 @@ class ExtensionArtifactManager {
     required String expectedSha,
     required File stagingFile,
   }) async {
-    final digestSink = _AccumulatorSink<Digest>();
+    final digestSink = AccumulatorSink<Digest>();
     try {
       final HttpClientRequest request = await _httpClient.getUrl(dep.url);
       final HttpClientResponse response = await request.close();
@@ -587,7 +592,7 @@ Actual:   $actualDigest''');
 
   /// Installs a verified [stagingFile] into its final cache destination
   /// ([artifactDir] when [isZip] is `true`, or [artifactFile] otherwise) and
-  /// writes [expectedSha] to [stampFile] via atomic renames from [stagingDir].
+  /// writes [expectedSha] to [stampFile] last via renames from [stagingDir].
   void _installStagedArtifact({
     required Directory artifactDir,
     required File artifactFile,
@@ -624,15 +629,4 @@ Actual:   $actualDigest''');
       ..writeAsStringSync(expectedSha);
     stagingStamp.renameSync(stampFile.path);
   }
-}
-
-/// A minimal [Sink] that collects emitted chunked-conversion events in [events].
-class _AccumulatorSink<T> implements Sink<T> {
-  final events = <T>[];
-
-  @override
-  void add(T event) => events.add(event);
-
-  @override
-  void close() {}
 }
