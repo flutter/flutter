@@ -264,8 +264,12 @@ const String ltoSetting = '//engine/src/flutter/build/bazel:lto';
 /// service's and the smoke test (gather_dart_smoke_test, gather_dart_tests),
 /// `dart-host` the Dart packages' own tests (build_dart_host_test_list),
 /// `benchmarks` the engine benchmarks (run_engine_benchmarks),
-/// `font-subset` font-subset's test, `impeller` the Impeller suite alone.
-/// `engine` is [runTestsEngineSuites], resolved among the converted targets.
+/// `font-subset` font-subset's test, `impeller` the Impeller suite alone,
+/// `java` the Android embedding's Robolectric tests (run_java_tests: Gradle in
+/// shell/platform/android/test_runner over the build's flutter.jar; the
+/// Bazel suite runs the same classes under an Android configuration,
+/// build_defs/java/robolectric.bzl). `engine` is [runTestsEngineSuites],
+/// resolved among the converted targets.
 const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'dart': <String>[
     '//engine/src/flutter/testing/dart:dart',
@@ -276,6 +280,7 @@ const Map<String, List<String>> runTestsTypeSuites = <String, List<String>>{
   'benchmarks': <String>['//engine/src/flutter:benchmarks'],
   'font-subset': <String>['//engine/src/flutter/tools/font_subset:font_subset_test'],
   'impeller': <String>['//engine/src/flutter/impeller:impeller_unittests'],
+  'java': <String>['//engine/src/flutter/shell/platform/android:java_tests'],
 };
 
 /// The test steps that run a script of the checkout (not run_tests.py, not

@@ -652,9 +652,12 @@ install(
 )
 
 # ci/android_debug_unopt's tests: run_tests.py --type java.
-# Not run, no Bazel test yet: the java type.
 # Other steps, scripts of the checkout: malioc diff.
-# Nothing to run.
+test_suite(
+    name = "android_debug_unopt_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/shell/platform/android:java_tests"],
+)
 
 # linux_unopt.json: ci/host_release_licenses
 #   bazel run --config=host_release_licenses :host_release_licenses
@@ -689,8 +692,11 @@ install(
 )
 
 # ci/android_debug_test's tests: run_tests.py --type java.
-# Not run, no Bazel test yet: the java type.
-# Nothing to run.
+test_suite(
+    name = "android_debug_test_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/shell/platform/android:java_tests"],
+)
 
 # linux_unopt.json: ci/host_debug_no_prebuilt_dart_sdk
 #   no configuration (configs.bazelrc); the flags would be:

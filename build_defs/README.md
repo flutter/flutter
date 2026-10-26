@@ -38,6 +38,9 @@ directory: the toolchain configurations
 | `repositories/` | `debian_runtime.lock.bzl` | **Generated** by `debian_runtime_lock.py`; never edit by hand. The 140 packages the pinned browsers load at run time -- the libraries, Mesa, and the fonts (DejaVu, Liberation, fontconfig's rules): the version in the build sysroot, the file in snapshot.debian.org's archive, its sha256. |
 | `repositories/` | `debian_runtime_lock.py` | Writes the lock file from the build sysroot's dpkg metadata (the browsers' `NEEDED` sonames to packages, the closure over `Depends`; `--data-package` for the fonts) and snapshot.debian.org. |
 | `web/` | `browser_launcher.bzl` | `browser_launcher`: a script in a browser's name that puts the runtime sysroot's library directories on `LD_LIBRARY_PATH`, confines fontconfig to its fonts (`FONTCONFIG_FILE`) and execs the browser; `web_ui_test` and `dart_test` take it as their `browser`. The label flag `//build_defs/web:browser_libraries` selects the sysroot's or the host's. |
+| `java/` | `maven.bzl` | The `maven` module extension and the `maven_artifacts` repository rule: the Android embedding's Java test dependencies fetched by URL and sha256 into `@maven_android_tests` (AARs unpacked; Robolectric's android-all jars in a directory of their own). The engine's own small rules_jvm_external, so that the module graph stays as it is. |
+| `java/` | `maven.lock.bzl` | **Generated** by `maven_lock.py` from `android_tests.artifacts` (Gradle's resolved closure for `shell/platform/android/test_runner`, plus the android-all jars); never edit by hand. |
+| `java/` | `robolectric.bzl` | `java_classes` (javac on `@openjdk` into one jar), `android_test_apk` (the merged manifest, the resource APK and the R classes, as AGP's unit tests get them), `robolectric_test` / `robolectric_tests` (one JUnit run per test class under Robolectric, offline, on `@openjdk`). |
 
 Loading a rule:
 
