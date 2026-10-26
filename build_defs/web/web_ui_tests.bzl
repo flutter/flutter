@@ -22,7 +22,9 @@ step -- felt compiled for the VM and placed where felt.dart lives, so that
 its path derivation holds: the bundle and the artifacts felt's copy step
 would make (CanvasKit, skwasm and flutter.js from the web SDK's archive,
 the fonts, Skia's test images, the host page) lie at engine/src/out/web_tests
-in the runfiles, and Chrome is the pinned @chrome (browsers.bzl) --
+in the runfiles, and the browser is the pinned @chrome or @firefox
+(browsers.bzl) through a browser_launcher (browser_launcher.bzl: its system
+libraries from the build's sysroot) --
 `felt test --run --suite=<suite>` with the file as the bundle's one result.
 No network: felt's Skia Gold client finds Gold unreachable and the goldens
 compare nothing, as for a developer offline; CI's Gold runs stay felt's.
@@ -374,6 +376,10 @@ exec "$root/{dart}" --packages="$root/{config}" "{felt}" test --run --suite="{su
             ctx.attr.runtime_package_config[PubPackageConfigInfo].sources,
         ]),
     )
+
+    # A browser_launcher's runfiles: the browser's directory and the
+    # libraries its script puts on LD_LIBRARY_PATH.
+    runfiles = runfiles.merge(ctx.attr.browser[DefaultInfo].default_runfiles)
     return [DefaultInfo(executable = launcher, runfiles = runfiles)]
 
 web_ui_test = rule(
@@ -396,8 +402,13 @@ web_ui_test = rule(
         "fallback_fonts": attr.label_list(allow_files = True, doc = "The fallback fonts (@google_fonts_for_unit_tests), laid as assets/fallback_fonts."),
         "test_images": attr.label_list(allow_files = True, doc = "Skia's resources/images, laid as test_images."),
         "host_files": attr.label_list(allow_files = True, doc = "The host page: index.html, host.css, favicon.ico and host.dart.js, laid as host/."),
-        "browser": attr.label(allow_single_file = True, mandatory = True, doc = "The browser's executable (@chrome, @firefox), exported as `browser_variable`."),
-        "browser_files": attr.label_list(allow_files = True, doc = "The browser's directory, whole."),
+        "browser": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            doc = "The browser's executable, exported as `browser_variable`: a browser_launcher (browser_launcher.bzl; " +
+                  "the pinned browser with the build's libraries), or the executable itself with `browser_files`.",
+        ),
+        "browser_files": attr.label_list(allow_files = True, doc = "The browser's directory, whole, when `browser` is the executable itself."),
         "browser_variable": attr.string(
             default = "CHROME_EXECUTABLE",
             values = ["CHROME_EXECUTABLE", "FIREFOX_EXECUTABLE"],

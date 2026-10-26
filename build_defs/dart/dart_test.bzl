@@ -378,7 +378,7 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
         for path, file in ctx.attr.pub_cache[PubCacheInfo].entries.items():
             cache[paths.join(".pub-cache", path)] = file
     runfiles = ctx.runfiles(
-        files = regular + ctx.files.browser_files + ctx.files.browser_driver,
+        files = regular + ctx.files.browser + ctx.files.browser_files + ctx.files.browser_driver,
         # The runtime configuration at the package's .dart_tool/, where `dart
         # test --precompiled` reads it from the working directory and a tool
         # under test looks for its own (flutter_tools' template images);
@@ -389,6 +389,12 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
     )
     for dep in ctx.attr.data:
         runfiles = runfiles.merge(dep[DefaultInfo].default_runfiles)
+
+    # A browser_launcher's runfiles: the browser's (or the driver's)
+    # directory and the libraries its script puts on LD_LIBRARY_PATH.
+    for target in [ctx.attr.browser, ctx.attr.browser_driver]:
+        if target:
+            runfiles = runfiles.merge(target[DefaultInfo].default_runfiles)
     return [DefaultInfo(executable = launcher, runfiles = runfiles)]
 
 dart_test = rule(
@@ -450,8 +456,9 @@ dart_test = rule(
         ),
         "browser": attr.label(
             allow_single_file = True,
-            doc = "A browser's executable, exported as CHROME_EXECUTABLE (`@chrome//:chrome-linux64/chrome`, Chrome " +
-                  "for Testing at the web engine's pinned version: browsers.bzl); `browser_files` carries its directory.",
+            doc = "A browser's executable, exported as CHROME_EXECUTABLE: a browser_launcher " +
+                  "(//build_defs/web:browser_launcher.bzl; Chrome for Testing at the web engine's pinned version with " +
+                  "the build's libraries), or the executable itself with `browser_files` carrying its directory.",
         ),
         "browser_files": attr.label_list(
             allow_files = True,
@@ -460,8 +467,8 @@ dart_test = rule(
         ),
         "browser_driver": attr.label(
             allow_single_file = True,
-            doc = "The browser's WebDriver executable (`@chrome//:chromedriver-linux64/chromedriver`); its directory " +
-                  "goes first on PATH, where the web-server device's tests spawn `chromedriver`.",
+            doc = "The browser's WebDriver executable (a browser_launcher of `@chrome//:chromedriver-linux64/chromedriver`, " +
+                  "or the executable); its directory goes first on PATH, where the web-server device's tests spawn `chromedriver`.",
         ),
         "writable": attr.string_list(
             doc = "Paths under FLUTTER_ROOT the tool under test rewrites in place (`pubspec.lock`: pub " +

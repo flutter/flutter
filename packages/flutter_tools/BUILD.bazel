@@ -12,6 +12,7 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//build_defs/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
+load("//build_defs/web:browser_launcher.bzl", "browser_launcher")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -407,6 +408,21 @@ pub_cache(
     roots = PUB_WORKSPACE_PACKAGES,
 )
 
+# The pinned Chrome for Testing and its chromedriver (the web engine's
+# version, @chrome), each through a launcher that gives it the build's
+# system libraries rather than the host's (//build_defs/web:browser_launcher.bzl;
+# --//build_defs/web:browser_libraries selects the host's).
+browser_launcher(
+    name = "chrome",
+    browser = "@chrome//:chrome-linux64/chrome",
+    browser_files = ["@chrome//:chrome"],
+)
+
+browser_launcher(
+    name = "chromedriver",
+    browser = "@chrome//:chromedriver-linux64/chromedriver",
+)
+
 # The integration shard: the tool run as a process on projects of its own --
 # hot reload and restart on flutter_tester, the daemon, the debug adapter,
 # `flutter test`, `flutter analyze`, gen-l10n -- from the facsimile with the
@@ -416,8 +432,7 @@ dart_package_tests(
     size = "large",
     srcs = _HARNESS,
     # The widget previewer's tests drive a headless Chrome.
-    browser = "@chrome//:chrome-linux64/chrome",
-    browser_files = ["@chrome//:chrome"],
+    browser = ":chrome",
     cache = _TOOL_CACHE,
     cache_files = _TOOL_CACHE_FILES,
     data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
@@ -469,11 +484,10 @@ dart_package_tests(
     name = "web_shard",
     size = "enormous",
     srcs = _HARNESS,
-    browser = "@chrome//:chrome-linux64/chrome",
+    browser = ":chrome",
     # The web-server device's tests connect a browser through `chromedriver`
     # on PATH.
-    browser_driver = "@chrome//:chromedriver-linux64/chromedriver",
-    browser_files = ["@chrome//:chrome"],
+    browser_driver = ":chromedriver",
     cache = _TOOL_CACHE,
     cache_files = _TOOL_CACHE_FILES,
     data = glob(["test/web.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS,
