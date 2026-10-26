@@ -64,7 +64,7 @@ class ComputePassVK final : public ComputePass {
   void AddTextureMemoryBarrier() override;
 
   // |ComputePass|
-  fml::Status Compute(std::array<uint32_t, 3> workgroup_count) override;
+  absl::Status Compute(std::array<uint32_t, 3> workgroup_count) override;
 
   // |ResourceBinder|
   bool BindResource(ShaderStage stage,

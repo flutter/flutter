@@ -48,7 +48,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       releaseMode,
       cocoapods,
       plugins,
-      staticFrameworks,
       output,
       force,
     ], verboseHelp: verboseHelp);
@@ -91,10 +90,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         'This is intended for cases where plugins are already being built separately.',
   );
 
-  static const staticFrameworks = FlagOptionDescriptor(
-    name: 'static',
-    help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
-  );
+  static const FlagOptionDescriptor staticFrameworks = DarwinAddToAppOptionsBundle.staticFrameworks;
 
   static const output = StringOptionDescriptor(
     name: 'output',
@@ -519,6 +515,16 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
+  bool get deprecated => true;
+
+  @override
+  String get deprecationWarning {
+    return '${toolContext.logger.terminal.warningMark} The "flutter build ios-framework" command is '
+        'deprecated and has been replaced by "flutter build swift-package --platform ios". '
+        'For more information, see: https://docs.flutter.dev/add-to-app/ios/project-setup\n';
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -1351,6 +1351,29 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual([object accessibilityTraits], UIAccessibilityTraitNone);
 }
 
+- (void)testTextInputSemanticsObject_isSecureTextEntry {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.label = "foo";
+  node.flags.isTextField = true;
+  node.flags.isObscured = true;
+
+  TextInputSemanticsObject* object = [[TextInputSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+
+  XCTAssertTrue([object isSecureTextEntry]);
+
+  node.flags.isObscured = false;
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+
+  XCTAssertFalse([object isSecureTextEntry]);
+}
+
 - (void)testTextInputSemanticsObject_canPerformAction {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
@@ -1548,5 +1571,23 @@ const float kFloatCompareEpsilon = 0.001;
   [scrollable accessibilityBridgeDidFinishUpdate];
 
   XCTAssertEqual(bridge->observations.size(), (size_t)0);
+}
+
+- (void)testAccessibilityRespondsToUserInteraction {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+
+  flutter::SemanticsNode node;
+  node.id = 0;
+  node.actions = flutter::kSystemActions | flutter::kScrollableSemanticsActions |
+                 static_cast<int32_t>(flutter::SemanticsAction::kDismiss);
+  [object setSemanticsNode:&node];
+  XCTAssertFalse(object.accessibilityRespondsToUserInteraction);
+
+  node.actions |= static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [object setSemanticsNode:&node];
+  XCTAssertTrue(object.accessibilityRespondsToUserInteraction);
 }
 @end

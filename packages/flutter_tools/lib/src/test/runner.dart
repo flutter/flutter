@@ -195,8 +195,8 @@ interface class FlutterTestRunner {
         testOutputDir: tempBuildDir,
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
-        webRenderer: debuggingOptions.webRenderer,
-        useWasm: debuggingOptions.webUseWasm,
+        webRenderer: debuggingOptions.webConfig.renderer,
+        useWasm: debuggingOptions.webConfig.useWasm,
       );
       testArgs
         ..add('--platform=chrome')
@@ -215,13 +215,13 @@ interface class FlutterTestRunner {
             browserFinder: findChromeExecutable,
             logger: logger,
           ),
-          crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
+          crossOriginIsolation: debuggingOptions.webConfig.crossOriginIsolation,
           flutterProject: flutterProject,
           flutterTesterBinPath: flutterTesterBinPath,
           toolContext: _toolContext,
-          useWasm: debuggingOptions.webUseWasm,
+          useWasm: debuggingOptions.webConfig.useWasm,
           webMemoryFS: result,
-          webRenderer: debuggingOptions.webRenderer,
+          webRenderer: debuggingOptions.webConfig.renderer,
           pauseAfterLoad: debuggingOptions.startPaused,
           testTimeRecorder: spec.testTimeRecorder,
           updateGoldens: spec.updateGoldens,
@@ -679,6 +679,7 @@ class SpawnPlugin extends PlatformPlugin {
   ) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Config config,
       :FileSystem fs,
       :Logger logger,
       :Platform platform,
@@ -699,7 +700,7 @@ class SpawnPlugin extends PlatformPlugin {
     ) = spec;
 
     final Directory buildDirectory = fs.directory(
-      fs.path.join(flutterProject.directory.path, getBuildDirectory()),
+      fs.path.join(flutterProject.directory.path, getBuildDirectory(config, fs)),
     );
     final Directory isolateSpawningTesterDirectory = buildDirectory.childDirectory(
       'isolate_spawning_tester',
@@ -801,12 +802,12 @@ class SpawnPlugin extends PlatformPlugin {
         : 'true';
     final environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
-      'FONTCONFIG_FILE': FontConfigManager().fontConfigFile.path,
+      'FONTCONFIG_FILE': FontConfigManager(toolContext: _toolContext).fontConfigFile.path,
       'APP_NAME': flutterProject.manifest.appName,
       'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (nativeAssetsBuilder != null && platform.isWindows)
         'PATH':
-            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${platform.environment['PATH']}',
+            '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject, toolContext: _toolContext)};${platform.environment['PATH']}',
     };
 
     logger.printTrace(
