@@ -5,9 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../application_package.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../device.dart';
@@ -71,6 +73,136 @@ final class ExtensionDeviceClient extends DeviceService {
       );
     }
     return false;
+  }
+
+  @override
+  Future<bool> installApp({required Uri bundleUri, required String deviceId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient installing app "$bundleUri" on "$deviceId" via RPC '
+      '("${DeviceService.installAppMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.installAppMethod,
+      params: <String, Object?>{
+        DeviceService.bundleUriParam: bundleUri.toString(),
+        DeviceService.deviceIdParam: deviceId,
+      },
+    );
+    if (rawResult case final bool installed) {
+      return installed;
+    }
+    _logger.printError(
+      'ExtensionDeviceClient received invalid response for "${DeviceService.installAppMethod}": '
+      'expected bool, got ${rawResult.runtimeType}.',
+    );
+    return false;
+  }
+
+  @override
+  Future<bool> uninstallApp({required String appId, required String deviceId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient uninstalling app "$appId" from "$deviceId" via RPC '
+      '("${DeviceService.uninstallAppMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.uninstallAppMethod,
+      params: <String, Object?>{
+        DeviceService.appIdParam: appId,
+        DeviceService.deviceIdParam: deviceId,
+      },
+    );
+    if (rawResult case final bool uninstalled) {
+      return uninstalled;
+    }
+    _logger.printError(
+      'ExtensionDeviceClient received invalid response for "${DeviceService.uninstallAppMethod}": '
+      'expected bool, got ${rawResult.runtimeType}.',
+    );
+    return false;
+  }
+
+  @override
+  Future<bool> isAppInstalled({required String appId, required String deviceId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient checking if app "$appId" is installed on "$deviceId" via RPC '
+      '("${DeviceService.isAppInstalledMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.isAppInstalledMethod,
+      params: <String, Object?>{
+        DeviceService.appIdParam: appId,
+        DeviceService.deviceIdParam: deviceId,
+      },
+    );
+    if (rawResult case final bool installed) {
+      return installed;
+    }
+    _logger.printError(
+      'ExtensionDeviceClient received invalid response for "${DeviceService.isAppInstalledMethod}": '
+      'expected bool, got ${rawResult.runtimeType}.',
+    );
+    return false;
+  }
+
+  @override
+  Future<void> takeScreenshot({required String deviceId, required Uri outputFileUri}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient taking screenshot on "$deviceId" to "$outputFileUri" via RPC '
+      '("${DeviceService.takeScreenshotMethod}")...',
+    );
+    await connection.sendRequest(
+      DeviceService.takeScreenshotMethod,
+      params: <String, Object?>{
+        DeviceService.deviceIdParam: deviceId,
+        DeviceService.outputFileUriParam: outputFileUri.toString(),
+      },
+    );
+  }
+
+  @override
+  Future<void> startScreenRecording({
+    required String deviceId,
+    required Uri outputFileUri,
+    Duration? duration,
+  }) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient starting screen recording on "$deviceId" to "$outputFileUri" via RPC '
+      '("${DeviceService.startScreenRecordingMethod}")...',
+    );
+    await connection.sendRequest(
+      DeviceService.startScreenRecordingMethod,
+      params: <String, Object?>{
+        DeviceService.deviceIdParam: deviceId,
+        DeviceService.durationMsParam: ?duration?.inMilliseconds,
+        DeviceService.outputFileUriParam: outputFileUri.toString(),
+      },
+    );
+  }
+
+  @override
+  Future<Uri> stopScreenRecording({required String deviceId}) async {
+    _logger.printTrace(
+      'ExtensionDeviceClient stopping screen recording on "$deviceId" via RPC '
+      '("${DeviceService.stopScreenRecordingMethod}")...',
+    );
+    final Object? rawResult = await connection.sendRequest(
+      DeviceService.stopScreenRecordingMethod,
+      params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
+    );
+    if (rawResult case final String rawUri) {
+      final Uri? uri = Uri.tryParse(rawUri);
+      if (uri != null && uri.isValidFileUri) {
+        return uri;
+      }
+      throw FormatException(
+        'ExtensionDeviceClient received invalid file URI for '
+        '"${DeviceService.stopScreenRecordingMethod}": "$rawUri".',
+      );
+    }
+    throw FormatException(
+      'ExtensionDeviceClient received invalid response for '
+      '"${DeviceService.stopScreenRecordingMethod}": expected String, got ${rawResult.runtimeType}.',
+    );
   }
 }
 
@@ -144,7 +276,8 @@ class ExtensionBackedDevice extends Device {
     required this._deviceService,
     required super.logger,
     required TargetDevice targetDevice,
-  }) : _targetDevice = targetDevice,
+  }) : _logger = logger,
+       _targetDevice = targetDevice,
        super(
          targetDevice.id,
          category: targetDevice.category,
@@ -153,6 +286,7 @@ class ExtensionBackedDevice extends Device {
        );
 
   final DeviceService _deviceService;
+  final Logger _logger;
   final TargetDevice _targetDevice;
   final ExtensionConnection connection;
 
@@ -212,7 +346,26 @@ class ExtensionBackedDevice extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async => true;
+  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
+    if (app is! PrebuiltApplicationPackage) {
+      _logger.printWarning(
+        'Cannot install application "${app.id}" on "$id": '
+        'expected a PrebuiltApplicationPackage.',
+      );
+      return false;
+    }
+    final Uri bundleUri = app.applicationPackage.absolute.uri;
+    try {
+      return await _deviceService.installApp(bundleUri: bundleUri, deviceId: id);
+    } on Object catch (err, stack) {
+      _logger.printWarning(
+        'Failed to install application "${app.id}" on "$id" '
+        '("${connection.extensionName}"): $err',
+      );
+      _logger.printTrace('$stack');
+      return false;
+    }
+  }
 
   @override
   Future<LaunchResult> startApp(
@@ -232,8 +385,54 @@ class ExtensionBackedDevice extends Device {
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async => true;
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => true;
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
+    try {
+      return await _deviceService.uninstallApp(appId: app.id, deviceId: id);
+    } on Object catch (err, stack) {
+      _logger.printWarning(
+        'Failed to uninstall application "${app.id}" from "$id" '
+        '("${connection.extensionName}"): $err',
+      );
+      _logger.printTrace('$stack');
+      return false;
+    }
+  }
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async {
+    try {
+      return await _deviceService.isAppInstalled(appId: app.id, deviceId: id);
+    } on Object catch (err, stack) {
+      _logger.printWarning(
+        'Failed to check if application "${app.id}" is installed on "$id" '
+        '("${connection.extensionName}"): $err',
+      );
+      _logger.printTrace('$stack');
+      return false;
+    }
+  }
+
+  @override
+  bool get supportsScreenshot => _targetDevice.supportsScreenshot;
+
+  /// Whether the device supports recording the screen of a running Flutter
+  /// application.
+  bool get supportsScreenRecording => _targetDevice.supportsScreenRecording;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) =>
+      _deviceService.takeScreenshot(deviceId: id, outputFileUri: outputFile.absolute.uri);
+
+  /// Starts recording the device screen to [outputFile], optionally stopping
+  /// automatically after [duration].
+  Future<void> startScreenRecording(File outputFile, {Duration? duration}) =>
+      _deviceService.startScreenRecording(
+        deviceId: id,
+        duration: duration,
+        outputFileUri: outputFile.absolute.uri,
+      );
+
+  /// Stops an active screen recording on the device and returns the [Uri] of
+  /// the recorded output file.
+  Future<Uri> stopScreenRecording() => _deviceService.stopScreenRecording(deviceId: id);
 }

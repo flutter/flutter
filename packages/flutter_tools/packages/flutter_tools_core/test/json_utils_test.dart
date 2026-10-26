@@ -329,4 +329,15 @@ void main() {
       expect(decoded.directoryUri('dir'), Uri.parse('file:///path/to/dir/'));
     });
   });
+
+  group('ExtensionUriValidation', () {
+    test('isValidFileUri returns true only for absolute file URIs', () {
+      expect(Uri.file('/tmp/app.apk').isValidFileUri, isTrue);
+      expect(Uri.directory('/tmp/app.bundle').isValidFileUri, isTrue);
+      expect(Uri.parse('relative/app.apk').isValidFileUri, isFalse);
+      expect(Uri.parse('/tmp/without_scheme').isValidFileUri, isFalse);
+      expect(Uri.parse('https://example.com/app.apk').isValidFileUri, isFalse);
+      expect(Uri.parse('').isValidFileUri, isFalse);
+    });
+  });
 }
