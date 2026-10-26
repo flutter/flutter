@@ -2997,7 +2997,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     );
 
     // Don't show the same thing that's already being shown.
-    if (_lastShown == this && isVisible && _lastTargetRect == targetRect) {
+    if (isVisible && _lastTargetRect == targetRect) {
       return Future<void>.value();
     }
 
@@ -3053,10 +3053,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     );
 
     // Don't show the same thing that's already being shown.
-    if (_lastShown == this &&
-        isVisible &&
-        _lastTargetRect == targetRect &&
-        listEquals(_lastItems, items)) {
+    if (isVisible && _lastTargetRect == targetRect && listEquals(_lastItems, items)) {
       return Future<void>.value();
     }
 
