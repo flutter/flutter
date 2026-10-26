@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Validation helpers for file system [Uri]s exchanged over the tool
+/// extension protocol.
+extension ExtensionUriValidation on Uri {
+  /// Whether this URI is an absolute `file:` directory URI ending with a
+  /// trailing slash (`/`).
+  bool get isValidDirectoryUri =>
+      isScheme('file') && hasAbsolutePath && !hasQuery && !hasFragment && path.endsWith('/');
+}
+
 /// Shared JSON deserialization utilities for Flutter tool extension models.
 extension ExtensionJsonParsing on Map<String, Object?> {
   /// Extracts a required non-null field of type [T] from this JSON map,
@@ -53,5 +62,36 @@ extension ExtensionJsonParsing on Map<String, Object?> {
         'Invalid "$key": expected Iterable<String>, got ${value.runtimeType}.',
       ),
     };
+  }
+
+  /// Extracts a required map of [String] keys to [String] values from this
+  /// JSON map.
+  ///
+  /// Throws a [FormatException] if [key] is missing, `null`, not a
+  /// `Map<String, Object?>`, or contains non-[String] values.
+  Map<String, String> stringMap(String key) {
+    return <String, String>{
+      for (final MapEntry(key: entryKey, :value) in requiredField<Map<String, Object?>>(
+        key,
+      ).entries)
+        entryKey: switch (value) {
+          final String v => v,
+          _ => throw FormatException(
+            'Invalid "$entryKey" value: expected String, got ${value.runtimeType}.',
+          ),
+        },
+    };
+  }
+
+  /// Extracts a trailing-slash-terminated absolute `file:` directory [Uri] from
+  /// this JSON map, throwing a [FormatException] if the key is missing, not a
+  /// [String], or not a valid directory URI.
+  Uri directoryUri(String key) {
+    final String rawUri = requiredField<String>(key);
+    final Uri? uri = Uri.tryParse(rawUri);
+    if (uri != null && uri.isValidDirectoryUri) {
+      return uri;
+    }
+    throw FormatException('Invalid "$key": expected trailing-slash-terminated absolute file: URI.');
   }
 }
