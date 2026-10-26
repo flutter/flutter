@@ -62,7 +62,10 @@ class MyHomePageState extends State<MyHomePage> {
   Future<void> _loadComponent() async {
     try {
       await component1.loadLibrary();
-    } catch (error) {
+    } on DeferredLoadException catch (error) {
+      if (!error.toString().contains('Injected deferred component installation failure')) {
+        rethrow;
+      }
       print('Deferred component error delivered to Dart: $error');
       await component1.loadLibrary();
     }
