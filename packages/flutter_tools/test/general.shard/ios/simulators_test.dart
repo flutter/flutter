@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
@@ -29,7 +31,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' show FakeLogger, FakePlistParser, FakeToolContext;
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -61,7 +63,10 @@ void main() {
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
     });
 
     testUsingContext(
@@ -428,7 +433,10 @@ void main() {
 
   group('Simulator screenshot', () {
     testWithoutContext('supports screenshots', () async {
-      final xcode = Xcode.test(processManager: FakeProcessManager.any());
+      final xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
       final Logger logger = BufferLogger.test();
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -598,7 +606,10 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       mockIosProject = FakeIosProject();
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
     });
 
     group('syslog', () {
@@ -634,7 +645,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -679,7 +694,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -737,7 +756,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -822,7 +845,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -884,7 +911,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final completer = Completer<void>();
@@ -951,7 +982,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             logger: logger,
           );
           final DeviceLogReader logReader = device.getLogReader(
-            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+            app: await BuildableIOSApp.fromProject(
+              mockIosProject,
+              null,
+              toolContext: FakeToolContext(fs: fileSystem),
+            ),
           );
 
           final List<String> lines = await logReader.logLines.toList();
@@ -1028,7 +1063,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
 
       final fakeProcessManagerBadSimctl = FakeProcessManager.list(<FakeCommand>[
         kWhichSysctlCommand,
@@ -1039,7 +1077,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           exitCode: 1,
         ),
       ]);
-      xcodeBadSimctl = Xcode.test(processManager: fakeProcessManagerBadSimctl);
+      xcodeBadSimctl = Xcode.test(
+        processManager: fakeProcessManagerBadSimctl,
+        toolContext: FakeToolContext.macosHost(processManager: fakeProcessManagerBadSimctl),
+      );
       logger = BufferLogger.test();
       simControl = SimControl(logger: logger, processManager: fakeProcessManager, xcode: xcode);
       simControlBadSimctl = SimControl(
@@ -1048,26 +1089,34 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         xcode: xcodeBadSimctl,
       );
       simulatorUtils = IOSSimulatorUtils(
-        operatingSystemUtils: OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: osx,
-          processManager: FakeProcessManager.any(),
-        ),
-        logger: logger,
-        processManager: fakeProcessManager,
         xcode: xcode,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          os: OperatingSystemUtils(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: FakeProcessManager.any(),
+          ),
+          platform: osx,
+          processManager: fakeProcessManager,
+        ),
       );
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
-        operatingSystemUtils: OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: osx,
-          processManager: FakeProcessManager.any(),
-        ),
-        logger: logger,
-        processManager: fakeProcessManager,
         xcode: xcodeBadSimctl,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          os: OperatingSystemUtils(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: FakeProcessManager.any(),
+          ),
+          platform: osx,
+          processManager: fakeProcessManager,
+        ),
       );
     });
 
@@ -1456,7 +1505,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
       testPlistParser = FakePlistParser();
       logger = BufferLogger.test();
     });
@@ -1679,6 +1731,183 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         Xcode: () => xcode,
       },
     );
+
+    group('waiting for the log stream', () {
+      final logStreamCommand = <Pattern>[
+        'xcrun',
+        'simctl',
+        'spawn',
+        'x',
+        'log',
+        'stream',
+        '--style',
+        'json',
+        '--predicate',
+        RegExp('.*'),
+      ];
+
+      late FakeProcessManager processManager;
+
+      setUp(() {
+        processManager = FakeProcessManager.empty();
+        testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+      });
+
+      IOSSimulator buildDevice() => IOSSimulator(
+        'x',
+        cpuArch: CpuArch.x64,
+        name: 'iPhone SE',
+        simulatorCategory: 'iOS 11.2',
+        simControl: simControl,
+        logger: logger,
+      );
+
+      IOSApp buildPackage() => PrebuiltIOSApp(
+        projectBundleId: 'correct',
+        bundleName: 'name',
+        uncompressedBundle: globals.fs.currentDirectory,
+        applicationPackage: globals.fs.currentDirectory,
+      );
+
+      testUsingContext(
+        'startApp waits for the log stream to be ready before each launch',
+        () {
+          // Regression test for https://github.com/flutter/flutter/issues/181771.
+          fakeAsync((FakeAsync async) {
+            final firstLogProcess = FakeStreamingProcess();
+            final secondLogProcess = FakeStreamingProcess();
+            processManager.addCommand(
+              FakeCommand(command: logStreamCommand, process: firstLogProcess),
+            );
+            processManager.addCommand(
+              FakeCommand(command: logStreamCommand, process: secondLogProcess),
+            );
+            final IOSSimulator device = buildDevice();
+            final IOSApp package = buildPackage();
+
+            device.startApp(
+              package,
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            );
+            async.elapse(const Duration(seconds: 1));
+            expect(simControl.requests, isEmpty);
+
+            firstLogProcess.write('Filtering the log data using "type == 1024"\n');
+            async.flushMicrotasks();
+            expect(simControl.requests, hasLength(1));
+
+            firstLogProcess.write(
+              '"eventMessage" : "The Dart VM service is listening on http://127.0.0.1:1234/abcdef/"\n',
+            );
+            async.elapse(const Duration(seconds: 1));
+
+            // The first launch stopped the log stream, so this one starts a new one.
+            device.startApp(
+              package,
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            );
+            async.elapse(const Duration(seconds: 1));
+            expect(simControl.requests, hasLength(1));
+
+            secondLogProcess.write('Filtering the log data using "type == 1024"\n');
+            async.flushMicrotasks();
+            expect(simControl.requests, hasLength(2));
+
+            async.elapse(const Duration(seconds: 30));
+            expect(logger.errorText, isEmpty);
+            expect(processManager, hasNoRemainingExpectations);
+          });
+        },
+        overrides: <Type, Generator>{
+          PlistParser: () => testPlistParser,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Logger: () => logger,
+          Xcode: () => xcode,
+        },
+      );
+
+      testUsingContext(
+        'startApp finds the VM Service when the log reader is listened to before startApp',
+        () async {
+          // `flutter run` listens to the log reader to echo logs before it calls startApp.
+          final logProcess = FakeStreamingProcess();
+          processManager.addCommand(
+            FakeCommand(
+              command: logStreamCommand,
+              onRun: (_) => logProcess.write('Filtering the log data using "type == 1024"\n'),
+              process: logProcess,
+            ),
+          );
+          simControl = FakeSimControl(
+            onLaunch: () {
+              logProcess.write(
+                '"eventMessage" : "The Dart VM service is listening on http://127.0.0.1:1234/abcdef/"\n',
+              );
+            },
+          );
+          final IOSSimulator device = buildDevice();
+          final IOSApp package = buildPackage();
+          final echoedLines = <String>[];
+          device.getLogReader(app: package).logLines.listen(echoedLines.add);
+
+          final LaunchResult result = await device.startApp(
+            package,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+
+          expect(result.vmServiceUri, Uri.parse('http://127.0.0.1:1234/abcdef/'));
+          expect(echoedLines, <String>[
+            'The Dart VM service is listening on http://127.0.0.1:1234/abcdef/',
+          ]);
+          expect(processManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          PlistParser: () => testPlistParser,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Logger: () => logger,
+          Xcode: () => xcode,
+        },
+      );
+
+      testUsingContext(
+        'startApp warns and keeps waiting if the log stream is slow to become ready',
+        () {
+          fakeAsync((FakeAsync async) {
+            final logProcess = FakeStreamingProcess();
+            processManager.addCommand(FakeCommand(command: logStreamCommand, process: logProcess));
+
+            buildDevice().startApp(
+              buildPackage(),
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            );
+            async.elapse(const Duration(seconds: 30));
+            expect(
+              logger.errorText,
+              contains('The iOS simulator log stream did not start after 30 seconds.'),
+            );
+            expect(simControl.requests, isEmpty);
+
+            logProcess.write('Filtering the log data using "type == 1024"\n');
+            async.flushMicrotasks();
+            expect(simControl.requests, hasLength(1));
+            expect(processManager, hasNoRemainingExpectations);
+          });
+        },
+        overrides: <Type, Generator>{
+          PlistParser: () => testPlistParser,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Logger: () => logger,
+          Xcode: () => xcode,
+        },
+      );
+    });
   });
 
   group('IOSDevice.isSupportedForProject', () {
@@ -1687,7 +1916,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
     setUp(() {
       simControl = FakeSimControl();
-      xcode = Xcode.test(processManager: FakeProcessManager.any());
+      xcode = Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      );
     });
 
     testUsingContext(
@@ -1797,7 +2029,11 @@ class FakeIosProject extends Fake implements IosProject {
 }
 
 class FakeSimControl extends Fake implements SimControl {
+  FakeSimControl({this.onLaunch});
+
   final requests = <LaunchRequest>[];
+
+  final void Function()? onLaunch;
 
   @override
   Future<RunResult> launch(
@@ -1805,6 +2041,7 @@ class FakeSimControl extends Fake implements SimControl {
     String appIdentifier, [
     List<String>? launchArgs,
   ]) async {
+    onLaunch?.call();
     requests.add(LaunchRequest(appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
@@ -1813,6 +2050,18 @@ class FakeSimControl extends Fake implements SimControl {
   Future<RunResult> install(String deviceId, String appPath) async {
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
+}
+
+/// A [FakeProcess] that keeps running, and whose stdout is written by the test.
+class FakeStreamingProcess extends FakeProcess {
+  FakeStreamingProcess() : super(completer: Completer<void>());
+
+  final _stdoutController = StreamController<List<int>>();
+
+  @override
+  Stream<List<int>> get stdout => _stdoutController.stream;
+
+  void write(String output) => _stdoutController.add(utf8.encode(output));
 }
 
 class LaunchRequest {
