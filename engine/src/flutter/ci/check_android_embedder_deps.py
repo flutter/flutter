@@ -92,9 +92,7 @@ def verify_build_gn_firewall(android_dir: Path) -> List[str]:
     errors.append('BUILD.gn is missing source_set("flutter_embedder_native_src")')
     return errors
   if '"FLUTTER_ENGINE_NO_PROTOTYPES"' not in content:
-    errors.append(
-        'BUILD.gn is missing defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]'
-    )
+    errors.append('BUILD.gn is missing defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]')
   if 'check_includes = true' not in content:
     errors.append('BUILD.gn is missing check_includes = true')
 
@@ -119,15 +117,11 @@ def verify_build_gn_firewall(android_dir: Path) -> List[str]:
     found_deps = set(re.findall(r'"([^"]+)"', deps_raw))
     unauthorized_deps = sorted(found_deps - ALLOWED_EMBEDDER_DEPS)
     if unauthorized_deps:
-      errors.append(
-          'flutter_embedder_native_src has unauthorized deps: '
-          f'{unauthorized_deps}'
-      )
+      errors.append('flutter_embedder_native_src has unauthorized deps: '
+                    f'{unauthorized_deps}')
     missing_deps = sorted(ALLOWED_EMBEDDER_DEPS - found_deps)
     if missing_deps:
-      errors.append(
-          f'flutter_embedder_native_src is missing required deps: {missing_deps}'
-      )
+      errors.append(f'flutter_embedder_native_src is missing required deps: {missing_deps}')
   return errors
 
 
@@ -143,9 +137,7 @@ def collect_candidate_files(android_dir: Path) -> List[Path]:
   return candidates
 
 
-def scan_android_sources(
-    android_dir: Path,
-) -> Tuple[Dict[str, List[str]], Set[str], List[str]]:
+def scan_android_sources(android_dir: Path,) -> Tuple[Dict[str, List[str]], Set[str], List[str]]:
   """Scans Android embedder files for internal includes and nogncheck comments."""
   file_to_headers = {}
   unique_headers = set()
@@ -168,8 +160,7 @@ def scan_android_sources(
       if any(header.startswith(prefix) for prefix in INTERNAL_PREFIXES):
         matched_headers.add(header)
       if rel_path in EMBEDDER_NATIVE_SRC_FILES and any(
-          header.startswith(prefix) for prefix in FORBIDDEN_EMBEDDER_PREFIXES
-      ):
+          header.startswith(prefix) for prefix in FORBIDDEN_EMBEDDER_PREFIXES):
         violations.append(
             f'{rel_path}:{line_no}: forbidden internal header "{header}" '
             'in :flutter_embedder_native_src'
@@ -223,8 +214,7 @@ def check_against_baseline(
     return [f'Baseline file {baseline_path} does not exist.']
 
   raw_json = '\n'.join(
-      line
-      for line in baseline_path.read_text(encoding='utf-8').splitlines()
+      line for line in baseline_path.read_text(encoding='utf-8').splitlines()
       if not line.lstrip().startswith('#')
   )
   baseline = json.loads(raw_json)
@@ -246,9 +236,7 @@ def check_against_baseline(
 
   new_files = sorted(set(file_to_headers.keys()) - allowed_files)
   if new_files:
-    errors.append(
-        f'Unauthorized new files including internal headers: {new_files}'
-    )
+    errors.append(f'Unauthorized new files including internal headers: {new_files}')
   return errors
 
 
@@ -258,18 +246,12 @@ def main(argv: List[str]) -> int:
   android_dir = flutter_dir / 'shell' / 'platform' / 'android'
   baseline_path = android_dir / 'allowed_internal_headers.yaml'
 
-  file_to_headers, unique_headers, scan_violations = scan_android_sources(
-      android_dir
-  )
+  file_to_headers, unique_headers, scan_violations = scan_android_sources(android_dir)
   sorted_unique_headers = sorted(unique_headers)
-  sorted_legacy_files = {
-      key: file_to_headers[key] for key in sorted(file_to_headers.keys())
-  }
+  sorted_legacy_files = {key: file_to_headers[key] for key in sorted(file_to_headers.keys())}
 
   if '--generate-baseline' in argv:
-    return write_baseline_file(
-        baseline_path, sorted_legacy_files, sorted_unique_headers
-    )
+    return write_baseline_file(baseline_path, sorted_legacy_files, sorted_unique_headers)
 
   errors = [
       *verify_build_gn_firewall(android_dir),

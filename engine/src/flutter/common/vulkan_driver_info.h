@@ -415,7 +415,7 @@ inline AdrenoGPU GetAdrenoVersion(std::string_view version) {
 
           // 800s
           {"830", AdrenoGPU::kAdreno830},
-      };
+  };
 
   /// The format that Adreno names follow is "Adreno (TM) VERSION".
   auto paren_pos = version.find("Adreno (TM) ");
