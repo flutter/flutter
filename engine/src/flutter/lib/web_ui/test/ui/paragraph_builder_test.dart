@@ -8,7 +8,6 @@ import 'package:ui/ui.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -116,7 +115,84 @@ Future<void> testMain() async {
     expect(paragraph.height, lessThan(2 * fontSize));
   });
 
-  // TODO(dbebawy): Enable on CanvasKit, https://github.com/flutter/flutter/issues/193506.
+  test('StrutStyle inherits leadingDistribution from ParagraphStyle.textHeightBehavior', () {
+    LineMetrics layoutWithStrut({
+      TextHeightBehavior? textHeightBehavior,
+      TextLeadingDistribution? strutLeadingDistribution,
+    }) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(
+          fontSize: 10,
+          fontFamily: 'FlutterTest',
+          textHeightBehavior: textHeightBehavior,
+          strutStyle: StrutStyle(
+            fontFamily: 'FlutterTest',
+            fontSize: 10,
+            height: 3,
+            forceStrutHeight: true,
+            leadingDistribution: strutLeadingDistribution,
+          ),
+        ),
+      );
+      builder.addText('A');
+      final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
+      final LineMetrics metrics = paragraph.computeLineMetrics().single;
+      paragraph.dispose();
+      return metrics;
+    }
+
+    final LineMetrics proportional = layoutWithStrut();
+    final LineMetrics inheritedEven = layoutWithStrut(
+      textHeightBehavior: const TextHeightBehavior(
+        leadingDistribution: TextLeadingDistribution.even,
+      ),
+    );
+    final LineMetrics explicitEven = layoutWithStrut(
+      strutLeadingDistribution: TextLeadingDistribution.even,
+    );
+    final LineMetrics overriddenProportional = layoutWithStrut(
+      textHeightBehavior: const TextHeightBehavior(
+        leadingDistribution: TextLeadingDistribution.even,
+      ),
+      strutLeadingDistribution: TextLeadingDistribution.proportional,
+    );
+
+    expect(inheritedEven.baseline, explicitEven.baseline);
+    expect(inheritedEven.baseline, isNot(proportional.baseline));
+    expect(overriddenProportional.baseline, proportional.baseline);
+  });
+
+  test('tracks placeholderCount and placeholderScales', () {
+    final builder = ParagraphBuilder(ParagraphStyle());
+    expect(builder.placeholderCount, 0);
+    expect(builder.placeholderScales, isEmpty);
+
+    builder.addPlaceholder(10, 20, PlaceholderAlignment.top, scale: 1.5);
+    builder.addPlaceholder(
+      30,
+      40,
+      PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      scale: 2.0,
+    );
+
+    expect(builder.placeholderCount, 2);
+    expect(builder.placeholderScales, <double>[1.5, 2.0]);
+
+    final Paragraph paragraph = builder.build()..layout(const ParagraphConstraints(width: 1000));
+    expect(paragraph.getBoxesForPlaceholders(), hasLength(2));
+    paragraph.dispose();
+    expect(paragraph.debugDisposed, isTrue);
+  });
+
+  test('pop at root style does not throw', () {
+    final builder = ParagraphBuilder(ParagraphStyle());
+    expect(() => builder.pop(), returnsNormally);
+    builder.addText('Hello');
+    final Paragraph paragraph = builder.build();
+    paragraph.dispose();
+  });
+
   group('hyphens', () {
     const text = 'abcd\u00ADe';
 
@@ -147,5 +223,5 @@ Future<void> testMain() async {
 
       expect(unspecified.longestLine, manual.longestLine);
     });
-  }, skip: isCanvasKit);
+  });
 }

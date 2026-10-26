@@ -2575,10 +2575,11 @@ TEST_F(ShellTest, RasterizerMakeImpellerSnapshotDoesNotGenerateMipmaps) {
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
         SnapshotDelegate* delegate = shell->GetRasterizer().get();
+        sk_sp<DisplayList> display_list = MakeSizedDisplayList(50, 50);
         std::shared_ptr<impeller::Texture> texture =
-            delegate->MakeImpellerSnapshotSync(MakeSizedDisplayList(50, 50),
-                                               DlISize(50, 50),
-                                               SnapshotPixelFormat::kDontCare);
+            delegate->MakeImpellerSnapshotSync(
+                [display_list](impeller::AiksContext*) { return display_list; },
+                DlISize(50, 50), SnapshotPixelFormat::kDontCare);
         EXPECT_NE(texture, nullptr);
         if (texture != nullptr) {
           EXPECT_EQ(texture->GetTextureDescriptor().mip_count, 1u);
