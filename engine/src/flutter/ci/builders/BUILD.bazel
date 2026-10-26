@@ -331,10 +331,10 @@ install(
 )
 
 # linux_clang_tidy.json: ci/android_debug_arm64_clang_tidy
-#   ninja's default target, everything: bazel run --config=android_debug_arm64_clang_tidy //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=android_debug_arm64_clang_tidy //engine/src/flutter:local_engine
 
 # linux_clang_tidy.json: ci/host_debug_clang_tidy
-#   ninja's default target, everything: bazel run --config=host_debug_clang_tidy //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=host_debug_clang_tidy //engine/src/flutter:local_engine
 
 # linux_host_desktop_engine.json: ci/host_debug_desktop
 #   bazel run --config=host_debug_desktop :host_debug_desktop
@@ -711,34 +711,34 @@ install(
 )
 
 # local_engine.json: linux/android_debug_arm64
-#   ninja's default target, everything: bazel run --config=android_debug_arm64 //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
 
 # local_engine.json: linux/android_debug_riscv64
-#   ninja's default target, everything: bazel run --config=android_debug_riscv64 //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=android_debug_riscv64 //engine/src/flutter:local_engine
 
 # local_engine.json: linux/android_debug_unopt_arm64
-#   ninja's default target, everything: bazel run --config=android_debug_unopt_arm64 //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=android_debug_unopt_arm64 //engine/src/flutter:local_engine
 
 # local_engine.json: linux/android_debug_unopt_x64
-#   ninja's default target, everything: bazel run --config=android_debug_unopt_x64 //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=android_debug_unopt_x64 //engine/src/flutter:local_engine
 
 # local_engine.json: linux/android_profile_arm64
-#   ninja's default target, everything: bazel run --config=android_profile_arm64 //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=android_profile_arm64 //engine/src/flutter:local_engine
 
 # local_engine.json: linux/android_release_arm64
-#   ninja's default target, everything: bazel run --config=android_release_arm64 //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=android_release_arm64 //engine/src/flutter:local_engine
 
 # local_engine.json: linux/host_debug
-#   ninja's default target, everything: bazel run --config=host_debug //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=host_debug //engine/src/flutter:local_engine
 
 # local_engine.json: linux/host_debug_unopt
-#   ninja's default target, everything: bazel run --config=host_debug_unopt //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=host_debug_unopt //engine/src/flutter:local_engine
 
 # local_engine.json: linux/host_profile
-#   ninja's default target, everything: bazel run --config=host_profile //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=host_profile //engine/src/flutter:local_engine
 
 # local_engine.json: linux/host_release
-#   ninja's default target, everything: bazel run --config=host_release //engine/src/flutter:install
+#   ninja's default target, everything: bazel build --config=host_release //engine/src/flutter:local_engine
 
 # local_engine.json: linux/wasm_release
 #   bazel run --config=wasm_release :wasm_release

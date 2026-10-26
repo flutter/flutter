@@ -3,28 +3,35 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Compares an installed Bazel build directory with a GN build directory.
+"""Compares a Bazel build's consumer-visible files with a GN build directory.
 
-`bazel run //engine/src/flutter:install -- <directory>` lays a build's files
-out as GN's `engine/src/out/<build>/` is (build_defs/dist/install.bzl). This tool
-walks the consumer-visible paths of such a directory -- what the flutter
-tool reads from a `--local-engine`, the embedder's library and header, the
-archives -- in both and reports, per path: whether it is on both sides, and
-for a file whether the two are identical (modulo the version hash in a
-generated LICENSE), expected to differ (a binary; `--expect-different`), or
-different; a directory is every file under it; an archive is compared entry
-by entry as artifact_diff.py does. Paths not given on the command line
-default to the Linux host's. Exit status 1 when a path is missing on either
+The Bazel side is either an installed directory -- `bazel run --config=<build>
+//engine/src/flutter/ci/builders:<build> -- <directory>` lays a builder's
+files out as GN's `engine/src/out/<build>/` is (build_defs/dist/install.bzl)
+-- or the directory holding a `local_engine.json`, which maps the GN paths
+the flutter tool reads to where Bazel built the files
+(build_defs/dist/local_engine.bzl; `bazel build //engine/src/flutter:local_engine`
+writes it beside its outputs). This tool walks the consumer-visible paths --
+what the flutter tool reads from a `--local-engine`, the embedder's library
+and header, the archives -- in both and reports, per path: whether it is on
+both sides, and for a file whether the two are identical (modulo the version
+hash in a generated LICENSE), expected to differ (a binary;
+`--expect-different`), or different; a directory is every file under it; an
+archive is compared entry by entry as artifact_diff.py does. Paths not given
+on the command line default to the Linux host's (without the archives for a
+manifest, which has none). Exit status 1 when a path is missing on either
 side or a file differs unexpectedly.
 
     python3 install_diff.py --gn engine/src/out/host_debug_unopt \\
-        --bazel engine/src/out/host_debug_unopt_bazel \\
+        --bazel engine/src/out/bazel-bin/engine/src/flutter \\
         --expect-different=flutter_tester --expect-different='*.so' ...
+    python3 install_diff.py --gn engine/src/out/ci/host_debug --bazel <installed directory>
     python3 install_diff.py --web --gn engine/src/out/wasm_release --bazel <dir>
 """
 
 import argparse
 import fnmatch
+import json
 import os
 import sys
 
@@ -78,13 +85,47 @@ WEB_EXPECTED_DIFFERENT = [
 # gen/flutter/lib/snapshot/out/<build>/.
 DEFAULT_IGNORED = ["*.d", "*.stamp", "*.S"]
 
+# The manifest a Bazel local engine writes beside its outputs.
+LOCAL_ENGINE_MANIFEST = "local_engine.json"
+
+
+def _manifest_resolver(directory):
+    """Resolves GN paths through `directory`'s local_engine.json; None without one.
+
+    An entry maps a GN path (`flutter_tester`, `gen/flutter/lib/snapshot`) to
+    where Bazel built it, relative to the manifest's directory; a path
+    resolves through the longest entry that is it or a parent of it, as the
+    flutter tool's LocalEngineLayout does, and stays where it is under the
+    directory when no entry covers it (and so reports as missing).
+    """
+    manifest = os.path.join(directory, LOCAL_ENGINE_MANIFEST)
+    if not os.path.isfile(manifest):
+        return None
+    with open(manifest, encoding="utf-8") as f:
+        entries = json.load(f)["entries"]
+    base = os.path.realpath(directory)
+
+    def resolve(path):
+        parts = path.split("/")
+        for n in range(len(parts), 0, -1):
+            prefix = "/".join(parts[:n])
+            if prefix in entries:
+                return os.path.normpath(os.path.join(base, entries[prefix], *parts[n:]))
+        return os.path.join(directory, path)
+
+    return resolve
+
 
 def _files_under(root, ignored):
-    """The files under `root` (a file or a directory) by path relative to it; empty if absent."""
+    """The files under `root` (a file or a directory) by path relative to it; empty if absent.
+
+    Symbolic links to directories are followed: a repository Bazel fetched
+    (the prebuilt Dart SDK a manifest maps `dart-sdk` to) is one.
+    """
     if os.path.isfile(root):
         return {"": root}
     found = {}
-    for directory, _, files in os.walk(root):
+    for directory, _, files in os.walk(root, followlinks=True):
         for name in files:
             path = os.path.join(directory, name)
             relative = os.path.relpath(path, root)
@@ -106,7 +147,11 @@ def _same(gn_path, bazel_path):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--gn", required=True, help="GN's build directory.")
-    parser.add_argument("--bazel", required=True, help="The installed Bazel build directory.")
+    parser.add_argument(
+        "--bazel",
+        required=True,
+        help=f"The installed Bazel build directory, or the directory holding a {LOCAL_ENGINE_MANIFEST}.",
+    )
     parser.add_argument(
         "--expect-different",
         action="append",
@@ -134,8 +179,14 @@ def main(argv):
     args = parser.parse_args(argv)
     if args.web:
         args.expect_different = args.expect_different + WEB_EXPECTED_DIFFERENT
+    resolve = _manifest_resolver(args.bazel)
+    manifest = resolve is not None
     if not args.paths:
         args.paths = WEB_PATHS if args.web else DEFAULT_PATHS
+        if manifest:
+            args.paths = [path for path in args.paths if path != "zip_archives"]
+    if not manifest:
+        resolve = lambda path: os.path.join(args.bazel, path)  # pylint: disable=unnecessary-lambda-assignment
 
     def expected(path):
         return any(
@@ -147,7 +198,7 @@ def main(argv):
     totals = {"identical": 0, "expected": 0, "different": 0, "missing": 0}
     for path in args.paths:
         gn_root = os.path.join(args.gn, path)
-        bazel_root = os.path.join(args.bazel, path)
+        bazel_root = resolve(path)
         if not os.path.exists(gn_root) or not os.path.exists(bazel_root):
             side = "GN" if os.path.exists(gn_root) else "Bazel" if os.path.exists(bazel_root) else "neither"
             print(f"{path}: only in {side}")
@@ -156,6 +207,13 @@ def main(argv):
             continue
         gn_files = _files_under(gn_root, args.ignore)
         bazel_files = _files_under(bazel_root, args.ignore)
+        beside = 0
+        if manifest:
+            # Bazel's output tree holds other outputs beside the mapped files
+            # (a package's intermediates, a repository's BUILD file); the
+            # consumer reads GN's paths, so only those are looked for.
+            beside = len(set(bazel_files) - set(gn_files))
+            bazel_files = {relative: f for relative, f in bazel_files.items() if relative in gn_files}
         identical, expected_different, different, details = [], [], [], []
         for relative in sorted(set(gn_files) | set(bazel_files)):
             full = os.path.join(path, relative) if relative else path
@@ -192,6 +250,7 @@ def main(argv):
                 f"{'' if len(gn_files) == len(bazel_files) else f' (GN {len(gn_files)})'}, "
                 f"{len(identical)} identical, {len(expected_different)} expected different, "
                 f"{len(different)} different, {len(missing)} missing"
+                f"{f', {beside} other files beside them' if beside else ''}"
             )
         for line in details:
             print(line)
