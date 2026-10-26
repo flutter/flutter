@@ -7,7 +7,7 @@
 #  * https://github.com/flutter/cocoon/blob/main/CI_YAML.md
 # This is intentionally a subset of .ci.yaml from the master branch.
 enabled_branches:
-  - \S+-experimental
+  - cp-577928128-experimental
 
 platform_properties:
   linux:
