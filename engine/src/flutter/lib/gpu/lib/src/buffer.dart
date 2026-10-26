@@ -152,7 +152,8 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
   /// This method can only be used if the [DeviceBuffer] was created with
   /// [StorageMode.hostVisible]. An exception will be thrown otherwise.
   ///
-  /// If [lengthInBytes] is set to -1, the entire buffer will be flushed.
+  /// If [lengthInBytes] is -1 (the default), the buffer is flushed from
+  /// [offsetInBytes] to its end, so `flush()` flushes the entire buffer.
   ///
   /// On devices with coherent host memory (memory shared between the CPU and
   /// GPU), this method is a no-op.
@@ -173,13 +174,16 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
         'The provided range must not be too large to fit within the buffer',
       );
     }
-    _flush(offsetInBytes, lengthInBytes);
+    // -1 is passed through; the engine maps it to the rest of the buffer.
+    if (!_flush(offsetInBytes, lengthInBytes)) {
+      throw Exception('Failed to flush the DeviceBuffer range');
+    }
   }
 
-  @Native<Void Function(Pointer<Void>, Int, Int)>(
+  @Native<Bool Function(Pointer<Void>, Int, Int)>(
     symbol: 'InternalFlutterGpu_DeviceBuffer_Flush',
   )
-  external void _flush(int offsetInBytes, int lengthInBytes);
+  external bool _flush(int offsetInBytes, int lengthInBytes);
 }
 
 /// [HostBuffer] is a bump allocator that managed a [DeviceBuffer] block list.
