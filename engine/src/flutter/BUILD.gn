@@ -336,6 +336,7 @@ if (is_fuchsia && enable_unittests) {
 # we can specify the toolchain to use, too.
 if (host_os == "win") {
   _gen_snapshot_target = "$dart_src/runtime/bin:gen_snapshot($host_toolchain)"
+
   copy("gen_snapshot") {
     deps = [ _gen_snapshot_target ]
 

@@ -3930,7 +3930,7 @@ TEST_F(EmbedderTest, CanSetNextFrameCallback) {
 
 static void MockThreadConfigSetter(const fml::Thread::ThreadConfig& config) {
   pthread_t tid = pthread_self();
-  struct sched_param param;
+  struct sched_param param{};
   int policy = SCHED_OTHER;
   switch (config.priority) {
     case fml::Thread::ThreadPriority::kDisplay:
@@ -3949,7 +3949,7 @@ TEST_F(EmbedderTest, EmbedderThreadHostUseCustomThreadConfig) {
 
   fml::AutoResetWaitableEvent ui_latch;
   int ui_policy;
-  struct sched_param ui_param;
+  struct sched_param ui_param{};
 
   thread_host->GetTaskRunners().GetUITaskRunner()->PostTask([&] {
     pthread_t current_thread = pthread_self();
@@ -3960,7 +3960,7 @@ TEST_F(EmbedderTest, EmbedderThreadHostUseCustomThreadConfig) {
 
   fml::AutoResetWaitableEvent io_latch;
   int io_policy;
-  struct sched_param io_param;
+  struct sched_param io_param{};
   thread_host->GetTaskRunners().GetIOTaskRunner()->PostTask([&] {
     pthread_t current_thread = pthread_self();
     pthread_getschedparam(current_thread, &io_policy, &io_param);

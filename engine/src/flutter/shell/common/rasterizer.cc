@@ -468,20 +468,20 @@ sk_sp<SkImage> Rasterizer::MakeSkiaSnapshotSync(
 }
 
 void Rasterizer::MakeImpellerSnapshot(
-    sk_sp<DisplayList> display_list,
+    SnapshotDisplayListProvider provider,
     DlISize picture_size,
     std::function<void(std::shared_ptr<impeller::Texture>)> callback,
     SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeImpellerSnapshot(
-      display_list, picture_size, std::move(callback), pixel_format);
+      std::move(provider), picture_size, std::move(callback), pixel_format);
 }
 
 std::shared_ptr<impeller::Texture> Rasterizer::MakeImpellerSnapshotSync(
-    sk_sp<DisplayList> display_list,
+    SnapshotDisplayListProvider provider,
     DlISize picture_size,
     SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeImpellerSnapshotSync(
-      std::move(display_list), picture_size, pixel_format);
+      std::move(provider), picture_size, pixel_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {

@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/native_assets.dart';
@@ -2043,6 +2044,49 @@ resolution: workspace
         ]);
       },
     );
+
+    testUsingContext('preserves expected hidden options and test-specific --wasm help text', () {
+      final defaultCommand = TestCommand(toolContext: toolContext);
+
+      expect(defaultCommand.argParser.options['track-widget-creation']!.hide, isFalse);
+      expect(
+        defaultCommand.argParser.options['wasm']!.help,
+        startsWith('Compile to WebAssembly rather than JavaScript.'),
+      );
+
+      final hiddenByDefault = <String>{
+        for (final entry in defaultCommand.argParser.options.entries)
+          if (entry.value.hide) entry.key,
+      };
+      expect(
+        hiddenByDefault,
+        unorderedEquals(<String>[
+          'frontend-server-starter-path',
+          'enable-experiment',
+          'enable-impeller',
+          'machine',
+          'enable-flutter-gpu',
+          'enable-hcpp',
+          'deprecated-js-interop',
+          'fatal-warnings',
+          'experimental-faster-testing',
+          'disable-service-auth-codes',
+          'disable-service-origin-check',
+          'ipv6',
+          'platform',
+          'enable-vmservice',
+          'cross-origin-isolation',
+          'disable-dds',
+        ]),
+      );
+
+      final verboseCommand = TestCommand(toolContext: toolContext, verboseHelp: true);
+      final hiddenInVerboseMode = <String>{
+        for (final entry in verboseCommand.argParser.options.entries)
+          if (entry.value.hide) entry.key,
+      };
+      expect(hiddenInVerboseMode, isEmpty);
+    });
   });
 }
 
@@ -2089,7 +2133,7 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
   }
 }
 
-class TestTestDevice extends TestDevice {
+class TestTestDevice extends Fake implements TestDevice {
   @override
   Future<void> get finished => Future<void>.delayed(const Duration(seconds: 1));
 
@@ -2155,9 +2199,11 @@ class _FakeNativeAssetsBuilderWithDataAssets extends Fake
   FlutterHookResult hookResult;
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo) async => null;
+  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext}) async => null;
 
   @override
-  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) async =>
-      (nativeAssetsManifest: null, flutterHookResult: hookResult);
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
+    BuildInfo buildInfo, {
+    required ToolContext toolContext,
+  }) async => (nativeAssetsManifest: null, flutterHookResult: hookResult);
 }

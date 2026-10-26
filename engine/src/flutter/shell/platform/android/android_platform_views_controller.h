@@ -154,6 +154,7 @@ class PlatformViewsProvider {
   virtual ANativeWindow* GetOverlayWindow(int32_t surface_id) = 0;
 
   virtual bool CreateTransaction() = 0;
+  virtual bool SealFrameTransactions() { return true; }
   virtual bool SwapTransactions() = 0;
   virtual bool ApplyTransactions() = 0;
   virtual bool SetHcppEnabled(bool enabled) = 0;
@@ -200,6 +201,7 @@ class DefaultPlatformViewsProvider final : public PlatformViewsProvider {
   ANativeWindow* GetOverlayWindow(int32_t surface_id) override;
 
   bool CreateTransaction() override;
+  bool SealFrameTransactions() override;
   bool SwapTransactions() override;
   bool ApplyTransactions() override;
   bool SetHcppEnabled(bool enabled) override;
@@ -253,6 +255,7 @@ class InMemoryPlatformViewsProvider final : public PlatformViewsProvider {
   ANativeWindow* GetOverlayWindow(int32_t surface_id) override;
 
   bool CreateTransaction() override;
+  bool SealFrameTransactions() override;
   bool SwapTransactions() override;
   bool ApplyTransactions() override;
   bool SetHcppEnabled(bool enabled) override;
@@ -269,6 +272,7 @@ class InMemoryPlatformViewsProvider final : public PlatformViewsProvider {
   bool IsOverlayVisible(int32_t surface_id) const;
   size_t GetBeginFrameCount() const;
   size_t GetEndFrameCount() const;
+  size_t GetSealFrameTransactionsCount() const;
   size_t GetSwapTransactionCount() const;
   size_t GetDisplayPlatformViewCount() const;
   size_t GetCreateOverlaySurfaceCount() const;
@@ -303,6 +307,7 @@ class InMemoryPlatformViewsProvider final : public PlatformViewsProvider {
   size_t begin_frame_count_ = 0;
   size_t end_frame_count_ = 0;
   size_t transaction_count_ = 0;
+  size_t seal_count_ = 0;
   size_t swap_count_ = 0;
   size_t apply_count_ = 0;
   size_t display_platform_view_count_ = 0;
@@ -642,6 +647,7 @@ class AndroidPlatformViewsController {
   bool OnEndFrame();
 
   bool CreateTransaction();
+  bool SealFrameTransactions();
   bool SwapTransactions();
   bool ApplyTransactions();
   bool SetHcppEnabled(bool enabled);

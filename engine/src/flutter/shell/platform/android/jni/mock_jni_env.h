@@ -24,7 +24,7 @@ using JniAttachEnvPtr = void**;
 
 class MockJavaVM : public JavaVM {
  public:
-  MockJavaVM() {
+  MockJavaVM() : JavaVM() {
     functions = &jni_invoke_;
 
     jni_invoke_.DestroyJavaVM = DoDestroyJavaVM;
@@ -66,7 +66,7 @@ class MockJavaVM : public JavaVM {
 
 class MockableJNIEnv : public JNIEnv {
  public:
-  MockableJNIEnv() {
+  MockableJNIEnv() : JNIEnv() {
     // Replace the JNIEnv's function table with wrappers that invoke the
     // mockable virtual methods in this class.
     functions = &jni_;

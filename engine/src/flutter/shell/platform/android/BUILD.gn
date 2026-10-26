@@ -447,7 +447,8 @@ if (is_android) {
 
     stamp_file = "$root_out_dir/check_android_imports"
 
-    # File does not actually get created, but GN expects us to have an output here.
+    # File does not actually get created, but GN expects us to have an output
+    # here.
     outputs = [ stamp_file ]
 
     args = [
@@ -579,8 +580,8 @@ if (is_android) {
 
       # We use a different toolchain here so that vulkan validation layers are
       # built against API level 26, which they require, rather than the default.
-      # This is safe because the Engine can do a version check before loading the
-      # .so for the validation layers.
+      # This is safe because the Engine can do a version check before loading
+      # the .so for the validation layers.
       apilevel26_toolchain = "//build/toolchain/android:clang_arm64_apilevel26"
       validation_layer_target =
           "//third_party/vulkan_validation_layers($apilevel26_toolchain)"
@@ -918,9 +919,9 @@ if (is_android) {
       }
     }
 
-    # NOTE(codefu): the URL having /*-$engine_version/ is expected; we want these
-    # files in one URL. The flutter-recipes duplicate them to content_hash as
-    # part of its upload step.
+    # NOTE(codefu): the URL having /*-$engine_version/ is expected; we want
+    # these files in one URL. The flutter-recipes duplicate them to content_hash
+    # as part of its upload step.
     # More info here: https://github.com/flutter/flutter/issues/172259
     hash_base_name =
         "$root_out_dir/zip_archives/download.flutter.io/io/flutter/" +
@@ -991,9 +992,9 @@ if (is_android) {
       ]
     }
 
-    # NOTE(codefu): the URL having /*-$engine_version/ is expected; we want these
-    # files in one URL. The flutter-recipes duplicate them to content_hash as
-    # part of its upload step.
+    # NOTE(codefu): the URL having /*-$engine_version/ is expected; we want
+    # these files in one URL. The flutter-recipes duplicate them to content_hash
+    # as part of its upload step.
     # More info here: https://github.com/flutter/flutter/issues/172259
     hash_base_name =
         "$root_out_dir/zip_archives/download.flutter.io/io/flutter/" +

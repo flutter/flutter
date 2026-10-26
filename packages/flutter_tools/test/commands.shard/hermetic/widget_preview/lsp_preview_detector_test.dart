@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
@@ -45,6 +44,7 @@ void main() {
     late ShutdownHooks shutdownHooks;
     late List<FlutterWidgetPreviews> detectedChanges;
     late List<String> detectedPubspecChanges;
+    late List<String> detectedNonDartFileChanges;
     late LspPreviewDetector detector;
 
     setUp(() async {
@@ -63,23 +63,26 @@ void main() {
       shutdownHooks = ShutdownHooks();
       detectedChanges = <FlutterWidgetPreviews>[];
       detectedPubspecChanges = <String>[];
+      detectedNonDartFileChanges = <String>[];
 
       detector = LspPreviewDetector(
-        platform: platform,
-        previewAnalytics: previewAnalytics,
-        project: project,
-        fs: fs,
-        logger: logger,
+        dtd: fakeDtd,
         onChangeDetected: detectedChanges.add,
         onPubspecChangeDetected: detectedPubspecChanges.add,
-        dtd: fakeDtd,
-        processManager: FakeProcessManager.any(),
-        terminal: Terminal.test(),
+        previewAnalytics: previewAnalytics,
+        project: project,
         suppressAnalytics: false,
-        artifacts: Artifacts.test(),
-        shutdownHooks: shutdownHooks,
-        watcherBuilder: (_) => fakeWatcher,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
         analysisServerFactory: () async => fakeAnalysisServer,
+        onNonDartFileChangeDetected: detectedNonDartFileChanges.add,
+        watcherBuilder: (_) => fakeWatcher,
       );
       await detector.initialize();
     });
@@ -136,21 +139,20 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'does not report preview reload timing when non-Dart file is modified',
-      () async {
-        expectNPreviewReloadTimingEvents(0);
-        expect(detectedChanges, isEmpty);
-        expect(detectedPubspecChanges, isEmpty);
+    testWithoutContext('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedChanges, isEmpty);
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
 
-        expect(detectedChanges, isEmpty);
-        expect(detectedPubspecChanges, isEmpty);
-        expectNPreviewReloadTimingEvents(0);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      expect(detectedChanges, isEmpty);
+      expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, <String>[_kNonDartFilePath]);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
 
     testWithoutContext('does not report preview reload timing for ignored directories', () async {
       expectNPreviewReloadTimingEvents(0);
@@ -159,6 +161,7 @@ void main() {
 
       expect(detectedChanges, isEmpty);
       expect(detectedPubspecChanges, isEmpty);
+      expect(detectedNonDartFileChanges, isEmpty);
       expectNPreviewReloadTimingEvents(0);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
@@ -206,21 +209,22 @@ void main() {
 
       fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
       detector = LspPreviewDetector(
-        platform: platform,
-        previewAnalytics: previewAnalytics,
-        project: project,
-        fs: fs,
-        logger: logger,
+        dtd: fakeDtd,
         onChangeDetected: detectedChanges.add,
         onPubspecChangeDetected: detectedPubspecChanges.add,
-        dtd: fakeDtd,
-        processManager: FakeProcessManager.any(),
-        terminal: Terminal.test(),
+        previewAnalytics: previewAnalytics,
+        project: project,
         suppressAnalytics: false,
-        artifacts: Artifacts.test(),
-        shutdownHooks: shutdownHooks,
-        watcherBuilder: (_) => fakeWatcher,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
         analysisServerFactory: () async => fakeAnalysisServer,
+        watcherBuilder: (_) => fakeWatcher,
       );
       await detector.initialize();
 

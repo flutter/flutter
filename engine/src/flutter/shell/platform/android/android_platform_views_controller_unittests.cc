@@ -371,6 +371,7 @@ TEST(AndroidPlatformViewsControllerTest,
 
   ASSERT_TRUE(controller.PresentView(&frame1));
   EXPECT_TRUE(provider->IsOverlayVisible(0));
+  EXPECT_EQ(provider->GetSealFrameTransactionsCount(), 1u);
   EXPECT_EQ(provider->GetSwapTransactionCount(), 1u);
   EXPECT_EQ(provider->GetEndFrameCount(), 1u);
 
@@ -388,6 +389,7 @@ TEST(AndroidPlatformViewsControllerTest,
   const auto hidden = provider->GetHiddenPlatformViews();
   ASSERT_EQ(hidden.size(), 1u);
   EXPECT_EQ(hidden[0], kUnregisteredJavaPlatformViewId1);
+  EXPECT_EQ(provider->GetSealFrameTransactionsCount(), 2u);
   EXPECT_EQ(provider->GetSwapTransactionCount(), 2u);
 
   EXPECT_TRUE(controller.CollectBackingStore(&ov_store));

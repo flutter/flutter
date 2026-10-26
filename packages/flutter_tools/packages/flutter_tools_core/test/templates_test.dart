@@ -78,5 +78,20 @@ void main() {
         throwsUnimplementedError,
       );
     });
+
+    test('ExtensionProjectTemplate.fromJson throws FormatException on invalid field types', () {
+      expect(
+        () => ExtensionProjectTemplate.fromJson(const <String, Object?>{
+          ProjectTemplate.nameKey: 123,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionProjectTemplate.fromJson(const <String, Object?>{
+          ProjectTemplate.templateDependenciesKey: <Object?>['app', 42],
+        }),
+        throwsFormatException,
+      );
+    });
   });
 }

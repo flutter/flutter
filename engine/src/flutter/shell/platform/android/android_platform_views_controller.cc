@@ -116,6 +116,33 @@ bool InvokeOnDisplayOverlaySurfaceHelper(T* invoker,
 }
 
 template <typename T>
+void InvokeSealFrameTransactionsHelper(T* invoker) {
+  if constexpr (requires { invoker->SealFrameTransactions(); }) {
+    invoker->SealFrameTransactions();
+  } else {
+    JNIEnv* env = invoker->GetEnv();
+    if (!IsRealJniEnv(env)) {
+      return;
+    }
+    auto java_object = invoker->GetFlutterJni(env);
+    if (java_object.is_null()) {
+      return;
+    }
+    jclass clazz = env->GetObjectClass(java_object.obj());
+    if (ClearJniExceptionIfAny(env) || clazz == nullptr) {
+      return;
+    }
+    jmethodID method = env->GetMethodID(clazz, "sealFrameTransactions", "()V");
+    const bool method_had_exception = ClearJniExceptionIfAny(env);
+    env->DeleteLocalRef(clazz);
+    if (!method_had_exception && method != nullptr) {
+      env->CallVoidMethod(java_object.obj(), method);
+      ClearJniExceptionIfAny(env);
+    }
+  }
+}
+
+template <typename T>
 void InvokeSwapTransactionsHelper(T* invoker) {
   if constexpr (requires { invoker->SwapTransactions(); }) {
     invoker->SwapTransactions();
@@ -614,6 +641,17 @@ bool DefaultPlatformViewsProvider::CreateTransaction() {
   return invoker != nullptr && invoker->IsAttached();
 }
 
+bool DefaultPlatformViewsProvider::SealFrameTransactions() {
+  TRACE_EVENT0("flutter",
+               "DefaultPlatformViewsProvider::SealFrameTransactions");
+  JvmInvoker* invoker = GetInvoker();
+  if (invoker == nullptr || !invoker->IsAttached()) {
+    return false;
+  }
+  InvokeSealFrameTransactionsHelper(invoker);
+  return true;
+}
+
 bool DefaultPlatformViewsProvider::SwapTransactions() {
   TRACE_EVENT0("flutter", "DefaultPlatformViewsProvider::SwapTransactions");
   JvmInvoker* invoker = GetInvoker();
@@ -858,6 +896,12 @@ bool InMemoryPlatformViewsProvider::CreateTransaction() {
   return true;
 }
 
+bool InMemoryPlatformViewsProvider::SealFrameTransactions() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  ++seal_count_;
+  return true;
+}
+
 bool InMemoryPlatformViewsProvider::SwapTransactions() {
   std::lock_guard<std::mutex> lock(mutex_);
   ++swap_count_;
@@ -949,6 +993,11 @@ size_t InMemoryPlatformViewsProvider::GetBeginFrameCount() const {
 size_t InMemoryPlatformViewsProvider::GetEndFrameCount() const {
   std::lock_guard<std::mutex> lock(mutex_);
   return end_frame_count_;
+}
+
+size_t InMemoryPlatformViewsProvider::GetSealFrameTransactionsCount() const {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return seal_count_;
 }
 
 size_t InMemoryPlatformViewsProvider::GetSwapTransactionCount() const {
@@ -1680,6 +1729,13 @@ bool AndroidPlatformViewsController::PresentView(
     frame_presented_callback = frame_presented_callback_;
   }
 
+  // Every path that posts a platform task calling SwapTransactions() must call
+  // SealFrameTransactions() once on the raster thread to keep the per-frame
+  // transaction queue paired 1:1.
+  if (is_surface_control) {
+    SealFrameTransactions();
+  }
+
   auto execute_presentation =
       [this, view_id, snapshot, views_to_hide = std::move(views_to_hide),
        is_surface_control, should_show_overlay, should_hide_overlay,
@@ -2365,6 +2421,17 @@ bool AndroidPlatformViewsController::CreateTransaction() {
     provider = provider_;
   }
   return provider ? provider->CreateTransaction() : false;
+}
+
+bool AndroidPlatformViewsController::SealFrameTransactions() {
+  TRACE_EVENT0("flutter",
+               "AndroidPlatformViewsController::SealFrameTransactions");
+  std::shared_ptr<PlatformViewsProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    provider = provider_;
+  }
+  return provider ? provider->SealFrameTransactions() : false;
 }
 
 bool AndroidPlatformViewsController::SwapTransactions() {

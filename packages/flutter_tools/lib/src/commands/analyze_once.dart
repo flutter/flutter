@@ -14,13 +14,8 @@ class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     super.argResults,
     List<Directory> repoPackages, {
-    required super.artifacts,
-    required super.fileSystem,
-    required super.logger,
-    required super.platform,
-    required super.processManager,
     required super.suppressAnalytics,
-    required super.terminal,
+    required super.toolContext,
     this.workingDirectory,
   }) : super(repoPackages: repoPackages);
 
@@ -55,15 +50,11 @@ class AnalyzeOnce extends AnalyzeBase {
     final server = AnalysisServer(
       sdkPath,
       items.toList(),
-      fileSystem: fileSystem,
-      platform: platform,
-      logger: logger,
-      processManager: processManager,
-      terminal: terminal,
-      protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
-      withFineDependencies: false,
+      toolContext: toolContext,
+      protocolTrafficLog: protocolTrafficLog,
       usePlugins: usePlugins,
+      withFineDependencies: false,
     );
 
     Stopwatch? timer;
