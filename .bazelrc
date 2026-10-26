@@ -11,6 +11,16 @@
 # leaves no trace outside directories that are already ignored.
 common --symlink_prefix=engine/src/out/bazel-
 
+# Name a cross build's output directory after its platform
+# (bazel-out/android_arm64-opt/, wasm32_emscripten-opt/, linux_arm64-opt/)
+# rather than the host CPU, which every platform shares (k8-opt/) -- the
+# host's own build keeps k8-<mode>. The flutter tool reads a build in place
+# through its local_engine.json (build_defs/dist/local_engine.bzl), and an
+# Android engine and the host engine it pairs with must both be on disk: in
+# one directory each build would overwrite the other's manifest and the
+# outputs whose paths they share.
+common --experimental_platform_in_output_dir
+
 # The toolchain's sysroot and standard-library headers are directory inputs
 # (one symlink per action in the sandbox instead of ~11,000; see
 # build/bazel/third_party/sysroot). Bazel tracks the contents of directory

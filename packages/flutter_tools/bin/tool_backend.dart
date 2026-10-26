@@ -48,7 +48,7 @@ Future<void> main(List<String> arguments) async {
 
   Directory.current = projectDirectory;
 
-  if (localEngine != null && !localEngine.contains(buildMode)) {
+  if (localEngine != null && !localEngineBuildName(localEngine).contains(buildMode)) {
     stderr.write('''
 ERROR: Requested build with Flutter local engine at '$localEngine'
 This engine is not compatible with FLUTTER_BUILD_MODE: '$buildMode'.
@@ -61,7 +61,7 @@ or
 ''');
     exit(1);
   }
-  if (localEngineHost != null && !localEngineHost.contains(buildMode)) {
+  if (localEngineHost != null && !localEngineBuildName(localEngineHost).contains(buildMode)) {
     stderr.write('''
 ERROR: Requested build with Flutter local engine host at '$localEngineHost'
 This engine is not compatible with FLUTTER_BUILD_MODE: '$buildMode'.
@@ -128,4 +128,25 @@ or
 String pathJoin(List<String> segments) {
   final separator = Platform.isWindows ? r'\' : '/';
   return segments.join(separator);
+}
+
+/// The name of the engine build `LOCAL_ENGINE` (or `LOCAL_ENGINE_HOST`) names,
+/// by which its mode is checked: the value itself (GN's directory name, or a
+/// path ending in it), or, for a Bazel build directory -- a path to the
+/// directory holding `local_engine.json` -- the build's name from that
+/// manifest (`host_debug_unopt`), which the path does not carry.
+String localEngineBuildName(String localEngine) {
+  final manifest = File(pathJoin(<String>[localEngine, 'local_engine.json']));
+  if (!manifest.existsSync()) {
+    return localEngine;
+  }
+  try {
+    final Object? document = json.decode(manifest.readAsStringSync());
+    if (document is Map<String, Object?> && document['name'] is String) {
+      return document['name']! as String;
+    }
+  } on FormatException {
+    // Not a manifest the tool wrote; the path is all there is to go by.
+  }
+  return localEngine;
 }
