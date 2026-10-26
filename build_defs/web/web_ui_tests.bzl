@@ -456,3 +456,115 @@ def web_ui_test_suite(name, suite, bundle, tests, test_set, size = "large", tags
         tests = names,
         tags = tags,
     )
+
+def web_ui_tests(
+        name,
+        config,
+        browsers,
+        srcs,
+        package_config,
+        felt,
+        runtime_package_config,
+        package_files,
+        web_sdk,
+        fonts,
+        fallback_fonts = [],
+        test_images = [],
+        host_files = [],
+        exclude = {},
+        network = [],
+        tags = ["cpu:2"],
+        bundle_tags = ["manual"]):
+    """The web engine's unit tests, whole, from felt's configuration.
+
+    One call declares, for the suites of `config` whose run configuration
+    names a browser in `browsers`: the compiled bundles they run
+    (`bundles/<bundle>/<file>` per test file, web_ui_test_bundles), one
+    web_ui_test per file and suite (`<suite>/<file>`, web_ui_test_suite), a
+    test_suite per suite (`<suite>`), one per browser (`<browser>_tests`) and
+    one over all of them (`name`). The test sets' files are globbed from
+    their directories here, so a new test file is a new target and nothing
+    else changes; a new suite, bundle or set is a change to felt_config.yaml
+    and a run of tools/gn_to_bazel.
+
+    Args:
+      name: the test_suite over every suite declared.
+      config: `FELT_CONFIG` from the generated felt_config.bzl (tools/gn_to_bazel's
+        rendering of test/felt_config.yaml).
+      browsers: the browsers this host runs, by felt's name (`chrome`, `firefox`), each a dict of
+        `browser` (the executable), `files` (its directory), `variable` (the variable felt finds it
+        through) and `env` (web_ui_test's attributes); suites of other browsers (Safari's, Edge's)
+        are left out.
+      srcs: the sources the test files import (a glob over test/).
+      package_config: the pub_package_config of the compiles.
+      felt: felt compiled for the VM.
+      runtime_package_config: felt's package configuration in the runfiles layout.
+      package_files: the package's files felt and the runner read at run time.
+      web_sdk: the web SDK's archive bundle.
+      fonts: the test fonts.
+      fallback_fonts: the fallback fonts.
+      test_images: Skia's test images.
+      host_files: the host page's files.
+      exclude: suite name to the test files left out of it (web_ui_test_suite's `exclude`).
+      network: the test files that reach the web (web_ui_test_suite's `network`).
+      tags: each test's tags.
+      bundle_tags: the bundle targets' tags (`manual`: built by the tests that run them).
+    """
+    test_sets = {
+        test_set: native.glob(["test/%s/**/*_test.dart" % directory])
+        for test_set, directory in config["test_sets"].items()
+    }
+    suites_by_browser = {}
+    bundles = {}
+    for suite, spec in config["test_suites"].items():
+        browser = config["run_configs"][spec["run_config"]]["browser"]
+        if browser not in browsers:
+            continue
+        suites_by_browser.setdefault(browser, []).append(suite)
+        bundles[spec["test_bundle"]] = None
+    for bundle in bundles:
+        spec = config["test_bundles"][bundle]
+        web_ui_test_bundles(
+            name = "bundles/" + bundle,
+            srcs = srcs,
+            bundle = bundle,
+            compile_configs = spec["compile_configs"],
+            package_config = package_config,
+            tags = bundle_tags,
+            test_set = config["test_sets"][spec["test_set"]],
+            tests = test_sets[spec["test_set"]],
+        )
+    for browser, suites in suites_by_browser.items():
+        for suite in suites:
+            spec = config["test_suites"][suite]
+            test_set = config["test_bundles"][spec["test_bundle"]]["test_set"]
+            web_ui_test_suite(
+                name = suite,
+                srcs = package_files,
+                browser = browsers[browser]["browser"],
+                browser_files = browsers[browser]["files"],
+                browser_variable = browsers[browser]["variable"],
+                bundle = spec["test_bundle"],
+                env = browsers[browser]["env"],
+                exclude = exclude.get(suite, []),
+                fallback_fonts = fallback_fonts,
+                felt = felt,
+                fonts = fonts,
+                host_files = host_files,
+                network = network,
+                runtime_package_config = runtime_package_config,
+                suite = suite,
+                tags = tags,
+                test_images = test_images,
+                test_set = config["test_sets"][test_set],
+                tests = test_sets[test_set],
+                web_sdk = web_sdk,
+            )
+        native.test_suite(
+            name = browser + "_tests",
+            tests = [":" + suite for suite in suites],
+        )
+    native.test_suite(
+        name = name,
+        tests = [":" + suite for suites in suites_by_browser.values() for suite in suites],
+    )

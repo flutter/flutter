@@ -849,6 +849,27 @@ stay felt's job. A file that declares no test on a suite's browser is left
 out of that suite (`exclude`: semantics_test on Firefox), since a run of
 the file alone would report that no test ran.
 
+The BUILD file does not repeat felt's configuration. `tools/gn_to_bazel`
+reads `test/felt_config.yaml` -- the web team's source of truth, as felt's
+own `dev/felt_config.dart` reads it -- and writes `lib/web_ui/felt_config.bzl`
+beside the BUILD file: `FELT_CONFIG`, one dict of the five tables (compile
+configurations, test sets with their directories, bundles with their set
+and compile configurations, run configurations with their browser, suites
+with their bundle, run configuration and artifact dependencies), the names
+and the references among them; a run configuration's flags and variant
+stay felt's, read from the YAML by suite name at run time. `--check`
+compares the two files as it compares the generated BUILD files. One macro
+call, `web_ui_tests(name = "tests", config = FELT_CONFIG, browsers =
+{...})`, declares everything above: the suites whose run configuration
+names one of the browsers given (Chrome's and Firefox's here; Safari's and
+Edge's need other hosts), the bundles those suites run, one test per file
+and suite -- the test sets' files are globbed from their directories, so a
+new test file is a new target with no edit -- and the suites per browser
+and whole. What the BUILD file still says is this host's: the browsers
+(`@chrome`, `@firefox`, their variables and sandbox environment), the
+files a suite leaves out, the files that need the network. A new suite,
+bundle or set is an edit to felt_config.yaml and a run of the converter.
+
 ```sh
 bazel test //engine/src/flutter/lib/web_ui:tests                              # Chrome's sixteen suites and Firefox's eight: 923 tests
 bazel test //engine/src/flutter/lib/web_ui:chrome_tests                       # 546 tests
