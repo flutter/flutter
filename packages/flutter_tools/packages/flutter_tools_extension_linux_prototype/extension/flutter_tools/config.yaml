@@ -4,7 +4,7 @@
 
 name: flutter_tools_extension_linux_prototype
 entrypoint: bin/flutter_tools_extension_linux_prototype.dart
-supported_platforms:
+host_platforms:
   - linux
 services:
   - diagnostics
@@ -17,5 +17,5 @@ build_targets:
   - custom-linux
 templates:
   - custom-linux-app
-platforms:
+target_platforms:
   - custom_linux
