@@ -66,6 +66,14 @@ void main() {
         logger: logger,
         featureFlags: TestFeatureFlags(),
       );
+      expect(manager.hostPlatformName, 'linux');
+
+      final customHostManager = ExtensionManager(
+        hostPlatform: const HostPlatform('freebsd-x64', 'x64'),
+        logger: logger,
+        featureFlags: TestFeatureFlags(),
+      );
+      expect(customHostManager.hostPlatformName, 'freebsd');
 
       final Directory explicitDir = fs.directory('/explicit/cache');
       final withOverride = ExtensionArtifactManager(

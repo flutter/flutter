@@ -110,6 +110,13 @@ void main() {
     expect(CpuArch.x64.darwinArchName, 'x86_64');
   });
 
+  testWithoutContext('CpuArch.fromHostPlatform maps standard and custom host platforms', () {
+    expect(CpuArch.fromHostPlatform(HostPlatform.linux_x64), CpuArch.x64);
+    expect(CpuArch.fromHostPlatform(HostPlatform.darwin_arm64), CpuArch.arm64);
+    expect(CpuArch.fromHostPlatform(HostPlatform.linux_riscv64), CpuArch.riscv64);
+    expect(CpuArch.fromHostPlatform(const HostPlatform('freebsd-x64', 'x64')), CpuArch.x64);
+  });
+
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
     expect(TargetPlatform.ios.getName(cpuArch: CpuArch.arm64), 'ios-arm64');
     expect(TargetPlatform.ios.getName(cpuArch: CpuArch.armv7), 'ios-armv7');

@@ -9,17 +9,46 @@ void main() {
   const validSha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
   group('HostPlatform', () {
-    test('cliName and fromName round-trip', () {
+    test('round-trips canonical built-in platforms', () {
       for (final HostPlatform platform in HostPlatform.values) {
-        expect(HostPlatform.fromName(platform.cliName), platform);
-        expect(HostPlatform.fromName(platform.name), platform);
-        expect(HostPlatform.tryFromName(platform.cliName), platform);
+        expect(HostPlatform.fromName(platform.cliName), same(platform));
+        expect(HostPlatform.fromName(platform.name), same(platform));
+        expect(HostPlatform.tryFromName(platform.cliName), same(platform));
       }
       expect(HostPlatform.linux_x64.cliName, 'linux-x64');
+      expect(HostPlatform.linux_x64.name, 'linux_x64');
       expect(HostPlatform.darwin_arm64.platformName, 'arm64');
       expect(HostPlatform.linux_riscv64.platformName, 'riscv64');
-      expect(HostPlatform.tryFromName('invalid-platform'), isNull);
-      expect(() => HostPlatform.fromName('invalid-platform'), throwsFormatException);
+      expect(HostPlatform.linux_x64.toString(), 'HostPlatform.linux_x64');
+      expect(HostPlatform.fromOsAndArch('macos', 'arm64'), HostPlatform.darwin_arm64);
+      expect(HostPlatform.fromOsAndArch('linux', 'riscv64'), HostPlatform.linux_riscv64);
+      expect(HostPlatform.fromOsAndArch('freebsd', 'x64'), isNull);
+    });
+
+    test('parses and compares custom <os>-<arch> platforms', () {
+      const customHost = HostPlatform('freebsd-x64', 'x64');
+      expect(customHost.cliName, 'freebsd-x64');
+      expect(customHost.name, 'freebsd_x64');
+      expect(customHost.platformName, 'x64');
+      expect(HostPlatform.fromName('freebsd-x64'), equals(customHost));
+      expect(HostPlatform.fromName('freebsd_x64'), equals(customHost));
+      expect(HostPlatform.fromName('freebsd-x64').hashCode, equals(customHost.hashCode));
+    });
+
+    test('rejects malformed host platform strings', () {
+      for (final invalid in <String>[
+        '',
+        '   ',
+        'invalid',
+        'linux-x86_64',
+        'FreeBSD-x64',
+        ' linux-x64 ',
+        'invalid/platform',
+        'invalid platform',
+      ]) {
+        expect(HostPlatform.tryFromName(invalid), isNull, reason: 'Expected "$invalid" to be null');
+        expect(() => HostPlatform.fromName(invalid), throwsFormatException);
+      }
     });
   });
 
@@ -53,6 +82,15 @@ void main() {
         'sha256Url: null, '
         'hostPlatform: HostPlatform.linux_x64, targetPlatform: linux-x64)',
       );
+
+      final customHostDep = ArtifactDependency(
+        name: 'custom-bsd-bin',
+        sha256: validSha256,
+        url: Uri.parse('https://example.com/artifacts/bsd.zip'),
+        hostPlatform: const HostPlatform('freebsd-x64', 'x64'),
+        targetPlatform: 'freebsd-x64',
+      );
+      expect(ArtifactDependency.fromJson(customHostDep.toMap()), equals(customHostDep));
     });
 
     test('serializes and deserializes correctly with sha256Url instead of sha256', () {
@@ -192,7 +230,7 @@ void main() {
           'name': 'test',
           'url': 'https://example.com/a.zip',
           'sha256': validSha256,
-          'hostPlatform': 'invalid-host',
+          'hostPlatform': 'invalid/host',
         }),
         throwsFormatException,
       );

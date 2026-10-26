@@ -6,49 +6,84 @@ import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
 
-/// Host platforms that Flutter tools can be executed on.
-enum HostPlatform {
-  darwin_x64,
-  darwin_arm64,
-  linux_x64,
-  linux_arm64,
-  linux_riscv64,
-  windows_x64,
-  windows_arm64;
+/// Host platforms that Flutter tools and extensions can be executed on.
+///
+/// Built-in host platforms are exposed as static constants (e.g. [linux_x64],
+/// [darwin_arm64]), while extensions running on non-standard host platforms can
+/// construct or parse custom `<os>-<arch>` identifiers (e.g.
+/// `HostPlatform('freebsd-x64', 'x64')`).
+@immutable
+final class HostPlatform {
+  /// Creates a [HostPlatform] with the given lowercase `<os>-<arch>` [cliName]
+  /// (e.g. `'linux-x64'` or `'freebsd-x64'`) and architecture [platformName]
+  /// matching the `<arch>` segment (e.g. `'x64'`).
+  const HostPlatform(this.cliName, this.platformName)
+    : assert(cliName.length > 0),
+      assert(platformName.length > 0);
 
-  /// Parses a [HostPlatform] from its [cliName] or enum [name].
+  /// Parses a [HostPlatform] from its [cliName] (e.g. `'linux-x64'`) or
+  /// underscore-delimited [name] (e.g. `'linux_x64'`).
   ///
-  /// Throws a [FormatException] if [name] does not match a known host platform.
+  /// Throws a [FormatException] if [name] is not a valid `<os>-<arch>` or
+  /// `<os>_<arch>` host platform identifier.
   factory HostPlatform.fromName(String name) {
-    return tryFromName(name) ?? (throw FormatException('Unsupported host platform: "$name"'));
+    return tryFromName(name) ?? (throw FormatException('Invalid host platform: "$name"'));
   }
 
+  static const darwin_x64 = HostPlatform('darwin-x64', 'x64');
+  static const darwin_arm64 = HostPlatform('darwin-arm64', 'arm64');
+  static const linux_x64 = HostPlatform('linux-x64', 'x64');
+  static const linux_arm64 = HostPlatform('linux-arm64', 'arm64');
+  static const linux_riscv64 = HostPlatform('linux-riscv64', 'riscv64');
+  static const windows_x64 = HostPlatform('windows-x64', 'x64');
+  static const windows_arm64 = HostPlatform('windows-arm64', 'arm64');
+
+  /// Standard built-in host platforms supported by the Flutter tool.
+  static const values = <HostPlatform>[
+    darwin_x64,
+    darwin_arm64,
+    linux_x64,
+    linux_arm64,
+    linux_riscv64,
+    windows_x64,
+    windows_arm64,
+  ];
+
+  // Matches a lowercase alphanumeric <os> and <arch> separated by a single '-' or '_'.
+  static final RegExp _validNameRegExp = RegExp(r'^[a-z0-9]+[-_][a-z0-9]+$');
+
+  /// The hyphen-delimited CLI representation (e.g. `'linux-x64'`).
+  final String cliName;
+
   /// Architecture name of the host platform (e.g. `'x64'`, `'arm64'`, `'riscv64'`).
-  String get platformName => switch (this) {
-    darwin_x64 || windows_x64 || linux_x64 => 'x64',
-    darwin_arm64 || windows_arm64 || linux_arm64 => 'arm64',
-    linux_riscv64 => 'riscv64',
-  };
+  final String platformName;
 
-  /// Returns the hyphen-delimited CLI representation (e.g. `'linux-x64'`).
-  String get cliName => name.replaceAll('_', '-');
+  /// The underscore-delimited representation (e.g. `'linux_x64'`).
+  String get name => cliName.replaceAll('-', '_');
 
-  /// Parses a [HostPlatform] from its [cliName] or enum [name], or returns `null` if invalid.
+  /// Parses a [HostPlatform] from its [cliName] or [name], returning canonical
+  /// constants from [values] when matched or a custom [HostPlatform] for
+  /// non-standard `<os>-<arch>` platforms, or `null` if [name] is invalid.
   static HostPlatform? tryFromName(String name) {
-    final String normalized = name.replaceAll('-', '_');
-    for (final HostPlatform value in HostPlatform.values) {
-      if (value.name == normalized) {
+    if (!_validNameRegExp.hasMatch(name)) {
+      return null;
+    }
+    final String normalizedCli = name.replaceAll('_', '-');
+    for (final HostPlatform value in values) {
+      if (value.cliName == normalizedCli) {
         return value;
       }
     }
-    return null;
+    final int separatorIndex = normalizedCli.indexOf('-');
+    final String arch = normalizedCli.substring(separatorIndex + 1);
+    return HostPlatform(normalizedCli, arch);
   }
 
   /// Returns the host platform for the specified OS and architecture.
   ///
   /// [os] is an operating system name as returned by `Platform.operatingSystem`.
   /// [arch] is an architecture name matching the [platformName] of one of the
-  /// values of this enum. Returns `null` if no match is found.
+  /// values in [values]. Returns `null` if no match is found.
   static HostPlatform? fromOsAndArch(String os, String arch) {
     return switch ((os, arch.toLowerCase())) {
       ('macos', 'x64') => darwin_x64,
@@ -61,6 +96,17 @@ enum HostPlatform {
       _ => null,
     };
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HostPlatform && other.cliName == cliName && other.platformName == platformName);
+
+  @override
+  int get hashCode => Object.hash(cliName, platformName);
+
+  @override
+  String toString() => 'HostPlatform.$name';
 }
 
 /// Representation of an artifact dependency required by a tool extension.

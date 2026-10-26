@@ -83,6 +83,20 @@ void main() {
       expect(deps.first.hostPlatform, HostPlatform.linux_x64);
       expect(deps.first.targetPlatform, 'linux-x64');
       expect(deps.last.targetPlatform, 'linux-arm64');
+
+      final Object? customHostResponse = await conn.sendRequest(
+        ArtifactService.downloadArtifactsMethod,
+        params: <String, Object?>{
+          ArtifactService.engineVersionParam: _testEngineVersion,
+          ArtifactService.hostPlatformParam: 'freebsd-x64',
+          ArtifactService.targetPlatformsParam: const <String>['freebsd-x64'],
+        },
+      );
+      final List<ArtifactDependency> customHostDeps = ArtifactDependency.listFromJson(
+        customHostResponse,
+      );
+      expect(customHostDeps, hasLength(1));
+      expect(customHostDeps.single.hostPlatform, const HostPlatform('freebsd-x64', 'x64'));
     });
 
     test('throws RpcException on missing or invalid engineVersion or hostPlatform', () async {
@@ -129,7 +143,7 @@ void main() {
           ArtifactService.downloadArtifactsMethod,
           params: const <String, Object?>{
             ArtifactService.engineVersionParam: _testEngineVersion,
-            ArtifactService.hostPlatformParam: 'invalid-host',
+            ArtifactService.hostPlatformParam: 'invalid/host',
           },
         ),
         throwsA(
