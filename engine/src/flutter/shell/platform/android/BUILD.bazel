@@ -12,6 +12,7 @@ load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//build_defs/dart:snapshot.bzl", "bin_to_assembly")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/gn:gn_action.bzl", "gn_action")
+load("//build_defs/java:robolectric.bzl", "android_test_apk", "java_classes", "robolectric_tests")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -5034,3 +5035,52 @@ exports_files([
     "io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
     "io/flutter/view/AccessibilityBridge.java",
 ])
+
+# The embedding's Java tests (test/; run_tests.py --type java runs them
+# through Gradle in test_runner/): compiled against this build's flutter.jar,
+# android.jar and the pinned Maven test dependencies, and run one class per
+# target under Robolectric on the engine's JDK (build_defs/java/robolectric.bzl;
+# NEED_DECISION D12). Under an Android configuration, as flutter.jar is.
+java_classes(
+    name = "java_tests_classes",
+    # The tests and their helpers, as Gradle's source set takes the directory.
+    srcs = glob(["test/**/*.java"]),  # buildifier: disable=bad-recursive-glob
+    bootclasspath = "@android_tools//:sdk/platforms/android-37.0/android.jar",
+    classpath = [
+        ":android_jar",
+        "@android_tools//:sdk/build-tools/37.0.0/core-lambda-stubs.jar",
+        "@maven_android_tests//:jars",
+    ],
+)
+
+# What AGP's unit tests hand Robolectric (includeAndroidResources): the
+# test module's manifest merged (its namespace, the SDK levels), linked with
+# the androidx libraries' resources into a resource APK by aapt2, and the R
+# classes over its ids.
+android_test_apk(
+    name = "java_tests_apk",
+    aapt2 = "@android_tools//:sdk/build-tools/37.0.0/aapt2",
+    android_jar = "@android_tools//:sdk/platforms/android-37.0/android.jar",
+    library_manifests = ["@maven_android_tests//:aar_manifests"],
+    library_resources = ["@maven_android_tests//:aar_resources"],
+    manifest = "test_runner/src/main/AndroidManifest.xml",
+    namespace = "io.flutter.app.test",
+)
+
+robolectric_tests(
+    name = "java_tests",
+    android_all = "@maven_android_tests//:android_all",
+    apk = ":java_tests_apk",
+    classes = ":java_tests_classes",
+    javaagent = "@maven_android_tests//:org_mockito_mockito_core",
+    robolectric_properties = "test_runner/src/main/resources/robolectric.properties",
+    # android.jar last, as AGP's mockable android jar: the runner's own
+    # classes name framework types (Config's Application default) before
+    # Robolectric's sandbox loads the real framework from android-all.
+    runtime_classpath = [
+        ":android_jar",
+        "@maven_android_tests//:jars",
+        "@android_tools//:sdk/platforms/android-37.0/android.jar",
+    ],
+    tests = glob(["test/**/*Test.java"]),  # buildifier: disable=bad-recursive-glob
+)
