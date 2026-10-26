@@ -49,10 +49,32 @@ def _flutter_test_assets_impl(ctx):
     # The package's assets, each at its key: the path under the package's
     # directory, as flutter_tools keys an asset of the application.
     root = ctx.attr.assets_root
+    keyed = []
     for file in ctx.files.assets:
         if root and not file.short_path.startswith(root + "/"):
             fail("%s: assets: %s is not under %s" % (ctx.label, file.short_path, root))
-        key = file.short_path[len(root) + 1:] if root else file.short_path
+        keyed.append((file.short_path[len(root) + 1:] if root else file.short_path, file))
+
+    # A dependency's assets, as flutter_tools keys them: `packages/<name>/`
+    # and the file's path under the package's lib/ (an asset the pubspec
+    # names as `packages/flutter_gallery_assets/people/ali_landscape.png`
+    # is lib/people/ali_landscape.png of that package); and a dependency's
+    # fonts, which its own pubspec declares relative to its root
+    # (cupertino_icons' assets/CupertinoIcons.ttf), under `packages/<name>/`
+    # at that path -- its assets/ and fonts/ directories. All of them rather
+    # than the pubspecs' lists: the superset is harmless to a test.
+    for target, name in ctx.attr.package_assets.items():
+        for file in target[DefaultInfo].files.to_list():
+            path = file.short_path
+            if path.startswith("../"):
+                path = path.split("/", 2)[2]
+            elif target.label.package:
+                path = path[len(target.label.package) + 1:]
+            if path.startswith("lib/"):
+                keyed.append(("packages/%s/%s" % (name, path[len("lib/"):]), file))
+            elif path.startswith("assets/") or path.startswith("fonts/"):
+                keyed.append(("packages/%s/%s" % (name, path), file))
+    for key, file in keyed:
         placed = ctx.actions.declare_file(prefix + "/" + key)
         ctx.actions.symlink(output = placed, target_file = file)
         outputs.append(placed)
@@ -115,6 +137,12 @@ flutter_test_assets = rule(
         "assets_root": attr.string(
             doc = "The package's directory, relative to the repository (`dev/integration_tests/ui`): " +
                   "the assets' keys are their paths under it.",
+        ),
+        "package_assets": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "Dependencies whose files the pubspec names as assets (`packages/<name>/...`: their lib/ files) " +
+                  "or whose own pubspecs declare fonts (their assets/ and fonts/ files, at their root-relative " +
+                  "paths): each one's files (a pub repository's `sources`) to the package's name.",
         ),
         "shaders": attr.label_keyed_string_dict(
             allow_files = [".frag"],

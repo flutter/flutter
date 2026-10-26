@@ -1,0 +1,47 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The gallery's tests, as `flutter test` runs them (the framework_tests
+# shard's runFlutterTest over this tree): the demos' smoke tests and the
+# unit tests beside them. The gallery's assets are hosted packages'
+# (flutter_gallery_assets, shrine_images), placed as `packages/<name>/...`.
+
+load("//build_defs/dart:flutter_package_tests.bzl", "flutter_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["**/*.dart"],
+        exclude = [
+            "**/*_test.dart",
+            # The driver-side program of the live smoke test, not a test.
+            "live_smoketest.dart",
+        ],
+    ),
+    assets = ["//dev/integration_tests/flutter_gallery:lib/gallery/example_code.dart"],
+    directory = "dev/integration_tests/flutter_gallery",
+    # The smoke test visits every demo twice (Android and iOS): over
+    # medium's five minutes here, within large's fifteen.
+    large = ["smoke_test.dart"],
+    package = "flutter_gallery",
+    # pubspec.yaml's assets: flutter_gallery_assets' images, videos and fonts,
+    # shrine_images (a package of its own), and cupertino_icons' font, which
+    # the Cupertino navigation demo's golden test loads from the bundle.
+    package_assets = {
+        "@pub//cupertino_icons:sources": "cupertino_icons",
+        "@pub//flutter_gallery_assets:sources": "flutter_gallery_assets",
+        "@pub//shrine_images:sources": "shrine_images",
+    },
+    packages = {"//packages/flutter_goldens:sources": "flutter_goldens"},
+    tests = glob(["**/*_test.dart"]),
+    # Dev dependencies of the driver and the device tests, and the web
+    # implementations of the plugins, which no test reaches.
+    without = [
+        "flutter_driver",
+        "flutter_web_plugins",
+        "integration_test",
+    ],
+)
