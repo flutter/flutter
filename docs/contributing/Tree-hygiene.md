@@ -488,7 +488,7 @@ Once everything has landed:
 
 Old APIs can be marked as deprecated as part of this process. Deprecation is not a way to avoid making a breaking change; you should consider deprecating an API to be equivalent to removing it, as some of our customers (and we ourselves) consider using a deprecated API to be anathema (triggering a build failure).
 
-To any users receiving a deprecation message, the steps to migrate off of the deprecated API should be crystal clear. Typically this means writing a migration guide and including it in the deprecation message.
+To any users receiving a deprecation message, the steps to migrate off of the deprecated API should be crystal clear. Typically this means writing a migration guide and including a link to it in the deprecation message.
 
 The syntax for deprecations must match the following pattern:
 
