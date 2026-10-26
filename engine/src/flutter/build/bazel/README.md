@@ -916,8 +916,8 @@ also wraps chromedriver). Under it Chrome loads 80 libraries from the
 sysroot and 8 from the host: `ld-linux`, `libc`, `libm`, `libdl`,
 `libpthread`, `librt`, `libresolv` and `libgcc_s`, by design -- the host's
 dynamic loader must match its own libc, and a library built against glibc
-2.31 runs on any newer one. What stays the host's: those eight, the X
-display (Xvfb), and the configuration the sysroot's other libraries read
+2.31 runs on any newer one. What stays the host's: those eight, xkbcomp
+(below), and the configuration the sysroot's other libraries read
 by absolute path (GTK's settings). Firefox's
 policies file, which felt writes beside the executable it resolves, is
 written beside the launcher's script by the rule. The label flag
@@ -949,6 +949,32 @@ default is hintfull, under which the TrueType hints of Liberation Sans
 tests, median 5.1 s), Firefox 3,994 s (377, median 9.3 s -- the cache it
 rebuilds per test now covers 22 files; 1.3 s above the host's libraries
 and caches).
+
+The X display comes from the build as well. felt starts `Xvfb` by name
+for Firefox when there is no `DISPLAY` (headless Firefox initializes
+WebGL only on a display), and took the host's. Xvfb is a program the
+build sysroot has no trace of, so `debian_runtime_lock.py` reads, for
+what the sysroot lacks, bullseye's own `Packages` index as
+snapshot.debian.org had it at `--index`'s timestamp (`20240901T000000Z`,
+the month of the sysroot's newest package): a package's version,
+dependencies, file and sha256 come from the index, and a package the
+sysroot has keeps the sysroot's version. `--package xvfb` closes to eight
+more packages (xvfb, libxfont2, libfontenc1, libunwind8, libaudit1,
+libcap-ng0, libbz2-1.0 and, as data, xkb-data: 148 in all, 262 MB
+unpacked). `display_launcher` writes a script named `Xvfb` that runs the
+sysroot's on the sysroot's libraries with the server's built-in fonts and
+the sysroot's keyboard data (`-fp built-ins -xkbdir`), and `web_ui_test`
+puts it first on the test's PATH (`tools`; the `_BROWSERS` entry for
+Firefox names it). One thing of X stays the host's: `xkbcomp`, the keymap
+compiler Xvfb runs at the path built into it, `/usr/bin/xkbcomp`
+(x11-xkb-utils; without it the server falls back to its pre-XKB keymap,
+with a warning). Under `--//build_defs/web:browser_libraries=//build_defs/web:host_libraries`
+the script hands over to the host's Xvfb, the next on PATH. Measured: the
+923 tests pass in 1,488 s of wall time, Firefox's 377 at a median of 7.9 s
+(9.3 s on the host's Xvfb, which scans the host's font directories at
+start; the host-libraries form's 8.0), Chrome's 546 at 5.0 s (unchanged
+path; 5.1 before). The sysroot's Xvfb loads 29 libraries from the sysroot
+and glibc's 6 from the host.
 
 ```sh
 bazel test //engine/src/flutter/lib/web_ui:tests                              # Chrome's sixteen suites and Firefox's eight: 923 tests
