@@ -102,7 +102,7 @@ dependencies:
   collection: ^1.19.1
   convert: 3.1.2
   coverage: 1.15.1
-  crypto: 3.0.7
+  crypto: 3.0.8
   csslib: 1.0.2
   cupertino_icons: 1.0.9
   cupertino_ui: ^1.1.4
@@ -222,4 +222,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 22iluo
+# PUBSPEC CHECKSUM: nk960h
