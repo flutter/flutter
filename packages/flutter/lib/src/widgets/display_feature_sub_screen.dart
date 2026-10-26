@@ -205,13 +205,23 @@ class DisplayFeatureSubScreen extends StatelessWidget {
           if (screen.left < bounds.left) {
             // There is a smaller sub-screen, left of the display feature
             newSubScreens.add(
-              Rect.fromLTWH(screen.left, screen.top, bounds.left - screen.left, screen.height),
+              Rect.fromLTRB(
+                screen.left,
+                screen.top,
+                math.min(bounds.left, screen.right),
+                screen.bottom,
+              ),
             );
           }
           if (screen.right > bounds.right) {
             // There is a smaller sub-screen, right of the display feature
             newSubScreens.add(
-              Rect.fromLTWH(bounds.right, screen.top, screen.right - bounds.right, screen.height),
+              Rect.fromLTRB(
+                math.max(bounds.right, screen.left),
+                screen.top,
+                screen.right,
+                screen.bottom,
+              ),
             );
           }
         } else if (screen.left >= bounds.left && screen.right <= bounds.right) {
@@ -219,17 +229,22 @@ class DisplayFeatureSubScreen extends StatelessWidget {
           if (screen.top < bounds.top) {
             // There is a smaller sub-screen, above the display feature
             newSubScreens.add(
-              Rect.fromLTWH(screen.left, screen.top, screen.width, bounds.top - screen.top),
+              Rect.fromLTRB(
+                screen.left,
+                screen.top,
+                screen.right,
+                math.min(bounds.top, screen.bottom),
+              ),
             );
           }
           if (screen.bottom > bounds.bottom) {
             // There is a smaller sub-screen, below the display feature
             newSubScreens.add(
-              Rect.fromLTWH(
+              Rect.fromLTRB(
                 screen.left,
-                bounds.bottom,
-                screen.width,
-                screen.bottom - bounds.bottom,
+                math.max(bounds.bottom, screen.top),
+                screen.right,
+                screen.bottom,
               ),
             );
           }
