@@ -72,8 +72,8 @@ class ImageDecoderImpeller final : public ImageDecoder {
   /// @brief Shrinks |target_size| by a single factor, keeping its aspect
   ///        ratio, so that it fits within |max_texture_size|. Each side stays
   ///        at least one pixel. A size that already fits is returned as is.
-  static SkISize ClampToMaxTextureSize(const SkISize& target_size,
-                                       const impeller::ISize& max_texture_size);
+  static SkISize ClampToMaxTextureSize(SkISize target_size,
+                                       impeller::ISize max_texture_size);
 
   static absl::StatusOr<DecompressResult> DecompressTexture(
       ImageDescriptor* descriptor,

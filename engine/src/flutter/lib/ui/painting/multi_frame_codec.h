@@ -24,7 +24,10 @@ class MultiFrameCodec : public Codec {
   ///                         `targetHeight`. Frames are always decoded and
   ///                         composited at the intrinsic size of the image,
   ///                         so that blending and disposal stay exact, and
-  ///                         only the finished frame is resized.
+  ///                         only the finished frame is resized. Like
+  ///                         single-frame images, it is resized with bilinear
+  ///                         filtering and no mipmaps
+  ///                         (`SkFilterMode::kLinear`, `SkMipmapMode::kNone`).
   MultiFrameCodec(std::shared_ptr<ImageGenerator> generator,
                   SkISize target_size);
 

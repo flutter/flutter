@@ -347,8 +347,8 @@ ImageDecoderImpeller::~ImageDecoderImpeller() = default;
 
 // static
 SkISize ImageDecoderImpeller::ClampToMaxTextureSize(
-    const SkISize& target_size,
-    const impeller::ISize& max_texture_size) {
+    SkISize target_size,
+    impeller::ISize max_texture_size) {
   if (target_size.width() <= max_texture_size.width &&
       target_size.height() <= max_texture_size.height) {
     return target_size;

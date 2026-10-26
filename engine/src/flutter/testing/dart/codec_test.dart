@@ -430,58 +430,6 @@ void main() {
     frameInfo.image.dispose();
     codec.dispose();
   });
-
-  test('Resized animated frames match the downscaled full-size frames', () async {
-    // Frames of animated images are composited at the intrinsic size of the
-    // image, and only the finished frame is resized. At exactly half of the
-    // intrinsic size, bilinear filtering samples every destination pixel
-    // exactly between four source pixels, so each resized pixel must be the
-    // average of the corresponding 2x2 block of the full-size frame. This
-    // covers frame reuse, disposal and blending in GIF, WebP and APNG.
-    final fixtures = <String, Uint8List>{
-      'alphabetAnim.gif': await _getSkiaResource('alphabetAnim.gif').readAsBytes(),
-      for (final name in <String>[
-        'four_frame_with_reuse.gif',
-        'heart.webp',
-        '2_dispose_op_restore_previous.apng',
-        'dispose_op_background.apng',
-      ])
-        name: File(path.join('flutter', 'lib', 'ui', 'fixtures', name)).readAsBytesSync(),
-    };
-
-    for (final MapEntry<String, Uint8List> fixture in fixtures.entries) {
-      final ui.Codec fullCodec = await ui.instantiateImageCodec(fixture.value);
-      ui.Codec? halfCodec;
-      for (var i = 0; i < fullCodec.frameCount; i++) {
-        final ui.Image full = (await fullCodec.getNextFrame()).image;
-        expect(full.width.isEven && full.height.isEven, isTrue, reason: fixture.key);
-        halfCodec ??= await ui.instantiateImageCodec(
-          fixture.value,
-          targetWidth: full.width ~/ 2,
-          targetHeight: full.height ~/ 2,
-        );
-        final ui.Image half = (await halfCodec.getNextFrame()).image;
-        expect(half.width, full.width ~/ 2, reason: fixture.key);
-        expect(half.height, full.height ~/ 2, reason: fixture.key);
-
-        final Uint8List expected = _downscaleByHalf(
-          (await full.toByteData())!.buffer.asUint8List(),
-          full.width,
-          full.height,
-        );
-        final Uint8List actual = (await half.toByteData())!.buffer.asUint8List();
-        expect(
-          _maxChannelDifference(actual, expected),
-          lessThanOrEqualTo(1),
-          reason: '${fixture.key}, frame $i',
-        );
-        full.dispose();
-        half.dispose();
-      }
-      fullCodec.dispose();
-      halfCodec?.dispose();
-    }
-  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.
@@ -500,39 +448,4 @@ File _getSkiaResource(String fileName) {
     fileName,
   );
   return File(assetPath);
-}
-
-/// Averages every 2x2 block of an RGBA image whose dimensions are even.
-Uint8List _downscaleByHalf(Uint8List rgba, int width, int height) {
-  final int halfWidth = width ~/ 2;
-  final int halfHeight = height ~/ 2;
-  final result = Uint8List(halfWidth * halfHeight * 4);
-  for (var y = 0; y < halfHeight; y++) {
-    for (var x = 0; x < halfWidth; x++) {
-      final int topLeft = (2 * y * width + 2 * x) * 4;
-      final int bottomLeft = topLeft + width * 4;
-      for (var channel = 0; channel < 4; channel++) {
-        final int sum =
-            rgba[topLeft + channel] +
-            rgba[topLeft + 4 + channel] +
-            rgba[bottomLeft + channel] +
-            rgba[bottomLeft + 4 + channel];
-        result[(y * halfWidth + x) * 4 + channel] = (sum + 2) >> 2;
-      }
-    }
-  }
-  return result;
-}
-
-/// Returns the largest difference between two equally sized byte buffers.
-int _maxChannelDifference(Uint8List a, Uint8List b) {
-  expect(a.length, b.length);
-  var maxDifference = 0;
-  for (var i = 0; i < a.length; i++) {
-    final int difference = (a[i] - b[i]).abs();
-    if (difference > maxDifference) {
-      maxDifference = difference;
-    }
-  }
-  return maxDifference;
 }

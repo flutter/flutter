@@ -14,6 +14,7 @@
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -64,7 +65,7 @@ static void InvokeNextFrameCallback(
 // image_decoder_skia.cc and `ResizeOnCpu` in image_decoder_impeller.cc), so
 // `targetWidth` and `targetHeight` behave the same way for every image.
 static std::optional<SkBitmap> ResizeFrame(const SkBitmap& frame,
-                                           const SkISize& target_size) {
+                                           SkISize target_size) {
   SkBitmap resized;
   if (!resized.tryAllocPixels(frame.info().makeDimensions(target_size))) {
     return std::nullopt;
@@ -189,10 +190,9 @@ MultiFrameCodec::State::GetNextFrameImage(
   if (bitmap.dimensions() != target_size) {
     std::optional<SkBitmap> resized = ResizeFrame(bitmap, target_size);
     if (!resized.has_value()) {
-      std::ostringstream ostr;
-      ostr << "Could not resize frame " << nextFrameIndex_ << " to "
-           << target_size.width() << "x" << target_size.height();
-      std::string decode_error = ostr.str();
+      std::string decode_error =
+          absl::StrCat("Could not resize frame ", nextFrameIndex_, " to ",
+                       target_size.width(), "x", target_size.height());
       FML_LOG(ERROR) << decode_error;
       return std::make_pair(nullptr, decode_error);
     }
@@ -266,11 +266,8 @@ MultiFrameCodec::State::GetNextFrameImage(
               // image_decoder_skia.cc), limit the texture to the maximum
               // texture size.
               skImage = SkImages::CrossContextTextureFromPixmap(
-                  resourceContext.get(),  // context
-                  pixmap,                 // pixmap
-                  true,                   // buildMips
-                  true                    // limitToMaxTextureSize
-              );
+                  resourceContext.get(), pixmap, /*buildMips=*/true,
+                  /*limitToMaxTextureSize=*/true);
             } else {
               // Defer decoding until time of draw later on the raster thread.
               // Can happen when GL operations are currently forbidden such as
