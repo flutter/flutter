@@ -3092,6 +3092,50 @@ void main() {
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, moreOrLessEquals(tabRight));
   });
 
+  testWidgets('Scrollable TabBar can change index before it is laid out', (
+    WidgetTester tester,
+  ) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/171372
+
+    final tabs = List<Tab>.generate(20, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    final navigatorKey = GlobalKey<NavigatorState>();
+    // The '/' route is built under the opaque '/detail' route, so its TabBar
+    // is not laid out.
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        initialRoute: '/detail',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(isScrollable: true, controller: controller, tabs: tabs),
+            ),
+          ),
+          '/detail': (BuildContext context) => const Scaffold(body: Text('detail')),
+        },
+      ),
+    );
+
+    controller.animateTo(tabs.length - 1);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    // The selected tab should be visible and right justified.
+    final double tabRight = 800.0 - kTabLabelPadding.right;
+    expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, moreOrLessEquals(tabRight));
+  });
+
   testWidgets('Indicator elastic animation', (WidgetTester tester) async {
     const indicatorWidth = 50.0;
     final tabs = List<Widget>.generate(4, (int index) {

@@ -1827,13 +1827,36 @@ class _TabBarState extends State<TabBar> {
     return _tabScrollOffset(_currentIndex!, viewportWidth, minExtent, maxExtent);
   }
 
+  // Whether the tab strip has been laid out, so that [_tabCenteredScrollOffset]
+  // can be computed.
+  //
+  // The TabBar can be built without being laid out, for example while it is
+  // in a route covered by an opaque route. If it is not laid out yet, the
+  // position is marked to jump to the current tab once it is laid out.
+  bool _canScrollToTab() {
+    final ScrollPosition position = _effectiveScrollController.position;
+    if (position.hasViewportDimension && position.hasContentDimensions) {
+      return true;
+    }
+    if (position is _TabBarScrollPosition) {
+      position.markNeedsPixelsCorrection();
+    }
+    return false;
+  }
+
   void _scrollToCurrentIndex() {
+    if (!_canScrollToTab()) {
+      return;
+    }
     final double offset = _tabCenteredScrollOffset(_currentIndex!);
 
     _effectiveScrollController.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
   }
 
   void _scrollToControllerValue() {
+    if (!_canScrollToTab()) {
+      return;
+    }
     final double? leadingPosition = _currentIndex! > 0
         ? _tabCenteredScrollOffset(_currentIndex! - 1)
         : null;
