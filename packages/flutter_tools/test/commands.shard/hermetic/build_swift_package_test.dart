@@ -1317,6 +1317,289 @@ let package = Package(
         )''');
       });
 
+      testWithoutContext(
+        'generateDependencies includes VMService when VMService.xcframework exists',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          final processManager = FakeProcessManager.empty();
+          const FlutterDarwinPlatform targetPlatform = .ios;
+          fs
+              .directory('$debugFrameworksDirectoryPath/VMService.xcframework')
+              .createSync(recursive: true);
+          final BuildSwiftPackageUtils testUtils = _createTestUtils(
+            fs: fs,
+            logger: logger,
+            processManager: processManager,
+          );
+          final appAndNativeAssetsDependencies = AppFrameworkAndNativeAssetsDependencies(
+            targetPlatform: targetPlatform,
+            utils: testUtils,
+          );
+          final (
+            List<SwiftPackageTargetDependency> targetDependencies,
+            List<SwiftPackageTarget> packageTargets,
+          ) = appAndNativeAssetsDependencies.generateDependencies(
+            xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
+          );
+          expect(targetDependencies.length, 2);
+          expect(packageTargets.length, 2);
+          expect(targetDependencies[0].format(), contains('.target(name: "App")'));
+          expect(packageTargets[0].format(), '''
+.binaryTarget(
+            name: "App",
+            path: "Frameworks/App.xcframework"
+        )''');
+          expect(targetDependencies[1].format(), contains('.target(name: "VMService")'));
+          expect(packageTargets[1].format(), '''
+.binaryTarget(
+            name: "VMService",
+            path: "Frameworks/VMService.xcframework"
+        )''');
+        },
+      );
+
+      testWithoutContext('generateArtifacts creates VMService.xcframework in profile mode and deletes stale VMService.xcframework otherwise', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const profileFrameworksDirectoryPath =
+            '$nativeIntegrationSwiftPackagePath/Profile/Frameworks';
+        final Directory xcframeworkOutput = fs.directory(profileFrameworksDirectoryPath);
+        final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
+        final Directory appDirectory = fs.directory(_flutterAppPath)..createSync(recursive: true);
+        fs.currentDirectory = appDirectory;
+
+        final Directory generatedAppFramework = cacheDirectory.childDirectory(
+          'Profile/iphoneos/App.framework',
+        )..createSync(recursive: true);
+        generatedAppFramework.childFile('flutter_assets/NativeAssetsManifest.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"native-assets":{}}');
+        final Directory generatedVmServiceFramework = cacheDirectory.childDirectory(
+          'Profile/iphoneos/VMService.framework',
+        )..createSync(recursive: true);
+        final Directory generatedAppSimulatorFramework = cacheDirectory.childDirectory(
+          'Profile/iphonesimulator/App.framework',
+        )..createSync(recursive: true);
+        generatedAppSimulatorFramework.childFile('flutter_assets/NativeAssetsManifest.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"native-assets":{}}');
+        final Directory generatedVmServiceSimulatorFramework = cacheDirectory.childDirectory(
+          'Profile/iphonesimulator/VMService.framework',
+        )..createSync(recursive: true);
+        final Directory generatedReleaseAppFramework = cacheDirectory.childDirectory(
+          'Release/iphoneos/App.framework',
+        )..createSync(recursive: true);
+        generatedReleaseAppFramework.childFile('flutter_assets/NativeAssetsManifest.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"native-assets":{}}');
+        final Directory generatedReleaseAppSimulatorFramework = cacheDirectory.childDirectory(
+          'Release/iphonesimulator/App.framework',
+        )..createSync(recursive: true);
+        generatedReleaseAppSimulatorFramework.childFile('flutter_assets/NativeAssetsManifest.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"native-assets":{}}');
+
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              generatedAppFramework.path,
+              '-framework',
+              generatedAppSimulatorFramework.path,
+              '-output',
+              '$profileFrameworksDirectoryPath/App.xcframework',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--sign',
+              codesignIdentity,
+              '--timestamp=none',
+              '$profileFrameworksDirectoryPath/App.xcframework',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              generatedVmServiceFramework.path,
+              '-framework',
+              generatedVmServiceSimulatorFramework.path,
+              '-output',
+              '$profileFrameworksDirectoryPath/VMService.xcframework',
+            ],
+            onRun: (_) {
+              xcframeworkOutput.childDirectory('VMService.xcframework').createSync(recursive: true);
+            },
+          ),
+          const FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--sign',
+              codesignIdentity,
+              '--timestamp=none',
+              '$profileFrameworksDirectoryPath/VMService.xcframework',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              generatedReleaseAppFramework.path,
+              '-framework',
+              generatedReleaseAppSimulatorFramework.path,
+              '-output',
+              '$profileFrameworksDirectoryPath/App.xcframework',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--sign',
+              codesignIdentity,
+              '$profileFrameworksDirectoryPath/App.xcframework',
+            ],
+          ),
+        ]);
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
+          logger: logger,
+          processManager: processManager,
+          buildSystem: FakeBuildSystem(
+            expectations: <BuildExpectations>[
+              BuildExpectations(
+                expectedTargetName: 'profile_ios_bundle_flutter_assets',
+                expectedProjectDirPath: _flutterAppPath,
+                expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
+                expectedOutputDirPath: '$cacheDirectoryPath/Profile/iphoneos',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
+                expectedCacheDirPath: _flutterCachePath,
+                expectedFlutterRootDirPath: _flutterRoot,
+                expectedEngineVersion: _engineVersion,
+                expectedDefines: <String, String>{
+                  'TargetFile': 'lib/main.dart',
+                  'TargetPlatform': 'ios',
+                  'IosArchs': 'arm64',
+                  'SdkRoot': _iosSdkRoot,
+                  'BuildMode': 'profile',
+                  'DartObfuscation': 'false',
+                  'TrackWidgetCreation': 'false',
+                  'TreeShakeIcons': 'true',
+                  'BuildSwiftPackage': 'true',
+                },
+                expectedGenerateDartPluginRegistry: true,
+              ),
+              BuildExpectations(
+                expectedTargetName: 'debug_ios_bundle_flutter_assets',
+                expectedProjectDirPath: _flutterAppPath,
+                expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
+                expectedOutputDirPath: '$cacheDirectoryPath/Profile/iphonesimulator',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
+                expectedCacheDirPath: _flutterCachePath,
+                expectedFlutterRootDirPath: _flutterRoot,
+                expectedEngineVersion: _engineVersion,
+                expectedDefines: <String, String>{
+                  'TargetFile': 'lib/main.dart',
+                  'TargetPlatform': 'ios',
+                  'IosArchs': 'x86_64 arm64',
+                  'SdkRoot': _iosSdkRoot,
+                  'BuildMode': 'profile',
+                  'DartObfuscation': 'false',
+                  'TrackWidgetCreation': 'false',
+                  'TreeShakeIcons': 'true',
+                  'BuildSwiftPackage': 'true',
+                },
+                expectedGenerateDartPluginRegistry: true,
+              ),
+              BuildExpectations(
+                expectedTargetName: 'release_ios_bundle_flutter_assets',
+                expectedProjectDirPath: _flutterAppPath,
+                expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
+                expectedOutputDirPath: '$cacheDirectoryPath/Release/iphoneos',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
+                expectedCacheDirPath: _flutterCachePath,
+                expectedFlutterRootDirPath: _flutterRoot,
+                expectedEngineVersion: _engineVersion,
+                expectedDefines: <String, String>{
+                  'TargetFile': 'lib/main.dart',
+                  'TargetPlatform': 'ios',
+                  'IosArchs': 'arm64',
+                  'SdkRoot': _iosSdkRoot,
+                  'BuildMode': 'release',
+                  'DartObfuscation': 'false',
+                  'TrackWidgetCreation': 'false',
+                  'TreeShakeIcons': 'true',
+                  'BuildSwiftPackage': 'true',
+                },
+                expectedGenerateDartPluginRegistry: true,
+              ),
+              BuildExpectations(
+                expectedTargetName: 'debug_ios_bundle_flutter_assets',
+                expectedProjectDirPath: _flutterAppPath,
+                expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
+                expectedOutputDirPath: '$cacheDirectoryPath/Release/iphonesimulator',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
+                expectedCacheDirPath: _flutterCachePath,
+                expectedFlutterRootDirPath: _flutterRoot,
+                expectedEngineVersion: _engineVersion,
+                expectedDefines: <String, String>{
+                  'TargetFile': 'lib/main.dart',
+                  'TargetPlatform': 'ios',
+                  'IosArchs': 'x86_64 arm64',
+                  'SdkRoot': _iosSdkRoot,
+                  'BuildMode': 'release',
+                  'DartObfuscation': 'false',
+                  'TrackWidgetCreation': 'false',
+                  'TreeShakeIcons': 'true',
+                  'BuildSwiftPackage': 'true',
+                },
+                expectedGenerateDartPluginRegistry: true,
+              ),
+            ],
+          ),
+        );
+        final appAndNativeAssetsDependencies = AppFrameworkAndNativeAssetsDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await appAndNativeAssetsDependencies.generateArtifacts(
+          buildInfo: BuildInfo.profile,
+          cacheDirectory: cacheDirectory,
+          packageConfigPath: '$flutterAppDartToolPath/package_config.json',
+          targetFile: 'lib/main.dart',
+          xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: codesignIdentity,
+        );
+        expect(xcframeworkOutput.childDirectory('VMService.xcframework').existsSync(), isTrue);
+
+        await appAndNativeAssetsDependencies.generateArtifacts(
+          buildInfo: BuildInfo.release,
+          cacheDirectory: cacheDirectory,
+          packageConfigPath: '$flutterAppDartToolPath/package_config.json',
+          targetFile: 'lib/main.dart',
+          xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: codesignIdentity,
+        );
+        expect(xcframeworkOutput.childDirectory('VMService.xcframework').existsSync(), isFalse);
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(logger.warningText, isEmpty);
+      });
+
       testWithoutContext('determineTarget', () {
         final fs = MemoryFileSystem.test();
         final logger = BufferLogger.test();
@@ -2731,6 +3014,170 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
             path: "Frameworks/App.xcframework"
         )''');
       });
+
+      testWithoutContext(
+        'generateDependencies includes VMService when VMService.xcframework exists',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          final processManager = FakeProcessManager.empty();
+          const FlutterDarwinPlatform targetPlatform = .macos;
+          fs
+              .directory('$debugFrameworksDirectoryPath/VMService.xcframework')
+              .createSync(recursive: true);
+          final BuildSwiftPackageUtils testUtils = _createTestUtils(
+            fs: fs,
+            logger: logger,
+            processManager: processManager,
+          );
+          final appAndNativeAssetsDependencies = AppFrameworkAndNativeAssetsDependencies(
+            targetPlatform: targetPlatform,
+            utils: testUtils,
+          );
+          final (
+            List<SwiftPackageTargetDependency> targetDependencies,
+            List<SwiftPackageTarget> packageTargets,
+          ) = appAndNativeAssetsDependencies.generateDependencies(
+            xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
+          );
+          expect(targetDependencies.length, 2);
+          expect(packageTargets.length, 2);
+          expect(targetDependencies[0].format(), contains('.target(name: "App")'));
+          expect(packageTargets[0].format(), '''
+.binaryTarget(
+            name: "App",
+            path: "Frameworks/App.xcframework"
+        )''');
+          expect(targetDependencies[1].format(), contains('.target(name: "VMService")'));
+          expect(packageTargets[1].format(), '''
+.binaryTarget(
+            name: "VMService",
+            path: "Frameworks/VMService.xcframework"
+        )''');
+        },
+      );
+
+      testWithoutContext(
+        'generateArtifacts creates VMService.xcframework in profile mode on macos',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          const profileFrameworksDirectoryPath =
+              '$nativeIntegrationSwiftPackagePath/Profile/Frameworks';
+          final Directory xcframeworkOutput = fs.directory(profileFrameworksDirectoryPath);
+          final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
+          final Directory appDirectory = fs.directory(_flutterAppPath)..createSync(recursive: true);
+          fs.currentDirectory = appDirectory;
+
+          final Directory generatedAppFramework = cacheDirectory.childDirectory(
+            'Profile/macosx/App.framework',
+          )..createSync(recursive: true);
+          generatedAppFramework.childFile('Resources/flutter_assets/NativeAssetsManifest.json')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('{"native-assets":{}}');
+          final Directory generatedVmServiceFramework = cacheDirectory.childDirectory(
+            'Profile/macosx/VMService.framework',
+          )..createSync(recursive: true);
+
+          final processManager = FakeProcessManager.list([
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'xcodebuild',
+                '-create-xcframework',
+                '-framework',
+                generatedAppFramework.path,
+                '-output',
+                '$profileFrameworksDirectoryPath/App.xcframework',
+              ],
+            ),
+            const FakeCommand(
+              command: <String>[
+                'codesign',
+                '--force',
+                '--sign',
+                codesignIdentity,
+                '--timestamp=none',
+                '$profileFrameworksDirectoryPath/App.xcframework',
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'xcodebuild',
+                '-create-xcframework',
+                '-framework',
+                generatedVmServiceFramework.path,
+                '-output',
+                '$profileFrameworksDirectoryPath/VMService.xcframework',
+              ],
+              onRun: (_) {
+                xcframeworkOutput
+                    .childDirectory('VMService.xcframework')
+                    .createSync(recursive: true);
+              },
+            ),
+            const FakeCommand(
+              command: <String>[
+                'codesign',
+                '--force',
+                '--sign',
+                codesignIdentity,
+                '--timestamp=none',
+                '$profileFrameworksDirectoryPath/VMService.xcframework',
+              ],
+            ),
+          ]);
+          const FlutterDarwinPlatform targetPlatform = .macos;
+          final BuildSwiftPackageUtils testUtils = _createTestUtils(
+            fs: fs,
+            logger: logger,
+            processManager: processManager,
+            buildSystem: FakeBuildSystem(
+              expectations: <BuildExpectations>[
+                BuildExpectations(
+                  expectedTargetName: 'profile_macos_bundle_flutter_assets',
+                  expectedProjectDirPath: _flutterAppPath,
+                  expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
+                  expectedOutputDirPath: '$cacheDirectoryPath/Profile/macosx',
+                  expectedBuildDirPath: '$flutterAppBuildPath/',
+                  expectedCacheDirPath: _flutterCachePath,
+                  expectedFlutterRootDirPath: _flutterRoot,
+                  expectedEngineVersion: _engineVersion,
+                  expectedDefines: <String, String>{
+                    'TargetFile': 'lib/main.dart',
+                    'TargetPlatform': 'darwin',
+                    'DarwinArchs': 'x86_64 arm64',
+                    'BuildMode': 'profile',
+                    'DartObfuscation': 'false',
+                    'TrackWidgetCreation': 'false',
+                    'TreeShakeIcons': 'true',
+                    'BuildSwiftPackage': 'true',
+                  },
+                  expectedGenerateDartPluginRegistry: true,
+                ),
+              ],
+            ),
+          );
+          final appAndNativeAssetsDependencies = AppFrameworkAndNativeAssetsDependencies(
+            targetPlatform: targetPlatform,
+            utils: testUtils,
+          );
+
+          await appAndNativeAssetsDependencies.generateArtifacts(
+            buildInfo: BuildInfo.profile,
+            cacheDirectory: cacheDirectory,
+            packageConfigPath: '$flutterAppDartToolPath/package_config.json',
+            targetFile: 'lib/main.dart',
+            xcframeworkOutput: xcframeworkOutput,
+            codesignIdentity: codesignIdentity,
+          );
+
+          expect(processManager, hasNoRemainingExpectations);
+          expect(logger.warningText, isEmpty);
+          expect(xcframeworkOutput.childDirectory('VMService.xcframework').existsSync(), isTrue);
+        },
+      );
 
       testWithoutContext('determineTarget', () {
         final fs = MemoryFileSystem.test();

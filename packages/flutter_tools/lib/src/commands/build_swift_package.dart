@@ -1145,6 +1145,7 @@ class AppFrameworkAndNativeAssetsDependencies {
   final BuildSwiftPackageUtils _utils;
 
   static const String _appBinaryName = 'App';
+  static const String _vmServiceBinaryName = 'VMService';
 
   /// Builds an App.framework for every sdk and then combines them into a single XCFramework.
   /// Also, builds any native assets for each sdk and bundles them into XCFrameworks.
@@ -1161,6 +1162,7 @@ class AppFrameworkAndNativeAssetsDependencies {
   }) async {
     final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
     final appFrameworks = <Directory>[];
+    final vmServiceFrameworks = <Directory>[];
     final Map<String, List<({XcodeSdk sdk, String path})>> nativeAssetFrameworks = {};
     final List<String> warnings = [];
 
@@ -1185,6 +1187,12 @@ class AppFrameworkAndNativeAssetsDependencies {
           '$_appBinaryName.framework',
         );
         appFrameworks.add(appFramework);
+        if (buildInfo.isProfile) {
+          final Directory vmServiceFramework = outputBuildDirectory.childDirectory(
+            '$_vmServiceBinaryName.framework',
+          );
+          vmServiceFrameworks.add(vmServiceFramework);
+        }
         _findNativeAssetFrameworks(outputBuildDirectory, nativeAssetFrameworks, sdk: sdk);
       }
 
@@ -1197,6 +1205,22 @@ class AppFrameworkAndNativeAssetsDependencies {
         codesignIdentity: codesignIdentity,
         buildMode: buildInfo.mode,
       );
+
+      if (buildInfo.isProfile) {
+        await _produceXCFramework(
+          frameworks: vmServiceFrameworks,
+          frameworkBinaryName: _vmServiceBinaryName,
+          outputDirectory: xcframeworkOutput,
+          processManager: _utils.processManager,
+          codesignIdentity: codesignIdentity,
+          buildMode: buildInfo.mode,
+        );
+      } else {
+        ErrorHandlingFileSystem.deleteIfExists(
+          xcframeworkOutput.childDirectory('$_vmServiceBinaryName.xcframework'),
+          recursive: true,
+        );
+      }
 
       // Create native assets XCFrameworks
       final Directory nativeAssetOutput = xcframeworkOutput.childDirectory(_kNativeAssets);
@@ -1428,8 +1452,18 @@ class AppFrameworkAndNativeAssetsDependencies {
     relativePath: '$_kFrameworks/$_appBinaryName.xcframework',
   );
 
-  /// Generate target dependencies and binary targets for the App.xcframework and any native
-  /// assets.
+  /// The target dependency for the VMService framework.
+  SwiftPackageTargetDependency get vmServiceTargetDependency =>
+      SwiftPackageTargetDependency.target(name: _vmServiceBinaryName);
+
+  /// The binary target for the VMService framework.
+  SwiftPackageTarget get vmServiceBinaryTarget => SwiftPackageTarget.binaryTarget(
+    name: _vmServiceBinaryName,
+    relativePath: '$_kFrameworks/$_vmServiceBinaryName.xcframework',
+  );
+
+  /// Generate target dependencies and binary targets for the App.xcframework,
+  /// VMService.xcframework, and any native assets.
   (List<SwiftPackageTargetDependency>, List<SwiftPackageTarget>) generateDependencies({
     required Directory xcframeworkOutput,
   }) {
@@ -1443,6 +1477,10 @@ class AppFrameworkAndNativeAssetsDependencies {
     );
     targetDependencies.add(appTargetDependency);
     packageTargets.add(appBinaryTarget);
+    if (xcframeworkOutput.childDirectory('$_vmServiceBinaryName.xcframework').existsSync()) {
+      targetDependencies.add(vmServiceTargetDependency);
+      packageTargets.add(vmServiceBinaryTarget);
+    }
     return (targetDependencies, packageTargets);
   }
 }

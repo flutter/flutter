@@ -327,6 +327,19 @@ end
       buildInfo.mode,
     );
     appFramework.deleteSync(recursive: true);
+
+    if (buildInfo.isProfile) {
+      final Directory vmServiceFramework = macosBuildOutput.childDirectory('VMService.framework');
+      await BuildFrameworkCommand.produceXCFramework(
+        <Directory>[vmServiceFramework],
+        'VMService',
+        outputBuildDirectory,
+        processManager,
+        codesignIdentity,
+        buildInfo.mode,
+      );
+      vmServiceFramework.deleteSync(recursive: true);
+    }
   }
 
   Future<void> _produceFlutterFramework(
