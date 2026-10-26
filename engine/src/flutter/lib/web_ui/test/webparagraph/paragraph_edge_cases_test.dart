@@ -868,6 +868,34 @@ Future<void> testMain() async {
         expect(ef, hasLength(1));
         expect(ef.single.left, closeTo(abcd.right, 0.01));
       });
+
+      test('getLineNumberAt maps a leading $name to its line', () {
+        // When a line starts with a character that has no cluster of its own (at offset 0 or
+        // right after a hard newline), the first visible cluster starts after that character,
+        // but the line's text range must still start at the beginning of the line so binary
+        // search in getLineNumberAt finds it.
+        final builder = ui.ParagraphBuilder(ahemStyle)..addText('${character}abcd\n${character}ef');
+        final ui.Paragraph paragraph = builder.build()
+          ..layout(const ui.ParagraphConstraints(width: 1000));
+
+        expect(paragraph.getLineNumberAt(0), 0);
+        expect(paragraph.getLineNumberAt(6), 1);
+      });
+
+      test('A styled span containing only a $name adds no visual block', () {
+        // A span whose text has no clusters of its own maps to an empty cluster range and must
+        // not emit a zero-width TextBlock in visualBlocks or split selection boxes.
+        final builder = ui.ParagraphBuilder(ahemStyle);
+        builder.addText('ab');
+        builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFF0000FF)));
+        builder.addText(character);
+        builder.pop();
+        builder.addText('cd');
+        final ui.Paragraph paragraph = builder.build()
+          ..layout(const ui.ParagraphConstraints(width: 1000));
+
+        expect(paragraph.getBoxesForRange(0, 5), hasLength(2));
+      });
     }
   });
 }

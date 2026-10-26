@@ -248,6 +248,37 @@ Future<void> testMain() async {
       // "ab" and the hyphen are 20 each.
       expect(paragraph.longestLine, closeTo(60, tolerance));
     });
+
+    test('ignores a soft hyphen immediately after a space', () {
+      // When U+00AD immediately follows a space, breaking before "ccc" breaks at the space
+      // with no pending word before the hyphen, so no hyphen width is reserved or counted in
+      // minIntrinsicWidth.
+      const text = 'a bbbb \u00ADccc';
+      final ui.Paragraph paragraph = layoutParagraph(text, 65);
+      expect(lineBreaks(paragraph, text), 'a bbbb |ccc');
+      expect(paragraph.minIntrinsicWidth, closeTo(40, tolerance));
+    });
+
+    test('handles a soft hyphen in its own styled span', () {
+      // When U+00AD is in a separate styled span and the line does not break there, the
+      // empty cluster range of the soft-hyphen span must not emit a visual block or out-of-range
+      // cluster lookup in LTR or RTL.
+      for (final ui.TextDirection direction in ui.TextDirection.values) {
+        final builder = ui.ParagraphBuilder(
+          ui.ParagraphStyle(fontFamily: 'FlutterTest', fontSize: 10, textDirection: direction),
+        );
+        builder.addText('ab');
+        builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFFFF0000)));
+        builder.addText('\u00AD');
+        builder.pop();
+        builder.addText('cd');
+        final ui.Paragraph paragraph = builder.build()
+          ..layout(const ui.ParagraphConstraints(width: 1000));
+
+        expect(paragraph.longestLine, closeTo(40, tolerance));
+        expect(paragraph.getBoxesForRange(0, 5), hasLength(2));
+      }
+    });
   });
 
   group('Soft hyphen intrinsic widths', () {
@@ -369,6 +400,45 @@ Future<void> testMain() async {
       expect(hyphen.left, closeTo(firstFour, tolerance));
       expect(hyphen.right, closeTo(firstFour + 10, tolerance));
       expect(hyphen.direction, ui.TextDirection.rtl);
+    });
+
+    test('hit testing the hyphen returns upstream affinity on the hyphen line', () {
+      // The position after a broken soft hyphen equals the start offset of the next line, so it
+      // must have upstream affinity to stay on the hyphenated line for getLineBoundary and
+      // getClosestGlyphInfoForOffset.
+      final ui.Paragraph paragraph = layoutParagraph('abcd\u00ADe', 45);
+      for (final dx in <double>[44, 45, 55]) {
+        final ui.TextPosition pos = paragraph.getPositionForOffset(ui.Offset(dx, 5));
+        expect(pos, const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream));
+        expect(paragraph.getLineBoundary(pos), const ui.TextRange(start: 0, end: 5));
+      }
+
+      final ui.GlyphInfo? glyph = paragraph.getClosestGlyphInfoForOffset(const ui.Offset(45, 5));
+      expect(glyph, isNotNull);
+      expect(glyph!.graphemeClusterCodeUnitRange, const ui.TextRange(start: 4, end: 5));
+    });
+
+    test('getLineNumberAt maps a leading soft hyphen to its line', () {
+      // When a line starts with U+00AD (at offset 0 or right after a hard newline), the first
+      // visible cluster starts after the soft hyphen, but the line's text range must still
+      // start at the beginning of the line so binary search in getLineNumberAt finds it.
+      final ui.Paragraph atStart = layoutParagraph('\u00ADabcd\ne', 1000);
+      expect(atStart.getLineNumberAt(0), 0);
+
+      final ui.Paragraph afterNewline = layoutParagraph('a\nb\n\u00ADc\nd', 1000);
+      expect(afterNewline.getLineNumberAt(4), 2);
+    });
+
+    test('directional marks without a cluster do not create empty or duplicate bidi runs', () {
+      // In FlutterTest, U+200F (RLM) has no cluster of its own. At the start of an LTR
+      // paragraph it must map to an empty cluster range [0, 0), and before a newline its
+      // empty BidiRun must be skipped during line layout.
+      final ui.Paragraph leadingRlm = layoutParagraph('\u200Fabc', 1000);
+      expect(leadingRlm.computeLineMetrics().single.width, closeTo(30, tolerance));
+      expect(leadingRlm.getBoxesForRange(1, 4), hasLength(1));
+
+      final ui.Paragraph interiorRlm = layoutParagraph('a\u200F\nb', 1000);
+      expect(interiorRlm.numberOfLines, 2);
     });
   });
 
