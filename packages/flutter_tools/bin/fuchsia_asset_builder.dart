@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 const _kOptionPackages = 'packages';
@@ -33,6 +34,7 @@ const _kRequiredOptions = <String>[
 Future<void> main(List<String> args) async {
   final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
     analytics: const NoOpAnalytics(),
+    templateRenderer: const MustacheTemplateRenderer(),
   );
   await run(args, toolContext: toolDeps.toolContext);
 }
