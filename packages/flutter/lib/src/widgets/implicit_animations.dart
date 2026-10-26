@@ -243,13 +243,13 @@ class TextStyleTween extends Tween<TextStyle> {
 /// the animation. While these widgets are simple to use and don't require you
 /// to manually manage the lifecycle of an [AnimationController], they
 /// are also somewhat limited: Besides the target value for the animated
-/// property, developers can only choose a [duration] and [curve] for the
-/// animation. If you require more control over the animation (e.g. you want
-/// to stop it somewhere in the middle), consider using an
-/// [AnimatedWidget] or one of its subclasses. These widgets take an [Animation]
-/// as an argument to power the animation. This gives the developer full control
-/// over the animation at the cost of requiring you to manually manage the
-/// underlying [AnimationController].
+/// property, developers can only choose a [duration], [curve], and
+/// [animationBehavior] for the animation. If you require more control over the
+/// animation (e.g. you want to stop it somewhere in the middle), consider using
+/// an [AnimatedWidget] or one of its subclasses. These widgets take an
+/// [Animation] as an argument to power the animation. This gives the developer
+/// full control over the animation at the cost of requiring you to manually
+/// manage the underlying [AnimationController].
 ///
 /// ## Common implicitly animated widgets
 ///
@@ -311,8 +311,9 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// a piece moving across a game board, so that it keeps its full [duration]
   /// even when that setting is active.
   ///
-  /// This value is read when the [AnimationController] is created; changing it
-  /// on an existing widget has no effect.
+  /// Changing this value on an existing widget affects animations started
+  /// afterwards. An animation that is already running keeps the duration it
+  /// started with.
   ///
   /// See also:
   ///
@@ -419,6 +420,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       _animation = _createCurve();
     }
     controller.duration = widget.duration;
+    controller.animationBehavior = widget.animationBehavior;
     if (_constructTweens()) {
       forEachTween((
         Tween<dynamic>? tween,

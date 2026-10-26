@@ -1069,6 +1069,21 @@ void main() {
       controller.dispose();
       fastController.dispose();
     });
+
+    test('animationBehavior can be changed after construction', () {
+      debugSemanticsDisableAnimations = true;
+      final controller = AnimationController(vsync: const TestVSync());
+      expect(controller.animationBehavior, AnimationBehavior.normal);
+
+      controller.animationBehavior = AnimationBehavior.preserve;
+      controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 0.5);
+
+      debugSemanticsDisableAnimations = null;
+      controller.dispose();
+    });
   });
 
   test('AnimationController methods assert _ticker is not null', () {

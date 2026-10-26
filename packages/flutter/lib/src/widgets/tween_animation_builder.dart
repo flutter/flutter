@@ -91,7 +91,8 @@ import 'value_listenable_builder.dart';
 /// Those [ImplicitlyAnimatedWidget]s (including this [TweenAnimationBuilder])
 /// all manage an internal [AnimationController] to drive the animation. If you
 /// want more control over the animation than just setting a target value,
-/// [duration], and [curve], have a look at (subclasses of) [AnimatedWidget]s.
+/// [duration], [curve], and [animationBehavior], have a look at (subclasses
+/// of) [AnimatedWidget]s.
 /// For those, you have to manually manage an [AnimationController] giving you
 /// full control over the animation. An example of an [AnimatedWidget] is the
 /// [AnimatedBuilder], which can be used similarly to this
@@ -116,8 +117,8 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
     super.curve,
     required this.builder,
     super.onEnd,
-    this.child,
     super.animationBehavior,
+    this.child,
   });
 
   /// Defines the target value for the animation.

@@ -812,9 +812,7 @@ void main() {
     expect(tester.getSize(find.byType(SlideTransition)), Size.zero);
   });
 
-  testWidgets('ImplicitlyAnimatedWidget reports animationBehavior in diagnostics', (
-    WidgetTester tester,
-  ) async {
+  test('ImplicitlyAnimatedWidget reports animationBehavior in diagnostics', () {
     final builder = DiagnosticPropertiesBuilder();
     AnimatedContainer(
       duration: animationDuration,
@@ -887,6 +885,100 @@ void main() {
     );
     await tester.pump(animationDuration ~/ 2);
     expect(value, 0.5);
+  });
+
+  test('every ImplicitlyAnimatedWidget forwards animationBehavior', () {
+    const AnimationBehavior preserve = AnimationBehavior.preserve;
+    final widgets = <ImplicitlyAnimatedWidget>[
+      AnimatedContainer(duration: animationDuration, animationBehavior: preserve),
+      AnimatedPadding(
+        padding: EdgeInsets.zero,
+        duration: animationDuration,
+        animationBehavior: preserve,
+      ),
+      const AnimatedAlign(
+        alignment: Alignment.center,
+        duration: animationDuration,
+        animationBehavior: preserve,
+      ),
+      const AnimatedPositioned(
+        duration: animationDuration,
+        animationBehavior: preserve,
+        child: SizedBox(),
+      ),
+      AnimatedPositioned.fromRect(
+        rect: Rect.zero,
+        duration: animationDuration,
+        animationBehavior: preserve,
+        child: const SizedBox(),
+      ),
+      const AnimatedPositionedDirectional(
+        duration: animationDuration,
+        animationBehavior: preserve,
+        child: SizedBox(),
+      ),
+      const AnimatedScale(scale: 1.0, duration: animationDuration, animationBehavior: preserve),
+      const AnimatedRotation(turns: 0.0, duration: animationDuration, animationBehavior: preserve),
+      const AnimatedSlide(
+        offset: Offset.zero,
+        duration: animationDuration,
+        animationBehavior: preserve,
+      ),
+      const AnimatedOpacity(opacity: 1.0, duration: animationDuration, animationBehavior: preserve),
+      const SliverAnimatedOpacity(
+        opacity: 1.0,
+        duration: animationDuration,
+        animationBehavior: preserve,
+      ),
+      const AnimatedDefaultTextStyle(
+        style: TextStyle(),
+        duration: animationDuration,
+        animationBehavior: preserve,
+        child: SizedBox(),
+      ),
+      const AnimatedPhysicalModel(
+        color: Color(0xFF000000),
+        shadowColor: Color(0xFF000000),
+        duration: animationDuration,
+        animationBehavior: preserve,
+        child: SizedBox(),
+      ),
+      const AnimatedFractionallySizedBox(duration: animationDuration, animationBehavior: preserve),
+      TweenAnimationBuilder<double>(
+        tween: Tween<double>(end: 1.0),
+        duration: animationDuration,
+        animationBehavior: preserve,
+        builder: (_, _, _) => const SizedBox(),
+      ),
+    ];
+    for (final widget in widgets) {
+      expect(widget.animationBehavior, preserve, reason: '${widget.runtimeType}');
+    }
+  });
+
+  testWidgets('animationBehavior can be changed on an existing widget', (
+    WidgetTester tester,
+  ) async {
+    debugSemanticsDisableAnimations = true;
+    addTearDown(() => debugSemanticsDisableAnimations = null);
+
+    Widget buildContainer(double width, AnimationBehavior animationBehavior) {
+      return Center(
+        child: AnimatedContainer(
+          duration: animationDuration,
+          animationBehavior: animationBehavior,
+          width: width,
+          height: 10.0,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildContainer(100.0, AnimationBehavior.normal));
+    // Same widget, new behavior: the state and its controller are kept.
+    await tester.pumpWidget(buildContainer(100.0, AnimationBehavior.preserve));
+    await tester.pumpWidget(buildContainer(200.0, AnimationBehavior.preserve));
+    await tester.pump(animationDuration ~/ 2);
+    expect(tester.getSize(find.byType(AnimatedContainer)).width, 150.0);
   });
 }
 

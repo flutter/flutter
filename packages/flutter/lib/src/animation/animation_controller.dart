@@ -313,7 +313,10 @@ class AnimationController extends Animation<double>
   /// Defaults to [AnimationBehavior.normal] for the [AnimationController.new]
   /// constructor, and [AnimationBehavior.preserve] for the
   /// [AnimationController.unbounded] constructor.
-  final AnimationBehavior animationBehavior;
+  ///
+  /// Changing this value affects animations started afterwards. An animation
+  /// that is already running keeps the duration it started with.
+  AnimationBehavior animationBehavior;
 
   /// Returns an [Animation<double>] for this animation controller, so that a
   /// pointer to this object can be passed around without allowing users of that
