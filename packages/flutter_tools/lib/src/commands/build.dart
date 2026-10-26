@@ -190,10 +190,9 @@ class BuildCommand extends FlutterCommand {
 
   @override
   Future<void> initializeDynamicOptions() async {
-    if ((_extensionBuildManager, _extensionArtifactManager) case (
-      final ExtensionBuildManager extensionBuildManager,
-      final ExtensionArtifactManager extensionArtifactManager,
-    )) {
+    final ExtensionBuildManager? extensionBuildManager = _extensionBuildManager;
+    final ExtensionArtifactManager? extensionArtifactManager = _extensionArtifactManager;
+    if (extensionBuildManager != null && extensionArtifactManager != null) {
       final List<ExtensionBuildTarget> targets = await extensionBuildManager.getBuildTargets();
       for (final target in targets) {
         if (!subcommands.containsKey(target.name)) {
