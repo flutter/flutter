@@ -113,6 +113,10 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
     required this._logger,
     required this.name,
   }) {
+    // Defer flushing buffered lines to a microtask so that if multiple
+    // subscribers attach to the broadcast stream in the same synchronous turn,
+    // all of them receive the initial buffered lines rather than only the first
+    // subscriber that triggered onListen synchronously.
     _logLinesController = StreamController<String>.broadcast(
       onListen: () => scheduleMicrotask(_flushPendingLines),
     );
