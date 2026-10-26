@@ -144,7 +144,7 @@ TEST_P(PipelineVariantRecordingTest,
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \
     FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE
   GTEST_SKIP() << "Pipeline usage logging is only in debug and profile builds.";
-#endif
+#else
   ContentContext content_context(GetContext(), GetTypographerContext());
   ASSERT_TRUE(content_context.IsValid());
 
@@ -170,6 +170,7 @@ TEST_P(PipelineVariantRecordingTest,
   EXPECT_TRUE(is_eagerly_created(solid_fill->GetDescriptor()));
   EXPECT_TRUE(is_eagerly_created(clip->GetDescriptor()));
   EXPECT_FALSE(is_eagerly_created(lazy_solid_fill->GetDescriptor()));
+#endif
 }
 
 }  // namespace testing

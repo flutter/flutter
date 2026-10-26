@@ -5219,7 +5219,7 @@ TEST_F(ShellTest, MakePipelineUsageJsonReportsEachPipeline) {
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \
     FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE
   GTEST_SKIP() << "Pipeline usage logging is only in debug and profile builds.";
-#endif
+#else
   ::impeller::testing::MockPipelineLibrary library;
 
   impeller::PipelineDescriptor eager_solid;
@@ -5270,6 +5270,7 @@ TEST_F(ShellTest, MakePipelineUsageJsonReportsEachPipeline) {
           R"({"label":"PorterDuffBlend Pipeline V#1","constants":[1.0,0.0,1.0],"count":1,"eagerly_created":false})",
           R"({"label":"Runtime Stage","constants":[],"count":2,"eagerly_created":false})",
           R"({"label":"Runtime Stage","constants":[],"count":1,"eagerly_created":false})"));
+#endif
 }
 
 }  // namespace testing
