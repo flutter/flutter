@@ -25,8 +25,11 @@ package(default_visibility = ["//visibility:public"])
 # one, runs the first and expects it to fail, and removes it. Both in the
 # checkout itself (the walk and the planted file are the source tree's), and
 # exclusive: the test's planted file must not be there while the check runs.
+# Both walk the whole checkout (`find` over the source tree): 8 s on an idle
+# host, over small's 60 s under a full compile load, hence medium.
 checkout_script_test(
     name = "ban_generated_plugin_registrant_java",
+    size = "medium",
     srcs = ["ban_generated_plugin_registrant_java.sh"],
     in_checkout = True,
     script = "ban_generated_plugin_registrant_java.sh",
@@ -35,6 +38,7 @@ checkout_script_test(
 
 checkout_script_test(
     name = "ban_generated_plugin_registrant_java_test",
+    size = "medium",
     srcs = [
         "ban_generated_plugin_registrant_java.sh",
         "test/ban_generated_plugin_registrant_java_test.sh",
