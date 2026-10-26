@@ -1,0 +1,27 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The multiple-windows example's test, as `flutter test` runs it (the
+# framework_tests shard's runFlutterTest over this tree).
+
+load("//build_defs/dart:flutter_package_tests.bzl", "flutter_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_package_tests(
+    name = "tests",
+    directory = "examples/multiple_windows",
+    package = "multiple_windows",
+    # package:material_ui, a dependency, reaches flutter_localizations.
+    packages = {"//packages/flutter_localizations:sources": "flutter_localizations"},
+    # The package is outside the pub workspace, so the lock's tables do not
+    # know its dependencies: pubspec.yaml's are named here.
+    roots = [
+        "flutter",
+        "flutter_test",
+        "material_ui",
+        "vector_math",
+    ],
+    tests = glob(["**/*_test.dart"]),
+)

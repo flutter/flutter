@@ -673,8 +673,11 @@ of 13) -- and `flutter_test` runs the kernel on the Bazel-built
 flutter_tester with `flutter test`'s flags and environment: from the
 package's directory, `FLUTTER_ROOT` the runfiles root, the asset directory
 (`flutter_test_assets`: the manifests as flutter_tools writes them, the
-package's own assets at their keys, the framework's two shaders compiled by
-the Bazel impellerc), the SDK cache's paths tests read (`cache`: the Dart
+package's own assets at their keys, its dependencies' as `packages/<name>/...`
+-- their lib/ files, and the fonts their own pubspecs declare at their
+root-relative paths (`package_assets`: the gallery's flutter_gallery_assets,
+shrine_images and cupertino_icons' font) -- the framework's two shaders
+compiled by the Bazel impellerc), the SDK cache's paths tests read (`cache`: the Dart
 SDK, the Material fonts from a pinned repository), `--vm-service-port=0`
 when a tree asks (`vm_service`), Impeller rendering when a tree asks
 (`impeller`), `block-network` by default (Skia Gold comparisons are skipped
@@ -806,8 +809,12 @@ Every tree counts what `flutter test` or `dart test` counts on the same
 engine (the migration notes record each): packages/flutter's 919 files, the
 API samples' 580, flutter_test's, flutter_localizations', flutter_goldens',
 flutter_driver's, integration_test's, the example apps', manual_tests',
-tracing_tests', stocks', vitool's, integration_ui's -- 1,627 files and 22,522
-cases -- plus the Impeller, no-tracking and release/profile runs,
+tracing_tests', stocks', vitool's, integration_ui's, the gallery's (16 files,
+153 + 2 skipped, its smoke test over every demo among them) and
+multiple_windows' (a package outside the pub workspace: its dependencies
+named as `roots`, since the lock's tables do not know them) -- 1,644 files
+and 22,676 cases, every `flutter test` tree of the framework_tests shard a
+Linux host runs -- plus the Impeller, no-tracking and release/profile runs,
 flutter_tools' general shard (271 files) and commands shard (the hermetic
 half whole, 67; the permeable half but for the one file that does not
 compile at this checkout, 10) and its integration shard where a Linux host
