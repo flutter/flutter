@@ -21,10 +21,9 @@ class GPUSurfaceGLImpeller final : public Surface {
                                 std::shared_ptr<impeller::Context> context,
                                 bool render_to_surface);
 
-  GPUSurfaceGLImpeller(
-      GPUSurfaceGLDelegate* delegate,
-      const std::shared_ptr<impeller::AiksContext>& aiks_context,
-      bool render_to_surface);
+  GPUSurfaceGLImpeller(GPUSurfaceGLDelegate* delegate,
+                       std::shared_ptr<impeller::AiksContext> aiks_context,
+                       bool render_to_surface);
 
   // |Surface|
   ~GPUSurfaceGLImpeller() override;

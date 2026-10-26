@@ -26,7 +26,7 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
 
 GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
     GPUSurfaceGLDelegate* delegate,
-    const std::shared_ptr<impeller::AiksContext>& aiks_context,
+    std::shared_ptr<impeller::AiksContext> aiks_context,
     bool render_to_surface)
     : weak_factory_(this) {
   if (delegate == nullptr) {
@@ -45,7 +45,7 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
   delegate_ = delegate;
   impeller_context_ = std::move(context);
   render_to_surface_ = render_to_surface;
-  aiks_context_ = aiks_context;
+  aiks_context_ = std::move(aiks_context);
   is_valid_ = true;
 }
 

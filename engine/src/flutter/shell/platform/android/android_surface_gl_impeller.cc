@@ -104,14 +104,14 @@ std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateGPUSurface(
   // Constructing an AiksContext and its ContentContext invokes GL APIs (e.g.
   // allocating the 1x1 empty_texture_), so ensure an EGL context is current on
   // the calling thread before lazily initializing `aiks_context_`.
-  if (!OnGLContextMakeCurrent()) {
-    if (!offscreen_surface_ || !android_context_->OnscreenContextMakeCurrent(
-                                   offscreen_surface_.get())) {
-      FML_DLOG(ERROR) << "Could not make GL context current.";
-      return nullptr;
-    }
-  }
   if (!aiks_context_) {
+    if (!OnGLContextMakeCurrent()) {
+      if (!offscreen_surface_ || !android_context_->OnscreenContextMakeCurrent(
+                                     offscreen_surface_.get())) {
+        FML_DLOG(ERROR) << "Could not make GL context current.";
+        return nullptr;
+      }
+    }
     aiks_context_ = std::make_shared<impeller::AiksContext>(
         android_context_->GetImpellerContext(),
         impeller::TypographerContextSkia::Make());

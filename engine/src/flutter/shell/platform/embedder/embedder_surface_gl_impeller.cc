@@ -202,18 +202,18 @@ EmbedderSurfaceGLImpeller::GLContextFramebufferInfo() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
-  // Ensure that the GL context is current before creating the GPU surface.
-  // GPUSurfaceGLImpeller and AiksContext initialization will set up shader
-  // pipelines and allocate textures, so the current thread needs to be able to
-  // execute reactor operations.
-  auto context_switch = GLContextMakeCurrent();
-  if (!context_switch || !context_switch->GetResult()) {
-    FML_LOG(ERROR)
-        << "Could not make GL context current to create GPU surface.";
-    return nullptr;
-  }
-
+  // Ensure that the GL context is current before lazily initializing
+  // `aiks_context_`. AiksContext initialization will set up shader pipelines
+  // and allocate textures, so the current thread needs to be able to execute
+  // reactor operations.
   if (!aiks_context_) {
+    auto context_switch = GLContextMakeCurrent();
+    if (!context_switch || !context_switch->GetResult()) {
+      FML_LOG(ERROR)
+          << "Could not make GL context current to create AiksContext.";
+      return nullptr;
+    }
+
     aiks_context_ = std::make_shared<impeller::AiksContext>(
         impeller_context_, impeller::TypographerContextSkia::Make());
     if (!aiks_context_->IsValid()) {
