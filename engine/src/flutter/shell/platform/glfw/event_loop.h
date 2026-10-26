@@ -64,9 +64,9 @@ class EventLoop {
   virtual void Wake() = 0;
 
   struct Task {
-    uint64_t order;
+    uint64_t order = 0;
     TaskTimePoint fire_time;
-    FlutterTask task;
+    FlutterTask task{};
 
     struct Comparer {
       bool operator()(const Task& a, const Task& b) {

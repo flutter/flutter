@@ -21,15 +21,27 @@ class LayerScene implements ui.Scene {
   }
 
   @override
-  Future<ui.Image> toImage(int width, int height) {
+  Future<ui.Image> toImage(int width, int height) async {
     final ui.Picture picture = layerTree.flatten(ui.Size(width.toDouble(), height.toDouble()));
-    return picture.toImage(width, height);
+    try {
+      return await picture.toImage(width, height);
+    } finally {
+      // The flattened picture is an implementation detail of this method and
+      // is never exposed to the caller, so it must be disposed here.
+      picture.dispose();
+    }
   }
 
   @override
   ui.Image toImageSync(int width, int height) {
     final ui.Picture picture = layerTree.flatten(ui.Size(width.toDouble(), height.toDouble()));
-    return picture.toImageSync(width, height);
+    try {
+      return picture.toImageSync(width, height);
+    } finally {
+      // The flattened picture is an implementation detail of this method and
+      // is never exposed to the caller, so it must be disposed here.
+      picture.dispose();
+    }
   }
 }
 
