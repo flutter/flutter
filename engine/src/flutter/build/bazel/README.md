@@ -1250,38 +1250,52 @@ nothing; for Android it is the default, and the aspect adds GN's android
 toolchain's `--strip-unneeded` copy as `lib.stripped/<name>` (see the
 Android section). The Dart wrap's `gen_snapshot` is already GN's stripped file.
 
-The root package has `//engine/src/flutter:install`, the Linux host's build
-directory as above with all seven archives of the Linux host configurations
--- and, under an Android platform, the Android developer's: the developer's
-`android_*` configurations have no ninja targets of their own (GN builds
-its default target, which is the root group `flutter`: `engine/src`'s
-`//:default` depends on `//flutter` alone), so the install's attributes
-select on the OS, and on Android lay that group -- libflutter.so with
+The root package had `//engine/src/flutter:install` for the developer's
+builds, GN's default target: the Linux host's build directory as above with
+all seven archives of the Linux host configurations -- and, under an
+Android platform, what the root group `flutter` lays (the developer's
+`android_*` configurations have no ninja targets of their own; `engine/src`'s
+`//:default` depends on `//flutter` alone): libflutter.so with
 `lib.stripped/`, the jars and poms, `clang_x64/gen_snapshot`, the
 snapshots, the Impeller SDK, the embedder archive, the javadoc, ICU's data
-file for the target (334 files for `android_debug_arm64`). Against GN's own
-`out/android_debug_arm64`, `install_diff.py` finds nothing missing on
+file for the target (334 files for `android_debug_arm64`). It is gone: the
+flutter tool reads a developer's build, Android's included, where Bazel
+builds it, through `local_engine.json` (next section), and `local_engine`
+took over its content tables, so what was measured against the install
+stands for the manifest's contents. Against GN's own
+`out/android_debug_arm64`, `install_diff.py` found nothing missing on
 either side over 19 paths: 305 files identical, the binaries expected
 different, and the poms, Maven metadata and javadoc pages differing by the
-version hash and the date alone. The Maven tree and the `dist` archives are
-not the default's under GN either; the builders name them as targets.
+version hash and the date alone; against `host_debug_unopt`, 1,390 files
+installed and 17 of 17 paths agreeing -- 1,387 files identical, the eight
+binaries differing as builds under different flags do, nothing missing on
+either side. The Maven tree and the `dist` archives are not the default's
+under GN either; the builders name them as targets.
+
+`tools/gn_to_bazel/tool/install_diff.py` compares an installed directory
+(a builder's, below) or a `local_engine.json` directory with GN's path by
+path (the consumer-visible paths above by default, a manifest directory's
+resolved through its entries; a directory is every file under it, an
+archive is compared entry by entry as `artifact_diff.py` does):
 
 ```sh
-bazel run //engine/src/flutter:install
-bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
-bazel run --config=android_debug_unopt_x64 //engine/src/flutter:install   # out/android_debug_unopt_x64
+bazel build //engine/src/flutter:local_engine
+python3 engine/src/flutter/tools/gn_to_bazel/tool/install_diff.py \
+    --gn=engine/src/out/host_debug_unopt --bazel=engine/src/out/bazel-bin/engine/src/flutter \
+    --expect-different=flutter_tester --expect-different='*.so' ...
 ```
 
-installs 1,390 files; `tools/gn_to_bazel/tool/install_diff.py` compares such
-a directory with GN's path by path (the consumer-visible paths above by
-default; a directory is every file under it, an archive is compared entry
-by entry as `artifact_diff.py` does): against `host_debug_unopt`, 17 of 17
-paths agree -- 1,387 files identical, the eight binaries differing as builds
-under different flags do, nothing missing on either side. Two things the
+Against `host_debug_unopt`, the manifest's 16 paths (the archives aside)
+all agree: 1,380 files identical, the eight binaries expected different,
+nothing missing. Two of its entries map directories where Bazel keeps other
+outputs beside the files (`dart-sdk` the prebuilt SDK's repository with its
+`BUILD.bazel`, `gen/flutter/lib/snapshot` the snapshot package's output
+directory with its 564 intermediates), which the tool counts as "beside
+them" and does not compare, since the consumer reads GN's paths. Two things the
 comparison turned up. GN's build root holds the *full* ICU data file
 (`copy("copy_icudata")`, `common/icudtl.dat`, 10.8 MB), where `artifacts.zip`
 ships the trimmed `flutter/icudtl.dat` (865 KB): a `--local-engine` run
-loads different ICU data than a release does; `install` follows the build
+loads different ICU data than a release does; the manifest follows the build
 directory. And the converter gives a copy elsewhere in the build directory
 that renames its file (`copy_headers`: `embedder.h` to `flutter_embedder.h`)
 an `outs` with GN's path for it, so that the Bazel file bears the layout's
@@ -1305,33 +1319,25 @@ declares an output per source. The script's directory walk did not follow
 symbolic links, which a sandbox's inputs are; it does now (a one-line
 change, harmless to GN). Its 289 files come out byte-identical to GN's.
 
-To use such a tree as a local engine with the flutter tool:
+A build used as a local engine with the flutter tool is the next section's
+manifest; the installed tree was what first ran there
+(`--local-engine=host_debug_unopt_bazel` under `engine/src/out/`:
+`packages/flutter/test/widgets` passed on it with GN's exact numbers, 7,349
+tests, 128 skipped), and two things learned with it hold. An install into
+a directory GN also builds (`out/ci/host_debug` for a builder's)
+overwrites -- each installed path is removed first and copied afresh, since
+GN's copies are hard links of their sources and a copy onto a hard link of
+its own source is refused as "the same file"; GN's files come back by
+deleting the installed paths -- the install script in bazel-bin lists them
+-- and running `ninja` there (ninja takes the newer Bazel copies for up to
+date otherwise). And on a fresh checkout: under a local engine the tool
+downloads no engine artifacts, and pub resolves `sky_engine` from
+`bin/cache/pkg/`, which only a run *without* `--local-engine` populates --
+run one plain `flutter test` first, or the first local-engine run fails in
+pub with "could not find package sky_engine".
 
-```sh
-bazel run --config=host_debug_unopt //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
-cd packages/flutter
-../../bin/flutter test test/widgets/text_test.dart \
-    --local-engine=host_debug_unopt_bazel --local-engine-host=host_debug_unopt_bazel
-```
-
-(any name under `engine/src/out/` will do; `host_debug_unopt`, the
-default, is where GN's own build of that configuration lands, which
-`install` overwrites -- each installed path is removed first and copied
-afresh, since GN's copies are hard links of their sources and a copy
-onto a hard link of its own source is refused as "the same file". GN's
-files come back by deleting the installed paths -- the install script in
-bazel-bin lists them -- and running `ninja` there; ninja takes the newer
-Bazel copies for up to date otherwise). The tool reads `flutter_tester`, the patched SDK,
-`dart-sdk/bin/dartaotruntime` and the frontend server from the tree, as the
-verbose log shows. One thing to know on a fresh checkout: under a local
-engine the tool downloads no engine artifacts, and pub resolves
-`sky_engine` from `bin/cache/pkg/`, which only a run *without*
-`--local-engine` populates -- run one plain `flutter test` first, or the
-first local-engine run fails in pub with "could not find package
-sky_engine". `packages/flutter/test/widgets` passes on the Bazel tree with
-GN's exact numbers (7,349 tests, 128 skipped).
-
-Not installed yet: the web SDK, and GN's own bookkeeping (`args.gn`,
+Neither an install nor the manifest carries the web SDK (the wasm builds'),
+or GN's own bookkeeping (`args.gn`,
 depfiles). `compile_commands.json`, which `tools/clang_tidy` and clangd
 read, comes from `tools/gn_to_bazel/tool/compile_commands.py` over
 `bazel aquery` after a build (a tool, since no action can query the
@@ -1344,20 +1350,26 @@ targets below install the archives alone.
 
 ## A local engine without the copy: `local_engine.json`
 
-`install` lays GN's layout because the flutter tool reads fixed paths of a
-build directory. `//engine/src/flutter:local_engine` (`local_engine.bzl`)
-builds the same set of files -- the `install` target's content tables are
-module constants the two share in the root BUILD file -- and, instead of
-copying them, writes `local_engine.json` beside them in `bazel-bin`: the
-build's name (`host_debug_unopt` for `-c dbg`, as `install` names its
-directory) and a map from each GN path the tool reads to where Bazel built
+The builders' installs lay GN's layout because the recipes read fixed paths
+of a build directory; the flutter tool no longer needs one.
+`//engine/src/flutter:local_engine` (`local_engine.bzl`)
+builds what the flutter tool reads from a build directory -- the content
+tables in the root BUILD file: for the host's own build the files above,
+for an Android build the root group `flutter` and ICU's data file for the
+target -- and, instead of copying them, writes `local_engine.json` beside
+them in `bazel-bin`: the build's name (`host_debug_unopt` for `-c dbg`,
+`android_debug_arm64` under that configuration, as GN names the directory) and a map from each GN path the tool reads to where Bazel built
 the file, relative to the manifest's directory -- `flutter_tester` to
 `shell/testing/shipped/flutter_tester`, `icudtl.dat` through `../` into the
 ICU repository, `dart-sdk` to the prebuilt SDK's repository (a `zip_tree`
 whose files all sit under one directory maps as that directory), and a GN
-directory whose files all sit by the same names in one directory of the
-build maps as that directory too (`flutter_patched_sdk`, which the tool
-hands the frontend server as `--sdk-root`). Two things the tool reads as
+directory whose every entry, at any depth, sits at its relative path under
+one directory of the build maps as that directory too
+(`flutter_patched_sdk`, which the tool hands the frontend server as
+`--sdk-root`; one agreeing child is not enough -- an Android build's
+`gen/dart-pkg/sky_engine` has `AUTHORS` from the source root beside `lib/`
+from the Dart tree, and an entry for it would shadow dart_pkg's directory
+at `gen/dart-pkg`). Two things the tool reads as
 directories are assembled as one under `local_engine/`: the sky_engine
 package (`gen/dart-pkg/sky_engine`, dart_pkg's directory and the copied
 libraries) and impellerc's `shader_lib` (GN copies the GLSL files beside
@@ -1390,11 +1402,62 @@ cd packages/flutter
 gives GN's exact result for the directory (7,349 tests, 128 skipped) with
 nothing copied, and `flutter assemble ... release_bundle_linux-x64_assets`
 builds an AOT snapshot with the Bazel `gen_snapshot` the same way. `et build
---backend bazel` with no targets, for a developer's host configuration,
-builds this target and prints the directory to pass. What still reads GN's
-layout by name: the Gradle plugin's `-Plocal-engine-out` (Android) and the
-desktop CMake/Xcode tooling, which re-derive `--local-engine` from
-`LOCAL_ENGINE`; `install` stays for them.
+--backend bazel` with no targets, for a developer's configuration, builds
+this target and prints the directory to pass.
+
+Two paths of the tool read GN's layout by name until commit 320, and read a
+manifest directory now. The Gradle plugin took `-Plocal-engine-out` as
+`<engine>/src/out/<name>`, deriving the ABI and the mode from the name and
+the Maven files (`flutter_embedding_<mode>.{pom,jar,maven-metadata.xml}`,
+`<abi>_<mode>.{...}`, from which `gradle.dart` builds the local Maven
+repository Gradle resolves the embedding from) from fixed paths, and
+handed `flutter assemble` the name with `--local-engine-src-path`; now the
+Maven files resolve through `LocalEngineLayout`, the ABI and mode come from
+the manifest's name, and `FlutterPlugin.kt` passes a directory holding
+`local_engine.json` as `--local-engine=<path>` with no source path (the
+tool finds `engine/src` from `FLUTTER_ROOT`). The desktop CMake re-entry
+(`tool_backend.dart`, run by the generated CMake and Visual Studio
+projects) got `LOCAL_ENGINE` as a name under `FLUTTER_ENGINE/out`; a
+manifest directory is passed as its absolute path with no `FLUTTER_ENGINE`
+(`LocalEngineInfo.toReentrantBuildEnvironment`), and the mode check reads
+the manifest's name. One Bazel setting goes with this: a cross build's
+output directory was named for the host CPU, the same as the host's own
+(`bazel-out/k8-opt/` for `android_debug_arm64` and `host_debug` both), so
+building one overwrote the other's manifest and the outputs whose paths
+they share -- an Android engine and the host engine it pairs with could
+not both be on disk. The root `.bazelrc` sets
+`--experimental_platform_in_output_dir`: `bazel-out/android_arm64-opt/`,
+`wasm32_emscripten-opt/`, `linux_arm64-opt/`, with the host's directories
+unchanged (`k8-opt`, `k8-dbg`, `k8-fastbuild` and the exec
+configurations), so nothing of the host build moved; the cross builds were
+rebuilt once (`android_debug_arm64`'s `local_engine`: 2,454 s, 15,150
+actions, the wrapped Dart SDK's GN build the critical path).
+
+```sh
+bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
+bazel build --config=host_debug //engine/src/flutter:local_engine
+cd examples/hello_world
+../../bin/flutter build apk --debug --target-platform android-arm64 \
+    --local-engine=$PWD/../../engine/src/out/bazel-out/android_arm64-opt/bin/engine/src/flutter \
+    --local-engine-host=$PWD/../../engine/src/out/bazel-out/k8-opt/bin/engine/src/flutter
+```
+
+builds hello_world's `app-debug.apk` (69.9 MB, 191 s with pub and the
+tool's own rebuild) whose `lib/arm64-v8a/libflutter.so` is byte-identical
+to the Bazel build's `lib.stripped/libflutter.so`; Gradle's log shows
+`-Plocal-engine-out=<the Bazel directory>`, the Maven repository built from
+the manifest's entries
+(`io/flutter/flutter_embedding_debug/1.0.0-<hash>/`, `arm64_v8a_debug/`),
+and the re-entry `flutter --local-engine <path> --local-engine-host <path>
+assemble debug_android_application`. `tool_backend.dart linux-x64 debug`
+with `LOCAL_ENGINE=LOCAL_ENGINE_HOST=<the host directory>` compiles the
+kernel with the Bazel Dart SDK's `dartaotruntime` and frontend server in
+19 s (`flutter build linux` itself needs cmake, clang and the GTK headers,
+which this host lacks). The Android manifest names 380 entries: the root
+group's files -- the embedding's jars and poms, `libflutter.so` with its
+`lib.stripped/` copy, `clang_x64/gen_snapshot`, the snapshots, the
+archives, ICU's data file for the target. The Xcode side (macOS, iOS) is
+the Apple phase's.
 
 ## The builders: `--config=<build>` and their install targets
 
@@ -1516,7 +1579,7 @@ targets nothing converted answers to listed (`flutter:unittests`,
 ```sh
 bazel run --config=ci_host_release //engine/src/flutter/ci/builders:ci_host_release
 bazel run --config=ci_host_debug //engine/src/flutter/ci/builders:ci_host_debug
-bazel run --config=host_profile //engine/src/flutter:install   # the developer's: everything
+bazel build --config=host_profile //engine/src/flutter:local_engine   # the developer's: everything, read in place (above)
 bazel run --config=wasm_release //engine/src/flutter/ci/builders:wasm_release
 bazel run --config=linux_debug_arm64 //engine/src/flutter/ci/builders:linux_debug_arm64
 ```
@@ -1563,15 +1626,15 @@ is left to Bazel to report.
 
 ```sh
 et build --backend bazel --config host_debug_unopt //flutter/fml:fml_unittests //flutter/txt/...
-et build --backend bazel --config host_debug_unopt        # everything: install into out/host_debug_unopt
+et build --backend bazel --config host_debug_unopt        # everything: the local engine, its directory printed
 et test --backend bazel --config host_debug_unopt //flutter/fml:fml_unittests
 et test --backend bazel --config ci/host_debug_test       # the builder's own suite (its run_tests.py steps)
 et query targets --backend bazel //flutter/fml/...        # the rules under fml, as GN labels
 et query targets --backend bazel --testonly //flutter/... # the tests
 et lint --backend bazel --config host_debug_unopt         # clang-tidy over the build's compile_commands.json
-et run --backend bazel --config host_debug_unopt -- -d linux  # install, then flutter run --local-engine
+et run --backend bazel --config host_debug_unopt -- -d linux  # the local engine, then flutter run --local-engine
 et build --backend bazel --config ci/android_debug_x64 //flutter/shell/platform/android:flutter_jar_zip
-et build --backend bazel --config android_debug_unopt_arm64  # the developer's linux/android_debug_unopt_arm64, installed into out/android_debug_unopt_arm64
+et build --backend bazel --config android_debug_unopt_arm64  # the developer's linux/android_debug_unopt_arm64: its local engine, for the Gradle plugin
 ```
 
 Android builds are named as `et` names them under GN: `ci/android_debug_x64`
@@ -1581,13 +1644,15 @@ on Linux; `et build --help --verbose` lists what there is). `ci/` builds
 are accepted without `--verbose`; `--help` merely hides them.
 
 `et build` with no targets is GN's default target, everything: for a
-developer's host configuration the `local_engine` manifest, built in place
-and its directory printed (`Local engine: <bazel-out/<cfg>/bin/engine/src/flutter>`,
-the flags to pass with it); for an Android configuration or a CI build the
-install target run into its build directory (`//engine/src/flutter:install`;
-`//engine/src/flutter/ci/builders:<name>` over the build's ninja targets) --
+developer's configuration, the host's or Android's, the `local_engine`
+manifest, built in place and its directory printed (`Local engine:
+<bazel-out/<cfg>/bin/engine/src/flutter>`, the flags to pass with it; an
+Android build's names the host build to pair it with); for a CI build the
+install target run into its build directory
+(`//engine/src/flutter/ci/builders:<name>` over the build's ninja targets) --
 GN's layout from Bazel's outputs, in the directory GN would have used, which
-the Gradle plugin and the recipes read. `et test` with no patterns runs the build's `<name>_tests` suite, and
+the recipes read. `et run` builds the host's local engine and, for another
+platform, the target's, and hands both directories to `flutter run`. `et test` with no patterns runs the build's `<name>_tests` suite, and
 errors when the build has no `run_tests.py` step. `et query targets` is
 `bazel query 'kind(rule, <patterns>)'` (`tests(<patterns>)` with
 `--testonly`), printed as GN labels; it needs no build directory and no

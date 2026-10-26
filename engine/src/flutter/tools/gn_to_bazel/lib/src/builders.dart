@@ -857,11 +857,12 @@ String buildersBuildFile(
       ..writeln()
       ..writeln('# ${build.file}: ${build.name}');
     if (build.ninjaTargets.isEmpty) {
-      // GN's default target: the whole build, which the root package's
-      // install lays out.
+      // GN's default target: the whole build, which the flutter tool reads
+      // where Bazel builds it, through the root package's local engine
+      // manifest; no install.
       out.writeln(
         "#   ninja's default target, everything: "
-        'bazel run --config=${build.configName} //engine/src/flutter:install',
+        'bazel build --config=${build.configName} //engine/src/flutter:local_engine',
       );
       continue;
     }

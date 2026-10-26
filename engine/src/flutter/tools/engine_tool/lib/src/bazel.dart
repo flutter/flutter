@@ -48,10 +48,12 @@ enum BuildBackend {
 /// builder files (`builders.dart`): a `--config=<name>` for every Linux build
 /// (the x64 host's own, the web's, the Linux arm64 cross builds' and
 /// Android's, `local_engine.json`'s `linux/` ones included) whose `tools/gn`
-/// flags the Bazel build can express, an install target laying the build's
-/// outputs into its build directory, and a test suite over its `run_tests.py`
-/// types. This class asks that code, so that `et` and the generated files
-/// cannot disagree on a name.
+/// flags the Bazel build can express, an install target laying a CI build's
+/// ninja targets into its build directory, and a test suite over its
+/// `run_tests.py` types. A build of everything (GN's default target: the
+/// developer's builds) has no install; the flutter tool reads it where Bazel
+/// builds it, through [localEngineTarget]'s manifest. This class asks that
+/// code, so that `et` and the generated files cannot disagree on a name.
 ///
 /// A build is named as `et` names it elsewhere: `-c ci/android_debug_x64`
 /// for CI's, `-c android_debug_unopt_x64` for the developer's
@@ -68,9 +70,6 @@ final class Bazel {
   /// The root Bazel package of the engine's sources (the GN root, `//`,
   /// lives at `engine/src` of the repository).
   static const String rootPackage = '//engine/src';
-
-  /// The install target of the whole tree (GN's default target).
-  static const String installTarget = '$rootPackage/flutter:install';
 
   /// The local engine target of the whole tree: the build's artifacts where
   /// Bazel builds them and `local_engine.json` beside them, which the flutter
@@ -115,28 +114,28 @@ final class Bazel {
     return builderBuild.configName;
   }
 
-  /// The install target of [build]: the builder's own
-  /// (`//engine/src/flutter/ci/builders:<name>`, over its ninja targets) when
-  /// it names ninja targets, the whole tree's otherwise.
-  String installTargetFor(Build build) {
+  /// The install target of [build]
+  /// (`//engine/src/flutter/ci/builders:<name>`, over its ninja targets), or
+  /// null for a build of everything, which has none: the flutter tool reads
+  /// such a build where Bazel builds it, through [localEngineTarget]'s
+  /// manifest ([buildLocalEngine]) -- its own platform's directly, Android's
+  /// through its Gradle plugin, which takes the manifest's directory as
+  /// `-Plocal-engine-out`. A CI build names ninja targets, and its install
+  /// lays what its recipe uploads, so it keeps its install target.
+  String? installTargetFor(Build build) {
     final gn_to_bazel.BuilderBuild? builderBuild = _builderBuild(build);
     if (builderBuild == null || builderBuild.ninjaTargets.isEmpty) {
-      return installTarget;
+      return null;
     }
     return '$rootPackage/flutter/ci/builders:${builderBuild.configName}';
   }
 
-  /// Whether the flutter tool reads [build]'s outputs where Bazel builds
-  /// them, through `local_engine.json`: a developer's build of the host's own
-  /// platform (no ninja targets, no `--platforms`). A CI build's install lays
-  /// what its recipe uploads, and another platform's build is read by that
-  /// platform's tooling -- Android's Gradle plugin takes `-Plocal-engine-out`
-  /// as GN's layout -- so those keep their install targets.
-  bool usesLocalEngineManifest(Build build) {
+  /// Whether [build] is of the host's own platform (no `--platforms`), as
+  /// against another's (Android's, the web's, Linux arm64's), whose local
+  /// engine the flutter tool pairs with a host build's (`--local-engine-host`).
+  bool isHostBuild(Build build) {
     final gn_to_bazel.BuilderBuild? builderBuild = _builderBuild(build);
-    return builderBuild != null &&
-        builderBuild.ninjaTargets.isEmpty &&
-        builderBuild.platform == null;
+    return builderBuild != null && builderBuild.platform == null;
   }
 
   /// Builds [localEngineTarget] under [config] and returns the directory
@@ -144,7 +143,11 @@ final class Bazel {
   /// `--local-engine-host` -- or null, the error logged, when a step fails.
   ///
   /// The directory is the configuration's own under `bazel-out`
-  /// (`<execroot>/bazel-out/k8-dbg/bin/engine/src/flutter`), found from
+  /// (`<execroot>/bazel-out/k8-dbg/bin/engine/src/flutter` for the host's
+  /// `-c dbg`, `bazel-out/android_arm64-opt/bin/engine/src/flutter` for
+  /// Android's: a cross build's directory is named after its platform, the
+  /// root `.bazelrc`'s `--experimental_platform_in_output_dir`, so that it
+  /// and the host build it pairs with are both on disk), found from
   /// `bazel info output_path` and the manifest's path among the target's
   /// outputs (`bazel cquery --output=files`), rather than the `bazel-bin`
   /// convenience symlink, which follows the last build of any configuration.

@@ -105,7 +105,6 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
     appendix: r'''
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
-load("//build_defs/dist:install.bzl", "install")
 load("//build_defs/dist:local_engine.bzl", "local_engine")
 
 # config("config"), config("export_dynamic_symbols") and
@@ -303,32 +302,38 @@ filegroup(
     ],
 )
 
-# The build directory as GN lays it out (engine/src/out/<variant>/), from
-# this build's outputs. For a Linux host build: what the flutter
-# tool reads from a `--local-engine` (flutter_tester, gen_snapshot,
-# icudtl.dat, impellerc and its libraries, font-subset, the GTK library and
-# headers, the Dart SDK, the patched SDK, the core snapshot under
-# gen/flutter/lib/snapshot/, the frontend server under gen/, the sky_engine
-# package under gen/dart-pkg/), the embedder library with its header, and
-# every archive the Linux host configurations define (the ones below),
-# under zip_archives/. For an Android build (the developer's android_*
-# configurations, whose GN build is ninja's default target -- the root
-# group `flutter`, which engine/src's //:default depends on): what that
-# group lays -- libflutter.so and its lib.stripped/ copy, the host
-# gen_snapshot under clang_x64/, the embedding's jars and poms, the Android
-# archives and the javadoc under zip_archives/, ICU's data file -- which is
-# what the flutter tool reads from an Android `--local-engine`; the Maven
-# tree and the dist archives are the builders' targets, not the default's,
-# as under GN (install_diff.py against GN's out/android_debug_arm64 agrees
-# path by path). `bazel run`
-# copies them into engine/src/out/<variant>/ -- host_debug_unopt for a
-# plain build, host_debug for -c opt, host_release with the mode flag,
-# android_debug_unopt_x64 under --config=android_debug_unopt_x64 -- or into
-# a directory named after `--`:
+# What the flutter tool reads from a developer's build, where Bazel built
+# it: `local_engine` writes local_engine.json beside the files
+# (build_defs/dist/local_engine.bzl; NEED_DECISION D15), a map from each
+# GN path the tool reads to Bazel's file, and `--local-engine` /
+# `--local-engine-host` take the directory holding it -- the Gradle plugin
+# and the desktop CMake re-entry included. For a Linux host build:
+# flutter_tester, gen_snapshot, icudtl.dat, impellerc and its libraries,
+# font-subset, the GTK library and headers, the Dart SDK, the patched SDK,
+# the core snapshot under gen/flutter/lib/snapshot/, the frontend server
+# under gen/, the sky_engine package under gen/dart-pkg/ (assembled as one
+# directory, as package:sky_engine's root, and so is impellerc's
+# shader_lib, which the tool passes whole as --include), the embedder
+# library with its header. For an Android build (the developer's android_*
+# configurations, whose GN build is ninja's default target -- the root group
+# `flutter`, which engine/src's //:default depends on): what that group
+# lays -- libflutter.so and its lib.stripped/ copy, the host gen_snapshot
+# under clang_x64/, the embedding's jars and poms (which the Gradle plugin
+# resolves through the manifest), the Android archives and the javadoc under
+# zip_archives/, ICU's data file for the target. The Maven tree and the
+# dist archives are the builders' targets, not the default's, as under GN.
+# A cross build's directory is named after its platform
+# (bazel-out/android_arm64-opt/; the root .bazelrc's
+# --experimental_platform_in_output_dir), so that it and the host build it
+# pairs with are both on disk:
 #
-#   bazel run //engine/src/flutter:install
-#   bazel run //engine/src/flutter:install -- engine/src/out/host_debug_unopt_bazel
-#   bazel run --config=android_debug_unopt_x64 //engine/src/flutter:install
+#   bazel build //engine/src/flutter:local_engine
+#   flutter test --local-engine=$PWD/engine/src/out/bazel-bin/engine/src/flutter \
+#       --local-engine-host=$PWD/engine/src/out/bazel-bin/engine/src/flutter
+#   bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
+#   bazel build --config=host_debug //engine/src/flutter:local_engine
+#   flutter build apk --local-engine=$PWD/engine/src/out/bazel-out/android_arm64-opt/bin/engine/src/flutter \
+#       --local-engine-host=$PWD/engine/src/out/bazel-out/k8-opt/bin/engine/src/flutter
 #
 # Not here: GN's own bookkeeping -- args.gn (nothing in the tree reads it:
 # testing/run_tests.py defines an is_asan() over it that nothing calls; a
@@ -338,100 +343,11 @@ filegroup(
 # The web SDK is the wasm builds' (ci/builders:wasm_release and the rest),
 # not the host build directory's, as under GN. The builders' own targets --
 # what each CI build of ci/builders/linux_*.json builds, into its
-# --target-dir, under its `--config` -- are generated into
-# ci/builders/BUILD.bazel.
-# What the flutter tool reads from a local engine, for `install` (copied into
-# GN's layout) and `local_engine` (where Bazel built them, by manifest):
-# the targets that place their own files, the files by directory, the trees.
-_LOCAL_ENGINE_CONTENTS = select({
-    # GN's default target is the root group `flutter` (engine/src's
-    # //:default depends on //flutter alone): the Android shell with its
-    # jars and archives, the host gen_snapshot, the snapshots, the
-    # Impeller SDK, the embedder archive. The Maven tree and the dist
-    # archives are not in it; the builders name them as targets.
-    "@platforms//os:android": [":flutter"],
-    # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
-    # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
-    # impellerc's GLSL library, which GN's shader_lib group copies beside
-    # the compiler (shader_lib/flutter/runtime_effect.glsl,
-    # shader_lib/impeller/*.glsl): the flutter tool hands the directory to
-    # impellerc as --include when it compiles a package's shaders.
-    "//conditions:default": [
-        "//engine/src/flutter/impeller/compiler/shader_lib/flutter",
-        "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
-        "//engine/src/flutter/sky/packages/sky_engine",
-    ],
-})
-
-_LOCAL_ENGINE_FILES = select({
-    # copy("copy_icudata"): ICU's data file for the target at the build
-    # root (android/icudtl.dat; @icu's filegroup selects it), as GN's
-    # icudata group lays it.
-    "@platforms//os:android": {"@icu//:icudata": ""},
-    "//conditions:default": {
-        "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
-        "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
-        "//engine/src/flutter/impeller/compiler:impellerc": "",
-        "//engine/src/flutter/impeller/tessellator:libtessellator.so": "",
-        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
-        "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
-        "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
-        "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
-        "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
-        "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
-        "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
-        "//engine/src/flutter/shell/platform/embedder:libflutter_engine.so": "",
-        "//engine/src/flutter/shell/platform/linux:flutter_linux_gtk": "",
-        "//engine/src/flutter/shell/testing:flutter_tester": "",
-        "//engine/src/flutter/tools/font_subset:font-subset": "",
-        "//engine/src/flutter/tools/path_ops:libpath_ops.so": "",
-        # copy("copy_icudata"): the full data file, where artifacts.zip
-        # carries the trimmed flutter/icudtl.dat.
-        "@icu//:icudata": "",
-    },
-})
-
-_LOCAL_ENGINE_TREES = select({
-    "@platforms//os:android": [],
-    "//conditions:default": [
-        "//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk",
-        "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
-    ],
-})
-
-install(
-    name = "install",
-    # The root group is testonly (GN's `testonly = true`), as the builders'
-    # installs over it are.
-    testonly = True,
-    archives = select({
-        "@platforms//os:android": [],
-        "//conditions:default": [
-            "//engine/src/flutter/build/archives:artifacts",
-            "//engine/src/flutter/build/archives:dart_sdk_archive",
-            "//engine/src/flutter/build/archives:flutter_patched_sdk",
-            "//engine/src/flutter/impeller/toolkit/interop:sdk",
-            "//engine/src/flutter/shell/platform/embedder:embedder-archive",
-            "//engine/src/flutter/shell/platform/linux:flutter_gtk",
-            "//engine/src/flutter/tools/font_subset:font_subset",
-        ],
-    }),
-    contents = _LOCAL_ENGINE_CONTENTS,
-    files = _LOCAL_ENGINE_FILES,
-    trees = _LOCAL_ENGINE_TREES,
-)
-
-# The same files without the copy: `local_engine.json` beside them, which
-# the flutter tool reads (local_engine.bzl; NEED_DECISION D15). The
-# sky_engine package is assembled as one directory, as package:sky_engine's
-# root, and so is the shader library (the tool passes `shader_lib` whole to
-# impellerc); everything else is mapped where it is.
-#
-#   bazel build //engine/src/flutter:local_engine
-#   flutter test --local-engine=$PWD/engine/src/out/bazel-bin/engine/src/flutter \
-#       --local-engine-host=$PWD/engine/src/out/bazel-bin/engine/src/flutter
+# --target-dir, under its `--config` (an `install` into GN's layout, which
+# the recipes read) -- are generated into ci/builders/BUILD.bazel.
 local_engine(
     name = "local_engine",
+    # The root group is testonly (GN's `testonly = true`).
     testonly = True,
     # The host build's assembled directories; an Android build has neither
     # (its contents are the root group's).
@@ -442,9 +358,62 @@ local_engine(
             "shader_lib",
         ],
     }),
-    contents = _LOCAL_ENGINE_CONTENTS,
-    files = _LOCAL_ENGINE_FILES,
-    trees = _LOCAL_ENGINE_TREES,
+    # The targets that place their own files (BuildDirectoryInfo).
+    contents = select({
+        # GN's default target is the root group `flutter` (engine/src's
+        # //:default depends on //flutter alone): the Android shell with its
+        # jars and archives, the host gen_snapshot, the snapshots, the
+        # Impeller SDK, the embedder archive. The Maven tree and the dist
+        # archives are not in it; the builders name them as targets.
+        "@platforms//os:android": [":flutter"],
+        # The sky_engine package (gen/dart-pkg/sky_engine): the targets of
+        # sky/packages/sky_engine place their own files (BuildDirectoryInfo).
+        # impellerc's GLSL library, which GN's shader_lib group copies beside
+        # the compiler (shader_lib/flutter/runtime_effect.glsl,
+        # shader_lib/impeller/*.glsl): the flutter tool hands the directory to
+        # impellerc as --include when it compiles a package's shaders.
+        "//conditions:default": [
+            "//engine/src/flutter/impeller/compiler/shader_lib/flutter",
+            "//engine/src/flutter/impeller/compiler/shader_lib/impeller",
+            "//engine/src/flutter/sky/packages/sky_engine",
+        ],
+    }),
+    # The files by the directory that holds them, under the build root.
+    files = select({
+        # copy("copy_icudata"): ICU's data file for the target at the build
+        # root (android/icudtl.dat; @icu's filegroup selects it), as GN's
+        # icudata group lays it.
+        "@platforms//os:android": {"@icu//:icudata": ""},
+        "//conditions:default": {
+            "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot": "",
+            "//engine/src/flutter/flutter_frontend_server:frontend_server": "gen",
+            "//engine/src/flutter/impeller/compiler:impellerc": "",
+            "//engine/src/flutter/impeller/tessellator:libtessellator.so": "",
+            "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/platform_strong.dill": "flutter_patched_sdk",
+            "//engine/src/flutter/lib/snapshot:flutter_patched_sdk/vm_outline_strong.dill": "flutter_patched_sdk",
+            "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+            "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+            "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot",
+            "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin": "gen/flutter/lib/snapshot",
+            "//engine/src/flutter/shell/platform/embedder:copy_headers": "",
+            "//engine/src/flutter/shell/platform/embedder:libflutter_engine.so": "",
+            "//engine/src/flutter/shell/platform/linux:flutter_linux_gtk": "",
+            "//engine/src/flutter/shell/testing:flutter_tester": "",
+            "//engine/src/flutter/tools/font_subset:font-subset": "",
+            "//engine/src/flutter/tools/path_ops:libpath_ops.so": "",
+            # copy("copy_icudata"): the full data file, where artifacts.zip
+            # carries the trimmed flutter/icudtl.dat.
+            "@icu//:icudata": "",
+        },
+    }),
+    # The trees: the Dart SDK and the GTK headers, at their paths.
+    trees = select({
+        "@platforms//os:android": [],
+        "//conditions:default": [
+            "//engine/src/flutter/build/archives:dart_sdk_archive_dart-sdk",
+            "//engine/src/flutter/shell/platform/linux:flutter_gtk_publish_headers_linux",
+        ],
+    }),
 )
 ''',
   ),
