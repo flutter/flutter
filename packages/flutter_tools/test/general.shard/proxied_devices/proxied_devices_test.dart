@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -686,6 +687,7 @@ void main() {
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
+        artifacts: Artifacts.test(),
         appName: 'Test App',
         disableServiceAuthCodes: true,
         ddsPort: 150,
@@ -747,6 +749,7 @@ void main() {
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          artifacts: Artifacts.test(),
           appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
@@ -808,6 +811,7 @@ void main() {
         expect(localDds.startCalled, false);
         await dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          artifacts: Artifacts.test(),
           appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
@@ -851,6 +855,7 @@ void main() {
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          artifacts: Artifacts.test(),
           appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
@@ -905,6 +910,7 @@ void main() {
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
+        artifacts: Artifacts.test(),
         enableDevTools: true,
       );
 
@@ -951,6 +957,7 @@ void main() {
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
+        artifacts: Artifacts.test(),
         enableDevTools: true,
       );
 
@@ -1387,6 +1394,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     FlutterDevice? device,
     int? ddsPort,
