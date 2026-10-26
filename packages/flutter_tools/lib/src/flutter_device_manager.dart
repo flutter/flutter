@@ -68,7 +68,11 @@ class FlutterDeviceManager extends DeviceManager {
         userMessages: userMessages,
       ),
       IOSDevices(platform: platform, xcdevice: xcDevice, iosWorkflow: iosWorkflow, logger: logger),
-      IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
+      IOSSimulators(
+        iosSimulatorUtils: iosSimulatorUtils,
+        iosWorkflow: iosWorkflow,
+        platform: platform,
+      ),
       FlutterTesterDevices(
         analytics: analytics,
         buildSystem: buildSystem,
