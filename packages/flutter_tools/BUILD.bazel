@@ -12,7 +12,8 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//build_defs/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
-load("//build_defs/web:browser_launcher.bzl", "browser_launcher")
+load("//build_defs/desktop:build_tools.bzl", "linux_build_tools")
+load("//build_defs/web:browser_launcher.bzl", "browser_launcher", "display_launcher")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -327,7 +328,7 @@ dart_package_tests(
 # dev/automated_tests and dev/missing_dependency_tests (test_test), the
 # gallery (analyze_suggestions_integration_test), hello_world
 # (command_output_test, tool_backend_test), data_asset_app with its
-# package (the isolated data-asset tests).
+# package (the isolated data-asset tests, in the desktop shard).
 _INTEGRATION_PROJECTS = [
     "//dev/automated_tests:project",
     "//dev/integration_tests/data_asset_app:project",
@@ -336,6 +337,19 @@ _INTEGRATION_PROJECTS = [
     "//dev/missing_dependency_tests:project",
     "//examples/hello_world:sources",
     "//examples/hello_world/test:files",
+]
+
+# The projects the desktop shard's tests add to the ones they create or
+# copy besides those: the native-asset packages (link_hook,
+# hook_user_defines), the record_use app and package, and
+# dev/integration_tests/ui (overall_experience_test runs its commands.dart).
+_DESKTOP_PROJECTS = _INTEGRATION_PROJECTS + [
+    "//dev/integration_tests/hook_user_defines:project",
+    "//dev/integration_tests/link_hook:project",
+    "//dev/integration_tests/record_use_test_app:project",
+    "//dev/integration_tests/record_use_test_package:project",
+    "//dev/integration_tests/ui:assets",
+    "//dev/integration_tests/ui:sources",
 ]
 
 # The integration shard's files a Linux host cannot run from the facsimile.
@@ -365,25 +379,9 @@ _INTEGRATION_EXCLUDED = [
     "test/integration.shard/flutter_build_with_compilation_error_test.dart",
     "test/integration.shard/gradle_jni_packaging_test.dart",
     "test/integration.shard/gradle_libapp_so_packaging_test.dart",
-    "test/integration.shard/gradle_non_android_plugin_test.dart",
-    # The host's C toolchain and CMake (native assets; `flutter build linux
-    # --config-only` runs CMake; the record_use and data-asset tests build
-    # or run for the Linux desktop as well as the web).
-    "test/integration.shard/build_linux_config_only_test.dart",
-    "test/integration.shard/isolated/dart_data_asset_conflicting_assets_test.dart",
-    "test/integration.shard/isolated/dart_data_asset_flutter_build_test.dart",
-    "test/integration.shard/isolated/dart_data_asset_flutter_run_test.dart",
-    "test/integration.shard/isolated/record_use_caching_test.dart",
-    "test/integration.shard/isolated/record_use_flutter_build_test.dart",
-    "test/integration.shard/isolated/record_use_flutter_run_test.dart",
+    # macOS and iOS frameworks only: declares no test on Linux.
     "test/integration.shard/isolated/native_assets_flutter_build_framework_test.dart",
-    "test/integration.shard/isolated/native_assets_flutter_build_test.dart",
-    "test/integration.shard/isolated/native_assets_flutter_run_test.dart",
-    "test/integration.shard/isolated/native_assets_flutter_test_integration_test_test.dart",
-    "test/integration.shard/isolated/native_assets_flutter_test_test.dart",
-    "test/integration.shard/isolated/native_assets_without_cbuild_assemble_test.dart",
-    # The host's xvfb-run.
-    "test/integration.shard/overall_experience_test.dart",
+    "test/integration.shard/gradle_non_android_plugin_test.dart",
     # Tests of the repository's own scripts and resolution: bin/dart's
     # bootstrap (the facsimile's launcher has none), the pub workspace's
     # package_graph.json at the root.
@@ -422,6 +420,29 @@ browser_launcher(
     name = "chromedriver",
     browser = "@chrome//:chromedriver-linux64/chromedriver",
 )
+
+# The integration shard's files that build or run for the Linux desktop:
+# `flutter build linux` (CMake, ninja, pkg-config over GTK, clang) and the
+# native-asset builds (package:native_toolchain_c's clang), `flutter run -d
+# linux` on an X display, and the one that runs the tool under
+# /usr/bin/xvfb-run when it sees no DISPLAY (overall_experience_test) -- a
+# shard of their own (desktop_shard, below), with those programs from the
+# build and a display of each test's own.
+_INTEGRATION_DESKTOP = [
+    "test/integration.shard/build_linux_config_only_test.dart",
+    "test/integration.shard/overall_experience_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_conflicting_assets_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_flutter_build_test.dart",
+    "test/integration.shard/isolated/dart_data_asset_flutter_run_test.dart",
+    "test/integration.shard/isolated/record_use_caching_test.dart",
+    "test/integration.shard/isolated/record_use_flutter_build_test.dart",
+    "test/integration.shard/isolated/record_use_flutter_run_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_build_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_run_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_test_integration_test_test.dart",
+    "test/integration.shard/isolated/native_assets_flutter_test_test.dart",
+    "test/integration.shard/isolated/native_assets_without_cbuild_assemble_test.dart",
+]
 
 # The integration shard: the tool run as a process on projects of its own --
 # hot reload and restart on flutter_tester, the daemon, the debug adapter,
@@ -469,8 +490,49 @@ dart_package_tests(
     tags = ["cpu:4"],
     tests = glob(
         ["test/integration.shard/**/*_test.dart"],
-        exclude = _INTEGRATION_EXCLUDED,
+        exclude = _INTEGRATION_EXCLUDED + _INTEGRATION_DESKTOP,
     ),
+    # pub touches the workspace's lock when it resolves a member.
+    writable = ["pubspec.lock"],
+)
+
+# What `flutter build linux` runs, from the build (//build_defs/desktop:build_tools.bzl):
+# cmake, ninja, pkg-config answering for the build sysroot's GTK, the
+# engine's clang over that sysroot; and an X server for `flutter run -d
+# linux` (//build_defs/web:browser_launcher.bzl's display_launcher).
+linux_build_tools(name = "linux_build_tools")
+
+display_launcher(name = "Xvfb")
+
+# The desktop shard: the integration shard's files that build or run a
+# Linux desktop app (_INTEGRATION_DESKTOP), each on a display of its own,
+# with the build tools first on PATH and the built app's libraries from
+# the runtime sysroot.
+dart_package_tests(
+    name = "desktop_shard",
+    size = "large",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES,
+    # Two files build for Android as well as Linux: their linux (and bundle)
+    # cases run, the apk cases -- Android's artifacts, SDK and Gradle -- not.
+    cases = {
+        "test/integration.shard/isolated/native_assets_flutter_build_test.dart": "linux",
+        "test/integration.shard/isolated/native_assets_without_cbuild_assemble_test.dart": "linux",
+    },
+    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _DESKTOP_PROJECTS,
+    display = ":Xvfb",
+    imports = _IMPORTS,
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The tool, CMake and ninja's compiles, and the app at once.
+    tags = ["cpu:4"],
+    tests = _INTEGRATION_DESKTOP,
+    tools = [":linux_build_tools"],
     # pub touches the workspace's lock when it resolves a member.
     writable = ["pubspec.lock"],
 )

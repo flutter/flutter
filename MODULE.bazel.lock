@@ -650,9 +650,22 @@
         }
       }
     },
+    "//build_defs/repositories:cmake.bzl%cmake": {
+      "general": {
+        "bzlTransitiveDigest": "RFgbphpc9a1QZFh5M2QHKNG9adnGD36k59dIvqPAqBw=",
+        "usagesDigest": "Bnf+gu//OXPKQP6YiGhrFH59c5aXK8Qp3/aZ7g36p8E=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {
+          "cmake_linux_x64": {
+            "repoRuleId": "@@//build_defs/repositories:cmake.bzl%cmake_repository",
+            "attributes": {}
+          }
+        }
+      }
+    },
     "//build_defs/repositories:debian_runtime.bzl%debian_runtime": {
       "general": {
-        "bzlTransitiveDigest": "Nku64ON+l61cJG8PDUskfnhrAjHCZOddmp7cKZXKH94=",
+        "bzlTransitiveDigest": "KupD/GAHfWBEX8VtOODa3/9HLxeRYzkoLqLzemy2Tzg=",
         "usagesDigest": "nTsUsBhSDpFZgdbF2jOPB4oxE47cwsoxJB0FshbYshY=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
@@ -1235,6 +1248,14 @@
                 "libzstd1": [
                   "https://snapshot.debian.org/archive/debian/20210301T210829Z/pool/main/libz/libzstd/libzstd1_1.4.8+dfsg-2.1_amd64.deb",
                   "5dcadfbb743bfa1c1c773bff91c018f835e8e8c821d423d3836f3ab84773507b"
+                ],
+                "ninja-build": [
+                  "https://snapshot.debian.org/archive/debian/20240901T000000Z/pool/main/n/ninja-build/ninja-build_1.10.1-1_amd64.deb",
+                  "54e7ab6ca81951f3de4e3d41666409647ad619319dd43f6cc66c1694c849eca3"
+                ],
+                "pkg-config": [
+                  "https://snapshot.debian.org/archive/debian/20200421T214331Z/pool/main/p/pkg-config/pkg-config_0.29.2-1_amd64.deb",
+                  "09a05a23c5fd5baacd488255a6b0114909210691b830fb951acd276e9bcd632a"
                 ],
                 "shared-mime-info": [
                   "https://snapshot.debian.org/archive/debian/20201009T210056Z/pool/main/s/shared-mime-info/shared-mime-info_2.0-1_amd64.deb",
