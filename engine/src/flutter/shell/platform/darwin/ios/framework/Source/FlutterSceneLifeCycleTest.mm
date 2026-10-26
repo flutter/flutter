@@ -1514,6 +1514,56 @@ FLUTTER_ASSERT_ARC
                                                               completionHandler:handler]);
 }
 
+- (void)testWindowSceneDidUpdateEffectiveGeometryUpdatesDisplaysOfEnginesInScene {
+  if (@available(iOS 26.0, *)) {
+    FlutterPluginSceneLifeCycleDelegate* delegate =
+        [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+    id mocks = [self mocksForEvents];
+    id mockScene = mocks[@"mockScene"];
+    // An engine whose view controller is in the scene, e.g. a fixed-size FlutterViewController
+    // embedded as a child view controller in an add-to-app host.
+    id viewControllerEngine = mocks[@"mockEngine"];
+    id mockWindow = OCMClassMock([UIWindow class]);
+    id mockHostViewController = OCMClassMock([UIViewController class]);
+    id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+    OCMStub([mockScene windows]).andReturn(@[ mockWindow ]);
+    OCMStub([mockWindow rootViewController]).andReturn(mockHostViewController);
+    OCMStub([mockHostViewController childViewControllers]).andReturn(@[
+      mockFlutterViewController
+    ]);
+    OCMStub([mockFlutterViewController engine]).andReturn(viewControllerEngine);
+    // An engine registered with the scene by the developer.
+    id registeredEngine = OCMClassMock([FlutterEngine class]);
+    [delegate registerSceneLifeCycleWithFlutterEngine:registeredEngine scene:mockScene];
+    XCTAssertEqual([delegate searchFlutterEnginesWithinScene:mockScene].count, 2.0);
+
+    id geometry = OCMClassMock([UIWindowSceneGeometry class]);
+    [delegate windowScene:mockScene didUpdateEffectiveGeometry:geometry];
+
+    OCMVerify(times(1), [viewControllerEngine updateDisplays]);
+    OCMVerify(times(1), [registeredEngine updateDisplays]);
+  }
+}
+
+- (void)testWindowSceneDidUpdateEffectiveGeometryDoesNotUpdateDisplaysOfEnginesInOtherScenes {
+  if (@available(iOS 26.0, *)) {
+    FlutterPluginSceneLifeCycleDelegate* delegate =
+        [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+
+    id mocks = [self mocksForEvents];
+    id mockEngine = mocks[@"mockEngine"];
+    id mockScene = mocks[@"mockScene"];
+    id otherScene = OCMClassMock([UIWindowScene class]);
+    [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine scene:otherScene];
+
+    [delegate windowScene:mockScene
+        didUpdateEffectiveGeometry:OCMClassMock([UIWindowSceneGeometry class])];
+
+    OCMVerify(never(), [mockEngine updateDisplays]);
+  }
+}
+
 - (NSDictionary*)mocksForEvents {
   id mockEngine = OCMClassMock([FlutterEngine class]);
   id mockLifecycleDelegate = OCMClassMock([FlutterEnginePluginSceneLifeCycleDelegate class]);
