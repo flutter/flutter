@@ -319,14 +319,20 @@ class _LineBuilder {
   }
 
   void markSoftLineBreak(int index, {SoftHyphen? softHyphen}) {
+    // A soft hyphen immediately after whitespace (when there is no pending word before the break)
+    // breaks at the preceding whitespace and never draws a hyphen.
+    final SoftHyphen? effectiveSoftHyphen = hasPendingText ? softHyphen : null;
+
     // Like SkParagraph, a break at a soft hyphen only fits if the hyphen fits too.
     // If it does not, the line ends at the last earlier break that fits instead, if there
     // is one; otherwise the hyphen overflows.
-    final double reservedWidth = softHyphen == null || _mayEllipsize ? 0.0 : softHyphen.width;
+    final double reservedWidth = effectiveSoftHyphen == null || _mayEllipsize
+        ? 0.0
+        : effectiveSoftHyphen.width;
     _isBreakTooWide = reservedWidth > 0.0 && _fallbackBreak != null && !canFit(reservedWidth);
 
     _hasSoftLineBreak = true;
-    _breakSoftHyphen = softHyphen;
+    _breakSoftHyphen = effectiveSoftHyphen;
     _breakIndex = index;
 
     if (hasPendingText) {
@@ -335,7 +341,7 @@ class _LineBuilder {
       assert(_newlineEnd == index);
     }
 
-    consumePendingText(hyphenWidth: softHyphen?.width ?? 0.0);
+    consumePendingText(hyphenWidth: effectiveSoftHyphen?.width ?? 0.0);
     assert(_newlineEnd == index);
 
     if (!_isBreakTooWide) {
@@ -423,13 +429,13 @@ class _LineBuilder {
 
   // TODO(mdebbar): Can we inline this in `markSoftLineBreak` and use that everywhere?
   void consumePendingText({double hyphenWidth = 0.0}) {
-    // Update min intrinsic width. Like CSS min-content, a piece of a word that ends at a soft
-    // hyphen counts with its hyphen.
-    _minIntrinsicWidth = math.max(_minIntrinsicWidth, _widthPendingText + hyphenWidth);
-
     if (!hasPendingText) {
       return;
     }
+
+    // Update min intrinsic width. Like CSS min-content, a piece of a word that ends at a soft
+    // hyphen counts with its hyphen.
+    _minIntrinsicWidth = math.max(_minIntrinsicWidth, _widthPendingText + hyphenWidth);
 
     _whitespaceStart = _pendingTextEnd;
     _whitespaceEnd = _pendingTextEnd;

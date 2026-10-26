@@ -220,9 +220,14 @@ class TextLayout {
     );
 
     for (final region in regions) {
-      // Regions operate in text indexes, not cluster indexes (one cluster can contain several text points)
-      // We need to convert one into another
+      // Regions operate in text indexes, not cluster indexes (one cluster can contain several text points).
+      // We need to convert one into another.
       final ClusterRange clusterRange = _mapping.toClusterRange(region.start, region.end);
+      if (clusterRange.isEmpty) {
+        // A bidi region containing only clusterless characters (such as a standalone directional
+        // mark or soft hyphen) owns no clusters and produces no visual run.
+        continue;
+      }
       final run = BidiRun(clusterRange, region.level);
       bidiRuns.add(run);
     }
@@ -311,8 +316,16 @@ class TextLayout {
       );
     }
 
-    // Arrange line vertically, calculate metrics and bounds
-    final ui.TextRange contentTextRange = _mapping.toTextRange(contentClusterRange);
+    // Arrange line vertically, calculate metrics and bounds.
+    // Leading clusterless characters (at offset 0 or right after a hard line break) map to the
+    // first visible cluster after them, so start the line's text range where the previous line's
+    // hard break ended (or at 0 for the first line) to keep line ranges contiguous.
+    final int lineStart = lines.isEmpty ? 0 : lines.last.hardLineBreakRange.end;
+    final ui.TextRange rawContentTextRange = _mapping.toTextRange(contentClusterRange);
+    final contentTextRange = ui.TextRange(
+      start: math.min(lineStart, rawContentTextRange.start),
+      end: rawContentTextRange.end,
+    );
     final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceClusterRange);
     final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineClusterRange);
     // A line includes the trailing newline if it has a hard line break that
@@ -461,6 +474,11 @@ class TextLayout {
           bidiLineSpanTextRange.start,
           bidiLineSpanTextRange.end,
         );
+        if (bidiLineSpanRange.isEmpty) {
+          // A span slice containing only clusterless characters (such as a standalone U+00AD or
+          // U+200B span) has no clusters to measure or paint on this line.
+          continue;
+        }
         final LineBlock block;
         final double blockWidth;
         if (span is PlaceholderSpan) {
@@ -920,10 +938,12 @@ class TextLayout {
 
         if (block is SoftHyphenBlock) {
           // Like SkParagraph, the hyphen maps to the position after the soft hyphen.
+          // Because that offset is also the start of the next line, use upstream affinity so
+          // line-boundary and closest-glyph queries keep the position on the hyphenated line.
           if (right < offset.dx) {
             continue;
           }
-          return ui.TextPosition(offset: block.textRange.end);
+          return ui.TextPosition(offset: block.textRange.end, affinity: ui.TextAffinity.upstream);
         }
 
         if (right < offset.dx) {
@@ -979,7 +999,12 @@ class TextLayout {
       // We found the line but not the block because the offset is to the right of all blocks in this line.
       final LineBlock? lastVisualBlockInLine = line.visualBlocks.lastOrNull;
       if (lastVisualBlockInLine is SoftHyphenBlock) {
-        return ui.TextPosition(offset: lastVisualBlockInLine.textRange.end);
+        // Offsets past a trailing soft hyphen map to the break boundary at the end of this line,
+        // so use upstream affinity to keep the position on the hyphenated line.
+        return ui.TextPosition(
+          offset: lastVisualBlockInLine.textRange.end,
+          affinity: ui.TextAffinity.upstream,
+        );
       }
       return lastVisualBlockInLine == null
           ? ui.TextPosition(offset: line.allLineTextRange.start, affinity: ui.TextAffinity.upstream)
@@ -1202,7 +1227,13 @@ class _TextClusterMapping {
       // starts at the next cluster.
       startClusterIndex += 1;
     }
-    return ClusterRange(start: startClusterIndex, end: toClusterIndex(end - 1) + 1);
+    int endClusterIndex = toClusterIndex(end - 1) + 1;
+    if (_clusters[endClusterIndex - 1].start >= end) {
+      // The code unit at (end - 1) has no cluster of its own at the start of the text and is
+      // mapped to the first cluster after it, so the range ends before that cluster.
+      endClusterIndex -= 1;
+    }
+    return ClusterRange(start: startClusterIndex, end: endClusterIndex);
   }
 
   ui.TextRange toTextRange(ClusterRange clusterRange) {
