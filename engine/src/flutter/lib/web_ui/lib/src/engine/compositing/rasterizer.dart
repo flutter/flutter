@@ -92,7 +92,7 @@ abstract class ViewRasterizer {
     if (presentationTimer != null) {
       presentationTimer.stop();
       Profiler.instance.benchmark(
-        'presentation_duration',
+        kProfilePresentationDuration,
         presentationTimer.elapsedMicroseconds.toDouble(),
       );
     }

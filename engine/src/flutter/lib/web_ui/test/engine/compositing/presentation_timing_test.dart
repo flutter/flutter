@@ -35,7 +35,7 @@ void testMain() {
           Profiler.ensureInitialized();
         }
         ui_web.benchmarkValueCallback = (String name, double value) {
-          if (name == 'presentation_duration') {
+          if (name == kProfilePresentationDuration) {
             values.add(value);
           }
         };
