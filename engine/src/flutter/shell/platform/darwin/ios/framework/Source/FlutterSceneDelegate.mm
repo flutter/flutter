@@ -102,6 +102,15 @@ FLUTTER_ASSERT_ARC
                          completionHandler:completionHandler];
 }
 
+#pragma mark - Responding to geometry changes
+
+- (void)windowScene:(UIWindowScene*)windowScene
+    didUpdateEffectiveGeometry:(UIWindowSceneGeometry*)previousEffectiveGeometry
+    API_AVAILABLE(ios(26.0)) {
+  [self.sceneLifeCycleDelegate windowScene:windowScene
+                didUpdateEffectiveGeometry:previousEffectiveGeometry];
+}
+
 #pragma mark - Helpers
 
 - (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
