@@ -130,8 +130,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)onStatusBarTap;
 
 /**
- * Sends the current display information (e.g. the size of the screen that the view controller's
- * view is on) to the framework.
+ * Sends display information for the screen that the view controller's view is on, if it differs
+ * from the display last sent to the framework.
+ *
+ * If the view isn't in a window, keeps the last display sent. If no display has been sent yet,
+ * sends `UIScreen.mainScreen` as a best-effort initial display.
  */
 - (void)updateDisplays;
 @end
