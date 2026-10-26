@@ -8,7 +8,6 @@ import 'package:ui/ui.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -236,16 +235,10 @@ Future<void> testMain() async {
       return (builder.build()..layout(const ParagraphConstraints(width: 65))).longestLine;
     }
 
-    test(
-      'is drawn at a soft hyphen line break',
-      () {
-        expect(longestLine(null), 50);
-        expect(longestLine('--'), 60);
-        expect(longestLine(''), 40);
-      },
-      // TODO(dbebawy): Enable on CanvasKit once its softHyphenString rolls in.
-      // https://github.com/flutter/flutter/issues/189617
-      skip: isCanvasKit,
-    );
+    test('is drawn at a soft hyphen line break', () {
+      expect(longestLine(null), 50);
+      expect(longestLine('--'), 60);
+      expect(longestLine(''), 40);
+    });
   });
 }

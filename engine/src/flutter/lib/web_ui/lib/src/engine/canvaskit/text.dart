@@ -83,8 +83,10 @@ SkParagraphStyle _toSkParagraphStyle(EngineParagraphStyle style) {
   properties.applyRoundingHack = false;
   // Like the native engine, render soft hyphens unless they are hidden.
   properties.renderSoftHyphens = style.hyphens != ui.Hyphens.hidden;
-  // TODO(dbebawy): Pass style.hyphenCharacter once CanvasKit's softHyphenString
-  // rolls in. https://github.com/flutter/flutter/issues/189617
+  final String? hyphenCharacter = style.hyphenCharacter;
+  if (hyphenCharacter != null) {
+    properties.softHyphenString = hyphenCharacter;
+  }
 
   return canvasKit.ParagraphStyle(properties);
 }
