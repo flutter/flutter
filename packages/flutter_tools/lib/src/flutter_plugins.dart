@@ -151,7 +151,6 @@ Future<Plugin?> _pluginFromPackage(
     flutterConfig['plugin'] as YamlMap?,
     flutterConstraint,
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
-    fileSystem: fs,
     appDependencies: appDependencies,
     isDevDependency: isDevDependency,
   );
@@ -551,14 +550,23 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String type) {
+List<Map<String, Object?>> _extractPlatformMaps(
+  Iterable<Plugin> plugins,
+  String type, {
+  required FileSystem fileSystem,
+}) {
   return <Map<String, Object?>>[
     for (final Plugin plugin in plugins)
-      if (plugin.platforms[type] case final PluginPlatform platformPlugin) platformPlugin.toMap(),
+      if (plugin.platforms[type] case final PluginPlatform platformPlugin)
+        platformPlugin.toMap(fileSystem: fileSystem),
   ];
 }
 
-Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> _writeAndroidPluginRegistrant(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  required FileSystem fileSystem,
+}) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     AndroidPlugin.kConfigKey,
@@ -566,19 +574,20 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     AndroidPlugin.kConfigKey,
+    fileSystem: fileSystem,
   );
 
   final templateContext = <String, Object>{
     'methodChannelPlugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
   };
-  final String javaSourcePath = globals.fs.path.join(
+  final String javaSourcePath = fileSystem.path.join(
     project.android.pluginRegistrantHost.path,
     'src',
     'main',
     'java',
   );
-  final String registryPath = globals.fs.path.join(
+  final String registryPath = fileSystem.path.join(
     javaSourcePath,
     'io',
     'flutter',
@@ -590,7 +599,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   await _renderTemplateToFile(
     templateContent,
     templateContext,
-    globals.fs.file(registryPath),
+    fileSystem.file(registryPath),
     globals.templateRenderer,
   );
 }
@@ -946,6 +955,7 @@ Future<void> writeIOSPluginRegistrant(
   final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     IOSPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final context = <String, Object>{
     'os': FlutterDarwinPlatform.ios.name,
@@ -1009,12 +1019,14 @@ Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins
   final List<Map<String, Object?>> linuxMethodChannelPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     LinuxPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, LinuxPlugin.kConfigKey)
     ..removeWhere(methodChannelPlugins.contains);
   final List<Map<String, Object?>> linuxFfiPlugins = _extractPlatformMaps(
     ffiPlugins,
     LinuxPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final context = <String, Object>{
     'os': 'linux',
@@ -1084,6 +1096,7 @@ Future<void> writeMacOSPluginRegistrant(
   final List<Map<String, Object?>> macosMethodChannelPlugins = _extractPlatformMaps(
     methodChannelPlugins,
     MacOSPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final context = <String, Object>{
     'os': FlutterDarwinPlatform.macos.name,
@@ -1166,12 +1179,14 @@ Future<void> writeWindowsPluginFiles(
   final List<Map<String, Object?>> windowsMethodChannelPlugins = _extractPlatformMaps(
     win32Plugins,
     WindowsPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final List<Plugin> ffiPlugins = _filterFfiPlugins(plugins, WindowsPlugin.kConfigKey)
     ..removeWhere(methodChannelPlugins.contains);
   final List<Map<String, Object?>> windowsFfiPlugins = _extractPlatformMaps(
     ffiPlugins,
     WindowsPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
   );
   final context = <String, Object>{
     'os': 'windows',
@@ -1207,7 +1222,11 @@ Future<void> _writeWebPluginRegistrant(
   List<Plugin> plugins,
   Directory destination,
 ) async {
-  final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
+  final List<Map<String, Object?>> webPlugins = _extractPlatformMaps(
+    plugins,
+    WebPlugin.kConfigKey,
+    fileSystem: project.directory.fileSystem,
+  );
   final context = <String, Object>{'methodChannelPlugins': webPlugins};
 
   final File pluginFile = destination.childFile('web_plugin_registrant.dart');
@@ -1460,6 +1479,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
 Future<void> injectPlugins(
   FlutterProject project, {
   required bool releaseMode,
+  required FileSystem fileSystem,
   bool androidPlatform = false,
   bool iosPlatform = false,
   bool linuxPlatform = false,
@@ -1495,6 +1515,7 @@ Future<void> injectPlugins(
     await _writeAndroidPluginRegistrant(
       project,
       filteredPluginsByPlatform[AndroidPlugin.kConfigKey]!,
+      fileSystem: fileSystem,
     );
   }
   if (linuxPlatform) {
@@ -1527,13 +1548,13 @@ Future<void> injectPlugins(
           project: project,
           cocoapods: globals.cocoaPods,
           swiftPackageManager: SwiftPackageManager(
-            fileSystem: globals.fs,
+            fileSystem: fileSystem,
             templateRenderer: globals.templateRenderer,
             processUtils: globals.processUtils,
             config: globals.config,
             logger: globals.logger,
           ),
-          fileSystem: globals.fs,
+          fileSystem: fileSystem,
           featureFlags: featureFlags,
           analytics: globals.analytics,
         );

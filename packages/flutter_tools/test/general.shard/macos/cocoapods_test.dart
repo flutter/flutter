@@ -399,7 +399,7 @@ environement:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.directory('project'),
         );
-        await injectPlugins(project, iosPlatform: true, releaseMode: false);
+        await injectPlugins(project, iosPlatform: true, releaseMode: false, fileSystem: fileSystem);
 
         final String debugContents = projectUnderTest.ios
             .xcodeConfigFor('Debug')
