@@ -6,16 +6,17 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
@@ -421,11 +422,9 @@ void main() {
       final logReader = FakeDeviceLogReader();
       final DriverService driverService = FlutterDriverService(
         applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
         dartSdkPath: 'dart',
         devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: FakeToolContext(artifacts: Artifacts.test(), processManager: processManager),
         logFlushDelay: Duration.zero,
         vmServiceConnector:
             (
@@ -434,6 +433,7 @@ void main() {
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
               Device? device,
@@ -497,17 +497,16 @@ FlutterDriverService setUpDriverService({
   FlutterVmService? vmService,
   DevtoolsLauncher? devtoolsLauncher,
 }) {
-  logger ??= BufferLogger.test();
   return FlutterDriverService(
     applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
-    logger: logger,
-    platform: platform ?? FakePlatform(),
-    processUtils: ProcessUtils(
-      logger: logger,
-      processManager: processManager ?? FakeProcessManager.any(),
-    ),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
+    toolContext: FakeToolContext(
+      artifacts: Artifacts.test(),
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+    ),
     vmServiceConnector:
         (
           Uri httpUri, {
@@ -515,6 +514,7 @@ FlutterDriverService setUpDriverService({
           Restart? restart,
           CompileExpression? compileExpression,
           FlutterProject? flutterProject,
+          FlutterVersion? flutterVersion,
           PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
           io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
           Device? device,
@@ -631,6 +631,7 @@ class FakeDartDevelopmentService extends Fake
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     FlutterDevice? device,
     int? ddsPort,
