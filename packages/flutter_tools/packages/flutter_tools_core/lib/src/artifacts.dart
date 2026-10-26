@@ -235,8 +235,15 @@ class ArtifactDependency {
   /// Whether [url] points to a `.zip` archive that is extracted into a directory.
   bool get isZipArchive => url.path.toLowerCase().endsWith(_zipExtension);
 
-  static String _normalizeTargetPlatform(String platform) =>
-      platform == 'macos' ? 'darwin' : platform;
+  static String _normalizeTargetPlatform(String platform) {
+    if (platform == 'macos') {
+      return 'darwin';
+    }
+    if (platform.startsWith('macos-')) {
+      return 'darwin-${platform.substring('macos-'.length)}';
+    }
+    return platform;
+  }
 
   /// Returns whether this artifact matches [currentHostPlatform] and optional
   /// [targetPlatforms].
