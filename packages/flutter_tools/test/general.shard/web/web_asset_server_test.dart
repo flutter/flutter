@@ -776,6 +776,7 @@ void main() {
       overrides: <Type, Generator>{
         Artifacts: () => Artifacts.test(),
         FileSystem: () => fileSystem,
+        Platform: () => platform,
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
