@@ -146,6 +146,42 @@ Future<void> testMain() async {
 
     expect(activeImages.length, 0);
   });
+
+  test('instantiateImageCodecWithSize scales to getTargetSize larger than intrinsic', () async {
+    final ui.Image scaled = await _decodePngWithTargetSize(
+      (int width, int height) => ui.TargetImageSize(width: width * 2, height: height * 2),
+    );
+    expect(scaled.width, 20);
+    expect(scaled.height, 20);
+    scaled.dispose();
+  });
+
+  test('instantiateImageCodecWithSize scales to getTargetSize smaller than intrinsic', () async {
+    final ui.Image scaled = await _decodePngWithTargetSize(
+      (int width, int height) => ui.TargetImageSize(width: width ~/ 2, height: height ~/ 2),
+    );
+    expect(scaled.width, 5);
+    expect(scaled.height, 5);
+    scaled.dispose();
+  });
+}
+
+Future<ui.Image> _decodePngWithTargetSize(ui.TargetImageSizeCallback getTargetSize) async {
+  final ui.Image image = await _createImage();
+  expect(image.width, 10);
+  expect(image.height, 10);
+  final ByteData? imageData = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  final ui.ImmutableBuffer imageBuffer = await ui.ImmutableBuffer.fromUint8List(
+    imageData!.buffer.asUint8List(),
+  );
+  final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+    imageBuffer,
+    getTargetSize: getTargetSize,
+  );
+  final ui.FrameInfo frame = await codec.getNextFrame();
+  codec.dispose();
+  return frame.image;
 }
 
 Future<ui.Image> _createImage() => _createPicture().toImage(10, 10);

@@ -759,11 +759,13 @@ Future<Codec> instantiateImageCodecWithSize(
       final int width = info.image.width;
       final int height = info.image.height;
       final TargetImageSize targetSize = getTargetSize(width, height);
+      // Honor the size returned by getTargetSize, which already applied the
+      // caller's upscaling policy (for example ResizeImage.allowUpscaling).
       return await engine.engineInstantiateImageCodec(
         buffer._list!,
         targetWidth: targetSize.width,
         targetHeight: targetSize.height,
-        allowUpscaling: false,
+        allowUpscaling: true,
       );
     }
   } finally {
