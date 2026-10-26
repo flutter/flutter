@@ -1,0 +1,22 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The app flutter_tools' isolated/record_use_* tests (integration.shard) copy
+# and build for the Linux desktop.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "project",
+    srcs = glob(
+        [
+            "lib/**",
+            "linux/**",
+            "web/**",
+        ],
+        exclude = ["**/.dart_tool/**"],
+    ) + [
+        "pubspec.yaml",
+    ],
+)

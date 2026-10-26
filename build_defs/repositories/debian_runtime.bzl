@@ -117,6 +117,37 @@ filegroup(
     ),
 )
 
+# GIO's modules (glib-networking's TLS, the proxy resolvers): GLib loads
+# the directory built into it, /usr/lib/<multiarch>/gio/modules -- the
+# host's modules into the sysroot's GLib -- unless GIO_MODULE_DIR says
+# otherwise.
+filegroup(
+    name = "gio_modules",
+    srcs = glob(
+        ["usr/lib/*-linux-gnu*/gio/modules"],
+        allow_empty = True,
+        exclude_directories = 0,
+    ),
+)
+
+# What `flutter build linux` runs besides CMake and the compilers
+# (ninja-build, pkg-config), for //build_defs/desktop:build_tools.bzl.
+filegroup(
+    name = "ninja",
+    srcs = glob(
+        ["usr/bin/ninja"],
+        allow_empty = True,
+    ),
+)
+
+filegroup(
+    name = "pkg_config",
+    srcs = glob(
+        ["usr/bin/pkg-config"],
+        allow_empty = True,
+    ),
+)
+
 # The packages' metadata and files, for anything that reads them whole.
 filegroup(
     name = "all_files",
