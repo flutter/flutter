@@ -18,11 +18,13 @@ import 'package:file/file.dart';
 /// also covers repositories and `git` commands created by the scripts under
 /// test. Requires Git 2.31 or newer.
 const Map<String, String> kDisableGitAutoMaintenanceEnvironment = <String, String>{
-  'GIT_CONFIG_COUNT': '2',
+  'GIT_CONFIG_COUNT': '3',
   'GIT_CONFIG_KEY_0': 'maintenance.auto',
   'GIT_CONFIG_VALUE_0': 'false',
   'GIT_CONFIG_KEY_1': 'gc.auto',
   'GIT_CONFIG_VALUE_1': '0',
+  'GIT_CONFIG_KEY_2': 'gc.autoDetach',
+  'GIT_CONFIG_VALUE_2': 'false',
 };
 
 /// Recursively deletes [directory], retrying briefly if the deletion fails.
