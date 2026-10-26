@@ -183,8 +183,7 @@ PlatformViewEmbedder::PlatformViewEmbedder(
           platform_dispatch_table.custom_platform_message_handler
               ? platform_dispatch_table.custom_platform_message_handler
               : embedder_platform_message_handler_),
-      platform_dispatch_table_(std::move(platform_dispatch_table)),
-      deferred_surface_resolution_(true) {
+      platform_dispatch_table_(std::move(platform_dispatch_table)) {
   platform_dispatch_table_.resolve_embedder_surface_callback =
       std::move(resolve_embedder_surface_callback);
 }

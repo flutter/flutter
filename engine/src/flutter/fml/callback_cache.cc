@@ -103,11 +103,11 @@ void CallbackCache::LoadCacheFromDisk() {
     return;
   }
 
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   for (Value::ConstMemberIterator iterator = root.MemberBegin();
        iterator != root.MemberEnd(); ++iterator) {
     int64_t hash = std::stoll(iterator->name.GetString());
-    auto entry = iterator->value.GetObject();
+    auto entry = iterator->value.GetObj();
 
     Value::ConstMemberIterator name_it = entry.FindMember(kNameKey);
     Value::ConstMemberIterator class_name_it = entry.FindMember(kClassNameKey);

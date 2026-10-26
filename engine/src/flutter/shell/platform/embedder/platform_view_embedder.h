@@ -191,7 +191,6 @@ class PlatformViewEmbedder final : public PlatformView {
       embedder_platform_message_handler_;
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   PlatformDispatchTable platform_dispatch_table_;
-  bool deferred_surface_resolution_ = false;
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
