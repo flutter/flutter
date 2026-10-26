@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// These tests drive the hit-test region pass through real widgets (routes,
+// showGeneralDialog and its barrier) under the flutter_test binding. The
+// geometry, claim rules and bookkeeping are covered in
+// test/rendering/hit_test_regions_test.dart.
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -10,26 +15,30 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../services/fake_platform_views.dart';
 
-typedef _HitTestRegionGroup = ({int viewId, List<Rect> rects});
+// Widgets are positioned in logical pixels but regions are in physical
+// pixels; a ratio other than 1 checks the conversion.
+const double _devicePixelRatio = 2.0;
 
-List<_HitTestRegionGroup> _decodePayload(Float64List payload) {
-  final groups = <_HitTestRegionGroup>[];
-  var i = 0;
-  while (i < payload.length) {
-    final int viewId = payload[i].toInt();
-    final int count = payload[i + 1].toInt();
-    i += 2;
-    final rects = <Rect>[];
-    for (var j = 0; j < count; j++) {
-      rects.add(Rect.fromLTRB(payload[i], payload[i + 1], payload[i + 2], payload[i + 3]));
-      i += 4;
+/// The regions computed by the last frame: for each platform view, in paint
+/// order, the distinct rects claimed over it, in logical pixels.
+///
+/// Rects are deduplicated because some widgets, such as [ModalBarrier], are
+/// built from several nested boxes that each claim the same rect.
+Map<int, Set<Rect>> _lastRegions() {
+  final Float64List payload = RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions!;
+  double at(int i) => payload[i] / _devicePixelRatio;
+  final regions = <int, Set<Rect>>{};
+  for (var i = 0; i < payload.length;) {
+    final Set<Rect> rects = regions[payload[i].toInt()] = <Rect>{};
+    final int end = i + 2 + 4 * payload[i + 1].toInt();
+    for (i += 2; i < end; i += 4) {
+      rects.add(Rect.fromLTRB(at(i), at(i + 1), at(i + 2), at(i + 3)));
     }
-    groups.add((viewId: viewId, rects: rects));
   }
-  return groups;
+  return regions;
 }
 
-Widget _buildPlatformView(int viewId) {
+Widget _platformView(int viewId) {
   return PlatformViewSurface(
     controller: FakePlatformViewController(viewId),
     hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -37,52 +46,35 @@ Widget _buildPlatformView(int viewId) {
   );
 }
 
-Widget _buildApp(Widget home) {
+Widget _app(Widget home) {
   return WidgetsApp(
     color: const Color(0xFF000000),
-    debugShowCheckedModeBanner: false,
-    pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-      return PageRouteBuilder<T>(
-        settings: settings,
-        pageBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Animation<double> secondaryAnimation,
-        ) => builder(context),
-      );
-    },
+    pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) => PageRouteBuilder<T>(
+      settings: settings,
+      pageBuilder: (BuildContext context, _, _) => builder(context),
+    ),
     home: home,
   );
 }
 
-class _PaintCountingPainter extends CustomPainter {
-  _PaintCountingPainter(this.onPaint);
-
-  final VoidCallback onPaint;
+class _PaintCounter extends CustomPainter {
+  int count = 0;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    onPaint();
-  }
+  void paint(Canvas canvas, Size size) => count += 1;
 
   @override
-  bool shouldRepaint(_PaintCountingPainter oldDelegate) => false;
+  bool shouldRepaint(_PaintCounter oldDelegate) => false;
 }
 
 void main() {
-  setUp(() {
-    RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
-    debugEnableHitTestRegionsOnAllPlatforms = false;
-  });
-
-  tearDown(() {
-    RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
-    debugEnableHitTestRegionsOnAllPlatforms = false;
-  });
-
-  void configureTestView(WidgetTester tester, {double devicePixelRatio = 1.0}) {
-    tester.view.devicePixelRatio = devicePixelRatio;
-    tester.view.physicalSize = Size(800.0 * devicePixelRatio, 600.0 * devicePixelRatio);
+  // Must reset through addTearDown: the binding verifies that debug variables
+  // are unset before tearDown callbacks run.
+  void enablePass(WidgetTester tester) {
+    debugEnableHitTestRegionsOnAllPlatforms = true;
+    RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
+    tester.view.devicePixelRatio = _devicePixelRatio;
+    tester.view.physicalSize = const Size(800, 600) * _devicePixelRatio;
     addTearDown(() {
       RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
       debugEnableHitTestRegionsOnAllPlatforms = false;
@@ -90,715 +82,116 @@ void main() {
     });
   }
 
-  testWidgets('does not compute hit-test regions when flag is off or not on web without override', (
+  testWidgets('PV1 under a dismissible showGeneralDialog that contains PV2', (
     WidgetTester tester,
   ) async {
-    configureTestView(tester);
+    enablePass(tester);
+    const homeButton = Rect.fromLTWH(20, 30, 80, 40);
+    const barrier = Rect.fromLTWH(0, 0, 800, 600);
+    const dialogHeader = Rect.fromLTWH(100, 100, 200, 40);
+    const dialogButton = Rect.fromLTWH(250, 150, 40, 40);
+    late BuildContext homeContext;
 
-    final widget = Directionality(
-      textDirection: TextDirection.ltr,
-      child: Stack(
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (BuildContext context) {
+            homeContext = context;
+            return Stack(
+              children: <Widget>[
+                // Painted below PV1, so it claims nothing.
+                Positioned.fromRect(
+                  rect: const Rect.fromLTWH(0, 0, 150, 150),
+                  child: const ColoredBox(color: Color(0xFF112233)),
+                ),
+                Positioned.fromRect(
+                  rect: const Rect.fromLTWH(0, 0, 500, 500),
+                  child: _platformView(1),
+                ),
+                Positioned.fromRect(
+                  rect: homeButton,
+                  child: const Listener(behavior: HitTestBehavior.opaque),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    showGeneralDialog<void>(
+      context: homeContext,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      pageBuilder: (_, _, _) => Stack(
         children: <Widget>[
-          Positioned(left: 0, top: 0, width: 400, height: 400, child: _buildPlatformView(1)),
-          Positioned(
-            left: 10,
-            top: 20,
-            width: 100,
-            height: 50,
-            child: Listener(behavior: HitTestBehavior.opaque, onPointerDown: (_) {}),
+          Positioned.fromRect(
+            rect: dialogHeader,
+            child: const ColoredBox(color: Color(0xFFFFFFFF)),
+          ),
+          Positioned.fromRect(
+            rect: const Rect.fromLTWH(100, 140, 200, 200),
+            child: _platformView(2),
+          ),
+          Positioned.fromRect(
+            rect: dialogButton,
+            child: const Listener(behavior: HitTestBehavior.opaque),
           ),
         ],
       ),
     );
+    await tester.pumpAndSettle();
 
-    // 1. Flag off -> debugLastHitTestRegions is null.
-    debugEnableHitTestRegionsOnAllPlatforms = true;
-    RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
-    await tester.pumpWidget(widget);
-    expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
-
-    // 2. Flag on, debug override off (when not on web) -> debugLastHitTestRegions is null.
-    if (!kIsWeb) {
-      debugEnableHitTestRegionsOnAllPlatforms = false;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-      await tester.pump();
-      expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
-    }
+    // PV1's group has exactly the claims painted between PV1 and PV2,
+    // including the barrier; PV2's group has only what is painted after PV2.
+    final Map<int, Set<Rect>> regions = _lastRegions();
+    expect(regions.keys, <int>[1, 2]);
+    expect(regions, <int, Set<Rect>>{
+      1: <Rect>{homeButton, barrier, dialogHeader},
+      2: <Rect>{dialogButton},
+    });
   });
 
-  testWidgets(
-    'returns null when no platform view is present and clears when last platform view is removed',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      // No platform view -> null.
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                left: 10,
-                top: 20,
-                width: 100,
-                height: 50,
-                child: Listener(behavior: HitTestBehavior.opaque, onPointerDown: (_) {}),
-              ),
-            ],
-          ),
-        ),
-      );
-      expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
-
-      // Add a platform view -> non-null payload.
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Positioned(left: 0, top: 0, width: 400, height: 400, child: _buildPlatformView(1)),
-              Positioned(
-                left: 10,
-                top: 20,
-                width: 100,
-                height: 50,
-                child: Listener(behavior: HitTestBehavior.opaque, onPointerDown: (_) {}),
-              ),
-            ],
-          ),
-        ),
-      );
-      expect(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
-        equals(Float64List.fromList(<double>[1.0, 1.0, 10.0, 20.0, 110.0, 70.0])),
-      );
-
-      // Remove the platform view -> debugLastHitTestRegions returns to null.
-      await tester.pumpWidget(
-        const Directionality(textDirection: TextDirection.ltr, child: Stack()),
-      );
-      expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
-    },
-  );
-
-  testWidgets(
-    'home route content painted before platform view produces no rects and overlay button produces physical rect at DPR 1.0 and 3.0',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      final widget = Directionality(
-        textDirection: TextDirection.ltr,
-        child: Stack(
-          children: <Widget>[
-            // Content painted before the platform view -> produces no rects.
-            const Positioned(
-              left: 0,
-              top: 0,
-              width: 200,
-              height: 200,
-              child: ColoredBox(color: Color(0xFFFF0000)),
-            ),
-            Positioned(
-              left: 20,
-              top: 30,
-              width: 80,
-              height: 40,
-              child: Listener(behavior: HitTestBehavior.opaque, onPointerDown: (_) {}),
-            ),
-            // Platform view.
-            Positioned(left: 0, top: 0, width: 400, height: 400, child: _buildPlatformView(1)),
-            // Button positioned over the platform view.
-            Positioned(
-              left: 10,
-              top: 20,
-              width: 100,
-              height: 50,
-              child: Listener(behavior: HitTestBehavior.opaque, onPointerDown: (_) {}),
-            ),
-          ],
-        ),
-      );
-
-      await tester.pumpWidget(widget);
-      expect(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
-        equals(Float64List.fromList(<double>[1.0, 1.0, 10.0, 20.0, 110.0, 70.0])),
-      );
-
-      // Change DPR to 3.0 -> physical coordinates scale by 3.0.
-      configureTestView(tester, devicePixelRatio: 3.0);
-      await tester.pump();
-      expect(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
-        equals(Float64List.fromList(<double>[1.0, 1.0, 30.0, 60.0, 330.0, 210.0])),
-      );
-    },
-  );
-
-  testWidgets(
-    'PV1 under showGeneralDialog (barrierDismissible) containing PV2 partitions claims into PV1 and PV2 groups',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      late BuildContext savedContext;
-
-      await tester.pumpWidget(
-        _buildApp(
-          Builder(
-            builder: (BuildContext context) {
-              savedContext = context;
-              return Stack(
-                children: <Widget>[
-                  // Home route content painted before PV1 -> produces no rects.
-                  const Positioned(
-                    left: 0,
-                    top: 0,
-                    width: 150,
-                    height: 150,
-                    child: ColoredBox(color: Color(0xFF112233)),
-                  ),
-                  // PV1 on home route.
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    width: 500,
-                    height: 500,
-                    child: _buildPlatformView(1),
-                  ),
-                  // Floating button over PV1 on home route (painted between PV1 and PV2).
-                  Positioned(
-                    left: 20,
-                    top: 30,
-                    width: 80,
-                    height: 40,
-                    child: Listener(behavior: HitTestBehavior.opaque, onPointerDown: (_) {}),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      );
-
-      // Open a dismissible dialog containing dialog chrome before PV2, PV2 itself, and a close button after PV2.
-      showGeneralDialog<void>(
-        context: savedContext,
-        barrierDismissible: true,
-        barrierLabel: 'Dismiss',
-        pageBuilder:
-            (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) {
-              return Stack(
-                children: <Widget>[
-                  // Dialog header painted before PV2 (overlaps PV1).
-                  const Positioned(
-                    left: 100,
-                    top: 100,
-                    width: 200,
-                    height: 40,
-                    child: ColoredBox(color: Color(0xFFFFFFFF)),
-                  ),
-                  // PV2 inside the dialog.
-                  Positioned(
-                    left: 100,
-                    top: 140,
-                    width: 200,
-                    height: 200,
-                    child: _buildPlatformView(2),
-                  ),
-                  // Close button inside the dialog painted after PV2.
-                  Positioned(
-                    left: 250,
-                    top: 150,
-                    width: 40,
-                    height: 40,
-                    child: Listener(behavior: HitTestBehavior.opaque, onPointerDown: (_) {}),
-                  ),
-                ],
-              );
-            },
-      );
-      await tester.pumpAndSettle();
-
-      final Float64List? payload =
-          RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions;
-      expect(payload, isNotNull);
-
-      final List<_HitTestRegionGroup> groups = _decodePayload(payload!);
-      expect(groups, hasLength(2));
-      expect(groups[0].viewId, 1);
-      expect(groups[1].viewId, 2);
-
-      // PV1's group contains the home button over PV1, the full-screen modal barrier rect,
-      // and the dialog header painted before PV2. It does NOT contain the home background
-      // painted before PV1 or the dialog close button painted after PV2.
-      const homeButtonRect = Rect.fromLTWH(20, 30, 80, 40);
-      const barrierRect = Rect.fromLTWH(0, 0, 800, 600);
-      const dialogHeaderRect = Rect.fromLTWH(100, 100, 200, 40);
-      const dialogCloseButtonRect = Rect.fromLTWH(250, 150, 40, 40);
-
-      expect(groups[0].rects, containsAll(<Rect>[homeButtonRect, barrierRect, dialogHeaderRect]));
-      for (final Rect rect in groups[0].rects) {
-        expect(
-          rect == homeButtonRect || rect == barrierRect || rect == dialogHeaderRect,
-          isTrue,
-          reason: 'Unexpected rect $rect in PV1 group',
-        );
-      }
-
-      // PV2's group contains ONLY the close button painted after PV2; no rect painted
-      // before PV2 (barrier, home button, or dialog header) lands in PV2's group.
-      expect(groups[1].rects, equals(<Rect>[dialogCloseButtonRect]));
-    },
-  );
-
-  testWidgets(
-    'dialog exit animation toggles barrier IgnorePointer and removes barrier rect without repainting underlying content',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      late BuildContext savedContext;
-      var homePaintCount = 0;
-
-      await tester.pumpWidget(
-        _buildApp(
-          RepaintBoundary(
-            child: CustomPaint(
-              painter: _PaintCountingPainter(() {
-                homePaintCount += 1;
-              }),
-              child: Builder(
-                builder: (BuildContext context) {
-                  savedContext = context;
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 0,
-                        top: 0,
-                        width: 400,
-                        height: 400,
-                        child: _buildPlatformView(1),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-      expect(homePaintCount, 1);
-
-      showGeneralDialog<void>(
-        context: savedContext,
-        barrierDismissible: true,
-        barrierLabel: 'Dismiss',
-        transitionDuration: const Duration(milliseconds: 300),
-        pageBuilder:
-            (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) {
-              return const Center(
-                child: SizedBox(
-                  width: 100,
-                  height: 100,
-                  child: ColoredBox(color: Color(0xFFFFFFFF)),
-                ),
-              );
-            },
-      );
-      await tester.pumpAndSettle();
-
-      const barrierRect = Rect.fromLTWH(0, 0, 800, 600);
-      final List<_HitTestRegionGroup> openGroups = _decodePayload(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions!,
-      );
-      expect(openGroups, hasLength(1));
-      expect(openGroups.single.viewId, 1);
-      expect(openGroups.single.rects, contains(barrierRect));
-
-      final paintCountBeforePop = homePaintCount;
-
-      // Start popping the dialog and pump a single frame mid-exit animation.
-      Navigator.of(savedContext).pop();
-      await tester.pump(const Duration(milliseconds: 50));
-
-      // Underlying home content did not repaint.
-      expect(homePaintCount, equals(paintCountBeforePop));
-
-      // The barrier IgnorePointer toggled to ignoring: true, so the barrier rect
-      // disappears from the payload immediately during the exit animation.
-      final List<_HitTestRegionGroup> exitingGroups = _decodePayload(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions!,
-      );
-      expect(exitingGroups, hasLength(1));
-      expect(exitingGroups.single.viewId, 1);
-      expect(exitingGroups.single.rects, isEmpty);
-    },
-  );
-
-  testWidgets(
-    'IgnorePointer overlay produces no rect, AbsorbPointer produces one rect and no descendants, translucent GestureDetector produces no rect, and Offstage is skipped',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Positioned(left: 0, top: 0, width: 400, height: 400, child: _buildPlatformView(1)),
-              // 1. IgnorePointer overlay -> no rect.
-              const Positioned(
-                left: 10,
-                top: 10,
-                width: 100,
-                height: 50,
-                child: IgnorePointer(child: ColoredBox(color: Color(0xFFFF0000))),
-              ),
-              // 2. AbsorbPointer -> claims its own rect; nothing in its subtree claims.
-              Positioned(
-                left: 40,
-                top: 50,
-                width: 120,
-                height: 80,
-                child: AbsorbPointer(
-                  child: Stack(
-                    children: <Widget>[
-                      const Positioned(
-                        left: 0,
-                        top: 0,
-                        width: 60,
-                        height: 30,
-                        child: ColoredBox(color: Color(0xFF00FF00)),
-                      ),
-                      Positioned(
-                        left: 10,
-                        top: 10,
-                        width: 40,
-                        height: 20,
-                        child: Listener(behavior: HitTestBehavior.opaque, onPointerDown: (_) {}),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // 3. Translucent GestureDetector -> no rect.
-              Positioned(
-                left: 20,
-                top: 20,
-                width: 100,
-                height: 50,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {},
-                  child: const SizedBox(width: 100, height: 50),
-                ),
-              ),
-              // 4. Offstage -> skipped completely.
-              const Positioned(
-                left: 30,
-                top: 30,
-                width: 100,
-                height: 50,
-                child: Offstage(child: ColoredBox(color: Color(0xFF0000FF))),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
-        equals(Float64List.fromList(<double>[1.0, 1.0, 40.0, 50.0, 160.0, 130.0])),
-      );
-    },
-  );
-
-  testWidgets(
-    'PlatformViewSurface inside IgnorePointer(ignoring: true) is discovered while non-platform-view content inside IgnorePointer does not claim rects',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                left: 0,
-                top: 0,
-                width: 300,
-                height: 300,
-                child: IgnorePointer(
-                  child: Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 0,
-                        top: 0,
-                        width: 300,
-                        height: 300,
-                        child: _buildPlatformView(3),
-                      ),
-                      const Positioned(
-                        left: 10,
-                        top: 10,
-                        width: 80,
-                        height: 80,
-                        child: ColoredBox(color: Color(0xFFFF0000)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const Positioned(
-                left: 15,
-                top: 25,
-                width: 90,
-                height: 45,
-                child: ColoredBox(color: Color(0xFF00FF00)),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
-        equals(Float64List.fromList(<double>[3.0, 1.0, 15.0, 25.0, 105.0, 70.0])),
-      );
-    },
-  );
-
-  testWidgets(
-    'PlatformViewSurface inside AbsorbPointer painted after another platform view still starts its own group',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Positioned(left: 0, top: 0, width: 400, height: 400, child: _buildPlatformView(1)),
-              Positioned(
-                left: 100,
-                top: 100,
-                width: 200,
-                height: 200,
-                child: AbsorbPointer(
-                  child: Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 0,
-                        top: 0,
-                        width: 200,
-                        height: 200,
-                        child: _buildPlatformView(2),
-                      ),
-                      const Positioned(
-                        left: 10,
-                        top: 10,
-                        width: 40,
-                        height: 40,
-                        child: ColoredBox(color: Color(0xFFFF0000)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // A barrier painted last, over both platform views.
-              const Positioned.fill(child: ColoredBox(color: Color(0x80000000))),
-            ],
-          ),
-        ),
-      );
-
-      final List<_HitTestRegionGroup> groups = _decodePayload(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions!,
-      );
-      expect(groups, hasLength(2));
-      expect(groups[0].viewId, 1);
-      expect(groups[0].rects, <Rect>[const Rect.fromLTRB(100, 100, 300, 300)]);
-      expect(groups[1].viewId, 2);
-      expect(groups[1].rects, <Rect>[const Rect.fromLTRB(0, 0, 800, 600)]);
-    },
-  );
-
-  testWidgets(
-    'applies ClipRect and Transform and keeps partially overlapping overlay unclipped to platform view bounds',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              // Small platform view at (100, 100) to (150, 150).
-              Positioned(left: 100, top: 100, width: 50, height: 50, child: _buildPlatformView(1)),
-              // Larger overlay at (0, 0) to (250, 250) partially overlapping PV -> unclipped to PV.
-              const Positioned(
-                left: 0,
-                top: 0,
-                width: 250,
-                height: 250,
-                child: ColoredBox(color: Color(0xFF00FF00)),
-              ),
-              // Clipped and translated overlay -> [120, 120, 160, 160].
-              Positioned(
-                left: 0,
-                top: 0,
-                width: 40,
-                height: 40,
-                child: Transform.translate(
-                  offset: const Offset(120, 120),
-                  child: const ClipRect(
-                    child: SizedBox(
-                      width: 200,
-                      height: 200,
-                      child: ColoredBox(color: Color(0xFFFF0000)),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
-        equals(
-          Float64List.fromList(<double>[
-            1.0,
-            2.0,
-            0.0,
-            0.0,
-            250.0,
-            250.0,
-            120.0,
-            120.0,
-            160.0,
-            160.0,
-          ]),
-        ),
-      );
-    },
-  );
-
-  testWidgets(
-    'toggling automaticPointerInterceptorsEnabled from true to false at runtime immediately clears debugLastHitTestRegions',
-    (WidgetTester tester) async {
-      configureTestView(tester);
-      debugEnableHitTestRegionsOnAllPlatforms = true;
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              Positioned(left: 0, top: 0, width: 300, height: 300, child: _buildPlatformView(1)),
-              const Positioned(
-                left: 10,
-                top: 20,
-                width: 100,
-                height: 50,
-                child: ColoredBox(color: Color(0xFF00FF00)),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(
-        RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
-        equals(Float64List.fromList(<double>[1.0, 1.0, 10.0, 20.0, 110.0, 70.0])),
-      );
-
-      // Toggle off at runtime -> immediately clears debugLastHitTestRegions before next frame.
-      RendererBinding.instance.automaticPointerInterceptorsEnabled = false;
-      expect(RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions, isNull);
-    },
-  );
-
-  testWidgets('overlay painted after PV2 that overlaps disjoint PV1 is appended to PV2 group', (
+  testWidgets('a closing dialog stops claiming as soon as its exit animation starts', (
     WidgetTester tester,
   ) async {
-    configureTestView(tester);
-    debugEnableHitTestRegionsOnAllPlatforms = true;
-    RendererBinding.instance.automaticPointerInterceptorsEnabled = true;
+    enablePass(tester);
+    final homePainter = _PaintCounter();
+    late BuildContext homeContext;
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Stack(
-          children: <Widget>[
-            // PV1 at (0, 0) to (100, 100).
-            Positioned(left: 0, top: 0, width: 100, height: 100, child: _buildPlatformView(1)),
-            // Overlay A painted between PV1 and PV2, overlapping PV1.
-            const Positioned(
-              left: 10,
-              top: 10,
-              width: 50,
-              height: 50,
-              child: ColoredBox(color: Color(0xFFFF0000)),
+      _app(
+        RepaintBoundary(
+          child: CustomPaint(
+            painter: homePainter,
+            child: Builder(
+              builder: (BuildContext context) {
+                homeContext = context;
+                return _platformView(1);
+              },
             ),
-            // PV2 at (300, 300) to (400, 400), disjoint from PV1.
-            Positioned(left: 300, top: 300, width: 100, height: 100, child: _buildPlatformView(2)),
-            // Overlay B painted after PV2, physically overlapping PV1 (at index 0) but disjoint from PV2.
-            const Positioned(
-              left: 20,
-              top: 20,
-              width: 40,
-              height: 40,
-              child: ColoredBox(color: Color(0xFF00FF00)),
-            ),
-          ],
+          ),
         ),
       ),
     );
-
-    expect(
-      RendererBinding.instance.rootPipelineOwner.debugLastHitTestRegions,
-      equals(
-        Float64List.fromList(<double>[
-          1.0,
-          1.0,
-          10.0,
-          10.0,
-          60.0,
-          60.0,
-          2.0,
-          1.0,
-          20.0,
-          20.0,
-          60.0,
-          60.0,
-        ]),
-      ),
+    showGeneralDialog<void>(
+      context: homeContext,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      pageBuilder: (_, _, _) => const SizedBox.shrink(),
     );
+    await tester.pumpAndSettle();
+    expect(_lastRegions(), <int, Set<Rect>>{
+      1: <Rect>{const Rect.fromLTWH(0, 0, 800, 600)},
+    });
+
+    final int homePaintCount = homePainter.count;
+    Navigator.of(homeContext).pop();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // The barrier's IgnorePointer flips to ignoring while the home route
+    // (with the platform view) is not repainted, so a region pass driven by
+    // paint would miss it.
+    expect(homePainter.count, homePaintCount);
+    expect(_lastRegions(), <int, Set<Rect>>{1: <Rect>{}});
   });
 }
