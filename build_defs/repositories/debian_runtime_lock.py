@@ -47,6 +47,7 @@ the sysroot's version.
         --binary engine/src/out/bazel-flutter-8/external/+browsers+firefox/firefox/libxul.so \\
         --package libgl1 ... (Mesa, which Firefox dlopens) \\
         --index 20240901T000000Z --package xvfb --data-package xkb-data \\
+        --package ninja-build --package pkg-config \\
         --data-package fonts-dejavu-core --data-package fonts-liberation \\
         --data-package fontconfig-config \\
         --output build_defs/repositories/debian_runtime.lock.bzl

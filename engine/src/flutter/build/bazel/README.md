@@ -752,6 +752,40 @@ CI's `chrome_and_driver` dependency holds -- as `CHROME_EXECUTABLE`, and
 pinned browser wherever they run and not the host's; Chrome's system
 libraries (X11, NSS, GTK, ...) come from the runtime sysroot through the
 same launcher the web engine's tests use (the next section).
+The desktop shard (`//packages/flutter_tools:desktop_shard`, 13 files)
+builds and runs Linux desktop apps through the tool: `flutter build linux`
+(`--config-only` and whole), the native-asset and data-asset tests,
+`flutter run -d linux`, and overall_experience_test, which runs the tool
+under `/usr/bin/xvfb-run` when it sees no DISPLAY (two of the native-asset
+files build for Android too: `cases` runs their linux cases alone, the apk
+ones wanting Android's artifacts, SDK and Gradle). `flutter build linux`
+runs `cmake -G Ninja` with `CC=clang CXX=clang++`, `ninja install` and
+`pkg-config` for GTK, and package:native_toolchain_c compiles with the
+`clang`, `ar` and `ld` it finds on PATH; `linux_build_tools`
+(`build_defs/desktop/build_tools.bzl`) writes one `bin/` directory of
+scripts in those names that run the build's own -- Kitware's CMake
+(`@cmake_linux_x64`, `build_defs/repositories/cmake.bzl`: one static
+executable with its modules, pinned by sha256), Debian's ninja and
+pkg-config from the runtime sysroot on its libraries, the engine's clang
+with `--sysroot` at the engine's build sysroot (bullseye's headers, the
+GTK the embedder itself is built against, the link-time stubs; pkg-config
+answers for that sysroot's `.pc` files, `PKG_CONFIG_SYSROOT_DIR`), lld as
+`ld` and the llvm tools as `ar`, `ranlib`, `strip`, `objcopy`, `nm`,
+`objdump`, `readelf` -- and `dart_test`'s `tools` puts it first on PATH
+(the scripts find the runfiles root from that PATH entry: a hook of
+package:hooks_runner runs with an environment of PATH, HOME and little
+else, and native_toolchain_c runs the compiler by its resolved path, the
+output tree's, where nothing else of the tree lies).
+The built app loads GTK at run time, so the target also carries the test's
+environment for it (`ToolEnvironmentInfo`: `LD_LIBRARY_PATH` at the
+runtime sysroot's libraries, Mesa's and GLVND's variables, `GIO_MODULE_DIR`
+at the sysroot's modules rather than the host's, which GLib would load into
+the sysroot's GLib from the path built into it), and `display` (the same
+`display_launcher` Xvfb) gives each test an X display of its own: the
+runner starts the server with `-displayfd`, exports `DISPLAY` and stops it
+after, as xvfb-run would. Measured: the 13 files pass in 719 s of wall
+time at `--local_test_jobs=3` (per-test sum 1,986 s; record_use_caching_test
+the longest at 336 s), on a host with no cmake, clang or GTK of its own.
 
 ```sh
 bazel test //:framework_tests //:tool_tests //:dart_tests   # everything below, the root's suites
@@ -764,6 +798,7 @@ bazel test //packages/flutter/test_release:tests    # -Ddart.vm.product=true
 bazel test //packages/flutter_tools:general_shard   # dart_test: the tool's unit tests
 bazel test //packages/flutter_tools:commands_shard_hermetic //packages/flutter_tools:commands_shard_permeable
 bazel test //packages/flutter_tools:integration_shard //packages/flutter_tools:web_shard   # the tool as a process
+bazel test //packages/flutter_tools:desktop_shard   # flutter build linux, flutter run -d linux: CMake, GTK and an X display from the build
 bazel test //dev/bots:tests //dev/tools/gen_keycodes:tests
 ```
 
@@ -776,7 +811,8 @@ cases -- plus the Impeller, no-tracking and release/profile runs,
 flutter_tools' general shard (271 files) and commands shard (the hermetic
 half whole, 67; the permeable half but for the one file that does not
 compile at this checkout, 10) and its integration shard where a Linux host
-can run it (73 of 117 files: not Android, CMake or xvfb) and its web shard
+can run it (73 of 117 files) and its desktop shard (13 more; the rest are
+Android's, and one macOS's) and its web shard
 (18 files, on the pinned Chrome),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,
@@ -902,9 +938,11 @@ postinst). `browser_launcher`
 (`build_defs/web/browser_launcher.bzl`) writes a script in the browser's
 name that puts that tree's `lib/x86_64-linux-gnu` and
 `usr/lib/x86_64-linux-gnu` first on `LD_LIBRARY_PATH`, points Mesa at its
-drivers (`LIBGL_DRIVERS_PATH`) and GLVND at its EGL vendor
-(`__EGL_VENDOR_LIBRARY_DIRS`) -- both found by absolute path otherwise --
-writes a `fonts.conf` confining fontconfig to the sysroot's
+drivers (`LIBGL_DRIVERS_PATH`), GLVND at its EGL vendor
+(`__EGL_VENDOR_LIBRARY_DIRS`) and GLib at its GIO modules
+(`GIO_MODULE_DIR`) -- all found by absolute path otherwise, the host's
+modules into the sysroot's GLib -- writes a `fonts.conf` confining
+fontconfig to the sysroot's
 `usr/share/fonts`, including its `etc/fonts/conf.d`, with a cache
 directory of the test's own
 (`FONTCONFIG_FILE`: a rendering depends on no font of the host, and

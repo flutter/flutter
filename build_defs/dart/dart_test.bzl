@@ -44,6 +44,14 @@ load("//build_defs/dart:pub.bzl", "PubCacheInfo", "PubPackageConfigInfo", "pub_p
 # Where test_core's precompiled mode looks for the package configuration.
 _PACKAGE_CONFIG = ".dart_tool/package_config.json"
 
+ToolEnvironmentInfo = provider(
+    doc = "What a test exports for the programs it runs (dart_test's `tools`): variables naming directories of the runfiles.",
+    fields = {
+        "directories": "Variable name to the Files (directories) it names, joined with ':' in order, each under the runfiles root " +
+                       "(LD_LIBRARY_PATH at the runtime sysroot's libraries for a built app to load; Mesa's LIBGL_DRIVERS_PATH).",
+    },
+)
+
 DartTestRunnerInfo = provider(
     doc = "package:test's runner, compiled to a kernel.",
     fields = {
@@ -278,6 +286,41 @@ def _dart_test_impl(ctx):
     # runs from the package, and tests read `data/`, `test/fixtures/` relative
     # to it. The kernel sits beside the test, so --precompiled is the same
     # directory.
+    # The programs the test runs by name (`tools`): their directories first
+    # on PATH, and the variables they ask the test to export.
+    tool_directories = []
+    tool_variables = {}
+    for tool in ctx.attr.tools:
+        for file in tool[DefaultInfo].files.to_list():
+            directory = paths.dirname(file.short_path)
+            if directory not in tool_directories:
+                tool_directories.append(directory)
+        if ToolEnvironmentInfo in tool:
+            for variable, files in tool[ToolEnvironmentInfo].directories.items():
+                tool_variables.setdefault(variable, []).extend(files)
+    tools_env = "".join(["export PATH=\"$root/%s:$PATH\"\n" % directory for directory in tool_directories]) + "".join([
+        "export %s=\"%s\"\n" % (variable, ":".join(["$root/" + f.short_path for f in files]))
+        for variable, files in tool_variables.items()
+    ])
+
+    # An X display of the test's own (`display`, an X server taking
+    # -displayfd): started before the test, DISPLAY exported, stopped after
+    # -- what xvfb-run does for the tests that run a desktop app.
+    if ctx.file.display:
+        display_env = """display_files="${{TEST_TMPDIR:-$(mktemp -d)}}/display"
+mkdir -p "$display_files"
+"$root/{display}" -displayfd 3 -screen 0 1280x800x24 -ac -nolisten tcp 3>"$display_files/number" 2>"$display_files/log" &
+display_pid=$!
+for _ in $(seq 1 200); do [ -s "$display_files/number" ] && break; sleep 0.1; done
+[ -s "$display_files/number" ] || {{ echo "{display} reported no display:" >&2; cat "$display_files/log" >&2; exit 1; }}
+export DISPLAY=":$(tr -d '\n' < "$display_files/number")"
+trap 'kill "$display_pid" 2>/dev/null' EXIT
+""".format(display = ctx.file.display.short_path)
+        run = ""
+    else:
+        display_env = ""
+        run = "exec "
+
     launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
     ctx.actions.write(
         output = launcher,
@@ -292,9 +335,12 @@ export FLUTTER_ROOT="$root"
 # (Cache.lock opens bin/cache/lockfile); what tests read of it is laid
 # in by `cache` and `cache_files`.
 mkdir -p "$root/bin/cache"
-{pub_cache_env}{tool_env}{browser_env}{writable}cd "{package}"
-exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} "{test}" "$@"
+{pub_cache_env}{tool_env}{browser_env}{tools_env}{display_env}{writable}cd "{package}"
+{run}"$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precompiled="$PWD" {args} "{test}" "$@"
 """.format(
+            tools_env = tools_env,
+            display_env = display_env,
+            run = run,
             package = ctx.label.package or ".",
             # A pub cache of the rule's own for a test that runs pub (pub_cache),
             # in the runfiles tree; pub writes nothing to it that is already
@@ -378,7 +424,7 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
         for path, file in ctx.attr.pub_cache[PubCacheInfo].entries.items():
             cache[paths.join(".pub-cache", path)] = file
     runfiles = ctx.runfiles(
-        files = regular + ctx.files.browser + ctx.files.browser_files + ctx.files.browser_driver,
+        files = regular + ctx.files.browser + ctx.files.browser_files + ctx.files.browser_driver + ctx.files.tools + ctx.files.display,
         # The runtime configuration at the package's .dart_tool/, where `dart
         # test --precompiled` reads it from the working directory and a tool
         # under test looks for its own (flutter_tools' template images);
@@ -391,8 +437,9 @@ exec "$root/{dart}" --packages="$root/{runner_config}" "$root/{runner}" --precom
         runfiles = runfiles.merge(dep[DefaultInfo].default_runfiles)
 
     # A browser_launcher's runfiles: the browser's (or the driver's)
-    # directory and the libraries its script puts on LD_LIBRARY_PATH.
-    for target in [ctx.attr.browser, ctx.attr.browser_driver]:
+    # directory and the libraries its script puts on LD_LIBRARY_PATH; the
+    # tools' and the display's likewise.
+    for target in [ctx.attr.browser, ctx.attr.browser_driver, ctx.attr.display] + ctx.attr.tools:
         if target:
             runfiles = runfiles.merge(target[DefaultInfo].default_runfiles)
     return [DefaultInfo(executable = launcher, runfiles = runfiles)]
@@ -470,6 +517,18 @@ dart_test = rule(
             doc = "The browser's WebDriver executable (a browser_launcher of `@chrome//:chromedriver-linux64/chromedriver`, " +
                   "or the executable); its directory goes first on PATH, where the web-server device's tests spawn `chromedriver`.",
         ),
+        "tools": attr.label_list(
+            allow_files = True,
+            doc = "Programs the test (or the tool under test) runs by name: each target's files' directories go first " +
+                  "on PATH, and a target's ToolEnvironmentInfo is exported (//build_defs/desktop:build_tools.bzl's " +
+                  "linux_build_tools: cmake, ninja, pkg-config and the compilers `flutter build linux` runs).",
+        ),
+        "display": attr.label(
+            allow_single_file = True,
+            doc = "An X server taking -displayfd (a display_launcher's Xvfb, //build_defs/web:browser_launcher.bzl): " +
+                  "started before the test with a screen of its own, DISPLAY exported, stopped after -- for a test " +
+                  "that runs a desktop app, as xvfb-run would.",
+        ),
         "writable": attr.string_list(
             doc = "Paths under FLUTTER_ROOT the tool under test rewrites in place (`pubspec.lock`: pub " +
                   "touches the workspace's lock when it resolves a member), copied over their runfiles " +
@@ -512,7 +571,7 @@ dart_test = rule(
     } | KERNEL_TOOL_ATTRS,
 )
 
-def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], **kwargs):
+def dart_tests(name, tests, size = "medium", tags = [], network = False, large = [], sizes = {}, flaky = [], cases = {}, runner_args = [], **kwargs):
     """One dart_test per test file, and a test_suite of them.
 
     Args:
@@ -529,6 +588,11 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
         projects through the tool).
       flaky: test files Bazel retries (a test with a timeout of its own
         inside, which a loaded machine overruns).
+      cases: test files to a regular expression of the cases to run of them
+        (`dart test --name`), for a file whose other cases want what the
+        host cannot give (the apk cases of two native-asset files: Android's
+        artifacts, SDK and Gradle); the rest run whole.
+      runner_args: further runner arguments for every file.
       **kwargs: dart_test's attributes, the same for every file.
     """
     test_tags = list(tags) + ([] if network else ["block-network"])
@@ -541,6 +605,7 @@ def dart_tests(name, tests, size = "medium", tags = [], network = False, large =
             size = sizes.get(test, "large" if test in large else size),
             tags = test_tags,
             flaky = test in flaky,
+            runner_args = runner_args + (["--name=" + cases[test]] if test in cases else []),
             **kwargs
         )
         targets.append(":" + test_name)
@@ -581,9 +646,9 @@ def dart_package_tests(
         none compiles each test from scratch.
       compile_args: further frontend server arguments, for the prelude and
         the tests alike.
-      **kwargs: dart_tests' other arguments (size, large, sizes, flaky, tags, network,
+      **kwargs: dart_tests' other arguments (size, large, sizes, flaky, cases, tags, network,
         runner_args, deps, cache, cache_files, sdk_files, sdk_trees, writable, pub_cache,
-        browser, browser_files, browser_driver).
+        browser, browser_files, browser_driver, tools, display).
     """
     workspace_packages = {":sources": package} | packages
     config_roots = [package, "test"] + roots
