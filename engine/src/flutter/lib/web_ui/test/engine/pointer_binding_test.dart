@@ -3081,7 +3081,7 @@ void testMain() {
     double clientX = 10,
     double clientY = 10,
   }) {
-    return createDomPointerEvent(type, <String, dynamic>{
+    return createDomPointerEvent(type, <String, Object?>{
       'bubbles': true,
       'cancelable': true,
       'composed': true,

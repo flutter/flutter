@@ -1105,8 +1105,8 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   /// [_viewTarget], even when the pointer moves over an `<iframe>` platform
   /// view, so drags that start on Flutter content keep receiving move events.
   /// The browser automatically releases the capture on `pointerup` and
-  /// `pointercancel` (W3C Pointer Events §10.3), so `releasePointerCapture`
-  /// does not need to be called manually.
+  /// `pointercancel`, so `releasePointerCapture` does not need to be called
+  /// manually. See https://w3c.github.io/pointerevents/#implicit-release-of-pointer-capture
   /// See https://github.com/flutter/flutter/issues/141307
   ///
   /// Presses on platform view content, the text editing host and the semantics
@@ -1270,15 +1270,17 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     }, checkModifiers: false);
 
     // The browser automatically releases pointer capture on `pointerup` and
-    // `pointercancel` (W3C Pointer Events §10.3), so `releasePointerCapture`
-    // never needs to be called explicitly. However, capture can also be taken
-    // away without a `pointerup` or a `pointercancel`, for example when the
-    // page calls `releasePointerCapture` or captures the pointer to another
-    // element, or, in some browsers, when the window loses focus. If buttons
-    // are still pressed, the press will never be released, so cancel it. The
-    // event bubbles, so ignore captures lost by descendants (such as platform
-    // view content); only the capture this adapter set on the view root
-    // matters.
+    // `pointercancel`, so `releasePointerCapture` never needs to be called
+    // explicitly. See
+    // https://w3c.github.io/pointerevents/#implicit-release-of-pointer-capture
+    //
+    // However, capture can also be taken away without a `pointerup` or a
+    // `pointercancel`, for example when the page calls `releasePointerCapture`
+    // or captures the pointer to another element, or, in some browsers, when
+    // the window loses focus. If buttons are still pressed, the press will
+    // never be released, so cancel it. The event bubbles, so ignore captures
+    // lost by descendants (such as platform view content); only the capture
+    // this adapter set on the view root matters.
     _addPointerEventListener(_viewTarget, 'lostpointercapture', (DomPointerEvent event) {
       if (event.target != _viewTarget) {
         return;
