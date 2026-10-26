@@ -37,6 +37,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     this.textHeightBehavior,
     this.hyphens,
+    this.hyphenCharacter,
   }) : _strutStyle = strutStyle as WebStrutStyle?,
        _textStyle = WebTextStyle(
          fontFamily: fontFamily,
@@ -69,6 +70,10 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   // https://github.com/flutter/flutter/issues/193506
   final ui.Hyphens? hyphens;
 
+  // TODO(dbebawy): draw hyphenCharacter along with hyphens.
+  // https://github.com/flutter/flutter/issues/193506
+  final String? hyphenCharacter;
+
   WebStrutStyle? get strutStyle => _strutStyle;
   final WebStrutStyle? _strutStyle;
 
@@ -88,7 +93,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
         textHeightBehavior == other.textHeightBehavior &&
         _strutStyle == other._strutStyle &&
         _textStyle == other._textStyle &&
-        hyphens == other.hyphens;
+        hyphens == other.hyphens &&
+        hyphenCharacter == other.hyphenCharacter;
   }
 
   @override
@@ -102,6 +108,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
       _strutStyle,
       _textStyle,
       hyphens,
+      hyphenCharacter,
     );
   }
 
@@ -117,6 +124,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
           'ellipsis: $ellipsis, '
           'textHeightBehavior: $textHeightBehavior, '
           'hyphens: $hyphens, '
+          'hyphenCharacter: $hyphenCharacter, '
           'strutStyle: $_strutStyle, '
           'textAlign: $textAlign'
           'textStyle: $_textStyle'

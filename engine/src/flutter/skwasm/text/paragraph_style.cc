@@ -89,3 +89,9 @@ SKWASM_EXPORT void paragraphStyle_setRenderSoftHyphens(
     bool render_soft_hyphens) {
   style->skia_paragraph_style.setRenderSoftHyphens(render_soft_hyphens);
 }
+
+SKWASM_EXPORT void paragraphStyle_setSoftHyphenString(
+    Skwasm::ParagraphStyle* style,
+    SkString* soft_hyphen_string) {
+  style->skia_paragraph_style.setSoftHyphenString(*soft_hyphen_string);
+}

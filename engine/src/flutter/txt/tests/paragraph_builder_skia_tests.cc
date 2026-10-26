@@ -43,4 +43,20 @@ TEST_F(SkiaParagraphBuilderTests, RenderSoftHyphensEnabled) {
   style.render_soft_hyphens = false;
   ASSERT_FALSE(builder.TxtToSkia(style).getRenderSoftHyphens());
 }
+
+TEST_F(SkiaParagraphBuilderTests, SoftHyphenString) {
+  ParagraphStyle style = ParagraphStyle();
+  auto collection = std::make_shared<FontCollection>();
+  auto builder = ParagraphBuilderSkia(style, collection, false);
+
+  // Unset keeps Skia's default hyphen.
+  ASSERT_EQ(builder.TxtToSkia(style).getSoftHyphenString(), SkString("-"));
+
+  style.soft_hyphen_string = u"\u2010";
+  ASSERT_EQ(builder.TxtToSkia(style).getSoftHyphenString(), SkString("\u2010"));
+
+  // The empty string is passed through and draws nothing.
+  style.soft_hyphen_string = u"";
+  ASSERT_EQ(builder.TxtToSkia(style).getSoftHyphenString(), SkString(""));
+}
 }  // namespace txt
