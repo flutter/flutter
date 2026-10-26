@@ -431,6 +431,8 @@ at 150% (including resize without a scale change), and monitor moves with the
 same DPR. The real GTK4 view verifies
 window metrics, display metadata/IDs, texture natural size, native accessible bounds, mouse-event
 coordinates, wheel-event coordinates/deltas, and scale-notification teardown.
+Wheel checks move the pointer without clicking, then click and move elsewhere
+before scrolling again, so stale click coordinates cannot satisfy the test.
 
 ```sh
 python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_wayland_scale_test.py \

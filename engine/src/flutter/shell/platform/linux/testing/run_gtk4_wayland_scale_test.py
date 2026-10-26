@@ -234,7 +234,9 @@ with tempfile.TemporaryDirectory(prefix='gtk4-fractional-') as temp:
           extent_x = max(o['rect']['x'] + o['rect']['width'] for o in outputs)
           extent_y = max(o['rect']['y'] + o['rect']['height'] for o in outputs)
           pointer.stdin.write(
-              f"click {rect['x']+100} {rect['y']+80} {extent_x} {extent_y}\nscroll\n"
+              f"move {rect['x']+200} {rect['y']+140} {extent_x} {extent_y}\nscroll\n"
+              f"click {rect['x']+100} {rect['y']+80} {extent_x} {extent_y}\n"
+              f"move {rect['x']+240} {rect['y']+160} {extent_x} {extent_y}\nscroll\n"
           )
           pointer.stdin.flush()
         elif line.startswith('DISPLAY_PHASE'):

@@ -188,6 +188,10 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
       if (!get_event_position(view, event, &x, &y)) {
         return FALSE;
       }
+      // GTK4 wheel events may not contain a position. Keep their fallback at
+      // the current hover location instead of the most recent click.
+      fl_scrolling_manager_set_last_mouse_position(
+          view->scrolling_manager, x * scale_factor, y * scale_factor);
       return fl_pointer_manager_handle_motion(
           view->pointer_manager, gdk_event_get_time(event),
           get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
@@ -205,6 +209,8 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
         return FALSE;
       }
       if (event_type == GDK_ENTER_NOTIFY) {
+        fl_scrolling_manager_set_last_mouse_position(
+            view->scrolling_manager, x * scale_factor, y * scale_factor);
         return fl_pointer_manager_handle_enter(
             view->pointer_manager, gdk_event_get_time(event),
             get_pointer_device_kind(event), x * scale_factor, y * scale_factor,

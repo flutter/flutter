@@ -309,15 +309,23 @@ TEST_F(FlGtk4ScalingTest, ExternalWaylandScaleChanges) {
             pointers.back().x, pointers.back().y);
     EXPECT_NEAR(pointers.back().x, 100 * scales[phase], 1);
     EXPECT_NEAR(pointers.back().y, 80 * scales[phase], 1);
-    while (scrolls.size() <= phase &&
+    // Wheel events must follow hover, including before the first click and
+    // after moving away from the most recently clicked widget.
+    const size_t expected_scrolls = (phase + 1) * 2;
+    while (scrolls.size() < expected_scrolls &&
            g_get_monotonic_time() < pointer_deadline) {
       g_main_context_iteration(nullptr, FALSE);
       g_usleep(1000);
     }
-    ASSERT_EQ(scrolls.size(), phase + 1);
-    EXPECT_NEAR(scrolls.back().x, 100 * scales[phase], 1);
-    EXPECT_NEAR(scrolls.back().y, 80 * scales[phase], 1);
-    EXPECT_NEAR(scrolls.back().scroll_delta_y, 53 * scales[phase], 0.01);
+    ASSERT_EQ(scrolls.size(), expected_scrolls);
+    const auto& before_click = scrolls[phase * 2];
+    ASSERT_NEAR(before_click.x, 200 * scales[phase], 1);
+    ASSERT_NEAR(before_click.y, 140 * scales[phase], 1);
+    EXPECT_NEAR(before_click.scroll_delta_y, 53 * scales[phase], 0.01);
+    const auto& after_move = scrolls[phase * 2 + 1];
+    ASSERT_NEAR(after_move.x, 240 * scales[phase], 1);
+    ASSERT_NEAR(after_move.y, 160 * scales[phase], 1);
+    EXPECT_NEAR(after_move.scroll_delta_y, 53 * scales[phase], 0.01);
     g_print("POINTER_PHASE %zu\n", phase);
     fflush(stdout);
     // Wait for the driver to change scale before evaluating the next phase.

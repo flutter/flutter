@@ -35,7 +35,13 @@ int main(void) {
   unsigned time = 1000;
   char command[32];
   while (scanf("%31s", command) == 1) {
-    if (!strcmp(command, "click")) {
+    if (!strcmp(command, "move")) {
+      unsigned x, y, w, h;
+      if (scanf("%u %u %u %u", &x, &y, &w, &h) != 4)
+        return 3;
+      zwlr_virtual_pointer_v1_motion_absolute(pointer, time++, x, y, w, h);
+      zwlr_virtual_pointer_v1_frame(pointer);
+    } else if (!strcmp(command, "click")) {
       unsigned x, y, w, h;
       if (scanf("%u %u %u %u", &x, &y, &w, &h) != 4)
         return 3;
