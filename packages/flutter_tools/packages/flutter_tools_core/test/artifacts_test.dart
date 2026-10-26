@@ -79,7 +79,6 @@ void main() {
         'ArtifactDependency(name: custom-engine-bin, '
         'url: https://example.com/artifacts/engine.zip, '
         'sha256: $validSha256, '
-        'sha256Url: null, '
         'hostPlatform: HostPlatform.linux_x64, targetPlatform: linux-x64)',
       );
 
@@ -93,44 +92,46 @@ void main() {
       expect(ArtifactDependency.fromJson(customHostDep.toMap()), equals(customHostDep));
     });
 
-    test('serializes and deserializes correctly with sha256Url instead of sha256', () {
-      final dep = ArtifactDependency(
-        name: 'custom-engine-bin',
-        sha256Url: Uri.parse('https://example.com/artifacts/engine.zip.sha256sum'),
-        url: Uri.parse('https://example.com/artifacts/engine.zip'),
-        hostPlatform: HostPlatform.linux_x64,
-        targetPlatform: 'linux-x64',
-      );
-
-      final Map<String, Object?> json = dep.toMap();
-      expect(json, <String, Object?>{
-        'name': 'custom-engine-bin',
-        'url': 'https://example.com/artifacts/engine.zip',
-        'sha256Url': 'https://example.com/artifacts/engine.zip.sha256sum',
-        'hostPlatform': 'linux-x64',
-        'targetPlatform': 'linux-x64',
-      });
-
-      final deserialized = ArtifactDependency.fromJson(json);
-      expect(deserialized, equals(dep));
-      expect(deserialized.sha256, isNull);
+    test('validates name, url scheme, and 64-character hex sha256 in constructor', () {
       expect(
-        deserialized.sha256Url,
-        Uri.parse('https://example.com/artifacts/engine.zip.sha256sum'),
-      );
-      expect(deserialized.hashCode, equals(dep.hashCode));
-    });
-
-    test('isValidSha256 validates 64-character hex strings', () {
-      expect(ArtifactDependency.isValidSha256(validSha256), isTrue);
-      expect(ArtifactDependency.isValidSha256(validSha256.toUpperCase()), isTrue);
-      expect(ArtifactDependency.isValidSha256('deadbeef'), isFalse);
-      expect(ArtifactDependency.isValidSha256(''), isFalse);
-      expect(
-        ArtifactDependency.isValidSha256(
-          'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+        () => ArtifactDependency(
+          name: 'custom-engine-bin',
+          sha256: validSha256.toUpperCase(),
+          url: Uri.parse('https://example.com/artifacts/engine.zip'),
         ),
-        isFalse,
+        returnsNormally,
+      );
+      expect(
+        () => ArtifactDependency(
+          name: '../evil',
+          sha256: validSha256,
+          url: Uri.parse('https://example.com/artifacts/engine.zip'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency(
+          name: 'custom-engine-bin',
+          sha256: validSha256,
+          url: Uri.parse('file:///etc/passwd'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency(
+          name: 'custom-engine-bin',
+          sha256: 'deadbeef',
+          url: Uri.parse('https://example.com/artifacts/engine.zip'),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(
+        () => ArtifactDependency(
+          name: 'custom-engine-bin',
+          sha256: 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+          url: Uri.parse('https://example.com/artifacts/engine.zip'),
+        ),
+        throwsA(isA<AssertionError>()),
       );
     });
 
@@ -196,6 +197,41 @@ void main() {
           targetPlatforms: const <String>{'android'},
         ),
         isFalse,
+      );
+
+      final osPrefixDep = ArtifactDependency(
+        name: 'linux-common',
+        sha256: validSha256,
+        url: Uri.parse('https://example.com/linux-common.zip'),
+        targetPlatform: 'linux',
+      );
+      expect(
+        osPrefixDep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.linux_x64,
+          targetPlatforms: const <String>{'linux-x64'},
+        ),
+        isTrue,
+      );
+
+      final darwinDep = ArtifactDependency(
+        name: 'darwin-common',
+        sha256: validSha256,
+        url: Uri.parse('https://example.com/darwin.zip'),
+        targetPlatform: 'darwin-arm64',
+      );
+      expect(
+        darwinDep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.darwin_arm64,
+          targetPlatforms: const <String>{'macos'},
+        ),
+        isTrue,
+      );
+      expect(
+        darwinDep.matchesPlatforms(
+          currentHostPlatform: HostPlatform.darwin_arm64,
+          targetPlatforms: const <String>{'darwin'},
+        ),
+        isTrue,
       );
     });
 
@@ -287,14 +323,6 @@ void main() {
         () => ArtifactDependency.fromJson(const <String, Object?>{
           'name': 'test',
           'url': 'https://example.com/a.zip',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ArtifactDependency.fromJson(const <String, Object?>{
-          'name': 'test',
-          'url': 'https://example.com/a.zip',
-          'sha256Url': 'file:///etc/passwd',
         }),
         throwsFormatException,
       );

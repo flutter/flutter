@@ -4,10 +4,11 @@
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:meta/meta.dart';
 
 /// Prototype Linux implementation of [ArtifactService].
 final class LinuxArtifactService extends ArtifactService {
-  LinuxArtifactService({this._artifacts = const <ArtifactDependency>[]});
+  LinuxArtifactService({@visibleForTesting this._artifacts = const <ArtifactDependency>[]});
 
   final List<ArtifactDependency> _artifacts;
 

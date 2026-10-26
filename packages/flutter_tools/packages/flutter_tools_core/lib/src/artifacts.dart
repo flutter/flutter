@@ -112,14 +112,24 @@ final class HostPlatform {
 /// Representation of an artifact dependency required by a tool extension.
 @immutable
 class ArtifactDependency {
-  const ArtifactDependency({
+  ArtifactDependency({
     required this.name,
+    required this.sha256,
     required this.url,
     this.hostPlatform,
-    this.sha256,
-    this.sha256Url,
     this.targetPlatform,
-  }) : assert(sha256 != null || sha256Url != null, 'Either sha256 or sha256Url must be provided.');
+  }) : assert(
+         isValidSinglePathSegment(name),
+         'Invalid artifact dependency name (expected a single path segment): "$name"',
+       ),
+       assert(
+         _isValidSha256(sha256),
+         'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
+       ),
+       assert(
+         url.isScheme(_httpScheme) || url.isScheme(_httpsScheme),
+         'Invalid artifact dependency URL (expected http/https): "$url"',
+       );
 
   /// Deserializes an [ArtifactDependency] from a JSON-serializable map.
   ///
@@ -129,26 +139,10 @@ class ArtifactDependency {
     if (!isValidSinglePathSegment(name)) {
       throw FormatException('Invalid artifact dependency name: "$name"');
     }
-    final String? sha256 = json.nullableField<String>(sha256Key);
-    if (sha256 != null && !isValidSha256(sha256)) {
+    final String sha256 = json.requiredField<String>(sha256Key);
+    if (!_isValidSha256(sha256)) {
       throw FormatException(
         'Invalid artifact dependency sha256 (expected 64 hex characters): "$sha256"',
-      );
-    }
-    final String? sha256UrlStr = json.nullableField<String>(sha256UrlKey);
-    Uri? sha256Uri;
-    if (sha256UrlStr != null) {
-      sha256Uri = Uri.tryParse(sha256UrlStr);
-      if (sha256Uri == null ||
-          (!sha256Uri.isScheme(_httpScheme) && !sha256Uri.isScheme(_httpsScheme))) {
-        throw FormatException(
-          'Invalid artifact dependency sha256Url (expected http/https): "$sha256UrlStr"',
-        );
-      }
-    }
-    if (sha256 == null && sha256Uri == null) {
-      throw const FormatException(
-        'ArtifactDependency requires either "$sha256Key" or "$sha256UrlKey".',
       );
     }
     final String urlStr = json.requiredField<String>(urlKey);
@@ -159,20 +153,19 @@ class ArtifactDependency {
     final String? hostPlatformName = json.nullableField<String>(hostPlatformKey);
     return ArtifactDependency(
       name: name,
+      sha256: sha256,
       url: uri,
       hostPlatform: hostPlatformName != null ? HostPlatform.fromName(hostPlatformName) : null,
-      sha256: sha256,
-      sha256Url: sha256Uri,
       targetPlatform: json.nullableField<String>(targetPlatformKey),
     );
   }
 
   static const String _httpScheme = 'http';
   static const String _httpsScheme = 'https';
+  static const String _zipExtension = '.zip';
   static final RegExp _sha256RegExp = RegExp(r'^[a-fA-F0-9]{64}$');
 
-  /// Returns whether [value] is a valid 64-character hexadecimal SHA-256 string.
-  static bool isValidSha256(String value) => _sha256RegExp.hasMatch(value);
+  static bool _isValidSha256(String value) => _sha256RegExp.hasMatch(value);
 
   /// Returns whether [value] is a non-empty single path segment without
   /// directory traversal or path separators.
@@ -195,9 +188,6 @@ class ArtifactDependency {
   /// Map key for [sha256].
   static const String sha256Key = 'sha256';
 
-  /// Map key for [sha256Url].
-  static const String sha256UrlKey = 'sha256Url';
-
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
 
@@ -215,21 +205,20 @@ class ArtifactDependency {
     return const <ArtifactDependency>[];
   }
 
-  /// The name of the artifact.
+  /// The unique single-segment identifier of the artifact within the extension.
+  ///
+  /// The host uses [name] as the local cache entry name and as the lookup key in
+  /// the `resolvedArtifacts` map passed to extension build targets. Downloads
+  /// whose [url] path ends with `.zip` (case-insensitive) are extracted into a
+  /// directory named [name]; all other downloads are stored verbatim as a single
+  /// file named [name].
   final String name;
 
   /// The download URL for the artifact.
   final Uri url;
 
-  /// Optional inline SHA-256 checksum of the artifact.
-  ///
-  /// Either [sha256] or [sha256Url] must be non-null.
-  final String? sha256;
-
-  /// Optional download URL for the file containing the SHA-256 checksum of the artifact.
-  ///
-  /// Either [sha256] or [sha256Url] must be non-null.
-  final Uri? sha256Url;
+  /// The 64-character hexadecimal SHA-256 checksum of the artifact.
+  final String sha256;
 
   /// Optional host platform this artifact is intended for.
   final HostPlatform? hostPlatform;
@@ -243,20 +232,32 @@ class ArtifactDependency {
   /// prefixes such as `'linux'` matching `'linux-x64'`).
   final String? targetPlatform;
 
+  /// Whether [url] points to a `.zip` archive that is extracted into a directory.
+  bool get isZipArchive => url.path.toLowerCase().endsWith(_zipExtension);
+
+  static String _normalizeTargetPlatform(String platform) =>
+      platform == 'macos' ? 'darwin' : platform;
+
   /// Returns whether this artifact matches [currentHostPlatform] and optional
   /// [targetPlatforms].
   ///
   /// When [targetPlatforms] is provided and [targetPlatform] is non-null, a
-  /// target platform matches if it equals [targetPlatform] or is an `<os>`
-  /// prefix of `<os>-<arch>` (e.g. `'linux'` matches `'linux-x64'`).
+  /// target platform matches if it equals [targetPlatform] or either is an
+  /// `<os>` prefix of `<os>-<arch>` (e.g. `'linux'` matches `'linux-x64'`, and
+  /// `'macos'` and `'darwin'` are treated as aliases). When [targetPlatforms]
+  /// is empty, only target-agnostic artifacts (`targetPlatform == null`) match.
   bool matchesPlatforms({required HostPlatform currentHostPlatform, Set<String>? targetPlatforms}) {
     if (hostPlatform != null && hostPlatform != currentHostPlatform) {
       return false;
     }
     if (targetPlatforms != null && targetPlatform != null) {
-      final String depTarget = targetPlatform!;
-      return targetPlatforms.contains(depTarget) ||
-          targetPlatforms.any((String p) => depTarget.startsWith('$p-'));
+      final String depTarget = _normalizeTargetPlatform(targetPlatform!);
+      return targetPlatforms.any((String p) {
+        final String requested = _normalizeTargetPlatform(p);
+        return depTarget == requested ||
+            depTarget.startsWith('$requested-') ||
+            requested.startsWith('$depTarget-');
+      });
     }
     return true;
   }
@@ -265,8 +266,7 @@ class ArtifactDependency {
   Map<String, Object?> toMap() => <String, Object?>{
     nameKey: name,
     urlKey: url.toString(),
-    sha256Key: ?sha256,
-    sha256UrlKey: ?sha256Url?.toString(),
+    sha256Key: sha256,
     hostPlatformKey: ?hostPlatform?.cliName,
     targetPlatformKey: ?targetPlatform,
   };
@@ -278,17 +278,15 @@ class ArtifactDependency {
             other.name == name &&
             other.url == url &&
             other.sha256 == sha256 &&
-            other.sha256Url == sha256Url &&
             other.hostPlatform == hostPlatform &&
             other.targetPlatform == targetPlatform);
   }
 
   @override
-  int get hashCode => Object.hash(name, url, sha256, sha256Url, hostPlatform, targetPlatform);
+  int get hashCode => Object.hash(name, url, sha256, hostPlatform, targetPlatform);
 
   @override
   String toString() =>
       'ArtifactDependency(name: $name, url: $url, sha256: $sha256, '
-      'sha256Url: $sha256Url, hostPlatform: $hostPlatform, '
-      'targetPlatform: $targetPlatform)';
+      'hostPlatform: $hostPlatform, targetPlatform: $targetPlatform)';
 }
