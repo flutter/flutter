@@ -929,6 +929,49 @@ void main() {
         fileSystem.path.join(targetEngine, 'icudtl.dat'),
       );
     });
+
+    testWithoutContext(
+      "names GN's build directories to a re-entrant build by name, with the engine source",
+      () {
+        localEngineInfo = LocalEngineInfo(
+          targetOutPath: '/engine/src/out/linux_debug_unopt',
+          hostOutPath: '/engine/src/out/host_debug_unopt',
+          fileSystem: fileSystem,
+        );
+        expect(
+          localEngineInfo.toReentrantBuildEnvironment(fileSystem: fileSystem),
+          <String, String>{
+            'FLUTTER_ENGINE': '/engine/src',
+            'LOCAL_ENGINE': 'linux_debug_unopt',
+            'LOCAL_ENGINE_HOST': 'host_debug_unopt',
+          },
+        );
+      },
+    );
+
+    testWithoutContext(
+      'names a Bazel build directory to a re-entrant build by its path, without a source',
+      () {
+        // A Bazel build directory is known by its manifest; its path is what
+        // --local-engine takes, and the tool finds the source as for any
+        // absolute path.
+        const bazelBin = '/checkout/engine/src/bazel-bin/engine/src/flutter';
+        fileSystem.file(fileSystem.path.join(bazelBin, 'local_engine.json'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"name": "host_debug_unopt", "entries": {}}');
+        localEngineInfo = LocalEngineInfo(
+          targetOutPath: bazelBin,
+          hostOutPath: bazelBin,
+          fileSystem: fileSystem,
+          targetName: 'host_debug_unopt',
+          hostName: 'host_debug_unopt',
+        );
+        expect(
+          localEngineInfo.toReentrantBuildEnvironment(fileSystem: fileSystem),
+          <String, String>{'LOCAL_ENGINE': bazelBin, 'LOCAL_ENGINE_HOST': bazelBin},
+        );
+      },
+    );
   });
 
   group('LocalEngineLayout', () {
@@ -998,11 +1041,13 @@ void main() {
     Artifacts bazelArtifacts() => CachedLocalEngineArtifacts(
       bazelBin,
       engineOutPath: bazelBin,
-      cache: cache,
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-      operatingSystemUtils: FakeOperatingSystemUtils(),
+      toolContext: FakeToolContext(
+        cache: cache,
+        fs: fileSystem,
+        os: FakeOperatingSystemUtils(),
+        platform: platform,
+        processManager: processManager,
+      ),
     );
 
     testWithoutContext('resolves GN paths through the manifest', () {

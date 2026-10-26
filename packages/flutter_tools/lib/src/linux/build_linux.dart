@@ -84,11 +84,7 @@ Future<void> buildLinux(
   environmentConfig['FLUTTER_TARGET'] = target;
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
-    final String targetOutPath = localEngineInfo.targetOutPath;
-    // $ENGINE/src/out/foo_bar_baz -> $ENGINE/src
-    environmentConfig['FLUTTER_ENGINE'] = fs.path.dirname(fs.path.dirname(targetOutPath));
-    environmentConfig['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
-    environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
+    environmentConfig.addAll(localEngineInfo.toReentrantBuildEnvironment(fileSystem: fs));
   }
   writeGeneratedCmakeConfig(cache.flutterRoot, linuxProject, buildInfo, environmentConfig, logger);
 
