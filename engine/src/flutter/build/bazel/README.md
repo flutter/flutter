@@ -1191,6 +1191,79 @@ archive at their places under `engine/src/out/<variant>` and the variant's
 name -- GN's build directory name for the mode -- substituted for
 `{variant}` in the script's arguments. 33 invocations, as in the checkout.
 
+### The Android embedding's Java tests (`--type java`)
+
+`run_tests.py --type java` runs Gradle in `shell/platform/android/test_runner`
+(the checkout's `third_party/gradle`, JDK 25 as `JAVA_HOME`, the SDK as
+`ANDROID_HOME`) over the build directory's `flutter.jar`: an
+`com.android.library` module whose only sources are the tests
+(`shell/platform/android/test/`, 96 files, 87 test classes), with AGP 9.3.1
+and the test dependencies -- Robolectric 4.17, JUnit 4, androidx.test,
+Mockito 5.20 as a `-javaagent`, Play Core, ICU4J -- resolved from Maven at
+run time, and `robolectric.properties` naming SDK 37 and a shadow. On the
+Bazel-built `flutter.jar` that flow passes all 1,565 tests (87 classes, 3
+skipped; one Gradle executor died of SIGABRT between classes at four forks
+of `-Xmx8g`, and the 20 classes it had not reached passed on a rerun).
+
+Under Bazel (`build_defs/java`; the targets in the android package's
+generated file; D12, option b) the same tests are the build's, without
+rules_java or rules_jvm_external -- the root module's graph stays as the
+10-20 decision left it, and the JDK is the engine's `@openjdk` 25, the one
+CI's Gradle runs with. `android_tests.artifacts` is the closure Gradle
+resolves for the test runtime (`gradle dependencies --configuration
+debugUnitTestRuntimeClasspath`, 88 coordinates at the versions its
+conflict resolution chose) plus Robolectric's fourteen
+`android-all-instrumented` jars for SDK 24 through 37 -- a
+`@Config(minSdk, maxSdk)` test runs once per SDK in its range, as Gradle's
+`[34]`, `[35]` suffixes show, and Robolectric would otherwise download
+each at first use; `maven_lock.py` pins each file (the `.aar` or the
+`.jar`, maven.google.com first, Maven Central second) by sha256 into
+`maven.lock.bzl` (99 files; the three BOMs have none), and `maven.bzl`'s
+`maven_artifacts` repository rule fetches them into
+`@maven_android_tests` (1.9 GB, the android-all jars most of it; AARs
+unpacked, `classes.jar` and `res/` apart; the android-all jars in one
+directory of their own, never on a class path). `robolectric.bzl` then:
+`java_classes` compiles the 96 files with `@openjdk`'s javac into one jar
+(`--release 17`; `android.jar` first on the class path rather than the
+boot class path, which javac refuses past release 8 -- what AGP does for
+a Java 17 module); `android_test_apk` gives Robolectric what AGP's unit
+tests give it, the manifest merged (the module's namespace as its
+`package`, `<uses-sdk>` 24/37) and linked by the SDK's aapt2 into a
+resource APK; `robolectric_test` runs one class with `@openjdk`'s java --
+JUnit's console runner, the `--add-opens` set and `-Xmx8g` from
+`build.gradle`, Mockito's agent, `robolectric.offline` over the
+android-all directory, and a class-path directory holding
+`robolectric.properties` and AGP's `com/android/tools/test_config.properties`
+(the manifest, the APK, `android_custom_package`); `robolectric_tests`
+declares one per `*Test.java`. A class is found in the jar by its simple
+name at run time, since a file's package need not match its directory
+(`KeyboardChannelTest.java` under `engine/systemchannels/` declares
+`io.flutter.embedding.android`; Gradle too finds classes, not files). The
+tests run under an Android configuration, as `flutter.jar` is built under
+one (`--config=android_debug_unopt` or any Android build's), on the host's
+JVM; `ci/builders`' Android suites carry them for the `java` run_tests
+type. Three things the first runs taught: the android-all jars on the
+class path break Robolectric's sandbox (`RobolectricInternals.classHandler`
+null); `android.jar` must be on the runtime class path, as AGP's mockable
+android jar is, since the runner names framework types before the sandbox
+exists; and without the resource APK the SDK 34-36 sandboxes resolved the
+declared activities against the package `org.robolectric.default` while
+SDK 37's did not.
+
+```sh
+bazel test --config=android_debug_unopt //engine/src/flutter/shell/platform/android:java_tests
+bazel test --config=android_debug_unopt //engine/src/flutter/shell/platform/android:java_tests/io.flutter.embedding.android.FlutterActivityTest
+```
+
+On this host, two tests at a time (a Robolectric JVM holds a sandbox per
+SDK a class runs on; four at once left a 94 GB machine swapping, so each
+test tells Bazel's scheduler `resources:memory:12288`): **87 of 87 classes
+pass in 1,509 s**, 1,567 test cases by JUnit's count (Gradle's 1,565
+passed and 3 skipped); the longest classes are TextInputPluginTest (134 s,
+124 tests over four SDKs), FlutterActivityTest (129 s) and
+FlutterFragmentActivityTest (59 s). The compile of the 96 files takes 11 s,
+the resource APK and R classes 4 s.
+
 ## The archives CI uploads: `zip_bundle`
 
 Every artifact a Linux host builder uploads is a `zip_bundle`

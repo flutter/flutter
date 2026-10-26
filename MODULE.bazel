@@ -137,6 +137,13 @@ use_repo(browsers, "chrome", "firefox")
 debian_runtime = use_extension("//build_defs/repositories:debian_runtime.bzl", "debian_runtime")
 use_repo(debian_runtime, "sysroot_linux_x64_runtime")
 
+# The Android embedding's Java test dependencies (Robolectric, JUnit, Mockito,
+# androidx.test and the rest), the closure Gradle resolves for
+# shell/platform/android/test_runner, pinned (build_defs/java/maven.bzl; the
+# lock file beside it).
+maven = use_extension("//build_defs/java:maven.bzl", "maven")
+use_repo(maven, "maven_android_tests")
+
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
 # found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
 register_toolchains(

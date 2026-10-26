@@ -26,6 +26,9 @@ package(default_visibility = ["//visibility:public"])
 exports_files(glob([
     "sdk/platforms/*/android.jar",
     "sdk/build-tools/*/core-lambda-stubs.jar",
+    # aapt2 links the embedding's Java tests' resource APK
+    # (//build_defs/java:robolectric.bzl).
+    "sdk/build-tools/*/aapt2",
 ]))
 
 # build/config/android/config.gni: android_ndk_version. The directory name

@@ -15,6 +15,7 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files([
     "bin/jar",
+    "bin/java",
     "bin/javac",
     "bin/javadoc",
 ])
