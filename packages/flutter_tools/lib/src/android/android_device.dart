@@ -826,8 +826,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    await _logReader?.dispose();
-    await _pastLogReader?.dispose();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?_pastLogReader?.dispose()]);
   }
 }
 
