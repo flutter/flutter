@@ -222,7 +222,12 @@ flutter_test_fixtures(
     fixtures = [
         "third_party/fonts/NotoColorEmoji.ttf",
         "third_party/fonts/Roboto-Regular.ttf",
-    ],
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "@host_files//:System/Library/Fonts/Apple Color Emoji.ttc",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }),
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
         "//conditions:default": ["@platforms//:incompatible"],

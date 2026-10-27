@@ -9,8 +9,8 @@
 # overlays are in the subdirectories here.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
-load("@host_platform//:host.bzl", "HOST_CPU_CONSTRAINT")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+load("@host_platform//:host.bzl", "HOST_CPU_CONSTRAINT", "HOST_OS")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -147,6 +147,26 @@ selects.config_setting_group(
         if os not in _HOST_OSES
     ] + _OTHER_CPUS,
 )
+
+# GN's `host_os == "mac"` and the rest: the OS of the machine that builds,
+# whatever the target (the text tests' fixtures take a Mac's emoji font).
+# Known when this file loads (@host_platform), it is a setting that holds
+# or not for the whole build: a flag whose default is the host's name,
+# which no builder sets, and a config_setting per host OS GN names. The
+# converter's comparisonSettings name these for `host_os` comparisons
+# where a file's assumptions make host_os a cased value (its hostOsCases).
+string_flag(
+    name = "host_os_name",
+    build_setting_default = HOST_OS,
+)
+
+[
+    config_setting(
+        name = "host_os_is_" + os,
+        flag_values = {":host_os_name": os},
+    )
+    for os in _HOST_OSES
+]
 
 # BUILDCONFIG.gn's use_flutter_cxx, `is_clang && (is_linux || is_android ||
 # is_mac || is_ios)`: where the engine builds and links its own libc++
