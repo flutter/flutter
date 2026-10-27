@@ -1049,6 +1049,7 @@ filegroup(
   ),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend'),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/gles'),
+  ConvertedFile('//flutter/impeller/toolkit/interop/backend/metal', condition: 'is_mac'),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/vulkan'),
   // The EGL, GLES and GL-Vulkan interop toolkits, which the Android shell
   // links (EGL's library under is_android).
@@ -1347,8 +1348,12 @@ selects.config_setting_group(
 ''',
   ),
   // Impeller's rendering backends (what //flutter/impeller's group and
-  // //flutter/flow need) and their test suites, on the playground.
+  // //flutter/flow need) and their test suites, on the playground. The
+  // Metal backend is a Mac's (or iOS's) alone: Objective-C++ over
+  // Metal.framework, its shaders by Xcode's metal compiler
+  // (build_defs/impeller/shaders.bzl's mtl backend; research/20 M4).
   ConvertedFile('//flutter/impeller/renderer/backend/gles'),
+  ConvertedFile('//flutter/impeller/renderer/backend/metal', condition: 'is_mac'),
   ConvertedFile(
     '//flutter/impeller/renderer/backend/vulkan',
     skip: <String, String>{
