@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' as ffi show Abi;
 import 'dart:io' as io;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
@@ -45,15 +46,17 @@ enum BuildBackend {
 /// the `bazel` process itself (bazelisk, run from `engine/src`).
 ///
 /// The Bazel side of a build is what tools/gn_to_bazel generates from the
-/// builder files (`builders.dart`): a `--config=<name>` for every Linux build
-/// (the x64 host's own, the web's, the Linux arm64 cross builds' and
-/// Android's, `local_engine.json`'s `linux/` ones included) whose `tools/gn`
-/// flags the Bazel build can express, an install target laying a CI build's
-/// ninja targets into its build directory, and a test suite over its
-/// `run_tests.py` types. A build of everything (GN's default target: the
-/// developer's builds) has no install; the flutter tool reads it where Bazel
-/// builds it, through [localEngineTarget]'s manifest. This class asks that
-/// code, so that `et` and the generated files cannot disagree on a name.
+/// builder files (`builders.dart`): a `--config=<name>` for every Linux and
+/// Mac build (the Linux x64 host's own, the web's, the Linux arm64 cross
+/// builds' and Android's, the Mac's for either CPU; `local_engine.json`'s
+/// `linux/` and `macos/` ones included) whose `tools/gn` flags the Bazel
+/// build can express, an install target laying a CI build's ninja targets
+/// into its build directory, and a test suite over its `run_tests.py` types.
+/// A build of everything (GN's default target: the developer's builds) has
+/// no install; the flutter tool reads it where Bazel builds it, through
+/// [localEngineTarget]'s manifest. This class asks that code, so that `et`
+/// and the generated files cannot disagree on a name. A build is looked up
+/// by its file and name: a Mac's `ci/host_debug` is not Linux's.
 ///
 /// A build is named as `et` names it elsewhere: `-c ci/android_debug_x64`
 /// for CI's, `-c android_debug_unopt_x64` for the developer's
@@ -62,10 +65,17 @@ final class Bazel {
   /// The Bazel side of the builds of [configs] (the builder files), for
   /// commands run in [environment].
   Bazel(this._environment, Map<String, BuilderConfig> configs)
-    : _builds = gn_to_bazel.linuxBuilds(configs);
+    : _builds = gn_to_bazel.builderBuilds(configs),
+      _files = <Build, String>{
+        for (final MapEntry<String, BuilderConfig> entry in configs.entries)
+          for (final Build build in entry.value.builds) build: '${entry.key}.json',
+      };
 
   final Environment _environment;
   final List<gn_to_bazel.BuilderBuild> _builds;
+
+  /// The builder file of each build of the configuration (`linux_host_engine.json`).
+  final Map<Build, String> _files;
 
   /// The root Bazel package of the engine's sources (the GN root, `//`,
   /// lives at `engine/src` of the repository).
@@ -80,10 +90,13 @@ final class Bazel {
   static const String localEngineManifest = 'local_engine.json';
 
   /// What the converter made of [build]: its configuration name, or null
-  /// with the reasons it has none.
+  /// with the reasons it has none. The file tells a Mac's build from a
+  /// Linux build of the same name; a build the configuration does not hold
+  /// (a test's own) is matched by name alone.
   gn_to_bazel.BuilderBuild? _builderBuild(Build build) {
+    final String? file = _files[build];
     for (final gn_to_bazel.BuilderBuild b in _builds) {
-      if (b.name == build.name) {
+      if (b.name == build.name && (file == null || b.file == file)) {
         return b;
       }
     }
@@ -97,9 +110,9 @@ final class Bazel {
     if (builderBuild == null) {
       _environment.logger.error(
         'The Bazel build has no configuration for ${build.name}: only the Linux '
-        "builds of ci/builders (the x64 host's, the web's, the Linux arm64 cross "
-        "builds' and Android's, local_engine.json's linux/ ones included) have "
-        'one (tools/gn_to_bazel generates them).',
+        "and Mac builds of ci/builders (the Linux x64 host's, the web's, the Linux "
+        "arm64 cross builds', Android's and the Mac's; local_engine.json's linux/ "
+        'and macos/ ones included) have one (tools/gn_to_bazel generates them).',
       );
       return null;
     }
@@ -130,12 +143,29 @@ final class Bazel {
     return '$rootPackage/flutter/ci/builders:${builderBuild.configName}';
   }
 
-  /// Whether [build] is of the host's own platform (no `--platforms`), as
-  /// against another's (Android's, the web's, Linux arm64's), whose local
+  /// Whether [build] is of the host's own platform -- no `--platforms`, or
+  /// on a Mac the macOS platform of the Mac's own CPU (a Mac's builds are
+  /// always a platform, its `--mac-cpu`'s) -- as against another's
+  /// (Android's, the web's, Linux arm64's, the other Mac CPU's), whose local
   /// engine the flutter tool pairs with a host build's (`--local-engine-host`).
   bool isHostBuild(Build build) {
     final gn_to_bazel.BuilderBuild? builderBuild = _builderBuild(build);
-    return builderBuild != null && builderBuild.platform == null;
+    if (builderBuild == null) {
+      return false;
+    }
+    final String? platform = builderBuild.platform;
+    if (platform == null) {
+      return true;
+    }
+    if (!_environment.platform.isMacOS) {
+      return false;
+    }
+    final String cpu = switch (_environment.abi) {
+      ffi.Abi.macosArm64 => 'arm64',
+      ffi.Abi.macosX64 => 'x64',
+      _ => '',
+    };
+    return platform == '--platforms=${gn_to_bazel.macosPlatforms[cpu]}';
   }
 
   /// Builds [localEngineTarget] under [config] and returns the directory
