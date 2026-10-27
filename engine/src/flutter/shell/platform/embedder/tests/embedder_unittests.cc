@@ -447,6 +447,11 @@ TEST_F(EmbedderTest,
   });
   signal_latch_ui.Wait();
   signal_latch_platform.Wait();
+
+  fml::AutoResetWaitableEvent kill_latch;
+  task_runner->PostTask(
+      [&] { task_runner->PostTask([&kill_latch] { kill_latch.Signal(); }); });
+  kill_latch.Wait();
 }
 
 TEST_F(EmbedderTest, UITaskRunnerFlushesMicrotasks) {

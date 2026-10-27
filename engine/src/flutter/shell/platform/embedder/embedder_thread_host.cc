@@ -344,7 +344,8 @@ bool EmbedderThreadHost::PostTask(intptr_t runner, uint64_t task) const {
   if (found == runners_map_.end()) {
     return false;
   }
-  return found->second->PostTask(task);
+  fml::RefPtr<EmbedderTaskRunner> runner_ref = found->second;
+  return runner_ref->PostTask(task);
 }
 
 }  // namespace flutter
