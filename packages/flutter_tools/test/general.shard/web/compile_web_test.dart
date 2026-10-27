@@ -232,7 +232,6 @@ environement:
           flutterProject,
           'target',
           BuildInfo.release,
-          null,
           compilerConfigs: compilerConfigs,
         );
 
@@ -241,7 +240,6 @@ environement:
             flutterProject,
             'target',
             BuildInfo.release,
-            null,
             compilerConfigs: compilerConfigs,
           ),
           throwsToolExit(message: 'Failed to compile application for the Web.'),
