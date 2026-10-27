@@ -804,6 +804,7 @@ exports_files(
           'generated_file: the entitlements list of the macOS bundle',
     },
     appendix: '''
+load("//build_defs/android:build_tools.bzl", "android_engine_artifacts")
 load("//build_defs/dist:local_engine.bzl", "bundle_directory")
 load("//build_defs/config:configuration.bzl", "in_configuration")
 
@@ -884,6 +885,14 @@ bundle_directory(
         ":flutter_patched_sdk_release",
     ],
 )
+
+# The Android artifacts the same way, for the tests that run `flutter
+# build apk` (//build_defs/android:build_tools.bzl): gen_snapshot per CPU
+# and AOT mode as android-<cpu>-<mode>/linux-x64, and the embedding's Maven
+# artifacts as a repository (android_engine_maven) -- the engine built for
+# arm, arm64 and x64 in debug, profile and release, the Android builders'
+# configurations, through in_configuration.
+android_engine_artifacts(name = "android_engine")
 ''',
   ),
   // font-subset, the SDK's font subsetting tool (run_tests.py --type

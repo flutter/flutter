@@ -33,6 +33,18 @@ exports_files(glob([
 
 # build/config/android/config.gni: android_ndk_version. The directory name
 # is the version.
+# The SDK whole, one directory: ANDROID_HOME for the tests that run
+# `flutter build apk` (//build_defs/android:build_tools.bzl). The glob with
+# exclude_directories = 0 is how a directory becomes a source artifact.
+filegroup(
+    name = "android_sdk",
+    # buildifier: disable=constant-glob
+    srcs = glob(
+        ["sdk"],
+        exclude_directories = 0,
+    ),
+)
+
 NDK_VERSION = "28.2.13676358"
 
 NDK = "sdk/ndk/" + NDK_VERSION

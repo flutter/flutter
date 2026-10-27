@@ -136,7 +136,7 @@ fi
                         ctx.files.clang + ctx.files.sysroot + libraries.directories + libraries.environment.values(),
             ),
         ),
-        ToolEnvironmentInfo(directories = directories),
+        ToolEnvironmentInfo(directories = directories, values = {}),
     ]
 
 linux_build_tools = rule(

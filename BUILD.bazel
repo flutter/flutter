@@ -86,6 +86,17 @@ test_suite(
     ],
 )
 
+# flutter_tools' Android tests: `flutter build apk|appbundle|aar` through
+# the tool, with the engine's Android artifacts from the build -- the engine
+# for three CPUs in three modes, hours the first time -- the checkout's SDK
+# and the engine's JDK, and Gradle's downloads from the network (by
+# decision; packages/flutter_tools/BUILD.bazel says why). A suite of its
+# own, for that first build and that network.
+test_suite(
+    name = "android_tool_tests",
+    tests = ["//packages/flutter_tools:android_shard"],
+)
+
 # The pure-Dart packages' tests (package:test's runner on the VM).
 test_suite(
     name = "dart_tests",
