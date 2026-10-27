@@ -6,7 +6,8 @@
 # compiles, and a quick check that a toolchain change still matches GN.
 
 load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJCC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 
 cc_test(
     name = "cc_toolchain_smoke_test",
@@ -24,4 +25,40 @@ cc_test(
     # Android build's compile_commands.json, and so out of its clang-tidy.
     target_compatible_with = ["@platforms//os:linux"],
     deps = ["@googletest//:gtest_main"],
+)
+
+# The macOS toolchains' test (macos_toolchain.bzl): the same checks against
+# the Xcode SDK, and Objective-C++ through flutter_objc_library -- the rule
+# GN's .mm sources go through, since cc_library takes no Objective-C
+# (build_defs/cc/objc_library.bzl) -- with the engine's Objective-C flags
+# and Foundation from the SDK.
+flutter_objc_library(
+    name = "macos_objc_smoke",
+    srcs = ["macos_objc_smoke.mm"],
+    hdrs = ["macos_objc_smoke.h"],
+    copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJCC,
+    linkopts = [
+        "-framework",
+        "Foundation",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = ["//engine/src:include_root"],
+)
+
+cc_test(
+    name = "macos_cc_toolchain_smoke_test",
+    size = "small",
+    srcs = [
+        "macos_cc_toolchain_smoke_test.cc",
+        "smoke_c_source.c",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        ":macos_objc_smoke",
+        "//engine/src:include_root",
+        "@googletest//:gtest_main",
+    ],
 )

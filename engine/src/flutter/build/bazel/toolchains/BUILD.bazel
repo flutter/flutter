@@ -23,6 +23,7 @@ load(
     "LINUX_ARM64_LINK_FLAGS",
     "flutter_cc_toolchain_config",
 )
+load(":macos_toolchain.bzl", "macos_clang_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -774,6 +775,60 @@ toolchain(
     ],
     toolchain = ":android_arm_clang",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+# ---------------------------------------------------------------------------
+# macOS: GN's //build/toolchain/mac:clang_arm64 and clang_x64 (a Mac host;
+# tools/gn --mac --mac-cpu <cpu>): the checkout's clang for the Mac
+# (@clang_mac_<cpu>), the SDK of its Xcode (@macos_sdk, -isysroot), the
+# engine's libc++, `--target=<cpu>-apple-macos -arch <cpu>` and
+# -mmacosx-version-min=12.0.0 (cc_toolchain_config.bzl, os = "mac"). A Mac
+# of either CPU builds for either; the platforms name the CPU built for.
+# Incompatible off macOS (macos_toolchain.bzl).
+# ---------------------------------------------------------------------------
+
+platform(
+    name = "macos_arm64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+platform(
+    name = "macos_x64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+macos_clang_toolchain(
+    name = "macos_arm64_clang",
+    clang = "@clang_mac_arm64",
+    exec_cpu = "arm64",
+    target_cpu = "arm64",
+)
+
+macos_clang_toolchain(
+    name = "macos_x64_clang",
+    clang = "@clang_mac_x64",
+    exec_cpu = "x64",
+    target_cpu = "x64",
+)
+
+macos_clang_toolchain(
+    name = "macos_x64_on_arm64_clang",
+    clang = "@clang_mac_arm64",
+    exec_cpu = "arm64",
+    target_cpu = "x64",
+)
+
+macos_clang_toolchain(
+    name = "macos_arm64_on_x64_clang",
+    clang = "@clang_mac_x64",
+    exec_cpu = "x64",
+    target_cpu = "arm64",
 )
 
 filegroup(
