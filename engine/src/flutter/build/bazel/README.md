@@ -1822,7 +1822,7 @@ the Apple phase's.
 CI's builds are `ci/builders/*.json`: for each, the `tools/gn` flags of its
 GN configuration, the ninja targets it builds, the archives it uploads from
 `engine/src/out/<target dir>/zip_archives/`, the tests it runs. The
-converter reads the Linux builder files (`tools/gn_to_bazel`'s
+converter reads the Linux and the Mac builder files (`tools/gn_to_bazel`'s
 `builders.dart`, run with the rest) and generates two files beside them.
 `ci/builders/configs.bazelrc`, which the root `.bazelrc` imports, has a
 `build:<name>` configuration per Linux build -- the x64 host's own, the
@@ -1922,6 +1922,46 @@ the twelve Fuchsia builds (a platform the Bazel build has none for yet)
 and the eight web test bundles (no `tools/gn` step) -- so that every build
 of the Linux builder files is in one place or the other, and one filed
 under the wrong reason shows.
+
+The Mac's builder files (`mac_*.json`, and `local_engine.json`'s `macos/`
+builds) are read the same way since the macOS port (research/20, M3), after
+the Linux ones: forty-four builds, thirty-six configurations distinct. A
+Mac's build is always a platform of the Bazel build, since `tools/gn`'s
+target CPU on a Mac is `--mac-cpu` -- x64 unless given -- and not the Mac's
+own: `--mac --mac-cpu arm64` and a host build with `--mac-cpu arm64` are
+`--platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64`, a
+host build without the flag (`ci/host_debug` from `mac_host_engine.json`,
+an x64 build on CI's arm64 Macs) `:macos_x64`; a plain `bazel build` on a
+Mac, with no `--config`, is the host's own as on Linux. A Mac build with a
+Linux build's bare name is the same configuration when it is the same build
+-- the same flags, ninja targets and tests, as the web's `wasm_release` and
+`wasm_debug_unopt` from either host, or a developer's build of everything
+with no tests on its flags alone, as `macos/android_debug_arm64` -- and
+keeps its OS otherwise, the configuration, the install and the suite alike:
+`mac_host_debug`, `mac_host_profile`, `mac_host_release` (the developer's,
+`--no-stripped`) with CI's `ci_mac_host_debug`, `ci_mac_host_profile`,
+`ci_mac_host_release` beside them (the `ci_` rule applies after the OS's),
+`mac_host_debug_clang_tidy`, and `mac_android_profile`, `mac_android_release`
+and their `_arm64` and `_x64` forms -- CI's Android AOT builds from a Mac,
+whose flags are Linux's but whose targets are the Mac's own `gen_snapshot`.
+The Mac-only names stay bare: `host_debug_unopt_arm64` (what a developer
+on an Apple-silicon Mac builds; `ci/host_debug_unopt_arm64` and
+`macos/host_debug_unopt_arm64` set the same flags), `host_profile_arm64`,
+`host_release_arm64`, `host_debug_arm64_tests`, `host_profile_arm64_tests`,
+`host_release_arm64_tests`, `host_release_arm64_licenses`,
+`mac_debug_arm64`, `mac_profile_arm64`, `mac_release_arm64`,
+`mac_release_arm64_tests`, and the `_framework` and `_gen_snapshot` builds
+of each mode for either CPU (`host_debug_framework`,
+`mac_debug_gen_snapshot_arm64`, ...). The iOS builds (seventeen, with
+`--simulator`, `--simulator-cpu` and `--darwin-extension-safe` among their
+flags) are listed at the end as a platform the Bazel build has none for yet.
+A Mac build's install and suite are compatible with macOS alone, as their
+contents are, so a wildcard build on Linux skips them; its `engine` tests
+are the Mac's list in `run_tests.py` (`runTestsEngineSuitesMac`: the common
+and non-Windows suites, the Objective-C ones -- `accessibility_unittests`,
+`framework_common_unittests`, ... -- `flow_unittests` without the golden
+test, the Darwin desktop suites and the Impeller suites), each listed until
+its package converts.
 `ci/builders/BUILD.bazel` has an `install` per
 build over the Bazel counterparts of its ninja targets (a label, a
 directory for its target of the same name, a bare unique name, as GN's
@@ -1955,9 +1995,10 @@ and `lib.unstripped/` (see the install section). A build with tests also gets a 
 Bazel suites that stand for its `run_tests.py` types (`dart` is the Dart
 tests under flutter_tester with the VM service's and the smoke test,
 `dart-host` the Dart packages' own, `benchmarks`, `font-subset`, and
-`engine` the 27 executables `run_cc_tests` runs on Linux, each the
-converted test of that name -- `runTestsTypeSuites` and
-`runTestsEngineSuites` in `builders.dart`), with the build's other steps
+`engine` the 27 executables `run_cc_tests` runs on Linux, or the 33 on a
+Mac, each the converted test of that name -- `runTestsTypeSuites`,
+`runTestsEngineSuites` and `runTestsEngineSuitesMac` in `builders.dart`),
+with the build's other steps
 (the formatter, the linters, `generate_metrics.sh`) listed as what they
 are, scripts of the checkout:
 `bazel test --config=host_debug_test //engine/src/flutter/ci/builders:host_debug_test_tests`
