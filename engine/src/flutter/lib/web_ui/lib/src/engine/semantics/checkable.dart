@@ -105,7 +105,8 @@ class SemanticCheckable extends SemanticRole {
       if (semanticsObject.flags.isChecked == ui.CheckedState.isTrue ||
           semanticsObject.flags.isToggled == ui.Tristate.isTrue) {
         ariaChecked = 'true';
-      } else if (_kind == _CheckableKind.checkbox && semanticsObject.isMixed) {
+      } else if (_kind == _CheckableKind.checkbox &&
+          semanticsObject.flags.isChecked == ui.CheckedState.mixed) {
         // ARIA defines "mixed" for checkboxes only, not for radio buttons or switches.
         ariaChecked = 'mixed';
       } else {
