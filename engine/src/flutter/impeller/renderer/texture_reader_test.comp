@@ -1,0 +1,19 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Copies the first texel of a texture into a buffer.
+layout(local_size_x = 1) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) writeonly buffer OutputData {
+  vec4 color;
+}
+output_data;
+
+layout(binding = 1) uniform sampler2D input_texture;
+
+void main() {
+  output_data.color = texelFetch(input_texture, ivec2(0, 0), 0);
+}

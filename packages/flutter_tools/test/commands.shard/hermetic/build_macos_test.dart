@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart' show HostPlatform, OperatingSystemUtils;
@@ -156,7 +157,9 @@ void main() {
     String hostPlatformArch = 'x86_64',
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
-    final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+    final Directory flutterBuildDir = fileSystem.directory(
+      getMacOSBuildDirectory(config: Config.test(), fileSystem: fileSystem),
+    );
     final destination = configuration == 'Debug'
         ? 'platform=macOS,arch=$hostPlatformArch'
         : 'generic/platform=macOS';
@@ -857,7 +860,9 @@ STDERR STUFF
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         fileSystem.currentDirectory,
       );
-      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+      final Directory flutterBuildDir = fileSystem.directory(
+        getMacOSBuildDirectory(config: Config.test(), fileSystem: fileSystem),
+      );
       createMinimalMockProjectFiles();
 
       fakeProcessManager.addCommands(<FakeCommand>[
