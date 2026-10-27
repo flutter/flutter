@@ -5,7 +5,6 @@
 #include "impeller/renderer/backend/metal/compute_pass_mtl.h"
 
 #include <Metal/Metal.h>
-#include <algorithm>
 #include <memory>
 
 #include "flutter/fml/backtrace.h"
@@ -33,8 +32,10 @@ ComputePassMTL::ComputePassMTL(std::shared_ptr<const Context> context,
   if (!buffer_) {
     return;
   }
+  // A serial encoder runs each dispatch after the previous one finishes and
+  // makes its writes visible, so dependent dispatches need no manual barrier.
   encoder_ = [buffer_ computeCommandEncoderWithDispatchType:
-                          MTLDispatchType::MTLDispatchTypeConcurrent];
+                          MTLDispatchType::MTLDispatchTypeSerial];
   if (!encoder_) {
     return;
   }
@@ -42,7 +43,12 @@ ComputePassMTL::ComputePassMTL(std::shared_ptr<const Context> context,
   is_valid_ = true;
 }
 
-ComputePassMTL::~ComputePassMTL() = default;
+ComputePassMTL::~ComputePassMTL() {
+  if (!did_finish_encoding_) {
+    [encoder_ endEncoding];
+    did_finish_encoding_ = true;
+  }
+}
 
 bool ComputePassMTL::IsValid() const {
   return is_valid_;
@@ -58,8 +64,10 @@ void ComputePassMTL::OnSetLabel(const std::string& label) {
 }
 
 void ComputePassMTL::SetCommandLabel(std::string_view label) {
+#ifdef IMPELLER_DEBUG
   has_label_ = true;
-  [encoder_ pushDebugGroup:@(label.data())];
+  [encoder_ pushDebugGroup:@(std::string(label).c_str())];
+#endif  // IMPELLER_DEBUG
 }
 
 // |ComputePass|
@@ -124,63 +132,46 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
   return true;
 }
 
-absl::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
-  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
-      workgroup_count[2] == 0u) {
-    return absl::Status(absl::StatusCode::kCancelled,
-                        "Invalid workgroup count for compute command.");
-  }
-
-  const NSUInteger max_total =
-      pass_bindings_cache_.GetPipeline().maxTotalThreadsPerThreadgroup;
-
-  // Unlike Vulkan and GLES, Metal does not bake the threadgroup size into the
-  // shader; it is supplied here at dispatch. Honor the shader's declared local
-  // size. A dimension of 0 means the shader sized it with a specialization
-  // constant. In that case fill the remaining threadgroup capacity into x while
-  // honoring any literal y and z, keeping the total within the device maximum.
-  MTLSize threads_per_threadgroup;
-  if (workgroup_size_[0] == 0u) {
-    const NSUInteger size_y =
-        workgroup_size_[1] == 0u ? 1u : workgroup_size_[1];
-    const NSUInteger size_z =
-        workgroup_size_[2] == 0u ? 1u : workgroup_size_[2];
-    const NSUInteger size_x =
-        std::max<NSUInteger>(1u, max_total / (size_y * size_z));
-    threads_per_threadgroup = MTLSizeMake(size_x, size_y, size_z);
-  } else {
-    threads_per_threadgroup = MTLSizeMake(
-        workgroup_size_[0], workgroup_size_[1] == 0u ? 1 : workgroup_size_[1],
-        workgroup_size_[2] == 0u ? 1 : workgroup_size_[2]);
-  }
-
-  // Metal aborts at dispatch if the threadgroup size exceeds the device
-  // maximum. Vulkan rejects an oversized local size at pipeline creation, so do
-  // the equivalent here and fail gracefully instead.
-  if (threads_per_threadgroup.width * threads_per_threadgroup.height *
-          threads_per_threadgroup.depth >
-      max_total) {
-    return absl::Status(absl::StatusCode::kCancelled,
-                        "Compute shader workgroup size exceeds the device's "
-                        "maximum threads per threadgroup.");
-  }
-
-  [encoder_
-       dispatchThreadgroups:MTLSizeMake(workgroup_count[0], workgroup_count[1],
-                                        workgroup_count[2])
-      threadsPerThreadgroup:threads_per_threadgroup];
-
+void ComputePassMTL::PopCommandLabel() {
 #ifdef IMPELLER_DEBUG
   if (has_label_) {
     [encoder_ popDebugGroup];
   }
   has_label_ = false;
 #endif  // IMPELLER_DEBUG
+}
+
+absl::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
+  // The label set by `SetCommandLabel` applies to this dispatch only.
+  fml::ScopedCleanupClosure pop_label([this]() { PopCommandLabel(); });
+
+  // A dispatch with no workgroups does nothing, like a draw with no vertices.
+  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
+      workgroup_count[2] == 0u) {
+    return absl::OkStatus();
+  }
+
+  if (!pass_bindings_cache_.GetPipeline()) {
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "No compute pipeline is bound.");
+  }
+
+  // Unlike Vulkan and GLES, Metal does not bake the threadgroup size into the
+  // shader; it is supplied here at dispatch. Pipeline creation checked the
+  // shader's declared size against the device and pipeline limits.
+  const MTLSize threads_per_threadgroup =
+      MTLSizeMake(workgroup_size_[0], workgroup_size_[1], workgroup_size_[2]);
+
+  [encoder_
+       dispatchThreadgroups:MTLSizeMake(workgroup_count[0], workgroup_count[1],
+                                        workgroup_count[2])
+      threadsPerThreadgroup:threads_per_threadgroup];
   return absl::OkStatus();
 }
 
 bool ComputePassMTL::EncodeCommands() const {
   [encoder_ endEncoding];
+  did_finish_encoding_ = true;
   return true;
 }
 

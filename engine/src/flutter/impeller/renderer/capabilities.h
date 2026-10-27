@@ -5,11 +5,31 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_CAPABILITIES_H_
 #define FLUTTER_IMPELLER_RENDERER_CAPABILITIES_H_
 
+#include <array>
+#include <cstdint>
 #include <memory>
 
 #include "impeller/core/formats.h"
 
 namespace impeller {
+
+/// The limits a device places on compute workgroups and dispatches.
+struct ComputeLimits {
+  /// The maximum number of invocations (threads) in one workgroup, across
+  /// all three dimensions.
+  ///
+  /// A compute pipeline may support fewer invocations than this, for example
+  /// on Metal when the shader uses many registers. Pipeline creation fails if
+  /// the workgroup size exceeds the pipeline's limit.
+  uint32_t max_workgroup_invocations = 0u;
+  /// The maximum size of one workgroup along each dimension.
+  std::array<uint32_t, 3> max_workgroup_size = {0u, 0u, 0u};
+  /// The maximum number of workgroups in one dispatch along each dimension.
+  std::array<uint32_t, 3> max_workgroup_count = {0u, 0u, 0u};
+  /// The maximum total size in bytes of the shared (threadgroup) memory a
+  /// workgroup can declare.
+  size_t max_shared_memory_size = 0u;
+};
 
 class Capabilities {
  public:
@@ -166,6 +186,11 @@ class Capabilities {
   /// @brief The minimum alignment of storage buffer value offsets in bytes.
   virtual size_t GetMinimumStorageBufferAlignment() const;
 
+  /// @brief The limits the device places on compute workgroups and
+  ///        dispatches. Every limit is zero if the backend does not support
+  ///        compute.
+  virtual ComputeLimits GetComputeLimits() const = 0;
+
   /// @brief Whether the host buffer should use separate device buffers
   /// for indexes from other data.
   virtual bool NeedsPartitionedHostBuffer() const = 0;
@@ -226,6 +251,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetNeedsPartitionedHostBuffer(bool value);
 
+  CapabilitiesBuilder& SetComputeLimits(const ComputeLimits& value);
+
   std::unique_ptr<Capabilities> Build();
 
  private:
@@ -253,6 +280,7 @@ class CapabilitiesBuilder {
       std::nullopt;
   uint32_t max_sampler_anisotropy_ = 1;
   size_t minimum_uniform_alignment_ = 256;
+  ComputeLimits compute_limits_;
 
   CapabilitiesBuilder(const CapabilitiesBuilder&) = delete;
 

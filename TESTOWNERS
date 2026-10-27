@@ -222,7 +222,6 @@
 /dev/devicelab/bin/tasks/native_assets_ios.dart @dcharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/new_gallery_skia_ios__transition_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_ios.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test_swift.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_channels_benchmarks_ios.dart @gaaclarke @flutter/engine

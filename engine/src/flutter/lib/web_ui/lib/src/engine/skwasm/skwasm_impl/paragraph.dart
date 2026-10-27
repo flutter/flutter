@@ -298,8 +298,8 @@ void _applyTextStyleToNative(EngineTextStyle style, SkwasmNativeTextStyle native
   if (style.height != null) {
     textStyleSetHeight(handle, style.height!);
   }
-  if (style.leadingDistribution != null) {
-    textStyleSetHalfLeading(handle, style.leadingDistribution == ui.TextLeadingDistribution.even);
+  if (style.halfLeading != null) {
+    textStyleSetHalfLeading(handle, style.halfLeading!);
   }
   if (style.locale != null) {
     final SkStringHandle localeHandle = skStringFromDartString(style.locale!.toLanguageTag());
@@ -365,8 +365,8 @@ StrutStyleHandle _createNativeStrutStyle(EngineStrutStyle style) {
   if (style.height != null) {
     strutStyleSetHeight(handle, style.height!);
   }
-  if (style.leadingDistribution != null) {
-    strutStyleSetHalfLeading(handle, style.leadingDistribution == ui.TextLeadingDistribution.even);
+  if (style.halfLeading != null) {
+    strutStyleSetHalfLeading(handle, style.halfLeading!);
   }
   if (style.leading != null) {
     strutStyleSetLeading(handle, style.leading!);
@@ -413,8 +413,9 @@ ParagraphStyleHandle _createNativeParagraphStyle(
     paragraphStyleSetEllipsis(handle, ellipsisHandle);
     skStringFree(ellipsisHandle);
   }
-  if (style.strutStyle != null) {
-    final StrutStyleHandle strutStyleHandle = _createNativeStrutStyle(style.strutStyle!);
+  final EngineStrutStyle? strutStyle = style.effectiveStrutStyle;
+  if (strutStyle != null) {
+    final StrutStyleHandle strutStyleHandle = _createNativeStrutStyle(strutStyle);
     paragraphStyleSetStrutStyle(handle, strutStyleHandle);
     strutStyleDispose(strutStyleHandle);
   }

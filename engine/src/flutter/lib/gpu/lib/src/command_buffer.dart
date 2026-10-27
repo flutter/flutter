@@ -114,17 +114,24 @@ base class TextureDestinationRegion {
   }
 }
 
+/// A pass that records into a [CommandBuffer] until it is ended.
+abstract interface class _CommandBufferPass {
+  /// Marks this pass as ended by [endedBy], the call that any later use of
+  /// the pass names in its [StateError].
+  void _markEnded(String endedBy);
+}
+
 /// A sequence of passes and copies that is submitted to the GPU as a unit.
 ///
 /// A command buffer records one pass at a time, and its passes execute in the
 /// order they were created. A pass stays open for recording until one of the
 /// following ends it:
 ///
-///  * [createRenderPass] creates the next pass.
+///  * [createRenderPass] or [createComputePass] creates the next pass.
 ///  * [copyBufferToTexture], [copyTextureToBuffer] or [copyTextureToTexture]
 ///    records a copy.
 ///  * [submit] submits the command buffer.
-///  * [RenderPass.end] ends it explicitly.
+///  * [RenderPass.end] or [ComputePass.end] ends it explicitly.
 ///
 /// Any later call on an ended pass throws a [StateError] naming what ended
 /// it. One command buffer can hold any number of passes. Once submitted, a
@@ -140,7 +147,7 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
   bool _submitted = false;
 
   /// The pass that is recording, if any.
-  RenderPass? _openPass;
+  _CommandBufferPass? _openPass;
 
   /// Whether [submit] has been called on this command buffer.
   bool get submitted => _submitted;
@@ -158,12 +165,12 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
   /// Ends the open pass, if any. [endedBy] names the call that ended it, for
   /// the [StateError] thrown by any later use of the pass.
   void _endOpenPass(String endedBy) {
-    final RenderPass? pass = _openPass;
+    final _CommandBufferPass? pass = _openPass;
     if (pass == null) {
       return;
     }
     _openPass = null;
-    pass._endedBy = endedBy;
+    pass._markEnded(endedBy);
   }
 
   /// Creates a [RenderPass] that draws into [renderTarget].
@@ -179,6 +186,26 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
     return RenderPass._(_gpuContext, this, renderTarget);
   }
 
+  /// Creates a [ComputePass] that dispatches compute shaders.
+  ///
+  /// This ends the pass that was recording on this command buffer, if any.
+  /// The new pass executes after every pass and copy recorded before it, and
+  /// sees their writes. It records until the next pass, copy or [submit] ends
+  /// it, or until [ComputePass.end] is called.
+  ///
+  /// Throws a [StateError] if this command buffer was already submitted, and
+  /// an [UnsupportedError] if [GpuContext.supportsCompute] is false.
+  ComputePass createComputePass() {
+    _checkNotSubmitted('CommandBuffer.createComputePass()');
+    if (!_gpuContext.supportsCompute) {
+      throw UnsupportedError(
+        'Compute is not supported by this GpuContext. Check '
+        'GpuContext.supportsCompute before creating a ComputePass.',
+      );
+    }
+    return ComputePass._(_gpuContext, this);
+  }
+
   /// Copies tightly packed texel data from [source] into [destination].
   ///
   /// Prefer this over [Texture.overwrite] when uploading more than one texture
@@ -186,9 +213,9 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
   /// [CommandBuffer] are batched by Flutter GPU into a single backend blit
   /// pass where the backend has such a concept.
   ///
-  /// Recording a copy ends the open [RenderPass], if any. The copy executes
-  /// after every pass and copy recorded before it. Throws a [StateError] if
-  /// this command buffer was already submitted.
+  /// Recording a copy ends the open [RenderPass] or [ComputePass], if any.
+  /// The copy executes after every pass and copy recorded before it. Throws a
+  /// [StateError] if this command buffer was already submitted.
   void copyBufferToTexture(BufferView source, TextureRegion destination) {
     _checkNotSubmitted('CommandBuffer.copyBufferToTexture()');
     destination._validate();
@@ -228,9 +255,9 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
   /// The destination buffer must be large enough to hold
   /// the source region rounded up to whole pixel-format blocks.
   ///
-  /// Recording a copy ends the open [RenderPass], if any. The copy executes
-  /// after every pass and copy recorded before it. Throws a [StateError] if
-  /// this command buffer was already submitted.
+  /// Recording a copy ends the open [RenderPass] or [ComputePass], if any.
+  /// The copy executes after every pass and copy recorded before it. Throws a
+  /// [StateError] if this command buffer was already submitted.
   void copyTextureToBuffer(TextureRegion source, BufferView destination) {
     _checkNotSubmitted('CommandBuffer.copyTextureToBuffer()');
     source._validate(allowMipAndSlice: false);
@@ -267,9 +294,9 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
   /// This is a raw copy. Source and destination textures must have matching
   /// formats and sample counts.
   ///
-  /// Recording a copy ends the open [RenderPass], if any. The copy executes
-  /// after every pass and copy recorded before it. Throws a [StateError] if
-  /// this command buffer was already submitted.
+  /// Recording a copy ends the open [RenderPass] or [ComputePass], if any.
+  /// The copy executes after every pass and copy recorded before it. Throws a
+  /// [StateError] if this command buffer was already submitted.
   void copyTextureToTexture(
     TextureRegion source,
     TextureDestinationRegion destination,
@@ -306,10 +333,10 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
   /// Submits the recorded passes and copies to the GPU, in the order they
   /// were recorded.
   ///
-  /// This ends the open [RenderPass], if any. [completionCallback] is called
-  /// when the submitted work completes, with `false` if it failed. A command
-  /// buffer can be submitted once, and counts as submitted even if this
-  /// throws.
+  /// This ends the open [RenderPass] or [ComputePass], if any.
+  /// [completionCallback] is called when the submitted work completes, with
+  /// `false` if it failed. A command buffer can be submitted once, and counts
+  /// as submitted even if this throws.
   void submit({CompletionCallback? completionCallback}) {
     if (_submitted) {
       throw StateError('CommandBuffer has already been submitted.');

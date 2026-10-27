@@ -13,6 +13,8 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -25,6 +27,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -298,6 +301,123 @@ public class PlatformViewWrapperTest {
     view.onTouchEvent(moveEvent);
     assertEquals(moveEvent, lastRequestedEvent[0]);
     assertFalse(view.getFlutterWonGesture());
+  }
+
+  /** Adds {@code wrapper} to a laid out parent at the given position. */
+  private FrameLayout layOutInParent(PlatformViewWrapper wrapper, int left, int top) {
+    final FrameLayout.LayoutParams params =
+        new FrameLayout.LayoutParams(10, 10, Gravity.LEFT | Gravity.TOP);
+    params.leftMargin = left;
+    params.topMargin = top;
+    wrapper.setLayoutParams(params);
+    final FrameLayout parent = new FrameLayout(ctx);
+    parent.addView(wrapper);
+    parent.measure(
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY));
+    parent.layout(0, 0, 100, 100);
+    return parent;
+  }
+
+  @Test
+  public void setOffset_movesViewWithoutRequestingLayout() {
+    final int[] scrollChangedCalls = new int[1];
+    final PlatformViewWrapper wrapper =
+        new PlatformViewWrapper(ctx) {
+          @Override
+          protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+            super.onScrollChanged(l, t, oldl, oldt);
+            scrollChangedCalls[0]++;
+          }
+        };
+    final FrameLayout parent = layOutInParent(wrapper, 1, 2);
+    assertEquals(1, wrapper.getLeft());
+    assertEquals(2, wrapper.getTop());
+    assertFalse(wrapper.isLayoutRequested());
+
+    wrapper.setOffset(30, 40);
+
+    // The view is moved immediately, without a layout pass, and scroll listeners are notified.
+    assertFalse(wrapper.isLayoutRequested());
+    assertFalse(parent.isLayoutRequested());
+    assertEquals(30, wrapper.getLeft());
+    assertEquals(40, wrapper.getTop());
+    assertEquals(40, wrapper.getRight());
+    assertEquals(50, wrapper.getBottom());
+    assertEquals(1, scrollChangedCalls[0]);
+
+    // Setting the same offset again is a no-op.
+    wrapper.setOffset(30, 40);
+    assertEquals(1, scrollChangedCalls[0]);
+
+    // The layout params are kept in sync, so a later layout pass keeps the position.
+    final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) wrapper.getLayoutParams();
+    assertEquals(30, params.leftMargin);
+    assertEquals(40, params.topMargin);
+    parent.requestLayout();
+    parent.measure(
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY));
+    parent.layout(0, 0, 100, 100);
+    assertEquals(30, wrapper.getLeft());
+    assertEquals(40, wrapper.getTop());
+  }
+
+  @Test
+  public void setOffset_beforeLayout_onlyUpdatesLayoutParams() {
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx);
+    wrapper.setLayoutParams(new FrameLayout.LayoutParams(10, 10));
+
+    wrapper.setOffset(30, 40);
+
+    final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) wrapper.getLayoutParams();
+    assertEquals(30, params.leftMargin);
+    assertEquals(40, params.topMargin);
+    assertEquals(Gravity.LEFT | Gravity.TOP, params.gravity);
+    assertEquals(0, wrapper.getLeft());
+    assertEquals(0, wrapper.getTop());
+  }
+
+  @Test
+  public void setOffset_whileLayoutRequested_stillMovesImmediately() {
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx);
+    layOutInParent(wrapper, 1, 2);
+    wrapper.requestLayout();
+    assertTrue(wrapper.isLayoutRequested());
+
+    wrapper.setOffset(30, 40);
+
+    assertEquals(30, wrapper.getLeft());
+    assertEquals(40, wrapper.getTop());
+  }
+
+  @Test
+  public void onTouchEvent_translatesByCurrentPosition() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx);
+    wrapper.setTouchProcessor(touchProcessor);
+    layOutInParent(wrapper, 5, 6);
+    final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
+
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 1.0f, 1.0f, 0);
+    wrapper.onTouchEvent(downEvent);
+
+    // The view moves (e.g. the list scrolls) in the middle of the gesture.
+    wrapper.setOffset(15, 26);
+    final MotionEvent moveEvent =
+        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 2.0f, 2.0f, 0);
+    wrapper.onTouchEvent(moveEvent);
+
+    verify(touchProcessor, times(2)).onTouchEvent(any(MotionEvent.class), matrixCaptor.capture());
+    final List<Matrix> matrices = matrixCaptor.getAllValues();
+    final float[] values = new float[9];
+    matrices.get(0).getValues(values);
+    assertEquals(5f, values[Matrix.MTRANS_X], 0f);
+    assertEquals(6f, values[Matrix.MTRANS_Y], 0f);
+    matrices.get(1).getValues(values);
+    assertEquals(15f, values[Matrix.MTRANS_X], 0f);
+    assertEquals(26f, values[Matrix.MTRANS_Y], 0f);
   }
 
   @Implements(ViewGroup.class)

@@ -2450,6 +2450,123 @@ flutter:
         },
       );
     }
+
+    for (final deprecatedJsInterop in <bool>[true, false]) {
+      testUsingContext(
+        'ResidentWebRunner sends flutterBuildInfo analytics on debug DDC '
+        'compile success when deprecatedJsInterop: $deprecatedJsInterop',
+        () async {
+          fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+          setupMocks();
+
+          final ResidentRunner residentWebRunner = setUpResidentRunner(
+            flutterDevice,
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
+            ),
+          );
+          residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+          final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+          unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+          await connectionInfoCompleter.future;
+
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(
+                label: 'web-compile',
+                buildType: 'web',
+                command: 'run',
+                settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        'ResidentWebRunner sends flutterBuildInfo analytics with error on debug '
+        'DDC compile failure when deprecatedJsInterop: $deprecatedJsInterop',
+        () async {
+          fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+          setupMocks();
+          webDevFS.report = UpdateFSReport();
+
+          final ResidentRunner residentWebRunner = setUpResidentRunner(
+            flutterDevice,
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
+            ),
+          );
+
+          expect(await residentWebRunner.run(), 1);
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(
+                label: 'web-compile',
+                buildType: 'web',
+                command: 'run',
+                settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+                error: 'ddc-compile-failure',
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          Pub: ThrowingPub.new,
+        },
+      );
+    }
+
+    testUsingContext(
+      'ResidentWebRunner does not send flutterBuildInfo analytics on debug DDC '
+      'compile when deprecatedJsInterop is null',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+        setupMocks();
+
+        final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+        residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+        await connectionInfoCompleter.future;
+
+        expect(
+          fakeAnalytics.sentEvents.where((Event e) => e.eventData['label'] == 'web-compile'),
+          isEmpty,
+        );
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
   });
 }
 
