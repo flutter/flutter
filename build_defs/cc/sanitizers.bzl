@@ -16,6 +16,7 @@ runfiles have it. Without the flag the launchers add nothing.
 """
 
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
+load("@host_platform//:host.bzl", "HOST_CLANG")
 
 SANITIZER_ATTRS = {
     "_asan": attr.label(
@@ -35,12 +36,14 @@ SANITIZER_ATTRS = {
         allow_files = True,
     ),
     "_llvm_symbolizer": attr.label(
-        # A symlink to the toolchain's multicall binary, which must come along.
-        default = "@clang_linux_x64//:bin/llvm-symbolizer",
+        # A symlink to the toolchain's multicall binary, which must come
+        # along; the host's clang (@host_platform), whichever host runs the
+        # tests.
+        default = HOST_CLANG + "//:bin/llvm-symbolizer",
         allow_single_file = True,
     ),
     "_llvm_multicall": attr.label(
-        default = "@clang_linux_x64//:bin/llvm",
+        default = HOST_CLANG + "//:bin/llvm",
         allow_single_file = True,
     ),
 }

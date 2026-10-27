@@ -7,13 +7,28 @@
 # engine consumes it: the executables and snapshots as files, the libraries
 # as cc_library facades around archives of their object files.
 #
-# Host linux-x64 only for now; the tree below and the GN args name that
-# toolchain explicitly. Other hosts and target platforms will select()
-# between toolchain repositories once they exist.
+# The host is whatever runs the build (@host_platform: Linux x64 today, a
+# Mac of either CPU since the macOS port, research/20 M3): its clang, its
+# cpython3 and its prebuilt Dart SDK go into the GN tree at the paths GN's
+# host_os/host_cpu name them by. The targets are the host's own, Linux
+# arm64, Android's ABIs and the Mac's two CPUs (the GN args select() on the
+# platform). On a Mac the GN build takes the SDK, the platform and the
+# toolchain of the host's Xcode from @macos_sdk (the same Xcode the Bazel
+# toolchain's sysroot comes from) rather than running xcrun itself.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
-load("@host_platform//:host.bzl", "HOST_DART_SDK")
+load(
+    "@host_platform//:host.bzl",
+    "HOST_BUILDTOOLS",
+    "HOST_CLANG",
+    "HOST_CPU",
+    "HOST_CPU_CONSTRAINT",
+    "HOST_DART_SDK",
+    "HOST_OS",
+    "HOST_OS_CONSTRAINT",
+)
+load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH", "MACOS_SDK_PATH", "XCODE_DEVELOPER_DIR")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/gn:gn_build.bzl", "gn_build")
 load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
@@ -80,19 +95,40 @@ config_setting(
 )
 
 # GN's prebuilt_dart_sdk outside the host toolchain (common/config.gni): the
-# prebuilt SDK of the *target* -- the host's own for the host's build, and
-# linux-arm64's for the Linux arm64 cross build -- which build/dart lays
+# prebuilt SDK of the *target* -- the host's own for the host's build,
+# linux-arm64's for the Linux arm64 cross build, the Mac's for the macOS
+# platforms (a Mac's host build is the platform of its --mac-cpu, x64 or
+# arm64, whichever Mac builds it: ci/builders) -- which build/dart lays
 # into the build directory as dart-sdk/ and build/archives ships as
 # dart-sdk-<platform>.zip. The tools that run at build time are always the
 # host's (@host_platform's HOST_DART_SDK, GN's host_prebuilt_dart_sdk).
-# The cross builds GN builds in a toolchain other than the host's, whose
-# build-time tools land under clang_x64/: Linux arm64 and the Android ABIs
-# (the wasm platform builds no VM).
+# A build for anything but the host's own OS and CPU GN builds in a
+# toolchain other than the host's, whose build-time tools land under
+# clang_<host cpu>/: Linux arm64 and the Android ABIs from a Linux x64 host,
+# the other CPU's build from a Mac (the wasm platform builds no VM).
 selects.config_setting_group(
-    name = "cross_build",
-    match_any = [
+    name = "host_own",
+    match_all = [
+        HOST_OS_CONSTRAINT,
+        HOST_CPU_CONSTRAINT,
+    ],
+)
+
+# The macOS platforms (build/bazel/toolchains:macos_arm64, :macos_x64); each
+# a specialization of its CPU's constraint for select().
+config_setting(
+    name = "macos_arm64",
+    constraint_values = [
+        "@platforms//os:macos",
         "@platforms//cpu:aarch64",
-        "@platforms//os:android",
+    ],
+)
+
+config_setting(
+    name = "macos_x64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
     ],
 )
 
@@ -124,6 +160,8 @@ selects.config_setting_group(
 filegroup(
     name = "prebuilt_dart_sdk",
     srcs = select({
+        ":macos_arm64": ["@dart_sdk_macos_arm64//:all_files"],
+        ":macos_x64": ["@dart_sdk_macos_x64//:all_files"],
         "@platforms//cpu:aarch64": ["@dart_sdk_linux_arm64//:all_files"],
         "//conditions:default": [HOST_DART_SDK + "//:all_files"],
     }),
@@ -145,11 +183,12 @@ _GN_ARGS = {
     # toolchain compiles the engine without it, so a -c opt build is one
     # build without LTO rather than an engine without and a VM with.
     "enable_lto": "false",
-    "host_cpu": '"x64"',
-    "host_os": '"linux"',
+    "host_cpu": '"%s"' % HOST_CPU,
+    "host_os": '"%s"' % HOST_OS,
     "is_clang": "true",
     # No system libraries: keeps //build/config/linux from probing the
     # sysroot with the host's pkg-config (nothing in this graph uses them).
+    # Declared in BUILDCONFIG.gn for every OS; read by Linux's alone.
     "is_minimal_linux": "true",
     "is_official_build": "true",
     "stripped_symbols": "true",
@@ -157,8 +196,22 @@ _GN_ARGS = {
     # The target OS: Android for the Android platforms (tools/gn --android),
     # where the VM's libraries are built against the NDK's sysroot and, on
     # the 64-bit ABIs, with compressed pointers (tools/gn: android x64 and
-    # arm64); Linux otherwise.
+    # arm64); mac for the macOS platforms, with what tools/gn sets on a Mac
+    # (setup_apple_sdks: the deployment target, no simulator) and the SDK,
+    # platform and toolchain paths of the host's Xcode from @macos_sdk,
+    # which build/config/darwin/darwin_sdk.gni would otherwise ask xcrun
+    # for (build/mac/darwin_sdk.py) -- the same Xcode either way, named
+    # here so that the action's key carries it; Linux otherwise.
     "@platforms//os:android": {"target_os": '"android"'},
+    "@platforms//os:macos": {
+        "ios_use_simulator": "false",
+        "mac_deployment_target": '"12.0.0"',
+        "mac_host_toolchain_path": '"%s/Toolchains/XcodeDefault.xctoolchain"' % XCODE_DEVELOPER_DIR,
+        "mac_platform_path": '"%s"' % MACOS_PLATFORM_PATH,
+        "mac_sdk_path": '"%s"' % MACOS_SDK_PATH,
+        "target_os": '"mac"',
+        "use_ios_simulator": "false",
+    },
     "//conditions:default": {"target_os": '"linux"'},
 }) | select({
     ":android_64": {"dart_use_compressed_pointers": "true"},
@@ -166,7 +219,8 @@ _GN_ARGS = {
 }) | select({
     # The target CPU: the host's, or arm64 for the Linux arm64 cross build
     # (tools/gn --target-os=linux --linux-cpu=arm64), in which GN builds the
-    # VM's libraries for arm64 and the build-time tools for the host.
+    # VM's libraries for arm64 and the build-time tools for the host; a
+    # Mac's --mac-cpu the same way.
     "@platforms//cpu:aarch64": {
         "dart_target_arch": '"arm64"',
         "target_cpu": '"arm64"',
@@ -218,7 +272,7 @@ gn_build(
     # bootstrap_compile_platform, gen_snapshot_host: what the snapshot rules
     # run and the Android shell archives) are the host toolchain's
     # (BUILD.gn): in the build root when the host's toolchain is the
-    # default, under clang_x64/ in the cross builds (out_paths). gen_snapshot
+    # default, under clang_<host cpu>/ in the cross builds (out_paths). gen_snapshot
     # and analyze_snapshot are the target's own -- the binary artifacts.zip
     # ships, and the one the root group lists where the engine artifacts are
     # built -- which in the host's build are the tools' files.
@@ -229,7 +283,7 @@ gn_build(
         "gen_snapshot",
         "gen_snapshot_host",
     ],
-    ar = "@clang_linux_x64//:bin/llvm-ar",
+    ar = HOST_CLANG + "//:bin/llvm-ar",
     # Dependencies the Bazel side builds itself (the facades depend on them).
     archive_boundaries = [
         "//flutter/third_party/boringssl",
@@ -251,14 +305,14 @@ gn_build(
     gn_args = _GN_ARGS,
     ninja_target = "dart_wrap",
     out_paths = select({
-        ":cross_build": {
-            "analyze_snapshot_host": "clang_x64/analyze_snapshot",
-            "bootstrap_compile_platform.exe": "clang_x64/bootstrap_compile_platform.exe",
-            "gen_snapshot_host": "clang_x64/gen_snapshot",
-        },
-        "//conditions:default": {
+        ":host_own": {
             "analyze_snapshot_host": "analyze_snapshot",
             "gen_snapshot_host": "gen_snapshot",
+        },
+        "//conditions:default": {
+            "analyze_snapshot_host": "clang_%s/analyze_snapshot" % HOST_CPU,
+            "bootstrap_compile_platform.exe": "clang_%s/bootstrap_compile_platform.exe" % HOST_CPU,
+            "gen_snapshot_host": "clang_%s/gen_snapshot" % HOST_CPU,
         },
     }) | select({
         # The analyze_snapshot tool is a 64-bit target's
@@ -281,10 +335,17 @@ gn_build(
     tree = {
         "//engine/src:gn_root_files": "",
         "//engine/src/build:gn_files": "build",
-        "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
-        # The arm64 cross build's sysroot (sysroot.gni asserts the target
-        # CPU's exists); the host's own build does not read it.
-        "@sysroot_linux_arm64//:build_tree": "build/linux/debian_bullseye_arm64-sysroot",
+    } | select({
+        # The Linux sysroots, for the Linux and Android targets' host tools
+        # (a Mac's Xcode SDK is named in the GN args instead): the x64
+        # host's and the arm64 cross build's (sysroot.gni asserts the
+        # target CPU's exists; the host's own build does not read it).
+        "@platforms//os:macos": {},
+        "//conditions:default": {
+            "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
+            "@sysroot_linux_arm64//:build_tree": "build/linux/debian_bullseye_arm64-sysroot",
+        },
+    }) | {
         "//engine/src/flutter/build:gn_files": "flutter/build",
     } | select({
         # The NDK, for the Android platforms (build/config/android/config.gni's
@@ -296,8 +357,8 @@ gn_build(
         },
         "//conditions:default": {},
     }) | {
-        "@clang_linux_x64//:all_files": "flutter/buildtools/linux-x64/clang",
-        "@cpython3//:runtime": "flutter/buildtools/linux-x64/cpython3",
+        HOST_CLANG + "//:all_files": "flutter/buildtools/%s/clang" % HOST_BUILDTOOLS,
+        "@cpython3//:runtime": "flutter/buildtools/%s/cpython3" % HOST_BUILDTOOLS,
         "//engine/src/flutter/third_party/boringssl:gn_files": "flutter/third_party/boringssl",
         "@boringssl//:build_tree": "flutter/third_party/boringssl/src",
         "@dart//:build_tree": "flutter/third_party/dart",
