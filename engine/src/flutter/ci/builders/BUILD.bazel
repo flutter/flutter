@@ -2,10 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.
+# Generated from ci/builders/{linux,mac}_*.json by gn_to_bazel; do not edit.
 #
-# An install target per Linux build of the builder files (the x64 host's own,
-# the web's, the Linux arm64 cross builds' and Android's), over the Bazel
+# An install target per Linux and Mac build of the builder files (the Linux
+# x64 host's own, the web's, the Linux arm64 cross builds', Android's, the
+# Mac's for either CPU; a Mac build with a Linux build's name is mac_<name>
+# unless it is the same build), over the Bazel
 # counterparts of its ninja targets: `bazel run --config=<name> :<name>` builds
 # what the build builds and lays it into GN's build directory for it
 # (--target-dir, or the directory tools/gn names for the flags), as the
@@ -13,9 +15,12 @@
 # counterpart yet is listed; a build whose configuration the Bazel build
 # cannot express yet (configs.bazelrc) is built with the flags of the nearest
 # one; a test executable among the targets is not installed, since `bazel
-# test` runs tests from their own place. A build with tests has a <name>_tests
+# test` runs tests from their own place. A Mac build's install and suite are
+# compatible with macOS alone, as their contents are: a wildcard build on
+# Linux skips them. A build with tests has a <name>_tests
 # suite over the Bazel suites that stand for its run_tests.py types
-# (runTestsTypeSuites, runTestsEngineSuites in builders.dart): `bazel test
+# (runTestsTypeSuites, runTestsEngineSuites and runTestsEngineSuitesMac in
+# builders.dart): `bazel test
 # --config=<name> :<name>_tests` runs what the build runs, with its other test
 # steps (scripts of the checkout) listed. The suites are manual: each stands
 # for one builder, named; a wildcard run of the tree has the tests themselves.
@@ -757,3 +762,431 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/web_sdk:flutter_web_sdk_archive"],
 )
+
+# mac_android_aot_engine.json: ci/android_profile
+#   bazel run --config=mac_android_profile :mac_android_profile
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
+install(
+    name = "mac_android_profile",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    directory = "ci/android_profile",
+)
+
+# mac_android_aot_engine.json: ci/android_profile_arm64
+#   bazel run --config=mac_android_profile_arm64 :mac_android_profile_arm64
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
+install(
+    name = "mac_android_profile_arm64",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    directory = "ci/android_profile_arm64",
+)
+
+# mac_android_aot_engine.json: ci/android_profile_x64
+#   bazel run --config=mac_android_profile_x64 :mac_android_profile_x64
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
+install(
+    name = "mac_android_profile_x64",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    directory = "ci/android_profile_x64",
+)
+
+# mac_android_aot_engine.json: ci/android_release
+#   bazel run --config=mac_android_release :mac_android_release
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
+install(
+    name = "mac_android_release",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    directory = "ci/android_release",
+)
+
+# mac_android_aot_engine.json: ci/android_release_arm64
+#   bazel run --config=mac_android_release_arm64 :mac_android_release_arm64
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
+install(
+    name = "mac_android_release_arm64",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    directory = "ci/android_release_arm64",
+)
+
+# mac_android_aot_engine.json: ci/android_release_x64
+#   bazel run --config=mac_android_release_x64 :mac_android_release_x64
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot.
+install(
+    name = "mac_android_release_x64",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
+    directory = "ci/android_release_x64",
+)
+
+# mac_clang_tidy.json: ci/host_debug_clang_tidy
+#   ninja's default target, everything: bazel build --config=mac_host_debug_clang_tidy //engine/src/flutter:local_engine
+
+# mac_host_engine.json: ci/host_debug_framework
+#   bazel run --config=host_debug_framework :host_debug_framework
+# Not built, no Bazel counterpart yet: flutter/build/archives:flutter_embedder_framework, flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+# Nothing to install.
+
+# mac_host_engine.json: ci/host_debug
+#   bazel run --config=ci_mac_host_debug :ci_mac_host_debug
+install(
+    name = "ci_mac_host_debug",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/build/archives:dart_sdk_archive",
+        "//engine/src/flutter/impeller/toolkit/interop:sdk",
+    ],
+    directory = "ci/host_debug",
+)
+
+# mac_host_engine.json: ci/host_debug_gen_snapshot
+#   bazel run --config=host_debug_gen_snapshot :host_debug_gen_snapshot
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot:create_macos_gen_snapshots.
+# Nothing to install.
+
+# mac_host_engine.json: ci/host_profile
+#   bazel run --config=ci_mac_host_profile :ci_mac_host_profile
+install(
+    name = "ci_mac_host_profile",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/archives:artifacts"],
+    directory = "ci/host_profile",
+)
+
+# mac_host_engine.json: ci/host_profile_framework
+#   bazel run --config=host_profile_framework :host_profile_framework
+# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+# Nothing to install.
+
+# mac_host_engine.json: ci/host_profile_gen_snapshot
+#   bazel run --config=host_profile_gen_snapshot :host_profile_gen_snapshot
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot:create_macos_gen_snapshots.
+# Nothing to install.
+
+# mac_host_engine.json: ci/host_release
+#   bazel run --config=ci_mac_host_release :ci_mac_host_release
+install(
+    name = "ci_mac_host_release",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+    directory = "ci/host_release",
+)
+
+# mac_host_engine.json: ci/host_release_framework
+#   bazel run --config=host_release_framework :host_release_framework
+# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+# Nothing to install.
+
+# mac_host_engine.json: ci/host_release_gen_snapshot
+#   bazel run --config=host_release_gen_snapshot :host_release_gen_snapshot
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot:create_macos_gen_snapshots.
+# Nothing to install.
+
+# mac_host_engine.json: ci/mac_debug_arm64
+#   bazel run --config=mac_debug_arm64 :mac_debug_arm64
+install(
+    name = "mac_debug_arm64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/build/archives:dart_sdk_archive",
+        "//engine/src/flutter/impeller/toolkit/interop:sdk",
+    ],
+    directory = "ci/mac_debug_arm64",
+)
+
+# mac_host_engine.json: ci/mac_debug_framework_arm64
+#   bazel run --config=mac_debug_framework_arm64 :mac_debug_framework_arm64
+# Not built, no Bazel counterpart yet: flutter/build/archives:flutter_embedder_framework, flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+# Nothing to install.
+
+# mac_host_engine.json: ci/mac_debug_gen_snapshot_arm64
+#   bazel run --config=mac_debug_gen_snapshot_arm64 :mac_debug_gen_snapshot_arm64
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot:create_macos_gen_snapshots.
+# Nothing to install.
+
+# mac_host_engine.json: ci/mac_profile_arm64
+#   bazel run --config=mac_profile_arm64 :mac_profile_arm64
+install(
+    name = "mac_profile_arm64",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/archives:artifacts"],
+    directory = "ci/mac_profile_arm64",
+)
+
+# mac_host_engine.json: ci/mac_profile_framework_arm64
+#   bazel run --config=mac_profile_framework_arm64 :mac_profile_framework_arm64
+# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+# Nothing to install.
+
+# mac_host_engine.json: ci/mac_profile_gen_snapshot_arm64
+#   bazel run --config=mac_profile_gen_snapshot_arm64 :mac_profile_gen_snapshot_arm64
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot:create_macos_gen_snapshots.
+# Nothing to install.
+
+# mac_host_engine.json: ci/mac_release_arm64
+#   bazel run --config=mac_release_arm64 :mac_release_arm64
+install(
+    name = "mac_release_arm64",
+    testonly = True,
+    contents = [
+        "//engine/src/flutter/build/archives:artifacts",
+        "//engine/src/flutter/tools/font_subset:font_subset",
+    ],
+    directory = "ci/mac_release_arm64",
+)
+
+# mac_host_engine.json: ci/mac_release_framework_arm64
+#   bazel run --config=mac_release_framework_arm64 :mac_release_framework_arm64
+# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+# Nothing to install.
+
+# mac_host_engine.json: ci/mac_release_gen_snapshot_arm64
+#   bazel run --config=mac_release_gen_snapshot_arm64 :mac_release_gen_snapshot_arm64
+# Not built, no Bazel counterpart yet: flutter/lib/snapshot:create_macos_gen_snapshots.
+# Nothing to install.
+
+# mac_unopt.json: ci/host_debug_arm64_tests
+#   ninja's default target, everything: bazel build --config=host_debug_arm64_tests //engine/src/flutter:local_engine
+
+# ci/host_debug_arm64_tests's tests: run_tests.py --type dart,dart-host,engine,font-subset.
+# Not run, no Bazel test yet: accessibility_unittests (engine), availability_version_check_unittests (engine), framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
+test_suite(
+    name = "host_debug_arm64_tests_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter/assets:assets_unittests",
+        "//engine/src/flutter/display_list:display_list_rendertests",
+        "//engine/src/flutter/display_list:display_list_unittests",
+        "//engine/src/flutter/flow:flow_unittests",
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/impeller:impeller_dart_unittests",
+        "//engine/src/flutter/impeller:impeller_unittests",
+        "//engine/src/flutter/lib/ui:ui_unittests",
+        "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:runtime_unittests",
+        "//engine/src/flutter/shell/common:shell_unittests",
+        "//engine/src/flutter/shell/geometry:geometry_unittests",
+        "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+        "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+        "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+        "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+        "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+        "//engine/src/flutter/testing:testing_unittests",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+        "//engine/src/flutter/tools/font_subset:font_subset_test",
+    ],
+)
+
+# mac_unopt.json: ci/host_profile_arm64_tests
+#   ninja's default target, everything: bazel build --config=host_profile_arm64_tests //engine/src/flutter:local_engine
+
+# ci/host_profile_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
+# Not run, no Bazel test yet: accessibility_unittests (engine), availability_version_check_unittests (engine), framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
+test_suite(
+    name = "host_profile_arm64_tests_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter/assets:assets_unittests",
+        "//engine/src/flutter/display_list:display_list_rendertests",
+        "//engine/src/flutter/display_list:display_list_unittests",
+        "//engine/src/flutter/flow:flow_unittests",
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/impeller:impeller_dart_unittests",
+        "//engine/src/flutter/impeller:impeller_unittests",
+        "//engine/src/flutter/lib/ui:ui_unittests",
+        "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:runtime_unittests",
+        "//engine/src/flutter/shell/common:shell_unittests",
+        "//engine/src/flutter/shell/geometry:geometry_unittests",
+        "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+        "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+        "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+        "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+        "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+        "//engine/src/flutter/testing:testing_unittests",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+    ],
+)
+
+# mac_unopt.json: ci/host_release_arm64_tests
+#   ninja's default target, everything: bazel build --config=host_release_arm64_tests //engine/src/flutter:local_engine
+
+# ci/host_release_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
+# Not run, no Bazel test yet: accessibility_unittests (engine), availability_version_check_unittests (engine), framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
+test_suite(
+    name = "host_release_arm64_tests_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter/assets:assets_unittests",
+        "//engine/src/flutter/display_list:display_list_rendertests",
+        "//engine/src/flutter/display_list:display_list_unittests",
+        "//engine/src/flutter/flow:flow_unittests",
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/impeller:impeller_dart_unittests",
+        "//engine/src/flutter/impeller:impeller_unittests",
+        "//engine/src/flutter/lib/ui:ui_unittests",
+        "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:runtime_unittests",
+        "//engine/src/flutter/shell/common:shell_unittests",
+        "//engine/src/flutter/shell/geometry:geometry_unittests",
+        "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+        "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+        "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+        "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+        "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+        "//engine/src/flutter/testing:testing_unittests",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+    ],
+)
+
+# mac_unopt.json: ci/host_release_arm64_licenses
+#   bazel run --config=host_release_arm64_licenses :host_release_arm64_licenses
+# Tests, run by `bazel test` rather than installed: flutter/tools/licenses_cpp:licenses_cpp_testrunner.
+install(
+    name = "host_release_arm64_licenses",
+    testonly = True,
+    contents = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp"],
+    directory = "ci/host_release_arm64_licenses",
+)
+
+# ci/host_release_arm64_licenses's tests run from the build directory: licenses_cpp_testrunner.
+# Other steps, scripts of the checkout: Run license_cpp.
+test_suite(
+    name = "host_release_arm64_licenses_tests",
+    tags = ["manual"],
+    tests = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp_testrunner"],
+)
+
+# mac_unopt.json: ci/mac_release_arm64_tests
+#   ninja's default target, everything: bazel build --config=mac_release_arm64_tests //engine/src/flutter:local_engine
+
+# ci/mac_release_arm64_tests's tests: run_tests.py --type impeller-golden.
+# Not run, no Bazel test yet: the impeller-golden type.
+# Nothing to run.
+
+# mac_unopt.json: ci/host_debug_unopt_arm64
+#   ninja's default target, everything: bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine
+
+# ci/host_debug_unopt_arm64's tests: run_tests.py --type dart,dart-host,engine,impeller-golden.
+# Not run, no Bazel test yet: accessibility_unittests (engine), availability_version_check_unittests (engine), framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine), the impeller-golden type.
+# ci/host_debug_unopt_arm64's steps that run a script of the checkout, as Bazel tests: //engine/src/flutter:gn_test.
+test_suite(
+    name = "host_debug_unopt_arm64_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter:dart_host_tests",
+        "//engine/src/flutter:gn_test",
+        "//engine/src/flutter/assets:assets_unittests",
+        "//engine/src/flutter/display_list:display_list_rendertests",
+        "//engine/src/flutter/display_list:display_list_unittests",
+        "//engine/src/flutter/flow:flow_unittests",
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/impeller:impeller_dart_unittests",
+        "//engine/src/flutter/impeller:impeller_unittests",
+        "//engine/src/flutter/lib/ui:ui_unittests",
+        "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
+        "//engine/src/flutter/runtime:runtime_unittests",
+        "//engine/src/flutter/shell/common:shell_unittests",
+        "//engine/src/flutter/shell/geometry:geometry_unittests",
+        "//engine/src/flutter/shell/gpu:gpu_surface_unittests",
+        "//engine/src/flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests",
+        "//engine/src/flutter/shell/platform/android/jni:jni_unittests",
+        "//engine/src/flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_core_unittests",
+        "//engine/src/flutter/shell/platform/common:common_cpp_unittests",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_a11y_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_proctable_unittests",
+        "//engine/src/flutter/shell/platform/embedder:embedder_unittests",
+        "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+        "//engine/src/flutter/testing:testing_unittests",
+        "//engine/src/flutter/testing/dart",
+        "//engine/src/flutter/testing/dart/vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
+    ],
+)
+
+# local_engine.json: macos/android_debug_arm64
+#   ninja's default target, everything: bazel build --config=android_debug_arm64 //engine/src/flutter:local_engine
+
+# local_engine.json: macos/android_debug_unopt
+#   ninja's default target, everything: bazel build --config=android_debug_unopt //engine/src/flutter:local_engine
+
+# local_engine.json: macos/android_debug_unopt_arm64
+#   ninja's default target, everything: bazel build --config=android_debug_unopt_arm64 //engine/src/flutter:local_engine
+
+# local_engine.json: macos/android_profile_arm64
+#   ninja's default target, everything: bazel build --config=android_profile_arm64 //engine/src/flutter:local_engine
+
+# local_engine.json: macos/android_release_arm64
+#   ninja's default target, everything: bazel build --config=android_release_arm64 //engine/src/flutter:local_engine
+
+# local_engine.json: macos/host_debug
+#   ninja's default target, everything: bazel build --config=mac_host_debug //engine/src/flutter:local_engine
+
+# local_engine.json: macos/host_debug_unopt_arm64
+#   ninja's default target, everything: bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine
+
+# local_engine.json: macos/host_profile_arm64
+#   ninja's default target, everything: bazel build --config=host_profile_arm64 //engine/src/flutter:local_engine
+
+# local_engine.json: macos/host_release_arm64
+#   ninja's default target, everything: bazel build --config=host_release_arm64 //engine/src/flutter:local_engine
+
+# local_engine.json: macos/host_profile
+#   ninja's default target, everything: bazel build --config=mac_host_profile //engine/src/flutter:local_engine
+
+# local_engine.json: macos/host_release
+#   ninja's default target, everything: bazel build --config=mac_host_release //engine/src/flutter:local_engine
+
+# local_engine.json: macos/wasm_release
+#   bazel run --config=wasm_release :wasm_release
+# The same install as linux_web_engine_build.json's ci/wasm_release, above.
+
+# local_engine.json: macos/wasm_debug_unopt
+#   bazel run --config=wasm_debug_unopt :wasm_debug_unopt
+# The same install as local_engine.json's linux/wasm_debug_unopt, above.
