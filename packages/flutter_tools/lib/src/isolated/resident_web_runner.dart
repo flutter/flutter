@@ -308,6 +308,12 @@ class ResidentWebRunner extends ResidentRunner {
         if (debuggingOptions.buildInfo.isDebug && !useWasm) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
+          sendDdcCompileAnalytics(
+            deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
+            command: 'run',
+            succeeded: report.success,
+            analytics: analytics,
+          );
           if (!report.success) {
             logger.printError('Failed to compile application.');
             appFailedToStart();
@@ -869,6 +875,7 @@ class ResidentWebRunner extends ResidentRunner {
             },
             device: device,
             flutterProject: flutterProject,
+            flutterVersion: toolContext.flutterVersion,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
           );

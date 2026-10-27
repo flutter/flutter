@@ -35,14 +35,13 @@ class WebDriverService extends DriverService {
     required this.buildSystem,
     required this.buildTargets,
     required this._dartSdkPath,
-    required this._toolContext,
+    required super.toolContext,
   });
 
   final Analytics _analytics;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
   final String _dartSdkPath;
-  final ToolContext _toolContext;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -71,12 +70,12 @@ class WebDriverService extends DriverService {
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       buildInfo: buildInfo,
       target: mainPath,
       userIdentifier: userIdentifier,
     );
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final webConfig = WebDebugConfig(
       devServerConfig: debuggingOptions.webConfig.devServerConfig,
       renderer: debuggingOptions.webConfig.renderer,
@@ -99,7 +98,7 @@ class WebDriverService extends DriverService {
       analytics: _analytics,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
@@ -144,8 +143,7 @@ class WebDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, DriveTestSpecification spec) async {
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
-        _toolContext;
+    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) = toolContext;
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(spec.browserName);
     final isAndroidChrome = browser == Browser.androidChrome;

@@ -40,43 +40,25 @@ class WebTestsSuite {
   ///
   ///  * Test code cannot be compiled because it uses Dart VM-specific
   ///    functionality. In this case `skip` doesn't help because the code cannot
-  ///    reach the point where it can even run the skipping logic.
+  ///    reach the point where it can even run the skipping logic. Note that
+  ///    `@TestOn('!chrome')` doesn't help either: `flutter test --platform=chrome`
+  ///    compiles all test files into a single entrypoint before the test
+  ///    runner gets a chance to evaluate the annotation.
   ///  * Migrations. It is OK to put tests here that need to be temporarily
   ///    disabled in certain modes because of some migration or initial bringup.
-  ///
-  /// The key in the map is whether it's for `wasm` mode or not. The value
-  /// is the list of tests known to fail for that mode.
   //
   // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
-  static const Map<bool, List<String>> kWebTestFileKnownFailures = <bool, List<String>>{
-    // useWasm: false
-    false: <String>[
-      // These tests are not compilable on the web due to dependencies on
-      // VM-specific functionality.
-      'test/services/message_codecs_vm_test.dart',
-      'test/examples/sector_layout_test.dart',
+  static const List<String> kWebTestFileKnownFailures = <String>[
+    // These tests are not compilable on the web due to dependencies on
+    // VM-specific functionality.
+    'test/services/message_codecs_vm_test.dart',
+    'test/examples/sector_layout_test.dart',
 
-      // These tests are broken and need to be fixed.
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
-      'test/material/text_field_test.dart',
-      'test/widgets/performance_overlay_test.dart',
-      'test/widgets/html_element_view_test.dart',
-      'test/cupertino/scaffold_test.dart',
-      'test/rendering/platform_view_test.dart',
-    ],
-    // useWasm: true
-    true: <String>[
-      // These tests are not compilable on the web due to dependencies on
-      // VM-specific functionality.
-      'test/services/message_codecs_vm_test.dart',
-      'test/examples/sector_layout_test.dart',
-
-      // These tests are broken and need to be fixed.
-      // TODO(jacksongardner): https://github.com/flutter/flutter/issues/71604
-      'test/material/text_field_test.dart',
-      'test/widgets/performance_overlay_test.dart',
-    ],
-  };
+    // This test has a few failing cases on the web that need `skip`s, but the
+    // file is under the Material code freeze and can't be modified here.
+    // TODO(mdebbar): https://github.com/flutter/flutter/issues/188444
+    'test/material/text_field_test.dart',
+  ];
 
   static const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
@@ -546,7 +528,7 @@ class WebTestsSuite {
             )
             .where(
               (String filePath) =>
-                  !kWebTestFileKnownFailures[useWasm]!.contains(path.split(filePath).join('/')),
+                  !kWebTestFileKnownFailures.contains(path.split(filePath).join('/')),
             )
             .toList()
           // Finally we shuffle the list because we want the average cost per file to be uniformly

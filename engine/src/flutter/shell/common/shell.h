@@ -20,7 +20,6 @@
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/status.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
@@ -841,6 +840,14 @@ class Shell final : public PlatformView::Delegate,
   bool OnServiceProtocolGetPipelineUsage(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
+
+  // Creates the "pipelines" array of a `_flutter.getPipelineUsage` response,
+  // with one entry per pipeline in `pipeline_library`: its label, its
+  // specialization constants, the number of times it was bound, and whether it
+  // was created eagerly.
+  static rapidjson::Value MakePipelineUsageJson(
+      const impeller::PipelineLibrary& pipeline_library,
+      rapidjson::Document::AllocatorType& allocator);
 
   // Send a system font change notification.
   void SendFontChangeNotification();

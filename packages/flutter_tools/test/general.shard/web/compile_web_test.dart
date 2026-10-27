@@ -189,6 +189,90 @@ environement:
     },
   );
 
+  for (final deprecatedJsInterop in <bool>[true, false]) {
+    testUsingContext(
+      'WebBuilder includes deprecatedJsInterop=$deprecatedJsInterop in buildEventAnalyticsValues on success and failure',
+      () async {
+        final buildSystem = TestBuildSystem.list(<BuildResult>[
+          BuildResult(success: true),
+          BuildResult(
+            success: false,
+            exceptions: <String, ExceptionMeasurement>{
+              'dart2js': ExceptionMeasurement(
+                'dart2js',
+                const FormatException('disallowed legacy web import'),
+                StackTrace.current,
+              ),
+            },
+          ),
+        ]);
+
+        final webBuilder = WebBuilder(
+          analytics: fakeAnalytics,
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: FakeToolContext(
+            artifacts: FakeArtifacts(fileSystem: fileSystem),
+            cache: FakeCache(fileSystem: fileSystem),
+            config: FakeConfig(),
+            flutterVersion: flutterVersion,
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.any(),
+            terminal: FakeTerminal(),
+          ),
+        );
+        final compilerConfigs = <WebCompilerConfig>[
+          const WasmCompilerConfig(optimizationLevel: 4, dryRun: true),
+          JsCompilerConfig(optimizationLevel: 4, deprecatedJsInterop: deprecatedJsInterop),
+        ];
+
+        await webBuilder.buildWeb(
+          flutterProject,
+          'target',
+          BuildInfo.release,
+          null,
+          compilerConfigs: compilerConfigs,
+        );
+
+        await expectLater(
+          () async => webBuilder.buildWeb(
+            flutterProject,
+            'target',
+            BuildInfo.release,
+            null,
+            compilerConfigs: compilerConfigs,
+          ),
+          throwsToolExit(message: 'Failed to compile application for the Web.'),
+        );
+
+        expect(
+          fakeAnalytics.sentEvents,
+          containsAll(<Event>[
+            Event.flutterBuildInfo(
+              label: 'web-compile',
+              buildType: 'web',
+              settings:
+                  'deprecatedJsInterop: $deprecatedJsInterop; dryRun: true; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+            ),
+            Event.flutterBuildInfo(
+              label: 'web-compile',
+              buildType: 'web',
+              settings:
+                  'deprecatedJsInterop: $deprecatedJsInterop; dryRun: true; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+              error: 'dart2js-failure',
+            ),
+          ]),
+        );
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+        Pub: ThrowingPub.new,
+      },
+    );
+  }
+
   Future<void> testRendererModeFromDartDefines(WebRendererMode webRenderer) async {
     testUsingContext(
       'WebRendererMode.${webRenderer.name} can be initialized from dart defines',
