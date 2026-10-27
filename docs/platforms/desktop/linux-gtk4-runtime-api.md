@@ -112,6 +112,15 @@ frame for offload. GTK retains its ordinary-composition fallback. The request
 also enables DMA-BUF export unless explicitly overridden, but DMA-BUF import
 keeps its own capability checks. See [rendering paths](linux-gtk-rendering.md#gtk-graphics-offload).
 
+The experimental `FLUTTER_LINUX_RENDERER=vulkan` path does not add optional
+GTK/GDK Vulkan bindings. `fl_vulkan_manager` loads `libvulkan.so.1` on demand
+and resolves Vulkan entry points through the loader, keeping Vulkan out of the
+mandatory dynamic imports. It owns its device independently of GTK; GTK receives
+baseline `GdkMemoryTexture` snapshots. Existing graphics-offload and DMA-BUF
+capability checks do not imply Vulkan image export support. Vulkan loader/device
+failure fails an explicit Vulkan startup request; it does not disable the
+OpenGL default. See [Vulkan validation](../../../engine/src/flutter/shell/platform/linux/testing/VULKAN.md).
+
 Callers should use the wrappers and feature predicates rather than adding
 ad-hoc lookups or testing a single pointer from a multi-function group.
 Unavailable operations have explicit null, invalid-type, or no-op results.

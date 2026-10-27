@@ -3,9 +3,22 @@
 Investigated at `655f44114e4` with Flutter GPU compute PR
 [#193805](https://github.com/flutter/flutter/pull/193805) (`a3a21c83724`) included.
 
-The GTK4 embedder currently runs Flutter/Impeller on OpenGL ES. Selecting GTK's
-`GSK_RENDERER=vulkan` changes GTK presentation, not Flutter's Impeller context.
-The new compute API therefore remains unavailable in a GTK4 app.
+GTK4 now has an experimental opt-in Impeller Vulkan backend selected with
+`FLUTTER_LINUX_RENDERER=vulkan`. Enable Flutter GPU as well to use compute.
+The default remains OpenGL ES; `GSK_RENDERER=vulkan` alone changes GTK
+presentation and does not enable compute. The Vulkan path currently presents
+through CPU readback, so functional compute support does not imply faster
+rendering or graphics offload. See [Vulkan setup and tests](VULKAN.md).
+
+The capability-only probe below remains useful for the GLES regression. For an
+actual dispatch, use `fixtures/compute_dispatch.dart`, include the engine's
+`test.shaderbundle` as an app asset, and run the driver with
+`--flutter-renderer vulkan --dispatch`. Add the native `compute_snapshot.h`
+runner helper and `--gtk-snapshot` to verify GTK widget pixels as well.
+
+The remaining investigation records the earlier GLES-only implementation at
+`655f44114e4`; its Vulkan integration gaps are addressed by the new opt-in path,
+with the limitations documented in `VULKAN.md`.
 
 ## Reproduction and evidence
 
@@ -46,7 +59,7 @@ Lavapipe (CPU software Vulkan), so they establish correctness, not hardware GPU
 offload or rendering performance. No GTK integration is exercised by those
 Vulkan tests.
 
-## What actually blocks compute
+## Original GLES limitation
 
 The gate in `lib/gpu/context.cc::SupportsCompute` intentionally accepts only
 Metal and Vulkan. Removing that gate would expose incomplete GLES functionality:
@@ -67,7 +80,7 @@ records both that correction and the remaining GLES work. Its Wave 3 explicitly
 includes Linux context negotiation. This is an existing upstream feature gap,
 not a GTK4-only defect.
 
-## Two implementation routes
+## Routes considered before Vulkan integration
 
 ### GLES compute, aligned with upstream Wave 3
 
@@ -84,8 +97,9 @@ backend work rather than an embedder switch.
 ### Opt-in Vulkan rendering in the GTK4 embedder
 
 The engine already has `EmbedderSurfaceVulkanImpeller` and
-`FlutterVulkanRendererConfig`. Linux's `fl_engine_start` currently rejects
-`kVulkan`; it only configures software and OpenGL. A Vulkan route needs:
+`FlutterVulkanRendererConfig`. At the investigation base, Linux's
+`fl_engine_start` rejected `kVulkan` and only configured software and OpenGL.
+The integration work identified was:
 
 1. A device/queue manager and thread-safe queue access, including enabled
    extensions and physical-device compatibility.
