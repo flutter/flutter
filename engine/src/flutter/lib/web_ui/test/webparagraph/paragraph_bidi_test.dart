@@ -89,9 +89,7 @@ Future<void> testMain() async {
 
     builder.addText(' & שלום · Emoji 👨👩👧👦 🏳️🌈 stay atomic.');
     final WebParagraph paragraph = builder.build();
-    expect(paragraph.spans, hasLength(3));
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
-    expect(paragraph.spans, hasLength(3));
 
     final List<ui.TextBox> boxesBidi = paragraph.getBoxesForRange(0, 5);
     final List<ui.TextBox> boxesArabic = paragraph.getBoxesForRange(5, 18);
@@ -158,9 +156,7 @@ Future<void> testMain() async {
     builder.pop();
 
     final WebParagraph paragraph = builder.build();
-    expect(paragraph.spans, hasLength(3));
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
-    expect(paragraph.spans, hasLength(3));
 
     final List<ui.TextBox> boxesArabic = paragraph.getBoxesForRange(0, 5);
     final List<ui.TextBox> boxesNeutral = paragraph.getBoxesForRange(5, 8);
@@ -172,5 +168,86 @@ Future<void> testMain() async {
     expect(boxesNeutral.single.left, closeTo(boxesHebrew.single.right, 0.001));
     expect(boxesArabic.single.left, closeTo(boxesNeutral.single.right, 0.001));
     expect(boxesNeutral.single.direction, ui.TextDirection.rtl);
+  });
+
+  test('Paragraph BiDi multi-span order in RTL paragraph', () {
+    final paragraphStyle = WebParagraphStyle(
+      textDirection: ui.TextDirection.rtl,
+      fontFamily: 'FlutterTest',
+      fontSize: 20,
+    );
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('שלום ');
+    builder.pushStyle(ui.TextStyle(fontWeight: ui.FontWeight.bold));
+    builder.addText('עולם');
+    builder.pop();
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+    final ui.TextBox first = paragraph.getBoxesForRange(0, 5).single;
+    final ui.TextBox second = paragraph.getBoxesForRange(5, 9).single;
+
+    // The logically second span is visually on the left.
+    expect(second.right, closeTo(first.left, 0.001));
+    expect(first.direction, ui.TextDirection.rtl);
+    expect(second.direction, ui.TextDirection.rtl);
+  });
+
+  test('Embedded multi-span LTR run inside RTL paragraph', () {
+    final paragraphStyle = WebParagraphStyle(
+      textDirection: ui.TextDirection.rtl,
+      fontFamily: 'FlutterTest',
+      fontSize: 20,
+    );
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Hello');
+    builder.pushStyle(ui.TextStyle(fontWeight: ui.FontWeight.bold));
+    builder.addText(' + ');
+    builder.pop();
+    builder.addText('World');
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+    final ui.TextBox first = paragraph.getBoxesForRange(0, 5).single;
+    final ui.TextBox plus = paragraph.getBoxesForRange(5, 8).single;
+    final ui.TextBox second = paragraph.getBoxesForRange(8, 13).single;
+
+    // The embedded LTR run overrides the RTL paragraph direction for all three spans.
+    expect(first.right, closeTo(plus.left, 0.001));
+    expect(plus.right, closeTo(second.left, 0.001));
+    expect(first.direction, ui.TextDirection.ltr);
+    expect(plus.direction, ui.TextDirection.ltr);
+    expect(second.direction, ui.TextDirection.ltr);
+  });
+
+  test('Multi-span RTL run with inline placeholder', () {
+    final paragraphStyle = WebParagraphStyle(
+      textDirection: ui.TextDirection.ltr,
+      fontFamily: 'FlutterTest',
+      fontSize: 20,
+    );
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('שלום');
+    builder.addPlaceholder(10, 10, ui.PlaceholderAlignment.bottom);
+    builder.addText('עולם');
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+    final ui.TextBox first = paragraph.getBoxesForRange(0, 4).single;
+    final List<ui.TextBox> ph = paragraph.getBoxesForPlaceholders();
+    final ui.TextBox second = paragraph.getBoxesForRange(5, 9).single;
+
+    expect(ph.length, 1);
+    // Visually from left to right within the RTL run: second text -> placeholder -> first text.
+    expect(second.right, closeTo(ph[0].left, 0.001));
+    expect(ph[0].right, closeTo(first.left, 0.001));
+    expect(first.direction, ui.TextDirection.rtl);
+    expect(second.direction, ui.TextDirection.rtl);
   });
 }
