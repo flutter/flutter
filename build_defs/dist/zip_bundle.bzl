@@ -13,12 +13,15 @@ license and the bundle's source directory at the engine's version.
 zip_bundle does the same under Bazel: the same script, under the synced
 Python (@cpython3; GN runs it under depot_tools' vpython3) through
 zip_bundle.py, which hands it the files the sandbox's input symlinks name,
-over the files of `files` (destination to the one file placed there) and
-the trees of `trees` (zip_tree below: files at their paths under a
-destination, GN's directory sources), the readme written by the rule from
-the version @engine_version//:version.bzl carries, and the archive at
-`zip_archives/<output>` under the package. The converter writes the calls
-from GN's zip_bundle invocations (tools/gn_to_bazel: templateMappings).
+over the files of `files` (destination to the one file placed there -- or,
+for a directory of the build directory that a target's closure fills, a
+macOS framework bundle, the files placed under it at their paths below the
+destination) and the trees of `trees` (zip_tree below: files at their paths
+under a destination, GN's directory sources), the readme written by the
+rule from the version @engine_version//:version.bzl carries, and the
+archive at `zip_archives/<output>` under the package. The converter writes
+the calls from GN's zip_bundle invocations (tools/gn_to_bazel:
+templateMappings).
 
 A zip_tree is a directory entry of a GN zip_bundle -- `source` a directory,
 which zip.py walks -- or the GTK shell's idiom of one entry per output of a
@@ -160,7 +163,9 @@ def _zip_bundle_impl(ctx):
     # zip.py stores a symlink as a symlink entry (a macOS framework's), and
     # every input of a sandboxed action is one; GN hands it the build
     # directory's real files. zip_bundle.py resolves each source to the file
-    # it names before zip.py sees it.
+    # it names before zip.py sees it -- except a symlink output
+    # (framework.bzl's, with a relative target), which is the symlink GN's
+    # archive stores.
     args = ctx.actions.args()
     args.add_all([ctx.file._wrapper, ctx.file._script])
     args.add("-o", output)
@@ -206,7 +211,23 @@ def _zip_bundle_impl(ctx):
                 if path == source
             ]
             if len(at_source) != 1:
-                fail("%s: %s should be one file for %s, or place one at %s; has %s" % (ctx.label, target.label, destination, source, files))
+                # Or a directory of the build directory that the target's
+                # closure fills (a macOS framework bundle: the copies under
+                # Versions/A and the symlinks beside them, framework.bzl),
+                # which zip.py would walk: every file placed under it, at
+                # its path below the destination.
+                under = [
+                    (file, path[len(source) + 1:])
+                    for file, path in collected_build_directory_entries(target)
+                    if source and path.startswith(source + "/")
+                ] if not at_source else []
+                if not under:
+                    fail("%s: %s should be one file for %s, or place one at %s (or files under it); has %s" % (ctx.label, target.label, destination, source, files))
+                for file, path in sorted(under, key = lambda e: e[1]):
+                    args.add_all(["-i", file, destination + "/" + path], expand_directories = False)
+                    inputs.append(file)
+                    entries.append((file, destination + "/" + path))
+                continue
             files = at_source
 
         # An executable or shared library goes in as GN's link tool leaves
@@ -258,7 +279,8 @@ zip_bundle = rule(
         "files": attr.string_keyed_label_dict(
             allow_files = True,
             aspects = [build_directory_aspect],
-            doc = "The archive's entries: each destination path mapped to the target of the one file placed there; " +
+            doc = "The archive's entries: each destination path mapped to the target of the one file placed there " +
+                  "(or, for a directory of the build directory that the target's closure fills, of the files under it); " +
                   "an executable or shared library is placed stripped, as GN links it.",
         ),
         "sources": attr.string_dict(

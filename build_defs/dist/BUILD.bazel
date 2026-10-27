@@ -6,7 +6,9 @@
 # uploads, and zip_tree), install.bzl (a build's files laid into GN's build
 # directory for the consumers that read one), local_engine.bzl (the
 # manifest flutter_tools reads instead of an install; assembled_directory
-# and bundle_directory, the directories the tests' SDK facsimile lays).
+# and bundle_directory, the directories the tests' SDK facsimile lays),
+# framework.bzl (a macOS framework bundle's symlinks, GN's
+# package_framework.py action).
 
 package(default_visibility = ["//visibility:public"])
 

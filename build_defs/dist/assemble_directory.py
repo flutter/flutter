@@ -8,7 +8,10 @@
 Each `--file <source>=<path>` is copied to <path> under the output directory;
 each `--directory <source>=<path>` has its contents copied under <path>
 (`.` for the output directory itself). Copies, not links: Bazel's
-output-tree files are read-only and a tree artifact is one unit.
+output-tree files are read-only and a tree artifact is one unit. A file
+that is a symlink output of the build (a framework bundle's
+`Versions/Current -> A`, framework.bzl: a relative target, where the
+sandbox's own input links are absolute) is made again as the link it is.
 """
 
 import argparse
@@ -35,6 +38,11 @@ def main():
     source, path = entry.split('=', 1)
     destination = os.path.join(options.output, path)
     os.makedirs(os.path.dirname(destination), exist_ok=True)
+    if os.path.islink(source) and not os.path.isabs(os.readlink(source)):
+      if os.path.lexists(destination):
+        os.remove(destination)
+      os.symlink(os.readlink(source), destination)
+      continue
     shutil.copyfile(source, destination)
     shutil.copymode(source, destination)
 

@@ -2125,7 +2125,12 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
 /// dart_pkg.py (sky/packages/sky_engine's `action("sky_engine")`) assembles
 /// a Dart package directory in the build directory from the package's own
 /// files and the SDK extension sources; its `args` are the same variables
-/// rebased, and its outputs a stamp.
+/// rebased, and its outputs a stamp. package_framework.py (the embedder's
+/// and the macOS shell's `action("generate_symlinks")`) makes a framework
+/// bundle's symlinks (`Versions/Current -> A`, the top-level links into
+/// it) and a stamp: its `args` name the bundle, the version, the contents
+/// and the stamp, which the rule declares as its outputs -- symlink outputs,
+/// kept as the links they are -- so GN's `outputs` go unread.
 const Map<String, TemplateMapping> scriptMappings = <String, TemplateMapping>{
   '//flutter/build/dart/tools/dart_pkg.py': TemplateMapping(
     '//build_defs/dart:dart_pkg.bzl',
@@ -2145,6 +2150,17 @@ const Map<String, TemplateMapping> scriptMappings = <String, TemplateMapping>{
       // GN's sdk_ext_directories: a generated directory nothing writes
       // ($root_gen_dir/sky/bindings), which the script walks as empty.
       'sdk_ext_directory': TemplateArgument('sdk_ext_directory', TemplateArgumentKind.ignored),
+    },
+    files: true,
+  ),
+  '//build/config/mac/package_framework.py': TemplateMapping(
+    '//build_defs/dist:framework.bzl',
+    'framework_symlinks',
+    <String, TemplateArgument>{
+      'args': TemplateArgument('args', TemplateArgumentKind.strings),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'script': TemplateArgument('script', TemplateArgumentKind.ignored),
+      'outputs': TemplateArgument('outputs', TemplateArgumentKind.ignored),
     },
     files: true,
   ),
