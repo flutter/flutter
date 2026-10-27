@@ -13,6 +13,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/gn:gn_build.bzl", "gn_build")
 load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
@@ -83,7 +84,7 @@ config_setting(
 # linux-arm64's for the Linux arm64 cross build -- which build/dart lays
 # into the build directory as dart-sdk/ and build/archives ships as
 # dart-sdk-<platform>.zip. The tools that run at build time are always the
-# host's (@dart_sdk_linux_x64, GN's host_prebuilt_dart_sdk).
+# host's (@host_platform's HOST_DART_SDK, GN's host_prebuilt_dart_sdk).
 # The cross builds GN builds in a toolchain other than the host's, whose
 # build-time tools land under clang_x64/: Linux arm64 and the Android ABIs
 # (the wasm platform builds no VM).
@@ -124,7 +125,7 @@ filegroup(
     name = "prebuilt_dart_sdk",
     srcs = select({
         "@platforms//cpu:aarch64": ["@dart_sdk_linux_arm64//:all_files"],
-        "//conditions:default": ["@dart_sdk_linux_x64//:all_files"],
+        "//conditions:default": [HOST_DART_SDK + "//:all_files"],
     }),
 )
 

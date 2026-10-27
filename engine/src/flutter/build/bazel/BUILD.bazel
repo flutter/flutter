@@ -10,6 +10,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@host_platform//:host.bzl", "HOST_CPU_CONSTRAINT")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -111,16 +112,18 @@ _HOST_OSES = [
     "win",
 ]
 
-_HOST_CPU = "@platforms//cpu:x86_64"
+# The CPU of the host that runs the build (@host_platform, laid by the
+# synced_deps extension from the machine): x86_64 on this Linux host,
+# aarch64 on an Apple-silicon Mac.
+_HOST_CPU = HOST_CPU_CONSTRAINT
 
 # The other CPUs the engine builds for (BUILDCONFIG.gn's target_cpu values,
-# as the converter's CPU settings spell them).
+# as the converter's CPU settings spell them; not mips or ppc, which
+# nothing builds for).
 _OTHER_CPUS = [
-    "@platforms//cpu:aarch64",
-    "@platforms//cpu:armv7",
-    "@platforms//cpu:riscv64",
-    "@platforms//cpu:wasm32",
-    "@platforms//cpu:x86_32",
+    constraint
+    for cpu, constraint in _CPU_CONSTRAINTS.items()
+    if cpu not in ("mips", "ppc") and constraint != _HOST_CPU
 ]
 
 selects.config_setting_group(

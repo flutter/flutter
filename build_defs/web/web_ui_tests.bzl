@@ -30,6 +30,7 @@ No network: felt's Skia Gold client finds Gold unreachable and the goldens
 compare nothing, as for a developer offline; CI's Gold runs stay felt's.
 """
 
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load("//build_defs/dart:pub.bzl", "PubPackageConfigInfo")
 load("//build_defs/dist:zip_bundle.bzl", "ZipBundleInfo")
 
@@ -193,7 +194,7 @@ web_ui_test_bundle = rule(
             mandatory = True,
             doc = "The package configuration of the compile (pub_package_config over lib/web_ui's own lock).",
         ),
-        "_sdk": attr.label(default = "@dart_sdk_linux_x64//:dart"),
+        "_sdk": attr.label(default = HOST_DART_SDK + "//:dart"),
     },
 )
 
@@ -272,7 +273,7 @@ web_ui_host_page = rule(
             mandatory = True,
             doc = "The package configuration (execroot layout).",
         ),
-        "_sdk": attr.label(default = "@dart_sdk_linux_x64//:dart"),
+        "_sdk": attr.label(default = HOST_DART_SDK + "//:dart"),
     },
 )
 
@@ -434,8 +435,8 @@ web_ui_test = rule(
             doc = "Programs felt starts by name, their directories put first on PATH: a display_launcher's Xvfb " +
                   "(browser_launcher.bzl) for Firefox, which felt gives a display of its own.",
         ),
-        "_sdk": attr.label(default = "@dart_sdk_linux_x64//:dart"),
-        "_dart": attr.label(default = "@dart_sdk_linux_x64//:bin/dart", allow_single_file = True),
+        "_sdk": attr.label(default = HOST_DART_SDK + "//:dart"),
+        "_dart": attr.label(default = HOST_DART_SDK + "//:bin/dart", allow_single_file = True),
     },
 )
 

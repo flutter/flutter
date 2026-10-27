@@ -3,24 +3,40 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/golden_tests/BUILD.gn by gn_to_bazel; do not edit.
+# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/impeller/renderer/backend/metal:metal, //flutter/third_party/angle:libEGL, //flutter/third_party/angle:libGLESv2.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "golden_playground_test",
     testonly = True,
-    srcs = [
-        "golden_playground_test_stub.cc",  # !(is_mac)
-    ],
+    srcs = select({
+        "@platforms//os:macos": [
+            "golden_playground_test_mac.cc",  # is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [],
+        "//conditions:default": [
+            "golden_playground_test_stub.cc",  # !(is_mac)
+        ],
+    }),
     hdrs = ["golden_playground_test.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -37,7 +53,14 @@ cc_library(
         "//engine/src/flutter/impeller/testing:screenshot",
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "//engine/src/flutter/testing:testing_lib",
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            ":metal_golden_screenshot",  # is_mac
+            "@abseil-cpp//absl/base:no_destructor",  # is_mac
+            "@abseil_cpp_tree//:root_includes",
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 
@@ -66,4 +89,140 @@ cc_library(
         "//engine/src/flutter/impeller:impeller_public_config",
     ],
     alwayslink = True,
+)
+
+# `is_mac && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_enable_unittests",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)
+
+# The Objective-C(++) sources of metal_golden_screenshot, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); metal_golden_screenshot links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "metal_golden_screenshot_objc",
+    testonly = True,
+    srcs = [
+        "metal_golden_screenshotter.mm",
+        "vulkan_golden_screenshotter.mm",
+    ],
+    hdrs = [
+        "golden_screenshotter.h",
+        "metal_golden_screenshotter.h",
+        "vulkan_golden_screenshotter.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground
+        "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unguarded-availability",  # from //flutter/display_list
+    ] + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/playground",
+        "//engine/src/flutter/impeller/renderer/backend/vulkan",
+        "//engine/src/flutter/impeller/testing:metal_screenshot",
+        "//engine/src/flutter/impeller/testing:screenshot",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "metal_golden_screenshot",
+    testonly = True,
+    hdrs = [
+        "golden_screenshotter.h",
+        "metal_golden_screenshotter.h",
+        "vulkan_golden_screenshotter.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground
+        "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unguarded-availability",  # from //flutter/display_list
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":metal_golden_screenshot_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/playground",
+        "//engine/src/flutter/impeller/renderer/backend/vulkan",
+        "//engine/src/flutter/impeller/testing:metal_screenshot",
+        "//engine/src/flutter/impeller/testing:screenshot",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "impeller_golden_tests",
+    size = "small",
+    srcs = [
+        "golden_tests.cc",
+        "main.cc",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-unguarded-availability",  # from //flutter/display_list
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":digest",
+        ":metal_golden_screenshot",
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/display_list:aiks_unittests_golden",
+        "//engine/src/flutter/impeller/display_list:display_list_unittests_golden",
+        "//engine/src/flutter/impeller/fixtures",
+        "//engine/src/flutter/impeller/renderer:renderer_unittests_golden",
+        "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ],
 )

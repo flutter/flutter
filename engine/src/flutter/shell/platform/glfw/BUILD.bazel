@@ -65,6 +65,14 @@ cc_library(
             "-lGL",  # is_linux
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-framework",
+            "CoreVideo",  # !(is_linux) && is_mac
+            "-framework",
+            "IOKit",  # !(is_linux) && is_mac
+        ],
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -92,7 +100,12 @@ flutter_cc_test(
     srcs = ["system_utils_test.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":flutter_glfw",
