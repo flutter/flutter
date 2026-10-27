@@ -608,6 +608,16 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
   }
 #endif  //  !SLIMPELLER
 
+#ifdef IMPELLER_SUPPORTS_RENDERING
+  // The Vulkan embedder API promises host completion before presenting backing
+  // images. Unlike GL presentation, consumers may immediately read or submit
+  // these images on a different graphics API.
+  if (aiks_context && aiks_context->GetContext()->GetBackendType() ==
+                          impeller::Context::BackendType::kVulkan) {
+    aiks_context->GetContext()->GetIdleWaiter()->WaitIdle();
+  }
+#endif
+
   {
     auto presentation_time_optional = frame->submit_info().presentation_time;
     uint64_t presentation_time =

@@ -101,6 +101,10 @@ extern const intptr_t kPlatformStrongDillSize;
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #endif  // SHELL_ENABLE_METAL
 
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+#include "flutter/shell/platform/embedder/embedder_render_target_vulkan_impeller.h"  // nogncheck
+#endif
+
 #ifdef SHELL_ENABLE_VULKAN
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h"
@@ -1523,7 +1527,10 @@ CreateEmbedderRenderTarget(
     }
     case kFlutterBackingStoreTypeVulkan: {
       if (enable_impeller) {
-        FML_LOG(ERROR) << "Unimplemented";
+#if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
+        render_target = flutter::CreateVulkanImpellerRenderTarget(
+            backing_store, config, aiks_context, std::move(collect_callback));
+#endif
         break;
       } else {
         auto skia_surface = MakeSkSurfaceFromBackingStore(
