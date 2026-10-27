@@ -34,6 +34,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/fake_web_devfs.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 const kTransparentImage = <int>[
@@ -76,10 +77,15 @@ void main() {
           InternetAddress.loopbackIPv4,
           <String, String>{},
           <String, String>{},
+          toolContext: FakeToolContext(
+            artifacts: globals.artifacts,
+            config: globals.config,
+            fs: globals.fs,
+            flutterVersion: globals.flutterVersion,
+            logger: logger,
+          ),
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
-          fileSystem: globals.fs,
-          logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -335,10 +341,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -355,10 +366,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     // Defaults to "/" when there's no base element.
@@ -377,10 +393,15 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -398,10 +419,15 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -459,10 +485,15 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: true,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     final Response response = await webAssetServer.handleRequest(
@@ -822,6 +853,12 @@ void main() {
         ),
       );
       expect((await response.read().toList()).first, source.readAsBytesSync());
+
+      // A dot segment that stays inside the package root still resolves.
+      expect(
+        await webAssetServer.dartSourceContents('packages/flutter_tools/src/../foo.dart'),
+        source.readAsStringSync(),
+      );
     },
   );
 
@@ -937,8 +974,9 @@ void main() {
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
 
     // Setup assets
-    final Directory assetDir = globals.fs.directory(getAssetBuildDirectory())
-      ..createSync(recursive: true);
+    final Directory assetDir = globals.fs.directory(
+      getAssetBuildDirectory(globals.config, globals.fs),
+    )..createSync(recursive: true);
     final File shaderFile = globals.fs.file(globals.fs.path.join(assetDir.path, 'my_shader.frag'))
       ..createSync(recursive: true)
       ..writeAsStringSync('shader_source');
@@ -1064,7 +1102,7 @@ void main() {
 
     // Verify asset was written
     final File destinationFile = globals.fs.file(
-      globals.fs.path.join(getAssetBuildDirectory(), 'my_image.png'),
+      globals.fs.path.join(getAssetBuildDirectory(globals.config, globals.fs), 'my_image.png'),
     );
     expect(destinationFile.existsSync(), isTrue);
     expect(destinationFile.readAsBytesSync(), equals(<int>[1, 2, 3, 4]));
@@ -1128,10 +1166,10 @@ void main() {
 
     // Verify assets were written
     final File destinationShader = globals.fs.file(
-      globals.fs.path.join(getAssetBuildDirectory(), 'my_shader.frag'),
+      globals.fs.path.join(getAssetBuildDirectory(globals.config, globals.fs), 'my_shader.frag'),
     );
     final File destinationImage = globals.fs.file(
-      globals.fs.path.join(getAssetBuildDirectory(), 'my_image.png'),
+      globals.fs.path.join(getAssetBuildDirectory(globals.config, globals.fs), 'my_image.png'),
     );
     expect(destinationShader.existsSync(), isTrue);
     expect(destinationShader.readAsStringSync(), equals('compiled_shader: shader_source'));
@@ -1213,7 +1251,7 @@ void main() {
 
     // Verify shader was NOT overwritten
     final File destinationFile = globals.fs.file(
-      globals.fs.path.join(getAssetBuildDirectory(), 'my_shader.frag'),
+      globals.fs.path.join(getAssetBuildDirectory(globals.config, globals.fs), 'my_shader.frag'),
     );
     expect(destinationFile.existsSync(), isTrue);
     expect(
@@ -1495,20 +1533,25 @@ void main() {
       const DartDevelopmentServiceConfiguration(enable: false),
       Uri.base,
       null,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
       crossOriginIsolation: false,
     );
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  });
 
   runInTestbed('passes on extra headers', () async {
     const extraHeaderKey = 'hurray';
@@ -1532,21 +1575,26 @@ void main() {
       const DartDevelopmentServiceConfiguration(enable: false),
       Uri.base,
       null,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
       crossOriginIsolation: false,
     );
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
 
     await webAssetServer.dispose();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  });
 
   runInTestbed('WebAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await webAssetServer.handleRequest(
@@ -1602,6 +1650,22 @@ void main() {
       '../../user/secret.txt',
       // An absolute path.
       '/home/user/secret.txt',
+      // A request path that is itself an absolute URI reference, in which case
+      // resolving it against a search root returns the reference instead of a
+      // location below that root.
+      'file:///home/user/secret.txt',
+      'FILE:///home/user/secret.txt',
+      'file://localhost/home/user/secret.txt',
+      // Extra leading slashes. Only one is removed when `Request.url` is built,
+      // so the colon is no longer in the first segment and survives
+      // unencoded, and `stripBasePath` then strips the remaining slashes off
+      // the front. This reaches the same absolute reference without a base
+      // path.
+      '/file:///home/user/secret.txt',
+      '//file:///home/user/secret.txt',
+      '///file:///home/user/secret.txt',
+      // The same reference reached through a prefix the handler strips.
+      'assets/../../../home/user/secret.txt',
     ];
 
     for (final path in possibleSecretPaths) {
@@ -1615,6 +1679,143 @@ void main() {
         reason: 'Path "$path" should return 200 and index.html',
       );
     }
+
+    // A base path changes how the request path is encoded before it reaches the
+    // handler: a colon in the first segment is percent-encoded, one in a later
+    // segment is not. So the same paths have to be checked again behind one.
+    for (final basePath in <String>['my_app', 'foo', 'a/b']) {
+      final prefixed = ReleaseAssetServer(
+        globals.fs.directory(testProjectPath).childFile('main.dart').uri,
+        fileSystem: globals.fs,
+        platform: platform,
+        flutterRoot: testFlutterRoot,
+        webBuildDirectory: testWebBuildPath,
+        needsCoopCoep: false,
+        basePath: basePath,
+      );
+      for (final path in possibleSecretPaths) {
+        final Response response = await prefixed.handle(
+          Request('GET', Uri.parse('http://foobar/$basePath/$path')),
+        );
+        // Either the index.html fallback or a 404, never the file itself. A
+        // path that no longer starts with the base path once the URI is
+        // normalized is rejected outright.
+        expect(
+          await response.readAsString(),
+          isNot(contains('top secret')),
+          reason: 'Path "/$basePath/$path" should not be served',
+        );
+      }
+    }
+  }, overrides: <Type, Generator>{Platform: () => linux});
+
+  runInTestbed('WebAssetServer does not serve files outside of the project', () async {
+    const testHomePath = '/home/user';
+    const testProjectPath = '/home/user/project';
+
+    // Files outside the project that should not be reachable, one of each kind
+    // the handler has a lookup path for.
+    globals.fs.directory(testHomePath).childFile('secret.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('top secret');
+    globals.fs.directory(testHomePath).childFile('secret.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('top secret source');
+
+    globals.fs.currentDirectory = globals.fs.directory(testProjectPath)
+      ..createSync(recursive: true);
+
+    // The index.html fallback the handler serves for an unknown path.
+    const htmlContent = '<html><head></head><body id="test"></body></html>';
+    globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(htmlContent);
+    globals.fs.file(
+        globals.fs.path.join(
+          globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+          'flutter.js',
+        ),
+      )
+      ..createSync(recursive: true)
+      ..writeAsStringSync('flutter.js content');
+
+    final requestPaths = <String>[
+      'file:///home/user/secret.txt',
+      'FILE:///home/user/secret.txt',
+      'file:///home/user/secret.dart',
+      '/file:///home/user/secret.txt',
+      '//file:///home/user/secret.txt',
+      '///file:///home/user/secret.txt',
+      'assets/file:///home/user/secret.txt',
+      'assets/../../secret.txt',
+      'canvaskit/file:///home/user/secret.txt',
+      // An absolute path behind a prefix the handler strips, which resolves
+      // against the search root as a root-relative reference rather than
+      // below it. No colon is involved.
+      'assets//home/user/secret.txt',
+      'canvaskit//home/user/secret.txt',
+      '../secret.txt',
+      '../secret.dart',
+      // Encoded separators, which do not name a file path once decoded.
+      '..%2F..%2Fsecret.txt',
+      'assets/..%2F..%2F..%2Fhome%2Fuser%2Fsecret.txt',
+      // An absolute path after the package name, which a package URI resolves
+      // against the package root as a root-relative reference.
+      'packages/flutter_tools//home/user/secret.dart',
+      // No path after the package name, which is not a valid package URI.
+      'packages/secret.dart',
+    ];
+
+    for (final path in requestPaths) {
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/$path')),
+      );
+      // Answered either way, rather than throwing out of the handler.
+      expect(
+        response.statusCode,
+        anyOf(HttpStatus.ok, HttpStatus.notFound),
+        reason: 'Path "$path" should be answered',
+      );
+      expect(
+        await response.readAsString(),
+        isNot(contains('top secret')),
+        reason: 'Path "$path" should not be served',
+      );
+    }
+
+    // Source map lookups go through the same resolution.
+    expect(await webAssetServer.dartSourceContents('../secret.dart'), isNull);
+    expect(
+      await webAssetServer.dartSourceContents('packages/flutter_tools/../../secret.dart'),
+      isNull,
+    );
+    expect(
+      await webAssetServer.dartSourceContents('packages/flutter_tools//home/user/secret.dart'),
+      isNull,
+    );
+    expect(await webAssetServer.dartSourceContents('packages/secret.dart'), isNull);
+
+    // Again behind a base path, which leaves a colon in a later segment
+    // unencoded on its way to the handler.
+    for (final basePath in <String>['my_app', 'foo', 'a/b']) {
+      webAssetServer.basePath = basePath;
+      for (final path in requestPaths) {
+        final Response response = await webAssetServer.handleRequest(
+          Request('GET', Uri.parse('http://foobar/$basePath/$path')),
+        );
+        expect(
+          response.statusCode,
+          anyOf(HttpStatus.ok, HttpStatus.notFound),
+          reason: 'Path "/$basePath/$path" should be answered',
+        );
+        expect(
+          await response.readAsString(),
+          isNot(contains('top secret')),
+          reason: 'Path "/$basePath/$path" should not be served',
+        );
+      }
+    }
+    webAssetServer.basePath = '';
   }, overrides: <Type, Generator>{Platform: () => linux});
 
   runInTestbed('WebAssetServer strips leading base href off of asset requests', () async {
@@ -1628,10 +1829,15 @@ void main() {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
-      logger: logger,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1690,10 +1896,15 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1737,11 +1948,16 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
         webDefines: <String, String>{}, // Empty webDefines
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1791,11 +2007,16 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          config: globals.config,
+          fs: globals.fs,
+          flutterVersion: globals.flutterVersion,
+          logger: logger,
+        ),
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
-        fileSystem: globals.fs,
         webDefines: <String, String>{}, // Empty webDefines
-        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1841,11 +2062,16 @@ const config = {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
+      toolContext: FakeToolContext(
+        artifacts: globals.artifacts,
+        config: globals.config,
+        fs: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: logger,
+      ),
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
-      fileSystem: globals.fs,
       webDefines: <String, String>{'API_URL': 'https://test.api.com', 'DEBUG_MODE': 'true'},
-      logger: logger,
     );
 
     final Response response = await webAssetServer.handleRequest(
