@@ -5,14 +5,48 @@
 #ifndef FLUTTER_IMPELLER_COMPILER_GLSL_MINIFIER_H_
 #define FLUTTER_IMPELLER_COMPILER_GLSL_MINIFIER_H_
 
-#include <cstddef>
 #include <string>
 #include <string_view>
-#include <unordered_map>
-#include <unordered_set>
+
+#include "spirv_glsl.hpp"
 
 namespace impeller {
 namespace compiler {
+
+/// @brief A `spirv_cross::CompilerGLSL` subclass that uses SPIRV-Cross's code
+///        generation hooks to emit compact GLSL.
+///
+/// Registers a custom `spirv_cross::FloatFormatter` backed by `std::to_chars`
+/// so floating-point literals are emitted in their shortest round-tripping
+/// decimal representation instead of SPIRV-Cross's default `"%.32g"` format.
+class MinifyingCompilerGLSL final : public spirv_cross::CompilerGLSL {
+ public:
+  explicit MinifyingCompilerGLSL(const spirv_cross::ParsedIR& ir);
+
+  ~MinifyingCompilerGLSL() override = default;
+
+  /// @brief Formats `value` using `std::to_chars` as the shortest decimal
+  ///        representation that round-trips to the exact same `float`,
+  ///        appending `".0"` if needed so GLSL lexes it as a float literal.
+  static std::string FormatFloat(float value);
+
+  /// @brief Formats `value` using `std::to_chars` as the shortest decimal
+  ///        representation that round-trips to the exact same `double`,
+  ///        appending `".0"` if needed so GLSL lexes it as a float literal.
+  static std::string FormatDouble(double value);
+
+ private:
+  class ShortFloatFormatter final : public spirv_cross::FloatFormatter {
+   public:
+    // |spirv_cross::FloatFormatter|
+    std::string format_float(float value) override;
+
+    // |spirv_cross::FloatFormatter|
+    std::string format_double(double value) override;
+  };
+
+  ShortFloatFormatter float_formatter_;
+};
 
 /// @brief Strips C-style single-line (`//...`) and multi-line (`/*...*/`)
 ///        comments from GLSL shader source text.
@@ -40,23 +74,6 @@ bool IsGLSLIdentOrNumChar(char c);
 /// - Two adjacent `-` characters (`- -`), which would otherwise lex as `--`.
 bool NeedsGLSLSpaceBetween(char prev, char next);
 
-/// @brief Shortens a verbose 32-bit float literal token emitted by SPIRV-Cross
-///        (such as `0.300000011920928955078125`) to the shortest decimal
-///        representation that round-trips to the exact same IEEE-754 binary32
-///        float (`0.3`).
-///
-/// Tokens with 9 or fewer characters, integer tokens (no `.`, `e`, or `E`),
-/// non-finite values, or values whose shortest float representation is not
-/// shorter than `token` are returned unchanged. If `std::to_chars` produces an
-/// integer-looking string (e.g. `"1"` for `1.0f`), `".0"` is appended so the
-/// result remains a valid GLSL float literal.
-std::string ShortenGLSLFloatLiteral(std::string_view token, float value);
-
-/// @brief Scans a single line of GLSL for standalone floating-point literals
-///        and replaces verbose literals with their shortened equivalents via
-///        `ShortenGLSLFloatLiteral`.
-std::string ShortenGLSLFloatLiteralsInLine(std::string_view line);
-
 /// @brief Trims leading and trailing spaces (`' '`), tabs (`'\t'`), and
 ///        carriage returns (`'\r'`) from `line`.
 std::string_view TrimGLSLLineWhitespace(std::string_view line);
@@ -70,46 +87,12 @@ std::string CollapseGLSLHorizontalWhitespace(std::string_view line);
 ///        spaces that are not required by `NeedsGLSLSpaceBetween`.
 std::string MinifyGLSLNonPreprocessorLine(std::string_view line);
 
-/// @brief Returns true if `token` is a synthesized SPIRV-Cross internal
-///        identifier:
-///        - Unnamed SPIR-V SSA/local temporaries (`_<digits>`, e.g. `_2461`).
-///        - RelaxedPrecision copy temporaries (`mp_copy_*` or `hp_copy_*`).
-///        - Dummy single-iteration loop counters (`spvDummy<digits>`).
-bool IsSynthesizedGLSLIdentifier(std::string_view token);
-
-/// @brief Generates the next short valid GLSL identifier starting from `cursor`
-///        (`a`..`z`, `A`..`Z`, `aa`.., etc.) that is not present in `reserved`,
-///        advancing `cursor` past the returned identifier.
-std::string NextShortGLSLIdentifier(
-    size_t& cursor,
-    const std::unordered_set<std::string_view>& reserved);
-
-/// @brief Builds a mapping from synthesized internal identifiers in `source`
-///        (matched by `IsSynthesizedGLSLIdentifier`) to shorter replacement
-///        identifiers.
+/// @brief Minifies GLSL shader source text by stripping comments, redundant
+///        whitespace, and unnecessary newlines.
 ///
-/// Candidates are ordered by descending occurrence count so the most frequently
-/// used temporaries receive 1-character names, and replacement names never
-/// collide with GLSL keywords or existing identifiers in `source`.
-std::unordered_map<std::string_view, std::string> BuildGLSLIdentifierRenameMap(
-    std::string_view source);
-
-/// @brief Shortens synthesized SPIRV-Cross internal identifiers in `source`
-///        (`_<digits>`, `mp_copy_*`, `hp_copy_*`, `spvDummy<digits>`) using the
-///        mapping produced by `BuildGLSLIdentifierRenameMap`.
-///
-/// External interface identifiers (uniforms, attributes, varyings, struct types
-/// and members, preprocessor macros, and GLSL keywords/built-ins) are never
-/// renamed.
-std::string ShortenGLSLInternalIdentifiers(std::string_view source);
-
-/// @brief Minifies SPIRV-Cross GLSL output by stripping comments, redundant
-///        whitespace, and non-preprocessor newlines, shortening verbose 32-bit
-///        float literals, and shrinking shader-internal identifiers.
-///
-/// Preprocessor directives (lines beginning with `#`, such as `#version`,
-/// `#extension`, `#ifndef`, `#define`, and `#endif`) are preserved on their own
-/// newline-delimited lines.
+/// Preprocessor directives (`#version`, `#extension`, `#ifndef`, `#define`,
+/// `#endif`, etc.) are preserved on their own newline-delimited lines, while
+/// non-preprocessor statements are joined onto a single line.
 std::string MinifyGLSL(std::string_view source);
 
 }  // namespace compiler

@@ -212,7 +212,9 @@ static CompilerBackend CreateVulkanCompiler(
 
 static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
                                           const SourceOptions& source_options) {
-  auto gl_compiler = std::make_shared<spirv_cross::CompilerGLSL>(ir);
+  std::shared_ptr<spirv_cross::CompilerGLSL> gl_compiler =
+      source_options.minify ? std::make_shared<MinifyingCompilerGLSL>(ir)
+                            : std::make_shared<spirv_cross::CompilerGLSL>(ir);
 
   // Walk the variables and insert the external image extension if any of them
   // begins with the external texture prefix. Unfortunately, we can't walk
@@ -635,7 +637,9 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
       sl_compilation_result_str =
           InjectYFlipForGLESVertexShader(std::move(sl_compilation_result_str));
     }
-    sl_compilation_result_str = MinifyGLSL(sl_compilation_result_str);
+    if (source_options.minify) {
+      sl_compilation_result_str = MinifyGLSL(sl_compilation_result_str);
+    }
   }
 
   auto sl_compilation_result =
