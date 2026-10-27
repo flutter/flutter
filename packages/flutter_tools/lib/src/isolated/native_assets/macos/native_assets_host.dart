@@ -90,32 +90,73 @@ Future<void> lipoDylibs(File target, List<File> sources) async {
 /// dependencies that are not present in the dylib are ignored. The install
 /// name of a dependencies needs to be updated if the location of the dependency
 /// has changed.
-Future<void> setInstallNamesDylib(
+///
+/// If [keepInstallNameIfItDoesNotFit] is true and `install_name_tool` reports
+/// that the header of [dylibFile] has no room for the updated load commands,
+/// the install name of [dylibFile] is left as it is and only its dependencies
+/// are updated. This happens for a dylib that was linked without
+/// `-headerpad_max_install_names`, such as a prebuilt one. If the dependencies
+/// do not fit either, or `install_name_tool` fails for any other reason, the
+/// tool exits.
+///
+/// Returns whether the install name of [dylibFile] was set to
+/// [newInstallName].
+Future<bool> setInstallNamesDylib(
   File dylibFile,
   String newInstallName,
-  Map<String, String> oldToNewInstallNames,
-) async {
-  final RunResult setInstallNamesResult = await globals.processUtils.run(<String>[
-    'xcrun',
-    'install_name_tool',
-    '-id',
-    newInstallName,
+  Map<String, String> oldToNewInstallNames, {
+  bool keepInstallNameIfItDoesNotFit = false,
+}) async {
+  final changeDependencies = <String>[
     for (final MapEntry<String, String> entry in oldToNewInstallNames.entries) ...<String>[
       '-change',
       entry.key,
       entry.value,
     ],
+  ];
+  final RunResult setInstallNamesResult = await globals.processUtils.run(<String>[
+    'xcrun',
+    'install_name_tool',
+    '-id',
+    newInstallName,
+    ...changeDependencies,
     dylibFile.path,
   ]);
-  if (setInstallNamesResult.exitCode != 0) {
+  if (setInstallNamesResult.exitCode == 0) {
+    return true;
+  }
+  if (keepInstallNameIfItDoesNotFit &&
+      setInstallNamesResult.stderr.contains(_loadCommandsDoNotFit)) {
+    final RunResult changeDependenciesResult = await globals.processUtils.run(<String>[
+      'xcrun',
+      'install_name_tool',
+      ...changeDependencies,
+      dylibFile.path,
+    ]);
+    if (changeDependenciesResult.exitCode == 0) {
+      return false;
+    }
     throwToolExit(
-      'Failed to change install names in $dylibFile:\n'
-      'id -> $newInstallName\n'
-      'dependencies -> $newInstallName\n'
-      '${setInstallNamesResult.stderr}',
+      'Failed to change install names in $dylibFile, also after keeping its '
+      'install name because $newInstallName did not fit:\n'
+      '${setInstallNamesResult.stderr}\n'
+      '${changeDependenciesResult.stderr}',
     );
   }
+  throwToolExit(
+    'Failed to change install names in $dylibFile:\n'
+    'id -> $newInstallName\n'
+    'dependencies -> $newInstallName\n'
+    '${setInstallNamesResult.stderr}',
+  );
 }
+
+/// What `install_name_tool` prints when a dylib's header has no room for the
+/// larger load commands.
+///
+/// If a later version words this differently, the fallback in
+/// [setInstallNamesDylib] no longer applies and the tool exits as before.
+const _loadCommandsDoNotFit = 'larger updated load commands do not fit';
 
 Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
   final RunResult installNameResult = await globals.processUtils.run(<String>[

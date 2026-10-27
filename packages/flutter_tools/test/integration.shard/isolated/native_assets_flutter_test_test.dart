@@ -41,4 +41,34 @@ void main() {
       }
     });
   });
+
+  testWithoutContext(
+    'flutter test with a native asset whose header has no room for its path',
+    () async {
+      await inTempDir((Directory tempDirectory) async {
+        final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
+        await linkMainLibraryWithoutHeaderRoom(packageName, packageDirectory);
+
+        // Logging stays on, so that the result holds the warning.
+        final ProcessTestResult result = await runFlutter(
+          <String>['test'],
+          packageDirectory.path,
+          <Transition>[Barrier(RegExp('.* All tests passed!'))],
+        );
+        if (result.exitCode != 0) {
+          throw Exception(
+            'flutter test failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+          );
+        }
+        // Without the warning the header had room after all, and this test
+        // would not exercise the fallback.
+        expect(
+          result.stderr.join('\n'),
+          contains('keeps its install name "@rpath/lib$packageName.dylib"'),
+        );
+        expectTesterKeptInstallName(packageName, packageDirectory);
+      });
+    },
+    skip: !platform.isMacOS, // [intended] Only the macOS tester rewrites install names.
+  );
 }
