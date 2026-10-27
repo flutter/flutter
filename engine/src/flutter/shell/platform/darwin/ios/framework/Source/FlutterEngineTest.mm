@@ -23,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 FLUTTER_ASSERT_ARC
@@ -176,12 +177,16 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
 
 - (void)testDestroyContextIsIdempotent {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertEqual(engine.backend.threadHost, nullptr);
   XCTAssertTrue([engine run]);
+  XCTAssertNotEqual(engine.backend.threadHost, nullptr);
 
   // Both `appOrSceneWillTerminate` and view controller deallocation can destroy the same engine.
   // Verify a second call is a no-op and not a double teardown.
   [engine destroyContext];
+  XCTAssertEqual(engine.backend.threadHost, nullptr);
   [engine destroyContext];
+  XCTAssertEqual(engine.backend.threadHost, nullptr);
   XCTAssertNil(engine.platformTaskRunner);
 }
 

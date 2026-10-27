@@ -19,7 +19,6 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
-#include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/variable_refresh_rate_display.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/command_line.h"
@@ -30,6 +29,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSpellCheckPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextureRegistryRelay.h"
@@ -38,46 +39,10 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#include "flutter/shell/profiling/sampling_profiler.h"
 
 FLUTTER_ASSERT_ARC
-
-/// Inheriting ThreadConfigurer and use iOS platform thread API to configure the thread priorities
-/// Using iOS platform thread API to configure thread priority
-static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& config) {
-  // set thread name
-  fml::Thread::SetCurrentThreadName(config);
-
-  // set thread priority
-  switch (config.priority) {
-    case fml::Thread::ThreadPriority::kBackground: {
-      pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0);
-      [[NSThread currentThread] setThreadPriority:0];
-      break;
-    }
-    case fml::Thread::ThreadPriority::kNormal: {
-      pthread_set_qos_class_self_np(QOS_CLASS_DEFAULT, 0);
-      [[NSThread currentThread] setThreadPriority:0.5];
-      break;
-    }
-    case fml::Thread::ThreadPriority::kRaster:
-    case fml::Thread::ThreadPriority::kDisplay: {
-      pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
-      [[NSThread currentThread] setThreadPriority:1.0];
-      sched_param param{};
-      int policy;
-      pthread_t thread = pthread_self();
-      if (!pthread_getschedparam(thread, &policy, &param)) {
-        param.sched_priority = 50;
-        pthread_setschedparam(thread, policy, &param);
-      }
-      break;
-    }
-  }
-}
 
 #pragma mark - Public exported constants
 
@@ -87,7 +52,6 @@ NSString* const FlutterDefaultInitialRoute = nil;
 #pragma mark - Internal constants
 
 NSString* const kFlutterKeyDataChannel = @"flutter/keydata";
-static constexpr int kNumProfilerSamplesPerSec = 5;
 NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.application_registrar";
 
 @interface FlutterEngineBaseRegistrar : NSObject <FlutterBaseRegistrar>
@@ -114,6 +78,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 #pragma mark - Properties
 
+@property(nonatomic, readonly) FlutterShell* backend;
 @property(nonatomic, readonly) FlutterDartProject* dartProject;
 @property(nonatomic, readonly, copy) NSString* labelPrefix;
 @property(nonatomic, readonly, assign) BOOL allowHeadlessExecution;
@@ -195,10 +160,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @end
 
 @implementation FlutterEngine {
-  std::shared_ptr<flutter::ThreadHost> _threadHost;
+  FlutterShell* _backend;
   std::unique_ptr<flutter::Shell> _shell;
-
-  std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
@@ -206,6 +169,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
   FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
 }
+
+@synthesize backend = _backend;
 
 - (int64_t)engineIdentifier {
   return reinterpret_cast<int64_t>((__bridge void*)self);
@@ -248,6 +213,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _allowHeadlessExecution = allowHeadlessExecution;
   _labelPrefix = [labelPrefix copy];
   _dartProject = project ?: [[FlutterDartProject alloc] init];
+  _backend = [[FlutterShell alloc] init];
 
   _enableEmbedderAPI = _dartProject.settings.enable_embedder_api;
   if (_enableEmbedderAPI) {
@@ -605,8 +571,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   [self resetChannels];
   self.isolateId = nil;
   _shell.reset();
-  _profiler.reset();
-  _threadHost.reset();
+  [self.backend destroyThreadHost];
   _platformViewsController = nil;
   _platformTaskRunnerWrapper = nil;
   _rasterTaskRunnerWrapper = nil;
@@ -631,18 +596,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.settingsChannel = nil;
   self.keyEventChannel = nil;
   self.spellCheckChannel = nil;
-}
-
-- (void)startProfiler {
-  FML_DCHECK(!_threadHost->name_prefix.empty());
-  _profiler = std::make_shared<flutter::SamplingProfiler>(
-      _threadHost->name_prefix.c_str(), _threadHost->profiler_thread->GetTaskRunner(),
-      []() {
-        flutter::ProfilerMetricsIOS profiler_metrics;
-        return profiler_metrics.GenerateSample();
-      },
-      kNumProfilerSamplesPerSec);
-  _profiler->Start();
 }
 
 // If you add a channel, be sure to also update `resetChannels`.
@@ -857,49 +810,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   [self configureForRunningShellWithVMServicePublication:doesVMServicePublication];
 }
 
-+ (BOOL)isProfilerEnabled {
-  bool profilerEnabled = false;
-#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
-    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
-  profilerEnabled = true;
-#endif
-  return profilerEnabled;
-}
-
-+ (NSString*)generateThreadLabel:(NSString*)labelPrefix {
-  static size_t s_shellCount = 0;
-  return [NSString stringWithFormat:@"%@.%zu", labelPrefix, ++s_shellCount];
-}
-
-static flutter::ThreadHost MakeThreadHost(NSString* thread_label) {
-  // The current thread will be used as the platform thread. Ensure that the message loop is
-  // initialized.
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-
-  // No dedicated UI thread is created: on iOS the UI thread is always merged onto the platform
-  // thread. FlutterDartProject rejects any other threading configuration at startup.
-  uint32_t threadHostType = flutter::ThreadHost::Type::kRaster | flutter::ThreadHost::Type::kIo;
-
-  if ([FlutterEngine isProfilerEnabled]) {
-    threadHostType = threadHostType | flutter::ThreadHost::Type::kProfiler;
-  }
-
-  flutter::ThreadHost::ThreadHostConfig host_config(thread_label.UTF8String, threadHostType,
-                                                    IOSPlatformThreadConfigSetter);
-
-  host_config.raster_config =
-      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kRaster, thread_label.UTF8String),
-                                fml::Thread::ThreadPriority::kRaster);
-
-  host_config.io_config =
-      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kIo, thread_label.UTF8String),
-                                fml::Thread::ThreadPriority::kNormal);
-
-  return (flutter::ThreadHost){host_config};
-}
-
 static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSString* libraryURI) {
   if (libraryURI) {
     FML_DCHECK(entrypoint) << "Must specify entrypoint if specifying library";
@@ -953,9 +863,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   SetEntryPoint(&settings, entrypoint, libraryURI);
 
-  NSString* threadLabel = [FlutterEngine generateThreadLabel:self.labelPrefix];
-  _threadHost = std::make_shared<flutter::ThreadHost>();
-  *_threadHost = MakeThreadHost(threadLabel);
+  [self.backend createThreadHostWithLabelPrefix:self.labelPrefix];
+  NSString* threadLabel = self.backend.threadLabel;
+  const flutter::ThreadHost* threadHost = self.backend.threadHost;
 
   __weak FlutterEngine* weakSelf = self;
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
@@ -978,11 +888,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   // The platform and UI threads are always merged on iOS, so the UI task runner is the platform
   // thread's task runner.
   fml::RefPtr<fml::TaskRunner> platform_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
-  flutter::TaskRunners task_runners(threadLabel.UTF8String,                       // label
-                                    platform_runner,                              // platform
-                                    _threadHost->raster_thread->GetTaskRunner(),  // raster
-                                    platform_runner,                              // ui
-                                    _threadHost->io_thread->GetTaskRunner()       // io
+  flutter::TaskRunners task_runners(threadLabel.UTF8String,                      // label
+                                    platform_runner,                             // platform
+                                    threadHost->raster_thread->GetTaskRunner(),  // raster
+                                    platform_runner,                             // ui
+                                    threadHost->io_thread->GetTaskRunner()       // io
   );
 
   // Create the shell. This is a blocking operation.
@@ -1001,9 +911,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   } else {
     [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
-    if ([FlutterEngine isProfilerEnabled]) {
-      [self startProfiler];
-    }
+    [self.backend startProfilerIfEnabled];
   }
 
   return _shell != nullptr;
@@ -1673,15 +1581,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   std::unique_ptr<flutter::Shell> shell = _shell->Spawn(
       std::move(configuration), cppInitialRoute, on_create_platform_view, on_create_rasterizer);
 
-  result->_threadHost = _threadHost;
-  result->_profiler = _profiler;
+  [result.backend inheritThreadHostFromShell:self.backend];
   result->_isGpuDisabled = _isGpuDisabled;
   [result setUpShell:std::move(shell) withVMServicePublication:NO];
   return result;
 }
 
 - (const flutter::ThreadHost&)threadHost {
-  return *_threadHost;
+  return *self.backend.threadHost;
 }
 
 - (FlutterDartProject*)project {

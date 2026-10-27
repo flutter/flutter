@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 
 @class FlutterBinaryMessengerRelay;
+@class FlutterShell;
 
 namespace flutter {
 class ThreadHost;
@@ -20,6 +21,7 @@ class ThreadHost;
 // Category to add test-only visibility.
 @interface FlutterEngine (Test) <FlutterBinaryMessenger>
 
+@property(nonatomic, readonly) FlutterShell* backend;
 @property(readonly, nonatomic) FlutterEngineProcTable& embedderAPI;
 @property(readonly, nonatomic) BOOL enableEmbedderAPI;
 @property(readonly, nonatomic) BOOL allowHeadlessExecution;
