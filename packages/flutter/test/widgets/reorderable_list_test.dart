@@ -2172,105 +2172,71 @@ void main() {
     expect(tester.getSize(find.byType(ReorderableDelayedDragStartListener)), Size.zero);
   });
 
-  testWidgets('SliverReorderableList keeps gap stable when dragging variable height items', (
-    WidgetTester tester,
-  ) async {
-    final items = List<int>.generate(8, (int index) => index);
-    const itemHeights = <double>[68, 85, 126, 97, 54, 106, 110, 119];
+  testWidgets(
+    'SliverReorderableList gap does not flip when dragging a taller item over a shorter one',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/194436.
+      const itemHeights = <double>[68, 85, 126, 97, 54, 106, 110, 119];
+      final items = List<int>.generate(itemHeights.length, (int index) => index);
 
-    await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        builder: (BuildContext context, Widget? child) {
-          return MediaQuery(
-            data: const MediaQueryData(),
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: Overlay(
-                initialEntries: <OverlayEntry>[
-                  OverlayEntry(
-                    builder: (BuildContext context) {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CustomScrollView(
+                slivers: <Widget>[
+                  SliverReorderableList(
+                    itemCount: items.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final int item = items[index];
                       return SizedBox(
-                        width: 800,
-                        height: 600,
-                        child: StatefulBuilder(
-                          builder: (BuildContext context, StateSetter setState) {
-                            return CustomScrollView(
-                              slivers: <Widget>[
-                                SliverReorderableList(
-                                  itemCount: items.length,
-                                  onReorder: (int oldIndex, int newIndex) {
-                                    setState(() {
-                                      if (oldIndex < newIndex) {
-                                        newIndex -= 1;
-                                      }
-                                      items.insert(newIndex, items.removeAt(oldIndex));
-                                    });
-                                  },
-                                  itemBuilder: (BuildContext context, int index) {
-                                    final int item = items[index];
-                                    return SizedBox(
-                                      key: ValueKey<int>(item),
-                                      height: itemHeights[item],
-                                      width: 800,
-                                      child: Text('item $item'),
-                                    );
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                        key: ValueKey<int>(item),
+                        height: itemHeights[item],
+                        child: ReorderableDragStartListener(
+                          index: index,
+                          child: Text('item $item'),
                         ),
                       );
                     },
+                    onReorderItem: (int fromIndex, int toIndex) {
+                      setState(() {
+                        items.insert(toIndex, items.removeAt(fromIndex));
+                      });
+                    },
                   ),
                 ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
+              );
+            },
+          ),
+        ),
+      );
 
-    final Finder item4 = find.text('item 4');
-    final Finder item5 = find.text('item 5');
+      final Finder item4 = find.text('item 4');
+      final Finder item5 = find.text('item 5');
+      expect(tester.getTopLeft(item4).dy, 376.0);
+      expect(tester.getTopLeft(item5).dy, 430.0);
 
-    // Verify initial layout positions before initiating drag.
-    const initialItem4Top = 376.0;
-    expect(tester.getTopLeft(item4).dy, equals(initialItem4Top));
-    expect(tester.getTopLeft(item5).dy, equals(430.0));
-
-    // Pick up item 5 and drag upward into upper half of item 4.
-    final TestGesture drag = await tester.startGesture(tester.getCenter(item5));
-    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
-    await tester.pumpAndSettle();
-
-    await drag.moveBy(const Offset(0, -80.0));
-    await tester.pumpAndSettle();
-
-    // Item 4 shifts upward (~296.0) to accommodate dragged item 5.
-    expect(
-      tester.getTopLeft(item4).dy,
-      lessThan(initialItem4Top - 50.0),
-      reason: 'Item 4 should be displaced upward when item 5 enters its slot region.',
-    );
-
-    // Incremental sub-pixel pointer movements in the same region must keep item 4
-    // displaced and not restore it to its original resting position (376.0).
-    for (var i = 0; i < 8; i++) {
-      await drag.moveBy(const Offset(0, -0.5));
+      // Pick up item 5 (106px) and move it up into the top half of item 4 (54px).
+      final TestGesture drag = await tester.startGesture(tester.getCenter(item5));
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(const Offset(0, -48.5));
       await tester.pumpAndSettle();
 
-      expect(
-        tester.getTopLeft(item4).dy,
-        lessThan(initialItem4Top - 50.0),
-        reason: 'Item 4 position flipped back to original resting position on step $i',
-      );
-    }
+      // Item 4 is pushed down by item 5's extent: 376 + 106.
+      final double pushedDown = tester.getTopLeft(item4).dy;
+      expect(pushedDown, 482.0);
 
-    await drag.up();
-    await tester.pumpAndSettle();
-  });
+      // Creep upward half a pixel at a time; item 4 must not flip back to 376.
+      for (var move = 0; move < 8; move++) {
+        await drag.moveBy(const Offset(0, -0.5));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(item4).dy, pushedDown);
+      }
+
+      await drag.up();
+      await tester.pumpAndSettle();
+    },
+  );
 }
 
 class TestList extends StatelessWidget {

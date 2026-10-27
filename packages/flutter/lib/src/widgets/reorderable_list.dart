@@ -1080,23 +1080,25 @@ class SliverReorderableListState extends State<SliverReorderableList>
           // the new index.
           newIndex = item.index + 1;
           break;
-        } else if (itemStart > proxyItemEnd && newIndex < item.index + 1) {
+        } else if (itemStart > proxyItemEnd && newIndex < (item.index + 1)) {
           newIndex = item.index + 1;
         } else if (proxyItemStart > itemEnd && newIndex > item.index) {
           newIndex = item.index;
         }
       } else {
         if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
-          // The start of the proxy is in the beginning half of the item.
+          // The start of the proxy is in the beginning half of the item, so
           // we should swap the item with the gap and we are done looking for
           // the new index.
           newIndex = item.index;
           break;
         } else if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
-          // The end of the proxy is in the ending half of the item.
+          // The end of the proxy is in the ending half of the item, so
+          // we should swap the item with the gap and we are done looking for
+          // the new index.
           newIndex = item.index + 1;
           break;
-        } else if (itemEnd < proxyItemStart && newIndex < item.index + 1) {
+        } else if (itemEnd < proxyItemStart && newIndex < (item.index + 1)) {
           newIndex = item.index + 1;
         } else if (proxyItemEnd < itemStart && newIndex > item.index) {
           newIndex = item.index;
