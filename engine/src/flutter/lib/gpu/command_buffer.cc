@@ -5,6 +5,7 @@
 #include "flutter/lib/gpu/command_buffer.h"
 
 #include "dart_api.h"
+#include "fml/logging.h"
 #include "fml/make_copyable.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/renderer/command_buffer.h"
@@ -31,6 +32,9 @@ bool CommandBuffer::Encodable::EncodeCommands() const {
   }
   if (blit_pass) {
     return blit_pass->EncodeCommands();
+  }
+  if (compute_pass) {
+    return compute_pass->EncodeCommands();
   }
   return false;
 }
@@ -61,6 +65,38 @@ bool CommandBuffer::EndRenderPass(const impeller::RenderPass* render_pass) {
     return true;
   }
   return EndOpenPass();
+}
+
+std::shared_ptr<impeller::ComputePass> CommandBuffer::CreateComputePass() {
+  if (!EndOpenPass()) {
+    return nullptr;
+  }
+  auto compute_pass = command_buffer_->CreateComputePass();
+  if (!compute_pass) {
+    return nullptr;
+  }
+  Encodable encodable;
+  encodable.compute_pass = compute_pass;
+  encodables_.push_back(std::move(encodable));
+  has_open_pass_ = true;
+  return compute_pass;
+}
+
+absl::Status CommandBuffer::EndComputePass(
+    const impeller::ComputePass* compute_pass) {
+  FML_DCHECK(compute_pass);
+  if (!has_open_pass_ ||
+      encodables_.back().compute_pass.get() != compute_pass) {
+    return absl::OkStatus();
+  }
+  if (!EndOpenPass()) {
+    return absl::InternalError("Failed to encode the compute pass.");
+  }
+  return absl::OkStatus();
+}
+
+const std::shared_ptr<impeller::Context>& CommandBuffer::GetContext() const {
+  return context_;
 }
 
 bool CommandBuffer::EndOpenPass() {
