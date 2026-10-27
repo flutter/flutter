@@ -28,9 +28,9 @@ load(
     "HOST_OS",
     "HOST_OS_CONSTRAINT",
 )
-load("@macos_sdk//:sdk.bzl", "MACOS_PLATFORM_PATH", "MACOS_SDK_PATH", "XCODE_DEVELOPER_DIR")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/gn:gn_build.bzl", "gn_build")
+load("//build_defs/gn:macos_args.bzl", "MACOS_TARGET_GN_ARGS")
 load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
 
 package(default_visibility = ["//visibility:public"])
@@ -197,21 +197,9 @@ _GN_ARGS = {
     # where the VM's libraries are built against the NDK's sysroot and, on
     # the 64-bit ABIs, with compressed pointers (tools/gn: android x64 and
     # arm64); mac for the macOS platforms, with what tools/gn sets on a Mac
-    # (setup_apple_sdks: the deployment target, no simulator) and the SDK,
-    # platform and toolchain paths of the host's Xcode from @macos_sdk,
-    # which build/config/darwin/darwin_sdk.gni would otherwise ask xcrun
-    # for (build/mac/darwin_sdk.py) -- the same Xcode either way, named
-    # here so that the action's key carries it; Linux otherwise.
+    # and the host's Xcode (//build_defs/gn:macos_args.bzl); Linux otherwise.
     "@platforms//os:android": {"target_os": '"android"'},
-    "@platforms//os:macos": {
-        "ios_use_simulator": "false",
-        "mac_deployment_target": '"12.0.0"',
-        "mac_host_toolchain_path": '"%s/Toolchains/XcodeDefault.xctoolchain"' % XCODE_DEVELOPER_DIR,
-        "mac_platform_path": '"%s"' % MACOS_PLATFORM_PATH,
-        "mac_sdk_path": '"%s"' % MACOS_SDK_PATH,
-        "target_os": '"mac"',
-        "use_ios_simulator": "false",
-    },
+    "@platforms//os:macos": MACOS_TARGET_GN_ARGS,
     "//conditions:default": {"target_os": '"linux"'},
 }) | select({
     ":android_64": {"dart_use_compressed_pointers": "true"},
