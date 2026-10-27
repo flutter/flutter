@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
+import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -582,8 +583,57 @@ void main() {
           );
         },
       );
+
+      testWithoutContext(
+        '$CleanCommand invokes ExtensionCleanManager with configured build-dir before deleting .dart_tool',
+        () async {
+          xcodeProjectInterpreter.isInstalled = false;
+          final FlutterProject projectUnderTest = setupProjectUnderTest(
+            fileSystem.currentDirectory,
+            false,
+          );
+          final config = Config.test(directory: fileSystem.directory('/'))
+            ..setValue('build-dir', 'custom_build_out');
+
+          final fakeCleanManager = FakeExtensionCleanManager();
+          final CleanCommand command = createCleanCommand(
+            config: config,
+            extensionCleanManager: fakeCleanManager,
+            fs: fileSystem,
+            logger: logger,
+            xcode: xcode,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          );
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          await runner.run(<String>['clean']);
+
+          expect(fakeCleanManager.cleanedProjects, hasLength(1));
+          expect(
+            fakeCleanManager.buildDirectories.single.path,
+            projectUnderTest.directory.childDirectory('custom_build_out').path,
+          );
+          expect(fakeCleanManager.dartToolExistedDuringClean, isTrue);
+          expect(fakeCleanManager.packageConfigExistedDuringClean, isTrue);
+          expect(projectUnderTest.dartTool, isNot(exists));
+        },
+      );
     });
   });
+}
+
+class FakeExtensionCleanManager extends Fake implements ExtensionCleanManager {
+  final cleanedProjects = <FlutterProject>[];
+  final buildDirectories = <Directory>[];
+  bool dartToolExistedDuringClean = false;
+  bool packageConfigExistedDuringClean = false;
+
+  @override
+  Future<void> cleanProject(FlutterProject project, {required Directory buildDirectory}) async {
+    cleanedProjects.add(project);
+    buildDirectories.add(buildDirectory);
+    dartToolExistedDuringClean = project.dartTool.existsSync();
+    packageConfigExistedDuringClean = project.packageConfig.existsSync();
+  }
 }
 
 class FakeTerminal extends Fake implements AnsiTerminal {
@@ -700,6 +750,7 @@ class CleanWorkspaceCall {
 }
 
 CleanCommand createCleanCommand({
+  ExtensionCleanManager? extensionCleanManager,
   FileSystem? fs,
   Logger? logger,
   Platform? platform,
@@ -718,6 +769,7 @@ CleanCommand createCleanCommand({
   final ProcessManager resolvedProcessManager = processManager ?? FakeProcessManager.any();
   final Logger resolvedLogger = logger ?? BufferLogger.test();
   return CleanCommand(
+    extensionCleanManager: extensionCleanManager,
     toolContext: FakeToolContext(
       fs: resolvedFs,
       logger: resolvedLogger,
@@ -733,7 +785,12 @@ CleanCommand createCleanCommand({
       stdio: FakeStdio(),
     ),
     verbose: verbose,
-    xcode: xcode ?? Xcode.test(processManager: resolvedProcessManager),
+    xcode:
+        xcode ??
+        Xcode.test(
+          processManager: resolvedProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: resolvedProcessManager),
+        ),
     xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
   );
 }

@@ -21,8 +21,14 @@ if (impeller_enable_compute) {
 
     shaders = [
       "compute_3d_test.comp",
+      "computed_vertices_test.frag",
+      "computed_vertices_test.vert",
+      "increment_test.comp",
+      "oversized_workgroup_test.comp",
       "prefix_sum_test.comp",
+      "texture_reader_test.comp",
       "threadgroup_sizing_test.comp",
+      "vertex_writer_test.comp",
     ]
   }
 }
@@ -55,8 +61,6 @@ impeller_component("renderer") {
     "pipeline.h",
     "pipeline_builder.cc",
     "pipeline_builder.h",
-    "pipeline_compile_queue.cc",
-    "pipeline_compile_queue.h",
     "pipeline_descriptor.cc",
     "pipeline_descriptor.h",
     "pipeline_library.cc",
@@ -92,6 +96,7 @@ impeller_component("renderer") {
     "../geometry",
     "../runtime_stage",
     "../tessellator",
+    "//third_party/abseil-cpp/absl/status",
   ]
 
   if (impeller_enable_compute) {
@@ -100,7 +105,6 @@ impeller_component("renderer") {
 
   deps = [
     "//flutter/fml",
-    "//third_party/abseil-cpp/absl/container:linked_hash_map",
     "//third_party/abseil-cpp/absl/strings",
   ]
 }
@@ -113,7 +117,6 @@ template("renderer_unittests_component") {
     "command_buffer_scheduling_receipt_unittests.cc",
     "command_queue_unittests.cc",
     "device_buffer_unittests.cc",
-    "pipeline_compile_queue_unittests.cc",
     "pipeline_descriptor_unittests.cc",
     "pipeline_library_unittests.cc",
     "pool_unittests.cc",
@@ -123,6 +126,7 @@ template("renderer_unittests_component") {
   if (impeller_enable_compute) {
     predefined_sources += [ "compute_unittests.cc" ]
   }
+
   impeller_component(target_name) {
     testonly = true
     if (defined(invoker.defines)) {

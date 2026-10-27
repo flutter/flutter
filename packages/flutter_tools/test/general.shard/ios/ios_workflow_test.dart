@@ -16,7 +16,10 @@ void main() {
   testWithoutContext('iOS workflow is disabled if feature is disabled', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macOS'),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(isIOSEnabled: false),
     );
 
@@ -28,7 +31,10 @@ void main() {
   testWithoutContext('iOS workflow is disabled on Linux', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(),
     );
 
@@ -40,7 +46,10 @@ void main() {
   testWithoutContext('iOS workflow is disabled on windows', () {
     final iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'windows'),
-      xcode: Xcode.test(processManager: FakeProcessManager.any()),
+      xcode: Xcode.test(
+        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+      ),
       featureFlags: TestFeatureFlags(),
     );
 
@@ -61,7 +70,7 @@ void main() {
       xcode: Xcode.test(
         processManager: xcodeProcessManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
           version: null,
         ),
       ),
@@ -79,7 +88,7 @@ void main() {
     final xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         version: Version(1, 0, 0),
       ),
     );
@@ -102,7 +111,7 @@ void main() {
     final xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
         version: Version(1000, 0, 0),
       ),
     );
