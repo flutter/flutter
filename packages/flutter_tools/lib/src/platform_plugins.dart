@@ -35,7 +35,7 @@ enum PluginPlatformVariant {
 abstract class PluginPlatform {
   const PluginPlatform();
 
-  Map<String, dynamic> toMap({required FileSystem fileSystem});
+  Map<String, dynamic> toMap();
 }
 
 /// A plugin that has platform variants.
@@ -74,7 +74,7 @@ abstract class DarwinPlugin {
 ///   point for the plugin's Dart code
 /// is required.
 class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
-  const AndroidPlugin({
+  AndroidPlugin({
     required this.name,
     required this.pluginPath,
     this.package,
@@ -82,6 +82,7 @@ class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
     this.dartPluginClass,
     this.dartFileName,
     bool? ffiPlugin,
+    required this._fileSystem,
   }) : ffiPlugin = ffiPlugin ?? false;
 
   /// Parses the Android plugin configuration from the given [yaml].
@@ -93,6 +94,7 @@ class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
     String name,
     YamlMap yaml, {
     required String pluginPath,
+    required FileSystem fileSystem,
   }) {
     final parser = PluginYamlParser(yaml, pluginName: name, configKey: kConfigKey);
     return (
@@ -115,11 +117,14 @@ class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
           dartFileName: dartPluginFields?.dartFileName,
           ffiPlugin: ffiPlugin,
           pluginPath: pluginPath,
+          fileSystem: fileSystem,
         );
       }
       return null;
     });
   }
+
+  final FileSystem _fileSystem;
 
   @override
   bool hasMethodChannel() => pluginClass != null;
@@ -153,8 +158,7 @@ class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
   final String pluginPath;
 
   @override
-  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
-    final Set<String> supportedEmbeddings = _getSupportedEmbeddings(fileSystem);
+  Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       'package': ?package,
@@ -163,15 +167,17 @@ class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
       kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       // Mustache doesn't support complex types.
-      'supportsEmbeddingV1': supportedEmbeddings.contains('1'),
-      'supportsEmbeddingV2': supportedEmbeddings.contains('2'),
+      'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
+      'supportsEmbeddingV2': _supportedEmbeddings.contains('2'),
     };
   }
 
   /// Returns the version of the Android embedding.
-  Set<String> _getSupportedEmbeddings(FileSystem fileSystem) {
+  late final Set<String> _supportedEmbeddings = _getSupportedEmbeddings();
+
+  Set<String> _getSupportedEmbeddings() {
     final supportedEmbeddings = <String>{};
-    final String baseMainPath = fileSystem.path.join(pluginPath, 'android', 'src', 'main');
+    final String baseMainPath = _fileSystem.path.join(pluginPath, 'android', 'src', 'main');
 
     final String? package = this.package;
     // Don't attempt to validate the native code if there isn't supposed to
@@ -181,16 +187,16 @@ class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
     }
 
     final mainClassCandidates = <String>[
-      fileSystem.path.join(
+      _fileSystem.path.join(
         baseMainPath,
         'java',
-        package.replaceAll('.', fileSystem.path.separator),
+        package.replaceAll('.', _fileSystem.path.separator),
         '$pluginClass.java',
       ),
-      fileSystem.path.join(
+      _fileSystem.path.join(
         baseMainPath,
         'kotlin',
-        package.replaceAll('.', fileSystem.path.separator),
+        package.replaceAll('.', _fileSystem.path.separator),
         '$pluginClass.kt',
       ),
     ];
@@ -198,7 +204,7 @@ class AndroidPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
     File? mainPluginClass;
     var mainClassFound = false;
     for (final mainClassCandidate in mainClassCandidates) {
-      mainPluginClass = fileSystem.file(mainClassCandidate);
+      mainPluginClass = _fileSystem.file(mainClassCandidate);
       if (mainPluginClass.existsSync()) {
         mainClassFound = true;
         break;
@@ -313,7 +319,7 @@ class IOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, Darw
   bool hasFfi() => ffiPlugin;
 
   @override
-  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
+  Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       'prefix': classPrefix,
@@ -406,7 +412,7 @@ class MacOSPlugin extends PluginPlatform implements NativePlugin, DartPlugin, Da
   bool hasFfi() => ffiPlugin;
 
   @override
-  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
+  Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       'class': ?pluginClass,
@@ -509,7 +515,7 @@ class WindowsPlugin extends PluginPlatform
   bool hasFfi() => ffiPlugin;
 
   @override
-  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
+  Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       'class': ?pluginClass,
@@ -583,7 +589,7 @@ class LinuxPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
   bool hasFfi() => ffiPlugin;
 
   @override
-  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
+  Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       'class': ?pluginClass,
@@ -626,7 +632,7 @@ class WebPlugin extends PluginPlatform {
   final String fileName;
 
   @override
-  Map<String, dynamic> toMap({required FileSystem fileSystem}) {
+  Map<String, dynamic> toMap() {
     return <String, dynamic>{'name': name, 'class': pluginClass, 'file': fileName};
   }
 }
