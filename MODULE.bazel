@@ -49,6 +49,8 @@ use_repo(
     "boringssl",
     "brotli",
     "clang_linux_x64",
+    "clang_mac_arm64",
+    "clang_mac_x64",
     "cpu_features",
     "cpython3",
     "dart",
@@ -80,6 +82,7 @@ use_repo(
     "libtess2",
     "libwebp",
     "llvm_libc",
+    "macos_sdk",
     "ninja",
     "node_preamble",
     "openjdk",
@@ -167,6 +170,13 @@ register_toolchains(
     "//engine/src/flutter/build/bazel/toolchains:android_riscv64_clang_toolchain",
     # Emscripten (wasm32), selected through its platform by wasm_module.
     "//engine/src/flutter/build/bazel/toolchains/emscripten:wasm32_emscripten_toolchain",
+    # macOS (build/toolchain/mac's clang_arm64 and clang_x64): the host's
+    # own build and the other CPU's, from either Mac; matched only on a
+    # macOS host (their execution constraints).
+    "//engine/src/flutter/build/bazel/toolchains:macos_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:macos_x64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:macos_x64_on_arm64_clang_toolchain",
+    "//engine/src/flutter/build/bazel/toolchains:macos_arm64_on_x64_clang_toolchain",
 )
 
 # The Fuchsia Bazel SDK rules (the rules_fuchsia spike, metric 0.7) are a

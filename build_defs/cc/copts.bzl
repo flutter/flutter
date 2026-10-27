@@ -51,6 +51,17 @@ DEFAULT_WARNING_FLAGS = [
 # What the toolchain passes to every compile (see the module docstring).
 TOOLCHAIN_WARNING_FLAGS = [flag for flag in DEFAULT_WARNING_FLAGS if flag != "-Werror"]
 
+# The same under is_mac: GN adds -Wunguarded-availability for the Apple
+# platforms (a method newer than the deployment target, used unguarded),
+# and -Wno-deprecated-declarations because tools/gn sets
+# allow_deprecated_api_calls on a Mac (OpenGL is deprecated there, and the
+# shell still has a GL backend).
+MACOS_DEFAULT_WARNING_FLAGS = DEFAULT_WARNING_FLAGS + [
+    "-Wunguarded-availability",
+    "-Wno-deprecated-declarations",
+]
+MACOS_TOOLCHAIN_WARNING_FLAGS = [flag for flag in MACOS_DEFAULT_WARNING_FLAGS if flag != "-Werror"]
+
 # The same under is_android: GN adds -Wno-deprecated-literal-operator for
 # clang on every platform but Android (`!is_android && is_clang`), so the
 # Android lists go without it.
@@ -91,11 +102,13 @@ WASM_DEFAULT_WARNING_FLAGS = [
 # of external repositories load this file too.
 _ANDROID = Label("@platforms//os:android")
 _WASM = Label("@platforms//os:emscripten")
+_MACOS = Label("@platforms//os:macos")
 
-def _by_platform(other, wasm, android):
+def _by_platform(other, wasm, android, macos = None):
     return select({
         _ANDROID: android,
         _WASM: wasm,
+        _MACOS: other if macos == None else macos,
         "//conditions:default": other,
     })
 
@@ -112,6 +125,10 @@ CHROMIUM_CODE_COPTS = _by_platform(
         "-Wall",
         "-Wextra",
     ] + ANDROID_DEFAULT_WARNING_FLAGS,
+    [
+        "-Wall",
+        "-Wextra",
+    ] + MACOS_DEFAULT_WARNING_FLAGS,
 )
 
 # //build/config/compiler:chromium_code (cflags) + //flutter:config.
@@ -134,6 +151,12 @@ FLUTTER_CFLAGS_OBJC = [
 
 FLUTTER_CFLAGS_OBJCC = FLUTTER_CFLAGS_OBJC
 
+# The same under is_mac: the macOS embedding's code is safe for app
+# extensions too.
+MACOS_CFLAGS_OBJC = FLUTTER_CFLAGS_OBJC + ["-fapplication-extension"]
+
+MACOS_CFLAGS_OBJCC = MACOS_CFLAGS_OBJC
+
 # //build/config/compiler:chromium_code (defines): the C99 macros, and, off
 # Linux (and without a sanitizer), a fortified libc -- `!is_linux ||
 # !is_clang`, so Android's first-party compiles have _FORTIFY_SOURCE=2 and
@@ -143,6 +166,11 @@ FLUTTER_CFLAGS_OBJCC = FLUTTER_CFLAGS_OBJC
 FLUTTER_LOCAL_DEFINES = select({
     _WASM: [],
     _ANDROID: [
+        "__STDC_CONSTANT_MACROS",
+        "__STDC_FORMAT_MACROS",
+        "_FORTIFY_SOURCE=2",
+    ],
+    _MACOS: [
         "__STDC_CONSTANT_MACROS",
         "__STDC_FORMAT_MACROS",
         "_FORTIFY_SOURCE=2",
@@ -173,6 +201,11 @@ FLUTTER_THIRD_PARTY_COPTS = _by_platform(
         "-Wno-newline-eof",
         "-Wno-typedef-redefinition",
     ] + ANDROID_DEFAULT_WARNING_FLAGS,
+    [
+        "-Wno-deprecated-non-prototype",
+        "-Wno-newline-eof",
+        "-Wno-typedef-redefinition",
+    ] + MACOS_DEFAULT_WARNING_FLAGS,
 )
 
 # config.gni's `feature_defines_list`: the runtime mode and slimpeller as
