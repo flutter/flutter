@@ -1669,7 +1669,11 @@ otherwise. `--no-stripped` in a builder configuration is that flag off
 `host_release`); for the web it is nothing, as GN's wasm toolchain strips
 nothing; for Android it is the default, and the aspect adds GN's android
 toolchain's `--strip-unneeded` copy as `lib.stripped/<name>` (see the
-Android section). The Dart wrap's `gen_snapshot` is already GN's stripped file.
+Android section); on the macOS platforms the aspect strips nothing and
+writes no `exe.unstripped/`, as GN's mac toolchain links into the build
+root as is (the frameworks' packaging strips and writes dSYMs: the Apple
+products' phase). The objcopy is the host's clang's (`@host_platform`). The
+Dart wrap's `gen_snapshot` is already GN's stripped file.
 
 The root package had `//engine/src/flutter:install` for the developer's
 builds, GN's default target: the Linux host's build directory as above with
