@@ -52,6 +52,9 @@ struct _FlEngine {
 
   // Manages OpenGL contexts.
   FlOpenGLManager* opengl_manager;
+#if FLUTTER_LINUX_GTK4
+  FlVulkanManager* vulkan_manager;
+#endif
 
   // Messenger used to send and receive platform messages.
   FlBinaryMessenger* binary_messenger;
@@ -370,6 +373,11 @@ static bool compositor_create_backing_store_callback(
   switch (self->renderer_type) {
     case kOpenGL:
       return create_opengl_backing_store(self, config, backing_store_out);
+#if FLUTTER_LINUX_GTK4
+    case kVulkan:
+      return fl_vulkan_manager_create_backing_store(self->vulkan_manager,
+                                                    config, backing_store_out);
+#endif
     case kSoftware:
       return create_software_backing_store(self, config, backing_store_out);
     default:
@@ -385,6 +393,11 @@ static bool compositor_collect_backing_store_callback(
   switch (self->renderer_type) {
     case kOpenGL:
       return collect_opengl_backing_store(self, backing_store);
+#if FLUTTER_LINUX_GTK4
+    case kVulkan:
+      fl_vulkan_manager_collect_backing_store(backing_store);
+      return true;
+#endif
     case kSoftware:
       return collect_software_backing_store(self, backing_store);
     default:
@@ -615,6 +628,9 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->project);
   g_clear_object(&self->display_monitor);
   g_clear_object(&self->opengl_manager);
+#if FLUTTER_LINUX_GTK4
+  g_clear_object(&self->vulkan_manager);
+#endif
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
   g_clear_object(&self->settings_handler);
@@ -705,6 +721,11 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
         "\n"
         "To switch back to the default renderer, unset the "
         "FLUTTER_LINUX_RENDERER environment variable.");
+#if FLUTTER_LINUX_GTK4
+  } else if (g_strcmp0(renderer, "vulkan") == 0) {
+    self->renderer_type = kVulkan;
+    self->vulkan_manager = fl_vulkan_manager_new();
+#endif
   } else {
     if (renderer != nullptr && strcmp(renderer, "opengl") != 0) {
       g_warning("Unknown renderer type '%s', defaulting to opengl", renderer);
@@ -756,6 +777,13 @@ FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* self) {
   return self->opengl_manager;
 }
 
+#if FLUTTER_LINUX_GTK4
+FlVulkanManager* fl_engine_get_vulkan_manager(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+  return self->vulkan_manager;
+}
+#endif
+
 FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->display_monitor;
@@ -788,8 +816,14 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       config.open_gl.gl_external_texture_frame_callback =
           fl_engine_gl_external_texture_frame_callback;
       break;
-    case kMetal:
+#if FLUTTER_LINUX_GTK4
     case kVulkan:
+      // Initialize after validating the Impeller switches below.
+      break;
+#else
+    case kVulkan:
+#endif
+    case kMetal:
     default:
       g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                   "Unsupported renderer type");
@@ -831,6 +865,22 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       enable_impeller = FALSE;
       has_enable_impeller = TRUE;
     }
+  }
+
+  if (self->renderer_type == kVulkan) {
+    if (has_enable_impeller && !enable_impeller) {
+      g_set_error_literal(error, fl_engine_error_quark(),
+                          FL_ENGINE_ERROR_FAILED,
+                          "The Vulkan renderer requires Impeller");
+      return FALSE;
+    }
+    enable_impeller = TRUE;
+#if FLUTTER_LINUX_GTK4
+    if (!fl_vulkan_manager_initialize(self->vulkan_manager, &config.vulkan,
+                                      error)) {
+      return FALSE;
+    }
+#endif
   }
 
   g_autoptr(GPtrArray) command_line_args =
@@ -1574,6 +1624,12 @@ gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
 gboolean fl_engine_register_external_texture(FlEngine* self,
                                              int64_t texture_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  if (self->renderer_type == kVulkan) {
+    g_warning(
+        "Linux OpenGL and pixel-buffer plugin textures are unavailable with "
+        "Vulkan");
+    return FALSE;
+  }
   return self->embedder_api.RegisterExternalTexture(self->engine, texture_id) ==
          kSuccess;
 }

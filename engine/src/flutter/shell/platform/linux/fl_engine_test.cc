@@ -20,6 +20,45 @@
 
 class FlEngineTest : public flutter::testing::LinuxTest {};
 
+#if FLUTTER_LINUX_GTK4
+TEST_F(FlEngineTest, SelectVulkanWithoutInitializingDriver) {
+  g_autofree gchar* previous = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);
+  g_autoptr(FlEngine) vulkan_engine = fl_engine_new(project);
+  if (previous) {
+    g_setenv("FLUTTER_LINUX_RENDERER", previous, TRUE);
+  } else {
+    g_unsetenv("FLUTTER_LINUX_RENDERER");
+  }
+  EXPECT_EQ(fl_engine_get_renderer_type(vulkan_engine), kVulkan);
+  EXPECT_NE(fl_engine_get_vulkan_manager(vulkan_engine), nullptr);
+}
+TEST_F(FlEngineTest, VulkanRejectsExplicitlyDisabledImpeller) {
+  g_autofree gchar* renderer = g_strdup(g_getenv("FLUTTER_LINUX_RENDERER"));
+  g_autofree gchar* count = g_strdup(g_getenv("FLUTTER_ENGINE_SWITCHES"));
+  g_autofree gchar* first = g_strdup(g_getenv("FLUTTER_ENGINE_SWITCH_1"));
+  g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);
+  g_setenv("FLUTTER_ENGINE_SWITCHES", "1", TRUE);
+  g_setenv("FLUTTER_ENGINE_SWITCH_1", "enable-impeller=false", TRUE);
+  g_autoptr(FlEngine) vulkan_engine = fl_engine_new(project);
+  g_autoptr(GError) error = nullptr;
+  gboolean started = fl_engine_start(vulkan_engine, &error);
+  auto restore = [](const char* key, const char* previous) {
+    if (previous) {
+      g_setenv(key, previous, TRUE);
+    } else {
+      g_unsetenv(key);
+    }
+  };
+  restore("FLUTTER_LINUX_RENDERER", renderer);
+  restore("FLUTTER_ENGINE_SWITCHES", count);
+  restore("FLUTTER_ENGINE_SWITCH_1", first);
+  EXPECT_FALSE(started);
+  ASSERT_NE(error, nullptr);
+  EXPECT_STREQ(error->message, "The Vulkan renderer requires Impeller");
+}
+#endif
+
 // Checks notifying display updates works.
 TEST_F(FlEngineTest, NotifyDisplayUpdate) {
   StartEngine();

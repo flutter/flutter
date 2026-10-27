@@ -10,6 +10,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_compositor_software.h"
+#include "flutter/shell/platform/linux/fl_compositor_vulkan.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_wayland_display.h"
@@ -144,6 +145,10 @@ void fl_view_gtk4_setup_rendering(FlView* self) {
   switch (fl_engine_get_renderer_type(self->engine)) {
     case kOpenGL:
       setup_opengl(self);
+      break;
+    case kVulkan:
+      self->compositor = FL_COMPOSITOR(
+          fl_compositor_vulkan_new(fl_engine_get_task_runner(self->engine)));
       break;
     case kSoftware:
       setup_software(self);
