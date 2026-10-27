@@ -148,7 +148,7 @@ The argument to `matchesGoldenFile` is the filename for the screenshot and must 
 
 Golden tests may be executed locally on Linux, macOS, and Windows, including Web browser tests via Chrome (`flutter test --platform chrome` for CanvasKit, or `flutter test --platform chrome --wasm` for Skwasm). If Flutter Gold cannot be reached (for example, when working offline), tests automatically fall back to skipping golden comparisons. All reference images can be found at [Flutter Gold baselines](https://flutter-gold.skia.org/list?fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false&limit=50&master=false&match=name&metric=combined&neg=false&new_clstore=true&offset=0&pos=true&query=source_type%3Dflutter&sort=desc&unt=true). Tests often have multiple golden baselines for a given test name to account for rendering differences across platforms and renderers; the parameter set for each image is listed on each digest.
 
-Once you have written your test, run `flutter test test/foo/bar_test.dart` (with or without `--update-goldens`) in the `packages/flutter` directory, where the path is relative to `packages/flutter`. Because a new test does not yet have a baseline on the [Flutter Gold](https://flutter-gold.skia.org/?query=source_type%3Dflutter) dashboard, it will pass locally, log that no expectations were found, and write the generated image under `bin/cache/pkg/skia_goldens/packages/flutter/test/` (matching the directory hierarchy of `packages/flutter/test/`). Verify that the generated images look as expected, updating your test and re-running until you are happy with the rendering.
+Once you have written your test, run `flutter test test/foo/bar_test.dart` (with or without `--update-goldens`) in the `packages/flutter` directory, where the path is relative to `packages/flutter`. Because a new test does not yet have a baseline on the [Flutter Gold](https://flutter-gold.skia.org/?query=source_type%3Dflutter) dashboard, it will pass locally, log that no expectations were found, and write the generated image under `<flutter_root>/bin/cache/pkg/skia_goldens/packages/flutter/test/` (matching the directory hierarchy of `packages/flutter/test/`). Verify that the generated images look as expected, updating your test and re-running until you are happy with the rendering.
 
 When you are happy with your image, you are ready to submit your PR for review. The reviewer should also verify your golden image(s), so include the golden(s) in your PR description.
 
@@ -193,10 +193,10 @@ If renderings change, then the golden baseline in [Flutter Gold](https://flutter
 
 When developing your change, running `flutter test` locally downloads the matching baseline from [Flutter Gold](https://flutter-gold.skia.org/?query=source_type%3Dflutter) (cached on disk at `.dart_tool/flutter_goldens_cache/baselines/`) and compares pixels (exact comparison on native platforms; tolerance-aware fuzzy comparison on `--platform chrome`). When a mismatch is detected, local testing fails and writes visual diff artifacts:
 
-- **Native (`linux`, `macos`, `windows`)**: diff and comparison images are written under `bin/cache/pkg/skia_goldens/packages/flutter/test/<subdir>/failures/`.
+- **Native (`linux`, `macos`, `windows`)**: diff and comparison images are written under `<flutter_root>/bin/cache/pkg/skia_goldens/packages/flutter/test/<subdir>/failures/`.
 - **Web (`--platform chrome`)**: `actual.png`, `expected.png`, and `diff.png` are written under `.dart_tool/flutter_goldens_cache/failures/<test_name>/`.
 
-Note that passing `--update-goldens` locally only updates the local preview file under `bin/cache/pkg/skia_goldens/`—it **does not** update baselines on Flutter Gold. Local runs without `--update-goldens` will continue to fail until the new baseline has landed and been approved on Flutter Gold.
+Note that passing `--update-goldens` locally only updates the local preview file under `<flutter_root>/bin/cache/pkg/skia_goldens/`—it **does not** update baselines on Flutter Gold. Local runs without `--update-goldens` will continue to fail until the new baseline has landed and been approved on Flutter Gold.
 
 When you are happy with your golden change, you are ready to submit your PR for review. The reviewer should also verify your golden image(s), so include the golden changes you have made in your PR description. Changes to tests will be compiled into a tryjob on the Flutter Gold dashboard, under [ChangeLists](https://flutter-gold.skia.org/changelists). There you will see your pull request and the associated golden files that were generated, as well as the visual differences against the pre-existing baselines. Gold will also apply the `will affect goldens` label and leave a comment on your pull request linking to your image results.
 
@@ -211,7 +211,7 @@ Once you have been added as an authorized user for Flutter Gold, you can log in 
 
 ## `flutter-gold` Check
 
-The `flutter-gold` status check is managed by `flutter/cocoon` (via a cron job that runs every 5 minutes) and is applied to open, non-draft pull requests in `flutter/flutter` targeting `master` (or `main`) once the unified `Dashboard Checks` run is present.
+The `flutter-gold` status check is managed by `flutter/cocoon` (via a cron job that runs every 5 minutes) and is applied to open, non-draft pull requests in `flutter/flutter` targeting `master` once the unified `Dashboard Checks` run is present.
 
 Because golden file tests execute across multiple CI shards, `flutter-gold` waits for `Dashboard Checks` (and any other presubmit checks in the suite) to complete before querying Flutter Gold. Holding a `pending` state while checks run and while image changes are untriaged ensures all shards finish uploading digests to the tryjob and prevents autosubmit or the merge queue from landing unapproved visual changes.
 
