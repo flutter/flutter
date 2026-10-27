@@ -22,35 +22,58 @@ def main():
   parser.add_argument('--engine-dir', type=Path, required=True)
   parser.add_argument('--output', type=Path, required=True)
   parser.add_argument('--gsk-renderer', choices=['gl', 'vulkan', 'cairo'], default='gl')
+  parser.add_argument('--flutter-renderer', choices=['opengl', 'vulkan'], default='opengl')
+  parser.add_argument('--dispatch', action='store_true', help='Require compute-to-render pixels')
+  parser.add_argument(
+      '--gtk-snapshot',
+      action='store_true',
+      help='Require a GTK widget snapshot from the compute_snapshot.h runner helper'
+  )
+  parser.add_argument('--display-backend', choices=['x11', 'wayland'], default='x11')
   args = parser.parse_args()
   binary = args.binary.resolve(strict=True)
   expected_engine = (args.engine_dir / 'libflutter_linux_gtk4.so').resolve(strict=True)
   args.output = args.output.resolve()
   args.output.parent.mkdir(parents=True, exist_ok=True)
-  report = {'gsk_renderer_requested': args.gsk_renderer, 'passed': False}
+  report = {
+      'gsk_renderer_requested': args.gsk_renderer,
+      'flutter_renderer_requested': args.flutter_renderer,
+      'display_backend_requested': args.display_backend, 'passed': False
+  }
   log_path = args.output.with_suffix('.log')
+  snapshot_path = args.output.with_suffix('.png')
+  if args.gtk_snapshot:
+    snapshot_path.unlink(missing_ok=True)
   with tempfile.TemporaryDirectory(prefix='gtk4-compute-') as directory:
     result_path = Path(directory) / 'capabilities.json'
+    quit_path = Path(directory) / 'quit'
     env = os.environ.copy()
     for key in ['GTK_MODULES', 'GTK_PATH', 'AT_SPI_BUS_ADDRESS']:
       env.pop(key, None)
     env.update(
         COMPUTE_PROBE_OUTPUT=str(result_path),
         GTK_A11Y='none',
-        GDK_BACKEND='x11',
+        GDK_DEBUG='no-portals',
+        GIO_USE_VFS='local',
+        FLUTTER_LINUX_GTK_DEBUG='1',
+        GDK_BACKEND=args.display_backend,
         GSK_RENDERER=args.gsk_renderer,
+        FLUTTER_LINUX_RENDERER=args.flutter_renderer,
         FLUTTER_ENGINE_SWITCHES='2',
         FLUTTER_ENGINE_SWITCH_1='enable-impeller=true',
         FLUTTER_ENGINE_SWITCH_2='enable-flutter-gpu=true'
     )
+    if args.gtk_snapshot:
+      env['COMPUTE_PROBE_SNAPSHOT'] = str(snapshot_path)
+      env['COMPUTE_PROBE_QUIT'] = str(quit_path)
     try:
       with log_path.open('w') as log:
-        app = subprocess.Popen(['xvfb-run', '-a', 'dbus-run-session', '--',
-                                str(binary)],
-                               env=env,
-                               stdout=log,
-                               stderr=subprocess.STDOUT,
-                               start_new_session=True)
+        command = ['dbus-run-session', '--', str(binary)]
+        if args.display_backend == 'x11':
+          command = ['xvfb-run', '-a', *command]
+        app = subprocess.Popen(
+            command, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True
+        )
         try:
           deadline = time.monotonic() + 45
           while not result_path.exists():
@@ -85,6 +108,10 @@ def main():
           )
           startup = log_path.read_text()
           report['impeller_gles_observed'] = 'Impeller rendering backend (OpenGLES' in startup
+          report['vulkan_device_diagnostics'] = [
+              line for line in startup.splitlines() if 'event=vulkan-device' in line
+          ]
+          report['impeller_vulkan_observed'] = 'Impeller rendering backend (Vulkan' in startup
           report['passed'] = (
               'error' not in report and report['gtk4_loaded'] and report['engine_matches'] and
               report['impeller_gles_observed'] and not probe['supports_compute'] and
@@ -92,11 +119,65 @@ def main():
               probe['max_shared_memory_bytes'] == 0 and probe['max_workgroup_size'] == [0, 0, 0] and
               probe['max_workgroup_count'] == [0, 0, 0]
           )
+          if args.flutter_renderer == 'vulkan':
+            report['passed'] = (
+                'error' not in report and report['gtk4_loaded'] and report['engine_matches'] and
+                report['impeller_vulkan_observed'] and probe['supports_compute'] and
+                not probe['create_compute_pass_rejected'] and
+                probe['max_workgroup_invocations'] > 0 and
+                all(value > 0 for value in probe['max_workgroup_size']) and
+                all(value > 0 for value in probe['max_workgroup_count'])
+            )
+          if args.dispatch:
+            report['passed'] = (
+                report['passed'] and probe.get('dispatch_tested') is True and
+                probe.get('compute_pixels_passed') is True
+            )
+          if args.gtk_snapshot:
+            while not snapshot_path.exists():
+              if app.poll() is not None or time.monotonic() > deadline:
+                raise RuntimeError('GTK snapshot missing')
+              time.sleep(.1)
+            from PIL import Image
+            # PNG encoding finishes before the runner callback returns.
+            while True:
+              try:
+                with Image.open(snapshot_path) as image:
+                  image = image.convert('RGBA')
+                  w, h = image.size
+                  samples = [
+                      image.getpixel((int(w * x), int(h * y)))
+                      for x, y in [(.1, .1), (.9, .1), (.1, .9), (.9, .9), (.5, .5)]
+                  ]
+                break
+              except OSError:
+                if time.monotonic() > deadline:
+                  raise
+                time.sleep(.05)
+            renderer_lines = [
+                line.partition('COMPUTE_GTK_RENDERER ')[2]
+                for line in log_path.read_text().splitlines()
+                if line.startswith('COMPUTE_GTK_RENDERER ')
+            ]
+            report['gsk_renderer_observed'] = renderer_lines[-1] if renderer_lines else None
+            expected_class = {'gl': 'gl', 'vulkan': 'vulkan', 'cairo': 'cairo'}[args.gsk_renderer]
+            report['passed'] = report['passed'] and bool(renderer_lines) and (
+                expected_class in renderer_lines[-1].lower()
+            )
+            report['gtk_pixels_rgba'] = samples
+            report['gtk_snapshot'] = str(snapshot_path)
+            report['passed'] = report['passed'] and all(
+                pixel == (0, 255, 0, 255) for pixel in samples
+            )
+            quit_path.touch()
+            report['clean_exit'] = app.wait(timeout=10) == 0
+            report['passed'] = report['passed'] and report['clean_exit']
         finally:
           if app.poll() is None:
             os.killpg(app.pid, signal.SIGTERM)
           app.wait(timeout=10)
     except Exception as error:
+      report['passed'] = False
       report['driver_error'] = str(error)
   args.output.write_text(json.dumps(report, indent=2) + '\n')
   print(json.dumps(report, indent=2))
