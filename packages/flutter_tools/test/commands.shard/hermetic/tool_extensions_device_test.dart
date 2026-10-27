@@ -2,18 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
+import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
@@ -30,6 +35,7 @@ import 'package:flutter_tools_core/flutter_tools_core.dart'
         TargetDevice;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -147,24 +153,77 @@ final class _FakeTestDeviceService extends DeviceService {
       return launched;
     }
     if (deviceId == 'missing_vm_service_device') {
-      final launched = executableUri == Uri.file('/tmp/fake_bundle/app');
-      if (launched) {
-        _runningDevices.add(deviceId);
-      }
-      return launched;
+      _runningDevices.add(deviceId);
+      return true;
     }
     return false;
   }
 
   @override
-  Future<Uri?> getVmServiceUri({required String deviceId}) async =>
-      deviceId == 'fake_test_device' ? Uri.parse('http://127.0.0.1:8181/abcd=/') : null;
+  Future<Uri?> getVmServiceUri({required String deviceId}) async {
+    if (deviceId == 'fake_test_device' && _runningDevices.contains(deviceId)) {
+      return Uri.parse('http://127.0.0.1:8181/abcd=/');
+    }
+    return null;
+  }
 
   @override
-  Future<bool> stopApp({required String deviceId}) async => _runningDevices.remove(deviceId);
+  Future<bool> stopApp({required String deviceId}) async {
+    return _runningDevices.remove(deviceId);
+  }
 }
 
-void _fakeLaunchExtensionEntryPoint(SendPort sendPort) {
+const _customExtensionDeviceId = 'custom_ext_device';
+const _customExtensionDeviceName = 'Custom Extension Device';
+
+void _customLogStreamingExtensionEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+      _CustomLogStreamingDeviceService(),
+    ]),
+  );
+}
+
+final class _CustomLogStreamingDeviceService extends DeviceService {
+  @override
+  Future<List<TargetDevice>> getDevices() async {
+    return const <TargetDevice>[
+      TargetDevice(
+        category: Category.desktop,
+        id: _customExtensionDeviceId,
+        name: _customExtensionDeviceName,
+        targetPlatform: 'custom-os',
+      ),
+    ];
+  }
+
+  @override
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => true;
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async => false;
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async => false;
+
+  @override
+  Future<void> startLogStream({required String deviceId}) async {
+    emitLogLine(deviceId: deviceId, line: 'Custom device log line 1');
+    emitLogLine(deviceId: deviceId, line: 'Custom device log line 2');
+  }
+}
+
+void _fakeAppLaunchExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_FakeTestBuildService(), _FakeTestDeviceService()],
@@ -251,6 +310,13 @@ void main() {
   });
 
   group('Tool Extensions Device Integration - Enabled', () {
+    ExtensionManager? logsExtensionManager;
+
+    tearDown(() async {
+      await logsExtensionManager?.dispose();
+      logsExtensionManager = null;
+    });
+
     testWithoutContext(
       'FlutterProject.toExtensionProject extracts project and manifest metadata',
       () async {
@@ -318,7 +384,7 @@ flutter:
             logger: testLogger,
           ),
           extensionManager: manager,
-          fileSystem: localFs,
+          fileSystem: MemoryFileSystem.test(),
           logger: testLogger,
         );
 
@@ -386,6 +452,63 @@ flutter:
       },
     );
 
+    testUsingContext(
+      'LogsCommand streams log output from custom extension device when feature flag enabled',
+      () async {
+        final logger = _LogLineWaitingBufferLogger(targetLine: 'Custom device log line 2');
+        final intSignal = _FakeProcessSignal();
+        final termSignal = _FakeProcessSignal();
+        final logsCommand = LogsCommand(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
+          sigint: intSignal,
+          sigterm: termSignal,
+          toolContext: FakeToolContext(logger: logger),
+        );
+        final CommandRunner<void> commandRunner = createTestCommandRunner(logsCommand);
+
+        final Future<void> commandFuture = commandRunner.run(<String>[
+          'logs',
+          '-d',
+          _customExtensionDeviceId,
+        ]);
+
+        await logger.receivedTargetLine.future;
+
+        expect(logger.statusText, contains('Showing $_customExtensionDeviceName logs:'));
+        expect(logger.statusText, contains('Custom device log line 1'));
+        expect(logger.statusText, contains('Custom device log line 2'));
+
+        intSignal.send(1);
+        await commandFuture;
+        await logsCommand.device?.dispose();
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+        DeviceManager: () {
+          logsExtensionManager = ExtensionManager(
+            entryPoints: <ExtensionEntryPoint>[_customLogStreamingExtensionEntryPoint],
+            featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+            hostPlatform: HostPlatform.linux_x64,
+            logger: testLogger,
+          );
+          return TestDeviceManager(
+            discoverers: <DeviceDiscovery>[
+              ExtensionDevices(
+                extensionBuildManager: ExtensionBuildManager(
+                  extensionManager: logsExtensionManager!,
+                  featureFlags: featureFlags,
+                  logger: testLogger,
+                ),
+                extensionManager: logsExtensionManager!,
+                fileSystem: MemoryFileSystem.test(),
+                logger: testLogger,
+              ),
+            ],
+          );
+        },
+      },
+    );
+
     group('ExtensionBackedDevice startApp and stopApp', () {
       Future<(ExtensionManager, BufferLogger, MemoryFileSystem, List<Device>)>
       setUpTestDevices() async {
@@ -396,10 +519,11 @@ flutter:
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: logger,
-          entryPoints: <ExtensionEntryPoint>[_fakeLaunchExtensionEntryPoint],
+          entryPoints: <ExtensionEntryPoint>[_fakeAppLaunchExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         addTearDown(manager.dispose);
+
         final discovery = ExtensionDevices(
           extensionBuildManager: ExtensionBuildManager(
             extensionManager: manager,
@@ -517,6 +641,37 @@ flutter:
   });
 }
 
+class _LogLineWaitingBufferLogger extends BufferLogger {
+  _LogLineWaitingBufferLogger({required this.targetLine}) : super.test();
+
+  final String targetLine;
+  final receivedTargetLine = Completer<void>();
+
+  @override
+  void printStatus(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    bool? newline,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    super.printStatus(
+      message,
+      emphasis: emphasis,
+      color: color,
+      newline: newline,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+    if (message == targetLine && !receivedTargetLine.isCompleted) {
+      receivedTargetLine.complete();
+    }
+  }
+}
+
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager({List<DeviceDiscovery>? discoverers})
     : deviceDiscoverers = discoverers ?? <DeviceDiscovery>[],
@@ -524,4 +679,31 @@ class TestDeviceManager extends DeviceManager {
 
   @override
   final List<DeviceDiscovery> deviceDiscoverers;
+}
+
+class _FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
+  @override
+  Future<ApplicationPackage?> getPackageForPlatform(
+    TargetPlatform platform, {
+    BuildInfo? buildInfo,
+    File? applicationBinary,
+  }) async {
+    if (platform == TargetPlatform.unsupported) {
+      throw UnsupportedError('Unexpected target platform $platform');
+    }
+    return null;
+  }
+}
+
+class _FakeProcessSignal extends Fake implements ProcessSignal {
+  late final _controller = StreamController<ProcessSignal>();
+
+  @override
+  Stream<ProcessSignal> watch() => _controller.stream;
+
+  @override
+  bool send(int pid) {
+    _controller.add(this);
+    return true;
+  }
 }

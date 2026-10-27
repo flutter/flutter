@@ -8,8 +8,8 @@ import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
-/// Extension service interface for retrieving target devices and managing
-/// application execution.
+/// Extension service interface for retrieving target devices, managing
+/// application execution, and streaming device logs.
 abstract base class DeviceService extends ToolExtensionService {
   /// Service namespace identifier for device services.
   static const String serviceNamespace = 'device';
@@ -19,6 +19,8 @@ abstract base class DeviceService extends ToolExtensionService {
   static const String _launchAppRpcMethod = 'launchApp';
   static const String _getVmServiceUriRpcMethod = 'getVmServiceUri';
   static const String _stopAppRpcMethod = 'stopApp';
+  static const String _startLogStreamRpcMethod = 'startLogStream';
+  static const String _stopLogStreamRpcMethod = 'stopLogStream';
 
   /// RPC method identifier to query contributed target devices.
   static const String getDevicesMethod = '$serviceNamespace.$_getDevicesRpcMethod';
@@ -36,6 +38,16 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC method identifier to stop a running application on a target device.
   static const String stopAppMethod = '$serviceNamespace.$_stopAppRpcMethod';
 
+  /// RPC method identifier to start streaming log output for a target device.
+  static const String startLogStreamMethod = '$serviceNamespace.$_startLogStreamRpcMethod';
+
+  /// RPC method identifier to stop streaming log output for a target device.
+  static const String stopLogStreamMethod = '$serviceNamespace.$_stopLogStreamRpcMethod';
+
+  /// JSON-RPC 2.0 notification method emitted by the extension for each device
+  /// log line.
+  static const String logEntryNotificationMethod = '$serviceNamespace.logEntry';
+
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
 
@@ -50,6 +62,10 @@ abstract base class DeviceService extends ToolExtensionService {
 
   /// RPC response key for the VM service URI.
   static const String vmServiceUriKey = 'vmServiceUri';
+
+  /// JSON key for the log line text in [logEntryNotificationMethod]
+  /// notifications.
+  static const String lineKey = 'line';
 
   @override
   String get namespace => serviceNamespace;
@@ -89,6 +105,30 @@ abstract base class DeviceService extends ToolExtensionService {
   /// application was running on [deviceId] or stopping it failed.
   Future<bool> stopApp({required String deviceId});
 
+  /// Starts streaming log output for the device identified by [deviceId].
+  ///
+  /// Invoked by the host tool when a log consumer (such as `flutter logs` or
+  /// `flutter run`) begins reading logs from [deviceId]. Implementations should
+  /// return once log streaming has been initiated rather than awaiting the
+  /// lifetime of the stream, and forward each log line (without a trailing
+  /// newline) to the host by calling [emitLogLine].
+  Future<void> startLogStream({required String deviceId}) async {}
+
+  /// Stops streaming log output for the device identified by [deviceId].
+  ///
+  /// Invoked by the host tool when the device log reader is disposed.
+  Future<void> stopLogStream({required String deviceId}) async {}
+
+  /// Sends a [logEntryNotificationMethod] JSON-RPC notification containing a
+  /// single log [line] (excluding any trailing newline) from [deviceId] to the
+  /// host tool.
+  void emitLogLine({required String deviceId, required String line}) {
+    sendNotification(logEntryNotificationMethod, <String, Object?>{
+      deviceIdParam: deviceId,
+      lineKey: line,
+    });
+  }
+
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
@@ -97,6 +137,8 @@ abstract base class DeviceService extends ToolExtensionService {
       _launchAppRpcMethod: _launchAppRpc,
       _getVmServiceUriRpcMethod: _getVmServiceUriRpc,
       _stopAppRpcMethod: _stopAppRpc,
+      _startLogStreamRpcMethod: _startLogStreamRpc,
+      _stopLogStreamRpcMethod: _stopLogStreamRpc,
     };
   }
 
@@ -109,10 +151,9 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
-    final String deviceId;
+    final String deviceId = _parseDeviceId(params);
     final ExtensionFlutterProject project;
     try {
-      deviceId = params.requiredField<String>(deviceIdParam);
       final Map<String, Object?> projectMap = params.requiredField<Map<String, Object?>>(
         projectParam,
       );
@@ -123,12 +164,24 @@ abstract base class DeviceService extends ToolExtensionService {
     return isSupportedForProject(deviceId: deviceId, project: project);
   }
 
-  Future<bool> _launchAppRpc(Map<String, Object?> params) async {
+  String _parseDeviceId(Map<String, Object?> params) {
     final String deviceId;
+    try {
+      deviceId = params.requiredField<String>(deviceIdParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    if (deviceId.isEmpty) {
+      throw RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
+    }
+    return deviceId;
+  }
+
+  Future<bool> _launchAppRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
     final String executableUriStr;
     final Map<String, Object?> optionsMap;
     try {
-      deviceId = params.requiredField<String>(deviceIdParam);
       executableUriStr = params.requiredField<String>(executableUriParam);
       optionsMap = params.requiredField<Map<String, Object?>>(debuggingOptionsParam);
     } on FormatException catch (e) {
@@ -164,23 +217,23 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<Map<String, Object?>> _getVmServiceUriRpc(Map<String, Object?> params) async {
-    final String deviceId;
-    try {
-      deviceId = params.requiredField<String>(deviceIdParam);
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
+    final String deviceId = _parseDeviceId(params);
     final Uri? uri = await getVmServiceUri(deviceId: deviceId);
     return <String, Object?>{vmServiceUriKey: uri?.toString()};
   }
 
   Future<bool> _stopAppRpc(Map<String, Object?> params) async {
-    final String deviceId;
-    try {
-      deviceId = params.requiredField<String>(deviceIdParam);
-    } on FormatException catch (e) {
-      throw RpcException.invalidParams(e.message);
-    }
+    final String deviceId = _parseDeviceId(params);
     return stopApp(deviceId: deviceId);
+  }
+
+  Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {
+    await startLogStream(deviceId: _parseDeviceId(params));
+    return null;
+  }
+
+  Future<Object?> _stopLogStreamRpc(Map<String, Object?> params) async {
+    await stopLogStream(deviceId: _parseDeviceId(params));
+    return null;
   }
 }
