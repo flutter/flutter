@@ -88,6 +88,7 @@ cc_library(
 cc_library(
     name = "availability_version_check",
     srcs = ["availability_version_check.cc"],
+    hdrs = ["availability_version_check.h"],
     copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
@@ -248,7 +249,9 @@ flutter_objc_library(
         "framework/Headers/FlutterHourFormat.h",
         "framework/Headers/FlutterMacros.h",
         "framework/Headers/FlutterTexture.h",
+        "framework/Source/FlutterBinaryMessengerRelay.h",
         "framework/Source/FlutterNSBundleUtils.h",
+        "framework/Source/FlutterStandardCodecHelper.h",
         "framework/Source/FlutterStandardCodec_Internal.h",
     ],
     copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJC,
@@ -272,8 +275,10 @@ flutter_objc_library(
 cc_library(
     name = "framework_common",
     srcs = [
+        "framework/Source/FlutterBinaryMessengerRelay.h",
         "framework/Source/FlutterNSBundleUtils.h",
         "framework/Source/FlutterStandardCodecHelper.cc",
+        "framework/Source/FlutterStandardCodecHelper.h",
         "framework/Source/FlutterStandardCodec_Internal.h",
     ],
     hdrs = [
