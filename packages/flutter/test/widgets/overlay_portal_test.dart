@@ -3061,93 +3061,96 @@ void main() {
     testWidgets('pending-layout overlay child is ignored and recovers '
         'with semantics ${semanticsEnabled ? 'enabled' : 'disabled'}', (WidgetTester tester) async {
       final SemanticsTester? semantics = semanticsEnabled ? SemanticsTester(tester) : null;
-      final scrollController = ScrollController();
-      addTearDown(scrollController.dispose);
-      late final OverlayEntry entry;
-      addTearDown(() {
-        entry.remove();
-        entry.dispose();
-      });
-      var overlayHitCount = 0;
+      try {
+        final scrollController = ScrollController();
+        addTearDown(scrollController.dispose);
+        late final OverlayEntry entry;
+        addTearDown(() {
+          entry.remove();
+          entry.dispose();
+        });
+        var overlayHitCount = 0;
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) => Center(
-                  child: SizedBox(
-                    height: 400.0,
-                    // Let debug baseline verification check the overlay child
-                    // without asking the viewport for an unsupported baseline.
-                    child: IgnoreBaseline(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: 20,
-                        itemBuilder: (BuildContext context, int index) => index == 3
-                            ? _KeepAliveOverlayPortalItem(
-                                onOverlayHit: () {
-                                  overlayHitCount += 1;
-                                },
-                              )
-                            : SizedBox(height: 250.0, child: Text('Item $index')),
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                entry = OverlayEntry(
+                  builder: (BuildContext context) => Center(
+                    child: SizedBox(
+                      height: 400.0,
+                      // Let debug baseline verification check the overlay child
+                      // without asking the viewport for an unsupported baseline.
+                      child: IgnoreBaseline(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: 20,
+                          itemBuilder: (BuildContext context, int index) => index == 3
+                              ? _KeepAliveOverlayPortalItem(
+                                  onOverlayHit: () {
+                                    overlayHitCount += 1;
+                                  },
+                                )
+                              : SizedBox(height: 250.0, child: Text('Item $index')),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-      scrollController.jumpTo(700.0);
-      await tester.pump();
+        );
+        scrollController.jumpTo(700.0);
+        await tester.pump();
 
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer(location: Offset.zero);
-      addTearDown(gesture.removePointer);
-      await tester.pump();
+        final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await gesture.addPointer(location: Offset.zero);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
 
-      // Showing the overlay child also requests keep-alive. Moving the item
-      // beyond the trailing cache extent in the same frame parks its layout
-      // surrogate before it can schedule the deferred child's layout.
-      await gesture.moveTo(tester.getCenter(find.byKey(_KeepAliveOverlayPortalItem.targetKey)));
-      scrollController.jumpTo(0.0);
-      _PaintOrder.paintOrder.clear();
-      await tester.pump();
-      expect(tester.takeException(), isNull);
-      expect(_PaintOrder.paintOrder, isEmpty);
-      if (semantics != null) {
-        expect(semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel), isEmpty);
+        // Showing the overlay child also requests keep-alive. Moving the item
+        // beyond the trailing cache extent in the same frame parks its layout
+        // surrogate before it can schedule the deferred child's layout.
+        await gesture.moveTo(tester.getCenter(find.byKey(_KeepAliveOverlayPortalItem.targetKey)));
+        scrollController.jumpTo(0.0);
+        _PaintOrder.paintOrder.clear();
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(_PaintOrder.paintOrder, isEmpty);
+        if (semantics != null) {
+          expect(semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel), isEmpty);
+        }
+
+        // Pointer movement still hit-tests the theater, but the pending overlay
+        // child must not participate.
+        await gesture.moveTo(const Offset(25.0, 25.0));
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(25.0, 25.0));
+        expect(tester.takeException(), isNull);
+        expect(overlayHitCount, 0);
+
+        // Laying out the surrogate again lets the deferred child catch up and
+        // rejoin paint, hit testing, and semantics.
+        _PaintOrder.paintOrder.clear();
+        scrollController.jumpTo(700.0);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(_PaintOrder.paintOrder, isNotEmpty);
+        expect(
+          tester.getCenter(find.byKey(_KeepAliveOverlayPortalItem.overlayKey)),
+          const Offset(25.0, 25.0),
+        );
+        if (semantics != null) {
+          expect(semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel), isNotEmpty);
+        }
+        await tester.tapAt(const Offset(25.0, 25.0));
+        expect(overlayHitCount, 1);
+      } finally {
+        semantics?.dispose();
       }
-
-      // Pointer movement still hit-tests the theater, but the pending overlay
-      // child must not participate.
-      await gesture.moveTo(const Offset(25.0, 25.0));
-      await tester.pump();
-      expect(tester.takeException(), isNull);
-      await tester.tapAt(const Offset(25.0, 25.0));
-      expect(tester.takeException(), isNull);
-      expect(overlayHitCount, 0);
-
-      // Laying out the surrogate again lets the deferred child catch up and
-      // rejoin paint, hit testing, and semantics.
-      _PaintOrder.paintOrder.clear();
-      scrollController.jumpTo(700.0);
-      await tester.pump();
-      expect(tester.takeException(), isNull);
-      expect(_PaintOrder.paintOrder, isNotEmpty);
-      expect(
-        tester.getCenter(find.byKey(_KeepAliveOverlayPortalItem.overlayKey)),
-        const Offset(25.0, 25.0),
-      );
-      if (semantics != null) {
-        expect(semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel), isNotEmpty);
-      }
-      await tester.tapAt(const Offset(25.0, 25.0));
-      expect(overlayHitCount, 1);
-      semantics?.dispose();
     }, semanticsEnabled: semanticsEnabled);
   }
 
@@ -3200,11 +3203,16 @@ void main() {
     // until the next layout updates it.
     final RenderBox overlayChild = tester.renderObject(find.byKey(overlayKey));
     final deferredChild = overlayChild.parent! as RenderBox;
+    expect(deferredChild.runtimeType.toString(), '_RenderDeferredLayoutBox');
     expect(deferredChild.hasSize, isTrue);
     deferredChild.markNeedsLayout();
     expect(deferredChild.debugNeedsLayout, isTrue);
     await tester.tapAt(overlayCenter);
     expect(overlayHitCount, 2);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    await tester.tapAt(overlayCenter);
+    expect(overlayHitCount, 3);
   });
 
   group('Semantics', () {

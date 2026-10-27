@@ -1165,7 +1165,8 @@ mixin _RenderTheaterMixin on RenderBox {
   void paint(PaintingContext context, Offset offset) {
     for (final RenderBox child in _childrenInPaintOrder()) {
       final childParentData = child.parentData! as StackParentData;
-      // RenderObject._paintWithContext skips deferred children needing layout.
+      // RenderObject._paintWithContext returns early for any child needing
+      // layout, including a pending _RenderDeferredLayoutBox.
       context.paintChild(child, childParentData.offset + offset);
     }
   }
@@ -2558,16 +2559,18 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //
 // 1. It's a relayout boundary, and calling `markNeedsLayout` on it or adding it
 //    to the `_RenderTheater` as a child never dirties its `_RenderTheater`.
-//    Instead, it is always added to the `PipelineOwner`'s dirty list when it
-//    needs layout (even for the initial layout when it is first added to the
-//    tree).
+//    Once established as a relayout boundary, it is added to the
+//    `PipelineOwner`'s dirty list when marked as needing layout. Before its
+//    first layout, it can remain attached without being on the dirty list if
+//    its layout surrogate is not laid out (for example, while kept alive).
 //
 // 2. Its `layout` implementation is overridden such that `performLayout` does
-//    not do anything when its called from `layout`, preventing the parent
+//    not lay out its child when it's called from `layout`, preventing the parent
 //    `_RenderTheater` from laying out this subtree prematurely (but this
 //    `RenderObject` may still be resized). Instead, `markNeedsLayout` will be
 //    called from within `layout` to schedule a layout update for this relayout
-//    boundary when needed.
+//    boundary if it needs layout or its constraints have changed. The layout
+//    surrogate also uses this path to schedule the initial deferred layout.
 //
 //  When invoked from `PipelineOwner.flushLayout`, this `RenderObject` behaves
 //  like an `Overlay` that has only one entry.
@@ -2671,7 +2674,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
       //     laid out, as it has a greater depth value than its dependencies.
       //
       //  2. when the deferred child's child starts to do layout, the nodes
-      //     from the layout surrogate to the theater (exclusive) have finishd
+      //     from the layout surrogate to the theater (exclusive) have finished
       //     doing layout, so the deferred child's child can read their sizes
       //     and (usually) compute the paint transform of the regular child
       //     within the Overlay.
