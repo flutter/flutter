@@ -6573,6 +6573,61 @@ test_fixtures("fixtures") {
       );
     });
 
+    test(
+      "a file of the machine under host_os == \"mac\" is a host file under the host's setting",
+      () async {
+        // txt's and impeller/fixtures' test_fixtures copy a Mac's emoji font
+        // by its absolute path under `host_os == "mac"`. With host_os a cased
+        // value (the manifest's hostOsCases for those files), the comparison
+        // is the host's setting and the file is @host_files' (a repository
+        // of the machine's files GN names, present where they exist); any
+        // other absolute path is an error. In the generation's own scope
+        // host_os is a string and the branch folds away.
+        const gn = '''
+test_fixtures("fixtures") {
+  fixtures = [ "data/local.txt" ]
+  if (host_os == "mac") {
+    fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]
+  }
+}
+''';
+        expect(
+          await convert(gn, assumptions: Assumptions(hostOsCases)),
+          contains('''
+flutter_test_fixtures(
+    name = "fixtures",
+    fixtures = ["data/local.txt"] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "@host_files//:System/Library/Fonts/Apple Color Emoji.ttc",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }),
+)
+'''),
+        );
+        expect(
+          await convert(
+            gn,
+            assumptions: Assumptions(const <String, GnValue>{'host_os': GnStringValue('linux')}),
+          ),
+          contains('''
+flutter_test_fixtures(
+    name = "fixtures",
+    fixtures = ["data/local.txt"],
+)
+'''),
+        );
+        await expectLater(
+          convert('''
+test_fixtures("fixtures") {
+  fixtures = [ "/Library/Fonts/Other.ttf" ]
+}
+'''),
+          throwsGnError(line: 2, message: 'not among the host files'),
+        );
+      },
+    );
+
     test('a relative path with .. resolves as GN resolves it', () async {
       // tonic's suite lists ../file_loader/file_loader_unittests.cc, a file
       // of the parent package; a Dart entry point is a single file.

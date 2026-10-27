@@ -1177,7 +1177,48 @@ final Map<String, Map<String, String>> comparisonSettings =
       // execution platform's, as a select() on a CPU constraint reads.
       'current_cpu': _cpuNameSettings,
       'full_target_platform_name': _targetPlatformSettings,
+      // The OS of the machine that builds (`host_os == "mac"`: the text
+      // tests' fixtures take a Mac's emoji font), a setting of the whole
+      // build from @host_platform (//engine/src/flutter/build/bazel). A
+      // comparison reaches here where a file's assumptions make host_os a
+      // cased value ([hostOsCases]); elsewhere host_os is the generation's
+      // host, a string.
+      'host_os': _hostOsSettings,
     });
+
+/// The host OSes GN's files compare `host_os` with, to the settings that
+/// hold when the machine building is that OS.
+const Map<String, String> _hostOsSettings = <String, String>{
+  'linux': '//engine/src/flutter/build/bazel:host_os_is_linux',
+  'mac': '//engine/src/flutter/build/bazel:host_os_is_mac',
+  'win': '//engine/src/flutter/build/bazel:host_os_is_win',
+};
+
+/// `host_os` as a value with a case per host OS, for a file whose
+/// `host_os == "..."` branches the generated file carries as select()s on
+/// the host's setting ([comparisonSettings]) rather than evaluated for the
+/// generation's host: the test fixtures that copy a file of the machine
+/// (txt, impeller/fixtures: a Mac's emoji font, see [hostFiles]). Not the
+/// generation's own assumption, since the strings GN builds from host_os
+/// (the prebuilt SDK's directory, the artifacts' names) are the host's
+/// constants of @host_platform at their use sites (research/20 §8).
+const Map<String, GnValue> hostOsCases = <String, GnValue>{
+  'host_os': GnCasedValue('host_os', <String, String>{
+    'linux': 'linux',
+    'mac': 'mac',
+    'win': 'win',
+  }),
+};
+
+/// Files of the machine that builds, which GN's files name by absolute
+/// path (a Mac's `/System/Library/Fonts/Apple Color Emoji.ttc`, the text
+/// tests' fixture under `host_os == "mac"`): each is a file of the
+/// `@host_files` repository (build_defs/repositories/host_files.bzl) at the
+/// path less its leading slash, present on a machine that has it.
+const Set<String> hostFiles = <String>{'/System/Library/Fonts/Apple Color Emoji.ttc'};
+
+/// The label of a host file (see [hostFiles]).
+String hostFileLabel(String path) => '@host_files//:${path.substring(1)}';
 
 /// The values a string around an enumerated variable is expanded over, where
 /// not every value with a setting is one the engine builds: the CPUs, less
