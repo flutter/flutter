@@ -6987,7 +6987,8 @@ cc_library(
         // The developer's configurations: linux/wasm_release sets what
         // ci/wasm_release sets (one configuration); linux/host_debug's
         // --no-stripped (the stripped setting off) parts it from
-        // ci/host_debug's; macos/ is not the host.
+        // ci/host_debug's; macos/host_debug is the Mac's, after the Linux
+        // builds, and keeps its OS beside Linux's host_debug.
         'local_engine.json':
             '''
 {"builds": [
@@ -6999,7 +7000,7 @@ cc_library(
   ${build('macos/host_debug', '--runtime-mode debug --no-stripped --no-lto --xcode-symlinks', <String>[])}
 ]}''',
       });
-      final List<BuilderBuild> builds = linuxBuilds(loaded);
+      final List<BuilderBuild> builds = builderBuilds(loaded);
       // CI's host_debug_unopt sets flags the developer's does not (asan, a
       // Debug VM): the developer's keeps the bare name, CI's its prefix.
       expect(builds.map((BuilderBuild b) => b.configName), <String>[
@@ -7020,6 +7021,8 @@ cc_library(
         'wasm_release',
         'wasm_debug_unopt',
         'android_debug_arm64',
+        'mac_host',
+        'mac_host_debug',
       ]);
       expect(
         configsBazelrc(builds),
@@ -7093,12 +7096,20 @@ build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runt
 # local_engine.json: linux/android_debug_arm64
 #   --runtime-mode debug --android --android-cpu=arm64 --no-stripped --no-lto --rbe --no-goma
 # The same configuration as linux_host_engine.json's ci/android_debug_arm64, above.
+
+# mac_host_engine.json: ci/mac_host
+#   --runtime-mode debug --no-lto
+build:mac_host --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64
+
+# local_engine.json: macos/host_debug
+#   --runtime-mode debug --no-stripped --no-lto --xcode-symlinks
+build:mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64 --//engine/src/flutter/build/bazel:stripped=false
 '''),
       );
       // Two builds of one name with different flags cannot share it.
       expect(
         () => configsBazelrc(
-          linuxBuilds(
+          builderBuilds(
             configs(<String, String>{
               'linux_a.json':
                   '{"builds": [${build('ci/host_x', '--runtime-mode debug --no-lto', <String>[])}]}',
@@ -7115,7 +7126,7 @@ build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runt
           ),
         ),
       );
-      // What linuxBuilds leaves out is named, with its reason, so that the
+      // What builderBuilds leaves out is named, with its reason, so that the
       // generated file accounts for every build of the Linux files: the
       // fixture's Fuchsia build, and a test-only build with no gn step.
       final Map<String, BuilderConfig> withTestOnly = configs(<String, String>{
@@ -7128,7 +7139,7 @@ build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runt
             '"parameters": ["test", "--compile", "--bundle=fallbacks"], '
             '"scripts": ["flutter/lib/web_ui/dev/felt"]}]}, "tests": []}]}',
       });
-      final List<LeftOutBuild> leftOut = leftOutLinuxBuilds(withTestOnly);
+      final List<LeftOutBuild> leftOut = leftOutBuilds(withTestOnly);
       expect(leftOut, <LeftOutBuild>[
         (
           file: 'linux_arm_host_engine.json',
@@ -7142,11 +7153,11 @@ build:wasm_debug_unopt --compilation_mode=dbg --//engine/src/flutter/common:runt
         ),
       ]);
       expect(
-        configsBazelrc(linuxBuilds(withTestOnly), leftOut: leftOut),
+        configsBazelrc(builderBuilds(withTestOnly), leftOut: leftOut),
         endsWith('''
 # Not configurations: the builds of these files that are not builds of this
 # scope -- another platform's, or a test-only build with no tools/gn step.
-# Every other build of the Linux builder files is above.
+# Every other build of the Linux and Mac builder files is above.
 #   linux_arm_host_engine.json: ci/fuchsia_debug_x64 -- a platform the Bazel build has none for yet (--target-os=fuchsia)
 #   linux_web_engine_test.json: web_tests/test_bundles/fallbacks -- no tools/gn step: not a build
 '''),
@@ -7279,7 +7290,17 @@ install(
 # Nothing to install.
 '''),
       );
-      expect(buildFile, isNot(contains('mac_host')));
+      // The Mac's build is an install of its own (the macOS platform); the
+      // Fuchsia build is out of scope.
+      expect(
+        buildFile,
+        contains('''
+# mac_host_engine.json: ci/mac_host
+#   bazel run --config=mac_host :mac_host
+# Not built, no Bazel counterpart yet: flutter.
+# Nothing to install.
+'''),
+      );
       expect(buildFile, isNot(contains('fuchsia_debug_x64')));
       expect(
         buildFile,
@@ -7294,7 +7315,6 @@ install(
 )
 '''),
       );
-      expect(buildFile, isNot(contains('mac_host')));
       expect(
         buildFile,
         contains(
@@ -7376,7 +7396,7 @@ test_suite(
     });
 
     test('the engine type names executables run_tests.py runs', () {
-      // One-directional: every name of the table is one the script runs
+      // One-directional: every name of the tables is one the script runs
       // (the script's platform branches keep the other direction manual).
       final String script = File(
         p.join(Directory.current.path, '..', '..', 'testing', 'run_tests.py'),
@@ -7384,6 +7404,169 @@ test_suite(
       for (final String name in runTestsEngineSuites) {
         expect(script, contains("make_test('$name'"), reason: name);
       }
+      for (final String name in runTestsEngineSuitesMac) {
+        expect(script, contains("'$name'"), reason: name);
+      }
+      // The Mac's list has the Objective-C and Darwin suites and not the
+      // Linux ones.
+      expect(runTestsEngineSuitesMac, contains('flutter_desktop_darwin_unittests'));
+      expect(runTestsEngineSuitesMac, isNot(contains('flutter_linux_unittests')));
+      expect(runTestsEngineSuitesMac, isNot(contains('txt_unittests')));
+    });
+
+    test("the Mac's builds: a platform each, their names kept or prefixed", () {
+      final Map<String, BuilderConfig> loaded = configs(<String, String>{
+        'linux_host_engine.json':
+            '''
+{"builds": [
+  ${build('ci/host_debug', '--target-dir ci/host_debug --runtime-mode debug --no-lto', <String>['flutter/build/archives:artifacts'])},
+  ${build('ci/android_profile', '--target-dir ci/android_profile --runtime-mode profile --android', <String>['default'])}
+]}''',
+        'linux_web_engine_build.json':
+            '{"builds": [${build('ci/wasm_release', '--web --runtime-mode=release --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'])}]}',
+        // The Mac's: its host_debug is an x64 build (tools/gn's --mac-cpu
+        // default) and builds other targets than Linux's, so it keeps its
+        // OS; --mac --mac-cpu arm64 and a host build with --mac-cpu arm64
+        // are the arm64 platform; the Android AOT build from a Mac makes
+        // the Mac's gen_snapshot, so it keeps its OS too, though its flags
+        // are Linux's.
+        'mac_host_engine.json':
+            '''
+{"builds": [
+  ${build('ci/host_debug', '--target-dir ci/host_debug --runtime-mode debug --no-lto --xcode-symlinks', <String>['flutter/build/archives:artifacts', 'flutter/shell/platform/darwin/macos:zip_macos_flutter_framework'])},
+  ${build('ci/mac_debug_arm64', '--target-dir ci/mac_debug_arm64 --mac --mac-cpu arm64 --runtime-mode debug --no-lto --xcode-symlinks', <String>['flutter/build/archives:artifacts'])},
+  ${build('ci/host_debug_unopt_arm64', '--target-dir ci/host_debug_unopt_arm64 --runtime-mode debug --unoptimized --no-lto --mac-cpu arm64 --xcode-symlinks', <String>[], tests: runTests('Host Tests', 'dart,engine'))}
+]}''',
+        'mac_android_aot_engine.json':
+            '{"builds": [${build('ci/android_profile', '--target-dir ci/android_profile --runtime-mode profile --android --xcode-symlinks', <String>['flutter/lib/snapshot', 'flutter/shell/platform/android:gen_snapshot'])}]}',
+        // iOS is out of scope, --simulator and --darwin-extension-safe with it.
+        'mac_ios_engine.json':
+            '{"builds": [${build('ci/ios_debug_sim_extension_safe', '--ios --runtime-mode debug --simulator --simulator-cpu=arm64 --no-lto --darwin-extension-safe', <String>[])}]}',
+        // The developer's: the web build from either host is one build;
+        // macos/host_debug (--no-stripped) is the Mac's developer build,
+        // from which CI's mac_host_debug differs, so CI's keeps its ci/.
+        'local_engine.json':
+            '''
+{"builds": [
+  ${build('linux/wasm_release', '--web --runtime-mode=release --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'])},
+  ${build('macos/wasm_release', '--web --runtime-mode=release --no-rbe --no-goma', <String>['flutter/web_sdk:flutter_web_sdk_archive'])},
+  ${build('macos/host_debug', '--runtime-mode debug --no-stripped --no-lto --xcode-symlinks', <String>[])}
+]}''',
+      });
+      final List<BuilderBuild> builds = builderBuilds(loaded);
+      expect(builds.map((BuilderBuild b) => '${b.name} ${b.configName}'), <String>[
+        'ci/host_debug host_debug',
+        'ci/android_profile android_profile',
+        'ci/wasm_release wasm_release',
+        'linux/wasm_release wasm_release',
+        'ci/android_profile mac_android_profile',
+        'ci/host_debug ci_mac_host_debug',
+        'ci/mac_debug_arm64 mac_debug_arm64',
+        'ci/host_debug_unopt_arm64 host_debug_unopt_arm64',
+        'macos/wasm_release wasm_release',
+        'macos/host_debug mac_host_debug',
+      ]);
+      final String bazelrc = configsBazelrc(builds, leftOut: leftOutBuilds(loaded));
+      expect(
+        bazelrc,
+        contains('''
+# mac_android_aot_engine.json: ci/android_profile
+#   --target-dir ci/android_profile --runtime-mode profile --android --xcode-symlinks
+build:mac_android_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:android_arm --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:stripped=false
+
+# mac_host_engine.json: ci/host_debug
+#   --target-dir ci/host_debug --runtime-mode debug --no-lto --xcode-symlinks
+build:ci_mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64
+
+# mac_host_engine.json: ci/mac_debug_arm64
+#   --target-dir ci/mac_debug_arm64 --mac --mac-cpu arm64 --runtime-mode debug --no-lto --xcode-symlinks
+build:mac_debug_arm64 --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64
+
+# mac_host_engine.json: ci/host_debug_unopt_arm64
+#   --target-dir ci/host_debug_unopt_arm64 --runtime-mode debug --unoptimized --no-lto --mac-cpu arm64 --xcode-symlinks
+build:host_debug_unopt_arm64 --compilation_mode=dbg --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_arm64
+
+# local_engine.json: macos/wasm_release
+#   --web --runtime-mode=release --no-rbe --no-goma
+# The same configuration as linux_web_engine_build.json's ci/wasm_release, above.
+
+# local_engine.json: macos/host_debug
+#   --runtime-mode debug --no-stripped --no-lto --xcode-symlinks
+build:mac_host_debug --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:macos_x64 --//engine/src/flutter/build/bazel:stripped=false
+'''),
+      );
+      expect(
+        bazelrc,
+        contains(
+          '#   mac_ios_engine.json: ci/ios_debug_sim_extension_safe -- a platform the Bazel '
+          'build has none for yet (--ios)',
+        ),
+      );
+      // fileHolds: a file read under is_mac exists for the Mac's builds, a
+      // Linux one not.
+      final BuilderBuild macBuild = builds.firstWhere(
+        (BuilderBuild b) => b.configName == 'mac_debug_arm64',
+      );
+      final BuilderBuild linuxBuild = builds.firstWhere(
+        (BuilderBuild b) => b.configName == 'host_debug',
+      );
+      expect(fileHolds('is_mac', macBuild), isTrue);
+      expect(fileHolds('is_linux', macBuild), isFalse);
+      expect(fileHolds('is_mac', linuxBuild), isFalse);
+      expect(fileHolds('is_linux', linuxBuild), isTrue);
+      // The installs: the Mac's host_debug under its own name, the darwin
+      // framework listed until it converts; the suite of the arm64 host
+      // build runs the Mac's engine list (the Darwin suites among them,
+      // txt_unittests not).
+      final String buildFile = buildersBuildFile(
+        builds,
+        <String, Set<String>>{
+          '//flutter/build/archives': <String>{'artifacts'},
+          '//flutter/web_sdk': <String>{'flutter_web_sdk_archive'},
+        },
+        convertedTests: <String, Set<String>>{
+          '//flutter/fml': <String>{'fml_unittests'},
+          '//flutter/txt': <String>{'txt_unittests'},
+          '//flutter/shell/platform/darwin/macos': <String>{'flutter_desktop_darwin_unittests'},
+        },
+      );
+      expect(
+        buildFile,
+        contains('''
+# mac_host_engine.json: ci/host_debug
+#   bazel run --config=ci_mac_host_debug :ci_mac_host_debug
+# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+install(
+    name = "ci_mac_host_debug",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/archives:artifacts"],
+    directory = "ci/host_debug",
+)
+'''),
+      );
+      expect(
+        buildFile,
+        contains('''
+# ci/host_debug_unopt_arm64's tests: run_tests.py --type dart,engine.
+# Not run, no Bazel test yet: assets_unittests (engine), '''),
+      );
+      expect(
+        buildFile,
+        contains('''
+test_suite(
+    name = "host_debug_unopt_arm64_tests",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+        "//engine/src/flutter/testing/dart:dart",
+        "//engine/src/flutter/testing/dart/vm_service:vm_service",
+        "//engine/src/flutter/testing/smoke_test_failure:smoke_test_failure",
+    ],
+)
+'''),
+      );
+      expect(buildFile, isNot(contains('txt_unittests (engine)')));
     });
   });
 
