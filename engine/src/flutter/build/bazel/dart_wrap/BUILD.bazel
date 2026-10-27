@@ -372,18 +372,29 @@ gn_build(
 
 # ---------------------------------------------------------------------------
 # Library facades: one per exported GN library, with the GN target's deps,
-# libs and the headers the engine includes from it.
+# libs and the headers the engine includes from it. Each is an archive a
+# link takes members from by reference, as GN's links do (the libraries are
+# static_library targets there), so none is alwayslink, which buildifier
+# would otherwise ask of a library without headers of its own.
 # ---------------------------------------------------------------------------
+
+# runtime/vm/BUILD.gn's libdart_vm_config, the VM's public config: objc on
+# a Mac (and iOS), besides dl and pthread.
+_VM_MAC_LINKOPTS = select({
+    "@platforms//os:macos": ["-lobjc"],
+    "//conditions:default": [],
+})
 
 # //flutter/third_party/dart/runtime:libdart_jit -- the VM. Its GN deps are
 # the VM source sets (in the archive), double-conversion, protozero and ICU.
+# buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdart_jit",
     srcs = [":libdart_jit.a"],
     # runtime/vm/BUILD.gn's libs: dl, and pthread except on Android, where
     # bionic has it in libc -- which the Linux toolchains' -pthread link
-    # flag already names, so dl alone is listed.
-    linkopts = ["-ldl"],
+    # flag already names, so dl alone is listed; and objc on a Mac.
+    linkopts = ["-ldl"] + _VM_MAC_LINKOPTS,
     deps = [
         ":libdouble_conversion",
         ":libprotozero",
@@ -396,10 +407,11 @@ cc_library(
 # snapshots (a second build of the VM's sources, DART_PRECOMPILED_RUNTIME),
 # which //flutter/runtime:libdart picks in the profile and release runtime
 # modes; the same GN deps as the JIT VM's.
+# buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdart_aotruntime",
     srcs = [":libdart_aotruntime.a"],
-    linkopts = ["-ldl"],
+    linkopts = ["-ldl"] + _VM_MAC_LINKOPTS,
     deps = [
         ":libdouble_conversion",
         ":libprotozero",
@@ -409,20 +421,44 @@ cc_library(
 )
 
 # //flutter/third_party/dart/runtime/bin:libdart_builtin -- shared by the
-# dart:io glue and the ELF loader.
+# dart:io glue and the ELF loader. On a Mac its GN target names
+# Security.framework (runtime/bin/BUILD.gn's build_libdart_builtin).
+# buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "libdart_builtin",
     srcs = [":libdart_builtin.a"],
-    linkopts = ["-ldl"],
+    linkopts = ["-ldl"] + select({
+        "@platforms//os:macos": [
+            "-framework",
+            "Security",
+        ],
+        "//conditions:default": [],
+    }),
     deps = ["@dart//:dart_api_headers"],
 )
 
 # //flutter/third_party/dart/runtime/bin:common_embedder_dart_io -- dart:io
-# for embedders, on BoringSSL and zlib.
+# for embedders, on BoringSSL and zlib. On a Mac its GN target (the dart_io
+# template) names CoreFoundation, Security, Foundation and CoreServices;
+# without them a Mac's flutter_tester link fails on dart:io's symbols (the
+# Mac's T9 finding).
+# buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "common_embedder_dart_io",
     srcs = [":libcommon_embedder_dart_io.a"],
-    linkopts = ["-ldl"],
+    linkopts = ["-ldl"] + select({
+        "@platforms//os:macos": [
+            "-framework",
+            "CoreFoundation",
+            "-framework",
+            "Security",
+            "-framework",
+            "Foundation",
+            "-framework",
+            "CoreServices",
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         ":libdart_builtin",
         "//engine/src/flutter/third_party/boringssl",
