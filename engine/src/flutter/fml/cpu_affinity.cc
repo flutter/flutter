@@ -5,8 +5,10 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/build_config.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <fstream>
+#include <limits>
 #include <optional>
 #include <string>
 
@@ -38,22 +40,19 @@ namespace {
 // one, and none is below half of the fastest. Equal capacities say nothing,
 // since a kernel without capacity data reports 1024 for every CPU.
 bool HasNoLittleCores(const std::vector<CpuIndexAndSpeed>& cpus) {
-  std::optional<int64_t> min_capacity = std::nullopt;
-  std::optional<int64_t> max_capacity = std::nullopt;
+  if (cpus.empty()) {
+    return false;
+  }
+  int64_t min_capacity = std::numeric_limits<int64_t>::max();
+  int64_t max_capacity = std::numeric_limits<int64_t>::min();
   for (const auto& cpu : cpus) {
     if (!cpu.capacity.has_value()) {
       return false;
     }
-    const int64_t capacity = cpu.capacity.value();
-    if (!min_capacity.has_value() || capacity < min_capacity.value()) {
-      min_capacity = capacity;
-    }
-    if (!max_capacity.has_value() || capacity > max_capacity.value()) {
-      max_capacity = capacity;
-    }
+    min_capacity = std::min(min_capacity, *cpu.capacity);
+    max_capacity = std::max(max_capacity, *cpu.capacity);
   }
-  return min_capacity.has_value() && min_capacity != max_capacity &&
-         min_capacity.value() * 2 >= max_capacity.value();
+  return min_capacity != max_capacity && min_capacity * 2 >= max_capacity;
 }
 
 }  // namespace
