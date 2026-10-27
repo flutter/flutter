@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
@@ -461,6 +462,43 @@ class SemanticTextField extends SemanticRole {
     _updateHintDescription();
 
     _updateInputType();
+
+    _updateValue();
+  }
+
+  /// Copies the framework's value into [editableElement] while this field is
+  /// not being edited.
+  ///
+  /// Without this, a field that has never been focused, such as a disabled
+  /// field, exposes an empty value to assistive technologies.
+  ///
+  /// While this field is the active editing element, the text editing strategy
+  /// owns the element's value and selection, so they are left alone. Obscured
+  /// fields are skipped because their semantics value is masked, and fields
+  /// owned by an autofill group are skipped because the group manages their
+  /// value.
+  void _updateValue() {
+    if (!semanticsObject.isValueDirty) {
+      return;
+    }
+    if (SemanticsTextEditingStrategy._instance?.activeTextField == this) {
+      return;
+    }
+    if (semanticsObject.flags.isObscured || _isAutofillOwned) {
+      return;
+    }
+    final String value = semanticsObject.value ?? '';
+    if (editableElement.isA<DomHTMLInputElement>()) {
+      final input = editableElement as DomHTMLInputElement;
+      if (input.value != value) {
+        input.value = value;
+      }
+    } else if (editableElement.isA<DomHTMLTextAreaElement>()) {
+      final textArea = editableElement as DomHTMLTextAreaElement;
+      if (textArea.value != value) {
+        textArea.value = value;
+      }
+    }
   }
 
   void _updateHintDescription() {

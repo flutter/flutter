@@ -3002,11 +3002,9 @@ void _testTextField() {
     final textFieldRole = node.semanticRole! as SemanticTextField;
     final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
 
-    // TODO(yjbanov): this used to attempt to test that value="hello" but the
-    //                test was a false positive. We should revise this test and
-    //                make sure it tests the right things:
-    //                https://github.com/flutter/flutter/issues/147200
-    expect(inputElement.value, '');
+    // `outerHTML` does not include the `value` property, so it is checked on
+    // the element directly.
+    expect(inputElement.value, 'hello');
 
     expect(node.semanticRole?.kind, EngineSemanticsRole.textField);
     expect(
