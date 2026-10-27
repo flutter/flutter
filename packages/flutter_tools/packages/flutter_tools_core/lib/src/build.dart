@@ -86,20 +86,24 @@ enum BuildMode {
 /// Representation of a custom `flutter build` subcommand target provided by a tool extension.
 @immutable
 class ExtensionBuildTarget {
-  const ExtensionBuildTarget({
+  ExtensionBuildTarget({
     required this.description,
     required this.name,
     required this.outputDir,
     required this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-  });
+  }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage');
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (!isValidName(name)) {
+      throw FormatException('Invalid "$nameKey" field: "$name". $_invalidNameMessage');
+    }
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
-      name: json.requiredField<String>(nameKey),
+      name: name,
       outputDir: json.requiredField<String>(outputDirKey),
       targetPlatform: json.requiredField<String>(targetPlatformKey),
       artifacts: <ExtensionArtifact>{
@@ -111,6 +115,18 @@ class ExtensionBuildTarget {
       },
     );
   }
+
+  static final _validNamePattern = RegExp(r'^[a-z][a-z0-9_-]*$');
+  static const _invalidNameMessage =
+      'Build target names must start with a lowercase ASCII letter and contain '
+      'only lowercase ASCII letters, digits, underscores, and hyphens.';
+
+  /// Returns whether [name] is a valid build target name.
+  ///
+  /// A valid target name must start with a lowercase ASCII letter (`a-z`) and
+  /// may contain only lowercase ASCII letters, digits (`0-9`), underscores
+  /// (`_`), and hyphens (`-`).
+  static bool isValidName(String name) => _validNamePattern.hasMatch(name);
 
   /// Map key for [artifacts].
   static const String artifactsKey = 'artifacts';
@@ -145,6 +161,8 @@ class ExtensionBuildTarget {
   final String description;
 
   /// The name of this build target (e.g. `'custom-apk'`).
+  ///
+  /// Must match [isValidName].
   final String name;
 
   /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).

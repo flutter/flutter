@@ -130,8 +130,14 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
     }
 
     final String? appName = _getCmakeBinaryName(projectDir.uri);
-    final File? executableFile = appName != null ? File('${outputDir.path}/bundle/$appName') : null;
-    return ExtensionBuildResult(success: true, executableUri: executableFile?.absolute.uri);
+    if (appName == null) {
+      return const ExtensionBuildResult(
+        success: false,
+        errorMessage: 'Could not find BINARY_NAME in linux/CMakeLists.txt.',
+      );
+    }
+    final File executableFile = File('${outputDir.path}/bundle/$appName');
+    return ExtensionBuildResult(success: true, executableUri: executableFile.absolute.uri);
   }
 }
 

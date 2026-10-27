@@ -597,7 +597,7 @@ class ExtensionBackedDevice extends Device {
     String? userIdentifier,
   }) async {
     // TODO(bkonyi): Forward additional BuildInfo and DebuggingOptions fields
-    // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/193955.
+    // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/190746.
     final BuildMode buildMode = debuggingOptions.buildInfo.mode;
 
     if (prebuiltApplication) {

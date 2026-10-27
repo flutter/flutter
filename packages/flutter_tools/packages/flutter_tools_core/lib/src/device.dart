@@ -117,6 +117,8 @@ class TargetDevice {
 
   /// The [ExtensionBuildTarget.name] of the extension build target used to
   /// build an application for this device during `flutter run`.
+  ///
+  /// Must match [ExtensionBuildTarget.isValidName].
   final String? buildTarget;
 
   /// Whether the device is ephemeral.
