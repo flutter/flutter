@@ -129,6 +129,17 @@ sealed class Condition {
         asserted[alternative.family] = alternative.member;
       }
     }
+    // A denial of the very member another term asserts (`!is_mac` beside
+    // `full_target_platform_name == "darwin-arm64"`, which asserts is_mac)
+    // never holds; a denial of another member is said already.
+    for (final term in terms) {
+      final _Alternative? alternative = term._alternative;
+      if (alternative != null &&
+          !alternative.asserted &&
+          asserted[alternative.family] == alternative.member) {
+        return never;
+      }
+    }
     terms.removeWhere((Condition term) {
       final _Alternative? alternative = term._alternative;
       return alternative != null &&

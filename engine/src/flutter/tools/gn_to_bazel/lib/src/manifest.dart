@@ -796,18 +796,12 @@ exports_files(
   // entitlement lists are the macOS signing step's.
   ConvertedFile(
     '//flutter/build/archives',
-    // The macOS archives (dart-sdk-darwin-<cpu>.zip with its entitlements
-    // lists, generated_file over metadata) are the Apple products' phase's.
-    assume: macosDeferred,
-    skip: <String, String>{
-      'artifacts_entitlement_config':
-          'generated_file over metadata: the entitlements list of the macOS bundle',
-      'artifacts_without_entitlement_config':
-          'generated_file over metadata: the entitlements list of the macOS bundle',
-      'dart_sdk_entitlement_config': 'generated_file: the entitlements list of the macOS bundle',
-      'dart_sdk_without_entitlement_config':
-          'generated_file: the entitlements list of the macOS bundle',
-    },
+    // The macOS archives (darwin-<cpu>/artifacts.zip, dart-sdk-darwin-<cpu>.zip
+    // with their entitlements lists -- generated_files over the tools'
+    // metadata, walked at conversion time -- and the rest) are the Mac's
+    // branches of this file; `host_os == "mac"` is the host's setting
+    // (hostOsCases: the .dylib names of the host's libraries).
+    assume: hostOsCases,
     appendix: '''
 load("//build_defs/android:build_tools.bzl", "android_engine_artifacts")
 load("//build_defs/dist:local_engine.bzl", "bundle_directory")
@@ -905,12 +899,9 @@ android_engine_artifacts(name = "android_engine")
   // archive, GN's zip_bundle). The entitlements list is the macOS bundle's.
   ConvertedFile(
     '//flutter/tools/font_subset',
-    // The macOS archive's entitlements lists: the Apple products' phase's.
-    assume: macosDeferred,
-    skip: <String, String>{
-      'font_entitlement_config':
-          'generated_file over metadata: the entitlements list of the macOS bundle',
-    },
+    // The macOS archive (darwin-<cpu>/font-subset.zip) carries the tool's
+    // without-entitlements list, a generated_file over the tool's metadata
+    // (walked at conversion time).
     appendix: '''
 load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
 
@@ -1055,11 +1046,10 @@ filegroup(
   // bundle is packaging, and the static library a GN artifact
   // (complete_static_lib) Bazel's cc_library does not stand for.
   ConvertedFile(
+    // The Impeller SDK: its shared library is libimpeller.so or .dylib by
+    // platform (flutter_shared_library), its archive darwin-<cpu>/
+    // impeller_sdk.zip on a Mac, where the Metal example builds too.
     '//flutter/impeller/toolkit/interop',
-    // The Impeller SDK's macOS form (libimpeller.dylib, the Metal example)
-    // is the Apple products' phase's.
-    assume: macosDeferred,
-    skip: <String, String>{'example_mtl': 'Objective-C and Metal: macOS'},
   ),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend'),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend/gles'),

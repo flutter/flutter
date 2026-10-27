@@ -754,10 +754,14 @@ final class _Emitter {
   /// (build_defs/gn) writing the lines, named after GN's output
   /// path under the build directory (or under the package's own gen dir,
   /// when it is there), with the output on record for install. The
-  /// `metadata`-walking form (`data_keys`) is not converted.
+  /// `metadata`-walking form (`data_keys`: the entitlements lists of the
+  /// macOS archives) has its walk done here, at conversion time
+  /// ([_walkedMetadata]): the lines are what GN would collect, each under
+  /// the condition of the dependency path that reaches it.
   void _convertGeneratedFile(GnTarget target) {
     _use('//build_defs/gn:gn_action.bzl', 'gn_generated_file');
     final rule = _Rule('gn_generated_file', target.name, target.comments);
+    List<String>? dataKeys;
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'outputs':
@@ -795,7 +799,16 @@ final class _Emitter {
           _labelsInto(rule.list('deps'), variable, target);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
-        case 'output_conversion' || 'data_keys' || 'walk_keys' || 'rebase':
+        case 'data_keys':
+          final List<GnValue>? items = variable.unconditionalItems;
+          if (items == null || items.isEmpty || items.any((GnValue v) => v is! GnStringValue)) {
+            throw GnError(
+              variable.assignments.first.location,
+              'generated_file ${target.name} must name its data_keys unconditionally',
+            );
+          }
+          dataKeys = <String>[for (final GnValue v in items) (v as GnStringValue).value];
+        case 'output_conversion' || 'walk_keys' || 'rebase':
           throw GnError(
             variable.assignments.first.location,
             'generated_file variable ${variable.name} is not converted yet',
@@ -815,7 +828,111 @@ final class _Emitter {
     if (!rule.scalars.containsKey('out')) {
       throw GnError(target.location, 'generated_file ${target.name} has no outputs');
     }
+    if (dataKeys != null) {
+      if (rule.lists.containsKey('content')) {
+        throw GnError(
+          target.location,
+          'generated_file ${target.name} has both contents and data_keys',
+        );
+      }
+      for (final (Condition condition, String line) in _walkedMetadata(target, dataKeys)) {
+        rule.list('content').add(condition, _Item(line));
+      }
+    }
     rules.add(rule);
+  }
+
+  /// What GN's generated_file collects for [keys]: walking the target's
+  /// `deps` (and `public_deps`, `data_deps`) depth-first, each target's
+  /// own `metadata` scope first and its dependencies after, in order, once
+  /// per target -- as GN's metadata walk goes with no `walk_keys`. The
+  /// targets of this file are read here, those of other files through the
+  /// resolver, under the generation's assumptions; a target the resolver
+  /// cannot read (a synced tree's) contributes nothing, which is right as
+  /// long as such trees carry no metadata under the engine's keys (the
+  /// entitlement keys: none does). Each line comes under the conjunction
+  /// of the conditions on the path to it and of its own listing.
+  List<(Condition, String)> _walkedMetadata(GnTarget target, List<String> keys) {
+    final lines = <(Condition, String)>[];
+    final visited = <String>{};
+    void visit(String label, Condition under) {
+      final String stripped = label.split('(').first;
+      final String absolute = absoluteGnLabel(stripped, package: gnPackage, implicitName: true);
+      if (!visited.add(absolute)) {
+        return;
+      }
+      final int colon = absolute.indexOf(':');
+      final String directory = absolute.substring(0, colon);
+      final String name = absolute.substring(colon + 1);
+      final GnTarget? dep = directory == gnPackage
+          ? localTargets[name]
+          : forwarded.targetOf(absolute);
+      if (dep == null) {
+        // A target the converter does not read: a hand-written package's,
+        // whose metadata the mapping mirrors (unreadMetadata), or a tree
+        // outside the engine's, which carries none of its keys.
+        final Map<String, List<String>>? known = unreadMetadata[absolute];
+        if (known != null) {
+          for (final key in keys) {
+            for (final String line in known[key] ?? const <String>[]) {
+              lines.add((under, line));
+            }
+          }
+        } else if (absolute.startsWith('//flutter/') &&
+            !absolute.startsWith('//flutter/third_party/') &&
+            !unreadMetadataPackages.contains(directory) &&
+            directory != gnPackage &&
+            forwarded.evaluationOf(directory) == null) {
+          throw GnError(
+            target.location,
+            'the metadata walk of ${target.name} reaches $absolute, whose file the converter '
+            'does not read; mirror its metadata in unreadMetadata (bazel_mapping.dart)',
+          );
+        }
+        return;
+      }
+      for (final GnAssignment assignment
+          in dep.variables['metadata']?.assignments ?? const <GnAssignment>[]) {
+        for (final GnValue value in assignment.items) {
+          if (value is! GnScopeValue) {
+            continue;
+          }
+          for (final key in keys) {
+            for (final GnListItem item in value.variables[key]?.liveItems ?? const <GnListItem>[]) {
+              final GnValue line = item.value;
+              if (line is! GnStringValue) {
+                throw GnError(
+                  item.assignment.location,
+                  'metadata $key of ${dep.name} holds $line, which the walk cannot write as a line',
+                );
+              }
+              lines.add((under.and(assignment.condition).and(item.condition), line.value));
+            }
+          }
+        }
+      }
+      for (final edge in const <String>['deps', 'public_deps', 'data_deps']) {
+        for (final GnListItem item in dep.variables[edge]?.liveItems ?? const <GnListItem>[]) {
+          final GnValue next = item.value;
+          if (next is GnStringValue) {
+            visit(
+              absoluteGnLabel(next.value, package: directory, implicitName: true),
+              under.and(item.condition),
+            );
+          }
+        }
+      }
+    }
+
+    for (final edge in const <String>['deps', 'public_deps', 'data_deps']) {
+      for (final GnListItem item in target.variables[edge]?.liveItems ?? const <GnListItem>[]) {
+        final GnValue dep = item.value;
+        if (dep is GnStringValue) {
+          visit(dep.value, item.condition);
+        }
+      }
+    }
+    return lines;
   }
 
   static bool _isCompleteStaticLibrary(GnTarget target) {
@@ -2043,7 +2160,9 @@ final class _Emitter {
         for (final MapEntry<String, String> b in bound.entries) {
           condition = condition.and(ConditionComparison(b.key, true, b.value));
         }
-        if (condition == Condition.never || _targetCondition.and(condition) == Condition.never) {
+        if (condition == Condition.never ||
+            _targetCondition.and(condition) == Condition.never ||
+            !_toolsGnBuilds(condition)) {
           continue;
         }
         final parts = <GnValue>[];
@@ -2069,6 +2188,42 @@ final class _Emitter {
       }
     }
     return out;
+  }
+
+  /// Whether a case's condition names an OS and a CPU tools/gn builds
+  /// together ([targetPlatformNames]: `darwin-arm64`, never `darwin-arm`).
+  /// The expansion over the CPUs is the converter's own device -- GN
+  /// evaluates one configuration -- so a pair tools/gn never configures is
+  /// no case; a condition naming no OS, or no CPU, is left alone.
+  static bool _toolsGnBuilds(Condition condition) {
+    final List<Condition> terms = condition is ConditionAnd
+        ? condition.terms
+        : <Condition>[condition];
+    String? os;
+    String? cpu;
+    for (final term in terms) {
+      switch (term) {
+        case ConditionVariable(:final String name) when exclusiveOsPredicates.contains(name):
+          os = name;
+        case ConditionComparison(
+          name: 'target_cpu' || 'current_cpu',
+          equals: true,
+          :final String value,
+        ):
+          cpu = value;
+        default:
+          break;
+      }
+    }
+    if (os == null || cpu == null) {
+      return true;
+    }
+    final String platform = switch (os) {
+      'is_mac' => 'darwin',
+      'is_win' => 'windows',
+      _ => os.substring('is_'.length),
+    };
+    return targetPlatformNames.contains('$platform-$cpu');
   }
 
   /// Whether [value] is a string around references the Bazel side keeps as
@@ -2135,6 +2290,23 @@ final class _Emitter {
   /// cannot see produced ([buildOutputLabels]: the wrapped and hand-written
   /// trees).
   String _buildOutputLabel(String path, GnTarget bundle, GnLocation location) {
+    final String? label = _producedOutputLabel(path, bundle, location);
+    if (label != null) {
+      return label;
+    }
+    final String spelled = path
+        .replaceFirst('$genDirRoot/', r'$root_gen_dir/')
+        .replaceFirst('$buildDirRoot/', r'$root_out_dir/');
+    throw GnError(
+      location,
+      'no target of this file or of the deps of ${bundle.name} produces $spelled '
+      '(buildOutputLabels in bazel_mapping.dart names the outputs of the wrapped trees)',
+    );
+  }
+
+  /// [_buildOutputLabel], or null when nothing the converter can see
+  /// produces [path].
+  String? _producedOutputLabel(String path, GnTarget bundle, GnLocation location) {
     String? label = _buildOutputs(localTargets.values.toList(), gnPackage)[path];
     if (label == null) {
       // The bundle's deps in other files, and what a group among them
@@ -2182,21 +2354,15 @@ final class _Emitter {
     if (known != null) {
       return _localLabel(known);
     }
-    final String spelled = path
-        .replaceFirst('$genDirRoot/', r'$root_gen_dir/')
-        .replaceFirst('$buildDirRoot/', r'$root_out_dir/');
-    throw GnError(
-      location,
-      'no target of this file or of the deps of ${bundle.name} produces $spelled '
-      '(buildOutputLabels in bazel_mapping.dart names the outputs of the wrapped trees)',
-    );
+    return null;
   }
 
   /// The build outputs of [targets] (of the GN directory [directory]), each
   /// as the GN label of what produces it: an executable's file is its
-  /// `output_name` or name, a shared library's `lib<name>.so`, a complete
-  /// static library's `lib<name>.a` under its `obj/` directory, and a copy's
-  /// or an action's its `outputs` -- the source itself for a copy that
+  /// `output_name` or name, a shared library's `lib<name>.so` (and the
+  /// Apple platforms' `lib<name>.dylib`), a complete static library's
+  /// `lib<name>.a` under its `obj/` directory, and a copy's, an action's or
+  /// a generated_file's its `outputs` -- the source itself for a copy that
   /// keeps the file as it is, the output file for one that renames or an
   /// action that generates. The host's file names: these files are the
   /// Linux host's.
@@ -2215,7 +2381,10 @@ final class _Emitter {
         case 'executable':
           outputs['$buildDirRoot/${name()}'] = label;
         case 'shared_library':
+          // The platform's file: .so off the Apple platforms, .dylib on
+          // them (flutter_shared_library declares both under GN's name).
           outputs['$buildDirRoot/lib${name()}.so'] = label;
+          outputs['$buildDirRoot/lib${name()}.dylib'] = label;
         case 'static_library':
           final List<GnValue>? complete =
               target.variables['complete_static_lib']?.unconditionalItems;
@@ -2224,10 +2393,12 @@ final class _Emitter {
               complete.single == const GnBoolValue(true)) {
             outputs['$buildDirRoot/obj${directory.substring(1)}/lib${name()}.a'] = label;
           }
-        case 'copy' || 'action':
+        case 'copy' || 'action' || 'generated_file':
           // An action's outputs may be partly conditional (android_jar's
           // engine jar, named by the CPU, beside flutter.jar): the live
-          // items, of which the plain strings are read below.
+          // items, of which the plain strings are read below. A
+          // generated_file's output (the entitlements lists) is under its
+          // gen dir: the file of the package, as a copy's.
           final List<GnValue>? files = target.rule == 'action'
               ? target.variables['outputs']?.liveItems.map((GnListItem i) => i.value).toList()
               : target.variables['outputs']?.unconditionalItems;
@@ -2501,7 +2672,30 @@ final class _Emitter {
           if (edge != null) {
             _moduleOutputsInto(rule, variable, edge, target);
           } else {
-            _filesInto(rule.list('srcs'), variable);
+            // A source under the build directory (the embedder's
+            // `$root_out_dir/libflutter_engine.dylib`, copied into its
+            // framework) is the target that produces it, as a zip_bundle's
+            // entries resolve (_buildOutputLabel); one under the generated
+            // directory is that too when a target the converter sees
+            // produces it, else the file's twin path in the package (a
+            // template's output, `$target_gen_dir/iplr/no_uniforms.frag.iplr`,
+            // which the package declares under that name); any other is a
+            // file -- given as an absolute path (sky_engine's
+            // `rebase_path(sources, "", lib_path)`), the file at that path.
+            _forEachItem(variable, into: rule.list('srcs'), (_Element e) {
+              final String raw = _rawString(e);
+              final String path = raw.contains(rebasedPathMarker) ? _unmarked(raw) : _string(e);
+              if (path.contains(rebasedPathMarker)) {
+                throw GnError(e.assignment.location, 'a rebased path inside a file name: $raw');
+              }
+              final GnLocation location = e.assignment.location;
+              final String item = path.startsWith('$buildDirRoot/')
+                  ? _buildOutputLabel(path, target, location)
+                  : path.startsWith('$genDirRoot/')
+                  ? _producedOutputLabel(path, target, location) ?? _filePath(path, location)
+                  : _filePath(path, location);
+              rule.list('srcs').addUnique(e.condition, _item(item, e));
+            });
           }
         case 'outputs':
           // As GN wrote them, for the record.
@@ -2766,12 +2960,14 @@ final class _Emitter {
   }
 
   /// A `source_set`/`static_library` ([library]), an `executable`, or a
-  /// `shared_library` ([shared]: a `cc_binary` with `linkshared`, named
-  /// after the file GN produces -- `lib<output_name>.so`, as Bazel requires
-  /// of a shared binary -- with an `alias` under the GN target's name). An
-  /// executable with an `output_name` of its own (`_font-subset`, producing
-  /// `font-subset`) is named and aliased the same way, since a cc_binary's
-  /// file is its name.
+  /// `shared_library` ([shared]: a `flutter_shared_library`
+  /// (build_defs/cc/shared_library.bzl), which declares the `cc_binary`
+  /// named after the file GN produces on each platform family --
+  /// `lib<output_name>.so` off the Apple platforms, `lib<output_name>.dylib`
+  /// on them, as Bazel names a shared binary by its file -- under GN's name
+  /// as an alias of the platform's). An executable with an `output_name` of
+  /// its own (`_font-subset`, producing `font-subset`) is named and aliased
+  /// the same way, since a cc_binary's file is its name.
   /// A `source_set()` whose sources are Swift: GN compiles it as one module
   /// through its `tool("swift")` (build/toolchain/darwin/swiftc.py).
   static bool _isSwiftTarget(GnTarget target) {
@@ -2980,23 +3176,30 @@ final class _Emitter {
         ? 'flutter_display_test'
         : gtestParallel
         ? 'flutter_cc_test'
+        : shared
+        ? 'flutter_shared_library'
         : kind;
     if (display || gtestParallel) {
       _use('//build_defs/testing:testing.bzl', ruleKind);
+    } else if (shared) {
+      _use('//build_defs/cc:shared_library.bzl', ruleKind);
     } else {
       _use('@rules_cc//cc:defs.bzl', kind);
     }
     // An executable's output_name is the rule's name, GN's name an alias
     // (below): a binary's, and a test's too (the Android suites run by
     // their file names: impeller_toolkit_android_unittests for
-    // toolkit/android's `unittests`).
+    // toolkit/android's `unittests`). A shared library keeps GN's name: the
+    // macro names the platform's file (`lib<output_name>.so` or `.dylib`)
+    // and aliases it.
     final String? outputName = _singleString(target.variables['output_name']);
-    final String name = shared
-        ? 'lib${outputName ?? target.name}.so'
-        : (kind == 'cc_binary' || kind == 'cc_test') && outputName != null
+    final String name = (kind == 'cc_binary' || kind == 'cc_test') && !shared && outputName != null
         ? outputName
         : target.name;
     final rule = _Rule(ruleKind, name, target.comments);
+    if (shared) {
+      rule.scalars['output_name'] = '"${outputName ?? target.name}"';
+    }
     if (kind == 'cc_test') {
       rule.scalars['size'] = '"${testSizes[target.name] ?? defaultTestSize}"';
       final int? shards = testShardCounts[target.name];
@@ -3085,8 +3288,7 @@ final class _Emitter {
       rule.list('data').addUnique(Condition.always, const _Item(':$gpuBackendsTargetName'));
     }
     if (shared) {
-      rule.scalars['linkshared'] = 'True';
-      _sharedLibraryOutputs.add(name);
+      _sharedLibraryOutputs.add('lib${outputName ?? target.name}.so');
     }
     var chromiumCode = true;
     // With an explicit `public` list the headers in `sources` are private.
@@ -3453,17 +3655,40 @@ final class _Emitter {
       companion.scalars['testonly'] = 'True';
     }
     // Compatible where its sources are listed, within the target's own
-    // condition; the target depends on it under the same conditions.
+    // condition -- and on the Apple platforms at most, whatever the listing
+    // says (applePlatforms): GN's other toolchains have no objc tool and
+    // write such sources nowhere (an unconditional example_mtl.m in a file
+    // Linux reads), where Bazel's objc_library fails to analyze. The target
+    // depends on it under the same conditions.
     Condition listed = Condition.never;
     for (final (Condition under, _) in objc) {
       listed = listed.or(under);
       rule.list('deps').addUnique(under, _Item(':${companion.name}'));
     }
-    final Condition compatible = target.condition.and(listed);
+    final Condition compatible = target.condition.and(listed).and(applePlatforms);
     if (compatible != Condition.always) {
       companion.scalars['target_compatible_with'] = _compatibilityOf(compatible, target);
     }
     rules.add(companion);
+    // A binary whose every compiled source went to the companion has
+    // nothing to link elsewhere (GN's ninja would link it from no
+    // objects): it is of the Apple platforms too, within its own condition.
+    bool compiles(_Item item) {
+      final int dot = item.text.lastIndexOf('.');
+      return !item.quoted || dot < 0 || !_headerExtensions.contains(item.text.substring(dot));
+    }
+
+    final bool othersRemain =
+        srcs.always.any(compiles) ||
+        srcs.conditional.values.any((List<_Item> items) => items.any(compiles)) ||
+        srcs.sequence.any(((Condition, _Item) entry) => compiles(entry.$2));
+    if (!library && !othersRemain) {
+      final Condition owner = target.condition.and(applePlatforms);
+      if (owner != Condition.always) {
+        rule.scalars['target_compatible_with'] = _compatibilityOf(owner, target);
+        rule.fixedCompatibility = true;
+      }
+    }
   }
 
   /// Copies [from]'s items into [to] under their conditions, in order.

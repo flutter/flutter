@@ -4,8 +4,9 @@
 
 # Generated from //flutter/impeller/tessellator/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -54,8 +55,8 @@ cc_library(
     alwayslink = True,
 )
 
-cc_binary(
-    name = "libtessellator.so",
+flutter_shared_library(
+    name = "tessellator_shared",
     srcs = [
         "c/tessellator.cc",
         "c/tessellator.h",
@@ -68,8 +69,8 @@ cc_binary(
         ],
         "//conditions:default": [],
     }),
-    linkshared = True,
     local_defines = FLUTTER_LOCAL_DEFINES,
+    output_name = "tessellator",
     deps = [
         ":tessellator_libtess",
         "//engine/src:include_root",
@@ -81,11 +82,6 @@ cc_binary(
         "//engine/src/flutter/impeller/geometry",
         "@libtess2",
     ],
-)
-
-alias(
-    name = "tessellator_shared",
-    actual = ":libtessellator.so",
 )
 
 cc_library(

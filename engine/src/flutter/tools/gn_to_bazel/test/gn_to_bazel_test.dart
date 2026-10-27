@@ -2851,17 +2851,66 @@ dart_pkg(
       expect(output, isNot(contains('gn_action(')));
     });
 
-    test('generated_file over metadata is refused', () async {
-      await expectLater(
-        convert(r'''
-generated_file("x") {
-  outputs = [ "$root_gen_dir/x.txt" ]
-  data_keys = [ "entitlements" ]
-  deps = []
+    test('generated_file over metadata walks the deps at conversion time', () async {
+      // The macOS archives' entitlements lists: GN collects `data_keys` from
+      // the metadata of the deps and of theirs, depth-first, each target
+      // once. The walk is done here -- this file's targets directly, other
+      // files' through the resolver -- each line under the conditions on
+      // its path, in GN's order; the file's `deps` stay the rule's.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/x/BUILD.gn': r'''
+executable("tool") {
+  sources = [ "a.cc" ]
+  deps = [ ":lib", "//flutter/y:helper" ]
+  metadata = {
+    entitlement_file_path = [ "tool" ]
+  }
 }
-'''),
-        throwsGnError(line: 3, message: 'generated_file variable data_keys is not converted yet'),
+source_set("lib") {
+  sources = [ "l.cc" ]
+  if (is_android) {
+    metadata = {
+      entitlement_file_path = [ "lib-android" ]
+    }
+  }
+}
+generated_file("entitlements") {
+  outputs = [ "$target_gen_dir/entitlements.txt" ]
+  data_keys = [ "entitlement_file_path" ]
+  deps = [ ":tool" ]
+}
+''',
+        'flutter/y/BUILD.gn': r'''
+executable("helper") {
+  sources = [ "h.cc" ]
+  metadata = {
+    entitlement_file_path = [ "helper" ]
+    without_entitlement_file_path = [ "other" ]
+  }
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/x/BUILD.gn', assumptions: generationAssumptions()),
+        gnPackage: '//flutter/x',
+        tree: tree,
       );
+      expect(
+        output,
+        contains(
+          'gn_generated_file(\n'
+          '    name = "entitlements",\n'
+          '    out = "entitlements.txt",\n'
+          '    content = ["tool"] + select({\n'
+          '        "@platforms//os:android": ["lib-android"],\n'
+          '        "//conditions:default": [],\n'
+          '    }) + ["helper"],\n'
+          '    outputs = ["\$root_gen_dir/flutter/x/entitlements.txt"],\n'
+          '    deps = [":tool"],\n'
+          ')\n',
+        ),
+      );
+      expect(output, isNot(contains('"other"')));
     });
   });
 
@@ -6988,8 +7037,13 @@ action_foreach("x") {
       );
     });
 
-    test('a shared_library is a shared cc_binary named after its output, with an alias', () async {
-      final String output = await convert('''
+    test(
+      "a shared_library is a flutter_shared_library under GN's name, named by its output",
+      () async {
+        // The macro (build_defs/cc/shared_library.bzl) declares the
+        // platform's file -- lib<output_name>.so off the Apple platforms,
+        // lib<output_name>.dylib on them -- and GN's name as an alias.
+        final String output = await convert('''
 shared_library("x_shared") {
   output_name = "x"
   sources = [ "a.cc" ]
@@ -6999,40 +7053,42 @@ source_set("y") {
   sources = [ "y.cc" ]
 }
 ''');
-      expect(
-        output,
-        contains('''
-cc_binary(
-    name = "libx.so",
+        expect(
+          output,
+          contains('''
+flutter_shared_library(
+    name = "x_shared",
     srcs = ["a.cc"],
     copts = CHROMIUM_CODE_COPTS,
-    linkshared = True,
     local_defines = FLUTTER_LOCAL_DEFINES,
+    output_name = "x",
     deps = [
         ":y",
         "//engine/src:include_root",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
     ],
 )
-
-alias(
-    name = "x_shared",
-    actual = ":libx.so",
-)
 '''),
-      );
-      // Without output_name the target's own name is the library's.
-      expect(
-        await convert('''
+        );
+        expect(
+          output,
+          contains('load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")'),
+        );
+        expect(output, isNot(contains('alias(')));
+        // Without output_name the target's own name is the library's.
+        expect(
+          await convert('''
 shared_library("z") {
   sources = [ "a.cc" ]
 }
 '''),
-        contains('    name = "libz.so",\n'),
-      );
-      // A library named like the shared library's output would declare the
-      // same libw.so; it gives the implicit output up.
-      final String clash = await convert('''
+          contains(
+            '    name = "z",\n    srcs = ["a.cc"],\n    copts = CHROMIUM_CODE_COPTS,\n    local_defines = FLUTTER_LOCAL_DEFINES,\n    output_name = "z",\n',
+          ),
+        );
+        // A library named like the shared library's output would declare the
+        // same libw.so; it gives the implicit output up.
+        final String clash = await convert('''
 source_set("w") {
   sources = [ "w.cc" ]
 }
@@ -7042,10 +7098,11 @@ shared_library("w_shared") {
   deps = [ ":w" ]
 }
 ''');
-      expect(clash, contains('    name = "w",\n    srcs = ["w.cc"],\n'));
-      expect(clash, contains('    linkstatic = True,\n'));
-      expect(clash, contains('    name = "libw.so",\n'));
-    });
+        expect(clash, contains('    name = "w",\n    srcs = ["w.cc"],\n'));
+        expect(clash, contains('    linkstatic = True,\n'));
+        expect(clash, contains('    name = "w_shared",\n'));
+      },
+    );
 
     test(
       r'an ldflags entry naming a source file becomes $(execpath) with a linker input',

@@ -533,12 +533,13 @@ selects.config_setting_group(
     ],
 )
 
-# `enable_unittests && test_enable_metal`, for the select()s of this file.
+# `enable_unittests && test_enable_metal && is_mac`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_enable_unittests_and_test_enable_metal",
+    name = "when_enable_unittests_and_test_enable_metal_and_is_mac",
     match_all = [
         "//engine/src/flutter/testing:unittests_enabled",
         "//engine/src/flutter/shell:test_enable_metal",
+        "@platforms//os:macos",
     ],
 )
 
@@ -573,7 +574,7 @@ flutter_objc_library(
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_enable_unittests_and_test_enable_metal": [],
+        ":when_enable_unittests_and_test_enable_metal_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -592,6 +593,15 @@ flutter_objc_library(
     alwayslink = True,
 )
 
+# `enable_unittests && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "@platforms//os:macos",
+    ],
+)
+
 flutter_cc_test(
     name = "testing_unittests",
     size = "small",
@@ -608,7 +618,7 @@ flutter_cc_test(
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        "//engine/src/flutter/testing:unittests_enabled": [],
+        ":when_enable_unittests_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [

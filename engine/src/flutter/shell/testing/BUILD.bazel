@@ -72,12 +72,13 @@ selects.config_setting_group(
     ],
 )
 
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal`, for the select()s of this file.
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal && is_mac`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal",
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_is_mac",
     match_all = [
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
         "//engine/src/flutter/shell:enable_metal",
+        "@platforms//os:macos",
     ],
 )
 
@@ -197,7 +198,7 @@ flutter_objc_library(
         "//conditions:default": [],
     }),
     target_compatible_with = select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal": [],
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -539,6 +540,15 @@ cc_binary(
     }),
 )
 
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "//engine/src/flutter/shell:enable_metal",
+    ],
+)
+
 # `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
@@ -573,16 +583,6 @@ selects.config_setting_group(
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
         "//engine/src/flutter/shell:enable_metal",
         "//engine/src/flutter/shell:enable_vulkan",
-    ],
-)
-
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal && is_mac`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_is_mac",
-    match_all = [
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-        "//engine/src/flutter/shell:enable_metal",
-        "@platforms//os:macos",
     ],
 )
 

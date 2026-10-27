@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/build/archives/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: artifacts_entitlement_config, artifacts_without_entitlement_config, dart_sdk_entitlement_config, dart_sdk_without_entitlement_config.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -11,8 +10,140 @@ load("//build_defs/android:build_tools.bzl", "android_engine_artifacts")
 load("//build_defs/config:configuration.bzl", "in_configuration")
 load("//build_defs/dist:local_engine.bzl", "bundle_directory")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle", "zip_tree")
+load("//build_defs/gn:gn_action.bzl", "gn_generated_file")
 
 package(default_visibility = ["//visibility:public"])
+
+gn_generated_file(
+    name = "artifacts_entitlement_config",
+    out = "entitlements.txt",
+    content = ["gen_snapshot"] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "impellerc",
+            "libtessellator.dylib",
+            "flutter_tester",
+            "libpath_ops.dylib",
+        ],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_gen_dir/flutter/build/archives/entitlements.txt"],
+    # You may also need to update
+    # dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart
+    # when adding/removing binaries from the entitlement config.
+    deps = ["//engine/src/flutter/lib/snapshot:generate_snapshot_bin"] + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "//engine/src/flutter/impeller/compiler:impellerc",  # flutter_runtime_mode == "debug"
+            "//engine/src/flutter/impeller/tessellator:tessellator_shared",  # flutter_runtime_mode == "debug"
+            "//engine/src/flutter/shell/testing",  # flutter_runtime_mode == "debug"
+            "//engine/src/flutter/tools/path_ops",  # flutter_runtime_mode == "debug"
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+gn_generated_file(
+    name = "artifacts_without_entitlement_config",
+    out = "without_entitlements.txt",
+    content = select({
+        "//engine/src/flutter/common:runtime_mode_debug": ["frontend_server_aot.dart.snapshot"],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_gen_dir/flutter/build/archives/without_entitlements.txt"],
+    deps = select({
+        "//engine/src/flutter/common:runtime_mode_debug": [
+            "//engine/src/flutter/flutter_frontend_server:frontend_server",  # flutter_runtime_mode == "debug"
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# `is_mac && flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `is_mac && flutter_runtime_mode == "debug" && !dart_dynamic_modules && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `is_mac && !dart_dynamic_modules && target_cpu == "x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
 
 # `!dart_dynamic_modules && full_target_platform_name == "android-arm" && flutter_runtime_mode == "profile"`, for the select()s of this file.
 selects.config_setting_group(
@@ -331,6 +462,94 @@ selects.config_setting_group(
         "//engine/src/flutter/common:runtime_mode_debug",
         "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_disabled",
         "//engine/src/flutter/common:platform_wasm_wasm",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && flutter_runtime_mode == "debug" && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_flutter_runtime_mode_debug_and_target_cpu_arm64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && flutter_runtime_mode == "debug" && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_flutter_runtime_mode_debug_and_target_cpu_x64",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `dart_dynamic_modules && is_mac && target_cpu == "x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_dynamic_modules_enabled",
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
     ],
 )
 
@@ -665,6 +884,24 @@ zip_tree(
     }),
 )
 
+# `flutter_runtime_mode == "debug" && host_os != "mac"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_host_os_not_mac",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel:host_os_is_not_mac",
+    ],
+)
+
+# `flutter_runtime_mode == "debug" && host_os == "mac"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_flutter_runtime_mode_debug_and_host_os_mac",
+    match_all = [
+        "//engine/src/flutter/common:runtime_mode_debug",
+        "//engine/src/flutter/build/bazel:host_os_is_mac",
+    ],
+)
+
 zip_bundle(
     name = "artifacts",
     files = {"gen_snapshot": "//engine/src/flutter/build/bazel/dart_wrap:gen_snapshot"} | select({
@@ -672,15 +909,39 @@ zip_bundle(
             "icudtl.dat": "@icu//:flutter/icudtl.dat",
             "flutter_tester": "//engine/src/flutter/shell/testing:flutter_tester",
             "impellerc": "//engine/src/flutter/impeller/compiler:impellerc",
-            "libpath_ops.so": "//engine/src/flutter/tools/path_ops",
-            "libtessellator.so": "//engine/src/flutter/impeller/tessellator:tessellator_shared",
             "isolate_snapshot.bin": "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin",
             "vm_isolate_snapshot.bin": "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin",
             "frontend_server_aot.dart.snapshot": "//engine/src/flutter/flutter_frontend_server:frontend_server",
         },
         "//conditions:default": {},
+    }) | select({
+        ":when_flutter_runtime_mode_debug_and_host_os_not_mac": {
+            "libpath_ops.so": "//engine/src/flutter/tools/path_ops",
+            "libtessellator.so": "//engine/src/flutter/impeller/tessellator:tessellator_shared",
+        },
+        "//conditions:default": {},
+    }) | select({
+        ":when_flutter_runtime_mode_debug_and_host_os_mac": {
+            "libpath_ops.dylib": "//engine/src/flutter/tools/path_ops",
+            "libtessellator.dylib": "//engine/src/flutter/impeller/tessellator:tessellator_shared",
+        },
+        "//conditions:default": {},
+    }) | select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": {
+            "entitlements.txt": ":entitlements.txt",
+            "without_entitlements.txt": ":without_entitlements.txt",
+        },
+        "//conditions:default": {},
     }),
     output = select({
+        ":when_is_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_arm64": "darwin-arm64/artifacts.zip",
+        ":when_is_mac_and_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_target_cpu_x64": "darwin-x64/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "darwin-arm64-profile/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_release": "darwin-arm64-release/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_arm64_and_flutter_runtime_mode_jit_release": "darwin-arm64-jit_release/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_profile": "darwin-x64-profile/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_release": "darwin-x64-release/artifacts.zip",
+        ":when_is_mac_and_not_dart_dynamic_modules_and_target_cpu_x64_and_flutter_runtime_mode_jit_release": "darwin-x64-jit_release/artifacts.zip",
         ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_profile": "android-arm-profile/artifacts.zip",
         ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_release": "android-arm-release/artifacts.zip",
         ":when_not_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_jit_release": "android-arm-jit_release/artifacts.zip",
@@ -713,6 +974,14 @@ zip_bundle(
         ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64": "linux-arm64/artifacts.zip",
         ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64": "linux-x64/artifacts.zip",
         ":when_flutter_runtime_mode_debug_and_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm": "wasm-wasm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_flutter_runtime_mode_debug_and_target_cpu_arm64": "darwin-arm64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_flutter_runtime_mode_debug_and_target_cpu_x64": "darwin-x64-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_profile": "darwin-arm64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_release": "darwin-arm64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_arm64_and_flutter_runtime_mode_jit_release": "darwin-arm64-jit_release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_profile": "darwin-x64-profile-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_release": "darwin-x64-release-ddm/artifacts.zip",
+        ":when_dart_dynamic_modules_and_is_mac_and_target_cpu_x64_and_flutter_runtime_mode_jit_release": "darwin-x64-jit_release-ddm/artifacts.zip",
         ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_profile": "android-arm-profile-ddm/artifacts.zip",
         ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_release": "android-arm-release-ddm/artifacts.zip",
         ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm_and_flutter_runtime_mode_jit_release": "android-arm-jit_release-ddm/artifacts.zip",
@@ -751,11 +1020,27 @@ zip_bundle(
         "//engine/src/flutter/common:runtime_mode_debug": {
             "flutter_tester": "flutter_tester",
             "impellerc": "impellerc",
-            "libpath_ops.so": "libpath_ops.so",
-            "libtessellator.so": "libtessellator.so",
             "isolate_snapshot.bin": "gen/flutter/lib/snapshot/isolate_snapshot.bin",
             "vm_isolate_snapshot.bin": "gen/flutter/lib/snapshot/vm_isolate_snapshot.bin",
             "frontend_server_aot.dart.snapshot": "gen/frontend_server_aot.dart.snapshot",
+        },
+        "//conditions:default": {},
+    }) | select({
+        ":when_flutter_runtime_mode_debug_and_host_os_not_mac": {
+            "libpath_ops.so": "libpath_ops.so",
+            "libtessellator.so": "libtessellator.so",
+        },
+        "//conditions:default": {},
+    }) | select({
+        ":when_flutter_runtime_mode_debug_and_host_os_mac": {
+            "libpath_ops.dylib": "libpath_ops.dylib",
+            "libtessellator.dylib": "libtessellator.dylib",
+        },
+        "//conditions:default": {},
+    }) | select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": {
+            "entitlements.txt": "gen/flutter/build/archives/entitlements.txt",
+            "without_entitlements.txt": "gen/flutter/build/archives/without_entitlements.txt",
         },
         "//conditions:default": {},
     }),
@@ -775,12 +1060,22 @@ zip_bundle(
         "//engine/src/flutter/lib/snapshot:generate_snapshot_bin",
         "//engine/src/flutter/shell/testing",
         "//engine/src/flutter/tools/path_ops",
-    ],
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            ":artifacts_entitlement_config",  # host_os == "mac"
+            ":artifacts_without_entitlement_config",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
     name = "embedder",
     data = ["//engine/src/flutter/shell/platform/embedder:embedder-archive"],
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # Generates flutter_patched_sdk.zip for debug and profile runtime modes
@@ -814,6 +1109,42 @@ zip_bundle(
         },
     }),
     deps = ["//engine/src/flutter/lib/snapshot:strong_platform"],
+)
+
+gn_generated_file(
+    name = "dart_sdk_entitlement_config",
+    out = "dart_sdk_entitlements.txt",
+    # Dart SDK is a prebuilt archive. The rule for building
+    # Dart SDK is
+    # https://github.com/flutter/flutter/blob/e8f1e18166fa9610c6f4bfbefaf6a118a5eb4121/engine/src/flutter/build/dart/BUILD.gn
+    content = [
+        "dart-sdk/bin/dart",
+        "dart-sdk/bin/dartaotruntime",
+        "dart-sdk/bin/dartvm",
+        "dart-sdk/bin/utils/gen_snapshot",
+        "dart-sdk/bin/utils/wasm-opt",
+    ],
+    outputs = ["$root_gen_dir/flutter/build/archives/dart_sdk_entitlements.txt"],
+)
+
+gn_generated_file(
+    name = "dart_sdk_without_entitlement_config",
+    out = "dart_sdk_without_entitlements.txt",
+    content = [
+        "dart-sdk/bin/snapshots/analysis_server_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dart2bytecode.dart.snapshot",
+        "dart-sdk/bin/snapshots/dart2js_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dart2wasm_product.snapshot",
+        "dart-sdk/bin/snapshots/dart_runtime_service_vm_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dart_tooling_daemon_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dartdev_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dartdevc_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/dds_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/gen_kernel_aot.dart.snapshot",
+        "dart-sdk/bin/snapshots/kernel_worker_aot.dart.snapshot",
+    ],
+    outputs = ["$root_gen_dir/flutter/build/archives/dart_sdk_without_entitlements.txt"],
 )
 
 # `dart_dynamic_modules && full_target_platform_name == "android-arm"`, for the select()s of this file.
@@ -960,6 +1291,24 @@ selects.config_setting_group(
     ],
 )
 
+# `is_mac && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_target_cpu_arm64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `is_mac && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_target_cpu_x64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
 zip_tree(
     name = "dart_sdk_archive_dart-sdk",
     srcs = ["//engine/src/flutter/build/bazel/dart_wrap:prebuilt_dart_sdk"],
@@ -973,6 +1322,13 @@ zip_tree(
 
 zip_bundle(
     name = "dart_sdk_archive",
+    files = select({
+        "@platforms//os:macos": {
+            "entitlements.txt": ":dart_sdk_entitlements.txt",
+            "without_entitlements.txt": ":dart_sdk_without_entitlements.txt",
+        },
+        "//conditions:default": {},
+    }),
     output = select({
         ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm": "dart-sdk-android-arm-ddm.zip",
         ":when_dart_dynamic_modules_and_full_target_platform_name_android_arm64": "dart-sdk-android-arm64-ddm.zip",
@@ -990,13 +1346,35 @@ zip_bundle(
         ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_arm64": "dart-sdk-linux-arm64.zip",
         ":when_not_dart_dynamic_modules_and_full_target_platform_name_linux_x64": "dart-sdk-linux-x64.zip",
         ":when_not_dart_dynamic_modules_and_full_target_platform_name_wasm_wasm": "dart-sdk-wasm-wasm.zip",
+        ":when_is_mac_and_target_cpu_arm64": "dart-sdk-darwin-arm64.zip",
+        ":when_is_mac_and_target_cpu_x64": "dart-sdk-darwin-x64.zip",
         "//conditions:default": None,
+    }),
+    sources = select({
+        "@platforms//os:macos": {
+            "entitlements.txt": "gen/flutter/build/archives/dart_sdk_entitlements.txt",
+            "without_entitlements.txt": "gen/flutter/build/archives/dart_sdk_without_entitlements.txt",
+        },
+        "//conditions:default": {},
     }),
     target_compatible_with = select({
         "//engine/src/flutter/common:engine_artifacts": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     trees = [":dart_sdk_archive_dart-sdk"],
+    deps = [
+        ":dart_sdk_entitlement_config",
+        ":dart_sdk_without_entitlement_config",
+    ],
+)
+
+cc_library(
+    name = "flutter_embedder_framework",
+    data = ["//engine/src/flutter/shell/platform/embedder:flutter_embedder_framework_archive"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # What GN has no words for; maintained in the converter's manifest
