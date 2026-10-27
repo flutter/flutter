@@ -12,6 +12,7 @@ helpers, and the two SDK-cache paths tests read through FLUTTER_ROOT
 anything of its own.
 """
 
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load("//build_defs/dart:flutter_test.bzl", "flutter_tests")
 
 def framework_tests(name, tests, data = [], deps = [], impeller = True, prelude = "//packages/flutter/test:prelude", compile_args = [], **kwargs):
@@ -53,7 +54,7 @@ def framework_tests(name, tests, data = [], deps = [], impeller = True, prelude 
             ],
         ) + data,
         cache = {
-            "@dart_sdk_linux_x64//:dart": "dart-sdk",
+            HOST_DART_SDK + "//:dart": "dart-sdk",
             "@material_fonts//:fonts": "artifacts/material_fonts",
         },
         package_config = "//packages/flutter/test:package_config",

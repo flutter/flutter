@@ -45,7 +45,12 @@ cc_library(
     hdrs = ["backends/skia/compressed_image_skia.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS,
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],

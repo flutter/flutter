@@ -3,10 +3,12 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/common/BUILD.gn by gn_to_bazel; do not edit.
+# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/shell/platform/darwin/graphics:graphics.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_CFLAGS_OBJCC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -119,8 +121,18 @@ cc_library(
         "//conditions:default": [],
     }),
     copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/txt
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/common/graphics
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
         ],
         "//conditions:default": [],
     }) + select({
@@ -276,6 +288,11 @@ cc_test(
             "-Wno-redundant-parens",  # from //flutter/flow
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
     }),
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -314,25 +331,22 @@ cc_library(
     }),
 )
 
-cc_library(
-    name = "shell_test_fixture_sources",
+# `enable_unittests && test_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_test_enable_metal",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "//engine/src/flutter/shell:test_enable_metal",
+    ],
+)
+
+# The Objective-C(++) sources of shell_test_fixture_sources, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); shell_test_fixture_sources links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "shell_test_fixture_sources_objc",
     testonly = True,
-    srcs = [
-        "shell_test.cc",
-        "shell_test_external_view_embedder.cc",
-        "shell_test_platform_view.cc",
-        "vsync_waiters_test.cc",
-    ] + select({
-        "//engine/src/flutter/shell:test_enable_gl": [
-            "shell_test_platform_view_gl.cc",  # test_enable_gl
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:test_enable_vulkan": [
-            "shell_test_platform_view_vulkan.cc",  # test_enable_vulkan
-        ],
-        "//conditions:default": [],
-    }) + select({
+    srcs = select({
         "//engine/src/flutter/shell:test_enable_metal": [
             "shell_test_platform_view_metal.mm",  # test_enable_metal
         ],
@@ -367,6 +381,11 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:test_enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/flutter_vma:flutter_skia_vma
             "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
@@ -380,13 +399,38 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_test_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/flutter_vma:flutter_skia_vma
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/platform/darwin/graphics
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_test_enable_software_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_test_enable_software_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_test_enable_gl_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_gl_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_gl_and_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -408,6 +452,11 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_test_enable_vulkan_and_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_test_enable_vulkan_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
             "-Wno-c++98-compat-extra-semi",  # from :shell_unittests_gpu_configuration
@@ -426,6 +475,11 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_test_enable_metal_and_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_test_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
             "-Wno-c++98-compat-extra-semi",  # from :shell_unittests_gpu_configuration
@@ -436,6 +490,11 @@ cc_library(
             "-Wno-suggest-override",  # from :shell_unittests_gpu_configuration
             "-Wno-unused-private-field",  # from :shell_unittests_gpu_configuration
             "-Wno-unused-variable",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
         ],
         "//conditions:default": [],
     }) + select({
@@ -452,7 +511,233 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC + FLUTTER_CFLAGS_OBJCC,
+        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_enable_unittests_and_test_enable_metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":common",
+        ":shell_test_fixture_sources_config",
+        ":shell_unittests_gpu_configuration",
+        ":shell_unittests_gpu_configuration_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:fixture_test",
+        "@rapidjson",
+        "@skia",
+    ] + select({
+        "//engine/src/flutter/shell:test_enable_gl": [
+            "//engine/src/flutter/testing:opengl",  # test_enable_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # test_enable_vulkan
+            "//engine/src/flutter/vulkan",  # test_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "shell_test_fixture_sources",
+    testonly = True,
+    srcs = [
+        "shell_test.cc",
+        "shell_test_external_view_embedder.cc",
+        "shell_test_platform_view.cc",
+        "vsync_waiters_test.cc",
+    ] + select({
+        "//engine/src/flutter/shell:test_enable_gl": [
+            "shell_test_platform_view_gl.cc",  # test_enable_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "shell_test_platform_view_vulkan.cc",  # test_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "shell_test.h",
+        "shell_test_external_view_embedder.h",
+        "shell_test_platform_view.h",
+        "vsync_waiters_test.h",
+    ] + select({
+        "//engine/src/flutter/shell:test_enable_gl": [
+            "shell_test_platform_view_gl.h",  # test_enable_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "shell_test_platform_view_vulkan.h",  # test_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_metal": [
+            "shell_test_platform_view_metal.h",  # test_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/common/graphics
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/flutter_vma:flutter_skia_vma
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/platform/darwin/graphics
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_software_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_software_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_gl_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_gl_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_gl_and_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :shell_unittests_gpu_configuration
+            "-Wno-deprecated-copy",  # from :shell_unittests_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :shell_unittests_gpu_configuration
+            "-Wno-nullability-completeness",  # from :shell_unittests_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :shell_unittests_gpu_configuration
+            "-Wno-suggest-override",  # from :shell_unittests_gpu_configuration
+            "-Wno-unused-private-field",  # from :shell_unittests_gpu_configuration
+            "-Wno-unused-variable",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_vulkan_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_vulkan_and_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :shell_unittests_gpu_configuration
+            "-Wno-deprecated-copy",  # from :shell_unittests_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :shell_unittests_gpu_configuration
+            "-Wno-nullability-completeness",  # from :shell_unittests_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :shell_unittests_gpu_configuration
+            "-Wno-suggest-override",  # from :shell_unittests_gpu_configuration
+            "-Wno-unused-private-field",  # from :shell_unittests_gpu_configuration
+            "-Wno-unused-variable",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :shell_unittests_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :shell_unittests_gpu_configuration
+            "-Wno-deprecated-copy",  # from :shell_unittests_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :shell_unittests_gpu_configuration
+            "-Wno-nullability-completeness",  # from :shell_unittests_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :shell_unittests_gpu_configuration
+            "-Wno-suggest-override",  # from :shell_unittests_gpu_configuration
+            "-Wno-unused-private-field",  # from :shell_unittests_gpu_configuration
+            "-Wno-unused-variable",  # from :shell_unittests_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -489,11 +774,6 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_metal": [
-            "//engine/src/flutter/shell/platform/darwin/graphics",  # test_enable_metal
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:metal": [
             "//engine/src/flutter/impeller",  # impeller_supports_rendering
         ],
@@ -503,6 +783,9 @@ cc_library(
         "//engine/src/flutter/impeller/tools:vulkan": [
             "//engine/src/flutter/impeller",  # impeller_supports_rendering
         ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_metal": [":shell_test_fixture_sources_objc"],
         "//conditions:default": [],
     }),
     alwayslink = True,
@@ -554,6 +837,11 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:test_enable_vulkan": [
             "-Wno-redundant-parens",  # from :shell_test_fixture_sources
             "-Wno-c++98-compat-extra-semi",  # from :shell_test_fixture_sources
@@ -564,6 +852,21 @@ flutter_cc_test(
             "-Wno-suggest-override",  # from :shell_test_fixture_sources
             "-Wno-unused-private-field",  # from :shell_test_fixture_sources
             "-Wno-unused-variable",  # from :shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list/testing:display_list_testing
         ],
         "//conditions:default": [],
     }),
@@ -600,6 +903,43 @@ flutter_cc_test(
     }),
 )
 
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_vulkan && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_vulkan_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_vulkan",
+        "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "@platforms//os:macos",
+    ],
+)
+
 # `test_enable_software && shell_enable_vulkan`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_test_enable_software_and_shell_enable_vulkan",
@@ -609,12 +949,40 @@ selects.config_setting_group(
     ],
 )
 
+# `test_enable_software && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_software_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_software",
+        "@platforms//os:macos",
+    ],
+)
+
 # `test_enable_gl && shell_enable_vulkan`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_test_enable_gl_and_shell_enable_vulkan",
     match_all = [
         "//engine/src/flutter/shell:test_enable_gl",
         "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `test_enable_gl && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_gl_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_gl",
+        "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_gl && impeller_enable_opengles && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_gl_and_impeller_enable_opengles_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_gl",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "@platforms//os:macos",
     ],
 )
 
@@ -637,6 +1005,16 @@ selects.config_setting_group(
     ],
 )
 
+# `test_enable_vulkan && impeller_enable_vulkan && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_vulkan_and_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_vulkan",
+        "//engine/src/flutter/impeller/tools:vulkan",
+        "@platforms//os:macos",
+    ],
+)
+
 # `test_enable_vulkan && impeller_enable_vulkan`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_test_enable_vulkan_and_impeller_enable_vulkan",
@@ -652,6 +1030,16 @@ selects.config_setting_group(
     match_all = [
         "//engine/src/flutter/shell:test_enable_metal",
         "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `test_enable_metal && impeller_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_impeller_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "//engine/src/flutter/impeller/tools:metal",
+        "@platforms//os:macos",
     ],
 )
 

@@ -51,6 +51,11 @@ cc_library(
             "-Wno-redundant-parens",  # from //flutter/lib/ui
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/lib/ui
+        ],
+        "//conditions:default": [],
     }),
     linkopts = [
         "-landroid",
@@ -100,7 +105,27 @@ cc_test(
         "-Wno-unused-private-field",  # from :flutter_shell_native_src
         "-Wno-unused-variable",  # from :flutter_shell_native_src
         "-Wno-inconsistent-missing-override",  # from //flutter/third_party/googletest:gmock
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :flutter_shell_native_src
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :flutter_shell_native_src
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :flutter_shell_native_src
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :flutter_shell_native_src
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "@platforms//os:android": [],
@@ -242,7 +267,27 @@ cc_library(
         "-Wno-suggest-override",  # from //flutter/impeller/toolkit/glvk
         "-Wno-unused-private-field",  # from //flutter/impeller/toolkit/glvk
         "-Wno-unused-variable",  # from //flutter/impeller/toolkit/glvk
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :android_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :android_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :android_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
     data = [":icudtl_asm"],
     linkopts = [
         "-landroid",
@@ -4692,6 +4737,43 @@ gn_action(
         ":android_jar",
         ":pom_content_hash_libflutter",
         ":pom_libflutter",
+    ],
+)
+
+# `impeller_enable_opengles && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "@platforms//os:macos",
+    ],
+)
+
+# `impeller_enable_vulkan && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:vulkan",
+        "@platforms//os:macos",
+    ],
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "@platforms//os:macos",
     ],
 )
 

@@ -14,6 +14,7 @@
 library;
 
 import 'bazel_mapping.dart';
+import 'gn_eval.dart';
 import 'mirrored_lists.dart';
 
 /// One generated file.
@@ -26,6 +27,7 @@ final class ConvertedFile {
     this.condition,
     this.unconvertedDeps = const <String>[],
     this.filesGroups = const <String>{},
+    this.assume = const <String, GnValue>{},
   });
 
   /// The GN directory (`//flutter/fml`); the input is its `BUILD.gn`.
@@ -73,7 +75,19 @@ final class ConvertedFile {
   /// dependencies to link, as GN's groups do, with its actions and copies
   /// as sources and data.
   final Set<String> filesGroups;
+
+  /// Assumptions for this file over the generation's (gn_eval's
+  /// Assumptions.withValues): a platform whose branches of the file are
+  /// deferred -- `is_mac` false where the macOS branch is a product of the
+  /// Apple phase's (the entitlements lists, the dylib) that the macOS port
+  /// has not reached, so that the file keeps converting for the others.
+  final Map<String, GnValue> assume;
 }
+
+/// The macOS branches of a file deferred to the Apple products' phase
+/// (research/20, M4): evaluated as if `is_mac` were false, as before the
+/// macOS port, so the file's Linux targets stay what they were.
+const Map<String, GnValue> macosDeferred = <String, GnValue>{'is_mac': GnBoolValue(false)};
 
 const List<ConvertedFile> convertedFiles = <ConvertedFile>[
   // The root: GN's default target `flutter` (what `ninja` with no target
@@ -777,6 +791,9 @@ exports_files(
   // entitlement lists are the macOS signing step's.
   ConvertedFile(
     '//flutter/build/archives',
+    // The macOS archives (dart-sdk-darwin-<cpu>.zip with its entitlements
+    // lists, generated_file over metadata) are the Apple products' phase's.
+    assume: macosDeferred,
     skip: <String, String>{
       'artifacts_entitlement_config':
           'generated_file over metadata: the entitlements list of the macOS bundle',
@@ -874,6 +891,8 @@ bundle_directory(
   // archive, GN's zip_bundle). The entitlements list is the macOS bundle's.
   ConvertedFile(
     '//flutter/tools/font_subset',
+    // The macOS archive's entitlements lists: the Apple products' phase's.
+    assume: macosDeferred,
     skip: <String, String>{
       'font_entitlement_config':
           'generated_file over metadata: the entitlements list of the macOS bundle',
@@ -1023,6 +1042,9 @@ filegroup(
   // (complete_static_lib) Bazel's cc_library does not stand for.
   ConvertedFile(
     '//flutter/impeller/toolkit/interop',
+    // The Impeller SDK's macOS form (libimpeller.dylib, the Metal example)
+    // is the Apple products' phase's.
+    assume: macosDeferred,
     skip: <String, String>{'example_mtl': 'Objective-C and Metal: macOS'},
   ),
   ConvertedFile('//flutter/impeller/toolkit/interop/backend'),
@@ -1561,7 +1583,12 @@ _BACKEND_PLATFORMS = {
   // The embedder API: its libraries, its shared library and its three suites,
   // and its artifact side -- the header copied into the build root, the
   // group over it and the library, the CI archive (linux-x64-embedder.zip).
-  ConvertedFile('//flutter/shell/platform/embedder'),
+  // On a Mac the dylib is packaged as FlutterEmbedder.framework: the group
+  // over the packaging action is a group of files to build, nothing links it.
+  ConvertedFile(
+    '//flutter/shell/platform/embedder',
+    filesGroups: <String>{'flutter_embedder_framework'},
+  ),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia

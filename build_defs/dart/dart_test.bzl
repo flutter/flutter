@@ -33,6 +33,7 @@ runfiles tree's root, so a file the test reads is at its repository path.
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load(
     "//build_defs/dart:kernel.bzl",
     "KERNEL_TOOL_ATTRS",
@@ -105,7 +106,7 @@ dart_test_runner = rule(
             doc = "The same for the run (runfiles layout).",
         ),
         "_vm_platform": attr.label(
-            default = "@dart_sdk_linux_x64//:vm_platform",
+            default = HOST_DART_SDK + "//:vm_platform",
             allow_files = True,
         ),
     } | KERNEL_TOOL_ATTRS,
@@ -169,7 +170,7 @@ dart_test_prelude = rule(
             doc = "The package configuration for the compile (pub_package_config, execroot layout).",
         ),
         "_vm_platform": attr.label(
-            default = "@dart_sdk_linux_x64//:vm_platform",
+            default = HOST_DART_SDK + "//:vm_platform",
             allow_files = True,
         ),
     } | KERNEL_TOOL_ATTRS,
@@ -225,7 +226,7 @@ dart_vm_kernel = rule(
             doc = "The package configuration for the compile (pub_package_config, execroot layout).",
         ),
         "_vm_platform": attr.label(
-            default = "@dart_sdk_linux_x64//:vm_platform",
+            default = HOST_DART_SDK + "//:vm_platform",
             allow_files = True,
         ),
     } | KERNEL_TOOL_ATTRS,
@@ -556,12 +557,12 @@ dart_test = rule(
                   "places it): the test's packages and package:test's.",
         ),
         "_vm_platform": attr.label(
-            default = "@dart_sdk_linux_x64//:vm_platform",
+            default = HOST_DART_SDK + "//:vm_platform",
             allow_files = True,
         ),
         # The command-line SDK: `dart` with the snapshots and libraries it loads.
         "_sdk": attr.label(
-            default = "@dart_sdk_linux_x64//:dart",
+            default = HOST_DART_SDK + "//:dart",
             allow_files = True,
         ),
         "_runner": attr.label(

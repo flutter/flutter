@@ -76,7 +76,12 @@ cc_library(
         "-Wno-unused-private-field",  # from :vulkan
         "-Wno-unused-variable",  # from :vulkan
         "-Wno-inconsistent-missing-override",  # from ../../../playground:playground_test
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../../../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -283,7 +288,12 @@ cc_library(
         "-Wno-unused-private-field",  # from :vulkan
         "-Wno-unused-variable",  # from :vulkan
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES + ["TESTING"],
     target_compatible_with = select({
         "@platforms//os:android": [],

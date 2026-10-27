@@ -4,9 +4,11 @@
 
 # Generated from //flutter/txt/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -18,6 +20,89 @@ cc_library(
 
 cc_library(
     name = "allow_posix_names",
+)
+
+# The Objective-C(++) sources of txt, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); txt links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "txt_objc",
+    srcs = select({
+        "@platforms//os:macos": [
+            "src/txt/platform_mac.mm",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "src/skia/paragraph_builder_skia.h",
+        "src/skia/paragraph_skia.h",
+        "src/txt/asset_font_manager.h",
+        "src/txt/font_asset_provider.h",
+        "src/txt/font_collection.h",
+        "src/txt/font_features.h",
+        "src/txt/font_style.h",
+        "src/txt/font_weight.h",
+        "src/txt/line_metrics.h",
+        "src/txt/paragraph.h",
+        "src/txt/paragraph_builder.h",
+        "src/txt/paragraph_style.h",
+        "src/txt/placeholder_run.h",
+        "src/txt/platform.h",
+        "src/txt/run_metrics.h",
+        "src/txt/test_font_manager.h",
+        "src/txt/text_baseline.h",
+        "src/txt/text_decoration.h",
+        "src/txt/text_shadow.h",
+        "src/txt/text_style.h",
+        "src/txt/typeface_font_asset_provider.h",
+    ] + select({
+        "@platforms//os:macos": [
+            "src/txt/platform_mac.h",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":txt_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "@googletest//:gtest_prod",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+        "@harfbuzz",
+        "@icu",
+        "@skia",
+        "@skia//modules/skparagraph",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
 )
 
 cc_library(
@@ -48,6 +133,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:macos": [],
         "@platforms//os:android": [],
         "@platforms//os:linux": [],
         "//conditions:default": [
@@ -76,8 +162,23 @@ cc_library(
         "src/txt/text_shadow.h",
         "src/txt/text_style.h",
         "src/txt/typeface_font_asset_provider.h",
-    ],
-    copts = FLUTTER_COPTS,
+    ] + select({
+        "@platforms//os:macos": [
+            "src/txt/platform_mac.h",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
+        "//conditions:default": [],
+    }),
     linkopts = select({
         "//engine/src/flutter/txt:fontconfig": [
             "-lfontconfig",  # flutter_use_fontconfig
@@ -109,6 +210,9 @@ cc_library(
             "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [":txt_objc"],
+        "//conditions:default": [],
     }),
     alwayslink = True,
 )
@@ -137,7 +241,12 @@ cc_test(
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :txt
+        ],
+        "//conditions:default": [],
+    }),
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     tags = [
@@ -168,11 +277,21 @@ flutter_cc_test(
         "tests/paragraph_builder_skia_tests.cc",
         "tests/paragraph_unittests.cc",
         "tests/txt_run_all_unittests.cc",
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "tests/platform_mac_tests.cc",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:skia
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :txt
+        ],
+        "//conditions:default": [],
+    }),
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
@@ -189,6 +308,25 @@ flutter_cc_test(
         "//engine/src/flutter/testing:skia",
         "//engine/src/flutter/testing:testing_lib",
         "@skia//modules/skparagraph",
+    ],
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "@platforms//os:macos",
     ],
 )
 

@@ -16,6 +16,7 @@ package:flutter's own test tree, with its many directories, has
 //packages/flutter/test:framework_tests.bzl instead.
 """
 
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load("//build_defs/dart:flutter_assets.bzl", "flutter_test_assets")
 load("//build_defs/dart:flutter_test.bzl", "flutter_test_prelude", "flutter_tests")
 load("//build_defs/dart:pub.bzl", "pub_package_config")
@@ -30,7 +31,7 @@ FRAMEWORK_SHADERS = {
 # engine builds with and the Material fonts
 # (build_defs/repositories/flutter_sdk_cache.bzl).
 SDK_CACHE = {
-    "@dart_sdk_linux_x64//:dart": "dart-sdk",
+    HOST_DART_SDK + "//:dart": "dart-sdk",
     "@material_fonts//:fonts": "artifacts/material_fonts",
 }
 

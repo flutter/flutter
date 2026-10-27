@@ -23,7 +23,12 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS,
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     # text_frame_skia.cc includes skparagraph's Paragraph.h.
     deps = [

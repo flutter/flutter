@@ -31,6 +31,8 @@ property of the tree instead: sources are compiled as
 look it up by that URI through flutter::testing::GetSourceUri.
 """
 
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
+
 SOURCE_URI_SCHEME = "org-dartlang-root"
 
 DartPackageRootInfo = provider(
@@ -155,13 +157,13 @@ def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [],
 # The frontend server and its runtime, for a rule that calls compile_to_kernel.
 KERNEL_TOOL_ATTRS = {
     "_dartaotruntime": attr.label(
-        default = "@dart_sdk_linux_x64//:dartaotruntime",
+        default = HOST_DART_SDK + "//:dartaotruntime",
         allow_single_file = True,
         executable = True,
         cfg = "exec",
     ),
     "_frontend_server": attr.label(
-        default = "@dart_sdk_linux_x64//:frontend_server",
+        default = HOST_DART_SDK + "//:frontend_server",
         allow_single_file = True,
     ),
 }

@@ -20,6 +20,7 @@ are always downloaded.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:lto_libraries.bzl", "emsdk_lto_libraries")
 load(":deps.lock.bzl", "CIPD_DEPS", "GIT_DEPS")
+load(":host_platform.bzl", "host_platform")
 load(":macos_sdk.bzl", "macos_sdk")
 load(":repositories.bzl", "cipd_package", "engine_version_repository", "synced_repository")
 
@@ -473,6 +474,17 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/prebuilts/linux-arm64/dart-sdk",
         build_file = _OVERLAYS + ":dart_sdk/BUILD.dart_sdk.bazel",
     ),
+    # The Mac's (DEPS: prebuilts/macos-<cpu>/dart-sdk, synced on a Mac of
+    # that CPU): the host's, through @host_platform's HOST_DART_SDK, is
+    # what the Dart rules and the tests' BUILD files name.
+    "dart_sdk_macos_arm64": struct(
+        path = "engine/src/flutter/prebuilts/macos-arm64/dart-sdk",
+        build_file = _OVERLAYS + ":dart_sdk/BUILD.dart_sdk.bazel",
+    ),
+    "dart_sdk_macos_x64": struct(
+        path = "engine/src/flutter/prebuilts/macos-x64/dart-sdk",
+        build_file = _OVERLAYS + ":dart_sdk/BUILD.dart_sdk.bazel",
+    ),
     # esbuild, which bundles the web SDK's flutter.js (build/esbuild).
     "esbuild": struct(
         path = "engine/src/flutter/prebuilts/linux-x64/esbuild",
@@ -659,6 +671,9 @@ def _synced_deps_impl(mctx):
     # The macOS SDK of the host's Xcode (macos_sdk.bzl), the macOS
     # toolchains' sysroot; an empty repository off macOS.
     macos_sdk(name = "macos_sdk")
+
+    # The host itself, as constants (host_platform.bzl).
+    host_platform(name = "host_platform")
     return _metadata(mctx)
 
 def _metadata(mctx):

@@ -15,7 +15,12 @@ cc_binary(
         "path_ops.cc",
         "path_ops.h",
     ],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "//conditions:default": [],
+    }),
     linkshared = True,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [

@@ -563,7 +563,8 @@ source_set("x") {
       }
       expect(
         generation.names.where((String n) => generation[n] is GnConditionValue).toList()..sort(),
-        perTargetOsArguments.keys.toList()..sort(),
+        // ... and is_apple, BUILDCONFIG.gn's `is_ios || is_mac`.
+        <String>[...perTargetOsArguments.keys, 'is_apple']..sort(),
       );
       expect(host.names.where((String name) => generation[name] == null).toList()..sort(), <String>[
         'build_engine_artifacts',
@@ -582,7 +583,10 @@ source_set("x") {
         'impeller_enable_opengles',
         'impeller_enable_vulkan',
         'is_android',
+        // The macOS port (research/20): is_mac is the macOS platform's
+        // (iOS is not built yet; is_apple is its formula, above).
         'is_linux',
+        'is_mac',
         'is_wasm',
         'shell_enable_gl',
         'shell_enable_metal',
@@ -3460,10 +3464,13 @@ if (enable_unittests) {
 
     test('list constants in a select() branch stand as themselves', () async {
       // testing's suites: cflags_objc = flutter_cflags_objc under
-      // test_enable_metal -- a list, joined to the branch with `+`.
+      // test_enable_metal -- a list, joined to the branch with `+`. The
+      // Objective-C flags go to the target's Objective-C library (its .mm
+      // sources), once for GN's two lists, which are one; the C++ library
+      // keeps the C++ flags and links the Objective-C library in.
       final String output = await convert('''
 source_set("x") {
-  sources = [ "a.cc" ]
+  sources = [ "a.cc", "b.mm" ]
   if (test_enable_metal) {
     cflags_objc = flutter_cflags_objc
     cflags_objcc = flutter_cflags_objcc
@@ -3474,15 +3481,96 @@ source_set("x") {
       expect(
         output,
         contains(
+          'flutter_objc_library(\n'
+          '    name = "x_objc",\n'
+          '    srcs = ["b.mm"],\n'
           '    copts = CHROMIUM_CODE_COPTS + select({\n'
-          '        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC + FLUTTER_CFLAGS_OBJCC + [\n'
+          '        "//engine/src/flutter/shell:test_enable_metal": [\n'
+          '            "-fobjc-weak",  # test_enable_metal\n'
+          '        ] + FLUTTER_CFLAGS_OBJC,\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+      expect(output, isNot(contains('FLUTTER_CFLAGS_OBJCC')));
+      expect(
+        output,
+        contains(
+          'cc_library(\n'
+          '    name = "x",\n'
+          '    srcs = ["a.cc"],\n'
+          '    copts = CHROMIUM_CODE_COPTS + select({\n'
+          '        "//engine/src/flutter/shell:test_enable_metal": [\n'
           '            "-fobjc-weak",  # test_enable_metal\n'
           '        ],\n'
           '        "//conditions:default": [],\n'
           '    }),\n',
         ),
       );
-      expect(output, contains('"FLUTTER_CFLAGS_OBJC", "FLUTTER_CFLAGS_OBJCC"'));
+      expect(output, contains('        ":x_objc",\n'));
+    });
+
+    test('the Objective-C flags of a target without Objective-C sources go nowhere', () async {
+      // GN applies cflags_objc to no compile of such a target; neither the
+      // flags nor their constant's load reach the file.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  cflags_objc = flutter_cflags_objc
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(output, isNot(contains('FLUTTER_CFLAGS_OBJC')));
+      expect(output, isNot(contains('flutter_objc_library')));
+    });
+
+    test('Objective-C sources under is_mac make a macOS library', () async {
+      // fml: .mm under is_mac || is_ios (is_ios a constant), with
+      // config.gni's macOS flags; the library is compatible on macOS alone
+      // and the C++ library links it there.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (is_mac) {
+    sources += [ "b.mm" ]
+    cflags_objcc = flutter_cflags_objcc
+  }
+}
+''', assumptions: generationAssumptions());
+      expect(
+        output,
+        contains(
+          'flutter_objc_library(\n'
+          '    name = "x_objc",\n'
+          '    srcs = select({\n'
+          '        "@platforms//os:macos": [\n'
+          '            "b.mm",  # is_mac\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n'
+          '    copts = CHROMIUM_CODE_COPTS + select({\n'
+          '        "@platforms//os:macos": MACOS_CFLAGS_OBJC,\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          '    target_compatible_with = select({\n'
+          '        "@platforms//os:macos": [],\n'
+          '        "//conditions:default": ["@platforms//:incompatible"],\n'
+          '    }),\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          '    deps = ["//engine/src:include_root"] + select({\n'
+          '        "@platforms//os:macos": [":x_objc"],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
     });
 
     test('an argument the macro applies under a predicate loses that condition', () async {
@@ -7371,7 +7459,7 @@ flutter_dart_tests(
         );
         final GnFileEvaluation evaluation = evaluateGnFile(
           tree.load(p.join(directory, 'BUILD.gn')),
-          assumptions: generationAssumptions(),
+          assumptions: generationAssumptions().withValues(file.assume),
           templates: templateMappings.keys.toSet(),
           externalVariables: knownExternalVariables,
           booleanVariables: knownBooleanVariables,

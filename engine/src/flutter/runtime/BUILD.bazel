@@ -4,6 +4,7 @@
 
 # Generated from //flutter/runtime/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
@@ -14,7 +15,12 @@ cc_library(
     name = "test_font",
     srcs = ["test_font_data.cc"],
     hdrs = ["test_font_data.h"],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES + select({
         "//engine/src/flutter/common:runtime_mode_debug": [
             # Though the test font data is small, we dont want to add to the binary size
@@ -121,6 +127,11 @@ cc_library(
             "-Wno-redundant-parens",  # from //flutter/lib/ui
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/lib/ui
+        ],
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -189,6 +200,11 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :runtime
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:test_enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/shell/common:shell_test_fixture_sources
             "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/common:shell_test_fixture_sources
@@ -199,6 +215,16 @@ flutter_cc_test(
             "-Wno-suggest-override",  # from //flutter/shell/common:shell_test_fixture_sources
             "-Wno-unused-private-field",  # from //flutter/shell/common:shell_test_fixture_sources
             "-Wno-unused-variable",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
         ],
         "//conditions:default": [],
     }),
@@ -244,6 +270,11 @@ flutter_cc_test(
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
         ],
@@ -282,6 +313,11 @@ flutter_cc_test(
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
         ],
@@ -301,5 +337,23 @@ flutter_cc_test(
         "//engine/src/flutter/lib/snapshot",
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:fixture_test",
+    ],
+)
+
+# `test_enable_vulkan && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_vulkan_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_vulkan",
+        "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "@platforms//os:macos",
     ],
 )

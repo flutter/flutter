@@ -54,6 +54,7 @@ does in the checkout (where they are ignored by git).
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load(
     "//build_defs/config:checkout_view.bzl",
     "BUILD_DIRECTORY_ATTRS",
@@ -203,8 +204,8 @@ _dart_package_test = rule(
         ),
         "_sdk": attr.label_list(
             default = [
-                "@dart_sdk_linux_x64//:dart",
-                "@dart_sdk_linux_x64//:dartaotruntime",
+                HOST_DART_SDK + "//:dart",
+                HOST_DART_SDK + "//:dartaotruntime",
             ],
             allow_files = True,
             doc = "The prebuilt SDK: dart with its libraries and snapshots, and the AOT runtime beside it " +

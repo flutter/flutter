@@ -4,10 +4,129 @@
 
 # Generated from //flutter/impeller/playground/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 
 package(default_visibility = ["//visibility:public"])
+
+# `enable_unittests && impeller_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_impeller_enable_metal",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "//engine/src/flutter/impeller/tools:metal",
+    ],
+)
+
+# The Objective-C(++) sources of playground, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); playground links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "playground_objc",
+    testonly = True,
+    srcs = select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "backend/metal/playground_impl_mtl.mm",  # impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "playground.h",
+        "playground_impl.h",
+        "switches.h",
+        "widgets.h",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "backend/metal/playground_impl_mtl.h",  # impeller_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "backend/gles/playground_impl_gles.h",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "backend/vulkan/playground_impl_vk.h",  # impeller_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../entity
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from ../renderer/backend
+            "-Wno-c++98-compat-extra-semi",  # from ../renderer/backend
+            "-Wno-deprecated-copy",  # from ../renderer/backend
+            "-Wno-implicit-fallthrough",  # from ../renderer/backend
+            "-Wno-nullability-completeness",  # from ../renderer/backend
+            "-Wno-suggest-destructor-override",  # from ../renderer/backend
+            "-Wno-suggest-override",  # from ../renderer/backend
+            "-Wno-unused-private-field",  # from ../renderer/backend
+            "-Wno-unused-variable",  # from ../renderer/backend
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_enable_unittests_and_impeller_enable_metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/entity",
+        "//engine/src/flutter/impeller/fixtures:modern_shader_fixtures",
+        "//engine/src/flutter/impeller/fixtures:shader_fixtures",
+        "//engine/src/flutter/impeller/playground/image:image_skia_backend",
+        "//engine/src/flutter/impeller/playground/imgui:imgui_impeller_backend",
+        "//engine/src/flutter/impeller/renderer",
+        "//engine/src/flutter/impeller/renderer/backend",
+        "//engine/src/flutter/impeller/testing:golden_digest_manager",
+        "//engine/src/flutter/impeller/testing:screenshot",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "//engine/src/flutter/testing:test_swiftshader_utils",
+        "//engine/src/flutter/testing:testing_lib",
+        "@glfw",
+        "@imgui//:imgui_glfw",
+    ] + select({
+        "@platforms//os:macos": [
+            "//engine/src/flutter/impeller/testing:metal_screenshot",  # is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/entity:entity_shaders",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:framebuffer_blend_entity_shaders",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:modern_entity_shaders",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/entity:entity_shaders",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:framebuffer_blend_entity_shaders",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:modern_entity_shaders",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/entity:entity_shaders",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:framebuffer_blend_entity_shaders",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller/entity:modern_entity_shaders",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
 
 cc_library(
     name = "playground",
@@ -18,11 +137,6 @@ cc_library(
         "switches.cc",
         "widgets.cc",
     ] + select({
-        "//engine/src/flutter/impeller/tools:metal": [
-            "backend/metal/playground_impl_mtl.mm",  # impeller_enable_metal
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:opengles": [
             "backend/gles/playground_impl_gles.cc",  # impeller_enable_opengles
         ],
@@ -59,6 +173,11 @@ cc_library(
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../entity
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from ../renderer/backend
             "-Wno-c++98-compat-extra-semi",  # from ../renderer/backend
@@ -69,6 +188,15 @@ cc_library(
             "-Wno-suggest-override",  # from ../renderer/backend
             "-Wno-unused-private-field",  # from ../renderer/backend
             "-Wno-unused-variable",  # from ../renderer/backend
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = select({
+        "@platforms//os:macos": [
+            "-framework",
+            "AppKit",  # is_mac
+            "-framework",
+            "QuartzCore",  # is_mac
         ],
         "//conditions:default": [],
     }),
@@ -96,6 +224,11 @@ cc_library(
         "@glfw",
         "@imgui//:imgui_glfw",
     ] + select({
+        "@platforms//os:macos": [
+            "//engine/src/flutter/impeller/testing:metal_screenshot",  # is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:metal": [
             "//engine/src/flutter/impeller/entity:entity_shaders",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/entity:framebuffer_blend_entity_shaders",  # impeller_supports_rendering
@@ -111,6 +244,9 @@ cc_library(
             "//engine/src/flutter/impeller/entity:framebuffer_blend_entity_shaders",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/entity:modern_entity_shaders",  # impeller_supports_rendering
         ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [":playground_objc"],
         "//conditions:default": [],
     }),
     alwayslink = True,
@@ -131,7 +267,12 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :playground
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :playground
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],

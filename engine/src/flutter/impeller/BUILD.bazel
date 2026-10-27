@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/BUILD.gn by gn_to_bazel; do not edit.
+# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/impeller/renderer/backend/metal:metal_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -89,7 +90,12 @@ cc_library(
     srcs = ["//engine/src/flutter/testing:run_all_unittests.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
+        ],
+        "//conditions:default": [],
+    }),
     # Informs run_all_unittests to perform impeller specific initialization
     local_defines = FLUTTER_LOCAL_DEFINES + ["IMPELLER_UNITTEST_SUITE=1"],
     deps = [
@@ -160,11 +166,6 @@ flutter_display_test(
             "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/impeller/tools:metal": [
-            "//engine/src/flutter/impeller/renderer/backend/metal:metal_unittests",  # impeller_enable_metal
         ],
         "//conditions:default": [],
     }) + select({

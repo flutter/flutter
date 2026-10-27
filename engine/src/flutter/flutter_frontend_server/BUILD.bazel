@@ -6,10 +6,11 @@
 # frontend server (the toString transformer), run from the prebuilt SDK's
 # frontend_server_aot.dart.snapshot. Hand-written: the GN file's one target
 # copies that snapshot into the build directory (copy("frontend_server")),
-# which the kernel compiles here take from @dart_sdk_linux_x64 directly
+# which the kernel compiles here take from the host's prebuilt SDK directly
 # (build_defs/dart/kernel.bzl); its tests are run_tests.py's
 # (--type dart-host).
 
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load("//build_defs/dart:package_test.bzl", "dart_package_test")
 
 package(default_visibility = ["//visibility:public"])
@@ -19,7 +20,7 @@ package(default_visibility = ["//visibility:public"])
 # ships (build/archives); the file as it is, under the GN target's name.
 filegroup(
     name = "frontend_server",
-    srcs = ["@dart_sdk_linux_x64//:frontend_server"],
+    srcs = [HOST_DART_SDK + "//:frontend_server"],
 )
 
 # The test compiles its fixture with the frontend server out of
@@ -30,7 +31,7 @@ filegroup(
 dart_package_test(
     name = "tests",
     build_directory = {
-        "@dart_sdk_linux_x64//:frontend_server": "gen",
+        HOST_DART_SDK + "//:frontend_server": "gen",
         "//engine/src/flutter/lib/snapshot:strong_platform": "flutter_patched_sdk",
     },
     deps = ["//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources"],

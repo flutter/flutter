@@ -36,6 +36,7 @@ one use of sdk_rewriter outside the web SDK is sky/packages/sky_engine's
 GN template does.
 """
 
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load("//build_defs/gn:build_directory.bzl", "BuildDirectoryInfo", "build_directory_path")
 
 # BUILD.gn's web_engine_libraries: the targets whose outputs assemble
@@ -51,7 +52,7 @@ WEB_ENGINE_LIBRARIES = [
     "//engine/src/flutter/web_sdk:web_locale_keymap_library",
 ]
 
-_PREBUILT_SDK = "@dart_sdk_linux_x64"
+_PREBUILT_SDK = HOST_DART_SDK
 
 def _sdk_rewriter_impl(ctx):
     input_dir = ctx.attr.input_dir.strip("/")

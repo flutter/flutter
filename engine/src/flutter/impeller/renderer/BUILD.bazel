@@ -14,6 +14,10 @@ impeller_shaders(
     name = "compute_shaders",
     enable_opengles = False,
     library_name = "compute",
+    metal_version = select({
+        "@platforms//os:macos": "2.1",
+        "//conditions:default": None,
+    }),
     shaders = [
         "compute_3d_test.comp",
         "prefix_sum_test.comp",
@@ -148,7 +152,12 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -198,7 +207,12 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "IMPELLER_GOLDEN_TESTS",
         "IMPELLER_ENABLE_VALIDATION=1",
@@ -232,6 +246,11 @@ cc_library(
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../playground:playground_test
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/runtime
         ],

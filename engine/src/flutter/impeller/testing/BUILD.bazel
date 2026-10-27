@@ -3,9 +3,12 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/testing/BUILD.gn by gn_to_bazel; do not edit.
+# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/impeller/renderer/backend/metal:metal.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -19,7 +22,12 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS,
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -63,7 +71,12 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -74,6 +87,100 @@ cc_library(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/playground:playground_test",
+    ],
+    alwayslink = True,
+)
+
+# `is_mac && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_enable_unittests",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)
+
+# The Objective-C(++) sources of metal_screenshot, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); metal_screenshot links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "metal_screenshot_objc",
+    testonly = True,
+    srcs = [
+        "metal/metal_screenshot.mm",
+        "metal/metal_screenshotter.mm",
+        "vulkan/vulkan_screenshotter.mm",
+    ],
+    hdrs = [
+        "metal/metal_screenshot.h",
+        "metal/metal_screenshotter.h",
+        "vulkan/vulkan_screenshotter.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+    ] + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":screenshot",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/renderer/backend/vulkan",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "metal_screenshot",
+    testonly = True,
+    hdrs = [
+        "metal/metal_screenshot.h",
+        "metal/metal_screenshotter.h",
+        "vulkan/vulkan_screenshotter.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":metal_screenshot_objc",
+        ":screenshot",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/renderer/backend/vulkan",
     ],
     alwayslink = True,
 )

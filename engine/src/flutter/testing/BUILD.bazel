@@ -6,7 +6,8 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_CFLAGS_OBJC", "FLUTTER_CFLAGS_OBJCC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_dart_snapshot_aot", "flutter_dart_snapshot_kernel", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -78,7 +79,12 @@ cc_library(
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :testing_core
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":testing_core",
@@ -133,6 +139,11 @@ cc_library(
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :testing_lib
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :testing_lib
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/runtime
         ],
@@ -162,7 +173,12 @@ cc_library(
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :testing_lib
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :testing_lib
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":testing_lib",
@@ -199,6 +215,11 @@ cc_library(
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from :dart
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :dart
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :dart
         ],
@@ -218,6 +239,22 @@ cc_library(
         "//engine/src/flutter/runtime",
     ],
     alwayslink = True,
+)
+
+cc_library(
+    name = "autoreleasepool_test",
+    testonly = True,
+    hdrs = ["autoreleasepool_test.h"],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src/flutter/fml",
+        "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ],
 )
 
 cc_library(
@@ -246,6 +283,11 @@ cc_library(
         "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
         "-Wno-shadow",  # from //flutter/third_party/swiftshader:swiftshader_config
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :skia
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/build/bazel:unoptimized": [],
         "//conditions:default": [
             "-Os",  # from //flutter/third_party/swiftshader:swiftshader_config
@@ -284,6 +326,124 @@ flutter_test_fixtures(
         "//engine/src/flutter/testing:unittests_enabled": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+)
+
+# `is_mac && shell_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_shell_enable_metal",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/shell:enable_metal",
+    ],
+)
+
+# The Objective-C(++) sources of metal, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); metal links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "metal_objc",
+    testonly = True,
+    srcs = select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "test_metal_context.mm",  # shell_enable_metal
+            "test_metal_surface.mm",  # shell_enable_metal
+            "test_metal_surface_impl.mm",  # shell_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "test_metal_context.h",  # shell_enable_metal
+            "test_metal_surface.h",  # shell_enable_metal
+            "test_metal_surface_impl.h",  # shell_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        ":when_shell_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "-Wno-inconsistent-missing-override",  # from :skia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :skia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_metal": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_mac_and_shell_enable_metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src:include_root"] + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            ":skia",  # shell_enable_metal
+            "//engine/src/flutter/fml",  # shell_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_shell_enable_vulkan": [
+            "//engine/src/flutter/vulkan",  # shell_enable_metal && shell_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "metal",
+    testonly = True,
+    hdrs = select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "test_metal_context.h",  # shell_enable_metal
+            "test_metal_surface.h",  # shell_enable_metal
+            "test_metal_surface_impl.h",  # shell_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        ":when_shell_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            "-Wno-inconsistent-missing-override",  # from :skia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :skia
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src:include_root"] + select({
+        "//engine/src/flutter/shell:enable_metal": [
+            ":metal_objc",
+            ":skia",  # shell_enable_metal
+            "//engine/src/flutter/fml",  # shell_enable_metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_shell_enable_vulkan": [
+            "//engine/src/flutter/vulkan",  # shell_enable_metal && shell_enable_vulkan
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
 )
 
 cc_library(
@@ -343,7 +503,12 @@ cc_library(
         "-Wno-inconsistent-missing-override",  # from :skia
         "-Wno-string-conversion",  # configs -= //build/config/clang:extra_warnings
         "-Wno-newline-eof",  # configs -= //build/config/clang:extra_warnings
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :skia
+        ],
+        "//conditions:default": [],
+    }),
     implementation_deps = ["@angle//:gl_prototypes"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
@@ -368,17 +533,72 @@ selects.config_setting_group(
     ],
 )
 
-flutter_cc_test(
-    name = "testing_unittests",
-    size = "small",
+# `enable_unittests && test_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_test_enable_metal",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "//engine/src/flutter/shell:test_enable_metal",
+    ],
+)
+
+# The Objective-C(++) sources of testing_unittests, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); testing_unittests links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "testing_unittests_objc",
     srcs = select({
         "//engine/src/flutter/shell:test_enable_metal": [
             "test_metal_surface_unittests.mm",  # test_enable_metal
         ],
         "//conditions:default": [],
     }),
-    copts = CHROMIUM_CODE_COPTS + select({
-        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC + FLUTTER_CFLAGS_OBJCC,
+    copts = FLUTTER_COPTS + select({
+        ":when_test_enable_metal_and_shell_enable_metal": [
+            "-Wno-inconsistent-missing-override",  # from :metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_enable_unittests_and_test_enable_metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":testing_fixtures",
+        "//engine/src:include_root",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ] + select({
+        "//engine/src/flutter/shell:test_enable_metal": [
+            ":metal",  # test_enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+flutter_cc_test(
+    name = "testing_unittests",
+    size = "small",
+    copts = FLUTTER_COPTS + select({
+        ":when_test_enable_metal_and_shell_enable_metal": [
+            "-Wno-inconsistent-missing-override",  # from :metal
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :metal
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -396,9 +616,47 @@ flutter_cc_test(
     ] + select({
         "//engine/src/flutter/shell:test_enable_metal": [
             ":metal",  # test_enable_metal
+            ":testing_unittests_objc",
         ],
         "//conditions:default": [],
     }),
+)
+
+# `shell_enable_metal && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_shell_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `shell_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_metal && shell_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_shell_enable_metal",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "//engine/src/flutter/shell:enable_metal",
+    ],
+)
+
+# `test_enable_metal && shell_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_shell_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "//engine/src/flutter/shell:enable_metal",
+        "@platforms//os:macos",
+    ],
 )
 
 # What GN has no words for; maintained in the converter's manifest
