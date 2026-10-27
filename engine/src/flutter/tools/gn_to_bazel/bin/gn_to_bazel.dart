@@ -180,6 +180,11 @@ Future<int> run(List<String> arguments) async {
         condition: manifest?.condition == null
             ? Condition.always
             : ConditionVariable(manifest!.condition!),
+        targetConditions: <String, Condition>{
+          for (final MapEntry<String, String> entry
+              in (manifest?.targetConditions ?? const <String, String>{}).entries)
+            entry.key: ConditionVariable(entry.value),
+        },
       );
       convertedTargets[gnPackage] = <String>{
         for (final GnTarget target in evaluation.targets)

@@ -3,13 +3,17 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/BUILD.gn by gn_to_bazel; do not edit.
-# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/shell/platform/darwin:darwin.
 
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "platform",
     srcs = select({
+        "@platforms//os:macos": [
+            "//engine/src/flutter/shell/platform/darwin",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
         "@platforms//os:android": [
             "//engine/src/flutter/shell/platform/android",  # !(is_mac || is_ios) && is_android
         ],
@@ -21,11 +25,3 @@ filegroup(
         "//conditions:default": [],
     }),
 )
-
-# What GN has no words for; maintained in the converter's manifest
-# (tools/gn_to_bazel/lib/src/manifest.dart).
-
-# The iOS embedding's AccessibilityFeatures, which api_check's tests read
-# (the enum mirrors dart:ui's): a file of this package until
-# shell/platform/darwin has a build file of its own.
-exports_files(["darwin/ios/framework/Source/AccessibilityFeatures.swift"])

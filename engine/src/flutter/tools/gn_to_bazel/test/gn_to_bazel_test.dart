@@ -33,6 +33,7 @@ Future<GnFileEvaluation> evaluate(
   Set<String> externalVariables = knownExternalVariables,
   Set<String> templates = const <String>{'test_fixtures'},
   Set<String> skip = const <String>{},
+  Map<String, Condition> targetConditions = const <String, Condition>{},
 }) async {
   return evaluateGnFile(
     await parse(gn),
@@ -41,6 +42,7 @@ Future<GnFileEvaluation> evaluate(
     externalVariables: externalVariables,
     booleanVariables: knownBooleanVariables,
     skipTargets: skip,
+    targetConditions: targetConditions,
   );
 }
 
@@ -53,6 +55,7 @@ Future<String> convert(
   Set<String> skip = const <String>{},
   String? appendix,
   OutputLayout layout = const OutputLayout.main(),
+  Map<String, Condition> targetConditions = const <String, Condition>{},
 }) async {
   return emitBuildFile(
     await evaluate(
@@ -61,6 +64,7 @@ Future<String> convert(
       externalVariables: externalVariables,
       templates: templates,
       skip: skip,
+      targetConditions: targetConditions,
     ),
     gnPackage: gnPackage,
     skipTargets: skip,
@@ -5884,6 +5888,66 @@ zip_bundle(
       },
     );
 
+    test("a target reached on one platform alone: the manifest's targetConditions", () async {
+      // shell/platform/common's accessibility bridge: defined outright, but
+      // only the macOS and Windows shells name it and only they compile it.
+      // Evaluated as if inside `if (is_mac)`: incompatible elsewhere, and
+      // what its block lists under is_mac is unconditional within it.
+      final String output = await convert(
+        r'''
+source_set("bridge") {
+  sources = [ "bridge.cc" ]
+  if (is_mac) {
+    sources += [ "bridge_mac.cc" ]
+  }
+  if (is_linux) {
+    sources += [ "bridge_linux.cc" ]
+  }
+}
+
+source_set("plain") {
+  sources = [ "plain.cc" ]
+}
+''',
+        assumptions: generationAssumptions(),
+        targetConditions: <String, Condition>{'bridge': const ConditionVariable('is_mac')},
+      );
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "bridge",
+    srcs = [
+        "bridge.cc",
+        "bridge_mac.cc",  # is_mac
+    ],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src:include_root"],
+    alwayslink = True,
+)
+'''),
+      );
+      expect(output, isNot(contains('bridge_linux.cc')));
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "plain",
+    srcs = ["plain.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = ["//engine/src:include_root"],
+    alwayslink = True,
+)
+'''),
+      );
+    });
+
     test(
       'zip_bundle_from_file over a directory of the build directory is a build_directory_tree',
       () async {
@@ -7597,6 +7661,10 @@ install(
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
     directory = "ci/host_debug",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 '''),
       );
@@ -7626,6 +7694,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/embedder:embedder-archive"],
     directory = "ci/android_debug_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 '''),
       );
@@ -7641,6 +7713,10 @@ install(
     name = "wasm_release",
     testonly = True,
     contents = ["//engine/src/flutter/web_sdk:flutter_web_sdk_archive"],
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_web_engine_build.json: ci/wasm_profile
@@ -7670,6 +7746,10 @@ install(
     name = "ci_host_debug_unopt",
     testonly = True,
     contents = ["//engine/src/flutter/tools/font_subset:font_subset"],
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 '''),
       );
@@ -7707,6 +7787,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/build/archives:artifacts"],
     directory = "ci/linux_debug_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 '''),
       );
@@ -7777,6 +7861,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp"],
     directory = "ci/host_release_licenses",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/host_release_licenses's tests run from the build directory: licenses_cpp_testrunner, other_testrunner.
@@ -7936,6 +8024,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/build/archives:artifacts"],
     directory = "ci/host_debug",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 '''),
       );
@@ -8045,6 +8137,10 @@ flutter_dart_tests(
           tree: tree,
           importPolicy: engineImportPolicy,
           condition: file.condition == null ? Condition.always : ConditionVariable(file.condition!),
+          targetConditions: <String, Condition>{
+            for (final MapEntry<String, String> entry in file.targetConditions.entries)
+              entry.key: ConditionVariable(entry.value),
+          },
         );
         final String output = emitBuildFile(
           evaluation,

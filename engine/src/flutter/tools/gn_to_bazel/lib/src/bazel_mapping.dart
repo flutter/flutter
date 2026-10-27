@@ -562,6 +562,9 @@ const Map<String, String> toolchainPlatforms = <String, String>{
 const Map<String, Set<String>> actionDirectoryOutputs = <String, Set<String>>{
   '//flutter/shell/platform/android:gen_android_javadoc': <String>{'javadocs'},
   '//flutter/sky/dist:sky_engine': <String>{'dist/packages/sky_engine'},
+  // create_xcframework.py's bundle (xcodebuild -create-xcframework), at
+  // the build root.
+  '//flutter/shell/platform/darwin/macos:flutter_framework': <String>{'FlutterMacOS.xcframework'},
 };
 
 /// Programs an action runs, which GN names by their absolute paths
@@ -582,6 +585,12 @@ const Map<String, List<String>> toolRuntimes = <String, List<String>>{
 const Map<String, String> genDirIncludeTargets = <String, String>{
   '//': defaultIncludeDirsLabel,
   '//flutter': '//engine/src/flutter:config',
+  // The darwin common package's generated directory, where its Swift
+  // module's header lands (`InternalFlutterSwiftCommon/...h`): its
+  // config("config") names it, and the macOS shell's Swift target takes
+  // that config from across the file boundary.
+  '//flutter/shell/platform/darwin/common':
+      '//engine/src/flutter/shell/platform/darwin/common:config',
 };
 
 /// Include directories in another repository that a Bazel library of that
@@ -610,6 +619,17 @@ const Map<String, String> includeDirLibraries = <String, String>{
   // package-relative.
   '//flutter/shell/platform/common/client_wrapper/include/flutter':
       '//engine/src/flutter/shell/platform/common/client_wrapper:relative_core_wrapper_headers',
+  // The darwin frameworks' shared headers as siblings of the platform's
+  // own (the layout a client sees): darwin/common's config
+  // framework_relative_headers carries the directory; the macOS shell's
+  // Swift target names it as an include directory.
+  '//flutter/shell/platform/darwin/common/framework/Headers':
+      '//engine/src/flutter/shell/platform/darwin/common:framework_relative_headers',
+  // The accessibility tree's root, which its packages name as their
+  // include directory (`#include "ax/..."`, `"base/..."`): the root's
+  // config library carries it.
+  '//flutter/third_party/accessibility':
+      '//engine/src/flutter/third_party/accessibility:accessibility_config',
 };
 
 /// A Bazel label taken apart: `@repo//package:name`.
@@ -901,6 +921,12 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
     '//engine/src/flutter:export_dynamic_test_symbols',
   ),
   '//flutter/common:flutter_config': ConfigDependency('//engine/src/flutter/common:flutter_config'),
+  // The accessibility tree's public config (its root as an include
+  // directory; a Windows define), which its packages and the desktop
+  // embeddings' bridge list: the root file's library of the same name.
+  '//flutter/third_party/accessibility:accessibility_config': ConfigDependency(
+    '//engine/src/flutter/third_party/accessibility:accessibility_config',
+  ),
   '//flutter/impeller:impeller_public_config': ConfigDependency(
     '//engine/src/flutter/impeller:impeller_public_config',
   ),
@@ -1208,6 +1234,32 @@ const Map<String, GnValue> hostOsCases = <String, GnValue>{
   // platform of the build.
   'host_os': GnCasedValue('host_os', <String, String>{'linux': 'linux', 'mac': 'mac'}),
 };
+
+/// The assumptions of a file that only a Mac builds (the macOS shell): the
+/// host is a Mac, and the host's platform name (`full_platform_name`, the
+/// archives' `darwin-<cpu>`) is the target's -- the shell is built for the
+/// Mac that builds it (tools/gn's --mac-cpu is the bot's own CPU on every
+/// builder of mac_host_engine.json), so the name follows the target CPU's
+/// setting.
+const Map<String, GnValue> macHostAssumptions = <String, GnValue>{
+  'host_os': GnStringValue('mac'),
+  'platform_name': GnStringValue('darwin'),
+  'full_platform_name': hostPlatformNameCases,
+};
+
+/// config.gni's `full_platform_name` (`<platform_name>-<host_cpu>`, the
+/// host's own name for the artifacts it ships) as a value cased over the
+/// target platform's setting, for a file that names the host's artifacts
+/// by it (the embedder's and the macOS shell's framework archives): the
+/// hosts the build runs on build their own platform -- a Linux x64 host
+/// linux-x64, a Mac darwin-<its cpu> (tools/gn's --mac-cpu is the bot's
+/// own on every builder) -- so the host's name is the target's there; a
+/// cross build (Android from Linux) has no case, and names nothing by it.
+const GnValue hostPlatformNameCases = GnCasedValue('full_target_platform_name', <String, String>{
+  'linux-x64': 'linux-x64',
+  'darwin-arm64': 'darwin-arm64',
+  'darwin-x64': 'darwin-x64',
+});
 
 /// The `metadata` of engine targets whose GN files the converter does not
 /// read (hand-written Bazel packages), for generated_file's metadata walk
