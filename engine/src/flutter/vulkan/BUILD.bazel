@@ -63,7 +63,12 @@ cc_library(
         "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
         "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
         "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flutter_vma:flutter_skia_vma
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",

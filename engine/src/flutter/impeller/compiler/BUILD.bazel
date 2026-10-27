@@ -74,7 +74,12 @@ cc_library(
         "-Wno-unused-variable",  # from //third_party/inja
         "-Wno-newline-eof",  # from //third_party/inja
         "-Wno-conversion",  # from //third_party/shaderc_flutter
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "//conditions:default": [],
+    }),
     # Current versions of libcxx have deprecated some of the UTF-16 string
     # conversion APIs.
     local_defines = FLUTTER_LOCAL_DEFINES + ["_LIBCPP_DISABLE_DEPRECATION_WARNINGS"],
@@ -108,7 +113,12 @@ cc_binary(
         "-Wno-unused-variable",  # from :compiler_lib
         "-Wno-newline-eof",  # from :compiler_lib
         "-Wno-conversion",  # from :compiler_lib
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :compiler_lib
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":compiler_lib",
@@ -140,7 +150,12 @@ cc_library(
         "-Wno-newline-eof",  # from :compiler_lib
         "-Wno-conversion",  # from :compiler_lib
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :compiler_lib
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],

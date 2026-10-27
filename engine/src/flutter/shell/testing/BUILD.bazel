@@ -7,6 +7,7 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/testing:testing.bzl", "flutter_gpu_test_backends")
 
 package(default_visibility = ["//visibility:public"])
@@ -61,34 +62,55 @@ cc_library(
     ],
 )
 
-cc_binary(
-    name = "flutter_tester",
-    srcs = [
-        "tester_context.h",
-        "tester_context_gles_factory.h",
-        "tester_context_mtl_factory.h",
-        "tester_context_vk_factory.h",
-        "tester_main.cc",
-    ] + select({
-        "//engine/src/flutter/impeller/tools:metal": [
-            "tester_context_vk_factory.cc",  # impeller_supports_rendering
-        ],
-        "//engine/src/flutter/impeller/tools:opengles": [
-            "tester_context_vk_factory.cc",  # impeller_supports_rendering
-        ],
-        "//engine/src/flutter/impeller/tools:vulkan": [
-            "tester_context_vk_factory.cc",  # impeller_supports_rendering
-        ],
-        "//conditions:default": [],
-    }) + select({
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "//engine/src/flutter/shell:enable_metal",
+    ],
+)
+
+# The Objective-C(++) sources of flutter_tester, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); flutter_tester links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "flutter_tester_objc",
+    srcs = select({
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal": [
             "tester_context_mtl_factory.mm",  # impeller_supports_rendering && shell_enable_metal
         ],
         "//conditions:default": [],
     }),
+    hdrs = [
+        "tester_context.h",
+        "tester_context_gles_factory.h",
+        "tester_context_mtl_factory.h",
+        "tester_context_vk_factory.h",
+    ],
     copts = FLUTTER_COPTS + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
         ],
         "//conditions:default": [],
     }) + select({
@@ -121,8 +143,182 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+            "-Wno-c++98-compat-extra-semi",  # from :tester_gpu_configuration
+            "-Wno-deprecated-copy",  # from :tester_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :tester_gpu_configuration
+            "-Wno-nullability-completeness",  # from :tester_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :tester_gpu_configuration
+            "-Wno-suggest-override",  # from :tester_gpu_configuration
+            "-Wno-unused-private-field",  # from :tester_gpu_configuration
+            "-Wno-unused-variable",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+            "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+            "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+            "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal": [
+            "SHELL_ENABLE_METAL",  # invoker.enable_metal
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter:export_dynamic_test_symbols",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/gpu:gpu_surface_software",
+        "//engine/src/flutter/third_party/tonic",
+        "@abseil-cpp//absl/base:no_destructor",
+        "@abseil_cpp_tree//:root_includes",
+        "@skia",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            ":tester_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            ":tester_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            ":tester_gpu_configuration",  # impeller_supports_rendering
+            "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",  # impeller_supports_rendering
+            "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+cc_binary(
+    name = "flutter_tester",
+    srcs = [
+        "tester_context.h",
+        "tester_context_gles_factory.h",
+        "tester_context_mtl_factory.h",
+        "tester_context_vk_factory.h",
+        "tester_main.cc",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "tester_context_vk_factory.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "tester_context_vk_factory.cc",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "tester_context_vk_factory.cc",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :tester_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :tester_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -193,6 +389,9 @@ cc_binary(
             "//engine/src/flutter/impeller",  # impeller_supports_rendering
         ],
         "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal": [":flutter_tester_objc"],
+        "//conditions:default": [],
     }),
 )
 
@@ -233,6 +432,16 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from //flutter/impeller
             "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
@@ -248,6 +457,11 @@ cc_binary(
     }) + select({
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :tester_opengles_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :tester_opengles_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -324,22 +538,12 @@ cc_binary(
     }),
 )
 
-# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-    match_any = [
-        "//engine/src/flutter/impeller/tools:metal",
-        "//engine/src/flutter/impeller/tools:opengles",
-        "//engine/src/flutter/impeller/tools:vulkan",
-    ],
-)
-
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal",
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
     match_all = [
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-        "//engine/src/flutter/shell:enable_metal",
+        "@platforms//os:macos",
     ],
 )
 
@@ -349,6 +553,15 @@ selects.config_setting_group(
     match_all = [
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
         "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `impeller_enable_vulkan && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:vulkan",
+        "@platforms//os:macos",
     ],
 )
 
@@ -362,6 +575,26 @@ selects.config_setting_group(
     ],
 )
 
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && shell_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_shell_enable_metal_and_is_mac",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "//engine/src/flutter/shell:enable_metal",
+        "@platforms//os:macos",
+    ],
+)
+
+# `shell_enable_metal && impeller_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_impeller_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/impeller/tools:metal",
+        "@platforms//os:macos",
+    ],
+)
+
 # `shell_enable_metal && impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan",
@@ -369,6 +602,15 @@ selects.config_setting_group(
         "//engine/src/flutter/shell:enable_metal",
         "//engine/src/flutter/impeller/tools:metal",
         "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `impeller_enable_opengles && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "@platforms//os:macos",
     ],
 )
 
