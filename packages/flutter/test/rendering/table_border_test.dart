@@ -64,6 +64,25 @@ void main() {
     );
   });
 
+  test('TableBorder.scale scales borderRadius', () {
+    final border = TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(8.0)));
+    expect(border.scale(0.5).borderRadius, const BorderRadius.all(Radius.circular(4.0)));
+  });
+
+  test('TableBorder.lerp interpolates borderRadius', () {
+    final a = TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(4.0)));
+    final b = TableBorder.all(borderRadius: const BorderRadius.all(Radius.circular(12.0)));
+    expect(TableBorder.lerp(a, b, 0.5)!.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
+    expect(
+      TableBorder.lerp(null, b, 0.25)!.borderRadius,
+      const BorderRadius.all(Radius.circular(3.0)),
+    );
+    expect(
+      TableBorder.lerp(a, null, 0.25)!.borderRadius,
+      const BorderRadius.all(Radius.circular(3.0)),
+    );
+  });
+
   test('TableBorder.lerp', () {
     const side1 = BorderSide(color: Color(0x00000001));
     const side2 = BorderSide(width: 2.0, color: Color(0x00000002));

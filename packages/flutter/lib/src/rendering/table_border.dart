@@ -222,6 +222,7 @@ class TableBorder {
       left: left.scale(t),
       horizontalInside: horizontalInside.scale(t),
       verticalInside: verticalInside.scale(t),
+      borderRadius: borderRadius * t,
     );
   }
 
@@ -248,6 +249,7 @@ class TableBorder {
       left: BorderSide.lerp(a.left, b.left, t),
       horizontalInside: BorderSide.lerp(a.horizontalInside, b.horizontalInside, t),
       verticalInside: BorderSide.lerp(a.verticalInside, b.verticalInside, t),
+      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t)!,
     );
   }
 
