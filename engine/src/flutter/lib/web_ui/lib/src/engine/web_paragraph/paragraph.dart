@@ -36,6 +36,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.Color? color,
     ui.StrutStyle? strutStyle,
     this.textHeightBehavior,
+    this.hyphens,
   }) : _strutStyle = strutStyle as WebStrutStyle?,
        _textStyle = WebTextStyle(
          fontFamily: fontFamily,
@@ -43,6 +44,9 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          fontStyle: fontStyle,
          fontWeight: fontWeight,
          height: height,
+         // Propagate the paragraph's default leadingDistribution to the root text style
+         // so spans and lines inherit it unless overridden by a child TextStyle.
+         leadingDistribution: textHeightBehavior?.leadingDistribution,
          locale: locale,
          color: color,
        ),
@@ -59,6 +63,11 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   final String? ellipsis;
 
   final ui.TextHeightBehavior? textHeightBehavior;
+
+  // TODO(dbebawy): honor hyphens in the pure-Dart line-breaker/painter (no
+  // soft-hyphen glyph emitted at a break yet). Accepted and stored for now.
+  // https://github.com/flutter/flutter/issues/193506
+  final ui.Hyphens? hyphens;
 
   WebStrutStyle? get strutStyle => _strutStyle;
   final WebStrutStyle? _strutStyle;
@@ -78,7 +87,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
         ellipsis == other.ellipsis &&
         textHeightBehavior == other.textHeightBehavior &&
         _strutStyle == other._strutStyle &&
-        _textStyle == other._textStyle;
+        _textStyle == other._textStyle &&
+        hyphens == other.hyphens;
   }
 
   @override
@@ -91,6 +101,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
       textHeightBehavior,
       _strutStyle,
       _textStyle,
+      hyphens,
     );
   }
 
@@ -105,6 +116,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
           'maxLines: $maxLines, '
           'ellipsis: $ellipsis, '
           'textHeightBehavior: $textHeightBehavior, '
+          'hyphens: $hyphens, '
           'strutStyle: $_strutStyle, '
           'textAlign: $textAlign'
           'textStyle: $_textStyle'
@@ -1495,10 +1507,11 @@ class ChildStyleNode extends StyleNode {
   @override
   double? get _wordSpacing => style.wordSpacing ?? parent._wordSpacing;
 
+  // Preserve `style.height` as-is (including `ui.kTextHeightNone`) so a child
+  // span can explicitly override a non-null parent height and disable the
+  // height multiplier during layout.
   @override
-  double? get _height {
-    return style.height == ui.kTextHeightNone ? null : (style.height ?? parent._height);
-  }
+  double? get _height => style.height ?? parent._height;
 
   @override
   ui.TextLeadingDistribution? get _leadingDistribution =>
@@ -1581,8 +1594,9 @@ class RootStyleNode extends StyleNode {
   @override
   double? get _height => style.height;
 
+  // Inherit the default leadingDistribution from ParagraphStyle.textHeightBehavior.
   @override
-  ui.TextLeadingDistribution? get _leadingDistribution => null;
+  ui.TextLeadingDistribution? get _leadingDistribution => style.leadingDistribution;
 
   @override
   ui.Locale? get _locale => style.locale;

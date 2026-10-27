@@ -489,6 +489,30 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
 }
 
+- (void)testFlutterTextInputViewDidRestoreFirstResponderWillCallTextInputClientOnFocusReceived {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+  [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.onFocusReceived"
+                                        arguments:@[ @(123) ]];
+  NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
+  NSData* encodedReply = [[FlutterJSONMethodCodec sharedInstance] encodeSuccessEnvelope:@NO];
+  id mockBinaryReply = [OCMArg invokeBlockWithArgs:encodedReply, nil];
+  OCMStub([mockBinaryMessenger sendOnChannel:@"flutter/textinput"
+                                     message:encodedMethodCall
+                                 binaryReply:mockBinaryReply]);
+
+  __block id focusReceivedResult;
+  [engine flutterTextInputView:nil
+      didRestoreFirstResponderWithTextInputClient:123
+                                           result:^(id result) {
+                                             focusReceivedResult = result;
+                                           }];
+  XCTAssertEqualObjects(focusReceivedResult, @NO);
+}
+
 - (void)testFlutterEngineUpdatesDisplays {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   id mockEngine = OCMPartialMock(engine);
@@ -847,24 +871,36 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   [engine cleanUpConnection:connection];
 }
 
-- (void)testLifeCycleNotificationSceneWillConnect {
+- (void)testSingleSceneEngineRegistersWithSceneLifeCycleDelegate {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication supportsMultipleScenes]).andReturn(NO);
+
+  id mockLifeCycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
-  id mockScene = OCMClassMock([UIWindowScene class]);
-  id mockLifecycleProvider = OCMProtocolMock(@protocol(FlutterSceneLifeCycleProvider));
-  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
-  OCMStub([mockScene delegate]).andReturn(mockLifecycleProvider);
-  OCMStub([mockLifecycleProvider sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
-  NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneWillConnectNotification
-                                    object:mockScene
-                                  userInfo:nil];
+  OCMVerify(times(1), [mockLifeCycleDelegate registerEngineForSingleScene:engine]);
+  [mockApplication stopMocking];
+  [mockLifeCycleDelegate stopMocking];
+}
 
-  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
-  OCMVerify(times(1), [mockLifecycleDelegate engine:engine
-                          receivedConnectNotificationFor:mockScene]);
+- (void)testMultiSceneEngineDoesNotRegisterWithSingleSceneLifeCycleDelegate {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication supportsMultipleScenes]).andReturn(YES);
+
+  id mockLifeCycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  OCMVerify(times(0), [mockLifeCycleDelegate registerEngineForSingleScene:engine]);
+  [mockApplication stopMocking];
+  [mockLifeCycleDelegate stopMocking];
 }
 
 - (void)testSpawnsShareGpuContext {

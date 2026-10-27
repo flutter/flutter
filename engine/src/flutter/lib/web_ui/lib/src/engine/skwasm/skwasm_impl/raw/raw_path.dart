@@ -114,7 +114,7 @@ external void pathArcToOval(
   RawRect rect,
   double startAngle,
   double sweepAngle,
-  bool forceMoveto,
+  bool forceMoveTo,
 );
 
 @Native<Void Function(PathHandle, Float, Float, Float, Int, Int, Float, Float)>(

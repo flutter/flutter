@@ -36,9 +36,13 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
+import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -868,6 +872,9 @@ class FakeJava extends Fake implements Java {
   Map<String, String> get environment => _environment;
 
   @override
+  Map<String, String> get gradleEnvironment => _environment;
+
+  @override
   Version? version;
 
   @override
@@ -1086,9 +1093,14 @@ class FakeArtifacts extends Fake implements Artifacts {
 }
 
 class FakeCache extends Fake implements Cache {
-  FakeCache({FileSystem? fileSystem}) : _fileSystem = fileSystem ?? MemoryFileSystem.test();
+  FakeCache({FileSystem? fileSystem, this.olderThanToolsStamp = true})
+    : _fileSystem = fileSystem ?? MemoryFileSystem.test();
 
   final FileSystem _fileSystem;
+  final bool olderThanToolsStamp;
+
+  @override
+  bool isOlderThanToolsStamp(FileSystemEntity entity) => olderThanToolsStamp;
 
   @override
   Future<void> lock() async {}
@@ -1108,6 +1120,9 @@ class FakeCache extends Fake implements Cache {
   @override
   Directory getCacheDir(String name, {bool shouldCreate = true}) =>
       _fileSystem.directory('/bin/cache/$name');
+
+  @override
+  Directory getCacheArtifacts() => getCacheDir('artifacts');
 
   @override
   Directory getArtifactDirectory(String name) =>
@@ -1145,12 +1160,19 @@ class FakeBuildTargets extends Fake implements BuildTargets {}
 class FakeCrashReporter extends Fake implements CrashReporter {}
 
 class FakeDoctor extends Fake implements Doctor {
-  FakeDoctor({this.canListEmulators = true, this.canLaunchAnything = true});
+  FakeDoctor({
+    this.canLaunchAnything = true,
+    this.canListAnything = true,
+    this.canListEmulators = true,
+  });
 
   final bool canListEmulators;
 
   @override
   final bool canLaunchAnything;
+
+  @override
+  final bool canListAnything;
 
   @override
   List<Workflow> get workflows => <Workflow>[FakeWorkflow(canListEmulators: canListEmulators)];
@@ -1202,8 +1224,12 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._buildSystem,
     this._buildTargets,
     this._crashReporter,
+    this._deviceManager,
     this._doctor,
     this._emulatorManager,
+    this.extensionBuildManager,
+    this.extensionCleanManager,
+    this.extensionManager,
     this._featureFlags,
     this._toolContext,
   });
@@ -1214,6 +1240,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final CrashReporter? _crashReporter;
+  final DeviceManager? _deviceManager;
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
   final FeatureFlags? _featureFlags;
@@ -1238,10 +1265,22 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
 
   @override
+  late final DeviceManager deviceManager = _deviceManager ?? FakeDeviceManager();
+
+  @override
   Doctor get doctor => _doctor ?? FakeDoctor();
 
   @override
   EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
+
+  @override
+  final ExtensionBuildManager? extensionBuildManager;
+
+  @override
+  final ExtensionCleanManager? extensionCleanManager;
+
+  @override
+  final ExtensionManager? extensionManager;
 
   @override
   FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
@@ -1280,6 +1319,32 @@ class FakeToolContext extends Fake implements ToolContext {
     this._userMessages,
   });
 
+  factory FakeToolContext.macosHost({
+    required ProcessManager processManager,
+    Config? config,
+    FileSystem? fs,
+    Logger? logger,
+    Platform? platform,
+  }) {
+    final FileSystem fileSystem = fs ?? MemoryFileSystem.test();
+    final Logger log = logger ?? BufferLogger.test();
+    final Platform hostPlatform =
+        platform ?? FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+    return FakeToolContext(
+      config: config ?? Config.test(),
+      fs: fileSystem,
+      logger: log,
+      os: OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: log,
+        platform: hostPlatform,
+        processManager: processManager,
+      ),
+      platform: hostPlatform,
+      processManager: processManager,
+    );
+  }
+
   final Artifacts? _artifacts;
   final BotDetector? _botDetector;
   final Cache? _cache;
@@ -1308,7 +1373,11 @@ class FakeToolContext extends Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  late final Artifacts artifacts = _artifacts ?? FakeArtifacts(fileSystem: fs);
+  late final Artifacts artifacts = switch (_artifacts) {
+    final DeferredArtifacts deferredArtifacts => deferredArtifacts,
+    final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
+    null => DeferredArtifacts(FakeArtifacts(fileSystem: fs)),
+  };
 
   @override
   late final BotDetector botDetector = _botDetector ?? const FakeBotDetector(false);
@@ -1382,7 +1451,7 @@ class FakeToolContext extends Fake implements ToolContext {
 
   @override
   late final FlutterProjectFactory projectFactory =
-      _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger);
+      _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger, config: config);
 
   @override
   late final ShutdownHooks shutdownHooks = _shutdownHooks ?? ShutdownHooks();
@@ -1407,8 +1476,8 @@ class FakeToolContext extends Fake implements ToolContext {
 }
 
 /// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
-class DelegatingToolContext extends Fake implements ToolContext {
-  DelegatingToolContext({
+class DelegatingToolContext with Fake implements ToolContext {
+  const DelegatingToolContext({
     this._artifacts,
     this._botDetector,
     this._cache,

@@ -2317,4 +2317,21 @@ void main() {
       });
     });
   });
+
+  testWidgets('Table does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Table(
+              children: const <TableRow>[
+                TableRow(children: <Widget>[Placeholder()]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Table)), Size.zero);
+  });
 }

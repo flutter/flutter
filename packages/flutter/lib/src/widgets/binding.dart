@@ -486,7 +486,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
-    _windowingOwner = createDefaultWindowingOwner();
+    _windowingOwner = createWindowingOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -764,8 +764,12 @@ mixin WidgetsBinding
             throw Exception('type parameter is required');
           }
 
-          switch (type) {
-            case 'MinimumTextContrastEvaluation':
+          final AccessibilityEvaluationType? evaluationType = AccessibilityEvaluationType.values
+              .where((AccessibilityEvaluationType e) => e.name == type)
+              .firstOrNull;
+
+          switch (evaluationType) {
+            case AccessibilityEvaluationType.minimumTextContrast:
               if (parameters case {
                 'minNormalTextContrastRatio': final String minNormalTextContrastRatio,
                 'minLargeTextContrastRatio': final String minLargeTextContrastRatio,
@@ -777,7 +781,7 @@ mixin WidgetsBinding
                 return _formatEvaluationResult(result.violations);
               }
               throw Exception('Invalid arguments');
-            case 'MinimumTapTargetEvaluation':
+            case AccessibilityEvaluationType.minimumTapTarget:
               if (parameters case {'targetSize': final String targetSize}) {
                 final EvaluationResult result = await MinimumTapTargetEvaluation(
                   size: Size.square(double.parse(targetSize)),
@@ -785,12 +789,15 @@ mixin WidgetsBinding
                 return _formatEvaluationResult(result.violations);
               }
               throw Exception('Invalid arguments');
-            case 'LabeledTapTargetEvaluation':
+            case AccessibilityEvaluationType.labeledTapTarget:
               final EvaluationResult result = await const LabeledTapTargetEvaluation().evaluate(
                 this,
               );
               return _formatEvaluationResult(result.violations);
-            default:
+            case AccessibilityEvaluationType.minimumNonTextContrast:
+            case AccessibilityEvaluationType.unlabeledLeafNode:
+            case AccessibilityEvaluationType.title:
+            case null:
               throw Exception('unknown type: $type');
           }
         },
@@ -1757,6 +1764,23 @@ mixin WidgetsBinding
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
+
+  /// Creates the [WindowingOwner] to install in [windowingOwner].
+  ///
+  /// By default, this creates the owner for the current platform, or an
+  /// unsupported owner when windowing is disabled. Test bindings override this
+  /// to avoid initializing native windowing before installing their test owner.
+  ///
+  /// [initInstances] calls this, so an override runs before this binding — and
+  /// before every binding mixed in after it — has finished initializing. Only
+  /// state that a constructor established, or that a binding earlier in the
+  /// mixin application initialized, can be read from here: [platformDispatcher]
+  /// can be, and anything assigned after the call below cannot.
+  ///
+  /// {@macro flutter.widgets.binding.window.experimental}
+  @internal
+  @protected
+  WindowingOwner createWindowingOwner() => createDefaultWindowingOwner();
 
   /// The [WindowingOwner] is responsible for creating and managing [BaseWindowController]s.
   ///
