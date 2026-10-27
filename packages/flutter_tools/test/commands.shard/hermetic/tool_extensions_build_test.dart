@@ -15,14 +15,16 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
+import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide HostPlatform;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -260,6 +262,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -506,11 +509,13 @@ void main() {
           featureFlags: featureFlags,
           logger: testLogger,
         );
+        final fakeArtifactManager = _FakeExtensionArtifactManager();
 
         final command = BuildCommand(
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: fakeArtifactManager,
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -522,6 +527,7 @@ void main() {
         await commandRunner.run(<String>['build', 'custom-hermetic-build', '--no-pub']);
 
         expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
+        expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
 
         await manager.dispose();
       },
@@ -536,7 +542,17 @@ void main() {
       'ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters',
       () async {
         final fakeBuildManager = _RecordingExtensionBuildManager();
+        final fakeArtifactManager = _FakeExtensionArtifactManager(
+          downloadedArtifacts: const <String, String>{
+            'custom-ext-artifact': '/cache/custom-ext-artifact',
+            'genSnapshot': '/cache/shadowed-gen-snapshot',
+          },
+        );
         const target = ExtensionBuildTarget(
+          artifacts: <ExtensionArtifact>{
+            BuiltInArtifacts.genSnapshot,
+            ExtensionArtifact('custom-ext-artifact'),
+          },
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir:
@@ -545,6 +561,7 @@ void main() {
         );
 
         final subCommand = ExtensionBuildSubCommand(
+          artifactManager: fakeArtifactManager,
           buildManager: fakeBuildManager,
           target: target,
           toolContext: FakeToolContext(fs: fs, logger: testLogger),
@@ -553,6 +570,8 @@ void main() {
 
         final FlutterCommandResult result = await subCommand.runCommand();
         expect(result.exitStatus, ExitStatus.success);
+        expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+        expect(fakeArtifactManager.requestedTargetPlatforms, equals(const <String>{'linux-x64'}));
 
         expect(fakeBuildManager.lastBuildArgs, isNotNull);
         expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
@@ -564,7 +583,13 @@ void main() {
           fakeBuildManager.lastBuildArgs!['outputDir'],
           equals(fs.directory('/build/custom/linux-x64/release').uri),
         );
-        expect(fakeBuildManager.lastBuildArgs!['resolvedArtifacts'], isA<Map<String, String>>());
+        expect(
+          fakeBuildManager.lastBuildArgs!['resolvedArtifacts'],
+          equals(const <String, String>{
+            'custom-ext-artifact': '/cache/custom-ext-artifact',
+            'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_x64.release',
+          }),
+        );
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
@@ -584,6 +609,7 @@ void main() {
       );
       final config = Config.test()..setValue('build-dir', 'custom_build_root');
       final subCommand = ExtensionBuildSubCommand(
+        artifactManager: _FakeExtensionArtifactManager(),
         buildManager: buildManager,
         target: target,
         toolContext: FakeToolContext(config: config, fs: fs, logger: BufferLogger.test()),
@@ -609,6 +635,7 @@ void main() {
           targetPlatform: 'linux-x64',
         );
         final subCommand = ExtensionBuildSubCommand(
+          artifactManager: _FakeExtensionArtifactManager(),
           buildManager: buildManager,
           target: target,
           toolContext: FakeToolContext(fs: fs, logger: BufferLogger.test()),
@@ -644,6 +671,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -695,6 +723,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          extensionArtifactManager: _FakeExtensionArtifactManager(),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           templateRenderer: FakeTemplateRenderer(),
@@ -716,4 +745,22 @@ void main() {
       },
     );
   });
+}
+
+class _FakeExtensionArtifactManager extends Fake implements ExtensionArtifactManager {
+  _FakeExtensionArtifactManager({this.downloadedArtifacts = const <String, String>{}});
+
+  final Map<String, String> downloadedArtifacts;
+  bool ensureArtifactsDownloadedCalled = false;
+  Set<String>? requestedTargetPlatforms;
+
+  @override
+  Future<Map<String, String>> ensureArtifactsDownloaded({
+    bool force = false,
+    Set<String>? targetPlatforms,
+  }) async {
+    ensureArtifactsDownloadedCalled = true;
+    requestedTargetPlatforms = targetPlatforms;
+    return downloadedArtifacts;
+  }
 }

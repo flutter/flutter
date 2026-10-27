@@ -25,6 +25,7 @@ import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../experimental/extension_artifact_manager.dart';
 import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
@@ -334,6 +335,7 @@ class RunCommand extends RunCommandBase {
     this._androidContext,
     this._androidWorkflow,
     this.deviceManager,
+    this._extensionArtifactManager,
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
@@ -400,6 +402,9 @@ class RunCommand extends RunCommandBase {
   final AndroidWorkflow? _androidWorkflow;
   final AppleContext appleContext;
   final DeviceManager? deviceManager;
+  final ExtensionArtifactManager? _extensionArtifactManager;
+
+  static const String _defaultCustomTargetPlatformDisplayName = 'custom';
 
   @override
   final name = 'run';
@@ -802,6 +807,35 @@ class RunCommand extends RunCommandBase {
           );
         }
       }
+    }
+
+    // Ensure any tool extension artifacts required by the target devices are
+    // downloaded and verified before creating FlutterDevice instances and
+    // starting the application.
+    if (_extensionArtifactManager case final ExtensionArtifactManager artifactManager) {
+      final List<String?> resolvedPlatforms = await Future.wait(
+        devices!.map((Device device) async {
+          final TargetPlatform tp = await device.targetPlatform;
+          // Built-in target platforms resolve directly via TargetPlatform.getName().
+          if (tp != TargetPlatform.unsupported) {
+            return tp.getName();
+          }
+          // Custom extension devices report TargetPlatform.unsupported and expose
+          // their platform identifier via targetPlatformDisplayName (or fall back
+          // to the generic 'custom' display name when unspecified).
+          final String displayName = await device.targetPlatformDisplayName;
+          return displayName.isNotEmpty && displayName != _defaultCustomTargetPlatformDisplayName
+              ? displayName
+              : null;
+        }),
+      );
+      final Set<String> runTargetPlatforms = resolvedPlatforms.nonNulls.toSet();
+      // If no specific target platform names were resolved (e.g. a custom device
+      // using the generic 'custom' display name), pass null to download artifacts
+      // for all target platforms supported by the active extension.
+      await artifactManager.ensureArtifactsDownloaded(
+        targetPlatforms: runTargetPlatforms.isNotEmpty ? runTargetPlatforms : null,
+      );
     }
 
     final flutterDevices = <FlutterDevice>[

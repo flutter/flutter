@@ -40,6 +40,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
@@ -1093,14 +1094,20 @@ class FakeArtifacts extends Fake implements Artifacts {
 }
 
 class FakeCache extends Fake implements Cache {
-  FakeCache({FileSystem? fileSystem, this.olderThanToolsStamp = true})
-    : _fileSystem = fileSystem ?? MemoryFileSystem.test();
+  FakeCache({
+    this.engineRevision = 'fake_engine_revision',
+    FileSystem? fileSystem,
+    this.olderThanToolsStamp = true,
+  }) : _fileSystem = fileSystem ?? MemoryFileSystem.test();
 
   final FileSystem _fileSystem;
   final bool olderThanToolsStamp;
 
   @override
   bool isOlderThanToolsStamp(FileSystemEntity entity) => olderThanToolsStamp;
+
+  @override
+  final String engineRevision;
 
   @override
   Future<void> lock() async {}
@@ -1227,6 +1234,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._deviceManager,
     this._doctor,
     this._emulatorManager,
+    this.extensionArtifactManager,
     this.extensionBuildManager,
     this.extensionCleanManager,
     this.extensionManager,
@@ -1272,6 +1280,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
+
+  @override
+  final ExtensionArtifactManager? extensionArtifactManager;
 
   @override
   final ExtensionBuildManager? extensionBuildManager;

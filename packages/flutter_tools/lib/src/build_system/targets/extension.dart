@@ -51,27 +51,37 @@ Directory resolveExtensionOutputDir({
 }
 
 /// Resolves all engine and host artifacts declared on [target] using
-/// [artifacts] and [buildMode].
+/// [artifacts], [buildMode], and optional downloaded [extensionArtifacts].
 ///
-/// Throws a [ToolExit] if any requested artifact name is invalid or unsupported.
+/// Built-in engine and host artifacts always take precedence over
+/// [extensionArtifacts]. Throws a [ToolExit] if any requested artifact name is
+/// neither a supported built-in artifact nor present in [extensionArtifacts].
 // TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionBuildTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
   required ExtensionBuildTarget target,
+  Map<String, String> extensionArtifacts = const <String, String>{},
 }) {
   final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
-  final resolvedArtifacts = <String, String>{};
+  final resolvedArtifacts = <String, String>{...extensionArtifacts};
   for (final ExtensionArtifact artifact in target.artifacts) {
-    resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
-      _resolveArtifact(artifact),
-      platform: targetPlatform,
-      mode: buildMode,
-    );
+    if (_builtInArtifacts[artifact.name] case final Artifact builtIn) {
+      resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
+        builtIn,
+        platform: targetPlatform,
+        mode: buildMode,
+      );
+    } else if (!extensionArtifacts.containsKey(artifact.name)) {
+      throwToolExit('Unsupported artifact "${artifact.name}" requested by a tool extension.');
+    }
   }
   for (final ExtensionHostArtifact artifact in target.hostArtifacts) {
-    final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
-    resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(hostArtifact).path;
+    if (_builtInHostArtifacts[artifact.name] case final HostArtifact builtIn) {
+      resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(builtIn).path;
+    } else if (!extensionArtifacts.containsKey(artifact.name)) {
+      throwToolExit('Unsupported host artifact "${artifact.name}" requested by a tool extension.');
+    }
   }
   return resolvedArtifacts;
 }
@@ -88,19 +98,15 @@ TargetPlatform? _tryResolveTargetPlatform(String platformName) {
   }
 }
 
-Artifact _resolveArtifact(ExtensionArtifact artifact) => switch (artifact.name) {
-  'flutterPatchedSdkPath' => Artifact.flutterPatchedSdkPath,
-  'genSnapshot' => Artifact.genSnapshot,
-  'icuData' => Artifact.icuData,
-  'linuxDesktopPath' => Artifact.linuxDesktopPath,
-  'linuxHeaders' => Artifact.linuxHeaders,
-  final String name => throwToolExit('Unsupported artifact "$name" requested by a tool extension.'),
+const _builtInArtifacts = <String, Artifact>{
+  'flutterPatchedSdkPath': Artifact.flutterPatchedSdkPath,
+  'genSnapshot': Artifact.genSnapshot,
+  'icuData': Artifact.icuData,
+  'linuxDesktopPath': Artifact.linuxDesktopPath,
+  'linuxHeaders': Artifact.linuxHeaders,
 };
 
-HostArtifact _resolveHostArtifact(ExtensionHostArtifact artifact) => switch (artifact.name) {
-  'impellerc' => HostArtifact.impellerc,
-  'libtessellator' => HostArtifact.libtessellator,
-  final String name => throwToolExit(
-    'Unsupported host artifact "$name" requested by a tool extension.',
-  ),
+const _builtInHostArtifacts = <String, HostArtifact>{
+  'impellerc': HostArtifact.impellerc,
+  'libtessellator': HostArtifact.libtessellator,
 };
