@@ -75,12 +75,7 @@ cc_library(
     srcs = ["toolkit_android_unittests.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/testing
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["TESTING"],
     target_compatible_with = select({
         "@platforms//os:android": [],

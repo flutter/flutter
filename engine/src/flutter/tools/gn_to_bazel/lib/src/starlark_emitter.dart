@@ -131,13 +131,19 @@ final class _EntrySelect {
 /// A list attribute: unconditional items, plus items per condition in the
 /// order the conditions first appeared.
 final class _ListAttribute {
-  _ListAttribute({this.setLike = false});
+  _ListAttribute({this.setLike = false, this.keepsRepeats = false});
 
   /// Whether the attribute is a set of labels Bazel rejects a duplicate in
   /// (deps, srcs, data), where an item under a condition implying another
   /// item's condition is a duplicate wherever it appears; a flag list keeps
   /// GN's repeats in GN's order.
   final bool setLike;
+
+  /// Whether a repeated item means something (`-framework` before each
+  /// framework among the link flags; an action's arguments), so that an
+  /// item joining the unconditional part is never dropped as a duplicate;
+  /// a compiler flag repeated says nothing new, and is dropped.
+  final bool keepsRepeats;
 
   final List<_Item> always = <_Item>[];
   final Map<Condition, List<_Item>> conditional = <Condition, List<_Item>>{};
@@ -253,14 +259,16 @@ final class _ListAttribute {
   }
 
   /// Moves the items under [condition] to the unconditional part, in their
-  /// places; one the unconditional part already holds is dropped.
+  /// places; one the unconditional part already holds is dropped, unless
+  /// the attribute keeps its repeats ([keepsRepeats]).
   void makeUnconditional(Condition condition) {
     final List<_Item>? items = conditional.remove(condition);
     if (items == null) {
       return;
     }
     for (final _Item item in items) {
-      final bool present = always.any((_Item existing) => existing.text == item.text);
+      final bool present =
+          !keepsRepeats && always.any((_Item existing) => existing.text == item.text);
       final int at = sequence.indexWhere(
         ((Condition, _Item) entry) => identical(entry.$2, item) && entry.$1 == condition,
       );
@@ -275,6 +283,16 @@ final class _ListAttribute {
         sequence[at] = (Condition.always, item);
       }
     }
+  }
+
+  /// Removes the items under [condition] (one the target's own condition
+  /// contradicts: a Linux-only branch in a target that exists on a Mac
+  /// alone).
+  void dropCondition(Condition condition) {
+    if (conditional.remove(condition) == null) {
+      return;
+    }
+    sequence.removeWhere(((Condition, _Item) entry) => entry.$1 == condition);
   }
 }
 
@@ -300,8 +318,15 @@ final class _Rule {
 
   _ListAttribute list(String attribute) => lists.putIfAbsent(
     attribute,
-    () => _ListAttribute(setLike: _setLikeAttributes.contains(attribute)),
+    () => _ListAttribute(
+      setLike: _setLikeAttributes.contains(attribute),
+      keepsRepeats: _repeatingAttributes.contains(attribute),
+    ),
   );
+
+  /// The attributes in which a repeated item means something: the link
+  /// flags (`-framework X -framework Y`) and an action's arguments.
+  static const Set<String> _repeatingAttributes = <String>{'linkopts', 'args'};
 
   /// The label-list attributes Bazel rejects a duplicate in.
   static const Set<String> _setLikeAttributes = <String>{
@@ -663,9 +688,13 @@ final class _Emitter {
         // list defined in the same `if (enable_unittests)` block as the
         // target that reads it) are unconditional within the target, which
         // exists nowhere else: no select() for them -- and a macro that
-        // inspects the list in Starlark gets a list.
+        // inspects the list in Starlark gets a list. Items under a condition
+        // the target's own contradicts (the GLFW shell's Linux-only branch
+        // in the macOS shell's group) are nothing: the target never sees
+        // them where it exists.
         for (final _ListAttribute list in rule.lists.values) {
           _dropImplied(list, target.condition);
+          _dropContradicted(list, target.condition);
         }
       }
     }
@@ -681,6 +710,16 @@ final class _Emitter {
         if (context.and(c) == context) c,
     ];
     implied.forEach(list.makeUnconditional);
+  }
+
+  /// Removes the items of [list] whose condition [context] contradicts
+  /// (context && condition is never).
+  static void _dropContradicted(_ListAttribute list, Condition context) {
+    final contradicted = <Condition>[
+      for (final Condition c in list.conditional.keys)
+        if (context.and(c) == Condition.never) c,
+    ];
+    contradicted.forEach(list.dropCondition);
   }
 
   /// `target_compatible_with` for a target defined under its condition:
@@ -3049,9 +3088,17 @@ final class _Emitter {
         }
         for (final _Element element in _elements(assignment, withComments: true)) {
           final String config = _string(element);
-          final GnTarget? local = config.startsWith(':') ? localConfigs[config.substring(1)] : null;
-          if (local != null) {
-            _swiftConfigInto(rule, local, element.condition);
+          // A config of this file, or of another converted file (the macOS
+          // shell's Swift target takes darwin/common's `:config`), read
+          // through the resolver: its settings apply here as a local
+          // config's do -- the include directory as a dependency on the
+          // library spanning it (genDirIncludeTargets), the swiftflags as
+          // they are.
+          final GnTarget? known = config.startsWith(':')
+              ? localConfigs[config.substring(1)]
+              : _remoteConfig(config);
+          if (known != null) {
+            _swiftConfigInto(rule, known, element.condition);
             continue;
           }
           final ConfigEffect? effect = configEffects[config] ?? configEffects[_gnLabel(config)];
@@ -3084,6 +3131,17 @@ final class _Emitter {
   /// A local config applied to a Swift target: its `swiftflags` and
   /// include directories under [under], its link flags, its own configs
   /// the same way; see [_convertSwiftTarget] for the rest.
+  /// A config() of another converted file, by its GN label, through the
+  /// resolver (which evaluates that file under its assumptions); null for
+  /// anything else -- a label the tables map (configEffects), or a file
+  /// the converter does not read.
+  GnTarget? _remoteConfig(String config) {
+    if (!config.startsWith('//')) {
+      return null;
+    }
+    return forwarded.configOf(_gnLabel(config));
+  }
+
   void _swiftConfigInto(_Rule rule, GnTarget config, Condition under) {
     for (final GnVariable variable in config.variables.values) {
       switch (variable.name) {
@@ -5463,10 +5521,13 @@ final class _Emitter {
       flush();
     }
 
-    if (!sorted && list.conditional.isNotEmpty && list.hasOrder) {
+    if (!sorted && list.hasOrder && list.sequence.isNotEmpty) {
       // In GN's order: a run of unconditional items, a select() for a run
       // under one condition, and so on -- the compiler reads these
       // attributes in order (an include directory's place is its priority).
+      // A list whose conditional items all became unconditional
+      // (_dropImplied: an action's args with one path under the file's
+      // condition) keeps GN's order the same way.
       Condition? current;
       final run = <_Item>[];
       void flushRun() {

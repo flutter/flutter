@@ -1395,6 +1395,10 @@ filegroup(
 # unpacked together, <host>-profile and <host>-release the other modes'
 # (gen_snapshot and the embedding, built under that mode's configuration:
 # in_configuration), common/ the patched SDK's debug and product archives.
+# The Linux host's for now: the desktop embedding here is the GTK shell's
+# (a Mac's facsimile takes FlutterMacOS.framework, when the tool's macOS
+# tests come), so the directory is incompatible elsewhere rather than
+# failing a Mac's analysis of the package.
 bundle_directory(
     name = "host_engine_directory",
     bundles = [
@@ -1402,6 +1406,7 @@ bundle_directory(
         "//engine/src/flutter/shell/platform/linux:flutter_gtk",
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 in_configuration(

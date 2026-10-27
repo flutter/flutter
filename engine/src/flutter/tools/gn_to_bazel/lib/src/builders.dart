@@ -1117,7 +1117,20 @@ String buildersBuildFile(
     if (build.buildDirectory != null) {
       out.writeln('    directory = "${build.buildDirectory}",');
     }
-    out.writeln(')');
+    // A builder's install is its host's: a Linux builder's on a Linux
+    // machine, a Mac's on a Mac (its Android builds included, whose target
+    // platform is Android), so that `ci/builders:all` analyzes on either
+    // host, skipping the other's.
+    final String hostSetting = switch (build.host) {
+      BuilderHost.linux => '//engine/src/flutter/build/bazel:host_os_is_linux',
+      BuilderHost.mac => '//engine/src/flutter/build/bazel:host_os_is_mac',
+    };
+    out
+      ..writeln('    target_compatible_with = select({')
+      ..writeln('        "$hostSetting": [],')
+      ..writeln('        "//conditions:default": ["@platforms//:incompatible"],')
+      ..writeln('    }),')
+      ..writeln(')');
     _testSuiteInto(out, build, convertedTests, suites, packageConditions: packageConditions);
   }
   return out.toString();

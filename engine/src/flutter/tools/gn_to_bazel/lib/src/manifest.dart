@@ -28,6 +28,7 @@ final class ConvertedFile {
     this.unconvertedDeps = const <String>[],
     this.filesGroups = const <String>{},
     this.assume = const <String, GnValue>{},
+    this.targetConditions = const <String, String>{},
   });
 
   /// The GN directory (`//flutter/fml`); the input is its `BUILD.gn`.
@@ -82,6 +83,14 @@ final class ConvertedFile {
   /// Apple phase's (the entitlements lists, the dylib) that the macOS port
   /// has not reached, so that the file keeps converting for the others.
   final Map<String, GnValue> assume;
+
+  /// The GN variable under which a target of the file is reached at all,
+  /// when neither the file nor the target's block says so (as [condition]
+  /// is for a whole file): shell/platform/common's accessibility bridge,
+  /// defined outright but named only by the macOS and Windows shells and
+  /// compiling for them alone. The target is evaluated as if inside
+  /// `if (variable)`, so it is incompatible elsewhere.
+  final Map<String, String> targetConditions;
 }
 
 /// The macOS branches of a file deferred to the Apple products' phase
@@ -120,6 +129,8 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
       // platform's Developer directory).
       '//flutter/shell/platform/darwin/common:framework_common_unittests',
       '//flutter/shell/platform/darwin/common:framework_common_swift_unittests',
+      '//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests',
+      '//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests',
     ],
     appendix: r'''
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -822,6 +833,10 @@ filegroup(
 # unpacked together, <host>-profile and <host>-release the other modes'
 # (gen_snapshot and the embedding, built under that mode's configuration:
 # in_configuration), common/ the patched SDK's debug and product archives.
+# The Linux host's for now: the desktop embedding here is the GTK shell's
+# (a Mac's facsimile takes FlutterMacOS.framework, when the tool's macOS
+# tests come), so the directory is incompatible elsewhere rather than
+# failing a Mac's analysis of the package.
 bundle_directory(
     name = "host_engine_directory",
     bundles = [
@@ -829,6 +844,7 @@ bundle_directory(
         "//engine/src/flutter/shell/platform/linux:flutter_gtk",
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
+    target_compatible_with = ["@platforms//os:linux"],
 )
 
 in_configuration(
@@ -1085,16 +1101,55 @@ filegroup(
       'swift_testing_config': "the Testing framework's search path and rpath: the Apple test phase",
     },
   ),
+  // The macOS shell: FlutterMacOS.framework (the Objective-C++ sources, the
+  // Swift run loop and resize synchronizer, the dylib, the copies into the
+  // bundle, package_framework.py's symlinks, the xcframework, the archive and
+  // its without-entitlements list). `macos` (what the root reaches through
+  // shell/platform:platform and darwin) and `universal_flutter_framework`
+  // are groups of things to build over the packaging actions, which nothing
+  // links. Its two suites wait for the Apple test phase; the umbrella-import
+  // check links against the assembled bundle in the build directory
+  // (`-F$root_out_dir`), which a cc rule cannot name yet (research/20 §11).
   ConvertedFile(
-    '//flutter/shell/platform',
-    filesGroups: <String>{'platform'},
+    '//flutter/shell/platform/darwin/macos',
+    condition: 'is_mac',
+    filesGroups: <String>{'macos', 'universal_flutter_framework'},
+    // The file is a Mac's alone: host_os is mac, and the archive's name
+    // (`$full_platform_name-$flutter_runtime_mode/FlutterMacOS.framework.zip`,
+    // the host's platform name) is the target's, darwin-<cpu>, since the
+    // macOS shell is built for the Mac that builds it (tools/gn's --mac-cpu
+    // is the bot's own CPU on every builder of mac_host_engine.json).
+    assume: macHostAssumptions,
+    skip: <String, String>{
+      'flutter_desktop_darwin_unittests':
+          "OCMock and the fixtures' Dart entry point, run as a test: the Apple test phase",
+      'flutter_desktop_darwin_swift_unittests':
+          "the Testing framework from the platform's Developer directory: the Apple test phase",
+      '_generate_symlinks_and_verify_framework_module':
+          r'a shared library linked against the assembled FlutterMacOS.framework in the build directory '
+          r'(-F$root_out_dir, frameworks = ["FlutterMacOS.framework"]): a verification target that '
+          'ships nothing, for a rule that takes the bundle as a link input (research/20 §11)',
+      'flutter_framework':
+          'create_xcframework.py over the assembled bundle (xcodebuild -create-xcframework): a rule '
+          'that lays the bundle out for it, links and all, is next (research/20 §11)',
+    },
+  ),
+  // The darwin platforms' group: `macos` on a Mac (under
+  // enable_desktop_embeddings), the iOS framework on iOS; what
+  // shell/platform:platform reaches on an Apple host. A group of things to
+  // build (the root's family).
+  ConvertedFile(
+    '//flutter/shell/platform/darwin',
+    condition: 'is_mac',
+    filesGroups: <String>{'darwin'},
     appendix: '''
 # The iOS embedding's AccessibilityFeatures, which api_check's tests read
 # (the enum mirrors dart:ui's): a file of this package until
-# shell/platform/darwin has a build file of its own.
-exports_files(["darwin/ios/framework/Source/AccessibilityFeatures.swift"])
+# shell/platform/darwin/ios has a build file of its own.
+exports_files(["ios/framework/Source/AccessibilityFeatures.swift"])
 ''',
   ),
+  ConvertedFile('//flutter/shell/platform', filesGroups: <String>{'platform'}),
   ConvertedFile(
     '//flutter/sky',
     filesGroups: <String>{'sky'},
@@ -1158,14 +1213,15 @@ exports_files(glob([
   // macOS embedders': on a Linux host neither compiles under GN either
   // (gfx::NativeWindow is defined for those two alone; the bridge fails on
   // a deprecation warning), and nothing CI builds there reaches them --
-  // they wait for those hosts' build.
+  // both convert under is_mac (the tree's files below, the bridge through
+  // targetConditions) for the macOS shell.
   ConvertedFile('//flutter/shell/geometry'),
   ConvertedFile(
     '//flutter/shell/platform/common',
-    skip: <String, String>{
-      'common_cpp_accessibility':
-          'needs //flutter/third_party/accessibility, which compiles on Windows and macOS alone',
-    },
+    // The accessibility bridge is defined outright but compiles for the
+    // macOS and Windows shells alone (gfx::NativeWindow is theirs; GN
+    // never builds it on Linux): a Mac's for now, as its tree is.
+    targetConditions: <String, String>{'common_cpp_accessibility': 'is_mac'},
   ),
   // The C++ client wrapper (plugin API) the desktop embeddings build on,
   // with its suite; its file lists come from core_wrapper_files.gni. The
@@ -1628,7 +1684,23 @@ _BACKEND_PLATFORMS = {
   ConvertedFile(
     '//flutter/shell/platform/embedder',
     filesGroups: <String>{'flutter_embedder_framework'},
+    // The framework's archive is named by the host's platform
+    // (`$full_platform_name/FlutterEmbedder.framework.zip`): darwin-<cpu>
+    // on the Mac that builds it (hostPlatformNameCases).
+    assume: <String, GnValue>{'full_platform_name': hostPlatformNameCases},
   ),
+  // The accessibility tree the desktop embeddings' bridge builds on
+  // (Chromium's ui/accessibility, trimmed): the macOS and Windows shells'
+  // alone -- on Linux it neither compiles nor is reached (see
+  // shell/platform/common above) -- so a Mac's for now. Its include
+  // directory is the tree's root, which the root's config carries
+  // (includeDirLibraries).
+  ConvertedFile('//flutter/third_party/accessibility', condition: 'is_mac'),
+  ConvertedFile('//flutter/third_party/accessibility/ax', condition: 'is_mac'),
+  ConvertedFile('//flutter/third_party/accessibility/ax_build', condition: 'is_mac'),
+  ConvertedFile('//flutter/third_party/accessibility/base', condition: 'is_mac'),
+  ConvertedFile('//flutter/third_party/accessibility/base/numerics', condition: 'is_mac'),
+  ConvertedFile('//flutter/third_party/accessibility/gfx', condition: 'is_mac'),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia

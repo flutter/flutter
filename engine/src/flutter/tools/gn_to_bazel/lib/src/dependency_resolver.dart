@@ -102,6 +102,22 @@ final class DependencyResolver {
     return targets.length == 1 ? targets.single : null;
   }
 
+  /// The config() [label] names in its file (evaluated as [targetOf]
+  /// evaluates it), or null: no such file, or no such config. A config and
+  /// a target may share a name; [targetOf] leaves the configs out.
+  GnTarget? configOf(String label) {
+    final int colon = label.indexOf(':');
+    if (colon < 0 || !label.startsWith('//')) {
+      return null;
+    }
+    final String name = label.substring(colon + 1);
+    final configs = <GnTarget>[
+      ...?_evaluate(label.substring(0, colon))?.targets
+          .where((GnTarget t) => t.rule == 'config' && t.name == name),
+    ];
+    return configs.length == 1 ? configs.single : null;
+  }
+
   List<ForwardedFlag> _derive(String label) {
     final int colon = label.indexOf(':');
     if (colon < 0 || !label.startsWith('//')) {
@@ -144,6 +160,14 @@ final class DependencyResolver {
       return null;
     }
     return _evaluations.putIfAbsent(directory, () {
+      // A repository whose targets are never converted (the Dart tree's,
+      // wrapped whole; its labels go through labelOverrides to the wrap's
+      // facades, which carry what their GN public configs would): its
+      // files say nothing here, and may not even read under the engine's
+      // assumptions (double-conversion's tests is_posix, BUILDCONFIG.gn's).
+      if (fileRepositoryPrefixes.keys.any((String prefix) => '$directory/'.startsWith(prefix))) {
+        return null;
+      }
       final String file = tree.resolve('$directory/BUILD.gn');
       if (!File(file).existsSync()) {
         return null;
@@ -170,6 +194,11 @@ final class DependencyResolver {
           condition: manifest?.condition == null
               ? Condition.always
               : ConditionVariable(manifest!.condition!),
+          targetConditions: <String, Condition>{
+            for (final MapEntry<String, String> entry
+                in (manifest?.targetConditions ?? const <String, String>{}).entries)
+              entry.key: ConditionVariable(entry.value),
+          },
         );
       } on GnError catch (e) {
         // A file of a tree the converter does not read (one importing a
