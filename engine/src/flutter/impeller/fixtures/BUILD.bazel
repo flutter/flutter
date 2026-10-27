@@ -176,7 +176,12 @@ flutter_test_fixtures(
         "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
         "//engine/src/flutter/txt:third_party/fonts/RobotoSlab-VariableFont_wght.ttf",
         "//engine/src/flutter/txt:third_party/fonts/ahem.ttf",
-    ],
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "@host_files//:System/Library/Fonts/Apple Color Emoji.ttc",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }),
     fixtures_targets = {
         ":runtime_stages": ["*.iplr"],
         ":runtime_stages_non_sksl": ["*.iplr"],

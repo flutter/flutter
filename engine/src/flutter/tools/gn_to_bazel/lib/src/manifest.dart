@@ -1109,6 +1109,9 @@ exports_files(["tools/dist_dart_pkg.py"])
   // point of the Flutter GPU tests.
   ConvertedFile(
     '//flutter/impeller/fixtures',
+    // The file fixtures take a Mac's emoji font (`host_os == "mac"`): the
+    // host's setting selects it (hostOsCases; the font from @host_files).
+    assume: hostOsCases,
     // lib/ui's shader fixtures compile shaders of this directory
     // (`//flutter/impeller/fixtures/ink_sparkle.frag`, the Flutter GPU ones).
     appendix: '''
@@ -1299,6 +1302,9 @@ robolectric_tests(
   ConvertedFile('//flutter/runtime'),
   ConvertedFile(
     '//flutter/txt',
+    // txt_fixtures take a Mac's emoji font (`host_os == "mac"`): the host's
+    // setting selects it (hostOsCases; the font from @host_files).
+    assume: hostOsCases,
     // The fonts are fixtures of other packages' tests (display_list's).
     // GN's flutter_use_fontconfig (declared here) and Skia's
     // skia_use_fontconfig, which tools/gn sets together from

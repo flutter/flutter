@@ -4219,6 +4219,18 @@ final class _Emitter {
   /// does. A path outside the output repository is an error: the GN file
   /// then names something Bazel cannot see from here.
   String _filePath(String gnFilePath, GnLocation location) {
+    // A file of the machine, named by its absolute path (a Mac's emoji
+    // font among the text tests' fixtures): a file of @host_files.
+    if (gnFilePath.startsWith('/') && !gnFilePath.startsWith('//')) {
+      if (!hostFiles.contains(gnFilePath)) {
+        throw GnError(
+          location,
+          '$gnFilePath is an absolute path of the machine that is not among the host files '
+          "(bazel_mapping.dart's hostFiles, build_defs/repositories/host_files.bzl)",
+        );
+      }
+      return hostFileLabel(gnFilePath);
+    }
     String absolute = gnFilePath.startsWith('//')
         ? _normalized(gnFilePath, location)
         : gnFilePath == '.'
