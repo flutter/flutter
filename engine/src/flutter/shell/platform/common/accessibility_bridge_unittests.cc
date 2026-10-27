@@ -652,6 +652,167 @@ TEST(AccessibilityBridgeTest, CanReparentNodeWithChild) {
               Contains(ui::AXEventGenerator::Event::ROLE_CHANGED).Times(1));
 }
 
+// Verify that one update can move a node out of a subtree that another move in
+// the same update detaches from the tree.
+// See: https://github.com/flutter/flutter/issues/175041
+TEST(AccessibilityBridgeTest, CanReparentNodeInsideReparentedSubtree) {
+  // The bridge processes pending nodes in hash map order, so try both orders.
+  for (bool add_inner_move_first : {false, true}) {
+    SCOPED_TRACE(add_inner_move_first);
+    std::shared_ptr<TestAccessibilityBridge> bridge =
+        std::make_shared<TestAccessibilityBridge>();
+
+    // 0 -> 1 -> 2 -> 3 -> 4
+    std::vector<int32_t> node0_children{1};
+    std::vector<int32_t> node1_children{2};
+    std::vector<int32_t> node2_children{3};
+    std::vector<int32_t> node3_children{4};
+    FlutterSemanticsNode2 node0 =
+        CreateSemanticsNode(0, "node 0", &node0_children);
+    FlutterSemanticsNode2 node1 =
+        CreateSemanticsNode(1, "node 1", &node1_children);
+    FlutterSemanticsNode2 node2 =
+        CreateSemanticsNode(2, "node 2", &node2_children);
+    FlutterSemanticsNode2 node3 =
+        CreateSemanticsNode(3, "node 3", &node3_children);
+    FlutterSemanticsNode2 node4 = CreateSemanticsNode(4, "node 4");
+
+    bridge->AddFlutterSemanticsNodeUpdate(node0);
+    bridge->AddFlutterSemanticsNodeUpdate(node1);
+    bridge->AddFlutterSemanticsNodeUpdate(node2);
+    bridge->AddFlutterSemanticsNodeUpdate(node3);
+    bridge->AddFlutterSemanticsNodeUpdate(node4);
+    bridge->CommitUpdates();
+
+    // New node 11 is inserted between 1 and 2, and node 4 moves from 3 to new
+    // node 12 under 11:
+    // 0 -> 1 -> 11 -> 2 -> 3
+    //             \-> 12 -> 4
+    std::vector<int32_t> new_node1_children{11};
+    node1.child_count = new_node1_children.size();
+    node1.children_in_traversal_order = new_node1_children.data();
+    node3.child_count = 0;
+    node3.children_in_traversal_order = nullptr;
+    std::vector<int32_t> node11_children{2, 12};
+    FlutterSemanticsNode2 node11 =
+        CreateSemanticsNode(11, "node 11", &node11_children);
+    std::vector<int32_t> node12_children{4};
+    FlutterSemanticsNode2 node12 =
+        CreateSemanticsNode(12, "node 12", &node12_children);
+
+    std::vector<const FlutterSemanticsNode2*> outer_move{&node1, &node11,
+                                                         &node2};
+    std::vector<const FlutterSemanticsNode2*> inner_move{&node3, &node12,
+                                                         &node4};
+    if (add_inner_move_first) {
+      std::swap(outer_move, inner_move);
+    }
+    for (const FlutterSemanticsNode2* node : outer_move) {
+      bridge->AddFlutterSemanticsNodeUpdate(*node);
+    }
+    for (const FlutterSemanticsNode2* node : inner_move) {
+      bridge->AddFlutterSemanticsNodeUpdate(*node);
+    }
+    bridge->CommitUpdates();
+
+    auto node1_delegate =
+        bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+    auto node11_delegate =
+        bridge->GetFlutterPlatformNodeDelegateFromID(11).lock();
+    auto node2_delegate =
+        bridge->GetFlutterPlatformNodeDelegateFromID(2).lock();
+    auto node3_delegate =
+        bridge->GetFlutterPlatformNodeDelegateFromID(3).lock();
+    auto node12_delegate =
+        bridge->GetFlutterPlatformNodeDelegateFromID(12).lock();
+    auto node4_delegate =
+        bridge->GetFlutterPlatformNodeDelegateFromID(4).lock();
+    ASSERT_TRUE(node1_delegate);
+    ASSERT_TRUE(node11_delegate);
+    ASSERT_TRUE(node2_delegate);
+    ASSERT_TRUE(node3_delegate);
+    ASSERT_TRUE(node12_delegate);
+    ASSERT_TRUE(node4_delegate);
+
+    EXPECT_EQ(node1_delegate->GetData().child_ids, std::vector<int32_t>({11}));
+    EXPECT_EQ(node11_delegate->GetData().child_ids,
+              std::vector<int32_t>({2, 12}));
+    EXPECT_EQ(node2_delegate->GetData().child_ids, std::vector<int32_t>({3}));
+    EXPECT_EQ(node3_delegate->GetChildCount(), 0);
+    EXPECT_EQ(node12_delegate->GetData().child_ids, std::vector<int32_t>({4}));
+    EXPECT_EQ(node4_delegate->GetName(), "node 4");
+
+    // A later update must still be applied.
+    node4.label = "node 4 updated";
+    bridge->AddFlutterSemanticsNodeUpdate(node4);
+    bridge->CommitUpdates();
+
+    node4_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(4).lock();
+    ASSERT_TRUE(node4_delegate);
+    EXPECT_EQ(node4_delegate->GetName(), "node 4 updated");
+  }
+}
+
+// Verify that the bridge does not keep pointers into the caller's update.
+TEST(AccessibilityBridgeTest, CopiesSemanticsFlags) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{.is_button = true};
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+
+  flags.is_button = false;
+  bridge->CommitUpdates();
+
+  EXPECT_EQ(bridge->GetRootAsAXNode()->data().role, ax::mojom::Role::kButton);
+}
+
+// Verify that a rejected update does not break later updates.
+TEST(AccessibilityBridgeTest, AppliesUpdatesAfterRejectedUpdate) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  std::vector<int32_t> root_children{1, 2};
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root", &root_children);
+  FlutterSemanticsNode2 node1 = CreateSemanticsNode(1, "node 1");
+  FlutterSemanticsNode2 node2 = CreateSemanticsNode(2, "node 2");
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
+  bridge->CommitUpdates();
+
+  // Node 1 claims a child that is neither in the tree nor in the update.
+  std::vector<int32_t> invalid_children{99};
+  node1.child_count = invalid_children.size();
+  node1.children_in_traversal_order = invalid_children.data();
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->CommitUpdates();
+  ASSERT_FALSE(bridge->GetTree()->error().empty());
+
+  // Move node 2 under node 1.
+  std::vector<int32_t> new_root_children{1};
+  root.child_count = new_root_children.size();
+  root.children_in_traversal_order = new_root_children.data();
+  std::vector<int32_t> node1_children{2};
+  node1.child_count = node1_children.size();
+  node1.children_in_traversal_order = node1_children.data();
+  node1.label = "node 1 updated";
+  bridge->accessibility_events.clear();
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
+  bridge->CommitUpdates();
+
+  auto node1_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  ASSERT_TRUE(node1_delegate);
+  EXPECT_EQ(node1_delegate->GetName(), "node 1 updated");
+  EXPECT_EQ(node1_delegate->GetData().child_ids, std::vector<int32_t>({2}));
+  EXPECT_TRUE(bridge->GetFlutterPlatformNodeDelegateFromID(2).lock());
+  EXPECT_FALSE(bridge->accessibility_events.empty());
+}
+
 TEST(AccessibilityBridgeTest, AXTreeManagerTest) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
