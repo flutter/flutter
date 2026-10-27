@@ -40,7 +40,7 @@ load(
     "tool",
 )
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("//build_defs/cc:copts.bzl", "ANDROID_TOOLCHAIN_WARNING_FLAGS", "TOOLCHAIN_WARNING_FLAGS")
+load("//build_defs/cc:copts.bzl", "ANDROID_TOOLCHAIN_WARNING_FLAGS", "MACOS_TOOLCHAIN_WARNING_FLAGS", "TOOLCHAIN_WARNING_FLAGS")
 
 # Flags GN passes to every C and C++ compile on Linux
 # (//build/config/compiler:compiler, :runtime_library, //build/config/gcc,
@@ -76,6 +76,10 @@ _WARNING_COMPILE_FLAGS = _warning_compile_flags(TOOLCHAIN_WARNING_FLAGS)
 # clang on every platform but Android (copts.bzl).
 _ANDROID_WARNING_COMPILE_FLAGS = _warning_compile_flags(ANDROID_TOOLCHAIN_WARNING_FLAGS)
 
+# macOS's: with -Wunguarded-availability, and -Wno-deprecated-declarations
+# as tools/gn sets allow_deprecated_api_calls on a Mac (copts.bzl).
+_MAC_WARNING_COMPILE_FLAGS = _warning_compile_flags(MACOS_TOOLCHAIN_WARNING_FLAGS)
+
 _LINUX_COMPILE_FLAGS = _COMMON_COMPILE_FLAGS + ["-pthread"] + _WARNING_COMPILE_FLAGS
 
 # Android (//build/config/compiler:compiler under is_android): no -pthread
@@ -86,6 +90,18 @@ _ANDROID_COMPILE_FLAGS = _COMMON_COMPILE_FLAGS + [
     "-funwind-tables",
     "-fno-short-enums",
 ] + _ANDROID_WARNING_COMPILE_FLAGS
+
+# macOS (//build/config/compiler:compiler under is_mac): the stack
+# protector on every function rather than on the ones with buffers, and
+# neither -pipe nor -pthread, which GN passes on Linux alone. Not here:
+# GN's -fdebug-prefix-map=<checkout>/engine/src/=, which strips the
+# checkout's absolute path from debug info; Bazel compiles with paths
+# relative to the execution root already, as on Linux.
+_MAC_COMPILE_FLAGS = [
+    "-no-canonical-prefixes",
+    "-fno-strict-aliasing",
+    "-fstack-protector-all",
+] + _MAC_WARNING_COMPILE_FLAGS
 
 # The architecture (//build/config/compiler:compiler), per target CPU:
 # x64's `-m64 -march=x86-64`, arm64's `--target=aarch64-linux-gnu` with the
@@ -107,6 +123,22 @@ LINUX_ARM64_COMPILE_FLAGS = [
     "-DBORINGSSL_CLANG_SUPPORTS_DOT_ARCH",
 ]
 
+# macOS (//build/config/compiler:compiler under is_mac, the
+# `common_mac_flags` of its compiles and links): the target triple and
+# -arch, per CPU.
+MACOS_ARM64_COMPILE_FLAGS = [
+    "--target=arm64-apple-macos",
+    "-arch",
+    "arm64",
+]
+MACOS_X64_COMPILE_FLAGS = [
+    "--target=x86_64-apple-macos",
+    "-arch",
+    "x86_64",
+]
+MACOS_ARM64_LINK_FLAGS = MACOS_ARM64_COMPILE_FLAGS
+MACOS_X64_LINK_FLAGS = MACOS_X64_COMPILE_FLAGS
+
 # Defines GN passes to every compile on Linux (//build/config:feature_flags,
 # //build/config/compiler:compiler, //build/config/gcc:symbol_visibility_hidden,
 # //build/config/clang:extra_warnings, the libc++ configs).
@@ -115,6 +147,16 @@ _LINUX_DEFINES = [
     "_FILE_OFFSET_BITS=64",
     "_LARGEFILE_SOURCE",
     "_LARGEFILE64_SOURCE",
+    "_LIBCPP_DISABLE_AVAILABILITY=1",
+    "_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS",
+    "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS",
+]
+
+# macOS's: no large-file defines (Darwin's libc is 64-bit-offset
+# throughout). Not here, as on Android: _FORTIFY_SOURCE=2, chromium_code's
+# off Linux (copts.bzl's FLUTTER_LOCAL_DEFINES).
+_MAC_DEFINES = [
+    "USE_OPENSSL=1",
     "_LIBCPP_DISABLE_AVAILABILITY=1",
     "_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS",
     "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS",
@@ -163,6 +205,14 @@ _LINUX_CXX_FLAGS = [
     "-nostdinc++",
 ]
 
+# macOS's C++ compiles end with //build/config/mac:sdk's -stdlib=libc++
+# (after the include paths; the rule appends it), and its Objective-C++
+# compiles, which GN gives the C++ flags too, add
+# //build/config/compiler:compiler's one Objective-C++ flag: C++ objects
+# inside Objective-C ones get their constructors and destructors run.
+_MAC_STDLIB_FLAGS = ["-stdlib=libc++"]
+_MAC_OBJCXX_FLAGS = ["-fobjc-call-cxx-cdtors"]
+
 # Flags GN passes to every link on Linux (//build/config/compiler:compiler,
 # :runtime_library, //build/config/gcc:executable_ldconfig). The sysroot comes
 # from Bazel's `sysroot` feature. -fuse-ld=lld is the toolchain's default and
@@ -185,6 +235,21 @@ _LINUX_LINK_FLAGS = [
 
 LINUX_X64_LINK_FLAGS = ["-m64"]
 LINUX_ARM64_LINK_FLAGS = ["--target=aarch64-linux-gnu"]
+
+# macOS's links (//build/config/compiler:compiler under is_mac,
+# //build/config/mac:mac_dynamic_flags, which BUILDCONFIG.gn gives every
+# executable and shared library): the engine's own libc++ again, and the
+# rpaths of an unbundled binary and of one inside a bundle. The linker is
+# the driver's default, ld64.lld from the same package (GN names none
+# either); the sysroot and the deployment target come from the `sysroot`
+# feature below. Not here: GN's `-L.`, the GN output directory itself.
+_MAC_LINK_FLAGS = [
+    "-nostdlib++",
+    "-Wl,-search_paths_first",
+    "-Wl,-rpath,@loader_path/.",
+    "-Wl,-rpath,/usr/local/lib/.",
+    "-Wl,-rpath,@loader_path/../../..",
+]
 
 # Android's links (//build/config/compiler:compiler under is_android,
 # //build/config/android:runtime_library, build/toolchain/android/BUILD.gn):
@@ -282,6 +347,19 @@ _LINUX_EXECUTABLE_LINK_FLAGS = [
 
 _LINUX_LINK_LIBS = ["-ldl"]
 
+# macOS's executables: //build/config/mac:mac_executable_flags, and the
+# rpath build/toolchain/mac's `link` tool adds (a bundle's Frameworks
+# directory). ld64 rejects undefined symbols on its own, so there is no
+# complete-link flag; and nothing is named after the libraries (Foundation
+# and the rest are a target's `frameworks`, in its linkopts).
+_MAC_EXECUTABLE_LINK_FLAGS = [
+    "-Wl,-pie",
+    "-Xlinker",
+    "-rpath",
+    "-Xlinker",
+    "@executable_path/Frameworks",
+]
+
 # //build/config:debug, :release, //build/config/compiler:no_optimize,
 # :optimize, and the symbol configs BUILDCONFIG.gn picks by symbol_level:
 # :symbols (-g2) for an unoptimized build, :no_symbols (-g0) for an
@@ -296,6 +374,15 @@ _FASTBUILD_COMPILE_FLAGS = ["-O0", "-g1"]
 _OPT_COMPILE_FLAGS = ["-O2", "-g0", "-fno-ident", "-fdata-sections", "-ffunction-sections"]
 _OPT_DEFINES = ["NDEBUG", "NVALGRIND", "DYNAMIC_ANNOTATIONS_ENABLED=0"]
 _OPT_LINK_FLAGS = ["-Wl,-O2", "-Wl,--gc-sections"]
+
+# macOS's: //build/config:debug defines _GLIBCXX_DEBUG on Linux alone;
+# symbol_level is 2 in every mode ("Mac and Windows have them separate"),
+# so an optimized build compiles with -g2 -- and dead-strips at link time
+# (//build/config/compiler:optimize under is_mac, which needs the symbols),
+# where the Linux link has -O2 --gc-sections --as-needed.
+_MAC_DBG_DEFINES = ["_DEBUG"]
+_MAC_OPT_COMPILE_FLAGS = ["-O2", "-g2", "-fno-ident", "-fdata-sections", "-ffunction-sections"]
+_MAC_OPT_LINK_FLAGS = ["-Wl,-dead_strip"]
 
 # ... and --as-needed, which GN leaves out under a sanitizer (functions the
 # sanitizers interpose can make the linker drop a library that is needed,
@@ -372,11 +459,19 @@ def _impl(ctx):
     for header in ctx.files.cxx_include_markers:
         cxx_include_flags.append("-I" + header.dirname)
 
+    android = ctx.attr.os == "android"
+    mac = ctx.attr.os == "mac"
+
     # Bazel passes this as --sysroot to compile and link actions (`sysroot`
-    # legacy feature) and uses it to expand %sysroot% below.
+    # legacy feature; on a Mac the feature below, -isysroot) and uses it to
+    # expand %sysroot% below: the directory of the marker file at the
+    # sysroot's root (the Debian sysroot's BUILD file, the SDK view's .view).
     sysroot = ctx.file.sysroot_marker.dirname
 
-    android = ctx.attr.os == "android"
+    cxx_flags = _LINUX_CXX_FLAGS + cxx_include_flags
+    objcxx_flags = []
+    opt_link_flags = _OPT_LINK_FLAGS + ([] if ctx.attr.asan else _OPT_AS_NEEDED_LINK_FLAGS)
+    dbg_defines = _DBG_DEFINES
     if android:
         compile_flags = _ANDROID_COMPILE_FLAGS + _defines(_ANDROID_DEFINES)
         link_flags = _ANDROID_LINK_FLAGS
@@ -391,6 +486,26 @@ def _impl(ctx):
             "%sysroot%/usr/include",
             "%sysroot%/usr/local/include",
             "%sysroot%/usr/include/" + ctx.file.crt_begin_so.dirname.split("/")[-2],
+        ]
+    elif mac:
+        compile_flags = _MAC_COMPILE_FLAGS + _defines(_MAC_DEFINES)
+        cxx_flags = cxx_flags + _MAC_STDLIB_FLAGS
+        objcxx_flags = _MAC_OBJCXX_FLAGS
+        link_flags = _MAC_LINK_FLAGS
+        opt_compile_flags = _MAC_OPT_COMPILE_FLAGS
+        opt_link_flags = _MAC_OPT_LINK_FLAGS
+        dbg_defines = _MAC_DBG_DEFINES
+        complete_link_flags = []
+        executable_link_flags = _MAC_EXECUTABLE_LINK_FLAGS
+        executable_link_libs = []
+        dynamic_library_link_libs = []
+
+        # The SDK's headers, and its frameworks' (a framework's header is
+        # found under System/Library/Frameworks/<name>.framework/Headers).
+        builtin_include_directories = [
+            "%sysroot%/usr/include",
+            "%sysroot%/System/Library/Frameworks",
+            "%sysroot%/System/Library/SubFrameworks",
         ]
     else:
         compile_flags = _LINUX_COMPILE_FLAGS + _defines(_LINUX_DEFINES)
@@ -412,8 +527,9 @@ def _impl(ctx):
             ALL_CC_COMPILE_ACTION_NAMES,
             compile_flags,
         ),
-        _flag_feature("flutter_c_flags", [ACTION_NAMES.c_compile], _LINUX_C_FLAGS),
-        _flag_feature("flutter_cxx_flags", ALL_CPP_COMPILE_ACTION_NAMES, _LINUX_CXX_FLAGS + cxx_include_flags),
+        _flag_feature("flutter_c_flags", [ACTION_NAMES.c_compile, ACTION_NAMES.objc_compile], _LINUX_C_FLAGS),
+        _flag_feature("flutter_cxx_flags", ALL_CPP_COMPILE_ACTION_NAMES, cxx_flags),
+        _flag_feature("flutter_objcxx_flags", [ACTION_NAMES.objcpp_compile], objcxx_flags),
         # AddressSanitizer, when the build asks for it (the `asan` attribute,
         # which BUILD.bazel selects on //engine/src/flutter/build/bazel:asan).
         feature(
@@ -442,12 +558,12 @@ def _impl(ctx):
             ],
         ),
         # Compilation modes; Bazel enables exactly one of dbg/opt/fastbuild.
-        _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
-        _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
+        _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(dbg_defines)),
+        _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(dbg_defines)),
         _mode_feature(
             "opt",
             opt_compile_flags + _defines(_OPT_DEFINES),
-            _OPT_LINK_FLAGS + ([] if ctx.attr.asan else _OPT_AS_NEEDED_LINK_FLAGS),
+            opt_link_flags,
         ),
         # A target's copts (Bazel's own `user_compile_flags` feature, defined
         # here so that it sits before the next one: Bazel appends the legacy
@@ -481,6 +597,32 @@ def _impl(ctx):
         # (the crt objects).
         _flag_feature("flutter_link_libs", CC_LINK_EXECUTABLE_ACTION_NAMES, executable_link_libs),
         _flag_feature("flutter_dynamic_library_link_libs", DYNAMIC_LIBRARY_LINK_ACTION_NAMES, dynamic_library_link_libs),
+    ] + ([
+        # The sysroot on a Mac: Bazel's own `sysroot` feature says
+        # --sysroot=; Apple's driver and GN's command lines say -isysroot,
+        # with the deployment target beside it (build/toolchain/mac's
+        # `sysroot_flags`, the last flags of a compile and the first of a
+        # link). A feature of this name replaces Bazel's.
+        feature(
+            name = "sysroot",
+            enabled = True,
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES + ALL_CC_LINK_ACTION_NAMES,
+                    flag_groups = [
+                        flag_group(
+                            flags = [
+                                "-isysroot",
+                                "%{sysroot}",
+                                "-mmacosx-version-min=" + ctx.attr.deployment_target,
+                            ],
+                            expand_if_available = "sysroot",
+                        ),
+                    ],
+                ),
+            ],
+        ),
+    ] if mac else []) + [
         # Capabilities Bazel asks about.
         feature(name = "supports_pic", enabled = True),
         feature(name = "supports_dynamic_linker", enabled = True),
@@ -493,7 +635,10 @@ def _impl(ctx):
         # --exclude-libs,ALL (Android's links) hides every symbol an archive
         # defines, version script or not, so with archives for source_sets
         # libflutter.so would export neither JNI_OnLoad nor the ICU data.
-        feature(name = "supports_start_end_lib", enabled = True),
+        # ld64 has no --start-lib: on a Mac a library is its archive, and an
+        # alwayslink one is -force_load'ed whole (Bazel's libraries_to_link
+        # under target_libc "macosx"), which is a source_set's objects again.
+        feature(name = "supports_start_end_lib", enabled = not mac),
         # Replaces Bazel's built-in include_paths feature, which passes the
         # `includes` of cc_library rules with -isystem. GN passes every include
         # directory with -I, and the difference matters: clang suppresses
@@ -580,7 +725,17 @@ def _impl(ctx):
             ACTION_NAMES.cpp_module_codegen,
             ACTION_NAMES.linkstamp_compile,
         ]
-    ] + [
+    ] + ([
+        # Objective-C and Objective-C++ (objc_library's actions), through
+        # clang++ as GN's `objc` and `objcxx` tools are, on a Mac alone:
+        # objc_library asks whether the toolchain has the first of these,
+        # and elsewhere it has not.
+        action_config(action_name = name, enabled = True, tools = [clangxx], implies = compile_implies)
+        for name in [
+            ACTION_NAMES.objc_compile,
+            ACTION_NAMES.objcpp_compile,
+        ]
+    ] if mac else []) + [
         action_config(
             action_name = ACTION_NAMES.cpp_link_executable,
             enabled = True,
@@ -640,7 +795,7 @@ def _impl(ctx):
 
 flutter_cc_toolchain_config = rule(
     implementation = _impl,
-    doc = "C/C++ toolchain configuration reproducing the GN build's flags for a Linux clang toolchain.",
+    doc = "C/C++ toolchain configuration reproducing the GN build's flags for one of its clang toolchains (Linux, Android, macOS).",
     attrs = {
         "toolchain_identifier": attr.string(mandatory = True),
         "target_system_name": attr.string(mandatory = True, doc = "Target triple, e.g. x86_64-unknown-linux-gnu."),
@@ -654,7 +809,12 @@ flutter_cc_toolchain_config = rule(
         "sysroot_marker": attr.label(
             mandatory = True,
             allow_single_file = True,
-            doc = "A file at the root of the sysroot repository; its directory becomes --sysroot.",
+            doc = "A file at the root of the sysroot: the Debian sysroot repository's BUILD file (--sysroot), " +
+                  "the macOS SDK view's marker (@macos_sdk//:view; -isysroot, with the deployment target).",
+        ),
+        "deployment_target": attr.string(
+            default = "12.0.0",
+            doc = "macOS: -mmacosx-version-min (GN's mac_deployment_target, which tools/gn sets to 12.0.0).",
         ),
         "cxx_include_markers": attr.label_list(
             mandatory = True,
@@ -685,9 +845,10 @@ flutter_cc_toolchain_config = rule(
         ),
         "os": attr.string(
             default = "linux",
-            values = ["linux", "android"],
+            values = ["linux", "android", "mac"],
             doc = "The target OS, which picks GN's flag sets: linux (the host's and the arm64 cross " +
-                  "build's) or android (the NDK sysroot, -nostdlib with the crt objects and libraries named).",
+                  "build's), android (the NDK sysroot, -nostdlib with the crt objects and libraries named) " +
+                  "or mac (the Xcode SDK as -isysroot, Objective-C, archives in place of --start-lib).",
         ),
         "crt_begin_so": attr.label(
             allow_single_file = True,

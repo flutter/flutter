@@ -349,6 +349,85 @@ compiler config's, the optimized build's, the libs), plus the relative
 sysroot and Bazel's `-o` first. The module loads and runs in Chrome,
 5 of 5.
 
+### The macOS toolchains
+
+GN's `//build/toolchain/mac:clang_arm64` and `clang_x64` (a Mac host,
+`tools/gn --mac --mac-cpu <cpu>`), assembled from the same pieces
+(`toolchains/macos_toolchain.bzl`; `cc_toolchain_config.bzl` under `os =
+"mac"`): the checkout's clang for the Mac (`@clang_mac_arm64`,
+`@clang_mac_x64`: `buildtools/mac-<cpu>/clang`, the Linux package's version,
+whose driver links with its own `ld64.lld` by default, as GN's does), the
+macOS SDK of the host's Xcode as sysroot (`@macos_sdk`), the engine's
+libc++ as everywhere, and `--target=<cpu>-apple-macos -arch <cpu>
+-mmacosx-version-min=12.0.0`. Four toolchains, since a Mac of either CPU
+builds for either (`macos_arm64_clang`, `macos_x64_clang`, and the two
+cross ones); the platforms `toolchains:macos_arm64` and `:macos_x64` name
+the CPU built for, and a Mac's own build needs no `--platforms`. Every
+target of theirs is `target_compatible_with` macOS, so a wildcard build on
+Linux skips them without fetching a clang the checkout there has not.
+
+`@macos_sdk` (`build_defs/repositories/macos_sdk.bzl`) runs `xcrun --sdk
+macosx` and lays a *view* of the SDK it names -- `MacOSX.sdk/` with the
+SDK's entries symlinked, `System/Library/Frameworks` as a directory of the
+frameworks' symlinks without `Ruby.framework`, which holds the SDK's one
+symlink cycle. The toolchain passes the view as `-isysroot` (GN's and
+Apple's spelling; a `sysroot` feature of the toolchain's own replaces
+Bazel's `--sysroot=`), and its `usr/include`, `usr/lib`, `Frameworks`,
+`SubFrameworks` and `SDKSettings.*` are directory inputs of every compile
+and link, tracked by content like the Linux sysroot's: an Xcode update
+changes the actions' keys, and a remote cache would see the SDK as an
+input rather than as an assumption about the executor. `DEVELOPER_DIR`
+selects the Xcode as it does for `xcrun`; without it the repository
+watches `xcode-select`'s link and the chosen Xcode's `version.plist`.
+`@macos_sdk//:sdk.bzl` records the paths and versions found. Off macOS the
+repository is empty.
+
+The flags are those of a `tools/gn --mac --unoptimized` build's command
+lines (taken on a Mac, 10-26): `-fstack-protector-all` where Linux has
+`-fstack-protector --param=ssp-buffer-size=8 -pipe -pthread`;
+`-Wunguarded-availability` and -- `tools/gn` sets
+`allow_deprecated_api_calls` on a Mac -- `-Wno-deprecated-declarations`
+among the warnings (`copts.bzl`'s macOS lists); `-stdlib=libc++` after the
+C++ flags; `-fobjc-call-cxx-cdtors` for Objective-C++, the one
+toolchain-wide Objective-C flag (ARC and the selector checks are a
+target's, `MACOS_CFLAGS_OBJC`); `_DEBUG` without `_GLIBCXX_DEBUG`; `-g2` in
+every mode and `-Wl,-dead_strip` in opt (symbol_level is 2 on a Mac);
+links with `-nostdlib++ -Wl,-search_paths_first` and the three rpaths of
+`mac_dynamic_flags`, executables with `-Wl,-pie` and the
+`@executable_path/Frameworks` rpath of GN's `link` tool. Left out: GN's
+`-fdebug-prefix-map=<checkout>/engine/src/=` (Bazel's paths are
+execution-root relative already, as on Linux) and `-L.`, the GN output
+directory. Three things differ in kind from the Linux toolchains: Bazel's
+own link features take their Mach-O forms (`target_libc = "macosx"`: an
+alwayslink library is `-force_load`ed, rpaths say `@loader_path`, and the
+archive action speaks libtool -- `-static -o` -- so the package's
+`llvm-libtool-darwin` stands where GN runs `llvm-ar rcs`, writing the same
+BSD archives with a symbol table); there is no `--start-lib` -- ld64 has
+none -- so a library is its archive and an alwayslink one (a GN
+source_set) is linked whole, which is GN's list of its objects again; and
+Objective-C sources go through `flutter_objc_library`
+(`build_defs/cc/objc_library.bzl`: `cc_library` takes none, and Bazel's
+`objc_library` adds mode flags of its own, `-Os` in opt among them), for
+which the toolchain has the `objc-compile`/`objc++-compile` actions on a
+Mac alone. libc++abi leaves out `cxa_thread_atexit.cpp` on Apple
+platforms as GN does.
+
+```sh
+bazelisk test //engine/src/flutter/build/bazel/toolchains/tests:macos_cc_toolchain_smoke_test   # on a Mac
+```
+
+The smoke test checks C++20, the engine's libc++ (`__fl`), the SDK with
+GN's deployment target (`__MAC_OS_X_VERSION_MIN_REQUIRED == 120000`), no
+exceptions or RTTI, C, and Objective-C++ through `flutter_objc_library`
+with ARC against Foundation (a C++ member's constructor and destructor run
+inside an Objective-C object). On the Mac (10-26): its first run 16.8 s
+wall -- the SDK view fetched (`xcrun`, ~300 symlinks), 4,772 targets
+analyzed, libc++, libc++abi, googletest and the test compiled, 84 actions
+in the darwin sandbox -- 7/7; a no-op rerun 0.3 s; `-c opt` 17.6 s, the
+`.mm` compiled with `-O2 -g2` and nothing of Bazel's. The command lines
+are GN's flags in GN's order but for a target's own, which Bazel puts
+after the toolchain's (research/20 has both).
+
 ## Wrapped GN builds: the Dart SDK
 
 The Dart SDK (VM, `gen_snapshot`, the frontend server, ...) is not converted
