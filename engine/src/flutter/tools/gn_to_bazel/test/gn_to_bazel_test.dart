@@ -5758,6 +5758,133 @@ zip_bundle("bundle") {
     });
 
     test(
+      'a framework bundle: the copies into it, package_framework.py, the archive over it',
+      () async {
+        // The embedder's FlutterEmbedder.framework: the shared library copied
+        // under Versions/A (its build-directory path resolving to the target
+        // that links it), the symlinks made by package_framework.py -- the
+        // action known by its script, the rule declaring the links from its
+        // arguments -- and the archive whose entries are the bundle directory
+        // (every file placed under it) and the top-level links.
+        final String output = await convert(
+          r'''
+import("//flutter/build/zip_bundle.gni")
+
+shared_library("engine_library") {
+  output_name = "engine"
+  sources = [ "b.cc" ]
+}
+
+_framework_dir = "$root_out_dir/Engine.framework"
+
+copy("copy_dylib") {
+  sources = [ "$root_out_dir/libengine.dylib" ]
+  outputs = [ "$_framework_dir/Versions/A/Engine" ]
+  deps = [ ":engine_library" ]
+}
+
+copy("copy_headers") {
+  sources = [ "embedder.h" ]
+  outputs = [ "$_framework_dir/Versions/A/Headers/Engine.h" ]
+}
+
+action("generate_symlinks") {
+  script = "//build/config/mac/package_framework.py"
+  outputs = [
+    "$root_build_dir/Engine.stamp",
+    _framework_dir,
+    "$_framework_dir/Headers",
+  ]
+  args = [
+    "--framework",
+    "Engine.framework",
+    "--version",
+    "A",
+    "--contents",
+    "Engine",
+    "Headers",
+    "--stamp",
+    "Engine.stamp",
+  ]
+  deps = [ ":copy_dylib", ":copy_headers" ]
+}
+
+zip_bundle("framework_archive") {
+  deps = [ ":generate_symlinks" ]
+  output = "darwin-x64/Engine.framework.zip"
+  files = [
+    {
+      source = _framework_dir
+      destination = "Engine.framework"
+    },
+    {
+      source = "$_framework_dir/Headers"
+      destination = "Engine.framework/Headers"
+    },
+  ]
+}
+''',
+          templates: <String>{'zip_bundle'},
+        );
+        expect(output, contains('load("//build_defs/dist:framework.bzl", "framework_symlinks")'));
+        expect(
+          output,
+          contains('''
+framework_symlinks(
+    name = "generate_symlinks",
+    args = [
+        "--framework",
+        "Engine.framework",
+        "--version",
+        "A",
+        "--contents",
+        "Engine",
+        "Headers",
+        "--stamp",
+        "Engine.stamp",
+    ],
+    deps = [
+        ":copy_dylib",
+        ":copy_headers",
+    ],
+)
+'''),
+        );
+        expect(
+          output,
+          contains(r'''
+gn_copy(
+    name = "copy_dylib",
+    srcs = [":engine_library"],
+    outs = ["Engine.framework/Versions/A/Engine"],
+    outputs = ["$root_out_dir/Engine.framework/Versions/A/Engine"],
+    deps = [":engine_library"],
+)
+'''),
+        );
+        expect(
+          output,
+          contains('''
+zip_bundle(
+    name = "framework_archive",
+    files = {
+        "Engine.framework": ":generate_symlinks",
+        "Engine.framework/Headers": ":generate_symlinks",
+    },
+    output = "darwin-x64/Engine.framework.zip",
+    sources = {
+        "Engine.framework": "Engine.framework",
+        "Engine.framework/Headers": "Engine.framework/Headers",
+    },
+    deps = [":generate_symlinks"],
+)
+'''),
+        );
+        expect(output, isNot(contains('package_framework.py')));
+      },
+    );
+
+    test(
       'zip_bundle_from_file over a directory of the build directory is a build_directory_tree',
       () async {
         // The web SDK's archive (web_sdk/BUILD.gn): every entry is a source
