@@ -1049,6 +1049,9 @@ InferDeferredPlatformViewCreationCallback(
             [resolve_callback, engine_user_data, view_embedder, enable_impeller,
              impeller_flags, renderer_state, engine_ptr_holder,
              io_task_runner]() -> std::unique_ptr<flutter::EmbedderSurface> {
+      (void)enable_impeller;
+      (void)impeller_flags;
+      (void)io_task_runner;
       FlutterRendererConfig resolved = {};
       std::shared_ptr<impeller::Context> shared_context;
       flutter::EmbedderEngine* current_engine =

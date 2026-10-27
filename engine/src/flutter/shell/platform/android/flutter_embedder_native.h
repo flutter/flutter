@@ -193,6 +193,7 @@ class AndroidSurfaceManager {
 
   struct Callbacks {
     std::function<void(void* native_window)> on_window_created;
+    std::function<void(void* native_window)> on_window_changed;
     std::function<void()> on_window_destroyed;
     std::function<void(size_t width, size_t height)> on_metrics_changed;
   };
@@ -232,6 +233,14 @@ class AndroidSurfaceManager {
   }
 
   void SurfaceWindowChanged(void* new_native_window) {
+    if (state_ == State::kCreated && callbacks_.on_window_changed) {
+      native_window_ = new_native_window;
+      callbacks_.on_window_changed(native_window_);
+      if (width_ > 0 && height_ > 0 && callbacks_.on_metrics_changed) {
+        callbacks_.on_metrics_changed(width_, height_);
+      }
+      return;
+    }
     if (state_ == State::kCreated) {
       if (callbacks_.on_window_destroyed) {
         callbacks_.on_window_destroyed();

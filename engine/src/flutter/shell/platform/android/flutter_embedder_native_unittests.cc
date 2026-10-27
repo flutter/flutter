@@ -894,5 +894,42 @@ TEST_F(FlutterEmbedderNativeTest,
   EXPECT_EQ(mock_state_->notify_low_memory_warning_count, 1u);
 }
 
+TEST_F(FlutterEmbedderNativeTest,
+       SurfaceWindowChangedSchedulesFrameWithoutLowMemoryWarning) {
+  FlutterEmbedderNative embedder(&proc_table_);
+  embedder.SetEngineForTesting(
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(kFakeEngineAddress));
+
+  // Arbitrary non-null synthetic JNI jobject handles representing two distinct
+  // Android Surface instances during a surface window swap.
+  constexpr uintptr_t kFakeSurfaceAddress1 = 0x1001;
+  constexpr uintptr_t kFakeSurfaceAddress2 = 0x1002;
+  // Expected call counts across the surface creation, swap, and teardown steps.
+  constexpr size_t kNoLowMemoryWarnings = 0u;
+  constexpr size_t kExpectedLowMemoryWarningsAfterDestroy = 1u;
+  constexpr size_t kExpectedFrameCountAfterCreate = 1u;
+  constexpr size_t kExpectedFrameCountAfterWindowSwap = 2u;
+
+  auto fake_surface_1 = reinterpret_cast<jobject>(kFakeSurfaceAddress1);
+  auto fake_surface_2 = reinterpret_cast<jobject>(kFakeSurfaceAddress2);
+
+  embedder.SurfaceCreated(nullptr, fake_surface_1);
+  EXPECT_EQ(mock_state_->schedule_frame_count, kExpectedFrameCountAfterCreate);
+  EXPECT_EQ(mock_state_->notify_low_memory_warning_count, kNoLowMemoryWarnings);
+
+  // Swapping the surface window mid-frame (e.g. convertToImageView() for
+  // Hybrid Composition) must schedule a frame on the new window without
+  // firing a low-memory warning or tearing down overlay surfaces.
+  embedder.SurfaceWindowChanged(nullptr, fake_surface_2);
+  EXPECT_EQ(mock_state_->schedule_frame_count,
+            kExpectedFrameCountAfterWindowSwap);
+  EXPECT_EQ(mock_state_->notify_low_memory_warning_count, kNoLowMemoryWarnings);
+
+  // Full surface destruction must fire NotifyLowMemoryWarning.
+  embedder.SurfaceDestroyed();
+  EXPECT_EQ(mock_state_->notify_low_memory_warning_count,
+            kExpectedLowMemoryWarningsAfterDestroy);
+}
+
 }  // namespace testing
 }  // namespace flutter

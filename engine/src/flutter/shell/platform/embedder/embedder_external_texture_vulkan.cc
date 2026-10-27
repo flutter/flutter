@@ -703,6 +703,11 @@ void EmbedderExternalTextureVulkan::OnGrContextDestroyed() {
 
 // |flutter::Texture|
 void EmbedderExternalTextureVulkan::MarkNewFrameAvailable() {
+  last_image_ = nullptr;
+  last_vk_image_ = VK_NULL_HANDLE;
+#if IMPELLER_SUPPORTS_RENDERING
+  last_impeller_texture_.reset();
+#endif  // IMPELLER_SUPPORTS_RENDERING
   new_frame_available_ = true;
 }
 

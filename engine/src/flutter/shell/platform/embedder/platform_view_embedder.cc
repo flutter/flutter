@@ -50,23 +50,28 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   void Shutdown() {
     std::scoped_lock lock(mutex_);
     parent_ = nullptr;
+    platform_task_runner_ = nullptr;
   }
 
   virtual void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
-    if (enable_direct_dispatch_) {
+    fml::RefPtr<fml::TaskRunner> task_runner;
+    {
       std::scoped_lock lock(mutex_);
-      if (parent_) {
-        parent_->HandlePlatformMessage(std::move(message));
-      } else if (message) {
-        FML_DLOG(WARNING) << "Deleted engine dropping message on channel "
-                          << message->channel();
-        if (message->response()) {
-          message->response()->CompleteEmpty();
+      if (enable_direct_dispatch_ || !platform_task_runner_) {
+        if (parent_) {
+          parent_->HandlePlatformMessage(std::move(message));
+        } else if (message) {
+          FML_DLOG(WARNING) << "Deleted engine dropping message on channel "
+                            << message->channel();
+          if (message->response()) {
+            message->response()->CompleteEmpty();
+          }
         }
+        return;
       }
-      return;
+      task_runner = platform_task_runner_;
     }
-    platform_task_runner_->PostTask(fml::MakeCopyable(
+    task_runner->PostTask(fml::MakeCopyable(
         [self = shared_from_this(), message = std::move(message)]() mutable {
           auto* handler =
               static_cast<EmbedderPlatformMessageHandler*>(self.get());
@@ -90,15 +95,19 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   virtual void InvokePlatformMessageResponseCallback(
       int response_id,
       std::unique_ptr<fml::Mapping> mapping) {
-    if (enable_direct_dispatch_) {
+    fml::RefPtr<fml::TaskRunner> task_runner;
+    {
       std::scoped_lock lock(mutex_);
-      if (parent_) {
-        parent_->InvokePlatformMessageResponseCallback(response_id,
-                                                       std::move(mapping));
+      if (enable_direct_dispatch_ || !platform_task_runner_) {
+        if (parent_) {
+          parent_->InvokePlatformMessageResponseCallback(response_id,
+                                                         std::move(mapping));
+        }
+        return;
       }
-      return;
+      task_runner = platform_task_runner_;
     }
-    platform_task_runner_->PostTask(
+    task_runner->PostTask(
         fml::MakeCopyable([self = shared_from_this(), response_id,
                            mapping = std::move(mapping)]() mutable {
           auto* handler =
@@ -112,14 +121,18 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   }
 
   virtual void InvokePlatformMessageEmptyResponseCallback(int response_id) {
-    if (enable_direct_dispatch_) {
+    fml::RefPtr<fml::TaskRunner> task_runner;
+    {
       std::scoped_lock lock(mutex_);
-      if (parent_) {
-        parent_->InvokePlatformMessageEmptyResponseCallback(response_id);
+      if (enable_direct_dispatch_ || !platform_task_runner_) {
+        if (parent_) {
+          parent_->InvokePlatformMessageEmptyResponseCallback(response_id);
+        }
+        return;
       }
-      return;
+      task_runner = platform_task_runner_;
     }
-    platform_task_runner_->PostTask([self = shared_from_this(), response_id]() {
+    task_runner->PostTask([self = shared_from_this(), response_id]() {
       auto* handler = static_cast<EmbedderPlatformMessageHandler*>(self.get());
       std::scoped_lock lock(handler->mutex_);
       if (handler->parent_) {
@@ -270,6 +283,11 @@ PlatformViewEmbedder::~PlatformViewEmbedder() {
 }
 
 void PlatformViewEmbedder::NotifyCreated() {
+  if (platform_dispatch_table_.raster_context_setup_callback == nullptr &&
+      platform_dispatch_table_.resolve_embedder_surface_callback == nullptr) {
+    PlatformView::NotifyCreated();
+    return;
+  }
   static_cast<Shell&>(delegate_).OnPlatformViewCreatedAsync(
       [this]() -> std::unique_ptr<Surface> {
         if (platform_dispatch_table_.raster_context_setup_callback != nullptr) {

@@ -15,13 +15,18 @@ import("//flutter/vulkan/config.gni")
 
 config("jni_headers_config") {
   if (!is_android) {
-    include_dirs = [ "//flutter/third_party/java/openjdk/include" ]
-    if (is_linux) {
-      include_dirs += [ "//flutter/third_party/java/openjdk/include/linux" ]
-    } else if (is_mac) {
-      include_dirs += [ "//flutter/third_party/java/openjdk/include/darwin" ]
-    } else if (is_win) {
-      include_dirs += [ "//flutter/third_party/java/openjdk/include/win32" ]
+    if (is_mac) {
+      include_dirs = [
+        "//flutter/third_party/java/openjdk/Contents/Home/include",
+        "//flutter/third_party/java/openjdk/Contents/Home/include/darwin",
+      ]
+    } else {
+      include_dirs = [ "//flutter/third_party/java/openjdk/include" ]
+      if (is_linux) {
+        include_dirs += [ "//flutter/third_party/java/openjdk/include/linux" ]
+      } else if (is_win) {
+        include_dirs += [ "//flutter/third_party/java/openjdk/include/win32" ]
+      }
     }
   }
 }

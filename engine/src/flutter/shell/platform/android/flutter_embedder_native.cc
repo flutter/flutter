@@ -942,6 +942,65 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     }
     ScheduleFrame();
   };
+  surface_callbacks.on_window_changed = [this](void* window) {
+    // View ID 0 represents the default implicit Android FlutterView.
+    constexpr int64_t kAndroidImplicitViewId = 0;
+    // Zero width and height passed when clearing the detached onscreen window.
+    constexpr int32_t kDetachedWindowDimension = 0;
+    void* old_window = native_window_;
+    native_window_ = window;
+    if (!is_using_mock_proc_table_) {
+      if (window != nullptr) {
+#if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
+        if (surface_control_) {
+          surface_control_->SurfaceCreated(
+              kAndroidImplicitViewId, window, nullptr,
+              static_cast<uint32_t>(surface_width_),
+              static_cast<uint32_t>(surface_height_));
+        }
+#endif
+#if FLUTTER_HAS_ANDROID_PLATFORM_VIEWS_CONTROLLER
+        if (platform_views_controller_) {
+          platform_views_controller_->SetOnscreenWindow(
+              kAndroidImplicitViewId, static_cast<ANativeWindow*>(window),
+              surface_width_, surface_height_);
+        }
+#endif
+        auto vm_args =
+            AndroidVMInit::GetGlobalVMArgs().value_or(AndroidVMArgs{});
+        AndroidRenderingAPI api = SelectRenderingAPI(vm_args);
+        if (!vm_args.enable_software_rendering &&
+            (api == AndroidRenderingAPI::kImpellerOpenGLES ||
+             egl_display_ != nullptr)) {
+          CreateOrUpdateAndroidWindowSurface(window);
+        }
+      } else {
+#if FLUTTER_HAS_ANDROID_PLATFORM_VIEWS_CONTROLLER
+        if (platform_views_controller_) {
+          platform_views_controller_->SetOnscreenWindow(
+              kAndroidImplicitViewId, nullptr, kDetachedWindowDimension,
+              kDetachedWindowDimension);
+        }
+#endif
+#if FLUTTER_HAS_ANDROID_SURFACE_CONTROL
+        if (surface_control_) {
+          surface_control_->SurfaceDestroyed(kAndroidImplicitViewId);
+        }
+#endif
+        DestroyAndroidWindowSurface();
+      }
+#if FML_OS_ANDROID
+      if (old_window != nullptr && old_window != window) {
+        ANativeWindow_release(static_cast<ANativeWindow*>(old_window));
+      }
+#else
+      (void)old_window;
+#endif
+    }
+    if (window != nullptr) {
+      ScheduleFrame();
+    }
+  };
   surface_callbacks.on_window_destroyed = [this]() {
     void* old_window = native_window_;
     native_window_ = nullptr;
@@ -3062,8 +3121,16 @@ bool FlutterEmbedderNative::CreateOrUpdateAndroidWindowSurface(
   std::lock_guard<std::mutex> lock(egl_mutex_);
   EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
   EGLConfig config = static_cast<EGLConfig>(egl_config_);
+  EGLContext context = static_cast<EGLContext>(egl_context_);
+  EGLSurface pbuffer = static_cast<EGLSurface>(egl_pbuffer_surface_);
   if (egl_window_surface_ != nullptr) {
-    eglDestroySurface(display, static_cast<EGLSurface>(egl_window_surface_));
+    EGLSurface old_surface = static_cast<EGLSurface>(egl_window_surface_);
+    if (context != EGL_NO_CONTEXT && eglGetCurrentContext() == context &&
+        (eglGetCurrentSurface(EGL_DRAW) == old_surface ||
+         eglGetCurrentSurface(EGL_READ) == old_surface)) {
+      eglMakeCurrent(display, pbuffer, pbuffer, context);
+    }
+    eglDestroySurface(display, old_surface);
     egl_window_surface_ = nullptr;
   }
   const EGLint attribs[] = {EGL_NONE};
@@ -3074,6 +3141,9 @@ bool FlutterEmbedderNative::CreateOrUpdateAndroidWindowSurface(
     return false;
   }
   egl_window_surface_ = win_surface;
+  if (context != EGL_NO_CONTEXT && eglGetCurrentContext() == context) {
+    eglMakeCurrent(display, win_surface, win_surface, context);
+  }
   return true;
 #else
   (void)native_window;
@@ -3086,7 +3156,15 @@ void FlutterEmbedderNative::DestroyAndroidWindowSurface() {
   std::lock_guard<std::mutex> lock(egl_mutex_);
   if (egl_display_ != nullptr && egl_window_surface_ != nullptr) {
     EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
-    eglDestroySurface(display, static_cast<EGLSurface>(egl_window_surface_));
+    EGLContext context = static_cast<EGLContext>(egl_context_);
+    EGLSurface pbuffer = static_cast<EGLSurface>(egl_pbuffer_surface_);
+    EGLSurface old_surface = static_cast<EGLSurface>(egl_window_surface_);
+    if (context != EGL_NO_CONTEXT && eglGetCurrentContext() == context &&
+        (eglGetCurrentSurface(EGL_DRAW) == old_surface ||
+         eglGetCurrentSurface(EGL_READ) == old_surface)) {
+      eglMakeCurrent(display, pbuffer, pbuffer, context);
+    }
+    eglDestroySurface(display, old_surface);
     egl_window_surface_ = nullptr;
   }
 #endif
@@ -3130,7 +3208,14 @@ bool FlutterEmbedderNative::PresentAndroidEGL() {
     std::lock_guard<std::mutex> lock(egl_mutex_);
     if (egl_display_ != nullptr && egl_window_surface_ != nullptr) {
       EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
+      EGLContext context = static_cast<EGLContext>(egl_context_);
       EGLSurface surface = static_cast<EGLSurface>(egl_window_surface_);
+      if (context != EGL_NO_CONTEXT &&
+          (eglGetCurrentContext() != context ||
+           eglGetCurrentSurface(EGL_DRAW) != surface ||
+           eglGetCurrentSurface(EGL_READ) != surface)) {
+        eglMakeCurrent(display, surface, surface, context);
+      }
       swapped_window = (eglSwapBuffers(display, surface) == EGL_TRUE);
     }
   }
@@ -3183,9 +3268,19 @@ bool FlutterEmbedderNative::BindAndroidOverlayEGLSurface(
     std::lock_guard<std::mutex> lock(egl_mutex_);
     EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
     EGLConfig config = static_cast<EGLConfig>(egl_config_);
+    EGLContext context = static_cast<EGLContext>(egl_context_);
+    EGLSurface fallback = egl_window_surface_ != nullptr
+                              ? static_cast<EGLSurface>(egl_window_surface_)
+                              : static_cast<EGLSurface>(egl_pbuffer_surface_);
     auto& entry = egl_overlay_surfaces_[overlay_surface_id];
     if (entry.native_window != native_window && entry.egl_surface != nullptr) {
-      eglDestroySurface(display, static_cast<EGLSurface>(entry.egl_surface));
+      EGLSurface old_surface = static_cast<EGLSurface>(entry.egl_surface);
+      if (context != EGL_NO_CONTEXT && eglGetCurrentContext() == context &&
+          (eglGetCurrentSurface(EGL_DRAW) == old_surface ||
+           eglGetCurrentSurface(EGL_READ) == old_surface)) {
+        eglMakeCurrent(display, fallback, fallback, context);
+      }
+      eglDestroySurface(display, old_surface);
       entry.egl_surface = nullptr;
     }
     if (entry.egl_surface == nullptr) {
@@ -3272,7 +3367,14 @@ bool FlutterEmbedderNative::PresentAndroidOverlayEGL(
       if (it != egl_overlay_surfaces_.end() &&
           it->second.egl_surface != nullptr) {
         EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
+        EGLContext context = static_cast<EGLContext>(egl_context_);
         EGLSurface surface = static_cast<EGLSurface>(it->second.egl_surface);
+        if (context != EGL_NO_CONTEXT &&
+            (eglGetCurrentContext() != context ||
+             eglGetCurrentSurface(EGL_DRAW) != surface ||
+             eglGetCurrentSurface(EGL_READ) != surface)) {
+          eglMakeCurrent(display, surface, surface, context);
+        }
         swapped = (eglSwapBuffers(display, surface) == EGL_TRUE);
       }
     }
@@ -3292,9 +3394,19 @@ void FlutterEmbedderNative::DestroyAndroidOverlayEGLSurfaces() {
   std::lock_guard<std::mutex> lock(egl_mutex_);
   if (egl_display_ != nullptr) {
     EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
+    EGLContext context = static_cast<EGLContext>(egl_context_);
+    EGLSurface fallback = egl_window_surface_ != nullptr
+                              ? static_cast<EGLSurface>(egl_window_surface_)
+                              : static_cast<EGLSurface>(egl_pbuffer_surface_);
     for (auto& [id, entry] : egl_overlay_surfaces_) {
       if (entry.egl_surface != nullptr) {
-        eglDestroySurface(display, static_cast<EGLSurface>(entry.egl_surface));
+        EGLSurface old_surface = static_cast<EGLSurface>(entry.egl_surface);
+        if (context != EGL_NO_CONTEXT && eglGetCurrentContext() == context &&
+            (eglGetCurrentSurface(EGL_DRAW) == old_surface ||
+             eglGetCurrentSurface(EGL_READ) == old_surface)) {
+          eglMakeCurrent(display, fallback, fallback, context);
+        }
+        eglDestroySurface(display, old_surface);
         entry.egl_surface = nullptr;
       }
     }
