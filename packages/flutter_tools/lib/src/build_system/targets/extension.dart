@@ -132,12 +132,7 @@ class ExtensionTarget extends Target {
     );
 
     if (!result.success) {
-      final String? errorMessage = result.errorMessage;
-      throw Exception(
-        errorMessage != null && errorMessage.isNotEmpty
-            ? 'Extension assemble target "${assembleTarget.name}" failed: $errorMessage'
-            : 'Extension assemble target "${assembleTarget.name}" failed.',
-      );
+      throw ExtensionAssembleException(assembleTarget.name, errorMessage: result.errorMessage);
     }
   }
 }
@@ -212,8 +207,7 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
 /// Resolves all engine and host artifact inputs declared on [target] using
 /// [artifacts] and [buildMode].
 ///
-/// Throws a [ToolExit] if any artifact platform name or requested artifact
-/// name is invalid or unsupported.
+/// Throws a [ToolExit] if any requested artifact name is invalid or unsupported.
 // TODO(bkonyi): Download required artifacts on demand if not already cached.
 Map<String, String> resolveExtensionAssembleTargetArtifacts({
   required Artifacts artifacts,
@@ -231,10 +225,9 @@ Map<String, String> resolveExtensionAssembleTargetArtifacts({
         :final String? platform,
         :final BuildMode? mode,
       ):
-        final TargetPlatform? resolvedPlatform = _resolveArtifactPlatform(platform, artifact);
         resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
           _resolveArtifact(artifact),
-          platform: resolvedPlatform ?? targetPlatform,
+          platform: platform != null ? _tryResolveTargetPlatform(platform) : targetPlatform,
           mode: mode ?? buildMode,
         );
       case ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact):
@@ -273,7 +266,7 @@ Source _toHostSource(
   ) =>
     Source.artifact(
       _resolveArtifact(artifact),
-      platform: _resolveArtifactPlatform(platform, artifact) ?? defaultTargetPlatform,
+      platform: platform != null ? _tryResolveTargetPlatform(platform) : defaultTargetPlatform,
       mode: mode ?? defaultBuildMode,
     ),
   ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact) => Source.hostArtifact(
@@ -289,17 +282,6 @@ Artifact _resolveArtifact(ExtensionArtifact artifact) => switch (artifact.name) 
   'linuxHeaders' => Artifact.linuxHeaders,
   final String name => throwToolExit('Unsupported artifact "$name" requested by a tool extension.'),
 };
-
-TargetPlatform? _resolveArtifactPlatform(String? platformName, ExtensionArtifact artifact) {
-  if (platformName == null) {
-    return null;
-  }
-  try {
-    return TargetPlatform.fromName(platformName);
-  } on Exception {
-    throwToolExit('Invalid platform name "$platformName" for artifact "${artifact.name}".');
-  }
-}
 
 HostArtifact _resolveHostArtifact(ExtensionHostArtifact artifact) => switch (artifact.name) {
   'impellerc' => HostArtifact.impellerc,

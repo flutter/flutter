@@ -207,55 +207,69 @@ void main() {
     },
   );
 
-  testWithoutContext('ExtensionTarget throws Exception if assemble fails', () async {
-    final buildManager = FakeExtensionBuildManager(
-      buildResult: const ExtensionBuildResult(success: false, errorMessage: 'Build failed error'),
-    );
-    final ExtensionTarget target = _createTarget(buildManager: buildManager);
+  testWithoutContext(
+    'ExtensionTarget throws ExtensionAssembleException if assemble fails',
+    () async {
+      final buildManager = FakeExtensionBuildManager(
+        buildResult: const ExtensionBuildResult(success: false, errorMessage: 'Build failed error'),
+      );
+      final ExtensionTarget target = _createTarget(buildManager: buildManager);
 
-    await expectLater(
-      () => target.build(environment),
-      throwsA(
-        isA<Exception>().having(
-          (Exception e) => e.toString(),
-          'toString',
-          contains('Extension assemble target "custom-target" failed: Build failed error'),
+      await expectLater(
+        () => target.build(environment),
+        throwsA(
+          isA<ExtensionAssembleException>()
+              .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
+              .having(
+                (ExtensionAssembleException e) => e.errorMessage,
+                'errorMessage',
+                'Build failed error',
+              )
+              .having(
+                (ExtensionAssembleException e) => e.toString(),
+                'toString',
+                equals('Extension assemble target "custom-target" failed: Build failed error'),
+              ),
         ),
-      ),
-    );
+      );
 
-    final ExtensionTarget emptyMessageTarget = _createTarget(
-      buildManager: FakeExtensionBuildManager(
-        buildResult: const ExtensionBuildResult(success: false, errorMessage: ''),
-      ),
-    );
-    await expectLater(
-      () => emptyMessageTarget.build(environment),
-      throwsA(
-        isA<Exception>().having(
-          (Exception e) => e.toString(),
-          'toString',
-          contains('Extension assemble target "custom-target" failed.'),
+      final ExtensionTarget emptyMessageTarget = _createTarget(
+        buildManager: FakeExtensionBuildManager(
+          buildResult: const ExtensionBuildResult(success: false, errorMessage: ''),
         ),
-      ),
-    );
+      );
+      await expectLater(
+        () => emptyMessageTarget.build(environment),
+        throwsA(
+          isA<ExtensionAssembleException>()
+              .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
+              .having(
+                (ExtensionAssembleException e) => e.toString(),
+                'toString',
+                equals('Extension assemble target "custom-target" failed.'),
+              ),
+        ),
+      );
 
-    final ExtensionTarget nullMessageTarget = _createTarget(
-      buildManager: FakeExtensionBuildManager(
-        buildResult: const ExtensionBuildResult(success: false),
-      ),
-    );
-    await expectLater(
-      () => nullMessageTarget.build(environment),
-      throwsA(
-        isA<Exception>().having(
-          (Exception e) => e.toString(),
-          'toString',
-          contains('Extension assemble target "custom-target" failed.'),
+      final ExtensionTarget nullMessageTarget = _createTarget(
+        buildManager: FakeExtensionBuildManager(
+          buildResult: const ExtensionBuildResult(success: false),
         ),
-      ),
-    );
-  });
+      );
+      await expectLater(
+        () => nullMessageTarget.build(environment),
+        throwsA(
+          isA<ExtensionAssembleException>()
+              .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
+              .having(
+                (ExtensionAssembleException e) => e.toString(),
+                'toString',
+                equals('Extension assemble target "custom-target" failed.'),
+              ),
+        ),
+      );
+    },
+  );
 
   testWithoutContext('ExtensionTarget maps pattern, artifact, and hostArtifact sources', () {
     final ExtensionTarget target = _createTarget(
@@ -409,44 +423,72 @@ void main() {
     },
   );
 
-  testWithoutContext('ExtensionTarget supports custom targetPlatform and throws ToolExit for invalid artifact platformName', () async {
-    final buildManager = FakeExtensionBuildManager();
-    final ExtensionTarget customTargetPlatformTarget = _createTarget(
-      buildManager: buildManager,
-      targetPlatform: 'custom-embedder-arm64',
-      inputs: const <ExtensionSource>[
-        ExtensionSource.artifact(BuiltInArtifacts.icuData),
-        ExtensionSource.artifact(
-          BuiltInArtifacts.genSnapshot,
-          platform: 'linux-arm64',
-          mode: .release,
-        ),
-      ],
-    );
+  testWithoutContext(
+    'ExtensionTarget supports custom targetPlatform on target and artifact sources',
+    () async {
+      final buildManager = FakeExtensionBuildManager();
+      final ExtensionTarget customTargetPlatformTarget = _createTarget(
+        buildManager: buildManager,
+        targetPlatform: 'custom-embedder-arm64',
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(BuiltInArtifacts.icuData),
+          ExtensionSource.artifact(
+            BuiltInArtifacts.flutterPatchedSdkPath,
+            platform: 'custom-artifact-platform',
+          ),
+          ExtensionSource.artifact(
+            BuiltInArtifacts.genSnapshot,
+            platform: 'linux-arm64',
+            mode: .release,
+          ),
+        ],
+      );
 
-    await customTargetPlatformTarget.build(environment);
+      await customTargetPlatformTarget.build(environment);
 
-    expect(
-      buildManager.invokedResolvedArtifacts,
-      equals(<String, String>{
-        'icuData': 'Artifact.icuData.debug',
-        'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
-      }),
-    );
+      expect(
+        buildManager.invokedResolvedArtifacts,
+        equals(<String, String>{
+          'icuData': 'Artifact.icuData.debug',
+          'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.debug',
+          'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
+        }),
+      );
 
-    final ExtensionTarget invalidArtifactPlatformTarget = _createTarget(
-      inputs: const <ExtensionSource>[
-        ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'invalid-artifact-platform'),
-      ],
-    );
+      final builtInTargetBuildManager = FakeExtensionBuildManager();
+      final ExtensionTarget builtInTargetWithCustomArtifactPlatform = _createTarget(
+        buildManager: builtInTargetBuildManager,
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(BuiltInArtifacts.icuData),
+          ExtensionSource.artifact(
+            BuiltInArtifacts.flutterPatchedSdkPath,
+            platform: 'custom-artifact-platform',
+          ),
+        ],
+      );
 
-    await expectLater(
-      () => invalidArtifactPlatformTarget.build(environment),
-      throwsToolExit(
-        message: 'Invalid platform name "invalid-artifact-platform" for artifact "icuData".',
-      ),
-    );
-  });
+      final ResolvedFiles resolvedInputs = builtInTargetWithCustomArtifactPlatform.resolveInputs(
+        environment,
+      );
+      expect(
+        resolvedInputs.sources.map((File file) => file.path),
+        containsAll(<String>[
+          'Artifact.icuData.TargetPlatform.linux_x64.debug',
+          'Artifact.flutterPatchedSdkPath.debug',
+        ]),
+      );
+
+      await builtInTargetWithCustomArtifactPlatform.build(environment);
+
+      expect(
+        builtInTargetBuildManager.invokedResolvedArtifacts,
+        equals(<String, String>{
+          'icuData': 'Artifact.icuData.TargetPlatform.linux_x64.debug',
+          'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.debug',
+        }),
+      );
+    },
+  );
 
   group('resolveExtensionOutputDir', () {
     final cases = <({String description, String pattern, String expectedPath})>[
