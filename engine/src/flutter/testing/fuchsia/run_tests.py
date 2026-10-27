@@ -92,6 +92,14 @@ def main() -> int:
   logging.basicConfig(level=logging.INFO)
   logging.info('Running tests in %s', OUT_DIR)
   force_running_unattended()
+  # Newer versions of ffx resolve $HOME to the ffx isolate directory, so the
+  # default ssh keys of ffx ($HOME/.ssh/fuchsia_*) no longer match the identity
+  # file used by the sshconfig of the test scripts (~/.ssh/fuchsia_ed25519).
+  # Point ffx at the keys in the real home directory so both use the same keys.
+  os.environ.setdefault('FUCHSIA_SSH_KEY', os.path.expanduser('~/.ssh/fuchsia_ed25519'))
+  os.environ.setdefault(
+      'FUCHSIA_AUTHORIZED_KEYS', os.path.expanduser('~/.ssh/fuchsia_authorized_keys')
+  )
   sys.argv.append('--out-dir=' + OUT_DIR)
   sys.argv.append('--test-realm=/core/testing/system-tests')
   if VARIANT.endswith('_arm64') or VARIANT.endswith('_arm64_tester'):
