@@ -124,6 +124,7 @@ Future<void> run(List<String> args) async {
       logger: globals.logger,
       platform: globals.platform,
       processManager: globals.processManager,
+      templateRenderer: const MustacheTemplateRenderer(),
     );
 
     Directory? testDirectory;
