@@ -45,27 +45,33 @@ _RELEASE_MODES = _PRODUCT_MODES
 
 # The GPU test backends (build/bazel/gl_wrap): SwiftShader's Vulkan driver,
 # its ICD manifest and the Vulkan loader, which a suite needs in the
-# directory of its binary.
+# directory of its binary, and the Khronos validation layer with its
+# manifest, for the Vulkan playground, which requires validation.
 # Each as gl_wrap's product (by base name) and its path next to the binary:
 # GN's layout, which the manifests' library_path entries are relative to
-# (the layer's is ../libVkLayer_khronos_validation.so from vulkan-data/).
-_GPU_TEST_BACKEND_FILES = {
-    "libvk_swiftshader.so": "libvk_swiftshader.so",
-    "libvulkan.so.1": "libvulkan.so.1",
+# (the layer's is ../libVkLayer_khronos_validation.<so|dylib> from
+# vulkan-data/), by the OS whose names the libraries carry: Linux's
+# (.so, the loader libvulkan.so.1) or macOS's (.dylib). The manifests are
+# the same on both.
+_GPU_TEST_BACKEND_MANIFESTS = {
     "vk_swiftshader_icd.json": "vk_swiftshader_icd.json",
-    # The Khronos validation layer and its manifest, for the Vulkan
-    # playground, which requires validation.
-    "libVkLayer_khronos_validation.so": "libVkLayer_khronos_validation.so",
     "VkLayer_khronos_validation.json": "vulkan-data/VkLayer_khronos_validation.json",
 }
 
-_GPU_TEST_BACKENDS_PACKAGE = "//engine/src/flutter/build/bazel/gl_wrap"
+_GPU_TEST_BACKEND_FILES = {
+    "@platforms//os:linux": {
+        "libvk_swiftshader.so": "libvk_swiftshader.so",
+        "libvulkan.so.1": "libvulkan.so.1",
+        "libVkLayer_khronos_validation.so": "libVkLayer_khronos_validation.so",
+    } | _GPU_TEST_BACKEND_MANIFESTS,
+    "@platforms//os:macos": {
+        "libvk_swiftshader.dylib": "libvk_swiftshader.dylib",
+        "libvulkan.dylib": "libvulkan.dylib",
+        "libVkLayer_khronos_validation.dylib": "libVkLayer_khronos_validation.dylib",
+    } | _GPU_TEST_BACKEND_MANIFESTS,
+}
 
-# Where the backends build: gl_wrap is a GN build for Linux today (its
-# sysroots, its clang, `host_os = "linux"` in its arguments), so its products
-# and their copies are Linux's alone, and a Mac's suites run without them
-# until gl_wrap builds there (the macOS GN arguments the Dart wrap has).
-_GPU_TEST_BACKENDS_PLATFORMS = ["@platforms//os:linux"]
+_GPU_TEST_BACKENDS_PACKAGE = "//engine/src/flutter/build/bazel/gl_wrap"
 
 def flutter_dart_snapshot_kernel(name, dart_main, dart_kernel, dart_srcs = None, dart_packages = {}, visibility = None, **kwargs):
     """GN's dart_snapshot_kernel (testing.gni): a Dart entry point to kernel.
@@ -428,29 +434,30 @@ def flutter_gpu_test_backends(name, visibility = None, **kwargs):
       **kwargs: the filegroup's other attributes (target_compatible_with,
         for a target GN defines under a condition).
     """
-    copies = []
-    for product, file in _GPU_TEST_BACKEND_FILES.items():
-        copy_file(
-            name = "_gb_%s_%s" % (name, product),
-            src = "%s:%s" % (_GPU_TEST_BACKENDS_PACKAGE, product),
-            out = file,
-            allow_symlink = True,
-            visibility = ["//visibility:private"],
-            target_compatible_with = _GPU_TEST_BACKENDS_PLATFORMS,
-        )
-        copies.append(file)
+
+    # The copies of each OS's files, compatible with that OS alone (a
+    # wildcard build on the other skips them; the filegroup selects its
+    # own), the manifests' copies shared by name.
+    copies = {}
+    made = {}
+    for os, files in _GPU_TEST_BACKEND_FILES.items():
+        copies[os] = []
+        for product, file in files.items():
+            copies[os].append(file)
+            if file in made:
+                continue
+            made[file] = True
+            copy_file(
+                name = "_gb_%s_%s" % (name, product),
+                src = "%s:%s" % (_GPU_TEST_BACKENDS_PACKAGE, product),
+                out = file,
+                allow_symlink = True,
+                visibility = ["//visibility:private"],
+                target_compatible_with = [] if product in _GPU_TEST_BACKEND_MANIFESTS else [os],
+            )
     native.filegroup(
         name = name,
-        # On a Mac the backends are not built yet (see the platforms above):
-        # the suites that list this target still build and run there, with
-        # the GPU-backed tests skipping as they do without a driver, which
-        # is how the Mac's T9 ran 7 suites; GN gives a Mac the same files
-        # (SwiftShader's libvk_swiftshader.dylib and the rest), which
-        # gl_wrap's macOS build will restore.
-        srcs = select({
-            "@platforms//os:linux": copies,
-            "//conditions:default": [],
-        }),
+        srcs = select(copies | {"//conditions:default": []}),
         visibility = visibility,
         **kwargs
     )
