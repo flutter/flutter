@@ -20,7 +20,7 @@ are always downloaded.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:lto_libraries.bzl", "emsdk_lto_libraries")
 load(":deps.lock.bzl", "CIPD_DEPS", "GIT_DEPS")
-load(":host_platform.bzl", "host_platform")
+load(":host_platform.bzl", "host_platform", "host_platform_values")
 load(":macos_sdk.bzl", "macos_sdk")
 load(":repositories.bzl", "cipd_package", "engine_version_repository", "synced_repository")
 
@@ -485,9 +485,11 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/prebuilts/macos-x64/dart-sdk",
         build_file = _OVERLAYS + ":dart_sdk/BUILD.dart_sdk.bazel",
     ),
-    # esbuild, which bundles the web SDK's flutter.js (build/esbuild).
+    # esbuild, which bundles the web SDK's flutter.js (build/esbuild): the
+    # host's (DEPS has one per host under prebuilts/<host>/; {host_prebuilts}
+    # is filled in from the machine, host_platform.bzl's HOST_PREBUILTS).
     "esbuild": struct(
-        path = "engine/src/flutter/prebuilts/linux-x64/esbuild",
+        path = "engine/src/flutter/prebuilts/{host_prebuilts}/esbuild",
         build_file = _OVERLAYS + ":esbuild/BUILD.esbuild.bazel",
     ),
     # The Noto fonts the web engine's unit tests fall back to (DEPS:
@@ -656,12 +658,14 @@ def _synced_deps_impl(mctx):
 
     fetch = _fetch_toolchains(mctx)
     platform = _cipd_platform(mctx)
+    host = host_platform_values(mctx.os.name, mctx.os.arch)
     for name, spec in _TOOL_REPOSITORIES.items():
-        pin = _cipd_pin(spec.path)
+        path = spec.path.format(host_prebuilts = host["HOST_PREBUILTS"])
+        pin = _cipd_pin(path)
         if fetch:
             _download_cipd_package(name, pin["package"], pin["version"], platform, spec.build_file)
         else:
-            synced_repository(name = name, path = spec.path, build_file = spec.build_file)
+            synced_repository(name = name, path = path, build_file = spec.build_file)
 
     for name, spec in _DOWNLOADED_TOOL_REPOSITORIES.items():
         _download_cipd_package(name, spec.package, spec.version, platform, spec.build_file)

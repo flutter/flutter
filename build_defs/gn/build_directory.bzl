@@ -17,6 +17,7 @@ the binary as linked under exe.unstripped/ or lib.unstripped/.
 """
 
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
+load("@host_platform//:host.bzl", "HOST_CLANG")
 
 BuildDirectoryInfo = provider(
     doc = "Where a target's files sit in GN's build directory.",
@@ -174,9 +175,16 @@ def _binary_entries(target, ctx):
     # jar packages.
     shared = ctx.rule.kind == "cc_shared_library" or getattr(ctx.rule.attr, "linkshared", False)
     android = ctx.target_platform_has_constraint(ctx.attr._android[platform_common.ConstraintValueInfo])
+    macos = ctx.target_platform_has_constraint(ctx.attr._macos[platform_common.ConstraintValueInfo])
     entries = []
     shipped = {}
     for binary in target[DefaultInfo].files.to_list():
+        # GN's mac toolchain (build/toolchain/mac) links into the build root
+        # as is and strips nothing: the frameworks' packaging strips and
+        # writes dSYMs (the Apple products' phase, research/20 M4).
+        if macos:
+            entries.append((binary, binary.basename))
+            continue
         if shared and android:
             entries.append((_strip(ctx, binary, "lib.stripped", "--strip-unneeded"), "lib.stripped/" + binary.basename))
         if shared and not ctx.attr._stripped[BuildSettingInfo].value:
@@ -246,8 +254,10 @@ build_directory_aspect = aspect(
     attrs = {
         "_stripped": attr.label(default = "//engine/src/flutter/build/bazel:stripped"),
         "_android": attr.label(default = "@platforms//os:android"),
+        "_macos": attr.label(default = "@platforms//os:macos"),
+        # The host's llvm-objcopy (@host_platform), whichever host builds.
         "_objcopy": attr.label(
-            default = "@clang_linux_x64//:objcopy_files",
+            default = HOST_CLANG + "//:objcopy_files",
             allow_files = True,
             cfg = "exec",
         ),
