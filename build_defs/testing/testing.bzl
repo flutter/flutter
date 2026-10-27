@@ -61,6 +61,12 @@ _GPU_TEST_BACKEND_FILES = {
 
 _GPU_TEST_BACKENDS_PACKAGE = "//engine/src/flutter/build/bazel/gl_wrap"
 
+# Where the backends build: gl_wrap is a GN build for Linux today (its
+# sysroots, its clang, `host_os = "linux"` in its arguments), so its products
+# and their copies are Linux's alone, and a Mac's suites run without them
+# until gl_wrap builds there (the macOS GN arguments the Dart wrap has).
+_GPU_TEST_BACKENDS_PLATFORMS = ["@platforms//os:linux"]
+
 def flutter_dart_snapshot_kernel(name, dart_main, dart_kernel, dart_srcs = None, dart_packages = {}, visibility = None, **kwargs):
     """GN's dart_snapshot_kernel (testing.gni): a Dart entry point to kernel.
 
@@ -430,11 +436,21 @@ def flutter_gpu_test_backends(name, visibility = None, **kwargs):
             out = file,
             allow_symlink = True,
             visibility = ["//visibility:private"],
+            target_compatible_with = _GPU_TEST_BACKENDS_PLATFORMS,
         )
         copies.append(file)
     native.filegroup(
         name = name,
-        srcs = copies,
+        # On a Mac the backends are not built yet (see the platforms above):
+        # the suites that list this target still build and run there, with
+        # the GPU-backed tests skipping as they do without a driver, which
+        # is how the Mac's T9 ran 7 suites; GN gives a Mac the same files
+        # (SwiftShader's libvk_swiftshader.dylib and the rest), which
+        # gl_wrap's macOS build will restore.
+        srcs = select({
+            "@platforms//os:linux": copies,
+            "//conditions:default": [],
+        }),
         visibility = visibility,
         **kwargs
     )

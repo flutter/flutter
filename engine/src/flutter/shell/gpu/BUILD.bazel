@@ -6,7 +6,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends")
 
@@ -297,6 +297,12 @@ flutter_objc_library(
             "-Wno-unused-variable",  # from //flutter/impeller
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [],
+        "//conditions:default": FLUTTER_CFLAGS_OBJC,
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({

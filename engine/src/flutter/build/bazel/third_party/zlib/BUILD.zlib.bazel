@@ -36,24 +36,26 @@ _WASM32 = "@platforms//cpu:wasm32"
 # riscv64 (Android): neither optimization, like wasm32.
 _RISCV64 = "@platforms//cpu:riscv64"
 
-# The ARM CPUs on Android and elsewhere (Linux): zlib_arm_crc32_config's
+# The ARM CPUs by OS (Android, Linux, macOS, iOS): zlib_arm_crc32_config's
 # ARMV8_OS_* define, which picks the CPU-feature query (the NDK-compatible
-# cpu-features on Android, getauxval on Linux).
-selects.config_setting_group(
-    name = "arm_android",
-    match_all = [
-        "@platforms//os:android",
-        ":arm_any",
-    ],
-)
-
-selects.config_setting_group(
-    name = "arm_elsewhere",
-    match_all = [
-        "@flutter//engine/src/flutter/build/bazel:not_android",
-        ":arm_any",
-    ],
-)
+# cpu-features on Android, getauxval on Linux, sysctl on Apple's). GN
+# asserts on any other OS; here an unlisted OS gets no define, and
+# cpu_features.c refuses to compile without one, as GN would have.
+[
+    selects.config_setting_group(
+        name = "arm_" + os,
+        match_all = [
+            "@platforms//os:" + os,
+            ":arm_any",
+        ],
+    )
+    for os in [
+        "android",
+        "ios",
+        "linux",
+        "macos",
+    ]
+]
 
 selects.config_setting_group(
     name = "arm_any",
@@ -103,7 +105,9 @@ _ARM_CRC32_DEFINES = select({
     "//conditions:default": [],
 }) + select({
     ":arm_android": ["ARMV8_OS_ANDROID"],
-    ":arm_elsewhere": ["ARMV8_OS_LINUX"],
+    ":arm_ios": ["ARMV8_OS_IOS"],
+    ":arm_linux": ["ARMV8_OS_LINUX"],
+    ":arm_macos": ["ARMV8_OS_MACOS"],
     "//conditions:default": [],
 })
 
