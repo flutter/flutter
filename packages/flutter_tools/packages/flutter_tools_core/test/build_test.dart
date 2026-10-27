@@ -143,8 +143,11 @@ void main() {
         description: 'A custom Linux build target.',
         name: 'custom-linux-build',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
-        hostArtifacts: <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.icuData,
+          BuiltInArtifacts.genSnapshot,
+        },
+        hostArtifacts: const <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
         outputDir: '{OUTPUT_DIR}/linux',
       );
 
@@ -333,14 +336,20 @@ void main() {
         name: 'target-1',
         outputDir: '{OUTPUT_DIR}/target-1',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.icuData,
+          BuiltInArtifacts.genSnapshot,
+        },
       );
       final target1Reordered = ExtensionBuildTarget(
         description: 'Target 1',
         name: 'target-1',
         outputDir: '{OUTPUT_DIR}/target-1',
         targetPlatform: 'linux-x64',
-        artifacts: <ExtensionArtifact>{BuiltInArtifacts.genSnapshot, BuiltInArtifacts.icuData},
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.genSnapshot,
+          BuiltInArtifacts.icuData,
+        },
       );
       final target2 = ExtensionBuildTarget(
         description: 'Target 2',

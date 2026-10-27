@@ -65,15 +65,13 @@ final class ExtensionDeviceClient extends DeviceService {
       '("${DeviceService.isSupportedForProjectMethod}")...',
     );
     try {
-      final Object? rawResult = await connection
-          .sendRequest(
-            DeviceService.isSupportedForProjectMethod,
-            params: <String, Object?>{
-              DeviceService.deviceIdParam: deviceId,
-              DeviceService.projectParam: project.toMap(),
-            },
-          )
-          .timeout(const Duration(seconds: 5));
+      final Object? rawResult = await connection.sendRequest(
+        DeviceService.isSupportedForProjectMethod,
+        params: <String, Object?>{
+          DeviceService.deviceIdParam: deviceId,
+          DeviceService.projectParam: project.toMap(),
+        },
+      );
       if (rawResult case final bool supported) {
         return supported;
       }
@@ -171,9 +169,6 @@ final class ExtensionDeviceClient extends DeviceService {
       final Object? rawResult = await connection.sendRequest(
         DeviceService.stopAppMethod,
         params: <String, Object?>{DeviceService.deviceIdParam: deviceId},
-        // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-        // https://github.com/flutter/flutter/issues/193955.
-        timeout: null,
       );
       if (rawResult case final bool stopped) {
         return stopped;
@@ -405,39 +400,34 @@ class ExtensionDevices extends PollingDeviceDiscovery {
       }),
     );
 
-    final targetDevices = <ExtensionBackedDevice>[];
-    final seenKeys = <(ExtensionConnection, String)>{};
     final failedConnections = <ExtensionConnection>{};
-
+    final seenKeys = <(ExtensionConnection, String)>{};
+    final targetDevices = <Device>[];
     for (final (ExtensionDeviceClient service, List<TargetDevice>? devices) in devicesPerService) {
       if (devices == null) {
         failedConnections.add(service.connection);
         continue;
       }
       for (final TargetDevice targetDevice in devices) {
-        final (ExtensionConnection connection, String deviceId) key = (
-          service.connection,
-          targetDevice.id,
-        );
+        final (ExtensionConnection, String) key = (service.connection, targetDevice.id);
         if (!seenKeys.add(key)) {
           continue;
         }
-
-        final ExtensionBackedDevice? existingDevice = _devicesByKey[key];
+        final ExtensionBackedDevice? existing = _devicesByKey[key];
         final ExtensionBackedDevice device;
-        if (existingDevice != null && !existingDevice._disposed) {
-          existingDevice._targetDevice = targetDevice;
-          device = existingDevice;
+        if (existing != null && !existing._disposed) {
+          existing._targetDevice = targetDevice;
+          device = existing;
         } else {
           device = ExtensionBackedDevice(
+            artifacts: _artifacts,
             buildManager: _extensionBuildManager,
+            config: _config,
             connection: service.connection,
             deviceService: service,
             fileSystem: _fileSystem,
             logger: _logger,
             targetDevice: targetDevice,
-            artifacts: _artifacts,
-            config: _config,
           );
           _devicesByKey[key] = device;
         }
@@ -597,7 +587,7 @@ class ExtensionBackedDevice extends Device {
     String? userIdentifier,
   }) async {
     // TODO(bkonyi): Forward additional BuildInfo and DebuggingOptions fields
-    // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/190746.
+    // (e.g. dartDefines, flavor), https://github.com/flutter/flutter/issues/190753.
     final BuildMode buildMode = debuggingOptions.buildInfo.mode;
 
     if (prebuiltApplication) {
@@ -620,38 +610,35 @@ class ExtensionBackedDevice extends Device {
     final ExtensionBuildTarget? target = targets
         .where((ExtensionBuildTarget t) => t.name == buildTargetName)
         .firstOrNull;
+    if (target == null) {
+      logger.printError('No tool extension provides build target "$buildTargetName" for $name.');
+      return LaunchResult.failed();
+    }
 
     final Directory projectDir = _fileSystem.currentDirectory;
-    final Directory outputDir;
-    final Map<String, String> resolvedArtifacts;
-    if (target != null) {
-      final Directory buildOutputDir = projectDir.childDirectory(
-        _config != null ? getBuildDirectory(_config, _fileSystem) : 'build',
-      );
-      outputDir = target.outputDir.contains('{')
-          ? resolveExtensionOutputDir(
-              buildMode: buildMode,
-              buildOutputDir: buildOutputDir,
-              fileSystem: _fileSystem,
-              projectDir: projectDir,
-              target: target,
-            )
-          : _fileSystem.directory(
-              _fileSystem.path.isRelative(target.outputDir)
-                  ? _fileSystem.path.join(projectDir.path, target.outputDir)
-                  : target.outputDir,
-            );
-      resolvedArtifacts = _artifacts != null
-          ? resolveExtensionBuildTargetArtifacts(
-              artifacts: _artifacts,
-              buildMode: buildMode,
-              target: target,
-            )
-          : const <String, String>{};
-    } else {
-      outputDir = projectDir.childDirectory('build');
-      resolvedArtifacts = const <String, String>{};
-    }
+    final Directory buildOutputDir = projectDir.childDirectory(
+      _config != null ? getBuildDirectory(_config, _fileSystem) : 'build',
+    );
+    final Directory outputDir = target.outputDir.contains('{')
+        ? resolveExtensionOutputDir(
+            buildMode: buildMode,
+            buildOutputDir: buildOutputDir,
+            fileSystem: _fileSystem,
+            projectDir: projectDir,
+            target: target,
+          )
+        : _fileSystem.directory(
+            _fileSystem.path.isRelative(target.outputDir)
+                ? _fileSystem.path.join(projectDir.path, target.outputDir)
+                : target.outputDir,
+          );
+    final Map<String, String> resolvedArtifacts = _artifacts != null
+        ? resolveExtensionBuildTargetArtifacts(
+            artifacts: _artifacts,
+            buildMode: buildMode,
+            target: target,
+          )
+        : const <String, String>{};
 
     final String flutterRootPath = Cache.flutterRoot ?? projectDir.path;
 

@@ -136,7 +136,7 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
         errorMessage: 'Could not find BINARY_NAME in linux/CMakeLists.txt.',
       );
     }
-    final File executableFile = File('${outputDir.path}/bundle/$appName');
+    final executableFile = File('${outputDir.path}/bundle/$appName');
     return ExtensionBuildResult(success: true, executableUri: executableFile.absolute.uri);
   }
 }

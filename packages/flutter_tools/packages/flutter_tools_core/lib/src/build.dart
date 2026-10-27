@@ -117,7 +117,7 @@ class ExtensionBuildTarget {
   }
 
   static final _validNamePattern = RegExp(r'^[a-z][a-z0-9_-]*$');
-  static const _invalidNameMessage =
+  static const String _invalidNameMessage =
       'Build target names must start with a lowercase ASCII letter and contain '
       'only lowercase ASCII letters, digits, underscores, and hyphens.';
 
