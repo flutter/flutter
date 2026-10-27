@@ -108,20 +108,25 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Attaches the DOM element owned by [textField] to the text editing
   /// strategy.
   ///
-  /// This method must be called after [enable] to name sure that [inputConfig],
-  /// [onChange], and [onAction] are not null.
+  /// Does nothing while no text input connection is open, that is before
+  /// [enable] or after [disable]. A field can stay focused in the semantics
+  /// tree after the framework closes its connection, for example after
+  /// `TextInput.hide`, and [SemanticTextField.update] calls this on every
+  /// semantics update while the field has focus.
   void activate(SemanticTextField textField) {
-    assert(
-      inputConfig != null && onChange != null && onAction != null,
-      '"enable" should be called before "enableFromSemantics" and initialize input configuration',
-    );
+    final InputConfiguration? inputConfig = this.inputConfig;
+    final OnChangeCallback? onChange = this.onChange;
+    final OnActionCallback? onAction = this.onAction;
+    if (inputConfig == null || onChange == null || onAction == null) {
+      return;
+    }
 
     if (activeTextField == textField) {
       // The specified field is already active. Skip.
       return;
     } else if (activeTextField != null) {
-      // Another text field is currently active. Deactivate it before switching.
-      disable();
+      // Another text field is currently active. Detach it before switching.
+      deactivate(activeTextField!);
     }
 
     activeTextField = textField;
@@ -129,7 +134,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     // Enable before syncing the style.
     // [DefaultTextEditingStrategy.updateElementStyle] only writes to the element
     // once editing is enabled, so syncing first drops the style silently.
-    super.enable(inputConfig!, onChange: onChange!, onAction: onAction!);
+    super.enable(inputConfig, onChange: onChange, onAction: onAction);
     _syncStyle();
   }
 
@@ -137,29 +142,32 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// strategy.
   ///
   /// Typically at this point the element loses focus (blurs) and stops being
-  /// used for editing.
+  /// used for editing. This only ends the element's part in editing. The text
+  /// input connection, and the state it owns such as the editing state and the
+  /// style, stays until [disable], so a replacement element for the same field
+  /// is restored by [activate]. The framework does not resend that state while
+  /// its connection is open, for example when the focused field's semantics
+  /// node leaves the tree for one update and comes back with a new element.
+  /// See https://github.com/flutter/flutter/issues/194636.
   void deactivate(SemanticTextField textField) {
     if (activeTextField == textField) {
-      disable();
+      _detachElement();
     }
   }
 
+  /// Ends the text input connection, detaching the active element if any and
+  /// dropping the state the connection owns.
   @override
   void disable() {
-    // The framework owns the editing state while its connection is open. When
-    // it closes the connection, [HybridTextEditing.stopEditing] clears
-    // `isEditing` before calling this, and the state goes with it. When only
-    // the DOM element goes away, for example because the focused field's
-    // semantics node left the tree for one update and is about to come back
-    // with a fresh, empty element, the framework still considers the
-    // connection open and does not send the state again. Keep it so [activate]
-    // restores it into the replacement element, instead of letting the first
-    // `selectionchange` on that element report an empty value as a user edit.
-    // See https://github.com/flutter/flutter/issues/194636.
-    if (!owner.isEditing) {
-      lastEditingState = null;
-    }
+    _detachElement();
+    lastEditingState = null;
+    _queuedStyle = null;
+    inputConfig = null;
+    onChange = null;
+    onAction = null;
+  }
 
+  void _detachElement() {
     // We don't want to remove the DOM element because the caller is responsible
     // for that. However we still want to stop editing, cleanup the handlers.
     if (!isEnabled) {
@@ -195,7 +203,6 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     EnginePlatformDispatcher.instance.viewManager.safeBlur(activeDomElement);
     domElement = null;
     activeTextField = null;
-    _queuedStyle = null;
   }
 
   @override

@@ -616,6 +616,88 @@ void testMain() {
       expect(strategy.lastEditingState, isNull);
     });
 
+    test('Restores the style into a re-created field while the connection is open', () {
+      testTextEditing.acceptCommand(
+        TextInputSetClient(clientId: 123, configuration: singlelineConfig),
+        () {},
+      );
+      // The framework sends the style once, when it opens the connection, and
+      // only again if the style changes.
+      testTextEditing.acceptCommand(
+        TextInputSetStyle(
+          style: EditableTextStyle(
+            textDirection: ui.TextDirection.ltr,
+            fontSize: 24,
+            textAlign: ui.TextAlign.left,
+            fontFamily: 'Arial',
+            fontWeight: 'normal',
+            letterSpacing: null,
+            wordSpacing: null,
+            lineHeight: null,
+          ),
+        ),
+        () {},
+      );
+      testTextEditing.acceptCommand(const TextInputShow(), () {});
+
+      void applyTree(SemanticsTester tester, {required bool withTextField}) {
+        tester.updateNode(
+          id: 0,
+          children: <SemanticsNodeUpdate>[
+            if (withTextField)
+              tester.updateNode(
+                id: 1,
+                flags: const ui.SemanticsFlags(
+                  isEnabled: ui.Tristate.isTrue,
+                  isTextField: true,
+                  isFocused: ui.Tristate.isTrue,
+                ),
+                value: 'hello',
+                rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
+              ),
+          ],
+        );
+        tester.apply();
+      }
+
+      try {
+        final tester = SemanticsTester(owner());
+        applyTree(tester, withTextField: true);
+        final DomHTMLElement firstInput = tester.getTextField(1).editableElement;
+        expect(firstInput.style.fontSize, '24px');
+
+        applyTree(tester, withTextField: false);
+        applyTree(tester, withTextField: true);
+        final DomHTMLElement secondInput = tester.getTextField(1).editableElement;
+        expect(secondInput, isNot(same(firstInput)));
+        expect(secondInput.style.fontSize, '24px');
+        expect(secondInput.style.fontFamily, contains('Arial'));
+      } finally {
+        testTextEditing.acceptCommand(const TextInputClearClient(), () {});
+      }
+    });
+
+    test('Does not attach a focused field after the connection is closed', () {
+      testTextEditing.acceptCommand(
+        TextInputSetClient(clientId: 123, configuration: singlelineConfig),
+        () {},
+      );
+      testTextEditing.acceptCommand(const TextInputShow(), () {});
+      createTextFieldSemantics(value: 'hello', isFocused: true);
+      expect(strategy.domElement, isNotNull);
+
+      // An app can hide the keyboard while the field keeps focus. The engine
+      // closes the connection, but the field is still focused in the semantics
+      // tree, so the next semantics update calls `activate` again.
+      testTextEditing.acceptCommand(const TextInputHide(), () {});
+      expect(testTextEditing.isEditing, isFalse);
+      expect(strategy.domElement, isNull);
+
+      expect(() => createTextFieldSemantics(value: 'hello', isFocused: true), returnsNormally);
+      expect(strategy.domElement, isNull);
+      expect(strategy.isEnabled, isFalse);
+    });
+
     test('renders a required text field', () {
       createTextFieldSemantics(isRequired: true, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input aria-required="true" /></sem>''');
