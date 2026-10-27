@@ -16,11 +16,24 @@ import 'table.dart';
 /// borders between rows and the inner vertical borders between columns.
 ///
 /// The sides are represented by [BorderSide] objects.
+///
+/// Deprecated in favor of [TableBorderPainter], which also skips the inner
+/// borders inside cells that span several columns or rows. A [TableBorder]
+/// created by one of its own constructors is still painted that way, but a
+/// subclass of [TableBorder] is painted without taking spans into account.
+@Deprecated(
+  'Use TableBorderPainter instead, which also skips the inner borders inside spanning cells. '
+  'This feature was deprecated after v3.50.0-0.2.pre.',
+)
 @immutable
 class TableBorder {
   /// Creates a border for a table.
   ///
   /// All the sides of the border default to [BorderSide.none].
+  @Deprecated(
+    'Use TableBorderPainter instead, which also skips the inner borders inside spanning cells. '
+    'This feature was deprecated after v3.50.0-0.2.pre.',
+  )
   const TableBorder({
     this.top = BorderSide.none,
     this.right = BorderSide.none,
@@ -34,6 +47,10 @@ class TableBorder {
   /// A uniform border with all sides the same color and width.
   ///
   /// The sides default to black solid borders, one logical pixel wide.
+  @Deprecated(
+    'Use TableBorderPainter instead, which also skips the inner borders inside spanning cells. '
+    'This feature was deprecated after v3.50.0-0.2.pre.',
+  )
   factory TableBorder.all({
     Color color = const Color(0xFF000000),
     double width = 1.0,
@@ -54,6 +71,10 @@ class TableBorder {
 
   /// Creates a border for a table where all the interior sides use the same
   /// styling and all the exterior sides use the same styling.
+  @Deprecated(
+    'Use TableBorderPainter instead, which also skips the inner borders inside spanning cells. '
+    'This feature was deprecated after v3.50.0-0.2.pre.',
+  )
   const TableBorder.symmetric({
     BorderSide inside = BorderSide.none,
     BorderSide outside = BorderSide.none,
@@ -253,58 +274,314 @@ class TableBorder {
     );
   }
 
-  /// Draws all vertical dividers between columns without checking for spans.
-  void _paintVerticalDividersUnspanned(
+  /// Paints the border around the given [Rect] on the given [Canvas], with the
+  /// given rows and columns.
+  ///
+  /// Uniform borders are more efficient to paint than more complex borders.
+  ///
+  /// The `rows` argument specifies the vertical positions between the rows,
+  /// relative to the given rectangle. For example, if the table contained two
+  /// rows of height 100.0 each, then `rows` would contain a single value,
+  /// 100.0, which is the vertical position between the two rows (relative to
+  /// the top edge of `rect`).
+  ///
+  /// The `columns` argument specifies the horizontal positions between the
+  /// columns, relative to the given rectangle. For example, if the table
+  /// contained two columns of height 100.0 each, then `columns` would contain a
+  /// single value, 100.0, which is the vertical position between the two
+  /// columns (relative to the left edge of `rect`).
+  ///
+  /// The [verticalInside] border is only drawn if there are at least two
+  /// columns. The [horizontalInside] border is only drawn if there are at least
+  /// two rows. The horizontal borders are drawn after the vertical borders.
+  ///
+  /// The outer borders (in the order [top], [right], [bottom], [left], with
+  /// [left] above the others) are painted after the inner borders.
+  ///
+  /// The paint order is particularly notable in the case of
+  /// partially-transparent borders.
+  void paint(
     Canvas canvas,
-    Rect rect,
-    Iterable<double> columns,
-    Paint paint,
-    Path path,
-  ) {
-    if (columns.isEmpty || verticalInside.style == BorderStyle.none) {
-      return;
+    Rect rect, {
+    required Iterable<double> rows,
+    required Iterable<double> columns,
+  }) {
+    // properties can't be null
+
+    // arguments can't be null
+    assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
+    assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
+
+    if (columns.isNotEmpty || rows.isNotEmpty) {
+      final paint = Paint();
+      final path = Path();
+
+      if (columns.isNotEmpty) {
+        switch (verticalInside.style) {
+          case BorderStyle.solid:
+            paint
+              ..color = verticalInside.color
+              ..strokeWidth = verticalInside.width
+              ..style = PaintingStyle.stroke;
+            path.reset();
+            for (final x in columns) {
+              path.moveTo(rect.left + x, rect.top);
+              path.lineTo(rect.left + x, rect.bottom);
+            }
+            canvas.drawPath(path, paint);
+          case BorderStyle.none:
+            break;
+        }
+      }
+
+      if (rows.isNotEmpty) {
+        switch (horizontalInside.style) {
+          case BorderStyle.solid:
+            paint
+              ..color = horizontalInside.color
+              ..strokeWidth = horizontalInside.width
+              ..style = PaintingStyle.stroke;
+            path.reset();
+            for (final y in rows) {
+              path.moveTo(rect.left, rect.top + y);
+              path.lineTo(rect.right, rect.top + y);
+            }
+            canvas.drawPath(path, paint);
+          case BorderStyle.none:
+            break;
+        }
+      }
     }
 
-    paint
-      ..color = verticalInside.color
-      ..strokeWidth = verticalInside.width
-      ..style = PaintingStyle.stroke;
-    path.reset();
-
-    for (final x in columns) {
-      path.moveTo(rect.left + x, rect.top);
-      path.lineTo(rect.left + x, rect.bottom);
-    }
-    canvas.drawPath(path, paint);
+    _paintTableBorder(canvas, rect);
   }
 
-  /// Draws all horizontal dividers between rows without checking for spans.
-  void _paintHorizontalDividersUnspanned(
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TableBorder &&
+        other.top == top &&
+        other.right == right &&
+        other.bottom == bottom &&
+        other.left == left &&
+        other.horizontalInside == horizontalInside &&
+        other.verticalInside == verticalInside &&
+        other.borderRadius == borderRadius;
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
+
+  @override
+  String toString() =>
+      'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
+}
+
+/// Border specification for [Table] widgets.
+///
+/// This is like [Border], with the addition of two sides: the inner horizontal
+/// borders between rows and the inner vertical borders between columns. The
+/// inner borders inside a cell that spans several columns or rows (see
+/// [TableCell.colSpan] and [TableCell.rowSpan]) are not painted.
+///
+/// The sides are represented by [BorderSide] objects.
+///
+/// To paint the borders differently, override [paint].
+class TableBorderPainter extends TableBorder {
+  /// Creates a border for a table.
+  ///
+  /// All the sides of the border default to [BorderSide.none].
+  const TableBorderPainter({
+    super.top,
+    super.right,
+    super.bottom,
+    super.left,
+    super.horizontalInside,
+    super.verticalInside,
+    super.borderRadius,
+  });
+
+  /// A uniform border with all sides the same color and width.
+  ///
+  /// The sides default to black solid borders, one logical pixel wide.
+  factory TableBorderPainter.all({
+    Color color = const Color(0xFF000000),
+    double width = 1.0,
+    BorderStyle style = BorderStyle.solid,
+    BorderRadius borderRadius = BorderRadius.zero,
+  }) {
+    final side = BorderSide(color: color, width: width, style: style);
+    return TableBorderPainter(
+      top: side,
+      right: side,
+      bottom: side,
+      left: side,
+      horizontalInside: side,
+      verticalInside: side,
+      borderRadius: borderRadius,
+    );
+  }
+
+  /// Creates a border for a table where all the interior sides use the same
+  /// styling and all the exterior sides use the same styling.
+  const TableBorderPainter.symmetric({super.inside, super.outside, super.borderRadius})
+    : super.symmetric();
+
+  /// Creates a copy of this border but with the widths scaled by the factor `t`.
+  ///
+  /// The `t` argument represents the multiplicand, or the position on the
+  /// timeline for an interpolation from nothing to `this`, with 0.0 meaning
+  /// that the object returned should be the nil variant of this object, 1.0
+  /// meaning that no change should be applied, returning `this` (or something
+  /// equivalent to `this`), and other values meaning that the object should be
+  /// multiplied by `t`. Negative values are treated like zero.
+  ///
+  /// Values for `t` are usually obtained from an [Animation<double>], such as
+  /// an [AnimationController].
+  ///
+  /// See also:
+  ///
+  ///  * [BorderSide.scale], which is used to implement this method.
+  @override
+  TableBorderPainter scale(double t) {
+    return TableBorderPainter(
+      top: top.scale(t),
+      right: right.scale(t),
+      bottom: bottom.scale(t),
+      left: left.scale(t),
+      horizontalInside: horizontalInside.scale(t),
+      verticalInside: verticalInside.scale(t),
+    );
+  }
+
+  /// Linearly interpolate between two table borders.
+  ///
+  /// If a border is null, it is treated as having only [BorderSide.none]
+  /// borders.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  static TableBorderPainter? lerp(TableBorderPainter? a, TableBorderPainter? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
+    if (a == null) {
+      return b!.scale(t);
+    }
+    if (b == null) {
+      return a.scale(1.0 - t);
+    }
+    return TableBorderPainter(
+      top: BorderSide.lerp(a.top, b.top, t),
+      right: BorderSide.lerp(a.right, b.right, t),
+      bottom: BorderSide.lerp(a.bottom, b.bottom, t),
+      left: BorderSide.lerp(a.left, b.left, t),
+      horizontalInside: BorderSide.lerp(a.horizontalInside, b.horizontalInside, t),
+      verticalInside: BorderSide.lerp(a.verticalInside, b.verticalInside, t),
+    );
+  }
+
+  /// Paints the border around the given [Rect] on the given [Canvas], with the
+  /// given rows and columns.
+  ///
+  /// Uniform borders are more efficient to paint than more complex borders.
+  ///
+  /// The `rows` argument specifies the vertical positions between the rows,
+  /// relative to the given rectangle. For example, if the table contained two
+  /// rows of height 100.0 each, then `rows` would contain a single value,
+  /// 100.0, which is the vertical position between the two rows (relative to
+  /// the top edge of `rect`).
+  ///
+  /// The `columns` argument specifies the horizontal positions between the
+  /// columns, relative to the given rectangle. For example, if the table
+  /// contained two columns of height 100.0 each, then `columns` would contain a
+  /// single value, 100.0, which is the vertical position between the two
+  /// columns (relative to the left edge of `rect`).
+  ///
+  /// The `spannedCells` argument records which cells are covered by a cell
+  /// that spans several columns or rows, so that the inner borders inside a
+  /// span can be skipped:
+  ///
+  ///  * A cell covered by a colSpan skips the vertical inner border on its
+  ///    leading edge.
+  ///  * A cell covered by a rowSpan skips the horizontal inner border on its
+  ///    top edge.
+  ///
+  /// It is null when the table has no spans, and then all inner borders are
+  /// painted. The `textDirection` argument is the direction in which the
+  /// columns of the table are ordered, so that the cells in `spannedCells` can
+  /// be mapped to the columns in `columns`.
+  ///
+  /// The [verticalInside] border is only drawn if there are at least two
+  /// columns. The [horizontalInside] border is only drawn if there are at least
+  /// two rows. The horizontal borders are drawn after the vertical borders.
+  ///
+  /// The outer borders (in the order [top], [right], [bottom], [left], with
+  /// [left] above the others) are painted after the inner borders.
+  ///
+  /// The paint order is particularly notable in the case of
+  /// partially-transparent borders.
+  @override
+  void paint(
     Canvas canvas,
-    Rect rect,
-    Iterable<double> rows,
-    Paint paint,
-    Path path,
-  ) {
-    if (rows.isEmpty || horizontalInside.style == BorderStyle.none) {
+    Rect rect, {
+    required Iterable<double> rows,
+    required Iterable<double> columns,
+    TableSpannedCells? spannedCells,
+    TextDirection textDirection = TextDirection.ltr,
+  }) {
+    if (spannedCells == null) {
+      super.paint(canvas, rect, rows: rows, columns: columns);
       return;
     }
+    assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
+    assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
-    paint
-      ..color = horizontalInside.color
-      ..strokeWidth = horizontalInside.width
-      ..style = PaintingStyle.stroke;
-    path.reset();
+    final paint = Paint();
+    final path = Path();
+    final List<double> rowList = rows.toList();
+    final List<double> columnList = columns.toList();
+    final int tableColumns = columnList.length + 1;
+    final isRTL = textDirection == TextDirection.rtl;
+    // The full set of row edges: the top of the first row (0.0), the inner
+    // row boundaries ([rowList]), and the bottom of the last row
+    // ([rect.height]). Consecutive differences give each row's height.
+    final rowTops = <double>[0.0, ...rowList, rect.height];
+    // Vertical dividers are painted before the horizontal ones (see the doc
+    // comment), so that horizontal borders sit on top at the intersections.
+    _paintVerticalDividers(
+      canvas,
+      rect,
+      columnList,
+      rowTops,
+      spannedCells,
+      tableColumns,
+      isRTL,
+      paint,
+      path,
+    );
+    _paintHorizontalDividers(
+      canvas,
+      rect,
+      rowList,
+      columnList,
+      spannedCells,
+      tableColumns,
+      isRTL,
+      paint,
+      path,
+    );
 
-    for (final y in rows) {
-      path.moveTo(rect.left, rect.top + y);
-      path.lineTo(rect.right, rect.top + y);
-    }
-    canvas.drawPath(path, paint);
+    _paintTableBorder(canvas, rect);
   }
 
   /// Draws vertical dividers between columns, skipping spanned regions.
-  void _paintVerticalDividersWithSpans(
+  void _paintVerticalDividers(
     Canvas canvas,
     Rect rect,
     List<double> columnList,
@@ -352,7 +629,7 @@ class TableBorder {
   }
 
   /// Draws horizontal dividers between rows, skipping spanned regions.
-  void _paintHorizontalDividersWithSpans(
+  void _paintHorizontalDividers(
     Canvas canvas,
     Rect rect,
     List<double> rowList,
@@ -405,125 +682,7 @@ class TableBorder {
     canvas.drawPath(path, paint);
   }
 
-  /// Paints the border around the given [Rect] on the given [Canvas], with the
-  /// given rows and columns.
-  ///
-  /// Uniform borders are more efficient to paint than more complex borders.
-  ///
-  /// The `rows` argument specifies the vertical positions between the rows,
-  /// relative to the given rectangle. For example, if the table contained two
-  /// rows of height 100.0 each, then `rows` would contain a single value,
-  /// 100.0, which is the vertical position between the two rows (relative to
-  /// the top edge of `rect`).
-  ///
-  /// The `columns` argument specifies the horizontal positions between the
-  /// columns, relative to the given rectangle. For example, if the table
-  /// contained two columns of height 100.0 each, then `columns` would contain a
-  /// single value, 100.0, which is the vertical position between the two
-  /// columns (relative to the left edge of `rect`).
-  ///
-  /// The optional [spannedCells] records which logical cells are covered by a
-  /// spanning cell, so that the inner borders that fall inside a span can be
-  /// skipped:
-  ///
-  ///  * A cell covered by a **horizontal** (colSpan) span skips the vertical
-  ///    inner border on its leading edge.
-  ///  * A cell covered by a **vertical** (rowSpan) span skips the horizontal
-  ///    inner border on its top edge.
-  ///
-  /// A cell at the corner of a rectangular span is covered by both. When
-  /// [spannedCells] is null, no borders are skipped. Pass [textDirection] so
-  /// the cell coordinates can be interpreted correctly for RTL tables.
-  ///
-  /// The [verticalInside] border is only drawn if there are at least two
-  /// columns. The [horizontalInside] border is only drawn if there are at least
-  /// two rows. The horizontal borders are drawn after the vertical borders.
-  ///
-  /// The outer borders (in the order [top], [right], [bottom], [left], with
-  /// [left] above the others) are painted after the inner borders.
-  ///
-  /// The paint order is particularly relevant when using
-  /// partially-transparent borders.
-  void paint(
-    Canvas canvas,
-    Rect rect, {
-    required Iterable<double> rows,
-    required Iterable<double> columns,
-    TableSpannedCells? spannedCells,
-    TextDirection textDirection = TextDirection.ltr,
-  }) {
-    // Validate row and column offsets are within the table's bounds.
-    assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
-    assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
-
-    final paint = Paint();
-    final path = Path();
-    final List<double> columnList = columns.toList();
-
-    if (spannedCells != null) {
-      final int tableColumns = columnList.length + 1;
-      final isRTL = textDirection == TextDirection.rtl;
-      final List<double> rowList = rows.toList();
-      // The full set of row edges: the top of the first row (0.0), the inner
-      // row boundaries ([rowList]), and the bottom of the last row
-      // ([rect.height]). Consecutive differences give each row's height.
-      final rowTops = <double>[0.0, ...rowList, rect.height];
-      // Vertical dividers are painted before the horizontal ones (see the doc
-      // comment), so that horizontal borders sit on top at the intersections.
-      _paintVerticalDividersWithSpans(
-        canvas,
-        rect,
-        columnList,
-        rowTops,
-        spannedCells,
-        tableColumns,
-        isRTL,
-        paint,
-        path,
-      );
-      _paintHorizontalDividersWithSpans(
-        canvas,
-        rect,
-        rowList,
-        columnList,
-        spannedCells,
-        tableColumns,
-        isRTL,
-        paint,
-        path,
-      );
-    } else {
-      _paintVerticalDividersUnspanned(canvas, rect, columns, paint, path);
-      _paintHorizontalDividersUnspanned(canvas, rect, rows, paint, path);
-    }
-
-    // Paint the outer border of the table.
-    _paintTableBorder(canvas, rect);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is TableBorder &&
-        other.top == top &&
-        other.right == right &&
-        other.bottom == bottom &&
-        other.left == left &&
-        other.horizontalInside == horizontalInside &&
-        other.verticalInside == verticalInside &&
-        other.borderRadius == borderRadius;
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
-
   @override
   String toString() =>
-      'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
+      'TableBorderPainter($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
 }

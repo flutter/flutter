@@ -551,6 +551,11 @@ class RenderTable extends RenderBox {
   }
 
   /// The style to use when painting the boundary and interior divisions of the table.
+  ///
+  /// A [TableBorderPainter] skips the inner borders inside cells that span
+  /// several columns or rows. So does a [TableBorder] created by one of its
+  /// own constructors, but a subclass of the deprecated [TableBorder] is
+  /// painted without taking spans into account.
   TableBorder? get border => _border;
   TableBorder? _border;
   set border(TableBorder? value) {
@@ -558,7 +563,38 @@ class RenderTable extends RenderBox {
       return;
     }
     _border = value;
+    _plainBorderPainter = null;
     markNeedsPaint();
+  }
+
+  // TODO(hm21): Remove when TableBorder is removed, and paint every border
+  // as a TableBorderPainter.
+  TableBorderPainter? _plainBorderPainter;
+
+  /// The [border] as a [TableBorderPainter], or null if it is a subclass of
+  /// the deprecated [TableBorder] that only knows how to paint tables without
+  /// spans.
+  ///
+  /// A [TableBorder] created by one of its own constructors can't override
+  /// [TableBorder.paint], so a [TableBorderPainter] with the same sides paints
+  /// it the same way, with spans.
+  TableBorderPainter? get _borderPainter {
+    final TableBorder? border = this.border;
+    if (border is TableBorderPainter) {
+      return border;
+    }
+    if (border == null || border.runtimeType != TableBorder) {
+      return null;
+    }
+    return _plainBorderPainter ??= TableBorderPainter(
+      top: border.top,
+      right: border.right,
+      bottom: border.bottom,
+      left: border.left,
+      horizontalInside: border.horizontalInside,
+      verticalInside: border.verticalInside,
+      borderRadius: border.borderRadius,
+    );
   }
 
   /// The decorations to use for each row of the table.
@@ -1856,14 +1892,19 @@ class RenderTable extends RenderBox {
       final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 1);
       final Iterable<double> columns = _columnLefts!.skip(1);
 
-      border!.paint(
-        context.canvas,
-        borderRect,
-        rows: rows,
-        columns: columns,
-        spannedCells: _cachedSpannedCells,
-        textDirection: textDirection,
-      );
+      final TableBorderPainter? borderPainter = _borderPainter;
+      if (borderPainter != null) {
+        borderPainter.paint(
+          context.canvas,
+          borderRect,
+          rows: rows,
+          columns: columns,
+          spannedCells: _cachedSpannedCells,
+          textDirection: textDirection,
+        );
+      } else {
+        border!.paint(context.canvas, borderRect, rows: rows, columns: columns);
+      }
     }
   }
 
@@ -1940,8 +1981,8 @@ class _Index {
 
 /// Records which cells in a table are covered ("hidden") by a spanning cell.
 ///
-/// This is typically used by [TableBorder] to decide whether to skip painting
-/// some of the cell dividers.
+/// This is typically used by [TableBorderPainter] to decide whether to skip
+/// painting some of the cell dividers.
 ///
 /// A cell can be covered in two independent ways, and both are tracked here:
 ///
@@ -1952,7 +1993,7 @@ class _Index {
 /// A cell in the interior of a rectangular span is both column- and row-spanned.
 class TableSpannedCells {
   // Only [RenderTable] populates this map, during layout. Consumers such as
-  // [TableBorder] receive it read-only, so painting can never mutate the flags
+  // [TableBorderPainter] receive it read-only, so painting can never mutate the flags
   // that layout derived.
   TableSpannedCells._({required int rows, required int columns})
     : _columns = columns,

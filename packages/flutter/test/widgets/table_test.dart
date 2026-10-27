@@ -1694,7 +1694,7 @@ void main() {
                 child: SizedBox(
                   width: 300,
                   child: Table(
-                    border: TableBorder.all(),
+                    border: TableBorderPainter.all(),
                     defaultColumnWidth: const FixedColumnWidth(100),
                     children: <TableRow>[
                       TableRow(
@@ -1758,7 +1758,7 @@ void main() {
                 child: SizedBox(
                   width: 300,
                   child: Table(
-                    border: TableBorder.all(),
+                    border: TableBorderPainter.all(),
                     defaultColumnWidth: const FixedColumnWidth(100),
                     children: <TableRow>[
                       TableRow(
@@ -1824,7 +1824,7 @@ void main() {
                 child: SizedBox(
                   width: 300,
                   child: Table(
-                    border: TableBorder.all(),
+                    border: TableBorderPainter.all(),
                     defaultColumnWidth: const FixedColumnWidth(100),
                     children: <TableRow>[
                       TableRow(
@@ -1907,7 +1907,7 @@ void main() {
                 child: SizedBox(
                   width: 400,
                   child: Table(
-                    border: TableBorder.all(),
+                    border: TableBorderPainter.all(),
                     defaultColumnWidth: const FixedColumnWidth(100),
                     children: <TableRow>[
                       // Header row spanning all columns
@@ -2008,7 +2008,7 @@ void main() {
                 child: SizedBox(
                   width: tableWidth,
                   child: Table(
-                    border: TableBorder.all(),
+                    border: TableBorderPainter.all(),
                     defaultVerticalAlignment: alignment,
                     children: <TableRow>[
                       TableRow(
@@ -2113,7 +2113,7 @@ void main() {
                   child: SizedBox(
                     width: tableWidth,
                     child: Table(
-                      border: TableBorder.all(),
+                      border: TableBorderPainter.all(),
                       defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: const <TableRow>[

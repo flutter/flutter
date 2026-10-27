@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show PathMetric;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1040,4 +1042,188 @@ void main() {
       expect(table.getMinIntrinsicWidth(double.infinity), equals(350.0));
     });
   });
+
+  group('Table borders with spans', () {
+    // A table with three 100x50 columns and two rows, whose first cell spans
+    // the first two columns:
+    //
+    //   +---------+----+
+    //   |    A    | B  |
+    //   +----+----+----+
+    //   | C  | D  | E  |
+    //   +----+----+----+
+    RenderTable spanningTable(
+      TableBorder border, {
+      TextDirection textDirection = TextDirection.ltr,
+    }) {
+      final table = RenderTable(textDirection: textDirection, columns: 3, rows: 2, border: border);
+      final RenderBox spanningCell = sizedBox(200.0, 50.0);
+      spanningCell.parentData = TableCellParentData()..colSpan = 2;
+      table.setChild(0, 0, spanningCell);
+      table.setChild(2, 0, sizedBox(100.0, 50.0));
+      for (var x = 0; x < 3; x += 1) {
+        table.setChild(x, 1, sizedBox(100.0, 50.0));
+      }
+      layout(table, constraints: const BoxConstraints.tightFor(width: 300.0));
+      return table;
+    }
+
+    // The inner borders of the table above when no border is skipped.
+    const allInnerBorders = <Rect>[
+      Rect.fromLTRB(100.0, 0.0, 100.0, 50.0),
+      Rect.fromLTRB(200.0, 0.0, 200.0, 50.0),
+      Rect.fromLTRB(100.0, 50.0, 100.0, 100.0),
+      Rect.fromLTRB(200.0, 50.0, 200.0, 100.0),
+      Rect.fromLTRB(0.0, 50.0, 100.0, 50.0),
+      Rect.fromLTRB(100.0, 50.0, 200.0, 50.0),
+      Rect.fromLTRB(200.0, 50.0, 300.0, 50.0),
+    ];
+
+    const inside = BorderSide();
+
+    test('TableBorderPainter skips the inner borders inside a span', () {
+      expect(
+        _innerBorderSegments(spanningTable(const TableBorderPainter.symmetric(inside: inside))),
+        unorderedEquals(<Rect>[
+          for (final Rect segment in allInnerBorders)
+            if (segment != const Rect.fromLTRB(100.0, 0.0, 100.0, 50.0)) segment,
+        ]),
+      );
+    });
+
+    test('TableBorderPainter skips the inner borders inside a span in RTL', () {
+      expect(
+        _innerBorderSegments(
+          spanningTable(
+            const TableBorderPainter.symmetric(inside: inside),
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+        unorderedEquals(<Rect>[
+          for (final Rect segment in allInnerBorders)
+            if (segment != const Rect.fromLTRB(200.0, 0.0, 200.0, 50.0)) segment,
+        ]),
+      );
+    });
+
+    test('a TableBorder paints spans like a TableBorderPainter', () {
+      final RenderTable table = spanningTable(const TableBorder.symmetric(inside: inside));
+      expect(
+        _innerBorderSegments(table),
+        unorderedEquals(
+          _innerBorderSegments(spanningTable(const TableBorderPainter.symmetric(inside: inside))),
+        ),
+      );
+
+      // Without inner sides, the new border paints no inner borders.
+      table.border = const TableBorder.symmetric(outside: BorderSide());
+      expect(_innerBorderSegments(table), isEmpty);
+    });
+
+    test('a TableBorder subclass is painted without spans', () {
+      final log = <String>[];
+      final RenderTable table = spanningTable(_LegacyTableBorder(log));
+      final List<Rect> segments = _innerBorderSegments(table);
+      expect(log, <String>['paint']);
+      expect(
+        segments,
+        unorderedEquals(const <Rect>[
+          Rect.fromLTRB(100.0, 0.0, 100.0, 100.0),
+          Rect.fromLTRB(200.0, 0.0, 200.0, 100.0),
+          Rect.fromLTRB(0.0, 50.0, 300.0, 50.0),
+        ]),
+      );
+    });
+
+    test('RenderTable passes the spans and the text direction to a TableBorderPainter', () {
+      final calls = <(TableSpannedCells?, TextDirection)>[];
+      final RenderTable table = spanningTable(
+        _RecordingTableBorderPainter(calls),
+        textDirection: TextDirection.rtl,
+      );
+      _innerBorderSegments(table);
+      final (TableSpannedCells? spannedCells, TextDirection textDirection) = calls.single;
+      expect(spannedCells, isNotNull);
+      expect(spannedCells!.isColumnSpanned(1, 0), isTrue);
+      expect(spannedCells.isColumnSpanned(2, 0), isFalse);
+      expect(textDirection, TextDirection.rtl);
+
+      // A table without spans passes no spans.
+      calls.clear();
+      final plainTable = RenderTable(
+        textDirection: TextDirection.ltr,
+        border: _RecordingTableBorderPainter(calls),
+        children: <List<RenderBox>>[
+          <RenderBox>[sizedBox(100.0, 50.0), sizedBox(100.0, 50.0)],
+        ],
+      );
+      layout(plainTable, constraints: const BoxConstraints.tightFor(width: 200.0));
+      _innerBorderSegments(plainTable);
+      expect(calls.single.$1, isNull);
+    });
+  });
+}
+
+/// The line segments of the inner borders that [table] paints.
+List<Rect> _innerBorderSegments(RenderTable table) {
+  final canvas = _InnerBorderRecordingCanvas();
+  table.paint(TestRecordingPaintingContext(canvas), Offset.zero);
+  return canvas.segments;
+}
+
+/// Records the line segments of the stroked paths drawn on it, which are the
+/// inner borders of a table.
+///
+/// The segments are taken when the path is drawn, because [TableBorder] reuses
+/// its path for the vertical and the horizontal borders.
+class _InnerBorderRecordingCanvas extends TestRecordingCanvas {
+  final List<Rect> segments = <Rect>[];
+
+  @override
+  void drawPath(Path path, Paint paint) {
+    if (paint.style != PaintingStyle.stroke) {
+      return;
+    }
+    for (final PathMetric metric in path.computeMetrics()) {
+      segments.add(metric.extractPath(0.0, metric.length).getBounds());
+    }
+  }
+}
+
+/// A [TableBorder] subclass that overrides [TableBorder.paint] and doesn't
+/// know about spans.
+class _LegacyTableBorder extends TableBorder {
+  const _LegacyTableBorder(this.log)
+    : super(horizontalInside: const BorderSide(), verticalInside: const BorderSide());
+
+  final List<String> log;
+
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    required Iterable<double> rows,
+    required Iterable<double> columns,
+  }) {
+    log.add('paint');
+    super.paint(canvas, rect, rows: rows, columns: columns);
+  }
+}
+
+class _RecordingTableBorderPainter extends TableBorderPainter {
+  const _RecordingTableBorderPainter(this.calls);
+
+  final List<(TableSpannedCells?, TextDirection)> calls;
+
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    required Iterable<double> rows,
+    required Iterable<double> columns,
+    TableSpannedCells? spannedCells,
+    TextDirection textDirection = TextDirection.ltr,
+  }) {
+    calls.add((spannedCells, textDirection));
+  }
 }

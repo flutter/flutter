@@ -193,4 +193,64 @@ void main() {
 
     expect(borderWithRadius.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
   });
+
+  group('TableBorderPainter', () {
+    void expectSameSides(TableBorder actual, TableBorder expected) {
+      expect(actual.top, expected.top);
+      expect(actual.right, expected.right);
+      expect(actual.bottom, expected.bottom);
+      expect(actual.left, expected.left);
+      expect(actual.horizontalInside, expected.horizontalInside);
+      expect(actual.verticalInside, expected.verticalInside);
+      expect(actual.borderRadius, expected.borderRadius);
+    }
+
+    const side = BorderSide(width: 2.0, color: Color(0xFF00FFFF));
+    const radius = BorderRadius.all(Radius.circular(8.0));
+
+    test('has the same constructors as TableBorder', () {
+      expectSameSides(
+        const TableBorderPainter(left: side, verticalInside: side, borderRadius: radius),
+        const TableBorder(left: side, verticalInside: side, borderRadius: radius),
+      );
+      expectSameSides(
+        TableBorderPainter.all(width: 2.0, color: const Color(0xFF00FFFF), borderRadius: radius),
+        TableBorder.all(width: 2.0, color: const Color(0xFF00FFFF), borderRadius: radius),
+      );
+      expectSameSides(
+        const TableBorderPainter.symmetric(inside: side, borderRadius: radius),
+        const TableBorder.symmetric(inside: side, borderRadius: radius),
+      );
+      expectSameSides(const TableBorderPainter(), const TableBorder());
+    });
+
+    test('is not equal to a TableBorder with the same sides', () {
+      expect(TableBorderPainter.all(), TableBorderPainter.all());
+      expect(TableBorderPainter.all().hashCode, TableBorderPainter.all().hashCode);
+      expect(TableBorderPainter.all(), isNot(TableBorder.all()));
+    });
+
+    test('scale returns a TableBorderPainter', () {
+      expect(TableBorderPainter.all(width: 2.0).scale(0.5), TableBorderPainter.all());
+    });
+
+    test('lerp returns a TableBorderPainter', () {
+      final a = TableBorderPainter.all();
+      final b = TableBorderPainter.all(width: 3.0);
+      expect(TableBorderPainter.lerp(a, b, 0.5), TableBorderPainter.all(width: 2.0));
+      expect(TableBorderPainter.lerp(null, TableBorderPainter.all(width: 2.0), 0.5), a);
+      expect(TableBorderPainter.lerp(TableBorderPainter.all(width: 2.0), null, 0.5), a);
+      expect(identical(TableBorderPainter.lerp(a, a, 0.5), a), isTrue);
+      expect(TableBorderPainter.lerp(null, null, 0.5), isNull);
+    });
+
+    test('toString', () {
+      final none = BorderSide.none.toString();
+      final zeroRadius = BorderRadius.zero.toString();
+      expect(
+        const TableBorderPainter().toString(),
+        'TableBorderPainter($none, $none, $none, $none, $none, $none, $zeroRadius)',
+      );
+    });
+  });
 }

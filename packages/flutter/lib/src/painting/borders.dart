@@ -58,7 +58,7 @@ enum BorderStyle {
 ///
 ///  * [Border], which uses [BorderSide] objects to represent its sides.
 ///  * [BoxDecoration], which optionally takes a [Border] object.
-///  * [TableBorder], which is similar to [Border] but has two more sides
+///  * [TableBorderPainter], which is similar to [Border] but has two more sides
 ///    ([TableBorder.horizontalInside] and [TableBorder.verticalInside]), both
 ///    of which are also [BorderSide] objects.
 @immutable
