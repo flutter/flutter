@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/BUILD.gn by gn_to_bazel; do not edit.
-# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/impeller/renderer/backend/metal:metal_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -166,6 +165,11 @@ flutter_display_test(
             "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
             "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/renderer/backend/metal:metal_unittests",  # impeller_enable_metal
         ],
         "//conditions:default": [],
     }) + select({

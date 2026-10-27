@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/testing/BUILD.gn by gn_to_bazel; do not edit.
-# Dependencies left out, their packages not converted yet (a platform the migration has not reached): //flutter/impeller/renderer/backend/metal:metal.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -141,6 +140,7 @@ flutter_objc_library(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/renderer/backend/metal",
         "//engine/src/flutter/impeller/renderer/backend/vulkan",
     ],
     alwayslink = True,
@@ -180,6 +180,7 @@ cc_library(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/renderer/backend/metal",
         "//engine/src/flutter/impeller/renderer/backend/vulkan",
     ],
     alwayslink = True,
