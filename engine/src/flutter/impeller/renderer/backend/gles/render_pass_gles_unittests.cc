@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <string>
+#include <vector>
+
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/command_buffer_gles.h"
@@ -25,7 +29,9 @@ namespace testing {
 
 using ::testing::_;
 using ::testing::Args;
+using ::testing::Contains;
 using ::testing::ElementsAreArray;
+using ::testing::HasSubstr;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::SetArgPointee;
@@ -229,6 +235,65 @@ TEST(RenderPassGLESTest, ResolvingMultisampleTextureCachesResolveFBO) {
     ASSERT_TRUE(render_pass2->EncodeCommands());
     ASSERT_TRUE(reactor->React());
   }
+}
+
+// Some drivers report an incomplete framebuffer for an offscreen render target
+// (https://github.com/flutter/flutter/issues/194171). The pass is reported as
+// a validation error and the process keeps running.
+TEST(RenderPassGLESTest, FramebufferRefusedByTheDriverDoesNotAbort) {
+#ifndef IMPELLER_DEBUG
+  GTEST_SKIP() << "The framebuffer status is only checked in debug builds.";
+#endif  // IMPELLER_DEBUG
+  auto mock_gl_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  auto& mock_gl_impl_ref = *mock_gl_impl;
+  auto mock_gl =
+      MockGLES::Init(std::move(mock_gl_impl), std::nullopt, "OpenGL ES 3.0");
+
+  auto context = CreateFakeGLESContext();
+  auto dummy_worker = std::make_shared<MockWorker>();
+  context->AddReactorWorker(dummy_worker);
+  auto reactor = context->GetReactor();
+
+  const auto command_buffer =
+      std::static_pointer_cast<Context>(context)->CreateCommandBuffer();
+
+  auto color_texture = std::make_shared<TextureGLES>(
+      reactor, TextureDescriptor{.storage_mode = StorageMode::kDevicePrivate,
+                                 .type = TextureType::kTexture2D,
+                                 .format = PixelFormat::kR8G8B8A8UNormInt,
+                                 .size = {10, 10},
+                                 .usage = TextureUsage::kRenderTarget,
+                                 .sample_count = SampleCount::kCount1});
+  auto render_target = RenderTarget{};
+  auto color_attachment = ColorAttachment{Attachment{
+      .texture = color_texture,
+      .load_action = LoadAction::kClear,
+      .store_action = StoreAction::kStore,
+  }};
+  color_attachment.clear_color = Color::Black();
+  render_target.SetColorAttachment(color_attachment, 0);
+
+  EXPECT_CALL(mock_gl_impl_ref, CheckFramebufferStatus(_))
+      .WillRepeatedly(Return(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT));
+
+  const auto render_pass = command_buffer->CreateRenderPass(render_target);
+  ASSERT_TRUE(render_pass);
+  // The render pass defers its encoding to the next reaction.
+  ASSERT_TRUE(render_pass->EncodeCommands());
+
+  std::vector<std::string> validation_errors;
+  ImpellerValidationErrorsSetCallback(
+      [&validation_errors](const char* message, const char* file, int line) {
+        validation_errors.emplace_back(message);
+        return true;
+      });
+  const bool reacted = reactor->React();
+  ImpellerValidationErrorsSetCallback(nullptr);
+
+  EXPECT_TRUE(reacted);
+  EXPECT_THAT(
+      validation_errors,
+      Contains(HasSubstr("Could not encode the commands of render pass")));
 }
 
 class RenderPassGLESCommandTest : public ::testing::Test {

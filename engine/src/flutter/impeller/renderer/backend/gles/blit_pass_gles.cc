@@ -8,6 +8,7 @@
 
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
@@ -84,8 +85,13 @@ bool BlitPassGLES::EncodeCommands() const {
   std::shared_ptr<const BlitPassGLES> shared_this = shared_from_this();
   return reactor_->AddOperation([blit_pass = std::move(shared_this),
                                  label = label_](const auto& reactor) {
-    auto result = EncodeCommandsInReactor(reactor, blit_pass->commands_, label);
-    FML_CHECK(result) << "Must be able to encode GL commands without error.";
+    // A driver can refuse a command here, for example by reporting an
+    // incomplete framebuffer for a readback. That is a failed pass, not a
+    // broken engine invariant, so it is logged rather than fatal.
+    if (!EncodeCommandsInReactor(reactor, blit_pass->commands_, label)) {
+      VALIDATION_LOG << "Could not encode the commands of blit pass '" << label
+                     << "'.";
+    }
   });
 }
 
