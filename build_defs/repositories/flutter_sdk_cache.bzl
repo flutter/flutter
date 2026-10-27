@@ -89,9 +89,22 @@ def _gradle_wrapper_impl(rctx):
     )
     rctx.file("BUILD.bazel", """# The Gradle wrapper of bin/internal/gradle_wrapper.version (flutter_sdk_cache.bzl).
 package(default_visibility = ["//visibility:public"])
+
+# As the tool lays it: the archive's own gradle-wrapper.properties (a
+# distribution of 2016) and NOTICE deleted after unpacking (flutter_cache.dart's
+# GradleWrapper.updateInner), so that `flutter create` writes the properties
+# for the Gradle its templates want rather than keeping these.
 filegroup(
     name = "wrapper",
-    srcs = glob(["**"], exclude = ["BUILD.bazel", "REPO.bazel"]),
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "NOTICE",
+            "gradle/wrapper/gradle-wrapper.properties",
+        ],
+    ),
 )
 """)
 

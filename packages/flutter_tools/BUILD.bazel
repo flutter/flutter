@@ -11,6 +11,7 @@
 
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@host_platform//:host.bzl", "HOST_DART_SDK")
+load("//build_defs/android:build_tools.bzl", "android_build_tools")
 load("//build_defs/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
 load("//build_defs/desktop:build_tools.bzl", "linux_build_tools")
@@ -21,17 +22,32 @@ package(default_visibility = ["//visibility:public"])
 # The tool: its libraries and entry points, and what it reads of its own
 # tree at run time (the templates it copies, the Gradle scripts, the
 # analysis options it ships, package:test's configuration for its tests).
+# Not the state a Gradle build of gradle/ (the Flutter Gradle plugin, an
+# included build of every app's) leaves there: what gradle/.gitignore names
+# and Gradle's and Kotlin's own directories -- read-only in the sandbox,
+# they would break the next build's locks.
 filegroup(
     name = "sources",
-    srcs = glob([
-        "bin/**",
-        "gradle/**",
-        "ide_templates/**",
-        "lib/**",
-        "static/**",
-        "templates/**",
-        "tool/**",
-    ]) + [
+    srcs = glob(
+        [
+            "bin/**",
+            "gradle/**",
+            "ide_templates/**",
+            "lib/**",
+            "static/**",
+            "templates/**",
+            "tool/**",
+        ],
+        exclude = [
+            "gradle/.gradle/**",
+            "gradle/.kotlin/**",
+            "gradle/bin/**",
+            "gradle/build/**",
+            "gradle/gradle/**",
+            "gradle/gradlew",
+            "gradle/gradlew.bat",
+        ],
+    ) + [
         "analysis_options.yaml",
         "dart_test.yaml",
         "pubspec.yaml",
@@ -353,9 +369,11 @@ _DESKTOP_PROJECTS = _INTEGRATION_PROJECTS + [
     "//dev/integration_tests/ui:sources",
 ]
 
-# The integration shard's files a Linux host cannot run from the facsimile.
-_INTEGRATION_EXCLUDED = [
-    # Android: an SDK, Gradle and its downloads.
+# The integration shard's files that build for Android through the tool
+# (`flutter build apk|appbundle|aar`, Gradle, the Android SDK) -- a shard of
+# their own (android_shard, below), with the engine's Android artifacts,
+# the SDK and the JDK from the build, and the network.
+_INTEGRATION_ANDROID = [
     "test/integration.shard/analyze_size_test.dart",
     "test/integration.shard/android_e2e_api_test.dart",
     "test/integration.shard/android_gradle_asset_merging_test.dart",
@@ -380,9 +398,13 @@ _INTEGRATION_EXCLUDED = [
     "test/integration.shard/flutter_build_with_compilation_error_test.dart",
     "test/integration.shard/gradle_jni_packaging_test.dart",
     "test/integration.shard/gradle_libapp_so_packaging_test.dart",
+    "test/integration.shard/gradle_non_android_plugin_test.dart",
+]
+
+# The integration shard's files a Linux host cannot run from the facsimile.
+_INTEGRATION_EXCLUDED = [
     # macOS and iOS frameworks only: declares no test on Linux.
     "test/integration.shard/isolated/native_assets_flutter_build_framework_test.dart",
-    "test/integration.shard/gradle_non_android_plugin_test.dart",
     # Tests of the repository's own scripts and resolution: bin/dart's
     # bootstrap (the facsimile's launcher has none), the pub workspace's
     # package_graph.json at the root.
@@ -491,7 +513,7 @@ dart_package_tests(
     tags = ["cpu:4"],
     tests = glob(
         ["test/integration.shard/**/*_test.dart"],
-        exclude = _INTEGRATION_EXCLUDED + _INTEGRATION_DESKTOP,
+        exclude = _INTEGRATION_EXCLUDED + _INTEGRATION_DESKTOP + _INTEGRATION_ANDROID,
     ),
     # pub touches the workspace's lock when it resolves a member.
     writable = ["pubspec.lock"],
@@ -534,6 +556,83 @@ dart_package_tests(
     tags = ["cpu:4"],
     tests = _INTEGRATION_DESKTOP,
     tools = [":linux_build_tools"],
+    # pub touches the workspace's lock when it resolves a member.
+    writable = ["pubspec.lock"],
+)
+
+# What `flutter build apk` needs of the build and the machine
+# (//build_defs/android:build_tools.bzl): ANDROID_HOME at the checkout's SDK,
+# JAVA_HOME at the engine's JDK, and the embedding's Maven artifacts from the
+# build at the facsimile's engine version, which the Gradle plugin resolves
+# from FLUTTER_STORAGE_BASE_URL.
+android_build_tools(
+    name = "android_build_tools",
+    maven = "//engine/src/flutter/build/archives:android_engine_maven",
+)
+
+# The Android gen_snapshot artifacts in the facsimile's cache: what `flutter
+# precache --android` downloads (AndroidGenSnapshotArtifacts, stamp
+# android-sdk), built here for the three CPUs `flutter build apk` builds
+# for by default in the two AOT modes (build/archives' android_engine_*).
+_ANDROID_CACHE_FILES = {
+    "//engine/src/flutter/build/archives:android_engine_%s_%s_gen_snapshot" % (cpu, mode): "artifacts/engine/android-%s-%s/linux-x64" % (cpu, mode)
+    for cpu in [
+        "arm",
+        "arm64",
+        "x64",
+    ]
+    for mode in [
+        "profile",
+        "release",
+    ]
+} | {
+    "//bin/internal:android_sdk_stamp": "android-sdk.stamp",
+    "//bin/internal:engine_realm": "engine.realm",
+}
+
+# The Android shard: the integration shard's files that build an app, a
+# plugin or a module for Android through the tool (_INTEGRATION_ANDROID) --
+# `flutter create` and `flutter build apk|appbundle|aar` in every mode, the
+# Gradle plugin's own tests -- from the facsimile with the engine's Android
+# artifacts, the checkout's SDK and the engine's JDK.
+#
+# These tests reach the network, by decision (10-26): Gradle fetches its
+# distribution, the Android Gradle plugin, Kotlin and the libraries an app
+# depends on from Google's and Maven Central's repositories at build time
+# -- nothing of that is in the checkout, and a pinned mirror of it would be
+# a gigabyte, an order of magnitude beyond the Java tests' Maven lock
+# (build_defs/java). The engine itself does not come from the network: its
+# artifacts are the build's, served to Gradle from a file: URL. Each test
+# downloads into a Gradle home of its own under TEST_TMPDIR (the tool's
+# HOME is the test's), so the first minutes of each are Gradle's, and their
+# timing and reliability depend on the network.
+dart_package_tests(
+    name = "android_shard",
+    size = "enormous",
+    srcs = _HARNESS,
+    cache = _TOOL_CACHE,
+    cache_files = _TOOL_CACHE_FILES | _ANDROID_CACHE_FILES,
+    data = glob(["test/integration.shard/test_data/**"]) + _SDK_PACKAGES + _TOOL_DATA + _INTEGRATION_PROJECTS + [
+        # analyze_size_test builds hello_world for Android.
+        "//examples/hello_world:project",
+    ],
+    imports = _IMPORTS,
+    # Gradle's downloads: see above.
+    network = True,
+    package = "flutter_tools",
+    packages = _PACKAGES,
+    pub_cache = ":workspace_pub_cache",
+    sdk_files = _TOOL_SDK_FILES,
+    sdk_trees = {"@pub_workspace//:pubspecs": ""},
+    # The tool, a Gradle daemon (the template's gradle.properties allows it
+    # 8 GB), a Kotlin daemon and the dex compiler at once: four cores and
+    # the memory of a build machine each.
+    tags = [
+        "cpu:4",
+        "resources:memory:10240",
+    ],
+    tests = _INTEGRATION_ANDROID,
+    tools = [":android_build_tools"],
     # pub touches the workspace's lock when it resolves a member.
     writable = ["pubspec.lock"],
 )

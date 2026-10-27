@@ -26,13 +26,24 @@ RUNTIME_MODES = ["debug", "profile", "release", "jit_release"]
 
 def _configuration_transition_impl(settings, attr):
     # tools/gn builds every mode but debug optimized (--unoptimized is the
-    # debug mode's own switch): -c opt as the builder configurations have it.
+    # debug mode's own switch): -c opt as the builder configurations have it;
+    # `compilation_mode` says otherwise (the Android builders build debug
+    # optimized too, android_debug_<cpu>).
     mode = attr.runtime_mode or settings["//engine/src/flutter/common:runtime_mode"]
+    compilation_mode = attr.compilation_mode or (settings["//command_line_option:compilation_mode"] if mode == "debug" else "opt")
     return {
-        "//command_line_option:compilation_mode": settings["//command_line_option:compilation_mode"] if mode == "debug" else "opt",
+        "//command_line_option:compilation_mode": compilation_mode,
         "//command_line_option:platforms": [str(attr.platform)] if attr.platform else settings["//command_line_option:platforms"],
         "//engine/src/flutter/common:runtime_mode": mode,
+        "//engine/src/flutter/build/bazel:lto": _tristate(attr.lto, settings["//engine/src/flutter/build/bazel:lto"]),
+        "//engine/src/flutter/build/bazel:stripped": _tristate(attr.stripped, settings["//engine/src/flutter/build/bazel:stripped"]),
     }
+
+def _tristate(value, current):
+    """A "true"/"false" attribute's value, or the current setting when it is unset."""
+    if value == "":
+        return current
+    return value == "true"
 
 _configuration_transition = transition(
     implementation = _configuration_transition_impl,
@@ -40,11 +51,15 @@ _configuration_transition = transition(
         "//command_line_option:compilation_mode",
         "//command_line_option:platforms",
         "//engine/src/flutter/common:runtime_mode",
+        "//engine/src/flutter/build/bazel:lto",
+        "//engine/src/flutter/build/bazel:stripped",
     ],
     outputs = [
         "//command_line_option:compilation_mode",
         "//command_line_option:platforms",
         "//engine/src/flutter/common:runtime_mode",
+        "//engine/src/flutter/build/bazel:lto",
+        "//engine/src/flutter/build/bazel:stripped",
     ],
 )
 
@@ -72,6 +87,23 @@ in_configuration = rule(
         ),
         "platform": attr.label(
             doc = "The platform to build for (--platforms); the current one if unset.",
+        ),
+        "compilation_mode": attr.string(
+            values = ["", "fastbuild", "dbg", "opt"],
+            doc = "The compilation mode (-c): opt for every runtime mode but debug by default, debug keeping the " +
+                  "current one; `opt` for a debug build the builders build optimized (Android's).",
+        ),
+        "lto": attr.string(
+            values = ["", "true", "false"],
+            doc = "GN's enable_lto (//engine/src/flutter/build/bazel:lto): the current setting if empty; `true` " +
+                  "for a build the builders make with it (the Android profile and release builds).",
+        ),
+        "stripped": attr.string(
+            values = ["", "true", "false"],
+            doc = "tools/gn's stripped_symbols (//engine/src/flutter/build/bazel:stripped): the current setting " +
+                  "if empty; `false` for a build the builders make with --no-stripped (every Android build: " +
+                  "the embedding's jar carries the unstripped libflutter.so, whose symbols an app's build " +
+                  "extracts and strips itself).",
         ),
         "_allowlist_function_transition": attr.label(
             default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
