@@ -1546,9 +1546,7 @@ bool AndroidPlatformViewsController::PresentView(
                              : kDefaultOnscreenFramebufferId;
         snapshot.root_layer.native_window =
             (ctx != nullptr) ? ctx->native_window : GetOnscreenWindow(view_id);
-        if (delegate) {
-          delegate->PresentOnscreenSurface(view_id, layer->backing_store);
-        }
+        snapshot.root_layer.backing_store = layer->backing_store;
       } else {
         CapturedOverlayLayer overlay;
         overlay.overlay_index =
@@ -1575,10 +1573,7 @@ bool AndroidPlatformViewsController::PresentView(
         overlay.native_window = (ctx != nullptr)
                                     ? ctx->native_window
                                     : GetOverlayWindow(overlay.surface_id);
-        if (delegate && overlay.surface_id >= 0) {
-          delegate->PresentOverlaySurface(view_id, overlay.surface_id,
-                                          layer->backing_store);
-        }
+        overlay.backing_store = layer->backing_store;
         snapshot.overlay_layers.push_back(overlay);
       }
     } else if (layer->type == kFlutterLayerContentTypePlatformView) {
@@ -1720,6 +1715,10 @@ bool AndroidPlatformViewsController::PresentView(
   if (!has_frame_work) {
     TRACE_EVENT0("flutter",
                  "AndroidPlatformViewsController::PresentView::NoFrameWork");
+    if (snapshot.root_layer.present && delegate) {
+      delegate->PresentOnscreenSurface(view_id,
+                                       snapshot.root_layer.backing_store);
+    }
     return true;
   }
 
@@ -1736,12 +1735,17 @@ bool AndroidPlatformViewsController::PresentView(
     SealFrameTransactions();
   }
 
+  const bool cross_thread_presentation =
+      task_runner && !task_runner->RunsTasksOnCurrentThread();
+
   auto execute_presentation =
-      [this, view_id, snapshot, views_to_hide = std::move(views_to_hide),
-       is_surface_control, should_show_overlay, should_hide_overlay,
+      [this, view_id, snapshot, delegate,
+       views_to_hide = std::move(views_to_hide), is_surface_control,
+       should_show_overlay, should_hide_overlay, cross_thread_presentation,
        frame_presented_callback = std::move(frame_presented_callback)]() {
         TRACE_EVENT0("flutter",
                      "AndroidPlatformViewsController::PresentView::Execute");
+        ANativeWindow* window_before_display = GetOnscreenWindow(view_id);
         if (!is_surface_control) {
           OnBeginFrame();
         }
@@ -1765,7 +1769,35 @@ bool AndroidPlatformViewsController::PresentView(
           HidePlatformView(old_view_id);
         }
 
+        const bool window_switched =
+            (!is_surface_control && GetOnscreenWindow(view_id) != nullptr &&
+             GetOnscreenWindow(view_id) != window_before_display);
+
+        if (delegate) {
+          if (snapshot.root_layer.present) {
+            if (window_switched) {
+              delegate->ClearAndPresentOnscreenSurface(view_id);
+            } else {
+              delegate->PresentOnscreenSurface(
+                  view_id, snapshot.root_layer.backing_store);
+            }
+          } else if (!is_surface_control && !snapshot.platform_views.empty()) {
+            // Hybrid Composition requires FlutterImageView's ImageReader to
+            // acquire a frame on every frame with a platform view, even when
+            // all Flutter content is in an overlay above the platform view.
+            delegate->ClearAndPresentOnscreenSurface(view_id);
+          }
+        }
+
         if (is_surface_control) {
+          if (delegate) {
+            for (const auto& ov : snapshot.overlay_layers) {
+              if (ov.surface_id >= 0) {
+                delegate->PresentOverlaySurface(view_id, ov.surface_id,
+                                                ov.backing_store);
+              }
+            }
+          }
           if (should_show_overlay) {
             ShowOverlaySurface(0);
           } else if (should_hide_overlay) {
@@ -1782,6 +1814,10 @@ bool AndroidPlatformViewsController::PresentView(
                 continue;
               }
               resolved_id = *maybe_id;
+            }
+            if (delegate && resolved_id >= 0) {
+              delegate->PresentOverlaySurface(view_id, resolved_id,
+                                              ov.backing_store);
             }
             PlatformViewOverlay overlay;
             overlay.surface_id = resolved_id;
@@ -1804,11 +1840,18 @@ bool AndroidPlatformViewsController::PresentView(
               "AndroidPlatformViewsController::PresentView::FramePresented");
           frame_presented_callback(view_id);
         }
+
+        if (cross_thread_presentation && delegate) {
+          delegate->PrepareForCrossThreadPresentation();
+        }
       };
 
-  if (!task_runner || task_runner->RunsTasksOnCurrentThread()) {
+  if (!cross_thread_presentation) {
     execute_presentation();
   } else {
+    if (delegate) {
+      delegate->PrepareForCrossThreadPresentation();
+    }
     fml::AutoResetWaitableEvent latch;
     task_runner->PostTask(
         [execute_presentation = std::move(execute_presentation),

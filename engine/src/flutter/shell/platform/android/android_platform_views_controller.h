@@ -225,7 +225,7 @@ class DefaultPlatformViewsProvider final : public PlatformViewsProvider {
  * @brief In-memory implementation of `PlatformViewsProvider` for deterministic
  * unit testing without an Android JVM.
  */
-class InMemoryPlatformViewsProvider final : public PlatformViewsProvider {
+class InMemoryPlatformViewsProvider : public PlatformViewsProvider {
  public:
   InMemoryPlatformViewsProvider();
   ~InMemoryPlatformViewsProvider() override;
@@ -357,6 +357,13 @@ class AndroidCompositorRenderDelegate {
     (void)backing_store;
     return true;
   }
+
+  virtual bool ClearAndPresentOnscreenSurface(FlutterViewId view_id) {
+    (void)view_id;
+    return true;
+  }
+
+  virtual void PrepareForCrossThreadPresentation() {}
 };
 
 /**
@@ -383,6 +390,7 @@ class AndroidPlatformViewsController {
     int32_t height = 0;
     uint32_t framebuffer_id = kDefaultOnscreenFramebufferId;
     ANativeWindow* native_window = nullptr;
+    const FlutterBackingStore* backing_store = nullptr;
   };
 
   /**
@@ -398,6 +406,7 @@ class AndroidPlatformViewsController {
     int32_t height = 0;
     uint32_t framebuffer_id = 0;
     ANativeWindow* native_window = nullptr;
+    const FlutterBackingStore* backing_store = nullptr;
   };
 
   /**

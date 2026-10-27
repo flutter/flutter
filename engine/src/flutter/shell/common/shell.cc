@@ -1611,36 +1611,31 @@ void Shell::OnEngineHandlePlatformMessage(
     if (route_messages_through_platform_thread_ &&
         !platform_message_handler_
              ->DoesHandlePlatformMessageOnPlatformThread()) {
-#if _WIN32
-      // On Windows capturing a TaskRunner with a TaskRunner will cause an
-      // uncaught exception in process shutdown because of the deletion order of
-      // global variables. See also
-      // https://github.com/flutter/flutter/issues/111575.
-      // This won't be an issue until Windows supports background platform
-      // channels (https://github.com/flutter/flutter/issues/93945). Then this
-      // can potentially be addressed by capturing a weak_ptr to an object that
-      // retains the ui TaskRunner, instead of the TaskRunner directly.
-      FML_DCHECK(false);
-#endif
       // We route messages through the platform thread temporarily when the
       // shell is being initialized to be backwards compatible with setting
       // message handlers in the same event as starting the isolate, but after
       // it is started.
-      auto ui_task_runner = task_runners_.GetUITaskRunner();
+      // Capture a weak_ptr to PlatformView instead of retaining the UI
+      // TaskRunner directly in the platform task queue, avoiding Windows static
+      // destruction order crashes if the platform queue is not drained before
+      // process exit (see https://github.com/flutter/flutter/issues/111575).
       task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
           [weak_platform_message_handler =
                std::weak_ptr<PlatformMessageHandler>(platform_message_handler_),
-           message = std::move(message), ui_task_runner]() mutable {
-            ui_task_runner->PostTask(
-                fml::MakeCopyable([weak_platform_message_handler,
-                                   message = std::move(message)]() mutable {
-                  auto platform_message_handler =
-                      weak_platform_message_handler.lock();
-                  if (platform_message_handler) {
-                    platform_message_handler->HandlePlatformMessage(
-                        std::move(message));
-                  }
-                }));
+           weak_platform_view = weak_platform_view_,
+           message = std::move(message)]() mutable {
+            if (weak_platform_view) {
+              weak_platform_view->GetTaskRunners().GetUITaskRunner()->PostTask(
+                  fml::MakeCopyable([weak_platform_message_handler,
+                                     message = std::move(message)]() mutable {
+                    auto platform_message_handler =
+                        weak_platform_message_handler.lock();
+                    if (platform_message_handler) {
+                      platform_message_handler->HandlePlatformMessage(
+                          std::move(message));
+                    }
+                  }));
+            }
           }));
     } else {
       platform_message_handler_->HandlePlatformMessage(std::move(message));

@@ -25,8 +25,10 @@
 #include "flutter/fml/platform/android/paths_android.h"
 #endif
 
+#if defined(__ELF__)
 extern "C" __attribute__((weak)) FlutterEngineResult
 FlutterEngineGetProcAddresses(FlutterEngineProcTable* table);
+#endif
 
 namespace flutter {
 namespace android {
@@ -38,10 +40,12 @@ using GetProcAddressesFn = FlutterEngineResult (*)(FlutterEngineProcTable*);
 FlutterEngineProcTable ResolveDefaultProcTable() {
   FlutterEngineProcTable table{};
   table.struct_size = sizeof(FlutterEngineProcTable);
+#if defined(__ELF__)
   if (&FlutterEngineGetProcAddresses != nullptr) {
     FlutterEngineGetProcAddresses(&table);
     return table;
   }
+#endif
   auto self_lib = fml::NativeLibrary::CreateForCurrentProcess();
   if (self_lib) {
     auto get_procs = self_lib->ResolveFunction<GetProcAddressesFn>(

@@ -720,5 +720,349 @@ TEST(AndroidPlatformViewsControllerTest,
   EXPECT_EQ(provider->GetEndFrameCount(), 1u);
 }
 
+TEST(AndroidPlatformViewsControllerTest,
+     PresentViewWithPlatformViewAndOverlayWithoutRootClearsOnscreenInOrder) {
+  std::vector<std::string> call_order;
+
+  class OrderedProvider final : public InMemoryPlatformViewsProvider {
+   public:
+    explicit OrderedProvider(std::vector<std::string>* order) : order_(order) {}
+
+    bool OnBeginFrame() override {
+      order_->push_back("OnBeginFrame");
+      return InMemoryPlatformViewsProvider::OnBeginFrame();
+    }
+
+    bool OnDisplayPlatformView(const PlatformViewGeometry& geometry) override {
+      order_->push_back("OnDisplayPlatformView");
+      return InMemoryPlatformViewsProvider::OnDisplayPlatformView(geometry);
+    }
+
+    bool OnDisplayOverlaySurface(const PlatformViewOverlay& overlay) override {
+      order_->push_back("OnDisplayOverlaySurface");
+      return InMemoryPlatformViewsProvider::OnDisplayOverlaySurface(overlay);
+    }
+
+    bool OnEndFrame() override {
+      order_->push_back("OnEndFrame");
+      return InMemoryPlatformViewsProvider::OnEndFrame();
+    }
+
+   private:
+    std::vector<std::string>* order_;
+  };
+
+  class OrderedRenderDelegate final
+      : public AndroidPlatformViewsController::RenderDelegate {
+   public:
+    explicit OrderedRenderDelegate(std::vector<std::string>* order)
+        : order_(order) {}
+
+    bool BindAndResizeOnscreenSurface(
+        FlutterViewId /*view_id*/,
+        ANativeWindow* /*onscreen_window*/,
+        size_t /*width*/,
+        size_t /*height*/,
+        FlutterBackingStore* backing_store_out) override {
+      *backing_store_out = {};
+      backing_store_out->struct_size = sizeof(FlutterBackingStore);
+      backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+      return true;
+    }
+
+    bool BindAndResizeOverlaySurface(
+        FlutterViewId /*view_id*/,
+        int32_t /*overlay_surface_id*/,
+        ANativeWindow* /*overlay_window*/,
+        size_t /*width*/,
+        size_t /*height*/,
+        FlutterBackingStore* backing_store_out) override {
+      *backing_store_out = {};
+      backing_store_out->struct_size = sizeof(FlutterBackingStore);
+      backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+      return true;
+    }
+
+    bool PresentOnscreenSurface(
+        FlutterViewId /*view_id*/,
+        const FlutterBackingStore* /*backing_store*/) override {
+      order_->push_back("PresentOnscreenSurface");
+      return true;
+    }
+
+    bool ClearAndPresentOnscreenSurface(FlutterViewId /*view_id*/) override {
+      order_->push_back("ClearAndPresentOnscreenSurface");
+      return true;
+    }
+
+    bool PresentOverlaySurface(
+        FlutterViewId /*view_id*/,
+        int32_t /*overlay_surface_id*/,
+        const FlutterBackingStore* /*backing_store*/) override {
+      order_->push_back("PresentOverlaySurface");
+      return true;
+    }
+
+   private:
+    std::vector<std::string>* order_;
+  };
+
+  auto provider = std::make_shared<OrderedProvider>(&call_order);
+  AndroidPlatformViewsController controller(provider);
+  OrderedRenderDelegate delegate(&call_order);
+  controller.SetRenderDelegate(&delegate);
+
+  FlutterBackingStoreConfig overlay_cfg = {};
+  overlay_cfg.struct_size = sizeof(FlutterBackingStoreConfig);
+  overlay_cfg.size = FlutterSize{kOverlayWidth, kOverlayHeight};
+  overlay_cfg.view_id = kPrimaryViewId;
+  overlay_cfg.is_root_layer = false;
+  FlutterBackingStore overlay_store = {};
+  ASSERT_TRUE(controller.CreateBackingStore(&overlay_cfg, &overlay_store));
+
+  FlutterPlatformView pv = {};
+  pv.struct_size = sizeof(FlutterPlatformView);
+  pv.identifier = kUnregisteredJavaPlatformViewId1;
+
+  FlutterLayer l_pv = {};
+  l_pv.struct_size = sizeof(FlutterLayer);
+  l_pv.type = kFlutterLayerContentTypePlatformView;
+  l_pv.platform_view = &pv;
+  l_pv.size = FlutterSize{kPlatformViewWidth, kPlatformViewHeight};
+
+  FlutterLayer l_overlay = {};
+  l_overlay.struct_size = sizeof(FlutterLayer);
+  l_overlay.type = kFlutterLayerContentTypeBackingStore;
+  l_overlay.backing_store = &overlay_store;
+  l_overlay.size = FlutterSize{kOverlayWidth, kOverlayHeight};
+
+  // Layer count of 2: [PlatformView, OverlayBackingStore] with no root layer.
+  constexpr size_t kLayerCount = 2;
+  const FlutterLayer* layers[kLayerCount] = {&l_pv, &l_overlay};
+  FlutterPresentViewInfo present_info = {};
+  present_info.struct_size = sizeof(FlutterPresentViewInfo);
+  present_info.view_id = kPrimaryViewId;
+  present_info.layers = layers;
+  present_info.layers_count = kLayerCount;
+  present_info.user_data = &controller;
+
+  ASSERT_TRUE(controller.PresentView(&present_info));
+
+  const std::vector<std::string> expected_order = {
+      "OnBeginFrame",
+      "OnDisplayPlatformView",
+      "ClearAndPresentOnscreenSurface",
+      "PresentOverlaySurface",
+      "OnDisplayOverlaySurface",
+      "OnEndFrame",
+  };
+  EXPECT_EQ(call_order, expected_order);
+  EXPECT_TRUE(controller.CollectBackingStore(&overlay_store));
+}
+
+TEST(AndroidPlatformViewsControllerTest,
+     PresentViewClearsOnscreenWhenOnDisplayPlatformViewSwitchesWindow) {
+  // Synthetic non-null ANativeWindow pointers representing FlutterSurfaceView
+  // before OnDisplayPlatformView and FlutterImageView after convertToImageView.
+  constexpr uintptr_t kSurfaceViewWindowAddr = 0x5001;
+  constexpr uintptr_t kImageViewWindowAddr = 0x5002;
+  auto* surface_view_window =
+      reinterpret_cast<ANativeWindow*>(kSurfaceViewWindowAddr);
+  auto* image_view_window =
+      reinterpret_cast<ANativeWindow*>(kImageViewWindowAddr);
+
+  class WindowSwitchingProvider final : public InMemoryPlatformViewsProvider {
+   public:
+    WindowSwitchingProvider(AndroidPlatformViewsController** controller_Slot,
+                            ANativeWindow* switched_window)
+        : controller_slot_(controller_Slot),
+          switched_window_(switched_window) {}
+
+    bool OnDisplayPlatformView(const PlatformViewGeometry& geometry) override {
+      if (*controller_slot_ != nullptr) {
+        (*controller_slot_)
+            ->SetOnscreenWindow(kPrimaryViewId, switched_window_,
+                                static_cast<size_t>(kOnscreenWidth),
+                                static_cast<size_t>(kOnscreenHeight));
+      }
+      return InMemoryPlatformViewsProvider::OnDisplayPlatformView(geometry);
+    }
+
+   private:
+    AndroidPlatformViewsController** controller_slot_;
+    ANativeWindow* switched_window_;
+  };
+
+  class RecordingRenderDelegate final
+      : public AndroidPlatformViewsController::RenderDelegate {
+   public:
+    bool BindAndResizeOnscreenSurface(
+        FlutterViewId /*view_id*/,
+        ANativeWindow* /*onscreen_window*/,
+        size_t /*width*/,
+        size_t /*height*/,
+        FlutterBackingStore* backing_store_out) override {
+      *backing_store_out = {};
+      backing_store_out->struct_size = sizeof(FlutterBackingStore);
+      backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+      return true;
+    }
+
+    bool BindAndResizeOverlaySurface(
+        FlutterViewId /*view_id*/,
+        int32_t /*overlay_surface_id*/,
+        ANativeWindow* /*overlay_window*/,
+        size_t /*width*/,
+        size_t /*height*/,
+        FlutterBackingStore* backing_store_out) override {
+      *backing_store_out = {};
+      backing_store_out->struct_size = sizeof(FlutterBackingStore);
+      backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+      return true;
+    }
+
+    bool PresentOnscreenSurface(
+        FlutterViewId /*view_id*/,
+        const FlutterBackingStore* /*backing_store*/) override {
+      ++present_onscreen_count;
+      return true;
+    }
+
+    bool ClearAndPresentOnscreenSurface(FlutterViewId /*view_id*/) override {
+      ++clear_and_present_count;
+      return true;
+    }
+
+    size_t present_onscreen_count = 0;
+    size_t clear_and_present_count = 0;
+  };
+
+  AndroidPlatformViewsController* controller_ptr = nullptr;
+  auto provider = std::make_shared<WindowSwitchingProvider>(&controller_ptr,
+                                                            image_view_window);
+  AndroidPlatformViewsController controller(provider);
+  controller_ptr = &controller;
+  controller.SetOnscreenWindow(kPrimaryViewId, surface_view_window,
+                               static_cast<size_t>(kOnscreenWidth),
+                               static_cast<size_t>(kOnscreenHeight));
+
+  RecordingRenderDelegate delegate;
+  controller.SetRenderDelegate(&delegate);
+
+  FlutterBackingStoreConfig root_cfg = {};
+  root_cfg.struct_size = sizeof(FlutterBackingStoreConfig);
+  root_cfg.size = FlutterSize{kOnscreenWidth, kOnscreenHeight};
+  root_cfg.view_id = kPrimaryViewId;
+  root_cfg.is_root_layer = true;
+  FlutterBackingStore root_store = {};
+  ASSERT_TRUE(controller.CreateBackingStore(&root_cfg, &root_store));
+
+  FlutterPlatformView pv = {};
+  pv.struct_size = sizeof(FlutterPlatformView);
+  pv.identifier = kUnregisteredJavaPlatformViewId1;
+
+  FlutterLayer l_root = {};
+  l_root.struct_size = sizeof(FlutterLayer);
+  l_root.type = kFlutterLayerContentTypeBackingStore;
+  l_root.backing_store = &root_store;
+  l_root.size = FlutterSize{kOnscreenWidth, kOnscreenHeight};
+
+  FlutterLayer l_pv = {};
+  l_pv.struct_size = sizeof(FlutterLayer);
+  l_pv.type = kFlutterLayerContentTypePlatformView;
+  l_pv.platform_view = &pv;
+  l_pv.size = FlutterSize{kPlatformViewWidth, kPlatformViewHeight};
+
+  // Layer count of 2: [RootBackingStore, PlatformView].
+  constexpr size_t kLayerCount = 2;
+  const FlutterLayer* layers[kLayerCount] = {&l_root, &l_pv};
+  FlutterPresentViewInfo present_info = {};
+  present_info.struct_size = sizeof(FlutterPresentViewInfo);
+  present_info.view_id = kPrimaryViewId;
+  present_info.layers = layers;
+  present_info.layers_count = kLayerCount;
+  present_info.user_data = &controller;
+
+  ASSERT_TRUE(controller.PresentView(&present_info));
+  EXPECT_EQ(delegate.present_onscreen_count, 0u);
+  EXPECT_EQ(delegate.clear_and_present_count, 1u);
+  EXPECT_TRUE(controller.CollectBackingStore(&root_store));
+}
+
+TEST(AndroidPlatformViewsControllerTest,
+     PresentViewWithoutPlatformViewsPresentsRootLayerWithoutJavaFrameHooks) {
+  class RootOnlyRenderDelegate final
+      : public AndroidPlatformViewsController::RenderDelegate {
+   public:
+    bool BindAndResizeOnscreenSurface(
+        FlutterViewId /*view_id*/,
+        ANativeWindow* /*onscreen_window*/,
+        size_t /*width*/,
+        size_t /*height*/,
+        FlutterBackingStore* backing_store_out) override {
+      *backing_store_out = {};
+      backing_store_out->struct_size = sizeof(FlutterBackingStore);
+      backing_store_out->type = kFlutterBackingStoreTypeOpenGL;
+      return true;
+    }
+
+    bool BindAndResizeOverlaySurface(
+        FlutterViewId /*view_id*/,
+        int32_t /*overlay_surface_id*/,
+        ANativeWindow* /*overlay_window*/,
+        size_t /*width*/,
+        size_t /*height*/,
+        FlutterBackingStore* backing_store_out) override {
+      *backing_store_out = {};
+      backing_store_out->struct_size = sizeof(FlutterBackingStore);
+      return true;
+    }
+
+    bool PresentOnscreenSurface(
+        FlutterViewId /*view_id*/,
+        const FlutterBackingStore* /*backing_store*/) override {
+      ++present_onscreen_count;
+      return true;
+    }
+
+    size_t present_onscreen_count = 0;
+  };
+
+  auto provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  AndroidPlatformViewsController controller(provider);
+  RootOnlyRenderDelegate delegate;
+  controller.SetRenderDelegate(&delegate);
+
+  FlutterBackingStoreConfig root_cfg = {};
+  root_cfg.struct_size = sizeof(FlutterBackingStoreConfig);
+  root_cfg.size = FlutterSize{kOnscreenWidth, kOnscreenHeight};
+  root_cfg.view_id = kPrimaryViewId;
+  root_cfg.is_root_layer = true;
+  FlutterBackingStore root_store = {};
+  ASSERT_TRUE(controller.CreateBackingStore(&root_cfg, &root_store));
+
+  FlutterLayer l_root = {};
+  l_root.struct_size = sizeof(FlutterLayer);
+  l_root.type = kFlutterLayerContentTypeBackingStore;
+  l_root.backing_store = &root_store;
+  l_root.size = FlutterSize{kOnscreenWidth, kOnscreenHeight};
+
+  // Single root backing-store layer with no platform views or overlays.
+  constexpr size_t kSingleLayerCount = 1;
+  const FlutterLayer* layers[kSingleLayerCount] = {&l_root};
+  FlutterPresentViewInfo present_info = {};
+  present_info.struct_size = sizeof(FlutterPresentViewInfo);
+  present_info.view_id = kPrimaryViewId;
+  present_info.layers = layers;
+  present_info.layers_count = kSingleLayerCount;
+  present_info.user_data = &controller;
+
+  ASSERT_TRUE(controller.PresentView(&present_info));
+  EXPECT_EQ(delegate.present_onscreen_count, 1u);
+  EXPECT_EQ(provider->GetBeginFrameCount(), 0u);
+  EXPECT_EQ(provider->GetEndFrameCount(), 0u);
+  EXPECT_TRUE(controller.CollectBackingStore(&root_store));
+}
+
 }  // namespace testing
 }  // namespace flutter

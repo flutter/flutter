@@ -491,6 +491,7 @@ class FlutterEmbedderNative {
   bool MakeAndroidEGLCurrent();
   bool ClearAndroidEGLCurrent();
   bool PresentAndroidEGL();
+  bool ClearAndPresentAndroidEGL();
   bool MakeAndroidEGLResourceCurrent();
   bool BindAndroidOverlayEGLSurface(int32_t overlay_surface_id,
                                     void* native_window,

@@ -81,8 +81,10 @@ class AndroidSurfaceControl {};
 #include <unistd.h>
 #endif
 
+#if defined(__ELF__)
 extern "C" __attribute__((weak)) FlutterEngineResult
 FlutterEngineGetProcAddresses(FlutterEngineProcTable* table);
+#endif
 
 namespace flutter {
 
@@ -143,15 +145,22 @@ class EmbedderCompositorRenderDelegate final
       std::function<bool(FlutterViewId, const FlutterBackingStore*)>;
   using PresentOverlayFn =
       std::function<bool(FlutterViewId, int32_t, const FlutterBackingStore*)>;
+  using ClearAndPresentOnscreenFn = std::function<bool(FlutterViewId)>;
+  using PrepareCrossThreadFn = std::function<void()>;
 
-  EmbedderCompositorRenderDelegate(BindOnscreenFn bind_onscreen,
-                                   BindOverlayFn bind_overlay,
-                                   PresentOnscreenFn present_onscreen,
-                                   PresentOverlayFn present_overlay)
+  EmbedderCompositorRenderDelegate(
+      BindOnscreenFn bind_onscreen,
+      BindOverlayFn bind_overlay,
+      PresentOnscreenFn present_onscreen,
+      PresentOverlayFn present_overlay,
+      ClearAndPresentOnscreenFn clear_and_present_onscreen = nullptr,
+      PrepareCrossThreadFn prepare_cross_thread = nullptr)
       : bind_onscreen_(std::move(bind_onscreen)),
         bind_overlay_(std::move(bind_overlay)),
         present_onscreen_(std::move(present_onscreen)),
-        present_overlay_(std::move(present_overlay)) {}
+        present_overlay_(std::move(present_overlay)),
+        clear_and_present_onscreen_(std::move(clear_and_present_onscreen)),
+        prepare_cross_thread_(std::move(prepare_cross_thread)) {}
 
   bool BindAndResizeOnscreenSurface(
       FlutterViewId view_id,
@@ -189,11 +198,23 @@ class EmbedderCompositorRenderDelegate final
            present_overlay_(view_id, overlay_surface_id, backing_store);
   }
 
+  bool ClearAndPresentOnscreenSurface(FlutterViewId view_id) override {
+    return !clear_and_present_onscreen_ || clear_and_present_onscreen_(view_id);
+  }
+
+  void PrepareForCrossThreadPresentation() override {
+    if (prepare_cross_thread_) {
+      prepare_cross_thread_();
+    }
+  }
+
  private:
   BindOnscreenFn bind_onscreen_;
   BindOverlayFn bind_overlay_;
   PresentOnscreenFn present_onscreen_;
   PresentOverlayFn present_overlay_;
+  ClearAndPresentOnscreenFn clear_and_present_onscreen_;
+  PrepareCrossThreadFn prepare_cross_thread_;
 };
 #endif
 
@@ -242,12 +263,14 @@ FlutterEngineProcTable ResolveProcTable(
   }
   FlutterEngineProcTable table{};
   table.struct_size = sizeof(FlutterEngineProcTable);
+#if defined(__ELF__)
   if (&FlutterEngineGetProcAddresses != nullptr) {
     if (FlutterEngineGetProcAddresses(&table) == kSuccess &&
         table.Initialize != nullptr) {
       return table;
     }
   }
+#endif
   auto self_lib = fml::NativeLibrary::CreateForCurrentProcess();
   if (self_lib) {
     auto get_procs = self_lib->ResolveFunction<GetProcAddressesFn>(
@@ -896,7 +919,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               return false;
             }
             return PresentAndroidOverlayEGL(overlay_surface_id);
-          }));
+          },
+          [this](FlutterViewId /*view_id*/) -> bool {
+            return ClearAndPresentAndroidEGL();
+          },
+          [this]() { ClearAndroidEGLCurrent(); }));
   platform_views_controller_->SetFramePresentedCallback(
       [this](FlutterViewId /*view_id*/) { NotifyFirstFramePresented(); });
 #endif
@@ -3134,6 +3161,16 @@ bool FlutterEmbedderNative::CreateOrUpdateAndroidWindowSurface(
     egl_window_surface_ = nullptr;
   }
   const EGLint attribs[] = {EGL_NONE};
+  EGLint visual_id = 0;
+  if (eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &visual_id) ==
+      EGL_TRUE) {
+    // Passing 0 for width and height preserves the ANativeWindow's existing
+    // dimensions while setting the pixel format to the EGL config's visual ID.
+    constexpr int32_t kPreserveWindowDimension = 0;
+    ANativeWindow_setBuffersGeometry(static_cast<ANativeWindow*>(native_window),
+                                     kPreserveWindowDimension,
+                                     kPreserveWindowDimension, visual_id);
+  }
   EGLSurface win_surface = eglCreateWindowSurface(
       display, config, static_cast<EGLNativeWindowType>(native_window),
       attribs);
@@ -3228,6 +3265,40 @@ bool FlutterEmbedderNative::PresentAndroidEGL() {
 #endif
 }
 
+bool FlutterEmbedderNative::ClearAndPresentAndroidEGL() {
+#if FML_OS_ANDROID
+  bool swapped_window = false;
+  {
+    std::lock_guard<std::mutex> lock(egl_mutex_);
+    if (egl_display_ != nullptr && egl_window_surface_ != nullptr &&
+        egl_context_ != nullptr) {
+      EGLDisplay display = static_cast<EGLDisplay>(egl_display_);
+      EGLContext context = static_cast<EGLContext>(egl_context_);
+      EGLSurface surface = static_cast<EGLSurface>(egl_window_surface_);
+      if (eglMakeCurrent(display, surface, surface, context) == EGL_TRUE) {
+        // Default onscreen window framebuffer ID in OpenGL ES.
+        constexpr GLuint kDefaultWindowFramebufferId = 0;
+        // Transparent RGBA component value for clearing the background surface.
+        constexpr GLclampf kTransparentClearComponent = 0.0f;
+        glBindFramebuffer(GL_FRAMEBUFFER, kDefaultWindowFramebufferId);
+        glDisable(GL_SCISSOR_TEST);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glClearColor(kTransparentClearComponent, kTransparentClearComponent,
+                     kTransparentClearComponent, kTransparentClearComponent);
+        glClear(GL_COLOR_BUFFER_BIT);
+        swapped_window = (eglSwapBuffers(display, surface) == EGL_TRUE);
+      }
+    }
+  }
+  if (swapped_window) {
+    NotifyFirstFramePresented();
+  }
+  return true;
+#else
+  return true;
+#endif
+}
+
 bool FlutterEmbedderNative::MakeAndroidEGLResourceCurrent() {
 #if FML_OS_ANDROID
   std::lock_guard<std::mutex> lock(egl_mutex_);
@@ -3285,6 +3356,17 @@ bool FlutterEmbedderNative::BindAndroidOverlayEGLSurface(
     }
     if (entry.egl_surface == nullptr) {
       const EGLint attribs[] = {EGL_NONE};
+      EGLint visual_id = 0;
+      if (eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID,
+                             &visual_id) == EGL_TRUE) {
+        // Passing 0 for width and height preserves the ANativeWindow's existing
+        // dimensions while setting the pixel format to the EGL config's visual
+        // ID.
+        constexpr int32_t kPreserveWindowDimension = 0;
+        ANativeWindow_setBuffersGeometry(
+            static_cast<ANativeWindow*>(native_window),
+            kPreserveWindowDimension, kPreserveWindowDimension, visual_id);
+      }
       EGLSurface surf = eglCreateWindowSurface(
           display, config, static_cast<EGLNativeWindowType>(native_window),
           attribs);
