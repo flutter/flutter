@@ -143,8 +143,8 @@ void main() {
   });
 }
 
-void expect(bool value) {
+void expect(bool value, [String? reason]) {
   if (!value) {
-    throw 'failed assertion in service extensions test';
+    throw reason ?? 'failed assertion in service extensions test';
   }
 }
