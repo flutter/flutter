@@ -4,10 +4,10 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
-import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
+import '../../base/file_system.dart' show Directory, File, FileSystem;
 import '../../build_info.dart'
     show
         BuildMode,
@@ -17,9 +17,17 @@ import '../../build_info.dart'
         getCpuArchForName,
         getCpuArchsFromEnv,
         kAndroidArchs,
+        kExtensionCCompilerAr,
+        kExtensionCCompilerCc,
+        kExtensionCCompilerEnvScript,
+        kExtensionCCompilerEnvScriptArgs,
+        kExtensionCCompilerLd,
+        kExtensionTargetArch,
+        kExtensionTargetOs,
         kIosArchs,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../convert.dart' show json;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
@@ -67,6 +75,22 @@ sealed class AssetBuildTarget {
     required List<SupportedAssetTypes> supportedAssetTypes,
     required Directory? buildDirectory,
   }) {
+    final (OS os, Architecture architecture)? customTarget = resolveCustomNativeTarget(
+      environmentDefines,
+    );
+    if (customTarget != null) {
+      final (OS os, Architecture architecture) = customTarget;
+      return <AssetBuildTarget>[
+        CustomCodeAssetTarget(
+          architecture: architecture,
+          environmentDefines: environmentDefines,
+          fileSystem: fileSystem,
+          os: os,
+          supportedAssetTypes: supportedAssetTypes,
+        ),
+      ];
+    }
+
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         return _windowsTarget(supportedAssetTypes, Architecture.x64);
@@ -115,8 +139,8 @@ sealed class AssetBuildTarget {
     return <AssetBuildTarget>[
       LinuxAssetTarget(
         architecture: architecture,
-        supportedAssetTypes: supportedAssetTypes,
         cmakeBuildDirectory: cmakeBuildDirectory,
+        supportedAssetTypes: supportedAssetTypes,
       ),
     ];
   }
@@ -205,9 +229,9 @@ final class WebAssetTarget extends AssetBuildTarget {
 
 sealed class CodeAssetTarget extends AssetBuildTarget {
   CodeAssetTarget({
-    required super.supportedAssetTypes,
     required this.architecture,
     required this.os,
+    required super.supportedAssetTypes,
   });
 
   final Architecture architecture;
@@ -243,6 +267,37 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 
   @override
   String get targetString => '${os.name}_${architecture.name}';
+}
+
+/// [CodeAssetTarget] for extension build targets configured via
+/// [kExtensionTargetOs] and [kExtensionTargetArch].
+final class CustomCodeAssetTarget extends CodeAssetTarget {
+  CustomCodeAssetTarget({
+    required super.architecture,
+    required this.environmentDefines,
+    required this.fileSystem,
+    required super.os,
+    required super.supportedAssetTypes,
+  });
+
+  final Map<String, String> environmentDefines;
+  final FileSystem fileSystem;
+
+  @override
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[
+    ...codeAssetExtensions,
+    ...dataAssetExtensions,
+  ];
+
+  @override
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
+    cCompilerConfigSync =
+        cCompilerConfigFromDefines(environmentDefines) ??
+        _cCompilerConfigForCustomTarget(
+          environmentDefines: environmentDefines,
+          fileSystem: fileSystem,
+        );
+  }
 }
 
 class WindowsAssetTarget extends CodeAssetTarget {
@@ -452,4 +507,180 @@ String? _emptyToNull(String? input) {
     return null;
   }
   return input;
+}
+
+/// Parses a native [OS] from a target OS string (such as `linux`, `android`,
+/// or a custom extension OS identifier).
+///
+/// Built-in operating systems map to the corresponding [OS] constants, while
+/// custom extension operating systems are constructed via [OS.fromString] so
+/// Dart build and link hooks receive the custom target OS identifier in
+/// `HookConfig.code.targetOS`.
+OS parseNativeOS(String rawOs) {
+  final String normalized = rawOs.trim().toLowerCase();
+  if (normalized.isEmpty) {
+    throwToolExit('Unsupported native assets target OS "$rawOs".');
+  }
+  if (normalized == 'darwin') {
+    return OS.macOS;
+  }
+  for (final OS builtinOs in OS.values) {
+    if (builtinOs.name == normalized) {
+      return builtinOs;
+    }
+  }
+  return OS.fromString(normalized);
+}
+
+/// Parses a native [Architecture] from a target architecture string (such as
+/// `x64` or `arm64`).
+///
+/// Common architecture aliases (`armv7`, `aarch64`, `x86`, `x86_64`, `amd64`)
+/// are normalized to their canonical `package:code_assets` [Architecture]
+/// constants, while custom architecture identifiers are constructed via
+/// [Architecture.fromString].
+Architecture parseNativeArchitecture(String rawArch) {
+  final String normalized = rawArch.trim().toLowerCase();
+  if (normalized.isEmpty) {
+    throwToolExit('Unsupported native assets target architecture "$rawArch".');
+  }
+  return switch (normalized) {
+    'arm' || 'armv7' => Architecture.arm,
+    'arm64' || 'aarch64' => Architecture.arm64,
+    'arm64e' => Architecture.arm64e,
+    'ia32' || 'x86' => Architecture.ia32,
+    'riscv32' => Architecture.riscv32,
+    'riscv64' => Architecture.riscv64,
+    'x64' || 'x86_64' || 'amd64' => Architecture.x64,
+    _ => Architecture.fromString(normalized),
+  };
+}
+
+/// Resolves the target [OS] and [Architecture] for an extension build target
+/// from [environmentDefines].
+///
+/// Returns `null` unless both [kExtensionTargetOs] and [kExtensionTargetArch]
+/// are explicitly defined.
+(OS, Architecture)? resolveCustomNativeTarget(Map<String, String> environmentDefines) {
+  final String? extensionTargetOs = _emptyToNull(environmentDefines[kExtensionTargetOs]);
+  final String? extensionTargetArch = _emptyToNull(environmentDefines[kExtensionTargetArch]);
+  if (extensionTargetOs == null || extensionTargetArch == null) {
+    return null;
+  }
+  return (parseNativeOS(extensionTargetOs), parseNativeArchitecture(extensionTargetArch));
+}
+
+/// Resolves a [CCompilerConfig] from explicit `kExtensionCCompiler*` defines in
+/// [environmentDefines], or returns `null` if compiler defines are not all provided.
+CCompilerConfig? cCompilerConfigFromDefines(Map<String, String> environmentDefines) {
+  final String? cc = _emptyToNull(environmentDefines[kExtensionCCompilerCc]);
+  final String? ar = _emptyToNull(environmentDefines[kExtensionCCompilerAr]);
+  final String? ld = _emptyToNull(environmentDefines[kExtensionCCompilerLd]);
+  if (cc == null || ar == null || ld == null) {
+    return null;
+  }
+  final String? envScript = _emptyToNull(environmentDefines[kExtensionCCompilerEnvScript]);
+  final List<String> envScriptArgs = _parseEnvScriptArgs(
+    environmentDefines[kExtensionCCompilerEnvScriptArgs],
+  );
+  return CCompilerConfig(
+    archiver: Uri.file(ar),
+    compiler: Uri.file(cc),
+    linker: Uri.file(ld),
+    windows: envScript == null
+        ? null
+        : WindowsCCompilerConfig(
+            developerCommandPrompt: DeveloperCommandPrompt(
+              script: Uri.file(envScript),
+              arguments: envScriptArgs,
+            ),
+          ),
+  );
+}
+
+List<String> _parseEnvScriptArgs(String? rawArgs) {
+  if (rawArgs == null || rawArgs.isEmpty) {
+    return const <String>[];
+  }
+  try {
+    final Object? decoded = json.decode(rawArgs);
+    if (decoded case final List<Object?> list) {
+      return <String>[
+        for (final Object? item in list)
+          if (item is String)
+            item
+          else
+            throwToolExit(
+              'Invalid "$kExtensionCCompilerEnvScriptArgs" define: expected a JSON-encoded list of strings.',
+            ),
+      ];
+    }
+  } on FormatException {
+    // Handled by throwToolExit below.
+  }
+  throwToolExit(
+    'Invalid "$kExtensionCCompilerEnvScriptArgs" define: expected a JSON-encoded list of strings.',
+  );
+}
+
+CCompilerConfig? _cCompilerConfigForCustomTarget({
+  required Map<String, String> environmentDefines,
+  required FileSystem fileSystem,
+}) {
+  final String? explicitCc = _emptyToNull(environmentDefines[kExtensionCCompilerCc]);
+  if (explicitCc == null) {
+    return null;
+  }
+  final compiler = Uri.file(explicitCc);
+  final String compilerParentDir = fileSystem.file(compiler).parent.path;
+  final Uri? archiver = _resolveSiblingExecutable(
+    const <String>['llvm-ar', 'ar'],
+    explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerAr]),
+    fileSystem: fileSystem,
+    siblingDir: compilerParentDir,
+  );
+  final Uri? linker = _resolveSiblingExecutable(
+    const <String>['ld.lld', 'ld'],
+    explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerLd]),
+    fileSystem: fileSystem,
+    siblingDir: compilerParentDir,
+  );
+  if (archiver == null || linker == null) {
+    return null;
+  }
+  final String? envScript = _emptyToNull(environmentDefines[kExtensionCCompilerEnvScript]);
+  final List<String> envScriptArgs = _parseEnvScriptArgs(
+    environmentDefines[kExtensionCCompilerEnvScriptArgs],
+  );
+  return CCompilerConfig(
+    archiver: archiver,
+    compiler: compiler,
+    linker: linker,
+    windows: envScript == null
+        ? null
+        : WindowsCCompilerConfig(
+            developerCommandPrompt: DeveloperCommandPrompt(
+              script: Uri.file(envScript),
+              arguments: envScriptArgs,
+            ),
+          ),
+  );
+}
+
+Uri? _resolveSiblingExecutable(
+  List<String> candidates, {
+  required String? explicitPath,
+  required FileSystem fileSystem,
+  required String siblingDir,
+}) {
+  if (explicitPath != null) {
+    return Uri.file(explicitPath);
+  }
+  for (final candidate in candidates) {
+    final File candidateFile = fileSystem.file(fileSystem.path.join(siblingDir, candidate));
+    if (candidateFile.existsSync()) {
+      return candidateFile.uri;
+    }
+  }
+  return null;
 }

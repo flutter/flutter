@@ -7,8 +7,13 @@ import 'dart:async';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
+import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../build_info.dart' show kExtensionPluginPlatformKey;
 import '../features.dart';
+import '../flutter_plugins.dart';
+import '../plugins.dart';
+import '../project.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
 
@@ -18,17 +23,37 @@ base class ExtensionBuildManager {
     required this._extensionManager,
     required this._featureFlags,
     required this._logger,
+    this._fileSystem,
+    this._projectFactory,
   });
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
+  final FileSystem? _fileSystem;
   final Logger _logger;
+  final FlutterProjectFactory? _projectFactory;
 
   List<ExtensionBuildTarget>? _cachedTargets;
   final _targetToConnection = <String, ExtensionConnection>{};
+  final _targetsByName = <String, ExtensionBuildTarget>{};
 
   /// Retrieve the cached build targets synchronously.
   List<ExtensionBuildTarget> get cachedTargets => _cachedTargets ?? const <ExtensionBuildTarget>[];
+
+  /// Returns the `flutter assemble` environment defines for [targetName],
+  /// including `kExtensionTargetOs`, `kExtensionTargetArch`, `kExtensionCCompiler*`,
+  /// and `kExtensionPluginPlatformKey` when configured on the [ExtensionBuildTarget].
+  Map<String, String> environmentDefinesForTarget(String targetName) {
+    final ExtensionBuildTarget? target = _targetsByName[targetName];
+    if (target == null) {
+      return const <String, String>{};
+    }
+    return <String, String>{
+      ...?target.nativeAssetsConfig?.toEnvironmentDefines(),
+      if (target.pluginPlatformKey case final String key when key.isNotEmpty)
+        kExtensionPluginPlatformKey: key,
+    };
+  }
 
   /// Retrieve build targets by routing `build.getBuildTargets` to active tool extensions.
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
@@ -48,6 +73,7 @@ base class ExtensionBuildManager {
 
     final targets = <ExtensionBuildTarget>[];
     _targetToConnection.clear();
+    _targetsByName.clear();
     final connections = <ExtensionConnection>[
       for (final connection in _extensionManager.connections)
         if (connection.capabilities.services.contains(BuildService.serviceNamespace)) connection,
@@ -81,6 +107,7 @@ base class ExtensionBuildManager {
         }
         targets.add(target);
         _targetToConnection[target.name] = connection;
+        _targetsByName[target.name] = target;
       }
     }
 
@@ -97,6 +124,7 @@ base class ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    List<ExtensionPlugin>? plugins,
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
@@ -136,6 +164,10 @@ base class ExtensionBuildManager {
       );
     }
 
+    final ExtensionBuildTarget? target = _targetsByName[targetName];
+    final List<ExtensionPlugin> resolvedPlugins =
+        plugins ?? await _resolvePluginsForTarget(projectRoot, target?.pluginPlatformKey);
+
     try {
       final Object? result = await connection.sendRequest(
         BuildService.buildMethod,
@@ -144,6 +176,10 @@ base class ExtensionBuildManager {
           BuildService.flutterRootParam: flutterRoot.toString(),
           BuildService.mainPathParam: mainPath,
           BuildService.outputDirParam: outputDir.toString(),
+          if (resolvedPlugins.isNotEmpty)
+            BuildService.pluginsParam: <Map<String, Object?>>[
+              for (final ExtensionPlugin plugin in resolvedPlugins) plugin.toMap(),
+            ],
           BuildService.projectRootParam: projectRoot.toString(),
           BuildService.resolvedArtifactsParam: resolvedArtifacts,
           BuildService.targetNameParam: targetName,
@@ -163,5 +199,31 @@ base class ExtensionBuildManager {
       _logger.printTrace('Failed to run build from extension: $e');
       return ExtensionBuildResult(success: false, errorMessage: e.toString());
     }
+  }
+
+  Future<List<ExtensionPlugin>> _resolvePluginsForTarget(
+    Uri projectRoot,
+    String? pluginPlatformKey,
+  ) async {
+    final FileSystem? fileSystem = _fileSystem;
+    if (fileSystem == null || pluginPlatformKey == null || pluginPlatformKey.isEmpty) {
+      return const <ExtensionPlugin>[];
+    }
+    final Directory projectDir = fileSystem.directory(projectRoot);
+    if (!projectDir.childFile('pubspec.yaml').existsSync()) {
+      return const <ExtensionPlugin>[];
+    }
+    final FlutterProject project =
+        (_projectFactory ?? FlutterProjectFactory(logger: _logger, fileSystem: fileSystem))
+            .fromDirectory(projectDir);
+    final List<Plugin> foundPlugins = await findPlugins(
+      project,
+      logger: _logger,
+      throwOnError: false,
+    );
+    if (foundPlugins.isEmpty) {
+      return const <ExtensionPlugin>[];
+    }
+    return resolveExtensionPluginsForPlatform(foundPlugins, pluginPlatformKey, quiet: true);
   }
 }

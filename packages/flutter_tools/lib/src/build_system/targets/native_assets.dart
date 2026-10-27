@@ -12,6 +12,7 @@
 /// need to be run in the `Target`s in `flutter assemble`.
 library;
 
+import 'package:code_assets/code_assets.dart' show OS;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -23,6 +24,7 @@ import '../../dart/package_map.dart';
 import '../../features.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
+import '../../isolated/native_assets/targets.dart' show resolveCustomNativeTarget;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart' show MissingDefineException;
@@ -315,10 +317,15 @@ class InstallCodeAssets extends Target {
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
+    final OS targetOS = getNativeOSFromTargetPlatform(
+      targetPlatform,
+      environmentDefines: environment.defines,
+    );
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    if (targetPlatform.os case .linux || .windows) {
-      // Avoid needing migration for CMake files, keep old directory structure.
-      targetUri = targetUri.resolve('${targetPlatform.osName}/');
+    if (targetOS == OS.linux || targetOS == OS.windows || !OS.values.contains(targetOS)) {
+      // Avoid needing migration for CMake files, keep old directory structure,
+      // and place custom extension OS assets under native_assets/<os>/.
+      targetUri = targetUri.resolve('${targetOS.name}/');
     }
 
     final List<File> installedFiles = await installCodeAssets(
@@ -375,7 +382,17 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
   if (targetPlatformEnvironment == null) {
     throw MissingDefineException(kTargetPlatform, name);
   }
-  return TargetPlatform.fromName(targetPlatformEnvironment);
+  try {
+    return TargetPlatform.fromName(targetPlatformEnvironment);
+  } on Exception {
+    // Custom extension platforms are not part of the built-in TargetPlatform
+    // enum. Map them to TargetPlatform.unsupported when a native OS and
+    // architecture can be resolved from extension defines.
+    if (resolveCustomNativeTarget(environment.defines) != null) {
+      return TargetPlatform.unsupported;
+    }
+    rethrow;
+  }
 }
 
 Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(

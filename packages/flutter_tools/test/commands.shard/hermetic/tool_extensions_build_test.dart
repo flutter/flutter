@@ -53,6 +53,7 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    List<ExtensionPlugin>? plugins,
   }) async {
     lastBuildArgs = <String, Object?>{
       'buildMode': buildMode,

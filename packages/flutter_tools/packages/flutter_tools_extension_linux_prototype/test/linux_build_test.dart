@@ -304,6 +304,11 @@ void main() {
               },
               'Invalid "${BuildService.resolvedArtifactsParam}" parameter: Invalid "genSnapshot": expected String, got int.',
             ),
+            (
+              'invalid plugins',
+              <String, Object?>{BuildService.pluginsParam: 'invalid_plugins'},
+              'Invalid "${BuildService.pluginsParam}": expected List<Object?>?, got String.',
+            ),
           ];
 
       for (final (String description, Map<String, Object?> overrides, String expectedMessage)

@@ -252,6 +252,16 @@ class Plugin {
       WindowsPlugin.kConfigKey,
       (YamlMap yaml) => WindowsPlugin.parseFromYaml(name, yaml),
     );
+    for (final Object? key in platformsYaml.keys) {
+      if (key is! String || _builtInPlatformKeys.contains(key) || platformsYaml[key] is! YamlMap) {
+        continue;
+      }
+      if (!_customPlatformKeyPattern.hasMatch(key)) {
+        errors.add('Invalid "$key" plugin specification.');
+        continue;
+      }
+      parsePlatform(key, (YamlMap yaml) => CustomPlatformPlugin.parseFromYaml(name, key, yaml));
+    }
 
     final Object? implementsValue = pluginYaml['implements'];
     var implementsPackage = '';
@@ -380,6 +390,17 @@ class Plugin {
     }
     return YamlMap.wrap(map);
   }
+
+  static const _builtInPlatformKeys = <String>{
+    AndroidPlugin.kConfigKey,
+    IOSPlugin.kConfigKey,
+    LinuxPlugin.kConfigKey,
+    MacOSPlugin.kConfigKey,
+    WebPlugin.kConfigKey,
+    WindowsPlugin.kConfigKey,
+  };
+
+  static final _customPlatformKeyPattern = RegExp(r'^[a-z][a-z0-9_]*$');
 
   static List<String> validatePluginYaml(YamlMap? yaml, {required String packageName}) {
     final ParseResult<Plugin> result = _parseFromYaml(
