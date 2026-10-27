@@ -249,6 +249,15 @@ selects.config_setting_group(
     ],
 )
 
+# `shell_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "@platforms//os:macos",
+    ],
+)
+
 # The Objective-C(++) sources of gpu_surface_metal, which cc_library takes none of
 # (build_defs/cc/objc_library.bzl); gpu_surface_metal links them in on the Apple
 # platforms.
@@ -306,7 +315,7 @@ flutter_objc_library(
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        "//engine/src/flutter/shell:enable_metal": [],
+        ":when_shell_enable_metal_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [

@@ -3,12 +3,13 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/toolkit/interop/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: example_mtl.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:cc_static_library.bzl", "cc_static_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/impeller:shaders.bzl", "embed_blob_library")
 
@@ -96,6 +97,11 @@ cc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../../display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from ../../renderer/backend
             "-Wno-c++98-compat-extra-semi",  # from ../../renderer/backend
@@ -133,6 +139,11 @@ cc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :interop_base
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop_base
             "-Wno-c++98-compat-extra-semi",  # from :interop_base
@@ -143,6 +154,11 @@ cc_library(
             "-Wno-suggest-override",  # from :interop_base
             "-Wno-unused-private-field",  # from :interop_base
             "-Wno-unused-variable",  # from :interop_base
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from backend
         ],
         "//conditions:default": [],
     }) + select({
@@ -159,6 +175,11 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from backend
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from backend
             "-Wno-c++98-compat-extra-semi",  # from backend
@@ -169,6 +190,11 @@ cc_library(
             "-Wno-suggest-override",  # from backend
             "-Wno-unused-private-field",  # from backend
             "-Wno-unused-variable",  # from backend
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from backend
         ],
         "//conditions:default": [],
     }),
@@ -182,19 +208,14 @@ cc_library(
     alwayslink = True,
 )
 
-cc_binary(
-    name = "libimpeller.so",
-    linkshared = True,
+flutter_shared_library(
+    name = "shared_library",
+    output_name = "impeller",
     deps = [
         ":interop",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
         "//engine/src/flutter/impeller:impeller_public_config",
     ],
-)
-
-alias(
-    name = "shared_library",
-    actual = ":libimpeller.so",
 )
 
 cc_static_library(
@@ -218,6 +239,11 @@ cc_binary(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
             "-Wno-c++98-compat-extra-semi",  # from :interop
@@ -228,6 +254,11 @@ cc_binary(
             "-Wno-suggest-override",  # from :interop
             "-Wno-unused-private-field",  # from :interop
             "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
@@ -244,6 +275,11 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
             "-Wno-c++98-compat-extra-semi",  # from :interop
@@ -254,6 +290,11 @@ cc_binary(
             "-Wno-suggest-override",  # from :interop
             "-Wno-unused-private-field",  # from :interop
             "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }),
@@ -271,12 +312,20 @@ alias(
     actual = ":impeller_interop_example_gl",
 )
 
-cc_binary(
-    name = "impeller_interop_example_vk",
-    srcs = ["example_vk.c"],
+# The Objective-C(++) sources of impeller_interop_example_mtl, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); impeller_interop_example_mtl links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "impeller_interop_example_mtl_objc",
+    srcs = ["example_mtl.m"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
             "-Wno-c++98-compat-extra-semi",  # from :interop
@@ -287,6 +336,11 @@ cc_binary(
             "-Wno-suggest-override",  # from :interop
             "-Wno-unused-private-field",  # from :interop
             "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
@@ -303,6 +357,11 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
             "-Wno-c++98-compat-extra-semi",  # from :interop
@@ -313,6 +372,180 @@ cc_binary(
             "-Wno-suggest-override",  # from :interop
             "-Wno-unused-private-field",  # from :interop
             "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":interop",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "@glfw",
+    ],
+    alwayslink = True,
+)
+
+cc_binary(
+    name = "impeller_interop_example_mtl",
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = [
+        "-framework",
+        "QuartzCore",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":impeller_interop_example_mtl_objc",
+        ":interop",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "@glfw",
+    ],
+)
+
+alias(
+    name = "example_mtl",
+    actual = ":impeller_interop_example_mtl",
+)
+
+cc_binary(
+    name = "impeller_interop_example_vk",
+    srcs = ["example_vk.c"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }),
@@ -364,6 +597,11 @@ cc_library(
     ] + FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from ../../playground:playground_test
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
             "-Wno-c++98-compat-extra-semi",  # from :interop
@@ -374,6 +612,11 @@ cc_library(
             "-Wno-suggest-override",  # from :interop
             "-Wno-unused-private-field",  # from :interop
             "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
@@ -390,6 +633,11 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
             "-Wno-c++98-compat-extra-semi",  # from :interop
@@ -400,6 +648,11 @@ cc_library(
             "-Wno-suggest-override",  # from :interop
             "-Wno-unused-private-field",  # from :interop
             "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }),
@@ -419,6 +672,42 @@ cc_library(
     alwayslink = True,
 )
 
+# `is_mac && target_cpu == "arm64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_target_cpu_arm64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+# `is_mac && target_cpu == "x64"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_target_cpu_x64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+# `is_linux || is_android`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_linux_or_is_android",
+    match_any = [
+        "@platforms//os:linux",
+        "@platforms//os:android",
+    ],
+)
+
+# `!is_mac && (is_linux || is_android)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_not_is_mac_and_is_linux_or_is_android",
+    match_all = [
+        "//engine/src/flutter/build/bazel:not_mac",
+        ":when_is_linux_or_is_android",
+    ],
+)
+
 zip_bundle(
     name = "sdk",
     files = {
@@ -429,20 +718,24 @@ zip_bundle(
         "examples/example_vk.c": "example_vk.c",
         "examples/example_mtl.m": "example_mtl.m",
     } | select({
-        "@platforms//os:linux": {
-            "lib/libimpeller.so": ":shared_library",
-            "lib/libimpeller.a": ":static_library",
-        },
-        "@platforms//os:android": {
-            "lib/libimpeller.so": ":shared_library",
-            "lib/libimpeller.a": ":static_library",
-        },
+        "@platforms//os:macos": {"lib/libimpeller.dylib": ":shared_library"},
         "//conditions:default": {},
     }) | select({
+        ":when_not_is_mac_and_is_linux_or_is_android": {"lib/libimpeller.so": ":shared_library"},
+        "//conditions:default": {},
+    }) | select({
+        "@platforms//os:macos": {"lib/libimpeller.a": ":static_library"},
+        "@platforms//os:linux": {"lib/libimpeller.a": ":static_library"},
+        "@platforms//os:android": {"lib/libimpeller.a": ":static_library"},
+        "//conditions:default": {},
+    }) | select({
+        "@platforms//os:macos": {"bin/impellerc": "//engine/src/flutter/impeller/compiler:impellerc"},
         "@platforms//os:linux": {"bin/impellerc": "//engine/src/flutter/impeller/compiler:impellerc"},
         "//conditions:default": {},
     }),
     output = select({
+        ":when_is_mac_and_target_cpu_arm64": "darwin-arm64/impeller_sdk.zip",
+        ":when_is_mac_and_target_cpu_x64": "darwin-x64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_android_arm": "android-arm/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_android_arm64": "android-arm64/impeller_sdk.zip",
         "//engine/src/flutter/common:platform_android_riscv64": "android-riscv64/impeller_sdk.zip",
@@ -454,16 +747,18 @@ zip_bundle(
         "//conditions:default": None,
     }),
     sources = select({
-        "@platforms//os:linux": {
-            "lib/libimpeller.so": "libimpeller.so",
-            "lib/libimpeller.a": "obj/flutter/impeller/toolkit/interop/libimpeller.a",
-        },
-        "@platforms//os:android": {
-            "lib/libimpeller.so": "libimpeller.so",
-            "lib/libimpeller.a": "obj/flutter/impeller/toolkit/interop/libimpeller.a",
-        },
+        "@platforms//os:macos": {"lib/libimpeller.dylib": "libimpeller.dylib"},
         "//conditions:default": {},
     }) | select({
+        ":when_not_is_mac_and_is_linux_or_is_android": {"lib/libimpeller.so": "libimpeller.so"},
+        "//conditions:default": {},
+    }) | select({
+        "@platforms//os:macos": {"lib/libimpeller.a": "obj/flutter/impeller/toolkit/interop/libimpeller.a"},
+        "@platforms//os:linux": {"lib/libimpeller.a": "obj/flutter/impeller/toolkit/interop/libimpeller.a"},
+        "@platforms//os:android": {"lib/libimpeller.a": "obj/flutter/impeller/toolkit/interop/libimpeller.a"},
+        "//conditions:default": {},
+    }) | select({
+        "@platforms//os:macos": {"bin/impellerc": "impellerc"},
         "@platforms//os:linux": {"bin/impellerc": "impellerc"},
         "//conditions:default": {},
     }),
@@ -474,8 +769,20 @@ zip_bundle(
         "@platforms//os:linux": [
             "//engine/src/flutter/impeller/compiler:impellerc",  # is_linux || is_mac || is_win
         ],
+        "@platforms//os:macos": [
+            "//engine/src/flutter/impeller/compiler:impellerc",  # is_linux || is_mac || is_win
+        ],
         "//conditions:default": [],
     }),
+)
+
+# `impeller_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "@platforms//os:macos",
+    ],
 )
 
 # `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
@@ -487,11 +794,29 @@ selects.config_setting_group(
     ],
 )
 
+# `impeller_enable_opengles && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "@platforms//os:macos",
+    ],
+)
+
 # `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
     match_all = [
         "//engine/src/flutter/impeller/tools:opengles",
         "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `impeller_enable_vulkan && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:vulkan",
+        "@platforms//os:macos",
     ],
 )
