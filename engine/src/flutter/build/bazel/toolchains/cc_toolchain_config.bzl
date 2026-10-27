@@ -347,11 +347,18 @@ _LINUX_EXECUTABLE_LINK_FLAGS = [
 
 _LINUX_LINK_LIBS = ["-ldl"]
 
+# ld64 rejects undefined symbols on its own, so a Mac has no complete-link
+# flag; instead the nodeps library, which has no GN counterpart and leaves
+# its dependencies unresolved by design (see above), must be excused from
+# ld64's default: without this the `.so` Bazel derives from every
+# cc_library fails to link on a Mac, and with it `bazel build //...` and
+# the Mac's T9 builds of the Metal backend and Impeller went through.
+_MAC_NODEPS_DYNAMIC_LIBRARY_LINK_FLAGS = ["-Wl,-undefined,dynamic_lookup"]
+
 # macOS's executables: //build/config/mac:mac_executable_flags, and the
 # rpath build/toolchain/mac's `link` tool adds (a bundle's Frameworks
-# directory). ld64 rejects undefined symbols on its own, so there is no
-# complete-link flag; and nothing is named after the libraries (Foundation
-# and the rest are a target's `frameworks`, in its linkopts).
+# directory). Nothing is named after the libraries (Foundation and the rest
+# are a target's `frameworks`, in its linkopts).
 _MAC_EXECUTABLE_LINK_FLAGS = [
     "-Wl,-pie",
     "-Xlinker",
@@ -472,6 +479,7 @@ def _impl(ctx):
     objcxx_flags = []
     opt_link_flags = _OPT_LINK_FLAGS + ([] if ctx.attr.asan else _OPT_AS_NEEDED_LINK_FLAGS)
     dbg_defines = _DBG_DEFINES
+    nodeps_dynamic_library_link_flags = []
     if android:
         compile_flags = _ANDROID_COMPILE_FLAGS + _defines(_ANDROID_DEFINES)
         link_flags = _ANDROID_LINK_FLAGS
@@ -496,6 +504,7 @@ def _impl(ctx):
         opt_link_flags = _MAC_OPT_LINK_FLAGS
         dbg_defines = _MAC_DBG_DEFINES
         complete_link_flags = []
+        nodeps_dynamic_library_link_flags = _MAC_NODEPS_DYNAMIC_LIBRARY_LINK_FLAGS
         executable_link_flags = _MAC_EXECUTABLE_LINK_FLAGS
         executable_link_libs = []
         dynamic_library_link_libs = []
@@ -590,6 +599,11 @@ def _impl(ctx):
         # Link.
         _flag_feature("flutter_link_flags", ALL_CC_LINK_ACTION_NAMES, link_flags + ctx.attr.arch_linkopts),
         _flag_feature("flutter_complete_link_flags", _COMPLETE_LINK_ACTION_NAMES, complete_link_flags),
+        _flag_feature(
+            "flutter_nodeps_dynamic_library_link_flags",
+            [ACTION_NAMES.cpp_link_nodeps_dynamic_library],
+            nodeps_dynamic_library_link_flags,
+        ),
         _flag_feature("flutter_executable_link_flags", CC_LINK_EXECUTABLE_ACTION_NAMES, executable_link_flags),
         # System libraries go after everything Bazel adds (user_link_flags,
         # libraries_to_link), which is why they are a separate, late feature;

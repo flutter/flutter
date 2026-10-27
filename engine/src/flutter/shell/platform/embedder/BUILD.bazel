@@ -7,7 +7,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy")
@@ -293,7 +293,10 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:enable_metal": FLUTTER_CFLAGS_OBJC,
+        ":when_shell_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -902,7 +905,10 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:enable_metal": FLUTTER_CFLAGS_OBJC,
+        ":when_shell_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -2007,7 +2013,10 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC,
+        ":when_test_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES + [
@@ -2960,6 +2969,15 @@ selects.config_setting_group(
     ],
 )
 
+# `shell_enable_metal && !is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_not_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/build/bazel:not_mac",
+    ],
+)
+
 # `test_enable_metal && shell_enable_metal && is_mac`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_test_enable_metal_and_shell_enable_metal_and_is_mac",
@@ -2967,6 +2985,24 @@ selects.config_setting_group(
         "//engine/src/flutter/shell:test_enable_metal",
         "//engine/src/flutter/shell:enable_metal",
         "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_metal && !is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_not_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "//engine/src/flutter/build/bazel:not_mac",
     ],
 )
 
