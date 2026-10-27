@@ -19,9 +19,9 @@ them.
 """
 
 _OSES = {
-    "linux": struct(gn = "linux", prebuilts = "linux", constraint = "@platforms//os:linux"),
-    "mac": struct(gn = "mac", prebuilts = "macos", constraint = "@platforms//os:macos"),
-    "windows": struct(gn = "win", prebuilts = "windows", constraint = "@platforms//os:windows"),
+    "linux": struct(gn = "linux", prebuilts = "linux", buildtools = "linux", constraint = "@platforms//os:linux"),
+    "mac": struct(gn = "mac", prebuilts = "macos", buildtools = "mac", constraint = "@platforms//os:macos"),
+    "windows": struct(gn = "win", prebuilts = "windows", buildtools = "windows", constraint = "@platforms//os:windows"),
 }
 
 _CPUS = {
@@ -64,8 +64,11 @@ def host_platform_values(os_name, arch):
         # The platform constraints of the host.
         "HOST_OS_CONSTRAINT": spec.constraint,
         "HOST_CPU_CONSTRAINT": _CPUS[cpu].constraint,
-        # The host's directory under prebuilts/ (linux-x64, macos-arm64, ...).
+        # The host's directory under prebuilts/ (linux-x64, macos-arm64, ...)
+        # and under buildtools/ (linux-x64, mac-arm64, ...: DEPS spells the
+        # two differently).
         "HOST_PREBUILTS": prebuilts,
+        "HOST_BUILDTOOLS": "%s-%s" % (spec.buildtools, cpu),
         # The repositories of the host's prebuilt Dart SDK and clang
         # (synced_deps' names).
         "HOST_DART_SDK": "@dart_sdk_" + prebuilts.replace("-", "_"),
