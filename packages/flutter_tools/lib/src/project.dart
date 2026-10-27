@@ -699,7 +699,6 @@ class FlutterProject {
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
-      fileSystem: directory.fileSystem,
     );
   }
 

@@ -31,6 +31,7 @@ import 'src/experimental/extension_discovery.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
+import 'src/reporting/unified_analytics.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/windows/windows_workflow.dart';
@@ -149,24 +150,40 @@ Future<int> run(
                 );
               }
 
+              // When analytics are suppressed by DASH__SUPPRESS_ANALYTICS,
+              // `globals.analytics` is a no-op and `setTelemetry` would
+              // silently do nothing, so warn rather than report a change that
+              // was not persisted.
+              final bool dashSuppressed = isDashAnalyticsSuppressionRequested(
+                globals.platform.environment,
+              );
+
               if (args.contains('--disable-analytics')) {
-                if (globals.analytics.telemetryEnabled) {
-                  globals.analytics.send(Event.analyticsCollectionEnabled(status: false));
-                  // Before disablig analytics, we need to close the client to make
-                  // sure the above collection event is sent.
-                  await globals.analytics.close();
+                if (dashSuppressed) {
+                  globals.printWarning(dashSuppressedTelemetryChangeMessage(enable: false));
+                } else {
+                  if (globals.analytics.telemetryEnabled) {
+                    globals.analytics.send(Event.analyticsCollectionEnabled(status: false));
+                    // Before disabling analytics, we need to close the client to make
+                    // sure the above collection event is sent.
+                    await globals.analytics.close();
+                  }
+                  await globals.analytics.setTelemetry(false);
+                  globals.printStatus('Analytics reporting disabled.');
                 }
-                await globals.analytics.setTelemetry(false);
-                globals.printStatus('Analytics reporting disabled.');
               }
 
               if (args.contains('--enable-analytics')) {
-                final bool alreadyEnabled = globals.analytics.telemetryEnabled;
-                await globals.analytics.setTelemetry(true);
-                if (!alreadyEnabled) {
-                  globals.analytics.send(Event.analyticsCollectionEnabled(status: true));
+                if (dashSuppressed) {
+                  globals.printWarning(dashSuppressedTelemetryChangeMessage(enable: true));
+                } else {
+                  final bool alreadyEnabled = globals.analytics.telemetryEnabled;
+                  await globals.analytics.setTelemetry(true);
+                  if (!alreadyEnabled) {
+                    globals.analytics.send(Event.analyticsCollectionEnabled(status: true));
+                  }
+                  globals.printStatus('Analytics reporting enabled.');
                 }
-                globals.printStatus('Analytics reporting enabled.');
               }
 
               await runner.run(args);
