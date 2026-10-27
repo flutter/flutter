@@ -483,6 +483,7 @@ selects.config_setting_group(
 # platforms.
 flutter_objc_library(
     name = "fml_unittests_objc",
+    testonly = True,
     srcs = select({
         "@platforms//os:macos": [
             "platform/darwin/cf_utils_unittests.mm",  # is_mac || is_ios
@@ -510,6 +511,7 @@ flutter_objc_library(
         "//engine/src/flutter/testing:testing_core",
         "@dart//:dart_api_headers",
     ],
+    alwayslink = True,
 )
 
 flutter_cc_test(

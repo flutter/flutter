@@ -547,6 +547,7 @@ selects.config_setting_group(
 # platforms.
 flutter_objc_library(
     name = "testing_unittests_objc",
+    testonly = True,
     srcs = select({
         "//engine/src/flutter/shell:test_enable_metal": [
             "test_metal_surface_unittests.mm",  # test_enable_metal
@@ -585,6 +586,7 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }),
+    alwayslink = True,
 )
 
 flutter_cc_test(
