@@ -109,7 +109,7 @@ def _install_impl(ctx):
     # directory, which may also hold other entries' files (sky_engine's
     # `gen/dart-pkg`), so the removals precede every mkdir and copy.
     for file, path in unique:
-        if file.is_directory:
+        if file.is_directory or file.is_symlink:
             lines.append('rm -rf "$dest/%s"' % path)
         else:
             lines.append('rm -f "$dest/%s"' % path)
@@ -137,6 +137,17 @@ def _install_impl(ctx):
             # it can in GN's build directory.
             lines.append('cp -r "%s/." "$dest/%s"' % (source, path))
             lines.append('chmod -R u+w "$dest/%s"' % path)
+        elif file.is_symlink:
+            # A symlink output (a framework bundle's `Versions/Current ->
+            # A`, framework.bzl): the link itself, with its relative target,
+            # as GN's build directory has it. The runfiles entry is a link
+            # to the output (absolute) -- -RP copies a link rather than what
+            # it names -- or, should the runfiles tree carry the output's
+            # own target instead, that target, which the install links to.
+            lines.append(
+                'link="$(readlink "%s")"; case "$link" in /*) cp -RP "$link" "$dest/%s" ;; *) ln -s "$link" "$dest/%s" ;; esac' %
+                (source, path, path),
+            )
         else:
             # -f besides the removal above, for a destination the shell
             # cannot remove but can replace.

@@ -9,6 +9,7 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
+load("//build_defs/dist:framework.bzl", "framework_symlinks")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
@@ -2686,7 +2687,7 @@ gn_copy(
     deps = [":flutter_engine_library"],
 )
 
-gn_action(
+framework_symlinks(
     name = "generate_symlinks",
     args = [
         "--framework",
@@ -2701,14 +2702,6 @@ gn_action(
         "--stamp",
         "FlutterEmbedder.stamp",
     ],
-    build_outputs = [
-        "FlutterEmbedder.stamp",
-        "FlutterEmbedder.framework/Resources",
-        "FlutterEmbedder.framework/Headers",
-        "FlutterEmbedder.framework/Modules",
-        "FlutterEmbedder.framework",  # is_mac && !embedder_for_target
-    ],
-    script = "//engine/src/build:config/mac/package_framework.py",
     target_compatible_with = select({
         ":when_is_mac_and_not_embedder_for_target": [],
         "//conditions:default": ["@platforms//:incompatible"],
