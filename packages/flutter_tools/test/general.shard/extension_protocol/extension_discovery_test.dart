@@ -5,8 +5,9 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:file/local.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
@@ -297,7 +298,8 @@ void main() {
       final Uri? packageConfigUri = await Isolate.packageConfig;
       expect(packageConfigUri, isNotNull);
 
-      const fs = LocalFileSystem();
+      final fs = LocalFileSystem.test(signals: LocalSignals.instance);
+      addTearDown(fs.dispose);
       final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
       final rawYaml = loadYaml(fs.file(configUri).readAsStringSync()) as YamlMap;
       final expectedConfig = ExtensionPackageConfig.fromMap(
