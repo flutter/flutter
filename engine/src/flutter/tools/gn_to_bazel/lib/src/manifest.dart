@@ -1154,9 +1154,14 @@ exports_files(["ios/framework/Source/AccessibilityFeatures.swift"])
     '//flutter/sky',
     filesGroups: <String>{'sky'},
     appendix: '''
-# sky/dist's action copies the assembled sky_engine package for release with
-# this script.
-exports_files(["tools/dist_dart_pkg.py"])
+# The scripts of other packages' actions: sky/dist's copy of the assembled
+# sky_engine package for release, the macOS shell's framework headers and
+# its xcframework (shell/platform/darwin/macos).
+exports_files([
+    "tools/create_xcframework.py",
+    "tools/dist_dart_pkg.py",
+    "tools/install_framework_headers.py",
+])
 ''',
   ),
   ConvertedFile('//flutter/sky/packages', filesGroups: <String>{'packages'}),
