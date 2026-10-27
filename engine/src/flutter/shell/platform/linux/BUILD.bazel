@@ -392,7 +392,12 @@ flutter_display_test(
     copts = FLUTTER_COPTS + [
         "-Wno-deprecated-volatile",  # from :flutter_linux_sources
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "//conditions:default": [],
+    }),
     data = [":flutter_linux_gschemas"],
     env = {"G_DEBUG": "fatal-criticals"},
     gtest_parallel = True,
@@ -651,6 +656,78 @@ selects.config_setting_group(
     ],
 )
 
+# `full_target_platform_name == "darwin-arm64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_debug",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_arm64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `full_target_platform_name == "darwin-arm64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_arm64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `full_target_platform_name == "darwin-arm64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_arm64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `full_target_platform_name == "darwin-arm64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_arm64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
+# `full_target_platform_name == "darwin-x64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_debug",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_x64",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# `full_target_platform_name == "darwin-x64" && flutter_runtime_mode == "profile"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_profile",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_x64",
+        "//engine/src/flutter/common:runtime_mode_profile",
+    ],
+)
+
+# `full_target_platform_name == "darwin-x64" && flutter_runtime_mode == "release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_x64",
+        "//engine/src/flutter/common:runtime_mode_release",
+    ],
+)
+
+# `full_target_platform_name == "darwin-x64" && flutter_runtime_mode == "jit_release"`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_jit_release",
+    match_all = [
+        "//engine/src/flutter/common:platform_darwin_x64",
+        "//engine/src/flutter/common:runtime_mode_jit_release",
+    ],
+)
+
 # `full_target_platform_name == "linux-arm64" && flutter_runtime_mode == "debug"`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_debug",
@@ -793,6 +870,14 @@ zip_bundle(
         ":when_full_target_platform_name_android_x86_and_flutter_runtime_mode_profile": "android-x86-profile/android-x86-flutter-gtk.zip",
         ":when_full_target_platform_name_android_x86_and_flutter_runtime_mode_release": "android-x86-release/android-x86-flutter-gtk.zip",
         ":when_full_target_platform_name_android_x86_and_flutter_runtime_mode_jit_release": "android-x86-jit_release/android-x86-flutter-gtk.zip",
+        ":when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_debug": "darwin-arm64-debug/darwin-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_profile": "darwin-arm64-profile/darwin-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_release": "darwin-arm64-release/darwin-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_darwin_arm64_and_flutter_runtime_mode_jit_release": "darwin-arm64-jit_release/darwin-arm64-flutter-gtk.zip",
+        ":when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_debug": "darwin-x64-debug/darwin-x64-flutter-gtk.zip",
+        ":when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_profile": "darwin-x64-profile/darwin-x64-flutter-gtk.zip",
+        ":when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_release": "darwin-x64-release/darwin-x64-flutter-gtk.zip",
+        ":when_full_target_platform_name_darwin_x64_and_flutter_runtime_mode_jit_release": "darwin-x64-jit_release/darwin-x64-flutter-gtk.zip",
         ":when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_debug": "linux-arm64-debug/linux-arm64-flutter-gtk.zip",
         ":when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_profile": "linux-arm64-profile/linux-arm64-flutter-gtk.zip",
         ":when_full_target_platform_name_linux_arm64_and_flutter_runtime_mode_release": "linux-arm64-release/linux-arm64-flutter-gtk.zip",

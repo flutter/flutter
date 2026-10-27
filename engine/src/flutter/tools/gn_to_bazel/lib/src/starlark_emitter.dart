@@ -288,6 +288,11 @@ final class _Rule {
   final Map<String, _ListAttribute> lists = <String, _ListAttribute>{};
   final Map<String, String> scalars = <String, String>{};
 
+  /// Whether the rule's `target_compatible_with` is its own (an
+  /// Objective-C library's, from its sources' conditions) rather than its
+  /// target's, which [convert] sets on every rule of a conditioned target.
+  bool fixedCompatibility = false;
+
   /// A target's own unconditional compiler flags by attribute (`copts`,
   /// `conlyopts`, `cxxopts`), which lead the attribute as they lead GN's
   /// command line; spliced in once the copts constants are placed.
@@ -651,7 +656,9 @@ final class _Emitter {
         if (rule.kind == 'selects.config_setting_group') {
           continue;
         }
-        rule.scalars['target_compatible_with'] = compatibility;
+        if (!rule.fixedCompatibility) {
+          rule.scalars['target_compatible_with'] = compatibility;
+        }
         // Items under a condition the target's own implies (a file-level
         // list defined in the same `if (enable_unittests)` block as the
         // target that reads it) are unconditional within the target, which
@@ -679,9 +686,14 @@ final class _Emitter {
   /// `target_compatible_with` for a target defined under its condition:
   /// compatible where the condition's settings hold, `@platforms//:incompatible`
   /// elsewhere.
-  String _compatibility(GnTarget target) {
+  String _compatibility(GnTarget target) => _compatibilityOf(target.condition, target);
+
+  /// `target_compatible_with` for [condition] (a target's, or an Objective-C
+  /// library's sources'): compatible where its settings hold,
+  /// `@platforms//:incompatible` elsewhere.
+  String _compatibilityOf(Condition condition, GnTarget target) {
     final _SelectKeys keys = _selectKeys(
-      target.condition,
+      condition,
       _Rule(target.rule, target.name, const <String>[]),
       target.location,
       () => 'defining ${target.rule} ${target.name}',
@@ -3017,7 +3029,13 @@ final class _Emitter {
     // to in GN.
     final bool compiles = !(rule.lists['srcs']?.isEmpty ?? true);
     if (!compiles) {
-      const <String>['copts', 'conlyopts', 'cxxopts', 'local_defines'].forEach(rule.lists.remove);
+      const <String>[
+        'copts',
+        'conlyopts',
+        'cxxopts',
+        _objcCoptsAttribute,
+        'local_defines',
+      ].forEach(rule.lists.remove);
     }
     if (compiles) {
       // GN applies chromium_code (or no_chromium_code) to every target, and
@@ -3087,11 +3105,147 @@ final class _Emitter {
       // Bazel's link_extra_libs reaches executables only.
       rule.list('deps').addUnique(Condition.always, _Item(_localLabel(cxxRuntimeLabel)));
     }
+    _splitObjcSources(rule, target, name: name, library: library);
     rules.add(rule);
     if (name != target.name) {
       // GN's name for the library or executable, for dependents and the
       // command line.
       rules.add(_Rule('alias', target.name, const <String>[])..scalars['actual'] = '":$name"');
+    }
+  }
+
+  /// The pseudo-attribute a target's `cflags_objc` and `cflags_objcc`
+  /// collect in, for its Objective-C library.
+  static const String _objcCoptsAttribute = 'objc_copts';
+
+  /// The Objective-C sources of [rule] (`.m`, `.mm`), which Bazel's C++ rules
+  /// refuse, go to a `flutter_objc_library` beside it, `<name>_objc`
+  /// (build_defs/cc/objc_library.bzl): the same headers, flags, defines and
+  /// dependencies, the target's Objective-C flags besides, alwayslink as the
+  /// target is, compatible where the sources are listed (the Apple
+  /// platforms); [rule] depends on it under the same conditions, so that the
+  /// objects link as GN links them. With no Objective-C source nothing
+  /// changes, and the Objective-C flags a target lists all the same go
+  /// nowhere, as in GN they apply to no compile.
+  void _splitObjcSources(
+    _Rule rule,
+    GnTarget target, {
+    required String name,
+    required bool library,
+  }) {
+    final _ListAttribute? objcCopts = rule.lists.remove(_objcCoptsAttribute);
+    final _ListAttribute? srcs = rule.lists['srcs'];
+    if (srcs == null) {
+      return;
+    }
+    bool isObjc(_Item item) =>
+        item.quoted && (item.text.endsWith('.m') || item.text.endsWith('.mm'));
+    final objc = <(Condition, _Item)>[
+      for (final (Condition, _Item) entry in srcs.sequence)
+        if (isObjc(entry.$2)) entry,
+    ];
+    if (objc.isEmpty) {
+      return;
+    }
+    srcs.always.removeWhere(isObjc);
+    for (final Condition under in srcs.conditional.keys.toList()) {
+      srcs.conditional[under]!.removeWhere(isObjc);
+      if (srcs.conditional[under]!.isEmpty) {
+        srcs.conditional.remove(under);
+      }
+    }
+    srcs.sequence.removeWhere(((Condition, _Item) entry) => isObjc(entry.$2));
+
+    _use('//build_defs/cc:objc_library.bzl', 'flutter_objc_library');
+    final companion = _Rule('flutter_objc_library', '${name}_objc', <String>[
+      '# The Objective-C(++) sources of $name, which cc_library takes none of',
+      '# (build_defs/cc/objc_library.bzl); $name links them in on the Apple',
+      '# platforms.',
+    ]);
+    companion.fixedCompatibility = true;
+    for (final (Condition under, _Item item) in objc) {
+      companion.list('srcs').addUnique(under, item);
+    }
+    // The headers the .mm files include: the target's, and the headers
+    // among a binary's sources.
+    final _ListAttribute? hdrs = rule.lists['hdrs'];
+    if (hdrs != null) {
+      _copyList(hdrs, companion.list('hdrs'), unique: true);
+    }
+    for (final (Condition under, _Item item) in srcs.sequence) {
+      final int dot = item.text.lastIndexOf('.');
+      if (item.quoted && dot >= 0 && _headerExtensions.contains(item.text.substring(dot))) {
+        companion.list('hdrs').addUnique(under, item);
+      }
+    }
+    for (final attribute in <String>[
+      'textual_hdrs',
+      'copts',
+      'local_defines',
+      'defines',
+      'includes',
+    ]) {
+      final _ListAttribute? list = rule.lists[attribute];
+      if (list != null && (attribute != 'includes' || library)) {
+        _copyList(
+          list,
+          companion.list(attribute),
+          unique: _Rule._setLikeAttributes.contains(attribute),
+        );
+      }
+    }
+    // The Objective-C flags, once each under a condition: GN gives
+    // cflags_objc to .m and cflags_objcc to .mm compiles, and the two
+    // lists are one here (see _constant).
+    if (objcCopts != null) {
+      final seen = <(Condition, String)>{};
+      for (final (Condition under, _Item item) in objcCopts.sequence) {
+        if (seen.add((under, item.text))) {
+          companion.list('copts').add(under, item);
+        }
+      }
+    }
+    for (final attribute in <String>['deps', 'implementation_deps']) {
+      final _ListAttribute? list = rule.lists[attribute];
+      if (list != null) {
+        _copyList(list, companion.list('deps'), unique: true);
+      }
+    }
+    for (final scalar in <String>['alwayslink', 'testonly']) {
+      final String? value = rule.scalars[scalar];
+      if (value != null) {
+        companion.scalars[scalar] = value;
+      }
+    }
+    // Compatible where its sources are listed, within the target's own
+    // condition; the target depends on it under the same conditions.
+    Condition listed = Condition.never;
+    for (final (Condition under, _) in objc) {
+      listed = listed.or(under);
+      rule.list('deps').addUnique(under, _Item(':${companion.name}'));
+    }
+    final Condition compatible = target.condition.and(listed);
+    if (compatible != Condition.always) {
+      companion.scalars['target_compatible_with'] = _compatibilityOf(compatible, target);
+    }
+    rules.add(companion);
+  }
+
+  /// Copies [from]'s items into [to] under their conditions, in order.
+  static void _copyList(_ListAttribute from, _ListAttribute to, {required bool unique}) {
+    final Iterable<(Condition, _Item)> entries = from.hasOrder
+        ? from.sequence
+        : <(Condition, _Item)>[
+            for (final _Item item in from.always) (Condition.always, item),
+            for (final MapEntry<Condition, List<_Item>> entry in from.conditional.entries)
+              for (final _Item item in entry.value) (entry.key, item),
+          ];
+    for (final (Condition under, _Item item) in entries) {
+      if (unique) {
+        to.addUnique(under, item);
+      } else {
+        to.add(under, item);
+      }
     }
   }
 
@@ -3266,9 +3420,12 @@ final class _Emitter {
     Condition condition, {
     bool own = false,
   }) {
+    // The Objective-C flags go to the target's Objective-C library
+    // (_splitObjcSources), not to its C++ compiles.
     final String attribute = switch (variable.name) {
       'cflags_c' => 'conlyopts',
       'cflags_cc' => 'cxxopts',
+      'cflags_objc' || 'cflags_objcc' => _objcCoptsAttribute,
       _ => 'copts',
     };
     _forEachItem(variable, into: rule.list(attribute), (_Element e) {
@@ -3295,12 +3452,16 @@ final class _Emitter {
   void _propagatedFlagsInto(_Rule rule, GnVariable variable) {
     _forEachItem(variable, into: _ListAttribute(), (_Element e) {
       for (final ForwardedFlag flag in forwarded.flagsOf(_gnLabel(_string(e)))) {
+        // The flag's condition under this file's assumptions (a platform
+        // the file defers, manifest.dart's `assume`, is a constant here
+        // where the dependency's file has it as a condition).
+        final Condition under = assumptions.apply(e.condition.and(flag.condition));
+        if (under == Condition.never) {
+          continue;
+        }
         rule
             .list('copts')
-            .addUnique(
-              e.condition.and(flag.condition),
-              _Item(_tokenizerEscaped(flag.flag), comment: 'from ${_string(e)}'),
-            );
+            .addUnique(under, _Item(_tokenizerEscaped(flag.flag), comment: 'from ${_string(e)}'));
       }
     });
   }
@@ -3708,12 +3869,31 @@ final class _Emitter {
 
   /// The Starlark constant for a reference to [name], loaded from its file.
   String _constant(String name, _Element element) {
-    final ReferenceConstant? constant = referenceConstants[name];
+    ReferenceConstant? constant = referenceConstants[name];
     if (constant == null) {
       throw GnError(element.assignment.location, 'no Bazel constant for $name');
     }
+    // config.gni's flutter_cflags_objc and flutter_cflags_objcc are one list
+    // (objcc is objc), with -fapplication-extension under is_mac: one
+    // constant for both, the macOS one where the flags apply on a Mac --
+    // so that a target's Objective-C library (which takes both lists, where
+    // GN gives each to its own compiles) carries the flags once.
+    if (name == 'flutter_cflags_objc' || name == 'flutter_cflags_objcc') {
+      constant = _impliesMac(_targetCondition.and(element.condition))
+          ? const ReferenceConstant(_coptsBzl, 'MACOS_CFLAGS_OBJC')
+          : const ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJC');
+    }
     _use(constant.file, constant.symbol);
     return constant.symbol;
+  }
+
+  static const String _coptsBzl = '//build_defs/cc:copts.bzl';
+
+  /// Whether [condition] holding means `is_mac` does: the variable itself,
+  /// or a conjunction with it among the terms.
+  static bool _impliesMac(Condition condition) {
+    const isMac = ConditionVariable('is_mac');
+    return condition == isMac || (condition is ConditionAnd && condition.terms.contains(isMac));
   }
 
   /// Strings into [attribute]; [defines] applies [_defineText].
@@ -3762,7 +3942,8 @@ final class _Emitter {
       if (gnLabel.startsWith(':') && skippedTargets.contains(_localName(gnLabel))) {
         return;
       }
-      if (_isUnconvertedDep(target, gnLabel)) {
+      if (_isUnconvertedDep(target, gnLabel) ||
+          _isUnconvertedPackageDep(gnLabel, e.assignment.location)) {
         return;
       }
       final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
@@ -3886,10 +4067,62 @@ final class _Emitter {
     return true;
   }
 
+  /// The dependencies left out because their package has no Bazel build
+  /// yet (see [_isUnconvertedPackageDep]), for the file's header.
+  final Set<String> unconvertedPackageDeps = <String>{};
+
+  /// Whether [gnLabel] names a target of a main-repository package that
+  /// neither the manifest converts nor a hand-written BUILD file covers: a
+  /// branch GN has for a platform the migration has not reached (the darwin
+  /// packages under is_mac, the Metal backends). Such a dependency is left
+  /// out and listed in the header rather than written, so that the file
+  /// loads and queries whole on every platform; the platform's build wants
+  /// the package converted, which the header says. A dependency into
+  /// another repository (Skia's, Dart's) is never this: those convert when
+  /// the repository is fetched.
+  bool _isUnconvertedPackageDep(String gnLabel, GnLocation location) {
+    if (tree == null) {
+      return false;
+    }
+    final String absolute = _gnLabel(_withoutToolchain(gnLabel));
+    final int colon = absolute.indexOf(':');
+    final String directory = colon < 0 ? absolute : absolute.substring(0, colon);
+    if (directory == gnPackage || _convertedPackages.contains(directory)) {
+      return false;
+    }
+    final String label = bazelLabel(gnLabel, package: gnPackage, location: location);
+    if (!label.startsWith('//')) {
+      return false;
+    }
+    // A label the mapping tables send elsewhere (the Dart wrap's targets
+    // for //flutter/third_party/dart's) names something that exists; the
+    // question is only about a GN directory mapped to its own place.
+    final int labelColon = label.indexOf(':');
+    final String labelPackage = labelColon < 0
+        ? label.substring(2)
+        : label.substring(2, labelColon);
+    if (labelPackage != 'engine/src${directory.substring(1)}') {
+      return false;
+    }
+    // The main repository's root is two levels above GN's (engine/src).
+    final String path = p.join(tree!.root, '..', '..', labelPackage);
+    if (File(p.join(path, 'BUILD.bazel')).existsSync() ||
+        File(p.join(path, 'BUILD')).existsSync()) {
+      return false;
+    }
+    unconvertedPackageDeps.add(absolute);
+    return true;
+  }
+
+  static final Set<String> _convertedPackages = <String>{
+    for (final ConvertedFile file in convertedFiles) file.gnPackage,
+  };
+
   void _depsInto(_Rule rule, GnVariable variable, GnTarget target) {
     _forEachItem(variable, into: rule.list('deps'), (_Element e) {
       final String gnLabel = _string(e);
-      if (_isUnconvertedDep(target, gnLabel)) {
+      if (_isUnconvertedDep(target, gnLabel) ||
+          _isUnconvertedPackageDep(gnLabel, e.assignment.location)) {
         return;
       }
       final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
@@ -4556,10 +4789,26 @@ final class _Emitter {
       final List<String> left = unconvertedDeps.where(usedUnconvertedDeps.contains).toList();
       out.writeln('# Dependencies left out, having no Bazel counterpart yet: ${left.join(', ')}.');
     }
+    if (unconvertedPackageDeps.isNotEmpty) {
+      final List<String> left = unconvertedPackageDeps.toList()..sort();
+      out.writeln(
+        '# Dependencies left out, their packages not converted yet (a platform the '
+        'migration has not reached): ${left.join(', ')}.',
+      );
+    }
     out.writeln();
-    final List<String> loadFiles = loads.keys.toList()..sort(_compareLoads);
+    // A symbol registered for an item that did not reach the file (the
+    // Objective-C flag constants of a target without Objective-C sources,
+    // which GN applies to no compile) is not loaded: buildifier rejects
+    // an unused load.
+    final String text = body.toString() + (appendix ?? '');
+    final loadFiles = <String>[
+      for (final MapEntry<String, Set<String>> load in loads.entries)
+        if (load.value.any((String symbol) => _mentions(text, symbol))) load.key,
+    ]..sort(_compareLoads);
     for (final bzl in loadFiles) {
-      final List<String> symbols = loads[bzl]!.toList()..sort();
+      final List<String> symbols =
+          loads[bzl]!.where((String symbol) => _mentions(text, symbol)).toList()..sort();
       out.writeln('load("$bzl", ${symbols.map((String s) => '"$s"').join(', ')})');
     }
     // One blank line between the header and the package() (a file of
@@ -4581,6 +4830,10 @@ final class _Emitter {
     }
     return out.toString();
   }
+
+  /// Whether [symbol] occurs in [text] as a word (not inside another name).
+  static bool _mentions(String text, String symbol) =>
+      RegExp('(?<![A-Za-z0-9_])${RegExp.escape(symbol)}(?![A-Za-z0-9_])').hasMatch(text);
 
   /// buildifier's order: `@` loads first, then by the package's path
   /// components and the file name, so that a package precedes its
@@ -4697,10 +4950,12 @@ final class _Emitter {
     final bool keepOrder = _keptOrderAttributes.contains(attribute);
     final parts = <String>[];
     // Bare list constants (FLUTTER_COPTS, FLUTTER_LOCAL_DEFINES) stand as
-    // themselves wherever they sit; the
-    // elements between them form list literals (a target's own flags lead
-    // its copts, ahead of the constants, as in GN).
-    bool constant(_Item item) => !item.quoted && !item.expression && item.comment == null;
+    // themselves wherever they sit; the elements between them form list
+    // literals (a target's own flags lead its copts, ahead of the
+    // constants, as in GN). A constant's comment (the condition a target's
+    // MACOS_CFLAGS_OBJC came under, now the target's own) has no place in
+    // the expression, as in a select() branch.
+    bool constant(_Item item) => !item.quoted && !item.expression;
     final elements = <_Item>[];
     void flush() {
       if (elements.isNotEmpty) {

@@ -157,7 +157,9 @@ Future<int> run(List<String> arguments) async {
     try {
       final GnFileEvaluation evaluation = evaluateGnFile(
         tree.load(file),
-        assumptions: assumptions,
+        assumptions: manifest == null || manifest.assume.isEmpty
+            ? assumptions
+            : assumptions.withValues(manifest.assume),
         templates: templateMappings.keys.toSet(),
         externalVariables: knownExternalVariables,
         booleanVariables: knownBooleanVariables,

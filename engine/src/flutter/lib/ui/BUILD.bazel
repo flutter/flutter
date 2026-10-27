@@ -4,6 +4,7 @@
 
 # Generated from //flutter/lib/ui/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
@@ -205,6 +206,16 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from //flutter/impeller
             "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
@@ -301,6 +312,11 @@ cc_test(
             "-Wno-redundant-parens",  # from :ui
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "//conditions:default": [],
     }),
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -370,6 +386,16 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :ui_testing_mocks
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from //flutter/impeller
             "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
@@ -393,6 +419,16 @@ flutter_cc_test(
             "-Wno-suggest-override",  # from //flutter/shell/common:shell_test_fixture_sources
             "-Wno-unused-private-field",  # from //flutter/shell/common:shell_test_fixture_sources
             "-Wno-unused-variable",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
         ],
         "//conditions:default": [],
     }),
@@ -451,6 +487,16 @@ cc_library(
             "-Wno-redundant-parens",  # from :ui
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :ui
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from :ui_testing_mocks
+        ],
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
@@ -496,6 +542,43 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_vulkan && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_vulkan_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_vulkan",
+        "@platforms//os:macos",
+    ],
+)
+
+# `test_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "@platforms//os:macos",
+    ],
 )
 
 # What GN has no words for; maintained in the converter's manifest

@@ -10,6 +10,7 @@
 #   bazel test //packages/flutter_tools:general_shard
 
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load("//build_defs/dart:dart_test.bzl", "dart_package_tests", "dart_vm_kernel")
 load("//build_defs/dart:pub.bzl", "PUB_WORKSPACE_PACKAGES", "pub_cache", "pub_package_config")
 load("//build_defs/desktop:build_tools.bzl", "linux_build_tools")
@@ -64,8 +65,8 @@ _HARNESS = glob(
 # (cache_test reads DevTools' version from its resources) and the engine
 # stamp the tool's bootstrap writes (version_test).
 _CACHE = {
-    "@dart_sdk_linux_x64//:dart": "dart-sdk",
-    "@dart_sdk_linux_x64//:devtools": "dart-sdk",
+    HOST_DART_SDK + "//:dart": "dart-sdk",
+    HOST_DART_SDK + "//:devtools": "dart-sdk",
 }
 
 _CACHE_FILES = {

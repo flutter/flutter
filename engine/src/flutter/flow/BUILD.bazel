@@ -4,6 +4,7 @@
 
 # Generated from //flutter/flow/BUILD.gn by gn_to_bazel; do not edit.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
@@ -97,6 +98,16 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from //flutter/impeller
             "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
@@ -173,6 +184,11 @@ cc_library(
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:skia
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing:skia
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :flow
         ],
@@ -246,6 +262,16 @@ flutter_cc_test(
             "-Wno-redundant-parens",  # from :flow
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list/testing:display_list_testing
+        ],
+        "//conditions:default": [],
     }),
     data = [
         "//engine/src/flutter/testing:resources",
@@ -272,5 +298,24 @@ flutter_cc_test(
         "@googletest_tree//:root_includes",
         "@googletest_tree//:third_party_dir_includes",
         "@skia",
+    ],
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "@platforms//os:macos",
     ],
 )

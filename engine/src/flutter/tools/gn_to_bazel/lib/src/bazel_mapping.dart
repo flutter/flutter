@@ -2226,17 +2226,23 @@ const GnCasedValue _skiaGlStandard = GnCasedValue('target_os', <String, String>{
 /// builds differ ([perTargetOsArguments]).
 Assumptions generationAssumptions() {
   const isWasm = ConditionVariable('is_wasm');
+  const isMac = ConditionVariable('is_mac');
   return Assumptions(<String, GnValue>{
     'default_library_type': const GnStringValue('static_library'),
     'host_cpu': const GnStringValue('x64'),
     'host_os': const GnStringValue('linux'),
-    'is_apple': const GnBoolValue(false),
+    // Not here: is_mac, a condition since the macOS port (10-26,
+    // research/20): the macOS platform selects its branches, as Android's
+    // and the web's do theirs. iOS is not built yet, so is_ios stays a
+    // constant and `is_mac || is_ios` reads as is_mac -- as does is_apple,
+    // BUILDCONFIG.gn's `is_ios || is_mac`, which the scope does not
+    // evaluate and so spells here.
+    'is_apple': const GnConditionValue(isMac),
     'is_component_build': const GnBoolValue(false),
     'is_fuchsia': const GnBoolValue(false),
     'is_ios': const GnBoolValue(false),
     // testing.gni: `is_ios && flutter_runtime_mode == "debug"`.
     'enable_ios_unittests': const GnBoolValue(false),
-    'is_mac': const GnBoolValue(false),
     'is_minimal_linux': const GnBoolValue(false),
     'is_official_build': const GnBoolValue(true),
     // tools/gn's --wasm-use-dwarf (DWARF rather than source maps for a
@@ -2305,33 +2311,64 @@ Assumptions generationAssumptions() {
     'skia_icu_bidi_third_party_dir': const GnStringValue(
       '//flutter/third_party/canvaskit/icu_bidi',
     ),
-    // The arguments tools/gn passes differently for the web (research/12):
-    // the host's value off the web, the web's on it.
-    for (final MapEntry<String, ({bool host, bool web})> argument in perTargetOsArguments.entries)
-      argument.key: GnConditionValue(argument.value.web ? isWasm : isWasm.negated),
+    // The arguments tools/gn passes differently for the web and for a Mac
+    // (research/12, research/20): the host's value elsewhere.
+    for (final MapEntry<String, ({bool host, bool web, bool mac})> argument
+        in perTargetOsArguments.entries)
+      argument.key: GnConditionValue(_perOsCondition(argument.value, isWasm: isWasm, isMac: isMac)),
   });
 }
 
+/// `(is_wasm && web) || (is_mac && mac) || (!is_wasm && !is_mac && host)`,
+/// with the constants folded: the OS condition under which an argument of
+/// [perTargetOsArguments] holds.
+Condition _perOsCondition(
+  ({bool host, bool web, bool mac}) value, {
+  required Condition isWasm,
+  required Condition isMac,
+}) {
+  final holds = <Condition>[
+    if (value.web) isWasm,
+    if (value.mac) isMac,
+    if (value.host) isWasm.negated.and(isMac.negated),
+  ];
+  if (holds.isEmpty) {
+    return Condition.never;
+  }
+  return holds.reduce((Condition a, Condition b) => a.or(b));
+}
+
 /// The arguments `tools/gn` passes with one value for a Linux host build and
-/// the other for the web build (`to_gn_wasm_args`), which GN derives from
-/// nothing and the generation scope takes as formulas over the OS, so that
-/// `if (skia_use_vulkan)` renders as a select() on the web platform: what
-/// GN's two builds say, with no flag (NEED_DECISION D4, design A). The
-/// arguments the six wasm toolchains set per variant (`skia_use_icu`, the
-/// codec decoders, ...) are not here: those are the variants' flags.
-const Map<String, ({bool host, bool web})> perTargetOsArguments = <String, ({bool host, bool web})>{
-  'skia_use_vulkan': (host: true, web: false),
-  'skia_use_expat': (host: true, web: false),
-  'skia_use_libjpeg_turbo_encode': (host: true, web: false),
-  'skia_use_no_jpeg_encode': (host: false, web: true),
-  'skia_use_libwebp_encode': (host: true, web: false),
-  'skia_use_no_webp_encode': (host: false, web: true),
-  'skia_enable_skottie': (host: true, web: false),
-  'skia_enable_fontmgr_custom_directory': (host: true, web: false),
-  // CanvasKit's WebGL binding (canvaskit.gni's default is off; tools/gn
-  // turns it on for the web), read by the module's file alone.
-  'skia_canvaskit_enable_webgl': (host: false, web: true),
-};
+/// another for the web build (`to_gn_wasm_args`) or for a Mac (the darwin
+/// branches of `to_gn_args`), which GN derives from nothing and the
+/// generation scope takes as formulas over the OS, so that `if
+/// (skia_use_vulkan)` renders as a select() on the platform: what GN's
+/// builds say, with no flag (NEED_DECISION D4, design A). The arguments the
+/// six wasm toolchains set per variant (`skia_use_icu`, the codec decoders,
+/// ...) are not here: those are the variants' flags. An Android or Fuchsia
+/// build takes the host's values, as tools/gn gives them.
+const Map<String, ({bool host, bool web, bool mac})> perTargetOsArguments =
+    <String, ({bool host, bool web, bool mac})>{
+      'skia_use_vulkan': (host: true, web: false, mac: false),
+      'skia_use_expat': (host: true, web: false, mac: true),
+      'skia_use_libjpeg_turbo_encode': (host: true, web: false, mac: true),
+      'skia_use_no_jpeg_encode': (host: false, web: true, mac: false),
+      'skia_use_libwebp_encode': (host: true, web: false, mac: true),
+      'skia_use_no_webp_encode': (host: false, web: true, mac: false),
+      'skia_enable_skottie': (host: true, web: false, mac: true),
+      'skia_enable_fontmgr_custom_directory': (host: true, web: false, mac: true),
+      // CanvasKit's WebGL binding (canvaskit.gni's default is off; tools/gn
+      // turns it on for the web), read by the module's file alone.
+      'skia_canvaskit_enable_webgl': (host: false, web: true, mac: false),
+      // tools/gn on a Mac (`sys.platform == 'darwin'` and a Mac target):
+      // Skia's Metal, and deprecated API calls allowed (OpenGL's); Vulkan is
+      // not turned on for the Apple targets (`target_os not in ['ios',
+      // 'mac']`), so skia_use_vma stays skia.gni's default there. The
+      // shell's backends (shell_enable_*) and fontconfig are settings, not
+      // here: //flutter/shell's groups by platform, txt's flag.
+      'allow_deprecated_api_calls': (host: false, web: false, mac: true),
+      'skia_use_metal': (host: false, web: false, mac: true),
+    };
 
 /// Which assumptions describe the Linux x64 host build (the values
 /// `tools/gn` gives these arguments for it, as in `out/host_debug*/args.gn`):
@@ -2426,6 +2463,9 @@ Assumptions linuxHostAssumptions() {
     'skia_use_dng_sdk': GnBoolValue(false),
     'skia_use_expat': GnBoolValue(true),
     'skia_use_gl': GnBoolValue(true),
+    // tools/gn on a Mac alone (research/20): off for a Linux host.
+    'allow_deprecated_api_calls': GnBoolValue(false),
+    'skia_use_metal': GnBoolValue(false),
     'skia_use_icu': GnBoolValue(true),
     'skia_use_libpng_decode': GnBoolValue(true),
     'skia_use_libpng_encode': GnBoolValue(true),

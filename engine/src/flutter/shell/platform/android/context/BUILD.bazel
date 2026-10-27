@@ -14,6 +14,11 @@ cc_library(
     srcs = ["android_context.cc"],
     hdrs = ["android_context.h"],
     copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/vulkan
         ],

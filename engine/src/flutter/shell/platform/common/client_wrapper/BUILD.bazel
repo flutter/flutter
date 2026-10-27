@@ -91,7 +91,12 @@ flutter_cc_test(
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ],
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_DESKTOP_LIBRARY"],
     deps = [
         ":client_wrapper",

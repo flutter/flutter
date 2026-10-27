@@ -428,6 +428,31 @@ in the darwin sandbox -- 7/7; a no-op rerun 0.3 s; `-c opt` 17.6 s, the
 are GN's flags in GN's order but for a target's own, which Bazel puts
 after the toolchain's (research/20 has both).
 
+The converter speaks macOS as of the same day: `is_mac` (and `is_apple`,
+which derives from it) is a platform condition, rendered as `select()`s on
+`@platforms//os:macos` as `is_android`'s and `is_wasm`'s are, so the
+darwin branches of every converted file are in the generated BUILD files
+(fml's `platform/darwin/`, the shell's `//flutter/shell/platform/darwin`
+dependency, Skia's Metal backend when its repository converts on a Mac);
+`is_ios` stays a constant until iOS is built, so `is_mac || is_ios` reads
+as `is_mac`. The arguments tools/gn passes for a Mac alone
+(`allow_deprecated_api_calls`, `skia_use_metal`) are formulas over the OS
+beside the web's (`perTargetOsArguments`). A GN target's `.m` and `.mm`
+sources go to a `flutter_objc_library` beside its `cc_library` or test,
+`<name>_objc` -- the same headers, flags, defines and dependencies, the
+target's `cflags_objc`/`cflags_objcc` (one list, `MACOS_CFLAGS_OBJC`
+under `is_mac`) besides, alwayslink as the target is, compatible where the
+sources are listed -- which the target depends on under the same
+conditions; a target with Objective-C flags and no Objective-C sources
+gets neither, as GN applies them to no compile. Three files keep `is_mac`
+false for now (the manifest's `assume`, `macosDeferred`): the archives'
+and font-subset's entitlements lists and the Impeller SDK's dylib are the
+Apple products' phase's. And the host itself is a repository,
+`@host_platform//:host.bzl` (`HOST_OS`, `HOST_CPU`, their constraints,
+`HOST_PREBUILTS`, `HOST_DART_SDK`, `HOST_CLANG`), from which
+`build/bazel`'s `host_toolchain` group takes the host's CPU -- an
+Apple-silicon Mac is its own host, where x86_64 was assumed.
+
 ## Wrapped GN builds: the Dart SDK
 
 The Dart SDK (VM, `gen_snapshot`, the frontend server, ...) is not converted

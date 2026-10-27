@@ -10,6 +10,7 @@
 #
 #   bazel test //dev/bots:tests
 
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
 load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
 
 package(default_visibility = ["//visibility:public"])
@@ -39,7 +40,7 @@ dart_package_tests(
         exclude = ["test/*_test.dart"],
     ),
     # The Dart SDK, as ../../bin/cache/dart-sdk/bin/dart.
-    cache = {"@dart_sdk_linux_x64//:dart": "dart-sdk"},
+    cache = {HOST_DART_SDK + "//:dart": "dart-sdk"},
     # The fixture trees the tests read.
     data = glob([
         "test/analyze-snippet-code-test-dart-ui/**",

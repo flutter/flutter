@@ -19,6 +19,11 @@ cc_library(
             "-Wno-redundant-parens",  # from //flutter/flow
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -61,6 +66,11 @@ flutter_cc_test(
     copts = FLUTTER_COPTS + [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/testing:dart
         ],

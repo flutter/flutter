@@ -25,6 +25,11 @@ cc_library(
             "-Wno-redundant-parens",  # from //flutter/flow
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -45,7 +50,12 @@ cc_library(
     name = "native_window",
     srcs = ["android_native_window.cc"],
     hdrs = ["android_native_window.h"],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -67,6 +77,16 @@ cc_library(
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/flow
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_is_mac": [
+            "-Wno-unguarded-availability",  # from //flutter/shell/gpu:gpu_surface_gl
         ],
         "//conditions:default": [],
     }) + select({
@@ -100,6 +120,15 @@ cc_library(
         "//conditions:default": [],
     }),
     alwayslink = True,
+)
+
+# `impeller_enable_opengles && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "@platforms//os:macos",
+    ],
 )
 
 # `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
