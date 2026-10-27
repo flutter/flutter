@@ -545,17 +545,23 @@ def _gn_generated_file_impl(ctx):
 
 gn_generated_file = rule(
     implementation = _gn_generated_file_impl,
-    doc = "A GN generated_file() with `contents`: the lines, written at build time.",
+    doc = "A GN generated_file(): the lines of `contents` -- or the lines GN's metadata walk over `data_keys` would " +
+          "collect, which the converter walks at conversion time -- written at build time.",
     attrs = {
         "out": attr.output(
             mandatory = True,
             doc = "The file, relative to the package: GN's output's path under the build directory.",
         ),
         "content": attr.string_list(
-            doc = "GN's `contents`: one element per line.",
+            doc = "GN's `contents`: one element per line; or the walked metadata's lines.",
         ),
         "outputs": attr.string_list(
             doc = "GN's `outputs`, for the record: where the build directory holds the file.",
+        ),
+        "deps": attr.label_list(
+            doc = "GN's `deps`: the targets whose metadata the lines were walked from, or that GN orders the file after; " +
+                  "ordering only here (the lines are known at conversion time), and what their closure places in the " +
+                  "build directory travels with the file's, as ninja's build of the file leaves it.",
         ),
     },
 )

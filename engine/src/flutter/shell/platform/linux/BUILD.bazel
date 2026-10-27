@@ -5,8 +5,9 @@
 # Generated from //flutter/shell/platform/linux/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle", "zip_tree")
 load("//build_defs/gn:gn_action.bzl", "gn_copy")
 load("//build_defs/testing:testing.bzl", "flutter_display_test", "flutter_test_fixtures")
@@ -40,10 +41,10 @@ cc_library(
     linkopts = ["-Wl,--no-fatal-warnings"],
 )
 
-cc_binary(
-    name = "libflutter_linux_glfw.so",
+flutter_shared_library(
+    name = "flutter_linux_glfw",
     linkopts = ["-Wl,--no-fatal-warnings"],
-    linkshared = True,
+    output_name = "flutter_linux_glfw",
     target_compatible_with = select({
         ":when_is_linux_and_is_host_toolchain": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -53,15 +54,6 @@ cc_binary(
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
         "//engine/src/flutter/shell/platform/glfw:flutter_glfw",
     ],
-)
-
-alias(
-    name = "flutter_linux_glfw",
-    actual = ":libflutter_linux_glfw.so",
-    target_compatible_with = select({
-        ":when_is_linux_and_is_host_toolchain": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
 )
 
 # `is_linux && is_host_toolchain`, for the select()s of this file.
@@ -427,20 +419,15 @@ flutter_display_test(
     ],
 )
 
-cc_binary(
-    name = "libflutter_linux_gtk.so",
+flutter_shared_library(
+    name = "flutter_linux_gtk",
     linkopts = ["-Wl,-rpath,$$ORIGIN"],
-    linkshared = True,
+    output_name = "flutter_linux_gtk",
     deps = [
         ":flutter_linux",
         "//engine/src/flutter:config",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
     ],
-)
-
-alias(
-    name = "flutter_linux_gtk",
-    actual = ":libflutter_linux_gtk.so",
 )
 
 gn_copy(

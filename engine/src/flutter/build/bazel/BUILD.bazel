@@ -168,6 +168,16 @@ string_flag(
     for os in _HOST_OSES
 ]
 
+# `host_os != "mac"` and the rest: any of the other hosts (the converter's
+# comparisonNegatedSettings, for the branch a `host_os == ...` overrides).
+[
+    selects.config_setting_group(
+        name = "host_os_is_not_" + os,
+        match_any = [":host_os_is_" + other for other in _HOST_OSES if other != os],
+    )
+    for os in _HOST_OSES
+]
+
 # BUILDCONFIG.gn's use_flutter_cxx, `is_clang && (is_linux || is_android ||
 # is_mac || is_ios)`: where the engine builds and links its own libc++
 # (toolchains:cxx_runtime selects on it); elsewhere the toolchain's serves.

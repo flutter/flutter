@@ -152,7 +152,13 @@ final class DependencyResolver {
         final ConvertedFile? manifest = manifestEntry(directory);
         return evaluateGnFile(
           tree.load(file),
-          assumptions: assumptions,
+          // Under the file's own assumptions (the manifest's `assume`), as
+          // its conversion evaluates it: a file whose macOS branches are
+          // deferred reads the same way here, rather than failing on an
+          // import of a branch its conversion never takes.
+          assumptions: manifest == null || manifest.assume.isEmpty
+              ? assumptions
+              : assumptions.withValues(manifest.assume),
           templates: templateMappings.keys.toSet(),
           externalVariables: knownExternalVariables,
           booleanVariables: knownBooleanVariables,

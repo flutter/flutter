@@ -5,9 +5,10 @@
 # Generated from //flutter/shell/platform/embedder/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
@@ -77,6 +78,15 @@ cc_library(
         "TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS=\\\"flutter/lib/snapshot/isolate_snapshot_instructions.bin\\\"",
         "TEST_VM_SNAPSHOT_DATA=\\\"flutter/lib/snapshot/vm_isolate_snapshot.bin\\\"",
         "TEST_VM_SNAPSHOT_INSTRUCTIONS=\\\"flutter/lib/snapshot/vm_snapshot_instructions.bin\\\"",
+    ],
+)
+
+# `shell_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "@platforms//os:macos",
     ],
 )
 
@@ -300,7 +310,7 @@ flutter_objc_library(
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        "//engine/src/flutter/shell:enable_metal": [],
+        ":when_shell_enable_metal_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -920,7 +930,7 @@ flutter_objc_library(
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        "//engine/src/flutter/shell:enable_metal": [],
+        ":when_shell_enable_metal_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -1385,12 +1395,13 @@ flutter_test_fixtures(
     ],
 )
 
-# `enable_unittests && test_enable_metal`, for the select()s of this file.
+# `enable_unittests && test_enable_metal && is_mac`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_enable_unittests_and_test_enable_metal",
+    name = "when_enable_unittests_and_test_enable_metal_and_is_mac",
     match_all = [
         "//engine/src/flutter/testing:unittests_enabled",
         "//engine/src/flutter/shell:test_enable_metal",
+        "@platforms//os:macos",
     ],
 )
 
@@ -1584,7 +1595,7 @@ flutter_objc_library(
         "//conditions:default": [],
     }),
     target_compatible_with = select({
-        ":when_enable_unittests_and_test_enable_metal": [],
+        ":when_enable_unittests_and_test_enable_metal_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -2061,7 +2072,7 @@ flutter_objc_library(
         "//conditions:default": [],
     }),
     target_compatible_with = select({
-        ":when_enable_unittests_and_test_enable_metal": [],
+        ":when_enable_unittests_and_test_enable_metal_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
@@ -2563,8 +2574,8 @@ flutter_cc_test(
     ],
 )
 
-cc_binary(
-    name = "libflutter_engine.so",
+flutter_shared_library(
+    name = "flutter_engine_library",
     additional_linker_inputs = [":embedder_exports.lst"],
     linkopts = select({
         ":when_is_mac_and_not_embedder_for_target": [
@@ -2577,17 +2588,12 @@ cc_binary(
         ],
         "//conditions:default": [],
     }),
-    linkshared = True,
+    output_name = "flutter_engine",
     deps = [
         ":embedder",
         "//engine/src/flutter:config",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
     ],
-)
-
-alias(
-    name = "flutter_engine_library",
-    actual = ":libflutter_engine.so",
 )
 
 gn_copy(
@@ -2670,7 +2676,7 @@ gn_copy(
 
 gn_copy(
     name = "copy_dylib",
-    srcs = ["//engine/src:@out/libflutter_engine.dylib"],
+    srcs = [":flutter_engine_library"],
     outs = ["FlutterEmbedder.framework/Versions/A/FlutterEmbedder"],
     outputs = ["$root_out_dir/FlutterEmbedder.framework/Versions/A/FlutterEmbedder"],
     target_compatible_with = select({
@@ -2933,15 +2939,6 @@ selects.config_setting_group(
     match_all = [
         "//engine/src/flutter/shell:enable_metal",
         "//engine/src/flutter/shell:enable_vulkan",
-    ],
-)
-
-# `shell_enable_metal && is_mac`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_shell_enable_metal_and_is_mac",
-    match_all = [
-        "//engine/src/flutter/shell:enable_metal",
-        "@platforms//os:macos",
     ],
 )
 

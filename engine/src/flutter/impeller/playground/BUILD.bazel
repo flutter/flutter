@@ -11,12 +11,13 @@ load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 
 package(default_visibility = ["//visibility:public"])
 
-# `enable_unittests && impeller_enable_metal`, for the select()s of this file.
+# `enable_unittests && impeller_enable_metal && is_mac`, for the select()s of this file.
 selects.config_setting_group(
-    name = "when_enable_unittests_and_impeller_enable_metal",
+    name = "when_enable_unittests_and_impeller_enable_metal_and_is_mac",
     match_all = [
         "//engine/src/flutter/testing:unittests_enabled",
         "//engine/src/flutter/impeller/tools:metal",
+        "@platforms//os:macos",
     ],
 )
 
@@ -81,7 +82,7 @@ flutter_objc_library(
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
-        ":when_enable_unittests_and_impeller_enable_metal": [],
+        ":when_enable_unittests_and_impeller_enable_metal_and_is_mac": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [

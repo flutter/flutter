@@ -828,8 +828,13 @@ install(
 
 # mac_host_engine.json: ci/host_debug_framework
 #   bazel run --config=host_debug_framework :host_debug_framework
-# Not built, no Bazel counterpart yet: flutter/build/archives:flutter_embedder_framework, flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+install(
+    name = "host_debug_framework",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/archives:flutter_embedder_framework"],
+    directory = "ci/host_debug_framework",
+)
 
 # mac_host_engine.json: ci/host_debug
 #   bazel run --config=ci_mac_host_debug :ci_mac_host_debug
@@ -905,8 +910,13 @@ install(
 
 # mac_host_engine.json: ci/mac_debug_framework_arm64
 #   bazel run --config=mac_debug_framework_arm64 :mac_debug_framework_arm64
-# Not built, no Bazel counterpart yet: flutter/build/archives:flutter_embedder_framework, flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
-# Nothing to install.
+# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
+install(
+    name = "mac_debug_framework_arm64",
+    testonly = True,
+    contents = ["//engine/src/flutter/build/archives:flutter_embedder_framework"],
+    directory = "ci/mac_debug_framework_arm64",
+)
 
 # mac_host_engine.json: ci/mac_debug_gen_snapshot_arm64
 #   bazel run --config=mac_debug_gen_snapshot_arm64 :mac_debug_gen_snapshot_arm64

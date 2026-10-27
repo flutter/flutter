@@ -1203,12 +1203,31 @@ const Map<String, String> _hostOsSettings = <String, String>{
 /// (the prebuilt SDK's directory, the artifacts' names) are the host's
 /// constants of @host_platform at their use sites (research/20 §8).
 const Map<String, GnValue> hostOsCases = <String, GnValue>{
-  'host_os': GnCasedValue('host_os', <String, String>{
-    'linux': 'linux',
-    'mac': 'mac',
-    'win': 'win',
-  }),
+  // The hosts the Bazel build runs on: Linux and a Mac. A Windows host's
+  // branches (`.exe`, `.dll`) are no case, as a Windows host is no
+  // platform of the build.
+  'host_os': GnCasedValue('host_os', <String, String>{'linux': 'linux', 'mac': 'mac'}),
 };
+
+/// The `metadata` of engine targets whose GN files the converter does not
+/// read (hand-written Bazel packages), for generated_file's metadata walk
+/// ([starlark_emitter]'s): by label, each key's lines. lib/snapshot's
+/// generate_snapshot_bin names gen_snapshot for the macOS artifacts'
+/// entitlements list. An engine target the walk reaches that is neither
+/// readable nor here is an error, so that a list never silently loses a
+/// line; targets outside the engine's tree (the Dart tree's, the
+/// third-party trees') carry none of the engine's keys and contribute
+/// nothing.
+const Map<String, Map<String, List<String>>> unreadMetadata = <String, Map<String, List<String>>>{
+  '//flutter/lib/snapshot:generate_snapshot_bin': <String, List<String>>{
+    'entitlement_file_path': <String>['gen_snapshot'],
+  },
+};
+
+/// The engine packages the converter does not read whose targets the walk
+/// may reach: every target of theirs with metadata is in [unreadMetadata],
+/// the rest carry none (lib/snapshot's snapshot libraries and actions).
+const Set<String> unreadMetadataPackages = <String>{'//flutter/lib/snapshot'};
 
 /// Files of the machine that builds, which GN's files name by absolute
 /// path (a Mac's `/System/Library/Fonts/Apple Color Emoji.ttc`, the text
@@ -1284,6 +1303,13 @@ const Map<String, Map<String, String>> comparisonNegatedSettings = <String, Map<
   'current_os': _osNameNegatedSettings,
   'target_cpu': _cpuNameNegatedSettings,
   'current_cpu': _cpuNameNegatedSettings,
+  // The host's complement (`host_os != "mac"`: the branch a Mac's overrides,
+  // in the archives' file names).
+  'host_os': <String, String>{
+    'linux': '//engine/src/flutter/build/bazel:host_os_is_not_linux',
+    'mac': '//engine/src/flutter/build/bazel:host_os_is_not_mac',
+    'win': '//engine/src/flutter/build/bazel:host_os_is_not_win',
+  },
   // zip_bundle.gni's android_zip_archive_dir, a scalar grown under
   // `flutter_runtime_mode != "debug"` and read in a conjunction.
   'flutter_runtime_mode': <String, String>{
@@ -2296,6 +2322,14 @@ const GnCasedValue _skiaGlStandard = GnCasedValue('target_os', <String, String>{
 /// derives from nothing: at the host's value where tools/gn's web build
 /// passes the same or none, and as a formula over the OS where the two
 /// builds differ ([perTargetOsArguments]).
+/// The Apple platforms as a condition: BUILDCONFIG.gn's `is_apple`
+/// (`is_ios || is_mac`), which is is_mac while iOS is not built
+/// ([generationAssumptions] keeps is_ios false). Where a thing exists on the
+/// Apple platforms alone whatever its listing says -- an Objective-C
+/// compile, which GN's other toolchains have no tool for and skip -- this is
+/// its compatibility.
+const Condition applePlatforms = ConditionVariable('is_mac');
+
 Assumptions generationAssumptions() {
   const isWasm = ConditionVariable('is_wasm');
   const isMac = ConditionVariable('is_mac');
@@ -2308,8 +2342,8 @@ Assumptions generationAssumptions() {
     // and the web's do theirs. iOS is not built yet, so is_ios stays a
     // constant and `is_mac || is_ios` reads as is_mac -- as does is_apple,
     // BUILDCONFIG.gn's `is_ios || is_mac`, which the scope does not
-    // evaluate and so spells here.
-    'is_apple': const GnConditionValue(isMac),
+    // evaluate and so spells here ([applePlatforms]).
+    'is_apple': const GnConditionValue(applePlatforms),
     // darwin_sdk.gni's mac_testing_deployment_target (its default), read
     // by darwin/common's test configs.
     'mac_testing_deployment_target': const GnStringValue('14.0'),
