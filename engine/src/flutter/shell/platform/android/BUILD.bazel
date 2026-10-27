@@ -7,8 +7,9 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@engine_version//:version.bzl", "CONTENT_HASH", "ENGINE_VERSION")
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 load("//build_defs/dart:snapshot.bzl", "bin_to_assembly")
 load("//build_defs/dist:zip_bundle.bzl", "zip_bundle")
 load("//build_defs/gn:gn_action.bzl", "gn_action")
@@ -144,11 +145,11 @@ cc_test(
     ],
 )
 
-cc_binary(
-    name = "libflutter.so",
+flutter_shared_library(
+    name = "flutter_shell_native",
     additional_linker_inputs = [":android_exports.lst"],
     linkopts = ["-Wl,--version-script=$(execpath :android_exports.lst)"],
-    linkshared = True,
+    output_name = "flutter",
     target_compatible_with = select({
         "@platforms//os:android": [],
         "//conditions:default": ["@platforms//:incompatible"],
@@ -157,15 +158,6 @@ cc_binary(
         ":flutter_shell_native_src",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
     ],
-)
-
-alias(
-    name = "flutter_shell_native",
-    actual = ":libflutter.so",
-    target_compatible_with = select({
-        "@platforms//os:android": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
 )
 
 bin_to_assembly(

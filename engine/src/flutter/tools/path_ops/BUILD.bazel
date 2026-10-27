@@ -4,13 +4,13 @@
 
 # Generated from //flutter/tools/path_ops/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:shared_library.bzl", "flutter_shared_library")
 
 package(default_visibility = ["//visibility:public"])
 
-cc_binary(
-    name = "libpath_ops.so",
+flutter_shared_library(
+    name = "path_ops",
     srcs = [
         "path_ops.cc",
         "path_ops.h",
@@ -21,17 +21,12 @@ cc_binary(
         ],
         "//conditions:default": [],
     }),
-    linkshared = True,
     local_defines = FLUTTER_LOCAL_DEFINES,
+    output_name = "path_ops",
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
         "@skia",
     ],
-)
-
-alias(
-    name = "path_ops",
-    actual = ":libpath_ops.so",
 )
