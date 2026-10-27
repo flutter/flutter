@@ -1356,7 +1356,7 @@ InferDeferredPlatformViewCreationCallback(
             frame_info.struct_size = sizeof(FlutterFrameInfo);
             frame_info.size = {static_cast<uint32_t>(frame_size.width),
                                static_cast<uint32_t>(frame_size.height)};
-            flutter::GPUMTLTextureInfo texture_info;
+            flutter::GPUMTLTextureInfo texture_info = {};
             FlutterMetalTexture metal_texture =
                 ptr(engine_user_data, &frame_info);
             texture_info.texture_id = metal_texture.texture_id;
@@ -1774,10 +1774,10 @@ MakeRenderTargetFromBackingStoreImpeller(
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
     const FlutterOpenGLFramebuffer* framebuffer,
-    flutter::EmbedderRenderTarget::MakeOrClearCurrentCallback on_make_current =
-        nullptr,
-    flutter::EmbedderRenderTarget::MakeOrClearCurrentCallback on_clear_current =
-        nullptr) {
+    const flutter::EmbedderRenderTarget::MakeOrClearCurrentCallback&
+        on_make_current = nullptr,
+    const flutter::EmbedderRenderTarget::MakeOrClearCurrentCallback&
+        on_clear_current = nullptr) {
 #if defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
   auto format = FlutterFormatToImpellerPixelFormat(framebuffer->target);
   if (!format.has_value()) {
@@ -1864,8 +1864,7 @@ MakeRenderTargetFromBackingStoreImpeller(
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
       backing_store, aiks_context,
       std::make_unique<impeller::RenderTarget>(std::move(render_target_desc)),
-      on_release, framebuffer_destruct, std::move(on_make_current),
-      std::move(on_clear_current));
+      on_release, framebuffer_destruct, on_make_current, on_clear_current);
 #else
   return nullptr;
 #endif

@@ -133,6 +133,8 @@ struct MockProcTableState {
   const uint8_t* last_response_bytes_ptr = nullptr;
   size_t last_response_size = 0;
   std::vector<uint8_t> last_response_payload;
+  FlutterDataCallback last_response_data_callback = nullptr;
+  void* last_response_user_data = nullptr;
 
   // Captured deferred library fields.
   intptr_t last_deferred_loading_unit_id = 0;
@@ -190,6 +192,16 @@ FlutterEngineProcTable BuildMockProcTable(MockProcTableState* state) {
         }
         g_mock_state->custom_asset_resolvers_count =
             args->custom_asset_resolvers_count;
+        if (args->custom_asset_resolvers != nullptr) {
+          for (size_t i = 0; i < args->custom_asset_resolvers_count; ++i) {
+            const FlutterCustomAssetResolver* resolver =
+                args->custom_asset_resolvers[i];
+            if (resolver != nullptr &&
+                resolver->destruction_callback != nullptr) {
+              resolver->destruction_callback(resolver->user_data);
+            }
+          }
+        }
         g_mock_state->image_decoders_count = args->image_decoders_count;
         if (args->image_decoders_count > 0 && args->image_decoders != nullptr &&
             args->image_decoders[0] != nullptr) {
@@ -301,6 +313,8 @@ FlutterEngineProcTable BuildMockProcTable(MockProcTableState* state) {
          FlutterPlatformMessageResponseHandle** response_out) {
         if (g_mock_state != nullptr) {
           g_mock_state->create_response_handle_count++;
+          g_mock_state->last_response_data_callback = data_callback;
+          g_mock_state->last_response_user_data = user_data;
         }
         if (response_out != nullptr) {
           *response_out =
@@ -315,6 +329,13 @@ FlutterEngineProcTable BuildMockProcTable(MockProcTableState* state) {
          FlutterPlatformMessageResponseHandle* response) {
         if (g_mock_state != nullptr) {
           g_mock_state->release_response_handle_count++;
+          if (g_mock_state->last_response_data_callback != nullptr) {
+            auto callback = g_mock_state->last_response_data_callback;
+            void* callback_user_data = g_mock_state->last_response_user_data;
+            g_mock_state->last_response_data_callback = nullptr;
+            g_mock_state->last_response_user_data = nullptr;
+            callback(nullptr, 0, callback_user_data);
+          }
         }
         return kSuccess;
       };

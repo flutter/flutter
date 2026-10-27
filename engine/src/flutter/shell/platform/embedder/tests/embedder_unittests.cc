@@ -401,6 +401,54 @@ TEST_F(EmbedderTest, MergedPlatformUIThread) {
   kill_latch.Wait();
 }
 
+TEST_F(EmbedderTest,
+       PlatformMessageCallbackCanShutdownEngineAndRespondWithoutDeadlock) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto task_runner = CreateNewThread("test_platform_and_ui_thread");
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_task_runner(task_runner, [&](FlutterTask task) {
+    if (!engine.is_valid()) {
+      return;
+    }
+    FlutterEngineRunTask(engine.get(), &task);
+  });
+
+  fml::AutoResetWaitableEvent signal_latch_ui;
+  fml::AutoResetWaitableEvent signal_latch_platform;
+
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+        ASSERT_TRUE(task_runner->RunsTasksOnCurrentThread());
+        signal_latch_ui.Signal();
+      }));
+
+  task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto task_runner_description =
+        test_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(DlISize(1, 1));
+    builder.SetUITaskRunner(&task_runner_description);
+    builder.SetPlatformTaskRunner(&task_runner_description);
+    builder.SetDartEntrypoint("mergedPlatformUIThread");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          ASSERT_TRUE(task_runner->RunsTasksOnCurrentThread());
+          engine.reset();
+          if (message->response_handle != nullptr) {
+            EXPECT_EQ(FlutterEngineSendPlatformMessageResponse(
+                          engine.get(), message->response_handle, nullptr, 0),
+                      kSuccess);
+          }
+          signal_latch_platform.Signal();
+        });
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch_ui.Wait();
+  signal_latch_platform.Wait();
+}
+
 TEST_F(EmbedderTest, UITaskRunnerFlushesMicrotasks) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   auto ui_task_runner = CreateNewThread("test_ui_thread");

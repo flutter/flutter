@@ -1142,6 +1142,12 @@ void FlutterEmbedderNative::Detach() {
       proc_table_.Shutdown(handle);
     }
   }
+  if (custom_asset_resolver_.destruction_callback != nullptr &&
+      custom_asset_resolver_.user_data != nullptr) {
+    custom_asset_resolver_.destruction_callback(
+        custom_asset_resolver_.user_data);
+  }
+  custom_asset_resolver_ = {};
   if (!is_using_mock_proc_table_) {
     ReleaseAllTextures();
     DestroyAndroidOverlayEGLSurfaces();
@@ -1183,6 +1189,11 @@ bool FlutterEmbedderNative::RunBundleAndSnapshotFromLibrary(
 
   if (asset_provider_) {
     asset_provider_->UpdateJavaAssetManager(env, asset_manager, bundle_path);
+    if (custom_asset_resolver_.destruction_callback != nullptr &&
+        custom_asset_resolver_.user_data != nullptr) {
+      custom_asset_resolver_.destruction_callback(
+          custom_asset_resolver_.user_data);
+    }
     custom_asset_resolver_ = asset_provider_->CreateCustomAssetResolver();
   }
 
@@ -1390,10 +1401,20 @@ bool FlutterEmbedderNative::RunBundleAndSnapshotFromLibrary(
       proc_table_.Initialize(FLUTTER_ENGINE_VERSION, &renderer_config,
                              &project_args, this, &initialized_engine);
   if (init_result != kSuccess || initialized_engine == nullptr) {
+    if (custom_asset_resolver_.destruction_callback != nullptr &&
+        custom_asset_resolver_.user_data != nullptr) {
+      custom_asset_resolver_.destruction_callback(
+          custom_asset_resolver_.user_data);
+    }
+    custom_asset_resolver_ = {};
     FML_LOG(ERROR) << "Failed to initialize Flutter engine via proc table: "
                    << init_result;
     return false;
   }
+  // Ownership of custom_asset_resolver_.user_data is transferred to the
+  // initialized engine (EmbedderCustomAssetResolver invokes
+  // destruction_callback when the engine's AssetManager is destroyed).
+  custom_asset_resolver_ = {};
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::Initialize[C-API]");
 
   engine_ = initialized_engine;

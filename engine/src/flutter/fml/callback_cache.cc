@@ -186,8 +186,8 @@ void CallbackCache::SaveCacheToDisk() {
   fml::NonOwnedMapping mapping(reinterpret_cast<const uint8_t*>(data),
                                buffer.GetSize());
   auto dir_name = fml::paths::GetDirectoryName(cache_path_);
-  auto dir = fml::OpenDirectory(dir_name.c_str(), false,
-                                fml::FilePermission::kReadWrite);
+  auto dir =
+      fml::OpenDirectory(dir_name.c_str(), false, fml::FilePermission::kRead);
   fml::WriteAtomically(dir, kCacheName, mapping);
 }
 

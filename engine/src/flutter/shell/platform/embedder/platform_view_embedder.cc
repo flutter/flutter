@@ -54,6 +54,7 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   }
 
   virtual void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
+    auto self = shared_from_this();
     fml::RefPtr<fml::TaskRunner> task_runner;
     {
       std::scoped_lock lock(mutex_);
@@ -72,7 +73,7 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
       task_runner = platform_task_runner_;
     }
     task_runner->PostTask(fml::MakeCopyable(
-        [self = shared_from_this(), message = std::move(message)]() mutable {
+        [self = std::move(self), message = std::move(message)]() mutable {
           auto* handler =
               static_cast<EmbedderPlatformMessageHandler*>(self.get());
           std::scoped_lock lock(handler->mutex_);
@@ -95,6 +96,7 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   virtual void InvokePlatformMessageResponseCallback(
       int response_id,
       std::unique_ptr<fml::Mapping> mapping) {
+    auto self = shared_from_this();
     fml::RefPtr<fml::TaskRunner> task_runner;
     {
       std::scoped_lock lock(mutex_);
@@ -108,7 +110,7 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
       task_runner = platform_task_runner_;
     }
     task_runner->PostTask(
-        fml::MakeCopyable([self = shared_from_this(), response_id,
+        fml::MakeCopyable([self = std::move(self), response_id,
                            mapping = std::move(mapping)]() mutable {
           auto* handler =
               static_cast<EmbedderPlatformMessageHandler*>(self.get());
@@ -121,6 +123,7 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   }
 
   virtual void InvokePlatformMessageEmptyResponseCallback(int response_id) {
+    auto self = shared_from_this();
     fml::RefPtr<fml::TaskRunner> task_runner;
     {
       std::scoped_lock lock(mutex_);
@@ -132,7 +135,7 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
       }
       task_runner = platform_task_runner_;
     }
-    task_runner->PostTask([self = shared_from_this(), response_id]() {
+    task_runner->PostTask([self = std::move(self), response_id]() {
       auto* handler = static_cast<EmbedderPlatformMessageHandler*>(self.get());
       std::scoped_lock lock(handler->mutex_);
       if (handler->parent_) {
@@ -143,7 +146,7 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   }
 
  private:
-  std::mutex mutex_;
+  std::recursive_mutex mutex_;
   PlatformViewEmbedder* parent_ = nullptr;
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;
   const bool enable_direct_dispatch_ = false;
@@ -337,8 +340,8 @@ void PlatformViewEmbedder::HandlePlatformMessage(
     return;
   }
 
-  platform_dispatch_table_.platform_message_response_callback(
-      std::move(message));
+  auto callback = platform_dispatch_table_.platform_message_response_callback;
+  callback(std::move(message));
 }
 
 // |PlatformView|
@@ -519,8 +522,9 @@ void PlatformViewEmbedder::InvokePlatformMessageResponseCallback(
     std::unique_ptr<fml::Mapping> mapping) {
   if (platform_dispatch_table_.platform_message_response_completion_callback !=
       nullptr) {
-    platform_dispatch_table_.platform_message_response_completion_callback(
-        response_id, std::move(mapping));
+    auto callback =
+        platform_dispatch_table_.platform_message_response_completion_callback;
+    callback(response_id, std::move(mapping));
   }
 }
 
@@ -528,8 +532,9 @@ void PlatformViewEmbedder::InvokePlatformMessageEmptyResponseCallback(
     int response_id) {
   if (platform_dispatch_table_
           .platform_message_empty_response_completion_callback != nullptr) {
-    platform_dispatch_table_
-        .platform_message_empty_response_completion_callback(response_id);
+    auto callback = platform_dispatch_table_
+                        .platform_message_empty_response_completion_callback;
+    callback(response_id);
   }
 }
 
