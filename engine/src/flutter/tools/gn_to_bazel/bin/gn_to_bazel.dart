@@ -67,6 +67,13 @@ Future<int> run(List<String> arguments) async {
           'become the packages of the repository, written under --out-dir.',
     )
     ..addOption('depfile', help: 'Write the GN files read, one per line, to this file.')
+    ..addOption(
+      'host',
+      help:
+          'EXPERIMENTAL: evaluate for another host than the Linux x64 one the checked-in files '
+          'assume (macos-arm64, macos-x64), with --out-dir, to see what of the generated files '
+          'depends on the host (research/20 §8).',
+    )
     ..addFlag(
       'check',
       help: 'Compare with the existing BUILD.bazel files instead of writing.',
@@ -91,7 +98,11 @@ Future<int> run(List<String> arguments) async {
   final String gn = options.wasParsed('gn')
       ? options.option('gn')!
       : p.join(root, 'flutter/third_party/gn/gn');
-  final Assumptions assumptions = _assumptions(options.multiOption('assume'));
+  Assumptions assumptions = _assumptions(options.multiOption('assume'));
+  final String? host = options.option('host');
+  if (host != null) {
+    assumptions = assumptions.withValues(_hostAssumptions(host));
+  }
   final Set<String> extraSkips = options.multiOption('skip').toSet();
   final String? buildifierOption = options.option('buildifier');
   final String? buildifier = buildifierOption == 'none'
@@ -423,6 +434,30 @@ Assumptions _assumptions(List<String> specs) {
     values[spec.substring(0, equals)] = Assumptions.parseValue(spec.substring(equals + 1));
   }
   return Assumptions(values);
+}
+
+/// What the generation assumes of the host, for another host than the Linux
+/// x64 one (--host): GN's host_os and host_cpu, config.gni's names of the
+/// host and the prebuilt Dart SDK's directory (DEPS: prebuilts/<host>).
+Map<String, GnValue> _hostAssumptions(String host) {
+  final List<String> parts = host.split('-');
+  if (parts.length != 2 || !const <String>{'linux', 'macos'}.contains(parts[0])) {
+    throw FormatException('--host takes <os>-<cpu> (linux-x64, macos-arm64, macos-x64), not $host');
+  }
+  final String os = parts[0];
+  final String cpu = parts[1];
+  final gnOs = os == 'macos' ? 'mac' : os;
+  final platformName = os == 'macos' ? 'darwin' : os;
+  final sdk = '//flutter/prebuilts/$host/dart-sdk';
+  return <String, GnValue>{
+    'host_os': GnStringValue(gnOs),
+    'host_cpu': GnStringValue(cpu),
+    'platform_name': GnStringValue(platformName),
+    'full_platform_name': GnStringValue('$platformName-$cpu'),
+    'prebuilt_dart_sdk': GnStringValue(sdk),
+    'host_prebuilt_dart_sdk': GnStringValue(sdk),
+    'target_prebuilt_dart_sdk': GnStringValue(sdk),
+  };
 }
 
 Future<String?> _findOnPath(String name) async {
