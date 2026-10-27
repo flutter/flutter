@@ -3,7 +3,10 @@
 # found in the LICENSE file.
 
 # The C/C++ compile's rules: copts.bzl (what GN adds per target: FLUTTER_COPTS,
-# the local defines) and sanitizers.bzl (the sanitizer attributes and the
-# launcher lines a test gets).
+# the local defines), sanitizers.bzl (the sanitizer attributes and the
+# launcher lines a test gets), and the Apple sources' rules -- objc_library.bzl
+# (flutter_objc_library, a GN target's .m/.mm files), swift_library.bzl
+# (flutter_swift_library, a source_set of .swift files through GN's
+# swiftc.py) and apple.bzl (what they and the toolchains agree on).
 
 package(default_visibility = ["//visibility:public"])
