@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -12,8 +14,6 @@ class DepfileService {
 
   final Logger _logger;
   final FileSystem _fileSystem;
-  static final _separatorExpr = RegExp(r'([^\\]) ');
-  static final _escapeExpr = RegExp(r'\\(.)');
 
   /// Given an [depfile] File, write the depfile contents.
   ///
@@ -36,7 +36,6 @@ class DepfileService {
       ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
-    final buffer = StringBuffer();
     final List<File> outputsToWrite;
     if (filterOutputs) {
       final Set<String> inputPaths = depfile.inputs.map((File f) => f.absolute.path).toSet();
@@ -46,10 +45,17 @@ class DepfileService {
     } else {
       outputsToWrite = depfile.outputs;
     }
-    _writeFilesToBuffer(outputsToWrite, buffer);
-    buffer.write(': ');
-    _writeFilesToBuffer(depfile.inputs, buffer);
-    output.writeAsStringSync(buffer.toString());
+    final extensionDepfile = ExtensionDepfile(
+      inputs: <String>[
+        for (final File file in depfile.inputs) _fileSystem.path.normalize(file.path),
+      ],
+      outputs: <String>[
+        for (final File file in outputsToWrite) _fileSystem.path.normalize(file.path),
+      ],
+    );
+    output.writeAsStringSync(
+      extensionDepfile.format(windows: _fileSystem.path.style.separator == r'\'),
+    );
   }
 
   /// Parse the depfile contents from [file].
@@ -60,13 +66,15 @@ class DepfileService {
   /// will be resolved relative to it.
   Depfile parse(File file, [Directory? baseDirectory]) {
     final String contents = file.readAsStringSync();
-    final List<String> colonSeparated = contents.split(': ');
-    if (colonSeparated.length != 2) {
+    final ExtensionDepfile parsed;
+    try {
+      parsed = ExtensionDepfile.parse(contents);
+    } on FormatException {
       _logger.printError('Invalid depfile: ${file.path}');
       return const Depfile(<File>[], <File>[]);
     }
-    final List<File> inputs = _processList(colonSeparated[1].trim(), baseDirectory);
-    final List<File> outputs = _processList(colonSeparated[0].trim(), baseDirectory);
+    final List<File> inputs = _resolvePaths(parsed.inputs, baseDirectory);
+    final List<File> outputs = _resolvePaths(parsed.outputs, baseDirectory);
     return Depfile(inputs, outputs);
   }
 
@@ -84,51 +92,19 @@ class DepfileService {
     return Depfile(inputs, <File>[output]);
   }
 
-  void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
-    final backslash = _fileSystem.path.style.separator == r'\';
-    for (final outputFile in files) {
-      String path = _fileSystem.path.normalize(outputFile.path);
-      if (backslash) {
-        // Backslashes in a depfile have to be escaped if the platform separator is a backslash.
-        path = path.replaceAll(r'\', r'\\');
-      } else {
-        // Convert all path separators to forward slashes.
-        path = path.replaceAll(r'\', r'/');
-      }
-      // Escape spaces.
-      path = path.replaceAll(r' ', r'\ ');
-      buffer.write(' $path');
-    }
-  }
-
-  List<File> _processList(String rawText, [Directory? baseDirectory]) {
+  List<File> _resolvePaths(List<String> paths, [Directory? baseDirectory]) {
     final isWindows = _fileSystem.path.style.separator == r'\';
-    return rawText
-        // Put every file on right-hand side on the separate line
-        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
-        .split('\n')
-        // Expand escape sequences, so that '\ ', for example, becomes ' '
-        .map<String>(
-          (String path) =>
-              path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)!).trim(),
-        )
-        .where((String path) => path.isNotEmpty)
-        // The tool doesn't write duplicates to these lists. This call is an attempt to
-        // be resilient to the outputs of other tools which write or user edits to depfiles.
-        .toSet()
-        // Normalize the path before creating a file object.
-        .map((String path) {
-          if (isWindows && path.length >= 5 && path.substring(0, 5).toLowerCase() == r'\unc\') {
-            path = r'\\' + path.substring(5);
-          }
-          if (baseDirectory != null && _fileSystem.path.isRelative(path)) {
-            return _fileSystem.file(
-              _fileSystem.path.normalize(_fileSystem.path.join(baseDirectory.path, path)),
-            );
-          }
-          return _fileSystem.file(_fileSystem.path.normalize(path));
-        })
-        .toList();
+    return paths.map((String path) {
+      if (isWindows && path.length >= 5 && path.substring(0, 5).toLowerCase() == r'\unc\') {
+        path = r'\\' + path.substring(5);
+      }
+      if (baseDirectory != null && _fileSystem.path.isRelative(path)) {
+        return _fileSystem.file(
+          _fileSystem.path.normalize(_fileSystem.path.join(baseDirectory.path, path)),
+        );
+      }
+      return _fileSystem.file(_fileSystem.path.normalize(path));
+    }).toList();
   }
 }
 

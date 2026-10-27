@@ -251,6 +251,7 @@ List<FlutterCommand> generateCommands({
   ),
   AssembleCommand(
     buildSystem: toolDependencies.buildSystem,
+    extensionBuildManager: toolDependencies.extensionBuildManager,
     featureFlags: toolDependencies.featureFlags,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
