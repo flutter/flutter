@@ -1810,8 +1810,11 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
   FML_CHECK(back_texture) << "Context is valid:"
                           << back_render_pass.GetInlinePassContext()->IsValid();
 
-  // The maximum coverage of the subpass. Subpasses textures should never
-  // extend outside the parent pass texture or the current clip coverage.
+  // The maximum coverage of the subpass. Subpasses textures should generally
+  // not extend outside the parent pass texture or the current clip coverage.
+  // The exception is a subpass whose image filter requires its full source
+  // coverage (see `FilterContents::RequiresFullSourceCoverage`), which
+  // `ComputeSaveLayerCoverage` may size to the full layer bounds.
   std::optional<Rect> maybe_coverage_limit =
       Rect::MakeOriginSize(GetGlobalPassPosition(),
                            Size(back_texture->GetSize()))

@@ -14,6 +14,13 @@ bool SizeDifferenceUnderThreshold(Size a, Size b, Scalar threshold) {
 }
 
 static constexpr Scalar kDefaultSizeThreshold = 0.3;
+
+// Compares in floating point so that non-finite or very large sizes are
+// rejected rather than overflowing a conversion to an integer size.
+bool FitsWithin(Size size, ISize max_size) {
+  return size.width <= static_cast<Scalar>(max_size.width) &&
+         size.height <= static_cast<Scalar>(max_size.height);
+}
 }  // namespace
 
 std::optional<Rect> ComputeSaveLayerCoverage(
@@ -63,17 +70,12 @@ std::optional<Rect> ComputeSaveLayerCoverage(
       // No intersection with parent coverage limit.
       return std::nullopt;
     }
-    bool source_is_unbounded = source_coverage_limit->IsMaximum() ||
-                               !source_coverage_limit->IsFinite();
     // The image filter may change the coverage limit required to flood
     // the parent layer. Returning the source coverage limit so that we
     // can guarantee the render target is larger enough.
     //
     // See note below on flood_output_coverage.
     if (flood_output_coverage || coverage.IsMaximum()) {
-      if (source_is_unbounded) {
-        return coverage_limit;
-      }
       return source_coverage_limit;
     }
 
@@ -88,20 +90,26 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     // intersected coverage, then just use the transformed coverage. In other
     // cases, use the intersection.
     auto transformed_coverage = coverage.TransformBounds(effect_transform);
-    if (source_is_unbounded) {
-      if (!transformed_coverage.IntersectsWithRect(coverage_limit)) {
-        return std::nullopt;
-      }
-      ISize full_size(transformed_coverage.GetSize());
-      if (!max_subpass_size.has_value() ||
-          (full_size.width <= max_subpass_size->width &&
-           full_size.height <= max_subpass_size->height)) {
-        return transformed_coverage;
-      }
-      return transformed_coverage.Intersection(coverage_limit);
-    }
     auto intersected_coverage =
         transformed_coverage.Intersection(source_coverage_limit.value());
+    // Filters that require their full source coverage (e.g. runtime effect
+    // shaders, whose output depends on the input's extent via `u_size` and
+    // `FlutterFragCoord()`) must not have their input trimmed to the source
+    // coverage limit. Preserve the full coverage as long as some of it is
+    // visible and it fits within a single render target. Both
+    // `transformed_coverage` and `source_coverage_limit` are in the filter's
+    // input space, so this also holds for filters composed with an outer
+    // filter that moves or expands its input.
+    if (image_filter->RequiresFullSourceCoverage()) {
+      if (!intersected_coverage.has_value()) {
+        return std::nullopt;
+      }
+      if (!max_subpass_size.has_value() ||
+          FitsWithin(transformed_coverage.GetSize(), *max_subpass_size)) {
+        return transformed_coverage;
+      }
+      return intersected_coverage;
+    }
     if (intersected_coverage.has_value() &&
         SizeDifferenceUnderThreshold(transformed_coverage.GetSize(),
                                      intersected_coverage->GetSize(),

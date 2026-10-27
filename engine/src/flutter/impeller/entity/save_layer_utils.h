@@ -31,9 +31,11 @@ namespace impeller {
 /// This should be set to true if the paint has a backdrop filter or if there is
 /// a transparent black effecting color filter.
 /// @param max_subpass_size      Optional maximum render pass attachment size.
-///                              When provided, filters with unbounded source
-///                              coverage only preserve the full layer coverage
-///                              if it fits within a single render target.
+///                              When provided, filters that require their
+///                              full source coverage (see
+///                              `FilterContents::RequiresFullSourceCoverage`)
+///                              only preserve the full layer coverage if it
+///                              fits within a single render target.
 ///
 /// The coverage computation expects `content_coverage` to be in the child
 /// coordinate space. `effect_transform` is used to transform this back into the

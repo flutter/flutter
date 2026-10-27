@@ -180,13 +180,21 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
 }
 
 // |FilterContents|
+bool RuntimeEffectFilterContents::RequiresFullSourceCoverage() const {
+  // The shader may sample anywhere in its input and its output depends on the
+  // input's extent via `u_size` and `FlutterFragCoord()`.
+  return true;
+}
+
+// |FilterContents|
 std::optional<Rect> RuntimeEffectFilterContents::GetFilterSourceCoverage(
     const Matrix& effect_transform,
     const Rect& output_limit) const {
-  if (output_limit.IsEmpty()) {
-    return std::nullopt;
-  }
-  return Rect::MakeMaximum();
+  // The output of a runtime effect filter covers the same region as its input,
+  // so this is the region of the input that maps to the visible output. The
+  // filter may still sample input pixels outside of this region; see
+  // |RequiresFullSourceCoverage|.
+  return output_limit;
 }
 
 }  // namespace impeller

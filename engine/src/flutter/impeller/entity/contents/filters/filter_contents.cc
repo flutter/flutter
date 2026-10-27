@@ -215,10 +215,6 @@ std::optional<Rect> FilterContents::GetSourceCoverage(
     return std::nullopt;
   }
 
-  if (filter_input_coverage->IsMaximum()) {
-    return filter_input_coverage;
-  }
-
   std::optional<Rect> inputs_coverage;
   for (const auto& input : inputs_) {
     auto input_coverage = input->GetSourceCoverage(
@@ -229,6 +225,15 @@ std::optional<Rect> FilterContents::GetSourceCoverage(
     inputs_coverage = Rect::Union(inputs_coverage, input_coverage.value());
   }
   return inputs_coverage;
+}
+
+bool FilterContents::RequiresFullSourceCoverage() const {
+  for (const auto& input : inputs_) {
+    if (input->RequiresFullSourceCoverage()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 std::optional<Entity> FilterContents::GetEntity(

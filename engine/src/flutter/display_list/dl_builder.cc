@@ -599,6 +599,7 @@ void DisplayListBuilder::saveLayer(const DlRect& bounds,
         // fill the output space, so we use a maximal rect to accumulate
         // the layer bounds.
         current_info().global_state.resetDeviceCullRect(kMaxCullRect);
+        current_layer().filter_input_is_unbounded = true;
       }
     }
 
@@ -711,13 +712,21 @@ void DisplayListBuilder::RestoreLayer() {
     DlRect user_bounds = layer_op->rect;
     if (!content_bounds.IsEmpty()) {
       DlRect device_bounds;
-      bool has_device_bounds = parent_info().global_state.mapAndClipRect(
-          user_bounds, &device_bounds);
-      DlIRect unused;
-      if (current_layer().filter && has_device_bounds &&
-          current_layer().filter->get_input_device_bounds(
-              DlIRect::RoundOut(device_bounds),
-              parent_info().global_state.matrix(), unused) == nullptr) {
+      if (current_layer().filter_input_is_unbounded) {
+        // The user bounds are in the filter's input space, but the parent's
+        // cull rect applies to the filter's output. Map the bounds to device
+        // space without clipping them here; TransferLayerBounds clips them
+        // against the parent cull rect after they have been mapped through
+        // the filter (which matters when the filter is composed with an outer
+        // filter that moves or expands its input, e.g. a matrix or blur).
+        parent_info().global_state.mapRect(user_bounds, &device_bounds);
+        device_bounds = device_bounds.IntersectionOrEmpty(kMaxCullRect);
+      }
+      if (!device_bounds.IsEmpty()) {
+        // The filter may need input from anywhere within the user bounds
+        // (e.g. a runtime effect that samples or displaces pixels relative
+        // to the full layer), so preserve them instead of shrinking the layer
+        // to its content bounds.
         if (!user_bounds.Contains(content_bounds)) {
           layer_op->options = layer_op->options.with_content_is_clipped();
         }
@@ -913,17 +922,18 @@ bool DisplayListBuilder::AdjustRTreeRects(
   auto rect_keep = rect_start_index;
   for (size_t i = rect_start_index; i < rects.size(); i++) {
     DlRect bounds;
+    bool rect_floods = full_layer_floods;
     if (full_layer_output.has_value()) {
       bounds = *full_layer_output;
-    } else if (!full_layer_floods) {
+    } else if (!rect_floods) {
       DlIRect ibounds = DlIRect::RoundOut(rects[i]);
       if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
         bounds = DlRect::Make(ibounds);
       } else {
-        full_layer_floods = true;
+        rect_floods = true;
       }
     }
-    if (full_layer_floods) {
+    if (rect_floods) {
       bounds = clip;
       ret = true;
     }

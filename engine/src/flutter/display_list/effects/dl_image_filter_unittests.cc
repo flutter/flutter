@@ -983,6 +983,7 @@ TEST(DisplayListImageFilter, RuntimeEffectMapDeviceBounds) {
   DlIRect* result =
       filter_a.map_device_bounds(input_bounds, identity, output_bounds);
 
+  EXPECT_NE(result, nullptr);
   EXPECT_EQ(result, &output_bounds);
   EXPECT_EQ(output_bounds, input_bounds);
 }
@@ -996,6 +997,7 @@ TEST(DisplayListImageFilter, RuntimeEffectMapInputBounds) {
   DlRect output_bounds;
   DlRect* result = filter_a.map_local_bounds(input_bounds, output_bounds);
 
+  EXPECT_NE(result, nullptr);
   EXPECT_EQ(result, &output_bounds);
   EXPECT_EQ(output_bounds, input_bounds);
 }
@@ -1197,6 +1199,82 @@ TEST(DisplayListImageFilter,
     EXPECT_EQ(dl_rtree->GetBounds(), expected_bounds);
     ASSERT_TRUE(dl_rtree->has_rtree());
     EXPECT_EQ(dl_rtree->rtree()->bounds(), expected_bounds);
+  }
+}
+
+namespace {
+
+class DrawRectCountingReceiver final : public IgnoreAttributeDispatchHelper,
+                                       public IgnoreClipDispatchHelper,
+                                       public IgnoreTransformDispatchHelper,
+                                       public IgnoreDrawDispatchHelper {
+ public:
+  void drawRect(const DlRect& rect) override { draw_rect_count++; }
+
+  int draw_rect_count = 0;
+};
+
+}  // namespace
+
+TEST(DisplayListImageFilter,
+     RuntimeEffectComposedWithOuterTranslateMapsLayerBeforeClipping) {
+  auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>());
+  // compose(outer: Matrix(translate 0, -500), inner: RuntimeEffect)
+  auto matrix_filter = DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({0.0f, -500.0f}), DlImageSampling::kLinear);
+  auto composed = DlImageFilter::MakeCompose(matrix_filter, runtime_filter);
+  DlPaint save_paint;
+  save_paint.setImageFilter(composed);
+
+  DlRect outer_clip = DlRect::MakeLTRB(0, 0, 400, 300);
+  // Drawn at [50, 100, 150, 200] after the outer translation.
+  DlRect child_bounds = DlRect::MakeLTRB(50, 600, 150, 700);
+
+  // Case 1: the layer bounds partially intersect the outer clip before the
+  // outer translation. The full layer output ([0, -500, 400, 300]) clipped to
+  // the outer clip must be attributed to the child in the RTree, rather than
+  // the outer clip mapped through the filter ([0, -500, 400, -200]).
+  {
+    DlRect layer_bounds = DlRect::MakeLTRB(0, 0, 400, 800);
+
+    DisplayListBuilder builder(outer_clip, /*prepare_rtree=*/true);
+    builder.SaveLayer(layer_bounds, &save_paint);
+    builder.DrawRect(child_bounds, DlPaint());
+    builder.Restore();
+    auto display_list = builder.Build();
+
+    EXPECT_EQ(display_list->GetBounds(), outer_clip);
+    ASSERT_TRUE(display_list->has_rtree());
+    EXPECT_EQ(display_list->rtree()->bounds(), outer_clip);
+
+    DrawRectCountingReceiver receiver;
+    display_list->Dispatch(receiver, DlRect::MakeLTRB(0, 100, 400, 200));
+    EXPECT_EQ(receiver.draw_rect_count, 1);
+  }
+
+  // Case 2: the layer bounds are entirely outside of the outer clip before
+  // the outer translation, but its output ([0, -100, 400, 300]) is visible.
+  // The caller bounds must still be preserved.
+  {
+    DlRect layer_bounds = DlRect::MakeLTRB(0, 400, 400, 800);
+
+    for (bool prepare_rtree : {false, true}) {
+      DisplayListBuilder builder(outer_clip, prepare_rtree);
+      builder.SaveLayer(layer_bounds, &save_paint);
+      builder.DrawRect(child_bounds, DlPaint());
+      builder.Restore();
+      auto display_list = builder.Build();
+
+      EXPECT_EQ(display_list->GetBounds(), outer_clip)
+          << "prepare_rtree: " << prepare_rtree;
+
+      SaveLayerOptionsReceiver receiver;
+      display_list->Dispatch(receiver);
+      ASSERT_EQ(receiver.recorded_bounds.size(), 1u);
+      EXPECT_EQ(receiver.recorded_bounds[0], layer_bounds)
+          << "prepare_rtree: " << prepare_rtree;
+    }
   }
 }
 

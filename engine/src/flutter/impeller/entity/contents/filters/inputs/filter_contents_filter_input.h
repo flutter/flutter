@@ -29,6 +29,9 @@ class FilterContentsFilterInput final : public FilterInput {
       const Rect& output_limit) const override;
 
   // |FilterInput|
+  bool RequiresFullSourceCoverage() const override;
+
+  // |FilterInput|
   Matrix GetLocalTransform(const Entity& entity) const override;
 
   // |FilterInput|

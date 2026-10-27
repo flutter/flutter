@@ -410,7 +410,7 @@ TEST(SaveLayerUtilsTest,
 }
 
 TEST(SaveLayerUtilsTest,
-     RuntimeEffectOuterComposedWithMatrixInnerAndFloodUsesCoverageLimit) {
+     RuntimeEffectOuterComposedWithMatrixInnerAndFloodUsesSourceCoverageLimit) {
   auto inner_matrix = FilterContents::MakeMatrixFilter(
       FilterInput::Make(Rect()), Matrix::MakeScale({0.5f, 0.5f, 1.0f}), {});
   auto composed_filter = FilterContents::MakeRuntimeEffect(
@@ -423,6 +423,112 @@ TEST(SaveLayerUtilsTest,
       /*image_filter=*/composed_filter,                     //
       /*flood_output_coverage=*/true,                       //
       /*flood_input_coverage=*/false                        //
+  );
+
+  // The subpass coverage is in the input space of the inner matrix filter,
+  // which must be twice as large as the coverage limit to flood it.
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 800, 1600));
+}
+
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectInnerComposedWithTranslateOuterMovedIntoCoverageLimit) {
+  auto runtime_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+  auto composed_filter = FilterContents::MakeMatrixFilter(
+      FilterInput::Make(runtime_filter), Matrix::MakeTranslation({150, 0, 0}),
+      {});
+
+  // The content does not intersect the coverage limit before the outer
+  // translation, but its output ([150, 0, 250, 100]) does.
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*effect_transform=*/{},                              //
+      /*coverage_limit=*/Rect::MakeLTRB(200, 0, 400, 100),  //
+      /*image_filter=*/composed_filter                      //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 100, 100));
+}
+
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectInnerComposedWithBlurOuterExpandedIntoCoverageLimit) {
+  auto runtime_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+  auto composed_filter = FilterContents::MakeGaussianBlur(
+      FilterInput::Make(runtime_filter), Sigma(10), Sigma(10));
+
+  // The content is just outside of the coverage limit, but the blur of the
+  // outer filter reaches into it.
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*effect_transform=*/{},                              //
+      /*coverage_limit=*/Rect::MakeLTRB(102, 0, 300, 100),  //
+      /*image_filter=*/composed_filter                      //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 100, 100));
+}
+
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectInnerComposedWithTranslateOuterAndFloodUsesSourceLimit) {
+  auto runtime_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+  auto composed_filter = FilterContents::MakeMatrixFilter(
+      FilterInput::Make(runtime_filter), Matrix::MakeTranslation({150, 0, 0}),
+      {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*effect_transform=*/{},                              //
+      /*coverage_limit=*/Rect::MakeLTRB(200, 0, 400, 100),  //
+      /*image_filter=*/composed_filter,                     //
+      /*flood_output_coverage=*/true                        //
+  );
+
+  // The coverage limit mapped back through the outer translation.
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(50, 0, 250, 100));
+}
+
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectInnerComposedWithTranslateOuterExceedingMaxSubpassSize) {
+  auto runtime_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+  auto composed_filter = FilterContents::MakeMatrixFilter(
+      FilterInput::Make(runtime_filter), Matrix::MakeTranslation({0, 1000, 0}),
+      {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 400, 20000),    //
+      /*effect_transform=*/{},                                  //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 15000, 400, 16000),  //
+      /*image_filter=*/composed_filter,                         //
+      /*flood_output_coverage=*/false,                          //
+      /*flood_input_coverage=*/false,                           //
+      /*max_subpass_size=*/ISize(4096, 4096)                    //
+  );
+
+  // Falls back to the content intersected with the coverage limit mapped back
+  // through the outer translation.
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 14000, 400, 15000));
+}
+
+TEST(SaveLayerUtilsTest, RuntimeEffectNonFiniteCoverageFallsBackToLimit) {
+  auto image_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),           //
+      /*effect_transform=*/Matrix::MakeScale({1e38f, 1e38f, 1.0f}),  //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 400, 800),             //
+      /*image_filter=*/image_filter,                                 //
+      /*flood_output_coverage=*/false,                               //
+      /*flood_input_coverage=*/false,                                //
+      /*max_subpass_size=*/ISize(4096, 4096)                         //
   );
 
   ASSERT_TRUE(coverage.has_value());
