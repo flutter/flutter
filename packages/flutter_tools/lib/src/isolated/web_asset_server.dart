@@ -17,6 +17,7 @@ import 'package:shelf/shelf_io.dart' as shelf;
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -25,9 +26,10 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart' show kDdcCanaryFeatures;
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../globals.dart' as globals;
+import '../version.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
@@ -76,11 +78,10 @@ class WebAssetServer implements AssetReader {
     this._digests, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
-    required this.fileSystem,
-    required this.logger,
+    required this._toolContext,
     this._baseHref,
     this._webDefines = const <String, String>{},
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex));
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(_toolContext.fs, 'index.html', _kDefaultIndex));
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -215,11 +216,11 @@ class WebAssetServer implements AssetReader {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     bool useDwdsWebSocketConnection = false,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
+    required ToolContext toolContext,
     Map<String, String> webDefines = const <String, String>{},
   }) async {
+    final ToolContext(:Config config, :FileSystem fs, :Logger logger, :Platform platform) =
+        toolContext;
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
     final HttpsConfig? httpsConfig = webDevServerConfig.https;
@@ -278,8 +279,7 @@ class WebAssetServer implements AssetReader {
       digests,
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
-      fileSystem: fileSystem,
-      logger: logger,
+      toolContext: toolContext,
       baseHref: webDevServerConfig.baseHref,
       webDefines: webDefines,
     );
@@ -311,10 +311,10 @@ class WebAssetServer implements AssetReader {
     if (buildInfo.mode != BuildMode.debug || isWasm) {
       final releaseAssetServer = ReleaseAssetServer(
         entrypoint,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         platform: platform,
         flutterRoot: Cache.flutterRoot,
-        webBuildDirectory: getWebBuildDirectory(config: globals.config, fileSystem: fileSystem),
+        webBuildDirectory: getWebBuildDirectory(config: config, fileSystem: fs),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,
       );
@@ -358,9 +358,7 @@ class WebAssetServer implements AssetReader {
           PackageUriMapper(packageConfig),
           digestProvider,
           BuildSettings(
-            appEntrypoint: packageConfig.toPackageUriForWorkspace(
-              fileSystem.file(entrypoint).absolute.uri,
-            ),
+            appEntrypoint: packageConfig.toPackageUriForWorkspace(fs.file(entrypoint).absolute.uri),
             canaryFeatures: kDdcCanaryFeatures,
           ),
           packageConfigPath: buildInfo.packageConfigPath,
@@ -503,37 +501,49 @@ class WebAssetServer implements AssetReader {
       return shelf.Response.ok(bytes, headers: headers);
     }
 
+    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs, :Platform platform) =
+        _toolContext;
     File file = _resolveDartFile(requestPath);
 
     if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
-      final Directory canvasKitDirectory = fileSystem.directory(
-        fileSystem.path.join(
-          globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
-          'canvaskit',
-        ),
+      final Directory canvasKitDirectory = fs.directory(
+        fs.path.join(artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path, 'canvaskit'),
       );
-      final Uri potential = canvasKitDirectory.uri.resolve(
+      final Uri? potential = resolveRequestPathUnder(
+        canvasKitDirectory.uri,
         requestPath.replaceFirst('canvaskit/', ''),
+        fileSystem: fs,
+        windows: platform.isWindows,
       );
-      file = fileSystem.file(potential);
+      if (potential != null) {
+        file = fs.file(potential);
+      }
     }
 
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
-      final Uri potential = fileSystem
-          .directory(getAssetBuildDirectory(null, fileSystem))
-          .uri
-          .resolve(requestPath.replaceFirst('assets/', ''));
-      file = fileSystem.file(potential);
+      final Uri? potential = resolveRequestPathUnder(
+        fs.directory(getAssetBuildDirectory(config, fs)).uri,
+        requestPath.replaceFirst('assets/', ''),
+        fileSystem: fs,
+        windows: platform.isWindows,
+      );
+      if (potential != null) {
+        file = fs.file(potential);
+      }
     }
 
     if (!file.existsSync()) {
-      final Uri webPath = fileSystem.currentDirectory
-          .childDirectory('web')
-          .uri
-          .resolve(requestPath);
-      file = fileSystem.file(webPath);
+      final Uri? webPath = resolveRequestPathUnder(
+        fs.currentDirectory.childDirectory('web').uri,
+        requestPath,
+        fileSystem: fs,
+        windows: platform.isWindows,
+      );
+      if (webPath != null) {
+        file = fs.file(webPath);
+      }
     }
 
     if (!file.existsSync()) {
@@ -595,26 +605,23 @@ class WebAssetServer implements AssetReader {
 
   final bool useLocalCanvasKit;
 
-  final FileSystem fileSystem;
-  final Logger logger;
+  final ToolContext _toolContext;
 
   String get _buildConfigString {
+    final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :FileSystem fs) =
+        _toolContext;
     final wasmHashes = <String, String>{};
     for (final String path in _webMemoryFS.files.keys) {
       if (path.endsWith('.wasm')) {
         wasmHashes[path] = crypto.sha256.convert(_webMemoryFS.files[path]!).toString();
       }
     }
-    final String canvasKitPath = globals.artifacts!
-        .getHostArtifact(HostArtifact.flutterWebSdk)
-        .path;
-    final Directory canvasKitDirectory = fileSystem.directory(
-      fileSystem.path.join(canvasKitPath, 'canvaskit'),
-    );
+    final String canvasKitPath = artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
+    final Directory canvasKitDirectory = fs.directory(fs.path.join(canvasKitPath, 'canvaskit'));
     if (canvasKitDirectory.existsSync()) {
       for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
         if (file.path.endsWith('.wasm')) {
-          final String relativePath = fileSystem.path
+          final String relativePath = fs.path
               .relative(file.path, from: canvasKitDirectory.path)
               .replaceAll(r'\', '/');
           wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
@@ -623,7 +630,7 @@ class WebAssetServer implements AssetReader {
     }
 
     final buildConfig = <String, Object>{
-      'engineRevision': globals.flutterVersion.engineRevision,
+      'engineRevision': flutterVersion.engineRevision,
       'wasmHashes': wasmHashes,
       'builds': <Object>[
         <String, Object>{
@@ -642,16 +649,16 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 ''';
   }
 
-  File get _flutterJsFile => fileSystem.file(
-    fileSystem.path.join(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
-      'flutter.js',
-    ),
-  );
+  File get _flutterJsFile {
+    final ToolContext(:Artifacts artifacts, :FileSystem fs) = _toolContext;
+    return fs.file(
+      fs.path.join(artifacts.getHostArtifact(HostArtifact.flutterJsDirectory).path, 'flutter.js'),
+    );
+  }
 
   String get _flutterBootstrapJsContent {
     final WebTemplate bootstrapTemplate = getWebTemplate(
-      fileSystem,
+      _toolContext.fs,
       'flutter_bootstrap.js',
       generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
@@ -660,7 +667,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
-      logger: logger,
+      logger: _toolContext.logger,
       webDefines: _webDefines,
     );
   }
@@ -673,7 +680,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   shelf.Response _serveIndexHtml() {
-    final WebTemplate indexHtml = getWebTemplate(fileSystem, 'index.html', _kDefaultIndex);
+    final WebTemplate indexHtml = getWebTemplate(_toolContext.fs, 'index.html', _kDefaultIndex);
     return shelf.Response.ok(
       indexHtml.withSubstitutions(
         baseHref: _baseHref ?? '/',
@@ -683,7 +690,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
-        logger: logger,
+        logger: _toolContext.logger,
         webDefines: _webDefines,
       ),
       encoding: utf8,
@@ -707,14 +714,28 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         return entrypointCacheDirectory.childFile('web_entrypoint.dart');
     }
 
-    final String extension = fileSystem.path.extension(path);
+    final ToolContext(:Artifacts artifacts, :FileSystem fs, :Platform platform) = _toolContext;
+    final File missing = fs.currentDirectory.childFile('.non_existent_file');
+    if (!isRelativeRequestPath(path)) {
+      return missing;
+    }
+
+    final String extension = fs.path.extension(path);
     if (_sourceMapExtensions.contains(extension)) {
       // If this is a dart file, it must be on the local file system and is
       // likely coming from a source map request. The tool doesn't currently
       // consider the case of Dart files as assets.
-      final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
-      if (dartFile.existsSync()) {
-        return dartFile;
+      final Uri? dartFileUri = resolveRequestPathUnder(
+        fs.currentDirectory.uri,
+        path,
+        fileSystem: fs,
+        windows: platform.isWindows,
+      );
+      if (dartFileUri != null) {
+        final File dartFile = fs.file(dartFileUri);
+        if (dartFile.existsSync()) {
+          return dartFile;
+        }
       }
 
       final List<String> segments = path.split('/');
@@ -723,50 +744,75 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       }
 
       // The file might have been a package file which is signaled by a
-      // `/packages/<package>/<path>` request.
-      if (segments.first == 'packages') {
-        final Uri? filePath = _packages.resolve(
-          Uri(scheme: 'package', pathSegments: segments.skip(1)),
-        );
-        if (filePath != null) {
-          final File packageFile = fileSystem.file(filePath);
-          if (packageFile.existsSync()) {
-            return packageFile;
+      // `/packages/<package>/<path>` request. The rest of the path is resolved
+      // below the package's root like any other search root, rather than
+      // through a `package:` URI built from the request segments.
+      if (segments.length >= 3 && segments.first == 'packages') {
+        final Package? package = _packages[segments[1]];
+        if (package != null) {
+          final Uri? packageFileUri = resolveRequestPathUnder(
+            package.packageUriRoot,
+            segments.skip(2).join('/'),
+            fileSystem: fs,
+            windows: platform.isWindows,
+          );
+          if (packageFileUri != null) {
+            final File packageFile = fs.file(packageFileUri);
+            if (packageFile.existsSync()) {
+              return packageFile;
+            }
           }
         }
       }
 
       // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
-      final Directory dartSdkParent = fileSystem
+      final Directory dartSdkParent = fs
           .directory(
-            globals.artifacts!.getArtifactPath(
+            artifacts.getArtifactPath(
               Artifact.engineDartSdkPath,
               platform: TargetPlatform.web_javascript,
             ),
           )
           .parent;
-      final File dartSdkFile = fileSystem.file(dartSdkParent.uri.resolve(path));
-      if (dartSdkFile.existsSync()) {
-        return dartSdkFile;
+      final Uri? dartSdkFileUri = resolveRequestPathUnder(
+        dartSdkParent.uri,
+        path,
+        fileSystem: fs,
+        windows: platform.isWindows,
+      );
+      if (dartSdkFileUri != null) {
+        final File dartSdkFile = fs.file(dartSdkFileUri);
+        if (dartSdkFile.existsSync()) {
+          return dartSdkFile;
+        }
       }
 
-      final Directory flutterWebSdk = fileSystem.directory(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk),
+      final Directory flutterWebSdk = fs.directory(
+        artifacts.getHostArtifact(HostArtifact.flutterWebSdk),
       );
-      final File webSdkFile = fileSystem.file(flutterWebSdk.uri.resolve(path));
-      if (webSdkFile.existsSync()) {
-        return webSdkFile;
+      final Uri? webSdkFileUri = resolveRequestPathUnder(
+        flutterWebSdk.uri,
+        path,
+        fileSystem: fs,
+        windows: platform.isWindows,
+      );
+      if (webSdkFileUri != null) {
+        final File webSdkFile = fs.file(webSdkFileUri);
+        if (webSdkFile.existsSync()) {
+          return webSdkFile;
+        }
       }
     }
 
-    return fileSystem.currentDirectory.childFile('.non_existent_file');
+    return missing;
   }
 
-  File get _resolveDartSdkJsFile =>
-      fileSystem.file(globals.artifacts!.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!));
+  File get _resolveDartSdkJsFile => _toolContext.fs.file(
+    _toolContext.artifacts.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!),
+  );
 
-  File get _resolveDartSdkJsMapFile => fileSystem.file(
-    globals.artifacts!.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!),
+  File get _resolveDartSdkJsMapFile => _toolContext.fs.file(
+    _toolContext.artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!),
   );
 
   @override

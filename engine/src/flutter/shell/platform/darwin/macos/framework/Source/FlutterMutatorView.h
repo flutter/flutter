@@ -32,8 +32,8 @@ class PlatformViewLayer {
  private:
   FlutterPlatformViewIdentifier identifier_;
   std::vector<FlutterPlatformViewMutation> mutations_;
-  FlutterPoint offset_;
-  FlutterSize size_;
+  FlutterPoint offset_{};
+  FlutterSize size_{};
 };
 }  // namespace flutter
 

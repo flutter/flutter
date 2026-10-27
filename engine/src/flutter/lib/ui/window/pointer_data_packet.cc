@@ -24,7 +24,7 @@ void PointerDataPacket::SetPointerData(size_t i, const PointerData& data) {
 
 PointerData PointerDataPacket::GetPointerData(size_t i) const {
   FML_DCHECK(i < GetLength());
-  PointerData result;
+  PointerData result{};
   memcpy(&result, &data_[i * sizeof(PointerData)], sizeof(PointerData));
   return result;
 }
