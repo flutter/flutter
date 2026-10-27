@@ -20,6 +20,7 @@ are always downloaded.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:lto_libraries.bzl", "emsdk_lto_libraries")
 load(":deps.lock.bzl", "CIPD_DEPS", "GIT_DEPS")
+load(":host_files.bzl", "host_files")
 load(":host_platform.bzl", "host_platform", "host_platform_values")
 load(":macos_sdk.bzl", "macos_sdk")
 load(":repositories.bzl", "cipd_package", "engine_version_repository", "synced_repository")
@@ -675,6 +676,10 @@ def _synced_deps_impl(mctx):
     # The macOS SDK of the host's Xcode (macos_sdk.bzl), the macOS
     # toolchains' sysroot; an empty repository off macOS.
     macos_sdk(name = "macos_sdk")
+
+    # The files of the machine GN names by absolute path (host_files.bzl):
+    # a Mac's emoji font, for the text tests' fixtures; empty elsewhere.
+    host_files(name = "host_files")
 
     # The host itself, as constants (host_platform.bzl).
     host_platform(name = "host_platform")

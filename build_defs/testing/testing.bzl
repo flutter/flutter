@@ -216,7 +216,7 @@ _destined_fixtures = rule(
 )
 
 def _fixture_copies_impl(ctx):
-    files = _selected_files(ctx.attr.targets)
+    files = list(ctx.files.files) + _selected_files(ctx.attr.targets)
     for dep in ctx.attr.deps:
         if _CollectedFixturesInfo in dep:
             for destined in dep[_CollectedFixturesInfo].by_package.get(ctx.label.package, []):
@@ -230,10 +230,14 @@ def _fixture_copies_impl(ctx):
 
 _fixture_copies = rule(
     implementation = _fixture_copies_impl,
-    doc = "Copies (as symlinks) into the fixtures directory the files of other targets (GN's " +
-          "`fixtures = get_target_outputs(...)`, optionally through filter_include) and the fixtures " +
-          "that test_fixtures() targets below `deps` declare for this package (GN's `dest`).",
+    doc = "Copies (as symlinks) into the fixtures directory the fixture files, the files of other " +
+          "targets (GN's `fixtures = get_target_outputs(...)`, optionally through filter_include) and " +
+          "the fixtures that test_fixtures() targets below `deps` declare for this package (GN's `dest`).",
     attrs = {
+        "files": attr.label_list(
+            allow_files = True,
+            doc = "The fixture files (a select() among them: a file of the machine under the host's setting).",
+        ),
         "targets": attr.label_keyed_string_dict(
             doc = "The targets, each with its patterns separated by spaces (none for every file).",
         ),
@@ -322,23 +326,15 @@ def flutter_test_fixtures(
         )
         return
 
+    # One rule copies them all (a select() among the fixtures -- a file of
+    # the machine under the host's setting, a Mac's emoji font -- is a
+    # rule's to resolve, and no test of a macro's), each at its basename
+    # under assets/.
     copies = []
-    for fixture in fixtures:
-        basename = paths.basename(fixture)
-        out = paths.join("assets", basename)
-        copy_file(
-            name = "_cf_%s_%s" % (name, basename),
-            src = fixture,
-            out = out,
-            allow_symlink = True,
-            testonly = True,
-            visibility = ["//visibility:private"],
-        )
-        copies.append(out)
-
-    if fixtures_targets or deps:
+    if type(fixtures) != "list" or fixtures or fixtures_targets or deps:
         _fixture_copies(
             name = "_ft_%s" % name,
+            files = fixtures,
             targets = targets,
             deps = deps,
             dir = "assets",
