@@ -71,13 +71,14 @@ Future<void> writeResponseData(
 ///
 /// As a result, returning `false` from `onScreenshot` will make the test fail.
 ///
-/// The in-browser test can also ask the driver to perform a real WebDriver
-/// pointer click by calling
-/// [IntegrationTestWidgetsFlutterBinding.webDriverClick]. Clicks require
-/// `driver` to be a [WebFlutterDriver]. If it is not, the click fails in the
-/// browser and this function throws a [StateError]. If WebDriver fails to
-/// perform the click, the click fails in the browser and the WebDriver
-/// exception is rethrown.
+/// The in-browser test can also ask the driver to perform real WebDriver
+/// pointer input by calling
+/// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions] or
+/// [IntegrationTestWidgetsFlutterBinding.webDriverClick]. Pointer actions
+/// require `driver` to be a [WebFlutterDriver]. If it is not, the call fails in
+/// the browser and this function throws a [StateError]. If WebDriver fails to
+/// perform the actions, pressed mouse buttons are released, the call fails in
+/// the browser, and the WebDriver exception is rethrown.
 ///
 /// `responseDataCallback` is the handler for processing [Response.data].
 /// The default value is `writeResponseData`.
@@ -124,28 +125,33 @@ Future<void> integrationDriver({
       }
 
       response = Response.fromJson(jsonResponse);
-    } else if (webDriverCommand == '${WebDriverCommandType.click}') {
+    } else if (webDriverCommand == '${WebDriverCommandType.pointerActions}') {
       if (driver is! WebFlutterDriver) {
-        // Fail the in-browser `webDriverClick` call instead of leaving it
-        // waiting for a reply.
+        // Fail the in-browser `webDriverPointerActions` call instead of leaving
+        // it waiting for a reply.
         try {
           await driver.requestData(DriverTestMessage.error().toString());
         } catch (_) {
           // Report the StateError below even if the app disconnected.
         }
         throw StateError(
-          'webDriverClick requires a WebFlutterDriver, but received ${driver.runtimeType}',
+          'webDriverPointerActions requires a WebFlutterDriver, but received ${driver.runtimeType}',
         );
       }
       try {
-        await driver.webDriver.mouse.moveTo(
-          xOffset: (response.data!['x'] as num).round(),
-          yOffset: (response.data!['y'] as num).round(),
-          absolute: true,
-        );
-        await driver.webDriver.mouse.click();
-        jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
+        final actions = <WebDriverPointerAction>[
+          for (final Object? json in response.data!['actions']! as List<Object?>)
+            WebDriverPointerAction.fromJson(
+              (json! as Map<Object?, Object?>).cast<String, Object?>(),
+            ),
+        ];
+        await driver.webDriver.postRequest('actions', _w3cPointerActionsRequest(actions));
       } catch (_) {
+        try {
+          await driver.webDriver.deleteRequest('actions');
+        } catch (_) {
+          // Preserve the original WebDriver exception.
+        }
         try {
           await driver.requestData(DriverTestMessage.error().toString());
         } catch (_) {
@@ -153,6 +159,7 @@ Future<void> integrationDriver({
         }
         rethrow;
       }
+      jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
       response = Response.fromJson(jsonResponse);
     } else if (webDriverCommand == '${WebDriverCommandType.ack}') {
       // Previous command completed ask for a new one.
@@ -217,6 +224,31 @@ Future<void> integrationDriver({
     }
     exit(1);
   }
+}
+
+Map<String, Object?> _w3cPointerActionsRequest(List<WebDriverPointerAction> actions) {
+  return <String, Object?>{
+    'actions': <Map<String, Object?>>[
+      <String, Object?>{
+        'type': 'pointer',
+        'id': 'integration_test_mouse',
+        'parameters': <String, Object?>{'pointerType': 'mouse'},
+        'actions': <Map<String, Object?>>[
+          for (final WebDriverPointerAction action in actions)
+            if (action.type == WebDriverPointerActionType.move)
+              <String, Object?>{
+                'type': 'pointerMove',
+                'origin': 'viewport',
+                'x': action.x!.round(),
+                'y': action.y!.round(),
+                'duration': action.duration!.inMilliseconds,
+              }
+            else
+              action.toJson(),
+        ],
+      },
+    ],
+  };
 }
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');

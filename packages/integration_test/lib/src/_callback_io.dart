@@ -105,8 +105,8 @@ class _IOCallbackManager implements CallbackManager {
   }
 
   @override
-  Future<void> click(double x, double y) async {
-    throw UnsupportedError('webDriverClick is only supported on the web');
+  Future<void> pointerActions(List<WebDriverPointerAction> actions) async {
+    throw UnsupportedError('webDriverPointerActions is only supported on the web');
   }
 
   Future<dynamic> _onMethodChannelCall(MethodCall call) async {

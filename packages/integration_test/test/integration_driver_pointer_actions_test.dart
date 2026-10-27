@@ -35,10 +35,10 @@ void main() {
 
         await _runIntegrationDriver(_FakeWebFlutterDriver(app, webDriver));
 
-        expect(webDriver.postRequests, <(String, Object?)>[
-          (
-            'actions',
-            <String, Object?>{
+        expect(webDriver.postRequests, <Map<String, Object?>>[
+          <String, Object?>{
+            'command': 'actions',
+            'params': <String, Object?>{
               'actions': <Map<String, Object?>>[
                 <String, Object?>{
                   'type': 'pointer',
@@ -66,7 +66,7 @@ void main() {
                 },
               ],
             },
-          ),
+          },
         ]);
         expect(webDriver.deleteRequests, isEmpty);
         expect(app.replies, <String>['complete']);
@@ -96,10 +96,10 @@ void main() {
 
         await _runIntegrationDriver(_FakeWebFlutterDriver(app, webDriver));
 
-        expect(webDriver.postRequests, <(String, Object?)>[
-          (
-            'actions',
-            <String, Object?>{
+        expect(webDriver.postRequests, <Map<String, Object?>>[
+          <String, Object?>{
+            'command': 'actions',
+            'params': <String, Object?>{
               'actions': <Map<String, Object?>>[
                 <String, Object?>{
                   'type': 'pointer',
@@ -119,10 +119,10 @@ void main() {
                 },
               ],
             },
-          ),
-          (
-            'actions',
-            <String, Object?>{
+          },
+          <String, Object?>{
+            'command': 'actions',
+            'params': <String, Object?>{
               'actions': <Map<String, Object?>>[
                 <String, Object?>{
                   'type': 'pointer',
@@ -142,7 +142,7 @@ void main() {
                 },
               ],
             },
-          ),
+          },
         ]);
         expect(app.replies, <String>['complete', 'complete']);
       },
@@ -364,7 +364,7 @@ class _FakeWebDriver extends Fake implements WebDriver {
   final Exception? deleteError;
   final List<String>? eventLog;
 
-  final List<(String, Object?)> postRequests = <(String, Object?)>[];
+  final List<Map<String, Object?>> postRequests = <Map<String, Object?>>[];
   final List<String> deleteRequests = <String>[];
 
   @override
@@ -373,7 +373,7 @@ class _FakeWebDriver extends Fake implements WebDriver {
     if (postError != null) {
       throw postError!;
     }
-    postRequests.add((command, params));
+    postRequests.add(<String, Object?>{'command': command, 'params': params});
     return null;
   }
 

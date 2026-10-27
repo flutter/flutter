@@ -210,6 +210,222 @@ class DriverTestMessage {
   }
 }
 
+/// A mouse button for [WebDriverPointerAction.down] and
+/// [WebDriverPointerAction.up].
+///
+/// See: https://www.w3.org/TR/webdriver/#dfn-process-a-pointer-up-or-pointer-down-action
+enum WebDriverMouseButton {
+  /// The primary mouse button (typically the left button), W3C button `0`.
+  primary(0),
+
+  /// The middle mouse button (typically the wheel button), W3C button `1`.
+  middle(1),
+
+  /// The secondary mouse button (typically the right button), W3C button `2`.
+  secondary(2);
+
+  const WebDriverMouseButton(this.w3cButton);
+
+  /// The W3C WebDriver button index (`0`, `1`, or `2`).
+  ///
+  /// Note that these are 0-based W3C WebDriver button indexes, not Flutter's
+  /// `kPrimaryButton`-style bit flags (where `1` is the primary button, which
+  /// WebDriver interprets as the [middle] button).
+  final int w3cButton;
+}
+
+/// The kind of pointer action represented by a [WebDriverPointerAction].
+enum WebDriverPointerActionType {
+  /// Moves the pointer to a position.
+  ///
+  /// See [WebDriverPointerAction.move].
+  move,
+
+  /// Presses a mouse button.
+  ///
+  /// See [WebDriverPointerAction.down].
+  down,
+
+  /// Releases a mouse button.
+  ///
+  /// See [WebDriverPointerAction.up].
+  up,
+
+  /// Pauses for a duration before the next action.
+  ///
+  /// See [WebDriverPointerAction.pause].
+  pause,
+}
+
+/// A single step in a WebDriver pointer action sequence.
+///
+/// Pass a list of [WebDriverPointerAction]s to
+/// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions] to perform a
+/// sequence of real browser mouse actions (such as hovers, clicks, or drags)
+/// through WebDriver.
+///
+/// See: https://www.w3.org/TR/webdriver/#actions
+final class WebDriverPointerAction {
+  /// Creates a pointer action that moves the mouse to ([x], [y]).
+  ///
+  /// With a non-zero [duration], the browser animates the move over [duration]
+  /// and dispatches intermediate `pointermove` events along the way.
+  ///
+  /// When passed to
+  /// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions], [x] and
+  /// [y] are logical positions in the target `FlutterView`. In
+  /// [WebDriverCommand.pointerActions], [CallbackManager.pointerActions], and
+  /// on the host driver, [x] and [y] are in CSS pixels relative to the
+  /// top-left corner of the browser viewport.
+  const WebDriverPointerAction.move(
+    double this.x,
+    double this.y, {
+    Duration this.duration = Duration.zero,
+  }) : type = WebDriverPointerActionType.move,
+       button = null;
+
+  /// Creates a pointer action that presses [button].
+  const WebDriverPointerAction.down({
+    WebDriverMouseButton this.button = WebDriverMouseButton.primary,
+  }) : type = WebDriverPointerActionType.down,
+       x = null,
+       y = null,
+       duration = null;
+
+  /// Creates a pointer action that releases [button].
+  const WebDriverPointerAction.up({WebDriverMouseButton this.button = WebDriverMouseButton.primary})
+    : type = WebDriverPointerActionType.up,
+      x = null,
+      y = null,
+      duration = null;
+
+  /// Creates a pointer action that waits for [duration].
+  const WebDriverPointerAction.pause(Duration this.duration)
+    : type = WebDriverPointerActionType.pause,
+      x = null,
+      y = null,
+      button = null;
+
+  /// Deserializes a [WebDriverPointerAction] from the JSON map produced by
+  /// [toJson].
+  ///
+  /// Throws a [FormatException] if [json] has an unknown `type` or is missing
+  /// or has mistyped fields for that type.
+  factory WebDriverPointerAction.fromJson(Map<String, Object?> json) {
+    return switch (json['type']) {
+      'pointerMove' => switch (json) {
+        {'x': final num x, 'y': final num y, 'duration': final num duration} =>
+          WebDriverPointerAction.move(
+            x.toDouble(),
+            y.toDouble(),
+            duration: Duration(milliseconds: duration.toInt()),
+          ),
+        _ => throw FormatException('Invalid pointerMove WebDriverPointerAction JSON: $json'),
+      },
+      'pointerDown' => WebDriverPointerAction.down(button: _buttonFromJson(json['button'])),
+      'pointerUp' => WebDriverPointerAction.up(button: _buttonFromJson(json['button'])),
+      'pause' => switch (json) {
+        {'duration': final num duration} => WebDriverPointerAction.pause(
+          Duration(milliseconds: duration.toInt()),
+        ),
+        _ => throw FormatException('Invalid pause WebDriverPointerAction JSON: $json'),
+      },
+      _ => throw FormatException('Unknown WebDriverPointerAction type in JSON: $json'),
+    };
+  }
+
+  static WebDriverMouseButton _buttonFromJson(Object? value) {
+    return switch (value) {
+      0 => WebDriverMouseButton.primary,
+      1 => WebDriverMouseButton.middle,
+      2 => WebDriverMouseButton.secondary,
+      _ => throw FormatException('Invalid WebDriverMouseButton value: $value'),
+    };
+  }
+
+  /// The kind of pointer action.
+  final WebDriverPointerActionType type;
+
+  /// Target horizontal coordinate for a [WebDriverPointerActionType.move]
+  /// action, or null for other action types.
+  ///
+  /// When passed to
+  /// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions], this is a
+  /// logical position in the target `FlutterView`. In
+  /// [WebDriverCommand.pointerActions], [CallbackManager.pointerActions], and
+  /// on the host driver, this is in CSS pixels relative to the top-left corner
+  /// of the browser viewport.
+  final double? x;
+
+  /// Target vertical coordinate for a [WebDriverPointerActionType.move]
+  /// action, or null for other action types.
+  ///
+  /// When passed to
+  /// [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions], this is a
+  /// logical position in the target `FlutterView`. In
+  /// [WebDriverCommand.pointerActions], [CallbackManager.pointerActions], and
+  /// on the host driver, this is in CSS pixels relative to the top-left corner
+  /// of the browser viewport.
+  final double? y;
+
+  /// Duration of a [WebDriverPointerActionType.move] or
+  /// [WebDriverPointerActionType.pause] action, or null for button actions.
+  final Duration? duration;
+
+  /// Mouse button for a [WebDriverPointerActionType.down] or
+  /// [WebDriverPointerActionType.up] action, or null for other action types.
+  final WebDriverMouseButton? button;
+
+  /// Serializes this action to a JSON-compatible map.
+  Map<String, Object?> toJson() {
+    return switch (type) {
+      WebDriverPointerActionType.move => <String, Object?>{
+        'type': 'pointerMove',
+        'x': x,
+        'y': y,
+        'duration': duration!.inMilliseconds,
+      },
+      WebDriverPointerActionType.down => <String, Object?>{
+        'type': 'pointerDown',
+        'button': button!.w3cButton,
+      },
+      WebDriverPointerActionType.up => <String, Object?>{
+        'type': 'pointerUp',
+        'button': button!.w3cButton,
+      },
+      WebDriverPointerActionType.pause => <String, Object?>{
+        'type': 'pause',
+        'duration': duration!.inMilliseconds,
+      },
+    };
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
+  bool operator ==(Object other) {
+    return other is WebDriverPointerAction &&
+        other.type == type &&
+        other.x == x &&
+        other.y == y &&
+        other.duration == duration &&
+        other.button == button;
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, common.dart stays dependency-free (no package:meta).
+  int get hashCode => Object.hash(type, x, y, duration, button);
+
+  @override
+  String toString() {
+    return switch (type) {
+      WebDriverPointerActionType.move => 'WebDriverPointerAction.move($x, $y, duration: $duration)',
+      WebDriverPointerActionType.down => 'WebDriverPointerAction.down(button: $button)',
+      WebDriverPointerActionType.up => 'WebDriverPointerAction.up(button: $button)',
+      WebDriverPointerActionType.pause => 'WebDriverPointerAction.pause($duration)',
+    };
+  }
+}
+
 /// Types of different WebDriver commands that can be used in web integration
 /// tests.
 ///
@@ -225,11 +441,11 @@ enum WebDriverCommandType {
   /// Asking WebDriver to take a screenshot of the Web page.
   screenshot,
 
-  /// Asking WebDriver to perform a real pointer click at a position in the
+  /// Asking WebDriver to perform a sequence of real pointer actions in the
   /// browser viewport.
   ///
-  /// See [IntegrationTestWidgetsFlutterBinding.webDriverClick].
-  click,
+  /// See [IntegrationTestWidgetsFlutterBinding.webDriverPointerActions].
+  pointerActions,
 }
 
 /// Command for WebDriver to execute.
@@ -246,24 +462,29 @@ class WebDriverCommand {
     : type = WebDriverCommandType.screenshot,
       values = <String, dynamic>{'screenshot_name': screenshotName, 'args': ?args};
 
-  /// Constructor for [WebDriverCommandType.click] command.
+  /// Constructor for [WebDriverCommandType.pointerActions] command.
   ///
-  /// [x] and [y] are the position to click, in CSS pixels relative to the
-  /// top-left corner of the browser viewport.
-  WebDriverCommand.click(double x, double y)
-    : type = WebDriverCommandType.click,
-      values = <String, dynamic>{'x': x, 'y': y};
+  /// Move coordinates in [actions] are in CSS pixels relative to the top-left
+  /// corner of the browser viewport.
+  WebDriverCommand.pointerActions(List<WebDriverPointerAction> actions)
+    : type = WebDriverCommandType.pointerActions,
+      values = <String, dynamic>{
+        'actions': <Map<String, Object?>>[
+          for (final WebDriverPointerAction action in actions) action.toJson(),
+        ],
+      };
 
   /// Type of the [WebDriverCommand].
   ///
-  /// The commands that trigger a WebDriver API are `screenshot` and `click`.
+  /// The commands that trigger a WebDriver API are `screenshot` and
+  /// `pointerActions`.
   ///
   /// There are also `ack` and `noop` commands defined to manage the handshake
   /// during the communication.
   final WebDriverCommandType type;
 
   /// Used for adding extra values to the commands such as file name for
-  /// `screenshot` or the viewport coordinates for `click`.
+  /// `screenshot` or the serialized action list for `pointerActions`.
   final Map<String, dynamic> values;
 
   /// Util method for converting [WebDriverCommandType] to a map entry.
@@ -293,15 +514,18 @@ abstract class CallbackManager {
   /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();
 
-  /// Web only. Asks the driver to perform a real pointer click at ([x], [y]),
-  /// in CSS pixels relative to the top-left corner of the browser viewport.
+  /// Web only. Asks the driver to perform a sequence of real pointer [actions]
+  /// in the browser viewport.
   ///
-  /// Completes once the driver has performed the click, and completes with an
-  /// error if the driver failed to perform it.
+  /// Move coordinates in [actions] are in CSS pixels relative to the top-left
+  /// corner of the browser viewport.
+  ///
+  /// Completes once the driver has performed the actions, and completes with an
+  /// error if the driver failed to perform them.
   ///
   /// The default implementation completes with an [UnsupportedError].
-  Future<void> click(double x, double y) async {
-    throw UnsupportedError('click is not supported by $runtimeType');
+  Future<void> pointerActions(List<WebDriverPointerAction> actions) async {
+    throw UnsupportedError('pointerActions is not supported by $runtimeType');
   }
 
   /// Cleanup and completers or locks used during the communication.

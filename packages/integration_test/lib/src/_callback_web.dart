@@ -20,8 +20,8 @@ CallbackManager get callbackManager => _singletonWebDriverCommandManager;
 /// relative to the top-left corner of the browser viewport.
 ///
 /// Adding this to a logical position in [view] gives the viewport position
-/// that WebDriver clicks expect. Returns [Offset.zero] if [view] has no host
-/// element.
+/// that WebDriver pointer actions expect. Returns [Offset.zero] if [view] has
+/// no host element.
 Offset viewportOrigin(FlutterView view) {
   final JSAny? hostElement = ui_web.views.getHostElement(view.viewId);
   if (hostElement == null) {
@@ -52,8 +52,8 @@ final _WebCallbackManager _singletonWebDriverCommandManager = _WebCallbackManage
 /// Along with responding to callbacks from the driver side this calls enables
 /// usage of Web Driver commands by sending [WebDriverCommand]s to driver side.
 ///
-/// Tests can execute WebDriver commands such as `screenshot` or `click` using
-/// browsers' WebDriver APIs.
+/// Tests can execute WebDriver commands such as `screenshot` or
+/// `pointerActions` using browsers' WebDriver APIs.
 ///
 /// See: https://www.w3.org/TR/webdriver/
 class _WebCallbackManager implements CallbackManager {
@@ -85,16 +85,15 @@ class _WebCallbackManager implements CallbackManager {
     };
   }
 
-  /// Performs a real pointer click at ([x], [y]) in the browser viewport using
-  /// the WebDriver actions API.
+  /// Performs a sequence of real pointer [actions] in the browser viewport
+  /// using the WebDriver actions API.
   ///
   /// Only works on Web when tests are run via the `flutter drive` command.
   ///
   /// See: https://www.w3.org/TR/webdriver/#actions
   @override
-  Future<void> click(double x, double y) async {
-    await _sendWebDriverCommand(WebDriverCommand.click(x, y));
-  }
+  Future<void> pointerActions(List<WebDriverPointerAction> actions) =>
+      _sendWebDriverCommand(WebDriverCommand.pointerActions(actions));
 
   @override
   Future<void> convertFlutterSurfaceToImage() async {
@@ -155,7 +154,7 @@ class _WebCallbackManager implements CallbackManager {
     if (message.isPending) {
       final WebDriverCommand command = await _webDriverCommandPipe.future;
       switch (command.type) {
-        case WebDriverCommandType.screenshot || WebDriverCommandType.click:
+        case WebDriverCommandType.screenshot || WebDriverCommandType.pointerActions:
           final data = Map<String, dynamic>.from(command.values);
           data.addAll(WebDriverCommand.typeToMap(command.type));
           response = <String, String>{'message': Response.webDriverCommand(data: data).toJson()};
