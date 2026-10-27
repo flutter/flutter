@@ -48,57 +48,43 @@ Future<void> testMain() async {
 
   group('test fonts in flutterTester environment', () {
     const testFonts = <String>['FlutterTest', 'Ahem'];
-    final String defaultTestFontFamily = testFonts.first;
 
     test('The default test font is used when a non-test fontFamily is specified', () {
       final textStyle = EngineTextStyle(
         fontFamily: 'BogusFontFamily',
         fontFamilyFallback: const <String>['BogusFallback'],
       );
-      expect(textStyle.effectiveFontFamily, defaultTestFontFamily);
-      expect(textStyle.effectiveFontFamilyFallback, isNull);
       expect(textStyle.effectiveFontFamilies, testFonts);
 
-      final EngineTextStyle paragraphTextStyle = EngineParagraphStyle(fontFamily: 'BogusFontFamily')
-          .getTextStyle();
-      expect(paragraphTextStyle.effectiveFontFamily, defaultTestFontFamily);
+      final EngineTextStyle paragraphTextStyle = const EngineParagraphStyle(
+        fontFamily: 'BogusFontFamily',
+      ).getTextStyle();
       expect(paragraphTextStyle.effectiveFontFamilies, testFonts);
 
-      final strutStyle = EngineStrutStyle(
+      const strutStyle = EngineStrutStyle(
         fontFamily: 'BogusFontFamily',
-        fontFamilyFallback: const <String>['BogusFallback'],
+        fontFamilyFallback: <String>['BogusFallback'],
       );
-      expect(strutStyle.effectiveFontFamily, defaultTestFontFamily);
-      expect(strutStyle.effectiveFontFamilyFallback, isNull);
       expect(strutStyle.effectiveFontFamilies, testFonts);
       expect(
         ui.StrutStyle(fontFamily: 'BogusFontFamily'),
-        isNot(ui.StrutStyle(fontFamily: defaultTestFontFamily)),
+        isNot(ui.StrutStyle(fontFamily: testFonts.first)),
       );
     });
 
     test('The default test font is used when fontFamily is unspecified', () {
-      expect(EngineTextStyle().effectiveFontFamily, defaultTestFontFamily);
       expect(EngineTextStyle().effectiveFontFamilies, testFonts);
-      expect(EngineParagraphStyle().getTextStyle().effectiveFontFamily, defaultTestFontFamily);
-      expect(EngineParagraphStyle().getTextStyle().effectiveFontFamilies, testFonts);
-      expect(EngineStrutStyle().effectiveFontFamily, defaultTestFontFamily);
-      expect(EngineStrutStyle().effectiveFontFamilies, testFonts);
+      expect(const EngineParagraphStyle().getTextStyle().effectiveFontFamilies, testFonts);
+      expect(const EngineStrutStyle().effectiveFontFamilies, testFonts);
     });
 
     test('Can specify test fontFamily to use', () {
       for (final testFont in testFonts) {
-        expect(EngineTextStyle(fontFamily: testFont).effectiveFontFamily, testFont);
         expect(EngineTextStyle(fontFamily: testFont).effectiveFontFamilies, <String>[testFont]);
-        expect(
-          EngineParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamily,
-          testFont,
-        );
         expect(
           EngineParagraphStyle(fontFamily: testFont).getTextStyle().effectiveFontFamilies,
           <String>[testFont],
         );
-        expect(EngineStrutStyle(fontFamily: testFont).effectiveFontFamily, testFont);
         expect(EngineStrutStyle(fontFamily: testFont).effectiveFontFamilies, <String>[testFont]);
       }
     });
