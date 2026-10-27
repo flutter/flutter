@@ -118,7 +118,8 @@ def verify_sysroot_symbols(repo: Path, sysroot: Path, version: tuple[int, int, i
 def verify_no_optional_imports(repo: Path, library: Path) -> None:
   symbols = dynamic_symbols(repo, library)
   for line in symbols.splitlines():
-    if " UND " in line and any(symbol in line for symbol in OPTIONAL_SYMBOLS):
+    symbol = re.search(r"\bUND\s+(\S+)", line)
+    if symbol and symbol.group(1).split("@", 1)[0] in OPTIONAL_SYMBOLS:
       raise RuntimeError(f"Compatibility artifact directly imports optional GTK symbol: {line}")
 
 
