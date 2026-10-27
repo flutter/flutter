@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Linux builds of `ci/builders/*.json` -- the x64 host's own, the web's,
-/// the Linux arm64 cross builds' and Android's -- as Bazel configurations and
-/// install targets.
+/// The Linux and Mac builds of `ci/builders/*.json` -- the Linux x64 host's
+/// own, the web's, the Linux arm64 cross builds', Android's, and the Mac's
+/// (its host builds for either CPU and its `--mac` builds) -- as Bazel
+/// configurations and install targets.
 ///
 /// Each builder file describes builds: a `tools/gn` flag list, the ninja
 /// targets to build, the archives to upload, the tests to run. The Bazel
 /// build has settings for some of what the flags set (the runtime mode, the
 /// compilation mode, the target platform) and assumptions for the rest;
-/// this module turns each Linux build into a `--config=<name>` of a
+/// this module turns each build into a `--config=<name>` of a
 /// generated bazelrc (`ci/builders/configs.bazelrc`, which the root
 /// `.bazelrc` imports) when every flag maps, and into an `install` target
 /// of a generated BUILD file (`ci/builders/BUILD.bazel`) over the Bazel
@@ -19,6 +20,16 @@
 /// the Bazel build cannot express yet costs the build its configuration,
 /// with the reason on record in the generated file; a ninja target with no
 /// Bazel counterpart is listed the same way.
+///
+/// The Mac's builds (the `mac_*.json` files and local_engine.json's `macos/`
+/// builds) are always a platform of the Bazel build: GN's `--mac-cpu` names
+/// the CPU a Mac builds for, x64 unless given, rather than the Mac's own --
+/// a Mac's `host_debug` is an x64 build on an arm64 bot -- so each gets
+/// `--platforms` for its CPU, where a Linux host build gets none. A Mac
+/// build with a Linux build's name is the same configuration when its
+/// flags, ninja targets and tests are the same (the web's `wasm_release`,
+/// the developer's Android builds) and keeps its OS otherwise:
+/// `mac_host_debug`, the configuration, the install and the suite alike.
 library;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
@@ -48,11 +59,13 @@ enum GnFlagEffect {
   platform,
 
   /// `--target-os <os>`, `--linux-cpu <cpu>`, `--android`,
-  /// `--android-cpu <cpu>`: the target, from which [BuilderBuild.of] decides
-  /// the platform (the Linux arm64 cross build and the Android CPUs of
-  /// [androidPlatforms] are platforms; an Android CPU without one is a flag
+  /// `--android-cpu <cpu>`, `--mac`, `--mac-cpu <cpu>`: the target, from
+  /// which [BuilderBuild.of] decides the platform (the Linux arm64 cross
+  /// build, the Android CPUs of [androidPlatforms] and the Mac's CPUs of
+  /// [macosPlatforms] are platforms; an Android CPU without one is a flag
   /// the build cannot express; another OS is out of scope; Linux on the
-  /// host's CPU is the host's own build).
+  /// host's CPU is the host's own build; a Mac's host build is the
+  /// platform of its `--mac-cpu`, x64 unless given).
   target,
 
   /// `--lto`/`--no-lto`: whether the optimized build compiles and links
@@ -92,8 +105,8 @@ enum GnFlagEffect {
   /// the flag sets too, is read by Fuchsia's files alone.)
   validationLayers,
 
-  /// A platform the Bazel build has none for yet (Fuchsia, iOS, macOS,
-  /// Windows): the build is out of scope.
+  /// A platform the Bazel build has none for yet (Fuchsia, iOS, Windows):
+  /// the build is out of scope.
   otherPlatform,
 }
 
@@ -139,6 +152,18 @@ const Map<String, String> androidPlatforms = <String, String>{
   'riscv64': '//engine/src/flutter/build/bazel/toolchains:android_riscv64',
   'x64': '//engine/src/flutter/build/bazel/toolchains:android_x64',
 };
+
+/// The macOS platforms by tools/gn's `--mac-cpu` (build/bazel/toolchains:
+/// the macOS toolchains, research/20): a Mac's `--mac` builds and its host
+/// builds alike, since tools/gn's target CPU for a Mac host build is
+/// `--mac-cpu` (x64 unless given), not the Mac's own.
+const Map<String, String> macosPlatforms = <String, String>{
+  'arm64': '//engine/src/flutter/build/bazel/toolchains:macos_arm64',
+  'x64': '//engine/src/flutter/build/bazel/toolchains:macos_x64',
+};
+
+/// tools/gn's `--mac-cpu` default.
+const String defaultMacCpu = 'x64';
 
 /// tools/gn's `--android-cpu` choices, and its default.
 const List<String> androidCpus = <String>['arm', 'x64', 'x86', 'arm64', 'riscv64'];
@@ -225,7 +250,20 @@ const Map<String, GnFlag> gnFlags = <String, GnFlag>{
   '--fuchsia': GnFlag(GnFlagEffect.otherPlatform),
   '--fuchsia-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
   '--ios': GnFlag(GnFlagEffect.otherPlatform),
-  '--mac': GnFlag(GnFlagEffect.otherPlatform),
+  // iOS's qualifiers (the simulator and its CPU): the iOS build they are in
+  // is out of scope; alone they would be too.
+  '--simulator': GnFlag(GnFlagEffect.otherPlatform),
+  '--simulator-cpu': GnFlag(GnFlagEffect.otherPlatform, takesValue: true),
+  // darwin_extension_safe: the app-extension-safe form of the iOS
+  // framework, the Apple products' phase's (research/20, M4).
+  '--darwin-extension-safe': GnFlag(
+    GnFlagEffect.unsupported,
+    note: "the app-extension-safe framework: the Apple products' phase",
+  ),
+  // The Mac: --mac is target_os mac, --mac-cpu the CPU of a --mac build and
+  // of a Mac's host build (tools/gn's get_target_cpu).
+  '--mac': GnFlag(GnFlagEffect.target),
+  '--mac-cpu': GnFlag(GnFlagEffect.target, takesValue: true),
   // tools/gn's --web: target_os wasm, the web build's GN arguments
   // (to_gn_wasm_args), which the wasm platform's flags carry.
   '--web': GnFlag(GnFlagEffect.platform, bazelFlag: '--platforms=$wasmPlatform'),
@@ -306,7 +344,7 @@ const Map<String, String> checkoutScriptTests = <String, String>{
 /// (run_cc_tests: the common list, the non-Windows additions, the Linux
 /// ones), by the executable's name, which is the GN target's; each is the
 /// converted test of that name. The test suite checks the list against the
-/// script.
+/// script. [runTestsEngineSuitesMac] is the Mac's.
 const List<String> runTestsEngineSuites = <String>[
   'assets_unittests',
   'client_wrapper_glfw_unittests',
@@ -337,10 +375,61 @@ const List<String> runTestsEngineSuites = <String>[
   'txt_unittests',
 ];
 
+/// The executables run_tests.py's `engine` type runs on a Mac (run_cc_tests:
+/// the common list, the non-Windows additions, the Objective-C ones,
+/// flow_unittests without the golden test, then the Swift and Darwin desktop
+/// suites and the Impeller suites run by name -- impeller_unittests twice,
+/// with the Metal validation environment, and the Flutter GPU suite).
+const List<String> runTestsEngineSuitesMac = <String>[
+  'assets_unittests',
+  'client_wrapper_glfw_unittests',
+  'client_wrapper_unittests',
+  'common_cpp_core_unittests',
+  'common_cpp_unittests',
+  'dart_plugin_registrant_unittests',
+  'display_list_rendertests',
+  'display_list_unittests',
+  'embedder_a11y_unittests',
+  'embedder_proctable_unittests',
+  'embedder_unittests',
+  'fml_unittests',
+  'geometry_unittests',
+  'gpu_surface_unittests',
+  'no_dart_plugin_registrant_unittests',
+  'runtime_unittests',
+  'testing_unittests',
+  'tonic_unittests',
+  'ui_unittests',
+  'android_external_view_embedder_unittests',
+  'jni_unittests',
+  'platform_view_android_delegate_unittests',
+  'shell_unittests',
+  'accessibility_unittests',
+  'availability_version_check_unittests',
+  'framework_common_swift_unittests',
+  'framework_common_unittests',
+  'spring_animation_unittests',
+  'flow_unittests',
+  'flutter_desktop_darwin_swift_unittests',
+  'flutter_desktop_darwin_unittests',
+  'impeller_unittests',
+  'impeller_dart_unittests',
+];
+
+/// The flags naming a platform the Bazel build has none for, as against
+/// their qualifiers.
+const Set<String> _otherPlatformOsFlags = <String>{'--fuchsia', '--ios', '--windows'};
+
+/// The host a builder file's builds run on: `linux_*.json` and
+/// local_engine.json's `linux/` builds on Linux, `mac_*.json` and `macos/`
+/// on a Mac.
+enum BuilderHost { linux, mac }
+
 /// One build of a builder file, read for Bazel.
 final class BuilderBuild {
   BuilderBuild._({
     required this.file,
+    required this.host,
     required this.name,
     required this.gn,
     required this.ninjaTargets,
@@ -356,8 +445,13 @@ final class BuilderBuild {
     required this.otherTests,
   }) : configName = bareName(name);
 
-  /// Reads [build] of the builder file [file] (`linux_host_engine.json`).
+  /// Reads [build] of the builder file [file] (`linux_host_engine.json`,
+  /// `mac_host_engine.json`; local_engine.json's builds say their host by
+  /// their `linux/` or `macos/` prefix).
   factory BuilderBuild.of(String file, Build build) {
+    final BuilderHost host = file.startsWith('mac_') || build.name.startsWith('macos/')
+        ? BuilderHost.mac
+        : BuilderHost.linux;
     final flags = <String>[];
     final settings = <String>[];
     final unsupported = <String>[];
@@ -371,6 +465,7 @@ final class BuilderBuild {
     String? targetOs;
     String? linuxCpu;
     String? androidCpu;
+    String? macCpu;
     var validationLayers = false;
     final List<String> gn = build.gn;
     for (var i = 0; i < gn.length; i++) {
@@ -410,6 +505,10 @@ final class BuilderBuild {
               targetOs = 'android';
             case '--android-cpu':
               androidCpu = value;
+            case '--mac':
+              targetOs = 'mac';
+            case '--mac-cpu':
+              macCpu = value;
             default:
               linuxCpu = value;
           }
@@ -439,9 +538,11 @@ final class BuilderBuild {
         case GnFlagEffect.validationLayers:
           validationLayers = true;
         case GnFlagEffect.otherPlatform:
-          // The OS flag names the platform; its CPU flag (--fuchsia-cpu)
-          // only qualifies it.
-          if (otherPlatform == null || (otherPlatform.contains('-cpu') && !flag.contains('-cpu'))) {
+          // The OS flag names the platform; its qualifiers (--fuchsia-cpu,
+          // --simulator) do not displace it.
+          if (otherPlatform == null ||
+              (!_otherPlatformOsFlags.contains(otherPlatform) &&
+                  _otherPlatformOsFlags.contains(flag))) {
             otherPlatform = flag;
           }
       }
@@ -465,8 +566,10 @@ final class BuilderBuild {
     // the host's CPU is the host's own build; --android --android-cpu=arm64
     // is the Android arm64 platform, and another Android CPU (tools/gn's
     // default is arm) a platform the Bazel build has not got yet, which
-    // costs the build its configuration; any other OS, or Linux CPU, is out
-    // of scope.
+    // costs the build its configuration; --mac --mac-cpu=<cpu>, and a Mac's
+    // host build (its CPU is --mac-cpu too, x64 unless given, whatever the
+    // Mac), is the macOS platform of that CPU; any other OS, or Linux CPU,
+    // is out of scope.
     if (targetOs == 'android') {
       final String cpu = androidCpu ?? defaultAndroidCpu;
       final String? androidPlatform = androidPlatforms[cpu];
@@ -476,6 +579,18 @@ final class BuilderBuild {
         unsupported.add(
           '--android-cpu=$cpu${androidCpu == null ? " (tools/gn's default)" : ''} '
           '(the Bazel build has Android ${androidPlatforms.keys.join(' and ')} platforms only)',
+        );
+      }
+    } else if (targetOs == 'mac' ||
+        (targetOs == null && platform == null && host == BuilderHost.mac)) {
+      final String cpu = macCpu ?? defaultMacCpu;
+      final String? macosPlatform = macosPlatforms[cpu];
+      if (macosPlatform != null) {
+        platform = '--platforms=$macosPlatform';
+      } else {
+        unsupported.add(
+          '--mac-cpu=$cpu (the Bazel build has macOS ${macosPlatforms.keys.join(' and ')} '
+          'platforms only)',
         );
       }
     } else if (targetOs != null && targetOs != 'linux') {
@@ -549,6 +664,7 @@ final class BuilderBuild {
     }
     return BuilderBuild._(
       file: file,
+      host: host,
       name: build.name,
       gn: gn,
       ninjaTargets: build.ninja.targets,
@@ -569,6 +685,9 @@ final class BuilderBuild {
 
   /// The builder file's name (`linux_host_engine.json`).
   final String file;
+
+  /// The host the build runs on.
+  final BuilderHost host;
 
   /// The build's name (`ci/host_debug`).
   final String name;
@@ -591,7 +710,8 @@ final class BuilderBuild {
   /// The `--platforms` of a build for another platform than the host's own
   /// (`--web`: [wasmPlatform]; `--target-os=linux --linux-cpu=arm64`:
   /// [linuxArm64Platform]; `--android --android-cpu=<cpu>`:
-  /// [androidPlatforms]); null for the host's own build.
+  /// [androidPlatforms]; a Mac's builds: [macosPlatforms]); null for the
+  /// Linux host's own build.
   final String? platform;
 
   /// The flags the Bazel build cannot express, with the reason each.
@@ -618,46 +738,91 @@ final class BuilderBuild {
 
   /// The configuration's name, and the install target's and the test
   /// suite's: the build's without CI's `ci/` prefix or local_engine.json's
-  /// `linux/` (`host_debug` for both `ci/host_debug` and `linux/host_debug`,
-  /// which set the same flags) -- unless a CI build's flags differ from the
-  /// developer's build of the same bare name, in which case the developer's
-  /// keeps the name `et build --config <name>` knows and CI's keeps its
-  /// prefix as GN's build directory does: `ci_host_debug_unopt`
-  /// (`out/ci/host_debug_unopt`: asan and a Debug VM) beside
-  /// `host_debug_unopt` (`out/host_debug_unopt`). [linuxHostBuilds] decides
-  /// that once every build is read.
+  /// `linux/` or `macos/` (`host_debug` for both `ci/host_debug` and
+  /// `linux/host_debug`, which set the same flags) -- unless a CI build's
+  /// flags differ from the developer's build of the same bare name, in
+  /// which case the developer's keeps the name `et build --config <name>`
+  /// knows and CI's keeps its prefix as GN's build directory does:
+  /// `ci_host_debug_unopt` (`out/ci/host_debug_unopt`: asan and a Debug VM)
+  /// beside `host_debug_unopt` (`out/host_debug_unopt`); and a Mac build
+  /// with a Linux build's bare name keeps its OS, `mac_host_debug`, unless
+  /// the two are the same build (flags, ninja targets and tests alike:
+  /// `wasm_release` from either host; a developer's build of everything
+  /// with no tests, on its flags alone). [builderBuilds] decides that once
+  /// every build is read.
   String configName;
 
-  /// [name] without its `ci/` or `linux/` prefix, `/` as `_`.
+  /// [name] without its `ci/`, `linux/` or `macos/` prefix, `/` as `_`.
   static String bareName(String name) {
     final String bare = name.startsWith('ci/')
         ? name.substring(3)
         : name.startsWith('linux/')
         ? name.substring(6)
+        : name.startsWith('macos/')
+        ? name.substring(6)
         : name;
     return bare.replaceAll('/', '_');
   }
+
+  /// What makes two builds of one name one build: their Bazel flags, their
+  /// ninja targets and their test steps.
+  String get _identity =>
+      '${bazelFlags.join(' ')} | ${ninjaTargets.join(' ')} | ${testTypes.join(',')} '
+      '${binaryTests.join(',')} ${scriptTests.join(',')} ${otherTests.join(';')}';
+
+  /// Whether this is a build of everything with no tests (the developer's
+  /// builds of local_engine.json): it gets no install and no suite, so it
+  /// is the same build as any of its name with the same flags.
+  bool get _isEverythingWithoutTests =>
+      ninjaTargets.isEmpty &&
+      testTypes.isEmpty &&
+      binaryTests.isEmpty &&
+      scriptTests.isEmpty &&
+      otherTests.isEmpty;
+
+  /// Whether [other], a build of the same name on the other host, is this
+  /// build: the same flags, and the same ninja targets and tests unless
+  /// this build names none.
+  bool _sameBuildAs(BuilderBuild other) {
+    if (bazelFlags.join(' ') != other.bazelFlags.join(' ')) {
+      return false;
+    }
+    return _isEverythingWithoutTests || _identity == other._identity;
+  }
 }
 
-/// The Linux builds of [configs] (a builder file's name to its
-/// configuration), by file and build order: the `linux_*.json` files' builds
-/// that target the host, the web, Linux arm64 or Android, and
+/// The builds of [configs] (a builder file's name to its configuration)
+/// in the order the generated files take: the `linux_*.json` files' builds
+/// that target the host, the web, Linux arm64 or Android, then
 /// local_engine.json's `linux/` builds -- the developer's configurations,
-/// which `et build --config <name>` runs.
-List<BuilderBuild> linuxBuilds(Map<String, BuilderConfig> configs) {
+/// which `et build --config <name>` runs -- then the `mac_*.json` files'
+/// builds for the Mac's CPUs, Android and the web, then local_engine.json's
+/// `macos/` builds. iOS's and Fuchsia's are left out ([leftOutBuilds]).
+List<BuilderBuild> builderBuilds(Map<String, BuilderConfig> configs) {
   final builds = <BuilderBuild>[];
-  final List<String> files =
-      configs.keys.where((String f) => f.startsWith('linux_') || f == 'local_engine').toList()
-        ..sort();
-  for (final file in files) {
-    for (final Build build in configs[file]!.builds) {
-      if (file == 'local_engine' && !build.name.startsWith('linux/')) {
-        continue;
-      }
-      final read = BuilderBuild.of('$file.json', build);
+  for (final BuilderHost host in BuilderHost.values) {
+    for (final Build build in _buildsOf(configs, host)) {
+      final read = BuilderBuild.of(_fileOf(configs, build), build);
       if (read.otherPlatform == null && read.gn.isNotEmpty) {
         builds.add(read);
       }
+    }
+  }
+  // A Mac build with a Linux build's name keeps its OS, unless it is the
+  // same build (a web build from either host; the developer's Android
+  // builds, which set what CI's set and name no target of their own).
+  final linuxNames = <String, List<BuilderBuild>>{};
+  for (final build in builds) {
+    if (build.host == BuilderHost.linux) {
+      linuxNames.putIfAbsent(build.configName, () => <BuilderBuild>[]).add(build);
+    }
+  }
+  for (final build in builds) {
+    final List<BuilderBuild>? linux = linuxNames[build.configName];
+    if (build.host == BuilderHost.mac &&
+        linux != null &&
+        !linux.any((BuilderBuild l) => build._sameBuildAs(l))) {
+      build.configName = 'mac_${build.configName}';
     }
   }
   // A CI build with the developer's name and other flags keeps its `ci/`.
@@ -676,26 +841,46 @@ List<BuilderBuild> linuxBuilds(Map<String, BuilderConfig> configs) {
   return builds;
 }
 
-/// A build of the Linux builder files that [linuxBuilds] leaves out, and why.
+/// The builds of [host]'s builder files, by file name and build order, then
+/// local_engine.json's builds of that host.
+List<Build> _buildsOf(Map<String, BuilderConfig> configs, BuilderHost host) {
+  final prefix = host == BuilderHost.linux ? 'linux_' : 'mac_';
+  final developer = host == BuilderHost.linux ? 'linux/' : 'macos/';
+  final List<String> files = configs.keys.where((String f) => f.startsWith(prefix)).toList()
+    ..sort();
+  return <Build>[
+    for (final file in files) ...configs[file]!.builds,
+    if (configs.containsKey('local_engine'))
+      for (final Build build in configs['local_engine']!.builds)
+        if (build.name.startsWith(developer)) build,
+  ];
+}
+
+/// The builder file's name (`linux_host_engine.json`) of [build].
+String _fileOf(Map<String, BuilderConfig> configs, Build build) {
+  for (final MapEntry<String, BuilderConfig> entry in configs.entries) {
+    if (entry.value.builds.contains(build)) {
+      return '${entry.key}.json';
+    }
+  }
+  throw ArgumentError('${build.name} is in no builder file');
+}
+
+/// A build of the builder files that [builderBuilds] leaves out, and why.
 typedef LeftOutBuild = ({String file, String name, String reason});
 
-/// The builds of the Linux builder files that are not builds of this scope:
-/// those of another platform (Fuchsia's: `--fuchsia`) and those with no
-/// `tools/gn` step (the web test bundles, which test another build's
-/// artifacts). Listed at the end of the generated bazelrc, so that a build
-/// missing from it is missing for a reason the file states -- the Android
-/// embedder build went unlisted for a week behind a misfiled flag.
-List<LeftOutBuild> leftOutLinuxBuilds(Map<String, BuilderConfig> configs) {
+/// The builds of the Linux and Mac builder files that are not builds of this
+/// scope: those of another platform (Fuchsia's: `--fuchsia`; iOS's: `--ios`)
+/// and those with no `tools/gn` step (the web test bundles, which test
+/// another build's artifacts). Listed at the end of the generated bazelrc,
+/// so that a build missing from it is missing for a reason the file states
+/// -- the Android embedder build went unlisted for a week behind a misfiled
+/// flag.
+List<LeftOutBuild> leftOutBuilds(Map<String, BuilderConfig> configs) {
   final leftOut = <LeftOutBuild>[];
-  final List<String> files =
-      configs.keys.where((String f) => f.startsWith('linux_') || f == 'local_engine').toList()
-        ..sort();
-  for (final file in files) {
-    for (final Build build in configs[file]!.builds) {
-      if (file == 'local_engine' && !build.name.startsWith('linux/')) {
-        continue;
-      }
-      final read = BuilderBuild.of('$file.json', build);
+  for (final BuilderHost host in BuilderHost.values) {
+    for (final Build build in _buildsOf(configs, host)) {
+      final read = BuilderBuild.of(_fileOf(configs, build), build);
       final String? platformFlag = read.otherPlatform;
       if (platformFlag != null) {
         leftOut.add((
@@ -720,18 +905,22 @@ String configsBazelrc(List<BuilderBuild> builds, {List<LeftOutBuild> leftOut = c
     ..writeln('# Use of this source code is governed by a BSD-style license that can be')
     ..writeln('# found in the LICENSE file.')
     ..writeln()
-    ..writeln('# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.')
+    ..writeln('# Generated from ci/builders/{linux,mac}_*.json by gn_to_bazel; do not edit.')
     ..writeln('#')
-    ..writeln("# Each Linux build of the builder files -- the x64 host's own, the web's, the")
-    ..writeln("# Linux arm64 cross builds' and Android's -- as a Bazel configuration: `bazel")
-    ..writeln("# build --config=<name> ...` sets what the build's tools/gn flags set, as far")
-    ..writeln('# as the Bazel build has settings for them (gnFlags in')
-    ..writeln('# tools/gn_to_bazel/lib/src/builders.dart says what each flag amounts to;')
-    ..writeln('# --web is the wasm platform, --target-os=linux --linux-cpu=arm64 the Linux')
-    ..writeln('# arm64 one, --android --android-cpu=arm64 the Android arm64 one). A build')
-    ..writeln('# with a flag the Bazel build cannot express yet is listed with')
-    ..writeln('# the reason and gets no configuration; the install target of each build is')
-    ..writeln('# in BUILD.bazel beside this file.');
+    ..writeln("# Each Linux and Mac build of the builder files -- the Linux x64 host's own,")
+    ..writeln("# the web's, the Linux arm64 cross builds', Android's, the Mac's for either")
+    ..writeln('# CPU -- as a Bazel configuration: `bazel build --config=<name> ...` sets')
+    ..writeln("# what the build's tools/gn flags set, as far as the Bazel build has settings")
+    ..writeln('# for them (gnFlags in tools/gn_to_bazel/lib/src/builders.dart says what each')
+    ..writeln('# flag amounts to; --web is the wasm platform, --target-os=linux')
+    ..writeln('# --linux-cpu=arm64 the Linux arm64 one, --android --android-cpu=arm64 the')
+    ..writeln("# Android arm64 one, and a Mac's build is the macOS platform of its --mac-cpu,")
+    ..writeln("# x64 unless given, as tools/gn's target CPU on a Mac is: a Mac's host_debug")
+    ..writeln("# is an x64 build on an arm64 bot). A Mac build with a Linux build's name")
+    ..writeln('# is the same configuration when it is the same build and mac_<name>')
+    ..writeln('# otherwise. A build with a flag the Bazel build cannot express yet is')
+    ..writeln('# listed with the reason and gets no configuration; the install target of')
+    ..writeln('# each build is in BUILD.bazel beside this file.');
   // A name may be two builds' (CI's ci/host_debug and the developer's
   // linux/host_debug): one configuration, if they set the same flags.
   final written = <String, BuilderBuild>{};
@@ -767,7 +956,7 @@ String configsBazelrc(List<BuilderBuild> builds, {List<LeftOutBuild> leftOut = c
       ..writeln()
       ..writeln('# Not configurations: the builds of these files that are not builds of this')
       ..writeln("# scope -- another platform's, or a test-only build with no tools/gn step.")
-      ..writeln('# Every other build of the Linux builder files is above.');
+      ..writeln('# Every other build of the Linux and Mac builder files is above.');
     for (final build in leftOut) {
       out.writeln('#   ${build.file}: ${build.name} -- ${build.reason}');
     }
@@ -792,10 +981,12 @@ String buildersBuildFile(
     ..writeln('# Use of this source code is governed by a BSD-style license that can be')
     ..writeln('# found in the LICENSE file.')
     ..writeln()
-    ..writeln('# Generated from ci/builders/linux_*.json by gn_to_bazel; do not edit.')
+    ..writeln('# Generated from ci/builders/{linux,mac}_*.json by gn_to_bazel; do not edit.')
     ..writeln('#')
-    ..writeln("# An install target per Linux build of the builder files (the x64 host's own,")
-    ..writeln("# the web's, the Linux arm64 cross builds' and Android's), over the Bazel")
+    ..writeln('# An install target per Linux and Mac build of the builder files (the Linux')
+    ..writeln("# x64 host's own, the web's, the Linux arm64 cross builds', Android's, the")
+    ..writeln("# Mac's for either CPU; a Mac build with a Linux build's name is mac_<name>")
+    ..writeln('# unless it is the same build), over the Bazel')
     ..writeln('# counterparts of its ninja targets: `bazel run --config=<name> :<name>` builds')
     ..writeln("# what the build builds and lays it into GN's build directory for it")
     ..writeln('# (--target-dir, or the directory tools/gn names for the flags), as the')
@@ -803,9 +994,12 @@ String buildersBuildFile(
     ..writeln('# counterpart yet is listed; a build whose configuration the Bazel build')
     ..writeln('# cannot express yet (configs.bazelrc) is built with the flags of the nearest')
     ..writeln('# one; a test executable among the targets is not installed, since `bazel')
-    ..writeln('# test` runs tests from their own place. A build with tests has a <name>_tests')
+    ..writeln("# test` runs tests from their own place. A Mac build's install and suite are")
+    ..writeln('# compatible with macOS alone, as their contents are: a wildcard build on')
+    ..writeln('# Linux skips them. A build with tests has a <name>_tests')
     ..writeln('# suite over the Bazel suites that stand for its run_tests.py types')
-    ..writeln('# (runTestsTypeSuites, runTestsEngineSuites in builders.dart): `bazel test')
+    ..writeln('# (runTestsTypeSuites, runTestsEngineSuites and runTestsEngineSuitesMac in')
+    ..writeln('# builders.dart): `bazel test')
     ..writeln('# --config=<name> :<name>_tests` runs what the build runs, with its other test')
     ..writeln('# steps (scripts of the checkout) listed. The suites are manual: each stands')
     ..writeln('# for one builder, named; a wildcard run of the tree has the tests themselves.')
@@ -864,11 +1058,13 @@ String buildersBuildFile(
     if (build.ninjaTargets.isEmpty) {
       // GN's default target: the whole build, which the flutter tool reads
       // where Bazel builds it, through the root package's local engine
-      // manifest; no install.
+      // manifest; no install. Its tests (the Mac's test builds name no
+      // target) get their suite.
       out.writeln(
         "#   ninja's default target, everything: "
         'bazel build --config=${build.configName} //engine/src/flutter:local_engine',
       );
+      _testSuiteInto(out, build, convertedTests, suites, packageConditions: packageConditions);
       continue;
     }
     if (build.unsupported.isEmpty) {
@@ -955,7 +1151,8 @@ void _testSuiteInto(
   }
   for (final String type in build.testTypes) {
     if (type == 'engine') {
-      for (final String name in runTestsEngineSuites) {
+      for (final String name
+          in build.host == BuilderHost.mac ? runTestsEngineSuitesMac : runTestsEngineSuites) {
         final String? label = _ninjaTargetLabel(name, convertedTests, build, packageConditions);
         if (label == null) {
           missing.add('$name (engine)');
@@ -1093,12 +1290,14 @@ String? _ninjaTargetLabel(
 bool fileHolds(String? condition, BuilderBuild build) {
   final String? platform = build.platform;
   final bool android = androidPlatforms.values.any((String p) => platform == '--platforms=$p');
+  final bool mac = macosPlatforms.values.any((String p) => platform == '--platforms=$p');
   final wasm = platform == '--platforms=$wasmPlatform';
   return switch (condition) {
     null => true,
     'is_android' => android,
     'is_wasm' => wasm,
-    'is_linux' => !android && !wasm,
+    'is_mac' || 'is_apple' => mac,
+    'is_linux' => !android && !wasm && !mac,
     _ => true,
   };
 }

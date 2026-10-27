@@ -234,8 +234,8 @@ Future<int> run(List<String> arguments) async {
       stderr.writeln('error: $message');
       failures++;
     }
-    // The builder files' Linux builds (the host's own, the web's) as configurations and
-    // install targets (lib/src/builders.dart).
+    // The builder files' Linux and Mac builds (the hosts' own, the web's, the
+    // cross builds') as configurations and install targets (lib/src/builders.dart).
     failures += await _builderOutputs(
       root,
       convertedTargets,
@@ -284,10 +284,10 @@ Future<int> _builderOutputs(
     }
     return loader.errors.length;
   }
-  final List<BuilderBuild> builds = linuxBuilds(configs);
+  final List<BuilderBuild> builds = builderBuilds(configs);
   final String bazelrc;
   try {
-    bazelrc = configsBazelrc(builds, leftOut: leftOutLinuxBuilds(configs));
+    bazelrc = configsBazelrc(builds, leftOut: leftOutBuilds(configs));
   } on FormatException catch (e) {
     stderr.writeln('error: ${e.message}');
     return 1;
@@ -311,7 +311,7 @@ Future<int> _builderOutputs(
     if (check) {
       if (!file.existsSync() || file.readAsStringSync() != output.value) {
         stderr.writeln(
-          '${output.key} is out of date with respect to flutter/ci/builders/linux_*.json; '
+          '${output.key} is out of date with respect to flutter/ci/builders/{linux,mac}_*.json; '
           'rerun tools/gn_to_bazel',
         );
         failures++;
@@ -319,7 +319,9 @@ Future<int> _builderOutputs(
     } else {
       file.writeAsStringSync(output.value);
       stdout.writeln(
-        'flutter/ci/builders/linux_*.json -> ${output.key} (${builds.length} Linux builds, '
+        'flutter/ci/builders/{linux,mac}_*.json -> ${output.key} (${builds.length} builds, '
+        '${builds.where((BuilderBuild b) => b.host == BuilderHost.linux).length} Linux and '
+        '${builds.where((BuilderBuild b) => b.host == BuilderHost.mac).length} Mac, '
         '${builds.where((BuilderBuild b) => b.unsupported.isEmpty).length} with a configuration)',
       );
     }

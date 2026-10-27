@@ -356,7 +356,7 @@ filegroup(
 # it on demand, `et lint --backend bazel` runs that) and ninja's .d files.
 # The web SDK is the wasm builds' (ci/builders:wasm_release and the rest),
 # not the host build directory's, as under GN. The builders' own targets --
-# what each CI build of ci/builders/linux_*.json builds, into its
+# what each CI build of ci/builders/{linux,mac}_*.json builds, into its
 # --target-dir, under its `--config` (an `install` into GN's layout, which
 # the recipes read) -- are generated into ci/builders/BUILD.bazel.
 local_engine(
