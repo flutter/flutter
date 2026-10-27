@@ -3466,8 +3466,10 @@ if (enable_unittests) {
       // testing's suites: cflags_objc = flutter_cflags_objc under
       // test_enable_metal -- a list, joined to the branch with `+`. The
       // Objective-C flags go to the target's Objective-C library (its .mm
-      // sources), once for GN's two lists, which are one; the C++ library
-      // keeps the C++ flags and links the Objective-C library in.
+      // sources), once for GN's two lists, which are one, and split by the
+      // platform: config.gni's macOS list on a Mac (test_enable_metal says
+      // nothing of the OS), the generic one elsewhere; the C++ library keeps
+      // the C++ flags and links the Objective-C library in.
       final String output = await convert('''
 source_set("x") {
   sources = [ "a.cc", "b.mm" ]
@@ -3487,7 +3489,13 @@ source_set("x") {
           '    copts = CHROMIUM_CODE_COPTS + select({\n'
           '        "//engine/src/flutter/shell:test_enable_metal": [\n'
           '            "-fobjc-weak",  # test_enable_metal\n'
-          '        ] + FLUTTER_CFLAGS_OBJC,\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }) + select({\n'
+          '        ":when_test_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,\n'
+          '        "//conditions:default": [],\n'
+          '    }) + select({\n'
+          '        ":when_test_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,\n'
           '        "//conditions:default": [],\n'
           '    }),\n',
         ),
@@ -3568,6 +3576,47 @@ source_set("x") {
           '    deps = ["//engine/src:include_root"] + select({\n'
           '        "@platforms//os:macos": [":x_objc"],\n'
           '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+    });
+
+    test("a target's own Objective-C flags reach its library, the macOS list on a Mac", () {
+      // shell/gpu's gpu_surface_metal: under shell_enable_metal (macOS or
+      // iOS) with config.gni's flags unconditionally -- a target's own
+      // flags, which the emitter keeps apart from the conditional ones
+      // (ownFlags) and the companion lost (found on the Mac, 10-27: no
+      // -fobjc-arc). The constant is the macOS list under is_mac and the
+      // other elsewhere, since the target's condition names no platform.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'known/config.gni': '',
+        'flutter/x/BUILD.gn': '''
+import("//known/config.gni")
+if (shell_enable_metal) {
+  source_set("gpu_surface_metal") {
+    cflags_objc = flutter_cflags_objc
+    cflags_objcc = flutter_cflags_objcc
+    sources = [ "a.cc", "b.mm" ]
+  }
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/x/BUILD.gn', assumptions: generationAssumptions()),
+        gnPackage: '//flutter/x',
+      );
+      expect(
+        output,
+        contains(
+          'flutter_objc_library(\n'
+          '    name = "gpu_surface_metal_objc",\n'
+          '    srcs = ["b.mm"],\n'
+          '    copts = CHROMIUM_CODE_COPTS + select({\n'
+          '        "@platforms//os:macos": MACOS_CFLAGS_OBJC,\n'
+          '        "//conditions:default": [],\n'
+          '    }) + select({\n'
+          '        "@platforms//os:macos": [],\n'
+          '        "//conditions:default": FLUTTER_CFLAGS_OBJC,\n'
           '    }),\n',
         ),
       );

@@ -7,7 +7,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
 load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
 load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
@@ -511,7 +511,10 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_metal": FLUTTER_CFLAGS_OBJC,
+        ":when_test_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -1050,5 +1053,14 @@ selects.config_setting_group(
         "//engine/src/flutter/shell:test_enable_metal",
         "//engine/src/flutter/impeller/tools:metal",
         "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `test_enable_metal && !is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_test_enable_metal_and_not_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:test_enable_metal",
+        "//engine/src/flutter/build/bazel:not_mac",
     ],
 )

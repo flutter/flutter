@@ -3197,10 +3197,37 @@ final class _Emitter {
     }
     // The Objective-C flags, once each under a condition: GN gives
     // cflags_objc to .m and cflags_objcc to .mm compiles, and the two
-    // lists are one here (see _constant).
+    // lists are one here (see _constant). A target's own unconditional
+    // flags were spliced into `always` (ownFlags) and are not in the
+    // sequence, so the list is walked as _copyList walks one -- the Mac
+    // found gpu_surface_metal's companion without its ARC flags (10-27).
     if (objcCopts != null) {
       final seen = <(Condition, String)>{};
-      for (final (Condition under, _Item item) in objcCopts.sequence) {
+      final Iterable<(Condition, _Item)> entries = objcCopts.hasOrder
+          ? objcCopts.sequence
+          : <(Condition, _Item)>[
+              for (final _Item item in objcCopts.always) (Condition.always, item),
+              for (final MapEntry<Condition, List<_Item>> entry in objcCopts.conditional.entries)
+                for (final _Item item in entry.value) (entry.key, item),
+            ];
+      // config.gni's list has -fapplication-extension under is_mac: where
+      // the target's condition does not say which Apple platform (a target
+      // under shell_enable_metal), the macOS list goes under is_mac and
+      // the other under its negation (iOS, when it is built).
+      const isMac = ConditionVariable('is_mac');
+      for (final (Condition under, _Item item) in entries) {
+        if (!item.quoted && item.text == 'FLUTTER_CFLAGS_OBJC' && !_impliesMac(under)) {
+          _use(_coptsBzl, 'MACOS_CFLAGS_OBJC');
+          for (final (Condition split, _Item flags) in <(Condition, _Item)>[
+            (under.and(isMac), const _Item('MACOS_CFLAGS_OBJC', quoted: false)),
+            (under.and(isMac.negated), item),
+          ]) {
+            if (seen.add((split, flags.text))) {
+              companion.list('copts').add(split, flags);
+            }
+          }
+          continue;
+        }
         if (seen.add((under, item.text))) {
           companion.list('copts').add(under, item);
         }
