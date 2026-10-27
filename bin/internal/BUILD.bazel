@@ -40,6 +40,15 @@ write_file(
     content = ["bazel"],
 )
 
+# The engine's storage realm beside it (bin/cache/engine.realm, which the
+# bootstrap writes from bin/internal/engine.realm): empty, the default; the
+# Gradle plugin reads the file whether or not it needs a realm.
+write_file(
+    name = "engine_realm",
+    out = "engine.realm",
+    content = [""],
+)
+
 # The framework's version as the tool writes it to bin/cache/flutter.version.json
 # (from git); pub reads `flutterVersion` from it to resolve `sdk: flutter`
 # dependencies and checks it against the packages' `flutter:` constraints
@@ -109,6 +118,14 @@ write_file(
 write_file(
     name = "linux_sdk_stamp",
     out = "linux-sdk.stamp",
+    content = ["bazel"],
+)
+
+# The Android gen_snapshot artifacts' (AndroidGenSnapshotArtifacts: the
+# stamp is named android-sdk), for the tests that run `flutter build apk`.
+write_file(
+    name = "android_sdk_stamp",
+    out = "android-sdk.stamp",
     content = ["bazel"],
 )
 

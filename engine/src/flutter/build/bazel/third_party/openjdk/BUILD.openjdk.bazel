@@ -24,6 +24,25 @@ exports_files([
 # runtime image (lib/modules, lib/jrt-fs.jar), the configuration (conf/) and
 # the JDK's own modules' libraries. Omitted: jmods/ (for jlink only),
 # include/ (JNI headers), man/, legal/ and the other programs.
+# The JDK as JAVA_HOME wants it: its directories whole (for the tests that
+# run Gradle, //build_defs/android:build_tools.bzl).
+filegroup(
+    name = "home",
+    # buildifier: disable=constant-glob
+    srcs = ["release"] + glob(
+        [
+            "bin",
+            "conf",
+            "include",
+            "jmods",
+            "legal",
+            "lib",
+        ],
+        allow_empty = True,
+        exclude_directories = 0,
+    ),
+)
+
 filegroup(
     name = "runtime",
     srcs = ["release"] + glob([

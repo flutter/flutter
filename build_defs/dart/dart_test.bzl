@@ -46,10 +46,15 @@ load("//build_defs/dart:pub.bzl", "PubCacheInfo", "PubPackageConfigInfo", "pub_p
 _PACKAGE_CONFIG = ".dart_tool/package_config.json"
 
 ToolEnvironmentInfo = provider(
-    doc = "What a test exports for the programs it runs (dart_test's `tools`): variables naming directories of the runfiles.",
+    doc = "What a test exports for the programs it runs (dart_test's `tools`): variables naming directories of the runfiles, and others.",
     fields = {
         "directories": "Variable name to the Files (directories) it names, joined with ':' in order, each under the runfiles root " +
                        "(LD_LIBRARY_PATH at the runtime sysroot's libraries for a built app to load; Mesa's LIBGL_DRIVERS_PATH).",
+        "values": "Variable name to its value, a string in which `$root` is the runfiles root and `$HOME` the test's own " +
+                  "home directory (JAVA_HOME at a repository's root; a file: URL into the runfiles; GRADLE_USER_HOME under " +
+                  "$HOME). Optional.",
+        "setup": "Shell lines the launcher runs after exporting the variables, before the test (a Gradle home's " +
+                 "properties file written under $HOME). Optional.",
     },
 )
 
@@ -291,6 +296,8 @@ def _dart_test_impl(ctx):
     # on PATH, and the variables they ask the test to export.
     tool_directories = []
     tool_variables = {}
+    tool_values = {}
+    tool_setup = []
     for tool in ctx.attr.tools:
         for file in tool[DefaultInfo].files.to_list():
             directory = paths.dirname(file.short_path)
@@ -299,10 +306,17 @@ def _dart_test_impl(ctx):
         if ToolEnvironmentInfo in tool:
             for variable, files in tool[ToolEnvironmentInfo].directories.items():
                 tool_variables.setdefault(variable, []).extend(files)
+            if hasattr(tool[ToolEnvironmentInfo], "values") and tool[ToolEnvironmentInfo].values:
+                tool_values |= tool[ToolEnvironmentInfo].values
+            if hasattr(tool[ToolEnvironmentInfo], "setup") and tool[ToolEnvironmentInfo].setup:
+                tool_setup.extend(tool[ToolEnvironmentInfo].setup)
     tools_env = "".join(["export PATH=\"$root/%s:$PATH\"\n" % directory for directory in tool_directories]) + "".join([
         "export %s=\"%s\"\n" % (variable, ":".join(["$root/" + f.short_path for f in files]))
         for variable, files in tool_variables.items()
-    ])
+    ]) + "".join([
+        "export %s=\"%s\"\n" % (variable, value)
+        for variable, value in tool_values.items()
+    ]) + "".join([line + "\n" for line in tool_setup])
 
     # An X display of the test's own (`display`, an X server taking
     # -displayfd): started before the test, DISPLAY exported, stopped after

@@ -8,13 +8,16 @@
 leave files behind that git ignores: pub's `.dart_tool/`, `build/`, and
 the platform tooling the tool regenerates each time -- `android/local.properties`,
 the generated plugin registrants, the `ephemeral/` directories, iOS's
-`Generated.xcconfig`. The projects the tool's integration tests copy or run
+`Generated.xcconfig` -- and what a Gradle build leaves in android/: the
+wrapper the tool copies in, Gradle's and Kotlin's state directories. The
+projects the tool's integration tests copy or run
 in (examples/hello_world, dev/integration_tests/*) are `filegroup`s of
 globs over the source tree, so after a developer's `flutter test` in one of
 them those files would be in the runfiles too -- read-only symlinks into
 the source tree -- and the tool under test, rewriting
-`android/local.properties`, fails with "the file system is read-only".
-Every such filegroup excludes FLUTTER_PROJECT_GENERATED.
+`android/local.properties`, fails with "the file system is read-only" (a
+Gradle build, on its lock files under `.gradle/`). Every such filegroup
+excludes FLUTTER_PROJECT_GENERATED.
 """
 
 FLUTTER_PROJECT_GENERATED = [
@@ -23,6 +26,12 @@ FLUTTER_PROJECT_GENERATED = [
     ".flutter-plugins-dependencies",
     "android/local.properties",
     "android/app/src/main/java/io/flutter/plugins/**",
+    "**/android/gradlew",
+    "**/android/gradlew.bat",
+    "**/android/gradle/wrapper/gradle-wrapper.jar",
+    "**/.gradle/**",
+    "**/.kotlin/**",
+    "**/.cxx/**",
     "ios/Flutter/Generated.xcconfig",
     "ios/Flutter/flutter_export_environment.sh",
     "ios/Runner/GeneratedPluginRegistrant.*",

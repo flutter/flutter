@@ -914,6 +914,56 @@ after, as xvfb-run would. Measured: the 13 files pass in 719 s of wall
 time at `--local_test_jobs=3` (per-test sum 1,986 s; record_use_caching_test
 the longest at 336 s), on a host with no cmake, clang or GTK of its own.
 
+The Android shard (`//packages/flutter_tools:android_shard`, 25 files; the
+root's `//:android_tool_tests`) builds apps, plugins and modules for
+Android through the tool -- `flutter create`, `flutter build
+apk|appbundle|aar` in every mode, the Gradle plugin's own tests. What
+`flutter build apk` needs, and where it comes from
+(`build_defs/android/build_tools.bzl`): the Android SDK, the checkout's
+own (`@android_tools`, `ANDROID_HOME`); a JDK, the engine's (`@openjdk`,
+`JAVA_HOME`); the engine's Android artifacts in the facsimile's cache --
+gen_snapshot for each CPU `flutter build apk` builds for by default (arm,
+arm64, x64) in each AOT mode (`artifacts/engine/android-<cpu>-<mode>/linux-x64`,
+what `flutter precache --android` downloads), and the embedding as the
+Maven artifacts the Gradle plugin resolves, `io.flutter:flutter_embedding_<mode>`
+and `io.flutter:<abi>_<mode>` at `1.0.0-<engine.stamp>`. The facsimile's
+stamp is the word `bazel`, so `engine_maven_repository` lays the build's
+jars and poms, which name the engine's revision, under `1.0.0-bazel` (the
+poms' text rewritten) as a Maven repository, and `FLUTTER_STORAGE_BASE_URL`
+is a `file:` URL to it: the plugin reads `$FLUTTER_STORAGE_BASE_URL/download.flutter.io`,
+and Gradle reads Maven repositories from `file:` URLs as from https ones.
+`android_engine_artifacts` (in `build/archives`) declares all of it: the
+engine for three CPUs in three modes through `in_configuration` -- the
+Android builders' configurations, `-c opt` in debug too (`compilation_mode`),
+so that a debug build shares `bazel-out/android_<cpu>-opt/` with
+`--config=android_debug_<cpu>` -- hours the first time, cached afterwards.
+**These tests reach the network, by decision (10-26):** Gradle fetches its
+distribution, the Android Gradle plugin, Kotlin and the libraries an app
+depends on from Google's and Maven Central's repositories at build time;
+nothing of that is in the checkout, and a pinned mirror of it would be a
+gigabyte, an order of magnitude beyond the Java tests' Maven lock. The
+engine itself does not come from the network. Each test downloads into a
+Gradle home of its own under `TEST_TMPDIR` (the tool's HOME is the
+test's), so the first minutes of each are Gradle's. Two things of the
+sandbox: a JVM takes `user.home` from the password database, not from
+`$HOME`, and the Gradle wrapper and the Android tools default to
+directories under it -- the invoking user's real home, read-only in the
+sandbox, where the wrapper died at once on its lock file -- so
+`android_build_tools` points `GRADLE_USER_HOME` and `ANDROID_USER_HOME`
+under the test's home; and the Flutter Gradle plugin
+(packages/flutter_tools/gradle) is an included build of every app's,
+compiled in its own directory (build/, .gradle/, .kotlin/) -- in the
+test's runfiles, which the sandbox lets it write, so long as the tool's
+`sources` leaves out what a build in the checkout left there (those would
+come in as read-only symlinks and break the locks). Measured (10-27):
+**25 of 25 files pass**, 46 min of wall time at `--local_test_jobs=3` with
+the artifacts built (per-test sum 8,613 s; `gradle_jni_packaging_test` the
+longest at 862 s, `flutter_build_config_only_test` 13 s; the shard as one
+`bazel test` 81 min, the host configurations' engines rebuilt on the way);
+the engine's six Android configurations take 4 h 30 min from nothing on 24
+cores (91,281 actions), hours again when the toolchain's files change, and
+nothing when cached.
+
 ```sh
 bazel test //:framework_tests //:tool_tests //:dart_tests   # everything below, the root's suites
 bazel test //packages/flutter/test:all              # 919 files, 20,163 cases: flutter test's
@@ -926,6 +976,7 @@ bazel test //packages/flutter_tools:general_shard   # dart_test: the tool's unit
 bazel test //packages/flutter_tools:commands_shard_hermetic //packages/flutter_tools:commands_shard_permeable
 bazel test //packages/flutter_tools:integration_shard //packages/flutter_tools:web_shard   # the tool as a process
 bazel test //packages/flutter_tools:desktop_shard   # flutter build linux, flutter run -d linux: CMake, GTK and an X display from the build
+bazel test //:android_tool_tests                    # flutter build apk: the engine's Android artifacts, the SDK and the JDK from the build; Gradle from the network
 bazel test //dev/bots:tests //dev/tools/gen_keycodes:tests
 ```
 
@@ -942,8 +993,8 @@ Linux host runs -- plus the Impeller, no-tracking and release/profile runs,
 flutter_tools' general shard (271 files) and commands shard (the hermetic
 half whole, 67; the permeable half but for the one file that does not
 compile at this checkout, 10) and its integration shard where a Linux host
-can run it (73 of 117 files) and its desktop shard (13 more; the rest are
-Android's, and one macOS's) and its web shard
+can run it (73 of 117 files), its desktop shard (13 more) and its Android
+shard (25, with the network; one file is macOS's) and its web shard
 (18 files, on the pinned Chrome),
 and the pure-Dart trees (dev/bots, devicelab, packages_autoroller,
 flutter_analyzer_plugin, snippets, gen_defaults, gen_keycodes,

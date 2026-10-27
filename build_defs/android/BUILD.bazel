@@ -1,0 +1,13 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Android rules for flutter_tools' tests: build_tools.bzl (the engine's
+# Android artifacts in the SDK facsimile's shape -- gen_snapshot per CPU and
+# mode, the embedding as a Maven repository -- and the environment of a test
+# that runs `flutter build apk`: the SDK, the JDK, the Maven repository's
+# URL) with engine_maven.py, its layout script.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["engine_maven.py"])
