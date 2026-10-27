@@ -19,6 +19,11 @@ parser = argparse.ArgumentParser(
 parser.add_argument('binary', type=pathlib.Path)
 parser.add_argument('--engine-dir', type=pathlib.Path, required=True)
 parser.add_argument(
+    '--graphics-offload',
+    action='store_true',
+    help='Exercise the optional GtkGraphicsOffload wrapper'
+)
+parser.add_argument(
     '--output', type=pathlib.Path, default=pathlib.Path('/tmp/gtk4-wayland-render-scale.json')
 )
 parser.add_argument('--impeller', choices=('true', 'false'), default='true')
@@ -47,6 +52,8 @@ with tempfile.TemporaryDirectory(prefix='gtk4-fractional-') as temp:
       FLUTTER_LINUX_RENDERER='software',
       FLUTTER_TEST_WAYLAND_SCALE='1'
   )
+  if args.graphics_offload:
+    env['FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD'] = '1'
   config = d / 'sway.conf'
   config.write_text(
       'output HEADLESS-1 resolution 2400x1800 scale 1\noutput HEADLESS-1 position 0 0\noutput HEADLESS-2 resolution 2400x1800 scale 2\noutput HEADLESS-2 position 2400 0\nfor_window [title="Flutter fractional scale probe"] floating enable, border none, resize set 1001 603, move position 50 50\n'
@@ -218,6 +225,7 @@ with tempfile.TemporaryDirectory(prefix='gtk4-fractional-') as temp:
                             ), None), 'results':
                                 results
     }
+    report['graphics_offload_requested'] = args.graphics_offload
     args.output.write_text(json.dumps(report, indent=2) + '\n')
     print(f'PASS: {args.output}')
   finally:

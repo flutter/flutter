@@ -97,6 +97,8 @@ TEST(FlGtk4RuntimeApiTest, CapabilitiesMatchLoadedGtk) {
   EXPECT_EQ(api->gtk_at_least_4_10, GtkRuntimeAtLeast(4, 10, 0));
   EXPECT_EQ(api->gtk_at_least_4_14, GtkRuntimeAtLeast(4, 14, 0));
   EXPECT_EQ(api->gtk_at_least_4_18, GtkRuntimeAtLeast(4, 18, 0));
+  EXPECT_EQ(api->gtk_graphics_offload_get_type != nullptr,
+            GtkRuntimeAtLeast(4, 14, 0));
   EXPECT_EQ(api->gtk_accessible_update_platform_state != nullptr,
             GtkRuntimeAtLeast(4, 18, 0));
   EXPECT_EQ(api->gtk_accessible_set_accessible_parent != nullptr,

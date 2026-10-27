@@ -23,6 +23,11 @@ sets select their respective adapters. Adapters return owned monitor snapshots
 and disconnect all subscriptions on disposal. The GTK4 adapter retains the
 existing behavior of resetting display IDs when the monitor list changes.
 
+Graphics offload policy and the optional presentation wrapper live in
+`fl_graphics_offload_gtk4.cc`; `FlView` only parents its result. See
+[graphics offload validation](GRAPHICS_OFFLOAD.md) for flags, fallback behavior
+and how to distinguish a request from an accepted handoff.
+
 ## GTK conditional-compilation audit
 
 Inventory GTK4 switches and GTK version checks per C/C++/Objective-C source file:

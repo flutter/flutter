@@ -56,6 +56,11 @@ const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
     result.gtk_at_least_4_10 = gtk_runtime_at_least(4, 10, 0);
     result.gtk_at_least_4_14 = gtk_runtime_at_least(4, 14, 0);
     result.gtk_at_least_4_18 = gtk_runtime_at_least(4, 18, 0);
+    if (result.gtk_at_least_4_14) {
+      result.gtk_graphics_offload_get_type =
+          lookup_symbol<decltype(result.gtk_graphics_offload_get_type)>(
+              "gtk_graphics_offload_get_type");
+    }
     result.gtk_accessible_update_platform_state =
         lookup_symbol<decltype(result.gtk_accessible_update_platform_state)>(
             "gtk_accessible_update_platform_state");

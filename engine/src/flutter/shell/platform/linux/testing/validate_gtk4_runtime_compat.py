@@ -23,6 +23,7 @@ OPTIONAL_SYMBOLS = (
     "gtk_accessible_get_first_accessible_child",
     "gtk_accessible_set_accessible_parent",
     "gtk_accessible_announce",
+    "gtk_graphics_offload_get_type",
 )
 
 HOST_SYSTEM_LIBRARIES = (
@@ -106,6 +107,7 @@ def verify_sysroot_symbols(repo: Path, sysroot: Path, version: tuple[int, int, i
       "gtk_accessible_get_first_accessible_child": version >= (4, 10, 0),
       "gtk_accessible_set_accessible_parent": version >= (4, 10, 0),
       "gtk_accessible_announce": version >= (4, 14, 0),
+      "gtk_graphics_offload_get_type": version >= (4, 14, 0),
   }
   for symbol, should_exist in expected.items():
     exists = re.search(rf"\b{re.escape(symbol)}(?:@@?\S+)?$", symbols, re.MULTILINE) is not None
@@ -215,7 +217,7 @@ def run_container_test(
 
 
 def runtime_test_filter(native_tree: bool) -> str:
-  test_filter = "FlGtk4RuntimeApiTest.*"
+  test_filter = "FlGtk4RuntimeApiTest.*:FlGraphicsOffloadGtk4Test.*"
   if native_tree:
     test_filter += ":FlViewGtk4AccessibilityTest.*:FlAccessibilitySemanticsStoreTest.*"
   return test_filter

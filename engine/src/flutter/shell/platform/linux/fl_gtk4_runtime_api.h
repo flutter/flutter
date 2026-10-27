@@ -206,6 +206,8 @@ struct FlGtkRuntimeApi {
   gboolean gtk_at_least_4_14;
   gboolean gtk_at_least_4_18;
 
+  GType (*gtk_graphics_offload_get_type)();
+
   void (*gtk_accessible_update_platform_state)(
       GtkAccessible* self,
       FlGtkAccessiblePlatformState state);

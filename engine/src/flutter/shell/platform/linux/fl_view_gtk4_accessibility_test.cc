@@ -644,12 +644,14 @@ TEST_F(FlViewGtk4AccessibilityTest,
   EXPECT_EQ(natural_after, natural_before);
 
   // Exercise the real surface lifecycle without starting Flutter GL rendering.
-  g_object_ref(surface);
+  // Preserve any presentation wrapper while moving the subtree into a window.
+  GtkWidget* presentation = gtk_widget_get_first_child(GTK_WIDGET(view));
+  g_object_ref(presentation);
   g_signal_handlers_disconnect_by_data(surface, view);
-  gtk_box_remove(GTK_BOX(view), surface);
+  gtk_box_remove(GTK_BOX(view), presentation);
   g_autoptr(GtkWindow) window = GTK_WINDOW(gtk_window_new());
   g_object_ref_sink(window);
-  gtk_window_set_child(window, surface);
+  gtk_window_set_child(window, presentation);
   gtk_window_present(window);
   EXPECT_TRUE(gtk_widget_get_realized(proxy));
   EXPECT_FALSE(gtk_widget_get_mapped(proxy));
@@ -676,8 +678,8 @@ TEST_F(FlViewGtk4AccessibilityTest,
   EXPECT_TRUE(gtk_widget_get_realized(proxy));
   EXPECT_FALSE(gtk_widget_get_mapped(proxy));
   gtk_window_set_child(window, nullptr);
-  gtk_box_append(GTK_BOX(view), surface);
-  g_object_unref(surface);
+  gtk_box_append(GTK_BOX(view), presentation);
+  g_object_unref(presentation);
   gtk_window_destroy(window);
 
   g_object_run_dispose(G_OBJECT(view));

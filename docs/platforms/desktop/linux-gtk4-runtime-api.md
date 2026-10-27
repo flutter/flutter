@@ -74,6 +74,7 @@ and the complete symbol set used by that capability:
 | Platform-state notifications | GTK 4.18 | Native nodes retain queryable focus state but do not emit these notifications |
 | Caret and selection commands | GTK 4.22 interface tail | Native text remains queryable without the newer command callbacks |
 | DMA-BUF texture APIs | GTK 4.14 | Compositor cannot select the DMA-BUF texture route |
+| Graphics offload wrapper | GTK 4.14 and `gtk_graphics_offload_get_type` | Original render widget is parented directly; no wrapper is created |
 
 Accessibility bounds apply Flutter’s affine and projective transform to the
 rectangle corners. Singular projective points are clamped to a finite fallback;
@@ -97,6 +98,19 @@ validation, and remaining behavior gaps.
 
 DMA-BUF API availability is only one prerequisite: display formats, EGL support,
 synchronization, and buffer ownership are checked by the rendering code.
+
+Graphics offload is separately requested with
+`FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1`. The table resolves its type getter
+after checking GTK 4.14, and `fl_graphics_offload_gtk4` constructs the wrapper
+through `g_object_new`, without requiring newer GTK declarations. This lookup
+is retained in both compatibility and direct-call builds: enabling offload
+does not add a hard import of the optional getter. The validator rejects such
+an import and includes the offload tests in its runtime filter.
+
+API presence permits construction; it does not establish that GTK accepted a
+frame for offload. GTK retains its ordinary-composition fallback. The request
+also enables DMA-BUF export unless explicitly overridden, but DMA-BUF import
+keeps its own capability checks. See [rendering paths](linux-gtk-rendering.md#gtk-graphics-offload).
 
 Callers should use the wrappers and feature predicates rather than adding
 ad-hoc lookups or testing a single pointer from a multi-function group.

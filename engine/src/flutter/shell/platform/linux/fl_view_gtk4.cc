@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_graphics_offload_gtk4.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
@@ -315,7 +316,8 @@ static void key_released_cb(GtkEventControllerKey* controller,
 }
 
 void fl_view_gtk4_setup(FlView* view) {
-  gtk_box_append(GTK_BOX(view), GTK_WIDGET(view->render_area));
+  gtk_box_append(GTK_BOX(view),
+                 fl_graphics_offload_gtk4_wrap(GTK_WIDGET(view->render_area)));
 
   GtkEventController* legacy = gtk_event_controller_legacy_new();
   g_signal_connect_swapped(legacy, "event",

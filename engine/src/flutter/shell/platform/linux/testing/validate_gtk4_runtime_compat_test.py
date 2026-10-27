@@ -46,6 +46,12 @@ class RuntimeCompatibilityTest(unittest.TestCase):
     with mock.patch.object(validator, 'dynamic_symbols', return_value=symbols):
       validator.verify_no_optional_imports(Path('/repo'), Path('/engine.so'))
 
+  def test_rejects_direct_graphics_offload_import(self):
+    symbols = '1: 00000000 0 FUNC GLOBAL DEFAULT UND gtk_graphics_offload_get_type'
+    with mock.patch.object(validator, 'dynamic_symbols', return_value=symbols):
+      with self.assertRaisesRegex(RuntimeError, 'directly imports optional'):
+        validator.verify_no_optional_imports(Path('/repo'), Path('/engine.so'))
+
   def test_rejects_gtk_dependency_from_host(self):
     output = 'libgtk-4.so.1 => /usr/lib/libgtk-4.so.1 (0x1234)'
     with mock.patch.object(validator, 'run', return_value=output):

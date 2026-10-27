@@ -23,6 +23,11 @@ parser = argparse.ArgumentParser(
 parser.add_argument('binary', type=pathlib.Path)
 parser.add_argument('--sized-to-content', action='store_true')
 parser.add_argument(
+    '--graphics-offload',
+    action='store_true',
+    help='Exercise the optional GtkGraphicsOffload wrapper'
+)
+parser.add_argument(
     '--atspi', action='store_true', help='Also query bounds through a private AT-SPI bus'
 )
 parser.add_argument(
@@ -35,7 +40,7 @@ args.output.parent.mkdir(parents=True, exist_ok=True)
 fixture = pathlib.Path(__file__).resolve().parent / 'fixtures' / 'wayland-scale'
 report = {
     'passed': False, 'binary_sha256': hashlib.sha256(args.binary.read_bytes()).hexdigest(),
-    'mode': 'native'
+    'graphics_offload_requested': args.graphics_offload, 'mode': 'native'
 }
 with tempfile.TemporaryDirectory(prefix='gtk4-fractional-') as temp:
   d = pathlib.Path(temp)
@@ -56,6 +61,8 @@ with tempfile.TemporaryDirectory(prefix='gtk4-fractional-') as temp:
       FLUTTER_LINUX_RENDERER='software',
       FLUTTER_TEST_WAYLAND_SCALE='1'
   )
+  if args.graphics_offload:
+    env['FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD'] = '1'
   if args.sized_to_content:
     env['FLUTTER_TEST_WAYLAND_CONTENT_SIZE'] = '1'
   config = d / 'sway.conf'

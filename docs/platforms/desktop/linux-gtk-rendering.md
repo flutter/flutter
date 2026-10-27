@@ -32,6 +32,7 @@ make a media plugin export DMA-BUFs or select Flutter's Vulkan backend.
 | Memory texture/readback | GTK4 | `glReadPixels`, RGBA-to-BGRA swizzle, `GdkMemoryTexture` | Readback synchronizes | Most compatible GTK4 fallback; highest CPU cost. |
 | Shared GL texture | GTK4 | EGLImage import into a sibling framebuffer, then `GdkGLTexture` | EGL fence; GPU wait when GDK has a compatible EGL context | CPU-copy-free and usually no GPU pixel copy. Falls back to a client wait for GLX/non-EGL consumers, or `glFinish()` when fences are unavailable. |
 | Exported DMA-BUF texture | GTK4 | Render framebuffer is GPU-blitted to an EGLImage-backed export snapshot; GDK imports its DMA-BUF | Native fence handoff, with completion fallback | CPU-copy-free and cross-renderer-oriented. Current implementation is **not** strict zero-copy because of the snapshot blit. |
+| GTK graphics offload | GTK4, 4.14+ runtime | Optional `GtkGraphicsOffload` wrapper around the texture widget; suitable DMA-BUFs can be handed to the Wayland compositor | Existing texture ownership and synchronization | GTK decides acceptance per scene and uses ordinary composition when unavailable. Independent of Flutter's subsurface renderer and of compositor direct scanout. |
 | Wayland EGL subsurface | GTK3/GTK4 | Flutter texture is rendered into a separate subsurface EGL surface | EGL/context handoff | CPU-copy-free presentation path for whole-view Wayland content. It is not a replacement for a `GdkTexture` used in GTK composition. |
 | GTK3 normal compositor | GTK3 | CPU readback/upload where a Wayland subsurface is not used | Readback | Compatibility fallback; upstream intentionally removed GTK3 shared-EGL-image frame sharing. |
 
@@ -39,7 +40,8 @@ make a media plugin export DMA-BUFs or select Flutter's Vulkan backend.
 
 The GTK4 compositor chooses a route in this order:
 
-1. **DMA-BUF**, when `FLUTTER_GTK4_ENABLE_DMABUF=1` and all runtime checks
+1. **DMA-BUF**, when `FLUTTER_GTK4_ENABLE_DMABUF=1` (or graphics offload requests
+   it implicitly) and all runtime checks
    pass:
    GTK exposes the DMA-BUF texture APIs, the EGL driver exposes
    `EGL_MESA_image_dma_buf_export`, GDK accepts the exported format/modifier,
@@ -63,6 +65,29 @@ subsurface renderer has a separate presentation path. GTK4 subsurface support
 is opt-in through `FLUTTER_GTK4_ENABLE_SUBSURFACE=1`; it also requires a suitable
 Wayland surface and currently applies only to the implicit OpenGL view, not
 secondary views. Leave this unset when comparing GTK texture routes.
+
+## GTK Graphics Offload
+
+Set `FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1` to place the texture widget inside
+`GtkGraphicsOffload`. This also requests DMA-BUF export unless
+`FLUTTER_GTK4_ENABLE_DMABUF` is explicitly set; `=0` preserves texture fallback
+for diagnostic comparisons. With the flag unset, the hierarchy is unchanged.
+
+The wrapper is discovered through the runtime API table, requiring GTK 4.14+
+and `gtk_graphics_offload_get_type`. Older runtimes or a missing symbol retain
+the original widget. On a supported runtime, GTK still decides whether the
+scene, texture format/modifier, clipping, transform and compositor allow offload.
+Input, sizing and semantic nodes stay on the render widget; the wrapper has the
+presentation accessibility role and no label. Transparency is preserved.
+
+Confirm acceptance with GTK diagnostics and non-null buffer attachments to
+GTK's child Wayland surface. A configured wrapper or successful DMA-BUF export
+alone does not prove acceptance. The export snapshot blit remains, and accepted
+offload does not establish direct scanout, zero-copy rendering or lower latency.
+Compare app and compositor CPU/GPU work together, with equal viewports/workloads.
+
+See [offload validation](../../../engine/src/flutter/shell/platform/linux/testing/GRAPHICS_OFFLOAD.md)
+for test coverage and observed-handoff checks.
 
 ## What DMA-BUF Improves
 
@@ -121,6 +146,12 @@ GTK4 renderers make the distinction more important:
 Available renderer names depend on the installed GTK version. `GSK_RENDERER`
 selects GTK's renderer, not Flutter's rendering backend.
 
+The current Linux embedder configures Flutter for software or OpenGL rendering.
+`GSK_RENDERER=vulkan` therefore presents Impeller GLES output through GTK Vulkan;
+it does not create an Impeller Vulkan context or enable Flutter GPU compute.
+DMA-BUF and graphics offload do not change that selection. See the
+[compute investigation](../../../engine/src/flutter/shell/platform/linux/testing/COMPUTE.md).
+
 Renderer names alone do not guarantee a path. The runtime API, EGL extensions,
 format/modifier acceptance, and frame size must all pass the compositor's
 checks.
@@ -140,6 +171,8 @@ GSK_RENDERER=cairo flutter run -d linux --linux-gtk=gtk4
 
 FLUTTER_GTK4_ENABLE_DMABUF=1 GSK_RENDERER=vulkan \
   flutter run -d linux --linux-gtk=gtk4
+FLUTTER_GTK4_ENABLE_GRAPHICS_OFFLOAD=1 GSK_RENDERER=vulkan \
+  flutter run -d linux --linux-gtk=gtk4
 FLUTTER_GTK4_DISABLE_READBACK=1 GSK_RENDERER=ngl \
   flutter run -d linux --linux-gtk=gtk4
 ```
@@ -152,6 +185,7 @@ as well as throughput and latency.
 ## Implementation References
 
 - [GTK4 compositor](../../../engine/src/flutter/shell/platform/linux/fl_compositor_opengl_gtk4.cc)
+- [GTK4 graphics offload](../../../engine/src/flutter/shell/platform/linux/fl_graphics_offload_gtk4.cc)
 - [GTK3 frame transfer](../../../engine/src/flutter/shell/platform/linux/fl_opengl_frame.cc)
 - [Subsurface renderer](../../../engine/src/flutter/shell/platform/linux/fl_view_renderer_subsurface.cc)
 - [GTK4 Runtime API Compatibility](linux-gtk4-runtime-api.md)

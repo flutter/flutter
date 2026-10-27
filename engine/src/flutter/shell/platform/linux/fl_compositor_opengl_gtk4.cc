@@ -11,6 +11,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include "flutter/shell/platform/linux/fl_graphics_offload_gtk4.h"
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
 #if GTK_CHECK_VERSION(4, 12, 0)
@@ -23,7 +24,9 @@ static gboolean gtk4_readback_disabled() {
 }
 
 static gboolean gtk4_dmabuf_enabled() {
-  return g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"), "1") == 0;
+  const gchar* setting = g_getenv("FLUTTER_GTK4_ENABLE_DMABUF");
+  return setting != nullptr ? g_strcmp0(setting, "1") == 0
+                            : fl_graphics_offload_gtk4_is_requested();
 }
 
 static void clear_native_texture_sync(FlCompositorOpenGL* self) {
