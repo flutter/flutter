@@ -32,7 +32,6 @@ cc_library(
         "src/cxa_exception_storage.cpp",
         "src/cxa_guard.cpp",
         "src/cxa_handlers.cpp",
-        "src/cxa_thread_atexit.cpp",
         "src/cxa_vector.cpp",
         "src/cxa_virtual.cpp",
         "src/fallback_malloc.cpp",
@@ -55,6 +54,13 @@ cc_library(
             "src/cxa_exception.cpp",
             "src/cxa_personality.cpp",
         ],
+    }) + select({
+        # GN builds the thread_local destructor fallback everywhere but on
+        # Apple platforms (`is_fuchsia || (is_posix && !is_apple)`), whose
+        # libSystem provides it.
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["src/cxa_thread_atexit.cpp"],
     }),
     # chromium_code's flags, as GN builds libc++abi (see @libcxx).
     copts = CHROMIUM_CODE_COPTS + ["-frtti"] + select({
