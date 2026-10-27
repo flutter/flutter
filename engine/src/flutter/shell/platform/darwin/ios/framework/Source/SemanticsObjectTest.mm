@@ -42,7 +42,6 @@ const float kFloatCompareEpsilon = 0.001;
 }
 
 - (void)testFlutterSemanticsScrollViewHidesScrollEdgeEffects {
-#if defined(__IPHONE_26_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_0
   if (@available(iOS 26.0, *)) {
     auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
     fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
@@ -55,7 +54,6 @@ const float kFloatCompareEpsilon = 0.001;
     XCTAssertTrue(scrollView.leftEdgeEffect.hidden);
     XCTAssertTrue(scrollView.rightEdgeEffect.hidden);
   }
-#endif
 }
 
 - (void)testUIFocusSystemMethodsDoNotCrashWhenBridgeIsDead {
