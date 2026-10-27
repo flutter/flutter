@@ -412,8 +412,11 @@ abstract mixin class WidgetsBindingObserver {
 
   /// Called when the platform configuration changes.
   ///
-  /// This typically happens when system-wide user preferences like 24-hour time
-  /// format change.
+  /// This notifies when system-wide user preferences on the [PlatformDispatcher]
+  /// change. Specifically, this callback notifies for configuration changes that
+  /// do not have dedicated observer methods, including:
+  ///
+  /// * [PlatformDispatcher.alwaysUse24HourFormat]
   ///
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onPlatformConfigurationChanged].
