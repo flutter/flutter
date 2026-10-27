@@ -485,9 +485,20 @@ globs exclude `__pycache__`: a GN build in the same checkout writes bytecode
 caches beside the Python scripts it runs (SPIRV-Tools' table generators, for
 one), and each new cache file would otherwise rebuild the wrap that reads the
 tree -- thirteen minutes for the GPU backends. The tools come
-from the same places as for the rest of the build: `@gn`, `@ninja`,
-`@clang_linux_x64`, `@sysroot_linux_x64`, and `@cpython3` as the
-`--script-executable` in place of depot_tools' `vpython3`.
+from the same places as for the rest of the build: `@gn`, `@ninja`, the
+host's clang (`@host_platform`'s `HOST_CLANG`: `@clang_linux_x64`,
+`@clang_mac_arm64`, ...), the Linux sysroots for the Linux and Android
+targets, and `@cpython3` as the `--script-executable` in place of
+depot_tools' `vpython3`. GN's `host_os` and `host_cpu` are the host's
+(`HOST_OS`, `HOST_CPU`), and the host's tools land under
+`clang_<host cpu>/` in a build for anything but the host's own OS and CPU
+(`:host_own`); for the macOS platforms the GN args are what `tools/gn`
+sets on a Mac (`target_os = "mac"`, the 12.0.0 deployment target, no
+simulator) with the SDK, platform and toolchain paths of the host's Xcode
+from `@macos_sdk` -- the same Xcode the Bazel toolchain's sysroot is a
+view of, named in the args so that the action's key carries it, where
+`darwin_sdk.gni` would otherwise ask `xcrun` -- and the prebuilt SDK is
+the Mac's for the CPU (`@dart_sdk_macos_arm64`, `@dart_sdk_macos_x64`).
 
 ```
 bazelisk build //engine/src/flutter/build/bazel/dart_wrap:dart_sdk   # everything
@@ -512,7 +523,8 @@ the GN root and build directory in
 (a regular GN build directory: `gn args`, `ninja -t ...` and
 `compile_commands.json` all work there).
 
-Known limits of the first version: host linux-x64 only; zlib and BoringSSL
+Known limits: a Mac host is wired (research/20, M3) but not yet run -- the
+Mac agent's next task; zlib and BoringSSL
 have no Bazel targets yet and stay inside `libcommon_embedder_dart_io.a`;
 `bootstrap_compile_platform.exe`, which the prebuilt SDK's `dart compile exe`
 produces, embeds the absolute path of the build directory (as the GN build's
