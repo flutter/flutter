@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity_playground.h"
+#include "impeller/renderer/pipeline_library.h"
 
 namespace impeller {
 namespace testing {
@@ -136,6 +137,40 @@ TEST_P(PipelineVariantRecordingTest, ReportsEachContextSeparately) {
   };
   EXPECT_EQ(count_lazy(observer.GetReports()[0]), 0u);
   EXPECT_EQ(count_lazy(observer.GetReports()[1]), 1u);
+}
+
+TEST_P(PipelineVariantRecordingTest,
+       DefaultPipelinesAreLoggedAsEagerlyCreated) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \
+    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE
+  GTEST_SKIP() << "Pipeline usage logging is only in debug and profile builds.";
+#else
+  ContentContext content_context(GetContext(), GetTypographerContext());
+  ASSERT_TRUE(content_context.IsValid());
+
+  ContentContextOptions default_options{
+      .sample_count = SampleCount::kCount4,
+      .color_attachment_pixel_format =
+          GetContext()->GetCapabilities()->GetDefaultColorFormat()};
+  PipelineRef solid_fill =
+      content_context.GetSolidFillPipeline(default_options);
+  ASSERT_TRUE(solid_fill);
+  PipelineRef clip = content_context.GetClipPipeline(default_options);
+  ASSERT_TRUE(clip);
+  PipelineRef lazy_solid_fill =
+      content_context.GetSolidFillPipeline(MakeLazyOptions(*GetContext()));
+  ASSERT_TRUE(lazy_solid_fill);
+
+  const PipelineUsageMap usage =
+      GetContext()->GetPipelineLibrary()->GetPipelineUsage();
+  auto is_eagerly_created = [&usage](const PipelineDescriptor& descriptor) {
+    auto found = usage.find(descriptor);
+    return found != usage.end() && found->second.eagerly_created;
+  };
+  EXPECT_TRUE(is_eagerly_created(solid_fill->GetDescriptor()));
+  EXPECT_TRUE(is_eagerly_created(clip->GetDescriptor()));
+  EXPECT_FALSE(is_eagerly_created(lazy_solid_fill->GetDescriptor()));
+#endif
 }
 
 }  // namespace testing
