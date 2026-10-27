@@ -2303,7 +2303,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     return {
       ...super.toJsonMap(delegate),
-      'values': ?value?.map<String>((T value) => value.toString()).toList(),
+      if (value != null) 'values': value!.map<String>((T value) => value.toString()).toList(),
     };
   }
 }
