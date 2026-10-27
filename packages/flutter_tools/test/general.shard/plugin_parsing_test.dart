@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:yaml/yaml.dart';
@@ -13,6 +15,7 @@ const _kTestPluginPath = 'test_plugin_path';
 
 void main() {
   testWithoutContext('Plugin creation from the legacy format', () {
+    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'androidPackage: com.flutter.dev\n'
         'iosPrefix: FLT\n'
@@ -26,6 +29,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
@@ -39,6 +43,7 @@ void main() {
   });
 
   testWithoutContext('Plugin creation from the multi-platform format', () {
+    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' android:\n'
@@ -66,6 +71,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
@@ -91,6 +97,7 @@ void main() {
   testWithoutContext(
     'Plugin parsing of unknown fields are allowed (allows some future compatibility)',
     () {
+      final fileSystem = MemoryFileSystem.test();
       const pluginYamlRaw =
           'implements: same_plugin\n' // this should be ignored by the tool
           'platforms:\n'
@@ -118,6 +125,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       );
 
       final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
@@ -142,6 +150,7 @@ void main() {
   );
 
   testWithoutContext('Plugin parsing allows for Dart-only plugins without a pluginClass', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'implements: same_plugin\n' // this should be ignored by the tool
         'platforms:\n'
@@ -164,6 +173,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     final androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey]! as AndroidPlugin;
@@ -185,6 +195,7 @@ void main() {
   });
 
   testWithoutContext('Plugin parsing allows a dartFileName field with dartPluginClass', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' android:\n'
@@ -211,6 +222,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     expect(plugin.pluginDartClassPlatforms, <String, DartPluginClassAndFilePair>{
@@ -223,6 +235,7 @@ void main() {
   });
 
   testWithoutContext('dartFileName without dartPluginClass throws (Android)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' android:\n'
@@ -239,6 +252,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
@@ -248,6 +262,7 @@ void main() {
   });
 
   testWithoutContext('dartFileName without dartPluginClass throws (iOS)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' ios:\n'
@@ -263,6 +278,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
@@ -272,6 +288,7 @@ void main() {
   });
 
   testWithoutContext('dartFileName without dartPluginClass throws (Linux)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' linux:\n'
@@ -287,6 +304,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
@@ -296,6 +314,7 @@ void main() {
   });
 
   testWithoutContext('dartFileName without dartPluginClass throws (MacOS)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' macos:\n'
@@ -311,6 +330,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
@@ -320,6 +340,7 @@ void main() {
   });
 
   testWithoutContext('dartFileName without dartPluginClass throws (Windows)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' windows:\n'
@@ -335,6 +356,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
@@ -347,6 +369,7 @@ void main() {
     'Plugin parsing of legacy format and multi-platform format together is not allowed '
     'and fatal error message contains plugin name',
     () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
       const pluginYamlRaw =
           'androidPackage: com.flutter.dev\n'
           'platforms:\n'
@@ -363,6 +386,7 @@ void main() {
           null,
           const <String>[],
           isDevDependency: false,
+          fileSystem: fileSystem,
         ),
         throwsToolExit(message: _kTestPluginName),
       );
@@ -370,6 +394,7 @@ void main() {
   );
 
   testWithoutContext('Plugin parsing allows a default_package field', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' android:\n'
@@ -393,6 +418,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     expect(plugin.platforms, <String, PluginPlatform>{});
@@ -407,6 +433,7 @@ void main() {
   });
 
   testWithoutContext('Desktop plugin parsing allows a dartPluginClass field', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' linux:\n'
@@ -424,6 +451,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     expect(plugin.pluginDartClassPlatforms, <String, DartPluginClassAndFilePair>{
@@ -434,6 +462,7 @@ void main() {
   });
 
   testWithoutContext('Windows allows supported mode lists', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' windows:\n'
@@ -449,6 +478,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
@@ -456,6 +486,7 @@ void main() {
   });
 
   testWithoutContext('Web plugin tool exits if fileName field missing', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' web:\n'
@@ -470,6 +501,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
@@ -479,6 +511,7 @@ void main() {
   });
 
   testWithoutContext('Windows assumes win32 when no variants are given', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' windows:\n'
@@ -492,6 +525,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
@@ -499,6 +533,7 @@ void main() {
   });
 
   testWithoutContext('Windows ignores unknown variants', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' windows:\n'
@@ -514,6 +549,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     final windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
@@ -521,6 +557,7 @@ void main() {
   });
 
   testWithoutContext('Plugin parsing throws a fatal error on an empty plugin', () {
+    final fileSystem = MemoryFileSystem.test();
     final pluginYaml = loadYaml('') as YamlMap?;
 
     expect(
@@ -531,12 +568,14 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "plugin" specification.'),
     );
   });
 
   testWithoutContext('Plugin parsing throws a fatal error on empty platforms', () {
+    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw = 'platforms:\n';
     final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
 
@@ -548,12 +587,14 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "platforms" specification.'),
     );
   });
 
   test('Plugin parsing throws a fatal error on an empty platform key', () {
+    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' android:\n';
@@ -567,12 +608,14 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(message: 'Invalid "android" plugin specification.'),
     );
   });
 
   testWithoutContext('Plugin parsing reports all errors across platforms at once', () {
+    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' android:\n'
@@ -594,6 +637,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
@@ -608,6 +652,7 @@ void main() {
   });
 
   testWithoutContext('Plugin parsing allows an empty web platform key', () {
+    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' android:\n'
@@ -622,6 +667,7 @@ void main() {
       null,
       const <String>[],
       isDevDependency: false,
+      fileSystem: fileSystem,
     );
 
     expect(plugin.platforms.keys, contains(AndroidPlugin.kConfigKey));
@@ -630,6 +676,7 @@ void main() {
   });
 
   testWithoutContext('Plugin parsing rejects non-string implements, non-bool flags, and non-string supportedVariants', () {
+    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'implements: 123\n'
         'platforms:\n'
@@ -652,6 +699,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
@@ -665,6 +713,7 @@ void main() {
   });
 
   testWithoutContext('Plugin parsing rejects invalid dartPluginClass next to default_package', () {
+    final fileSystem = MemoryFileSystem.test();
     const pluginYamlRaw =
         'platforms:\n'
         ' linux:\n'
@@ -680,6 +729,7 @@ void main() {
         null,
         const <String>[],
         isDevDependency: false,
+        fileSystem: fileSystem,
       ),
       throwsToolExit(
         message:
