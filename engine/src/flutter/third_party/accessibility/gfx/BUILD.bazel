@@ -1,0 +1,114 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/accessibility/gfx/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The Objective-C(++) sources of gfx, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); gfx links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "gfx_objc",
+    srcs = [
+        "mac/coordinate_conversion.mm",  # is_mac
+    ],
+    hdrs = [
+        "geometry/insets.h",
+        "geometry/insets_f.h",
+        "geometry/point.h",
+        "geometry/point_conversions.h",
+        "geometry/point_f.h",
+        "geometry/rect.h",
+        "geometry/rect_conversions.h",
+        "geometry/rect_f.h",
+        "geometry/size.h",
+        "geometry/size_conversions.h",
+        "geometry/size_f.h",
+        "geometry/vector2d.h",
+        "geometry/vector2d_conversions.h",
+        "geometry/vector2d_f.h",
+        "gfx_export.h",
+        "mac/coordinate_conversion.h",  # is_mac
+        "native_widget_types.h",
+        "range/gfx_range_export.h",
+        "range/range.h",
+        "transform.h",
+    ],
+    copts = FLUTTER_COPTS + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/third_party/accessibility:accessibility_config",
+        "//engine/src/flutter/third_party/accessibility/ax_build",
+        "//engine/src/flutter/third_party/accessibility/base",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "gfx",
+    srcs = [
+        "geometry/insets.cc",
+        "geometry/insets_f.cc",
+        "geometry/point.cc",
+        "geometry/point_conversions.cc",
+        "geometry/point_f.cc",
+        "geometry/rect.cc",
+        "geometry/rect_conversions.cc",
+        "geometry/rect_f.cc",
+        "geometry/size.cc",
+        "geometry/size_conversions.cc",
+        "geometry/size_f.cc",
+        "geometry/vector2d.cc",
+        "geometry/vector2d_conversions.cc",
+        "geometry/vector2d_f.cc",
+        "range/range.cc",
+        "transform.cc",
+    ],
+    hdrs = [
+        "geometry/insets.h",
+        "geometry/insets_f.h",
+        "geometry/point.h",
+        "geometry/point_conversions.h",
+        "geometry/point_f.h",
+        "geometry/rect.h",
+        "geometry/rect_conversions.h",
+        "geometry/rect_f.h",
+        "geometry/size.h",
+        "geometry/size_conversions.h",
+        "geometry/size_f.h",
+        "geometry/vector2d.h",
+        "geometry/vector2d_conversions.h",
+        "geometry/vector2d_f.h",
+        "gfx_export.h",
+        "mac/coordinate_conversion.h",  # is_mac
+        "native_widget_types.h",
+        "range/gfx_range_export.h",
+        "range/range.h",
+        "transform.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":gfx_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter/third_party/accessibility:accessibility_config",
+        "//engine/src/flutter/third_party/accessibility/ax_build",
+        "//engine/src/flutter/third_party/accessibility/base",
+    ],
+    alwayslink = True,
+)

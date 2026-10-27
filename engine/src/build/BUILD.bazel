@@ -38,6 +38,11 @@ exports_files([
     "toolchain/darwin/swiftc.py",
 ])
 
+# The macOS framework bundles' symlinks (the embedder's and the macOS
+# shell's `generate_symlinks` actions), which framework_symlinks
+# (build_defs/dist/framework.bzl) runs as GN does.
+exports_files(["config/mac/package_framework.py"])
+
 # What the scripts of android/gyp import (their util/ package, jar.py,
 # md5_check.py), for the actions that run them.
 filegroup(

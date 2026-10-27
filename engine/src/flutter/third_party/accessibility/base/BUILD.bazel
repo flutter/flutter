@@ -1,0 +1,45 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/accessibility/base/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "base",
+    srcs = [
+        "logging.cc",
+        "simple_token.cc",
+        "string_utils.cc",
+    ],
+    hdrs = [
+        "auto_reset.h",
+        "color_utils.h",
+        "compiler_specific.h",
+        "container_utils.h",
+        "logging.h",
+        "macros.h",
+        "no_destructor.h",
+        "simple_token.h",
+        "string_utils.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdouble_conversion",
+        "//engine/src/flutter/fml:string_conversion",
+        "//engine/src/flutter/third_party/accessibility:accessibility_config",
+        "//engine/src/flutter/third_party/accessibility/ax_build",
+        "//engine/src/flutter/third_party/accessibility/base/numerics",
+    ],
+    alwayslink = True,
+)

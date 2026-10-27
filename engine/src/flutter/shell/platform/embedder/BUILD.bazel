@@ -2762,7 +2762,12 @@ zip_bundle(
         "FlutterEmbedder.framework/Headers": ":generate_symlinks",
         "FlutterEmbedder.framework/Modules": ":generate_symlinks",
     },
-    output = "linux-x64/FlutterEmbedder.framework.zip",
+    output = select({
+        "//engine/src/flutter/common:platform_linux_x64": "linux-x64/FlutterEmbedder.framework.zip",
+        "//engine/src/flutter/common:platform_darwin_arm64": "darwin-arm64/FlutterEmbedder.framework.zip",
+        "//engine/src/flutter/common:platform_darwin_x64": "darwin-x64/FlutterEmbedder.framework.zip",
+        "//conditions:default": None,
+    }),
     sources = {
         "FlutterEmbedder.framework": "FlutterEmbedder.framework",
         "FlutterEmbedder.framework/Resources": "FlutterEmbedder.framework/Resources",

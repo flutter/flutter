@@ -48,6 +48,10 @@ install(
         "//engine/src/flutter/shell/platform/android:embedding_jars",
     ],
     directory = "ci/android_profile",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_aot_engine.json: ci/android_release
@@ -62,6 +66,10 @@ install(
         "//engine/src/flutter/shell/platform/android:embedding_jars",
     ],
     directory = "ci/android_release",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_aot_engine.json: ci/android_release_arm64
@@ -76,6 +84,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # Other steps, scripts of the checkout: Generate treemap for android_release_arm64.
@@ -93,6 +105,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_profile_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_aot_engine.json: ci/android_profile_x64
@@ -107,6 +123,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_profile_x64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_aot_engine.json: ci/android_release_x64
@@ -121,6 +141,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_x64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_aot_engine.json: ci/android_profile_riscv64
@@ -135,6 +159,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_profile_riscv64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_aot_engine.json: ci/android_release_riscv64
@@ -149,6 +177,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_riscv64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_aot_engine_ddm.json: ci/android_release_arm64_ddm
@@ -162,6 +194,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_arm64_ddm",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # Other steps, scripts of the checkout: Generate treemap for android_release_arm64_ddm.
@@ -178,6 +214,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_x64_ddm",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_aot_engine_size_exp.json: ci/android_release_arm64_size_exp
@@ -191,6 +231,10 @@ install(
         "//engine/src/flutter/shell/platform/android:analyze_snapshot",
     ],
     directory = "ci/android_release_arm64_size_exp",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # Other steps, scripts of the checkout: Generate treemap for android_release_arm64_size_exp.
@@ -203,6 +247,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter:flutter"],
     directory = "ci/android_debug_arm64_size_exp",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_debug_engine.json: ci/android_debug
@@ -220,6 +268,10 @@ install(
         "//engine/src/flutter/sky/dist:zip_old_location",
     ],
     directory = "ci/android_debug",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_debug_engine.json: ci/android_debug_arm64
@@ -234,6 +286,10 @@ install(
         "//engine/src/flutter/shell/platform/embedder:embedder-archive",
     ],
     directory = "ci/android_debug_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_debug_engine.json: ci/android_debug_x64
@@ -248,6 +304,10 @@ install(
         "//engine/src/flutter/shell/platform/embedder:embedder-archive",
     ],
     directory = "ci/android_debug_x64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_debug_engine.json: ci/android_debug_riscv64
@@ -262,6 +322,10 @@ install(
         "//engine/src/flutter/shell/platform/embedder:embedder-archive",
     ],
     directory = "ci/android_debug_riscv64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_debug_engine_ddm.json: ci/android_debug_arm64_ddm
@@ -271,6 +335,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter:flutter"],
     directory = "ci/android_debug_arm64_ddm",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_debug_engine_ddm.json: ci/android_debug_x64_ddm
@@ -280,6 +348,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter:flutter"],
     directory = "ci/android_debug_x64_ddm",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_android_emulator.json: ci/android_emulator_debug_x64
@@ -300,6 +372,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
     directory = "ci/linux_debug_arm64_desktop",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_arm_host_desktop_engine.json: ci/linux_profile_arm64_desktop
@@ -309,6 +385,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
     directory = "ci/linux_profile_arm64_desktop",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_arm_host_desktop_engine.json: ci/linux_release_arm64_desktop
@@ -318,6 +398,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
     directory = "ci/linux_release_arm64_desktop",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_arm_host_engine.json: ci/linux_debug_arm64
@@ -333,6 +417,10 @@ install(
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
     directory = "ci/linux_debug_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_clang_tidy.json: ci/android_debug_arm64_clang_tidy
@@ -348,6 +436,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
     directory = "ci/host_debug_desktop",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_host_desktop_engine.json: ci/host_profile_desktop
@@ -357,6 +449,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
     directory = "ci/host_profile_desktop",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_host_desktop_engine.json: ci/host_release_desktop
@@ -366,6 +462,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/linux:flutter_gtk"],
     directory = "ci/host_release_desktop",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_host_engine.json: ci/host_debug
@@ -382,6 +482,10 @@ install(
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
     directory = "ci/host_debug",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_host_engine.json: ci/host_release
@@ -391,6 +495,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/build/archives:flutter_patched_sdk"],
     directory = "ci/host_release",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_host_engine_ddm.json: ci/host_debug_ddm
@@ -400,6 +508,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/build/archives:artifacts"],
     directory = "ci/host_debug_ddm",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_host_engine_test.json: ci/host_debug_test
@@ -414,6 +526,10 @@ install(
         "//engine/src/flutter/tools/path_ops:path_ops",
     ],
     directory = "ci/host_debug_test",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/host_debug_test's tests: run_tests.py --type dart,dart-host.
@@ -440,6 +556,10 @@ install(
         "//engine/src/flutter/tools/path_ops:path_ops",
     ],
     directory = "ci/host_profile_test",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/host_profile_test's tests: run_tests.py --type dart,dart-host,engine.
@@ -498,6 +618,10 @@ install(
         "//engine/src/flutter/tools/path_ops:path_ops",
     ],
     directory = "ci/host_release_test",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/host_release_test's tests: run_tests.py --type dart,dart-host,engine,benchmarks.
@@ -555,6 +679,10 @@ install(
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
     directory = "ci/host_debug_unopt",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/host_debug_unopt's tests: run_tests.py --type dart,dart-host,engine,font-subset.
@@ -614,6 +742,10 @@ install(
         "//engine/src/flutter/sky/packages:packages",
     ],
     directory = "ci/host_debug_unopt_impeller_tests",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/host_debug_unopt_impeller_tests's tests: run_tests.py --type impeller.
@@ -630,6 +762,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/embedder:flutter_engine"],
     directory = "ci/android_embedder_debug_unopt",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_unopt.json: ci/android_debug_arm64_validation_layers
@@ -642,6 +778,10 @@ install(
         "//engine/src/flutter/shell/platform/android:abi_jars",
     ],
     directory = "ci/android_debug_arm64_validation_layers",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_unopt.json: ci/android_debug_unopt
@@ -654,6 +794,10 @@ install(
         "//engine/src/flutter/shell/platform/android:android_jar",
     ],
     directory = "ci/android_debug_unopt",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/android_debug_unopt's tests: run_tests.py --type java.
@@ -672,6 +816,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp"],
     directory = "ci/host_release_licenses",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/host_release_licenses's tests run from the build directory: licenses_cpp_testrunner.
@@ -694,6 +842,10 @@ install(
         "//engine/src/flutter/sky/dist:zip_old_location",
     ],
     directory = "ci/android_debug_test",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/android_debug_test's tests: run_tests.py --type java.
@@ -711,6 +863,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter:flutter"],
     directory = "ci/host_debug",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # linux_web_engine_build.json: ci/wasm_release
@@ -719,6 +875,10 @@ install(
     name = "wasm_release",
     testonly = True,
     contents = ["//engine/src/flutter/web_sdk:flutter_web_sdk_archive"],
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # local_engine.json: linux/android_debug_arm64
@@ -761,6 +921,10 @@ install(
     name = "wasm_debug_unopt",
     testonly = True,
     contents = ["//engine/src/flutter/web_sdk:flutter_web_sdk_archive"],
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_android_aot_engine.json: ci/android_profile
@@ -771,6 +935,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
     directory = "ci/android_profile",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_android_aot_engine.json: ci/android_profile_arm64
@@ -781,6 +949,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
     directory = "ci/android_profile_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_android_aot_engine.json: ci/android_profile_x64
@@ -791,6 +963,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
     directory = "ci/android_profile_x64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_android_aot_engine.json: ci/android_release
@@ -801,6 +977,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
     directory = "ci/android_release",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_android_aot_engine.json: ci/android_release_arm64
@@ -811,6 +991,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
     directory = "ci/android_release_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_android_aot_engine.json: ci/android_release_x64
@@ -821,6 +1005,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/shell/platform/android:gen_snapshot"],
     directory = "ci/android_release_x64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_clang_tidy.json: ci/host_debug_clang_tidy
@@ -828,12 +1016,18 @@ install(
 
 # mac_host_engine.json: ci/host_debug_framework
 #   bazel run --config=host_debug_framework :host_debug_framework
-# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
 install(
     name = "host_debug_framework",
     testonly = True,
-    contents = ["//engine/src/flutter/build/archives:flutter_embedder_framework"],
+    contents = [
+        "//engine/src/flutter/build/archives:flutter_embedder_framework",
+        "//engine/src/flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
+    ],
     directory = "ci/host_debug_framework",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_host_engine.json: ci/host_debug
@@ -847,6 +1041,10 @@ install(
         "//engine/src/flutter/impeller/toolkit/interop:sdk",
     ],
     directory = "ci/host_debug",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_host_engine.json: ci/host_debug_gen_snapshot
@@ -861,12 +1059,24 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/build/archives:artifacts"],
     directory = "ci/host_profile",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_host_engine.json: ci/host_profile_framework
 #   bazel run --config=host_profile_framework :host_profile_framework
-# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
-# Nothing to install.
+install(
+    name = "host_profile_framework",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"],
+    directory = "ci/host_profile_framework",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
 
 # mac_host_engine.json: ci/host_profile_gen_snapshot
 #   bazel run --config=host_profile_gen_snapshot :host_profile_gen_snapshot
@@ -883,12 +1093,24 @@ install(
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
     directory = "ci/host_release",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_host_engine.json: ci/host_release_framework
 #   bazel run --config=host_release_framework :host_release_framework
-# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
-# Nothing to install.
+install(
+    name = "host_release_framework",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"],
+    directory = "ci/host_release_framework",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
 
 # mac_host_engine.json: ci/host_release_gen_snapshot
 #   bazel run --config=host_release_gen_snapshot :host_release_gen_snapshot
@@ -906,16 +1128,26 @@ install(
         "//engine/src/flutter/impeller/toolkit/interop:sdk",
     ],
     directory = "ci/mac_debug_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_host_engine.json: ci/mac_debug_framework_arm64
 #   bazel run --config=mac_debug_framework_arm64 :mac_debug_framework_arm64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
 install(
     name = "mac_debug_framework_arm64",
     testonly = True,
-    contents = ["//engine/src/flutter/build/archives:flutter_embedder_framework"],
+    contents = [
+        "//engine/src/flutter/build/archives:flutter_embedder_framework",
+        "//engine/src/flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
+    ],
     directory = "ci/mac_debug_framework_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_host_engine.json: ci/mac_debug_gen_snapshot_arm64
@@ -930,12 +1162,24 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/build/archives:artifacts"],
     directory = "ci/mac_profile_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_host_engine.json: ci/mac_profile_framework_arm64
 #   bazel run --config=mac_profile_framework_arm64 :mac_profile_framework_arm64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
-# Nothing to install.
+install(
+    name = "mac_profile_framework_arm64",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"],
+    directory = "ci/mac_profile_framework_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
 
 # mac_host_engine.json: ci/mac_profile_gen_snapshot_arm64
 #   bazel run --config=mac_profile_gen_snapshot_arm64 :mac_profile_gen_snapshot_arm64
@@ -952,12 +1196,24 @@ install(
         "//engine/src/flutter/tools/font_subset:font_subset",
     ],
     directory = "ci/mac_release_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # mac_host_engine.json: ci/mac_release_framework_arm64
 #   bazel run --config=mac_release_framework_arm64 :mac_release_framework_arm64
-# Not built, no Bazel counterpart yet: flutter/shell/platform/darwin/macos:zip_macos_flutter_framework.
-# Nothing to install.
+install(
+    name = "mac_release_framework_arm64",
+    testonly = True,
+    contents = ["//engine/src/flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"],
+    directory = "ci/mac_release_framework_arm64",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
 
 # mac_host_engine.json: ci/mac_release_gen_snapshot_arm64
 #   bazel run --config=mac_release_gen_snapshot_arm64 :mac_release_gen_snapshot_arm64
@@ -968,7 +1224,7 @@ install(
 #   ninja's default target, everything: bazel build --config=host_debug_arm64_tests //engine/src/flutter:local_engine
 
 # ci/host_debug_arm64_tests's tests: run_tests.py --type dart,dart-host,engine,font-subset.
-# Not run, no Bazel test yet: accessibility_unittests (engine), framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
+# Not run, no Bazel test yet: framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
 test_suite(
     name = "host_debug_arm64_tests_tests",
     tags = ["manual"],
@@ -1003,6 +1259,7 @@ test_suite(
         "//engine/src/flutter/testing/dart",
         "//engine/src/flutter/testing/dart/vm_service",
         "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
         "//engine/src/flutter/tools/font_subset:font_subset_test",
     ],
@@ -1012,7 +1269,7 @@ test_suite(
 #   ninja's default target, everything: bazel build --config=host_profile_arm64_tests //engine/src/flutter:local_engine
 
 # ci/host_profile_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
-# Not run, no Bazel test yet: accessibility_unittests (engine), framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
+# Not run, no Bazel test yet: framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
 test_suite(
     name = "host_profile_arm64_tests_tests",
     tags = ["manual"],
@@ -1047,6 +1304,7 @@ test_suite(
         "//engine/src/flutter/testing/dart",
         "//engine/src/flutter/testing/dart/vm_service",
         "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
     ],
 )
@@ -1055,7 +1313,7 @@ test_suite(
 #   ninja's default target, everything: bazel build --config=host_release_arm64_tests //engine/src/flutter:local_engine
 
 # ci/host_release_arm64_tests's tests: run_tests.py --type dart,dart-host,engine.
-# Not run, no Bazel test yet: accessibility_unittests (engine), framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
+# Not run, no Bazel test yet: framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine).
 test_suite(
     name = "host_release_arm64_tests_tests",
     tags = ["manual"],
@@ -1090,6 +1348,7 @@ test_suite(
         "//engine/src/flutter/testing/dart",
         "//engine/src/flutter/testing/dart/vm_service",
         "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
     ],
 )
@@ -1102,6 +1361,10 @@ install(
     testonly = True,
     contents = ["//engine/src/flutter/tools/licenses_cpp:licenses_cpp"],
     directory = "ci/host_release_arm64_licenses",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 # ci/host_release_arm64_licenses's tests run from the build directory: licenses_cpp_testrunner.
@@ -1123,7 +1386,7 @@ test_suite(
 #   ninja's default target, everything: bazel build --config=host_debug_unopt_arm64 //engine/src/flutter:local_engine
 
 # ci/host_debug_unopt_arm64's tests: run_tests.py --type dart,dart-host,engine,impeller-golden.
-# Not run, no Bazel test yet: accessibility_unittests (engine), framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine), the impeller-golden type.
+# Not run, no Bazel test yet: framework_common_swift_unittests (engine), framework_common_unittests (engine), spring_animation_unittests (engine), flutter_desktop_darwin_swift_unittests (engine), flutter_desktop_darwin_unittests (engine), the impeller-golden type.
 # ci/host_debug_unopt_arm64's steps that run a script of the checkout, as Bazel tests: //engine/src/flutter:gn_test.
 test_suite(
     name = "host_debug_unopt_arm64_tests",
@@ -1160,6 +1423,7 @@ test_suite(
         "//engine/src/flutter/testing/dart",
         "//engine/src/flutter/testing/dart/vm_service",
         "//engine/src/flutter/testing/smoke_test_failure",
+        "//engine/src/flutter/third_party/accessibility:accessibility_unittests",
         "//engine/src/flutter/third_party/tonic/tests:tonic_unittests",
     ],
 )

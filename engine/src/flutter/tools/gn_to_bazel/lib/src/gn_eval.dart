@@ -1237,7 +1237,12 @@ final class ImportPolicy {
 /// may be read (they become [GnReference]s -- or, for the [booleanVariables]
 /// among them, the predicate itself) or tested (they stay symbolic).
 /// Targets named in [skipTargets] are not evaluated at all (so that what is
-/// inside them need not be understood); they are listed in the result.
+/// inside them need not be understood); they are listed in the result. A
+/// target named in [targetConditions] exists under that condition besides
+/// its block's, as if its definition sat inside `if (condition)`: a target
+/// GN defines outright but reaches on some platforms alone (the desktop
+/// embeddings' accessibility bridge, which only the macOS and Windows
+/// shells name and only they compile).
 /// Imports are resolved and loaded through [tree] according to
 /// [importPolicy]; without a tree, imports are only recorded.
 GnFileEvaluation evaluateGnFile(
@@ -1250,6 +1255,7 @@ GnFileEvaluation evaluateGnFile(
   GnSourceTree? tree,
   ImportPolicy importPolicy = const ImportPolicy(),
   Condition condition = Condition.always,
+  Map<String, Condition> targetConditions = const <String, Condition>{},
 }) {
   final settings = _Settings(
     assumptions: assumptions,
@@ -1260,6 +1266,7 @@ GnFileEvaluation evaluateGnFile(
     tree: tree,
     importPolicy: importPolicy,
     importCache: <String, _ImportedFile>{},
+    targetConditions: targetConditions,
   );
   final evaluator = _Evaluator(settings, file.location.file);
   evaluator.evaluateFile(file, condition);
@@ -1625,9 +1632,14 @@ final class _Settings {
     required this.tree,
     required this.importPolicy,
     required this.importCache,
+    this.targetConditions = const <String, Condition>{},
   });
 
   final Assumptions assumptions;
+
+  /// Conditions targets exist under besides their blocks' (see
+  /// [evaluateGnFile]), by target name.
+  final Map<String, Condition> targetConditions;
   final Set<String> templates;
   final Set<String> externalVariables;
 
@@ -1867,10 +1879,12 @@ final class _Evaluator {
       throw GnError(call.location, '${call.name}() without a block');
     }
     final _Invocation? invocation = _invocations.isEmpty ? null : _invocations.last;
-    final newTarget = GnTarget(call.location, resolvedRule, name, condition)
-      ..comments = invocation != null && invocation.targetName == name
-          ? invocation.comments
-          : comments;
+    final Condition? own = settings.targetConditions[name];
+    final newTarget =
+        GnTarget(call.location, resolvedRule, name, own == null ? condition : condition.and(own))
+          ..comments = invocation != null && invocation.targetName == name
+              ? invocation.comments
+              : comments;
     final targetScope = _Scope(scope, isTarget: true);
     // GN defines target_name in every target's block (an action's depfile
     // named after it); it is the block's, not a variable of the target.
