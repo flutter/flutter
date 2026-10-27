@@ -1572,4 +1572,22 @@ const float kFloatCompareEpsilon = 0.001;
 
   XCTAssertEqual(bridge->observations.size(), (size_t)0);
 }
+
+- (void)testAccessibilityRespondsToUserInteraction {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+
+  flutter::SemanticsNode node;
+  node.id = 0;
+  node.actions = flutter::kSystemActions | flutter::kScrollableSemanticsActions |
+                 static_cast<int32_t>(flutter::SemanticsAction::kDismiss);
+  [object setSemanticsNode:&node];
+  XCTAssertFalse(object.accessibilityRespondsToUserInteraction);
+
+  node.actions |= static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  [object setSemanticsNode:&node];
+  XCTAssertTrue(object.accessibilityRespondsToUserInteraction);
+}
 @end

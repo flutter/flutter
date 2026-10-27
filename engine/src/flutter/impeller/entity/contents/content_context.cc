@@ -47,10 +47,16 @@ class GenericVariants {
     pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
   }
 
-  void SetDefault(const ContentContextOptions& options,
+  /// Defaults are created ahead of time rather than on first use, so they are
+  /// logged as eagerly created with the pipeline library.
+  void SetDefault(PipelineLibrary& pipeline_library,
+                  const ContentContextOptions& options,
                   std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
     default_options_ = options;
     if (pipeline) {
+      if (std::optional<PipelineDescriptor> desc = pipeline->GetDescriptor()) {
+        pipeline_library.LogPipelineCreation(*desc);
+      }
       Set(options, std::move(pipeline));
     }
   }
@@ -113,9 +119,10 @@ class Variants : public GenericVariants {
     GenericVariants::Set(options, std::move(pipeline));
   }
 
-  void SetDefault(const ContentContextOptions& options,
+  void SetDefault(PipelineLibrary& pipeline_library,
+                  const ContentContextOptions& options,
                   std::unique_ptr<PipelineHandleT> pipeline) {
-    GenericVariants::SetDefault(options, std::move(pipeline));
+    GenericVariants::SetDefault(pipeline_library, options, std::move(pipeline));
   }
 
   void CreateDefault(const Context& context,
@@ -128,11 +135,11 @@ class Variants : public GenericVariants {
       VALIDATION_LOG << "Failed to create default pipeline.";
       return;
     }
-    context.GetPipelineLibrary()->LogPipelineCreation(*desc);
     options.ApplyToPipelineDescriptor(*desc);
     desc_ = desc;
-    SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
-                                                          /*async=*/true));
+    SetDefault(*context.GetPipelineLibrary(), options,
+               std::make_unique<PipelineHandleT>(context, desc_,
+                                                 /*async=*/true));
   }
 
   PipelineHandleT* Get(const ContentContextOptions& options) const {
@@ -147,8 +154,8 @@ class Variants : public GenericVariants {
     if (result != nullptr) {
       return result;
     }
-    SetDefault(default_options_.value(), std::make_unique<PipelineHandleT>(
-                                             context, desc_, /*async=*/false));
+    Set(default_options_.value(),
+        std::make_unique<PipelineHandleT>(context, desc_, /*async=*/false));
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return Get(default_options_.value());
   }
@@ -704,7 +711,7 @@ ContentContext::ContentContext(
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
     pipelines_->clip.SetDefault(
-        options,
+        *context_->GetPipelineLibrary(), options,
         std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
@@ -890,7 +897,7 @@ std::shared_ptr<Texture> ContentContext::GetEmptyTexture() const {
   return empty_texture_;
 }
 
-fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
+absl::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     std::string_view label,
     ISize texture_size,
     const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -927,7 +934,7 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
   return MakeSubpass(label, subpass_target, command_buffer, subpass_callback);
 }
 
-fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
+absl::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     std::string_view label,
     const RenderTarget& subpass_target,
     const std::shared_ptr<CommandBuffer>& command_buffer,
@@ -936,27 +943,27 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
 
   auto subpass_texture = subpass_target.GetRenderTargetTexture();
   if (!subpass_texture) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   auto sub_renderpass = command_buffer->CreateRenderPass(subpass_target);
   if (!sub_renderpass) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
   sub_renderpass->SetLabel(label);
 
   if (!subpass_callback(*this, *sub_renderpass)) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   if (!sub_renderpass->EncodeCommands()) {
-    return fml::Status(fml::StatusCode::kUnknown, "");
+    return absl::Status(absl::StatusCode::kUnknown, "");
   }
 
   const std::shared_ptr<Texture>& target_texture =
       subpass_target.GetRenderTargetTexture();
   if (target_texture->GetMipCount() > 1) {
-    fml::Status mipmap_status =
+    absl::Status mipmap_status =
         AddMipmapGeneration(command_buffer, context, target_texture);
     if (!mipmap_status.ok()) {
       return mipmap_status;
