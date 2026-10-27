@@ -216,11 +216,13 @@ in postsubmit.
 ### Skia Gold
 
 The Flutter engine uses [Skia Gold][skia_gold] for image comparison tests which
-fail if the image is different from an accepted baseline image.
+compare rendered output against accepted baseline images.
 
-[skia_gold]: https://flutter-engine-gold.skia.org/
+[skia_gold]: https://flutter-gold.skia.org/
 
-Any untriaged failures will block presubmit and postsubmit tests.
+Any untriaged image changes hold the `flutter-gold` check pending in presubmit
+(see [Writing a golden file test](../../../docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md))
+and fail postsubmit tests.
 
 ### Example run_tests.py invocation
 
