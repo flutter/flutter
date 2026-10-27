@@ -1883,6 +1883,7 @@ cc_library(
 # platforms.
 flutter_objc_library(
     name = "embedder_unittests_objc",
+    testonly = True,
     srcs = select({
         "//engine/src/flutter/shell:test_enable_metal": [
             "tests/embedder_metal_unittests.mm",  # test_enable_metal
@@ -2045,6 +2046,7 @@ flutter_objc_library(
         "//engine/src:include_root",
         "//engine/src/flutter:export_dynamic_symbols",
     ],
+    alwayslink = True,
 )
 
 flutter_cc_test(

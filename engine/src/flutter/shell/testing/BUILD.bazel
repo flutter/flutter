@@ -235,6 +235,7 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }),
+    alwayslink = True,
 )
 
 cc_binary(
