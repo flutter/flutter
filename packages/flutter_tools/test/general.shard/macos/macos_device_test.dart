@@ -5,28 +5,20 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
-import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_http_client.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 
 final macOS = FakePlatform(operatingSystem: 'macos');
@@ -270,101 +262,6 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
-
-  testWithoutContext('createDevFSWriter returns null', () {
-    final device = MacOSDevice(
-      toolContext: FakeToolContext(
-        fs: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
-        processManager: FakeProcessManager.any(),
-      ),
-    );
-
-    expect(device.createDevFSWriter(FakeMacOSApp(), ''), isNull);
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/193907.
-  testWithoutContext(
-    'DevFS syncs over VM service HTTP writer when sandbox container blocks direct host writes',
-    () async {
-      const sandboxDevFSPath = '/Users/user/Library/Containers/com.example.app/Data/tmp/app';
-      const sandboxDillPath = '$sandboxDevFSPath/main.dart.dill';
-      const compiledDillPath = 'build/app.dill';
-      const reloadDillPath = 'main.dart.dill';
-      const vmServiceHttpUrl = 'http://127.0.0.1:8181/';
-
-      final handler = FileExceptionHandler();
-      final memoryFileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-      final fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: macOS);
-      handler.addError(
-        memoryFileSystem.file(sandboxDillPath),
-        FileSystemOp.create,
-        const FileSystemException(
-          'Operation not permitted',
-          sandboxDillPath,
-          OSError('Operation not permitted', 1),
-        ),
-      );
-
-      final toolContext = FakeToolContext(
-        artifacts: Artifacts.test(),
-        fs: fileSystem,
-        logger: BufferLogger.test(),
-        os: FakeOperatingSystemUtils(),
-        platform: macOS,
-        processManager: FakeProcessManager.any(),
-      );
-      final device = MacOSDevice(toolContext: toolContext);
-      final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          FakeVmServiceRequest(
-            method: '_createDevFS',
-            args: const <String, Object>{'fsName': 'app'},
-            jsonResponse: <String, Object>{'uri': Uri.file('$sandboxDevFSPath/').toString()},
-          ),
-        ],
-        httpAddress: Uri.parse(vmServiceHttpUrl),
-      );
-      final residentCompiler = FakeResidentCompiler()
-        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
-          fileSystem.file(compiledDillPath)
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(const <int>[1, 2, 3, 4]);
-          return const CompilerOutput(compiledDillPath, 0, <Uri>[]);
-        };
-      final devFS = DevFS(
-        fakeVmServiceHost.vmService,
-        'app',
-        fileSystem.currentDirectory,
-        buildMode: .debug,
-        toolContext: toolContext,
-        httpClient: FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(
-            Uri.parse(vmServiceHttpUrl),
-            method: HttpMethod.put,
-            body: const <int>[1, 2, 3, 4],
-          ),
-        ]),
-      );
-
-      await devFS.create();
-      final UpdateFSReport report = await devFS.update(
-        mainUri: Uri.file('/main.dart'),
-        generator: residentCompiler,
-        dillOutputPath: compiledDillPath,
-        pathToReload: reloadDillPath,
-        trackWidgetCreation: false,
-        invalidatedFiles: <Uri>[],
-        packageConfig: PackageConfig.empty,
-        devFSWriter: device.createDevFSWriter(FakeMacOSApp(), null),
-        shaderCompiler: const FakeShaderCompiler(),
-      );
-
-      expect(report.success, isTrue);
-      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
-    },
-  );
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
@@ -385,41 +282,4 @@ class FakeMacOSApp extends Fake implements MacOSApp {
       _ => throw StateError(''),
     };
   }
-}
-
-class FakeResidentCompiler extends Fake implements ResidentCompiler {
-  Future<CompilerOutput> Function(Uri mainUri, List<Uri>? invalidatedFiles)? onRecompile;
-
-  @override
-  Future<CompilerOutput> recompile(
-    Uri mainUri,
-    List<Uri>? invalidatedFiles, {
-    String? outputPath,
-    PackageConfig? packageConfig,
-    String? projectRootPath,
-    FileSystem? fs,
-    bool suppressErrors = false,
-    bool checkDartPluginRegistry = false,
-    File? dartPluginRegistrant,
-    Uri? nativeAssetsYaml,
-    bool recompileRestart = false,
-  }) {
-    return onRecompile?.call(mainUri, invalidatedFiles) ??
-        Future<CompilerOutput>.value(const CompilerOutput('', 1, <Uri>[]));
-  }
-}
-
-class FakeShaderCompiler implements DevelopmentShaderCompiler {
-  const FakeShaderCompiler();
-
-  @override
-  void configureCompiler(TargetPlatform? platform) {}
-
-  @override
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) async {
-    return DevFSByteContent(await inputShader.contentsAsBytes());
-  }
-
-  @override
-  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

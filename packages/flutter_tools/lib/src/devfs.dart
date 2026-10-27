@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'artifacts.dart';
@@ -480,6 +481,94 @@ class DevFS {
   Uri? _baseUri;
   Uri? get baseUri => _baseUri;
 
+  Directory? _localSandboxTempDir;
+  String? _cachedDarwinUserTempDirectory;
+
+  // Matches the temporary directory path inside a macOS App Sandbox container,
+  // e.g. `/Users/<user>/Library/Containers/<bundle-id>/Data/tmp/<temp-dir>/<fs-name>/`.
+  static final _macOSSandboxContainerTempRegExp = RegExp(
+    r'/Library/Containers/([^/]+)/Data/tmp/(.+)$',
+  );
+
+  // Sandboxed macOS apps return a DevFS path inside
+  // ~/Library/Containers/<bundle-id>/Data/tmp/. Starting in macOS 14, macOS TCC
+  // associates ~/Library/Containers/<bundle-id> with the app's code signature
+  // (kTCCServiceSystemPolicyAppData) and blocks external processes like
+  // flutter_tools from writing directly into the container unless the user
+  // approves the TCC prompt or the terminal/IDE has Full Disk Access.
+  //
+  // However, the macOS App Sandbox profile (/System/Library/Sandbox/Profiles/application.sb)
+  // also grants every sandboxed app full read/write access to
+  // application_darwin_temp_dir (<DARWIN_USER_TEMP_DIR>/<bundle-id>), which lies
+  // outside ~/Library/Containers/ and is not subject to TCC container protection.
+  // When running on a macOS host (_toolContext.platform.isMacOS), redirecting
+  // the local DevFS directory there allows LocalDevFSWriter to use fast APFS
+  // copy-on-write file copies without triggering TCC prompts or errors.
+  Future<Uri> _prepareDeviceUri(Uri uri) async {
+    if (!_toolContext.platform.isMacOS || !uri.isScheme('file')) {
+      return uri;
+    }
+    final RegExpMatch? match = _macOSSandboxContainerTempRegExp.firstMatch(uri.path);
+    if (match == null) {
+      return uri;
+    }
+    final String containerId = match.group(1)!;
+    final String relativePath = match.group(2)!;
+    final List<String> segments = relativePath
+        .split('/')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    if (segments.isEmpty) {
+      logger.printTrace(
+        'DevFS: Sandbox container URI is missing a subdirectory under Data/tmp: $uri',
+      );
+      return uri;
+    }
+    final String? darwinTempDir = await _resolveDarwinUserTempDirectory();
+    if (darwinTempDir == null) {
+      return uri;
+    }
+    final Directory containerTempDir = fs.directory(darwinTempDir).childDirectory(containerId);
+    _localSandboxTempDir = containerTempDir.childDirectory(segments.first);
+    final Directory devFSDir = fs.directory(
+      fs.path.joinAll(<String>[containerTempDir.path, ...segments]),
+    )..createSync(recursive: true);
+    return devFSDir.uri;
+  }
+
+  Future<String?> _resolveDarwinUserTempDirectory() async {
+    final String? cached = _cachedDarwinUserTempDirectory;
+    if (cached != null) {
+      return cached;
+    }
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+    if (!processManager.canRun('getconf')) {
+      logger.printTrace('DevFS: Cannot run getconf to resolve DARWIN_USER_TEMP_DIR.');
+      return null;
+    }
+    try {
+      final ProcessResult result = await processManager.run(const <String>[
+        'getconf',
+        'DARWIN_USER_TEMP_DIR',
+      ]);
+      if (result.exitCode != 0) {
+        logger.printTrace(
+          'DevFS: getconf DARWIN_USER_TEMP_DIR exited with code ${result.exitCode}: ${result.stderr}',
+        );
+        return null;
+      }
+      final String path = (result.stdout as String).trim();
+      if (path.isEmpty) {
+        return null;
+      }
+      return _cachedDarwinUserTempDirectory = path;
+    } on ProcessException catch (error) {
+      logger.printTrace('DevFS: Failed to run getconf DARWIN_USER_TEMP_DIR: $error');
+      return null;
+    }
+  }
+
   Uri deviceUriToHostUri(Uri deviceUri) {
     final deviceUriString = deviceUri.toString();
     final baseUriString = baseUri.toString();
@@ -495,7 +584,7 @@ class DevFS {
     logger.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       final vm_service.Response response = await _vmService.createDevFS(fsName);
-      _baseUri = Uri.parse(response.json!['uri'] as String);
+      _baseUri = await _prepareDeviceUri(Uri.parse(response.json!['uri'] as String));
     } on vm_service.RPCError catch (rpcException) {
       if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
           rpcException.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
@@ -513,7 +602,7 @@ class DevFS {
       logger.printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
       final vm_service.Response response = await _vmService.createDevFS(fsName);
-      _baseUri = Uri.parse(response.json!['uri'] as String);
+      _baseUri = await _prepareDeviceUri(Uri.parse(response.json!['uri'] as String));
     }
     logger.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri!;
@@ -522,6 +611,15 @@ class DevFS {
   Future<void> destroy() async {
     final Logger logger = _toolContext.logger;
     logger.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
+    final Directory? localSandboxTempDir = _localSandboxTempDir;
+    _localSandboxTempDir = null;
+    if (localSandboxTempDir != null && localSandboxTempDir.existsSync()) {
+      try {
+        localSandboxTempDir.deleteSync(recursive: true);
+      } on FileSystemException catch (error) {
+        logger.printTrace('DevFS: Failed to delete local sandbox DevFS directory: $error');
+      }
+    }
     await _vmService.deleteDevFS(fsName);
     logger.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
