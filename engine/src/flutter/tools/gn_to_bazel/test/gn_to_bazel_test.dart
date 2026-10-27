@@ -3573,6 +3573,42 @@ source_set("x") {
       );
     });
 
+    test("a test's Objective-C sources make a testonly, alwayslink library", () async {
+      // fml_unittests: its .mm hold gtest registrations nothing refers to
+      // (GN links the executable's objects whole) and depend on testonly
+      // fixtures, which Bazel's test rule may and a plain library may not
+      // (found on the Mac, 10-27).
+      final String output = await convert('''
+import("//flutter/testing/testing.gni")
+executable("x_unittests") {
+  testonly = true
+  sources = [ "a_unittests.cc" ]
+  if (is_mac) {
+    sources += [ "b_unittests.mm" ]
+  }
+  deps = [ "//flutter/testing" ]
+}
+''', assumptions: generationAssumptions());
+      expect(
+        output,
+        contains(
+          'flutter_objc_library(\n'
+          '    name = "x_unittests_objc",\n'
+          '    testonly = True,\n'
+          '    srcs = select({\n'
+          '        "@platforms//os:macos": [\n'
+          '            "b_unittests.mm",  # is_mac\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+      expect(
+        output,
+        contains('    alwayslink = True,\n)\n\ncc_test(\n    name = "x_unittests",\n'),
+      );
+    });
+
     test('an argument the macro applies under a predicate loses that condition', () async {
       // impeller/fixtures: gles_exclusions under impeller_enable_opengles,
       // which impeller_shaders asks `in` of, and applies to the GLES backend

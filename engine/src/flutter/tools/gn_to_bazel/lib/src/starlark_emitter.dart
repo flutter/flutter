@@ -3105,7 +3105,7 @@ final class _Emitter {
       // Bazel's link_extra_libs reaches executables only.
       rule.list('deps').addUnique(Condition.always, _Item(_localLabel(cxxRuntimeLabel)));
     }
-    _splitObjcSources(rule, target, name: name, library: library);
+    _splitObjcSources(rule, target, name: name, library: library, test: kind == 'cc_test');
     rules.add(rule);
     if (name != target.name) {
       // GN's name for the library or executable, for dependents and the
@@ -3132,6 +3132,7 @@ final class _Emitter {
     GnTarget target, {
     required String name,
     required bool library,
+    required bool test,
   }) {
     final _ListAttribute? objcCopts = rule.lists.remove(_objcCoptsAttribute);
     final _ListAttribute? srcs = rule.lists['srcs'];
@@ -3216,6 +3217,17 @@ final class _Emitter {
       if (value != null) {
         companion.scalars[scalar] = value;
       }
+    }
+    // A binary's or a test's own sources: GN links the target's objects
+    // whole, so the library is alwayslink (a test's .mm hold gtest
+    // registrations nothing refers to); a test's is testonly, as Bazel's
+    // test rules are without saying so. (Found on the Mac, 10-27:
+    // fml_unittests' companion depended on testonly fixtures.)
+    if (!library) {
+      companion.scalars['alwayslink'] = 'True';
+    }
+    if (test) {
+      companion.scalars['testonly'] = 'True';
     }
     // Compatible where its sources are listed, within the target's own
     // condition; the target depends on it under the same conditions.
