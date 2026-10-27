@@ -297,6 +297,31 @@ void main() {
       expect(fakeAnalytics.telemetryEnabled, true);
     });
 
+    testWithoutContext(
+      'analytics flag warns and does not change telemetry when DASH__SUPPRESS_ANALYTICS=true',
+      () async {
+        final ConfigCommand configCommand = createConfigCommand(
+          platform: FakePlatform(
+            environment: <String, String>{DashEnvVar.suppressAnalytics.name: 'true'},
+          ),
+        );
+        final CommandRunner<void> commandRunner = createRunner(configCommand);
+
+        expect(fakeAnalytics.telemetryEnabled, true);
+
+        await commandRunner.run(<String>['config', '--no-analytics']);
+        expect(fakeAnalytics.telemetryEnabled, true);
+        expect(testLogger.warningText, contains('Analytics reporting was not disabled'));
+
+        await fakeAnalytics.setTelemetry(false);
+        await commandRunner.run(<String>['config', '--analytics']);
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testLogger.warningText, contains('Analytics reporting was not enabled'));
+
+        expect(testLogger.statusText, isNot(contains('Analytics reporting')));
+      },
+    );
+
     testWithoutContext('analytics reported with help usages', () async {
       final ConfigCommand configCommand = createConfigCommand();
       createRunner(configCommand);

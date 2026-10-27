@@ -908,6 +908,9 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -938,6 +941,9 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -973,6 +979,9 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -1003,6 +1012,9 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
@@ -1032,9 +1044,44 @@ void main() {
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
+        // Don't inherit DASH__SUPPRESS_ANALYTICS from the test runner's
+        // environment, which would block telemetry changes.
+        Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    for (final enable in const <bool>[true, false]) {
+      final flag = enable ? '--enable-analytics' : '--disable-analytics';
+      testUsingContext(
+        '$flag warns and does not change telemetry when DASH__SUPPRESS_ANALYTICS=true',
+        () async {
+          setExitFunctionForTests((int exitCode) {});
+          await globals.analytics.setTelemetry(!enable);
+
+          await runner.run(
+            <String>[flag],
+            (ToolDependencies toolDependencies) => <FlutterCommand>[],
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            shutdownHooks: ShutdownHooks(),
+          );
+
+          expect(globals.analytics.telemetryEnabled, !enable);
+          expect(fakeAnalytics.sentEvents, isEmpty);
+          expect(testLogger.warningText, contains('DASH__SUPPRESS_ANALYTICS=true is set'));
+          expect(testLogger.statusText, isNot(contains('Analytics reporting')));
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          FileSystem: () => MemoryFileSystem.test(),
+          Platform: () => FakePlatform(
+            environment: <String, String>{DashEnvVar.suppressAnalytics.name: 'true'},
+          ),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    }
   });
 }
 
