@@ -67,7 +67,7 @@ static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& confi
     case fml::Thread::ThreadPriority::kDisplay: {
       pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
       [[NSThread currentThread] setThreadPriority:1.0];
-      sched_param param;
+      sched_param param{};
       int policy;
       pthread_t thread = pthread_self();
       if (!pthread_getschedparam(thread, &policy, &param)) {
@@ -501,7 +501,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   }
   const char* character = event.character;
 
-  flutter::KeyData key_data;
+  flutter::KeyData key_data{};
   key_data.Clear();
   key_data.timestamp = (uint64_t)event.timestamp;
   switch (event.type) {
