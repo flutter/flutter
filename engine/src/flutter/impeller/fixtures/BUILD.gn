@@ -151,6 +151,8 @@ test_fixtures("file_fixtures") {
     "blue_noise.png",
     "boston.jpg",
     "embarcadero.jpg",
+    "flutter_gpu_compute.comp",
+    "flutter_gpu_compute_specialized_size.comp",
     "flutter_gpu_instanced.frag",
     "flutter_gpu_instanced.vert",
     "flutter_gpu_texture.frag",
