@@ -184,7 +184,7 @@ abstract class ChromiumDevice extends WebDevice {
 
   @override
   Future<void> dispose() async {
-    _logReader?.dispose();
+    await _logReader?.dispose();
     await portForwarder?.dispose();
   }
 }
@@ -474,7 +474,7 @@ class WebServerDevice extends WebDevice {
 
   @override
   Future<void> dispose() async {
-    _logReader?.dispose();
+    await _logReader?.dispose();
     await portForwarder?.dispose();
   }
 }

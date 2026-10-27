@@ -1533,7 +1533,7 @@ abstract class DeviceLogReader {
   String toString() => name;
 
   // Clean up resources allocated by log reader e.g. subprocesses
-  void dispose();
+  Future<void> dispose();
 }
 
 // An empty device log reader
@@ -1547,7 +1547,7 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   Stream<String> get logLines => const Stream<String>.empty();
 
   @override
-  void dispose() {}
+  Future<void> dispose() async {}
 
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {}

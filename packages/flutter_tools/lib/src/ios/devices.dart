@@ -1428,9 +1428,9 @@ class IOSDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    for (final DeviceLogReader logReader in _logReaders.values) {
-      logReader.dispose();
-    }
+    await Future.wait(<Future<void>>[
+      for (final DeviceLogReader logReader in _logReaders.values) logReader.dispose(),
+    ]);
     _logReaders.clear();
     await _portForwarder?.dispose();
   }
@@ -1980,13 +1980,15 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
   }
 
   @override
-  void dispose() {
-    for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions) {
-      loggingSubscription.cancel();
-    }
+  Future<void> dispose() async {
+    final futures = <Future<void>>[
+      for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions)
+        loggingSubscription.cancel(),
+      ?_iosDeployDebugger?.detach(),
+      _coreDeviceLoggingSource.dispose(),
+    ];
     idevicesyslogProcess?.kill();
-    _iosDeployDebugger?.detach();
-    _coreDeviceLoggingSource.dispose();
+    await Future.wait(futures);
   }
 }
 
@@ -2058,12 +2060,14 @@ class CoreDeviceLoggingSource {
   String _debuggerLineHandler(String line) =>
       _debuggerLoggingRegex.firstMatch(line)?.group(1) ?? line;
 
-  void dispose() {
-    for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions) {
-      loggingSubscription.cancel();
-    }
-    coreDeviceLauncher?.lldbLogForwarder.exit();
-    coreDeviceLauncher?.coreDeviceLogForwarder.exit();
+  Future<void> dispose() async {
+    final futures = <Future<void>>[
+      for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions)
+        loggingSubscription.cancel(),
+      ?coreDeviceLauncher?.lldbLogForwarder.exit(),
+      ?coreDeviceLauncher?.coreDeviceLogForwarder.exit(),
+    ];
+    await Future.wait(futures);
   }
 }
 

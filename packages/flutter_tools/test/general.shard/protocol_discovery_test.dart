@@ -30,9 +30,9 @@ void main() {
     });
 
     group('no port forwarding', () {
-      tearDown(() {
-        discoverer.cancel();
-        logReader.dispose();
+      tearDown(() async {
+        await discoverer.cancel();
+        await logReader.dispose();
       });
 
       testWithoutContext('discovers uri if logs already produced output', () async {

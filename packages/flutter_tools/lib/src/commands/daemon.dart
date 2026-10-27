@@ -1395,7 +1395,7 @@ class DeviceDomain extends Domain {
   /// Stops a log reader that was previously started.
   Future<void> stopLogReader(Map<String, Object?> args) async {
     final String? id = _getStringArg(args, 'id', required: true);
-    _logReaders.remove(id)?.dispose();
+    await _logReaders.remove(id)?.dispose();
   }
 
   /// Starts an app on a device.
